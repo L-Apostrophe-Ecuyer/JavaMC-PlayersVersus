@@ -1,4 +1,4 @@
-package frootloops.mobs.mixin;
+package frootloops.mobs.mixin.melee_attacks;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
@@ -44,7 +44,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     }
 
     private int getCooldownAmount(){
-        if(this.mob instanceof WardenEntity || this.mob instanceof IronGolemEntity)
+        if(this.mob instanceof WardenEntity || this.mob instanceof IronGolemEntity || this.mob instanceof HoglinEntity)
             return 40;
         else if(this.mob.getMainHandStack() != null) {
             Item weapon = this.mob.getMainHandStack().getItem();

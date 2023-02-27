@@ -1,27 +1,24 @@
-package frootloops.mobs.mixin;
+package frootloops.mobs.mixin.hostile_mobs;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.brain.task.SonicBoomTask;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(WardenEntity.class)
-public class WardenSonicBoomMixin extends HostileEntity {
+public class WardenMixin extends HostileEntity {
 
     private static final double OLD_RANGE_HORIZONTAL = 15.0d,
             OLD_RANGE_VERTICAL = 20.0d,
-            NEW_RANGE_HORIZONTAL = 6.0d,
+            NEW_RANGE_HORIZONTAL = 8.0d,
             NEW_RANGE_VERTICAL = 12.0d,
             NEW_RANGE_HORIZONTAL_SQUARED = NEW_RANGE_HORIZONTAL * NEW_RANGE_HORIZONTAL,
             NEW_RANGE_VERTICAL_SQUARED = NEW_RANGE_VERTICAL * NEW_RANGE_VERTICAL;
 
-    protected WardenSonicBoomMixin(EntityType<? extends HostileEntity> entityType, World world) {
+    protected WardenMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
     }
 

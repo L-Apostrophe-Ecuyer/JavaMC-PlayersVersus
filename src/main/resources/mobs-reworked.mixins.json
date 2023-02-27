@@ -4,8 +4,12 @@
   "package": "frootloops.mobs.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "WardenSonicBoomMixin",
-    "MeleeAttackGoalMixin"
+    "hostile_mobs.CreeperEntityMixin",
+    "hostile_mobs.CreeperIgniteMixin",
+    "hostile_mobs.SkeletonMixin",
+    "hostile_mobs.WardenMixin",
+    "melee_attacks.MeleeAttackGoalMixin",
+    "melee_attacks.LivingEntityMixin"
   ],
   "client": [],
   "injectors": {
