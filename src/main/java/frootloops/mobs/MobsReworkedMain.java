@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 public class MobsReworkedMain implements ModInitializer {
 
 	public static final String MOD_ID = "mobs-reworked";
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	public static final Logger MOD_LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
 	public void onInitialize() {
@@ -15,6 +15,6 @@ public class MobsReworkedMain implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 
-		LOGGER.info("Launching " + MOD_ID);
+		MOD_LOGGER.info("Launching " + MOD_ID);
 	}
 }

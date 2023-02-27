@@ -1,14 +1,13 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.fabricmc.example.mixin",
+  "package": "frootloops.mobs.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "WardenSonicBoomMixin",
+    "MeleeAttackGoalMixin"
   ],
   "client": [],
-  "server": [
-    "WardenSonicBoomMixin"
-  ],
   "injectors": {
     "defaultRequire": 1
   }
