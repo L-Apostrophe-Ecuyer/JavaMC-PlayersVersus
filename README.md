@@ -11,6 +11,7 @@
 - Skeletons have less health, better drops, and can sometimes spawn with different equipment; including axes, swords, pickaxes, shovels. They're less punishing this way, while still being pretty threatning.
 - Zombies have more health, more movement speed, but don't see as well. If you're sneaky, you can avoid them without them detecting you.
 - Drowned swim much faster.
+- Warden's sonic boom is nerfed; it can be blocked, has a range of only 8 blocks, and is on a longer timer.
 
 ## Reworked Dragon
 - A lot more aggressive. Fires more often, and will sweep towards players.
