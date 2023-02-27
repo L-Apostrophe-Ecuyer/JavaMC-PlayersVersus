@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "mobs-reworked",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Mobs Reworked",
+  "description": "Improves the challenge of PVE; less frustration, more fear and fun.",
   "authors": [
-    "Me!"
+    "Frootloop"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
@@ -19,11 +19,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "frootloops.mobs.MobsReworkedMain"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "mobs-reworked.mixins.json"
   ],
 
   "depends": {
