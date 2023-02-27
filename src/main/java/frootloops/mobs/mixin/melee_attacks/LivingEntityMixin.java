@@ -42,9 +42,9 @@ public abstract class LivingEntityMixin extends Entity {
             if(mainHand.getItem() instanceof AxeItem)
                 cir.setReturnValue(24);
             else if(mainHand.getItem() instanceof HoeItem)
-                cir.setReturnValue(12);
+                cir.setReturnValue(10);
             else
-                cir.setReturnValue(18);
+                cir.setReturnValue(16);
         }
     }
 
