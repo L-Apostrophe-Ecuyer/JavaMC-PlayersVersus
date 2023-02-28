@@ -31,14 +31,14 @@ public class HungerManagerMixin {
     public void update(PlayerEntity player) {
         this.prevFoodLevel = this.foodLevel;
 
-        // Natural Regeneration
+        // Natural Regeneration (works with >20 max health):
         boolean hasSufficientHungerToHeal = (foodLevel == 20) || (foodLevel > Math.ceil(player.getHealth()) && player.canFoodHeal());
         if (hasSufficientHungerToHeal && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION)) {
             foodTickTimer++;
             if(player.hurtTime > 0 && !player.isOnFire()) {
                 foodTickTimer = -16;
             }
-            else if(foodTickTimer > 40){
+            else if(foodTickTimer > 32){
                 foodTickTimer = 0;
                 player.heal(1);
                 if (saturationLevel > 0.0F) saturationLevel = Math.max(0.0F, saturationLevel - 0.5F);

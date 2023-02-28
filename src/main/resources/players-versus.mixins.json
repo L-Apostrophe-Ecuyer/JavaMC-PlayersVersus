@@ -6,6 +6,7 @@
   "mixins": [
     "environment.BlockExplosivityMixin",
     "environment.SculkShriekerMixin",
+    "environment.SheepShearingMixin",
     "environment.TntMixin",
     "hostile_mobs.dragon.AreaEffectCloudEntityMixin",
     "hostile_mobs.dragon.ChargingPlayerPhaseMixin",
@@ -31,10 +32,23 @@
     "players.accessors.MiningToolAccessor",
     "players.accessors.SwordAccessor",
     "players.accessors.TridentAccessor",
+    "players.consumables.drinking.HoneyMixin",
+    "players.consumables.drinking.MilkBucketMixin",
+    "players.consumables.drinking.PotionMixin",
+    "players.consumables.drinking.StewMixin",
+    "players.consumables.drinking.SuspiciousStewMixin",
+    "players.consumables.throwing.SnowballEntityMixin",
+    "players.consumables.throwing.SnowballMixin",
+    "players.consumables.throwing.SplashPotionMixin",
+    "players.consumables.ItemEatingMixin",
+    "players.shields.LivingEntityBlockingMixin",
+    "players.shields.PlayerEntityBlockingMixin",
+    "players.shields.ShieldItemMixin",
     "players.HungerManagerMixin",
     "players.LivingEntityAccessor",
     "players.MinecraftClientMixin",
-    "players.PlayerEntityMixin"
+    "players.PlayerEntityMixin",
+    "trading.VillagerEntityMixin"
   ],
   "client": [],
   "injectors": {
