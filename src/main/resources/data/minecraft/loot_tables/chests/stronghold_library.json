@@ -1,0 +1,166 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "min": 0.0,
+        "max": 1.0,
+        "type": "minecraft:uniform"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{StoredEnchantments:[{id:mending,lvl:1}]}"
+            }
+          ],
+          "name": "minecraft:enchanted_book"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "min": 0.0,
+        "max": 1.0,
+        "type": "minecraft:uniform"
+      },
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "minecraft:music_disc_blocks"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 8,
+          "name": "minecraft:globe_banner_pattern"
+        },
+	{
+          "type": "minecraft:item",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{Recipes:[\"minecraft:end_portal_frame\"]}"
+            }
+          ],
+          "name": "minecraft:knowledge_book"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "min": 5.0,
+        "max": 11.0,
+        "type": "minecraft:uniform"
+      },
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1.0,
+                "max": 3.0,
+                "type": "minecraft:uniform"
+              }
+            }
+          ],
+          "name": "minecraft:book"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 12,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 2.0,
+                "max": 7.0,
+                "type": "minecraft:uniform"
+              }
+            }
+          ],
+          "name": "minecraft:paper"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 8,
+          "name": "minecraft:glass_bottle"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 6,
+          "name": "minecraft:map"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 6,
+          "name": "minecraft:compass"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 6,
+          "name": "minecraft:writable_book"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "min": 3.0,
+        "max": 5.0,
+        "type": "minecraft:uniform"
+      },
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:warped_roots"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:warped_fungus"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:nether_sprouts"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:twisting_vines"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:string"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "min": 0.0,
+        "max": 3.0,
+        "type": "minecraft:uniform"
+      },
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:enchant_with_levels",
+              "levels": 35,
+              "treasure": true
+            }
+          ],
+          "name": "minecraft:book"
+        }
+      ]
+    }
+  ]
+}
