@@ -57,7 +57,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
     @ModifyVariable(method = "damage", ordinal = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageSource;isProjectile()Z"))
     private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
-        if(source.method_5533() || source.method_5535()) return 0.0f;
+        if(source.isExplosive() || source.isProjectile()) return 0.0f;
         return Math.max(0.0f, damageAmount/2.0f - SHIELD_BLOCKED_DAMAGE);
     }
 
@@ -84,7 +84,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
             // Reflect damage back to attacker, in cases of thorns or parries:
             if(source.getName() == "thorns") return;
             if(reflectedDamage > 0 && source.getSource() instanceof LivingEntity attacker && !attacker.equals(this)) {
-                attacker.damage(DamageSource.method_5532(player), reflectedDamage);
+                attacker.damage(DamageSource.player(player), reflectedDamage);
                 attacker.takeKnockback(0.55, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
             }
         }

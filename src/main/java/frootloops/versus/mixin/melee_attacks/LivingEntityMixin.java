@@ -45,11 +45,11 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
         if(timeUntilRegen > 0 && source.getAttacker() instanceof LivingEntity){
-            if(source.method_5533())
+            if(source.isProjectile())
                 timeUntilRegen = 0;
             else {
                 ItemStack mainHand = ((LivingEntity) source.getAttacker()).getMainHandStack();
-                if (!source.method_5527() && mainHand != null && mainHand.getItem().isDamageable())
+                if (!source.isMagic() && mainHand != null && mainHand.getItem().isDamageable())
                     timeUntilRegen = 7;
                 else
                     timeUntilRegen = 10;

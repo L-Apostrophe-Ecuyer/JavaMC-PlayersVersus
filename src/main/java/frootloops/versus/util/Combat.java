@@ -1,4 +1,4 @@
-package frootloops.versus.util.players;
+package frootloops.versus.util;
 
 
 import com.google.common.collect.ImmutableMultimap;

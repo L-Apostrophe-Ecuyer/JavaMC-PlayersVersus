@@ -1,7 +1,8 @@
 package frootloops.versus;
 
-import frootloops.versus.util.enchantments.Enchants;
-import frootloops.versus.util.players.Combat;
+import frootloops.versus.util.Enchants;
+import frootloops.versus.util.Combat;
+import frootloops.versus.util.Items;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,5 +21,6 @@ public class Main implements ModInitializer {
 		MOD_LOGGER.info("Launching " + MOD_ID);
 		Combat.init();
 		Enchants.init();
+		Items.init();
 	}
 }

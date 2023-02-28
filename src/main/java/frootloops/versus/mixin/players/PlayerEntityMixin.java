@@ -2,9 +2,9 @@ package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
 import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
-import frootloops.versus.util.enchantments.Enchants;
+import frootloops.versus.util.Enchants;
 import frootloops.versus.util.enchantments.TossingEnchantment;
-import frootloops.versus.util.players.Combat;
+import frootloops.versus.util.Combat;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -58,15 +58,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
 
         // Explosions are bigger, but deal significantly less damage:
-        if (source.method_5535())
+        if (source.isExplosive())
             return Math.min(32.0f, amount/4.0f);
 
         // Falling doesn't hurt as much:
-        if (source == DamageSource.field_5868)
+        if (source == DamageSource.FALL)
             return amount/1.75f;
 
         // Hitting blocks while flying no longer neglects helmet protection:
-        if(source == DamageSource.field_5843) {
+        if(source == DamageSource.FLY_INTO_WALL) {
             ItemStack helmet = this.getEquippedStack(EquipmentSlot.HEAD);
             if(helmet != null) {
                 Multimap<EntityAttribute, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);
@@ -103,7 +103,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "tick", at = @At("HEAD"))
     public void fasterAirStrafing(CallbackInfo info) {
         if(getStatusEffect(StatusEffects.SPEED) != null || getStatusEffect(StatusEffects.JUMP_BOOST) != null)
-            field_6281 *= 1.2;
+            airStrafingSpeed *= 1.2;
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
