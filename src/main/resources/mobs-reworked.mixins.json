@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "frootloops.mobs.mixin",
+  "package": "frootloops.versus.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "environment.BlockExplosivityMixin",
@@ -25,7 +25,17 @@
     "hostile_mobs.ZombieEventListenerMixin",
     "hostile_mobs.ZombieMixin",
     "melee_attacks.MeleeAttackGoalMixin",
-    "melee_attacks.LivingEntityMixin"
+    "melee_attacks.LivingEntityMixin",
+    "players.accessors.ItemAccessor",
+    "players.accessors.LivingEntityAccessor",
+    "players.accessors.MiningToolAccessor",
+    "players.accessors.SwordAccessor",
+    "players.accessors.TridentAccessor",
+    "players.ClientPlayerEntitySprintingMixin",
+    "players.HungerManagerMixin",
+    "players.LivingEntityAccessor",
+    "players.MinecraftClientMixin",
+    "players.PlayerEntityMixin"
   ],
   "client": [],
   "injectors": {

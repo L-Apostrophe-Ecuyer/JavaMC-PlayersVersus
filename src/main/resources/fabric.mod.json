@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "mobs-reworked",
+  "id": "players-versus",
   "version": "${version}",
 
-  "name": "Mobs Reworked",
-  "description": "Improves the challenge of PVE; less frustration, more fear and fun.",
+  "name": "Players Versus",
+  "description": "Improves the challenge of PVE and PVP; less frustration, more fear, more fun.",
   "authors": [
     "Frootloop"
   ],
