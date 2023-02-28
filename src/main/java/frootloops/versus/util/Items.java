@@ -11,7 +11,7 @@ import static frootloops.versus.Main.MOD_ID;
 public abstract class Items {
 
     public static void init() {
-        int maxSnacks = 64, maxMeals = 64, maxStews = 16, maxBottled = 16, maxThrowables = 64, maxPlaceableEntities = 16;
+        int maxSnacks = 64, maxMeals = 16, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
         setStackSizes(maxSnacks, maxMeals, maxBottled, maxStews, maxThrowables, maxPlaceableEntities);
     }
 
@@ -32,7 +32,8 @@ public abstract class Items {
                 ((ItemAccessor) item).setMaxCount(maxPlaceableEntities);
         }
 
-        // Meals:
+        // Other foods:
+        ((ItemAccessor) net.minecraft.item.Items.CAKE).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.BREAD).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.PUMPKIN_PIE).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.SALMON).setMaxCount(maxMeals);
@@ -41,6 +42,7 @@ public abstract class Items {
         ((ItemAccessor) net.minecraft.item.Items.COOKED_COD).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.PUFFERFISH).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.TROPICAL_FISH).setMaxCount(maxMeals);
+        ((ItemAccessor) net.minecraft.item.Items.ROTTEN_FLESH).setMaxCount(64);
 
         // Bottles:
         ((ItemAccessor) net.minecraft.item.Items.POTION).setMaxCount(maxBottled);
@@ -56,7 +58,6 @@ public abstract class Items {
         ((ItemAccessor) net.minecraft.item.Items.POWDER_SNOW_BUCKET).setMaxCount(16);
 
         // Rarities
-        ((ItemAccessor) net.minecraft.item.Items.NAUTILUS_SHELL).setMaxCount(16);
         ((ItemAccessor) net.minecraft.item.Items.HEART_OF_THE_SEA).setMaxCount(1);
         ((ItemAccessor) net.minecraft.item.Items.NETHER_STAR).setMaxCount(1);
     }
