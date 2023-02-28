@@ -65,7 +65,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             double playerAttackSpeed = player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED);
             double attackProgress =  ((double)((LivingEntityAccessor)player).getLastAttackedTicks()) * playerAttackSpeed / 20.0;
 
-            if(attackProgress > 1) {
+            if(attackProgress > 1.05) {
                 this.doAttack();
                 this.player.resetLastAttackedTicks();
             }

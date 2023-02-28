@@ -19,11 +19,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "frootloops.mobs.MobsReworkedMain"
+      "frootloops.versus.Main"
     ]
   },
   "mixins": [
-    "mobs-reworked.mixins.json"
+    "players-versus.mixins.json"
   ],
 
   "depends": {

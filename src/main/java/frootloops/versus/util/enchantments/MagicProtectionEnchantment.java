@@ -36,7 +36,7 @@ public class MagicProtectionEnchantment extends Enchantment {
 
     @Override
     public int getProtectionAmount(int level, DamageSource source) {
-        if (source.isMagic()) return level + 1;
+        if (source.method_5527()) return level + 1;
         return 0;
     }
 

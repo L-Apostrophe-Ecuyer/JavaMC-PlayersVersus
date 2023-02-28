@@ -49,7 +49,7 @@ public class HungerManagerMixin {
         // Starvation
         else if (foodLevel == 0 && exhaustion > 0.5F) {
             exhaustion = 0.0F;
-            player.damage(DamageSource.STARVE, 1.0F);
+            player.damage(DamageSource.field_5852, 1.0F);
         }
 
         // Food Exhaustion

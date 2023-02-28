@@ -1,11 +1,9 @@
 package frootloops.versus.util.enchantments;
 
-import frootloops.versus.MobsReworkedMain;
-import net.minecraft.enchantment.Enchantments;
+import frootloops.versus.Main;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import frootloops.versus.util.enchantments.*;
 
 
 public abstract class Enchants {
@@ -18,10 +16,10 @@ public abstract class Enchants {
     public static final PhysicalProtectionEnchantment PHYSICAL_PROTECTION = new PhysicalProtectionEnchantment();
     public static void init(){
 
-        Registry.register(Registries.ENCHANTMENT, new Identifier(MobsReworkedMain.MOD_ID, "frost_aspect"), FROST_ASPECT);
-        Registry.register(Registries.ENCHANTMENT, new Identifier(MobsReworkedMain.MOD_ID, "tossing"), TOSSING);
-        Registry.register(Registries.ENCHANTMENT, new Identifier(MobsReworkedMain.MOD_ID, "cleaving"), CLEAVING);
-        Registry.register(Registries.ENCHANTMENT, new Identifier(MobsReworkedMain.MOD_ID, "magic_protection"), MAGIC_PROTECTION);
-        Registry.register(Registries.ENCHANTMENT, new Identifier(MobsReworkedMain.MOD_ID, "physical_protection"), PHYSICAL_PROTECTION);
+        Registry.register(Registries.ENCHANTMENT, new Identifier(Main.MOD_ID, "frost_aspect"), FROST_ASPECT);
+        Registry.register(Registries.ENCHANTMENT, new Identifier(Main.MOD_ID, "tossing"), TOSSING);
+        Registry.register(Registries.ENCHANTMENT, new Identifier(Main.MOD_ID, "cleaving"), CLEAVING);
+        Registry.register(Registries.ENCHANTMENT, new Identifier(Main.MOD_ID, "magic_protection"), MAGIC_PROTECTION);
+        Registry.register(Registries.ENCHANTMENT, new Identifier(Main.MOD_ID, "physical_protection"), PHYSICAL_PROTECTION);
     }
 }

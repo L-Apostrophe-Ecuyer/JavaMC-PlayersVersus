@@ -31,7 +31,6 @@
     "players.accessors.MiningToolAccessor",
     "players.accessors.SwordAccessor",
     "players.accessors.TridentAccessor",
-    "players.ClientPlayerEntitySprintingMixin",
     "players.HungerManagerMixin",
     "players.LivingEntityAccessor",
     "players.MinecraftClientMixin",

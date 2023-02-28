@@ -29,12 +29,12 @@ public class PhysicalProtectionEnchantment extends Enchantment {
 
     @Override
     public int getProtectionAmount(int level, DamageSource source) {
-        if (!source.isMagic()
-                && !source.isFire()
-                && !source.isFromFalling()
-                && !source.isProjectile()
-                && !source.isExplosive()
-                && !source.bypassesArmor())
+        if (!source.method_5527()
+                && !source.method_5534()
+                && !source.method_33329()
+                && !source.method_5533()
+                && !source.method_5535()
+                && !source.method_5537())
             return level;
         return 0;
     }
