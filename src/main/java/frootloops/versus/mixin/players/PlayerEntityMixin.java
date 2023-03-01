@@ -1,7 +1,6 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
-import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import frootloops.versus.util.Enchants;
 import frootloops.versus.util.enchantments.TossingEnchantment;
 import frootloops.versus.util.Combat;
@@ -51,7 +50,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
 
         cir.setReturnValue(LivingEntity.createLivingAttributes()
-                .add(ReachEntityAttributes.ATTACK_RANGE, Combat.PLAYER_BASE_ATTACK_REACH)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, Combat.PLAYER_BASE_ATTACK_SPEED)
