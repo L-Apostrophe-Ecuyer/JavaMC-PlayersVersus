@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.players.attacking;
 
-import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+//import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import frootloops.versus.mixin.players.accessors.LivingEntityAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -118,7 +118,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
                     Vec3d camera = player.getCameraPosVec(1.0F);
                     Vec3d rotation = player.getRotationVec(1.0F);
-                    double range = ReachEntityAttributes.getAttackRange(player, 3.0);
+                    double range = 3.0d; // ReachEntityAttributes.getAttackRange(player, 3.0);
                     Vec3d end = camera.add(rotation.x * range, rotation.y * range, rotation.z * range);
                     Predicate<Entity> predicate = EntityPredicates.CAN_COLLIDE.and(e -> e != null);
 
@@ -140,7 +140,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     private void doSweepAttack(){
         Vec3d cameraPos = player.getCameraPosVec(1.0F);
         Vec3d rotation = player.getRotationVec(1.0F);
-        double range = ReachEntityAttributes.getAttackRange(player, 3.0);
+        double range = 3.0d;// ReachEntityAttributes.getAttackRange(player, 3.0);
 
         Vec3d rotatedEightDegZ = new Vec3d(rotation.x * 0.99026806874 - rotation.z * 0.13917310096, rotation.y, rotation.x * 0.13917310096 + rotation.z * 0.99026806874);
         Vec3d rotatedEightDegX = new Vec3d(rotation.x * 0.99026806874 - rotation.z * -0.13917310096, rotation.y, rotation.x * -0.13917310096 + rotation.z * 0.99026806874);
