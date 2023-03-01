@@ -11,6 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShovelItem;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.SoundEvents;
 
 
@@ -36,7 +37,7 @@ public class MagicProtectionEnchantment extends Enchantment {
 
     @Override
     public int getProtectionAmount(int level, DamageSource source) {
-        if (source.isMagic()) return level + 1;
+        if (source.isIn(DamageTypeTags.WITCH_RESISTANT_TO)) return level + 1;
         return 0;
     }
 

@@ -13,6 +13,7 @@ public abstract class TntMixin extends Entity {
         super(type, world);
     }
 
+
     @Overwrite
     private void explode() {
         this.world.createExplosion(this, this.getX(), this.getBodyY(0.0625), this.getZ(), 6.0F, World.ExplosionSourceType.TNT);

@@ -22,6 +22,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.thread.ReentrantThreadExecutor;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -148,7 +149,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         swingAtEntities(rotatedEightDegX, cameraPos, range);
 
         // Break all foliage within range of the crosshair target, - 1 block:
-        BlockPos pos = new BlockPos(this.crosshairTarget.getPos().subtract(rotation));
+        Vec3d crosshairPos = this.crosshairTarget.getPos().subtract(rotation);
+        BlockPos pos = new BlockPos(new Vec3i((int)crosshairPos.x, (int)crosshairPos.y, (int)crosshairPos.z));
         swungAtBlockPos(pos);
     }
 
@@ -158,7 +160,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         EntityHitResult entityResult = ProjectileUtil.getEntityCollision(world, player, cameraPos, end, new Box(cameraPos, end), predicate);
         if (entityResult != null) {
             this.interactionManager.attackEntity(player, entityResult.getEntity());
-            BlockPos pos = new BlockPos(entityResult.getPos().subtract(rotation));
+            Vec3d entityPos = entityResult.getPos().subtract(rotation);
+            BlockPos pos = new BlockPos(new Vec3i((int)entityPos.x, (int)entityPos.y, (int)entityPos.z));
             swungAtBlockPos(pos);
         }
     }

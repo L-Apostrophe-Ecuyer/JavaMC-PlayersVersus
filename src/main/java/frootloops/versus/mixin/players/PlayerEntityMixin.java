@@ -2,7 +2,6 @@ package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
 import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
-import frootloops.versus.Main;
 import frootloops.versus.util.Enchants;
 import frootloops.versus.util.enchantments.TossingEnchantment;
 import frootloops.versus.util.Combat;
@@ -14,7 +13,7 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -22,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.PotionItem;
 import net.minecraft.item.ShovelItem;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.GameRules;
@@ -71,15 +71,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
 
         // Explosions are bigger, but deal significantly less damage:
-        if (source.isExplosive())
+        if(source.isIn(DamageTypeTags.IS_EXPLOSION))//(source.isExplosive())
             return Math.min(32.0f, amount/4.0f);
 
         // Falling doesn't hurt as much:
-        if (source == DamageSource.FALL)
+        if (source.isIn(DamageTypeTags.IS_FALL))//(source == DamageSource.FALL)
             return amount/1.75f;
 
         // Hitting blocks while flying no longer neglects helmet protection:
-        if(source == DamageSource.FLY_INTO_WALL) {
+        if(source.method_49708(DamageTypes.FLY_INTO_WALL)) {//(source == DamageSource.FLY_INTO_WALL) {
             ItemStack helmet = this.getEquippedStack(EquipmentSlot.HEAD);
             if(helmet != null) {
                 Multimap<EntityAttribute, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);
@@ -112,14 +112,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
     }
 
-    @Inject(method = "tick", at = @At("HEAD"))
-    public void fasterAirStrafing(CallbackInfo info) {
-        if(getStatusEffect(StatusEffects.SPEED) != null)
-            airStrafingSpeed *= 1.2 * getStatusEffect(StatusEffects.SPEED).getAmplifier();
-        else if (getStatusEffect(StatusEffects.JUMP_BOOST) != null)
-            airStrafingSpeed *= 1.2;
-    }
-
     @Inject(method = "attack", at = @At("TAIL"))
     public void attack(Entity target, CallbackInfo ci) {
         int frostAspect = EnchantmentHelper.getEquipmentLevel(Enchants.FROST_ASPECT, this);
@@ -140,7 +132,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         boolean isToss = !this.isSneaking() && this.onGround && this.getMainHandStack().getItem() instanceof ShovelItem;
         if (isToss) {
-            TossingEnchantment.performTossAttack(this, (LivingEntity)target, 0.125 + 0.125 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
+            TossingEnchantment.performTossAttack(this, target, 0.125 + 0.125 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
         }
     }
 }
