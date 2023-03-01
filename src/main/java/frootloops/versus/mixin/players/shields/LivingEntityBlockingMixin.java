@@ -33,9 +33,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         super(type, world);
     }
 
-
     private static final int PARRY_TIME_TICKS = 8;
-    private static final float SHIELD_BLOCKED_DAMAGE = 6.0f;
 
 
     @Inject(method = "blockedByShield", at = @At("HEAD"), cancellable = true)
@@ -55,14 +53,6 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     private void saveDamageAmount(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         damageAmount = amount;
     }
-
-
-    @ModifyVariable(method = "damage", ordinal = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageSource;isProjectile()Z"))
-    private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
-        if(source.isIn(DamageTypeTags.IS_EXPLOSION) || source.isIn(DamageTypeTags.IS_PROJECTILE)) return 0.0f;
-        return Math.max(0.0f, damageAmount/2.0f - SHIELD_BLOCKED_DAMAGE);
-    }
-
 
     @Inject(method = "damage", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/damage/DamageSource;getSource()Lnet/minecraft/entity/Entity;"))
