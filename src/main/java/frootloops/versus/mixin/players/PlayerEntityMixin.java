@@ -2,6 +2,7 @@ package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
 import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import frootloops.versus.Main;
 import frootloops.versus.util.Enchants;
 import frootloops.versus.util.enchantments.TossingEnchantment;
 import frootloops.versus.util.Combat;
@@ -23,6 +24,7 @@ import net.minecraft.item.ShovelItem;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,6 +44,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow
     private final ItemCooldownManager itemCooldownManager;
 
+    @Shadow public int totalExperience;
+
 
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
@@ -52,6 +56,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, Combat.PLAYER_BASE_ATTACK_SPEED)
                 .add(EntityAttributes.GENERIC_LUCK));
+    }
+
+    @Inject(method = "getXpToDrop", at = @At("RETURN"), cancellable = true)
+    public void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
+        if (this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+            cir.setReturnValue(0);
+        } else {
+            cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1));
+        }
     }
 
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
@@ -85,7 +98,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 return DamageUtil.getDamageLeft(amount, armorAmount, toughnessAmount);
             }
         }
-
         return amount;
     }
 
@@ -102,23 +114,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void fasterAirStrafing(CallbackInfo info) {
-        if(getStatusEffect(StatusEffects.SPEED) != null || getStatusEffect(StatusEffects.JUMP_BOOST) != null)
+        if(getStatusEffect(StatusEffects.SPEED) != null)
+            airStrafingSpeed *= 1.2 * getStatusEffect(StatusEffects.SPEED).getAmplifier();
+        else if (getStatusEffect(StatusEffects.JUMP_BOOST) != null)
             airStrafingSpeed *= 1.2;
-    }
-
-    @Inject(method = "tick", at = @At("HEAD"))
-    public void extraReachChargedAttacks(CallbackInfo info) {
-        double attackProgress = this.lastAttackedTicks * this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED) / 20.0;
-        if(attackProgress > 0.95) {
-            boolean hasAlreadyGottenBonus = (this.getAttributeBaseValue(ReachEntityAttributes.ATTACK_RANGE) == Combat.PLAYER_BASE_ATTACK_REACH);
-            if(!hasAlreadyGottenBonus)
-                this.getAttributeInstance(ReachEntityAttributes.ATTACK_RANGE).setBaseValue(Combat.PLAYER_BASE_ATTACK_REACH + 1);
-        }
     }
 
     @Inject(method = "attack", at = @At("TAIL"))
     public void attack(Entity target, CallbackInfo ci) {
-
         int frostAspect = EnchantmentHelper.getEquipmentLevel(Enchants.FROST_ASPECT, this);
         boolean isFrostAttack = (target instanceof LivingEntity && frostAspect > 0);
         if (isFrostAttack) {

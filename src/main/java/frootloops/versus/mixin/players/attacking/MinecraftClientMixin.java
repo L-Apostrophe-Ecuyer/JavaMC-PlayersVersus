@@ -1,6 +1,7 @@
-package frootloops.versus.mixin.players;
+package frootloops.versus.mixin.players.attacking;
 
 import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import frootloops.versus.mixin.players.accessors.LivingEntityAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.WindowEventHandler;

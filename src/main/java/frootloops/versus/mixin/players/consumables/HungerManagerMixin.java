@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players;
+package frootloops.versus.mixin.players.consumables;
 
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.HungerManager;
