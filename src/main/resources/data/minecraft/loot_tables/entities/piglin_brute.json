@@ -1,0 +1,39 @@
+{
+    "type": "minecraft:entity",
+    "pools": [
+      {
+        "rolls": 1,
+        "entries": [
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:netherite_scrap",
+            "conditions": [
+              {
+                "condition": "minecraft:random_chance",
+                "chance": 0.4
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "rolls": 1,
+        "entries": [
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:gold_ingot",
+            "functions": [
+              {
+                "function": "minecraft:set_count",
+                "count": {
+                  "min": 0,
+                  "max": 3
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  
