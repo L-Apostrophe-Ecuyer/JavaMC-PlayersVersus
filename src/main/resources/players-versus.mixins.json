@@ -19,6 +19,7 @@
     "environment.SculkShriekerMixin",
     "environment.SheepShearingMixin",
     "environment.TntMixin",
+    "environment.DarknessFogMixin",
     "hostile_mobs.dragon.AreaEffectCloudEntityMixin",
     "hostile_mobs.dragon.ChargingPlayerPhaseMixin",
     "hostile_mobs.dragon.DragonFireballEntityMixin",
