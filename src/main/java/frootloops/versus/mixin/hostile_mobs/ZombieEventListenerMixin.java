@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.hostile_mobs;
 
-import frootloops.versus.util.ai.ZombieSoundListener;
+import frootloops.versus.util.hostile_mobs.ZombieSoundListener;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;

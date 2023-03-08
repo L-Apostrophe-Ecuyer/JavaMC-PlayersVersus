@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.hostile_mobs;
 
-import frootloops.versus.util.ai.creeper.XrayFollowTargetGoal;
+import frootloops.versus.util.hostile_mobs.creeper.XrayFollowTargetGoal;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -28,13 +28,13 @@ public class CreeperEntityMixin extends HostileEntity {
     @Shadow
     private int fuseTime = 30;
     @Shadow
-    private int explosionRadius = 6;
+    private int explosionRadius = 3;
 
     @Nullable
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
         fuseTime = 34;
-        explosionRadius = 5;
+        explosionRadius = 3;
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
 

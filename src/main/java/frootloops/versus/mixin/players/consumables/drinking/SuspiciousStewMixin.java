@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SuspiciousStewItem.class)
@@ -30,6 +31,11 @@ public class SuspiciousStewMixin extends Item {
         if(user instanceof PlayerEntity player && !player.getInventory().insertStack(emptyBowl))
             player.dropItem(emptyBowl, false);
         cir.setReturnValue(stack);
+    }
+
+    @ModifyVariable(method = "addEffectToStew", at = @At("HEAD"), ordinal = 0)
+    private static int doubleDuration(int duration) {
+        return duration >> 1;
     }
 }
 

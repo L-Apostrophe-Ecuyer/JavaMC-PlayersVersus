@@ -1,4 +1,4 @@
-package frootloops.versus.util.ai;
+package frootloops.versus.util.hostile_mobs;
 
 import frootloops.versus.Main;
 import frootloops.versus.mixin.hostile_mobs.PhantomAccessor;

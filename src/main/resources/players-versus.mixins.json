@@ -58,6 +58,7 @@
     "players.shields.PlayerEntityBlockingMixin",
     "players.shields.ShieldItemMixin",
     "players.PlayerEntityMixin",
+    "players.DamageUtilMixin",
     "trading.VillagerEntityMixin"
   ],
   "client": [],

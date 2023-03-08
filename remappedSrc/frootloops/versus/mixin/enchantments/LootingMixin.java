@@ -23,9 +23,9 @@ public class LootingMixin extends Enchantment {
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        if (this.type == EnchantmentTarget.WEAPON && (stack.getItem() instanceof AxeItem || stack.getItem() instanceof HoeItem || stack.getItem() instanceof TridentItem)){
+        if (this.target == EnchantmentTarget.WEAPON && (stack.getItem() instanceof AxeItem || stack.getItem() instanceof HoeItem || stack.getItem() instanceof TridentItem)){
             return true;
         }
-        return this.type.isAcceptableItem(stack.getItem());
+        return this.target.isAcceptableItem(stack.getItem());
     }
 }

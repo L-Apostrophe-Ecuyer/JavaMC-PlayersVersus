@@ -1,9 +1,7 @@
-package frootloops.versus.util.ai;
+package frootloops.versus.util.hostile_mobs;
 
-import frootloops.versus.Main;
 import frootloops.versus.mixin.hostile_mobs.PhantomAccessor;
 import net.minecraft.entity.ai.control.MoveControl;
-import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;

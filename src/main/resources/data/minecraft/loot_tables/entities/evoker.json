@@ -1,59 +1,146 @@
 {
-    "type": "minecraft:entity",
-    "pools": [
-      {
-        "rolls": 1,
-        "entries": [
-          {
-            "type": "minecraft:item",
-            "name": "minecraft:vex_armor_trim_smithing_template"
-          }
-        ]
-      },
-      {
-        "rolls": 1,
-        "bonus_rolls": 0,
-        "entries": [
-          {
-            "type": "minecraft:item",
-            "name": "minecraft:totem_of_undying"
-          }
-        ]
-      },
-      {
-        "rolls": 1,
-        "bonus_rolls": 0,
-        "entries": [
-          {
-            "type": "minecraft:item",
-            "name": "minecraft:emerald",
-            "functions": [
-              {
-                "function": "minecraft:set_count",
-                "count": {
-                  "type": "minecraft:uniform",
-                  "min": 0,
-                  "max": 1
-                },
-                "add": false
-              },
-              {
-                "function": "minecraft:looting_enchant",
-                "count": {
-                  "type": "minecraft:uniform",
-                  "min": 0,
-                  "max": 1
-                }
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:totem_of_undying"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:killed_by_player"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 99,
+          "name": "minecraft:vex_armor_trim_smithing_template",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 0,
+                "max": 1
               }
-            ]
-          }
-        ],
-        "conditions": [
-          {
-            "condition": "minecraft:killed_by_player"
-          }
-        ]
-      }
-    ]
-  }
-  
+            }
+          ],
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "structure": "minecraft:mansion"
+              }
+            },
+            {
+              "condition": "minecraft:killed_by_player"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 1,
+          "name": "minecraft:filled_map",
+          "functions": [
+            {
+              "function": "minecraft:exploration_map",
+              "destination": "minecraft:eye_of_ender_located",
+              "decoration": "banner_black",
+              "zoom": 3,
+              "search_radius": 50,
+              "skip_existing_chunks": true
+            },
+            {
+              "function": "minecraft:set_name",
+              "name": "Forbidden Map"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 2,
+          "name": "minecraft:enchanted_book",
+          "functions": [
+            {
+              "function": "minecraft:enchant_randomly"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "min": 2,
+        "max": 3
+      },
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 12,
+          "name": "minecraft:emerald",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 1
+              },
+              "add": false
+            },
+            {
+              "function": "minecraft:looting_enchant",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 5,
+          "name": "minecraft:gold_ingot",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 3,
+          "name": "minecraft:paper",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 3,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 1,
+          "name": "minecraft:map"
+        }
+      ]
+    }
+  ]
+}

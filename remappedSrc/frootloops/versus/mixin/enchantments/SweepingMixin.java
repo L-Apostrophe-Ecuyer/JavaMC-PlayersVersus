@@ -18,6 +18,6 @@ public class SweepingMixin extends Enchantment {
         if ((stack.getItem() instanceof SwordItem || stack.getItem() instanceof HoeItem)){
             return true;
         }
-        return this.type.isAcceptableItem(stack.getItem());
+        return this.target.isAcceptableItem(stack.getItem());
     }
 }

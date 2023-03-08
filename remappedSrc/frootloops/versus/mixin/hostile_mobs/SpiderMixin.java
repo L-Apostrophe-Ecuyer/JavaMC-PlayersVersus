@@ -37,7 +37,7 @@ public class SpiderMixin extends HostileEntity {
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
 
         EntityAttributeInstance instanceMvt = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (instanceMvt != null) instanceMvt.setBaseValue(0.26D);
+        if (instanceMvt != null) instanceMvt.setBaseValue(0.28D);
 
         EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
         if (instanceDmg != null) instanceDmg.setBaseValue(8.0D);
@@ -79,7 +79,7 @@ public class SpiderMixin extends HostileEntity {
                     "Baby spawn malus", -30.0D, EntityAttributeModifier.Operation.ADDITION));
 
             Objects.requireNonNull(speed).addPersistentModifier(new EntityAttributeModifier(
-                    "Baby spawn malus", +0.04D, EntityAttributeModifier.Operation.ADDITION));
+                    "Baby spawn malus", +0.08D, EntityAttributeModifier.Operation.ADDITION));
         }
     }
 

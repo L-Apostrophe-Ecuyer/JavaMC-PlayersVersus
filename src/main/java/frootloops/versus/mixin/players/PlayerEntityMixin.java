@@ -68,16 +68,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
 
-        // Explosions are bigger, but deal significantly less damage:
-        if(source.isIn(DamageTypeTags.IS_EXPLOSION))//(source.isExplosive())
-            return Math.min(32.0f, amount/4.0f);
-
         // Falling doesn't hurt as much:
         if (source.isIn(DamageTypeTags.IS_FALL))//(source == DamageSource.FALL)
             return amount/1.75f;
 
         // Hitting blocks while flying no longer neglects helmet protection:
-        if(source.method_49708(DamageTypes.FLY_INTO_WALL)) {//(source == DamageSource.FLY_INTO_WALL) {
+        if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
             ItemStack helmet = this.getEquippedStack(EquipmentSlot.HEAD);
             if(helmet != null) {
                 Multimap<EntityAttribute, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);

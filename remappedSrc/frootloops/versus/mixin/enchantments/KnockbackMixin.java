@@ -20,9 +20,9 @@ public class KnockbackMixin extends Enchantment {
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        if ((stack.getItem() instanceof SwordItem || stack.getItem() instanceof AxeItem || stack.getItem() instanceof ShovelItem || stack.getItem() instanceof HoeItem)){
-            return true;
-        }
-        return this.type.isAcceptableItem(stack.getItem());
+        return (stack.getItem() instanceof SwordItem ||
+                stack.getItem() instanceof AxeItem ||
+                stack.getItem() instanceof ShovelItem ||
+                stack.getItem() instanceof HoeItem);
     }
 }

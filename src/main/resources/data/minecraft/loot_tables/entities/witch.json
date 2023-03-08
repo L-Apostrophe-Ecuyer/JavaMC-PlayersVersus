@@ -66,6 +66,16 @@
         "entries": [
           {
             "type": "minecraft:item",
+            "name": "minecraft:potion",
+            "functions": [
+              {
+                "function": "minecraft:set_potion",
+                "id": "minecraft:healing"
+              }
+            ]
+          },
+          {
+            "type": "minecraft:item",
             "name": "minecraft:glowstone_dust",
             "functions": [
               {

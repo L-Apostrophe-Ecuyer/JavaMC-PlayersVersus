@@ -6,9 +6,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.World;
@@ -31,9 +33,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         super(type, world);
     }
 
-
     private static final int PARRY_TIME_TICKS = 8;
-    private static final float SHIELD_BLOCKED_DAMAGE = 6.0f;
 
 
     @Inject(method = "blockedByShield", at = @At("HEAD"), cancellable = true)
@@ -53,14 +53,6 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     private void saveDamageAmount(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         damageAmount = amount;
     }
-
-
-    @ModifyVariable(method = "damage", ordinal = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageSource;isProjectile()Z"))
-    private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
-        if(source.isExplosive() || source.isProjectile()) return 0.0f;
-        return Math.max(0.0f, damageAmount/2.0f - SHIELD_BLOCKED_DAMAGE);
-    }
-
 
     @Inject(method = "damage", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/damage/DamageSource;getSource()Lnet/minecraft/entity/Entity;"))
@@ -84,8 +76,8 @@ public abstract class LivingEntityBlockingMixin extends Entity {
             // Reflect damage back to attacker, in cases of thorns or parries:
             if(source.getName() == "thorns") return;
             if(reflectedDamage > 0 && source.getSource() instanceof LivingEntity attacker && !attacker.equals(this)) {
-                attacker.damage(DamageSource.player(player), reflectedDamage);
-                attacker.takeKnockback(0.55, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
+                attacker.damage(this.getDamageSources().playerAttack(player), reflectedDamage);
+                attacker.takeKnockback(0.6, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
             }
         }
     }

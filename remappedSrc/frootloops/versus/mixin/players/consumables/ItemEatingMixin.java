@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.players.consumables;
 
+import frootloops.versus.Main;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
@@ -29,10 +30,14 @@ public class ItemEatingMixin {
     @Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable = true)
     public void getMaxUseTime(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         if (stack.getItem().isFood()) {
+
             if(foodComponent.isMeat()) cir.setReturnValue(44);
-            if(foodComponent.getHunger() < 3)  cir.setReturnValue(16);
-            if(foodComponent.getSaturationModifier() == 0.3F)  cir.setReturnValue(24);
-            cir.setReturnValue(32);
+            else if(foodComponent.isSnack()) cir.setReturnValue(16);
+            else if(foodComponent.getHunger() == 1 && foodComponent.getSaturationModifier() == 0.3f) cir.setReturnValue(44);
+            else if(foodComponent.getHunger() < 4)  cir.setReturnValue(16);
+            else if(foodComponent.getSaturationModifier() == 0.3F)  cir.setReturnValue(24);
+            else cir.setReturnValue(32);
+
         }
     }
 }

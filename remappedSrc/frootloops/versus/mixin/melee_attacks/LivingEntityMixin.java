@@ -5,12 +5,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,14 +47,14 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
         if(timeUntilRegen > 0 && source.getAttacker() instanceof LivingEntity){
-            if(source.isProjectile())
+            if(source.isIn(DamageTypeTags.IS_PROJECTILE))//if(source.isProjectile())
                 timeUntilRegen = 0;
             else {
                 ItemStack mainHand = ((LivingEntity) source.getAttacker()).getMainHandStack();
-                if (!source.isMagic() && mainHand != null && mainHand.getItem().isDamageable())
-                    timeUntilRegen = 7;
+                if(source.isIn(DamageTypeTags.BYPASSES_ARMOR))
+                    timeUntilRegen = 12;
                 else
-                    timeUntilRegen = 10;
+                    timeUntilRegen = 6;
             }
         }
     }

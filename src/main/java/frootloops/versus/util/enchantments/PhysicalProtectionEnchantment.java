@@ -35,11 +35,11 @@ public class PhysicalProtectionEnchantment extends Enchantment {
             return (level + 1) >> 1;
         if(source.isIn(DamageTypeTags.IS_FALL) || source.isIn(DamageTypeTags.DAMAGES_HELMET))
             return (level + 1) >> 1;
-        if(source.method_49708(DamageTypes.CRAMMING) || source.method_49708(DamageTypes.IN_WALL))
+        if(source.isOf(DamageTypes.CRAMMING) || source.isOf(DamageTypes.IN_WALL))
             return (level + 1) >> 1;
-        if(source.method_49708(DamageTypes.MOB_ATTACK) || source.method_49708(DamageTypes.PLAYER_ATTACK))
+        if(source.isOf(DamageTypes.MOB_ATTACK) || source.isOf(DamageTypes.PLAYER_ATTACK))
             return level;
-        if(source.method_49708(DamageTypes.CACTUS) || source.method_49708(DamageTypes.SWEET_BERRY_BUSH))
+        if(source.isOf(DamageTypes.CACTUS) || source.isOf(DamageTypes.SWEET_BERRY_BUSH))
             return level + 1;
         return 0;
     }

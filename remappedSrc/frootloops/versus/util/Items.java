@@ -11,7 +11,7 @@ import static frootloops.versus.Main.MOD_ID;
 public abstract class Items {
 
     public static void init() {
-        int maxSnacks = 64, maxMeals = 16, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
+        int maxSnacks = 64, maxMeals = 64, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
         setStackSizes(maxSnacks, maxMeals, maxBottled, maxStews, maxThrowables, maxPlaceableEntities);
     }
 

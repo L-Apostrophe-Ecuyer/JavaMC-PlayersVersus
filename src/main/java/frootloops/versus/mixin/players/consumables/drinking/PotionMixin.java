@@ -13,7 +13,7 @@ public class PotionMixin extends Item {
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return 24;
+        return 32;
     }
 }
 
