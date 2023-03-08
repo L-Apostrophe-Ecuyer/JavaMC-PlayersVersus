@@ -20,6 +20,7 @@
     "environment.SheepShearingMixin",
     "environment.TntMixin",
     "environment.DarknessFogMixin",
+    "environment.LightmapMixin",
     "hostile_mobs.dragon.AreaEffectCloudEntityMixin",
     "hostile_mobs.dragon.ChargingPlayerPhaseMixin",
     "hostile_mobs.dragon.DragonFireballEntityMixin",
