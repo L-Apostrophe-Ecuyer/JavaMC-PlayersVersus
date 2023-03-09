@@ -16,7 +16,6 @@
     "enchantments.SweepingMixin",
     "enchantments.ThornsMixin",
     "environment.BlockExplosivityMixin",
-    "environment.SculkShriekerMixin",
     "environment.SheepShearingMixin",
     "environment.TntMixin",
     "environment.DarknessFogMixin",
