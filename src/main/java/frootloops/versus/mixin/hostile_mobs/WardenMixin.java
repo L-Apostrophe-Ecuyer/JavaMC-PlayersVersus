@@ -50,20 +50,20 @@ public class WardenMixin extends HostileEntity {
 
     @Override
     public boolean damage(DamageSource source, float amount) {
-        boolean hasRecievedDamage = false, mightRecieveDamage = true;
+        boolean hasReceivedDamage = false, mightReceiveDamage = true;
         if (source.getSource() instanceof PersistentProjectileEntity && !(source.getSource() instanceof TridentEntity)) {
             Entity attacker = source.getAttacker();
             if(attacker == null || !(attacker instanceof PlayerEntity)) {
-                mightRecieveDamage = false;
+                mightReceiveDamage = false;
             }
             else {
                 double distanceSquared = attacker.getPos().squaredDistanceTo(this.getPos());
-                if(distanceSquared > 256.0d) mightRecieveDamage = false;
+                if(distanceSquared > 256.0d) mightReceiveDamage = false;
                 else amount = (amount * (256.0f - (float)attacker.getPos().squaredDistanceTo(this.getPos())))/256.0f;
             }
-            if(amount < 3.0f) mightRecieveDamage = false;
+            if(amount < 3.0f) mightReceiveDamage = false;
         }
-        if(mightRecieveDamage) hasRecievedDamage = super.damage(source, amount);
+        if(mightReceiveDamage) hasReceivedDamage = super.damage(source, amount);
 
         if (!(this.world.isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
             Entity entity = source.getAttacker();
@@ -75,7 +75,7 @@ public class WardenMixin extends HostileEntity {
                 }
             }
         }
-        return hasRecievedDamage;
+        return hasReceivedDamage;
     }
 
 
