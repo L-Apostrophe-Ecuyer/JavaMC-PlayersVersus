@@ -1,14 +1,11 @@
 package frootloops.versus.mixin.hostile_mobs;
 
 import com.google.common.annotations.VisibleForTesting;
-import frootloops.versus.Main;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.WardenAngerManager;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
-import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.Angriness;
 import net.minecraft.entity.mob.HostileEntity;
@@ -16,7 +13,6 @@ import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.TridentEntity;
-import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -24,11 +20,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Collections;
 
 @Mixin(WardenEntity.class)
 public class WardenMixin extends HostileEntity {
@@ -108,8 +101,6 @@ public class WardenMixin extends HostileEntity {
             }
         }
     }
-
-
 
     /***
      *  - SONIC BOOM NERFED
