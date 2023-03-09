@@ -51,8 +51,8 @@ public class WardenMixin extends HostileEntity {
     @Override
     public boolean damage(DamageSource source, float amount) {
         boolean hasReceivedDamage = false, mightReceiveDamage = true;
+        Entity attacker = source.getAttacker();
         if (source.getSource() instanceof PersistentProjectileEntity && !(source.getSource() instanceof TridentEntity)) {
-            Entity attacker = source.getAttacker();
             if(attacker == null || !(attacker instanceof PlayerEntity)) {
                 mightReceiveDamage = false;
             }
@@ -66,10 +66,9 @@ public class WardenMixin extends HostileEntity {
         if(mightReceiveDamage) hasReceivedDamage = super.damage(source, amount);
 
         if (!(this.world.isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
-            Entity entity = source.getAttacker();
-            this.increaseAngerAt(entity, Angriness.ANGRY.getThreshold() + 20, false);
-            if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && entity instanceof LivingEntity) {
-                LivingEntity livingEntity = (LivingEntity)entity;
+            this.increaseAngerAt(attacker, Angriness.ANGRY.getThreshold() + 20, false);
+            if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity) {
+                LivingEntity livingEntity = (LivingEntity)attacker;
                 if (!source.isIndirect() || this.isInRange(livingEntity, 5.0)) {
                     this.updateAttackTarget(livingEntity);
                 }
@@ -135,6 +134,10 @@ public class WardenMixin extends HostileEntity {
         // Sniffing:
         if(horizontalRadius == 6.0d)
             return MathHelper.squaredHypot(d, f) < (3.0d * 3.0d) && e < 5.0d;
+
+        // Immediate retaliation:
+        if(horizontalRadius == 5.0d && verticalRadius == 5.0d)
+            return MathHelper.squaredHypot(d, f) < (4.0d * 4.0d) && e < 4.0d;
 
         // Sonic booms:
         if(entity instanceof PlayerEntity)
