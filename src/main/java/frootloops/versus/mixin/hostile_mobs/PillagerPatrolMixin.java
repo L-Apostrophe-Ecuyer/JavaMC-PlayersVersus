@@ -24,7 +24,7 @@ public class PillagerPatrolMixin {
             if(rand < 15) patrolEntity = EntityType.VINDICATOR.create(world);
             else if(rand < 40) patrolEntity = EntityType.WITCH.create(world);
             else if(rand < 70) patrolEntity = EntityType.PILLAGER.create(world);
-            else if(rand < 62) patrolEntity = EntityType.RAVAGER.create(world);
+            else if(rand < 73) patrolEntity = EntityType.RAVAGER.create(world);
 
             if (patrolEntity != null) {
                 patrolEntity.setPosition(pos.getX(), pos.getY(), pos.getZ());
