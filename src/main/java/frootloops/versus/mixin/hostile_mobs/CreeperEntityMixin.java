@@ -34,8 +34,13 @@ public class CreeperEntityMixin extends HostileEntity {
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
         fuseTime = 34;
-        explosionRadius = 3;
+        explosionRadius = 4;
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
+    }
+
+    @Override
+    public boolean disablesShield(){
+        return true;
     }
 
     @Redirect(at=@At(value = "NEW", target="net/minecraft/entity/ai/goal/ActiveTargetGoal"), method= "initGoals()V")
