@@ -1,4 +1,4 @@
-package frootloops.versus.util.trading;
+package frootloops.versus.util.passive_mobs;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;

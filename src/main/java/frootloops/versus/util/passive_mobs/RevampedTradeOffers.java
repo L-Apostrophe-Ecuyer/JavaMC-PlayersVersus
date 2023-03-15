@@ -1,4 +1,4 @@
-package frootloops.versus.util.trading;
+package frootloops.versus.util.passive_mobs;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -29,7 +29,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.StructureTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.structure.StructureSetKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Util;

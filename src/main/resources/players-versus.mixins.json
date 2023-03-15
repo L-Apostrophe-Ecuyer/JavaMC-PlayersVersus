@@ -16,7 +16,6 @@
     "enchantments.SweepingMixin",
     "enchantments.ThornsMixin",
     "environment.BlockExplosivityMixin",
-    "environment.SheepShearingMixin",
     "environment.TntMixin",
     "environment.DarknessFogMixin",
     "environment.LightmapMixin",
@@ -41,6 +40,8 @@
     "hostile_mobs.ZombieMixin",
     "melee_attacks.MeleeAttackGoalMixin",
     "melee_attacks.LivingEntityMixin",
+    "passive_mobs.VillagerEntityMixin",
+    "passive_mobs.SheepMixin",
     "players.accessors.ItemAccessor",
     "players.accessors.LivingEntityAccessor",
     "players.accessors.MiningToolAccessor",
@@ -61,8 +62,7 @@
     "players.shields.PlayerEntityBlockingMixin",
     "players.shields.ShieldItemMixin",
     "players.PlayerEntityMixin",
-    "players.DamageUtilMixin",
-    "trading.VillagerEntityMixin"
+    "players.DamageUtilMixin"
   ],
   "client": [],
   "injectors": {
