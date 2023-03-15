@@ -29,10 +29,18 @@ public abstract class DrownedMixin extends ZombieEntity {
     @Inject(method = "initEquipment", at = @At("HEAD"), cancellable = true)
     public void changeProbability(Random random, LocalDifficulty localDifficulty, CallbackInfo ci) {
         int rand = random.nextInt(100);
-        if (rand < 15) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.TRIDENT));
-        else if (rand < 18) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.FISHING_ROD));
-        this.handDropChances[0] = 0.75f;
-        this.handDropChances[1] = 0.75f;
+        this.handDropChances[1] = 0.5f;
+        this.handDropChances[1] = 0.5f;
+
+        if (rand < 10) {
+            this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.TRIDENT));
+            this.handDropChances[0] = 1f;
+            this.handDropChances[1] = 1f;
+        }
+        else if (rand < 20)
+            this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.FISHING_ROD));
+        else if (rand < 25)
+            this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.SPYGLASS));
         ci.cancel();
     }
 

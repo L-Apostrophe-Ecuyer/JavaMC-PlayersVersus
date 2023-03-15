@@ -39,10 +39,10 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
     @Nullable
     protected void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
+        this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.6F;
+
         int rand = random.nextInt(100);
-        if(rand > 40)
-            this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-        else if (rand < 15) {
+        if (rand < 15) {
             this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
         }
@@ -54,13 +54,16 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
             this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
         }
-        else if(rand < 45) {
+        else if(rand < 48) {
             this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
         }
-        else {
+        else if(rand < 55){
             this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
+        }
+        else {
+            this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
         }
     }
 }

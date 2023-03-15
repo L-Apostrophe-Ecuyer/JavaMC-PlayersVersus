@@ -11,7 +11,7 @@ public class BlockExplosivityMixin {
 
     @Inject(method = "getBlastResistance()F", at = @At("RETURN"), cancellable = true)
     private void lowerBlastResistance(CallbackInfoReturnable<Float> cir) {
-        cir.setReturnValue(cir.getReturnValue() * 0.25f);
+        cir.setReturnValue(cir.getReturnValue() * 0.4f);
     }
 
 }

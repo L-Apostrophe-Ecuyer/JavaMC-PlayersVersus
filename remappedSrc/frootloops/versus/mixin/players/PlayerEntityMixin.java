@@ -73,7 +73,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             return amount/1.75f;
 
         // Hitting blocks while flying no longer neglects helmet protection:
-        if(source.method_49708(DamageTypes.FLY_INTO_WALL)) {//(source == DamageSource.FLY_INTO_WALL) {
+        if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
             ItemStack helmet = this.getEquippedStack(EquipmentSlot.HEAD);
             if(helmet != null) {
                 Multimap<EntityAttribute, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);
