@@ -90,9 +90,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean resetAttackCooldown = false;
         switch (this.crosshairTarget.getType()) {
             case ENTITY: {
-
-                Main.MOD_LOGGER.warn("Attack range is " + attackRange + " and attack charge is " + attackProgress + " while distance squared is " + player.squaredDistanceTo(crosshairTarget.getPos()));
-
                 if(canAttackEntities && (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos())) {
                     interactionManager.attackEntity(this.player, ((EntityHitResult) this.crosshairTarget).getEntity());
                     break;
