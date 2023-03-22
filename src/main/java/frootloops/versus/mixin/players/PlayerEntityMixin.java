@@ -44,8 +44,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private final ItemCooldownManager itemCooldownManager;
 
     @Shadow public int totalExperience;
-
-
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
 
