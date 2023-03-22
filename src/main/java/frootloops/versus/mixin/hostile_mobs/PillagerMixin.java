@@ -3,11 +3,13 @@ package frootloops.versus.mixin.hostile_mobs;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.FleeEntityGoal;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.IllagerEntity;
 import net.minecraft.entity.mob.PillagerEntity;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.LocalDifficulty;
@@ -40,8 +42,8 @@ public abstract class PillagerMixin extends IllagerEntity {
 
     @Inject(method = "initGoals", at = @At("HEAD"))
     private void fleePlayer(CallbackInfo ci) {
-        this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 3, 1.1, 1.2,
-                (livingEntity) -> true));
+        this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 3, 1.1, 1.2, (livingEntity) -> true));
+        this.targetSelector.add(4, new ActiveTargetGoal(this, ZombieEntity.class, true));
     }
 
     @ModifyArg(method = "enchantMainHandItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I"))

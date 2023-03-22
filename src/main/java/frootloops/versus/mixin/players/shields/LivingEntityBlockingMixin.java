@@ -38,7 +38,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
     @Inject(method = "blockedByShield", at = @At("HEAD"), cancellable = true)
     private void blockSonicBooms(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-        if(source.getName() == "sonic_boom" && this.isBlocking()) {
+        if(source.isOf(DamageTypes.SONIC_BOOM) && this.isBlocking()) {
             cir.setReturnValue(true);
         }
     }

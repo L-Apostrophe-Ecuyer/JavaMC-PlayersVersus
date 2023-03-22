@@ -96,7 +96,7 @@ public class WardenMixin extends HostileEntity {
     private void reduceAngerTowardsSneakyPlayers(CallbackInfo ci){
         if(this.getAngriness() == Angriness.ANGRY && this.age % 2 == 0) {
             Entity target = this.getTarget();
-            if(target != null && target instanceof PlayerEntity && target.isSneaky()) {
+            if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getPos()) > 320)) {
                 this.angerManager.increaseAngerAt(target, -1);
             }
         }

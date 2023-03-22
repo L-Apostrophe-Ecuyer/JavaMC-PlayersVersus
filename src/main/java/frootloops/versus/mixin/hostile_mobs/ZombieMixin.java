@@ -64,11 +64,11 @@ public abstract class ZombieMixin extends HostileEntity {
     @Override
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
-        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.5f : 0.3f;
-        float worldDepthRatio = (float)this.getBlockPos().getY()/256f;
-        float threshold = Math.min(0.1f, difficulty - worldDepthRatio);
+        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.6f : 0.3f;
+        float worldDepthRatio = ((float)this.getBlockPos().getY())/256f;
+        boolean haDifficultyBonusFromDepth = random.nextFloat() < Math.min(0.1f, difficulty - worldDepthRatio);
 
-        if (random.nextFloat() < threshold) {
+        if (haDifficultyBonusFromDepth) {
             int rand = random.nextInt(100);
             if(rand % 2 == 0 || rand % 7 == 0) {
                 this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));

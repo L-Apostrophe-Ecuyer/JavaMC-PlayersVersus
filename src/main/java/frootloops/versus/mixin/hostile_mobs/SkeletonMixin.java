@@ -38,7 +38,6 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
     @Override
     @Nullable
     protected void initEquipment(Random random, LocalDifficulty localDifficulty) {
-        super.initEquipment(random, localDifficulty);
         this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.6F;
 
         int rand = random.nextInt(100);

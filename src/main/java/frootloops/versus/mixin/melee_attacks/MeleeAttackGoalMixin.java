@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.melee_attacks;
 
+import frootloops.versus.Main;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
@@ -58,8 +59,9 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     @Inject(method = "shouldContinue", at = @At("HEAD"), cancellable = true)
     public void shouldContinue(CallbackInfoReturnable cir) {
         if(this.cooldown > 0) {
-            this.mob.setAttacking(true);
+            mob.setAttacking(true);
             cir.setReturnValue(true);
+            cir.cancel();
         }
     }
 
@@ -73,26 +75,30 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(CallbackInfo info) {
-        if(this.cooldown > this.getCooldownAmount()) {
+        if(this.cooldown > this.getCooldownAmount() && this.mob.hurtTime < 8) {
             this.mob.setAttacking(true);
             this.cooldown = Math.max(this.cooldown - 1, 0);
             info.cancel();
         }
-    }
-
-    @Overwrite
+    }   @Overwrite
     public void attack(LivingEntity target, double squaredDistance) {
-        double d = this.getSquaredMaxAttackDistance(target);
 
-        if (squaredDistance <= d + 1) {
-            int cooldownAmount = this.getCooldownAmount();
-            if(this.cooldown <= 0) {
-                this.mob.swingHand(Hand.MAIN_HAND);
-                this.cooldown = cooldownAmount;
-            }
-            else if(this.cooldown == (cooldownAmount - 7) || this.cooldown == (cooldownAmount - 8)) {
-                this.mob.tryAttack(target);
-                this.cooldown -= 2;
+        if(this.mob.hurtTime > 8) {
+            cooldown = 0;
+            mob.setAttacking(false);
+            mob.handSwingProgress = 0f;
+        }
+        else {
+            double d = this.getSquaredMaxAttackDistance(target);
+            if (squaredDistance <= d + 1) {
+                int cooldownAmount = this.getCooldownAmount();
+                if (this.cooldown <= 0) {
+                    this.mob.swingHand(Hand.MAIN_HAND);
+                    this.cooldown = cooldownAmount;
+                } else if (this.cooldown == (cooldownAmount - 7) || this.cooldown == (cooldownAmount - 8)) {
+                    this.mob.tryAttack(target);
+                    this.cooldown -= 2;
+                }
             }
         }
     }

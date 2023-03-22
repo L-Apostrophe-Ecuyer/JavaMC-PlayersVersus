@@ -1,7 +1,9 @@
 package frootloops.versus.mixin.players.attacking;
 
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import frootloops.versus.Main;
 import frootloops.versus.mixin.players.accessors.LivingEntityAccessor;
+import frootloops.versus.util.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.WindowEventHandler;
@@ -19,16 +21,14 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import net.minecraft.util.thread.ReentrantThreadExecutor;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -47,14 +47,13 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
     @Shadow protected abstract boolean doAttack();
 
-    public MinecraftClientMixin(String string) { super(string); }
+    private boolean wasPreviouslyPressed = false;
 
-    private static final boolean SHOW_DEBUG_MESSAGES = false;
+    public MinecraftClientMixin(String string) { super(string); }
 
     @Inject(method = "handleBlockBreaking",at = @At("HEAD"), cancellable = true)
     private void holdToAttack(boolean bl, CallbackInfo ci) {
-        boolean isPressed = options.attackKey.isPressed();
-        if(isPressed) {
+        if(options.attackKey.isPressed()) {
 
             // If the player is breaking a block, return;
             if (crosshairTarget != null && crosshairTarget.getType() == BLOCK) {
@@ -64,10 +63,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             }
 
             // Otherwise, try swinging:
-            double playerAttackSpeed = player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED);
-            double attackProgress =  ((double)((LivingEntityAccessor)player).getLastAttackedTicks()) * playerAttackSpeed / 20.0;
-
-            if(attackProgress > 1.05) {
+            if(Combat.getAttackChargeProgress(player) > 0.6) {
                 this.doAttack();
                 this.player.resetLastAttackedTicks();
             }
@@ -83,19 +79,22 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Inject(method = "doAttack",at = @At("HEAD"), cancellable = true)
     private void doAttackOverhaul(CallbackInfoReturnable<Boolean> cir) {
 
-        double attackProgress =  ((double)((LivingEntityAccessor)player).getLastAttackedTicks()) * player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED) / 20.0;
-        boolean canAttackEntities = attackProgress > 0.66;
+        double attackProgress =  Combat.getAttackChargeProgress(player);
+        double attackRange = Combat.getAttackRange(player, attackProgress);
+        boolean canAttackEntities = attackProgress > 0.5;
         boolean isCharged = attackProgress > 0.95;
 
         if(isCharged && !player.isSneaking() && EnchantmentHelper.getEquipmentLevel(Enchantments.SWEEPING, player) > 0)
-            doSweepAttack();
+            doSweepAttack(attackRange);
 
         boolean resetAttackCooldown = false;
         switch (this.crosshairTarget.getType()) {
             case ENTITY: {
 
-                if(canAttackEntities && !(this.attackCooldown > 0 || this.player.isRiding())) {
-                    this.interactionManager.attackEntity(this.player, ((EntityHitResult) this.crosshairTarget).getEntity());
+                Main.MOD_LOGGER.warn("Attack range is " + attackRange + " and attack charge is " + attackProgress + " while distance squared is " + player.squaredDistanceTo(crosshairTarget.getPos()));
+
+                if(canAttackEntities && (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos())) {
+                    interactionManager.attackEntity(this.player, ((EntityHitResult) this.crosshairTarget).getEntity());
                     break;
                 }
                 else {
@@ -107,7 +106,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
                 BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
                 BlockPos pos = blockHitResult.getBlockPos();
-                this.interactionManager.attackBlock(pos, blockHitResult.getSide());
+                interactionManager.attackBlock(pos, blockHitResult.getSide());
                 if(isMineableBlock(pos, this.world.getBlockState(pos))) {
                     resetAttackCooldown = true;
                     break;
@@ -118,35 +117,34 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
                     Vec3d camera = player.getCameraPosVec(1.0F);
                     Vec3d rotation = player.getRotationVec(1.0F);
-                    double range = 3.0d; // ReachEntityAttributes.getAttackRange(player, 3.0);
-                    Vec3d end = camera.add(rotation.x * range, rotation.y * range, rotation.z * range);
+                    Vec3d end = camera.add(rotation.x * attackRange, rotation.y * attackRange, rotation.z * attackRange);
                     Predicate<Entity> predicate = EntityPredicates.CAN_COLLIDE.and(e -> e != null);
 
                     EntityHitResult result = ProjectileUtil.getEntityCollision(world, player, camera, end, new Box(camera, end), predicate);
-                    if (result != null) this.interactionManager.attackEntity(player, result.getEntity());
+                    if (result != null) interactionManager.attackEntity(player, result.getEntity());
                 }
                 break;
             }
             case MISS: {
-                if (!this.interactionManager.hasLimitedAttackSpeed()) this.attackCooldown = 1;
+                if (!interactionManager.hasLimitedAttackSpeed()) this.attackCooldown = 1;
                 else this.attackCooldown = 4;
                 this.player.resetLastAttackedTicks();
             }
         }
         this.player.swingHand(Hand.MAIN_HAND);
         cir.setReturnValue(resetAttackCooldown);
+        cir.cancel();
     }
 
-    private void doSweepAttack(){
+    private void doSweepAttack(double attackRange){
         Vec3d cameraPos = player.getCameraPosVec(1.0F);
         Vec3d rotation = player.getRotationVec(1.0F);
-        double range = 3.0d;// ReachEntityAttributes.getAttackRange(player, 3.0);
 
         Vec3d rotatedEightDegZ = new Vec3d(rotation.x * 0.99026806874 - rotation.z * 0.13917310096, rotation.y, rotation.x * 0.13917310096 + rotation.z * 0.99026806874);
         Vec3d rotatedEightDegX = new Vec3d(rotation.x * 0.99026806874 - rotation.z * -0.13917310096, rotation.y, rotation.x * -0.13917310096 + rotation.z * 0.99026806874);
 
-        swingAtEntities(rotatedEightDegZ, cameraPos, range);
-        swingAtEntities(rotatedEightDegX, cameraPos, range);
+        swingAtEntities(rotatedEightDegZ, cameraPos, attackRange);
+        swingAtEntities(rotatedEightDegX, cameraPos, attackRange);
 
         // Break all foliage within range of the crosshair target, - 1 block:
         Vec3d crosshairPos = this.crosshairTarget.getPos().subtract(rotation);
@@ -154,7 +152,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         swungAtBlockPos(pos);
     }
 
-    private final void swingAtEntities(final Vec3d rotation, Vec3d cameraPos, double range){
+    private void swingAtEntities(final Vec3d rotation, Vec3d cameraPos, double range){
         Vec3d end = cameraPos.add(rotation.x * range, rotation.y * range, rotation.z * range);
         Predicate<Entity> predicate = EntityPredicates.CAN_COLLIDE.and(e -> e != null);
         EntityHitResult entityResult = ProjectileUtil.getEntityCollision(world, player, cameraPos, end, new Box(cameraPos, end), predicate);
@@ -166,7 +164,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         }
     }
 
-    private final void swungAtBlockPos(BlockPos pos) {
+    private void swungAtBlockPos(BlockPos pos) {
         int x = pos.getX(), y = pos.getY(), z = pos.getZ();
         breakFoliageAt(new BlockPos(x + 1, y, z + 1));
         breakFoliageAt(new BlockPos(x + 1, y, z - 1));
@@ -178,7 +176,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         breakFoliageAt(new BlockPos(x, y, z - 1));
     }
 
-    private final void breakFoliageAt(BlockPos pos) {
+    private void breakFoliageAt(BlockPos pos) {
         if(this.world.getBlockState(pos).getHardness(world, pos) == 0.0F) {
             this.interactionManager.breakBlock(pos);
             BlockPos above = new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ());
