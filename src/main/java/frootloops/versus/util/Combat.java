@@ -21,7 +21,6 @@ public abstract class Combat {
     private static final String[] tools = new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
     private static final float[] toolsSpeed  = new float[]{1.0F, 1.5F, 2.0F, 1.2F, 1.5F};
     private static final float[] toolsDamage = new float[]{7.0F, 4.0F, 1.0F, 3.0F, 3.0F};
-    private static final float[] toolsReachBonus = new float[]{0.0F, 0.5F, 1.0F, 0.0F, 0.0F};
 
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{0F, 0F, 1F, 1F, 2F, 3F};
@@ -35,25 +34,22 @@ public abstract class Combat {
                 String name = "minecraft:" + toolTiers[tierIndex] + "_" + tools[toolIndex];
                 float damage = toolsDamage[toolIndex] + toolTierDamageBonuses[tierIndex] - (float)PLAYER_BASE_ATTACK_DAMAGE;
                 float speed = toolsSpeed[toolIndex] - (float)PLAYER_BASE_ATTACK_SPEED;
-                float reach = toolsReachBonus[toolIndex];
-                setAttributes(name, damage, speed, reach);
+                setAttributes(name, damage, speed);
             }
         }
 
         setAttributes("minecraft:trident",
                 8.0F - (float)PLAYER_BASE_ATTACK_DAMAGE,
-                1.0F - (float)PLAYER_BASE_ATTACK_SPEED,
-                1.0F + (float)PLAYER_BASE_ATTACK_REACH);
+                1.0F - (float)PLAYER_BASE_ATTACK_SPEED);
     }
 
-    private static void setAttributes(String itemName, float damageModifier, float speedModifier, float reachModifier) {
+    private static void setAttributes(String itemName, float damageModifier, float speedModifier) {
         ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> itemBuilder = ImmutableMultimap.builder();
         Item item = Registries.ITEM.get(new Identifier(itemName));
         String modifierType = item instanceof MiningToolItem ? "Tool modifier" : "Weapon modifier";
 
         itemBuilder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_DAMAGE_MODIFIER_ID(), modifierType, damageModifier, EntityAttributeModifier.Operation.ADDITION));
         itemBuilder.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_SPEED_MODIFIER_ID(), modifierType, speedModifier, EntityAttributeModifier.Operation.ADDITION));
-        //if(reachModifier != 0.0F) itemBuilder.put(ReachEntityAttributes.ATTACK_RANGE, new EntityAttributeModifier(modifierType, reachModifier, EntityAttributeModifier.Operation.ADDITION));
 
         if (item instanceof MiningToolItem) {
             ((MiningToolAccessor) item).setAttackDamage(damageModifier);
@@ -78,7 +74,7 @@ public abstract class Combat {
         if(item instanceof TridentItem) return 1.0d;
         if(item instanceof HoeItem) return 1.0d;
         if(item instanceof SwordItem) return 0.5d;
-        return 0.5d;
+        return 0.0d;
     }
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
