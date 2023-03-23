@@ -78,11 +78,10 @@ public abstract class Combat {
     }
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
-        double reachAmount = Combat.PLAYER_BASE_ATTACK_REACH;
         double toolReachBonus = Combat.getAttackRangeBonusOf(player.getEquippedStack(EquipmentSlot.MAINHAND));
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
-        double sneakingPenalty = player.isSneaking() ? -0.5d : 0.0d;
-        return reachAmount + chargeTimeBonus + sneakingPenalty + toolReachBonus;
+        double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
+        return Combat.PLAYER_BASE_ATTACK_REACH + chargeTimeBonus + toolReachBonus + ridingBonus;
     }
 
     public static double getAttackRange(PlayerEntity player) {
