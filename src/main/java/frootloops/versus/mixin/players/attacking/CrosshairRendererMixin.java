@@ -64,7 +64,7 @@ public class CrosshairRendererMixin {
 
                     // Changes start here:
                     // This is the code that makes the crosshair's size depend on the attack cooldown:
-                    float attackCooldownProgress = this.client.player.getAttackCooldownProgress(0.0F);
+                    float attackCooldownProgress = this.client.player.getAttackCooldownProgress(-1.0F);
                     int crosshairSize = 1 + 2 * (int)(7f * attackCooldownProgress);
                     int uv = 7 - crosshairSize/2;
                     drawTexture(matrices, (this.scaledWidth - crosshairSize) / 2, (this.scaledHeight - crosshairSize) / 2, uv, uv, crosshairSize, crosshairSize);

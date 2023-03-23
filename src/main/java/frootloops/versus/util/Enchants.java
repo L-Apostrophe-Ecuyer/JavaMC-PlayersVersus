@@ -16,7 +16,6 @@ public abstract class Enchants {
     public static final MagicProtectionEnchantment MAGIC_PROTECTION = new MagicProtectionEnchantment();
     public static final PhysicalProtectionEnchantment PHYSICAL_PROTECTION = new PhysicalProtectionEnchantment();
     public static void init(){
-
         Registry.register(Registries.ENCHANTMENT, new Identifier(Main.MOD_ID, "frost_aspect"), FROST_ASPECT);
         Registry.register(Registries.ENCHANTMENT, new Identifier(Main.MOD_ID, "tossing"), TOSSING);
         Registry.register(Registries.ENCHANTMENT, new Identifier(Main.MOD_ID, "cleaving"), CLEAVING);

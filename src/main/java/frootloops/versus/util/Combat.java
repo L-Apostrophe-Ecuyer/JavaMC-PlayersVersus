@@ -76,15 +76,15 @@ public abstract class Combat {
         if(itemStack == null || itemStack.isEmpty() || !itemStack.isDamageable()) return 0.0d;
         Item item = itemStack.getItem();
         if(item instanceof TridentItem) return 1.0d;
-        String translationKey = itemStack.getItem().getTranslationKey();
-        if(translationKey.endsWith("_hoe")) return 1.0d;
-        return 0.0d;
+        if(item instanceof HoeItem) return 1.0d;
+        if(item instanceof SwordItem) return 0.5d;
+        return 0.5d;
     }
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
         double reachAmount = Combat.PLAYER_BASE_ATTACK_REACH;
         double toolReachBonus = Combat.getAttackRangeBonusOf(player.getEquippedStack(EquipmentSlot.MAINHAND));
-        double chargeTimeBonus = (attackChargeProgress * attackChargeProgress);
+        double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double sneakingPenalty = player.isSneaking() ? -0.5d : 0.0d;
         return reachAmount + chargeTimeBonus + sneakingPenalty + toolReachBonus;
     }
