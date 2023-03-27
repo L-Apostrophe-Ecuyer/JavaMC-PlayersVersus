@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.melee_attacks;
 
-import frootloops.versus.Main;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;

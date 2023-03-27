@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.hostile_mobs;
 
-import frootloops.versus.Main;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.world.ServerWorld;

@@ -19,7 +19,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "frootloops.versus.Main"
+      "frootloops.versus.VersusMod"
     ]
   },
   "mixins": [

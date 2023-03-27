@@ -1,14 +1,17 @@
-package frootloops.versus.mixin.players.attacking;
+package frootloops.versus.mixin.players;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import frootloops.versus.VersusMod;
+import frootloops.versus.util.bridging.ReacharoundTracker;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.option.AttackIndicator;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.GameMode;
@@ -19,8 +22,10 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import static net.minecraft.client.gui.DrawableHelper.drawTexture;
 
-@Mixin(InGameHud.class)
+@Mixin(value = InGameHud.class, priority = 9999)
 public class CrosshairRendererMixin {
+
+    private static final int ICON_SIZE = 31;
 
     @Shadow
     private final MinecraftClient client;
@@ -34,19 +39,14 @@ public class CrosshairRendererMixin {
         this.client = client;
     }
 
-    /*
-    @ModifyVariable(method = "renderCrosshair", at = @At("STORE"), ordinal = 0)
-    private float hideAttackIndicatorWhenNoTarget(float f) {
-        if(client.targetedEntity != null) return f;
-        else return 1.0f;
-    }*/
-
     @Overwrite
     private void renderCrosshair(MatrixStack matrices) {
         GameOptions gameOptions = this.client.options;
         if (gameOptions.getPerspective().isFirstPerson()) {
             if (this.client.interactionManager.getCurrentGameMode() != GameMode.SPECTATOR || this.shouldRenderSpectatorCrosshair(this.client.crosshairTarget)) {
+
                 if (gameOptions.debugEnabled && !gameOptions.hudHidden && !this.client.player.hasReducedDebugInfo() && !(Boolean)gameOptions.getReducedDebugInfo().getValue()) {
+
                     Camera camera = this.client.gameRenderer.getCamera();
                     MatrixStack matrixStack = RenderSystem.getModelViewStack();
                     matrixStack.push();
@@ -59,6 +59,7 @@ public class CrosshairRendererMixin {
                     RenderSystem.renderCrosshair(10);
                     matrixStack.pop();
                     RenderSystem.applyModelViewMatrix();
+
                 } else {
                     RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE_MINUS_DST_COLOR, GlStateManager.DstFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
 
@@ -81,9 +82,35 @@ public class CrosshairRendererMixin {
                             drawTexture(matrices, k, j, 52, 94, l, 4);
                         }
                     }
+                    if(ReacharoundTracker.currentTarget != null) this.drawBlockPlacementIcon(matrices);
                     RenderSystem.defaultBlendFunc();
                 }
             }
         }
+    }
+
+
+    private void drawBlockPlacementIcon(MatrixStack matrices) {
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShaderTexture(0, VersusMod.CROSSHAIR_BLOCK_ICONS_TEXTURE);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE_MINUS_DST_COLOR, GlStateManager.DstFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+
+        int w = this.scaledWidth;
+        int h = this.scaledHeight;
+
+        if (ReacharoundTracker.isInVerticalOrientation()) {
+            ((InGameHud) (Object) this).drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 0, 0, ICON_SIZE, ICON_SIZE);
+
+        } else {
+            ((InGameHud) (Object) this).drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 32, 0, ICON_SIZE, ICON_SIZE);
+        }
+
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShaderTexture(0, DrawableHelper.GUI_ICONS_TEXTURE);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE_MINUS_DST_COLOR, GlStateManager.DstFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SrcFactor.ZERO, GlStateManager.DstFactor.ONE);
     }
 }

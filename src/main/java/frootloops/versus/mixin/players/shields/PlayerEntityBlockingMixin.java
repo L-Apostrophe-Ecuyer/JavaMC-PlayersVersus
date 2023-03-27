@@ -31,8 +31,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
     @Inject(method = "disableShield", at = @At(value = "HEAD"), cancellable = true)
     private void disableShield(boolean sprinting, CallbackInfo info) {
 
-        int disableForTicks = 20;
-        if(!this.isSneaking()) disableForTicks += 40;
+        int disableForTicks = this.isSneaking() ? 10 : 40;
         if(this.getAttacker() != null)
             disableForTicks += 10 * EnchantmentHelper.getLevel(Enchants.CLEAVING, this.getAttacker().getMainHandStack());
 

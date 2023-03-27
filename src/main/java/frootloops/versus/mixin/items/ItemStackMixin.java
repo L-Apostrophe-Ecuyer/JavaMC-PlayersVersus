@@ -1,8 +1,5 @@
 package frootloops.versus.mixin.items;
 
-import frootloops.versus.Main;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.item.*;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
