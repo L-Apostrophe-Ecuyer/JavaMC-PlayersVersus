@@ -82,7 +82,7 @@ public class CrosshairRendererMixin {
                             drawTexture(matrices, k, j, 52, 94, l, 4);
                         }
                     }
-                    if(ReacharoundTracker.currentTarget != null) this.drawBlockPlacementIcon(matrices);
+                    if(ReacharoundTracker.currentTarget != null) this.drawExtraCrosshairIcon(matrices);
                     RenderSystem.defaultBlendFunc();
                 }
             }
@@ -90,7 +90,7 @@ public class CrosshairRendererMixin {
     }
 
 
-    private void drawBlockPlacementIcon(MatrixStack matrices) {
+    private void drawExtraCrosshairIcon(MatrixStack matrices) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, VersusMod.CROSSHAIR_BLOCK_ICONS_TEXTURE);
