@@ -45,6 +45,7 @@
     "melee_attacks.LivingEntityMixin",
     "passive_mobs.VillagerEntityMixin",
     "passive_mobs.SheepMixin",
+    "passive_mobs.PolarBearMixin",
     "players.accessors.ItemAccessor",
     "players.accessors.LivingEntityAccessor",
     "players.accessors.MiningToolAccessor",
