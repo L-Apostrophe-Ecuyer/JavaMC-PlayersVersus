@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players.consumables;
 
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameRules;
@@ -30,6 +31,9 @@ public class HungerManagerMixin {
     @Overwrite
     public void update(PlayerEntity player) {
         this.prevFoodLevel = this.foodLevel;
+
+        // Hunger is more punishing:
+        if(player.getStatusEffect(StatusEffects.HUNGER) != null) this.exhaustion += 0.025f;
 
         // Natural Regeneration (works with >20 max health):
         if (player.canFoodHeal() && (foodLevel == 20 || foodLevel > Math.ceil(player.getHealth())) &&

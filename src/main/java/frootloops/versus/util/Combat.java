@@ -2,6 +2,7 @@ package frootloops.versus.util;
 
 
 import com.google.common.collect.ImmutableMultimap;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.players.accessors.*;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -60,6 +61,10 @@ public abstract class Combat {
         } else if (item instanceof TridentItem) {
             ((TridentAccessor) item).setAttributeModifiers(itemBuilder.build());
         }
+    }
+
+    public static int getTicksPerAttackOf(PlayerEntity player) {
+        return (int)(20d / player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
     }
 
     public static double getAttackChargeProgress(PlayerEntity player) {

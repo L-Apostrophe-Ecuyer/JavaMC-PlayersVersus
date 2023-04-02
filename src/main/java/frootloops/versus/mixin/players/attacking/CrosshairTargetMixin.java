@@ -18,35 +18,16 @@ abstract class CrosshairTargetMixin implements SynchronousResourceReloader{
 
     private double playerAttackRange = 0.0d;
 
-    @ModifyVariable(method = "updateTargetedEntity", at = @At("STORE"), ordinal = 0)
-    private double modifyPlayerReachForCrosshairRendering(double reach) {
-        playerAttackRange = Combat.getAttackRange(this.client.player);
-        return playerAttackRange;
-    }
-
-    @ModifyVariable(method = "updateTargetedEntity", at = @At("STORE"), ordinal = 0)
-    private EntityHitResult ensureEntityWithinReach(EntityHitResult entityHitResult) {
-        if(entityHitResult != null) {
-            double squaredDist = entityHitResult.getPos().squaredDistanceTo(client.getCameraEntity().getPos());
-            if(squaredDist < (playerAttackRange * playerAttackRange)) return entityHitResult;
-        }
-        return null;
-    }
-
     @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 3.0))
-    private double getActualAttackRange0(final double attackRange) {
-        if (this.client.player != null) {
-            return playerAttackRange; //Combat.getAttackRange(this.client.player);
-        }
-        return attackRange;
+    private double getActualAttackRange(final double attackRange) {
+        playerAttackRange = Combat.getAttackRange(this.client.player);
+        if (this.client.player != null) return playerAttackRange;
+        return 3.0d;
     }
 
     @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9.0))
-    private double getActualAttackRange1(final double attackRange) {
-        if (this.client.player != null) {
-            double newAttackRange = playerAttackRange; //Combat.getAttackRange(this.client.player);
-            return newAttackRange * newAttackRange;
-        }
-        return attackRange;
+    private double getActualAttackRangeSquared(final double attackRange) {
+        if (this.client.player != null) return playerAttackRange * playerAttackRange;
+        return 9.0d;
     }
 }
