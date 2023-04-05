@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.items;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.item.*;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
@@ -65,7 +66,7 @@ public class ItemStackMixin {
                 }
 
                 if(value != -1d) {
-                    Text text = ScreenTexts.space().append(Text.translatable("attribute.modifier.equals.0", new Object[]{MODIFIER_FORMAT.format(value), Text.translatable("attribute.name.generic.player-versus.attack_reach")})).formatted(Formatting.DARK_GREEN);
+                    Text text = ScreenTexts.space().append(Text.translatable("attribute.modifier.equals.0", new Object[]{MODIFIER_FORMAT.format(value), Text.translatable("attribute.name.generic."+ VersusMod.MOD_ID + ".attack_reach")})).formatted(Formatting.DARK_GREEN);
                     if(i == list.size()) list.add(text);
                     else list.add(i, text);
                     cir.setReturnValue(list);

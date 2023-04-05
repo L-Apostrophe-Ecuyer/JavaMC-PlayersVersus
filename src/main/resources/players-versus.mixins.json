@@ -21,6 +21,7 @@
     "environment.LightmapMixin",
     "environment.SculkBlockMixin",
     "items.ItemStackMixin",
+    "items.ItemEntityMixin",
     "hostile_mobs.dragon.AreaEffectCloudEntityMixin",
     "hostile_mobs.dragon.ChargingPlayerPhaseMixin",
     "hostile_mobs.dragon.DragonFireballEntityMixin",

@@ -1,8 +1,8 @@
 {
-  "attribute.name.generic.player-versus.attack_reach": "Attack Reach",
-  "enchantment.player-versus.frost_aspect": "Frost Aspect",
-  "enchantment.player-versus.tossing": "Tossing",
-  "enchantment.player-versus.cleaving": "Shield Cleaving",
-  "enchantment.player-versus.magic_protection": "Magic Protection",
-  "enchantment.player-versus.physical_protection": "Physical Protection"
+  "attribute.name.generic.players-versus.attack_reach": "Attack Reach",
+  "enchantment.players-versus.frost_aspect": "Frost Aspect",
+  "enchantment.players-versus.tossing": "Tossing",
+  "enchantment.players-versus.cleaving": "Shield Cleaving",
+  "enchantment.players-versus.magic_protection": "Magic Protection",
+  "enchantment.players-versus.physical_protection": "Physical Protection"
 }
