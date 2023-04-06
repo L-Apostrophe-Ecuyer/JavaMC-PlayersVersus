@@ -59,6 +59,7 @@ public abstract class ItemEntityMixin extends Entity {
             else if (this.getStack().isOf(Items.CRYING_OBSIDIAN)) return true;
             else if (this.getStack().isOf(Items.ENDER_CHEST)) return true;
             else if (this.getStack().isOf(Items.ENCHANTING_TABLE)) return true;
+            else if (this.getStack().isOf(Items.ENCHANTED_GOLDEN_APPLE)) return true;
         }
         return this.getStack().getItem().isFireproof() || super.isFireImmune();
     }
@@ -107,7 +108,7 @@ public abstract class ItemEntityMixin extends Entity {
         }
 
         // Items break down into components, or get used/placed:
-        if(currentItemStack.isOf(Items.TOTEM_OF_UNDYING) || currentItemStack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) {
+        if(currentItemStack.isOf(Items.TOTEM_OF_UNDYING)) {
             this.world.sendEntityStatus(this, (byte)35);
             Box boundingBox = new Box(this.getX() - 4d, this.getY() - 4d, this.getZ() - 4d, this.getX() + 4d, this.getY() + 4d, this.getZ() + 4d);
             List<ItemEntity> entitiesNearby = this.world.getEntitiesByClass(ItemEntity.class, boundingBox, EntityPredicates.VALID_ENTITY);
