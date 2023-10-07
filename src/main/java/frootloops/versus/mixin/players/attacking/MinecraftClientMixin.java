@@ -20,6 +20,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.util.thread.ReentrantThreadExecutor;
+import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,41 +52,45 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
     @Inject(method = "handleBlockBreaking",at = @At("HEAD"), cancellable = true)
     private void holdToAttack(boolean bl, CallbackInfo ci) {
-        if(options.attackKey.isPressed()) {
-            ticksPressed++;
+        boolean tryAttacking = false;
+        if(Combat.getAttackChargeProgress(player) > 0.5d) {
+            if (options.attackKey.wasPressed()) {
+                tryAttacking = true;
+            } else if (options.attackKey.isPressed()) {
+                ticksPressed++;
 
-            // If the player is breaking a block, return;
-            if (crosshairTarget != null && crosshairTarget.getType() == BLOCK) {
-                BlockPos pos = ((BlockHitResult)crosshairTarget).getBlockPos();
-                if(isMineableBlock(pos, world.getBlockState(pos)))
-                    return;
-            }
+                // Otherwise, try seeing if you can hit something:
+                if ((ticksPressed >= Combat.getTicksPerAttackOf(player) - 3)) {
 
-            // Otherwise, try seeing if you can hit something:
-            if(ticksPressed >= Combat.getTicksPerAttackOf(player) - 3) {
-                boolean tryAttacking = false;
-
-                // If the cooldown is complete, swing:
-                if(ticksPressed >= Combat.getTicksPerAttackOf(player))
-                    tryAttacking = true;
-
-                // For 4 ticks prior, if at some point we can attack something, we do:
-                else if(this.crosshairTarget.getType() == ENTITY) {
-                    double attackRange = Combat.getAttackRange(player);
-                    if((attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos()))
+                    // If the cooldown is complete, swing:
+                    if (ticksPressed >= Combat.getTicksPerAttackOf(player))
                         tryAttacking = true;
-                }
 
-                if(tryAttacking) {
-                    ticksPressed = 0;
-                    this.doAttack();
-                    this.player.resetLastAttackedTicks();
+                        // For 4 ticks prior, if at some point we can attack something, we do:
+                    else if (this.crosshairTarget.getType() == ENTITY) {
+                        double attackRange = Combat.getAttackRange(player);
+                        if ((attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos()))
+                            tryAttacking = true;
+                    }
                 }
             }
-            ci.cancel();
         }
         else {
             ticksPressed = 0;
+        }
+
+        if(tryAttacking) {
+            // If the player is breaking a block, return;
+            if (crosshairTarget != null && crosshairTarget.getType() == BLOCK) {
+                BlockPos pos = ((BlockHitResult)crosshairTarget).getBlockPos();
+                if(isMineableBlock(pos, world.getBlockState(pos))) return;
+            }
+            else {
+                ticksPressed = 0;
+                this.doAttack();
+                this.player.resetLastAttackedTicks();
+                ci.cancel();
+            }
         }
     }
 
@@ -176,6 +181,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         Vec3d end = cameraPos.add(rotation.x * range, rotation.y * range, rotation.z * range);
         Predicate<Entity> predicate = EntityPredicates.CAN_COLLIDE.and(e -> e != null);
         EntityHitResult entityResult = ProjectileUtil.getEntityCollision(world, player, cameraPos, end, new Box(cameraPos, end), predicate);
+
         if (entityResult != null) {
             this.interactionManager.attackEntity(player, entityResult.getEntity());
             Vec3d entityPos = entityResult.getPos().subtract(rotation);

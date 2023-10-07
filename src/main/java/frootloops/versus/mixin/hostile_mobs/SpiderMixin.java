@@ -49,7 +49,7 @@ public class SpiderMixin extends HostileEntity {
         }
 
         if(this.random.nextFloat() < 0.7F) this.setBaby(true);
-
+        this.getNavigation().setCanSwim(true);
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
 

@@ -16,8 +16,7 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
@@ -46,16 +45,18 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
-        if(timeUntilRegen > 0 && source.getAttacker() instanceof LivingEntity){
-            if(source.isIn(DamageTypeTags.IS_PROJECTILE))//if(source.isProjectile())
+        if(timeUntilRegen > 10 && source.getAttacker() instanceof LivingEntity){
+            if(source.isIn(DamageTypeTags.IS_PROJECTILE))
                 timeUntilRegen = 0;
             else {
-                ItemStack mainHand = ((LivingEntity) source.getAttacker()).getMainHandStack();
-                if(source.isIn(DamageTypeTags.BYPASSES_ARMOR))
-                    timeUntilRegen = 12;
-                else
-                    timeUntilRegen = 6;
+                if(timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR))
+                    timeUntilRegen = 16;
             }
         }
+    }
+
+    @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
+    private float fasterWaterMovement(float h) {
+        return h + 0.75f;
     }
 }

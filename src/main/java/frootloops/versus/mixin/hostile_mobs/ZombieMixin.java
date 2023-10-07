@@ -8,6 +8,8 @@ import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.ai.pathing.MobNavigation;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.MerchantEntity;
@@ -48,6 +50,8 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Overwrite
     public void initCustomGoals() {
+        this.getNavigation().setCanSwim(true);
+
         this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.6F;
         this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.6F;
 
@@ -64,9 +68,11 @@ public abstract class ZombieMixin extends HostileEntity {
     @Override
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
-        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.6f : 0.3f;
-        float worldDepthRatio = ((float)this.getBlockPos().getY())/256f;
-        boolean haDifficultyBonusFromDepth = random.nextFloat() < Math.min(0.1f, difficulty - worldDepthRatio);
+        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.3f : 0.1f;
+
+        float distanceFromGroundLevel = 100.0f - (float)this.getBlockPos().getY();
+        float worldDepthExtraDifficulty = (distanceFromGroundLevel * distanceFromGroundLevel)/40000.0f;
+        boolean haDifficultyBonusFromDepth = random.nextFloat() < (difficulty + worldDepthExtraDifficulty);
 
         if (haDifficultyBonusFromDepth) {
             int rand = random.nextInt(100);
@@ -86,17 +92,23 @@ public abstract class ZombieMixin extends HostileEntity {
                 this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
                 this.getEquippedStack(EquipmentSlot.FEET).setDamage(rand + 80);
             }
+            if(rand % 13 == 0) {
+                this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
+                this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 250);
+                if(rand < 65) this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, -1));
+            }
 
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
-            if (isAtDiamondDepth && rand < 10) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
-            else if (isAtDiamondDepth && rand < 20) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
+            if (isAtDiamondDepth && rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+            else if (isAtDiamondDepth && rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
+            else if (isAtDiamondDepth && rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
             else if(rand < 20) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
             else if(rand < 40) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
             else if(rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
             else if(rand < 80) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
             else if(rand < 90)this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
             if(rand < 90) {
-                int damageAmount = (isAtDiamondDepth && rand < 20) ? rand + 900 : rand/2 + 150;
+                int damageAmount = (isAtDiamondDepth && rand < 60) ? rand + 900 : rand/2 + 150;
                 this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
                 this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.4F;
             }
