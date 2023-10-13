@@ -62,12 +62,12 @@ public class FleeLastAttackerGoal<T extends LivingEntity> extends Goal {
                 isDrinkingPotion = true;
                 drinkTimeLeft = 24;
                 mob.equipStack(EquipmentSlot.OFFHAND, mob.getMainHandStack());
-                mob.equipStack(EquipmentSlot.MAINHAND, PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.STRONG_HEALING));
+                mob.equipStack(EquipmentSlot.MAINHAND, PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.REGENERATION));
                 if (!mob.isSilent()) {
                     mob.world.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENTITY_WITCH_DRINK, mob.getSoundCategory(), 1.0f, 1.0f);
                 }
             }
-            else if (isDrinkingPotion && this.drinkTimeLeft-- <= 0) {
+            else if (isDrinkingPotion && --this.drinkTimeLeft <= 0) {
                 isDrinkingPotion = false;
                 mob.equipStack(EquipmentSlot.MAINHAND, mob.getOffHandStack());
                 mob.equipStack(EquipmentSlot.OFFHAND, ItemStack.EMPTY);

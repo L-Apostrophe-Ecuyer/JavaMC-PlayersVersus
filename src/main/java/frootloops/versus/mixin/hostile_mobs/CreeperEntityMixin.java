@@ -14,10 +14,12 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.mob.MobEntity;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CreeperEntity.class)
 public class CreeperEntityMixin extends HostileEntity {
@@ -52,5 +54,14 @@ public class CreeperEntityMixin extends HostileEntity {
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(this.getBlockPos().getY() > 32) return false;
         return super.canSpawn(world, spawnReason);
+    }
+
+    // If a creeper isn't on the ground, it won't increase its ignition timer nor explode. Useful for ravines:
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
+    public void tick(CallbackInfo info) {
+        if(!this.onGround && !((CreeperEntity)((Object)this)).isIgnited()) {
+            super.tick();
+            info.cancel();
+        }
     }
 }

@@ -34,7 +34,6 @@ public class CreeperIgniteMixin {
         //If method thinks creeper can't start exploding, check if the creeper can try breaching
         if (!cir.getReturnValue() && CreeperDecisionHelper.shouldBreach(seer, peeper)) {
             cir.setReturnValue(true);
-
         }
     }
 

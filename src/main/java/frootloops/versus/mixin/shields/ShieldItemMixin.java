@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.shields;
+package frootloops.versus.mixin.shields;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;

@@ -20,7 +20,6 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.util.thread.ReentrantThreadExecutor;
-import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,31 +52,27 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Inject(method = "handleBlockBreaking",at = @At("HEAD"), cancellable = true)
     private void holdToAttack(boolean bl, CallbackInfo ci) {
         boolean tryAttacking = false;
-        if(Combat.getAttackChargeProgress(player) > 0.5d) {
-            if (options.attackKey.wasPressed()) {
+        double attackChargeProgress = Combat.getAttackChargeProgress(player);
+        if(attackChargeProgress > 0.6d) {
+            if (!options.attackKey.isPressed() && ticksPressed > 0) {
                 tryAttacking = true;
             } else if (options.attackKey.isPressed()) {
                 ticksPressed++;
 
-                // Otherwise, try seeing if you can hit something:
-                if ((ticksPressed >= Combat.getTicksPerAttackOf(player) - 3)) {
+                // If the cooldown is complete, swing:
+                if (ticksPressed >= Combat.getTicksPerAttackOf(player) - 1)
+                    tryAttacking = true;
 
-                    // If the cooldown is complete, swing:
-                    if (ticksPressed >= Combat.getTicksPerAttackOf(player))
+                // Otherwise, if at some point we can attack something, we do:
+                else if (this.crosshairTarget.getType() == ENTITY && attackChargeProgress > 0.8d) {
+                    double attackRange = Combat.getAttackRange(player,attackChargeProgress);
+                    if ((attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos()))
                         tryAttacking = true;
-
-                        // For 4 ticks prior, if at some point we can attack something, we do:
-                    else if (this.crosshairTarget.getType() == ENTITY) {
-                        double attackRange = Combat.getAttackRange(player);
-                        if ((attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos()))
-                            tryAttacking = true;
-                    }
                 }
             }
+            else ticksPressed = 0;
         }
-        else {
-            ticksPressed = 0;
-        }
+        else ticksPressed = 0;
 
         if(tryAttacking) {
             // If the player is breaking a block, return;
@@ -85,12 +80,10 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 BlockPos pos = ((BlockHitResult)crosshairTarget).getBlockPos();
                 if(isMineableBlock(pos, world.getBlockState(pos))) return;
             }
-            else {
-                ticksPressed = 0;
-                this.doAttack();
-                this.player.resetLastAttackedTicks();
-                ci.cancel();
-            }
+            ticksPressed = 0;
+            this.doAttack();
+            this.player.resetLastAttackedTicks();
+            ci.cancel();
         }
     }
 
@@ -104,13 +97,14 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
         double attackProgress =  Combat.getAttackChargeProgress(player);
         double attackRange = Combat.getAttackRange(player, attackProgress);
-        boolean canAttackEntities = attackProgress > 0.1;
+        boolean canAttackEntities = attackProgress > 0.5;
         boolean isCharged = attackProgress > 0.95;
 
         if(isCharged && !player.isSneaking() && EnchantmentHelper.getEquipmentLevel(Enchantments.SWEEPING, player) > 0)
             doSweepAttack(attackRange);
 
-        boolean resetAttackCooldown = false, missedSwing = true;
+        boolean resetAttackCooldown = false;
+        boolean missedSwing = true;
         switch (this.crosshairTarget.getType()) {
             case ENTITY: {
                 if(canAttackEntities && (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos())) {
@@ -121,7 +115,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 break;
             }
             case BLOCK: {
-
                 BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
                 BlockPos pos = blockHitResult.getBlockPos();
                 interactionManager.attackBlock(pos, blockHitResult.getSide());
@@ -133,7 +126,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 // Tweaked code from Rongmario's Clean Cut:
                 // Allow attacks through weaker blocks to count as an attack, i.e. swinging through foliage
                 else if(canAttackEntities) {
-
                     Vec3d camera = player.getCameraPosVec(1.0F);
                     Vec3d rotation = player.getRotationVec(1.0F);
                     Vec3d end = camera.add(rotation.x * attackRange, rotation.y * attackRange, rotation.z * attackRange);
@@ -149,10 +141,9 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 break;
             }
         }
-
         if(missedSwing) {
             if (!interactionManager.hasLimitedAttackSpeed()) this.attackCooldown = 1;
-            else this.attackCooldown = 4;
+            else this.attackCooldown = 5;
             this.player.resetLastAttackedTicks();
         }
 

@@ -46,17 +46,14 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
         if(timeUntilRegen > 10 && source.getAttacker() instanceof LivingEntity){
-            if(source.isIn(DamageTypeTags.IS_PROJECTILE))
-                timeUntilRegen = 0;
-            else {
-                if(timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR))
-                    timeUntilRegen = 16;
-            }
+            if(source.isIn(DamageTypeTags.IS_PROJECTILE)) timeUntilRegen = 0;
+            else if(timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
         }
     }
 
     @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
+        if(((LivingEntity)((Object)this)).isSprinting()) return h;
         return h + 0.75f;
     }
 }

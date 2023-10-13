@@ -66,11 +66,15 @@
     "players.consumables.throwing.SplashPotionMixin",
     "players.consumables.ItemEatingMixin",
     "players.consumables.HungerManagerMixin",
-    "players.shields.LivingEntityBlockingMixin",
-    "players.shields.PlayerEntityBlockingMixin",
-    "players.shields.ShieldItemMixin",
     "players.PlayerEntityMixin",
-    "players.DamageUtilMixin"
+    "players.DamageUtilMixin",
+    "shields.LivingEntityBlockingMixin",
+    "shields.PlayerEntityBlockingMixin",
+    "shields.ShieldItemMixin",
+    "shields.mob_render.IllagerModelMixin",
+    "shields.mob_render.PiglinModelMixin",
+    "shields.mob_render.SkeletonModelMixin",
+    "shields.mob_render.ZombieModelMixin"
   ],
   "client": [],
   "injectors": {

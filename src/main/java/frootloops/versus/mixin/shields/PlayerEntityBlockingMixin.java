@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.shields;
+package frootloops.versus.mixin.shields;
 
 import frootloops.versus.util.Enchants;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -33,7 +33,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
 
         int disableForTicks = this.isSneaking() ? 10 : 40;
         if(this.getAttacker() != null)
-            disableForTicks += 10 * EnchantmentHelper.getLevel(Enchants.CLEAVING, this.getAttacker().getMainHandStack());
+            disableForTicks += 20 * EnchantmentHelper.getLevel(Enchants.CLEAVING, this.getAttacker().getMainHandStack());
 
         this.itemCooldownManager.set(Items.SHIELD, disableForTicks);
         this.clearActiveItem();

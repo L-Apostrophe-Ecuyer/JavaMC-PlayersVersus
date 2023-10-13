@@ -48,6 +48,10 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
         else if(rand < 30) {
             this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+            if(rand % 3 == 1) {
+                this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+                this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(rand/2 + 100);
+            }
         }
         else if(rand < 40) {
             this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));

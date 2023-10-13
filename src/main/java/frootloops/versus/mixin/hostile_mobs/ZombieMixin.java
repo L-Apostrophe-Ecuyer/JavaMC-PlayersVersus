@@ -42,16 +42,14 @@ public abstract class ZombieMixin extends HostileEntity {
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
                 HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 8.0)
-                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.36f)
-                        .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0)
+                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.34f)
+                        .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                         .add(EntityAttributes.GENERIC_MAX_HEALTH, 26.0)
-                        .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.03));
+                        .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
     }
 
     @Overwrite
     public void initCustomGoals() {
-        this.getNavigation().setCanSwim(true);
-
         this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.6F;
         this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.6F;
 
@@ -69,6 +67,8 @@ public abstract class ZombieMixin extends HostileEntity {
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
         float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.3f : 0.1f;
+        ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
+        this.setCanPickUpLoot(true);
 
         float distanceFromGroundLevel = 100.0f - (float)this.getBlockPos().getY();
         float worldDepthExtraDifficulty = (distanceFromGroundLevel * distanceFromGroundLevel)/40000.0f;

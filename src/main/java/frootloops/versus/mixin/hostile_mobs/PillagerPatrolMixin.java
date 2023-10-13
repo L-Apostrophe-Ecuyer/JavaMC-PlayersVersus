@@ -1,8 +1,11 @@
 package frootloops.versus.mixin.hostile_mobs;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.PatrolEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -23,8 +26,13 @@ public class PillagerPatrolMixin {
             PatrolEntity patrolEntity = null;
             if(rand < 15) patrolEntity = EntityType.VINDICATOR.create(world);
             else if(rand < 40) patrolEntity = EntityType.WITCH.create(world);
-            else if(rand < 70) patrolEntity = EntityType.PILLAGER.create(world);
-            else if(rand < 73) patrolEntity = EntityType.RAVAGER.create(world);
+            else if(rand < 65){
+                patrolEntity = EntityType.VINDICATOR.create(world);
+                patrolEntity.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+                patrolEntity.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+                patrolEntity.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(180);
+                patrolEntity.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(120);
+            }
 
             if (patrolEntity != null) {
                 patrolEntity.setPosition(pos.getX(), pos.getY(), pos.getZ());

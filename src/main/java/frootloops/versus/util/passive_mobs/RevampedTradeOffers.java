@@ -335,6 +335,10 @@ public class RevampedTradeOffers {
                                         StructureTags.EYE_OF_ENDER_LOCATED, "Ruins Explorer Map",
                                         MapIcon.Type.TARGET_X, 1, 20),
                                 new SellMapFactory(
+                                        5,
+                                        StructureTags.CATS_SPAWN_AS_BLACK, "Swamp Explorer Map",
+                                        MapIcon.Type.TARGET_X, 1, 10),
+                                new SellMapFactory(
                                         6,
                                         StructureTags.RUINED_PORTAL, "Ruins Explorer Map",
                                         MapIcon.Type.TARGET_X, 3, 10)},
@@ -417,7 +421,7 @@ public class RevampedTradeOffers {
                         new SellSpecialHeavyArmorFactory(((ArmorItem) Items.CHAINMAIL_LEGGINGS), 10, 1, 12),
                         new SellItemFactory(new ItemStack(Items.IRON_CHESTPLATE), 12, 1, 12, 10, 0.2f)},
                 4, new Factory[]{
-                        new BuyForMutlipleEmeraldsFactory(Items.DIAMOND, 14, 12, 20),
+                        new BuyForMutlipleEmeraldsFactory(Items.IRON_BLOCK, 8, 12, 20),
                         new SellSpecialHeavyArmorFactory(((ArmorItem) Items.IRON_LEGGINGS), 14, 1, 12),
                         new SellSpecialHeavyArmorFactory(((ArmorItem) Items.IRON_HELMET), 10, 1, 12),
                         new SellSpecialHeavyArmorFactory(((ArmorItem) Items.IRON_BOOTS), 8, 1, 12)},
@@ -474,13 +478,21 @@ public class RevampedTradeOffers {
                         new SellItemFactory(new ItemStack(Items.STONE_SHOVEL), 1, 1, 12, 1, 0.2f),
                         new SellItemFactory(new ItemStack(Items.STONE_PICKAXE), 1, 1, 12, 1, 0.2f),
                         new TypeAwareSellItemFactory(1, 5, 32, 1, ImmutableMap.builder().put(
-                            VillagerType.PLAINS, Items.OAK_LOG).put(
-                            VillagerType.TAIGA, Items.SPRUCE_LOG).put(
-                            VillagerType.SNOW, Items.SPRUCE_LOG).put(
-                            VillagerType.DESERT, Items.JUNGLE_LOG).put(
-                            VillagerType.JUNGLE, Items.JUNGLE_LOG).put(
-                            VillagerType.SAVANNA, Items.ACACIA_LOG).put(
-                            VillagerType.SWAMP, Items.MANGROVE_LOG).build())},
+                                VillagerType.PLAINS, Items.OAK_LOG).put(
+                                VillagerType.TAIGA, Items.SPRUCE_LOG).put(
+                                VillagerType.SNOW, Items.SPRUCE_LOG).put(
+                                VillagerType.DESERT, Items.JUNGLE_LOG).put(
+                                VillagerType.JUNGLE, Items.JUNGLE_LOG).put(
+                                VillagerType.SAVANNA, Items.ACACIA_LOG).put(
+                                VillagerType.SWAMP, Items.MANGROVE_LOG).build()),
+                        new TypeAwareSellItemFactory(1, 5, 32, 1, ImmutableMap.builder().put(
+                                VillagerType.PLAINS, Items.STRIPPED_OAK_LOG).put(
+                                VillagerType.TAIGA, Items.STRIPPED_SPRUCE_LOG).put(
+                                VillagerType.SNOW, Items.STRIPPED_SPRUCE_LOG).put(
+                                VillagerType.DESERT, Items.STRIPPED_JUNGLE_LOG).put(
+                                VillagerType.JUNGLE, Items.STRIPPED_JUNGLE_LOG).put(
+                                VillagerType.SAVANNA, Items.STRIPPED_ACACIA_LOG).put(
+                                VillagerType.SWAMP, Items.STRIPPED_MANGROVE_LOG).build())},
                 2, new Factory[]{
                         new BuyForOneEmeraldFactory(Items.RAW_GOLD, 16, 16, 5),
                         new SellItemFactory(new ItemStack(Items.IRON_HOE), 3, 1, 12, 4, 0.2f),
@@ -494,6 +506,7 @@ public class RevampedTradeOffers {
                         new SellEnchantedToolFactory(Items.IRON_SHOVEL, 2, 3, 10, 0.2f),
                         new SellEnchantedToolFactory(Items.IRON_PICKAXE, 4, 3, 10, 0.2f)},
                 4, new Factory[]{
+                        new BuyForMutlipleEmeraldsFactory(Items.IRON_BLOCK, 8, 12, 20),
                         new SellEnchantedToolFactory(Items.DIAMOND_HOE, 6, 3, 15, 0.2f),
                         new SellEnchantedToolFactory(Items.DIAMOND_SHOVEL, 7, 3, 15, 0.2f)},
                 5, new Factory[]{

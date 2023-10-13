@@ -96,7 +96,7 @@ public class WardenMixin extends HostileEntity {
     private void reduceAngerTowardsSneakyPlayers(CallbackInfo ci){
         if(this.getAngriness() == Angriness.ANGRY && this.age % 2 == 0) {
             Entity target = this.getTarget();
-            if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getPos()) > 320)) {
+            if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getPos()) > 600)) {
                 this.angerManager.increaseAngerAt(target, -1);
             }
         }
@@ -109,7 +109,7 @@ public class WardenMixin extends HostileEntity {
      * why you're being attacked, and have a way to avoiding it, but by default, these
      * sonic booms are simply too punishing.
      */
-    private static final double NEW_RANGE_HORIZONTAL = 8.0d, NEW_RANGE_VERTICAL = 12.0d,
+    private static final double NEW_RANGE_HORIZONTAL = 10.0d, NEW_RANGE_VERTICAL = 12.0d,
             NEW_RANGE_HORIZONTAL_SQUARED = NEW_RANGE_HORIZONTAL * NEW_RANGE_HORIZONTAL;
 
     protected WardenMixin(EntityType<? extends HostileEntity> entityType, World world) {
@@ -118,22 +118,22 @@ public class WardenMixin extends HostileEntity {
 
     @Override
     public boolean isInRange(Entity entity, double horizontalRadius, double verticalRadius) {
-        double d = entity.getX() - this.getX();
-        double e = entity.getY() - this.getY();
-        double f = entity.getZ() - this.getZ();
+        double deltaX = entity.getX() - this.getX();
+        double deltaY = entity.getY() - this.getY();
+        double deltaZ = entity.getZ() - this.getZ();
 
         // Sniffing:
         if(horizontalRadius == 6.0d)
-            return MathHelper.squaredHypot(d, f) < (3.0d * 3.0d) && e < 5.0d;
+            return MathHelper.squaredHypot(deltaX, deltaZ) < (6.0d * 6.0d) && deltaY <6.0d;
 
         // Immediate retaliation:
         if(horizontalRadius == 5.0d && verticalRadius == 5.0d)
-            return MathHelper.squaredHypot(d, f) < (4.0d * 4.0d) && e < 4.0d;
+            return MathHelper.squaredHypot(deltaX, deltaZ) < (4.0d * 4.0d) && deltaY < 4.0d;
 
         // Sonic booms:
         if(entity instanceof PlayerEntity)
-            return MathHelper.squaredHypot(d, f) < NEW_RANGE_HORIZONTAL_SQUARED && e < NEW_RANGE_VERTICAL;
+            return MathHelper.squaredHypot(deltaX, deltaZ) < NEW_RANGE_HORIZONTAL_SQUARED && deltaY < NEW_RANGE_VERTICAL;
         else
-            return MathHelper.squaredHypot(d, f) < (horizontalRadius * horizontalRadius) && e < verticalRadius;
+            return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
     }
 }

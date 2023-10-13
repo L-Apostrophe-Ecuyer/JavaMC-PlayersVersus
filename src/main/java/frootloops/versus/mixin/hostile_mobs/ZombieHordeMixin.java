@@ -62,7 +62,7 @@ public class ZombieHordeMixin implements Spawner {
                 this.startY = blockPos.getY();
                 this.startZ = blockPos.getZ() + MathHelper.floor(MathHelper.sin(f) * 32.0f);
                 if(this.getSpawnVector(world, new BlockPos(this.startX, this.startY, this.startZ)) == null) continue;
-                if(!this.spawned) this.remaining = world.isNearOccupiedPointOfInterest(blockPos) ? 32 : 16;
+                if(!this.spawned) this.remaining = world.isNearOccupiedPointOfInterest(blockPos) ? 32 : 24;
                 break;
             }
             return true;

@@ -1,15 +1,26 @@
 package frootloops.versus.mixin.melee_attacks;
 
+import frootloops.versus.VersusMod;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.control.LookControl;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.ai.pathing.Path;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
+import net.minecraft.util.UseAction;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,6 +37,12 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         this.speed = speed;
         this.mob = mob;
     }
+
+    private final int TICKS_ENDLAG = 8;
+    private final int TICKS_SWING_DEFAULT = TICKS_ENDLAG + 10;
+    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 8;
+    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 14;
+    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 20;
 
     @Shadow
     private final double speed;
@@ -49,14 +66,14 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     private int getCooldownAmount(){
         if(this.mob instanceof WardenEntity || this.mob instanceof IronGolemEntity || this.mob instanceof HoglinEntity)
-            return 40;
+            return TICKS_SWING_HEAVY;
         else if(this.mob.getMainHandStack() != null) {
             Item weapon = this.mob.getMainHandStack().getItem();
-            if(weapon instanceof AxeItem || weapon instanceof TridentItem) return 40;
-            else if(weapon instanceof HoeItem) return 24;
-            else if(weapon instanceof ToolItem) return 32;
+            if(weapon instanceof AxeItem || weapon instanceof TridentItem) return TICKS_SWING_HEAVY;
+            else if(weapon instanceof HoeItem) return TICKS_SWING_QUICK;
+            else if(weapon instanceof ToolItem) return TICKS_SWING_TOOLS;
         }
-        return 28;
+        return TICKS_SWING_DEFAULT;
     }
 
     @Inject(method = "shouldContinue", at = @At("HEAD"), cancellable = true)
@@ -78,31 +95,97 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(CallbackInfo info) {
-        if(this.cooldown > this.getCooldownAmount() && this.mob.hurtTime < 8) {
-            this.mob.setAttacking(true);
-            this.cooldown = Math.max(this.cooldown - 1, 0);
-            info.cancel();
+        LivingEntity target = this.mob.getTarget();
+        if (target != null) {
+
+            // Shield Blocking:
+            boolean shouldBlockWithShield = false;
+            if(this.cooldown < -24) // Up to 24 ticks with the shield up
+                this.cooldown = 6; // After 16 ticks, cooldown of 6 ticks before we can block again
+            else shouldBlockWithShield = this.canBlockWithShield() && this.shouldPlayDefensively();
+            if (shouldBlockWithShield) {
+                this.cooldown = Math.min(this.cooldown - 1, -12); // Minimum 12 ticks with the shield up
+                Vec3d velocity = this.mob.getVelocity();
+                this.mob.setPose(EntityPose.CROUCHING);
+                this.mob.setVelocity(0, velocity.y, 0);
+                this.mob.setAttacking(false);
+                this.mob.getOffHandStack().usageTick(this.mob.world, this.mob, 8);
+                this.mob.setCurrentHand(Hand.OFF_HAND);
+                info.cancel();
+
+            // Attacking:
+            } else if (this.cooldown >= 0) {
+                if (this.mob.getPose() == EntityPose.CROUCHING) {
+                    this.mob.setPose(EntityPose.STANDING);
+                    this.mob.stopUsingItem();
+                }
+                if (this.cooldown > this.getCooldownAmount() - 4 && this.mob.hurtTime < 8) {
+                    this.cooldown = Math.max(this.cooldown - 1, 0);
+                    this.mob.setAttacking(true);
+                    info.cancel();
+                }
+            }
         }
+    }
+
+    private boolean canBlockWithShield() {
+        if(this.mob.getOffHandStack().isEmpty()) return false;
+        return (this.mob.getOffHandStack().getItem().getUseAction(this.mob.getOffHandStack()) == UseAction.BLOCK);
+    }
+
+    private boolean shouldPlayDefensively() {
+        if(this.cooldown > 6) return false;
+        if(this.cooldown < 0) return true;
+        if(this.mob.handSwinging) return false;
+        if(this.mob.timeUntilRegen > 4) return false;
+
+        LivingEntity opponent = mob.getLastAttacker();
+        if(opponent != null) {
+
+            // If the enemy already attacked, and mob wasn't hurt, exit (attack of opportunity);
+            if(opponent.handSwinging && this.mob.timeUntilRegen < 6) return false;
+
+            // If enemy isn't in the "danger zone" for an incoming attack, and mob isn't hurt, exit to attack;
+            double d = this.mob.getPos().squaredDistanceTo(opponent.getPos());
+            if((d > 16.0d || d < 7.0d) && this.mob.timeUntilRegen != 0) return false;
+
+            // If opponent is about to crit or sprint attack, sometimes try blocking:
+            if((!opponent.isOnGround() || opponent.isSprinting()) && this.cooldown % 4 == 0) return true;
+
+            // if enemy is walking slowly, easy target, exit to attack;
+            if(opponent.getVelocity().x == 0.0d && opponent.getVelocity().z == 0.0d) return false;
+            return true;
+        }
+        return false;
     }
 
     @Overwrite
     public void attack(LivingEntity target, double squaredDistance) {
-
-        if(this.mob.hurtTime > 8) {
+        if(this.mob.hurtTime > 8 && cooldown > 18) {
             cooldown = 0;
             mob.setAttacking(false);
             mob.handSwingProgress = 0f;
         }
         else {
-            double d = this.getSquaredMaxAttackDistance(target);
-            if (squaredDistance <= d + 2) {
+            double attackReach = this.getSquaredMaxAttackDistance(target);
+
+            if(this.mob.getMainHandStack() != null) {
+                Item weapon = this.mob.getMainHandStack().getItem();
+                if (weapon instanceof HoeItem || weapon instanceof TridentItem) attackReach += 3.0f;
+                else if (weapon instanceof SwordItem) attackReach += 1.5f;
+            }
+
+            if (squaredDistance <= attackReach) {
                 int cooldownAmount = this.getCooldownAmount();
                 if (this.cooldown <= 0) {
                     this.mob.swingHand(Hand.MAIN_HAND);
                     this.cooldown = cooldownAmount;
-                } else if (this.cooldown == (cooldownAmount - 7) || this.cooldown == (cooldownAmount - 8)) {
 
-                    boolean isTargetInRange = (squaredDistance <= d);
+                } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG - 1) || this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
+                    if (this.cooldown == (cooldownAmount - TICKS_ENDLAG - 1))
+                        this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
+
+                    boolean isTargetInRange = (squaredDistance <= attackReach);
                     if(!isTargetInRange) return;
 
                     boolean isTargetInBounds = (target.getBoundingBox().maxY + target.getY() > this.mob.getBoundingBox().minY + this.mob.getY());
@@ -111,9 +194,10 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     LookControl posMobLookingAt = this.mob.getLookControl();
                     double deltaX = Math.abs(posMobLookingAt.getLookX() - target.getX());
                     double deltaZ = Math.abs(posMobLookingAt.getLookZ() - target.getZ());
-                    boolean isTargetInSight = deltaX + deltaZ < 2.0d;
+                    boolean isTargetInSight = deltaX + deltaZ < 1.0d;
                     if(!isTargetInSight) return;
 
+                    this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.2F);
                     this.mob.tryAttack(target);
                     this.cooldown -= 2;
                 }

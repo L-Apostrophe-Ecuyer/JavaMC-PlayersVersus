@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
+import frootloops.versus.VersusMod;
 import frootloops.versus.util.Enchants;
 import frootloops.versus.util.enchantments.TossingEnchantment;
 import frootloops.versus.util.Combat;
@@ -13,6 +14,8 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -20,6 +23,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +48,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow public int totalExperience;
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-
         cir.setReturnValue(LivingEntity.createLivingAttributes()
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
@@ -101,8 +105,26 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
     }
 
+    @Inject(method = "attack", at = @At("HEAD"))
+    public void attackTypes(Entity target, CallbackInfo ci) {
+
+        // Sprint attack (charged or not):
+        if(this.onGround && this.isSprinting()) {
+            double facingX = -MathHelper.sin(this.getYaw() * 0.017453292F);
+            double facingZ = MathHelper.cos(this.getYaw() * 0.017453292F);
+            target.addVelocity(this.getVelocity().x/2.0 + facingX * 1.25, 0.2, this.getVelocity().z/2.0 + facingZ * 1.25);
+            this.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 3,1, true, false));;
+        }
+    }
+
     @Inject(method = "attack", at = @At("TAIL"))
-    public void attack(Entity target, CallbackInfo ci) {
+    public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {
+
+        // Attacking while walking backwards deals less knockback:
+        boolean isStillOrWalkingBackwards = (this.onGround && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
+        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.5d, 0.8d, 0.5d));
+
+        // Frost enchantment:
         int frostAspect = EnchantmentHelper.getEquipmentLevel(Enchants.FROST_ASPECT, this);
         boolean isFrostAttack = (target instanceof LivingEntity && frostAspect > 0);
         if (isFrostAttack) {
@@ -119,9 +141,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             }
         }
 
+        // Toss attack and enchantment:
         boolean isToss = !this.isSneaking() && this.onGround && this.getMainHandStack().getItem() instanceof ShovelItem;
         if (isToss) {
-            TossingEnchantment.performTossAttack(this, target, 0.125 + 0.125 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
+            TossingEnchantment.performTossAttack(this, target, 0.2 + 0.125 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
         }
     }
 }

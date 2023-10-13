@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.shields;
+package frootloops.versus.mixin.shields;
 
 import frootloops.versus.util.Enchants;
 import net.minecraft.enchantment.EnchantmentHelper;

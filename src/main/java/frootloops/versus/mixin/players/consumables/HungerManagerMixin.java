@@ -30,55 +30,80 @@ public class HungerManagerMixin {
      */
     @Overwrite
     public void update(PlayerEntity player) {
-        this.prevFoodLevel = this.foodLevel;
 
         // Hunger effect is more punishing:
-        if(player.getStatusEffect(StatusEffects.HUNGER) != null) this.exhaustion += 0.08f;
+        if(player.getStatusEffect(StatusEffects.HUNGER) != null) this.exhaustion += 0.025f;
 
-        // Sprinting is more punishing:
-        if(player.isSprinting()) this.exhaustion += 0.02f;
-        if(!player.isSprinting()) this.exhaustion = Math.max(this.exhaustion - 0.005f, 0.0f);
+        // Sprinting is more punishing, whilst choosing not to sprint is a lot less punishing:
+        if(player.isSprinting()) this.exhaustion += 0.01f;
+        else if (foodLevel >= 6) {
+            this.exhaustion = Math.max(0.0f, this.exhaustion - 0.0025f);
+            if(this.exhaustion == 0.0f) {
+                this.exhaustion = 1.0f;
+                this.saturationLevel = Math.max(2.0F, saturationLevel);
+            }
+        }
 
         // Food exhaustion and starvation:
-        if (exhaustion > 8.0F) {
+        if(exhaustion > 1.0F && foodLevel == 0){
             exhaustion = 0.0F;
-            if (saturationLevel == 0.0F) {
-                if(foodLevel > 0) foodLevel--;
-                else player.damage(player.getDamageSources().starve(), 2.0f);
+            player.damage(player.getDamageSources().starve(), 1.0f);
+
+        } else if(exhaustion > 3.0F && (foodLevel <= 6 || saturationLevel > 0.0F)){
+            exhaustion = 0.0F;
+            if(saturationLevel > 0.0F) saturationLevel = Math.max(0.0F, saturationLevel - 1.0F);
+            else foodLevel--;
+
+        } else if(exhaustion > 9.0F){
+            exhaustion = 0.0F;
+            foodLevel--;
+        }
+
+        // Starvation
+        if(foodLevel == 1) {
+            foodTickTimer++;
+            if(foodTickTimer > 96){
+                foodTickTimer = 0;
+                player.damage(player.getDamageSources().starve(), 1.0f);
             }
-            else saturationLevel = Math.max(0.0F, saturationLevel - 0.5F);
         }
 
         // Natural regeneration:
         //  - FoodLevel regenerates over time, back to health level, if below.
         //  - Health regenerates quickly up to food level, otherwise.
-        boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel == 20 || foodLevel > Math.ceil(player.getHealth())) && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
-        boolean canPlayerRegenHunger = !player.isSprinting() && (foodLevel < Math.ceil(player.getHealth()) && foodLevel < 20);
-
+        boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (canPlayerRegenHealth) {
             foodTickTimer++;
-            if(player.hurtTime > 0 && !player.isOnFire()) {
+            if(player.isOnFire()) {
                 foodTickTimer = -16;
+                player.setFireTicks(player.getFireTicks() - 1);
             }
-            else if(foodTickTimer > 32){
+            else if(player.hurtTime > 0) {
+                foodTickTimer = -32;
+            }
+            else if(foodTickTimer > 24 & saturationLevel > 3.0F){
                 foodTickTimer = 0;
                 player.heal(1);
-                if (saturationLevel > 0.0F) saturationLevel = Math.max(0.0F, saturationLevel - 1.0F);
-                else if(foodLevel - Math.ceil(player.getHealth()) > 1) exhaustion += 4.0F;
-                else if(exhaustion < 5.0f) exhaustion += 1.0F;
+                saturationLevel = Math.max(0.0F, saturationLevel - 1.5F);
             }
-        }
-        else if (canPlayerRegenHunger) {
-            foodTickTimer++;
-            if(foodTickTimer > 16){
+            else if(foodTickTimer > 32 && foodLevel > 12){
                 foodTickTimer = 0;
-                foodLevel += 1;
+                player.heal(1);
+                foodLevel--;
+            }
+            else if(foodTickTimer > 48 && foodLevel > 6){
+                foodTickTimer = 0;
+                player.heal(1);
+                foodLevel--;
+            }
+            else if(foodTickTimer > 96 && foodLevel == 6){
+                foodTickTimer = 0;
+                player.heal(1);
+                exhaustion += 0.5F;
             }
         }
-        else {
-            foodTickTimer = -16;
-        }
 
-
+        // Update:
+        this.prevFoodLevel = this.foodLevel;
     }
 }

@@ -25,12 +25,13 @@ public class ItemEatingMixin {
     public void getMaxUseTime(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         if (stack.getItem().isFood()) {
 
-            if(foodComponent.isMeat()) cir.setReturnValue(44);
-            else if(foodComponent.isSnack()) cir.setReturnValue(16);
-            else if(foodComponent.getHunger() == 1 && foodComponent.getSaturationModifier() == 0.3f) cir.setReturnValue(44);
-            else if(foodComponent.getHunger() < 4)  cir.setReturnValue(16);
-            else if(foodComponent.getSaturationModifier() == 0.3F)  cir.setReturnValue(24);
-            else cir.setReturnValue(32);
+            if(foodComponent.isMeat()) cir.setReturnValue(32);
+            else if(foodComponent.isSnack()) cir.setReturnValue(8);
+            else if(foodComponent.getHunger() == 1 && foodComponent.getSaturationModifier() == 0.3f) cir.setReturnValue(32);
+            else if(foodComponent.getHunger() < 3)  cir.setReturnValue(8);
+            else if(foodComponent.getHunger() < 5)  cir.setReturnValue(12);
+            else if(foodComponent.getSaturationModifier() == 0.3F)  cir.setReturnValue(16);
+            else cir.setReturnValue(20);
 
         }
     }
