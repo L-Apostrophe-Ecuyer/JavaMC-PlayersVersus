@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players.attacking;
 
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import frootloops.versus.VersusMod;
 import frootloops.versus.util.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -54,8 +55,9 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean tryAttacking = false;
         double attackChargeProgress = Combat.getAttackChargeProgress(player);
         if(attackChargeProgress > 0.6d) {
-            if (!options.attackKey.isPressed() && ticksPressed > 0) {
-                tryAttacking = true;
+            if (!options.attackKey.isPressed() && ticksPressed > 0 && attackChargeProgress != 1.0d) {
+                tryAttacking = this.crosshairTarget.getType() != BLOCK;
+
             } else if (options.attackKey.isPressed()) {
                 ticksPressed++;
 
@@ -95,6 +97,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Inject(method = "doAttack",at = @At("HEAD"), cancellable = true)
     private void doAttackOverhaul(CallbackInfoReturnable<Boolean> cir) {
 
+        this.ticksPressed = 0;
         double attackProgress =  Combat.getAttackChargeProgress(player);
         double attackRange = Combat.getAttackRange(player, attackProgress);
         boolean canAttackEntities = attackProgress > 0.5;
