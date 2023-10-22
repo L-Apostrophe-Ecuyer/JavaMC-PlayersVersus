@@ -39,7 +39,7 @@ public class TossingEnchantment extends Enchantment {
     @Override
     public void onTargetDamaged(LivingEntity user, Entity target, int level) {
         if(!(user instanceof PlayerEntity) && user.isOnGround()) {
-            performTossAttack(user, target, 0.0875 + (double)level * 0.0875);
+            performTossAttack(user, target, 0.1 + (double)level * 0.1);
         }
         super.onTargetDamaged(user, target, level);
     }

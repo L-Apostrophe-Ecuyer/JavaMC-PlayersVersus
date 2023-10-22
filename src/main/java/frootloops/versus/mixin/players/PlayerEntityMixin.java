@@ -68,8 +68,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
 
         // Falling doesn't hurt as much:
-        if (source.isIn(DamageTypeTags.IS_FALL))//(source == DamageSource.FALL)
+        if (source.isIn(DamageTypeTags.IS_FALL))
             return amount/1.75f;
+
+        // Explosions don't hurt as much, or at least, the damage is more consistent:
+        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 3.0f) {
+            amount = (amount + amount/4.0f + 16.0f) / 4.0f;
+            return  Math.min(amount, 30.0f);
+        }
 
         // Hitting blocks while flying no longer neglects helmet protection:
         if(source.isOf(DamageTypes.FLY_INTO_WALL)) {

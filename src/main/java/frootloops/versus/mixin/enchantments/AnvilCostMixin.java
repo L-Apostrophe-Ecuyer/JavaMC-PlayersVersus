@@ -50,19 +50,12 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
         ItemStack toolStack = input.getStack(0);
         ItemStack repairStack = input.getStack(1);
 
-        if(toolStack.isEmpty()) return;
-        if(!repairStack.isEmpty()) {
-            if (!toolStack.isDamageable()) return; // Only repairs and enchant appliances!
-            if (toolStack.isOf(Items.ENCHANTED_BOOK)) return; // No book combining in my town!
-        }
-
         boolean canSmithResult = false;
         ItemStack resultStack = toolStack.copy();
         int levelCostValue = 0;
 
-
         // DURABILITY
-        boolean isRepairing = (toolStack.getDamage() > 0) && (toolStack.isOf(repairStack.getItem()) || toolStack.getItem().canRepair(toolStack, repairStack));
+        boolean isRepairing = (toolStack.isDamageable() && toolStack.getDamage() > 0) && (toolStack.isOf(repairStack.getItem()) || toolStack.getItem().canRepair(toolStack, repairStack));
         if(isRepairing) {
             int toolUsesLeft = toolStack.getMaxDamage() - toolStack.getDamage();
             int repairUsesLeft = repairStack.isDamageable()? repairStack.getMaxDamage() - repairStack.getDamage(): 0;

@@ -11,6 +11,6 @@ public class EnchantmentBottleMixin {
 
     @ModifyVariable(method = "onCollision", ordinal = 0, at = @At("STORE"))
     private int moreExperiencePerBottle(int amount) {
-        return amount * 5;
+        return amount * 4;
     }
 }

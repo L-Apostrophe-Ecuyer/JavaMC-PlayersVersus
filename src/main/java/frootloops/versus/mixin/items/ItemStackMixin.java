@@ -40,7 +40,7 @@ public class ItemStackMixin {
     public Text getName() { return null; }
 
     @Inject(method = "getTooltip", at = @At("RETURN"), cancellable = true)
-    private void injected(CallbackInfoReturnable<List<Text>> cir) {
+    private void addAttackReachTooltip(CallbackInfoReturnable<List<Text>> cir) {
         if(isSectionVisible(this.getHideFlags(), ItemStack.TooltipSection.MODIFIERS)) {
             List<Text> list = cir.getReturnValue();
 

@@ -68,7 +68,6 @@
     "players.consumables.ItemEatingMixin",
     "players.consumables.HungerManagerMixin",
     "players.PlayerEntityMixin",
-    "players.DamageUtilMixin",
     "shields.LivingEntityBlockingMixin",
     "shields.PlayerEntityBlockingMixin",
     "shields.ShieldItemMixin",

@@ -79,8 +79,7 @@ public class HungerManagerMixin {
         if (canPlayerRegenHealth) {
             foodTickTimer++;
             if(player.isOnFire()) {
-                foodTickTimer = -24;
-                player.setFireTicks(player.getFireTicks() - 1);
+                foodTickTimer = -8;
             }
             else if(player.hurtTime > 0) {
                 foodTickTimer = -32;
