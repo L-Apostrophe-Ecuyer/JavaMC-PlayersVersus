@@ -286,7 +286,7 @@ public class RevampedTradeOffers {
                                 new BuyForOneEmeraldFactory(Items.SOUL_SAND, 8, 12, 10),
                                 new BuyForOneEmeraldFactory(Items.SOUL_SOIL, 8, 12, 10),
                                 new BuyForOneEmeraldFactory(Items.GLOW_INK_SAC, 5, 12, 10),
-                                new SellItemFactory(Items.WRITABLE_BOOK, 3, 1, 10),
+                                new SellItemFactory(Items.WRITABLE_BOOK, 3, 1, 15),
                                 new SellItemFactory(Items.CANDLE, 1, 3, 5),
                                 new SellItemFactory(Items.BLACK_CANDLE, 1, 3, 5),
                                 new SellItemFactory(Items.GRAY_CANDLE, 1, 3, 5)},
@@ -325,37 +325,37 @@ public class RevampedTradeOffers {
                                 new SellMapFactory(
                                         8,
                                         StructureTags.SHIPWRECK, "Shipwreck Explorer Map",
-                                        MapIcon.Type.TARGET_X, 3, 10),
+                                        MapIcon.Type.TARGET_X, 3, 30),
                                 new SellMapFactory(
                                         6,
                                         StructureTags.OCEAN_RUIN, "Ruins Explorer Map",
-                                        MapIcon.Type.TARGET_X, 3, 10),
+                                        MapIcon.Type.TARGET_X, 3, 30),
                                 new SellMapFactory(
                                         6,
                                         StructureTags.EYE_OF_ENDER_LOCATED, "Ruins Explorer Map",
-                                        MapIcon.Type.TARGET_X, 1, 20),
+                                        MapIcon.Type.TARGET_X, 1, 30),
                                 new SellMapFactory(
                                         5,
                                         StructureTags.CATS_SPAWN_AS_BLACK, "Swamp Explorer Map",
-                                        MapIcon.Type.TARGET_X, 1, 10),
+                                        MapIcon.Type.TARGET_X, 1, 40),
                                 new SellMapFactory(
                                         6,
                                         StructureTags.RUINED_PORTAL, "Ruins Explorer Map",
-                                        MapIcon.Type.TARGET_X, 3, 10)},
+                                        MapIcon.Type.TARGET_X, 3, 30)},
                         3, new Factory[]{
                                 new SellItemFactory(Items.SKULL_BANNER_PATTERN, 21, 1, 15),
                                 new SellItemFactory(Items.MUSIC_DISC_WAIT, 32, 1, 15),
                                 new SellMapFactory(
                                         13,
                                         StructureTags.ON_OCEAN_EXPLORER_MAPS, "filled_map.monument",
-                                        MapIcon.Type.MONUMENT, 3, 5)},
+                                        MapIcon.Type.MONUMENT, 3, 60)},
                         4, new Factory[]{
                                 new SellItemFactory(Items.CREEPER_BANNER_PATTERN, 24, 1, 15),
                                 new SellItemFactory(Items.MUSIC_DISC_FAR, 32, 1, 15),
                                 new SellMapFactory(
                                         14,
                                         StructureTags.ON_WOODLAND_EXPLORER_MAPS, "filled_map.mansion",
-                                        MapIcon.Type.MANSION, 3, 10)},
+                                        MapIcon.Type.MANSION, 3, 100)},
                         5, new Factory[]{
                                 new SellItemFactory(Items.GLOBE_BANNER_PATTERN, 8, 1, 30)}
                 )));

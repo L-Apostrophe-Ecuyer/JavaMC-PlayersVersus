@@ -7,6 +7,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageType;
+import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
@@ -37,7 +40,14 @@ public class MagicProtectionEnchantment extends Enchantment {
 
     @Override
     public int getProtectionAmount(int level, DamageSource source) {
-        if (source.isIn(DamageTypeTags.WITCH_RESISTANT_TO)) return level + 1;
+        if (source.isIn(DamageTypeTags.WITCH_RESISTANT_TO)) return (level * 3);
+        if (source.isOf(DamageTypes.DRAGON_BREATH)) return (level * 3);
+        if (source.isOf(DamageTypes.THORNS)) return (level * 3);
+        if (source.isOf(DamageTypes.MOB_ATTACK) || source.isOf(DamageTypes.PLAYER_ATTACK)) {
+            if(source.getAttacker() instanceof LivingEntity attacker) {
+                if (attacker.hasStatusEffect(StatusEffects.STRENGTH)) return 4;
+            }
+        }
         return 0;
     }
 

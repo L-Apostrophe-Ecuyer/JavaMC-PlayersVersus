@@ -4,9 +4,10 @@
   "package": "frootloops.versus.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "enchantments.AnvilCostMixin",
+    "enchantments.EnchantmentBottleMixin",
     "enchantments.EnchantmentHelperMixin",
-    "enchantments.FireAspectMixin",
-    "enchantments.FlameMixin",
+    "enchantments.EnchantmentProtectionMixin",
     "enchantments.ImpalingMixin",
     "enchantments.KnockbackMixin",
     "enchantments.LootingMixin",

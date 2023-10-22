@@ -27,6 +27,8 @@ public class ZombieHordeMixin implements Spawner {
     @Shadow
     private void trySpawnZombie(ServerWorld world) {}
 
+    private static final boolean ONLY_DO_ZOMBIE_SEIGES_NEAR_VILLAGES = false;
+
 
     @Override
     public int spawn(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals) {
@@ -55,7 +57,8 @@ public class ZombieHordeMixin implements Spawner {
     private boolean tryGettingSpawnLocation(ServerWorld world) {
         for (PlayerEntity playerEntity : world.getPlayers()) {
             BlockPos blockPos;
-            if (playerEntity.isSpectator() || !world.isNearOccupiedPointOfInterest(blockPos = playerEntity.getBlockPos()) || world.getBiome(blockPos).isIn(BiomeTags.WITHOUT_ZOMBIE_SIEGES)) continue;
+            if (playerEntity.isSpectator() || world.getBiome(blockPos = playerEntity.getBlockPos()).isIn(BiomeTags.WITHOUT_ZOMBIE_SIEGES)) continue;
+            if(ONLY_DO_ZOMBIE_SEIGES_NEAR_VILLAGES && !world.isNearOccupiedPointOfInterest(blockPos)) continue;
             for (int i = 0; i < 10; ++i) {
                 float f = world.random.nextFloat() * ((float)Math.PI * 2);
                 this.startX = blockPos.getX() + MathHelper.floor(MathHelper.cos(f) * 32.0f);

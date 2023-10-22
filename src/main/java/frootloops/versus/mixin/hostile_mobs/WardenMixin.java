@@ -27,11 +27,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class WardenMixin extends HostileEntity {
 
 
-    /**
-     *  - WARDENS ARE IMMUNE TO WEAK ARROWS
-     *  The only buff Wardens get. This allows us to nerf their ranged attacks and target
-     *  tracking to make it a lot more dangerous and interesting to fight one of these things.
-     */
     @Shadow @VisibleForTesting
     public void increaseAngerAt(@Nullable Entity entity, int amount, boolean listening) {}
 
@@ -41,43 +36,16 @@ public class WardenMixin extends HostileEntity {
     @Shadow
     public void updateAttackTarget(LivingEntity target) {}
 
-    @Override
-    public boolean damage(DamageSource source, float amount) {
-        boolean hasReceivedDamage = false, mightReceiveDamage = true;
-        Entity attacker = source.getAttacker();
-        if (source.getSource() instanceof PersistentProjectileEntity && !(source.getSource() instanceof TridentEntity)) {
-            if(attacker == null || !(attacker instanceof PlayerEntity)) {
-                mightReceiveDamage = false;
-            }
-            else {
-                double distanceSquared = attacker.getPos().squaredDistanceTo(this.getPos());
-                if(distanceSquared > 256.0d) mightReceiveDamage = false;
-                else amount = (amount * (256.0f - (float)attacker.getPos().squaredDistanceTo(this.getPos())))/256.0f;
-            }
-            if(amount < 3.0f) mightReceiveDamage = false;
-        }
-        if(mightReceiveDamage) hasReceivedDamage = super.damage(source, amount);
-
-        if (!(this.world.isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
-            this.increaseAngerAt(attacker, Angriness.ANGRY.getThreshold() + 20, false);
-            if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity) {
-                LivingEntity livingEntity = (LivingEntity)attacker;
-                if (!source.isIndirect() || this.isInRange(livingEntity, 5.0)) {
-                    this.updateAttackTarget(livingEntity);
-                }
-            }
-        }
-        return hasReceivedDamage;
-    }
-
-
 
     /**
-     *  - ANGER TRACKING NERFED
+     *  - ANGER TRACKING TWEAKED (NERFED)
      * Wardens will quickly lose sight (haha) of their targets, meaning if you run away
      * and crouch or hide again, the Warden won't be able to pinpoint where you are anymore.
      * This is to incentive other play styles, like Tom & Jerry chases, rather than just
      * running away and waiting.
+     *
+     * However! On spawning, they'll be immediately suspicious of the nearest player, and
+     * will start walking in their direction.
      */
     @Shadow
     private WardenAngerManager angerManager;
@@ -94,13 +62,19 @@ public class WardenMixin extends HostileEntity {
 
     @Inject(method = "mobTick", at = @At("HEAD"))
     private void reduceAngerTowardsSneakyPlayers(CallbackInfo ci){
-        if(this.getAngriness() == Angriness.ANGRY && this.age % 2 == 0) {
+        if(this.getAngriness() == Angriness.ANGRY && this.age % 3 == 0) {
             Entity target = this.getTarget();
             if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getPos()) > 600)) {
                 this.angerManager.increaseAngerAt(target, -1);
             }
         }
     }
+
+    @Inject(method = "initDataTracker", at = @At("TAIL"))
+    private void moreInvestigative(CallbackInfo ci){
+        this.increaseAngerAt(this.world.getClosestPlayer(this, 48.0d), 60, true);
+    }
+
 
     /***
      *  - SONIC BOOM NERFED
@@ -135,5 +109,39 @@ public class WardenMixin extends HostileEntity {
             return MathHelper.squaredHypot(deltaX, deltaZ) < NEW_RANGE_HORIZONTAL_SQUARED && deltaY < NEW_RANGE_VERTICAL;
         else
             return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
+    }
+
+    /**
+     *  - WARDENS ARE IMMUNE TO WEAK ARROWS
+     *  This allows us to nerf their ranged attacks and target tracking to make it a lot
+     *  more dangerous and interesting to fight one of these things.
+     */
+    @Override
+    public boolean damage(DamageSource source, float amount) {
+        boolean hasReceivedDamage = false, mightReceiveDamage = true;
+        Entity attacker = source.getAttacker();
+        if (source.getSource() instanceof PersistentProjectileEntity && !(source.getSource() instanceof TridentEntity)) {
+            if(attacker == null || !(attacker instanceof PlayerEntity)) {
+                mightReceiveDamage = false;
+            }
+            else {
+                double distanceSquared = attacker.getPos().squaredDistanceTo(this.getPos());
+                if(distanceSquared > 256.0d) mightReceiveDamage = false;
+                else amount = (amount * (256.0f - (float)attacker.getPos().squaredDistanceTo(this.getPos())))/256.0f;
+            }
+            if(amount < 3.0f) mightReceiveDamage = false;
+        }
+        if(mightReceiveDamage) hasReceivedDamage = super.damage(source, amount);
+
+        if (!(this.world.isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
+            this.increaseAngerAt(attacker, Angriness.ANGRY.getThreshold() + 20, false);
+            if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity) {
+                LivingEntity livingEntity = (LivingEntity)attacker;
+                if (!source.isIndirect() || this.isInRange(livingEntity, 5.0)) {
+                    this.updateAttackTarget(livingEntity);
+                }
+            }
+        }
+        return hasReceivedDamage;
     }
 }

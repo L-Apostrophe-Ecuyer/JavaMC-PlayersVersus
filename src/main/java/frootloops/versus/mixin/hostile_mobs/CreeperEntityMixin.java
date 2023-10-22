@@ -37,6 +37,7 @@ public class CreeperEntityMixin extends HostileEntity {
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
         fuseTime = 34;
         explosionRadius = 4;
+        this.experiencePoints = 16;
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
 
@@ -52,7 +53,7 @@ public class CreeperEntityMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(this.getBlockPos().getY() > 32) return false;
+        if(this.getBlockPos().getY() > 24) return false;
         return super.canSpawn(world, spawnReason);
     }
 

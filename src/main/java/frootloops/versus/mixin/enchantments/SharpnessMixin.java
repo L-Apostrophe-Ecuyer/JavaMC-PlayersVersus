@@ -3,6 +3,7 @@ package frootloops.versus.mixin.enchantments;
 import net.minecraft.enchantment.DamageEnchantment;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
+import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EquipmentSlot;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,5 +31,10 @@ public class SharpnessMixin extends Enchantment {
             return (float)level * 3.5f;
         }
         return 0.0f;
+    }
+
+    @Override
+    public Rarity getRarity() {
+        return Rarity.RARE;
     }
 }

@@ -11,7 +11,7 @@ import net.minecraft.registry.tag.DamageTypeTags;
 
 public class PhysicalProtectionEnchantment extends Enchantment {
     public PhysicalProtectionEnchantment() {
-        super(Rarity.UNCOMMON, EnchantmentTarget.ARMOR, new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET});
+        super(Rarity.RARE, EnchantmentTarget.ARMOR, new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET});
     }
 
     @Override

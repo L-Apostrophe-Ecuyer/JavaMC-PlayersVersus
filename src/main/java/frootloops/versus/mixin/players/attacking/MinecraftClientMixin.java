@@ -62,14 +62,13 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 ticksPressed++;
 
                 // If the cooldown is complete, swing:
-                if (ticksPressed >= Combat.getTicksPerAttackOf(player) - 1)
+                if (ticksPressed >= Combat.getTicksPerAttackOf(player))
                     tryAttacking = true;
 
                 // Otherwise, if at some point we can attack something, we do:
-                else if (this.crosshairTarget.getType() == ENTITY && attackChargeProgress > 0.8d) {
+                else if (this.crosshairTarget.getType() == ENTITY && attackChargeProgress > 0.85d) {
                     double attackRange = Combat.getAttackRange(player,attackChargeProgress);
-                    if ((attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos()))
-                        tryAttacking = true;
+                    tryAttacking = (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos());
                 }
             }
             else ticksPressed = 0;

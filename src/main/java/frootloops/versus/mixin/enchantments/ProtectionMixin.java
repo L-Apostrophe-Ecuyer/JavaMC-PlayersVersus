@@ -25,4 +25,10 @@ public class ProtectionMixin extends Enchantment {
     public boolean isTreasure() {
         return this.protectionType == ProtectionEnchantment.Type.FIRE || this.protectionType == ProtectionEnchantment.Type.ALL;
     }
+
+    @Override
+    public Rarity getRarity() {
+        if(this.protectionType == ProtectionEnchantment.Type.ALL) return Rarity.VERY_RARE;
+        return Rarity.RARE;
+    }
 }
