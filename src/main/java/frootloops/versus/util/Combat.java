@@ -22,7 +22,6 @@ public abstract class Combat {
     private static final String[] tools = new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
     private static final float[] toolsSpeed  = new float[]{1.0F, 1.6F, 2.4F, 1.2F, 1.4F};
     private static final float[] toolsDamage = new float[]{7.0F, 4.0F, 2.0F, 4.0F, 3.0F};
-
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{0F, 0F, 1F, 1F, 2F, 3F};
 
@@ -37,7 +36,7 @@ public abstract class Combat {
                 setAttributes(name, damage, speed);
             }
         }
-        setAttributes("minecraft:trident", 8.0F - (float)PLAYER_BASE_ATTACK_DAMAGE, 1.0F - (float)PLAYER_BASE_ATTACK_SPEED);
+        setAttributes("minecraft:trident", 9.0F - (float)PLAYER_BASE_ATTACK_DAMAGE, 1.0F - (float)PLAYER_BASE_ATTACK_SPEED);
     }
 
     private static void setAttributes(String itemName, float damageModifier, float speedModifier) {

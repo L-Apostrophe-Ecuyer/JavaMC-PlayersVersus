@@ -2,6 +2,8 @@ package frootloops.versus.util.enchantments;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
+import net.minecraft.enchantment.FireAspectEnchantment;
+import net.minecraft.enchantment.SwiftSneakEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EquipmentSlot;
@@ -16,11 +18,11 @@ import net.minecraft.server.world.ServerWorld;
 
 public class FrostAspectEnchantment extends Enchantment {
     public FrostAspectEnchantment() {
-        super(Rarity.COMMON, EnchantmentTarget.WEAPON, new EquipmentSlot[] {EquipmentSlot.MAINHAND});
+        super(Rarity.RARE, EnchantmentTarget.WEAPON, new EquipmentSlot[] {EquipmentSlot.MAINHAND});
     }
 
     public boolean isTreasure() {
-        return true;
+        return false;
     }
 
     @Override
@@ -44,8 +46,18 @@ public class FrostAspectEnchantment extends Enchantment {
     }
 
     @Override
+    public boolean canAccept(Enchantment other) {
+        return !(other instanceof FrostAspectEnchantment || other instanceof FireAspectEnchantment);
+    }
+
+    @Override
+    public int getMaxLevel() {
+        return 2;
+    }
+
+    @Override
     public void onTargetDamaged(LivingEntity user, Entity target, int level) {
         if (target instanceof LivingEntity livingEntity && livingEntity.canFreeze())
-            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 8, 2));
+            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 4 + (4 * level), 2));
     }
 }

@@ -10,6 +10,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
@@ -45,10 +46,18 @@ public class MagicProtectionEnchantment extends Enchantment {
         if (source.isOf(DamageTypes.THORNS)) return (level * 3);
         if (source.isOf(DamageTypes.MOB_ATTACK) || source.isOf(DamageTypes.PLAYER_ATTACK)) {
             if(source.getAttacker() instanceof LivingEntity attacker) {
-                if (attacker.hasStatusEffect(StatusEffects.STRENGTH)) return 4;
+                if (attacker.hasStatusEffect(StatusEffects.STRENGTH)) return level + 2;
+                if (attacker.getMainHandStack().hasEnchantments()) return level/2;
             }
         }
         return 0;
+    }
+
+    @Override
+    public void onUserDamaged(LivingEntity user, Entity attacker, int level) {
+        if(attacker instanceof WardenEntity) {
+            if(user.isAlive()) user.heal(4.0f);
+        }
     }
 
     @Override

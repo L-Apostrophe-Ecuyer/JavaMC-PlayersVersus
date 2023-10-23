@@ -50,7 +50,7 @@ public class SpiderMixin extends HostileEntity {
         EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instanceHP != null) {
             instanceHP.setBaseValue(36.0D);
-            this.setHealth(this.getMaxHealth());
+            this.setHealth(36.0f);
         }
 
         if(this.random.nextFloat() < 0.7F) this.setBaby(true);
@@ -85,6 +85,8 @@ public class SpiderMixin extends HostileEntity {
 
             Objects.requireNonNull(speed).addPersistentModifier(new EntityAttributeModifier(
                     "Baby spawn malus", +0.08D, EntityAttributeModifier.Operation.ADDITION));
+
+            this.setHealth(6.0f);
         }
     }
 
