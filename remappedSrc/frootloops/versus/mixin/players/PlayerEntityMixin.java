@@ -1,9 +1,9 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
-import frootloops.versus.util.Enchants;
-import frootloops.versus.util.enchantments.TossingEnchantment;
-import frootloops.versus.util.Combat;
+import frootloops.versus.mod.Enchants;
+import frootloops.versus.mod.enchantments.TossingEnchantment;
+import frootloops.versus.mod.Combat;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;

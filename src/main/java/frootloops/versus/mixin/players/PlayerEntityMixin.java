@@ -1,10 +1,9 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
-import frootloops.versus.VersusMod;
-import frootloops.versus.util.Enchants;
-import frootloops.versus.util.enchantments.TossingEnchantment;
-import frootloops.versus.util.Combat;
+import frootloops.versus.mod.Enchants;
+import frootloops.versus.mod.enchantments.TossingEnchantment;
+import frootloops.versus.mod.Combat;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -24,7 +23,6 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;

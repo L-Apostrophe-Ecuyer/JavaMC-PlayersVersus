@@ -1,4 +1,4 @@
-package frootloops.versus.util;
+package frootloops.versus.mod;
 
 import frootloops.versus.mixin.players.accessors.ItemAccessor;
 import net.minecraft.item.*;

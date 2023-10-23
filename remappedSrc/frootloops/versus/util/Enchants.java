@@ -1,7 +1,7 @@
-package frootloops.versus.util;
+package frootloops.versus.mod;
 
 import frootloops.versus.Main;
-import frootloops.versus.util.enchantments.*;
+import frootloops.versus.mod.enchantments.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;

@@ -1,19 +1,15 @@
-package frootloops.versus.util.enchantments;
+package frootloops.versus.mod.enchantments;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.FireAspectEnchantment;
-import net.minecraft.enchantment.SwiftSneakEnchantment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
 
 
 public class FrostAspectEnchantment extends Enchantment {

@@ -1,7 +1,5 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
-import net.minecraft.client.sound.Sound;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -19,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static frootloops.versus.util.Enchants.DASH_ENCHANTMENT;
+import static frootloops.versus.mod.Enchants.DASH_ENCHANTMENT;
 
 
 @Mixin(PlayerEntity.class)

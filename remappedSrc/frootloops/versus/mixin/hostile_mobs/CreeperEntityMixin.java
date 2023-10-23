@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.hostile_mobs;
 
-import frootloops.versus.util.hostile_mobs.creeper.XrayFollowTargetGoal;
+import frootloops.versus.mod.hostile_mobs.creeper.XrayFollowTargetGoal;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;

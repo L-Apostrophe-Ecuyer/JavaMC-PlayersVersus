@@ -1,4 +1,4 @@
-package frootloops.versus.util.enchantments;
+package frootloops.versus.mod.enchantments;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;

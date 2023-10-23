@@ -1,8 +1,8 @@
 package frootloops.versus;
 
-import frootloops.versus.util.Enchants;
-import frootloops.versus.util.Combat;
-import frootloops.versus.util.Items;
+import frootloops.versus.mod.Enchants;
+import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.Items;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;

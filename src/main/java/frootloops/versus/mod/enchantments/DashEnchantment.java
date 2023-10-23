@@ -1,12 +1,9 @@
-package frootloops.versus.util.enchantments;
+package frootloops.versus.mod.enchantments;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.SwiftSneakEnchantment;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
 
 public class DashEnchantment extends Enchantment {
     public DashEnchantment() {

@@ -3,7 +3,7 @@ package frootloops.versus.mixin.players;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import frootloops.versus.VersusMod;
-import frootloops.versus.util.bridging.ReacharoundTracker;
+import frootloops.versus.mod.bridging.ReacharoundTracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;

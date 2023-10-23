@@ -1,8 +1,7 @@
-package frootloops.versus.util;
+package frootloops.versus.mod;
 
 
 import com.google.common.collect.ImmutableMultimap;
-import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.players.accessors.*;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;

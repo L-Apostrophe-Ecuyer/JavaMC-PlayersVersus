@@ -1,21 +1,12 @@
-package frootloops.versus.util.enchantments;
+package frootloops.versus.mod.enchantments;
 
 import net.minecraft.enchantment.BindingCurseEnchantment;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
-import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageSources;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.entity.passive.FoxEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ChorusFruitItem;
-import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;

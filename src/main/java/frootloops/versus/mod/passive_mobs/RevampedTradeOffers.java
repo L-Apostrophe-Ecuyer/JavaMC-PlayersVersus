@@ -1,9 +1,9 @@
-package frootloops.versus.util.passive_mobs;
+package frootloops.versus.mod.passive_mobs;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import frootloops.versus.util.Enchants;
+import frootloops.versus.mod.Enchants;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;

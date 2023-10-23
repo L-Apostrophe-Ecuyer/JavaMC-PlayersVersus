@@ -1,4 +1,4 @@
-package frootloops.versus.util.bosses;
+package frootloops.versus.mod.bosses;
 
 import java.util.ArrayList;
 import java.util.List;

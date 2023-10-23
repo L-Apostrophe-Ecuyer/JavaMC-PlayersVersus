@@ -1,4 +1,4 @@
-package frootloops.versus.util.hostile_mobs.creeper;
+package frootloops.versus.mod.hostile_mobs.creeper;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;

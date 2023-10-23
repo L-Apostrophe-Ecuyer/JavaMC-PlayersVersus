@@ -1,4 +1,4 @@
-package frootloops.versus.util.enchantments;
+package frootloops.versus.mod.enchantments;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
@@ -7,16 +7,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.WardenEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShovelItem;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.sound.SoundEvents;
 
 
 public class MagicProtectionEnchantment extends Enchantment {

@@ -1,4 +1,4 @@
-package frootloops.versus.util.bridging;
+package frootloops.versus.mod.bridging;
 
 
 import net.minecraft.block.BlockState;

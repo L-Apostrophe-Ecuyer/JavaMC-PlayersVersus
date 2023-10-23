@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.hostile_mobs.dragon;
 
-import frootloops.versus.util.bosses.DragonManager;
+import frootloops.versus.mod.bosses.DragonManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;

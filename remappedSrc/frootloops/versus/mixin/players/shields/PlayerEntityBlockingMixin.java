@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.shields;
 
-import frootloops.versus.util.Enchants;
+import frootloops.versus.mod.Enchants;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;

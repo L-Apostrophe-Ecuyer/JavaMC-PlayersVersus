@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.hostile_mobs;
 
-import frootloops.versus.util.hostile_mobs.PhantomMoveControlRevamp;
+import frootloops.versus.mod.hostile_mobs.PhantomMoveControlRevamp;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;

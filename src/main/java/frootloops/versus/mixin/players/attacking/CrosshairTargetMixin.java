@@ -1,10 +1,9 @@
 package frootloops.versus.mixin.players.attacking;
 
-import frootloops.versus.util.Combat;
+import frootloops.versus.mod.Combat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.resource.SynchronousResourceReloader;
-import net.minecraft.util.hit.EntityHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

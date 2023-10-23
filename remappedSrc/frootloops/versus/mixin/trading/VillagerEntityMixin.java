@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.trading;
 
 import com.google.common.collect.Sets;
-import frootloops.versus.util.passive_mobs.RevampedTradeOffers;
+import frootloops.versus.mod.passive_mobs.RevampedTradeOffers;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.*;
 
-import static frootloops.versus.util.passive_mobs.RevampedTradeOffers.REVAMPED_PROFESSION_TO_LEVELED_TRADE;
+import static frootloops.versus.mod.passive_mobs.RevampedTradeOffers.REVAMPED_PROFESSION_TO_LEVELED_TRADE;
 
 @Mixin(VillagerEntity.class)
 public abstract class VillagerEntityMixin extends MerchantEntity {

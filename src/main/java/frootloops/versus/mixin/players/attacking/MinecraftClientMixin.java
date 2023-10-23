@@ -1,8 +1,7 @@
 package frootloops.versus.mixin.players.attacking;
 
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
-import frootloops.versus.VersusMod;
-import frootloops.versus.util.Combat;
+import frootloops.versus.mod.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.WindowEventHandler;
