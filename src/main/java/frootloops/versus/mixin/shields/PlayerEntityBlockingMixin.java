@@ -2,13 +2,23 @@ package frootloops.versus.mixin.shields;
 
 import frootloops.versus.mod.Enchants;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.ShieldItem;
+import net.minecraft.util.Hand;
+import net.minecraft.util.UseAction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,11 +37,19 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
     @Shadow
     private final ItemCooldownManager itemCooldownManager;
 
+    @Override
+    public void swingHand(Hand hand) {
+        if(this.getOffHandStack().getItem() instanceof ShieldItem) {
+            this.clearActiveItem();
+            itemCooldownManager.set(this.getOffHandStack().getItem(), 4);
+        }
+        super.swingHand(hand, false);
+    }
 
     @Inject(method = "disableShield", at = @At(value = "HEAD"), cancellable = true)
     private void disableShield(boolean sprinting, CallbackInfo info) {
 
-        int disableForTicks = this.isSneaking() ? 10 : 40;
+        int disableForTicks = 40;
         if(this.getAttacker() != null)
             disableForTicks += 20 * EnchantmentHelper.getLevel(Enchants.CLEAVING, this.getAttacker().getMainHandStack());
 

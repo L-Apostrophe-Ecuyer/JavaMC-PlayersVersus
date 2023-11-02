@@ -14,10 +14,8 @@ public abstract class ShieldItemMixin extends Item {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        int ticksShieldNeedsToBeUp = 6;
-        int ticksToDisable = ticksShieldNeedsToBeUp - (getMaxUseTime(stack) - remainingUseTicks);
-        if(ticksToDisable > 0 && user instanceof PlayerEntity player)
-            player.getItemCooldownManager().set(this, ticksToDisable);
+        if(!user.isSneaking() && user instanceof PlayerEntity player)
+            player.getItemCooldownManager().set(this, 4);
     }
 
     @Override

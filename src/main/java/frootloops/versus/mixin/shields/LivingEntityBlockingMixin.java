@@ -35,15 +35,6 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
     private static final int PARRY_TIME_TICKS = 8;
 
-    private boolean isEntityBlocking() {
-        LivingEntity self = (LivingEntity) ((Object)this);
-        boolean isUsingShield = !this.activeItemStack.isEmpty() && this.activeItemStack.getItem().getUseAction(this.activeItemStack) == UseAction.BLOCK;
-        boolean isCrouchBlocking = !isUsingShield && (self.getPose() == EntityPose.CROUCHING) && !self.getOffHandStack().isEmpty() && (self.getOffHandStack().getItem().getUseAction(self.getOffHandStack()) == UseAction.BLOCK);
-        return (isUsingShield || isCrouchBlocking);
-    }
-
-
-
     @Inject(method = "isBlocking", at = @At("HEAD"), cancellable = true)
     private void isBlocking(CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(!this.activeItemStack.isEmpty() && this.activeItemStack.getItem().getUseAction(this.activeItemStack) == UseAction.BLOCK);

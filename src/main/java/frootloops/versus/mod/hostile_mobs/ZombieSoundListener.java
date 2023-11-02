@@ -16,6 +16,9 @@ import java.util.List;
 public class ZombieSoundListener {
     public static void OnGameEvent(ServerWorld serverWorld, GameEvent event, Vec3d emitterPos, GameEvent.Emitter emitter) {
 
+        // Optimization for walking:
+        if(event == GameEvent.STEP && serverWorld.getTime() % 5 != 0) return;
+
         // If the sound comes from an entity, skip if the entity is sneaking or on wool:
         boolean heardProjectileLanding = (event == GameEvent.PROJECTILE_LAND);
         boolean heardPlayerSprinting = false;
@@ -34,6 +37,7 @@ public class ZombieSoundListener {
                 heardPlayerSprinting = emitter.sourceEntity().isSprinting();
             }
         }
+        else if(!heardProjectileLanding) return;
 
 
         // How much zombies should be attracted to the sound:

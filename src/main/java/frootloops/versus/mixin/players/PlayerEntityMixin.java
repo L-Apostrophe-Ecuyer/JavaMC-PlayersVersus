@@ -112,12 +112,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "attack", at = @At("HEAD"))
     public void attackTypes(Entity target, CallbackInfo ci) {
 
-        // Sprint attack (charged or not):
-        if(this.onGround && this.isSprinting()) {
-            double facingX = -MathHelper.sin(this.getYaw() * 0.017453292F);
-            double facingZ = MathHelper.cos(this.getYaw() * 0.017453292F);
-            target.addVelocity(this.getVelocity().x/2.0 + facingX * 1.25, 0.2, this.getVelocity().z/2.0 + facingZ * 1.25);
-            this.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 3,1, true, false));;
+        // After attacking, the shield is interrupted:
+        if(this.getOffHandStack().getItem() instanceof ShieldItem) {
+            this.clearActiveItem();
+            itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
         }
     }
 
