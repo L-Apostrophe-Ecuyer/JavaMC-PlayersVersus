@@ -1,10 +1,10 @@
 {
   "attribute.name.generic.players-versus.attack_reach": "Attack Reach",
   "enchantment.players-versus.frost_aspect": "Frost Aspect",
-  "enchantment.players-versus.dash": "Dash",
   "enchantment.players-versus.tossing": "Tossing",
   "enchantment.players-versus.cleaving": "Shield Cleaving",
   "enchantment.players-versus.ender_curse": "Curse of the End",
+  "enchantment.players-versus.bounding_strides": "Bounding Strides",
   "enchantment.players-versus.magic_protection": "Magic Protection",
   "enchantment.players-versus.physical_protection": "Physical Protection"
 }

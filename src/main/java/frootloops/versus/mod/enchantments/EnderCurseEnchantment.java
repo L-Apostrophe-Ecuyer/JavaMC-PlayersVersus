@@ -48,6 +48,7 @@ public class EnderCurseEnchantment extends Enchantment {
                 if(!user.isAlive())
                     return;
 
+                user.timeUntilRegen = 18; // 8 ticks of invincibility frames
                 double d = user.getX();
                 double e = user.getY();
                 double f = user.getZ();

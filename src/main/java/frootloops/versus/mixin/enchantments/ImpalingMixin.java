@@ -1,10 +1,14 @@
 package frootloops.versus.mixin.enchantments;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.ImpalingEnchantment;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.sound.SoundEvents;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ImpalingEnchantment.class)
@@ -19,7 +23,11 @@ public class ImpalingMixin extends Enchantment {
     }
 
     @Override
-    public float getAttackDamage(int level, EntityGroup group) {
-        return (float)level * 0.5f;
+    public void onTargetDamaged(LivingEntity user, Entity target, int level) {
+        if(target.isTouchingWaterOrRain()) {
+            float extraDamageToWetMobs = level; // Note: for some reason, this is called twice. So I've reduced the damage.
+            target.damage(user.getDamageSources().trident(user,user), extraDamageToWetMobs);
+            user.playSound(SoundEvents.ITEM_TRIDENT_HIT, 1.1f, 1.0f);
+        }
     }
 }

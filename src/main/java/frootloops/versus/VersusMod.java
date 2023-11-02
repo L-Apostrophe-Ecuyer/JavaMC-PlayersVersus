@@ -1,5 +1,6 @@
 package frootloops.versus;
 
+import frootloops.versus.mod.CustomBlocks;
 import frootloops.versus.mod.Enchants;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.Items;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 public class VersusMod implements ModInitializer {
 
 	public static final String MOD_ID = "players-versus";
+	public static final String MOD_FOLDER = "data/" + MOD_ID;
 	public static final Logger MOD_LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	public static final Identifier CROSSHAIR_BLOCK_ICONS_TEXTURE = Identifier.of(MOD_ID, "textures/gui/block_placement_icons.png");
@@ -22,6 +24,7 @@ public class VersusMod implements ModInitializer {
 		// Proceed with mild caution.
 
 		MOD_LOGGER.info("Launching " + MOD_ID);
+		CustomBlocks.init();
 		Combat.init();
 		Enchants.init();
 		Items.init();

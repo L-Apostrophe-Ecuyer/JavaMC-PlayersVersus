@@ -1,13 +1,11 @@
 package frootloops.versus.mod.enchantments;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
-import net.minecraft.enchantment.SwiftSneakEnchantment;
+import net.minecraft.enchantment.*;
 import net.minecraft.entity.EquipmentSlot;
 
-public class DashEnchantment extends Enchantment {
-    public DashEnchantment() {
-        super(Rarity.RARE, EnchantmentTarget.ARMOR, new EquipmentSlot[]{EquipmentSlot.LEGS});
+public class BoundingStridesEnchantment extends Enchantment {
+    public BoundingStridesEnchantment() {
+        super(Rarity.RARE, EnchantmentTarget.ARMOR, new EquipmentSlot[]{EquipmentSlot.FEET});
     }
 
     public boolean isTreasure() {
@@ -36,6 +34,6 @@ public class DashEnchantment extends Enchantment {
 
     @Override
     public boolean canAccept(Enchantment other) {
-        return !(other instanceof DashEnchantment || other instanceof SwiftSneakEnchantment);
+        return !(other instanceof BoundingStridesEnchantment || other instanceof DepthStriderEnchantment || other instanceof SoulSpeedEnchantment);
     }
 }

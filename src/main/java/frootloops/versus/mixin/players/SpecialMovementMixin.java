@@ -6,6 +6,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
@@ -13,11 +14,12 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static frootloops.versus.mod.Enchants.DASH_ENCHANTMENT;
+import static frootloops.versus.mod.Enchants.BOUNDING_STRIDES;
 
 
 @Mixin(PlayerEntity.class)
@@ -26,6 +28,9 @@ public abstract class SpecialMovementMixin extends LivingEntity {
     protected SpecialMovementMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
+
+    @Shadow
+    protected HungerManager hungerManager;
 
     private int ticksLeftToLeap = 0;
     private int ticksLeftToDash = 0;
@@ -55,30 +60,37 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             velocityZ += MathHelper.cos(yaw) * horizontalVelocity;
         }
 
-        if (ticksLeftToDash > 0 && isSprinting()) {
-            this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0,true, false));
-            int dashEnchantmentLevel = EnchantmentHelper.getLevel(DASH_ENCHANTMENT, this.getEquippedStack(EquipmentSlot.LEGS));
-            if(dashEnchantmentLevel > 0) {
-                this.world.playSound(null, this.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, SoundCategory.PLAYERS);
-                for (int i = 0; i < 6; ++i) {
-                    double d = this.random.nextGaussian() * 0.02 - velocityX/2;
-                    double e = this.random.nextGaussian() * 0.02 + 0.01;
-                    double f = this.random.nextGaussian() * 0.02 - velocityZ/2;
-                    this.world.addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
-                }
-            }
-            velocityX *= 1.25 + 0.5f * dashEnchantmentLevel;
-            velocityZ *= 1.25 + 0.5f * dashEnchantmentLevel;
-            this.spawnSprintingParticles();
-            this.playBlockFallSound();
+        int boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.FEET));
+        boolean hasBounded = false;
+
+        if (ticksLeftToDash > 0 && isSprinting() && boundingStridesLevel > 0) {
+            velocityX *= 1.5 + 0.5 * boundingStridesLevel;
+            velocityZ *= 1.5 + 0.5 * boundingStridesLevel;
+            timeUntilRegen = 12; // Invincible for two ticks
+            hungerManager.addExhaustion(0.5f); // Increases hunger by a lot
             ticksLeftToDash = -1;
+            hasBounded = true;
         }
 
         if(ticksLeftToLeap > 0 && !this.isSneaking()) {
-            velocityY *= 1.35;
+            velocityY *= 1.25 + 0.15 * boundingStridesLevel;
             this.playBlockFallSound();
-            this.setSneaking(false);
             ticksLeftToLeap = -1;
+            hasBounded = true;
+        }
+
+        if(boundingStridesLevel > 0 && hasBounded) {
+            this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0,true, false));
+            this.world.playSound(null, this.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, SoundCategory.PLAYERS);
+            this.world.playSound(null, this.getBlockPos(), SoundEvents.BLOCK_DISPENSER_LAUNCH, SoundCategory.PLAYERS);
+            for (int i = 0; i < 6; ++i) {
+                double d = this.random.nextGaussian() * 0.02 - velocityX;
+                double e = this.random.nextGaussian() * 0.02 + 0.01;
+                double f = this.random.nextGaussian() * 0.02 - velocityZ;
+                this.world.addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
+            }
+            this.spawnSprintingParticles();
+            this.playBlockFallSound();
         }
 
         this.setVelocity(velocityX, velocityY, velocityZ);

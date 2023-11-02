@@ -6,8 +6,8 @@ import net.minecraft.item.*;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(LuckEnchantment.class)
-public class LootingMixin extends Enchantment {
-    protected LootingMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
+public class LuckMixin extends Enchantment {
+    protected LuckMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
         super(weight, type, slotTypes);
     }
 
@@ -19,6 +19,11 @@ public class LootingMixin extends Enchantment {
     @Override
     public boolean isTreasure() {
         return true;
+    }
+
+    @Override
+    public Rarity getRarity() {
+        return Rarity.RARE;
     }
 
     @Override

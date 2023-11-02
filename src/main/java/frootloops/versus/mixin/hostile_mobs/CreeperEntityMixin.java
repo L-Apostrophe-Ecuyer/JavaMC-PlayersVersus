@@ -6,11 +6,12 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.SlimeEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.*;
+import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CreeperEntity.class)
-public class CreeperEntityMixin extends HostileEntity {
+public class  CreeperEntityMixin extends HostileEntity {
     protected CreeperEntityMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -49,12 +50,6 @@ public class CreeperEntityMixin extends HostileEntity {
     @Redirect(at=@At(value = "NEW", target="net/minecraft/entity/ai/goal/ActiveTargetGoal"), method= "initGoals()V")
     private ActiveTargetGoal createFollowGoal(MobEntity creeper, Class targetClass, boolean checkVisibility) {
         return new XrayFollowTargetGoal(creeper, targetClass, false);
-    }
-
-    @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(this.getBlockPos().getY() > 24) return false;
-        return super.canSpawn(world, spawnReason);
     }
 
     // If a creeper isn't on the ground, it won't increase its ignition timer nor explode. Useful for ravines:

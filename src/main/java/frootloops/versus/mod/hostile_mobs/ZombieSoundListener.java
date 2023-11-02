@@ -17,41 +17,49 @@ public class ZombieSoundListener {
     public static void OnGameEvent(ServerWorld serverWorld, GameEvent event, Vec3d emitterPos, GameEvent.Emitter emitter) {
 
         // If the sound comes from an entity, skip if the entity is sneaking or on wool:
+        boolean heardProjectileLanding = (event == GameEvent.PROJECTILE_LAND);
         boolean heardPlayerSprinting = false;
+
         if(emitter.sourceEntity() != null) {
 
             // For performance's sake:
-            if (event.getId() != "projectile_land"
+            if (!heardProjectileLanding
                     && !(emitter.sourceEntity() instanceof PlayerEntity)
                     && !(emitter.sourceEntity() instanceof VillagerEntity)) return;
 
             // For consistency with wool occlusion and sneaking mechanics:
-            if (event.getId().equals("step")) {
+            if (event == GameEvent.STEP) {
                 if (emitter.sourceEntity().bypassesSteppingEffects()) return; // Sneaking
                 if (emitter.affectedState() != null && emitter.affectedState().isIn(BlockTags.DAMPENS_VIBRATIONS)) return; // Walking on wool
                 heardPlayerSprinting = emitter.sourceEntity().isSprinting();
             }
         }
 
-        // How much zombies should pay attention to the sound:
-        boolean isPriority = heardPlayerSprinting || IsPriority(event);
-        double range = isPriority? 24d : 10d;
-        double speedMultiplier = isPriority ? 0.8d : 0.6d;
+
+        // How much zombies should be attracted to the sound:
+        boolean isHighPriority = (event == GameEvent.EAT || event == GameEvent.DRINK || event == GameEvent.ENTITY_DAMAGE);
+        boolean isPriority = !isHighPriority && (heardPlayerSprinting || heardProjectileLanding || event.getId().startsWith("block"));
+        double range = isHighPriority ? 64d : isPriority? 48d : 24d;
+        double speedMultiplier = isHighPriority ? 1.2d : isPriority ? 1.0d : 0.8d;
 
         // Create a bounding box surrounding the event's position:
         double x = emitterPos.x, y = emitterPos.y, z = emitterPos.z;
-        Box boundingBox = new Box(x - range, y - 8d, z - range, x + range, y + 8d, z + range);
+        Box boundingBox = new Box(x - range, y - 12d, z - range, x + range, y + 12d, z + range);
 
         // For every zombie inside the bounds, make them walk towards the sound:
         List<ZombieEntity> zombiesNearby = serverWorld.getEntitiesByClass(ZombieEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
         for (ZombieEntity zombie : zombiesNearby) {
             if(zombie instanceof ZombifiedPiglinEntity) continue;
-            if(zombie.getNavigation().isIdle()) zombie.getNavigation().startMovingTo(x, y, z, speedMultiplier);
+            if(zombie.getTarget() == null) {
+                zombie.getNavigation().startMovingTo(x, y, z, speedMultiplier);
+                zombie.playAmbientSound();
+                zombie.ambientSoundChance = -1000;
+            }
         }
     }
 
     private static boolean IsPriority(final GameEvent event){
         String id = event.getId();
-        return (id.equals("eat") || id.startsWith("entity_d") || id.startsWith("block"));
+        return (id.equals("eat") || id.startsWith("block"));
     }
 }

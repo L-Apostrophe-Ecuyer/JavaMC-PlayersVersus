@@ -6,6 +6,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
+import static frootloops.versus.VersusMod.MOD_FOLDER;
 import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class Items {

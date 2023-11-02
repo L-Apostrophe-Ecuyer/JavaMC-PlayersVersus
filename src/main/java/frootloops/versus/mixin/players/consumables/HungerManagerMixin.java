@@ -22,9 +22,9 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_6_HAUNCHES = 96, REGEN_TIME_7_TO_10_HAUNCHES = 64, REGEN_TIME_11_TO_14_HAUNCHES = 48, REGEN_TIME_15_TO_20_HAUNCHES = 40, REGEN_TIME_SATURATION = 32;
-    private static final int STARVATION_TIME = 96;
-    private static final float SATURATION_REGEN_AMOUNT = 2.0f, MINIMUM_SATURATION_TO_QUICK_HEAL = 3.0f;
+    private static final int REGEN_TIME_6_HAUNCHES = 128, REGEN_TIME_7_TO_10_HAUNCHES = 64, REGEN_TIME_11_TO_14_HAUNCHES = 48, REGEN_TIME_15_TO_20_HAUNCHES = 40, REGEN_TIME_SATURATION = 32;
+
+    private static final float MINIMUM_SATURATION_TO_QUICK_HEAL = 4.0f;
 
     /***
      * @author
@@ -35,46 +35,58 @@ public class HungerManagerMixin {
     public void update(PlayerEntity player) {
 
         // Hunger effect is more punishing:
-        if(player.getStatusEffect(StatusEffects.HUNGER) != null) this.exhaustion += 0.025f;
+        if (player.getStatusEffect(StatusEffects.HUNGER) != null) this.exhaustion += 0.025f;
 
-        // Sprinting is more punishing, whilst choosing not to sprint is a lot less punishing:
-        if(player.isSprinting()) this.exhaustion += 0.0075f;
-        else if (foodLevel >= 6) {
-            // Saturation regenerates back up to 2.0f after no activity:
-            this.exhaustion = Math.max(0.0f, this.exhaustion - 0.0025f);
-            if(this.exhaustion == 0.0f) {
+        // Saturation regenerates back up to 3 after no activity, when over 6 haunches:
+        if (foodLevel >= 6) {
+            this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.0025f);
+            if (this.exhaustion == -0.01f) {
                 this.exhaustion = 1.0f;
-                this.saturationLevel = Math.max(SATURATION_REGEN_AMOUNT, saturationLevel);
+                this.saturationLevel = Math.max(3f, saturationLevel + 1f);
             }
-        }
 
-        // Food exhaustion:
-        if(exhaustion > 1.0F && foodLevel == 0){
-            exhaustion = 0.0F;
-            player.damage(player.getDamageSources().starve(), 1.0f);
+        // Food exhaustion: When starving, activities deal damage.
+        } else if(foodLevel == 0) {
+            if(exhaustion > 0.5F) {
+                exhaustion = 0.0F;
+                player.damage(player.getDamageSources().starve(), 1.0f);
+            }
 
-        } else if(exhaustion > 3.0F && (foodLevel <= 6 || saturationLevel > 0.0F)){
+        // Food exhaustion: Faster when the player has saturation, slower otherwise.
+        } else if(exhaustion > 2.0F && (foodLevel < 6 || saturationLevel > 0.0F)){
             exhaustion = 0.0F;
             if(saturationLevel > 0.0F) saturationLevel = Math.max(0.0F, saturationLevel - 1.0F);
             else foodLevel--;
 
-        } else if(exhaustion > 9.0F){
+        } else if(exhaustion > 8.0F){
             exhaustion = 0.0F;
             foodLevel--;
         }
 
-        // Starvation
-        if(foodLevel == 1) {
-            foodTickTimer++;
-            if(foodTickTimer > STARVATION_TIME){
-                foodTickTimer = 0;
-                player.damage(player.getDamageSources().starve(), 1.0f);
-            }
-        }
-
         // Natural regeneration:
-        //  - FoodLevel regenerates over time, back to health level, if below.
-        //  - Health regenerates quickly up to food level, otherwise.
+        //  - Players can start healing from food about 2 seconds after they were damaged.
+        //  - Saturation is used up first to quick heal, until under 4.0f.
+        //  - Each haunch then heals one heart, one to one. Until sprint loss (3 haunches, or up to 6 hearts healed).
+        //  - Finally, when at 3 haunches, sprint is lost, but players still slowly, passively heal (almost for free).
+
+        // Design notes:
+        //  - This helps rebalance sprinting, especially in combat; taking too much damage, without eating, endangers you. Players
+        //    have to be smart about when to disengage from fights and when to eat.
+
+        //  - Food eating time also plays a huge role in making this new system work as well as it does. Foods are much quicker to eat, and
+        //    much less interrupting, yet eating can be interrupted by being attacked. Players can pick foods depending on their activity
+        //    (snacks or stews for sprinting in combat, or meats for better inventory efficiency when outside immediate danger.
+        //  - If food eating time stayed at 32 ticks, like vanilla, this system would probably be annoying rather than engaging.
+
+        //  - It also means foods stacking isn't much of a balance issue, since while you're not required to eat much to stay full health,
+        //    taking damage can mean quickly going through your stack of food.
+
+        //  - When building, you don't need to worry about constantly eating after taking small damage since healing is almost free on 3 haunches.
+        //    I want to drive players to build infrastructure with a lack of sprinting in mind (old school vibes!)
+
+        //  - When exploring, so long as you don't make too many mistakes, hunger won't go down much, either. I want to give incentive for eating
+        //    food that you find on your travels, which makes for.
+
         boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (canPlayerRegenHealth) {
             foodTickTimer++;
@@ -93,16 +105,19 @@ public class HungerManagerMixin {
                 foodTickTimer = 0;
                 player.heal(1);
                 foodLevel--;
+                exhaustion = 0.0F;
             }
             else if(foodTickTimer > REGEN_TIME_11_TO_14_HAUNCHES && foodLevel > 10){
                 foodTickTimer = 0;
                 player.heal(1);
                 foodLevel--;
+                exhaustion = 0.0F;
             }
             else if(foodTickTimer > REGEN_TIME_7_TO_10_HAUNCHES && foodLevel > 6){
                 foodTickTimer = 0;
                 player.heal(1);
                 foodLevel--;
+                exhaustion = 0.0F;
             }
             else if(foodTickTimer > REGEN_TIME_6_HAUNCHES && foodLevel == 6){
                 foodTickTimer = 0;
@@ -111,7 +126,7 @@ public class HungerManagerMixin {
             }
         }
 
-        // Update:
+        // Update value:
         this.prevFoodLevel = this.foodLevel;
     }
 }

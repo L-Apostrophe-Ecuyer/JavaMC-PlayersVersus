@@ -6,6 +6,7 @@ import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -36,5 +37,11 @@ public class SharpnessMixin extends Enchantment {
     @Override
     public Rarity getRarity() {
         return Rarity.RARE;
+    }
+
+
+    @Override
+    public boolean isAcceptableItem(ItemStack stack) {
+        return (stack.getItem() instanceof SwordItem || stack.getItem() instanceof AxeItem || stack.getItem() instanceof TridentItem);
     }
 }

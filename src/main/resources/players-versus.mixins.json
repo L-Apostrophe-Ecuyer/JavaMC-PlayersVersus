@@ -10,7 +10,7 @@
     "enchantments.EnchantmentProtectionMixin",
     "enchantments.ImpalingMixin",
     "enchantments.KnockbackMixin",
-    "enchantments.LootingMixin",
+    "enchantments.LuckMixin",
     "enchantments.PowerMixin",
     "enchantments.ProtectionMixin",
     "enchantments.SharpnessMixin",

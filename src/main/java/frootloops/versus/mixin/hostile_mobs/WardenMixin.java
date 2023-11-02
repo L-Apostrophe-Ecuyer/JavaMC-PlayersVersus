@@ -9,6 +9,7 @@ import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.Angriness;
 import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.WardenBrain;
 import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
@@ -70,9 +71,13 @@ public class WardenMixin extends HostileEntity {
         }
     }
 
-    @Inject(method = "initDataTracker", at = @At("TAIL"))
+    @Inject(method = "addDigParticles", at = @At("TAIL"))
     private void moreInvestigative(CallbackInfo ci){
-        this.increaseAngerAt(this.world.getClosestPlayer(this, 48.0d), 60, true);
+        PlayerEntity closestPlayer = this.world.getClosestPlayer(this, 48.0d);
+        if(closestPlayer != null) {
+            this.increaseAngerAt(closestPlayer, 20, true);
+            WardenBrain.lookAtDisturbance((WardenEntity) ((Object)this), closestPlayer.getBlockPos());
+        }
     }
 
 
@@ -80,8 +85,8 @@ public class WardenMixin extends HostileEntity {
      *  - SONIC BOOM NERFED
      * Ranged sonic boom attacks have a shorter range. This allows for closer encounters,
      * fewer frustrating deaths, and things like arrow invulnerability.You want to know
-     * why you're being attacked, and have a way to avoiding it, but by default, these
-     * sonic booms are simply too punishing.
+     * why you're being attacked, and have a way to avoiding it. In vanilla, these sonic
+     * booms are simply too punishing.
      */
     private static final double NEW_RANGE_HORIZONTAL = 10.0d, NEW_RANGE_VERTICAL = 12.0d,
             NEW_RANGE_HORIZONTAL_SQUARED = NEW_RANGE_HORIZONTAL * NEW_RANGE_HORIZONTAL;

@@ -1,15 +1,10 @@
 package frootloops.versus.mixin.hostile_mobs;
 
-import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.ai.NavigationConditions;
 import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.ai.pathing.MobNavigation;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.MerchantEntity;
@@ -26,8 +21,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.UUID;
 
 @Mixin(ZombieEntity.class)
 public abstract class ZombieMixin extends HostileEntity {
@@ -41,7 +37,7 @@ public abstract class ZombieMixin extends HostileEntity {
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
-                HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 8.0)
+                HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
                         .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.34f)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                         .add(EntityAttributes.GENERIC_MAX_HEALTH, 26.0)
@@ -52,6 +48,7 @@ public abstract class ZombieMixin extends HostileEntity {
     public void initCustomGoals() {
         this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.6F;
         this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.6F;
+        this.ambientSoundChance = -1000;
 
         this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
         this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, ((ZombieEntity) ((Object)this))::canBreakDoors));
@@ -66,12 +63,12 @@ public abstract class ZombieMixin extends HostileEntity {
     @Override
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
-        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.3f : 0.1f;
+        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.2f : 0.1f;
         ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
         this.setCanPickUpLoot(true);
 
-        float distanceFromGroundLevel = 100.0f - (float)this.getBlockPos().getY();
-        float worldDepthExtraDifficulty = (distanceFromGroundLevel * distanceFromGroundLevel)/40000.0f;
+        float distanceFromGroundLevel = 96.0f - (float)this.getBlockPos().getY();
+        float worldDepthExtraDifficulty = (distanceFromGroundLevel * distanceFromGroundLevel)/32768.0f;
         boolean haDifficultyBonusFromDepth = random.nextFloat() < (difficulty + worldDepthExtraDifficulty);
 
         if (haDifficultyBonusFromDepth) {
@@ -94,8 +91,7 @@ public abstract class ZombieMixin extends HostileEntity {
             }
             if(rand % 13 == 0) {
                 this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
-                this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 250);
-                if(rand < 65) this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, -1));
+                this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 384);
             }
 
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;

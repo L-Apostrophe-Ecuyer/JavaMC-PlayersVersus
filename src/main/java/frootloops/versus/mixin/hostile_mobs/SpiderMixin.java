@@ -9,6 +9,8 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -33,7 +35,7 @@ public class SpiderMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(this.getBlockPos().getY() > 64 && !world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)) return false;
+        if(this.getBlockPos().getY() > 72 && !world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)) return false;
         return super.canSpawn(world, spawnReason);
     }
 
@@ -65,6 +67,23 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
+    public boolean tryAttack(Entity target) {
+        if (super.tryAttack(target)) {
+            if (target instanceof LivingEntity && !this.isBaby()) {
+                int i = 0;
+                if (this.world.getDifficulty() == Difficulty.NORMAL) i = 3;
+                else if (this.world.getDifficulty() == Difficulty.HARD) i = 6;
+                if (i > 0) {
+                    ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, i * 20, 0), this);
+                    ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, i * 20, 0), this);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean isBaby() {
         return this.getDataTracker().get(BABY);
     }
@@ -81,7 +100,7 @@ public class SpiderMixin extends HostileEntity {
                     "Baby spawn malus", -4.0D, EntityAttributeModifier.Operation.ADDITION));
 
             Objects.requireNonNull(maxHealth).addPersistentModifier(new EntityAttributeModifier(
-                    "Baby spawn malus", -30.0D, EntityAttributeModifier.Operation.ADDITION));
+                    "Baby spawn malus", -28.0D, EntityAttributeModifier.Operation.ADDITION));
 
             Objects.requireNonNull(speed).addPersistentModifier(new EntityAttributeModifier(
                     "Baby spawn malus", +0.08D, EntityAttributeModifier.Operation.ADDITION));
