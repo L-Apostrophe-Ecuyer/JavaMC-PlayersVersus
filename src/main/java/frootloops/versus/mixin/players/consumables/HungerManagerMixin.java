@@ -37,8 +37,32 @@ public class HungerManagerMixin {
         // Hunger effect is more punishing:
         if (player.getStatusEffect(StatusEffects.HUNGER) != null) this.exhaustion += 0.025f;
 
-        // Saturation regenerates back up to 3 after no activity, when over 6 haunches:
-        if (foodLevel >= 6) {
+        // Food exhaustion:
+        this.doHungerExhaustion(player);
+
+        // Natural regeneration:
+        this.doHealthRegeneration(player);
+
+        // Update value:
+        this.prevFoodLevel = this.foodLevel;
+    }
+
+    private void doHungerExhaustion(PlayerEntity player) {
+
+        // Food exhaustion:
+
+        //  - Hunger is twice as slow as previously when over or equal to 3 haunches (6 foodLevel).
+        //    Food loss is primarily due to damage taken, and healing.
+
+        //  - When over 3 haunches, but not jumping around or sprinting, saturation will slowly build back up to 3.
+        //    This is to reduce the stress or need to constantly eat to prevent food loss.
+
+        //  - Finally, when below 3 haunches, and unable to heal, that's when we want players to feel like
+        //    they need to scavenge to survive, and feel the threat of starvation looming. Players will need to totally
+        //    neglect their food bar to get to that point, which drives interesting (and stressful) gameplay!
+
+        // Saturation regenerates back up to 3 after no activity, when over 3 haunches:
+        if (foodLevel > 6) {
             this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.0025f);
             if (this.exhaustion == -0.01f) {
                 this.exhaustion = 1.0f;
@@ -62,7 +86,9 @@ public class HungerManagerMixin {
             exhaustion = 0.0F;
             foodLevel--;
         }
+    }
 
+    private void doHealthRegeneration(PlayerEntity player) {
         // Natural regeneration:
         //  - Players can start healing from food about 2 seconds after they were damaged.
         //  - Saturation is used up first to quick heal, until under 4.0f.
@@ -125,8 +151,5 @@ public class HungerManagerMixin {
                 exhaustion += 0.5F;
             }
         }
-
-        // Update value:
-        this.prevFoodLevel = this.foodLevel;
     }
 }
