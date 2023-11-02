@@ -104,7 +104,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             Item item = this.activeItemStack.getItem();
             if (item.isFood() || item instanceof PotionItem) {
                 this.clearActiveItem();
-                itemCooldownManager.set(item, 16);
+                itemCooldownManager.set(item, 32);
             }
         }
     }

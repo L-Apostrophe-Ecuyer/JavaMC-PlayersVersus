@@ -27,12 +27,12 @@ public class ItemEatingMixin {
         if (stack.getItem().isFood()) {
 
             if(foodComponent.isMeat()) cir.setReturnValue(32);
-            else if(foodComponent.isSnack()) cir.setReturnValue(8);
+            else if(foodComponent.isSnack()) cir.setReturnValue(12);
             else if(stack.isOf(Items.POTATO)) cir.setReturnValue(32);
             else if(stack.isOf(Items.GOLDEN_APPLE)) cir.setReturnValue(24);
             else if(stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) cir.setReturnValue(24);
-            else if(foodComponent.getHunger() < 3)  cir.setReturnValue(12);
-            else if(foodComponent.getHunger() < 5)  cir.setReturnValue(16);
+            else if(foodComponent.getHunger() < 3)  cir.setReturnValue(16);
+            else if(foodComponent.getHunger() < 5)  cir.setReturnValue(20);
             else if(foodComponent.getSaturationModifier() == 0.3F)  cir.setReturnValue(16);
             else cir.setReturnValue(24);
 
