@@ -35,7 +35,8 @@ public class SpiderMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(this.getBlockPos().getY() > 72 && !world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)) return false;
+        if(this.getBlockPos().getY() > 84 && !world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)) return false;
+        if(this.getBlockPos().getY() > 32 && world.getLightLevel(LightType.SKY, this.getBlockPos()) > 0) return false;
         return super.canSpawn(world, spawnReason);
     }
 

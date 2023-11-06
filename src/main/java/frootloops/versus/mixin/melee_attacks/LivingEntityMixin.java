@@ -54,6 +54,6 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
         if(((LivingEntity)((Object)this)).isSprinting()) return h;
-        return h + 0.75f;
+        return h + 0.5f;
     }
 }

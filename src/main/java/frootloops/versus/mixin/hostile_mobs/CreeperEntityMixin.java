@@ -4,9 +4,7 @@ import frootloops.versus.mod.hostile_mobs.creeper.XrayFollowTargetGoal;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.SlimeEntity;
+import net.minecraft.entity.mob.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -18,7 +16,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.minecraft.entity.mob.MobEntity;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -59,5 +56,12 @@ public class  CreeperEntityMixin extends HostileEntity {
             super.tick();
             info.cancel();
         }
+    }
+
+    @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        if(this.getBlockPos().getY() > 64) return false;
+        if(this.getBlockPos().getY() > 32 && world.getLightLevel(LightType.SKY, this.getBlockPos()) > 0) return false;
+        return super.canSpawn(world, spawnReason);
     }
 }
