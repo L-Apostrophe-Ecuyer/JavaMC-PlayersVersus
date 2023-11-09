@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.consumables.drinking;
+package frootloops.versus.mixin.players.items.drinking;
 
 import net.minecraft.item.HoneyBottleItem;
 import net.minecraft.item.Item;

@@ -18,12 +18,17 @@ public class LuckMixin extends Enchantment {
 
     @Override
     public boolean isTreasure() {
-        return true;
+        return false;
     }
 
     @Override
     public Rarity getRarity() {
         return Rarity.RARE;
+    }
+
+    @Override
+    public int getMinPower(int level) {
+        return 6 + level * 12;
     }
 
     @Override

@@ -3,7 +3,9 @@ package frootloops.versus.mod;
 
 import com.google.common.collect.ImmutableMultimap;
 import frootloops.versus.mixin.players.accessors.*;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -12,6 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 
 public abstract class Combat {
 
@@ -19,7 +22,7 @@ public abstract class Combat {
     public static final double PLAYER_BASE_ATTACK_SPEED = 2.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
     private static final String[] tools = new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
-    private static final float[] toolsSpeed  = new float[]{1.0F, 1.6F, 2.4F, 1.2F, 1.4F};
+    private static final float[] toolsSpeed  = new float[]{1.0F, 1.6F, 2.0F, 1.2F, 1.4F};
     private static final float[] toolsDamage = new float[]{7.0F, 4.0F, 2.0F, 4.0F, 3.0F};
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{0F, 0F, 1F, 1F, 2F, 3F};
@@ -85,5 +88,12 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player) {
         return Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
+    }
+
+    public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
+        if(looker==null || targetPos == null) return false;
+        Vec3d rotationVector = looker.getRotationVec(1.0F);
+        Vec3d positionVector = targetPos.relativize(looker.getPos()).normalize();
+        return (positionVector.dotProduct(rotationVector) < -0.15);
     }
 }

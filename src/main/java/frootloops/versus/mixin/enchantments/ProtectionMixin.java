@@ -23,7 +23,7 @@ public class ProtectionMixin extends Enchantment {
 
     @Override
     public boolean isTreasure() {
-        return this.protectionType == ProtectionEnchantment.Type.FIRE || this.protectionType == ProtectionEnchantment.Type.ALL;
+        return this.protectionType == ProtectionEnchantment.Type.ALL;
     }
 
     @Override

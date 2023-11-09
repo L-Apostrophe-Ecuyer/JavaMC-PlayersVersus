@@ -1,9 +1,9 @@
-package frootloops.versus.mixin.players.consumables.throwing;
+package frootloops.versus.mixin.players.items.throwing;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SplashPotionItem;
+import net.minecraft.item.SnowballItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(SplashPotionItem.class)
-public class SplashPotionMixin extends Item {
-    public SplashPotionMixin(Settings settings) {
+@Mixin(SnowballItem.class)
+public class SnowballMixin extends Item {
+    public SnowballMixin(Settings settings) {
         super(settings);
     }
 

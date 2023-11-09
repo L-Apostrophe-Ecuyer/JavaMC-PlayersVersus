@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.consumables.drinking;
+package frootloops.versus.mixin.players.items.drinking;
 
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.Item;

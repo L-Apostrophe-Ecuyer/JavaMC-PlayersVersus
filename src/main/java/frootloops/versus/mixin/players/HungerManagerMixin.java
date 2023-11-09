@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.consumables;
+package frootloops.versus.mixin.players;
 
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;

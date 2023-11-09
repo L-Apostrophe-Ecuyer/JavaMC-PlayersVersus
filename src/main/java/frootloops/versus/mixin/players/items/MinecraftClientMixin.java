@@ -1,0 +1,168 @@
+package frootloops.versus.mixin.players.items;
+
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.Combat;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.WindowEventHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.UseAction;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.thread.ReentrantThreadExecutor;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(value = MinecraftClient.class, priority = 100000)
+public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runnable> implements WindowEventHandler {
+    @Shadow public ClientPlayerEntity player;
+    @Shadow public ClientWorld world;
+    @Shadow protected int attackCooldown;
+    @Shadow private int itemUseCooldown;
+    @Shadow @Nullable public HitResult crosshairTarget;
+    @Shadow @Nullable public ClientPlayerInteractionManager interactionManager;
+
+    @Shadow @Nullable public final GameRenderer gameRenderer;
+
+    private boolean queuedAttack = false;
+    private int ticksPressed = 0;
+
+    public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer) { super(string);
+        this.gameRenderer = gameRenderer;
+    }
+
+
+    /**
+     * Shields are activated when looking at a mob or player, regardless of mainhand stack.
+     * @param ci
+     */
+    @Inject(method = "doItemUse",at = @At("HEAD"), cancellable = true)
+    private void doItemUse(CallbackInfo ci) {
+        if (this.interactionManager.isBreakingBlock()) return;
+        this.itemUseCooldown = 4;
+
+        if (this.player.isRiding()) return;
+        if (this.crosshairTarget == null) {
+            VersusMod.MOD_LOGGER.warn("Null returned as 'hitResult', this shouldn't happen!");
+        }
+
+        if(this.shouldPrioritizeOffhand()){
+            if(!this.tryUsingItem(Hand.OFF_HAND)) this.tryUsingItem(Hand.MAIN_HAND);
+        }
+        else {
+            if(!this.tryUsingItem(Hand.MAIN_HAND)) this.tryUsingItem(Hand.OFF_HAND);
+        }
+
+        ci.cancel();
+    }
+
+    private boolean shouldPrioritizeOffhand(){
+        ItemStack offhandStack = player.getOffHandStack();
+        ItemStack mainhandStack = player.getMainHandStack();
+        if(offhandStack.isEmpty() || mainhandStack.isEmpty()) return false;
+        if(offhandStack.getUseAction()== UseAction.BLOCK){
+            if(player.isSneaking()) {
+                return true;
+            }
+            else if (crosshairTarget.getType() == HitResult.Type.ENTITY) {
+                if(player.isUsingItem()) {
+                    return player.getActiveItem() == offhandStack;
+                } else {
+                    Entity target = ((EntityHitResult) this.crosshairTarget).getEntity();
+                    return (target instanceof HostileEntity || target instanceof PlayerEntity || target == player.getAttacker());
+                }
+            }
+            else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
+                if(player.squaredDistanceTo(player.getAttacker()) > 100.0) return false;
+                return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Shields are activated when looking at a mob or player, regardless of mainhand stack.
+     * @param hand
+     * @return whether the item was used or not.
+     */
+    private boolean tryUsingItem(Hand hand) {
+        ItemStack itemStack = this.player.getStackInHand(hand);
+        if (!itemStack.isItemEnabled(this.world.getEnabledFeatures())) return false;
+        ActionResult actionResult = null;
+
+        if (this.crosshairTarget != null) {
+            switch (this.crosshairTarget.getType()) {
+                case ENTITY:
+                    EntityHitResult entityHitResult = (EntityHitResult)this.crosshairTarget;
+                    Entity entity = entityHitResult.getEntity();
+                    if (!this.world.getWorldBorder().contains(entity.getBlockPos())) {
+                        return false;
+                    }
+
+                    actionResult = this.interactionManager.interactEntityAtLocation(this.player, entity, entityHitResult, hand);
+                    if (!actionResult.isAccepted()) {
+                        actionResult = this.interactionManager.interactEntity(this.player, entity, hand);
+                    }
+
+                    if (actionResult.isAccepted()) {
+                        if (actionResult.shouldSwingHand()) {
+                            this.player.swingHand(hand);
+                        }
+                        return true;
+                    }
+                    break;
+                case BLOCK:
+                    BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
+                    int i = itemStack.getCount();
+
+                    if(itemStack.isFood() && !this.player.isSneaking() && this.player.getHungerManager().isNotFull())
+                        actionResult = this.interactionManager.interactItem(this.player, hand);
+
+                    if(actionResult == null || !actionResult.isAccepted())
+                        actionResult = this.interactionManager.interactBlock(this.player, hand, blockHitResult);
+
+                    if (actionResult.isAccepted()) {
+                        if (actionResult.shouldSwingHand()) {
+                            this.player.swingHand(hand);
+                            if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.interactionManager.hasCreativeInventory())) {
+                                this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
+                            }
+                        }
+                        return true;
+                    }
+
+                    if (actionResult == ActionResult.FAIL) {
+                        return false;
+                    }
+            }
+        }
+
+        if (!itemStack.isEmpty()) {
+            actionResult = this.interactionManager.interactItem(this.player, hand);
+            if (actionResult.isAccepted()) {
+                if (actionResult.shouldSwingHand()) {
+                    this.player.swingHand(hand);
+                }
+
+                this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+}

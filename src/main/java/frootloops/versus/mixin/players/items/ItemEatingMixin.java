@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.consumables;
+package frootloops.versus.mixin.players.items;
 
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
