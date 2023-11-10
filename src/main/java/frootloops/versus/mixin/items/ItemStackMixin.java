@@ -47,7 +47,7 @@ public class ItemStackMixin {
             int i = 0;
             for (i = 0; i < list.size(); i++) {
                 if(list.get(i) instanceof MutableText) {
-                    if(((MutableText)list.get(i)).getStyle().equals(list.get(i).getStyle().withFormatting(Formatting.DARK_GREEN))) break;
+                    if(list.get(i).getStyle().equals(list.get(i).getStyle().withFormatting(Formatting.DARK_GREEN))) break;
                 }
             }
 
@@ -66,7 +66,7 @@ public class ItemStackMixin {
                 }
 
                 if(value != -1d) {
-                    Text text = ScreenTexts.space().append(Text.translatable("attribute.modifier.equals.0", new Object[]{MODIFIER_FORMAT.format(value), Text.translatable("attribute.name.generic."+ VersusMod.MOD_ID + ".attack_reach")})).formatted(Formatting.DARK_GREEN);
+                    Text text = ScreenTexts.space().append(Text.translatable("attribute.modifier.equals.0", MODIFIER_FORMAT.format(value), Text.translatable("attribute.name.generic."+ VersusMod.MOD_ID + ".attack_reach"))).formatted(Formatting.DARK_GREEN);
                     if(i == list.size()) list.add(text);
                     else list.add(i, text);
                     cir.setReturnValue(list);

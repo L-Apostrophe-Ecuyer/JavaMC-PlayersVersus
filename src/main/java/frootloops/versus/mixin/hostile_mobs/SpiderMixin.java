@@ -6,6 +6,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -35,9 +36,28 @@ public class SpiderMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(this.getBlockPos().getY() > 84 && !world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)) return false;
-        if(this.getBlockPos().getY() > 32 && world.getLightLevel(LightType.SKY, this.getBlockPos()) > 0) return false;
+        int y = this.getBlockPos().getY();
+        int ySpawnBonus = world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS) ? 32 : 0;
+        if(y > 84 + ySpawnBonus) return false;
+        if(y > 56 + ySpawnBonus && world.getLightLevel(LightType.SKY, this.getBlockPos()) > 1) return false;
         return super.canSpawn(world, spawnReason);
+    }
+
+    @Override
+    protected int computeFallDamage(float fallDistance, float damageMultiplier) {
+        return super.computeFallDamage(fallDistance, damageMultiplier) - 10;
+    }
+
+    @Override
+    protected void dropLoot(DamageSource source, boolean causedByPlayer) {
+        super.dropLoot(source, causedByPlayer);
+        if(!this.isBaby()) super.dropLoot(source, causedByPlayer); // Double loot for the big boys!
+    }
+
+    @Override
+    public int getXpToDrop() {
+        if (!this.isBaby()) this.experiencePoints = (int)((double)this.experiencePoints * 3);
+        return super.getXpToDrop();
     }
 
     @Nullable
@@ -52,7 +72,7 @@ public class SpiderMixin extends HostileEntity {
 
         EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instanceHP != null) {
-            instanceHP.setBaseValue(36.0D);
+            instanceHP.setBaseValue(38.0D);
             this.setHealth(36.0f);
         }
 

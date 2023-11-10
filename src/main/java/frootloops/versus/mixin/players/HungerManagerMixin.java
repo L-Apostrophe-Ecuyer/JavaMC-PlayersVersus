@@ -66,7 +66,7 @@ public class HungerManagerMixin {
             this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.0025f);
             if (this.exhaustion == -0.01f) {
                 this.exhaustion = 1.0f;
-                this.saturationLevel = Math.max(3f, saturationLevel + 1f);
+                this.saturationLevel = Math.min(3f, saturationLevel + 1f);
             }
 
         // Food exhaustion: When starving, activities deal damage.
@@ -126,24 +126,25 @@ public class HungerManagerMixin {
                 foodTickTimer = 0;
                 player.heal(1);
                 saturationLevel = Math.max(0.0F, saturationLevel - 1.5F);
+                exhaustion = 1.0F;
             }
             else if(foodTickTimer > REGEN_TIME_15_TO_20_HAUNCHES && foodLevel > 14){
                 foodTickTimer = 0;
                 player.heal(1);
                 foodLevel--;
-                exhaustion = 0.0F;
+                exhaustion = 1.0F;
             }
             else if(foodTickTimer > REGEN_TIME_11_TO_14_HAUNCHES && foodLevel > 10){
                 foodTickTimer = 0;
                 player.heal(1);
                 foodLevel--;
-                exhaustion = 0.0F;
+                exhaustion = 1.0F;
             }
             else if(foodTickTimer > REGEN_TIME_7_TO_10_HAUNCHES && foodLevel > 6){
                 foodTickTimer = 0;
                 player.heal(1);
                 foodLevel--;
-                exhaustion = 0.0F;
+                exhaustion = 1.0F;
             }
             else if(foodTickTimer > REGEN_TIME_6_HAUNCHES && foodLevel == 6){
                 foodTickTimer = 0;

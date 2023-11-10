@@ -54,7 +54,7 @@ public class EnderCurseEnchantment extends Enchantment {
                 double f = user.getZ();
                 for (int i = 0; i < 16; ++i) {
                     double g = user.getX() + (user.getRandom().nextDouble() - 0.5) * 16.0;
-                    double h = MathHelper.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), (double)user.world.getBottomY(), (double)(user.world.getBottomY() + ((ServerWorld)user.world).getLogicalHeight() - 1));
+                    double h = MathHelper.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), user.world.getBottomY(), user.world.getBottomY() + ((ServerWorld)user.world).getLogicalHeight() - 1);
                     double j = user.getZ() + (user.getRandom().nextDouble() - 0.5) * 16.0;
                     if (user.hasVehicle()) {
                         user.stopRiding();

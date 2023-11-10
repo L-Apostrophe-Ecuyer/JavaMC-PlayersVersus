@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.items;
+package frootloops.versus.mixin.players.item_usage;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
@@ -11,7 +11,9 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ShieldItem;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.UseAction;
@@ -37,8 +39,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
     @Shadow @Nullable public final GameRenderer gameRenderer;
 
-    private boolean queuedAttack = false;
-    private int ticksPressed = 0;
+    private final boolean queuedAttack = false;
+    private final int ticksPressed = 0;
 
     public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer) { super(string);
         this.gameRenderer = gameRenderer;
@@ -73,7 +75,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         ItemStack offhandStack = player.getOffHandStack();
         ItemStack mainhandStack = player.getMainHandStack();
         if(offhandStack.isEmpty() || mainhandStack.isEmpty()) return false;
-        if(offhandStack.getUseAction()== UseAction.BLOCK){
+        if(offhandStack.getItem() instanceof ShieldItem){
             if(player.isSneaking()) {
                 return true;
             }
@@ -90,8 +92,34 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
             }
         }
+        else if(mainhandStack.getUseAction() == UseAction.BLOCK){
+            if(player.isSneaking()) {
+                return false;
+            }
+            else if (crosshairTarget.getType() == HitResult.Type.ENTITY) {
+                if(player.isUsingItem()) {
+                    return player.getActiveItem() == offhandStack;
+                } else {
+                    Entity target = ((EntityHitResult) this.crosshairTarget).getEntity();
+                    return !(target instanceof HostileEntity || target instanceof PlayerEntity || target == player.getAttacker());
+                }
+            }
+            else if(offhandStack.getUseAction() == UseAction.EAT || offhandStack.getUseAction() == UseAction.DRINK) {
+                if(offhandStack.isFood()) {
+                    if(offhandStack.getItem().getFoodComponent().isAlwaysEdible()) return true;
+                    return player.getHungerManager().isNotFull();
+                }
+                else return true;
+            }
+            else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
+                if(player.squaredDistanceTo(player.getAttacker()) > 100.0) return false;
+                return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
+            }
+        }
+
         return false;
     }
+
 
     /**
      * Shields are activated when looking at a mob or player, regardless of mainhand stack.

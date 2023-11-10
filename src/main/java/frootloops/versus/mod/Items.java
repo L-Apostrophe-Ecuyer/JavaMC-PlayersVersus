@@ -1,6 +1,11 @@
 package frootloops.versus.mod;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.players.accessors.ItemAccessor;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -16,7 +21,7 @@ public abstract class Items {
         setStackSizes(maxSnacks, maxMeals, maxBottled, maxStews, maxThrowables, maxPlaceableEntities);
     }
 
-    private static Item registerItem(String name, Item item) {
+    private static Item registerCustomItem(String name, Item item) {
         return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);
     }
 

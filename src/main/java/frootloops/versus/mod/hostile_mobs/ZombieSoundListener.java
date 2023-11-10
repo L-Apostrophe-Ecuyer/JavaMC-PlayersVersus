@@ -43,7 +43,7 @@ public class ZombieSoundListener {
         // How much zombies should be attracted to the sound:
         boolean isHighPriority = (event == GameEvent.EAT || event == GameEvent.DRINK || event == GameEvent.ENTITY_DAMAGE);
         boolean isPriority = !isHighPriority && (heardPlayerSprinting || heardProjectileLanding || event.getId().startsWith("block"));
-        double range = isHighPriority ? 64d : isPriority? 48d : 24d;
+        double range = isHighPriority ? 64d : isPriority? 32d : 20d;
         double speedMultiplier = isHighPriority ? 1.2d : isPriority ? 1.0d : 0.8d;
 
         // Create a bounding box surrounding the event's position:
@@ -56,8 +56,7 @@ public class ZombieSoundListener {
             if(zombie instanceof ZombifiedPiglinEntity) continue;
             if(zombie.getTarget() == null) {
                 zombie.getNavigation().startMovingTo(x, y, z, speedMultiplier);
-                zombie.playAmbientSound();
-                zombie.ambientSoundChance = -1000;
+                zombie.ambientSoundChance += isHighPriority ? 1000 : isPriority ? 500 : 250;
             }
         }
     }

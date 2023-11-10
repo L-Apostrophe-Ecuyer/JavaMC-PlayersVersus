@@ -33,7 +33,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
     @Shadow
     private int durationOnUse;
     @Shadow
-    private int waitTime = 20;
+    private final int waitTime = 20;
     @Shadow
     private float radiusGrowth;
     @Shadow
@@ -41,7 +41,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
     @Shadow
     private final Map<Entity, Integer> affectedEntities = Maps.newHashMap();
     @Shadow
-    private Potion potion = Potions.EMPTY;
+    private final Potion potion = Potions.EMPTY;
     @Shadow @Nullable
     private LivingEntity owner;
     @Shadow @Nullable
@@ -117,7 +117,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
                             int k = j >> 16 & 255;
                             int l = j >> 8 & 255;
                             int i1 = j & 255;
-                            this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY(), this.getZ() + (double)z, (double)((float)k / 255.0F), (double)((float)l / 255.0F), (double)((float)i1 / 255.0F));
+                            this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY(), this.getZ() + (double)z, (float)k / 255.0F, (float)l / 255.0F, (float)i1 / 255.0F);
                         }
                         else {
                             this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY(), this.getZ() + (double)z, 0.0D, 0.0D, 0.0D);
@@ -146,7 +146,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
                         int j1 = l1 & 255;
                         this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY() + (double)y, this.getZ() + (double)z, (float)i2 / 255.0F, (float)j2 / 255.0F, (float)j1 / 255.0F);
                     } else {
-                        this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY() + (double)y, this.getZ() + (double)z, (0.5D - this.random.nextDouble()) * 0.15D, (double)0.01F, (0.5D - this.random.nextDouble()) * 0.15D);
+                        this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY() + (double)y, this.getZ() + (double)z, (0.5D - this.random.nextDouble()) * 0.15D, 0.01F, (0.5D - this.random.nextDouble()) * 0.15D);
                     }
                 }
             }

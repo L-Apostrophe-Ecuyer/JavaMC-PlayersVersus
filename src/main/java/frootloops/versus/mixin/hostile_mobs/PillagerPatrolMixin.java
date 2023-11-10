@@ -20,7 +20,7 @@ public class PillagerPatrolMixin {
 
     @Inject(method = "spawnPillager", at = @At("RETURN"), cancellable = true)
     private void moreDiversePatrol(ServerWorld world, BlockPos pos, Random random, boolean captain, CallbackInfoReturnable<Boolean> cir) {
-        if(cir.getReturnValue() == true) {
+        if(cir.getReturnValue()) {
             int rand = random.nextInt(100);
 
             PatrolEntity patrolEntity = null;

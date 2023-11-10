@@ -55,7 +55,7 @@ public abstract class SheepMixin extends AnimalEntity {
         this.goalSelector.add(0, new SwimGoal(this));
         this.goalSelector.add(1, new EscapeDangerGoal(this, 1.3));
         this.goalSelector.add(2, new AnimalMateGoal(this, 1.0));
-        this.goalSelector.add(3, new TemptGoal(this, 1.2, Ingredient.ofItems(new ItemConvertible[]{Items.WHEAT}), false));
+        this.goalSelector.add(3, new TemptGoal(this, 1.2, Ingredient.ofItems(Items.WHEAT), false));
         this.goalSelector.add(4, this.fleePlayersGoal);
         this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
         this.goalSelector.add(6, this.eatGrassGoal);

@@ -101,10 +101,10 @@ public class CrosshairRendererMixin {
         int h = this.scaledHeight;
 
         if (ReacharoundTracker.isInVerticalOrientation()) {
-            ((InGameHud) (Object) this).drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 0, 0, ICON_SIZE, ICON_SIZE);
+            drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 0, 0, ICON_SIZE, ICON_SIZE);
 
         } else {
-            ((InGameHud) (Object) this).drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 32, 0, ICON_SIZE, ICON_SIZE);
+            drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 32, 0, ICON_SIZE, ICON_SIZE);
         }
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

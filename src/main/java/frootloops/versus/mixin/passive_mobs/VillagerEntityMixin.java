@@ -29,7 +29,7 @@ public abstract class VillagerEntityMixin extends MerchantEntity {
 
     @Override
     public void fillRecipes() {
-        VillagerData villagerData = this.dataTracker.get(VILLAGER_DATA);;
+        VillagerData villagerData = this.dataTracker.get(VILLAGER_DATA);
         Int2ObjectMap<RevampedTradeOffers.Factory[]> int2ObjectMap = REVAMPED_PROFESSION_TO_LEVELED_TRADE.get(villagerData.getProfession());
         if (int2ObjectMap == null || int2ObjectMap.isEmpty()) {
             return;

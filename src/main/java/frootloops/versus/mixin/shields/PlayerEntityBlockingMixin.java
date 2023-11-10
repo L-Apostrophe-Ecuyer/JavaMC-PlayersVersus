@@ -2,10 +2,7 @@ package frootloops.versus.mixin.shields;
 
 import frootloops.versus.mod.Enchants;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -14,6 +11,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.ShieldItem;
+import net.minecraft.item.SwordItem;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stat;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.MathHelper;
@@ -34,16 +35,33 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
 
     private static final int PARRY_TIME_TICKS = 8;
 
-    @Shadow
-    private final ItemCooldownManager itemCooldownManager;
+    @Shadow private final ItemCooldownManager itemCooldownManager;
+    @Shadow public void incrementStat(Stat<?> stat) {}
 
     @Override
-    public void swingHand(Hand hand) {
-        if(this.getOffHandStack().getItem() instanceof ShieldItem) {
-            this.clearActiveItem();
-            itemCooldownManager.set(this.getOffHandStack().getItem(), 4);
+    public void damageShield(float amount) {
+        if (!this.world.isClient) {
+            this.incrementStat(Stats.USED.getOrCreateStat(this.activeItemStack.getItem()));
         }
-        super.swingHand(hand, false);
+
+        if (amount >= 3.0F) {
+            int i = 1 + MathHelper.floor(amount);
+            Hand hand = this.getActiveHand();
+            this.activeItemStack.damage(i, this, (player) -> {
+                player.sendToolBreakStatus(hand);
+            });
+            if (this.activeItemStack.isEmpty()) {
+                if (hand == Hand.MAIN_HAND) {
+                    this.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+                } else {
+                    this.equipStack(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+                }
+
+                this.activeItemStack = ItemStack.EMPTY;
+                if (this.activeItemStack.isOf(Items.SHIELD)) this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.world.random.nextFloat() * 0.4F);
+                if (this.activeItemStack.getItem() instanceof SwordItem) this.playSound(SoundEvents.ENTITY_ITEM_BREAK, 0.6F, 0.5F + this.world.random.nextFloat() * 0.3F);
+            }
+        }
     }
 
     @Inject(method = "disableShield", at = @At(value = "HEAD"), cancellable = true)
@@ -53,7 +71,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
         if(this.getAttacker() != null)
             disableForTicks += 20 * EnchantmentHelper.getLevel(Enchants.CLEAVING, this.getAttacker().getMainHandStack());
 
-        this.itemCooldownManager.set(Items.SHIELD, disableForTicks);
+        this.itemCooldownManager.set(this.activeItemStack.getItem(), disableForTicks);
         this.clearActiveItem();
         this.world.sendEntityStatus(this, (byte)30);
         info.cancel();

@@ -18,8 +18,7 @@ public class DarknessFogMixin {
 
     @Inject(method = "getFogModifier", at = @At("HEAD"), cancellable = true)
     private static void noMoreDarknessFog(Entity entity, float tickDelta, CallbackInfoReturnable cir) {
-        if (entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) entity;
+        if (entity instanceof PlayerEntity player) {
             if(player.hasStatusEffect(StatusEffects.DARKNESS))
                 if(!player.hasStatusEffect(StatusEffects.BLINDNESS))
                     cir.cancel();

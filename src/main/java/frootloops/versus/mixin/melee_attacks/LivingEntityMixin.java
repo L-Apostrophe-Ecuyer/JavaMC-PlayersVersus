@@ -9,6 +9,7 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemStack;
@@ -49,11 +50,5 @@ public abstract class LivingEntityMixin extends Entity {
             if(source.isIn(DamageTypeTags.IS_PROJECTILE)) timeUntilRegen = 0;
             else if(timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
         }
-    }
-
-    @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
-    private float fasterWaterMovement(float h) {
-        if(((LivingEntity)((Object)this)).isSprinting()) return h;
-        return h + 0.5f;
     }
 }

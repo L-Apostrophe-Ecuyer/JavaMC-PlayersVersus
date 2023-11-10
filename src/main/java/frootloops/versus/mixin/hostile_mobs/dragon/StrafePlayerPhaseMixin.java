@@ -56,7 +56,7 @@ public abstract class StrafePlayerPhaseMixin extends AbstractPhase {
 				if (this.dragon.canSee(this.target)) {
 					++this.seenTargetTimes;
 					Vec3d vector3d1 = (new Vec3d(this.target.getX() - this.dragon.getX(), 0.0D, this.target.getZ() - this.dragon.getZ())).normalize();
-					Vec3d vector3d = (new Vec3d((double) MathHelper.sin(this.dragon.getRotationClient().y * ((float)Math.PI / 180F)), 0.0D, (double)(-MathHelper.cos(this.dragon.getRotationClient().y * ((float)Math.PI / 180F))))).normalize();
+					Vec3d vector3d = (new Vec3d(MathHelper.sin(this.dragon.getRotationClient().y * ((float)Math.PI / 180F)), 0.0D, -MathHelper.cos(this.dragon.getRotationClient().y * ((float)Math.PI / 180F)))).normalize();
 					float f1 = (float)vector3d.dotProduct(vector3d1);
 					float f = (float)(Math.acos(f1) * (double)(180F / (float)Math.PI));
 					f = f + 0.5F;

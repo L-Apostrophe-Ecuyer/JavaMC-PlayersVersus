@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.items.throwing;
+package frootloops.versus.mixin.players.item_usage.throwing;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;

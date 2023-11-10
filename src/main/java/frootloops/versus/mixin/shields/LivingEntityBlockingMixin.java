@@ -6,12 +6,15 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stat;
+import net.minecraft.stat.Stats;
+import net.minecraft.util.Hand;
 import net.minecraft.util.UseAction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,6 +37,19 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     }
 
     private static final int PARRY_TIME_TICKS = 8;
+
+    @Inject(method = "handleStatus", at = @At("HEAD"), cancellable = true)
+    private void blockingSound(byte status, CallbackInfo info) {
+        if(status == 29) {
+            if(this.activeItemStack.getItem() instanceof SwordItem) {
+                this.playSound(SoundEvents.ITEM_AXE_SCRAPE, 0.3F, 0.6F + this.world.random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 1.2F, 0.8F + this.world.random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.3F, 0.8F + this.world.random.nextFloat() * 0.4F);
+            }
+            else this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.world.random.nextFloat() * 0.4F);
+            info.cancel();
+        }
+    }
 
     @Inject(method = "isBlocking", at = @At("HEAD"), cancellable = true)
     private void isBlocking(CallbackInfoReturnable<Boolean> cir) {
@@ -73,9 +89,14 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         damageAmount = amount;
     }
 
+    @ModifyVariable(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageSource;isIn(Lnet/minecraft/registry/tag/TagKey;)Z", ordinal = 1), argsOnly = true)
+    private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
+        return activeItemStack.getItem() instanceof ShieldItem ? 0.0f : Math.max(damageAmount/2.0f, damageAmount - 5.0f);
+    }
+
     @Inject(method = "damage", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/damage/DamageSource;getSource()Lnet/minecraft/entity/Entity;"))
-    public void shieldParry(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
+    public void shieldBlockingLogic(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
         ItemStack shieldItemStack = activeItemStack;
         Item shieldItem = activeItemStack.getItem();
         if(shieldItem.getUseAction(activeItemStack) != UseAction.BLOCK) {
@@ -89,7 +110,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
         // If you blocked within 8 ticks of an attack, you reflect the attack back (partially)
         int useTime =  shieldItem.getMaxUseTime(shieldItemStack) - itemUseTimeLeft;
-        boolean hasParried = useTime < PARRY_TIME_TICKS && useTime > 1;
+        boolean hasParried = useTime < PARRY_TIME_TICKS && useTime > 0;
         if(hasParried) {
             if ((LivingEntity) (Object) this instanceof PlayerEntity player) {
                 player.getItemCooldownManager().set(shieldItem, PARRY_TIME_TICKS << 1);

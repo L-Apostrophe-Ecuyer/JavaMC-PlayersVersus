@@ -42,8 +42,7 @@ public abstract class TridentEntityMixin extends PersistentProjectileEntity {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = false)
     private void sameBehaviorForDrowned(CallbackInfo ci) {
-        if(this.getOwner() instanceof DrownedEntity && this.getOwner().isAlive()) {
-            DrownedEntity drowned = (DrownedEntity)this.getOwner();
+        if(this.getOwner() instanceof DrownedEntity drowned && this.getOwner().isAlive()) {
             if(!this.noClip) {
                 drowned.getMainHandStack().setCount(0);
             }

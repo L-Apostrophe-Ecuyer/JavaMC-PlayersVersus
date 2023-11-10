@@ -2,7 +2,7 @@ package frootloops.versus.mixin.shields.mob_render;
 
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.AbstractZombieModel;
-import net.minecraft.client.render.entity.model.BipedEntityModel;;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.util.math.MathHelper;

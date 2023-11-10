@@ -140,8 +140,7 @@ public class WardenMixin extends HostileEntity {
 
         if (!(this.world.isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
             this.increaseAngerAt(attacker, Angriness.ANGRY.getThreshold() + 20, false);
-            if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity) {
-                LivingEntity livingEntity = (LivingEntity)attacker;
+            if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity livingEntity) {
                 if (!source.isIndirect() || this.isInRange(livingEntity, 5.0)) {
                     this.updateAttackTarget(livingEntity);
                 }

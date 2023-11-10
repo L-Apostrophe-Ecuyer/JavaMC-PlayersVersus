@@ -34,6 +34,11 @@ public abstract class ZombieMixin extends HostileEntity {
     @Shadow
     protected boolean canConvertInWater() {return true;}
 
+    @Override
+    public int getMinAmbientSoundDelay() {
+        return 500;
+    }
+
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
@@ -53,7 +58,7 @@ public abstract class ZombieMixin extends HostileEntity {
         this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
         this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, ((ZombieEntity) ((Object)this))::canBreakDoors));
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.66F));
-        this.targetSelector.add(1, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[]{ZombifiedPiglinEntity.class}));
+        this.targetSelector.add(1, (new RevengeGoal(this)).setGroupRevenge(ZombifiedPiglinEntity.class));
         this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, MerchantEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, IronGolemEntity.class, false));

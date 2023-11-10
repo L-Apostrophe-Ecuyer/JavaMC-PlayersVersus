@@ -44,7 +44,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
     @Shadow protected abstract boolean doAttack();
 
-    private boolean queuedAttack = false;
+    private final boolean queuedAttack = false;
     private int ticksPressed = 0;
 
     public MinecraftClientMixin(String string) { super(string); }

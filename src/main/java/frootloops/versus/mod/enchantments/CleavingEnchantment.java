@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack;
 public class CleavingEnchantment extends DamageEnchantment {
 
     public CleavingEnchantment() {
-        super(Rarity.COMMON, 0, new EquipmentSlot[]{EquipmentSlot.MAINHAND});
+        super(Rarity.COMMON, 0, EquipmentSlot.MAINHAND);
     }
 
     @Override

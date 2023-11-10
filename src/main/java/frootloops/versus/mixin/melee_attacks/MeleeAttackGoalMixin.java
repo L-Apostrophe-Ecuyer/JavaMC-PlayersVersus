@@ -153,8 +153,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
             if((!opponent.isOnGround() || opponent.isSprinting()) && this.cooldown % 4 == 0) return true;
 
             // if enemy is walking slowly, easy target, exit to attack;
-            if(opponent.getVelocity().x == 0.0d && opponent.getVelocity().z == 0.0d) return false;
-            return true;
+            return opponent.getVelocity().x != 0.0d || opponent.getVelocity().z != 0.0d;
         }
         return false;
     }

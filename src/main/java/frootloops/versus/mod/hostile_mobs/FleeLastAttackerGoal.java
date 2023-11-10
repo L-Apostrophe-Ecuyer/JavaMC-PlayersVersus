@@ -1,5 +1,4 @@
 package frootloops.versus.mod.hostile_mobs;
-;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.NoPenaltyTargeting;

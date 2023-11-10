@@ -28,7 +28,7 @@ public class ElytraFireworksMixin extends Item {
                 for (int i = 0; i < 3; i++) {
                     int durabilityLeft = maxDamage - elytraStack.getDamage();
                     if(durabilityLeft > 1) {
-                        elytraStack.damage(Math.min(durabilityLeft - 1, 3), user, p -> p.sendEquipmentBreakStatus(EquipmentSlot.CHEST));
+                        elytraStack.damage(Math.min(durabilityLeft - 1, 5), user, p -> p.sendEquipmentBreakStatus(EquipmentSlot.CHEST));
                     }
                     else {
                         break;

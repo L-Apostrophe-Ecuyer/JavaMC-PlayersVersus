@@ -626,9 +626,8 @@ public class RevampedTradeOffers {
         return new Int2ObjectOpenHashMap<Factory[]>(map);
     }
 
-    public static interface Factory {
-        @Nullable
-        public TradeOffer create(Entity var1, Random var2);
+    public interface Factory {
+        @Nullable TradeOffer create(Entity var1, Random var2);
     }
 
     static class BuyForOneEmeraldFactory
@@ -823,7 +822,7 @@ public class RevampedTradeOffers {
 
         public TypeAwareSellItemFactory(int price, int count, int maxUses, int experience, ImmutableMap<Object, Object> map) {
             Registries.VILLAGER_TYPE.stream().filter(villagerType -> !map.containsKey(villagerType)).findAny().ifPresent(villagerType -> {
-                throw new IllegalStateException("Missing trade for villager type: " + Registries.VILLAGER_TYPE.getId((VillagerType)villagerType));
+                throw new IllegalStateException("Missing trade for villager type: " + Registries.VILLAGER_TYPE.getId(villagerType));
             });
             this.map = map;
             this.price = price;
@@ -921,10 +920,9 @@ public class RevampedTradeOffers {
         @Override
         @Nullable
         public TradeOffer create(Entity entity, Random random) {
-            if (!(entity.world instanceof ServerWorld)) {
+            if (!(entity.world instanceof ServerWorld serverWorld)) {
                 return null;
             }
-            ServerWorld serverWorld = (ServerWorld)entity.world;
             BlockPos blockPos = serverWorld.locateStructure(this.structure, entity.getBlockPos(), 100, true);
             if (blockPos != null) {
                 ItemStack itemStack = FilledMapItem.createMap(serverWorld, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
@@ -959,7 +957,7 @@ public class RevampedTradeOffers {
             ItemStack enchantedStack = EnchantmentHelper.enchant(random, new ItemStack(this.armorPiece), i, false);
             ItemStack emeraldStack = new ItemStack(Items.EMERALD, Math.min(this.basePrice + i, 64));
 
-            double armorAmount = ((ArmorItem)this.armorPiece).getProtection();
+            double armorAmount = this.armorPiece.getProtection();
             double toughnessAmount = this.armorPiece.getToughness();
             double knockbackResistance = this.armorPiece.getMaterial().getKnockbackResistance();
             EquipmentSlot slot = this.armorPiece.getSlotType();
