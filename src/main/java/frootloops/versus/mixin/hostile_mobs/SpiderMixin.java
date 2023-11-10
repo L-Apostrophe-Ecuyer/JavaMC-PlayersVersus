@@ -1,7 +1,10 @@
 package frootloops.versus.mixin.hostile_mobs;
 
+import net.minecraft.block.AirBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.CobwebBlock;
+import net.minecraft.data.client.BlockStateSupplier;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -51,12 +54,15 @@ public class SpiderMixin extends HostileEntity {
     @Override
     protected void dropLoot(DamageSource source, boolean causedByPlayer) {
         super.dropLoot(source, causedByPlayer);
-        if(!this.isBaby()) super.dropLoot(source, causedByPlayer); // Double loot for the big boys!
+        if(!this.isBaby()) {
+            super.dropLoot(source, causedByPlayer); // Triple loot for the big boys!
+            super.dropLoot(source, causedByPlayer);
+        }
     }
 
     @Override
     public int getXpToDrop() {
-        if (!this.isBaby()) this.experiencePoints = (int)((double)this.experiencePoints * 3);
+        if (!this.isBaby()) this.experiencePoints = 17;
         return super.getXpToDrop();
     }
 
@@ -65,18 +71,18 @@ public class SpiderMixin extends HostileEntity {
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
 
         EntityAttributeInstance instanceMvt = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (instanceMvt != null) instanceMvt.setBaseValue(0.28D);
+        if (instanceMvt != null) instanceMvt.setBaseValue(0.3D);
 
         EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
         if (instanceDmg != null) instanceDmg.setBaseValue(7.0D);
 
         EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instanceHP != null) {
-            instanceHP.setBaseValue(38.0D);
-            this.setHealth(36.0f);
+            instanceHP.setBaseValue(50.0f);
+            this.setHealth(50.0f);
         }
 
-        if(this.random.nextFloat() < 0.7F) this.setBaby(true);
+        if(this.random.nextFloat() < 0.85F) this.setBaby(true);
         this.getNavigation().setCanSwim(true);
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
@@ -95,8 +101,15 @@ public class SpiderMixin extends HostileEntity {
                 if (this.world.getDifficulty() == Difficulty.NORMAL) i = 3;
                 else if (this.world.getDifficulty() == Difficulty.HARD) i = 6;
                 if (i > 0) {
-                    ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, i * 20, 0), this);
-                    ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, i * 20, 0), this);
+                    ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, i * 10, 0), this);
+                    ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, i * 10, 0), this);
+                }
+                if(world.getTime() % 5 == 0) {
+                    if(world.getBlockState(target.getBlockPos()) == Blocks.AIR.getDefaultState()) {
+                        if (Blocks.COBWEB.getDefaultState().canPlaceAt(world, target.getBlockPos())) {
+                            world.setBlockState(target.getBlockPos(), Blocks.COBWEB.getDefaultState());
+                        }
+                    }
                 }
             }
             return true;
@@ -121,12 +134,12 @@ public class SpiderMixin extends HostileEntity {
                     "Baby spawn malus", -4.0D, EntityAttributeModifier.Operation.ADDITION));
 
             Objects.requireNonNull(maxHealth).addPersistentModifier(new EntityAttributeModifier(
-                    "Baby spawn malus", -28.0D, EntityAttributeModifier.Operation.ADDITION));
+                    "Baby spawn malus", -40.0D, EntityAttributeModifier.Operation.ADDITION));
 
             Objects.requireNonNull(speed).addPersistentModifier(new EntityAttributeModifier(
-                    "Baby spawn malus", +0.08D, EntityAttributeModifier.Operation.ADDITION));
+                    "Baby spawn malus", +0.06D, EntityAttributeModifier.Operation.ADDITION));
 
-            this.setHealth(6.0f);
+            this.setHealth(10.0f);
         }
     }
 

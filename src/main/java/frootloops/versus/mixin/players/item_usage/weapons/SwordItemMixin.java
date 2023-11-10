@@ -25,12 +25,17 @@ public class SwordItemMixin extends ToolItem {
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return 16;
+        return 96;
+    }
+
+    @Override
+    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if(user instanceof PlayerEntity player) player.getItemCooldownManager().set(this, 4);
     }
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        if(user instanceof PlayerEntity player) player.getItemCooldownManager().set(this, 128);
+        if(user instanceof PlayerEntity player) player.getItemCooldownManager().set(this, 64);
         return stack;
     }
 
