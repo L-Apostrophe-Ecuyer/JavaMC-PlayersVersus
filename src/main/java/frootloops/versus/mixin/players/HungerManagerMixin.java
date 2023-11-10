@@ -66,7 +66,7 @@ public class HungerManagerMixin {
             this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.0025f);
             if (this.exhaustion == -0.01f) {
                 this.exhaustion = 1.0f;
-                this.saturationLevel = Math.min(3f, saturationLevel + 1f);
+                this.saturationLevel = Math.min(MINIMUM_SATURATION_TO_QUICK_HEAL - 1f, saturationLevel + 1f);
             }
 
         // Food exhaustion: When starving, activities deal damage.
@@ -116,7 +116,10 @@ public class HungerManagerMixin {
         boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (canPlayerRegenHealth) {
             foodTickTimer++;
-            if(player.isOnFire()) {
+            if(foodLevel > prevFoodLevel) {
+                foodTickTimer = 1024;
+            }
+            else if(player.isOnFire()) {
                 foodTickTimer = -8;
             }
             else if(player.hurtTime > 0) {
