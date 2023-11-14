@@ -9,8 +9,6 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -44,8 +42,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
     @Shadow protected abstract boolean doAttack();
 
-    private final boolean queuedAttack = false;
-    private int ticksPressed = 0;
+    private int ticksAttackKeyPressed = 0;
 
     public MinecraftClientMixin(String string) { super(string); }
 
@@ -54,14 +51,14 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean tryAttacking = false;
         double attackChargeProgress = Combat.getAttackChargeProgress(player);
         if(attackChargeProgress > 0.6d) {
-            if (!options.attackKey.isPressed() && ticksPressed > 0 && attackChargeProgress != 1.0d) {
+            if (!options.attackKey.isPressed() && ticksAttackKeyPressed > 0 && attackChargeProgress != 1.0d) {
                 tryAttacking = this.crosshairTarget.getType() != BLOCK;
 
             } else if (options.attackKey.isPressed()) {
-                ticksPressed++;
+                ticksAttackKeyPressed++;
 
                 // If the cooldown is complete, swing:
-                if (ticksPressed >= Combat.getTicksPerAttackOf(player))
+                if (ticksAttackKeyPressed >= Combat.getTicksPerAttackOf(player))
                     tryAttacking = true;
 
                 // Otherwise, if at some point we can attack something, we do:
@@ -70,9 +67,9 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                     tryAttacking = (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos());
                 }
             }
-            else ticksPressed = 0;
+            else ticksAttackKeyPressed = 0;
         }
-        else ticksPressed = 0;
+        else ticksAttackKeyPressed = 0;
 
         if(tryAttacking) {
             // If the player is breaking a block, return;
@@ -80,7 +77,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 BlockPos pos = ((BlockHitResult)crosshairTarget).getBlockPos();
                 if(isMineableBlock(pos, world.getBlockState(pos))) return;
             }
-            ticksPressed = 0;
+            ticksAttackKeyPressed = 0;
             this.doAttack();
             this.player.resetLastAttackedTicks();
             ci.cancel();
@@ -95,7 +92,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Inject(method = "doAttack",at = @At("HEAD"), cancellable = true)
     private void doAttackOverhaul(CallbackInfoReturnable<Boolean> cir) {
 
-        this.ticksPressed = 0;
+        this.ticksAttackKeyPressed = 0;
         double attackProgress =  Combat.getAttackChargeProgress(player);
         double attackRange = Combat.getAttackRange(player, attackProgress);
         boolean canAttackEntities = attackProgress > 0.5;
@@ -108,7 +105,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                     missedSwing = false;
                     interactionManager.attackEntity(this.player, ((EntityHitResult) this.crosshairTarget).getEntity());
                 }
-                else ticksPressed++;
+                else ticksAttackKeyPressed++;
                 break;
             }
             case BLOCK: {
@@ -134,7 +131,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                         missedSwing = false;
                     }
                 }
-                else ticksPressed++;
+                else ticksAttackKeyPressed++;
                 break;
             }
         }
