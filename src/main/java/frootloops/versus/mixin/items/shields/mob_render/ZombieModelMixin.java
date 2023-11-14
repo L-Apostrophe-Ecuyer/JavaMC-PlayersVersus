@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.shields.mob_render;
+package frootloops.versus.mixin.items.shields.mob_render;
 
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.AbstractZombieModel;
