@@ -1,8 +1,13 @@
 package frootloops.versus.mixin.items.elytra;
 
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.Combat;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
@@ -20,17 +25,18 @@ public class ElytraFireworksMixin extends Item {
     }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    private void addAttackReachTooltip(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
+    private void fireworksTweak(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
         if(!world.isClient && user.isFallFlying() && !user.getAbilities().creativeMode) {
             ItemStack elytraStack = user.getEquippedStack(EquipmentSlot.CHEST);
             if(elytraStack.isOf(Items.ELYTRA)) {
+
+                // Durability of elytra is only ever affected by fireworks:
                 int maxDamage = elytraStack.getMaxDamage();
                 for (int i = 0; i < 3; i++) {
                     int durabilityLeft = maxDamage - elytraStack.getDamage();
-                    if(durabilityLeft > 1) {
-                        elytraStack.damage(Math.min(durabilityLeft - 1, 5), user, p -> p.sendEquipmentBreakStatus(EquipmentSlot.CHEST));
-                    }
-                    else {
+                    if (durabilityLeft > 1) {
+                        elytraStack.damage(Math.min(durabilityLeft - 1, 3), user, p -> p.sendEquipmentBreakStatus(EquipmentSlot.CHEST));
+                    } else {
                         break;
                     }
                 }

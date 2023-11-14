@@ -99,10 +99,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         double attackProgress =  Combat.getAttackChargeProgress(player);
         double attackRange = Combat.getAttackRange(player, attackProgress);
         boolean canAttackEntities = attackProgress > 0.5;
-        boolean isCharged = attackProgress > 0.95;
-
-        if(isCharged && !player.isSneaking() && EnchantmentHelper.getEquipmentLevel(Enchantments.SWEEPING, player) > 0)
-            doSweepAttack(attackRange);
 
         boolean resetAttackCooldown = false;
         boolean missedSwing = true;
@@ -151,47 +147,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         this.player.swingHand(Hand.MAIN_HAND);
         cir.setReturnValue(resetAttackCooldown);
         cir.cancel();
-    }
-
-    private void doSweepAttack(double attackRange){
-        Vec3d cameraPos = player.getCameraPosVec(1.0F);
-        Vec3d rotation = player.getRotationVec(1.0F);
-
-        Vec3d rotatedEightDegZ = new Vec3d(rotation.x * 0.99026806874 - rotation.z * 0.13917310096, rotation.y, rotation.x * 0.13917310096 + rotation.z * 0.99026806874);
-        Vec3d rotatedEightDegX = new Vec3d(rotation.x * 0.99026806874 - rotation.z * -0.13917310096, rotation.y, rotation.x * -0.13917310096 + rotation.z * 0.99026806874);
-
-        swingAtEntities(rotatedEightDegZ, cameraPos, attackRange);
-        swingAtEntities(rotatedEightDegX, cameraPos, attackRange);
-
-        // Break all foliage within range of the crosshair target, - 1 block:
-        Vec3d crosshairPos = this.crosshairTarget.getPos().subtract(rotation);
-        BlockPos pos = new BlockPos(new Vec3i((int)crosshairPos.x, (int)crosshairPos.y, (int)crosshairPos.z));
-        swungAtBlockPos(pos);
-    }
-
-    private void swingAtEntities(final Vec3d rotation, Vec3d cameraPos, double range){
-        Vec3d end = cameraPos.add(rotation.x * range, rotation.y * range, rotation.z * range);
-        Predicate<Entity> predicate = EntityPredicates.CAN_COLLIDE.and(e -> e != null);
-        EntityHitResult entityResult = ProjectileUtil.getEntityCollision(world, player, cameraPos, end, new Box(cameraPos, end), predicate);
-
-        if (entityResult != null) {
-            this.interactionManager.attackEntity(player, entityResult.getEntity());
-            Vec3d entityPos = entityResult.getPos().subtract(rotation);
-            BlockPos pos = new BlockPos(new Vec3i((int)entityPos.x, (int)entityPos.y, (int)entityPos.z));
-            swungAtBlockPos(pos);
-        }
-    }
-
-    private void swungAtBlockPos(BlockPos pos) {
-        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
-        breakFoliageAt(new BlockPos(x + 1, y, z + 1));
-        breakFoliageAt(new BlockPos(x + 1, y, z - 1));
-        breakFoliageAt(new BlockPos(x - 1, y, z + 1));
-        breakFoliageAt(new BlockPos(x - 1, y, z - 1));
-        breakFoliageAt(new BlockPos(x + 1, y, z));
-        breakFoliageAt(new BlockPos(x - 1, y, z));
-        breakFoliageAt(new BlockPos(x, y, z + 1));
-        breakFoliageAt(new BlockPos(x, y, z - 1));
     }
 
     private void breakFoliageAt(BlockPos pos) {

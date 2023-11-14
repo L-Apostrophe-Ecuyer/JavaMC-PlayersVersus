@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items.trident;
+package frootloops.versus.mixin.items.weapons;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

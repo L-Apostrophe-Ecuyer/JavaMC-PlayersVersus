@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.item_usage.drinking;
+package frootloops.versus.mixin.items.drinking;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;

@@ -1,10 +1,11 @@
 {
-  "attribute.name.generic.players-versus.attack_reach": "Attack Reach",
-  "enchantment.players-versus.frost_aspect": "Frost Aspect",
-  "enchantment.players-versus.tossing": "Tossing",
-  "enchantment.players-versus.cleaving": "Shield Cleaving",
-  "enchantment.players-versus.ender_curse": "Curse of the End",
-  "enchantment.players-versus.bounding_strides": "Bounding Strides",
-  "enchantment.players-versus.magic_protection": "Magic Protection",
-  "enchantment.players-versus.physical_protection": "Physical Protection"
+  "attribute.name.generic.players-versus.attack_reach": "Portée d'attaque",
+  "enchantment.players-versus.frost_aspect": "Aura de glace",
+  "enchantment.players-versus.tossing": "Jeté",
+  "enchantment.players-versus.cleaving": "Bris de bouclier",
+  "enchantment.players-versus.riposte": "Riposte",
+  "enchantment.players-versus.ender_curse": "Malédiction du néant",
+  "enchantment.players-versus.bounding_strides": "Bondissement",
+  "enchantment.players-versus.magic_protection": "Protection contre la magie",
+  "enchantment.players-versus.physical_protection": "Protection physique"
 }

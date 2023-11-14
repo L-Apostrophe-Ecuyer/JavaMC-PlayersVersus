@@ -10,11 +10,25 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
+import net.minecraft.world.World;
+
+import java.util.List;
 
 public abstract class Combat {
 
@@ -67,7 +81,7 @@ public abstract class Combat {
     public static double getAttackChargeProgress(PlayerEntity player) {
         int lastAttackTicks = ((LivingEntityAccessor)player).getLastAttackedTicks();
         double attackSpeed = player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED);
-        return Math.min(1.0d, (attackSpeed * (double)lastAttackTicks) / 20.0d);
+        return (attackSpeed * (double)lastAttackTicks) / 20.0d;
     }
 
     public static double getAttackRangeBonusOf(ItemStack itemStack) {
@@ -90,10 +104,87 @@ public abstract class Combat {
         return Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
     }
 
+    public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {
+        if(level < 1) return;
+
+        player.spawnSweepAttackParticles();
+        player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 3, 0, true, false));
+        player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
+
+        if(player.getWorld() instanceof ServerWorld serverWorld) {
+            attackRange = attackRange - (0.5d * (double)level);
+            double attackRangeSquared = attackRange * attackRange;
+
+            // Attack entities:
+            Vec3d playerPos = player.getPos();
+            Box boundingBox = new Box(playerPos.x - attackRange, playerPos.y - attackRange, playerPos.z - attackRange, playerPos.x + attackRange, playerPos.y + attackRange, playerPos.z + attackRange);
+            List<LivingEntity> entitiesInRange = serverWorld.getEntitiesByClass(LivingEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
+            for (LivingEntity targetEntity : entitiesInRange) {
+                if(!player.isTeammate(targetEntity)) {
+                    if (targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
+                        player.setSprinting(true);
+                        player.attack(targetEntity);
+                    }
+                }
+            }
+
+            // Break foliage:
+            Vec3d hitPos = Combat.getHitResultOf(player,attackRange - 1d).getPos();
+            BlockPos blockPosOfHit = new BlockPos((int)hitPos.x, (int)hitPos.y, (int)hitPos.z);
+            BlockPos blockPosOfPlayer = player.getBlockPos();
+            BlockPos delta = blockPosOfHit.subtract(blockPosOfPlayer);
+
+            BlockPos blockPos, above;
+            for(int x = -2; x <= 2 ; x++) {
+                for(int z = -2; z <= 2; z++) {
+                    blockPos = blockPosOfHit.add(x,0, z);
+                    if(serverWorld.getBlockState(blockPos).getHardness(serverWorld, blockPos) == 0.0F) {
+                        serverWorld.breakBlock(blockPos, true, player);
+                        above = blockPos.add(0,1, 0);
+                        if(serverWorld.getBlockState(above).getHardness(serverWorld, above) == 0.0F) {
+                            serverWorld.breakBlock(above, true, player);
+                        }
+                    }
+                }
+            }
+            serverWorld.breakBlock(blockPosOfHit,true, player);
+        }
+    }
+
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
         if(looker==null || targetPos == null) return false;
         Vec3d rotationVector = looker.getRotationVec(1.0F);
         Vec3d positionVector = targetPos.relativize(looker.getPos()).normalize();
-        return (positionVector.dotProduct(rotationVector) < -0.15);
+        return (positionVector.dotProduct(rotationVector) < -0.25);
     }
+
+    public static HitResult getHitResultOf(LivingEntity entity, double range) {
+        return getHitResultOf(entity.getYaw(1F), entity.getPitch(1f), range, entity);
+    }
+
+    public static HitResult getHitResultOf(float yaw, float pitch, double range, Entity entity) {
+
+        // Convert degrees to radians manually
+        double yawRadians = yaw * Math.PI / 180.0;
+        double pitchRadians = pitch * Math.PI / 180.0;
+
+        // Calculate the components of the direction vector
+        double dx = range * -Math.sin(yawRadians) * Math.cos(pitchRadians);
+        double dy = range * -Math.sin(pitchRadians);
+        double dz = range * Math.cos(yawRadians) * Math.cos(pitchRadians);
+        Vec3d direction = new Vec3d(dx, dy, dz);
+
+        World world = entity.world;
+        Vec3d posStart = entity.getEyePos();
+        Vec3d posStop = posStart.add(direction);
+
+        HitResult hitResult = world.raycast(new RaycastContext(posStart, posStop, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity));
+        if (((HitResult)hitResult).getType() != HitResult.Type.MISS) posStop = ((HitResult)hitResult).getPos();
+
+        HitResult entityHitResult = ProjectileUtil.getEntityCollision(world, entity, posStart, posStop, entity.getBoundingBox().stretch(direction).expand(1.0), EntityPredicates.CAN_COLLIDE.and(e -> e != null));
+        if (entityHitResult != null) hitResult = entityHitResult;
+
+        return (HitResult)hitResult;
+    }
+
 }

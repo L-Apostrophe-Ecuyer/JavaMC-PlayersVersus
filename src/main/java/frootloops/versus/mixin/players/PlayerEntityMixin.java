@@ -30,6 +30,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -117,6 +118,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             this.clearActiveItem();
             itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
         }
+    }
+
+    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 4)
+    private boolean noSweepOnRegularAttacks(boolean sweepLevel) {
+        return false;
     }
 
     @Inject(method = "attack", at = @At("TAIL"))

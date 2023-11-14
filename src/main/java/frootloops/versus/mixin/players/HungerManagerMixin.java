@@ -51,11 +51,11 @@ public class HungerManagerMixin {
 
         // Food exhaustion:
 
-        //  - Hunger is twice as slow as previously when over or equal to 3 haunches (6 foodLevel).
-        //    Food loss is primarily due to damage taken, and healing.
+        //  - Hunger is twice as slow as previously when able to sprint (3 haunches or more).
+        //    Food loss is primarily due to damage taken (healing).
 
         //  - When over 3 haunches, but not jumping around or sprinting, saturation will slowly build back up to 3.
-        //    This is to reduce the stress or need to constantly eat to prevent food loss.
+        //    This removes the stress/need to constantly eat to prevent food loss.
 
         //  - Finally, when below 3 haunches, and unable to heal, that's when we want players to feel like
         //    they need to scavenge to survive, and feel the threat of starvation looming. Players will need to totally
@@ -97,7 +97,7 @@ public class HungerManagerMixin {
 
         // Design notes:
         //  - This helps rebalance sprinting, especially in combat; taking too much damage, without eating, endangers you. Players
-        //    have to be smart about when to disengage from fights and when to eat.
+        //    have to be smart about when to disengage from fights and when to eat, lest they be caught unable to sprint away.
 
         //  - Food eating time also plays a huge role in making this new system work as well as it does. Foods are much quicker to eat, and
         //    much less interrupting, yet eating can be interrupted by being attacked. Players can pick foods depending on their activity
@@ -108,24 +108,20 @@ public class HungerManagerMixin {
         //    taking damage can mean quickly going through your stack of food.
 
         //  - When building, you don't need to worry about constantly eating after taking small damage since healing is almost free on 3 haunches.
-        //    I want to drive players to build infrastructure with a lack of sprinting in mind (old school vibes!)
+        //    I want to motivate players to build infrastructure with a lack of sprinting in mind (old school vibes! horses! rails!)
 
-        //  - When exploring, so long as you don't make too many mistakes, hunger won't go down much, either. I want to give incentive for eating
-        //    food that you find on your travels, which makes for.
+        //  - When exploring, so long as you don't make too many mistakes, hunger won't go down much, either. I want to give incentive for
+        //    surviving off of food that you find on your travels, which makes for daunting adventures and mellowing stay home times, for
+        //    you to invest in your area and build farms for longer excursions.
 
         boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (canPlayerRegenHealth) {
             foodTickTimer++;
-            if(foodLevel > prevFoodLevel) {
-                foodTickTimer = 1024;
-            }
-            else if(player.isOnFire()) {
-                foodTickTimer = -8;
-            }
-            else if(player.hurtTime > 0) {
-                foodTickTimer = -32;
-            }
-            else if(foodTickTimer > REGEN_TIME_SATURATION & saturationLevel > MINIMUM_SATURATION_TO_QUICK_HEAL){
+            if(foodLevel > prevFoodLevel || foodLevel == 20) foodTickTimer = 1024;
+            else if(player.isOnFire()) foodTickTimer = -8;
+            else if(player.hurtTime > 0) foodTickTimer = -32;
+
+            if(foodTickTimer > REGEN_TIME_SATURATION & saturationLevel > MINIMUM_SATURATION_TO_QUICK_HEAL){
                 foodTickTimer = 0;
                 player.heal(1);
                 saturationLevel = Math.max(0.0F, saturationLevel - 1.5F);

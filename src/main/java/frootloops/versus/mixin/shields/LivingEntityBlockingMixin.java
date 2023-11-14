@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.shields;
 
+import frootloops.versus.mod.Enchants;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -105,32 +106,33 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         }
 
         // If your shield has thorns, deal some damage to the attacker
-        boolean hasThorns = EnchantmentHelper.getLevel(Enchantments.THORNS, shieldItemStack) > 0;
-        float reflectedDamage = hasThorns ? 1.0F : 0.0F;
+        int levelThorns = EnchantmentHelper.getLevel(Enchantments.THORNS, shieldItemStack);
+        float reflectedDamage = 0.1F * damageAmount * levelThorns;
+
+        // If your shield has riposte, deal some damage to the attacker, on parrying
+        int levelRiposte = EnchantmentHelper.getLevel(Enchants.RIPOSTE, shieldItemStack);
+        float paryingDamage = levelRiposte > 0 ? 0.2F * damageAmount * levelRiposte : 0.0F;
 
         // If you blocked within 8 ticks of an attack, you reflect the attack back (partially)
         int useTime =  shieldItem.getMaxUseTime(shieldItemStack) - itemUseTimeLeft;
         boolean hasParried = useTime < PARRY_TIME_TICKS && useTime > 0;
         if(hasParried) {
-            if ((LivingEntity) (Object) this instanceof PlayerEntity player) {
-                player.getItemCooldownManager().set(shieldItem, PARRY_TIME_TICKS << 1);
-                player.clearActiveItem();
-                reflectedDamage += damageAmount * 0.2F;
-                world.playSound(null, getBlockPos(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1F, 1F);
-            }
-            else if(useTime < PARRY_TIME_TICKS - 1 && useTime > 2) {
-                ((LivingEntity) ((Object) this)).clearActiveItem();
-                reflectedDamage += damageAmount * 0.1F;
-                world.playSound(null, getBlockPos(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.NEUTRAL, 0.5F, 0.4F);
+            if ((LivingEntity) (Object) this instanceof PlayerEntity player) player.getItemCooldownManager().set(shieldItem, PARRY_TIME_TICKS << 1);
+            ((LivingEntity) ((Object) this)).clearActiveItem();
+            if(paryingDamage > 0f) {
+                reflectedDamage += paryingDamage;
+                world.playSound(null, getBlockPos(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, this.getSoundCategory(), 1F, 1F);
             }
         }
 
         // Reflect damage back to attacker, in cases of thorns or parries:
-        if(source.getName() == "thorns") return;
-        if(reflectedDamage > 0 && source.getSource() instanceof LivingEntity attacker && !attacker.equals(this)) {
-            if ((LivingEntity) (Object) this instanceof PlayerEntity player) attacker.damage(this.getDamageSources().playerAttack(player), reflectedDamage);
-            else attacker.damage(this.getDamageSources().mobAttack((LivingEntity) ((Object)this)), reflectedDamage);
-            attacker.takeKnockback(0.6, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
+        double knockbackStrength = hasParried ? (paryingDamage > 0.0f ? 0.8 : 0.6) : 0.4;
+        if((hasParried || reflectedDamage > 0.0f) && source.getSource() instanceof LivingEntity attacker && !attacker.equals(this)) {
+            if(reflectedDamage > 0 && source.getName() != "thorns") {
+                if ((LivingEntity) (Object) this instanceof PlayerEntity player) attacker.damage(this.getDamageSources().playerAttack(player), reflectedDamage);
+                else attacker.damage(this.getDamageSources().mobAttack((LivingEntity) ((Object)this)), reflectedDamage);
+            }
+            attacker.takeKnockback(knockbackStrength, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
         }
     }
 }

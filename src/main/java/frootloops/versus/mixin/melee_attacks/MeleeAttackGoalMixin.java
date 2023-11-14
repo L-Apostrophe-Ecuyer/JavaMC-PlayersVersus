@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.melee_attacks;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.Combat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
@@ -193,7 +194,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     LookControl posMobLookingAt = this.mob.getLookControl();
                     double deltaX = Math.abs(posMobLookingAt.getLookX() - target.getX());
                     double deltaZ = Math.abs(posMobLookingAt.getLookZ() - target.getZ());
-                    boolean isTargetInSight = deltaX + deltaZ < 1.0d;
+                    boolean isTargetInSight = (deltaX + deltaZ < 1.25d) || Combat.isLookingTowards(this.mob, target.getPos());
                     if(!isTargetInSight) return;
 
                     this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.2F);

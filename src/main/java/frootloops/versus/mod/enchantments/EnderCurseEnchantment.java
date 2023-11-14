@@ -1,5 +1,6 @@
 package frootloops.versus.mod.enchantments;
 
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.enchantment.BindingCurseEnchantment;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
@@ -61,10 +62,11 @@ public class EnderCurseEnchantment extends Enchantment {
                     }
                     Vec3d vec3d = user.getPos();
                     if (!user.teleport(g, h, j, true)) continue;
+
                     user.world.emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(user));
-                    SoundEvent soundEvent = user instanceof FoxEntity ? SoundEvents.ENTITY_FOX_TELEPORT : SoundEvents.ITEM_CHORUS_FRUIT_TELEPORT;
-                    user.world.playSound(null, d, e, f, soundEvent, SoundCategory.PLAYERS, 1.0f, 1.0f);
-                    user.playSound(soundEvent, 1.0f, 1.0f);
+                    user.world.playSound(null, d, e, f, SoundEvents.ENTITY_ENDERMAN_TELEPORT, user.getSoundCategory(), 1.0f, 1.0f);
+                    user.playSound(SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                    user.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, attacker.getEyePos());
                     break;
                 }
             }

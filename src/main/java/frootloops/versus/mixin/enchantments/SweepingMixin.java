@@ -15,9 +15,6 @@ public class SweepingMixin extends Enchantment {
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        if ((stack.getItem() instanceof SwordItem || stack.getItem() instanceof HoeItem)){
-            return true;
-        }
-        return this.target.isAcceptableItem(stack.getItem());
+        return ((stack.getItem() instanceof SwordItem));
     }
 }

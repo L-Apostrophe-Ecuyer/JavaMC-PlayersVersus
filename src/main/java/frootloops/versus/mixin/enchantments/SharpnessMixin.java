@@ -36,7 +36,7 @@ public class SharpnessMixin extends Enchantment {
 
     @Override
     public Rarity getRarity() {
-        return Rarity.RARE;
+        return this.typeIndex == 2 ? Rarity.RARE : Rarity.UNCOMMON;
     }
 
 

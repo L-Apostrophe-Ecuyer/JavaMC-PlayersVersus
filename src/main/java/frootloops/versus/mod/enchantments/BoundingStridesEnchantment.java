@@ -5,7 +5,7 @@ import net.minecraft.entity.EquipmentSlot;
 
 public class BoundingStridesEnchantment extends Enchantment {
     public BoundingStridesEnchantment() {
-        super(Rarity.RARE, EnchantmentTarget.ARMOR, new EquipmentSlot[]{EquipmentSlot.FEET});
+        super(Rarity.RARE, EnchantmentTarget.ARMOR_FEET, new EquipmentSlot[]{EquipmentSlot.FEET});
     }
 
     public boolean isTreasure() {

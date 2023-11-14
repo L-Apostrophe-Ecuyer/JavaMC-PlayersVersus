@@ -11,7 +11,7 @@ import net.minecraft.registry.tag.DamageTypeTags;
 
 public class PhysicalProtectionEnchantment extends Enchantment {
     public PhysicalProtectionEnchantment() {
-        super(Rarity.RARE, EnchantmentTarget.ARMOR, new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET});
+        super(Rarity.UNCOMMON, EnchantmentTarget.ARMOR, new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET});
     }
 
     @Override
@@ -32,15 +32,15 @@ public class PhysicalProtectionEnchantment extends Enchantment {
     @Override
     public int getProtectionAmount(int level, DamageSource source) {
         if(source.isIn(DamageTypeTags.IS_FALL) || source.isIn(DamageTypeTags.DAMAGES_HELMET))
-            return (level + 1) >> 1;
-        if(source.isIn(DamageTypeTags.IS_FALL) || source.isIn(DamageTypeTags.DAMAGES_HELMET))
-            return (level + 1) >> 1;
-        if(source.isOf(DamageTypes.CRAMMING) || source.isOf(DamageTypes.IN_WALL))
-            return (level + 1) >> 1;
-        if(source.isOf(DamageTypes.MOB_ATTACK) || source.isOf(DamageTypes.PLAYER_ATTACK))
             return level;
-        if(source.isOf(DamageTypes.CACTUS) || source.isOf(DamageTypes.SWEET_BERRY_BUSH))
+        if(source.isOf(DamageTypes.MOB_PROJECTILE) || source.isOf(DamageTypes.ARROW))
+            return level;
+        if(source.isOf(DamageTypes.MOB_ATTACK) || source.isOf(DamageTypes.PLAYER_ATTACK) || source.isOf(DamageTypes.TRIDENT))
+            return level;
+        if(source.isOf(DamageTypes.CRAMMING) || source.isOf(DamageTypes.IN_WALL) )
             return level + 1;
+        if(source.isOf(DamageTypes.CACTUS) || source.isOf(DamageTypes.SWEET_BERRY_BUSH) || source.isOf(DamageTypes.TRIDENT))
+            return level + 2;
         return 0;
     }
 

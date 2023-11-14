@@ -2,6 +2,7 @@ package frootloops.versus.mixin.hostile_mobs;
 
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.WardenAngerManager;
@@ -14,6 +15,7 @@ import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.TridentEntity;
+import net.minecraft.util.Unit;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -80,6 +82,13 @@ public class WardenMixin extends HostileEntity {
         }
     }
 
+    @Inject(method = "onSpawnPacket", at = @At("TAIL"))
+    private void dontDespawnWhenSummonedByCheats(CallbackInfo ci){
+        if (!this.getBrain().hasMemoryModule(MemoryModuleType.DIG_COOLDOWN) && this.getPose() != EntityPose.EMERGING) {
+            this.setPersistent();
+        }
+    }
+
 
     /***
      *  - SONIC BOOM NERFED
@@ -103,17 +112,15 @@ public class WardenMixin extends HostileEntity {
 
         // Sniffing:
         if(horizontalRadius == 6.0d)
-            return MathHelper.squaredHypot(deltaX, deltaZ) < (6.0d * 6.0d) && deltaY <6.0d;
+            return MathHelper.squaredHypot(deltaX, deltaZ) < (6.0d * 6.0d) && deltaY < 6.0d;
 
         // Immediate retaliation:
         if(horizontalRadius == 5.0d && verticalRadius == 5.0d)
-            return MathHelper.squaredHypot(deltaX, deltaZ) < (4.0d * 4.0d) && deltaY < 4.0d;
+            return MathHelper.squaredHypot(deltaX, deltaZ) < (4.0d) && deltaY < 2.0d;
 
         // Sonic booms:
-        if(entity instanceof PlayerEntity)
-            return MathHelper.squaredHypot(deltaX, deltaZ) < NEW_RANGE_HORIZONTAL_SQUARED && deltaY < NEW_RANGE_VERTICAL;
-        else
-            return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
+        if(entity instanceof PlayerEntity) return MathHelper.squaredHypot(deltaX, deltaZ) < NEW_RANGE_HORIZONTAL_SQUARED && deltaY < NEW_RANGE_VERTICAL;
+        else return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
     }
 
     /**

@@ -10,12 +10,12 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(KnockbackEnchantment.class)
 public class KnockbackMixin extends Enchantment {
     protected KnockbackMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
-        super(weight, type, slotTypes);
+        super(Rarity.RARE, type, slotTypes);
     }
 
     @Override
     public int getMaxLevel() {
-        return 1;
+        return 2;
     }
 
     @Override

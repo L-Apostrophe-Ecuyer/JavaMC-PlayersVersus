@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.item_usage;
+package frootloops.versus.mixin.items;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;

@@ -61,6 +61,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         }
 
         int boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.FEET));
+        boundingStridesLevel += EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
         boolean hasBounded = false;
 
         if (ticksLeftToDash > 0 && isSprinting() && boundingStridesLevel > 0) {
