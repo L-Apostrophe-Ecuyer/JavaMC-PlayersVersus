@@ -20,6 +20,11 @@ public class MagicProtectionEnchantment extends Enchantment {
     }
 
     @Override
+    public boolean isTreasure() {
+        return true;
+    }
+
+    @Override
     public int getMinPower(int level) {
         return 10 + 8 * (level - 1);
     }
