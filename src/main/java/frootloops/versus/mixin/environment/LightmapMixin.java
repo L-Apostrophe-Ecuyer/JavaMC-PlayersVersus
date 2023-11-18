@@ -10,7 +10,7 @@ public class LightmapMixin {
 
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 3)
     private float alwaysSomeDarkness(float h) {
-        return (h + 2.5f)/3.0f;
+        return (h + 2.0f)/3.0f;
     }
 
 }

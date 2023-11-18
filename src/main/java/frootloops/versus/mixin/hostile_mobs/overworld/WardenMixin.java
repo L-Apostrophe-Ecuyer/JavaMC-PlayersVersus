@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs;
+package frootloops.versus.mixin.hostile_mobs.overworld;
 
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.entity.Entity;

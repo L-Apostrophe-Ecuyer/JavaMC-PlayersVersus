@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.melee_attacks;
+package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
@@ -30,6 +30,18 @@ public abstract class LivingEntityMixin extends Entity {
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
+    }
+
+    @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
+    private float fasterWaterMovement(float h) {
+        return this.isSprinting() ? h + 0.1f : h + 0.5f;
+    }
+
+    @Inject(method = "damage", at = @At("HEAD"), cancellable = true)
+    private void armorsBlockingDamageTypes(DamageSource source, float amount, CallbackInfoReturnable cir) {
+        if(source.isIn(DamageTypeTags.IS_PROJECTILE)){
+
+        }
     }
 
     @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)

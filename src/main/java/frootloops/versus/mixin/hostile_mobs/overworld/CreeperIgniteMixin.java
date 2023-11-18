@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs;
+package frootloops.versus.mixin.hostile_mobs.overworld;
 
 import frootloops.versus.mod.hostile_mobs.creeper.CreeperDecisionHelper;
 import net.minecraft.entity.LivingEntity;

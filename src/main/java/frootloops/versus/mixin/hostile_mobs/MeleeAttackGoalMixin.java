@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.melee_attacks;
+package frootloops.versus.mixin.hostile_mobs;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
@@ -141,6 +141,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         if(this.mob.timeUntilRegen > 4) return false;
 
         LivingEntity opponent = mob.getLastAttacker();
+        if(opponent == null) opponent = mob.world.getClosestPlayer(mob, 8d);
         if(opponent != null) {
 
             // If the enemy already attacked, and mob wasn't hurt, exit (attack of opportunity);
@@ -148,13 +149,14 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
             // If enemy isn't in the "danger zone" for an incoming attack, and mob isn't hurt, exit to attack;
             double d = this.mob.getPos().squaredDistanceTo(opponent.getPos());
-            if((d > 16.0d || d < 7.0d) && this.mob.timeUntilRegen != 0) return false;
+            if((d > 16.0d || d < 4.0d) && this.mob.timeUntilRegen != 0) return false;
 
             // If opponent is about to crit or sprint attack, sometimes try blocking:
-            if((!opponent.isOnGround() || opponent.isSprinting()) && this.cooldown % 4 == 0) return true;
+            if((!opponent.isOnGround() || opponent.isSprinting()) && this.cooldown % 3 == 0) return Combat.isLookingTowards(mob,opponent.getPos());
 
             // if enemy is walking slowly, easy target, exit to attack;
-            return opponent.getVelocity().x != 0.0d || opponent.getVelocity().z != 0.0d;
+            if(opponent.getVelocity().x == 0.0d || opponent.getVelocity().z == 0.0d) return false;
+            return true;
         }
         return false;
     }

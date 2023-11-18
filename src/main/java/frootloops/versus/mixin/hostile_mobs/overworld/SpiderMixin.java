@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs;
+package frootloops.versus.mixin.hostile_mobs.overworld;
 
 import net.minecraft.block.AirBlock;
 import net.minecraft.block.BlockState;

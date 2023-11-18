@@ -1,5 +1,6 @@
-package frootloops.versus.mixin.hostile_mobs;
+package frootloops.versus.mixin.hostile_mobs.overworld;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ai.goal.*;
@@ -10,6 +11,7 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.random.Random;
@@ -100,6 +102,13 @@ public abstract class ZombieMixin extends HostileEntity {
             }
 
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
+            if (isAtDiamondDepth && rand % 7 == 0) {
+                ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
+                EnchantmentHelper.enchant(world.random, enchantedBook, 12, true);
+;               this.equipStack(EquipmentSlot.OFFHAND, enchantedBook);
+                this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
+            }
+
             if (isAtDiamondDepth && rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
             else if (isAtDiamondDepth && rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
             else if (isAtDiamondDepth && rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));

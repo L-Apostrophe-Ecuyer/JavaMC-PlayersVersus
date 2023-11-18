@@ -113,9 +113,6 @@ public class PiggingAroundGoal extends Goal {
     private void makeHeadBobDown() {
         float f = ((float)this.timer) / 32.0F;
         float pitch = 100f * (0.62831855F + 0.21991149F * MathHelper.sin(f * 28.7F));
-        VersusMod.MOD_LOGGER.warn("PIGGING!");
-        VersusMod.MOD_LOGGER.warn("Pitch before: " + this.mob.getPitch());
-        VersusMod.MOD_LOGGER.warn("Pitch after: " + pitch);
         this.mob.getLookControl().lookAt(this.mob.getX(), this.mob.getY() - 1D, this.mob.getZ());
         this.mob.setPitch(pitch);
         this.mob.prevPitch = pitch;

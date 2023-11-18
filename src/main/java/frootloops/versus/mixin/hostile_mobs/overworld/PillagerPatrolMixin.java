@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs;
+package frootloops.versus.mixin.hostile_mobs.overworld;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
