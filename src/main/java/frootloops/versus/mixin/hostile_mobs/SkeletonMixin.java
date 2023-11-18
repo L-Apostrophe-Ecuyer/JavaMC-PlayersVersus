@@ -41,14 +41,17 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
         this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.6F;
 
         int rand = random.nextInt(100);
-        if (rand < 15) {
+        if(rand > 52){
+            this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+        }
+        else if (rand < 12) {
             this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
             if(rand % 4 == 1) {
                 this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
             }
         }
-        else if(rand < 30) {
+        else if(rand < 24) {
             this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
             if(rand % 3 == 1) {
@@ -56,25 +59,22 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
                 this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(rand/2 + 100);
             }
         }
-        else if(rand < 40) {
+        else if(rand < 38) {
             this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
             if(rand % 4 == 1) this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
             if(rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
         }
-        else if(rand < 48) {
+        else if(rand < 44) {
             this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
         }
-        else if(rand < 55){
+        else {
             this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
             if(rand % 3 == 1) this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
             if(rand % 4 == 1) this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.GOLDEN_LEGGINGS));
             if(rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
-        }
-        else {
-            this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
         }
     }
 }

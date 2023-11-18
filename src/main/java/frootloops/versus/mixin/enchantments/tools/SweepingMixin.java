@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.enchantments;
+package frootloops.versus.mixin.enchantments.tools;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
@@ -15,6 +15,6 @@ public class SweepingMixin extends Enchantment {
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        return ((stack.getItem() instanceof SwordItem));
+        return ((stack.getItem() instanceof SwordItem) || (stack.getItem() instanceof HoeItem));
     }
 }

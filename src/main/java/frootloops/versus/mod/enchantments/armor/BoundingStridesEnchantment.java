@@ -1,11 +1,11 @@
-package frootloops.versus.mod.enchantments;
+package frootloops.versus.mod.enchantments.armor;
 
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.EquipmentSlot;
 
 public class BoundingStridesEnchantment extends Enchantment {
     public BoundingStridesEnchantment() {
-        super(Rarity.RARE, EnchantmentTarget.ARMOR_FEET, new EquipmentSlot[]{EquipmentSlot.FEET});
+        super(Rarity.RARE, EnchantmentTarget.ARMOR_LEGS, new EquipmentSlot[]{EquipmentSlot.LEGS});
     }
 
     public boolean isTreasure() {
@@ -29,7 +29,7 @@ public class BoundingStridesEnchantment extends Enchantment {
 
     @Override
     public int getMaxLevel() {
-        return 3;
+        return 2;
     }
 
     @Override

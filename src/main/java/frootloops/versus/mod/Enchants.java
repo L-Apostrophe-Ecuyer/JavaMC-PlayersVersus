@@ -1,7 +1,14 @@
 package frootloops.versus.mod;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.enchantments.*;
+import frootloops.versus.mod.enchantments.armor.BoundingStridesEnchantment;
+import frootloops.versus.mod.enchantments.armor.EnderCurseEnchantment;
+import frootloops.versus.mod.enchantments.armor.ImpactProtectionEnchantment;
+import frootloops.versus.mod.enchantments.armor.MagicProtectionEnchantment;
+import frootloops.versus.mod.enchantments.tools.CleavingEnchantment;
+import frootloops.versus.mod.enchantments.tools.FrostAspectEnchantment;
+import frootloops.versus.mod.enchantments.tools.RiposteEnchantment;
+import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -16,10 +23,9 @@ public abstract class Enchants {
     public static final EnderCurseEnchantment CURSE_OF_ENDER = new EnderCurseEnchantment();
     public static final BoundingStridesEnchantment BOUNDING_STRIDES = new BoundingStridesEnchantment();
     public static final MagicProtectionEnchantment MAGIC_PROTECTION = new MagicProtectionEnchantment();
-    public static final PhysicalProtectionEnchantment PHYSICAL_PROTECTION = new PhysicalProtectionEnchantment();
+    public static final ImpactProtectionEnchantment PHYSICAL_PROTECTION = new ImpactProtectionEnchantment();
 
     public static void init(){
-
         Registry.register(Registries.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, "tossing"), TOSSING);
         Registry.register(Registries.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, "cleaving"), CLEAVING);
         Registry.register(Registries.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, "riposte"), RIPOSTE);

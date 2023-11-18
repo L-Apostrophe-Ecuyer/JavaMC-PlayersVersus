@@ -1,4 +1,4 @@
-package frootloops.versus.mod.enchantments;
+package frootloops.versus.mod.enchantments.tools;
 
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.EquipmentSlot;

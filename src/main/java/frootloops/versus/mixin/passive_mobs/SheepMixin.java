@@ -21,9 +21,6 @@ import java.util.function.Predicate;
 
 @Mixin(SheepEntity.class)
 public abstract class SheepMixin extends AnimalEntity {
-
-    @Shadow
-    private int eatGrassTimer;
     @Shadow
     private EatGrassGoal eatGrassGoal;
 
@@ -36,9 +33,16 @@ public abstract class SheepMixin extends AnimalEntity {
         return 8;
     }
 
+    public Predicate<Entity> NOTICEABLE_PLAYER_FILTER = (entity) -> {
+        return !entity.isSneaky() && EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(entity);
+    };
+
     protected void eat(PlayerEntity player, Hand hand, ItemStack stack) {
         if (this.isBreedingItem(stack)) {
             if(this.getLovingPlayer() == null) {
+
+                // Reset goals, but without the fleeing.
+                // Bad code practice, but ya gotta do what ya gotta do.
                 this.goalSelector.getGoals().clear();
                 eatGrassGoal = new EatGrassGoal(this);
                 this.goalSelector.add(0, new SwimGoal(this));
@@ -63,7 +67,7 @@ public abstract class SheepMixin extends AnimalEntity {
         this.goalSelector.add(1, new EscapeDangerGoal(this, 1.3));
         this.goalSelector.add(2, new AnimalMateGoal(this, 1.0));
         this.goalSelector.add(3, new TemptGoal(this, 1.2, Ingredient.ofItems(Items.WHEAT), false));
-        if(!this.isBaby()) this.goalSelector.add(4, new FleeEntityGoal(this, PlayerEntity.class, 16.0F, 1.6, 1.4));
+        if(!this.isBaby()) this.goalSelector.add(4, new FleeEntityGoal(this, PlayerEntity.class, 16.0F, 1.6, 1.4, (entity) -> {return !((Entity) entity).isSneaky();}));
         this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
         this.goalSelector.add(6, this.eatGrassGoal);
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));

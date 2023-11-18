@@ -1,4 +1,4 @@
-package frootloops.versus.mod.enchantments;
+package frootloops.versus.mod.enchantments.tools;
 
 import net.minecraft.enchantment.DamageEnchantment;
 import net.minecraft.entity.EntityGroup;
@@ -35,6 +35,6 @@ public class CleavingEnchantment extends DamageEnchantment {
 
     @Override
     public float getAttackDamage(int level, EntityGroup group) {
-        return level;
+        return  1F + (float)(level >> 1);
     }
 }

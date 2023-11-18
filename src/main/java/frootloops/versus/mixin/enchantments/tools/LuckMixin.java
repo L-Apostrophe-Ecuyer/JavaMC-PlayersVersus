@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.enchantments;
+package frootloops.versus.mixin.enchantments.tools;
 
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.EquipmentSlot;

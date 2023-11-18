@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.enchantments;
+package frootloops.versus.mixin.enchantments.tools;
 
 import net.minecraft.enchantment.EfficiencyEnchantment;
 import net.minecraft.enchantment.Enchantment;

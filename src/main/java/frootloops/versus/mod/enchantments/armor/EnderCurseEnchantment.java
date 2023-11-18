@@ -1,4 +1,4 @@
-package frootloops.versus.mod.enchantments;
+package frootloops.versus.mod.enchantments.armor;
 
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.enchantment.BindingCurseEnchantment;
@@ -7,10 +7,7 @@ import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;

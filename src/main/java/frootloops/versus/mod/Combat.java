@@ -2,7 +2,10 @@ package frootloops.versus.mod;
 
 
 import com.google.common.collect.ImmutableMultimap;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.players.accessors.*;
+import net.minecraft.block.AbstractPlantBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -95,6 +98,7 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
         double toolReachBonus = Combat.getAttackRangeBonusOf(player.getEquippedStack(EquipmentSlot.MAINHAND));
+        attackChargeProgress = Math.min(1.0d, attackChargeProgress);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
         return Combat.PLAYER_BASE_ATTACK_REACH + chargeTimeBonus + toolReachBonus + ridingBonus;
@@ -108,11 +112,10 @@ public abstract class Combat {
         if(level < 1) return;
 
         player.spawnSweepAttackParticles();
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 3, 0, true, false));
         player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
 
         if(player.getWorld() instanceof ServerWorld serverWorld) {
-            attackRange = attackRange - (0.5d * (double)level);
+            attackRange = attackRange - (0.5d * (double)(4 - level));
             double attackRangeSquared = attackRange * attackRange;
 
             // Attack entities:
@@ -122,32 +125,37 @@ public abstract class Combat {
             for (LivingEntity targetEntity : entitiesInRange) {
                 if(!player.isTeammate(targetEntity)) {
                     if (targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
-                        player.setSprinting(true);
-                        player.attack(targetEntity);
+                        if(player.canSee(targetEntity)) {
+                            player.setSprinting(true);
+                            ((LivingEntityAccessor) player).setLastAttackedTicks(20);
+                            player.attack(targetEntity);
+                        }
                     }
                 }
             }
 
             // Break foliage:
-            Vec3d hitPos = Combat.getHitResultOf(player,attackRange - 1d).getPos();
-            BlockPos blockPosOfHit = new BlockPos((int)hitPos.x, (int)hitPos.y, (int)hitPos.z);
-            BlockPos blockPosOfPlayer = player.getBlockPos();
-            BlockPos delta = blockPosOfHit.subtract(blockPosOfPlayer);
-
-            BlockPos blockPos, above;
-            for(int x = -2; x <= 2 ; x++) {
-                for(int z = -2; z <= 2; z++) {
-                    blockPos = blockPosOfHit.add(x,0, z);
-                    if(serverWorld.getBlockState(blockPos).getHardness(serverWorld, blockPos) == 0.0F) {
-                        serverWorld.breakBlock(blockPos, true, player);
-                        above = blockPos.add(0,1, 0);
-                        if(serverWorld.getBlockState(above).getHardness(serverWorld, above) == 0.0F) {
-                            serverWorld.breakBlock(above, true, player);
+            if(player.getActiveItem().getItem() instanceof HoeItem) {
+                Vec3d hitPos = Combat.getHitResultOf(player, attackRange - 1d).getPos();
+                BlockPos blockPosOfHit = new BlockPos((int) hitPos.x, (int) hitPos.y, (int) hitPos.z);
+                BlockPos blockPos, above;
+                BlockState blockState;
+                for (int x = -2; x <= 2; x++) {
+                    for (int z = -2; z <= 2; z++) {
+                        for (int y = -1; y <= 1; y++) {
+                            blockPos = blockPosOfHit.add(x, y, z);
+                            blockState = serverWorld.getBlockState(blockPos);
+                            if (blockState.getHardness(serverWorld, blockPos) == 0.0) {
+                                serverWorld.breakBlock(blockPos, true, player);
+                                above = blockPos.add(0, 1, 0);
+                                if (serverWorld.getBlockState(above).getHardness(serverWorld, above) == 0.0F) {
+                                    serverWorld.breakBlock(above, true, player);
+                                }
+                            }
                         }
                     }
                 }
             }
-            serverWorld.breakBlock(blockPosOfHit,true, player);
         }
     }
 
@@ -155,7 +163,7 @@ public abstract class Combat {
         if(looker==null || targetPos == null) return false;
         Vec3d rotationVector = looker.getRotationVec(1.0F);
         Vec3d positionVector = targetPos.relativize(looker.getPos()).normalize();
-        return (positionVector.dotProduct(rotationVector) < -0.25);
+        return (positionVector.dotProduct(rotationVector) < -0.4);
     }
 
     public static HitResult getHitResultOf(LivingEntity entity, double range) {

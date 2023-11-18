@@ -270,54 +270,90 @@ public class RevampedTradeOffers {
         map.put(VillagerProfession.LIBRARIAN, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Items.ENCHANTED_BOOK, 2, 12, 8),
-                                new BuyForMutlipleEmeraldsFactory(Items.LAPIS_LAZULI, 3, 12, 8),
-                                new BuyForOneEmeraldFactory(Items.AMETHYST_SHARD, 4, 12, 5),
-                                new SellItemFactory(Items.BOOK, 1, 4, 3),
-                                new SellItemFactory(Items.PAPER, 1, 24, 2),
-                                new SellItemFactory(Items.LANTERN, 1, 3, 5),
-                                new SellItemFactory(Items.CLOCK, 1, 1, 5),
+                                new BuyForMutlipleEmeraldsFactory(Items.LAPIS_LAZULI, 4, 12, 8),
+                                new BuyForOneEmeraldFactory(Items.AMETHYST_SHARD, 1, 12, 5),
+                                new SellItemFactory(Items.BOOK, 1, 3, 3),
+                                new SellItemFactory(Items.LANTERN, 1, 3, 4),
+                                new SellItemFactory(Items.CLOCK, 1, 1, 4),
                                 new SellItemFactory(Items.GLASS, 1, 6, 3),
-                                new SellItemFactory(Blocks.BOOKSHELF, 3, 1, 12, 5)},
+                                new SellItemFactory(Blocks.BOOKSHELF, 3, 1, 12, 6),
+                                new TypeAwareSellItemFactory(24, 1, 3, 16, ImmutableMap.builder().put(
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FIRE_PROTECTION, 3))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.TOSSING, 2))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SILK_TOUCH, 1))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FIRE_PROTECTION, 1))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.POWER, 2))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.KNOCKBACK, 2))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.LURE, 3))).build()),
+                                new TypeAwareSellItemFactory(18, 1, 3, 14, ImmutableMap.builder().put(
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SMITE, 2))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SWEEPING, 2))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.FROST_ASPECT, 1))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FLAME, 1))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PIERCING, 3))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.KNOCKBACK, 2))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.RESPIRATION, 1))).build())},
                         2, new Factory[]{
-                                new EnchantBookFactory(10),
+                                new TypeAwareSellItemFactory(27, 1, 3, 18, ImmutableMap.builder().put(
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.RIPOSTE, 3))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BINDING_CURSE, 1))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FROST_WALKER, 2))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FIRE_ASPECT, 2))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.QUICK_CHARGE, 2))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.BOUNDING_STRIDES, 1))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.RIPTIDE, 2))).build()),
                                 new BuyForMutlipleEmeraldsFactory(Items.MUSIC_DISC_11, 8, 1, 20),
-                                new BuyForOneEmeraldFactory(Items.EXPERIENCE_BOTTLE, 1, 32, 15),
+                                new BuyForMutlipleEmeraldsFactory(Items.EXPERIENCE_BOTTLE, 3, 12, 15),
                                 new BuyForOneEmeraldFactory(Items.SOUL_SAND, 8, 12, 10),
                                 new BuyForOneEmeraldFactory(Items.SOUL_SOIL, 8, 12, 10),
                                 new BuyForOneEmeraldFactory(Items.GLOW_INK_SAC, 5, 12, 10),
                                 new SellItemFactory(Items.WRITABLE_BOOK, 3, 1, 15),
-                                new SellItemFactory(Items.CANDLE, 1, 3, 5),
-                                new SellItemFactory(Items.BLACK_CANDLE, 1, 3, 5),
-                                new SellItemFactory(Items.GRAY_CANDLE, 1, 3, 5)},
+                                new SellItemFactory(Items.CANDLE, 1, 8, 5),
+                                new SellItemFactory(Items.BLACK_CANDLE, 1, 8, 5),
+                                new SellItemFactory(Items.GRAY_CANDLE, 1, 8, 5)},
                         3, new Factory[]{
-                                new EnchantBookFactory(10),
-                                new EnchantBookFactory(10),
+                                new TypeAwareSellItemFactory(32, 1, 3, 20, ImmutableMap.builder().put(
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.CLEAVING, 2))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PUNCH, 2))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SILK_TOUCH, 1))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.INFINITY, 1))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.MULTISHOT, 1))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BINDING_CURSE, 1))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.DEPTH_STRIDER, 2))).build()),
+                                new EnchantBookFactory(15),
+                                new EnchantBookFactory(15),
                                 new BuyForMutlipleEmeraldsFactory(Items.SCULK_CATALYST, 6, 16, 20),
-                                new BuyForOneEmeraldFactory(Items.SOUL_TORCH, 2, 16, 20),
-                                new BuyForOneEmeraldFactory(Items.EXPERIENCE_BOTTLE, 1, 32, 20),
                                 new SellItemFactory(Items.NAME_TAG, 20, 1, 15),
                                 new SellItemFactory(Items.TINTED_GLASS, 1, 2, 10)},
                         4, new Factory[]{
-                                new EnchantBookFactory(15),
-                                new EnchantBookFactory(15),
-                                new EnchantBookFactory(15),
-                                new EnchantBookFactory(15),
+                                new EnchantBookFactory(20),
+                                new EnchantBookFactory(20),
+                                new EnchantBookFactory(20),
+                                new EnchantBookFactory(20),
                                 new BuyForMutlipleEmeraldsFactory(Items.MUSIC_DISC_5, 52, 1, 50),
-                                new BuyForMutlipleEmeraldsFactory(Items.ENDER_EYE, 5, 12, 20),
+                                new BuyForMutlipleEmeraldsFactory(Items.ENDER_EYE, 4, 12, 20),
                                 new BuyForOneEmeraldFactory(Items.ENDER_PEARL, 1, 12, 15)},
                         5, new Factory[]{
-                                new ProcessItemFactory(Items.ECHO_SHARD, 1, Items.RECOVERY_COMPASS,1, 1, 20),
-                                new SellItemFactory(EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.MENDING, 1)), 48, 1, 1, 30)}
+                                new EnchantBookFactory(20),
+                                new TypeAwareSellItemFactory(48, 1, 3, 20, ImmutableMap.builder().put(
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FEATHER_FALLING, 3))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.THORNS, 3))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.UNBREAKING, 3))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.EFFICIENCY, 4))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FORTUNE, 2))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SHARPNESS, 3))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.MENDING, 1))).build()),
+                                new ProcessItemFactory(Items.ECHO_SHARD, 1, Items.RECOVERY_COMPASS,1, 1, 20)}
                 )));
 
         map.put(VillagerProfession.CARTOGRAPHER, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Raid.getOminousBanner(), 24, 16, 5),
+                                new BuyForMutlipleEmeraldsFactory(Raid.getOminousBanner(), 24, 16, 6),
                                 new SellItemFactory(Items.SPYGLASS, 2, 1, 8),
-                                new SellItemFactory(Items.COMPASS, 1, 1, 1),
-                                new SellItemFactory(Items.MAP, 1, 1, 3)},
+                                new SellItemFactory(Items.COMPASS, 1, 1, 3),
+                                new SellItemFactory(Items.PAPER, 1, 12, 3),
+                                new SellItemFactory(Items.MAP, 1, 1, 4)},
                         2, new Factory[]{
                                 new SellItemFactory(Items.FLOWER_BANNER_PATTERN, 18, 1, 15),
                                 new SellItemFactory(Items.GLASS_PANE, 1, 16, 8),

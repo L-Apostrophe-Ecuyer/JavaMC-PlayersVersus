@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.enchantments;
+package frootloops.versus.mixin.enchantments.armor;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
@@ -19,13 +19,32 @@ public class ProtectionMixin extends Enchantment {
     }
 
     @Override
+    public int getMaxLevel() {
+        return 4;
+    }
+
+    @Override
     public boolean isAvailableForEnchantedBookOffer() {
-        return false;
+        return this.protectionType != ProtectionEnchantment.Type.ALL;
     }
 
     @Override
     public boolean isTreasure() {
-        return this.protectionType == ProtectionEnchantment.Type.ALL;
+        return true;
+    }
+
+    @Override
+    public boolean isAvailableForRandomSelection() {
+        return true;// this.protectionType != ProtectionEnchantment.Type.ALL;
+    }
+
+    @Override
+    public boolean canAccept(Enchantment other) {
+        if (other instanceof ProtectionEnchantment protectionEnchantment) {
+            return (this.protectionType != protectionEnchantment.protectionType);
+        } else {
+            return super.canAccept(other);
+        }
     }
 
     @Override
