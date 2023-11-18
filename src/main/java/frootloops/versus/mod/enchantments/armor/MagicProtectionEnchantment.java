@@ -61,9 +61,4 @@ public class MagicProtectionEnchantment extends Enchantment {
             if(user.squaredDistanceTo(attacker) > 4.0d) user.heal(3.0f * (float)level);
         }
     }
-
-    @Override
-    public boolean canAccept(Enchantment other) {
-        return !(other instanceof PiercingProtectionEnchantment || other instanceof ImpactProtectionEnchantment || other instanceof MagicProtectionEnchantment);
-    }
 }

@@ -37,13 +37,6 @@ public abstract class LivingEntityMixin extends Entity {
         return this.isSprinting() ? h + 0.1f : h + 0.5f;
     }
 
-    @Inject(method = "damage", at = @At("HEAD"), cancellable = true)
-    private void armorsBlockingDamageTypes(DamageSource source, float amount, CallbackInfoReturnable cir) {
-        if(source.isIn(DamageTypeTags.IS_PROJECTILE)){
-
-        }
-    }
-
     @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)
     private void getHandSwingDuration(CallbackInfoReturnable<Integer> cir) {
         ItemStack mainHand = ((LivingEntity)((Object)this)).getMainHandStack();

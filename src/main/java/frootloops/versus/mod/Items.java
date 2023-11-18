@@ -30,7 +30,7 @@ public abstract class Items {
 
             if(item.getFoodComponent() != null) {
                 if(item.getFoodComponent().isMeat()) ((ItemAccessor) item).setMaxCount(maxMeals);
-                else if(item instanceof StewItem) ((ItemAccessor) item).setMaxCount(maxStews);
+                else if(item instanceof StewItem || item instanceof SuspiciousStewItem) ((ItemAccessor) item).setMaxCount(maxStews);
                 else ((ItemAccessor) item).setMaxCount(maxSnacks);
             }
 

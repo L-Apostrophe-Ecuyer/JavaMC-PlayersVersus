@@ -16,6 +16,11 @@ public class ImpactProtectionEnchantment extends Enchantment {
     }
 
     @Override
+    public boolean isTreasure() {
+        return true;
+    }
+
+    @Override
     public int getMinPower(int level) {
         return 10 + 8 * (level - 1);
     }
@@ -49,18 +54,5 @@ public class ImpactProtectionEnchantment extends Enchantment {
             }
         }
         return 0;
-    }
-
-    public static double transformExplosionKnockback(LivingEntity entity, double velocity, int level) {
-        int i = EnchantmentHelper.getEquipmentLevel(Enchantments.BLAST_PROTECTION, entity);
-        if (i > 0) {
-            velocity *= MathHelper.clamp(1.0 - (double)i * 0.15, 0.0, 1.0);
-        }
-        return velocity;
-    }
-
-    @Override
-    public boolean canAccept(Enchantment other) {
-        return !(other instanceof ProtectionEnchantment || other instanceof PiercingProtectionEnchantment || other instanceof ImpactProtectionEnchantment || other instanceof MagicProtectionEnchantment);
     }
 }

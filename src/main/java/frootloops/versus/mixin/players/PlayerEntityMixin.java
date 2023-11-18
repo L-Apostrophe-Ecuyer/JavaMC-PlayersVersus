@@ -86,7 +86,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 for (EntityAttributeModifier modifier:helmetAttributeModifiers.get(EntityAttributes.GENERIC_ARMOR_TOUGHNESS))
                     toughnessAmount += modifier.getValue();
 
-                float protectionAmount = (float)Math.max(EnchantmentHelper.getLevel(Enchants.PHYSICAL_PROTECTION, helmet), EnchantmentHelper.getLevel(Enchantments.PROTECTION, helmet));
+                float protectionAmount = (float)Math.max(EnchantmentHelper.getLevel(Enchants.IMPACT_PROTECTION, helmet), EnchantmentHelper.getLevel(Enchantments.PROTECTION, helmet));
                 if (protectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, protectionAmount);
 
                 return DamageUtil.getDamageLeft(amount, armorAmount, toughnessAmount);

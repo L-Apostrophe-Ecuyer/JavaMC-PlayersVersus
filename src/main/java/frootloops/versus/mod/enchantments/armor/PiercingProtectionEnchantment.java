@@ -17,6 +17,11 @@ public class PiercingProtectionEnchantment extends Enchantment {
     }
 
     @Override
+    public boolean isTreasure() {
+        return true;
+    }
+
+    @Override
     public int getMinPower(int level) {
         return 10 + 8 * (level - 1);
     }
@@ -50,10 +55,5 @@ public class PiercingProtectionEnchantment extends Enchantment {
         if(source.isOf(DamageTypes.CACTUS) || source.isOf(DamageTypes.SWEET_BERRY_BUSH) || source.isOf(DamageTypes.STING))
             return level;
         return 0;
-    }
-
-    @Override
-    public boolean canAccept(Enchantment other) {
-        return !(other instanceof ProtectionEnchantment || other instanceof PiercingProtectionEnchantment || other instanceof ImpactProtectionEnchantment || other instanceof MagicProtectionEnchantment);
     }
 }

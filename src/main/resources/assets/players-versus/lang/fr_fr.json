@@ -7,5 +7,6 @@
   "enchantment.players-versus.ender_curse": "Malédiction du néant",
   "enchantment.players-versus.bounding_strides": "Bondissement",
   "enchantment.players-versus.magic_protection": "Protection contre la magie",
-  "enchantment.players-versus.physical_protection": "Protection physique"
+  "enchantment.players-versus.impact_protection": "Protection contre les dégats d'impacts",
+  "enchantment.players-versus.piercing_protection": "Protection contre les dégats perforants"
 }
