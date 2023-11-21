@@ -42,15 +42,16 @@ public class ImpactProtectionEnchantment extends Enchantment {
         if(source.isOf(DamageTypes.CRAMMING) || source.isOf(DamageTypes.IN_WALL) )
             return level * 2;
         if(source.isOf(DamageTypes.FLY_INTO_WALL) || source.isOf(DamageTypes.FALLING_ANVIL))
-            return level * 3;
+            return level * 4;
         if(source.isOf(DamageTypes.MOB_ATTACK) || source.isOf(DamageTypes.PLAYER_ATTACK)) {
             if( source.getAttacker() instanceof LivingEntity attacker) {
                 ItemStack mainHandStack = attacker.getMainHandStack();
                 if(!mainHandStack.isEmpty() && mainHandStack.getItem().isDamageable()) {
                     Item weapon = mainHandStack.getItem();
+                    if(weapon instanceof AxeItem || weapon instanceof ShovelItem) return level;
                     if(weapon instanceof ToolItem || weapon instanceof TridentItem) return level/2;
                 }
-                else return level;
+                else return level + level/2;
             }
         }
         return 0;

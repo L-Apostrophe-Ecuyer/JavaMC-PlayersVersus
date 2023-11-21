@@ -35,21 +35,17 @@ public class ProtectionMixin extends Enchantment {
 
     @Override
     public boolean isAvailableForRandomSelection() {
-        return true;// this.protectionType != ProtectionEnchantment.Type.ALL;
+        return this.protectionType != ProtectionEnchantment.Type.PROJECTILE;
     }
 
     @Override
     public boolean canAccept(Enchantment other) {
-        if (other instanceof ProtectionEnchantment protectionEnchantment) {
-            return (this.protectionType != protectionEnchantment.protectionType);
-        } else {
-            return super.canAccept(other);
-        }
+        return super.canAccept(other);
     }
 
     @Override
     public Rarity getRarity() {
         if(this.protectionType == ProtectionEnchantment.Type.ALL) return Rarity.VERY_RARE;
-        return Rarity.RARE;
+        return Rarity.UNCOMMON;
     }
 }

@@ -87,7 +87,14 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
     @ModifyVariable(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageSource;isIn(Lnet/minecraft/registry/tag/TagKey;)Z", ordinal = 1), argsOnly = true)
     private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
-        return activeItemStack.getItem() instanceof ShieldItem ? 0.0f : Math.max(damageAmount/2.0f, damageAmount - 5.0f);
+        if( activeItemStack.getItem() instanceof ShieldItem) return 0.0f;
+
+        int useTime =  activeItemStack.getMaxUseTime() - itemUseTimeLeft;
+        boolean hasParried = useTime < PARRY_TIME_TICKS && useTime > 0;
+        if(hasParried) return 0;
+
+        float damageAfterBlocking = Math.max(damageAmount/2.0f, damageAmount - 5.0f);
+        return Math.max(0.0f, damageAfterBlocking - EnchantmentHelper.getLevel(Enchants.RIPOSTE, activeItemStack));
     }
 
     @Inject(method = "damage", at = @At(value = "INVOKE",

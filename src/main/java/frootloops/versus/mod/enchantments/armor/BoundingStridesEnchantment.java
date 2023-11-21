@@ -34,6 +34,7 @@ public class BoundingStridesEnchantment extends Enchantment {
 
     @Override
     public boolean canAccept(Enchantment other) {
-        return !(other instanceof BoundingStridesEnchantment || other instanceof DepthStriderEnchantment || other instanceof SoulSpeedEnchantment);
+        return super.canAccept(other);
+        //return !(other instanceof BoundingStridesEnchantment || other instanceof DepthStriderEnchantment || other instanceof SoulSpeedEnchantment);
     }
 }

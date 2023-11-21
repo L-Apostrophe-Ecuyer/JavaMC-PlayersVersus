@@ -6,6 +6,7 @@
   "mixins": [
     "LivingEntityMixin",
     "enchantments.AnvilCostMixin",
+    "enchantments.EnchantingTableMixin",
     "enchantments.EnchantmentBottleMixin",
     "enchantments.EnchantmentHelperMixin",
     "enchantments.armor.DepthStriderMixin",

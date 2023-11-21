@@ -10,11 +10,11 @@ public class EnchantmentProtectionMixin {
 
     @ModifyConstant(method = "getInflictedDamage", constant = @Constant(floatValue = 20.0f))
     private static float higherCeiling(float protectionMaxValue) {
-        return 24.0f;
+        return 25.0f;
     }
 
     @ModifyConstant(method = "getInflictedDamage", constant = @Constant(floatValue = 25.0f))
     private static float lessProtectionOverall(float protectionMaxValue) {
-        return 32.0f;
+        return 35f;
     }
 }

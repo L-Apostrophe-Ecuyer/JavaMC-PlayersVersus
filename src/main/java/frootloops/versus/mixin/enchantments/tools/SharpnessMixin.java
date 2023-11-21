@@ -21,6 +21,11 @@ public class SharpnessMixin extends Enchantment {
     public final int typeIndex;
 
     @Override
+    public boolean isTreasure() {
+        return this.typeIndex != 0;
+    }
+
+    @Override
     public float getAttackDamage(int level, EntityGroup group) {
         if (this.typeIndex == 0) {
             return (float)level * 0.5f;

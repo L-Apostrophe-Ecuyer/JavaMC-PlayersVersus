@@ -1,10 +1,7 @@
 package frootloops.versus.mod;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.enchantments.armor.BoundingStridesEnchantment;
-import frootloops.versus.mod.enchantments.armor.EnderCurseEnchantment;
-import frootloops.versus.mod.enchantments.armor.ImpactProtectionEnchantment;
-import frootloops.versus.mod.enchantments.armor.MagicProtectionEnchantment;
+import frootloops.versus.mod.enchantments.armor.*;
 import frootloops.versus.mod.enchantments.tools.CleavingEnchantment;
 import frootloops.versus.mod.enchantments.tools.FrostAspectEnchantment;
 import frootloops.versus.mod.enchantments.tools.RiposteEnchantment;
@@ -24,7 +21,7 @@ public abstract class Enchants {
     public static final BoundingStridesEnchantment BOUNDING_STRIDES = new BoundingStridesEnchantment();
     public static final MagicProtectionEnchantment MAGIC_PROTECTION = new MagicProtectionEnchantment();
     public static final ImpactProtectionEnchantment IMPACT_PROTECTION = new ImpactProtectionEnchantment();
-    public static final ImpactProtectionEnchantment PIERCING_PROTECTION = new ImpactProtectionEnchantment();
+    public static final PiercingProtectionEnchantment PIERCING_PROTECTION = new PiercingProtectionEnchantment();
 
     public static void init(){
         Registry.register(Registries.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, "tossing"), TOSSING);

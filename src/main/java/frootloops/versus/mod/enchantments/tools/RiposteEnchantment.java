@@ -35,6 +35,6 @@ public class RiposteEnchantment extends Enchantment {
 
     @Override
     public boolean canAccept(Enchantment other) {
-        return !(other instanceof ThornsEnchantment || other instanceof RiposteEnchantment);
+        return !(other instanceof ThornsEnchantment || other instanceof RiposteEnchantment || other instanceof SweepingEnchantment);
     }
 }

@@ -11,6 +11,7 @@ import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -21,6 +22,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,6 +42,9 @@ public abstract class ItemEntityMixin extends Entity {
     public ItemStack getStack() {return null;}
 
     @Shadow
+    public Entity getOwner() {return null;}
+
+    @Shadow
     public void setStack(ItemStack stack) {}
 
     public ItemEntityMixin(EntityType<?> type, World world) {
@@ -49,11 +54,13 @@ public abstract class ItemEntityMixin extends Entity {
     @Inject(method = "initDataTracker", at = @At(value = "HEAD"))
     public void setHealth(CallbackInfo info) {
         health = 60;
+        boolean playerDied = this.getOwner() != null && this.getOwner() instanceof PlayerEntity player && !player.isAlive();
+        if(playerDied) itemAge = -12000;
     }
 
     @Override
     public boolean isFireImmune() {
-        if(itemAge < 10) return true;
+        if(itemAge >= 0 && itemAge < 10) return true;
         if(this.getStack().getItem() instanceof BlockItem) {
             if (this.getStack().isOf(Items.OBSIDIAN)) return true;
             else if (this.getStack().isOf(Items.CRYING_OBSIDIAN)) return true;
