@@ -70,16 +70,16 @@ public abstract class ZombieMixin extends HostileEntity {
     @Override
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
-        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.2f : 0.1f;
+        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
         ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
         this.setCanPickUpLoot(true);
 
-        float distanceFromGroundLevel = 96.0f - (float)this.getBlockPos().getY();
-        float worldDepthExtraDifficulty = (distanceFromGroundLevel * distanceFromGroundLevel)/32768.0f;
+        float depth = Math.max(16.0f, 96.0f - (float)this.getBlockPos().getY());
+        float worldDepthExtraDifficulty = (depth * depth)/32768.0f;
         boolean haDifficultyBonusFromDepth = random.nextFloat() < (difficulty + worldDepthExtraDifficulty);
 
         if (haDifficultyBonusFromDepth) {
-            int rand = random.nextInt(100);
+            int rand = random.nextInt(150);
             if(rand % 2 == 0 || rand % 7 == 0) {
                 this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
                 this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 80);
@@ -96,13 +96,14 @@ public abstract class ZombieMixin extends HostileEntity {
                 this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
                 this.getEquippedStack(EquipmentSlot.FEET).setDamage(rand + 80);
             }
-            if(rand % 13 == 0) {
+            if(rand % 13 == 0 && depth > 64) {
                 this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
                 this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 384);
+                this.armorDropChances[EquipmentSlot.CHEST.getEntitySlotId()] = 0.1f;
             }
 
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
-            if (isAtDiamondDepth && rand % 7 == 0) {
+            if (isAtDiamondDepth && rand % 17 == 0) {
                 ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.enchant(world.random, enchantedBook, 12, true);
 ;               this.equipStack(EquipmentSlot.OFFHAND, enchantedBook);
@@ -120,7 +121,7 @@ public abstract class ZombieMixin extends HostileEntity {
             if(rand < 90) {
                 int damageAmount = (isAtDiamondDepth && rand < 60) ? rand + 900 : rand/2 + 150;
                 this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
-                this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.4F;
+                this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.3F;
             }
         }
     }
