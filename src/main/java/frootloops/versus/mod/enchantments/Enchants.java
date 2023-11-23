@@ -1,4 +1,4 @@
-package frootloops.versus.mod;
+package frootloops.versus.mod.enchantments;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.armor.*;

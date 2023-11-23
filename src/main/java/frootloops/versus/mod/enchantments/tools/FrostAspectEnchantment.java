@@ -10,6 +10,9 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvents;
 
 
 public class FrostAspectEnchantment extends Enchantment {
@@ -18,12 +21,12 @@ public class FrostAspectEnchantment extends Enchantment {
     }
 
     public boolean isTreasure() {
-        return false;
+        return true;
     }
 
     @Override
     public int getMinPower(int level) {
-        return 10 + 20 * (level - 1);
+        return 10 + 12 * (level - 1);
     }
 
     @Override
@@ -53,7 +56,16 @@ public class FrostAspectEnchantment extends Enchantment {
 
     @Override
     public void onTargetDamaged(LivingEntity user, Entity target, int level) {
-        if (target instanceof LivingEntity livingEntity && livingEntity.canFreeze())
-            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 4 + (4 * level), 2));
+        if (target instanceof LivingEntity targetEntity && targetEntity.canFreeze()) {
+            user.world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, user.getSoundCategory(), 1.0f, 1.0f);
+            targetEntity.extinguish();
+
+            // Minimum ticks to get damaged is 140, for most. Entities get rid of 2 FrozenTicks per tick.
+            target.setFrozenTicks(target.getFrozenTicks() + 220);
+            if(user.world instanceof ServerWorld serverWorld) {
+                target.world.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, target.getSoundCategory(), 1.0f, 1.0f);
+                serverWorld.spawnParticles(ParticleTypes.WAX_OFF, target.getX(), target.getY() + 1, target.getZ(), 4, 0.2, 0.2, 0.2, 6.0f);
+            }
+        }
     }
 }

@@ -3,7 +3,7 @@ package frootloops.versus.mod.passive_mobs;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import frootloops.versus.mod.Enchants;
+import frootloops.versus.mod.enchantments.Enchants;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
@@ -278,7 +278,7 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.GLASS, 1, 6, 3),
                                 new SellItemFactory(Blocks.BOOKSHELF, 3, 1, 12, 6),
                                 new TypeAwareSellItemFactory(24, 1, 3, 16, ImmutableMap.builder().put(
-                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FIRE_PROTECTION, 3))).put(
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BLAST_PROTECTION, 1))).put(
                                         VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.TOSSING, 2))).put(
                                         VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SILK_TOUCH, 1))).put(
                                         VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FIRE_PROTECTION, 1))).put(

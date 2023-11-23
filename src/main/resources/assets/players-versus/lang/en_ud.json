@@ -8,5 +8,6 @@
   "enchantment.players-versus.bounding_strides": "Bounding Strides",
   "enchantment.players-versus.magic_protection": "Magic Protection",
   "enchantment.players-versus.impact_protection": "Impact Protection",
-  "enchantment.players-versus.piercing_protection": "Piercing Protection"
+  "enchantment.players-versus.piercing_protection": "Piercing Protection",
+  "enchantment.minecraft.protection": "Max Protection"
 }

@@ -35,6 +35,6 @@ public class CleavingEnchantment extends DamageEnchantment {
 
     @Override
     public float getAttackDamage(int level, EntityGroup group) {
-        return  1F + (float)(level >> 1);
+        return  1F + (float)(level)/2F;
     }
 }

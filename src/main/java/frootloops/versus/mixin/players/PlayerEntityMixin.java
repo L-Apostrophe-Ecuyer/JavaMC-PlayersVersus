@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
-import frootloops.versus.mod.Enchants;
+import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -16,10 +16,7 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,6 +55,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1));
         }
     }
+
+    @Override
+    protected float modifyAppliedDamage(DamageSource source, float amount) {
+        if(source.isOf(DamageTypes.SONIC_BOOM)) {
+            int protectionAmount = EnchantmentHelper.getProtectionAmount(this.getArmorItems(), source);
+            if (protectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, protectionAmount);
+        }
+        return super.modifyAppliedDamage(source, amount);
+    }
+
 
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
@@ -126,29 +133,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         // Attacking while walking backwards deals less knockback:
         boolean isStillOrWalkingBackwards = (this.onGround && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
-        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.5d, 0.8d, 0.5d));
-
-        // Frost enchantment:
-        int frostAspect = EnchantmentHelper.getEquipmentLevel(Enchants.FROST_ASPECT, this);
-        boolean isFrostAttack = (target instanceof LivingEntity && frostAspect > 0);
-        if (isFrostAttack) {
-            this.world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
-            target.extinguish();
-
-            if(target.canFreeze()) {
-                // Minimum ticks to get damaged is 140, for most. Entities get rid of 2 FrozenTicks per tick.
-                target.setFrozenTicks(target.getFrozenTicks() + 220);
-                if(this.world instanceof ServerWorld) {
-                    this.world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, this.getSoundCategory(), 1.0f, 1.0f);
-                    ((ServerWorld)this.world).spawnParticles(ParticleTypes.WAX_OFF, target.getX(), target.getY() + 1, target.getZ(), 4, 0.2, 0.2, 0.2, 6.0f);
-                }
-            }
-        }
+        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0d, 0.5d, 0d));
 
         // Toss attack and enchantment:
-        boolean isToss = !this.isSneaking() && this.onGround && this.getMainHandStack().getItem() instanceof ShovelItem;
-        if (isToss) {
-            TossingEnchantment.performTossAttack(this, target, 0.2 + 0.125 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
+        if (!this.isSneaking() && this.onGround && this.getMainHandStack().getItem() instanceof ShovelItem) {
+            TossingEnchantment.performTossAttack(this, target, 0.2 + 0.1 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
         }
     }
 }

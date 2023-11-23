@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.hostile_mobs.overworld;
 
-import frootloops.versus.mod.hostile_mobs.creeper.CreeperDecisionHelper;
+import frootloops.versus.mod.hostile_mobs.overworld.CreeperDecisionHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.CreeperIgniteGoal;
 import net.minecraft.entity.mob.CreeperEntity;

@@ -47,7 +47,7 @@ public class ItemStackMixin {
     @Inject(method = "isEnchantable", at = @At("RETURN"), cancellable = true)
     public void itemsCanBeReEnchanted(CallbackInfoReturnable<Boolean> cir) {
         if(this.hasEnchantments()) {
-            cir.setReturnValue(!EnchantmentHelper.getPossibleEntries(10, (ItemStack) ((Object)this), false).isEmpty());
+            cir.setReturnValue(!EnchantmentHelper.getPossibleEntries(33, (ItemStack) ((Object)this), false).isEmpty());
         }
     }
 

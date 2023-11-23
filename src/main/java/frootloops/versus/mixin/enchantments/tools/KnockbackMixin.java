@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(KnockbackEnchantment.class)
 public class KnockbackMixin extends Enchantment {
     protected KnockbackMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
-        super(Rarity.RARE, type, slotTypes);
+        super(Rarity.UNCOMMON, type, slotTypes);
     }
 
     @Override
@@ -20,8 +20,7 @@ public class KnockbackMixin extends Enchantment {
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        return (stack.getItem() instanceof SwordItem ||
-                stack.getItem() instanceof AxeItem ||
+        return (stack.getItem() instanceof AxeItem ||
                 stack.getItem() instanceof ShovelItem ||
                 stack.getItem() instanceof HoeItem);
     }

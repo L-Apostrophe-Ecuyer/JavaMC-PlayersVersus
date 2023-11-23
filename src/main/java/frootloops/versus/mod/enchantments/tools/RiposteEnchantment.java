@@ -15,7 +15,7 @@ public class RiposteEnchantment extends Enchantment {
 
     @Override
     public int getMinPower(int level) {
-        return 6 + (level - 1) * 12;
+        return 6 + ((level - 1) * 8);
     }
 
     @Override

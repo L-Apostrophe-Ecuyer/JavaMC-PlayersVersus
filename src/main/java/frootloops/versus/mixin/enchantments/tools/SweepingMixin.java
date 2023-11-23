@@ -14,6 +14,11 @@ public class SweepingMixin extends Enchantment {
     }
 
     @Override
+    public int getMinPower(int level) {
+        return 5 + level * 9;
+    }
+
+    @Override
     public boolean isAcceptableItem(ItemStack stack) {
         return ((stack.getItem() instanceof SwordItem) || (stack.getItem() instanceof HoeItem));
     }

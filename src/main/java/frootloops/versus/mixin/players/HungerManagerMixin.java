@@ -71,13 +71,14 @@ public class HungerManagerMixin {
 
         // Food exhaustion: When starving, activities deal damage.
         } else if(foodLevel == 0) {
-            if(exhaustion > 0.5F) {
+            if (exhaustion > 0.5F) {
                 exhaustion = 0.0F;
                 player.damage(player.getDamageSources().starve(), 1.0f);
             }
+        }
 
         // Food exhaustion: Faster when the player has saturation, slower otherwise.
-        } else if(exhaustion > 2.0F && (foodLevel < 6 || saturationLevel > 0.0F)){
+        if(exhaustion > 2.0F && (foodLevel < 6 || saturationLevel > 0.0F)){
             exhaustion = 0.0F;
             if(saturationLevel > 0.0F) saturationLevel = Math.max(0.0F, saturationLevel - 1.0F);
             else foodLevel--;
@@ -117,29 +118,20 @@ public class HungerManagerMixin {
         boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (canPlayerRegenHealth) {
             foodTickTimer++;
-            if(foodLevel > prevFoodLevel || foodLevel == 20) foodTickTimer = 1024;
+            if(foodLevel > prevFoodLevel) foodTickTimer = Math.max(foodTickTimer, REGEN_TIME_SATURATION);
+            else if(foodLevel == 20) foodTickTimer = Math.max(foodTickTimer, 0);
             else if(player.isOnFire()) foodTickTimer = -8;
             else if(player.hurtTime > 0) foodTickTimer = -32;
 
-            if(foodTickTimer > REGEN_TIME_SATURATION & saturationLevel > MINIMUM_SATURATION_TO_QUICK_HEAL){
+            if(foodTickTimer > REGEN_TIME_SATURATION && saturationLevel > MINIMUM_SATURATION_TO_QUICK_HEAL) {
                 foodTickTimer = 0;
                 player.heal(1);
                 saturationLevel = Math.max(0.0F, saturationLevel - 1.5F);
                 exhaustion = 1.0F;
             }
-            else if(foodTickTimer > REGEN_TIME_15_TO_20_HAUNCHES && foodLevel > 14){
-                foodTickTimer = 0;
-                player.heal(1);
-                foodLevel--;
-                exhaustion = 1.0F;
-            }
-            else if(foodTickTimer > REGEN_TIME_11_TO_14_HAUNCHES && foodLevel > 10){
-                foodTickTimer = 0;
-                player.heal(1);
-                foodLevel--;
-                exhaustion = 1.0F;
-            }
-            else if(foodTickTimer > REGEN_TIME_7_TO_10_HAUNCHES && foodLevel > 6){
+            else if((foodTickTimer > REGEN_TIME_15_TO_20_HAUNCHES && foodLevel > 14)
+                || (foodTickTimer > REGEN_TIME_11_TO_14_HAUNCHES && foodLevel > 10)
+                || (foodTickTimer > REGEN_TIME_7_TO_10_HAUNCHES && foodLevel > 6)) {
                 foodTickTimer = 0;
                 player.heal(1);
                 foodLevel--;

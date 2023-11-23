@@ -1,13 +1,8 @@
-package frootloops.versus.mixin.items.elytra;
+package frootloops.versus.mixin.items.equipment.elytra;
 
-import frootloops.versus.VersusMod;
-import frootloops.versus.mod.Combat;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;

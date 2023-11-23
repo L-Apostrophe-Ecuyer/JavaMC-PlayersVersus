@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static frootloops.versus.mod.Enchants.BOUNDING_STRIDES;
+import static frootloops.versus.mod.enchantments.Enchants.BOUNDING_STRIDES;
 
 
 @Mixin(PlayerEntity.class)

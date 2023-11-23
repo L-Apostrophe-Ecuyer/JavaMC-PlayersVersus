@@ -14,8 +14,14 @@ public class PowerMixin extends Enchantment {
 
     @Override
     public int getMinPower(int level) {
-        return 1 + (level - 1) * (10 + level);
+        return 1 + (level) * (8 + level);
     }
+
+    @Override
+    public Rarity getRarity() {
+        return Rarity.VERY_RARE;
+    }
+
 
     @Override
     public boolean isAvailableForEnchantedBookOffer() {

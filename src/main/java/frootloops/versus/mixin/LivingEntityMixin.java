@@ -5,6 +5,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageSources;
+import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -15,6 +17,7 @@ import net.minecraft.item.HoeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +37,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
-        return this.isSprinting() ? h + 0.1f : h + 0.5f;
+        return this.isSprinting() ? h : h + 0.4f;
     }
 
     @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)

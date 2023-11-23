@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.items.shields;
 
-import frootloops.versus.mod.Enchants;
+import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -32,7 +32,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         super(type, world);
     }
 
-    private static final int PARRY_TIME_TICKS = 8;
+    private static final int PARRY_TIME_TICKS = 6;
 
     @Inject(method = "handleStatus", at = @At("HEAD"), cancellable = true)
     private void blockingSound(byte status, CallbackInfo info) {
@@ -89,12 +89,13 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
         if( activeItemStack.getItem() instanceof ShieldItem) return 0.0f;
 
+        int levelRiposte = EnchantmentHelper.getLevel(Enchants.RIPOSTE, activeItemStack);
         int useTime =  activeItemStack.getMaxUseTime() - itemUseTimeLeft;
-        boolean hasParried = useTime < PARRY_TIME_TICKS && useTime > 0;
+        boolean hasParried = useTime < PARRY_TIME_TICKS + levelRiposte && useTime > 0;
         if(hasParried) return 0;
 
         float damageAfterBlocking = Math.max(damageAmount/2.0f, damageAmount - 5.0f);
-        return Math.max(0.0f, damageAfterBlocking - EnchantmentHelper.getLevel(Enchants.RIPOSTE, activeItemStack));
+        return Math.max(0.0f, damageAfterBlocking - levelRiposte);
     }
 
     @Inject(method = "damage", at = @At(value = "INVOKE",
@@ -117,7 +118,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
         // If you blocked within 8 ticks of an attack, you reflect the attack back (partially)
         int useTime =  shieldItem.getMaxUseTime(shieldItemStack) - itemUseTimeLeft;
-        boolean hasParried = useTime < PARRY_TIME_TICKS && useTime > 0;
+        boolean hasParried = useTime < PARRY_TIME_TICKS + levelRiposte && useTime > 0;
         if(hasParried) {
             if ((LivingEntity) (Object) this instanceof PlayerEntity player) player.getItemCooldownManager().set(shieldItem, PARRY_TIME_TICKS << 1);
             ((LivingEntity) ((Object) this)).clearActiveItem();

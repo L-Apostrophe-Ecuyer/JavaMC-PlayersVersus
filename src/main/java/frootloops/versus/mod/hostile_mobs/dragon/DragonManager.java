@@ -1,4 +1,4 @@
-package frootloops.versus.mod.bosses;
+package frootloops.versus.mod.hostile_mobs.dragon;
 
 import java.util.ArrayList;
 import java.util.List;

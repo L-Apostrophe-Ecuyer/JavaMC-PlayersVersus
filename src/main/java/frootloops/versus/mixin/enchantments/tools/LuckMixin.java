@@ -28,14 +28,19 @@ public class LuckMixin extends Enchantment {
 
     @Override
     public int getMinPower(int level) {
-        return 6 + level * 12;
+        return 6 + level * 16;
     }
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        if (this.target == EnchantmentTarget.WEAPON && (stack.getItem() instanceof AxeItem || stack.getItem() instanceof ShovelItem || stack.getItem() instanceof HoeItem || stack.getItem() instanceof TridentItem)){
-            return true;
+        if (this.target == EnchantmentTarget.FISHING_ROD){
+            return (stack.getItem() instanceof FishingRodItem);
         }
-        return this.target.isAcceptableItem(stack.getItem());
+        else if (this.target == EnchantmentTarget.WEAPON){
+            return (stack.getItem() instanceof AxeItem || stack.getItem() instanceof HoeItem || stack.getItem() instanceof TridentItem);
+        }
+        else {
+            return (stack.getItem() instanceof ShovelItem || stack.getItem() instanceof HoeItem || stack.getItem() instanceof PickaxeItem);
+        }
     }
 }

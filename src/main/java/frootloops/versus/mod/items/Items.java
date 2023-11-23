@@ -1,20 +1,19 @@
-package frootloops.versus.mod;
+package frootloops.versus.mod.items;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.players.accessors.ItemAccessor;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import frootloops.versus.mod.items.equipment.bronze.BronzeArmorMaterial;
+import frootloops.versus.mod.items.equipment.slime.SlimeArmorMaterial;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
-import static frootloops.versus.VersusMod.MOD_FOLDER;
 import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class Items {
+
+    public static final BronzeArmorMaterial BRONZE_ARMOR_MATERIAL = new BronzeArmorMaterial();
+    public static final SlimeArmorMaterial SLIME_ARMOR_MATERIAL = new SlimeArmorMaterial();
 
     public static void init() {
         int maxSnacks = 64, maxMeals = 64, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;

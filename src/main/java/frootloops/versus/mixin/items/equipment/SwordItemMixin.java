@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items.weapons;
+package frootloops.versus.mixin.items.equipment;
 
 import frootloops.versus.mod.Combat;
 import net.minecraft.enchantment.EnchantmentHelper;
