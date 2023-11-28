@@ -47,7 +47,7 @@ public abstract class ZombieMixin extends HostileEntity {
                 HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
                         .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.34f)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0)
-                        .add(EntityAttributes.GENERIC_MAX_HEALTH, 22.0)
+                        .add(EntityAttributes.GENERIC_MAX_HEALTH, 24.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
     }
 

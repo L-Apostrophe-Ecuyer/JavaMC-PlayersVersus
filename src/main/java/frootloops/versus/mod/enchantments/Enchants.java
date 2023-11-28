@@ -23,7 +23,7 @@ public abstract class Enchants {
     public static final ImpactProtectionEnchantment IMPACT_PROTECTION = new ImpactProtectionEnchantment();
     public static final PiercingProtectionEnchantment PIERCING_PROTECTION = new PiercingProtectionEnchantment();
 
-    public static void init(){
+    public static void onInitialize(){
         Registry.register(Registries.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, "tossing"), TOSSING);
         Registry.register(Registries.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, "cleaving"), CLEAVING);
         Registry.register(Registries.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, "riposte"), RIPOSTE);

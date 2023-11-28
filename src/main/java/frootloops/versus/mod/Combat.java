@@ -2,9 +2,7 @@ package frootloops.versus.mod;
 
 
 import com.google.common.collect.ImmutableMultimap;
-import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.players.accessors.*;
-import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -13,8 +11,6 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
@@ -22,7 +18,6 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -36,7 +31,7 @@ import java.util.List;
 public abstract class Combat {
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
-    public static final double PLAYER_BASE_ATTACK_SPEED = 2.0d;
+    public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
     private static final String[] tools = new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
     private static final float[] toolsSpeed  = new float[]{1.0F, 1.6F, 2.0F, 1.2F, 1.4F};
@@ -44,9 +39,13 @@ public abstract class Combat {
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{0F, 0F, 1F, 1F, 2F, 3F};
 
+    public static float getAxeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[0];}
+    public static float getSwordSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[1];}
+    public static float getHoeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[2];}
+    public static float getPickaxeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[3];}
+    public static float getShovelSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[4];}
 
-
-    public static void init() {
+    public static void onInitialize() {
         for(int toolIndex = 0; toolIndex < tools.length; toolIndex++) {
             for (int tierIndex = 0; tierIndex < toolTiers.length; tierIndex++) {
                 String name = "minecraft:" + toolTiers[tierIndex] + "_" + tools[toolIndex];

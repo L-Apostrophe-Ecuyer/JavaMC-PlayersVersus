@@ -1,7 +1,9 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.mixin.players.accessors.ItemAccessor;
+import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.items.equipment.bronze.BronzeArmorMaterial;
+import frootloops.versus.mod.items.equipment.bronze.BronzeToolMaterial;
 import frootloops.versus.mod.items.equipment.slime.SlimeArmorMaterial;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
@@ -12,12 +14,38 @@ import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class Items {
 
+    public static final BronzeToolMaterial BRONZE_TOOL_MATERIAL = new BronzeToolMaterial();
     public static final BronzeArmorMaterial BRONZE_ARMOR_MATERIAL = new BronzeArmorMaterial();
     public static final SlimeArmorMaterial SLIME_ARMOR_MATERIAL = new SlimeArmorMaterial();
 
-    public static void init() {
+    public static final Item BRONZE_INGOT = new Item(new Item.Settings());
+    public static final Item RAW_BRONZE_ALLOY = new Item(new Item.Settings());
+    public static final Item BRONZE_HELMET = new ArmorItem(BRONZE_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Settings());
+    public static final Item BRONZE_CHESTPLATE = new ArmorItem(BRONZE_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings());
+    public static final Item BRONZE_LEGGINGS = new ArmorItem(BRONZE_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Settings());
+    public static final Item BRONZE_BOOTS = new ArmorItem(BRONZE_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings());
+    public static ToolItem BRONZE_HOE = new HoeItem(BRONZE_TOOL_MATERIAL, 4, Combat.getHoeSpeedModifier(), new Item.Settings());
+    public static ToolItem BRONZE_AXE = new AxeItem(BRONZE_TOOL_MATERIAL, 8, Combat.getAxeSpeedModifier(), new Item.Settings());
+    public static ToolItem BRONZE_SWORD = new SwordItem(BRONZE_TOOL_MATERIAL, 5, Combat.getSwordSpeedModifier(), new Item.Settings());
+    public static ToolItem BRONZE_SHOVEL = new ShovelItem(BRONZE_TOOL_MATERIAL, 4, Combat.getShovelSpeedModifier(), new Item.Settings());
+    public static ToolItem BRONZE_PICKAXE = new PickaxeItem(BRONZE_TOOL_MATERIAL, 5, Combat.getPickaxeSpeedModifier(), new Item.Settings());
+
+    public static void onInitialize() {
         int maxSnacks = 64, maxMeals = 64, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
         setStackSizes(maxSnacks, maxMeals, maxBottled, maxStews, maxThrowables, maxPlaceableEntities);
+
+        registerCustomItem("bronze_ingot", BRONZE_INGOT);
+        registerCustomItem("raw_bronze_ingot", RAW_BRONZE_ALLOY);
+
+        registerCustomItem("bronze_chestplate", BRONZE_CHESTPLATE);
+        registerCustomItem("bronze_leggings", BRONZE_LEGGINGS);
+        registerCustomItem("bronze_helmet", BRONZE_HELMET);
+        registerCustomItem("bronze_boots", BRONZE_BOOTS);
+        registerCustomItem("bronze_hoe", BRONZE_HOE);
+        registerCustomItem("bronze_axe", BRONZE_AXE);
+        registerCustomItem("bronze_sword", BRONZE_SWORD);
+        registerCustomItem("bronze_shovel", BRONZE_SHOVEL);
+        registerCustomItem("bronze_pickaxe", BRONZE_PICKAXE);
     }
 
     private static Item registerCustomItem(String name, Item item) {

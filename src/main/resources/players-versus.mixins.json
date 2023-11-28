@@ -31,6 +31,7 @@
     "items.throwing.SnowballEntityMixin",
     "items.throwing.SnowballMixin",
     "items.throwing.SplashPotionMixin",
+    "items.throwing.SlimeballsAndFireChargesMixin",
     "items.shields.LivingEntityBlockingMixin",
     "items.shields.PlayerEntityBlockingMixin",
     "items.shields.ShieldItemMixin",

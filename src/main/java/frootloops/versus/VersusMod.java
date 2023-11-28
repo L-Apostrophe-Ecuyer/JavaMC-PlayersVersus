@@ -1,6 +1,7 @@
 package frootloops.versus;
 
 import frootloops.versus.mod.CustomBlocks;
+import frootloops.versus.mod.Entities;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.items.Items;
@@ -24,9 +25,10 @@ public class VersusMod implements ModInitializer {
 		// Proceed with mild caution.
 
 		MOD_LOGGER.info("Launching " + MOD_ID);
-		CustomBlocks.init();
-		Combat.init();
-		Enchants.init();
-		Items.init();
+		CustomBlocks.onInitialize();
+		Combat.onInitialize();
+		Enchants.onInitialize();
+		Entities.onInitialize();
+		Items.onInitialize();
 	}
 }

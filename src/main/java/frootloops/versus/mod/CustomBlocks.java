@@ -21,7 +21,7 @@ public class CustomBlocks {
         Registry.register(Registries.ITEM, new Identifier(VersusMod.MOD_ID, name), new BlockItem(block, new FabricItemSettings()));
     }
 
-    public static void init() {
+    public static void onInitialize() {
         registerBlocks("smoldering_torch", SMOLDERING_TORCH);
         registerBlocks("smoldering_wall_torch", SMOLDERING_WALL_TORCH);
     }
