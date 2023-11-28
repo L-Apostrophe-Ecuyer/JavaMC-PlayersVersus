@@ -5,13 +5,17 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.random.Random;
@@ -24,7 +28,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
 import java.util.UUID;
 
 @Mixin(ZombieEntity.class)
@@ -40,6 +43,13 @@ public abstract class ZombieMixin extends HostileEntity {
     public int getMinAmbientSoundDelay() {
         return 500;
     }
+
+    @Shadow
+    private static final TrackedData<Boolean> BABY = DataTracker.registerData(ZombieEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+
+    private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
+
+    private static final EntityAttributeModifier BABY_SPEED_BONUS = new EntityAttributeModifier(BABY_SPEED_ID, "Baby speed boost", 0.2, EntityAttributeModifier.Operation.MULTIPLY_BASE);
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
@@ -70,6 +80,8 @@ public abstract class ZombieMixin extends HostileEntity {
     @Override
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
+        if(this.isBaby()) return;
+
         float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
         ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
         this.setCanPickUpLoot(true);
@@ -128,6 +140,16 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Override
     public void setBaby(boolean baby) {
-        // No.
+
+        // Less babies:
+        if(this.getPos().y > 72) return;
+        if(this.world.getTime() % 3 != 0) return;
+
+        this.getDataTracker().set(BABY, baby);
+        if (this.world != null && !this.world.isClient) {
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+            entityAttributeInstance.removeModifier(BABY_SPEED_BONUS);
+            if (baby) entityAttributeInstance.addTemporaryModifier(BABY_SPEED_BONUS);
+        }
     }
 }
