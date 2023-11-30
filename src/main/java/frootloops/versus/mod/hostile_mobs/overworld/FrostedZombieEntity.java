@@ -6,8 +6,6 @@ import net.minecraft.entity.ai.RangedAttackMob;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -80,7 +78,7 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
         if(rand - 8 > 0) {
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SNOWBALL, rand - 8));
             this.handDropChances[1] = 0.8f;
-            this.goalSelector.add(2, new SnowballAttackGoal(this, 1.25, 12, 12.0f));
+            this.goalSelector.add(1, new SnowballAttackGoal(this, 1.25, 12, 12.0f));
         }
         if (rand < 4) {
             int i = random.nextInt(3);
@@ -96,8 +94,8 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
         this.goalSelector.add(2, new ZombieAttackGoal(this, 1.1, false));
         this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, this::canBreakDoors));
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
-        this.targetSelector.add(1, new RevengeGoal(this, new Class[0]).setGroupRevenge(ZombifiedPiglinEntity.class));
-        this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>((MobEntity)this, PlayerEntity.class, true));
+        this.targetSelector.add(1, new ActiveTargetGoal<PlayerEntity>((MobEntity)this, PlayerEntity.class, true));
+        this.targetSelector.add(2, new RevengeGoal(this, new Class[0]).setGroupRevenge(ZombifiedPiglinEntity.class));
         this.targetSelector.add(3, new ActiveTargetGoal<MerchantEntity>((MobEntity)this, MerchantEntity.class, false));
     }
 }
