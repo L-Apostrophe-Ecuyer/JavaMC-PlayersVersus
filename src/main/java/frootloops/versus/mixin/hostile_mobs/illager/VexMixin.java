@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs.overworld;
+package frootloops.versus.mixin.hostile_mobs.illager;
 
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;

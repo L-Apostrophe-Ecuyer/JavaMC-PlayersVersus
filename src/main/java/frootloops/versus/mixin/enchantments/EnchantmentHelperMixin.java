@@ -49,8 +49,8 @@ public class EnchantmentHelperMixin {
 
         stack.removeSubNbt("Enchantments");
         stack.removeSubNbt("StoredEnchantments");
-        EnchantmentHelper.set(currentEnchantments, stack);
         if (stack.isOf(Items.BOOK)) stack = new ItemStack(Items.ENCHANTED_BOOK);
+        EnchantmentHelper.set(currentEnchantments, stack);
         return stack;
     }
 
@@ -68,8 +68,6 @@ public class EnchantmentHelperMixin {
             if(currentEnchant instanceof ProtectionEnchantment) numProtectionEnchantments += 1;
         }
 
-        VersusMod.MOD_LOGGER.warn("Enchanting an item with " + numProtectionEnchantments + " protection enchantments attached.");
-
         List<EnchantmentLevelEntry> listCandidateEnchantments = EnchantmentHelper.getPossibleEntries(power = MathHelper.clamp(Math.round((float)power), 1, Integer.MAX_VALUE), stack, treasureAllowed);
         if (!listCandidateEnchantments.isEmpty()) {
             Weighting.getRandom(random, listCandidateEnchantments).ifPresent(list::add);
@@ -79,16 +77,11 @@ public class EnchantmentHelperMixin {
 
                 EnchantmentLevelEntry candidate = Weighting.getRandom(random, listCandidateEnchantments).get();
                 if(candidate != null && ( candidate.enchantment instanceof ProtectionEnchantment)) {
-
-                    VersusMod.MOD_LOGGER.warn("  > Encountered a protection enchantment: " + Text.translatable(candidate.enchantment.getTranslationKey()));
-                    VersusMod.MOD_LOGGER.warn("  > Accepted? " + (numProtectionEnchantments >= 2));
-
                     if(numProtectionEnchantments >= 2) {
                         listCandidateEnchantments.remove(candidate);
                         continue;
                     }
                     else numProtectionEnchantments += 1;
-                    VersusMod.MOD_LOGGER.warn("  > There are now " + numProtectionEnchantments + " protection enchantments.");
                 }
                 list.add(candidate);
                 power /= 2;

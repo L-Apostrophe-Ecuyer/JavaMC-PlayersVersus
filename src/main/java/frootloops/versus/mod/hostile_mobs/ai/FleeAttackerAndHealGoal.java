@@ -1,22 +1,20 @@
-package frootloops.versus.mod.hostile_mobs.overworld;
-import net.minecraft.entity.EquipmentSlot;
+package frootloops.versus.mod.hostile_mobs.ai;
+import frootloops.versus.VersusMod;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.potion.PotionUtil;
-import net.minecraft.potion.Potions;
+import net.minecraft.entity.raid.RaiderEntity;
+import net.minecraft.item.PotionItem;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 
-public class FleeLastAttackerGoal<T extends LivingEntity> extends Goal {
+public class FleeAttackerAndHealGoal<T extends LivingEntity> extends Goal {
     protected final PathAwareEntity mob;
     private final double speed;
     @Nullable
@@ -28,8 +26,9 @@ public class FleeLastAttackerGoal<T extends LivingEntity> extends Goal {
     private int drinkTimeLeft = 24;
 
     private boolean isDrinkingPotion = false;
+    private boolean canDrinkPotion = false;
 
-    public FleeLastAttackerGoal(PathAwareEntity mob, double speed) {
+    public FleeAttackerAndHealGoal(PathAwareEntity mob, double speed) {
         this.mob = mob;
         this.speed = speed;
         this.fleeingEntityNavigation = mob.getNavigation();
@@ -40,9 +39,10 @@ public class FleeLastAttackerGoal<T extends LivingEntity> extends Goal {
     @Override
     public boolean canStart() {
         if (mob.hurtTime == 0) return false;
-        if (mob.getRecentDamageSource().getAttacker() == null) return false;
-        if (!(mob.getRecentDamageSource().getAttacker() instanceof LivingEntity)) return false;
-        else targetEntity = (LivingEntity) mob.getRecentDamageSource().getAttacker();
+        if (mob.getHealth()/mob.getMaxHealth() > 0.8f) return false;
+
+        targetEntity = (LivingEntity) mob.getRecentDamageSource().getAttacker();
+        if (targetEntity == null || !(targetEntity instanceof LivingEntity)) return false;
 
         Vec3d vec3d = NoPenaltyTargeting.findFrom(mob, 16, 7, targetEntity.getPos());
         if (vec3d == null) return false;
@@ -54,23 +54,24 @@ public class FleeLastAttackerGoal<T extends LivingEntity> extends Goal {
     }
 
     @Override
+    public void start() {
+        canDrinkPotion = (mob instanceof RaiderEntity || mob.getOffHandStack().getItem() instanceof PotionItem);
+        mob.getNavigation().setSpeed(speed);
+        fleeingEntityNavigation.startMovingAlong(fleePath, speed);
+    }
+
+    @Override
     public boolean shouldContinue() {
-        if(fleeingEntityNavigation.isIdle()) {
-            // Done fleeing, now we can heal with a potion
-            if (!isDrinkingPotion) {
+        if(fleeingEntityNavigation.isIdle() || targetEntity.squaredDistanceTo(this.mob) > 64.0) {
+            if (!isDrinkingPotion && canDrinkPotion) {
                 isDrinkingPotion = true;
                 drinkTimeLeft = 24;
-                mob.equipStack(EquipmentSlot.OFFHAND, mob.getMainHandStack());
-                mob.equipStack(EquipmentSlot.MAINHAND, PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.REGENERATION));
-                if (!mob.isSilent()) {
-                    mob.world.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENTITY_WITCH_DRINK, mob.getSoundCategory(), 1.0f, 1.0f);
-                }
+                if (!mob.isSilent()) mob.world.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENTITY_WITCH_DRINK, mob.getSoundCategory(), 1.0f, 1.0f);
             }
             else if (isDrinkingPotion && --this.drinkTimeLeft <= 0) {
                 isDrinkingPotion = false;
-                mob.equipStack(EquipmentSlot.MAINHAND, mob.getOffHandStack());
-                mob.equipStack(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
-                mob.heal(8);
+                canDrinkPotion = false;
+                mob.heal(12);
                 return false;
             }
         }
@@ -78,17 +79,7 @@ public class FleeLastAttackerGoal<T extends LivingEntity> extends Goal {
     }
 
     @Override
-    public void start() {
-        fleeingEntityNavigation.startMovingAlong(fleePath, speed);
-    }
-
-    @Override
     public void stop() {
         targetEntity = null;
-    }
-
-    @Override
-    public void tick() {
-        mob.getNavigation().setSpeed(speed);
     }
 }

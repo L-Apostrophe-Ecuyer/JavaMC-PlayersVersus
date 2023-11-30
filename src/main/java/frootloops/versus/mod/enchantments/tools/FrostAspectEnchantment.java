@@ -60,7 +60,7 @@ public class FrostAspectEnchantment extends Enchantment {
             user.world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, user.getSoundCategory(), 1.0f, 1.0f);
             targetEntity.extinguish();
 
-            // Minimum ticks to get damaged is 140, for most. Entities get rid of 2 FrozenTicks per tick.
+            // Minimum ticks to get damaged is 140, for most. ModEntities get rid of 2 FrozenTicks per tick.
             target.setFrozenTicks(target.getFrozenTicks() + 220);
             if(user.world instanceof ServerWorld serverWorld) {
                 target.world.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, target.getSoundCategory(), 1.0f, 1.0f);

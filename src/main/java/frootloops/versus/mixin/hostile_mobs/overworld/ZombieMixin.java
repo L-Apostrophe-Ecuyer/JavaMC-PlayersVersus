@@ -49,7 +49,8 @@ public abstract class ZombieMixin extends HostileEntity {
 
     private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
 
-    private static final EntityAttributeModifier BABY_SPEED_BONUS = new EntityAttributeModifier(BABY_SPEED_ID, "Baby speed boost", 0.2, EntityAttributeModifier.Operation.MULTIPLY_BASE);
+    // Reduced:
+    private static final EntityAttributeModifier BABY_SPEED_BONUS_REDUCED = new EntityAttributeModifier(BABY_SPEED_ID, "Baby speed boost", 0.2, EntityAttributeModifier.Operation.MULTIPLY_BASE);
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
@@ -116,8 +117,7 @@ public abstract class ZombieMixin extends HostileEntity {
 
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
             if (isAtDiamondDepth && rand % 17 == 0) {
-                ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.enchant(world.random, enchantedBook, 12, true);
+                ItemStack enchantedBook = EnchantmentHelper.enchant(world.random, new ItemStack(Items.BOOK), 12, true);;
 ;               this.equipStack(EquipmentSlot.OFFHAND, enchantedBook);
                 this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
             }
@@ -138,18 +138,18 @@ public abstract class ZombieMixin extends HostileEntity {
         }
     }
 
+    @Overwrite
+    public static boolean shouldBeBaby(Random random) {
+        return random.nextFloat() < 0.02f;
+    }
+
     @Override
     public void setBaby(boolean baby) {
-
-        // Less babies:
-        if(this.getPos().y > 72) return;
-        if(this.world.getTime() % 3 != 0) return;
-
         this.getDataTracker().set(BABY, baby);
         if (this.world != null && !this.world.isClient) {
             EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-            entityAttributeInstance.removeModifier(BABY_SPEED_BONUS);
-            if (baby) entityAttributeInstance.addTemporaryModifier(BABY_SPEED_BONUS);
+            entityAttributeInstance.removeModifier(BABY_SPEED_BONUS_REDUCED);
+            if (baby) entityAttributeInstance.addTemporaryModifier(BABY_SPEED_BONUS_REDUCED);
         }
     }
 }

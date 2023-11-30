@@ -1,4 +1,4 @@
-package frootloops.versus.mod.hostile_mobs;
+package frootloops.versus.mod.hostile_mobs.overworld;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.ZombieEntity;

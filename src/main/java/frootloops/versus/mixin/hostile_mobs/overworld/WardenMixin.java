@@ -1,10 +1,7 @@
 package frootloops.versus.mixin.hostile_mobs.overworld;
 
 import com.google.common.annotations.VisibleForTesting;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.WardenAngerManager;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.damage.DamageSource;
@@ -15,15 +12,16 @@ import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.TridentEntity;
-import net.minecraft.util.Unit;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
 @Mixin(WardenEntity.class)
@@ -82,11 +80,17 @@ public class WardenMixin extends HostileEntity {
         }
     }
 
-    @Inject(method = "onSpawnPacket", at = @At("TAIL"))
-    private void dontDespawnWhenSummonedByCheats(CallbackInfo ci){
-        if (!this.getBrain().hasMemoryModule(MemoryModuleType.DIG_COOLDOWN) && this.getPose() != EntityPose.EMERGING) {
+    @Inject(method = "initialize", at = @At("TAIL"))
+    private void dontDespawnWhenSummonedByCheats(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt, CallbackInfoReturnable cir){
+        if (spawnReason != SpawnReason.TRIGGERED) {
             this.setPersistent();
         }
+    }
+
+    @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        if(spawnReason == SpawnReason.NATURAL && this.getBlockPos().getY() > -16) return false;
+        else return super.canSpawn(world, spawnReason);
     }
 
 

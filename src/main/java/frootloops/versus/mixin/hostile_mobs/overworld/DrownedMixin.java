@@ -42,7 +42,7 @@ public abstract class DrownedMixin extends ZombieEntity {
     @Inject(method = "initEquipment", at = @At("HEAD"), cancellable = true)
     public void changeProbability(Random random, LocalDifficulty localDifficulty, CallbackInfo ci) {
         int rand = random.nextInt(100);
-        this.handDropChances[1] = 0.5f;
+        this.handDropChances[0] = 0.5f;
         this.handDropChances[1] = 0.5f;
 
         if (rand < 10) {

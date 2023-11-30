@@ -1,12 +1,10 @@
 package frootloops.versus.mod.items.throwing;
 
-import frootloops.versus.mod.Entities;
-import net.minecraft.client.render.entity.ProjectileEntityRenderer;
+import frootloops.versus.mod.ModEntities;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -23,17 +21,17 @@ public class SlimeballEntity extends ThrownItemEntity {
     private static final ItemStack slimeballStack = new ItemStack(Items.SLIME_BALL, 1);
 
     public SlimeballEntity(World world, LivingEntity owner) {
-        super((EntityType<SlimeballEntity>)Entities.SLIMEBALL, owner, world);
+        super((EntityType<SlimeballEntity>) ModEntities.SLIMEBALL, owner, world);
         this.setItem(slimeballStack);
     }
 
     public SlimeballEntity(World world, double x, double y, double z) {
-        super((EntityType<SlimeballEntity>)Entities.SLIMEBALL, x, y, z, world);
+        super((EntityType<SlimeballEntity>) ModEntities.SLIMEBALL, x, y, z, world);
         this.setItem(slimeballStack);
     }
 
     public SlimeballEntity(EntityType<SlimeballEntity> entityType, World world) {
-        super((EntityType<SlimeballEntity>)Entities.SLIMEBALL, world);
+        super((EntityType<SlimeballEntity>) ModEntities.SLIMEBALL, world);
         this.setItem(slimeballStack);
     }
 

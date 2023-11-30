@@ -61,22 +61,25 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
     @Inject(method = "takeShieldHit", at = @At("TAIL"))
     private void shieldDisablingForMobs(LivingEntity attacker, CallbackInfo ci) {
-        if (attacker.disablesShield() && this.getType() != EntityType.PLAYER) {
-            this.world.sendEntityStatus(this, (byte)30);
-            if(this.world instanceof ServerWorld) {
+        if (this.getType() != EntityType.PLAYER) {
+            this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.world.random.nextFloat() * 0.4F);
+            if (attacker.disablesShield()) {
+                if (this.world instanceof ServerWorld) {
 
-                // Drop the shield
-                ItemStack shieldItemStack = ((LivingEntity) ((Object) this)).getOffHandStack();
-                ItemEntity itemEntity = new ItemEntity(this.world, this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
-                itemEntity.setPickupDelay(40);
-                this.world.spawnEntity(itemEntity);
-                shieldItemStack.setCount(0);
+                    // Drop the shield
 
-                // Stop blocking
-                this.setPose(EntityPose.STANDING);
-                ((LivingEntity) ((Object) this)).stopUsingItem();
+                    ItemStack shieldItemStack = ((LivingEntity) ((Object) this)).getOffHandStack();
+                    ItemEntity itemEntity = new ItemEntity(this.world, this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
+                    itemEntity.setPickupDelay(40);
+                    this.world.spawnEntity(itemEntity);
+                    shieldItemStack.setCount(0);
+
+                    // Stop blocking
+                    this.setPose(EntityPose.STANDING);
+                    ((LivingEntity) ((Object) this)).stopUsingItem();
+                }
+                this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.world.random.nextFloat() * 0.4F);
             }
-            this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.world.random.nextFloat() * 0.4F);
         }
     }
 

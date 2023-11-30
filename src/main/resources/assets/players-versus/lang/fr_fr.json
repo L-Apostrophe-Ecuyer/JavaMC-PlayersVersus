@@ -8,6 +8,8 @@
   "enchantment.players-versus.bounding_strides": "Bondissement",
   "enchantment.players-versus.magic_protection": "Protection contre la magie",
   "enchantment.players-versus.impact_protection": "Protection contre les coups",
-  "enchantment.players-versus.piercing_protection": "Protection contre les dégats perforants",
-  "enchantment.minecraft.protection": "Protection complète"
+  "enchantment.players-versus.piercing_protection": "Protection contre les perforations",
+  "enchantment.minecraft.protection": "Protection totale",
+  "entities.players-versus.deeper_creeper": "Dreeper",
+  "entities.players-versus.frosted_zombie": "Surgelé"
 }

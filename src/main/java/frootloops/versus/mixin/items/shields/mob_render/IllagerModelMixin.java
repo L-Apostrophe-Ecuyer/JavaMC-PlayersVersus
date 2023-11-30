@@ -41,8 +41,8 @@ public abstract class IllagerModelMixin<T extends IllagerEntity> extends SingleP
     private void setAnglesForShield(T hostileEntity, float f, float g, float h, float i, float j, CallbackInfo ci) {
         if(hostileEntity.getPose() == EntityPose.CROUCHING && hostileEntity.isBlocking()) {
             this.arms.visible = true;
-            this.leftArm.visible = false;
-            this.rightArm.visible = false;
+            this.leftArm.visible = true;
+            this.rightArm.visible = true;
             this.leftArm.pitch = MathHelper.cos(f * 0.6662f) * 2.0f * g * 0.5f;
             this.leftArm.pitch = this.leftArm.pitch * 0.5f - 0.9424779f;
             this.leftArm.yaw = 0.5235988f;

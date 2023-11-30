@@ -1,4 +1,4 @@
-package frootloops.versus.mod.hostile_mobs.overworld;
+package frootloops.versus.mod.hostile_mobs.ai;
 
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
@@ -43,7 +43,7 @@ public class ZombieSoundListener {
         // How much zombies should be attracted to the sound:
         boolean isHighPriority = (event == GameEvent.EAT || event == GameEvent.DRINK || event == GameEvent.ENTITY_DAMAGE);
         boolean isPriority = !isHighPriority && (heardPlayerSprinting || heardProjectileLanding || event.getId().startsWith("block"));
-        double range = isHighPriority ? 64d : isPriority? 32d : 20d;
+        double range = isHighPriority ? 48d : isPriority? 32d : 20d;
         double speedMultiplier = isHighPriority ? 1.2d : isPriority ? 1.0d : 0.8d;
 
         // Create a bounding box surrounding the event's position:
@@ -59,10 +59,5 @@ public class ZombieSoundListener {
                 zombie.ambientSoundChance += isHighPriority ? 1000 : isPriority ? 500 : 250;
             }
         }
-    }
-
-    private static boolean IsPriority(final GameEvent event){
-        String id = event.getId();
-        return (id.equals("eat") || id.startsWith("block"));
     }
 }

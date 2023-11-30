@@ -87,14 +87,16 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                     return (target instanceof HostileEntity || target instanceof PlayerEntity || target == player.getAttacker());
                 }
             }
+            else if (mainhandStack.getUseAction() == UseAction.BLOCK) {
+                return true;
+            }
             else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
-                if(player.squaredDistanceTo(player.getAttacker()) > 100.0) return false;
                 return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
             }
         }
         else if(mainhandStack.getUseAction() == UseAction.BLOCK){
             if(player.isSneaking()) {
-                return false;
+                return !(mainhandStack.getItem() instanceof ShieldItem);
             }
             else if (crosshairTarget.getType() == HitResult.Type.ENTITY) {
                 if(player.isUsingItem()) {
@@ -104,6 +106,9 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                     return !(target instanceof HostileEntity || target instanceof PlayerEntity || target == player.getAttacker());
                 }
             }
+            else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
+                return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
+            }
             else if(offhandStack.getUseAction() == UseAction.EAT || offhandStack.getUseAction() == UseAction.DRINK) {
                 if(offhandStack.isFood()) {
                     if(offhandStack.getItem().getFoodComponent().isAlwaysEdible()) return true;
@@ -111,12 +116,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 }
                 else return true;
             }
-            else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
-                if(player.squaredDistanceTo(player.getAttacker()) > 100.0) return false;
-                return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
-            }
         }
-
         return false;
     }
 

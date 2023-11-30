@@ -9,5 +9,7 @@
   "enchantment.players-versus.magic_protection": "Magic Protection",
   "enchantment.players-versus.impact_protection": "Impact Protection",
   "enchantment.players-versus.piercing_protection": "Piercing Protection",
-  "enchantment.minecraft.protection": "Max Protection"
+  "enchantment.minecraft.protection": "Total Protection",
+  "entities.players-versus.deeper_creeper": "Dreeper",
+  "entities.players-versus.frosted_zombie": "Frosted"
 }
