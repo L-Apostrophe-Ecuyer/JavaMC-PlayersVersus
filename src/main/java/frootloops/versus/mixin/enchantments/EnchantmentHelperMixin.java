@@ -128,7 +128,7 @@ public class EnchantmentHelperMixin {
             for (int i = enchantment.getMaxLevel(); i > minLevel; --i) {
 
                 // See if we can affort the new enchantment (or upgrade to old enchantment):
-                int upgradeRebate = currentLevel == 0 ? 0 : (enchantment.getMinPower(currentLevel))/2;
+                int upgradeRebate = currentLevel == 0 ? 0 : (enchantment.getMinPower(currentLevel)) * 2/3;
                 int overEnchantingCost = (enchantment instanceof ProtectionEnchantment) ? i * numProtectionEnchantments : 0;
                 if (power + upgradeRebate < enchantment.getMinPower(i) + overEnchantingCost|| power > enchantment.getMaxPower(i) + overEnchantingCost) continue;
 

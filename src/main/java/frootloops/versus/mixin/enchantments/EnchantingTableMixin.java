@@ -121,7 +121,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
         return false;
     }
 
-    @Inject(method = "onContentChanged()V", at = @At(value = "TAIL"))
+    @Inject(method = "onContentChanged", at = @At(value = "TAIL"))
     private void updateUnavailableEnchantments(Inventory inventory, CallbackInfo ci) {
         this.context.run((world, pos) -> {
             List<EnchantmentLevelEntry> list;

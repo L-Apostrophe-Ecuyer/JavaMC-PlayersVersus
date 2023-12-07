@@ -1,0 +1,66 @@
+
+QUICK WINS:
+- Bug fix for hand swinging without LMB being held down.
+- Cobwebs easier to break
+- Figure out Smoldering Torches
+- Spider pitch fix
+
+SURVIVAL:
+    - (1.21 only) Sleeping speeds up tick speed, rather than skipping the night.
+
+EQUIPMENT:
+    - Knives: Work as shears and close range swords
+    - Copper armor & tools: Superchargeable, unenchantable.
+    - Bronze armor & tools: Iron, but much faster! But unenchantable.
+    - Slime arrows
+
+ENVIRONMENT:
+    - Fog as a weather event
+    - More mob interactions:
+        - Pigs attack nearby zombies, and scare them off.
+        - Pigs gang up on hostile entities.
+        - Frogs eat spiders, and a unique yellow variant spawns in Lush Caves.
+        - Black Bears in Taigas eat berries, breed with honey, and are territorial to strangers. Basically, neutral Ravagers.
+        - ???
+
+CREEPIES AND CRAWLIES:
+    - Warden overhaul: Backstage Director, decides if and when to increase Warden chances of spawning, regardless of Shriekers
+    - Gooey Skeletons: Skeletons shooting slime arrows, that ought to bounce around.
+    - Desert spiders: Beige spiders spawning in desert caves. Territorial. They drop sand.
+
+
+------------------------------------------------------------------------------------------
+                         Wishlist: Might not happen, but who knows
+------------------------------------------------------------------------------------------
+
+CREEPIES AND CRAWLIES:
+    - Mobs can jump
+    - Dopplegangers in the caves
+
+INVENTORY:
+    - Low priority items like seeds shouldn't default to the hotbar
+
+ENVIRONMENT:
+    - Seasons!
+        - Variable day/night cycle length, crop growth rate
+        - Variable mob spawns
+        - Grass color and temperature changes
+        - Freezing in cold biomes during the winter
+
+    - Immersion:
+        - Better aquifer generation.
+        - No floating blocks on structure generation
+
+    - Animal happiness:
+        - Breeding has a long cooldown, but reduced by the animal's activities
+        - Replenishing activities: Decreases animal "breeding age", i.e. giving it ressources to perform activities
+            - DrinkWaterGoal, EatPlantBlockGoal
+        - Consumption activities: Decreases animal "breeding age", i.e. puts these activities on cooldown, as well as breeding
+            - Milking for cows, digging for pigs, wool for sheep. Only available if the animal can breed
+            - Add Cheese!
+
+    - Dynamic systems:
+        - Mossification: Stone & Cobblestone can become mossy overtime
+        - Better fire spread: Certain blocks are omitted, other blocks can get charred. Soot.
+
+    - Tunnels in the dark, some analog horror goodness

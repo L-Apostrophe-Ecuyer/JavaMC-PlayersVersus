@@ -44,12 +44,9 @@ public abstract class LivingEntityMixin extends Entity {
     private void getHandSwingDuration(CallbackInfoReturnable<Integer> cir) {
         ItemStack mainHand = ((LivingEntity)((Object)this)).getMainHandStack();
         if(((LivingEntity)((Object)this)) instanceof PathAwareEntity && mainHand != null){
-            if(mainHand.getItem() instanceof AxeItem)
-                cir.setReturnValue(24);
-            else if(mainHand.getItem() instanceof HoeItem)
-                cir.setReturnValue(10);
-            else
-                cir.setReturnValue(16);
+            if(mainHand.getItem() instanceof AxeItem) cir.setReturnValue(24);
+            else if(mainHand.getItem() instanceof HoeItem) cir.setReturnValue(10);
+            else cir.setReturnValue(16);
         }
     }
 

@@ -70,28 +70,36 @@ public class CreepingAndExplodingGoal extends Goal {
 
         // If the creeper was attacked, drop all pretenses and rush them:
         if (this.creeper.getAttacker() != null) this.wasCoverBlown = true;
+        if (targetEntity.handSwinging) this.wasCoverBlown = true;
 
         double squaredDistance = this.creeper.squaredDistanceTo(targetEntity);
-        if (squaredDistance > 4.0 && Combat.isLookingTowards(targetEntity, this.creeper.getPos())) {
+        boolean isPlayerLooking = Combat.isLookingTowards(targetEntity, this.creeper.getPos());
+
+        // When far enough away from target, only move when not looking (unless cover was blown):
+        if (squaredDistance > 12.0) {
             // Freeze! Target player is looking! (Andy's coming!)
-            if (targetEntity.canSee(this.creeper)) {
-                if(!this.wasCoverBlown) {
-                    this.creeper.getNavigation().stop();
-                    return; // Won't explode, either
+            if (isPlayerLooking && targetEntity.canSee(this.creeper) && !this.wasCoverBlown) {
+                this.creeper.getNavigation().stop();
+                return; // Won't explode, either
+            }
+            // If the player can't see the creeper, creep up on them:
+            else {
+                this.wasCoverBlown = false;
+                if(this.creeper.getNavigation().isIdle()) {
+                    this.creeper.getNavigation().startMovingTo(targetEntity, this.wasCoverBlown ? this.speed * 1.2 : this.speed);
+                    this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
                 }
             }
-            // If the player can't see the creeper, start stalking again:
-            else this.wasCoverBlown = false;
         }
 
-        // Walk towards player target:
-        if (squaredDistance > 4.0 || this.creeper.getNavigation().isIdle()) {
-            this.creeper.getNavigation().startMovingTo(targetEntity, this.wasCoverBlown ? this.speed + 0.04 : this.speed - 0.02);
+        // If the player is looking, but the creeper is close enough, start charging:
+        else if(this.wasCoverBlown || !isPlayerLooking || this.creeper.getNavigation().isIdle() || this.creeper.getFuseSpeed() > 0) {
+            this.creeper.getNavigation().startMovingTo(targetEntity, this.speed * 1.2);
             this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
         }
 
-        // Explode when within 2 blocks:
-        if(squaredDistance < 9.0 && this.creeper.getVisibilityCache().canSee(targetEntity)) this.creeper.setFuseSpeed(1);
+        // Explode when within 2.5 blocks:
+        if(squaredDistance < 7.0 && isPlayerLooking && this.creeper.getVisibilityCache().canSee(targetEntity)) this.creeper.setFuseSpeed(1);
         else this.creeper.setFuseSpeed(-1);
     }
 }
