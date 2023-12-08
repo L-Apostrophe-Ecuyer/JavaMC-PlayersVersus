@@ -112,7 +112,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
                 BlockPos pos = blockHitResult.getBlockPos();
                 interactionManager.attackBlock(pos, blockHitResult.getSide());
-                if(isMineableBlock(pos, this.world.getBlockState(pos))) {
+                if(isMineableBlock(pos, this.getWorld().getBlockState(pos))) {
                     missedSwing = false;
                     resetAttackCooldown = true;
                     break;
@@ -147,10 +147,10 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     }
 
     private void breakFoliageAt(BlockPos pos) {
-        if(this.world.getBlockState(pos).getHardness(world, pos) == 0.0F) {
+        if(this.getWorld().getBlockState(pos).getHardness(world, pos) == 0.0F) {
             this.interactionManager.breakBlock(pos);
             BlockPos above = new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ());
-            if(this.world.getBlockState(above).getHardness(world, above) == 0.0F) this.interactionManager.breakBlock(above);
+            if(this.getWorld().getBlockState(above).getHardness(world, above) == 0.0F) this.interactionManager.breakBlock(above);
         }
     }
 }

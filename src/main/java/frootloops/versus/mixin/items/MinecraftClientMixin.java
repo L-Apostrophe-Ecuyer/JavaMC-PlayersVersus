@@ -128,7 +128,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
      */
     private boolean tryUsingItem(Hand hand) {
         ItemStack itemStack = this.player.getStackInHand(hand);
-        if (!itemStack.isItemEnabled(this.world.getEnabledFeatures())) return false;
+        if (!itemStack.isItemEnabled(world.getEnabledFeatures())) return false;
         ActionResult actionResult = null;
 
         if (this.crosshairTarget != null) {
@@ -136,7 +136,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 case ENTITY:
                     EntityHitResult entityHitResult = (EntityHitResult)this.crosshairTarget;
                     Entity entity = entityHitResult.getEntity();
-                    if (!this.world.getWorldBorder().contains(entity.getBlockPos())) {
+                    if (!world.getWorldBorder().contains(entity.getBlockPos())) {
                         return false;
                     }
 

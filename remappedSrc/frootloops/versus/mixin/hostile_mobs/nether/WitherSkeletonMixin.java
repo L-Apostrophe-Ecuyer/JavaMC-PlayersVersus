@@ -22,7 +22,7 @@ public class WitherSkeletonMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason == SpawnReason.NATURAL && this.getBlockPos().getY() > -32 && !this.world.getBiome(this.getBlockPos()).isIn(BiomeTags.ANCIENT_CITY_HAS_STRUCTURE)) return false;
+        if(spawnReason == SpawnReason.NATURAL && this.getBlockPos().getY() > -32 && !this.getWorld().getBiome(this.getBlockPos()).isIn(BiomeTags.ANCIENT_CITY_HAS_STRUCTURE)) return false;
         else return super.canSpawn(world, spawnReason);
     }
 }

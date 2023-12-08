@@ -35,7 +35,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
 
     @Override
     public void damageShield(float amount) {
-        if (!this.world.isClient) {
+        if (!this.getWorld().isClient) {
             this.incrementStat(Stats.USED.getOrCreateStat(this.activeItemStack.getItem()));
         }
 
@@ -53,8 +53,8 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
                 }
 
                 this.activeItemStack = ItemStack.EMPTY;
-                if (this.activeItemStack.isOf(Items.SHIELD)) this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.world.random.nextFloat() * 0.4F);
-                if (this.activeItemStack.getItem() instanceof SwordItem) this.playSound(SoundEvents.ENTITY_ITEM_BREAK, 0.6F, 0.5F + this.world.random.nextFloat() * 0.3F);
+                if (this.activeItemStack.isOf(Items.SHIELD)) this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
+                if (this.activeItemStack.getItem() instanceof SwordItem) this.playSound(SoundEvents.ENTITY_ITEM_BREAK, 0.6F, 0.5F + this.getWorld().random.nextFloat() * 0.3F);
             }
         }
     }
@@ -74,7 +74,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
 
         this.itemCooldownManager.set(this.activeItemStack.getItem(), disableForTicks);
         this.clearActiveItem();
-        this.world.sendEntityStatus(this, (byte)30);
+        this.getWorld().sendEntityStatus(this, (byte)30);
         info.cancel();
     }
 

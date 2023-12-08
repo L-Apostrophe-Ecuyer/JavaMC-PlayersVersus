@@ -49,7 +49,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "getXpToDrop", at = @At("RETURN"), cancellable = true)
     public void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
-        if (this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+        if (this.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
             cir.setReturnValue(0);
         } else {
             cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1));
