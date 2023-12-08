@@ -13,6 +13,7 @@ EQUIPMENT:
     - Copper armor & tools: Superchargeable, unenchantable.
     - Bronze armor & tools: Iron, but much faster! But unenchantable.
     - Slime arrows
+    - Skirt item, with custom model, would be fun cosmetics
 
 ENVIRONMENT:
     - Fog as a weather event
