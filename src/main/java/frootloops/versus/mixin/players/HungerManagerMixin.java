@@ -115,7 +115,7 @@ public class HungerManagerMixin {
         //    surviving off of food that you find on your travels, which makes for daunting adventures and mellowing stay home times, for
         //    you to invest in your area and build farms for longer excursions.
 
-        boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
+        boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.getWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (canPlayerRegenHealth) {
             foodTickTimer++;
             if(foodLevel > prevFoodLevel) foodTickTimer = Math.max(foodTickTimer, REGEN_TIME_SATURATION);

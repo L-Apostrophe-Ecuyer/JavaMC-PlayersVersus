@@ -49,8 +49,8 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
     }
 
     @Override
-    public void attack(LivingEntity target, float pullProgress) {
-        SnowballEntity snowballEntity = new SnowballEntity(this.world, this);
+    public void shootAt(LivingEntity target, float pullProgress) {
+        SnowballEntity snowballEntity = new SnowballEntity(this.getWorld(), this);
         double d = target.getEyeY() - (double)1.1f;
         double e = target.getX() - this.getX();
         double f = d - snowballEntity.getY();
@@ -58,7 +58,7 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
         double h = Math.sqrt(e * e + g * g) * (double)0.2f;
         snowballEntity.setVelocity(e, f + h, g, 1.6f, 12.0f);
         this.playSound(SoundEvents.ENTITY_SNOW_GOLEM_SHOOT, 1.0f, 0.4f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
-        this.world.spawnEntity(snowballEntity);
+        this.getWorld().spawnEntity(snowballEntity);
         this.swingHand(Hand.OFF_HAND);
         this.getOffHandStack().setCount(this.getOffHandStack().getCount() - 1);
     }

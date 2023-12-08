@@ -42,12 +42,12 @@ public class DragonManager {
 
 		double chance = chargePlayerMaxChance;
 
-		BlockPos centerPodium = dragon.world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.ORIGIN);
+		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
 		Box boundingBox = new Box(centerPodium).expand(64d);
-		List<PlayerEntity> players = dragon.world.getEntitiesByClass(PlayerEntity.class, boundingBox, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
+		List<PlayerEntity> players = dragon.getWorld().getEntitiesByClass(PlayerEntity.class, boundingBox, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
 
 		for (PlayerEntity player : players) {
-			List<EndCrystalEntity> endCrystals = player.world.getNonSpectatingEntities(EndCrystalEntity.class, player.getBoundingBox().expand(10d));
+			List<EndCrystalEntity> endCrystals = player.getWorld().getNonSpectatingEntities(EndCrystalEntity.class, player.getBoundingBox().expand(10d));
 			if (endCrystals.size() > 0) {
 				chance *= 2d;
 				break;
@@ -58,9 +58,9 @@ public class DragonManager {
 	}
 
 	private static void chargePlayer(EnderDragonEntity dragon) {
-		BlockPos centerPodium = dragon.world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.ORIGIN);
+		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
 		Box bb = new Box(centerPodium).expand(64d);
-		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayerNearCrystal(dragon.world, bb);
+		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayerNearCrystal(dragon.getWorld(), bb);
 
 		if (player == null)
 			return;
@@ -79,10 +79,10 @@ public class DragonManager {
 	}
 
 	private static void fireballPlayer(EnderDragonEntity dragon) {
-		BlockPos centerPodium = dragon.world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.ORIGIN);
+		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
 		Box bb = new Box(centerPodium).expand(64d);
 
-		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayer(dragon.world, bb);
+		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayer(dragon.getWorld(), bb);
 		if (player == null) return;
 
 		dragon.getPhaseManager().setPhase(PhaseType.STRAFE_PLAYER);
@@ -99,12 +99,12 @@ public class DragonManager {
 		double yPower = attackTarget.getBodyY(0.5D) - y;
 		double zPower = attackTarget.getZ() - z;
 		if (!dragon.isSilent()) {
-			dragon.world.syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
+			dragon.getWorld().syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
 		}
 
-		DragonFireballEntity dragonfireballentity = new DragonFireballEntity(dragon.world, dragon, xPower, yPower, zPower);
+		DragonFireballEntity dragonfireballentity = new DragonFireballEntity(dragon.getWorld(), dragon, xPower, yPower, zPower);
 		dragonfireballentity.refreshPositionAndAngles(x, y, z, 0.0F, 0.0F);
-		dragon.world.spawnEntity(dragonfireballentity);
+		dragon.getWorld().spawnEntity(dragonfireballentity);
 
 		double numFireballs = 3.0D;
 
@@ -118,12 +118,12 @@ public class DragonManager {
 			yPower = attackTarget.getBodyY(0.5D) - y + randomOffset;
 			zPower = attackTarget.getZ() - z + randomOffset;
 			if (!dragon.isSilent()) {
-				dragon.world.syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
+				dragon.getWorld().syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
 			}
 
-			dragonfireballentity = new DragonFireballEntity(dragon.world, dragon, xPower, yPower, zPower);
+			dragonfireballentity = new DragonFireballEntity(dragon.getWorld(), dragon, xPower, yPower, zPower);
 			dragonfireballentity.refreshPositionAndAngles(x, y, z, 0.0F, 0.0F);
-			dragon.world.spawnEntity(dragonfireballentity);
+			dragon.getWorld().spawnEntity(dragonfireballentity);
 		}
 	}
 
@@ -147,7 +147,7 @@ public class DragonManager {
 		List<PlayerEntity> playersNearCrystals = new ArrayList<>();
 
  		for (PlayerEntity player : players) {
-			List<EndCrystalEntity> endCrystals = player.world.getEntitiesByClass(EndCrystalEntity.class, player.getBoundingBox().expand(10d), EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
+			List<EndCrystalEntity> endCrystals = player.getWorld().getEntitiesByClass(EndCrystalEntity.class, player.getBoundingBox().expand(10d), EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
 			if (endCrystals.size() > 0)
 				playersNearCrystals.add(player);
 		}

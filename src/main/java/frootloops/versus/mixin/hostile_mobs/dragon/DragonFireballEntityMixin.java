@@ -35,7 +35,7 @@ public class DragonFireballEntityMixin extends ExplosiveProjectileEntity {
 		Entity entity = source.getAttacker();
 
 		if (entity != null) {
-			if (!this.world.isClient) {
+			if (!this.getWorld().isClient) {
 				Vec3d vec3d = entity.getRotationVector();
 				this.setVelocity(vec3d);
 				this.powerX = vec3d.x * 0.1;

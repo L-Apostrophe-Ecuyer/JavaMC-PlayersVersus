@@ -74,14 +74,14 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
     }
     @Shadow
     public void setRadius(float radius) {
-        if (!this.world.isClient) {
+        if (!this.getWorld().isClient) {
             this.getDataTracker().set(RADIUS, Float.valueOf(MathHelper.clamp(radius, 0.0f, 32.0f)));
         }
     }
     @Shadow @Nullable
     public LivingEntity getOwner() {
         Entity entity;
-        if (this.owner == null && this.ownerUuid != null && this.world instanceof ServerWorld && (entity = ((ServerWorld)this.world).getEntity(this.ownerUuid)) instanceof LivingEntity) {
+        if (this.owner == null && this.ownerUuid != null && this.getWorld() instanceof ServerWorld && (entity = ((ServerWorld)this.getWorld()).getEntity(this.ownerUuid)) instanceof LivingEntity) {
             this.owner = (LivingEntity)entity;
         }
         return this.owner;
@@ -103,7 +103,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
     public void tick() {
         boolean isWaiting = this.isWaiting();
         float radius = this.getRadius();
-        if (this.world.isClient) {
+        if (this.getWorld().isClient) {
             ParticleEffect particleOptions = this.getParticleType();
             if (isWaiting) {
                 if (this.random.nextBoolean()) {
@@ -117,10 +117,10 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
                             int k = j >> 16 & 255;
                             int l = j >> 8 & 255;
                             int i1 = j & 255;
-                            this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY(), this.getZ() + (double)z, (float)k / 255.0F, (float)l / 255.0F, (float)i1 / 255.0F);
+                            this.getWorld().addParticle(particleOptions, this.getX() + (double)x, this.getY(), this.getZ() + (double)z, (float)k / 255.0F, (float)l / 255.0F, (float)i1 / 255.0F);
                         }
                         else {
-                            this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY(), this.getZ() + (double)z, 0.0D, 0.0D, 0.0D);
+                            this.getWorld().addParticle(particleOptions, this.getX() + (double)x, this.getY(), this.getZ() + (double)z, 0.0D, 0.0D, 0.0D);
                         }
                     }
                 }
@@ -144,9 +144,9 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
                         int i2 = l1 >> 16 & 255;
                         int j2 = l1 >> 8 & 255;
                         int j1 = l1 & 255;
-                        this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY() + (double)y, this.getZ() + (double)z, (float)i2 / 255.0F, (float)j2 / 255.0F, (float)j1 / 255.0F);
+                        this.getWorld().addParticle(particleOptions, this.getX() + (double)x, this.getY() + (double)y, this.getZ() + (double)z, (float)i2 / 255.0F, (float)j2 / 255.0F, (float)j1 / 255.0F);
                     } else {
-                        this.world.addParticle(particleOptions, this.getX() + (double)x, this.getY() + (double)y, this.getZ() + (double)z, (0.5D - this.random.nextDouble()) * 0.15D, 0.01F, (0.5D - this.random.nextDouble()) * 0.15D);
+                        this.getWorld().addParticle(particleOptions, this.getX() + (double)x, this.getY() + (double)y, this.getZ() + (double)z, (0.5D - this.random.nextDouble()) * 0.15D, 0.01F, (0.5D - this.random.nextDouble()) * 0.15D);
                     }
                 }
             }
@@ -189,7 +189,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
                 if (list.isEmpty()) {
                     this.affectedEntities.clear();
                 } else {
-                    List<LivingEntity> list1 = this.world.getNonSpectatingEntities(LivingEntity.class, this.getBoundingBox());
+                    List<LivingEntity> list1 = this.getWorld().getNonSpectatingEntities(LivingEntity.class, this.getBoundingBox());
                     if (!list1.isEmpty()) {
                         for(LivingEntity livingentity : list1) {
                             if (!this.affectedEntities.containsKey(livingentity) && livingentity.isAffectedBySplashPotions()) {

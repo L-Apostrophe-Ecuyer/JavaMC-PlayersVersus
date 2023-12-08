@@ -12,6 +12,7 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
@@ -45,6 +46,8 @@ public abstract class Combat {
     public static float getHoeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[2];}
     public static float getPickaxeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[3];}
     public static float getShovelSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[4];}
+
+    public static float getSwordReachModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[4];}
 
     public static void onInitialize() {
         for(int toolIndex = 0; toolIndex < tools.length; toolIndex++) {
@@ -112,7 +115,7 @@ public abstract class Combat {
         if(level < 1) return;
 
         player.spawnSweepAttackParticles();
-        player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
+        player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
 
         if(player.getWorld() instanceof ServerWorld serverWorld) {
             attackRange = attackRange - (0.5d * (double)(4 - level));
@@ -160,10 +163,19 @@ public abstract class Combat {
     }
 
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
+        return Combat.isLookingTowards(looker,targetPos,-0.5);
+    }
+
+    public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, boolean strict){
+        return strict ? Combat.isLookingTowards(looker,targetPos,-0.9) : Combat.isLookingTowards(looker,targetPos,-0.5);
+    }
+
+    private static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
         if(looker==null || targetPos == null) return false;
         Vec3d rotationVector = looker.getRotationVec(1.0F);
         Vec3d positionVector = targetPos.relativize(looker.getPos()).normalize();
-        return (positionVector.dotProduct(rotationVector) < -0.5);
+        VersusMod.MOD_LOGGER.warn("Dot product is: " + positionVector.dotProduct(rotationVector));
+        return (positionVector.dotProduct(rotationVector) < dotProductThreshold);
     }
 
     public static HitResult getHitResultOf(LivingEntity entity, double range) {
@@ -182,7 +194,7 @@ public abstract class Combat {
         double dz = range * Math.cos(yawRadians) * Math.cos(pitchRadians);
         Vec3d direction = new Vec3d(dx, dy, dz);
 
-        World world = entity.world;
+        World world = entity.getWorld();
         Vec3d posStart = entity.getEyePos();
         Vec3d posStop = posStart.add(direction);
 
@@ -195,4 +207,28 @@ public abstract class Combat {
         return (HitResult)hitResult;
     }
 
+    public static Box getMobAttackBox(MobEntity mob) {
+        Entity ridingEntity = mob.getVehicle();
+        Box attackBox;
+        if (ridingEntity != null) {
+            Box box = ridingEntity.getBoundingBox();
+            Box box2 = mob.getBoundingBox();
+            attackBox = new Box(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
+        } else {
+            attackBox = mob.getBoundingBox();
+        }
+        double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND));
+        return attackBox.expand(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);
+    }
+
+    public static Box getEntityHitbox(LivingEntity entity) {
+        Box box = entity.getBoundingBox();
+        Entity ridingEntity = entity.getVehicle();
+        if (ridingEntity != null) {
+            Vec3d vec3d = ridingEntity.getPassengerRidingPos(entity);
+            return box.withMinY(Math.max(vec3d.y, box.minY));
+        } else {
+            return box;
+        }
+    }
 }

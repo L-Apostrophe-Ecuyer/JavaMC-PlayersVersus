@@ -21,6 +21,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
@@ -40,10 +41,10 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     }
 
     private final int TICKS_ENDLAG = 8;
-    private final int TICKS_SWING_DEFAULT = TICKS_ENDLAG + 10;
-    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 8;
-    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 14;
-    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 20;
+    private final int TICKS_SWING_DEFAULT = TICKS_ENDLAG + 6;
+    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 4;
+    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 9;
+    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 12;
 
     @Shadow
     private final double speed;
@@ -59,11 +60,6 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     @Shadow
     private int cooldown;
-
-    @Shadow
-    protected double getSquaredMaxAttackDistance(LivingEntity entity) {
-        return this.mob.getWidth() * 2.0f * (this.mob.getWidth() * 2.0f) + entity.getWidth();
-    }
 
     private int getCooldownAmount(){
         if(this.mob instanceof WardenEntity || this.mob instanceof IronGolemEntity || this.mob instanceof HoglinEntity)
@@ -102,15 +98,16 @@ public abstract class MeleeAttackGoalMixin extends Goal {
             // Shield Blocking:
             boolean shouldBlockWithShield = false;
             if(this.cooldown < -24) // Up to 24 ticks with the shield up
-                this.cooldown = 6; // After 16 ticks, cooldown of 6 ticks before we can block again
+                this.cooldown = 6; // After 16 ticks, cooldown of 6 ticks before we can block or attack again
             else shouldBlockWithShield = this.canBlockWithShield() && this.shouldPlayDefensively();
+
             if (shouldBlockWithShield) {
                 this.cooldown = Math.min(this.cooldown - 1, -12); // Minimum 12 ticks with the shield up
                 Vec3d velocity = this.mob.getVelocity();
                 this.mob.setPose(EntityPose.CROUCHING);
                 this.mob.setVelocity(0, velocity.y, 0);
                 this.mob.setAttacking(false);
-                this.mob.getOffHandStack().usageTick(this.mob.world, this.mob, 8);
+                this.mob.getOffHandStack().usageTick(this.mob.getWorld(), this.mob, 8);
                 this.mob.setCurrentHand(Hand.OFF_HAND);
                 info.cancel();
 
@@ -119,6 +116,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                 if (this.mob.getPose() == EntityPose.CROUCHING) {
                     this.mob.setPose(EntityPose.STANDING);
                     this.mob.stopUsingItem();
+                    info.cancel();
                 }
                 if (this.cooldown > this.getCooldownAmount() - 4 && this.mob.hurtTime < 8) {
                     this.cooldown = Math.max(this.cooldown - 1, 0);
@@ -126,6 +124,15 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     info.cancel();
                 }
             }
+        }
+    }
+
+    @Inject(method = "tick", at = @At("TAIL"), cancellable = false)
+    public void mobsNeedToBeAimingToLandHit(CallbackInfo info) {
+        // If the mob started attacking or blocking, it can't properly adjust its aim mid-swing anymore:
+        if (this.cooldown < 0 || this.cooldown > TICKS_ENDLAG) {
+            LookControl lookControl = this.mob.getLookControl();
+            if (lookControl.isLookingAtSpecificPosition()) lookControl.lookAt(lookControl.getLookX(), lookControl.getLookY(), lookControl.getLookZ(),15f,15f);
         }
     }
 
@@ -141,7 +148,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         if(this.mob.timeUntilRegen > 4) return false;
 
         LivingEntity opponent = mob.getLastAttacker();
-        if(opponent == null) opponent = mob.world.getClosestPlayer(mob, 8d);
+        if(opponent == null) opponent = mob.getWorld().getClosestPlayer(mob, 8d);
         if(opponent != null) {
 
             // If the enemy already attacked, and mob wasn't hurt, exit (attack of opportunity);
@@ -162,47 +169,32 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     }
 
     @Overwrite
-    public void attack(LivingEntity target, double squaredDistance) {
+    public void attack(LivingEntity target) {
         if(this.mob.hurtTime > 8 && cooldown > 18) {
             cooldown = 0;
             mob.setAttacking(false);
             mob.handSwingProgress = 0f;
         }
         else {
-            double attackReach = this.getSquaredMaxAttackDistance(target);
-
-            if(this.mob.getMainHandStack() != null) {
-                Item weapon = this.mob.getMainHandStack().getItem();
-                if (weapon instanceof HoeItem || weapon instanceof TridentItem) attackReach += 3.0f;
-                else if (weapon instanceof SwordItem) attackReach += 1.5f;
-            }
-
-            if (squaredDistance <= attackReach) {
-                int cooldownAmount = this.getCooldownAmount();
+            int cooldownAmount = this.getCooldownAmount();
+            Box mobAttackBox = Combat.getMobAttackBox(mob);
+            if(mobAttackBox.intersects(Combat.getEntityHitbox(target))) {
                 if (this.cooldown <= 0) {
                     this.mob.swingHand(Hand.MAIN_HAND);
                     this.cooldown = cooldownAmount;
 
-                } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG - 1) || this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
-                    if (this.cooldown == (cooldownAmount - TICKS_ENDLAG - 1))
+                } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
+                    if((Combat.isLookingTowards(this.mob, target.getPos(), true)) && this.mob.getVisibilityCache().canSee(target)) {
+                        this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.4F);
+                        this.mob.tryAttack(target);
+                        this.cooldown -= 2;
+                    }
+                    else {
                         this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
-
-                    boolean isTargetInRange = (squaredDistance <= attackReach);
-                    if(!isTargetInRange) return;
-
-                    boolean isTargetInBounds = (target.getBoundingBox().maxY + target.getY() > this.mob.getBoundingBox().minY + this.mob.getY());
-                    if(!isTargetInBounds) return;
-
-                    LookControl posMobLookingAt = this.mob.getLookControl();
-                    double deltaX = Math.abs(posMobLookingAt.getLookX() - target.getX());
-                    double deltaZ = Math.abs(posMobLookingAt.getLookZ() - target.getZ());
-                    boolean isTargetInSight = (deltaX + deltaZ < 1.25d) || Combat.isLookingTowards(this.mob, target.getPos());
-                    if(!isTargetInSight) return;
-
-                    this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.2F);
-                    this.mob.tryAttack(target);
-                    this.cooldown -= 2;
+                    }
                 }
+            } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
+                this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
             }
         }
     }

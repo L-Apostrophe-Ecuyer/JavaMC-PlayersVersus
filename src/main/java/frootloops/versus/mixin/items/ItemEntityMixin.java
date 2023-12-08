@@ -116,9 +116,9 @@ public abstract class ItemEntityMixin extends Entity {
 
         // Items break down into components, or get used/placed:
         if(currentItemStack.isOf(Items.TOTEM_OF_UNDYING)) {
-            this.world.sendEntityStatus(this, (byte)35);
+            this.getWorld().sendEntityStatus(this, (byte)35);
             Box boundingBox = new Box(this.getX() - 4d, this.getY() - 4d, this.getZ() - 4d, this.getX() + 4d, this.getY() + 4d, this.getZ() + 4d);
-            List<ItemEntity> entitiesNearby = this.world.getEntitiesByClass(ItemEntity.class, boundingBox, EntityPredicates.VALID_ENTITY);
+            List<ItemEntity> entitiesNearby = this.getWorld().getEntitiesByClass(ItemEntity.class, boundingBox, EntityPredicates.VALID_ENTITY);
             for (ItemEntity entity: entitiesNearby) {
                 entity.setNeverDespawn();
                 entity.setGlowing(true);
@@ -133,9 +133,9 @@ public abstract class ItemEntityMixin extends Entity {
             health = 300;
         }
         else if(currentItemStack.getItem() instanceof BucketItem) {
-            if(this.world instanceof ServerWorld) {
-                ((BucketItem)currentItemStack.getItem()).placeFluid(null, this.world, this.getBlockPos(), null);
-                ((BucketItem)currentItemStack.getItem()).onEmptied(null, this.world, currentItemStack, this.getBlockPos());
+            if(this.getWorld() instanceof ServerWorld) {
+                ((BucketItem)currentItemStack.getItem()).placeFluid(null, this.getWorld(), this.getBlockPos(), null);
+                ((BucketItem)currentItemStack.getItem()).onEmptied(null, this.getWorld(), currentItemStack, this.getBlockPos());
             }
             if(isLava) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.LAVA_BUCKET, currentItemStack.getCount()));
             else ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.BUCKET, currentItemStack.getCount()));
@@ -143,8 +143,8 @@ public abstract class ItemEntityMixin extends Entity {
         }
         else if(currentItemStack.getItem() instanceof PowderSnowBucketItem) {
             if(isLava) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.LAVA_BUCKET, currentItemStack.getCount()));
-            else if(this.world instanceof ServerWorld) {
-                this.world.setBlockState(this.getBlockPos(), Blocks.AIR.getDefaultState());
+            else if(this.getWorld() instanceof ServerWorld) {
+                this.getWorld().setBlockState(this.getBlockPos(), Blocks.AIR.getDefaultState());
                 ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.BUCKET, currentItemStack.getCount()));
             }
             health = 300;
@@ -192,7 +192,7 @@ public abstract class ItemEntityMixin extends Entity {
 
         // Make some noise!
         if(health > 40 || health == 0) {
-            this.world.playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+            this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
         }
     }
     private void doRegularDamageTransformation(ItemStack currentItemStack) {

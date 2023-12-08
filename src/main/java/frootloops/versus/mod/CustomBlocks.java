@@ -13,9 +13,8 @@ import net.minecraft.util.Identifier;
 
 public class CustomBlocks {
 
-    public static final Block SMOLDERING_TORCH = new TorchBlock(AbstractBlock.Settings.of(Material.DECORATION).noCollision().breakInstantly().luminance(state -> 6).sounds(BlockSoundGroup.WOOD).dropsLike(Blocks.TORCH), ParticleTypes.FLAME);
-    public static final Block SMOLDERING_WALL_TORCH = new WallTorchBlock(AbstractBlock.Settings.of(Material.DECORATION).noCollision().breakInstantly().luminance(state -> 6).sounds(BlockSoundGroup.WOOD).dropsLike(SMOLDERING_TORCH), ParticleTypes.FLAME);
-
+    public static final Block SMOLDERING_TORCH = new TorchBlock(AbstractBlock.Settings.copy(Blocks.TORCH).luminance(state -> 6).dropsLike(Blocks.TORCH), ParticleTypes.FLAME);
+    public static final Block SMOLDERING_WALL_TORCH = new WallTorchBlock(AbstractBlock.Settings.copy(Blocks.WALL_TORCH).luminance(state -> 6).dropsLike(Blocks.TORCH), ParticleTypes.FLAME);
     private static void registerBlocks(String name, Block block) {
         Registry.register(Registries.BLOCK, new Identifier(VersusMod.MOD_ID, name), block);
         Registry.register(Registries.ITEM, new Identifier(VersusMod.MOD_ID, name), new BlockItem(block, new FabricItemSettings()));
