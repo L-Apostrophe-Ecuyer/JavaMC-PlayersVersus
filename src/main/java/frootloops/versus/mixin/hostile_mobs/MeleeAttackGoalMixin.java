@@ -41,10 +41,10 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     }
 
     private final int TICKS_ENDLAG = 8;
-    private final int TICKS_SWING_DEFAULT = TICKS_ENDLAG + 32;
-    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 10;
-    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 16;
-    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 22;
+    private final int TICKS_SWING_DEFAULT = TICKS_ENDLAG + 6;
+    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 4;
+    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 9;
+    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 12;
 
     @Shadow
     private final double speed;
@@ -130,9 +130,9 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     @Inject(method = "tick", at = @At("TAIL"), cancellable = false)
     public void mobsNeedToBeAimingToLandHit(CallbackInfo info) {
         // If the mob started attacking or blocking, it can't properly adjust its aim mid-swing anymore:
-        LookControl lookControl = this.mob.getLookControl();
-        if (lookControl.isLookingAtSpecificPosition() && this.cooldown != 0) {
-            lookControl.lookAt(lookControl.getLookX(), lookControl.getLookY(), lookControl.getLookZ(),5f,5f);
+        if (this.cooldown < 0 || this.cooldown > TICKS_ENDLAG) {
+            LookControl lookControl = this.mob.getLookControl();
+            if (lookControl.isLookingAtSpecificPosition()) lookControl.lookAt(lookControl.getLookX(), lookControl.getLookY(), lookControl.getLookZ(),15f,15f);
         }
     }
 
@@ -176,25 +176,25 @@ public abstract class MeleeAttackGoalMixin extends Goal {
             mob.handSwingProgress = 0f;
         }
         else {
+            int cooldownAmount = this.getCooldownAmount();
             Box mobAttackBox = Combat.getMobAttackBox(mob);
             if(mobAttackBox.intersects(Combat.getEntityHitbox(target))) {
-                int cooldownAmount = this.getCooldownAmount();
                 if (this.cooldown <= 0) {
                     this.mob.swingHand(Hand.MAIN_HAND);
                     this.cooldown = cooldownAmount;
 
-                } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG - 1) || this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
-
-                    boolean isTargetInSight = (Combat.isLookingTowards(this.mob, target.getPos(), true)) && this.mob.getVisibilityCache().canSee(target);
-                    if(!isTargetInSight) {
-                        this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
-                    }
-                    else {
+                } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
+                    if((Combat.isLookingTowards(this.mob, target.getPos(), true)) && this.mob.getVisibilityCache().canSee(target)) {
                         this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.4F);
                         this.mob.tryAttack(target);
                         this.cooldown -= 2;
                     }
+                    else {
+                        this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
+                    }
                 }
+            } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
+                this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
             }
         }
     }
