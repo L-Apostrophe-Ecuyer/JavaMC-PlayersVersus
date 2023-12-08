@@ -98,16 +98,16 @@ public class SpiderMixin extends HostileEntity {
         if (super.tryAttack(target)) {
             if (target instanceof LivingEntity && !this.isBaby()) {
                 int i = 0;
-                if (this.world.getDifficulty() == Difficulty.NORMAL) i = 3;
-                else if (this.world.getDifficulty() == Difficulty.HARD) i = 6;
+                if (this.getWorld().getDifficulty() == Difficulty.NORMAL) i = 3;
+                else if (this.getWorld().getDifficulty() == Difficulty.HARD) i = 6;
                 if (i > 0) {
                     ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, i * 10, 0), this);
                     ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, i * 10, 0), this);
                 }
-                if(world.getTime() % 5 == 0) {
-                    if(world.getBlockState(target.getBlockPos()) == Blocks.AIR.getDefaultState()) {
-                        if (Blocks.COBWEB.getDefaultState().canPlaceAt(world, target.getBlockPos())) {
-                            world.setBlockState(target.getBlockPos(), Blocks.COBWEB.getDefaultState());
+                if(this.getWorld().getTime() % 5 == 0) {
+                    if(this.getWorld().getBlockState(target.getBlockPos()) == Blocks.AIR.getDefaultState()) {
+                        if (Blocks.COBWEB.getDefaultState().canPlaceAt(this.getWorld(), target.getBlockPos())) {
+                            this.getWorld().setBlockState(target.getBlockPos(), Blocks.COBWEB.getDefaultState());
                         }
                     }
                 }

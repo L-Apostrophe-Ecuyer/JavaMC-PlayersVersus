@@ -73,7 +73,7 @@ public class WardenMixin extends HostileEntity {
 
     @Inject(method = "addDigParticles", at = @At("TAIL"))
     private void moreInvestigative(CallbackInfo ci){
-        PlayerEntity closestPlayer = this.world.getClosestPlayer(this, 48.0d);
+        PlayerEntity closestPlayer = this.getWorld().getClosestPlayer(this, 48.0d);
         if(closestPlayer != null) {
             this.increaseAngerAt(closestPlayer, 20, true);
             WardenBrain.lookAtDisturbance((WardenEntity) ((Object)this), closestPlayer.getBlockPos());
@@ -149,7 +149,7 @@ public class WardenMixin extends HostileEntity {
         }
         if(mightReceiveDamage) hasReceivedDamage = super.damage(source, amount);
 
-        if (!(this.world.isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
+        if (!(this.getWorld().isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
             this.increaseAngerAt(attacker, Angriness.ANGRY.getThreshold() + 20, false);
             if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity livingEntity) {
                 if (!source.isIndirect() || this.isInRange(livingEntity, 5.0)) {

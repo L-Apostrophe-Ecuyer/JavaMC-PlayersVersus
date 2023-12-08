@@ -1,0 +1,25 @@
+package frootloops.versus.mixin.enchantments.tools;
+
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentTarget;
+import net.minecraft.enchantment.SweepingEnchantment;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.*;
+import org.spongepowered.asm.mixin.Mixin;
+
+@Mixin(SweepingEnchantment.class)
+public class SweepingMixin extends Enchantment {
+    protected SweepingMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
+        super(weight, type, slotTypes);
+    }
+
+    @Override
+    public int getMinPower(int level) {
+        return 5 + level * 9;
+    }
+
+    @Override
+    public boolean isAcceptableItem(ItemStack stack) {
+        return ((stack.getItem() instanceof SwordItem) || (stack.getItem() instanceof HoeItem));
+    }
+}

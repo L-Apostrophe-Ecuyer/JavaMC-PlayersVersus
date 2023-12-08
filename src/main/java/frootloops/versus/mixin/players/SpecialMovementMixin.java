@@ -82,13 +82,13 @@ public abstract class SpecialMovementMixin extends LivingEntity {
 
         if(boundingStridesLevel > 0 && hasBounded) {
             this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0,true, false));
-            this.world.playSound(null, this.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, SoundCategory.PLAYERS);
-            this.world.playSound(null, this.getBlockPos(), SoundEvents.BLOCK_DISPENSER_LAUNCH, SoundCategory.PLAYERS);
+            this.getWorld().playSound(null, this.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, SoundCategory.PLAYERS);
+            this.getWorld().playSound(null, this.getBlockPos(), SoundEvents.BLOCK_DISPENSER_LAUNCH, SoundCategory.PLAYERS);
             for (int i = 0; i < 6; ++i) {
                 double d = this.random.nextGaussian() * 0.02 - velocityX;
                 double e = this.random.nextGaussian() * 0.02 + 0.01;
                 double f = this.random.nextGaussian() * 0.02 - velocityZ;
-                this.world.addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
+                this.getWorld().addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
             }
             this.spawnSprintingParticles();
             this.playBlockFallSound();

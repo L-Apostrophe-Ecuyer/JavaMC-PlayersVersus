@@ -35,7 +35,7 @@ public class PiggingAroundGoal extends Goal {
 
     public PiggingAroundGoal(AnimalEntity mob) {
         this.mob = mob;
-        this.world = mob.world;
+        this.world = mob.getWorld();
         this.setControls(EnumSet.of(Control.MOVE, Control.LOOK, Control.JUMP));
         this.timer = -world.random.nextBetween(80, COOLDOWN);
     }

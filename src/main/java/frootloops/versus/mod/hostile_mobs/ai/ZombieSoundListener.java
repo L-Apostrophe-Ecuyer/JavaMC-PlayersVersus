@@ -42,7 +42,7 @@ public class ZombieSoundListener {
 
         // How much zombies should be attracted to the sound:
         boolean isHighPriority = (event == GameEvent.EAT || event == GameEvent.DRINK || event == GameEvent.ENTITY_DAMAGE);
-        boolean isPriority = !isHighPriority && (heardPlayerSprinting || heardProjectileLanding || event.getId().startsWith("block"));
+        boolean isPriority = !isHighPriority && (heardPlayerSprinting || heardProjectileLanding || event == GameEvent.BLOCK_DESTROY);
         double range = isHighPriority ? 48d : isPriority? 32d : 20d;
         double speedMultiplier = isHighPriority ? 1.2d : isPriority ? 1.0d : 0.8d;
 

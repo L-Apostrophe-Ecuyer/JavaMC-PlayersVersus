@@ -49,7 +49,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "getXpToDrop", at = @At("RETURN"), cancellable = true)
     public void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
-        if (this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+        if (this.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
             cir.setReturnValue(0);
         } else {
             cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1));
@@ -132,11 +132,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {
 
         // Attacking while walking backwards deals less knockback:
-        boolean isStillOrWalkingBackwards = (this.onGround && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
+        boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
         if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0d, 0.5d, 0d));
 
         // Toss attack and enchantment:
-        if (!this.isSneaking() && this.onGround && this.getMainHandStack().getItem() instanceof ShovelItem) {
+        if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {
             TossingEnchantment.performTossAttack(this, target, 0.2 + 0.1 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
         }
     }

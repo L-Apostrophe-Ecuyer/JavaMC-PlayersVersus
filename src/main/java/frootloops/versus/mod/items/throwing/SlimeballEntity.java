@@ -54,7 +54,7 @@ public class SlimeballEntity extends ThrownItemEntity {
         if (status == EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES) {
             ParticleEffect particleEffect = this.getParticleParameters();
             for (int i = 0; i < 8; ++i) {
-                this.world.addParticle(particleEffect, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
+                this.getWorld().addParticle(particleEffect, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
             }
         }
     }
@@ -71,8 +71,8 @@ public class SlimeballEntity extends ThrownItemEntity {
     @Override
     protected void onCollision(HitResult hitResult) {
         super.onCollision(hitResult);
-        if (!this.world.isClient) {
-            this.world.sendEntityStatus(this, EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES);
+        if (!this.getWorld().isClient) {
+            this.getWorld().sendEntityStatus(this, EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES);
             this.playSound(SoundEvents.ENTITY_SLIME_JUMP_SMALL, 1f, 1f);
             this.discard();
         }

@@ -35,7 +35,7 @@ public class ReacharoundTracker {
         if(!(isSupportedStack(player.getMainHandStack()) || isSupportedStack(player.getOffHandStack()))) return null;
 
         Pair<Vec3d, Vec3d> rayDetails = RayTraceHandler.getEntityParams(player);
-        World world = player.world;
+        World world = player.getWorld();
 
         double range = RayTraceHandler.getEntityRange(player);
         Vec3d rayPos = rayDetails.getLeft();
@@ -74,7 +74,7 @@ public class ReacharoundTracker {
             BlockPos pos = ((BlockHitResult) take2Res).getBlockPos().down();
             BlockState state = world.getBlockState(pos);
 
-            if (player.getPos().y - pos.getY() > 1 && (world.isAir(pos) || state.getMaterial().isReplaceable()))
+            if (player.getPos().y - pos.getY() > 1 && (world.isAir(pos) || state.isReplaceable()))
                 return new Pair<>(pos, Direction.DOWN);
         }
 
@@ -91,7 +91,7 @@ public class ReacharoundTracker {
             BlockPos pos = ((BlockHitResult) take2Res).getBlockPos().offset(dir);
             BlockState state = world.getBlockState(pos);
 
-            if ((world.isAir(pos) || state.getMaterial().isReplaceable())) return new Pair<>(pos, dir.getOpposite());
+            if ((world.isAir(pos) || state.isReplaceable())) return new Pair<>(pos, dir.getOpposite());
         }
 
         return null;

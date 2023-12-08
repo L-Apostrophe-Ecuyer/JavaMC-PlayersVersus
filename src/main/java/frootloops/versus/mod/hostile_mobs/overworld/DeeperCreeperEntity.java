@@ -50,7 +50,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason == SpawnReason.NATURAL && (this.getBlockPos().getY() > -24 || this.world.getLightLevel(this.getBlockPos()) > 10)) return false;
+        if(spawnReason == SpawnReason.NATURAL && (this.getBlockPos().getY() > -24 || this.getWorld().getLightLevel(this.getBlockPos()) > 10)) return false;
         if(!this.getSteppingBlockState().isOf(Blocks.DEEPSLATE)) return false;
         return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0f;
     }
@@ -124,16 +124,16 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     private void explode() {
-        if (!this.world.isClient) {
+        if (!this.getWorld().isClient) {
             this.dead = true;
-            this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius, World.ExplosionSourceType.MOB);
+            this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius, World.ExplosionSourceType.MOB);
             this.discard();
             this.spawnEffectsCloud();
         }
     }
 
     private void spawnEffectsCloud() {
-        AreaEffectCloudEntity areaEffectCloudEntity = new AreaEffectCloudEntity(this.world, this.getX(), this.getY(), this.getZ());
+        AreaEffectCloudEntity areaEffectCloudEntity = new AreaEffectCloudEntity(this.getWorld(), this.getX(), this.getY(), this.getZ());
         areaEffectCloudEntity.setRadius(5f);
         areaEffectCloudEntity.setRadiusOnUse(-0.5f);
         areaEffectCloudEntity.setWaitTime(10);
@@ -141,7 +141,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
         areaEffectCloudEntity.setRadiusGrowth(-areaEffectCloudEntity.getRadius() / (float)areaEffectCloudEntity.getDuration());
         areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 120, 0, true, false));
         areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 120, 0, true, false));
-        this.world.spawnEntity(areaEffectCloudEntity);
+        this.getWorld().spawnEntity(areaEffectCloudEntity);
     }
 
     @Override
