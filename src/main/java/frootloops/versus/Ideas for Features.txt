@@ -26,7 +26,8 @@ ENVIRONMENT:
 CREEPIES AND CRAWLIES:
     - Warden overhaul: Backstage Director, decides if and when to increase Warden chances of spawning, regardless of Shriekers
     - Gooey Skeletons: Skeletons shooting slime arrows, that ought to bounce around.
-    - Desert spiders: Beige spiders spawning in desert caves. Territorial. They drop sand.
+    - Desert Spiders: Beige spiders spawning in desert caves. Territorial. They drop sand.
+    - Trumpet (toot toot)
 
 
 ------------------------------------------------------------------------------------------
