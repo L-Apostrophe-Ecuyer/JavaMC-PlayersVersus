@@ -27,7 +27,7 @@ public abstract class PigMixin extends AnimalEntity {
         super(entityType, world);
     }
 
-    private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.CARROT_ON_A_STICK);
+    public static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.CARROT_ON_A_STICK);
 
     @Inject(method = "createPigAttributes", at = @At("HEAD"), cancellable = true)
     private static void createPigAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
