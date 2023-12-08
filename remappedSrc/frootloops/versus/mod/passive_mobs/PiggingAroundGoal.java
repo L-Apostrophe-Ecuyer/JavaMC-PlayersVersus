@@ -35,18 +35,18 @@ public class PiggingAroundGoal extends Goal {
 
     public PiggingAroundGoal(AnimalEntity mob) {
         this.mob = mob;
-        this.world = mob.world;
+        this.getWorld() = mob.world;
         this.setControls(EnumSet.of(Control.MOVE, Control.LOOK, Control.JUMP));
         this.timer = -world.random.nextBetween(80, COOLDOWN);
     }
 
     public boolean canStart() {
-        if (!this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) return false;
+        if (!this.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) return false;
         if (this.mob.isBaby()) return false;
 
         // If the pig is in a crop, eat it:
         BlockPos blockPos = this.mob.getBlockPos();
-        if (YUMMY_CROPS_PREDICATE.test(this.world.getBlockState(blockPos))) {
+        if (YUMMY_CROPS_PREDICATE.test(this.getWorld().getBlockState(blockPos))) {
             return true;
 
         // Pig has to be on grass and feel free to move around, or they won't dig:
@@ -57,10 +57,10 @@ public class PiggingAroundGoal extends Goal {
             Path pathToWander = this.mob.getNavigation().findPathTo(wanderTarget.x, wanderTarget.y, wanderTarget.z, 0);
             if(pathToWander == null) return false;
 
-            if( this.world.getBlockState(blockPos.down()).isOf(Blocks.GRASS_BLOCK)) {
+            if( this.getWorld().getBlockState(blockPos.down()).isOf(Blocks.GRASS_BLOCK)) {
                 this.timer++;
                 if(timer >= 0) {
-                    this.world.playSoundFromEntity(null, this.mob, SoundEvents.ENTITY_SNIFFER_SCENTING, SoundCategory.AMBIENT, 1.0F, 1.3F);
+                    this.getWorld().playSoundFromEntity(null, this.mob, SoundEvents.ENTITY_SNIFFER_SCENTING, SoundCategory.AMBIENT, 1.0F, 1.3F);
                     timer = MAX_TIMER;
                     return true;
                 }
@@ -71,7 +71,7 @@ public class PiggingAroundGoal extends Goal {
 
     public void start() {
         this.timer = this.getTickCount(MAX_TIMER);
-        this.world.sendEntityStatus(this.mob, (byte)10);
+        this.getWorld().sendEntityStatus(this.mob, (byte)10);
         this.mob.getNavigation().stop();
     }
 
@@ -89,16 +89,16 @@ public class PiggingAroundGoal extends Goal {
         this.spawnDiggingParticles();
         if (this.timer == EATING_TICKS) {
             BlockPos blockPos = this.mob.getBlockPos();
-            BlockState blockState = this.world.getBlockState(blockPos);
+            BlockState blockState = this.getWorld().getBlockState(blockPos);
             if (blockState.getBlock() == Blocks.CARROTS) {
-                this.world.setBlockState(blockPos, Blocks.CARROTS.getDefaultState());
+                this.getWorld().setBlockState(blockPos, Blocks.CARROTS.getDefaultState());
                 this.mob.eatFood(world, new ItemStack(Items.CARROT, 1));
 
             } else {
                 blockPos = blockPos.down();
-                if (this.world.getBlockState(blockPos).isOf(Blocks.GRASS_BLOCK)) {
-                    this.world.syncWorldEvent(2001, blockPos, Block.getRawIdFromState(Blocks.GRASS_BLOCK.getDefaultState()));
-                    this.world.setBlockState(blockPos, Blocks.DIRT.getDefaultState(), 2);
+                if (this.getWorld().getBlockState(blockPos).isOf(Blocks.GRASS_BLOCK)) {
+                    this.getWorld().syncWorldEvent(2001, blockPos, Block.getRawIdFromState(Blocks.GRASS_BLOCK.getDefaultState()));
+                    this.getWorld().setBlockState(blockPos, Blocks.DIRT.getDefaultState(), 2);
                     this.mob.playAmbientSound();
                     this.mob.onEatingGrass();
                 }
@@ -123,11 +123,11 @@ public class PiggingAroundGoal extends Goal {
         BlockPos blockPos = this.mob.getBlockPos();
         for(int i = 0; i < 30; ++i) {
             Vec3d vec3d = Vec3d.ofCenter(blockPos);
-            this.world.addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState), vec3d.x, vec3d.y, vec3d.z, 0.0, 0.0, 0.0);
+            this.getWorld().addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState), vec3d.x, vec3d.y, vec3d.z, 0.0, 0.0, 0.0);
         }
 
         if (this.timer % 4 == 0) {
-            this.world.playSound(this.mob.getX(), this.mob.getY(), this.mob.getZ(), blockState.getSoundGroup().getHitSound(), this.mob.getSoundCategory(), 0.5F, 0.5F, false);
+            this.getWorld().playSound(this.mob.getX(), this.mob.getY(), this.mob.getZ(), blockState.getSoundGroup().getHitSound(), this.mob.getSoundCategory(), 0.5F, 0.5F, false);
         }
     }
 }

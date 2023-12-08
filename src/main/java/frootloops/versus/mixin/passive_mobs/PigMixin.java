@@ -27,7 +27,7 @@ public abstract class PigMixin extends AnimalEntity {
         super(entityType, world);
     }
 
-    public static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.CARROT_ON_A_STICK);
+    private static final Ingredient PIG_BREEDING_INGREDIENT = Ingredient.ofItems(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.CARROT_ON_A_STICK);
 
     @Inject(method = "createPigAttributes", at = @At("HEAD"), cancellable = true)
     private static void createPigAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
@@ -43,7 +43,7 @@ public abstract class PigMixin extends AnimalEntity {
         this.goalSelector.add(0, new SwimGoal(this));
         this.goalSelector.add(1, new EscapeDangerGoal(this, 1.25));
         this.goalSelector.add(3, new AnimalMateGoal(this, 1.0));
-        this.goalSelector.add(4, new TemptGoal(this, 1.2, BREEDING_INGREDIENT, false));
+        this.goalSelector.add(4, new TemptGoal(this, 1.2, PIG_BREEDING_INGREDIENT, false));
         this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
         this.goalSelector.add(6, new WanderAroundFarGoal(this, 1.0));
         this.goalSelector.add(7, new LookAtEntityGoal(this, PlayerEntity.class, 6.0f));

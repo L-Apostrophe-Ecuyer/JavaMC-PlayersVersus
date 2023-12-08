@@ -225,8 +225,7 @@ public abstract class Combat {
         Box box = entity.getBoundingBox();
         Entity ridingEntity = entity.getVehicle();
         if (ridingEntity != null) {
-            Vec3d vec3d = ridingEntity.getPassengerRidingPos(entity);
-            return box.withMinY(Math.max(vec3d.y, box.minY));
+            return box.withMinY(box.minY + ridingEntity.getMountedHeightOffset());
         } else {
             return box;
         }

@@ -169,7 +169,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     }
 
     @Overwrite
-    public void attack(LivingEntity target) {
+    public void attack(LivingEntity target, double squaredDistance) {
         if(this.mob.hurtTime > 8 && cooldown > 18) {
             cooldown = 0;
             mob.setAttacking(false);

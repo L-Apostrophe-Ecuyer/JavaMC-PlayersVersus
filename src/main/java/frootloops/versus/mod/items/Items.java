@@ -50,12 +50,12 @@ public abstract class Items {
         registerCustomItem("bronze_pickaxe", BRONZE_PICKAXE, ItemGroups.TOOLS);
     }
 
-    private static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
+    private static Item registerCustomItem(String name, Item item, ItemGroup group) {//RegistryKey<ItemGroup> group) {
         if(group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);
     }
 
-    private static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
+    private static Item registerCustomItem(String name, Item item, ItemGroup group1, ItemGroup group2){//RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
         if(group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.add(item));
         if(group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);

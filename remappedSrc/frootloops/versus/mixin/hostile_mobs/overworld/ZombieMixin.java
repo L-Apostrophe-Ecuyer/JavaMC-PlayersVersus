@@ -83,7 +83,7 @@ public abstract class ZombieMixin extends HostileEntity {
         super.initEquipment(random, localDifficulty);
         if(this.isBaby()) return;
 
-        float difficulty = this.world.getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
+        float difficulty = this.getWorld().getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
         ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
         this.setCanPickUpLoot(true);
 
@@ -146,7 +146,7 @@ public abstract class ZombieMixin extends HostileEntity {
     @Override
     public void setBaby(boolean baby) {
         this.getDataTracker().set(BABY, baby);
-        if (this.world != null && !this.world.isClient) {
+        if (this.getWorld() != null && !this.getWorld().isClient) {
             EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
             entityAttributeInstance.removeModifier(BABY_SPEED_BONUS_REDUCED);
             if (baby) entityAttributeInstance.addTemporaryModifier(BABY_SPEED_BONUS_REDUCED);

@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.SuspiciousStewIngredient;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
@@ -762,13 +761,13 @@ public class RevampedTradeOffers {
 
     static class SellSuspiciousStewFactory
             implements Factory {
-        final List<SuspiciousStewIngredient.StewEffect> stewEffects = new ArrayList<>();
+        final StatusEffect effect;
         final int duration;
         final int experience;
         private final float multiplier;
 
         public SellSuspiciousStewFactory(StatusEffect effect, int duration, int experience) {
-            this.stewEffects.add(new SuspiciousStewIngredient.StewEffect(effect, duration));
+            this.effect = effect;
             this.duration = duration;
             this.experience = experience;
             this.multiplier = 0.05f;
@@ -778,7 +777,7 @@ public class RevampedTradeOffers {
         @Nullable
         public TradeOffer create(Entity entity, Random random) {
             ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
-            SuspiciousStewItem.addEffectsToStew(itemStack, stewEffects);
+            SuspiciousStewItem.addEffectToStew(itemStack, this.effect, this.duration);
             return new TradeOffer(new ItemStack(Items.EMERALD, 1), itemStack, 12, this.experience, this.multiplier);
         }
     }
@@ -957,7 +956,7 @@ public class RevampedTradeOffers {
         @Override
         @Nullable
         public TradeOffer create(Entity entity, Random random) {
-            if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
+            if (!(entity.world instanceof ServerWorld serverWorld)) {
                 return null;
             }
             BlockPos blockPos = serverWorld.locateStructure(this.structure, entity.getBlockPos(), 100, true);

@@ -42,7 +42,7 @@ public class DragonManager {
 
 		double chance = chargePlayerMaxChance;
 
-		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.ORIGIN); //.offsetOrigin(new BlockPos(0,0,0)));
 		Box boundingBox = new Box(centerPodium).expand(64d);
 		List<PlayerEntity> players = dragon.getWorld().getEntitiesByClass(PlayerEntity.class, boundingBox, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
 
@@ -58,7 +58,7 @@ public class DragonManager {
 	}
 
 	private static void chargePlayer(EnderDragonEntity dragon) {
-		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.ORIGIN);//.offsetOrigin(new BlockPos(0,0,0)));
 		Box bb = new Box(centerPodium).expand(64d);
 		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayerNearCrystal(dragon.getWorld(), bb);
 
@@ -79,7 +79,7 @@ public class DragonManager {
 	}
 
 	private static void fireballPlayer(EnderDragonEntity dragon) {
-		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.ORIGIN);//.offsetOrigin(new BlockPos(0,0,0)));
 		Box bb = new Box(centerPodium).expand(64d);
 
 		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayer(dragon.getWorld(), bb);

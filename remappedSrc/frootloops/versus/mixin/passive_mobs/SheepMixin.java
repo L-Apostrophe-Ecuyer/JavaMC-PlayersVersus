@@ -83,7 +83,7 @@ public abstract class SheepMixin extends AnimalEntity implements Shearable {
     public ActionResult interactMob(PlayerEntity player2, Hand hand) {
         ItemStack itemStack = player2.getStackInHand(hand);
         if (itemStack.isOf(Items.SHEARS) || itemStack.getItem() instanceof KnifeItem) {
-            if (!this.world.isClient && this.isShearable()) {
+            if (!this.getWorld().isClient && this.isShearable()) {
                 this.sheared(SoundCategory.PLAYERS);
                 this.emitGameEvent(GameEvent.SHEAR, player2);
                 itemStack.damage(1, player2, player -> player.sendToolBreakStatus(hand));

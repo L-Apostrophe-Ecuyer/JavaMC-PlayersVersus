@@ -20,7 +20,7 @@ public abstract class MobEquipmentMixin extends Entity {
 
     @Redirect(at=@At(value = "INVOKE", target="Lnet/minecraft/world/LocalDifficulty;getClampedLocalDifficulty()F"), method= "Lnet/minecraft/entity/mob/MobEntity;initEquipment(Lnet/minecraft/util/math/random/Random;Lnet/minecraft/world/LocalDifficulty;)V")
     private float harderFartherAndDeeper(LocalDifficulty localDifficulty) {
-        float distanceMultiplier = ((float)(this.getBlockPos().getX() - this.world.getSpawnPos().getX()))/512f + ((float)(this.getBlockPos().getZ() - this.world.getSpawnPos().getZ()))/512f;
+        float distanceMultiplier = ((float)(this.getBlockPos().getX() - this.getWorld().getSpawnPos().getX()))/512f + ((float)(this.getBlockPos().getZ() - this.getWorld().getSpawnPos().getZ()))/512f;
         float depthBonus = 160.0f/Math.abs((float)this.getPos().y - 64f);
         return (localDifficulty.getClampedLocalDifficulty() + depthBonus) * distanceMultiplier;
     }
