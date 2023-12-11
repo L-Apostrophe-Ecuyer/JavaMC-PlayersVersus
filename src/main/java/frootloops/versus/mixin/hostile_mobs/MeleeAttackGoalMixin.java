@@ -169,7 +169,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     }
 
     @Overwrite
-    public void attack(LivingEntity target) {
+    public void attack(LivingEntity target, double distanceSquared) {
         int cooldownAmount = this.getCooldownAmount();
         boolean canTrySwinging = this.cooldown <= 0;
         boolean willTryLandingAnAttack = this.cooldown == (cooldownAmount - TICKS_ENDLAG);
