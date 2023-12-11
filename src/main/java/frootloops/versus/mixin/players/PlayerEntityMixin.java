@@ -4,6 +4,9 @@ import com.google.common.collect.Multimap;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -17,6 +20,7 @@ import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,6 +57,32 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             cir.setReturnValue(0);
         } else {
             cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1));
+        }
+    }
+
+    @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
+    public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
+        if (!this.isOnGround()) cir.setReturnValue(cir.getReturnValue() * 3f);
+
+        if(blockState.isOf(Blocks.COBWEB)) {
+            cir.setReturnValue(cir.getReturnValue() * 0.75f + 6f);
+            return;
+        }
+
+        if(blockState.getBlock() instanceof ShulkerBoxBlock) {
+            cir.setReturnValue(cir.getReturnValue() + 5f);
+            return;
+        }
+
+        if(blockState.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
+            if(this.getMainHandStack().getItem() instanceof PickaxeItem pickaxeItem) {
+                if(pickaxeItem.getMaterial().getMiningLevel() < 2) {
+                    cir.setReturnValue(cir.getReturnValue()/3f);
+                }
+                else if(pickaxeItem.getMaterial().getMiningLevel() >= 4) {
+                    cir.setReturnValue(cir.getReturnValue() * 1.15f);
+                }
+            }
         }
     }
 
@@ -133,7 +163,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         // Attacking while walking backwards deals less knockback:
         boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
-        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0d, 0.5d, 0d));
+        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.6d, 0.8d, 0.6d));
 
         // Toss attack and enchantment:
         if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {

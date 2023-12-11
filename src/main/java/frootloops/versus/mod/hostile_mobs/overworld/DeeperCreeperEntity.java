@@ -45,12 +45,12 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     public static DefaultAttributeContainer.Builder createDeeperCreeperAttributes() {
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3).add(EntityAttributes.GENERIC_FOLLOW_RANGE, 80.0);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3).add(EntityAttributes.GENERIC_FOLLOW_RANGE, 40.0).add(EntityAttributes.GENERIC_ARMOR, 4.0);
     }
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason == SpawnReason.NATURAL && (this.getBlockPos().getY() > -24 || this.getWorld().getLightLevel(this.getBlockPos()) > 10)) return false;
+        if(spawnReason == SpawnReason.NATURAL && (this.getBlockPos().getY() > -16 || this.getWorld().getLightLevel(this.getBlockPos()) > 10)) return false;
         if(!this.getSteppingBlockState().isOf(Blocks.DEEPSLATE)) return false;
         return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0f;
     }

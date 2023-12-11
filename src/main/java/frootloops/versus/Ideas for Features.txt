@@ -7,6 +7,8 @@ QUICK WINS:
 
 SURVIVAL:
     - (1.21 only) Sleeping speeds up tick speed, rather than skipping the night.
+    - Diamond tools are required to properly mine deepslate.
+    - Iron spawns deeper down.
 
 EQUIPMENT:
     - Knives: Work as shears and close range swords
@@ -41,6 +43,11 @@ CREEPIES AND CRAWLIES:
 
 INVENTORY:
     - Low priority items like seeds shouldn't default to the hotbar
+    - Rotating rows of the inventory, ala Better Than Adventure with the tab key
+    - Quick Stack to nearby chests / Deposit Stacks to nearby chests button
+    - Miscellaneous items can stack together, like bundles;
+        - Flowers and plants stack together as a "Bouquet of Flowers"
+        - Arrows can stack together as a "Quiver of Arrows"
 
 ENVIRONMENT:
     - Seasons!
@@ -62,7 +69,11 @@ ENVIRONMENT:
             - Add Cheese!
 
     - Dynamic systems:
-        - Mossification: Stone & Cobblestone can become mossy overtime
         - Better fire spread: Certain blocks are omitted, other blocks can get charred. Soot.
+        - Plant dynamics:
+            - Moss spreads naturally overtime to certain blocks
+            - Saplings might get placed
+            - Rooted dirt spreads from certain trees
+            - Trees grow differently based off temperature (size)
 
     - Tunnels in the dark, some analog horror goodness
