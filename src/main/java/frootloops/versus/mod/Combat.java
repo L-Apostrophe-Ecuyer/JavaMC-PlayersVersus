@@ -162,19 +162,23 @@ public abstract class Combat {
         }
     }
 
+    public static double fastSquareRoot(double x){
+        double d = 289358932.0;
+        return Double.longBitsToDouble(((Double.doubleToLongBits( d )-(1l<<52) )>>1 ) + ( 1l<<61 ) );
+    }
+
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
         return Combat.isLookingTowards(looker,targetPos,-0.5);
     }
 
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, boolean strict){
-        return strict ? Combat.isLookingTowards(looker,targetPos,-0.9) : Combat.isLookingTowards(looker,targetPos,-0.5);
+        return strict ? Combat.isLookingTowards(looker,targetPos,-0.8) : Combat.isLookingTowards(looker,targetPos,-0.5);
     }
 
-    private static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
+    public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
         if(looker==null || targetPos == null) return false;
         Vec3d rotationVector = looker.getRotationVec(1.0F);
-        Vec3d positionVector = targetPos.relativize(looker.getPos()).normalize();
-        VersusMod.MOD_LOGGER.warn("Dot product is: " + positionVector.dotProduct(rotationVector));
+        Vec3d positionVector = targetPos.relativize(looker.getEyePos()).normalize();
         return (positionVector.dotProduct(rotationVector) < dotProductThreshold);
     }
 
@@ -216,6 +220,7 @@ public abstract class Combat {
             attackBox = new Box(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
         } else {
             attackBox = mob.getBoundingBox();
+            attackBox.offset(0d, mob.getEyeHeight(mob.getPose()), 0d);
         }
         double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND));
         return attackBox.expand(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);

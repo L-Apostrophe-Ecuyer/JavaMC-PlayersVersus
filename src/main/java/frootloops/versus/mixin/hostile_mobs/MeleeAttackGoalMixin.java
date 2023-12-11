@@ -170,21 +170,30 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     @Overwrite
     public void attack(LivingEntity target) {
-        if(this.mob.hurtTime > 8 && cooldown > 18) {
-            cooldown = 0;
+        int cooldownAmount = this.getCooldownAmount();
+        boolean canTrySwinging = this.cooldown <= 0;
+        boolean willTryLandingAnAttack = this.cooldown == (cooldownAmount - TICKS_ENDLAG);
+
+        // Attack interruption, if the player swung right after the mob did:
+        if(this.mob.hurtTime > 8 && cooldownAmount > TICKS_SWING_DEFAULT - 4) {
+            cooldown = TICKS_ENDLAG;
             mob.setAttacking(false);
             mob.handSwingProgress = 0f;
         }
-        else {
-            int cooldownAmount = this.getCooldownAmount();
+
+        // Otherwise, see if we can attack (cooldown is reduced in tick()):
+        else if (canTrySwinging || willTryLandingAnAttack) {
             Box mobAttackBox = Combat.getMobAttackBox(mob);
-            if(mobAttackBox.intersects(Combat.getEntityHitbox(target))) {
-                if (this.cooldown <= 0) {
+            if(mobAttackBox.intersects(Combat.getEntityHitbox(target)) && Combat.isLookingTowards(this.mob, target.getEyePos(), willTryLandingAnAttack)) {
+
+                // Start swinging:
+                if (canTrySwinging) {
                     this.mob.swingHand(Hand.MAIN_HAND);
                     this.cooldown = cooldownAmount;
 
-                } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
-                    if((Combat.isLookingTowards(this.mob, target.getPos(), true)) && this.mob.getVisibilityCache().canSee(target)) {
+                // After 6 ticks, see if the swing landed:
+                } else if (willTryLandingAnAttack) {
+                    if(this.mob.getVisibilityCache().canSee(target)) {
                         this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.4F);
                         this.mob.tryAttack(target);
                         this.cooldown -= 2;
@@ -193,7 +202,8 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                         this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
                     }
                 }
-            } else if (this.cooldown == (cooldownAmount - TICKS_ENDLAG)) {
+
+            } else if (willTryLandingAnAttack) {
                 this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
             }
         }
