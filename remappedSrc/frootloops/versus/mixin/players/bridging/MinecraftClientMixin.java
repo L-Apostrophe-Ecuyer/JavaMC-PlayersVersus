@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.players.bridging;
 
-import frootloops.versus.mod.bridging.ReacharoundTracker;
+import frootloops.versus.mod.players.bridging.ReacharoundTracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
