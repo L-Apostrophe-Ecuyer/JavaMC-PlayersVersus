@@ -111,6 +111,11 @@ public abstract class Combat {
         return Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
     }
 
+    public static boolean isInAttackRangeOf(PlayerEntity player, Entity target) {
+        double range = Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
+        return player.squaredDistanceTo(target) < range * range;
+    }
+
     public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {
         if(level < 1) return;
 

@@ -2,6 +2,7 @@ package frootloops.versus.mixin.players;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import frootloops.versus.mod.Combat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.DebugHud;
@@ -72,18 +73,19 @@ public class CrosshairRendererMixin {
                     // This is the code that makes the crosshair's size depend on the attack cooldown:
                     float attackCooldownProgress = this.client.player.getAttackCooldownProgress(-1.0F);
                     int crosshairSize = 1 + 2 * (int)(7f * attackCooldownProgress);
-                    int uv = 7 - crosshairSize/2;
-                    context.drawTexture(CROSSHAIR_TEXTURE, (this.scaledWidth - crosshairSize) / 2, (this.scaledHeight - crosshairSize) / 2, uv, uv, crosshairSize, crosshairSize);
+                    context.drawGuiTexture(CROSSHAIR_TEXTURE, (this.scaledWidth - crosshairSize) / 2, (this.scaledHeight - crosshairSize) / 2, crosshairSize, crosshairSize);
 
                     // This is the code to make sure the attack indicator only shows when a target can be hit:
-                    int j = this.scaledHeight / 2 - 7 + 16;
-                    int k = this.scaledWidth / 2 - 8;
-                    if (attackCooldownProgress >= 1.0F) {
-                        context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_FULL_TEXTURE, k, j, 16, 16);
-                    } else {
-                        int l = (int)(attackCooldownProgress * 17.0F);
-                        context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_TEXTURE, k, j, 16, 4);
-                        context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE, 16, 4, 0, 0, k, j, l, 4);
+                    if(this.client.targetedEntity != null && Combat.isInAttackRangeOf(client.player, client.targetedEntity)) {
+                        int j = this.scaledHeight / 2 - 7 + 16;
+                        int k = this.scaledWidth / 2 - 8;
+                        if (attackCooldownProgress >= 1.0F) {
+                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_FULL_TEXTURE, k, j, 16, 16);
+                        } else {
+                            int l = (int)(attackCooldownProgress * 17.0F);
+                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_TEXTURE, k, j, 16, 4);
+                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE, 16, 4, 0, 0, k, j, l, 4);
+                        }
                     }
 
                     //if(ReacharoundTracker.currentTarget != null) this.drawExtraCrosshairIcon(matrices);
