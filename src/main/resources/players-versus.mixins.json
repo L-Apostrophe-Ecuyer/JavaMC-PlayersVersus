@@ -42,6 +42,7 @@
     "items.equipment.elytra.ElytraFireworksMixin",
     "items.equipment.elytra.ElytraGlideDurabilityMixin",
     "items.equipment.elytra.ElytraFireworksSpeedMixin",
+    "items.equipment.ArmorProtectionMixin",
     "items.equipment.HoeItemMixin",
     "items.equipment.SwordItemMixin",
     "items.equipment.TridentEntityMixin",
