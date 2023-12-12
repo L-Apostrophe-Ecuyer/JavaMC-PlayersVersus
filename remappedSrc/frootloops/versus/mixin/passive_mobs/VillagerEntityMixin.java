@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.passive_mobs;
+package frootloops.versus.mixin.mobs.passive;
 
 import com.google.common.collect.Sets;
 import frootloops.versus.mod.passive_mobs.RevampedTradeOffers;

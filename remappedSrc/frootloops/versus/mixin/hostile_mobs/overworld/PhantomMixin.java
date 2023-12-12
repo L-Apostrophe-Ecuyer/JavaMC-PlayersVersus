@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs.overworld;
+package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.mod.hostile_mobs.ai.PhantomMoveControlRevamp;
 import net.minecraft.entity.EntityData;

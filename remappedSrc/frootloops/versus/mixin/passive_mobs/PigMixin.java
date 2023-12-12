@@ -1,5 +1,5 @@
 
-package frootloops.versus.mixin.passive_mobs;
+package frootloops.versus.mixin.mobs.passive;
 
 import frootloops.versus.mod.passive_mobs.PiggingAroundGoal;
 import net.minecraft.entity.EntityType;

@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs.dragon;
+package frootloops.versus.mixin.mobs.hostile.dragon;
 
 import frootloops.versus.mod.hostile_mobs.dragon.DragonManager;
 import net.minecraft.entity.ai.pathing.Path;

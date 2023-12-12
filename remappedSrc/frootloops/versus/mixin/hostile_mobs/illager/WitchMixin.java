@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs.illager;
+package frootloops.versus.mixin.mobs.hostile.illager;
 
 import frootloops.versus.mod.hostile_mobs.ai.FleeAttackerAndHealGoal;
 import net.minecraft.entity.EntityType;

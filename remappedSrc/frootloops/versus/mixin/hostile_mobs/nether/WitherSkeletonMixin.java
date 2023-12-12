@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs.nether;
+package frootloops.versus.mixin.mobs.hostile.nether;
 
 import frootloops.versus.VersusMod;
 import net.minecraft.entity.EntityData;
