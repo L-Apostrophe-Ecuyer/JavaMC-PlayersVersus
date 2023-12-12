@@ -1,4 +1,4 @@
-package frootloops.versus.mod.passive_mobs;
+package frootloops.versus.mod.mobs.passive;
 
 import frootloops.versus.VersusMod;
 import net.minecraft.block.Block;

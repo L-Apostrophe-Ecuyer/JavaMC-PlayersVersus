@@ -1,4 +1,4 @@
-package frootloops.versus.mod.passive_mobs;
+package frootloops.versus.mod.mobs.passive;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;

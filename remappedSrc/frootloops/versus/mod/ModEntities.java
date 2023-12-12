@@ -1,11 +1,11 @@
 package frootloops.versus.mod;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.hostile_mobs.MobSpawning;
-import frootloops.versus.mod.hostile_mobs.overworld.DeeperCreeperEntity;
-import frootloops.versus.mod.hostile_mobs.overworld.DeeperCreeperRenderer;
-import frootloops.versus.mod.hostile_mobs.overworld.FrostedZombieEntity;
-import frootloops.versus.mod.hostile_mobs.overworld.FrostedZombieRenderer;
+import frootloops.versus.mod.mobs.hostile.MobSpawning;
+import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperRenderer;
+import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieRenderer;
 import frootloops.versus.mod.items.throwing.SlimeballEntity;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;

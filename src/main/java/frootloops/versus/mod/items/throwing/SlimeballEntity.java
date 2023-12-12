@@ -1,6 +1,6 @@
 package frootloops.versus.mod.items.throwing;
 
-import frootloops.versus.mod.ModEntities;
+import frootloops.versus.mod.mobs.ModEntities;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;

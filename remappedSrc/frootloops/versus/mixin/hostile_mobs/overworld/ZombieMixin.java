@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs.overworld;
+package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;

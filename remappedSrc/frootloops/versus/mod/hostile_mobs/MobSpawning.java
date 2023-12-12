@@ -1,7 +1,7 @@
-package frootloops.versus.mod.hostile_mobs;
+package frootloops.versus.mod.mobs.hostile;
 
 import frootloops.versus.mod.ModEntities;
-import frootloops.versus.mod.hostile_mobs.overworld.FrostedZombieEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.entity.*;

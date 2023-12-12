@@ -1,4 +1,4 @@
-package frootloops.versus.mod.hostile_mobs.overworld;
+package frootloops.versus.mod.mobs.hostile.overworld;
 
 import frootloops.versus.VersusMod;
 import net.minecraft.client.render.entity.CreeperEntityRenderer;

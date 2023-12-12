@@ -1,8 +1,8 @@
-package frootloops.versus.mod.hostile_mobs.overworld;
+package frootloops.versus.mod.mobs.hostile.overworld;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.hostile_mobs.ai.CreepingAndExplodingGoal;
-import frootloops.versus.mod.hostile_mobs.ai.FollowTargetThroughWallsGoal;
+import frootloops.versus.mod.mobs.hostile.ai.CreepingAndExplodingGoal;
+import frootloops.versus.mod.mobs.hostile.ai.FollowTargetThroughWallsGoal;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;

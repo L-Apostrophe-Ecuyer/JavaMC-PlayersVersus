@@ -1,4 +1,4 @@
-package frootloops.versus.mod.hostile_mobs.ai;
+package frootloops.versus.mod.mobs.hostile.ai;
 
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;

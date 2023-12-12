@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.hostile_mobs;
+package frootloops.versus.mixin.mobs.hostile;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
