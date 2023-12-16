@@ -13,6 +13,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
@@ -173,11 +174,11 @@ public abstract class Combat {
     }
 
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
-        return Combat.isLookingTowards(looker,targetPos,-0.5);
+        return Combat.isLookingTowards(looker,targetPos,false);
     }
 
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, boolean strict){
-        return strict ? Combat.isLookingTowards(looker,targetPos,-0.8) : Combat.isLookingTowards(looker,targetPos,-0.5);
+        return Combat.isLookingTowards(looker,targetPos,strict ? -0.8 : -0.5);
     }
 
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){

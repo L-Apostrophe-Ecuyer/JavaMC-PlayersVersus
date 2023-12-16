@@ -12,12 +12,11 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.*;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.passive.MerchantEntity;
-import net.minecraft.entity.passive.TurtleEntity;
+import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.LocalDifficulty;
@@ -48,9 +47,11 @@ public abstract class ZombieMixin extends HostileEntity {
     private static final TrackedData<Boolean> BABY = DataTracker.registerData(ZombieEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
+    private static final UUID BABY_HEALTH_ID = UUID.fromString("AA766B59-9566-4402-BC1F-2EE2A276D836");
 
     // Reduced:
     private static final EntityAttributeModifier BABY_SPEED_BONUS_REDUCED = new EntityAttributeModifier(BABY_SPEED_ID, "Baby speed boost", 0.2, EntityAttributeModifier.Operation.MULTIPLY_BASE);
+    private static final EntityAttributeModifier BABY_HEALTH_REDUCED = new EntityAttributeModifier(BABY_HEALTH_ID, "Baby health nerf", -10, EntityAttributeModifier.Operation.ADDITION);
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
@@ -64,14 +65,18 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Overwrite
     public void initCustomGoals() {
-        this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.6F;
-        this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.6F;
+        this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.4F;
+        this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.5F;
         this.ambientSoundChance = -1000;
 
+        if(this.getY() > 56d || this.getSteppingBlockState().getSoundGroup() == BlockSoundGroup.GRASS) {
+            this.goalSelector.add(1, new FleeEntityGoal(this, PigEntity.class, 6.0F, 1.0, 1.2));
+            this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, ((ZombieEntity) ((Object)this))::canBreakDoors));
+        }
+
         this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
-        this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, ((ZombieEntity) ((Object)this))::canBreakDoors));
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.66F));
-        this.targetSelector.add(1, (new RevengeGoal(this)).setGroupRevenge(ZombifiedPiglinEntity.class));
+        this.targetSelector.add(1, (new RevengeGoal(this, PigEntity.class)));
         this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, MerchantEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, IronGolemEntity.class, false));
@@ -150,6 +155,10 @@ public abstract class ZombieMixin extends HostileEntity {
             EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
             entityAttributeInstance.removeModifier(BABY_SPEED_ID);
             if (baby) entityAttributeInstance.addTemporaryModifier(BABY_SPEED_BONUS_REDUCED);
+
+            entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+            if (baby) entityAttributeInstance.addTemporaryModifier(BABY_HEALTH_REDUCED);
+            if (baby) this.setHealth(16.0f);
         }
     }
 }

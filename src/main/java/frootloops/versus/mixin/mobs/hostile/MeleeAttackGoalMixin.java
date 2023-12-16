@@ -87,12 +87,11 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
             // Shield Blocking:
             boolean shouldBlockWithShield = false;
-            if(this.cooldown < -24) // Up to 24 ticks with the shield up
-                this.cooldown = 6; // After 16 ticks, cooldown of 6 ticks before we can block or attack again
+            if(this.cooldown < -32) this.cooldown = 8; // Up to 32 ticks with the shield up. After, attacks/shields on cooldown for 8 ticks
             else shouldBlockWithShield = this.canBlockWithShield() && this.shouldPlayDefensively();
 
             if (shouldBlockWithShield) {
-                this.cooldown = Math.min(this.cooldown - 1, -12); // Minimum 12 ticks with the shield up
+                this.cooldown = Math.min(this.cooldown - 1, -16); // Minimum 16 ticks with the shield up
                 Vec3d velocity = this.mob.getVelocity();
                 this.mob.setPose(EntityPose.CROUCHING);
                 this.mob.setVelocity(0, velocity.y, 0);
@@ -162,7 +161,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     public void attack(LivingEntity target) {
         int cooldownAmount = this.getCooldownAmount();
         boolean canTrySwinging = this.cooldown <= 0;
-        boolean willTryLandingAnAttack = this.cooldown == (cooldownAmount - TICKS_ENDLAG);
+        boolean willTryLandingAnAttack = this.mob.isAttacking() && this.cooldown == (cooldownAmount - TICKS_ENDLAG);
 
         // Attack interruption, if the player swung right after the mob did:
         if(this.mob.hurtTime > 8 && cooldownAmount > TICKS_SWING_DEFAULT - 4) {
@@ -173,8 +172,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
         // Otherwise, see if we can attack (cooldown is reduced in tick()):
         else if (canTrySwinging || willTryLandingAnAttack) {
-            Box mobAttackBox = Combat.getMobAttackBox(mob);
-            if(mobAttackBox.intersects(Combat.getEntityHitbox(target)) && Combat.isLookingTowards(this.mob, target.getEyePos(), willTryLandingAnAttack)) {
+            if(Combat.getMobAttackBox(mob).intersects(Combat.getEntityHitbox(target)) && Combat.isLookingTowards(this.mob, target.getEyePos(), willTryLandingAnAttack)) {
 
                 // Start swinging:
                 if (canTrySwinging) {

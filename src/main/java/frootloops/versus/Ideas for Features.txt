@@ -1,19 +1,15 @@
 
 QUICK WINS:
 - Bug fix for hand swinging without LMB being held down.
-- Cobwebs easier to break
 - Figure out Smoldering Torches
 - Spider pitch fix
 
 SURVIVAL:
-    - (1.21 only) Sleeping speeds up tick speed, rather than skipping the night.
-    - Diamond tools are required to properly mine deepslate.
     - Iron spawns deeper down.
 
 EQUIPMENT:
     - Knives: Work as shears and close range swords
     - Copper armor & tools: Superchargeable, unenchantable.
-    - Bronze armor & tools: Iron, but much faster! But unenchantable.
     - Slime arrows
     - Skirt item, with custom model, would be fun cosmetics
 
@@ -77,3 +73,13 @@ ENVIRONMENT:
             - Trees grow differently based off temperature (size)
 
     - Tunnels in the dark, some analog horror goodness
+
+--------------------------------------------
+
+DONE!
+
+SURVIVAL:
+    - (done) Sleeping speeds up tick speed, rather than skipping the night.
+    - (done) Diamond tools are required to properly mine deepslate.
+
+---------------------------------------------------
