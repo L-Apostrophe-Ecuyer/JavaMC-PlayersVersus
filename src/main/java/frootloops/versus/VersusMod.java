@@ -20,15 +20,26 @@ public class VersusMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+		MOD_LOGGER.info("Launching Players Versus!");
 
-		MOD_LOGGER.info("Launching " + MOD_ID);
-		CustomBlocks.onInitialize();
+		MOD_LOGGER.info("Setting up combat parameters...");
 		Combat.onInitialize();
+
+		MOD_LOGGER.info("Initializing custom blocks...");
+		CustomBlocks.onInitialize();
+
+		MOD_LOGGER.info("Initializing custom enchantments...");
 		Enchants.onInitialize();
+
+		MOD_LOGGER.info("Initializing custom entities and mobs...");
 		ModEntities.onInitialize();
+
+		MOD_LOGGER.info("Implementing item changes and adding new ones...");
 		Items.onInitialize();
+
+		MOD_LOGGER.info("Setting up server settings...");
+		ServerSettings.onInitialize();
+
+		MOD_LOGGER.info("Done! This mod is ready to party.");
 	}
 }
