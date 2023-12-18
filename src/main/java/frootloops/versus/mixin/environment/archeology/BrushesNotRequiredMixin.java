@@ -1,8 +1,8 @@
 package frootloops.versus.mixin.environment.archeology;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BrushableBlock;
-import net.minecraft.block.entity.BrushableBlockEntity;
+import net.minecraft.block.SuspiciousSandBlock;
+import net.minecraft.block.entity.SuspiciousSandBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.particle.BlockStateParticleEffect;
@@ -51,8 +51,8 @@ public class BrushesNotRequiredMixin {
     private void update(CallbackInfo info) {
         if(this.tickCounter - startMiningTime > 10 && this.tickCounter - startMiningTime < 30) {
             BlockState blockState = world.getBlockState(miningPos);
-            if (blockState.getBlock() instanceof BrushableBlock) {
-                if (world.getBlockEntity(miningPos) instanceof BrushableBlockEntity brushableBlockEntity) {
+            if (blockState.getBlock() instanceof SuspiciousSandBlock) {
+                if (world.getBlockEntity(miningPos) instanceof SuspiciousSandBlockEntity brushableBlockEntity) {
                     brushableBlockEntity.brush(world.getTime(), player, prevDirection);
                     addDustParticles(world, prevDirection, miningPos, blockState, player);
                 }

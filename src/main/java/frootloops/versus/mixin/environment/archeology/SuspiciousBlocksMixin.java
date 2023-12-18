@@ -3,7 +3,7 @@ package frootloops.versus.mixin.environment.archeology;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.BrushableBlockEntity;
+import net.minecraft.block.entity.SuspiciousSandBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BrushItem;
 import net.minecraft.server.world.ServerWorld;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
-@Mixin(BrushableBlockEntity.class)
+@Mixin(SuspiciousSandBlockEntity.class)
 public abstract class SuspiciousBlocksMixin extends BlockEntity {
 
     public SuspiciousBlocksMixin(BlockEntityType<?> type, BlockPos pos, BlockState state) {
