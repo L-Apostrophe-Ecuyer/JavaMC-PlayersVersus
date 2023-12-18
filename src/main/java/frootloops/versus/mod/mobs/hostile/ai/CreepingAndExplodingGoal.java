@@ -70,15 +70,15 @@ public class CreepingAndExplodingGoal extends Goal {
 
         // If the creeper was attacked, drop all pretenses and rush them:
         if (this.creeper.getAttacker() != null) this.wasCoverBlown = true;
-        if (targetEntity.handSwinging) this.wasCoverBlown = true;
+        if (this.creeper.getFuseSpeed() > 0) this.wasCoverBlown = true;
 
         double squaredDistance = this.creeper.squaredDistanceTo(targetEntity);
         boolean isPlayerLooking = Combat.isLookingTowards(targetEntity, this.creeper.getPos());
+        boolean canPlayerSeeCreeper = targetEntity.canSee(this.creeper);
 
         // When far enough away from target, only move when not looking (unless cover was blown):
-        if (squaredDistance > 12.0) {
+        if (squaredDistance > 16.0) {
             // Freeze! Target player is looking! (Andy's coming!)
-            boolean canPlayerSeeCreeper = targetEntity.canSee(this.creeper);
             if (isPlayerLooking && canPlayerSeeCreeper && !this.wasCoverBlown) {
                 this.creeper.getNavigation().stop();
                 return; // Won't explode, either
@@ -90,17 +90,22 @@ public class CreepingAndExplodingGoal extends Goal {
                     this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
                 }
             }
-            if(this.wasCoverBlown) this.wasCoverBlown = !canPlayerSeeCreeper;
         }
 
         // If the player is looking, but the creeper is close enough, start charging:
-        else if(this.wasCoverBlown || !isPlayerLooking || this.creeper.getNavigation().isIdle() || this.creeper.getFuseSpeed() > 0) {
-            this.creeper.getNavigation().startMovingTo(targetEntity, this.speed * 1.2);
-            this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
+        else {
+            if (targetEntity.handSwinging) this.wasCoverBlown = true;
+            if(this.wasCoverBlown && !canPlayerSeeCreeper) this.wasCoverBlown = false;
+            if(this.wasCoverBlown || !(isPlayerLooking && canPlayerSeeCreeper) || this.creeper.getNavigation().isIdle()) {
+                this.creeper.getNavigation().startMovingTo(targetEntity, this.speed);
+                this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
+            }
         }
 
         // Explode when within 2.5 blocks:
-        if(squaredDistance < 7.0 && isPlayerLooking && this.creeper.getVisibilityCache().canSee(targetEntity)) this.creeper.setFuseSpeed(1);
+        boolean shouldStartExploding = (squaredDistance < 6.25 && isPlayerLooking && this.creeper.getVisibilityCache().canSee(targetEntity));
+        boolean shouldKeepExploding = (this.creeper.getFuseSpeed() > 0);
+        if(shouldStartExploding || shouldKeepExploding) this.creeper.setFuseSpeed(1);
         else this.creeper.setFuseSpeed(-1);
     }
 }
