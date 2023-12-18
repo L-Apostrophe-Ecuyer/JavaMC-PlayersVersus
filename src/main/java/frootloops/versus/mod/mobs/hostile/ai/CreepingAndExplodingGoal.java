@@ -78,18 +78,19 @@ public class CreepingAndExplodingGoal extends Goal {
         // When far enough away from target, only move when not looking (unless cover was blown):
         if (squaredDistance > 12.0) {
             // Freeze! Target player is looking! (Andy's coming!)
-            if (isPlayerLooking && targetEntity.canSee(this.creeper) && !this.wasCoverBlown) {
+            boolean canPlayerSeeCreeper = targetEntity.canSee(this.creeper);
+            if (isPlayerLooking && canPlayerSeeCreeper && !this.wasCoverBlown) {
                 this.creeper.getNavigation().stop();
                 return; // Won't explode, either
             }
             // If the player can't see the creeper, creep up on them:
             else {
-                this.wasCoverBlown = false;
                 if(this.creeper.getNavigation().isIdle()) {
                     this.creeper.getNavigation().startMovingTo(targetEntity, this.wasCoverBlown ? this.speed * 1.2 : this.speed);
                     this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
                 }
             }
+            if(this.wasCoverBlown) this.wasCoverBlown = !canPlayerSeeCreeper;
         }
 
         // If the player is looking, but the creeper is close enough, start charging:

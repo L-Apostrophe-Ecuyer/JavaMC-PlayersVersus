@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 public class DeeperCreeperEntity extends CreeperEntity {
     private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private int lastFuseTime, currentFuseTime, fuseTime = 34, explosionRadius = 5;
+    private int lastFuseTime, currentFuseTime, fuseTime = 24, explosionRadius = 5;
 
     public DeeperCreeperEntity(EntityType<? extends CreeperEntity> entityType, World world) {
         super(entityType, world);
@@ -43,7 +43,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     public static DefaultAttributeContainer.Builder createDeeperCreeperAttributes() {
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3).add(EntityAttributes.GENERIC_FOLLOW_RANGE, 40.0).add(EntityAttributes.GENERIC_ARMOR, 4.0);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.36).add(EntityAttributes.GENERIC_FOLLOW_RANGE, 40.0).add(EntityAttributes.GENERIC_ARMOR, 10.0).add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 3.0);
     }
 
     @Override
