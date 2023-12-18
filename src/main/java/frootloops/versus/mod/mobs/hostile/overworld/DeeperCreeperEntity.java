@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 public class DeeperCreeperEntity extends CreeperEntity {
     private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private int lastFuseTime, currentFuseTime, fuseTime = 24, explosionRadius = 5;
+    private int lastFuseTime, currentFuseTime, fuseTime = 34, explosionRadius = 5;
 
     public DeeperCreeperEntity(EntityType<? extends CreeperEntity> entityType, World world) {
         super(entityType, world);

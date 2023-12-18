@@ -26,7 +26,7 @@ public class  CreeperEntityMixin extends HostileEntity {
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
         fuseTime = 34;
-        explosionRadius = 4;
+        explosionRadius = 3;
         this.experiencePoints = 10;
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
