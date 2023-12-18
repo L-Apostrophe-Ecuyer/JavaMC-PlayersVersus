@@ -19,6 +19,8 @@
     "enchantments.tools.PowerMixin",
     "enchantments.tools.SharpnessMixin",
     "enchantments.tools.SweepingMixin",
+    "environment.archeology.BrushesNotRequiredMixin",
+    "environment.archeology.SuspiciousBlocksMixin",
     "environment.sleeping.ServerSleepingMixin",
     "environment.sleeping.TimePerTickMixin",
     "environment.BlockExplosivityMixin",

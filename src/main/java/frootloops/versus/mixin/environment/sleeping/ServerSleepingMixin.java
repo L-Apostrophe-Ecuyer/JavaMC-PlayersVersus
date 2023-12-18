@@ -1,7 +1,6 @@
 package frootloops.versus.mixin.environment.sleeping;
 
 import frootloops.versus.ServerSettings;
-import frootloops.versus.VersusMod;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.DynamicRegistryManager;
@@ -40,10 +39,10 @@ public abstract class ServerSleepingMixin extends World {
     public boolean checkOnEepyPlayers(SleepManager sleepManager, int percentage, List<ServerPlayerEntity> players) {
         cachedSleepManager = sleepManager;
         if(this.isEveryoneTuckedIn()) { // If everyone is asleep, make time go by quick:
-            ServerSettings.isFastForwarding = true;
+            ServerSettings.isTimeFastForwarding = true;
             this.setTimeOfDay((this.properties.getTimeOfDay() + 1) % 24000);
         }
-        else if(ServerSettings.isFastForwarding) { // Otherwise, check if we need to wake up:
+        else if(ServerSettings.isTimeFastForwarding) { // Otherwise, check if we need to wake up:
             this.riseAndGrind();
         }
         return false; // Return false to cancel vanilla time skip:
@@ -51,7 +50,7 @@ public abstract class ServerSleepingMixin extends World {
 
     @Inject(method = "tick", at = @At(value = "TAIL"))
     public void stopIfPlayerWokeUp(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
-        if(ServerSettings.isFastForwarding && !this.isEveryoneTuckedIn()) this.riseAndGrind();
+        if(ServerSettings.isTimeFastForwarding && !this.isEveryoneTuckedIn()) this.riseAndGrind();
     }
 
     private void riseAndGrind() {
@@ -61,7 +60,7 @@ public abstract class ServerSleepingMixin extends World {
                 player.wakeUp(false, false);
             });
         }
-        ServerSettings.isFastForwarding = false;
+        ServerSettings.isTimeFastForwarding = false;
     }
 
     private boolean isEveryoneTuckedIn() {
