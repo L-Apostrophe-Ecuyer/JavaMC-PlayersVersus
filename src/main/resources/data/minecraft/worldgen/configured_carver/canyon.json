@@ -1,0 +1,79 @@
+{
+  "type": "minecraft:canyon",
+  "config": {
+    "probability": 0.03,
+    "y": {
+      "type": "minecraft:uniform",
+      "min_inclusive": {
+        "above_bottom": 12
+      },
+      "max_inclusive": {
+        "above_bottom": 32
+      }
+    },
+    "yScale": 1,
+    "lava_level": {
+      "above_bottom": 8
+    },
+    "replaceable": "#minecraft:overworld_carver_replaceables",
+    "debug_settings": {
+      "debug_mode": false,
+      "air_state": {
+        "Name": "minecraft:warped_button",
+        "Properties": {
+          "face": "wall",
+          "facing": "north",
+          "powered": "false"
+        }
+      },
+      "water_state": {
+        "Name": "minecraft:candle",
+        "Properties": {
+          "candles": "1",
+          "lit": "false",
+          "waterlogged": "false"
+        }
+      },
+      "lava_state": {
+        "Name": "minecraft:orange_stained_glass"
+      },
+      "barrier_state": {
+        "Name": "minecraft:glass"
+      }
+    },
+    "vertical_rotation": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": -0.15,
+        "max_exclusive": 0.15
+      }
+    },
+    "shape": {
+      "distance_factor": {
+        "type": "minecraft:uniform",
+        "value": {
+          "min_inclusive": 0.5,
+          "max_exclusive": 0.9
+        }
+      },
+      "thickness": {
+        "type": "minecraft:trapezoid",
+        "value": {
+          "min": 0,
+          "max": 12,
+          "plateau": 2
+        }
+      },
+      "width_smoothness": 3,
+      "horizontal_radius_factor": {
+        "type": "minecraft:uniform",
+        "value": {
+          "min_inclusive": 0.75,
+          "max_exclusive": 1
+        }
+      },
+      "vertical_radius_default_factor": 1,
+      "vertical_radius_center_factor": 0
+    }
+  }
+}
