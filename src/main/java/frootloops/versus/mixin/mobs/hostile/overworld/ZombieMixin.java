@@ -51,13 +51,13 @@ public abstract class ZombieMixin extends HostileEntity {
 
     // Reduced:
     private static final EntityAttributeModifier BABY_SPEED_BONUS_REDUCED = new EntityAttributeModifier(BABY_SPEED_ID, "Baby speed boost", 0.2, EntityAttributeModifier.Operation.MULTIPLY_BASE);
-    private static final EntityAttributeModifier BABY_HEALTH_REDUCED = new EntityAttributeModifier(BABY_HEALTH_ID, "Baby health nerf", -10, EntityAttributeModifier.Operation.ADDITION);
+    private static final EntityAttributeModifier BABY_HEALTH_REDUCED = new EntityAttributeModifier(BABY_HEALTH_ID, "Baby health nerf", -12, EntityAttributeModifier.Operation.ADDITION);
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
                 HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
-                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.34f)
+                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.36f)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0)
                         .add(EntityAttributes.GENERIC_MAX_HEALTH, 24.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
@@ -75,7 +75,7 @@ public abstract class ZombieMixin extends HostileEntity {
         }
 
         this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.66F));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.33F));
         this.targetSelector.add(1, (new RevengeGoal(this, PigEntity.class)));
         this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, MerchantEntity.class, false));
@@ -158,7 +158,7 @@ public abstract class ZombieMixin extends HostileEntity {
 
             entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
             if (baby) entityAttributeInstance.addTemporaryModifier(BABY_HEALTH_REDUCED);
-            if (baby) this.setHealth(16.0f);
+            if (baby) this.setHealth(12.0f);
         }
     }
 }

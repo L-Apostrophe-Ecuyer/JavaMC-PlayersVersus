@@ -1,4 +1,4 @@
-package frootloops.versus.mod;
+package frootloops.versus.mod.environment;
 
 import frootloops.versus.VersusMod;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
