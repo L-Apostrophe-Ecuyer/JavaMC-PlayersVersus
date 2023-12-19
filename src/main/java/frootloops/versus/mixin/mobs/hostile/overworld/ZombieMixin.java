@@ -117,19 +117,22 @@ public abstract class ZombieMixin extends HostileEntity {
             if(rand % 13 == 0 && depth > 64) {
                 this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
                 this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 384);
-                this.armorDropChances[EquipmentSlot.CHEST.getEntitySlotId()] = 0.1f;
+                this.armorDropChances[EquipmentSlot.CHEST.getEntitySlotId()] = 0.08f;
             }
 
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
-            if (isAtDiamondDepth && rand % 17 == 0) {
-                ItemStack enchantedBook = EnchantmentHelper.enchant(this.getWorld().random, new ItemStack(Items.BOOK), 12, true);;
+            if (isAtDiamondDepth && rand % 23 == 0) {
+                ItemStack enchantedBook = EnchantmentHelper.enchant(this.getWorld().random, new ItemStack(Items.BOOK), 16, true);;
 ;               this.equipStack(EquipmentSlot.OFFHAND, enchantedBook);
                 this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
             }
 
-            if (isAtDiamondDepth && rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
-            else if (isAtDiamondDepth && rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
-            else if (isAtDiamondDepth && rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
+            if(isAtDiamondDepth && rand < 60) {
+                this.armorDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15f;
+                if (rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+                else if (rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
+                else if (rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
+            }
             else if(rand < 20) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
             else if(rand < 40) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
             else if(rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
