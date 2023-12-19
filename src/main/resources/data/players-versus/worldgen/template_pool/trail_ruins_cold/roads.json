@@ -4,7 +4,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "players-versus:trail_ruins_cold/roads/long_road_end",
-        "processors": "player-versus:trail_ruins_roads_archaeology",
+        "processors": "players-versus:trail_ruins_roads_archaeology",
         "projection": "rigid"
       },
       "weight": 1
@@ -13,7 +13,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "players-versus:trail_ruins_cold/roads/road_end_1",
-        "processors": "player-versus:trail_ruins_roads_archaeology",
+        "processors": "players-versus:trail_ruins_roads_archaeology",
         "projection": "rigid"
       },
       "weight": 1
@@ -22,7 +22,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "players-versus:trail_ruins_cold/roads/road_section_1",
-        "processors": "player-versus:trail_ruins_roads_archaeology",
+        "processors": "players-versus:trail_ruins_roads_archaeology",
         "projection": "rigid"
       },
       "weight": 1
@@ -31,7 +31,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "players-versus:trail_ruins_cold/roads/road_section_2",
-        "processors": "player-versus:trail_ruins_roads_archaeology",
+        "processors": "players-versus:trail_ruins_roads_archaeology",
         "projection": "rigid"
       },
       "weight": 1
@@ -40,7 +40,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "players-versus:trail_ruins_cold/roads/road_section_3",
-        "processors": "player-versus:trail_ruins_roads_archaeology",
+        "processors": "players-versus:trail_ruins_roads_archaeology",
         "projection": "rigid"
       },
       "weight": 1
@@ -49,7 +49,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "players-versus:trail_ruins_cold/roads/road_section_4",
-        "processors": "player-versus:trail_ruins_roads_archaeology",
+        "processors": "players-versus:trail_ruins_roads_archaeology",
         "projection": "rigid"
       },
       "weight": 1
@@ -58,7 +58,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "players-versus:trail_ruins_cold/roads/road_spacer_1",
-        "processors": "player-versus:trail_ruins_roads_archaeology",
+        "processors": "players-versus:trail_ruins_roads_archaeology",
         "projection": "rigid"
       },
       "weight": 1
