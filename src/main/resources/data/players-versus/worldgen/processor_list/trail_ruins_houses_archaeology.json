@@ -8,24 +8,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:white_terracotta"
-          },
-          "output_state": {
-            "Name": "minecraft:terracotta"
-          }
-        },
-        {
-          "location_predicate": {
-            "predicate_type": "minecraft:always_true"
-          },
-          "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:gravel",
             "probability": 0.2
           },
           "output_state": {
-            "Name": "minecraft:coarse_dirt"
+            "Name": "minecraft:dirt"
           }
         },
         {
@@ -58,7 +46,7 @@
     },
     {
       "processor_type": "minecraft:capped",
-      "limit": 18,
+      "limit": 12,
       "delegate": {
         "processor_type": "minecraft:rule",
         "rules": [
@@ -86,7 +74,7 @@
     },
     {
       "processor_type": "minecraft:capped",
-      "limit": 10,
+      "limit": 8,
       "delegate": {
         "processor_type": "minecraft:rule",
         "rules": [
