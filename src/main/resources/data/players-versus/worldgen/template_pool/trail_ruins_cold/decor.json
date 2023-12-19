@@ -1,0 +1,68 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/decor/decor_1",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/decor/decor_2",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/decor/decor_3",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/decor/decor_4",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/decor/decor_5",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/decor/decor_6",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/decor/decor_7",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ],
+  "fallback": "minecraft:empty"
+}

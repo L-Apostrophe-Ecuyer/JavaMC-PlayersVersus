@@ -1,0 +1,50 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/tower/tower_1",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/tower/tower_2",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/tower/tower_3",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/tower/tower_4",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:trail_ruins_cold/tower/tower_5",
+        "processors": "player-versus:trail_ruins_houses_archaeology",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ],
+  "fallback": "minecraft:empty"
+}

@@ -49,12 +49,13 @@ public class BrushesNotRequiredMixin {
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = false)
     private void update(CallbackInfo info) {
-        if(this.tickCounter - startMiningTime > 10 && this.tickCounter - startMiningTime < 30) {
+        if(this.tickCounter - startMiningTime > 5 && this.tickCounter - startMiningTime < 36) {
             BlockState blockState = world.getBlockState(miningPos);
             if (blockState.getBlock() instanceof BrushableBlock) {
                 if (world.getBlockEntity(miningPos) instanceof BrushableBlockEntity brushableBlockEntity) {
-                    brushableBlockEntity.brush(world.getTime(), player, prevDirection);
                     addDustParticles(world, prevDirection, miningPos, blockState, player);
+                    brushableBlockEntity.brush(world.getTime(), player, prevDirection);
+                    brushableBlockEntity.scheduledTick();
                 }
             }
         }
