@@ -32,9 +32,9 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     private final int TICKS_ENDLAG = 8;
     private final int TICKS_SWING_DEFAULT = TICKS_ENDLAG + 6;
-    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 4;
-    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 9;
-    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 12;
+    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 8;
+    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 10;
+    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 14;
 
     @Shadow
     private final double speed;
