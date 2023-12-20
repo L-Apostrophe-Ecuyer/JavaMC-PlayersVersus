@@ -31,7 +31,11 @@ public abstract class MobEntityMixin extends LivingEntity {
     @Override
     public boolean startRiding(Entity entity) {
         if(this.hurtTime > 0) return false;
-        if(target instanceof PlayerEntity && visibilityCache.canSee(target)) return super.startRiding(entity, false);
+        if(entity instanceof BoatEntity) {
+           if(target == null) return false;
+           if(visibilityCache.canSee(target)) return false;
+           return super.startRiding(entity, false);
+        }
         else return false;
     }
 
