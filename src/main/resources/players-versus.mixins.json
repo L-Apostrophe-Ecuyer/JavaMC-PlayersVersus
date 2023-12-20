@@ -75,7 +75,7 @@
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
     "mobs.hostile.nether.WitherSkeletonMixin",
-    "mobs.hostile.MobEquipmentMixin",
+    "mobs.hostile.MobEntityMixin",
     "mobs.hostile.MeleeAttackGoalMixin",
     "mobs.passive.VillagerEntityMixin",
     "mobs.passive.SheepMixin",
