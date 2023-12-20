@@ -3,6 +3,7 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -56,10 +57,11 @@ public abstract class ZombieMixin extends HostileEntity {
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
-                HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
+                HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 6.0)
                         .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.36f)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0)
                         .add(EntityAttributes.GENERIC_MAX_HEALTH, 24.0)
+                        .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 4.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
     }
 
@@ -81,6 +83,11 @@ public abstract class ZombieMixin extends HostileEntity {
         this.targetSelector.add(3, new ActiveTargetGoal(this, MerchantEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, IronGolemEntity.class, false));
         this.targetSelector.add(5, new ActiveTargetGoal(this, TurtleEntity.class, 10, true, false, TurtleEntity.BABY_TURTLE_ON_LAND_FILTER));
+    }
+
+    @Override
+    protected void loot(ItemEntity itemEntity) {
+        if(itemEntity.getItemAge() > 160) super.loot(itemEntity);
     }
 
     @Override
@@ -141,7 +148,7 @@ public abstract class ZombieMixin extends HostileEntity {
             if(rand < 90) {
                 int damageAmount = (isAtDiamondDepth && rand < 60) ? rand + 900 : rand/2 + 150;
                 this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
-                this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.3F;
+                this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15F;
             }
         }
     }
