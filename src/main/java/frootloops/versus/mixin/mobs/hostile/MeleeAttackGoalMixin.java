@@ -172,7 +172,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
         // Otherwise, see if we can attack (cooldown is reduced in tick()):
         else if (canTrySwinging || willTryLandingAnAttack) {
-            if(Combat.getMobAttackBox(mob).intersects(Combat.getEntityHitbox(target)) && Combat.isLookingTowards(this.mob, target.getEyePos(), willTryLandingAnAttack)) {
+            if(Combat.getMobAttackBox(mob).intersects(Combat.getEntityHitbox(target)) && Combat.isLookingTowards(this.mob, target.getEyePos(), true)) {
 
                 // Start swinging:
                 if (canTrySwinging) {
