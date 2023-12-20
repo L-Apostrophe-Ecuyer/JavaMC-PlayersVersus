@@ -178,7 +178,7 @@ public abstract class Combat {
     }
 
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, boolean strict){
-        return Combat.isLookingTowards(looker,targetPos,strict ? -0.8 : -0.5);
+        return Combat.isLookingTowards(looker,targetPos,strict ? -0.75 : -0.5);
     }
 
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
