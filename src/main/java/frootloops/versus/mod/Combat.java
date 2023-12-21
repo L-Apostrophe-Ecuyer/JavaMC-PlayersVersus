@@ -33,7 +33,7 @@ import java.util.List;
 
 public abstract class Combat {
 
-    public static final double PLAYER_BASE_ATTACK_DAMAGE = 2.0d;
+    public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
     private static final String[] tools = new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
