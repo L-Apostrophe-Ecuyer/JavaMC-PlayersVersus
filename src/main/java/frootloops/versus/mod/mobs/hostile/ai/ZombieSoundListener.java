@@ -22,7 +22,7 @@ public class ZombieSoundListener {
         // If the sound comes from an entity, skip if the entity is sneaking or on wool:
         boolean heardProjectileLanding = (event == GameEvent.PROJECTILE_LAND);
         boolean heardPlayerSprinting = false;
-
+        PlayerEntity player = null;
         if(emitter.sourceEntity() != null) {
 
             // For performance's sake:
@@ -30,8 +30,11 @@ public class ZombieSoundListener {
                     && !(emitter.sourceEntity() instanceof PlayerEntity)
                     && !(emitter.sourceEntity() instanceof VillagerEntity)) return;
 
+            // If it's a player:
+            if(emitter.sourceEntity() instanceof PlayerEntity) player = (PlayerEntity) emitter.sourceEntity();
+
             // For consistency with wool occlusion and sneaking mechanics:
-            if (event == GameEvent.STEP) {
+            if (event == GameEvent.STEP || event == GameEvent.HIT_GROUND) {
                 if (emitter.sourceEntity().bypassesSteppingEffects()) return; // Sneaking
                 if (emitter.affectedState() != null && emitter.affectedState().isIn(BlockTags.DAMPENS_VIBRATIONS)) return; // Walking on wool
                 heardPlayerSprinting = emitter.sourceEntity().isSprinting();
@@ -43,8 +46,8 @@ public class ZombieSoundListener {
         // How much zombies should be attracted to the sound:
         boolean isHighPriority = (heardProjectileLanding || event == GameEvent.DRINK || event == GameEvent.EAT);
         boolean isPriority = !isHighPriority && (heardPlayerSprinting || event == GameEvent.ENTITY_DAMAGE || event == GameEvent.BLOCK_DESTROY);
-        double range = isHighPriority ? 32d : isPriority? 20d : 12d;
-        double speedMultiplier = isHighPriority ? 1.2d : isPriority ? 1.0d : 0.8d;
+        double range = isHighPriority ? 32d : isPriority? 24d : 12d;
+        double speedMultiplier = isHighPriority ? 1.3d : isPriority ? 1.2d : 0.9d;
 
         // Create a bounding box surrounding the event's position:
         double x = emitterPos.x, y = emitterPos.y, z = emitterPos.z;
@@ -55,8 +58,19 @@ public class ZombieSoundListener {
         for (ZombieEntity zombie : zombiesNearby) {
             if(zombie instanceof ZombifiedPiglinEntity) continue;
             if(zombie.getTarget() == null) {
-                zombie.getNavigation().startMovingTo(x, y, z, speedMultiplier);
-                zombie.ambientSoundChance += isHighPriority ? 1000 : isPriority ? 400 : 200;
+                if((isHighPriority || isPriority) && player != null) {
+                    double dx = x - zombie.getX();
+                    double dz = y - zombie.getY();
+                    if ((dx * dx + dz * dz) < 256d) zombie.setTarget(player);
+                    else {
+                        zombie.getNavigation().startMovingTo(x, y, z, speedMultiplier);
+                        zombie.ambientSoundChance += 1000;
+                    }
+                }
+                else {
+                    zombie.getNavigation().startMovingTo(x, y, z, speedMultiplier);
+                    zombie.ambientSoundChance += isPriority ? 400 : 200;
+                }
             }
         }
     }
