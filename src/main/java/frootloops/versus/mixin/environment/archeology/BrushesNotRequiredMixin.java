@@ -1,9 +1,11 @@
 package frootloops.versus.mixin.environment.archeology;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BrushableBlock;
 import net.minecraft.block.entity.BrushableBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ShovelItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -49,7 +51,8 @@ public class BrushesNotRequiredMixin {
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = false)
     private void update(CallbackInfo info) {
-        if(this.tickCounter - startMiningTime > 5 && this.tickCounter - startMiningTime < 36) {
+        int ticksTillBrushing = player.getMainHandStack().getItem() instanceof ShovelItem ? 2 : 6;
+        if(this.tickCounter - startMiningTime > ticksTillBrushing && this.tickCounter - startMiningTime < 36 && player.handSwinging) {
             BlockState blockState = world.getBlockState(miningPos);
             if (blockState.getBlock() instanceof BrushableBlock) {
                 if (world.getBlockEntity(miningPos) instanceof BrushableBlockEntity brushableBlockEntity) {

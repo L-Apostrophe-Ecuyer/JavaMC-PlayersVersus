@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
@@ -76,7 +77,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         if(blockState.getBlock() instanceof BrushableBlock) {
-            cir.setReturnValue(cir.getReturnValue() - 0.55f);
+            cir.setReturnValue(cir.getReturnValue() - 0.5f);
             return;
         }
 
@@ -89,6 +90,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                     cir.setReturnValue(cir.getReturnValue() * 1.15f);
                 }
             }
+            return;
         }
     }
 

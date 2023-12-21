@@ -1,7 +1,7 @@
 {
   "structures": [
     {
-      "structure": "minecraft:trail_ruins",
+      "structure": "players-versus:trail_ruins_cold",
       "weight": 1
     }
   ],

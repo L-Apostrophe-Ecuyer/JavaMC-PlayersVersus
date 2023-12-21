@@ -1,36 +1,93 @@
 {
   "processors": [
     {
-      "delegate": {
-        "processor_type": "minecraft:rule",
-        "rules": [
-          {
-            "block_entity_modifier": {
-              "type": "minecraft:append_loot",
-              "loot_table": "minecraft:archaeology/trail_ruins_common"
-            },
-            "input_predicate": {
-              "predicate_type": "minecraft:tag_match",
-              "tag": "minecraft:trail_ruins_replaceable"
-            },
-            "location_predicate": {
-              "predicate_type": "minecraft:always_true"
-            },
-            "output_state": {
-              "Name": "minecraft:suspicious_sand",
-              "Properties": {
-                "dusted": "0"
-              }
+      "processor_type": "minecraft:rule",
+      "rules": [
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:orange_glazed_terracotta"
+          },
+          "output_state": {
+            "Name": "minecraft:stripped_mangrove_log",
+            "Properties": {
+              "axis": "y"
             }
           }
-        ]
-      },
-      "limit": 2,
-      "processor_type": "minecraft:capped"
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:white_terracotta"
+          },
+          "output_state": {
+            "Name": "minecraft:terracotta"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:mud_bricks",
+            "probability": 0.1
+          },
+          "output_state": {
+            "Name": "minecraft:packed_mud"
+          }
+        }
+      ]
     },
     {
       "processor_type": "minecraft:rule",
       "rules": [
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:gravel",
+            "probability": 0.3
+          },
+          "output_state": {
+            "Name": "minecraft:suspicious_sand",
+            "Properties": {
+              "dusted": "0"
+            }
+          },
+          "block_entity_modifier": {
+            "type": "minecraft:append_loot",
+            "loot_table": "minecraft:archaeology/trail_ruins_common"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:gravel",
+            "probability": 0.1
+          },
+          "output_state": {
+            "Name": "minecraft:suspicious_sand",
+            "Properties": {
+              "dusted": "0"
+            }
+          },
+          "block_entity_modifier": {
+            "type": "minecraft:append_loot",
+            "loot_table": "minecraft:archaeology/trail_ruins_rare"
+          }
+        },
         {
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
