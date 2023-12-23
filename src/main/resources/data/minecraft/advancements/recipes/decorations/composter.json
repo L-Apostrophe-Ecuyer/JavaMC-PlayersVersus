@@ -1,0 +1,45 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "minecraft:composter"
+      }
+    },
+    "has_wood_slab": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "minecraft:wooden_slabs"
+          }
+        ]
+      }
+    },
+    "has_used_bonemeal": {
+      "trigger": "minecraft:item_used_on_block",
+      "conditions": {
+        "item": {
+          "items": [
+            "minecraft:bone_meal"
+          ]
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_used_bonemeal"
+    ],
+    [
+      "has_wood_slab",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:composter"
+    ]
+  }
+}

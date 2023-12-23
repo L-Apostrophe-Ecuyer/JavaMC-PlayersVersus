@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_iron_ingot": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:iron_ingot"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "minecraft:shield"
+      }
+    },
+    "was_hurt": {
+      "trigger": "minecraft:entity_hurt_player",
+      "conditions": {
+        "damage": {
+          "taken": {
+            "min": 3,
+            "max": 256
+          },
+          "blocked": false
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_iron_ingot",
+      "has_the_recipe",
+      "was_hurt"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:shield"
+    ]
+  }
+}

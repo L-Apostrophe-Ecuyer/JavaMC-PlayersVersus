@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "minecraft:jukebox"
+      }
+    },
+    "has_disc": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "minecraft:music_discs"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [],
+    [
+      "has_disc",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:jukebox"
+    ]
+  }
+}

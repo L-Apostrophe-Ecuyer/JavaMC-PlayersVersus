@@ -1,0 +1,63 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_paper": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:paper"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "minecraft:cartography_table"
+      }
+    },
+    "has_used_map": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "slots": {},
+        "items": [
+          {
+            "items": [
+              "minecraft:filled_map"
+            ]
+          }
+        ]
+      }
+    },
+    "has_empty_map": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:map"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_empty_map",
+      "has_used_map"
+    ],
+    [
+      "has_paper",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:cartography_table"
+    ]
+  }
+}

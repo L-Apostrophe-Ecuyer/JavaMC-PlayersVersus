@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:nether_sprouts"
+          "name": "minecraft:seagrass"
         }
       ],
       "conditions": [
@@ -15,7 +15,6 @@
           "condition": "minecraft:match_tool",
           "predicate": {
             "items": [
-              "players-versus:copper_hoe",
               "minecraft:shears",	
               "minecraft:wooden_hoe",
               "minecraft:golden_hoe",
