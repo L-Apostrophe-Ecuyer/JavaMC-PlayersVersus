@@ -10,14 +10,15 @@
           "children": [
             {
               "type": "minecraft:item",
-              "name": "minecraft:snow_block",
+              "name": "minecraft:clay",
               "conditions": [
                 {
                   "condition": "minecraft:match_tool",
                   "predicate": {
                     "enchantments": [
                       {
-                        "enchantment": "minecraft:silk_touch"
+                        "enchantment": "minecraft:silk_touch",
+                        "levels": 1
                       }
                     ]
                   }
@@ -26,7 +27,19 @@
             },
             {
               "type": "minecraft:item",
-              "name": "minecraft:snow_block",
+              "name": "minecraft:clay",
+              "conditions": [
+                {
+                  "condition": "minecraft:match_tool",
+                  "predicate": {
+                    "tag": "minecraft:shovels"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "minecraft:clay",
               "conditions": [
                 {
                   "condition": "minecraft:match_tool",
@@ -40,19 +53,7 @@
             },
             {
               "type": "minecraft:item",
-              "name": "minecraft:snow_block",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "tag": "minecraft:shovels"
-                  }
-                }
-              ]
-            },
-            {
-              "type": "minecraft:item",
-              "name": "minecraft:snowball",
+              "name": "minecraft:clay_ball",
               "functions": [
                 {
                   "function": "minecraft:set_count",

@@ -15,6 +15,7 @@
           "condition": "minecraft:match_tool",
           "predicate": {
             "items": [
+              "players-versus:copper_hoe",
               "minecraft:shears",	
               "minecraft:wooden_hoe",
               "minecraft:golden_hoe",
