@@ -2,8 +2,8 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.mixin.players.accessors.ItemAccessor;
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.items.equipment.bronze.BronzeArmorMaterial;
-import frootloops.versus.mod.items.equipment.bronze.BronzeToolMaterial;
+import frootloops.versus.mod.items.equipment.copper.CopperArmorMaterial;
+import frootloops.versus.mod.items.equipment.copper.CopperToolMaterial;
 import frootloops.versus.mod.items.equipment.slime.SlimeArmorMaterial;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.*;
@@ -16,38 +16,33 @@ import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class Items {
 
-    public static final BronzeToolMaterial BRONZE_TOOL_MATERIAL = new BronzeToolMaterial();
-    public static final BronzeArmorMaterial BRONZE_ARMOR_MATERIAL = new BronzeArmorMaterial();
+    public static final CopperToolMaterial COPPER_TOOL_MATERIAL = new CopperToolMaterial();
+    public static final CopperArmorMaterial COPPER_ARMOR_MATERIAL = new CopperArmorMaterial();
     public static final SlimeArmorMaterial SLIME_ARMOR_MATERIAL = new SlimeArmorMaterial();
 
-    public static final Item BRONZE_INGOT = new Item(new Item.Settings());
-    public static final Item RAW_BRONZE_ALLOY = new Item(new Item.Settings());
-    public static final Item BRONZE_HELMET = new ArmorItem(BRONZE_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Settings());
-    public static final Item BRONZE_CHESTPLATE = new ArmorItem(BRONZE_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings());
-    public static final Item BRONZE_LEGGINGS = new ArmorItem(BRONZE_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Settings());
-    public static final Item BRONZE_BOOTS = new ArmorItem(BRONZE_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings());
-    public static ToolItem BRONZE_HOE = new HoeItem(BRONZE_TOOL_MATERIAL, 4, Combat.getHoeSpeedModifier(), new Item.Settings());
-    public static ToolItem BRONZE_AXE = new AxeItem(BRONZE_TOOL_MATERIAL, 9, Combat.getAxeSpeedModifier(), new Item.Settings());
-    public static ToolItem BRONZE_SWORD = new SwordItem(BRONZE_TOOL_MATERIAL, 6, Combat.getSwordSpeedModifier(), new Item.Settings());
-    public static ToolItem BRONZE_SHOVEL = new ShovelItem(BRONZE_TOOL_MATERIAL, 4, Combat.getShovelSpeedModifier(), new Item.Settings());
-    public static ToolItem BRONZE_PICKAXE = new PickaxeItem(BRONZE_TOOL_MATERIAL, 5, Combat.getPickaxeSpeedModifier(), new Item.Settings());
+    public static final Item COPPER_HELMET = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Settings());
+    public static final Item COPPER_CHESTPLATE = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings());
+    public static final Item COPPER_LEGGINGS = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Settings());
+    public static final Item COPPER_BOOTS = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings());
+    public static ToolItem COPPER_HOE = new HoeItem(COPPER_TOOL_MATERIAL, (int)Combat.getHoeDamageModifier(), Combat.getHoeSpeedModifier(), new Item.Settings());
+    public static ToolItem COPPER_AXE = new AxeItem(COPPER_TOOL_MATERIAL, (int)Combat.getAxeDamageModifier(), Combat.getAxeSpeedModifier(), new Item.Settings());
+    public static ToolItem COPPER_SWORD = new SwordItem(COPPER_TOOL_MATERIAL, (int)Combat.getSwordDamageModifier(), Combat.getSwordSpeedModifier(), new Item.Settings());
+    public static ToolItem COPPER_SHOVEL = new ShovelItem(COPPER_TOOL_MATERIAL, (int)Combat.getShovelDamageModifier(), Combat.getShovelSpeedModifier(), new Item.Settings());
+    public static ToolItem COPPER_PICKAXE = new PickaxeItem(COPPER_TOOL_MATERIAL, (int)Combat.getPickaxeDamageModifier(), Combat.getPickaxeSpeedModifier(), new Item.Settings());
 
     public static void onInitialize() {
         int maxSnacks = 64, maxMeals = 64, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
         setStackSizes(maxSnacks, maxMeals, maxBottled, maxStews, maxThrowables, maxPlaceableEntities);
 
-        registerCustomItem("bronze_ingot", BRONZE_INGOT, ItemGroups.INGREDIENTS);
-        registerCustomItem("raw_bronze_ingot", RAW_BRONZE_ALLOY, ItemGroups.INGREDIENTS);
-
-        registerCustomItem("bronze_chestplate", BRONZE_CHESTPLATE, ItemGroups.COMBAT);
-        registerCustomItem("bronze_leggings", BRONZE_LEGGINGS, ItemGroups.COMBAT);
-        registerCustomItem("bronze_helmet", BRONZE_HELMET, ItemGroups.COMBAT);
-        registerCustomItem("bronze_boots", BRONZE_BOOTS, ItemGroups.COMBAT);
-        registerCustomItem("bronze_hoe", BRONZE_HOE, ItemGroups.TOOLS);
-        registerCustomItem("bronze_axe", BRONZE_AXE, ItemGroups.TOOLS, ItemGroups.COMBAT);
-        registerCustomItem("bronze_sword", BRONZE_SWORD, ItemGroups.COMBAT);
-        registerCustomItem("bronze_shovel", BRONZE_SHOVEL, ItemGroups.TOOLS);
-        registerCustomItem("bronze_pickaxe", BRONZE_PICKAXE, ItemGroups.TOOLS);
+        registerCustomItem("copper_chestplate", COPPER_CHESTPLATE, ItemGroups.COMBAT);
+        registerCustomItem("copper_leggings", COPPER_LEGGINGS, ItemGroups.COMBAT);
+        registerCustomItem("copper_helmet", COPPER_HELMET, ItemGroups.COMBAT);
+        registerCustomItem("copper_boots", COPPER_BOOTS, ItemGroups.COMBAT);
+        registerCustomItem("copper_hoe", COPPER_HOE, ItemGroups.TOOLS);
+        registerCustomItem("copper_axe", COPPER_AXE, ItemGroups.TOOLS, ItemGroups.COMBAT);
+        registerCustomItem("copper_sword", COPPER_SWORD, ItemGroups.COMBAT);
+        registerCustomItem("copper_shovel", COPPER_SHOVEL, ItemGroups.TOOLS);
+        registerCustomItem("copper_pickaxe", COPPER_PICKAXE, ItemGroups.TOOLS);
     }
 
     private static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {

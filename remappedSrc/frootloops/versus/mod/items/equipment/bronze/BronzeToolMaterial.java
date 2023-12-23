@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.equipment.bronze;
+package frootloops.versus.mod.items.equipment.copper;
 
 import net.fabricmc.yarn.constants.MiningLevels;
 import net.minecraft.item.Items;

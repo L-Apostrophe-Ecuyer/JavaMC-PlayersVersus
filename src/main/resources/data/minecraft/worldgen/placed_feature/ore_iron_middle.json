@@ -1,5 +1,61 @@
 {
-  "feature": "minecraft:ore_iron",
+  "feature": {
+    "type": "minecraft:ore",
+    "config": {
+      "size": 16,
+      "discard_chance_on_air_exposure": 0.4,
+      "targets": [
+        {
+          "target": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:stone",
+            "probability": 0.7
+          },
+          "state": {
+            "Name": "minecraft:tuff"
+          }
+        },
+        {
+          "target": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:deepslate",
+            "probability": 0.85
+          },
+          "state": {
+            "Name": "minecraft:tuff"
+          }
+        },
+        {
+          "target": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:stone",
+            "probability": 0.1
+          },
+          "state": {
+            "Name": "minecraft:stone"
+          }
+        },
+        {
+          "target": {
+            "predicate_type": "minecraft:tag_match",
+            "tag": "minecraft:base_stone_overworld"
+          },
+          "state": {
+            "Name": "minecraft:iron_ore"
+          }
+        },
+        {
+          "target": {
+            "predicate_type": "minecraft:tag_match",
+            "tag": "minecraft:deepslate_ore_replaceables"
+          },
+          "state": {
+            "Name": "minecraft:deepslate_iron_ore"
+          }
+        }
+      ]
+    }
+  },
   "placement": [
     {
       "type": "minecraft:count",
@@ -12,11 +68,11 @@
       "type": "minecraft:height_range",
       "height": {
         "type": "minecraft:trapezoid",
-        "max_inclusive": {
-          "absolute": 24
-        },
         "min_inclusive": {
           "absolute": -16
+        },
+        "max_inclusive": {
+          "absolute": 24
         }
       }
     },

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "dirts_to_dirt",
+  "ingredients": [
+    {
+      "item": "minecraft:mud"
+    }
+  ],
+  "result": {
+    "item": "minecraft:dirt",
+    "count": 1
+  }
+}

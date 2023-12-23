@@ -42,11 +42,16 @@ public abstract class Combat {
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{0F, 0F, 1F, 1F, 2F, 3F};
 
-    public static float getAxeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[0];}
-    public static float getSwordSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[1];}
-    public static float getHoeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[2];}
-    public static float getPickaxeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[3];}
-    public static float getShovelSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[4];}
+    public static float getAxeSpeedModifier() { return toolsSpeed[0] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getSwordSpeedModifier() { return toolsSpeed[1] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getHoeSpeedModifier() { return toolsSpeed[2] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getPickaxeSpeedModifier() { return toolsSpeed[3] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getShovelSpeedModifier() { return toolsSpeed[4] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getAxeDamageModifier() { return toolsDamage[0] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getSwordDamageModifier() { return toolsDamage[1] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getHoeDamageModifier() { return toolsDamage[2] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getPickaxeDamageModifier() { return toolsDamage[3] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getShovelDamageModifier() { return toolsDamage[4] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
 
     public static float getSwordReachModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[4];}
 

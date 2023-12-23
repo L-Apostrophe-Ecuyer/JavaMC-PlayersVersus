@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "group": "helmets",
+    "pattern": [
+      "XXX",
+      "X X"
+    ],
+    "key": {
+      "X": {
+        "item": "minecraft:copper_ingot"
+      }
+    },
+    "result": {
+      "item": "players-versus:copper_helmet"
+    }
+  }
+  

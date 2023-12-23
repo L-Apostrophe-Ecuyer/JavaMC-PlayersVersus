@@ -29,7 +29,7 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
         EntityAttributeInstance instance = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instance != null) {
-            instance.setBaseValue(16.0D);
+            instance.setBaseValue(22.0D);
             this.setHealth(this.getMaxHealth());
         }
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
@@ -43,6 +43,7 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
         int rand = random.nextInt(100);
         if(rand > 52){
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+            this.setHealth(16);
         }
         else if (rand < 12) {
             this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
@@ -61,7 +62,8 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
         }
         else if(rand < 38) {
             this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-            this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+            if(this.getY() < 32) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+            else this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
             if(rand % 4 == 1) this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
             if(rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
         }
