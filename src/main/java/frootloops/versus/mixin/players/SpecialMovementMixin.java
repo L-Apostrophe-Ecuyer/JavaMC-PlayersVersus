@@ -1,5 +1,7 @@
 package frootloops.versus.mixin.players;
 
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.Combat;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -8,10 +10,13 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -60,19 +65,39 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             velocityZ += MathHelper.cos(yaw) * horizontalVelocity;
         }
 
+        // Bounding strides:
         int boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.FEET));
         boundingStridesLevel += EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
         boolean hasBounded = false;
 
-        if (ticksLeftToDash > 0 && isSprinting() && boundingStridesLevel > 0) {
-            velocityX *= 1.5 + 0.5 * boundingStridesLevel;
-            velocityZ *= 1.5 + 0.5 * boundingStridesLevel;
+        // Sprint-jump:
+        if (ticksLeftToDash > 0 && boundingStridesLevel > 0 && isSprinting()) {
+            velocityX *= 1.5 + velocityX * boundingStridesLevel;
+            velocityZ *= 1.5 + velocityZ * boundingStridesLevel;
             timeUntilRegen = 12; // Invincible for two ticks
             hungerManager.addExhaustion(0.5f); // Increases hunger by a lot
             ticksLeftToDash = -1;
             hasBounded = true;
         }
 
+        // Dodging:
+        if(velocityX != 0d && velocityZ != 0d && this.isOnGround() && !this.isSprinting()) {
+            double sideStepAmount = (this.prevBodyYaw -  this.getHeadYaw());
+            boolean isPlayerDodging = (sideStepAmount * sideStepAmount) > 1600d;
+            VersusMod.MOD_LOGGER.warn("Side-step amount squared: " + (sideStepAmount * sideStepAmount));
+            if(isPlayerDodging) {
+                velocityX *= 3.5 + velocityX * 1.5 * boundingStridesLevel;
+                velocityZ *= 3.5 + velocityZ * 1.5 * boundingStridesLevel;
+                velocityX = MathHelper.clamp(velocityX, -0.36 - 0.1 * boundingStridesLevel, 0.36 + 0.1 * boundingStridesLevel);
+                velocityZ = MathHelper.clamp(velocityZ, -0.36 - 0.1 * boundingStridesLevel, 0.36 + 0.1 * boundingStridesLevel);
+                velocityY *= 0.85;
+                this.playBlockFallSound();
+                ticksLeftToLeap = -1;
+                hasBounded = true;
+            }
+        }
+
+        // Crouch-jump:
         if(ticksLeftToLeap > 0 && !this.isSneaking()) {
             velocityY *= 1.25 + 0.15 * boundingStridesLevel;
             this.playBlockFallSound();
@@ -80,6 +105,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             hasBounded = true;
         }
 
+        // Bounding strides effect:
         if(boundingStridesLevel > 0 && hasBounded) {
             this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0,true, false));
             this.getWorld().playSound(null, this.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, SoundCategory.PLAYERS);
