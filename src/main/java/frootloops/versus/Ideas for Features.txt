@@ -1,11 +1,7 @@
 
 QUICK WINS:
-- Bug fix for hand swinging without LMB being held down.
 - Figure out Smoldering Torches
 - Spider pitch fix
-
-SURVIVAL:
-    - Iron spawns deeper down.
 
 EQUIPMENT:
     - Knives: Work as shears and close range swords
@@ -16,8 +12,6 @@ EQUIPMENT:
 ENVIRONMENT:
     - Fog as a weather event
     - More mob interactions:
-        - Pigs attack nearby zombies, and scare them off.
-        - Pigs gang up on hostile entities.
         - Frogs eat spiders, and a unique yellow variant spawns in Lush Caves.
         - Black Bears in Taigas eat berries, breed with honey, and are territorial to strangers. Basically, neutral Ravagers.
         - ???

@@ -50,8 +50,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     private void holdToAttack(boolean bl, CallbackInfo ci) {
         boolean tryAttacking = false;
         double attackChargeProgress = Combat.getAttackChargeProgress(player);
-        if(attackChargeProgress > 0.6d) {
-            if (!options.attackKey.isPressed() && ticksAttackKeyPressed > 0 && attackChargeProgress != 1.0d) {
+        if(attackChargeProgress > 0.75d) {
+            if (!options.attackKey.isPressed() && ticksAttackKeyPressed >= Combat.getTicksPerAttackOf(player) - 1) {
                 tryAttacking = this.crosshairTarget.getType() != BLOCK;
 
             } else if (options.attackKey.isPressed()) {
