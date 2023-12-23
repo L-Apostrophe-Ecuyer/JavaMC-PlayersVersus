@@ -28,6 +28,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -38,8 +39,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         this.itemCooldownManager = itemCooldownManager;
     }
 
-    @Shadow
-    private final ItemCooldownManager itemCooldownManager;
+    @Shadow private final ItemCooldownManager itemCooldownManager;
+    @Shadow private ItemStack selectedItem;
 
     @Shadow public int totalExperience;
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
@@ -49,6 +50,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, Combat.PLAYER_BASE_ATTACK_SPEED)
                 .add(EntityAttributes.GENERIC_LUCK));
+    }
+
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
+    private boolean switchHeldItemsWithoutResettingCooldown(ItemStack selectedItem, ItemStack itemStack) {
+        if (!ItemStack.areEqual(selectedItem, itemStack)) {
+            this.selectedItem = itemStack.copy();
+        }
+        return false;
     }
 
     @Inject(method = "getXpToDrop", at = @At("RETURN"), cancellable = true)
