@@ -86,13 +86,17 @@ public abstract class Combat {
         }
     }
 
+    private static double getCappedAttackSpeedOf(PlayerEntity player) {
+        return Math.min(2.5d, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+    }
+
     public static int getTicksPerAttackOf(PlayerEntity player) {
-        return (int)(20d / player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+        return (int)(20d / Combat.getCappedAttackSpeedOf(player));
     }
 
     public static double getAttackChargeProgress(PlayerEntity player) {
         int lastAttackTicks = ((LivingEntityAccessor)player).getLastAttackedTicks();
-        double attackSpeed = player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED);
+        double attackSpeed = Combat.getCappedAttackSpeedOf(player);
         return (attackSpeed * (double)lastAttackTicks) / 20.0d;
     }
 
