@@ -20,11 +20,16 @@
     "has_used_bonemeal": {
       "trigger": "minecraft:item_used_on_block",
       "conditions": {
-        "item": {
-          "items": [
-            "minecraft:bone_meal"
-          ]
-        }
+        "location": [
+          {
+            "condition": "minecraft:match_tool",
+            "predicate": {
+              "items": [
+                "minecraft:bone_meal"
+              ]
+            }
+          }
+        ]
       }
     }
   },
@@ -33,13 +38,14 @@
       "has_used_bonemeal"
     ],
     [
-      "has_wood_slab",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_wood_slab"
     ]
   ],
   "rewards": {
     "recipes": [
       "minecraft:composter"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }
