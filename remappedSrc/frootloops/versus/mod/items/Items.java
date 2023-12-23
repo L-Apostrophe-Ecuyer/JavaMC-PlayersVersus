@@ -2,8 +2,8 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.mixin.players.accessors.ItemAccessor;
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.items.equipment.bronze.BronzeArmorMaterial;
-import frootloops.versus.mod.items.equipment.bronze.BronzeToolMaterial;
+import frootloops.versus.mod.items.equipment.copper.BronzeArmorMaterial;
+import frootloops.versus.mod.items.equipment.copper.BronzeToolMaterial;
 import frootloops.versus.mod.items.equipment.slime.SlimeArmorMaterial;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;

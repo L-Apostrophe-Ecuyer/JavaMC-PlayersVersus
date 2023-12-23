@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": [
+    {
+      "item": "minecraft:iron_helmet"
+    },
+    {
+      "item": "minecraft:iron_chestplate"
+    },
+    {
+      "item": "minecraft:iron_leggings"
+    },
+    {
+      "item": "minecraft:iron_boots"
+    },
+    {
+      "item": "minecraft:iron_horse_armor"
+    },
+    {
+      "item": "minecraft:bucket"
+    },
+    {
+      "item": "minecraft:cauldron"
+    },
+    {
+      "item": "minecraft:compass"
+    }
+  ],
+  "result": "minecraft:iron_ingot",
+  "experience": 0.3,
+  "cookingtime": 100
+}

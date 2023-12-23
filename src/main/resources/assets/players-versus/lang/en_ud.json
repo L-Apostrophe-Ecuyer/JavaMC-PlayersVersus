@@ -1,4 +1,13 @@
 {
+  "item.players-versus.copper_axe": "Copper Axe",
+  "item.players-versus.copper_pickaxe": "Copper Pickaxe",
+  "item.players-versus.copper_sword": "Copper Sword",
+  "item.players-versus.copper_shovel": "Copper Shovel",
+  "item.players-versus.copper_hoe": "Copper Hoe",
+  "item.players-versus.copper_leggings": "Copper Leggings",
+  "item.players-versus.copper_chestplate": "Copper Chestplate",
+  "item.players-versus.copper_helmet": "Copper Helmet",
+  "item.players-versus.copper_boots": "Copper Boots",
   "attribute.name.generic.players-versus.attack_reach": "Attack Reach",
   "enchantment.players-versus.frost_aspect": "Frost Aspect",
   "enchantment.players-versus.tossing": "Tossing",
@@ -11,5 +20,5 @@
   "enchantment.players-versus.piercing_protection": "Piercing Protection",
   "enchantment.minecraft.protection": "Total Protection",
   "entity.players-versus.deeper_creeper": "Dreeper",
-  "entity.players-versus.frosted_zombie": "Frosted"
+  "entity.players-versus.frosted_zombie": "Shiver"
 }
