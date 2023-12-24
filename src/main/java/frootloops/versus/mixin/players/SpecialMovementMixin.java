@@ -86,11 +86,11 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             boolean isPlayerDodging = (sideStepAmount * sideStepAmount) > 1600d;
             VersusMod.MOD_LOGGER.warn("Side-step amount squared: " + (sideStepAmount * sideStepAmount));
             if(isPlayerDodging) {
-                velocityX *= 3.5 + velocityX * 1.5 * boundingStridesLevel;
-                velocityZ *= 3.5 + velocityZ * 1.5 * boundingStridesLevel;
+                velocityX *= 4.5 + velocityX * 1.5 * boundingStridesLevel;
+                velocityZ *= 4.5 + velocityZ * 1.5 * boundingStridesLevel;
                 velocityX = MathHelper.clamp(velocityX, -0.36 - 0.1 * boundingStridesLevel, 0.36 + 0.1 * boundingStridesLevel);
                 velocityZ = MathHelper.clamp(velocityZ, -0.36 - 0.1 * boundingStridesLevel, 0.36 + 0.1 * boundingStridesLevel);
-                velocityY *= 0.85;
+                velocityY *= 0.8;
                 this.playBlockFallSound();
                 ticksLeftToLeap = -1;
                 hasBounded = true;
