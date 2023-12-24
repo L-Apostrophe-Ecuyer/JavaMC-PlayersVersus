@@ -51,10 +51,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean tryAttacking = false;
         double attackChargeProgress = Combat.getAttackChargeProgress(player);
         if(attackChargeProgress > 0.75d) {
-            if (!options.attackKey.isPressed() && ticksAttackKeyPressed >= Combat.getTicksPerAttackOf(player) - 1) {
-                tryAttacking = this.crosshairTarget.getType() != BLOCK;
-
-            } else if (options.attackKey.isPressed()) {
+            if (options.attackKey.isPressed()) {
                 ticksAttackKeyPressed++;
 
                 // If the cooldown is complete, swing:
@@ -69,7 +66,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             }
             else ticksAttackKeyPressed = 0;
         }
-        else ticksAttackKeyPressed = 0;
 
         if(tryAttacking) {
             // If the player is breaking a block, return;
