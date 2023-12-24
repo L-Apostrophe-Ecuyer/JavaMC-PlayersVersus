@@ -83,11 +83,10 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         // Dodging:
         if(velocityX != 0d && velocityZ != 0d && this.isOnGround() && !this.isSprinting()) {
             double sideStepAmount = (this.prevBodyYaw -  this.getHeadYaw());
-            boolean isPlayerDodging = (sideStepAmount * sideStepAmount) > 1600d;
-            VersusMod.MOD_LOGGER.warn("Side-step amount squared: " + (sideStepAmount * sideStepAmount));
+            boolean isPlayerDodging = (sideStepAmount * sideStepAmount) > 2000d;
             if(isPlayerDodging) {
-                velocityX *= 4.5 + velocityX * 1.5 * boundingStridesLevel;
-                velocityZ *= 4.5 + velocityZ * 1.5 * boundingStridesLevel;
+                velocityX *= 3.75 + velocityX * 1.5 * boundingStridesLevel;
+                velocityZ *= 3.75 + velocityZ * 1.5 * boundingStridesLevel;
                 velocityX = MathHelper.clamp(velocityX, -0.36 - 0.1 * boundingStridesLevel, 0.36 + 0.1 * boundingStridesLevel);
                 velocityZ = MathHelper.clamp(velocityZ, -0.36 - 0.1 * boundingStridesLevel, 0.36 + 0.1 * boundingStridesLevel);
                 velocityY *= 0.8;
