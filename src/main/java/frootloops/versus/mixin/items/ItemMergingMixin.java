@@ -32,7 +32,6 @@ public class ItemMergingMixin {
     }
 
     private static boolean tryFuseWithStack(ItemStack cursorStack, Slot slot, ClickType clickType) {
-        VersusMod.MOD_LOGGER.warn("Trying to merge...");
         if(slot == null || cursorStack.isEmpty() || !slot.hasStack()) return false;
         if(slot.getStack() == cursorStack) return false;
         if(!clickType.equals(ClickType.LEFT)) return false;

@@ -40,6 +40,7 @@ public class FleeAttackerAndHealGoal<T extends LivingEntity> extends Goal {
     public boolean canStart() {
         if (mob.hurtTime == 0) return false;
         if (mob.getHealth()/mob.getMaxHealth() > 0.8f) return false;
+        if (mob.getRecentDamageSource() == null) return false;
 
         targetEntity = (LivingEntity) mob.getRecentDamageSource().getAttacker();
         if (targetEntity == null || !(targetEntity instanceof LivingEntity)) return false;
