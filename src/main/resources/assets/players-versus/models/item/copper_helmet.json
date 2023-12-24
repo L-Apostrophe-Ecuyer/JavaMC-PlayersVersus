@@ -2,7 +2,7 @@
   "parent": "minecraft:item/generated",
   "overrides": [
     {
-      "model": "minecraft:item/copper_helmet_quartz_trim",
+      "model": "players-versus:item/copper_helmet_quartz_trim",
       "predicate": {
         "trim_type": 0.1
       }

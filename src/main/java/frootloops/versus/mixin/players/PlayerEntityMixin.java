@@ -74,6 +74,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
     public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
         if (!this.isOnGround()) cir.setReturnValue(cir.getReturnValue() * 3f);
+        if(this.getMainHandStack().getItem() instanceof ToolItem toolItem && toolItem.getMaterial() == ToolMaterials.WOOD) cir.setReturnValue(cir.getReturnValue() * 1.2f);
 
         if(blockState.isOf(Blocks.COBWEB)) {
             cir.setReturnValue(cir.getReturnValue() * 0.75f + 6f);
