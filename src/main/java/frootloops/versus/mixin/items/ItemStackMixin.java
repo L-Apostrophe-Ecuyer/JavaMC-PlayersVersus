@@ -2,10 +2,15 @@ package frootloops.versus.mixin.items;
 
 import frootloops.versus.VersusMod;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.*;
+import net.minecraft.recipe.RecipeManager;
 import net.minecraft.screen.ScreenTexts;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.ClickType;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -35,8 +40,7 @@ public class ItemStackMixin {
         return 0;
     }
 
-    @Shadow
-    private final Item item;
+    @Shadow private final Item item;
 
     @Shadow
     public Text getName() { return null; }
@@ -86,5 +90,4 @@ public class ItemStackMixin {
             }
         }
     }
-
 }

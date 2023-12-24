@@ -54,6 +54,7 @@
     "items.ItemEatingMixin",
     "items.ItemEntityMixin",
     "items.ItemStackMixin",
+    "items.ItemMergingMixin",
     "items.MinecraftClientMixin",
     "mobs.hostile.dragon.AreaEffectCloudEntityMixin",
     "mobs.hostile.dragon.ChargingPlayerPhaseMixin",
