@@ -172,11 +172,6 @@ public abstract class Combat {
         }
     }
 
-    public static double fastSquareRoot(double x){
-        double d = 289358932.0;
-        return Double.longBitsToDouble(((Double.doubleToLongBits( d )-(1l<<52) )>>1 ) + ( 1l<<61 ) );
-    }
-
     public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
         return Combat.isLookingTowards(looker,targetPos,false);
     }
