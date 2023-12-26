@@ -15,6 +15,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -37,6 +39,10 @@ public abstract class SpecialMovementMixin extends LivingEntity {
     @Shadow
     protected HungerManager hungerManager;
 
+    @Shadow public void addExhaustion(float exhaustion) {}
+
+    @Shadow public void incrementStat(Identifier stat) {}
+
     private int ticksLeftToLeap = 0;
     private int ticksLeftToDash = 0;
 
@@ -47,7 +53,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             if(isSneaking()) ticksLeftToLeap = 8;
             else if(ticksLeftToLeap > 0) ticksLeftToLeap--;
 
-            if(!isSprinting()) ticksLeftToDash = 8;
+            if(!isSprinting() || isSneaking()) ticksLeftToDash = 8;
             else if(ticksLeftToDash > 0) ticksLeftToDash--;
         }
     }
@@ -59,45 +65,53 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         double velocityZ = this.getVelocity().z;
 
         if (isSprinting()) {
-            float yaw = this.getYaw() * ((float) Math.PI / 180);
-            float horizontalVelocity = 0.2f;
-            velocityX += -MathHelper.sin(yaw) * horizontalVelocity;
-            velocityZ += MathHelper.cos(yaw) * horizontalVelocity;
+            float yawRads = this.getYaw() * ((float) Math.PI / 180);
+            velocityX += -MathHelper.sin(yawRads) * 0.12; // Sprint jump speed reduced
+            velocityZ += MathHelper.cos(yawRads) * 0.12;
         }
 
         // Bounding strides:
-        int boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.FEET));
+        double boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.FEET));
         boundingStridesLevel += EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
         boolean hasBounded = false;
 
         // Sprint-jump:
-        if (ticksLeftToDash > 0 && boundingStridesLevel > 0 && isSprinting()) {
-            velocityX *= 1.5 + velocityX * boundingStridesLevel;
-            velocityZ *= 1.5 + velocityZ * boundingStridesLevel;
+        if (ticksLeftToDash > 0 && isSprinting()) {
+            velocityX *= (10.0 + boundingStridesLevel)/ 8.5;
+            velocityZ *= (10.0 + boundingStridesLevel)/ 8.5;
+
+            ((PlayerEntity)((Object)this)).addExhaustion(0.2f);
+            this.spawnSprintingParticles();
+            this.playBlockFallSound();
             timeUntilRegen = 12; // Invincible for two ticks
-            hungerManager.addExhaustion(0.5f); // Increases hunger by a lot
             ticksLeftToDash = -1;
             hasBounded = true;
         }
 
         // Dodging:
-        if(velocityX != 0d && velocityZ != 0d && this.isOnGround() && !this.isSprinting() && !this.isSneaking()) {
-            double dotProduct = this.getVelocity().dotProduct(this.getRotationVector());
-            boolean isPlayerDodging = (dotProduct * dotProduct) < 0.01;
-            if (isPlayerDodging) {
-                double horizontalVelocityTotal = Math.sqrt(velocityX * velocityX + velocityZ * velocityZ);
-                double horizontalDodgeVelocity = 0.45 + 0.1 * boundingStridesLevel;
+        if(!hasBounded && velocityX != 0d && velocityZ != 0d && this.isOnGround() && !this.isSprinting() && !this.isSneaking()) {
+            double sideStepAmount = (this.prevBodyYaw - this.getHeadYaw());
+            boolean isPlayerSideStepping = (sideStepAmount * sideStepAmount) > 1600d;
+            if (isPlayerSideStepping) {
+                double dotProduct = this.getVelocity().dotProduct(this.getRotationVector());
+                boolean canPlayerDodge = (dotProduct * dotProduct) < 0.01;
+                if (canPlayerDodge) {
+                    double horizontalVelocityTotal = Math.sqrt(velocityX * velocityX + velocityZ * velocityZ);
+                    double horizontalDodgeVelocity = 0.38 + 0.1 * boundingStridesLevel;
+                    if (horizontalVelocityTotal < 0.15d && horizontalVelocityTotal > 0.08) {
+                        velocityX = (velocityX / horizontalVelocityTotal) * horizontalDodgeVelocity;
+                        velocityZ = (velocityZ / horizontalVelocityTotal) * horizontalDodgeVelocity;
+                        velocityY *= 0.85;
 
-                velocityX = (velocityX / horizontalVelocityTotal) * horizontalDodgeVelocity;
-                velocityZ = (velocityZ / horizontalVelocityTotal) * horizontalDodgeVelocity;
-                velocityY *= 0.75;
-
-                hungerManager.addExhaustion(0.5f);
-                this.spawnSprintingParticles();
-                this.playBlockFallSound();
-                ticksLeftToLeap = -1;
-                ticksLeftToDash = -1;
-                hasBounded = true;
+                        ((PlayerEntity)((Object)this)).addExhaustion(0.2f);
+                        this.spawnSprintingParticles();
+                        this.playBlockFallSound();
+                        timeUntilRegen = 12; // Invincible for two ticks
+                        ticksLeftToLeap = -1;
+                        ticksLeftToDash = -1;
+                        hasBounded = true;
+                    }
+                }
             }
         }
 
@@ -110,7 +124,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         }
 
         // Bounding strides effect:
-        if(boundingStridesLevel > 0 && hasBounded) {
+        if(boundingStridesLevel > 0.0 && hasBounded) {
             this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0,true, false));
             this.playSound(SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, 1.0f, 1.0f);
             this.playSound(SoundEvents.BLOCK_DISPENSER_LAUNCH, 1.0f, 1.0f);
@@ -126,6 +140,9 @@ public abstract class SpecialMovementMixin extends LivingEntity {
 
         this.setVelocity(velocityX, velocityY, velocityZ);
         this.velocityDirty = true;
+        this.incrementStat(Stats.JUMP);
+        if (this.isSprinting()) ((PlayerEntity)((Object)this)).addExhaustion(0.15f);
+        else ((PlayerEntity)((Object)this)).addExhaustion(0.075f);
         ci.cancel();
     }
 }

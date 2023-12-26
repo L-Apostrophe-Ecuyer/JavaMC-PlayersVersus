@@ -216,16 +216,25 @@ public abstract class Combat {
         return (HitResult)hitResult;
     }
 
-    public static Box getMobAttackBox(MobEntity mob) {
+    public static Box getMobAttackBox(MobEntity mob, boolean jump) {
         Entity ridingEntity = mob.getVehicle();
         Box attackBox;
         if (ridingEntity != null) {
             Box box = ridingEntity.getBoundingBox();
             Box box2 = mob.getBoundingBox();
             attackBox = new Box(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
-        } else {
-            attackBox = mob.getBoundingBox();
-            attackBox.offset(0d, mob.getEyeHeight(mob.getPose()), 0d);
+        }
+        else if (jump) {
+
+            //double jumpBlockMultiplier = mob.getWorld().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
+            //double jumpVelocity = 0.84 * jumpBlockMultiplier + mob.getJumpBoostVelocityModifier();
+
+            attackBox = mob.getBoundingBox().expand(0d, mob.getEyeHeight(mob.getPose()) + 1d, 0d);
+            VersusMod.MOD_LOGGER.warn("Attack box expanded for jumping, by " + (mob.getEyeHeight(mob.getPose()) + 1d));
+            VersusMod.MOD_LOGGER.warn("Attack box height should be " + (attackBox.maxY - attackBox.minY));
+        }
+        else {
+            attackBox = mob.getBoundingBox().offset(0d, mob.getEyeHeight(mob.getPose())/2, 0d);
         }
         double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND));
         return attackBox.expand(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);

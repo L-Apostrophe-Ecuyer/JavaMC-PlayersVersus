@@ -28,7 +28,7 @@ public abstract class LightmapMixin {
 
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 6)
     private float reducedNightVision(float l) {
-        return l/3.0f;
+        return l/1.25f;
     }
 
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 15)

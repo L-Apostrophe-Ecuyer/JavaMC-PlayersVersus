@@ -64,7 +64,7 @@ public class HungerManagerMixin {
 
         // Saturation regenerates back up to 3 after no activity, when over 3 haunches:
         if (foodLevel > 6) {
-            this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.0025f);
+            this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.001f);
             if (this.exhaustion == -0.01f) {
                 this.exhaustion = 1.0f;
                 this.saturationLevel = Math.min(MINIMUM_SATURATION_TO_QUICK_HEAL - 1f, saturationLevel + 1f);

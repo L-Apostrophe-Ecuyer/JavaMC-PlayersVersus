@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players.attacking;
 
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import frootloops.versus.ClientSettings;
 import frootloops.versus.mod.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -37,12 +38,15 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Shadow private GameOptions options;
     @Shadow public ClientWorld world;
     @Shadow protected int attackCooldown;
+
+    @Shadow @Nullable public Entity cameraEntity;
     @Shadow @Nullable public HitResult crosshairTarget;
     @Shadow @Nullable public ClientPlayerInteractionManager interactionManager;
 
     @Shadow protected abstract boolean doAttack();
 
     private int ticksAttackKeyPressed = 0;
+    private Entity prevTargettedEntity = null;
 
     public MinecraftClientMixin(String string) { super(string); }
 
@@ -51,15 +55,15 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean tryAttacking = false;
         double attackChargeProgress = Combat.getAttackChargeProgress(player);
         if(attackChargeProgress > 0.75d) {
-            if (options.attackKey.isPressed()) {
+            if (options.attackKey.isPressed() && ClientSettings.Combat.CAN_HOLD_TO_ATTACK) {
                 ticksAttackKeyPressed++;
 
                 // If the cooldown is complete, swing:
-                if (ticksAttackKeyPressed >= Combat.getTicksPerAttackOf(player))
+                if (ticksAttackKeyPressed >= 1 && ticksAttackKeyPressed >= Combat.getTicksPerAttackOf(player))
                     tryAttacking = true;
 
                 // Otherwise, if at some point we can attack something, we do:
-                else if (this.crosshairTarget.getType() == ENTITY && attackChargeProgress > 0.85d) {
+                else if (attackChargeProgress > 0.85d) {
                     double attackRange = Combat.getAttackRange(player,attackChargeProgress);
                     tryAttacking = (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos());
                 }
@@ -87,11 +91,16 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
     @Inject(method = "doAttack",at = @At("HEAD"), cancellable = true)
     private void doAttackOverhaul(CallbackInfoReturnable<Boolean> cir) {
-
         this.ticksAttackKeyPressed = 0;
         double attackProgress =  Combat.getAttackChargeProgress(player);
         double attackRange = Combat.getAttackRange(player, attackProgress);
         boolean canAttackEntities = attackProgress > 0.5;
+
+        if(ClientSettings.Combat.CAN_AIM_ASSIST && canAttackEntities) {
+            if(this.crosshairTarget.getType() != ENTITY && attackProgress < 2.0 && prevTargettedEntity != null) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
+            if(this.crosshairTarget.getType() != ENTITY && player.getAttacker() != null) attemptToAimAssistTarget(player.getAttacker(), attackRange);
+            if(this.crosshairTarget.getType() != ENTITY) prevTargettedEntity = null;
+        }
 
         boolean resetAttackCooldown = false;
         boolean missedSwing = true;
@@ -99,7 +108,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             case ENTITY: {
                 if(canAttackEntities && (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos())) {
                     missedSwing = false;
-                    interactionManager.attackEntity(this.player, ((EntityHitResult) this.crosshairTarget).getEntity());
+                    prevTargettedEntity = ((EntityHitResult) this.crosshairTarget).getEntity();
+                    interactionManager.attackEntity(this.player, prevTargettedEntity);
                 }
                 else ticksAttackKeyPressed++;
                 break;
@@ -142,11 +152,11 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         cir.cancel();
     }
 
-    private void breakFoliageAt(BlockPos pos) {
-        if(this.world.getBlockState(pos).getHardness(world, pos) == 0.0F) {
-            this.interactionManager.breakBlock(pos);
-            BlockPos above = new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ());
-            if(this.world.getBlockState(above).getHardness(world, above) == 0.0F) this.interactionManager.breakBlock(above);
-        }
+    private void attemptToAimAssistTarget(Entity entity, double range) {
+        if(entity == null) return;
+        if(entity.squaredDistanceTo(player) > range * range) return;
+        if(!Combat.isLookingTowards(player, entity.getEyePos(),0.85)) return;
+        if(!player.canSee(entity)) return;
+        this.crosshairTarget = new EntityHitResult(entity);
     }
 }
