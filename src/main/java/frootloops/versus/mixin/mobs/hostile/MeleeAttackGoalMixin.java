@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
@@ -29,6 +30,8 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         this.speed = speed;
         this.mob = mob;
     }
+
+    private final boolean DEBUG = false;
 
     private final int TICKS_ENDLAG = 8;
     private final int TICKS_SWING_DEFAULT = TICKS_ENDLAG + 6;
@@ -161,10 +164,10 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     public void attack(LivingEntity target) {
         int cooldownAmount = this.getCooldownAmount();
         boolean canTrySwinging = this.cooldown <= 0;
-        boolean willTryLandingAnAttack = this.mob.isAttacking() && this.cooldown == (cooldownAmount - TICKS_ENDLAG);
+        boolean willTryLandingAnAttack = this.mob.isAttacking() && (this.cooldown == (cooldownAmount - TICKS_ENDLAG) || this.cooldown == (cooldownAmount - TICKS_ENDLAG) - 1);
 
         // Attack interruption, if the player swung right after the mob did:
-        if(this.mob.hurtTime > 8 && cooldownAmount > TICKS_SWING_DEFAULT - 4) {
+        if(this.mob.hurtTime > 12 && cooldownAmount > TICKS_SWING_DEFAULT - 4) {
             cooldown = TICKS_ENDLAG;
             mob.setAttacking(false);
             mob.handSwingProgress = 0f;
@@ -172,28 +175,67 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
         // Otherwise, see if we can attack (cooldown is reduced in tick()):
         else if (canTrySwinging || willTryLandingAnAttack) {
-            if(Combat.getMobAttackBox(mob).intersects(Combat.getEntityHitbox(target)) && Combat.isLookingTowards(this.mob, target.getEyePos(), true)) {
+            boolean isInCloseQuarters = target.getEyePos().squaredDistanceTo(mob.getEyePos()) < 1.5d;
+            if(isInCloseQuarters || Combat.isLookingTowards(this.mob, target.getEyePos(), true)) {
 
-                // Start swinging:
-                if (canTrySwinging) {
-                    this.mob.swingHand(Hand.MAIN_HAND);
-                    this.cooldown = cooldownAmount;
+                if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("-------------------- SWING ATTEMPT");
+                else if(DEBUG) VersusMod.MOD_LOGGER.warn("-------------------- ATTACK ATTEMPT");
 
-                // After 6 ticks, see if the swing landed:
-                } else if (willTryLandingAnAttack) {
-                    if(this.mob.getVisibilityCache().canSee(target)) {
-                        this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.4F);
-                        this.mob.tryAttack(target);
-                        this.cooldown -= 2;
-                    }
-                    else {
-                        this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
-                    }
+                boolean canAttack = false;
+                if(isInCloseQuarters) {
+                    if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("Can swing, by means of being near the player");
+                    else if(DEBUG) VersusMod.MOD_LOGGER.warn("Can land attack, by means of being near the player");
+                    canAttack = true;
+                }
+                else if(Combat.getMobAttackBox(mob, false).intersects(Combat.getEntityHitbox(target))) {
+                    if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("Can swing, by means of intersecting with the player");
+                    else if(DEBUG) VersusMod.MOD_LOGGER.warn("Can land attack, by means of intersecting with the player");
+                    canAttack = true;
+                }
+                else if(canTrySwinging && target.getVehicle() == null && Combat.getMobAttackBox(mob, true).intersects(Combat.getEntityHitbox(target))) {
+                    if(DEBUG) VersusMod.MOD_LOGGER.warn("Jump attack!");
+
+                    double jumpBlockMultiplier = mob.getWorld().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
+                    double jumpVelocity = 0.42 * jumpBlockMultiplier + mob.getJumpBoostVelocityModifier();
+                    mob.getVelocity().multiply(1.6);
+                    mob.addVelocity(0.0, jumpVelocity, 0.0);
+                    canAttack = true;
                 }
 
-            } else if (willTryLandingAnAttack) {
+                if(canAttack) {
+                    if(DEBUG) VersusMod.MOD_LOGGER.warn("Can attack...");
+
+                    // Start swinging:
+                    if (canTrySwinging) {
+                        if(DEBUG) VersusMod.MOD_LOGGER.warn("Started swinging!");
+                        this.mob.swingHand(Hand.MAIN_HAND);
+                        this.cooldown = cooldownAmount;
+
+                    // After 6 ticks, see if the swing landed:
+                    } else if (willTryLandingAnAttack) {
+                        if(this.mob.canSee(target)) {
+                            if(DEBUG) VersusMod.MOD_LOGGER.warn("Landing attack!");
+                            this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.4F);
+                            this.mob.tryAttack(target);
+                            this.cooldown -= 2;
+                        }
+                        else {
+                            if(DEBUG) VersusMod.MOD_LOGGER.warn("Missed: couldn't see target.");
+                            this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
+                            this.cooldown -= 1;
+                        }
+                    }
+                }
+                else if (willTryLandingAnAttack) {
+                    if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack.");
+                    this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
+                }
+            }
+            else if (willTryLandingAnAttack) {
                 this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
             }
+
+
         }
     }
 
