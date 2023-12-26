@@ -81,17 +81,22 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         }
 
         // Dodging:
-        if(velocityX != 0d && velocityZ != 0d && this.isOnGround() && !this.isSprinting()) {
-            double sideStepAmount = (this.prevBodyYaw -  this.getHeadYaw());
-            boolean isPlayerDodging = (sideStepAmount * sideStepAmount) > 2000d;
-            if(isPlayerDodging) {
-                velocityX *= 3.75 + velocityX * 1.5 * boundingStridesLevel;
-                velocityZ *= 3.75 + velocityZ * 1.5 * boundingStridesLevel;
-                velocityX = MathHelper.clamp(velocityX, -0.36 - 0.1 * boundingStridesLevel, 0.36 + 0.1 * boundingStridesLevel);
-                velocityZ = MathHelper.clamp(velocityZ, -0.36 - 0.1 * boundingStridesLevel, 0.36 + 0.1 * boundingStridesLevel);
-                velocityY *= 0.8;
+        if(velocityX != 0d && velocityZ != 0d && this.isOnGround() && !this.isSprinting() && !this.isSneaking()) {
+            double dotProduct = this.getVelocity().dotProduct(this.getRotationVector());
+            boolean isPlayerDodging = (dotProduct * dotProduct) < 0.01;
+            if (isPlayerDodging) {
+                double horizontalVelocityTotal = Math.sqrt(velocityX * velocityX + velocityZ * velocityZ);
+                double horizontalDodgeVelocity = 0.45 + 0.1 * boundingStridesLevel;
+
+                velocityX = (velocityX / horizontalVelocityTotal) * horizontalDodgeVelocity;
+                velocityZ = (velocityZ / horizontalVelocityTotal) * horizontalDodgeVelocity;
+                velocityY *= 0.75;
+
+                hungerManager.addExhaustion(0.5f);
+                this.spawnSprintingParticles();
                 this.playBlockFallSound();
                 ticksLeftToLeap = -1;
+                ticksLeftToDash = -1;
                 hasBounded = true;
             }
         }
@@ -107,8 +112,8 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         // Bounding strides effect:
         if(boundingStridesLevel > 0 && hasBounded) {
             this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0,true, false));
-            this.getWorld().playSound(null, this.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, SoundCategory.PLAYERS);
-            this.getWorld().playSound(null, this.getBlockPos(), SoundEvents.BLOCK_DISPENSER_LAUNCH, SoundCategory.PLAYERS);
+            this.playSound(SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, 1.0f, 1.0f);
+            this.playSound(SoundEvents.BLOCK_DISPENSER_LAUNCH, 1.0f, 1.0f);
             for (int i = 0; i < 6; ++i) {
                 double d = this.random.nextGaussian() * 0.02 - velocityX;
                 double e = this.random.nextGaussian() * 0.02 + 0.01;
