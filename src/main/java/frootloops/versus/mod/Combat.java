@@ -40,7 +40,7 @@ public abstract class Combat {
     private static final float[] toolsSpeed  = new float[]{1.0F, 1.6F, 2.0F, 1.2F, 1.4F};
     private static final float[] toolsDamage = new float[]{8.0F, 5.0F, 3.0F, 4.0F, 3.0F};
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
-    private static final float[] toolTierDamageBonuses = new float[]{0F, 0F, 1F, 1F, 2F, 3F};
+    private static final float[] toolTierDamageBonuses = new float[]{-1F, 0F, 1F, 1F, 2F, 3F};
 
     public static float getAxeSpeedModifier() { return toolsSpeed[0] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getSwordSpeedModifier() { return toolsSpeed[1] - (float)PLAYER_BASE_ATTACK_SPEED;}
@@ -60,7 +60,7 @@ public abstract class Combat {
             for (int tierIndex = 0; tierIndex < toolTiers.length; tierIndex++) {
                 String name = "minecraft:" + toolTiers[tierIndex] + "_" + tools[toolIndex];
                 float damage = toolsDamage[toolIndex] + toolTierDamageBonuses[tierIndex] - (float)PLAYER_BASE_ATTACK_DAMAGE;
-                float speed = toolsSpeed[toolIndex] - (float)PLAYER_BASE_ATTACK_SPEED;
+                float speed = toolsSpeed[toolIndex] - (float)PLAYER_BASE_ATTACK_SPEED - (tierIndex == 0 ? 0.2f : 0.0f);
                 setAttributes(name, damage, speed);
             }
         }
@@ -224,14 +224,8 @@ public abstract class Combat {
             Box box2 = mob.getBoundingBox();
             attackBox = new Box(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
         }
-        else if (jump) {
-
-            //double jumpBlockMultiplier = mob.getWorld().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
-            //double jumpVelocity = 0.84 * jumpBlockMultiplier + mob.getJumpBoostVelocityModifier();
-
-            attackBox = mob.getBoundingBox().expand(0d, mob.getEyeHeight(mob.getPose()) + 1d, 0d);
-            VersusMod.MOD_LOGGER.warn("Attack box expanded for jumping, by " + (mob.getEyeHeight(mob.getPose()) + 1d));
-            VersusMod.MOD_LOGGER.warn("Attack box height should be " + (attackBox.maxY - attackBox.minY));
+        else if (jump || !mob.isOnGround()) {
+            attackBox = mob.getBoundingBox().expand(0d, mob.getEyeHeight(mob.getPose())/2 + 0.5d, 0d);
         }
         else {
             attackBox = mob.getBoundingBox().offset(0d, mob.getEyeHeight(mob.getPose())/2, 0d);
