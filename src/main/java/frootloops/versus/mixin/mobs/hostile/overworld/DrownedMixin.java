@@ -78,7 +78,7 @@ public abstract class DrownedMixin extends ZombieEntity {
 
     @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/mob/DrownedEntity;updateVelocity(FLnet/minecraft/util/math/Vec3d;)V"))
     private float increaseVelocity(float speed) {
-        if(this.isWet()) return 0.07F;
+        if(this.isSwimming()) return 0.06F;
         else return speed;
     }
 }

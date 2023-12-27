@@ -30,6 +30,7 @@ public abstract class PhantomMixin extends FlyingEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        if((world.getMoonPhase() + 2) % 8 < 6) return false;
         if(world.getRandom().nextBoolean()) return false;
         return super.canSpawn(world, spawnReason);
     }
@@ -38,7 +39,7 @@ public abstract class PhantomMixin extends FlyingEntity {
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
         this.moveControl = new PhantomMoveControlRevamp((PhantomEntity) ((Object)this));
-        this.circlingCenter = this.getBlockPos().up(12);
+        this.circlingCenter = this.getBlockPos().up(24);
 
         EntityAttributeInstance instance = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instance != null) {

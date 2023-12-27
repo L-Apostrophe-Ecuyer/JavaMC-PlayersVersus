@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
-  "group": "axes",
+  "group": "wooden_tools",
   "category": "equipment",
   "key": {
     "#": {

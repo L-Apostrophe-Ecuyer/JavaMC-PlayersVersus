@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
-  "group": "shovels",
+  "group": "wooden_tools",
   "category": "equipment",
   "key": {
     "#": {

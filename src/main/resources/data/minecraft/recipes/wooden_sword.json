@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
-  "group": "swords",
+  "group": "wooden_tools",
   "category": "equipment",
   "key": {
     "#": {

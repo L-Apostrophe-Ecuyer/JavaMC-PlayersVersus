@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
+  "group": "iron_armor",
   "key": {
     "X": {
       "item": "minecraft:iron_ingot"

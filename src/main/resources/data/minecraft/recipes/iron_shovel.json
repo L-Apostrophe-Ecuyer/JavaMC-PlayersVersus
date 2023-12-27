@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "group": "shovels",
+  "group": "iron_tools",
   "key": {
     "#": {
       "item": "minecraft:stick"
