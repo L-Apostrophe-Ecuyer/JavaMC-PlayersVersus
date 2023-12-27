@@ -278,6 +278,7 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.CLOCK, 1, 1, 4),
                                 new SellItemFactory(Items.GLASS, 1, 6, 3),
                                 new SellItemFactory(Blocks.BOOKSHELF, 3, 1, 12, 6),
+                                new EnchantBookFactory(10),
                                 new TypeAwareSellItemFactory(24, 1, 3, 16, ImmutableMap.builder().put(
                                         VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BLAST_PROTECTION, 1))).put(
                                         VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.TOSSING, 2))).put(
@@ -335,7 +336,7 @@ public class RevampedTradeOffers {
                                 new BuyForMutlipleEmeraldsFactory(Items.ENDER_EYE, 4, 12, 20),
                                 new BuyForOneEmeraldFactory(Items.ENDER_PEARL, 1, 12, 15)},
                         5, new Factory[]{
-                                new EnchantBookFactory(20),
+                                new EnchantBookFactory(22),
                                 new TypeAwareSellItemFactory(48, 1, 3, 20, ImmutableMap.builder().put(
                                         VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FEATHER_FALLING, 3))).put(
                                         VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.THORNS, 3))).put(
@@ -872,8 +873,12 @@ public class RevampedTradeOffers {
         @Nullable
         public TradeOffer create(Entity entity, Random random) {
             if (entity instanceof VillagerDataContainer) {
-                ItemStack soldItem = new ItemStack((Item) this.map.get(((VillagerDataContainer)(entity)).getVillagerData().getType()), this.count);
-                return new TradeOffer(new ItemStack(Items.EMERALD, this.price), soldItem, this.maxUses, this.experience, 0.05f);
+                if(this.map.get(((VillagerDataContainer)(entity)).getVillagerData().getType()) instanceof Item item) {
+                    return new TradeOffer(new ItemStack(Items.EMERALD, this.price), new ItemStack(item), this.maxUses, this.experience, 0.05f);
+                }
+                else if(this.map.get(((VillagerDataContainer)(entity)).getVillagerData().getType()) instanceof ItemStack itemStack) {
+                    return new TradeOffer(new ItemStack(Items.EMERALD, this.price), itemStack, this.maxUses, this.experience, 0.05f);
+                }
             }
             return null;
         }
