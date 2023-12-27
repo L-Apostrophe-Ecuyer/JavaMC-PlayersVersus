@@ -1,13 +1,10 @@
 package frootloops.versus.mixin.environment;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.LightType;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,7 +38,7 @@ public abstract class LightmapMixin {
         float result = world.getSkyBrightness(tickDelta);
         if(result < 1.0f && world.getDimension().hasSkyLight()) {
             float moonPhaseDarkness = Math.abs(4.0f - (float)((world.getLunarTime() + 6000L + (24000L * 3L)) % (24000L * 8L))/24000.0f);
-            return result - moonPhaseDarkness/64f - (moonPhaseDarkness * moonPhaseDarkness)/96f;
+            return result - moonPhaseDarkness/56f - (moonPhaseDarkness * moonPhaseDarkness)/94f;
         }
         else return result;
     }
