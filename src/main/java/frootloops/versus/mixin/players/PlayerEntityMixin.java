@@ -70,6 +70,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
+    public void canMineCopperWithWood(BlockState state, CallbackInfoReturnable<Boolean> cir) {
+        if(!cir.getReturnValue() && this.getMainHandStack().getItem() == Items.WOODEN_PICKAXE && (state.getSoundGroup() == BlockSoundGroup.COPPER || state.isOf(Blocks.COPPER_ORE))) cir.setReturnValue(true);
+    }
+
+    @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
     public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
         if (!this.isOnGround()) cir.setReturnValue(cir.getReturnValue() * 3f);
         if(this.getMainHandStack().getItem() instanceof ToolItem toolItem && toolItem.getMaterial() == ToolMaterials.STONE) cir.setReturnValue(cir.getReturnValue() * 1.2f);
