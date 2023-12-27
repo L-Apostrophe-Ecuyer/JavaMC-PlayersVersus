@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:block/template_torch",
+  "parent": "minecraft:block/template_torch_wall",
   "textures": {
     "torch": "players-versus:block/smoldering_torch"
   }
