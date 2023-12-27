@@ -1,6 +1,7 @@
 {
     "type": "minecraft:crafting_shaped",
-    "group": "helmets",
+    "category": "equipment",
+    "group": "copper_armor",
     "pattern": [
       "XXX",
       "X X"

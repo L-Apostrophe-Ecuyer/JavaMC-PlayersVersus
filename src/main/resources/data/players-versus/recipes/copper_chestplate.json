@@ -1,6 +1,6 @@
 {
     "type": "minecraft:crafting_shaped",
-    "group": "chestplates",
+    "group": "copper_armor",
     "category": "equipment",
     "pattern": [
       "X X",

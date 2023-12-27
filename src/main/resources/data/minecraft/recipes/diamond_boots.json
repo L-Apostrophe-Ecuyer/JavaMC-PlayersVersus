@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
+  "group": "diamond_armor",
   "key": {
     "X": {
       "item": "minecraft:diamond"

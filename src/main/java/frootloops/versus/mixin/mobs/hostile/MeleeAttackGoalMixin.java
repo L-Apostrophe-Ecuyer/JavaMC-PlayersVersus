@@ -34,10 +34,9 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     private final boolean DEBUG = false;
 
     private final int TICKS_ENDLAG = 8;
-    private final int TICKS_SWING_DEFAULT = TICKS_ENDLAG + 6;
-    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 8;
-    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 10;
-    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 14;
+    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 10;
+    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 12;
+    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 16;
 
     @Shadow
     private final double speed;
@@ -63,7 +62,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
             else if(weapon instanceof HoeItem) return TICKS_SWING_QUICK;
             else if(weapon instanceof ToolItem) return TICKS_SWING_TOOLS;
         }
-        return TICKS_SWING_DEFAULT;
+        return TICKS_SWING_QUICK;
     }
 
     @Inject(method = "shouldContinue", at = @At("HEAD"), cancellable = true)
@@ -167,7 +166,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         boolean willTryLandingAnAttack = this.mob.isAttacking() && (this.cooldown == (cooldownAmount - TICKS_ENDLAG) || this.cooldown == (cooldownAmount - TICKS_ENDLAG) - 1);
 
         // Attack interruption, if the player swung right after the mob did:
-        if(this.mob.hurtTime > 12 && cooldownAmount > TICKS_SWING_DEFAULT - 4) {
+        if(this.mob.hurtTime > 12 && cooldownAmount > TICKS_SWING_QUICK - 4) {
             cooldown = TICKS_ENDLAG;
             mob.setAttacking(false);
             mob.handSwingProgress = 0f;

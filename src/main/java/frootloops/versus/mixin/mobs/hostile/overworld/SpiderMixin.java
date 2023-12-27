@@ -11,13 +11,16 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.SkeletonEntity;
 import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,25 +67,54 @@ public class SpiderMixin extends HostileEntity {
         return super.getXpToDrop();
     }
 
-    @Nullable
     @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
-
-        EntityAttributeInstance instanceMvt = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (instanceMvt != null) instanceMvt.setBaseValue(0.3D);
-
-        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-        if (instanceDmg != null) instanceDmg.setBaseValue(7.0D);
-
-        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-        if (instanceHP != null) {
-            instanceHP.setBaseValue(50.0f);
-            this.setHealth(50.0f);
+    @Nullable
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
+        entityData = super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
+        if (entityData == null) {
+            entityData = new SpiderEntity.SpiderData();
+            if (world.getDifficulty() == Difficulty.HARD && random.nextFloat() < 0.2f * difficulty.getClampedLocalDifficulty()) {
+                ((SpiderEntity.SpiderData)entityData).setEffect(random);
+            }
+        }
+        if (entityData instanceof SpiderEntity.SpiderData) {
+            SpiderEntity.SpiderData spiderData = (SpiderEntity.SpiderData)entityData;
+            StatusEffect statusEffect = spiderData.effect;
+            if (statusEffect != null) {
+                this.addStatusEffect(new StatusEffectInstance(statusEffect, -1));
+            }
         }
 
-        if(this.random.nextFloat() < 0.85F) this.setBaby(true);
+        EntityAttributeInstance instanceMvt = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+
+        if(random.nextFloat() < 0.85F) {
+            this.setBaby(true);
+            if (instanceMvt != null) instanceMvt.setBaseValue(0.36D);
+            if (instanceDmg != null) instanceDmg.setBaseValue(3.0D);
+            if (instanceHP != null) {
+                instanceHP.setBaseValue(12.0f);
+                this.setHealth(12.0f);
+            }
+        }
+        else {
+            if (instanceMvt != null) instanceMvt.setBaseValue(0.3D);
+            if (instanceDmg != null) instanceDmg.setBaseValue(7.0D);
+            if (instanceHP != null) {
+                instanceHP.setBaseValue(50.0f);
+                this.setHealth(50.0f);
+            }
+            SkeletonEntity skeletonEntity;
+            if (random.nextInt(100) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getWorld())) != null) {
+                skeletonEntity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.getYaw(), 0.0f);
+                skeletonEntity.initialize(world, difficulty, spawnReason, null, null);
+                skeletonEntity.startRiding(this);
+            }
+        }
+
         this.getNavigation().setCanSwim(true);
-        return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
+        return entityData;
     }
 
 
@@ -118,27 +150,6 @@ public class SpiderMixin extends HostileEntity {
     @Override
     public boolean isBaby() {
         return this.getDataTracker().get(BABY);
-    }
-
-    @Override
-    public void setBaby(boolean baby) {
-        this.getDataTracker().set(BABY, baby);
-        if (baby) {
-            EntityAttributeInstance attackDamage = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-            EntityAttributeInstance maxHealth = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-            EntityAttributeInstance speed = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-
-            Objects.requireNonNull(attackDamage).addPersistentModifier(new EntityAttributeModifier(
-                    "Baby spawn malus", -4.0D, EntityAttributeModifier.Operation.ADDITION));
-
-            Objects.requireNonNull(maxHealth).addPersistentModifier(new EntityAttributeModifier(
-                    "Baby spawn malus", -40.0D, EntityAttributeModifier.Operation.ADDITION));
-
-            Objects.requireNonNull(speed).addPersistentModifier(new EntityAttributeModifier(
-                    "Baby spawn malus", +0.06D, EntityAttributeModifier.Operation.ADDITION));
-
-            this.setHealth(10.0f);
-        }
     }
 
     @Override
