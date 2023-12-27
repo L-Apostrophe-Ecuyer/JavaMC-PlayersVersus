@@ -57,18 +57,10 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         this.itemUseCooldown = 4;
 
         if (this.player.isRiding()) return;
-        if (this.crosshairTarget == null) {
-            VersusMod.MOD_LOGGER.warn("Null returned as 'hitResult', this shouldn't happen!");
-        }
-
         if(this.shouldPrioritizeOffhand()){
             if(!this.tryUsingItem(Hand.OFF_HAND)) this.tryUsingItem(Hand.MAIN_HAND);
+            ci.cancel();
         }
-        else {
-            if(!this.tryUsingItem(Hand.MAIN_HAND)) this.tryUsingItem(Hand.OFF_HAND);
-        }
-
-        ci.cancel();
     }
 
     private boolean shouldPrioritizeOffhand(){

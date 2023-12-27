@@ -25,6 +25,7 @@
     "environment.sleeping.TimePerTickMixin",
     "environment.BlockExplosivityMixin",
     "environment.TntMixin",
+    "environment.TorchMixin",
     "environment.DarknessFogMixin",
     "environment.LightmapMixin",
     "items.drinking.HoneyMixin",
