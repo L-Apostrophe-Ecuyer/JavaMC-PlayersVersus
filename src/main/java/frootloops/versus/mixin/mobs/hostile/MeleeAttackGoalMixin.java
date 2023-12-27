@@ -161,7 +161,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     }
 
     @Overwrite
-    public void attack(LivingEntity target) {
+    public void attack(LivingEntity target, double squaredDistance) {
         int cooldownAmount = this.getCooldownAmount();
         boolean canTrySwinging = this.cooldown <= 0;
         boolean willTryLandingAnAttack = this.mob.isAttacking() && (this.cooldown == (cooldownAmount - TICKS_ENDLAG) || this.cooldown == (cooldownAmount - TICKS_ENDLAG) - 1);
@@ -175,7 +175,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
         // Otherwise, see if we can attack (cooldown is reduced in tick()):
         else if (canTrySwinging || willTryLandingAnAttack) {
-            boolean isInCloseQuarters = target.getEyePos().squaredDistanceTo(mob.getEyePos()) < 1.5d;
+            boolean isInCloseQuarters = squaredDistance < 1.5d;
             if(isInCloseQuarters || Combat.isLookingTowards(this.mob, target.getEyePos(), true)) {
 
                 if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("-------------------- SWING ATTEMPT");
