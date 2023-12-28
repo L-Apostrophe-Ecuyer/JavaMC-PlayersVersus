@@ -11,11 +11,11 @@ public class TimePerTickMixin {
 
     @ModifyConstant(method = "runServer", constant = @Constant(longValue = 50L))
     private long modifyTimePerTick(long millisecondsPerTick) {
-        return ServerSettings.isTimeFastForwarding ? 5L: 50L;
+        return ServerSettings.isTimeFastForwarding ? 3L: 50L;
     }
 
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))
-    private int modifyTicksPerAutosave(int millisecondsPerTick) {
-        return ServerSettings.isTimeFastForwarding ? 60000: 6000;
+    private int modifyTicksPerAutosave(int millisecondsPerTickToAutosave) {
+        return ServerSettings.isTimeFastForwarding ? 120000: 6000;
     }
 }
