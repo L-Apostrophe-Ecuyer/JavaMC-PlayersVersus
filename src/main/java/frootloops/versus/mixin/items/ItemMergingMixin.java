@@ -41,65 +41,81 @@ public class ItemMergingMixin {
         int amountBetweenBoth = 0;
 
         // TODO: Make this a dict lookup
-        if(cursorStack.getItem() == Items.IRON_INGOT) {
+        Item cursorItem = cursorStack.getItem();
+        if(cursorItem == Items.IRON_INGOT) {
             itemToMergeInto = Items.IRON_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.RAW_IRON) {
+        else if(cursorItem == Items.RAW_IRON) {
             itemToMergeInto = Items.RAW_IRON_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.IRON_NUGGET) {
+        else if(cursorItem == Items.IRON_NUGGET) {
             itemToMergeInto = Items.IRON_INGOT;
             amountRequired = 4;
         }
-        else if(cursorStack.getItem() == Items.GOLD_INGOT) {
+        else if(cursorItem == Items.GOLD_INGOT) {
             itemToMergeInto = Items.GOLD_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.RAW_IRON) {
+        else if(cursorItem == Items.RAW_IRON) {
             itemToMergeInto = Items.RAW_GOLD_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.GOLD_NUGGET) {
+        else if(cursorItem == Items.GOLD_NUGGET) {
             itemToMergeInto = Items.GOLD_INGOT;
             amountRequired = 4;
         }
-        else if(cursorStack.getItem() == Items.COPPER_INGOT) {
+        else if(cursorItem == Items.COPPER_INGOT) {
             itemToMergeInto = Items.COPPER_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.RAW_COPPER) {
+        else if(cursorItem == Items.RAW_COPPER) {
             itemToMergeInto = Items.RAW_COPPER_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.EMERALD) {
+        else if(cursorItem == Items.EMERALD) {
             itemToMergeInto = Items.EMERALD_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.DIAMOND) {
+        else if(cursorItem == Items.COAL) {
+            itemToMergeInto = Items.COAL_BLOCK;
+            amountRequired = 9;
+        }
+        else if(cursorItem == Items.DIAMOND) {
             itemToMergeInto = Items.DIAMOND_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.LAPIS_LAZULI) {
+        else if(cursorItem == Items.LAPIS_LAZULI) {
             itemToMergeInto = Items.LAPIS_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.WHEAT) {
+        else if(cursorItem == Items.WHEAT) {
             itemToMergeInto = Items.HAY_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorStack.getItem() == Items.CLAY_BALL) {
+        else if(cursorItem == Items.CLAY_BALL) {
             itemToMergeInto = Items.CLAY;
             amountRequired = 4;
         }
-        else if(cursorStack.getItem() == Items.SNOWBALL) {
+        else if(cursorItem == Items.SNOWBALL) {
             itemToMergeInto = Items.SNOW_BLOCK;
             amountRequired = 4;
         }
-        else if(cursorStack.getItem() == Items.SLIME_BALL) {
+        else if(cursorItem == Items.SLIME_BALL) {
             itemToMergeInto = Items.SLIME_BLOCK;
             amountRequired = 4;
+        }
+        else if(cursorStack.isDamaged() && slot.getStack().isDamaged()) {
+            if(cursorItem != slot.getStack().getItem()) return false;
+            if(cursorStack.hasEnchantments() || slot.getStack().hasEnchantments()) return false;
+            if(!cursorStack.getName().getString().equals(slot.getStack().getName().getString())) return false;
+
+            int maxUses = cursorStack.getMaxDamage();
+            int damage = Math.max(0, cursorStack.getDamage() + slot.getStack().getDamage() - maxUses - maxUses/10);
+            slot.getStack().setDamage(damage);
+            cursorStack.setCount(0);
+            return true;
         }
         else return false;
 
