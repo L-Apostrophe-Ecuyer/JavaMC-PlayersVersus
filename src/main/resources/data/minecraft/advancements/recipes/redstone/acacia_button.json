@@ -38,7 +38,7 @@
       "conditions": {
         "recipe": "minecraft:acacia_button"
       }
-    },
+    }
   },
   "requirements": [
     [
