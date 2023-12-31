@@ -58,7 +58,7 @@ public class ItemMergingMixin {
             itemToMergeInto = Items.GOLD_BLOCK;
             amountRequired = 9;
         }
-        else if(cursorItem == Items.RAW_IRON) {
+        else if(cursorItem == Items.RAW_GOLD) {
             itemToMergeInto = Items.RAW_GOLD_BLOCK;
             amountRequired = 9;
         }
