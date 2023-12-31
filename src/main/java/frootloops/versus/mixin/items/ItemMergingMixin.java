@@ -96,7 +96,7 @@ public class ItemMergingMixin {
         }
         else if(cursorItem == Items.CLAY_BALL) {
             itemToMergeInto = Items.CLAY;
-            amountRequired = 4;
+            amountRequired = 9;
         }
         else if(cursorItem == Items.SNOWBALL) {
             itemToMergeInto = Items.SNOW_BLOCK;
