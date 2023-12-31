@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:story/mine_stone",
+  "criteria": {
+    "stone_pickaxe": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:copper_pickaxe"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "players-versus.advancements.story.upgrade_to_copper.description"
+    },
+    "icon": {
+      "item": "minecraft:stone_pickaxe",
+      "nbt": "{Damage:0}"
+    },
+    "title": {
+      "translate": "players-versus.advancements.story.upgrade_to_copper.title"
+    }
+  },
+  "requirements": [
+    [
+      "copper_pickaxe"
+    ]
+  ],
+  "sends_telemetry_event": false
+}
