@@ -4,7 +4,9 @@ import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.ai.pathing.Path;
+import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.mob.WitchEntity;
 import net.minecraft.entity.raid.RaiderEntity;
 import net.minecraft.item.PotionItem;
 import net.minecraft.sound.SoundEvents;
@@ -55,7 +57,7 @@ public class FleeAttackerAndHealGoal<T extends LivingEntity> extends Goal {
 
     @Override
     public void start() {
-        canDrinkPotion = (mob instanceof RaiderEntity || mob.getOffHandStack().getItem() instanceof PotionItem);
+        canDrinkPotion = (mob instanceof WitchEntity || mob.getOffHandStack().getItem() instanceof PotionItem);
         mob.getNavigation().setSpeed(speed);
         fleeingEntityNavigation.startMovingAlong(fleePath, speed);
     }
