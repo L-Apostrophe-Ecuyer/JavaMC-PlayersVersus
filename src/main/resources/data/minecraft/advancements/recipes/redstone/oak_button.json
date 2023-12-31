@@ -43,6 +43,11 @@
   "requirements": [
     [
       "has_the_recipe",
+      "has_trapdoor",
+      "has_door"
+    ],
+    [
+      "has_the_recipe",
       "has_planks"
     ]
   ],
