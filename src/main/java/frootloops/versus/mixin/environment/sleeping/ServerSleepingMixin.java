@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.sleeping;
 
 import frootloops.versus.ServerSettings;
+import frootloops.versus.VersusMod;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.DynamicRegistryManager;
@@ -41,6 +42,7 @@ public abstract class ServerSleepingMixin extends World {
         if(this.isEveryoneTuckedIn()) { // If everyone is asleep, make time go by quick:
             ServerSettings.isTimeFastForwarding = true;
             this.setTimeOfDay((this.properties.getTimeOfDay() + 1) % 24000);
+            if(this.properties.getTimeOfDay() % 40 == 0) VersusMod.MOD_LOGGER.warn("Time should be moving quickly...");
         }
         else if(ServerSettings.isTimeFastForwarding) { // Otherwise, check if we need to wake up:
             this.riseAndGrind();

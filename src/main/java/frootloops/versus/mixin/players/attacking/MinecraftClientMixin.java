@@ -55,7 +55,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean tryAttacking = false;
         double attackChargeProgress = Combat.getAttackChargeProgress(player);
         if(attackChargeProgress > 0.75d) {
-            if (options.attackKey.isPressed() && ClientSettings.Combat.CAN_HOLD_TO_ATTACK) {
+            if (options.attackKey.isPressed() && ClientSettings.CAN_HOLD_TO_ATTACK) {
                 ticksAttackKeyPressed++;
 
                 // If the cooldown is complete, swing:
@@ -96,8 +96,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         double attackRange = Combat.getAttackRange(player, attackProgress);
         boolean canAttackEntities = attackProgress > 0.5;
 
-        if(ClientSettings.Combat.CAN_AIM_ASSIST && canAttackEntities) {
-            if(this.crosshairTarget.getType() != ENTITY && attackProgress < 2.0 && prevTargettedEntity != null) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
+        if(ClientSettings.CAN_AIM_ASSIST && canAttackEntities) {
+            if(this.crosshairTarget.getType() != ENTITY && attackProgress < 3.0 && prevTargettedEntity != null) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
             if(this.crosshairTarget.getType() != ENTITY && player.getAttacker() != null) attemptToAimAssistTarget(player.getAttacker(), attackRange);
             if(this.crosshairTarget.getType() != ENTITY) prevTargettedEntity = null;
         }
