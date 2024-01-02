@@ -15,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:copper_shovel"
+        "recipe": "players-versus:copper_shovel"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:copper_shovel"
+      "players-versus:copper_shovel"
     ]
   }
 }

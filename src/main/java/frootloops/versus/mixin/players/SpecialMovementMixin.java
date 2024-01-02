@@ -94,14 +94,14 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             boolean isPlayerSideStepping = (sideStepAmount * sideStepAmount) > 1600d;
             if (isPlayerSideStepping) {
                 double dotProduct = this.getVelocity().dotProduct(this.getRotationVector());
-                boolean canPlayerDodge = (dotProduct * dotProduct) < 0.01;
+                boolean canPlayerDodge = (dotProduct * dotProduct) < 0.05;
                 if (canPlayerDodge) {
                     double horizontalVelocityTotal = Math.sqrt(velocityX * velocityX + velocityZ * velocityZ);
-                    double horizontalDodgeVelocity = 0.38 + 0.1 * boundingStridesLevel;
-                    if (horizontalVelocityTotal < 0.15d && horizontalVelocityTotal > 0.08) {
+                    double horizontalDodgeVelocity = 0.32 + 0.12 * boundingStridesLevel;
+                    if (horizontalVelocityTotal < 0.3d && horizontalVelocityTotal > 0.06) {
                         velocityX = (velocityX / horizontalVelocityTotal) * horizontalDodgeVelocity;
                         velocityZ = (velocityZ / horizontalVelocityTotal) * horizontalDodgeVelocity;
-                        velocityY *= 0.85;
+                        velocityY *= 0.95;
 
                         ((PlayerEntity)((Object)this)).addExhaustion(0.2f);
                         this.spawnSprintingParticles();

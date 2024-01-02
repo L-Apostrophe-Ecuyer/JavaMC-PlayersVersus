@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:story/mine_stone",
   "criteria": {
-    "stone_pickaxe": {
+    "copper_pickaxe": {
       "conditions": {
         "items": [
           {
             "items": [
-              "minecraft:copper_pickaxe"
+              "players-versus:copper_pickaxe"
             ]
           }
         ]
@@ -19,7 +19,7 @@
       "translate": "players-versus.advancements.story.upgrade_to_copper.description"
     },
     "icon": {
-      "item": "minecraft:stone_pickaxe",
+      "item": "players-versus:copper_pickaxe",
       "nbt": "{Damage:0}"
     },
     "title": {
