@@ -21,10 +21,16 @@ public abstract class TorchMixin extends Block {
         super(settings);
     }
 
-    public void tickTorchDegradation(BlockState state, ServerWorld world, BlockPos pos) {
+    public void tickTorchDegradation(BlockState state, ServerWorld world, BlockPos pos, boolean isCompletelyExtinguished) {
         if(world.getDimension().ultrawarm()) return;
-        if(state.isOf(Blocks.TORCH)) world.setBlockState(pos, CustomBlocks.SMOLDERING_TORCH.getStateWithProperties(state));
-        else if(state.isOf(Blocks.WALL_TORCH)) world.setBlockState(pos, CustomBlocks.SMOLDERING_WALL_TORCH.getStateWithProperties(state));
+        if(state.isOf(Blocks.TORCH)) {
+            if(isCompletelyExtinguished) world.setBlockState(pos, CustomBlocks.EXTINGUISHED_TORCH.getStateWithProperties(state));
+            else world.setBlockState(pos, CustomBlocks.SMOLDERING_TORCH.getStateWithProperties(state));
+        }
+        else if(state.isOf(Blocks.WALL_TORCH)) {
+            if(isCompletelyExtinguished) world.setBlockState(pos, CustomBlocks.EXTINGUISHED_WALL_TORCH.getStateWithProperties(state));
+            else world.setBlockState(pos, CustomBlocks.SMOLDERING_WALL_TORCH.getStateWithProperties(state));
+        }
         else return;
 
         world.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 4, 0.1, 0.2, 0.1, 0.05);
@@ -41,7 +47,7 @@ public abstract class TorchMixin extends Block {
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if(world instanceof ServerWorld && state.isOf(Blocks.TORCH) || state.isOf(Blocks.WALL_TORCH)) {
             if (random.nextInt(128) > Math.max(64, Math.min(127, pos.getY() + 64))) {
-                this.tickTorchDegradation(state, world, pos);
+                this.tickTorchDegradation(state, world, pos, false);
             }
         }
     }
@@ -49,7 +55,7 @@ public abstract class TorchMixin extends Block {
     @Override
     public void precipitationTick(BlockState state, World world, BlockPos pos, Biome.Precipitation precipitation) {
         if(world instanceof ServerWorld && state.isOf(Blocks.TORCH) || state.isOf(Blocks.WALL_TORCH)) {
-            this.tickTorchDegradation(state, (ServerWorld)world, pos);
+            this.tickTorchDegradation(state, (ServerWorld)world, pos, true);
         }
     }
 }

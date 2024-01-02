@@ -234,7 +234,7 @@ public abstract class Combat {
         return attackBox.expand(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);
     }
 
-    public static Box getEntityHitbox(LivingEntity entity) {
+    public static Box getEntityHitbox(Entity entity) {
         Box box = entity.getBoundingBox();
         Entity ridingEntity = entity.getVehicle();
         if (ridingEntity != null) {

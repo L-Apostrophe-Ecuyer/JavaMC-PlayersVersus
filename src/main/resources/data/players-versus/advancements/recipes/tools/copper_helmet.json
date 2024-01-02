@@ -6,7 +6,7 @@
         "items": [
           {
             "items": [
-              "minecraft:copper"
+              "minecraft:copper_ingot"
             ]
           }
         ]
@@ -15,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:copper_helmet"
+        "recipe": "players-versus:copper_helmet"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:copper_helmet"
+      "players-versus:copper_helmet"
     ]
   }
 }
