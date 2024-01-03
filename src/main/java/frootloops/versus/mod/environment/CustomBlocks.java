@@ -16,22 +16,30 @@ import net.minecraft.util.Identifier;
 
 public class CustomBlocks {
 
-    public static final Block SMOLDERING_TORCH = new SmolderingTorchBlock(AbstractBlock.Settings.copy(Blocks.TORCH).dropsLike(Blocks.TORCH).luminance(state -> 12), ParticleTypes.SMALL_FLAME);
+    public static final Block SMOLDERING_TORCH = new SmolderingTorchBlock(AbstractBlock.Settings.copy(Blocks.TORCH).luminance(state -> 12), ParticleTypes.SMALL_FLAME);
     public static final Block SMOLDERING_WALL_TORCH = new SmolderingWallTorchBlock(AbstractBlock.Settings.copy(Blocks.WALL_TORCH).luminance(state -> 12).dropsLike(SMOLDERING_TORCH), ParticleTypes.SMALL_FLAME);
 
-    public static final Block EXTINGUISHED_TORCH = new TorchBlock(AbstractBlock.Settings.copy(Blocks.TORCH).dropsNothing().luminance(state -> 6), ParticleTypes.SMOKE);
-    public static final Block EXTINGUISHED_WALL_TORCH = new WallTorchBlock(AbstractBlock.Settings.copy(Blocks.WALL_TORCH).dropsNothing().luminance(state -> 6).dropsLike(EXTINGUISHED_TORCH), ParticleTypes.SMOKE);
+    public static final Block EXTINGUISHED_TORCH = new TorchBlock(AbstractBlock.Settings.copy(Blocks.TORCH).luminance(state -> 6), ParticleTypes.SMOKE);
+    public static final Block EXTINGUISHED_WALL_TORCH = new WallTorchBlock(AbstractBlock.Settings.copy(Blocks.WALL_TORCH).dropsLike(EXTINGUISHED_TORCH).luminance(state -> 6).dropsLike(EXTINGUISHED_TORCH), ParticleTypes.SMOKE);
 
-    private static void registerBlocks(String name, Block block, boolean hasItem) {
+    private static void registerBlockAndItem(String name, Block block) {
+        registerBlock(name, block);
+        registerBlockItem(name, block);
+    }
+
+    private static void registerBlock(String name, Block block) {
         Registry.register(Registries.BLOCK, new Identifier(VersusMod.MOD_ID, name), block);
+    }
+
+    private static void registerBlockItem(String name, Block block) {
         Registry.register(Registries.ITEM, new Identifier(VersusMod.MOD_ID, name), new BlockItem(block, new FabricItemSettings()));
     }
 
     public static void onInitialize() {
-        registerBlocks("smoldering_torch", SMOLDERING_TORCH, true);
-        registerBlocks("smoldering_wall_torch", SMOLDERING_WALL_TORCH, false);
-        registerBlocks("extinguished_torch", EXTINGUISHED_TORCH, true);
-        registerBlocks("extinguished_wall_torch", EXTINGUISHED_WALL_TORCH, false);
+        registerBlockAndItem("smoldering_torch", SMOLDERING_TORCH);
+        registerBlock("smoldering_wall_torch", SMOLDERING_WALL_TORCH);
+        registerBlockAndItem("extinguished_torch", EXTINGUISHED_TORCH);
+        registerBlock("extinguished_wall_torch", EXTINGUISHED_WALL_TORCH);
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), SMOLDERING_TORCH, SMOLDERING_WALL_TORCH, EXTINGUISHED_TORCH, EXTINGUISHED_WALL_TORCH);
     }
 
