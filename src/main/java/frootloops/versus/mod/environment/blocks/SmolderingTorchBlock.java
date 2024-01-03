@@ -1,9 +1,7 @@
 package frootloops.versus.mod.environment.blocks;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.TorchBlock;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;

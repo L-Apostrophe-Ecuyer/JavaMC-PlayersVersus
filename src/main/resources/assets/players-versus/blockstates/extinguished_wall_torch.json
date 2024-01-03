@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
-      "model": "players-versus:block/extinguished_torch"
+    "facing=east": {
+      "model": "players-versus:block/extinguished_wall_torch"
+    },
+    "facing=north": {
+      "model": "players-versus:block/extinguished_wall_torch",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "players-versus:block/extinguished_wall_torch",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "players-versus:block/extinguished_wall_torch",
+      "y": 180
     }
   }
 }
