@@ -50,6 +50,7 @@ public abstract class FlintAndSteelItemMixin extends Item {
     public ActionResult useOnEntity(ItemStack stack, PlayerEntity user, LivingEntity entity, Hand hand) {
         if(entity.isAlive()) {
             entity.setOnFireFor(2);
+            entity.setAttacker(user);
             if (user != null) stack.damage(1, user, p -> p.sendToolBreakStatus(hand));
             return ActionResult.SUCCESS;
         }
