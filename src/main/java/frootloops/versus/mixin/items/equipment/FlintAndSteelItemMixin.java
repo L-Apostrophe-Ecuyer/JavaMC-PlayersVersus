@@ -41,6 +41,7 @@ public abstract class FlintAndSteelItemMixin extends Item {
             world.playSound(playerEntity, blockPos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0f, world.getRandom().nextFloat() * 0.4f + 0.8f);
             if (playerEntity != null) context.getStack().damage(1, playerEntity, p -> p.sendToolBreakStatus(context.getHand()));
             cir.setReturnValue(ActionResult.success(world.isClient()));
+            cir.cancel();
         }
     }
 
