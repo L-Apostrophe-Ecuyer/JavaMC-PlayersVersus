@@ -29,49 +29,50 @@ import java.util.stream.Collectors;
 @Mixin(ServerWorld.class)
 public abstract class ServerSleepingMixin extends World {
     @Shadow public void setTimeOfDay(long timeOfDay) {}
+    @Shadow final List<ServerPlayerEntity> players;
     private static SleepManager cachedSleepManager = null;
 
-    protected ServerSleepingMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates, MutableWorldProperties properties1, List<ServerPlayerEntity> players, SleepManager sleepManager) {
+    protected ServerSleepingMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates, MutableWorldProperties properties1, List<ServerPlayerEntity> players, SleepManager sleepManager, List<ServerPlayerEntity> players1) {
         super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
+        this.players = players1;
     }
 
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/SleepManager;canResetTime(ILjava/util/List;)Z"))
     public boolean checkOnEepyPlayers(SleepManager sleepManager, int percentage, List<ServerPlayerEntity> players) {
         cachedSleepManager = sleepManager;
-        if(this.isEveryoneTuckedIn()) { // If everyone is asleep, make time go by quick:
-            ServerSettings.isTimeFastForwarding = true;
-            this.setTimeOfDay((this.properties.getTimeOfDay() + 1) % 24000);
-            if(this.properties.getTimeOfDay() % 40 == 0) VersusMod.MOD_LOGGER.warn("Time should be moving quickly...");
-        }
-        else if(ServerSettings.isTimeFastForwarding) { // Otherwise, check if we need to wake up:
-            this.riseAndGrind();
-        }
-        return false; // Return false to cancel vanilla time skip:
+        return false; // Return false to cancel vanilla time skip
     }
 
     @Inject(method = "tick", at = @At(value = "TAIL"))
     public void stopIfPlayerWokeUp(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
-        if(ServerSettings.isTimeFastForwarding && !this.isEveryoneTuckedIn()) this.riseAndGrind();
-    }
+        long timeOfDay = this.properties.getTimeOfDay();
+        if(timeOfDay % 8l != 0) return;
 
-    private void riseAndGrind() {
-        if(this.properties.getTimeOfDay() >= 23300) {
-            if(cachedSleepManager != null) cachedSleepManager.clearSleeping();
-            (this.getPlayers().stream().filter(LivingEntity::isSleeping).collect(Collectors.toList())).forEach((PlayerEntity player) -> {
-                player.wakeUp(false, false);
-            });
-        }
-        ServerSettings.isTimeFastForwarding = false;
-    }
-
-    private boolean isEveryoneTuckedIn() {
-        if(this.properties.getTimeOfDay() > 12999 && this.properties.getTimeOfDay() < 23300) {
-            for (PlayerEntity player : this.getPlayers()) {
-                if (player.hurtTime > 0 || !player.canResetTimeBySleeping()) return false;
+        boolean canSleepThroughNight = true;
+        if(timeOfDay > 12999l && timeOfDay < 23300l && players.size() > 0) {
+            for (PlayerEntity player : players) {
+                if (player.hurtTime > 0 || player.getSleepTimer() < 40) {
+                    canSleepThroughNight = false;
+                    break;
+                }
             }
-            return true;
         }
-        return false;
+        else {
+            canSleepThroughNight = false;
+        }
+
+        // If everyone is asleep, make time go by quick:
+        if(canSleepThroughNight) {
+            ServerSettings.isTimeFastForwarding = true;
+            this.setTimeOfDay(this.properties.getTimeOfDay() + 1);
+        }
+
+        // Otherwise, wake everyone up:
+        else if(ServerSettings.isTimeFastForwarding) {
+            ServerSettings.isTimeFastForwarding = false;
+            if(cachedSleepManager != null) cachedSleepManager.clearSleeping();
+            (this.getPlayers().stream().filter(LivingEntity::isSleeping).collect(Collectors.toList())).forEach((PlayerEntity player) -> {player.wakeUp(false, false);});
+        }
     }
 }
