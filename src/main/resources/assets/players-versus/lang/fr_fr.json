@@ -1,7 +1,9 @@
 {
+  "players-versus.advancements.story.craft_a_furnace.title": "Au feu!",
+  "players-versus.advancements.story.craft_a_furnace.description": "Fabriquez un furneau",
   "players-versus.advancements.story.upgrade_to_copper.title": "L'âge de bronze",
-  "players-versus.advancements.story.upgrade_to_copper.title": "Fabriquez une pioche en cuivre.",
-  "advancements.story.iron_tools.description": "Fabriquez une pioche en fer.",
+  "players-versus.advancements.story.upgrade_to_copper.description": "Fabriquez une pioche en cuivre.",
+  "minecraft.advancements.story.iron_tools.description": "Fabriquez une pioche en fer.",
   "block.players-versus.smoldering_torch" : "Torche en fin de vie",
   "block.players-versus.extinguished_torch" : "Torche éteinte",
   "item.players-versus.smoldering_torch" : "Torche en fin de vie",

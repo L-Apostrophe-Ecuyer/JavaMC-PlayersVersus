@@ -1,12 +1,12 @@
 {
   "parent": "players-versus:story/craft_a_furnace",
   "criteria": {
-    "copper_pickaxe": {
+    "iron": {
       "conditions": {
         "items": [
           {
             "items": [
-              "players-versus:copper_pickaxe"
+              "minecraft:iron_ingot"
             ]
           }
         ]
@@ -16,20 +16,19 @@
   },
   "display": {
     "description": {
-      "translate": "players-versus.advancements.story.upgrade_to_copper.description"
+      "translate": "advancements.story.smelt_iron.description"
     },
     "icon": {
-      "item": "players-versus:copper_pickaxe",
-      "nbt": "{Damage:0}"
+      "item": "minecraft:iron_ingot"
     },
     "title": {
-      "translate": "players-versus.advancements.story.upgrade_to_copper.title"
+      "translate": "advancements.story.smelt_iron.title"
     }
   },
   "requirements": [
     [
-      "copper_pickaxe"
+      "iron"
     ]
   ],
-  "sends_telemetry_event": false
+  "sends_telemetry_event": true
 }
