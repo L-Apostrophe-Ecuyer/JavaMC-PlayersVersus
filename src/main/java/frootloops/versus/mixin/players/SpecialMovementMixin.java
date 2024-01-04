@@ -76,7 +76,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         boolean hasBounded = false;
 
         // Sprint-jump:
-        if (ticksLeftToDash > 0 && isSprinting()) {
+        if (ticksLeftToDash > 0 && isSprinting() && boundingStridesLevel > 0) {
             velocityX *= (10.0 + boundingStridesLevel)/ 8.5;
             velocityZ *= (10.0 + boundingStridesLevel)/ 8.5;
 
@@ -87,34 +87,6 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             ticksLeftToDash = -1;
             hasBounded = true;
         }
-
-        /*
-        // Dodging:
-        if(!hasBounded && velocityX != 0d && velocityZ != 0d && this.isOnGround() && !this.isSprinting() && !this.isSneaking()) {
-            double sideStepAmount = (this.prevBodyYaw - this.getHeadYaw());
-            boolean isPlayerSideStepping = (sideStepAmount * sideStepAmount) > 1600d;
-            if (isPlayerSideStepping) {
-                double dotProduct = this.getVelocity().dotProduct(this.getRotationVector());
-                boolean canPlayerDodge = (dotProduct * dotProduct) < 0.05;
-                if (canPlayerDodge) {
-                    double horizontalVelocityTotal = Math.sqrt(velocityX * velocityX + velocityZ * velocityZ);
-                    double horizontalDodgeVelocity = 0.28 + 0.12 * boundingStridesLevel;
-                    if (horizontalVelocityTotal < 0.3d && horizontalVelocityTotal > 0.06) {
-                        velocityX = (velocityX / horizontalVelocityTotal) * horizontalDodgeVelocity;
-                        velocityZ = (velocityZ / horizontalVelocityTotal) * horizontalDodgeVelocity;
-                        velocityY *= 0.95;
-
-                        ((PlayerEntity)((Object)this)).addExhaustion(0.2f);
-                        this.spawnSprintingParticles();
-                        this.playBlockFallSound();
-                        timeUntilRegen = 12; // Invincible for two ticks
-                        ticksLeftToLeap = -1;
-                        ticksLeftToDash = -1;
-                        hasBounded = true;
-                    }
-                }
-            }
-        }*/
 
         // Crouch-jump:
         if(ticksLeftToLeap > 0 && !this.isSneaking()) {
