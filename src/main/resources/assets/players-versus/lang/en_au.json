@@ -1,7 +1,7 @@
 {
   "players-versus.advancements.story.upgrade_to_copper.title": "Bronze Age",
-  "players-versus.advancements.story.upgrade_to_copper.title": "Upgrade your Pickaxe, with Copper",
-  "advancements.story.iron_tools.description": "Upgrade your Pickaxe, with Iron",
+  "players-versus.advancements.story.upgrade_to_copper.description": "Upgrade to a Copper Pickaxe",
+  "advancements.story.iron_tools.description": "Upgrade to an Iron Pickaxe",
   "block.players-versus.smoldering_torch" : "Smoldering Torch",
   "block.players-versus.extinguished_torch" : "Extinguished Torch",
   "item.players-versus.smoldering_torch" : "Smoldering Torch",

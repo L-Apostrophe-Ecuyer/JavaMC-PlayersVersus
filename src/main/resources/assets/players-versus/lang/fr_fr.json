@@ -1,6 +1,6 @@
 {
   "players-versus.advancements.story.upgrade_to_copper.title": "L'âge de bronze",
-  "players-versus.advancements.story.upgrade_to_copper.title": "Fabriquez une pioche en cuivre.",
+  "players-versus.advancements.story.upgrade_to_copper.description": "Fabriquez une pioche en cuivre.",
   "advancements.story.iron_tools.description": "Fabriquez une pioche en fer.",
   "block.players-versus.smoldering_torch" : "Torche en fin de vie",
   "block.players-versus.extinguished_torch" : "Torche éteinte",

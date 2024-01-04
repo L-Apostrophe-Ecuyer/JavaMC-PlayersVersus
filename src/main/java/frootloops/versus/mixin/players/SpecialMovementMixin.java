@@ -88,6 +88,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             hasBounded = true;
         }
 
+        /*
         // Dodging:
         if(!hasBounded && velocityX != 0d && velocityZ != 0d && this.isOnGround() && !this.isSprinting() && !this.isSneaking()) {
             double sideStepAmount = (this.prevBodyYaw - this.getHeadYaw());
@@ -97,7 +98,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                 boolean canPlayerDodge = (dotProduct * dotProduct) < 0.05;
                 if (canPlayerDodge) {
                     double horizontalVelocityTotal = Math.sqrt(velocityX * velocityX + velocityZ * velocityZ);
-                    double horizontalDodgeVelocity = 0.32 + 0.12 * boundingStridesLevel;
+                    double horizontalDodgeVelocity = 0.28 + 0.12 * boundingStridesLevel;
                     if (horizontalVelocityTotal < 0.3d && horizontalVelocityTotal > 0.06) {
                         velocityX = (velocityX / horizontalVelocityTotal) * horizontalDodgeVelocity;
                         velocityZ = (velocityZ / horizontalVelocityTotal) * horizontalDodgeVelocity;
@@ -113,7 +114,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                     }
                 }
             }
-        }
+        }*/
 
         // Crouch-jump:
         if(ticksLeftToLeap > 0 && !this.isSneaking()) {
