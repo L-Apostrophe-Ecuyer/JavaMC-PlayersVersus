@@ -55,9 +55,14 @@ public abstract class PhantomMixin extends FlyingEntity {
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason == SpawnReason.NATURAL) {
+
+            long dayTime = world.getLunarTime() % 24000l;
+            if(dayTime < 20000l || dayTime > 22000l) return false;
+
             int moonPhase = world.getMoonPhase();
             if((moonPhase + 2) % 8 < 6) return false;
             if(moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
+
         }
         return super.canSpawn(world, spawnReason);
     }
