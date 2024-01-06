@@ -24,11 +24,11 @@ public abstract class DungeonsMixin extends Feature<DefaultFeatureConfig> {
         if (predicate.test(world.getBlockState(pos))) {
             Block block = state.getBlock();
             if (Blocks.COBBLESTONE.equals(block) ) {
-                if(pos.getY() < 12 && world.getRandom().nextInt(12) > pos.getY()) state = Blocks.STONE_BRICKS.getDefaultState();
-                else if(pos.getY() < 0 || (world.getBlockState(pos).isOf(Blocks.DEEPSLATE))) state = Blocks.DEEPSLATE_BRICKS.getDefaultState();
+                if(pos.getY() < 0 || (world.getBlockState(pos).isOf(Blocks.DEEPSLATE))) state = Blocks.DEEPSLATE_BRICKS.getDefaultState();
+                else if(pos.getY() < 12 && world.getRandom().nextInt(12) > pos.getY()) state = Blocks.STONE_BRICKS.getDefaultState();
             } else if (Blocks.MOSSY_COBBLESTONE.equals(block) ) {
-                if(pos.getY() < 12 && world.getRandom().nextInt(12) > pos.getY()) state = Blocks.MOSSY_STONE_BRICKS.getDefaultState();
-                else if(pos.getY() < 0 || (world.getBlockState(pos).isOf(Blocks.DEEPSLATE))) state = Blocks.CRACKED_DEEPSLATE_BRICKS.getDefaultState();
+                if(pos.getY() < 0 || (world.getBlockState(pos).isOf(Blocks.DEEPSLATE))) state = Blocks.CRACKED_DEEPSLATE_BRICKS.getDefaultState();
+                else if(pos.getY() < 12 && world.getRandom().nextInt(12) > pos.getY()) state = Blocks.MOSSY_STONE_BRICKS.getDefaultState();
             }
             world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
         }
