@@ -37,7 +37,7 @@ public class PiggingAroundGoal extends Goal {
         this.mob = mob;
         this.world = mob.getWorld();
         this.setControls(EnumSet.of(Control.MOVE, Control.LOOK, Control.JUMP));
-        this.timer = -world.random.nextBetween(80, COOLDOWN);
+        this.timer = -mob.getRandom().nextBetween(80, COOLDOWN);
     }
 
     public boolean canStart() {
