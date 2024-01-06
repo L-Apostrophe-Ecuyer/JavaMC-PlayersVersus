@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(StructurePiece.class)
 public abstract class StructurePieceMixin {
 
-    @ModifyVariable(method = "addBlockWithRandomThreshold", at = @At("HEAD"), ordinal = 8)
+    @ModifyVariable(method = "addBlockWithRandomThreshold", at = @At("HEAD"), ordinal = 0)
     private BlockState extinguished(BlockState state) {
         if(state.isOf(Blocks.WALL_TORCH)) state = CustomBlocks.EXTINGUISHED_WALL_TORCH.getStateWithProperties(state);
         return state;
