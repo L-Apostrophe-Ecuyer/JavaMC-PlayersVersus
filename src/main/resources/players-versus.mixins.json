@@ -35,6 +35,7 @@
     "items.drinking.PotionMixin",
     "items.drinking.StewMixin",
     "items.drinking.SuspiciousStewMixin",
+    "items.throwing.FireballMixin",
     "items.throwing.SnowballEntityMixin",
     "items.throwing.SnowballMixin",
     "items.throwing.SplashPotionMixin",
