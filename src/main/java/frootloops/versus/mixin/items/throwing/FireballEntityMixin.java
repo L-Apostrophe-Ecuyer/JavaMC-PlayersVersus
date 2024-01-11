@@ -28,26 +28,12 @@ public abstract class FireballEntityMixin extends AbstractFireballEntity {
     public void tick() {
         if(this.isTouchingWaterOrRain()) {
             if(this.getWorld() instanceof ServerWorld serverWorld) {
-                serverWorld.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(), this.getY(), this.getZ(), 16, 0, 0, 0, 1);
+                serverWorld.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(), this.getY(), this.getZ(), 16, 0, 0, 0, 0.3);
             }
             this.playSound(SoundEvents.BLOCK_FIRE_EXTINGUISH, 1.0F, 0.4F);
             this.discard();
             return;
         }
         super.tick();
-    }
-
-    @Override
-    protected void onEntityHit(EntityHitResult entityHitResult) {
-        super.onEntityHit(entityHitResult);
-        if (this.getWorld().isClient) {
-            return;
-        }
-        Entity entity = entityHitResult.getEntity();
-        Entity owner = this.getOwner();
-        if (owner instanceof LivingEntity) this.applyDamageEffects((LivingEntity)owner, entity);
-        if(entity.damage(this.getDamageSources().fireball(this, owner), 6.0f)) {
-            this.onCollision(entityHitResult);
-        }
     }
 }
