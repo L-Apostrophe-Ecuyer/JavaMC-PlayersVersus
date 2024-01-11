@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.mobs.hostile.dragon;
+package frootloops.versus.mixin.mobs.hostile.end.dragon;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

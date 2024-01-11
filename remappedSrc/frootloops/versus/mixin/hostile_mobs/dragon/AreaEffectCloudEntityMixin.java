@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.mobs.hostile.dragon;
+package frootloops.versus.mixin.mobs.hostile.end.dragon;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
