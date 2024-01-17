@@ -5,7 +5,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.CobwebBlock;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
@@ -20,7 +19,6 @@ import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -150,6 +148,11 @@ public class SpiderMixin extends HostileEntity {
     @Override
     public boolean isBaby() {
         return this.getDataTracker().get(BABY);
+    }
+
+    @Override
+    public void setBaby(boolean baby) {
+        this.getDataTracker().set(BABY, baby);
     }
 
     @Override

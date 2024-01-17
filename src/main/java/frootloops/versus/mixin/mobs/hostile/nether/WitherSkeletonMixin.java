@@ -22,13 +22,13 @@ public class WitherSkeletonMixin extends HostileEntity {
     @Nullable
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
-        EntityAttributeInstance instance1 = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-        if (instance1 != null) {
-            instance1.setBaseValue(30.0D);
+        EntityAttributeInstance instanceHealth = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        if (instanceHealth != null) {
+            instanceHealth.setBaseValue(40.0D);
             this.setHealth(this.getMaxHealth());
         }
-        EntityAttributeInstance instance2 = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
-        if (instance2 != null) instance2.setBaseValue(0.4D);
+        EntityAttributeInstance instanceKnockback = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
+        if (instanceKnockback != null) instanceKnockback.setBaseValue(0.5D);
 
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }

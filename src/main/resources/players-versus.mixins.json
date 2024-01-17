@@ -66,6 +66,7 @@
     "mobs.hostile.end.dragon.DragonFireballEntityMixin",
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",
     "mobs.hostile.end.dragon.StrafePlayerPhaseMixin",
+    "mobs.hostile.end.EndermanMixin",
     "mobs.hostile.illager.PillagerMixin",
     "mobs.hostile.illager.PillagerPatrolMixin",
     "mobs.hostile.illager.VindicatorMixin",
