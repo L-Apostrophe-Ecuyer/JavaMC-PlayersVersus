@@ -55,7 +55,7 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason == SpawnReason.NATURAL && world.getDimension().hasSkyLight()) {
-            if(!world.getServer().getSaveProperties().getDragonFight().dragonKilled()) {
+            if(!world.getServer().isHardcore()) {
                 int moonPhase = world.getMoonPhase();
                 if((moonPhase + 2) % 8 < 6) return false;
             }
