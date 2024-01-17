@@ -2,11 +2,8 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.mobs.hostile.ai.PhantomMoveControlRevamp;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityData;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -14,17 +11,18 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.FlyingEntity;
 import net.minecraft.entity.mob.PhantomEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.Inject;
 
 @Mixin(PhantomEntity.class)
 public abstract class PhantomMixin extends FlyingEntity {
@@ -57,7 +55,7 @@ public abstract class PhantomMixin extends FlyingEntity {
         if(spawnReason == SpawnReason.NATURAL) {
 
             long dayTime = world.getLunarTime() % 24000l;
-            if(dayTime < 20000l || dayTime > 22000l) return false;
+            if(dayTime < 18000l || dayTime > 20000l) return false;
 
             int moonPhase = world.getMoonPhase();
             if((moonPhase + 2) % 8 < 6) return false;
@@ -67,18 +65,61 @@ public abstract class PhantomMixin extends FlyingEntity {
         return super.canSpawn(world, spawnReason);
     }
 
+    @Override
+    public boolean isInvisibleTo(PlayerEntity player) {
+        return super.isInvisible() ? super.isInvisibleTo(player) : false;
+    }
+
+    @Override
+    public boolean isInvisible() {
+        return this.hurtTime == 0;
+    }
+
     @Nullable
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.moveControl = new PhantomMoveControlRevamp((PhantomEntity) ((Object)this));
         this.circlingCenter = this.getBlockPos().up(16);
+        this.noClip = true;
 
         EntityAttributeInstance instanceHp = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instanceHp != null) {
-            instanceHp.setBaseValue(12.0D);
-            this.setHealth(12.0f);
+            instanceHp.setBaseValue(10.0D);
+            this.setHealth(this.getMaxHealth());
         }
+
+        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        if (instanceDmg != null) {
+            instanceDmg.setBaseValue(4.0D);
+        }
+
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
+    }
+
+    @Override
+    public void move(MovementType movementType, Vec3d movement) {
+        boolean isInsideBlock = false;
+        if(this.noClip) {
+            float width = this.getWidth() * 0.8f;
+            Box box = Box.of(this.getEyePos(), width, 1.0E-6, width);
+            isInsideBlock = BlockPos.stream(box).anyMatch(pos -> {
+                BlockState blockState = this.getWorld().getBlockState((BlockPos)pos);
+                return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(this.getWorld(), (BlockPos)pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
+            });
+        }
+        this.noClip = (this.getPitch() > 1.0f || movement.y > 0.1d || isInsideBlock || movement.squaredDistanceTo(0d,0d,0d) < 0.01d);
+        if(this.horizontalCollision) {
+            movement = movement.multiply(-1.0d);
+            this.setYaw(-this.getYaw(1f));
+            this.horizontalCollision = false;
+        }
+        if(this.verticalCollision) {
+            movement = movement.add(0d, 0.3d, 0d);
+            this.setPitch(60.0f);
+            this.verticalCollision = false;
+        }
+        super.move(movementType,movement);
+        if(this.isTouchingWater()) this.damage(getDamageSources().drown(), 2.0F);
     }
 
     @Override

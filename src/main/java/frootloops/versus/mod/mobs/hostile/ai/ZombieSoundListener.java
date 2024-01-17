@@ -17,7 +17,7 @@ public class ZombieSoundListener {
     public static void OnGameEvent(ServerWorld serverWorld, GameEvent event, Vec3d emitterPos, GameEvent.Emitter emitter) {
 
         // Optimization for walking:
-        if(event == GameEvent.STEP && serverWorld.getTime() % 5 != 0) return;
+        if(event == GameEvent.STEP && serverWorld.getTime() % 10 != 0) return;
 
         // If the sound comes from an entity, skip if the entity is sneaking or on wool:
         boolean heardProjectileLanding = (event == GameEvent.PROJECTILE_LAND);
@@ -31,7 +31,10 @@ public class ZombieSoundListener {
                     && !(emitter.sourceEntity() instanceof VillagerEntity)) return;
 
             // If it's a player:
-            if(emitter.sourceEntity() instanceof PlayerEntity) player = (PlayerEntity) emitter.sourceEntity();
+            if(emitter.sourceEntity() instanceof PlayerEntity) {
+                player = (PlayerEntity) emitter.sourceEntity();
+                if(player.isCreative()) return;
+            }
 
             // For consistency with wool occlusion and sneaking mechanics:
             if (event == GameEvent.STEP || event == GameEvent.HIT_GROUND) {
@@ -48,6 +51,7 @@ public class ZombieSoundListener {
         boolean isPriority = !isHighPriority && (heardPlayerSprinting || event == GameEvent.ENTITY_DAMAGE || event == GameEvent.BLOCK_DESTROY);
         double range = isHighPriority ? 32d : isPriority? 24d : 12d;
         double speedMultiplier = isHighPriority ? 1.3d : isPriority ? 1.2d : 0.9d;
+        if(!isPriority && !isHighPriority && serverWorld.getTime() % 2 != 0) return; // Optimization: chance for zombies to ignore certain sounds/events
 
         // Create a bounding box surrounding the event's position:
         double x = emitterPos.x, y = emitterPos.y, z = emitterPos.z;

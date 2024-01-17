@@ -12,8 +12,8 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
@@ -177,19 +177,28 @@ public abstract class Combat {
         }
     }
 
-    public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
+    public static final boolean isLookingTowardsEntity(LivingEntity looker, LivingEntity target, boolean strict){
+        return Combat.isLookingTowards(looker,new Vec3d(target.getX(), target.getEyeY(), target.getZ()),strict);
+    }
+
+    public static final boolean isLookingTowardsEntity(LivingEntity looker, LivingEntity target, double dotProductThreshold){
+        return Combat.isLookingTowards(looker,new Vec3d(target.getX(), target.getEyeY(), target.getZ()),dotProductThreshold);
+    }
+
+
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
         return Combat.isLookingTowards(looker,targetPos,false);
     }
 
-    public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, boolean strict){
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, boolean strict){
         return Combat.isLookingTowards(looker,targetPos,strict ? -0.75 : -0.5);
     }
 
-    public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
         if(looker==null || targetPos == null) return false;
         Vec3d rotationVector = looker.getRotationVec(1.0F);
         Vec3d positionVector = targetPos.relativize(looker.getEyePos()).normalize();
-        return (positionVector.dotProduct(rotationVector) < dotProductThreshold);
+        return (positionVector.dotProduct(rotationVector) < Math.max(1.0, dotProductThreshold));
     }
 
     public static HitResult getHitResultOf(LivingEntity entity, double range) {
@@ -228,6 +237,9 @@ public abstract class Combat {
             Box box = ridingEntity.getBoundingBox();
             Box box2 = mob.getBoundingBox();
             attackBox = new Box(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
+        }
+        else if (mob instanceof EndermanEntity) {
+            attackBox = mob.getBoundingBox().expand(0.5d, mob.getEyeHeight(mob.getPose())/2 + 1d, 0.5d);
         }
         else if (jump || !mob.isOnGround()) {
             attackBox = mob.getBoundingBox().expand(0d, mob.getEyeHeight(mob.getPose())/2 + 0.5d, 0d);
