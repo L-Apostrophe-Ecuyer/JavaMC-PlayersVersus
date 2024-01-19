@@ -1,6 +1,7 @@
 package frootloops.versus;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.CustomWorldgen;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.Combat;
@@ -27,6 +28,9 @@ public class VersusMod implements ModInitializer {
 
 		MOD_LOGGER.info("Initializing custom blocks...");
 		CustomBlocks.onInitialize();
+
+		MOD_LOGGER.info("Initializing custom worldgen features...");
+		CustomWorldgen.onInitialize();
 
 		MOD_LOGGER.info("Initializing custom enchantments...");
 		Enchants.onInitialize();
