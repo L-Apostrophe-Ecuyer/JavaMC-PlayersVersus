@@ -26,6 +26,7 @@ import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -45,6 +46,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow private ItemStack selectedItem;
 
     @Shadow public int totalExperience;
+
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(LivingEntity.createLivingAttributes()

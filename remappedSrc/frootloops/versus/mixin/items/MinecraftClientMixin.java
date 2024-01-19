@@ -57,18 +57,10 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         this.itemUseCooldown = 4;
 
         if (this.player.isRiding()) return;
-        if (this.crosshairTarget == null) {
-            VersusMod.MOD_LOGGER.warn("Null returned as 'hitResult', this shouldn't happen!");
-        }
-
         if(this.shouldPrioritizeOffhand()){
             if(!this.tryUsingItem(Hand.OFF_HAND)) this.tryUsingItem(Hand.MAIN_HAND);
+            ci.cancel();
         }
-        else {
-            if(!this.tryUsingItem(Hand.MAIN_HAND)) this.tryUsingItem(Hand.OFF_HAND);
-        }
-
-        ci.cancel();
     }
 
     private boolean shouldPrioritizeOffhand(){
@@ -128,7 +120,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
      */
     private boolean tryUsingItem(Hand hand) {
         ItemStack itemStack = this.player.getStackInHand(hand);
-        if (!itemStack.isItemEnabled(this.getWorld().getEnabledFeatures())) return false;
+        if (!itemStack.isItemEnabled(world.getEnabledFeatures())) return false;
         ActionResult actionResult = null;
 
         if (this.crosshairTarget != null) {
@@ -136,7 +128,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 case ENTITY:
                     EntityHitResult entityHitResult = (EntityHitResult)this.crosshairTarget;
                     Entity entity = entityHitResult.getEntity();
-                    if (!this.getWorld().getWorldBorder().contains(entity.getBlockPos())) {
+                    if (!world.getWorldBorder().contains(entity.getBlockPos())) {
                         return false;
                     }
 

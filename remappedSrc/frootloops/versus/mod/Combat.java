@@ -12,6 +12,8 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import net.minecraft.entity.mob.EndermanEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
@@ -31,27 +33,34 @@ import java.util.List;
 
 public abstract class Combat {
 
-    public static final double PLAYER_BASE_ATTACK_DAMAGE = 2.0d;
+    public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
     private static final String[] tools = new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
-    private static final float[] toolsSpeed  = new float[]{1.0F, 1.6F, 2.0F, 1.2F, 1.4F};
-    private static final float[] toolsDamage = new float[]{8.0F, 5.0F, 3.0F, 4.0F, 3.0F};
+    private static final float[] toolsSpeed  = new float[]{1.0F, 2.0F, 2.5F, 1.5F, 1.5F};
+    private static final float[] toolsDamage = new float[]{8.0F, 4.0F, 3.0F, 4.0F, 3.0F};
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
-    private static final float[] toolTierDamageBonuses = new float[]{0F, 0F, 1F, 1F, 2F, 3F};
+    private static final float[] toolTierDamageBonuses = new float[]{-1F, 0F, 1F, 1F, 2F, 3F};
 
-    public static float getAxeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[0];}
-    public static float getSwordSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[1];}
-    public static float getHoeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[2];}
-    public static float getPickaxeSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[3];}
-    public static float getShovelSpeedModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[4];}
+    public static float getAxeSpeedModifier() { return toolsSpeed[0] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getSwordSpeedModifier() { return toolsSpeed[1] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getHoeSpeedModifier() { return toolsSpeed[2] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getPickaxeSpeedModifier() { return toolsSpeed[3] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getShovelSpeedModifier() { return toolsSpeed[4] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getAxeDamageModifier() { return toolsDamage[0] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getSwordDamageModifier() { return toolsDamage[1] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getHoeDamageModifier() { return toolsDamage[2] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getPickaxeDamageModifier() { return toolsDamage[3] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getShovelDamageModifier() { return toolsDamage[4] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+
+    public static float getSwordReachModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[4];}
 
     public static void onInitialize() {
         for(int toolIndex = 0; toolIndex < tools.length; toolIndex++) {
             for (int tierIndex = 0; tierIndex < toolTiers.length; tierIndex++) {
                 String name = "minecraft:" + toolTiers[tierIndex] + "_" + tools[toolIndex];
                 float damage = toolsDamage[toolIndex] + toolTierDamageBonuses[tierIndex] - (float)PLAYER_BASE_ATTACK_DAMAGE;
-                float speed = toolsSpeed[toolIndex] - (float)PLAYER_BASE_ATTACK_SPEED;
+                float speed = toolsSpeed[toolIndex] - (float)PLAYER_BASE_ATTACK_SPEED - (tierIndex == 0 ? 0.2f : 0.0f);
                 setAttributes(name, damage, speed);
             }
         }
@@ -77,13 +86,17 @@ public abstract class Combat {
         }
     }
 
+    private static double getCappedAttackSpeedOf(PlayerEntity player) {
+        return Math.min(2.5d, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+    }
+
     public static int getTicksPerAttackOf(PlayerEntity player) {
-        return (int)(20d / player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+        return (int)(20d / Combat.getCappedAttackSpeedOf(player));
     }
 
     public static double getAttackChargeProgress(PlayerEntity player) {
         int lastAttackTicks = ((LivingEntityAccessor)player).getLastAttackedTicks();
-        double attackSpeed = player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED);
+        double attackSpeed = Combat.getCappedAttackSpeedOf(player);
         return (attackSpeed * (double)lastAttackTicks) / 20.0d;
     }
 
@@ -108,11 +121,16 @@ public abstract class Combat {
         return Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
     }
 
+    public static boolean isInAttackRangeOf(PlayerEntity player, Entity target) {
+        double range = Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
+        return player.squaredDistanceTo(target) < range * range;
+    }
+
     public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {
         if(level < 1) return;
 
         player.spawnSweepAttackParticles();
-        player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
+        player.method_48926().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
 
         if(player.method_48926() instanceof ServerWorld serverWorld) {
             attackRange = attackRange - (0.5d * (double)(4 - level));
@@ -159,11 +177,28 @@ public abstract class Combat {
         }
     }
 
-    public static boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
+    public static final boolean isLookingTowardsEntity(LivingEntity looker, LivingEntity target, boolean strict){
+        return Combat.isLookingTowards(looker,new Vec3d(target.getX(), target.getEyeY(), target.getZ()),strict);
+    }
+
+    public static final boolean isLookingTowardsEntity(LivingEntity looker, LivingEntity target, double dotProductThreshold){
+        return Combat.isLookingTowards(looker,new Vec3d(target.getX(), target.getEyeY(), target.getZ()),dotProductThreshold);
+    }
+
+
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
+        return Combat.isLookingTowards(looker,targetPos,false);
+    }
+
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, boolean strict){
+        return Combat.isLookingTowards(looker,targetPos,strict ? -0.75 : -0.5);
+    }
+
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
         if(looker==null || targetPos == null) return false;
         Vec3d rotationVector = looker.getRotationVec(1.0F);
-        Vec3d positionVector = targetPos.relativize(looker.getPos()).normalize();
-        return (positionVector.dotProduct(rotationVector) < -0.5);
+        Vec3d positionVector = targetPos.relativize(looker.getEyePos()).normalize();
+        return (positionVector.dotProduct(rotationVector) < Math.max(1.0, dotProductThreshold));
     }
 
     public static HitResult getHitResultOf(LivingEntity entity, double range) {
@@ -182,7 +217,7 @@ public abstract class Combat {
         double dz = range * Math.cos(yawRadians) * Math.cos(pitchRadians);
         Vec3d direction = new Vec3d(dx, dy, dz);
 
-        World world = entity.world;
+        World world = entity.method_48926();
         Vec3d posStart = entity.getEyePos();
         Vec3d posStop = posStart.add(direction);
 
@@ -195,4 +230,35 @@ public abstract class Combat {
         return (HitResult)hitResult;
     }
 
+    public static Box getMobAttackBox(MobEntity mob, boolean jump) {
+        Entity ridingEntity = mob.getVehicle();
+        Box attackBox;
+        if (ridingEntity != null) {
+            Box box = ridingEntity.getBoundingBox();
+            Box box2 = mob.getBoundingBox();
+            attackBox = new Box(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
+        }
+        else if (mob instanceof EndermanEntity) {
+            attackBox = mob.getBoundingBox().expand(0.5d, mob.getEyeHeight(mob.getPose())/2 + 1d, 0.5d);
+        }
+        else if (jump || !mob.isOnGround()) {
+            attackBox = mob.getBoundingBox().expand(0d, mob.getEyeHeight(mob.getPose())/2 + 0.5d, 0d);
+        }
+        else {
+            attackBox = mob.getBoundingBox().offset(0d, mob.getEyeHeight(mob.getPose())/2, 0d);
+        }
+        double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND));
+        return attackBox.expand(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);
+    }
+
+    public static Box getEntityHitbox(Entity entity) {
+        Box box = entity.getBoundingBox();
+        Entity ridingEntity = entity.getVehicle();
+        if (ridingEntity != null) {
+            Vec3d vec3d = ridingEntity.getPassengerRidingPos(entity);
+            return box.withMinY(Math.max(vec3d.y, box.minY));
+        } else {
+            return box;
+        }
+    }
 }

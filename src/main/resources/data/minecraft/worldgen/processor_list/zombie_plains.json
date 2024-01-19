@@ -63,7 +63,7 @@
             "block": "minecraft:dirt_path"
           },
           "output_state": {
-            "Name": "minecraft:grass_block",
+            "Name": "minecraft:short_grass_block",
             "Properties": {
               "snowy": "false"
             }
@@ -370,7 +370,7 @@
             "probability": 0.8
           },
           "output_state": {
-            "Name": "minecraft:grass"
+            "Name": "minecraft:short_grass"
           }
         }
       ]

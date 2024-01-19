@@ -9,7 +9,4 @@ public class ServerSettings {
     public static void onInitialize() {
 
     }
-
-    public static boolean isTimeFastForwarding = false; // Accessed and modified by mixins in "environment.sleeping"
-
 }

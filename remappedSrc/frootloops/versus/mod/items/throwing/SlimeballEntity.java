@@ -1,6 +1,6 @@
 package frootloops.versus.mod.items.throwing;
 
-import frootloops.versus.mod.ModEntities;
+import frootloops.versus.mod.mobs.ModEntities;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
@@ -54,7 +54,7 @@ public class SlimeballEntity extends ThrownItemEntity {
         if (status == EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES) {
             ParticleEffect particleEffect = this.getParticleParameters();
             for (int i = 0; i < 8; ++i) {
-                this.getWorld().addParticle(particleEffect, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
+                this.method_48926().addParticle(particleEffect, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
             }
         }
     }
@@ -71,8 +71,8 @@ public class SlimeballEntity extends ThrownItemEntity {
     @Override
     protected void onCollision(HitResult hitResult) {
         super.onCollision(hitResult);
-        if (!this.getWorld().isClient) {
-            this.getWorld().sendEntityStatus(this, EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES);
+        if (!this.method_48926().isClient) {
+            this.method_48926().sendEntityStatus(this, EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES);
             this.playSound(SoundEvents.ENTITY_SLIME_JUMP_SMALL, 1f, 1f);
             this.discard();
         }

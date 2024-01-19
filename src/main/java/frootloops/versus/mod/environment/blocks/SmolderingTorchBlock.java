@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment.blocks;
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TorchBlock;
+import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -14,8 +15,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
 public class SmolderingTorchBlock extends TorchBlock {
-    public SmolderingTorchBlock(Settings settings, ParticleEffect particle) {
-        super(settings, particle);
+
+    public SmolderingTorchBlock(DefaultParticleType particle, Settings settings) {
+        super(particle, settings);
     }
 
     public void tickSmolderingTorchDegradation(BlockState state, ServerWorld world, BlockPos pos) {

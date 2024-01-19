@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.players;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,7 +23,7 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_6_HAUNCHES = 128, REGEN_TIME_7_TO_10_HAUNCHES = 64, REGEN_TIME_11_TO_14_HAUNCHES = 48, REGEN_TIME_15_TO_20_HAUNCHES = 40, REGEN_TIME_SATURATION = 32;
+    private static final int REGEN_TIME_6_HAUNCHES = 96, REGEN_TIME_7_TO_10_HAUNCHES = 64, REGEN_TIME_11_TO_14_HAUNCHES = 48, REGEN_TIME_15_TO_20_HAUNCHES = 40, REGEN_TIME_SATURATION = 32;
 
     private static final float MINIMUM_SATURATION_TO_QUICK_HEAL = 4.0f;
 
@@ -63,7 +64,7 @@ public class HungerManagerMixin {
 
         // Saturation regenerates back up to 3 after no activity, when over 3 haunches:
         if (foodLevel > 6) {
-            this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.0025f);
+            this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.001f);
             if (this.exhaustion == -0.01f) {
                 this.exhaustion = 1.0f;
                 this.saturationLevel = Math.min(MINIMUM_SATURATION_TO_QUICK_HEAL - 1f, saturationLevel + 1f);
@@ -80,10 +81,8 @@ public class HungerManagerMixin {
         // Food exhaustion: Faster when the player has saturation, slower otherwise.
         if(exhaustion > 2.0F && (foodLevel < 6 || saturationLevel > 0.0F)){
             exhaustion = 0.0F;
-            if(saturationLevel > 0.0F) saturationLevel = Math.max(0.0F, saturationLevel - 1.0F);
-            else foodLevel--;
-
-        } else if(exhaustion > 8.0F){
+            saturationLevel = Math.max(0.0F, saturationLevel - 1.0F);
+        } else if(exhaustion > 8.0F && (foodLevel > 0)){
             exhaustion = 0.0F;
             foodLevel--;
         }
@@ -114,8 +113,8 @@ public class HungerManagerMixin {
         //  - When exploring, so long as you don't make too many mistakes, hunger won't go down much, either. I want to give incentive for
         //    surviving off of food that you find on your travels, which makes for daunting adventures and mellowing stay home times, for
         //    you to invest in your area and build farms for longer excursions.
-
-        boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
+        float playerHealth = player.getHealth();
+        boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.method_48926().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (canPlayerRegenHealth) {
             foodTickTimer++;
             if(foodLevel > prevFoodLevel) foodTickTimer = Math.max(foodTickTimer, REGEN_TIME_SATURATION);
@@ -124,23 +123,23 @@ public class HungerManagerMixin {
             else if(player.hurtTime > 0) foodTickTimer = -32;
 
             if(foodTickTimer > REGEN_TIME_SATURATION && saturationLevel > MINIMUM_SATURATION_TO_QUICK_HEAL) {
-                foodTickTimer = 0;
-                player.heal(1);
+                player.setHealth((float)Math.ceil(playerHealth) + 1);
                 saturationLevel = Math.max(0.0F, saturationLevel - 1.5F);
+                foodTickTimer = 0;
                 exhaustion = 1.0F;
             }
             else if((foodTickTimer > REGEN_TIME_15_TO_20_HAUNCHES && foodLevel > 14)
                 || (foodTickTimer > REGEN_TIME_11_TO_14_HAUNCHES && foodLevel > 10)
                 || (foodTickTimer > REGEN_TIME_7_TO_10_HAUNCHES && foodLevel > 6)) {
-                foodTickTimer = 0;
-                player.heal(1);
+                player.setHealth((float)Math.ceil(playerHealth) + 1);
                 foodLevel--;
-                exhaustion = 1.0F;
+                foodTickTimer = 0;
+                exhaustion = 0.5F;
             }
             else if(foodTickTimer > REGEN_TIME_6_HAUNCHES && foodLevel == 6){
+                player.setHealth((float)Math.ceil(playerHealth) + 1f);
                 foodTickTimer = 0;
-                player.heal(1);
-                exhaustion += 0.5F;
+                exhaustion += 0.25F;
             }
         }
     }

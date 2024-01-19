@@ -6,6 +6,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.TorchBlock;
 import net.minecraft.block.WallTorchBlock;
+import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -17,8 +18,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
 public class SmolderingWallTorchBlock extends WallTorchBlock {
-    public SmolderingWallTorchBlock(Settings settings, ParticleEffect particle) {
-        super(settings, particle);
+
+    public SmolderingWallTorchBlock(DefaultParticleType defaultParticleType, Settings settings) {
+        super(defaultParticleType, settings);
     }
 
     public void tickSmolderingTorchDegradation(BlockState state, ServerWorld world, BlockPos pos) {

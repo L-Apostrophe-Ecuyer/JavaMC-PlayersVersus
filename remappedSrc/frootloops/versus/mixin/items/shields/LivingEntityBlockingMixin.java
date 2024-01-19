@@ -38,11 +38,11 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     private void blockingSound(byte status, CallbackInfo info) {
         if(status == 29) {
             if(this.activeItemStack.getItem() instanceof SwordItem) {
-                this.playSound(SoundEvents.ITEM_AXE_SCRAPE, 0.3F, 0.6F + this.getWorld().random.nextFloat() * 0.4F);
-                this.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 1.2F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
-                this.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.3F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.ITEM_AXE_SCRAPE, 0.3F, 0.6F + this.method_48926().random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 1.2F, 0.8F + this.method_48926().random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.3F, 0.8F + this.method_48926().random.nextFloat() * 0.4F);
             }
-            else this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
+            else this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.method_48926().random.nextFloat() * 0.4F);
             info.cancel();
         }
     }
@@ -62,23 +62,23 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     @Inject(method = "takeShieldHit", at = @At("TAIL"))
     private void shieldDisablingForMobs(LivingEntity attacker, CallbackInfo ci) {
         if (this.getType() != EntityType.PLAYER) {
-            this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
+            this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.method_48926().random.nextFloat() * 0.4F);
             if (attacker.disablesShield()) {
-                if (this.getWorld() instanceof ServerWorld) {
+                if (this.method_48926() instanceof ServerWorld) {
 
                     // Drop the shield
 
                     ItemStack shieldItemStack = ((LivingEntity) ((Object) this)).getOffHandStack();
-                    ItemEntity itemEntity = new ItemEntity(this.getWorld(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
+                    ItemEntity itemEntity = new ItemEntity(this.method_48926(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
                     itemEntity.setPickupDelay(40);
-                    this.getWorld().spawnEntity(itemEntity);
+                    this.method_48926().spawnEntity(itemEntity);
                     shieldItemStack.setCount(0);
 
                     // Stop blocking
                     this.setPose(EntityPose.STANDING);
                     ((LivingEntity) ((Object) this)).stopUsingItem();
                 }
-                this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.method_48926().random.nextFloat() * 0.4F);
             }
         }
     }
@@ -127,7 +127,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
             ((LivingEntity) ((Object) this)).clearActiveItem();
             if(paryingDamage > 0f) {
                 reflectedDamage += paryingDamage;
-                world.playSound(null, getBlockPos(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, this.getSoundCategory(), 1F, 1F);
+                this.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
             }
         }
 

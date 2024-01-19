@@ -22,7 +22,6 @@
     "environment.archeology.BrushesNotRequiredMixin",
     "environment.archeology.SuspiciousBlocksMixin",
     "environment.sleeping.ServerSleepingMixin",
-    "environment.sleeping.TimePerTickMixin",
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",
     "environment.BlockExplosivityMixin",

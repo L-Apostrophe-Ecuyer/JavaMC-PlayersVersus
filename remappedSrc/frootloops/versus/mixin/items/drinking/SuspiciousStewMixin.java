@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.items.drinking;
 
+import net.minecraft.block.SuspiciousStewIngredient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -11,7 +12,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 @Mixin(SuspiciousStewItem.class)
 public class SuspiciousStewMixin extends Item {
@@ -30,11 +34,6 @@ public class SuspiciousStewMixin extends Item {
         if(user instanceof PlayerEntity player && !player.getInventory().insertStack(emptyBowl))
             player.dropItem(emptyBowl, false);
         cir.setReturnValue(stack);
-    }
-
-    @ModifyVariable(method = "addEffectToStew", at = @At("HEAD"), ordinal = 0)
-    private static int doubleDuration(int duration) {
-        return duration >> 1;
     }
 }
 

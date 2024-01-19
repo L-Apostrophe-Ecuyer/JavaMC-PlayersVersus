@@ -1,9 +1,14 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BrushableBlock;
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -17,6 +22,7 @@ import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,6 +30,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -34,8 +41,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         this.itemCooldownManager = itemCooldownManager;
     }
 
-    @Shadow
-    private final ItemCooldownManager itemCooldownManager;
+    @Shadow private final ItemCooldownManager itemCooldownManager;
+    @Shadow private ItemStack selectedItem;
 
     @Shadow public int totalExperience;
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
@@ -47,12 +54,58 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 .add(EntityAttributes.GENERIC_LUCK));
     }
 
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
+    private boolean switchHeldItemsWithoutResettingCooldown(ItemStack selectedItem, ItemStack itemStack) {
+        if (!ItemStack.areEqual(selectedItem, itemStack)) {
+            this.selectedItem = itemStack.copy();
+        }
+        return false;
+    }
+
     @Inject(method = "getXpToDrop", at = @At("RETURN"), cancellable = true)
     public void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
-        if (this.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+        if (this.method_48926().getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
             cir.setReturnValue(0);
         } else {
             cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1));
+        }
+    }
+
+    @Inject(method = "canHarvest", at = @At("RETURN"), cancellable = true)
+    public void canMineCopperWithWood(BlockState state, CallbackInfoReturnable<Boolean> cir) {
+        if(!cir.getReturnValue() && this.getMainHandStack().isOf(Items.WOODEN_PICKAXE) && (state.getSoundGroup() == BlockSoundGroup.COPPER || state.isOf(Blocks.COPPER_ORE) || state.isOf(Blocks.RAW_COPPER_BLOCK))) cir.setReturnValue(true);
+    }
+
+    @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
+    public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
+        if (!this.isOnGround()) cir.setReturnValue(cir.getReturnValue() * 3f);
+        if(this.getMainHandStack().getItem() instanceof ToolItem toolItem && toolItem.getMaterial() == ToolMaterials.STONE) cir.setReturnValue(cir.getReturnValue() * 1.2f);
+
+        if(blockState.isOf(Blocks.COBWEB)) {
+            cir.setReturnValue(cir.getReturnValue() * 0.75f + 6f);
+            return;
+        }
+
+        if(blockState.getBlock() instanceof ShulkerBoxBlock) {
+            cir.setReturnValue(cir.getReturnValue() + 8f);
+            return;
+        }
+
+        if(blockState.getBlock() instanceof BrushableBlock) {
+            cir.setReturnValue(cir.getReturnValue() - 0.5f);
+            return;
+        }
+
+        if(blockState.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
+            if(this.getMainHandStack().getItem() instanceof PickaxeItem pickaxeItem) {
+                if(pickaxeItem.getMaterial().getMiningLevel() < 2) {
+                    cir.setReturnValue(cir.getReturnValue()/3f);
+                }
+                else if(pickaxeItem.getMaterial().getMiningLevel() >= 4) {
+                    cir.setReturnValue(cir.getReturnValue() * 1.15f);
+                }
+            }
+            return;
         }
     }
 
@@ -132,11 +185,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {
 
         // Attacking while walking backwards deals less knockback:
-        boolean isStillOrWalkingBackwards = (this.onGround && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
-        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0d, 0.5d, 0d));
+        boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
+        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.6d, 0.8d, 0.6d));
 
         // Toss attack and enchantment:
-        if (!this.isSneaking() && this.onGround && this.getMainHandStack().getItem() instanceof ShovelItem) {
+        if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {
             TossingEnchantment.performTossAttack(this, target, 0.2 + 0.1 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
         }
     }

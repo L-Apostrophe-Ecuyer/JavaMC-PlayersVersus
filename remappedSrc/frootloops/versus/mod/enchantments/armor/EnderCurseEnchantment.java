@@ -41,7 +41,7 @@ public class EnderCurseEnchantment extends Enchantment {
     @Override
     public void onUserDamaged(LivingEntity user, Entity attacker, int level) {
         if(attacker instanceof LivingEntity && user != null & user.isAlive()) {
-            if (!user.world.isClient) {
+            if (!user.method_48926().isClient) {
                 user.damage(user.getDamageSources().magic(), 2.0f);
                 if(!user.isAlive())
                     return;
@@ -52,7 +52,7 @@ public class EnderCurseEnchantment extends Enchantment {
                 double f = user.getZ();
                 for (int i = 0; i < 16; ++i) {
                     double g = user.getX() + (user.getRandom().nextDouble() - 0.5) * 16.0;
-                    double h = MathHelper.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), user.world.getBottomY(), user.world.getBottomY() + ((ServerWorld)user.world).getLogicalHeight() - 1);
+                    double h = MathHelper.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), user.method_48926().getBottomY(), user.method_48926().getBottomY() + ((ServerWorld)user.method_48926()).getLogicalHeight() - 1);
                     double j = user.getZ() + (user.getRandom().nextDouble() - 0.5) * 16.0;
                     if (user.hasVehicle()) {
                         user.stopRiding();
@@ -60,8 +60,8 @@ public class EnderCurseEnchantment extends Enchantment {
                     Vec3d vec3d = user.getPos();
                     if (!user.teleport(g, h, j, true)) continue;
 
-                    user.world.emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(user));
-                    user.world.playSound(null, d, e, f, SoundEvents.ENTITY_ENDERMAN_TELEPORT, user.getSoundCategory(), 1.0f, 1.0f);
+                    user.method_48926().emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(user));
+                    user.method_48926().playSound(null, d, e, f, SoundEvents.ENTITY_ENDERMAN_TELEPORT, user.getSoundCategory(), 1.0f, 1.0f);
                     user.playSound(SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
                     user.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, attacker.getEyePos());
                     break;
