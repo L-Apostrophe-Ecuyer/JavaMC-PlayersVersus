@@ -2,14 +2,19 @@ package frootloops.versus.mixin.environment.sleeping;
 
 import frootloops.versus.ServerSettings;
 import frootloops.versus.VersusMod;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.SleepManager;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.World;
@@ -46,13 +51,15 @@ public abstract class ServerSleepingMixin extends World {
 
     @Inject(method = "tick", at = @At(value = "TAIL"))
     public void stopIfPlayerWokeUp(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
+        if(players.size() == 0) return;
+
         long timeOfDay = this.properties.getTimeOfDay();
         if(timeOfDay % 8l != 0) return;
 
         boolean canSleepThroughNight = true;
-        if(timeOfDay > 12999l && timeOfDay < 23300l && players.size() > 0) {
+        if(timeOfDay > 12999l && timeOfDay < 23300l) {
             for (PlayerEntity player : players) {
-                if (player.hurtTime > 0 || player.getSleepTimer() < 40) {
+                if (player.hurtTime > 0 || player.getPose() != EntityPose.SLEEPING) {
                     canSleepThroughNight = false;
                     break;
                 }
@@ -64,8 +71,24 @@ public abstract class ServerSleepingMixin extends World {
 
         // If everyone is asleep, make time go by quick:
         if(canSleepThroughNight) {
-            ServerSettings.isTimeFastForwarding = true;
-            this.setTimeOfDay(this.properties.getTimeOfDay() + 1);
+            // If everyone is asleep, make time go by quick
+            // And make nearby hostiles target players, to test their shelters
+            if(!ServerSettings.isTimeFastForwarding) {
+                ServerSettings.isTimeFastForwarding = true;
+                this.setTimeOfDay(this.properties.getTimeOfDay() + 1);
+
+                for (PlayerEntity player : players) {
+                    Vec3d pos = player.getPos();
+                    Box boundingBox = new Box(pos.x - 32.0, pos.y - 12.0, pos.z - 32.0, pos.x + 32.0, pos.y + 12.0, pos.z + 32.0);
+                    List<HostileEntity> hostilesNearby = this.getEntitiesByClass(HostileEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
+                    for (HostileEntity hostile : hostilesNearby) {
+                        if (hostile.getNavigation().isIdle()) {
+                            if (hostile.getTarget() == null) hostile.setTarget(player);
+                            else hostile.getNavigation().startMovingTo(pos.x, pos.y, pos.z, 1.5);
+                        }
+                    }
+                }
+            }
         }
 
         // Otherwise, wake everyone up:
