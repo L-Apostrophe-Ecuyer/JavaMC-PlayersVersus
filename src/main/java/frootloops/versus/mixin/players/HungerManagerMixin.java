@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -23,9 +22,10 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_6_HAUNCHES = 96, REGEN_TIME_7_TO_10_HAUNCHES = 64, REGEN_TIME_11_TO_14_HAUNCHES = 48, REGEN_TIME_15_TO_20_HAUNCHES = 40, REGEN_TIME_SATURATION = 32;
+    private static final int REGEN_TIME_6_HAUNCHES = 80, REGEN_TIME_7_TO_10_HAUNCHES = 64, REGEN_TIME_11_TO_14_HAUNCHES = 48, REGEN_TIME_15_TO_20_HAUNCHES = 40, REGEN_TIME_SATURATION_SLOW = 32, REGEN_TIME_SATURATION_QUICK = 24;
 
     private static final float MINIMUM_SATURATION_TO_QUICK_HEAL = 4.0f;
+    private static final float MINIMUM_SATURATION_TO_HEAL = 2.0f;
 
     /***
      * @author
@@ -67,7 +67,7 @@ public class HungerManagerMixin {
             this.exhaustion = Math.max(-0.01f, this.exhaustion - 0.001f);
             if (this.exhaustion == -0.01f) {
                 this.exhaustion = 1.0f;
-                this.saturationLevel = Math.min(MINIMUM_SATURATION_TO_QUICK_HEAL - 1f, saturationLevel + 1f);
+                this.saturationLevel = Math.min(MINIMUM_SATURATION_TO_HEAL - 1f, saturationLevel + 1f);
             }
 
         // Food exhaustion: When starving, activities deal damage.
@@ -117,14 +117,20 @@ public class HungerManagerMixin {
         boolean canPlayerRegenHealth = player.canFoodHeal() && (foodLevel > 5) && player.getWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (canPlayerRegenHealth) {
             foodTickTimer++;
-            if(foodLevel > prevFoodLevel) foodTickTimer = Math.max(foodTickTimer, REGEN_TIME_SATURATION);
+            if(foodLevel > prevFoodLevel) foodTickTimer = Math.max(foodTickTimer, REGEN_TIME_SATURATION_QUICK);
             else if(foodLevel == 20) foodTickTimer = Math.max(foodTickTimer, 0);
             else if(player.isOnFire()) foodTickTimer = -8;
             else if(player.hurtTime > 0) foodTickTimer = -32;
 
-            if(foodTickTimer > REGEN_TIME_SATURATION && saturationLevel > MINIMUM_SATURATION_TO_QUICK_HEAL) {
+            if(foodTickTimer > REGEN_TIME_SATURATION_QUICK && saturationLevel > MINIMUM_SATURATION_TO_QUICK_HEAL) {
                 player.setHealth((float)Math.ceil(playerHealth) + 1);
                 saturationLevel = Math.max(0.0F, saturationLevel - 1.5F);
+                foodTickTimer = 0;
+                exhaustion = 1.0F;
+            }
+            else if(foodTickTimer > REGEN_TIME_SATURATION_SLOW && saturationLevel > MINIMUM_SATURATION_TO_HEAL) {
+                player.setHealth((float)Math.ceil(playerHealth) + 1);
+                saturationLevel = Math.max(0.0F, saturationLevel - 1.0F);
                 foodTickTimer = 0;
                 exhaustion = 1.0F;
             }
@@ -139,7 +145,7 @@ public class HungerManagerMixin {
             else if(foodTickTimer > REGEN_TIME_6_HAUNCHES && foodLevel == 6){
                 player.setHealth((float)Math.ceil(playerHealth) + 1f);
                 foodTickTimer = 0;
-                exhaustion += 0.25F;
+                exhaustion += 0.125F;
             }
         }
     }
