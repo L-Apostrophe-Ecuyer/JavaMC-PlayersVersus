@@ -35,9 +35,9 @@ public abstract class LightmapMixin {
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/LightmapTextureManager;getBrightness(Lnet/minecraft/world/dimension/DimensionType;I)F"))
     private float getBrightness(DimensionType type, int lightLevel) {
-        float f = (float)lightLevel / 14.0f;
-        float ambientLight = this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION) ? type.ambientLight() + 0.1f : type.ambientLight() - 0.02f;
-        return MathHelper.lerp(ambientLight, f / (4.0f - 3.0f * f), 1.5f);
+        float lightPercent = (float)lightLevel/32f + (float)(lightLevel + 6f)/ 32.0f;
+        float ambientLight = this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION) ? type.ambientLight() + 0.065f : type.ambientLight() - 0.05f;
+        return MathHelper.lerp(ambientLight, lightPercent / (4.0f - 3.0f * lightPercent), 1.5f);
     }
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getSkyBrightness(F)F"))

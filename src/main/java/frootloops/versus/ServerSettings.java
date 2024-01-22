@@ -9,4 +9,6 @@ public class ServerSettings {
     public static void onInitialize() {
 
     }
+
+    public static boolean CAN_GENERATE_AQUIFERS_ABOVEGROUND = false;
 }
