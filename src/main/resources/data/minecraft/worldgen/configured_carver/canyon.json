@@ -1,14 +1,14 @@
 {
   "type": "minecraft:canyon",
   "config": {
-    "probability": 0.015,
+    "probability": 0.01,
     "y": {
       "type": "minecraft:uniform",
       "min_inclusive": {
-        "above_bottom": 12
+        "above_bottom": 48
       },
       "max_inclusive": {
-        "above_bottom": 32
+        "above_bottom": 64
       }
     },
     "yScale": 1,
