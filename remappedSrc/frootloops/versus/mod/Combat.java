@@ -33,6 +33,8 @@ import java.util.List;
 
 public abstract class Combat {
 
+    public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
+
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;

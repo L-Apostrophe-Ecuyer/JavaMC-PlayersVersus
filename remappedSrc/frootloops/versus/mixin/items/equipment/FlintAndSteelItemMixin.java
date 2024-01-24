@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(FlintAndSteelItem.class)
 public abstract class FlintAndSteelItemMixin extends Item {
 
-    public FlintAndSteelItemMixin(Settings settings) {
+    public FlintAndSteelItemMixin(net.minecraft.item.Item.Settings settings) {
         super(settings);
     }
 

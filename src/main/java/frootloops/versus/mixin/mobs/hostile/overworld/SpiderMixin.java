@@ -77,9 +77,8 @@ public class SpiderMixin extends HostileEntity {
         }
         if (entityData instanceof SpiderEntity.SpiderData) {
             SpiderEntity.SpiderData spiderData = (SpiderEntity.SpiderData)entityData;
-            StatusEffect statusEffect = spiderData.effect;
-            if (statusEffect != null) {
-                this.addStatusEffect(new StatusEffectInstance(statusEffect, -1));
+            if (spiderData.effect.hasKeyAndValue()) {
+                this.addStatusEffect(new StatusEffectInstance(spiderData.effect, -1));
             }
         }
 
@@ -179,11 +178,6 @@ public class SpiderMixin extends HostileEntity {
     @Override
     public float getScaleFactor() {
         return this.isBaby() ? 0.85F : 1.3F;
-    }
-
-    @Override
-    public float getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions) {
-        return 0.65F * this.getScaleFactor();
     }
 
     @Override

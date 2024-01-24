@@ -24,7 +24,7 @@ public class HoeItemMixin extends ToolItem {
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING, stack);
+        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack);
         return sweepLevel > 0 ? UseAction.BRUSH : UseAction.NONE;
     }
 
@@ -33,7 +33,7 @@ public class HoeItemMixin extends ToolItem {
         if(!context.getPlayer().isSneaking()) {
             ItemStack stack = context.getStack();
             PlayerEntity user = context.getPlayer();
-            int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING, stack);
+            int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack);
             if(sweepLevel > 0) {
                 double attackCharge = Combat.getAttackChargeProgress(user);
                 double attackChargeRequired = 1d + 0.2d * (3 - sweepLevel);
@@ -48,7 +48,7 @@ public class HoeItemMixin extends ToolItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING, stack);
+        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack);
         if(sweepLevel > 0) {
             double attackCharge = Combat.getAttackChargeProgress(user);
             double attackChargeRequired = 1d + 0.2d * (3 - sweepLevel);
@@ -68,7 +68,7 @@ public class HoeItemMixin extends ToolItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if((EnchantmentHelper.getLevel(Enchantments.SWEEPING, stack) > 0)) {
+        if((EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack) > 0)) {
             if (user instanceof PlayerEntity player) player.resetLastAttackedTicks();
             else user.onAttacking(user.getAttacking());
         }

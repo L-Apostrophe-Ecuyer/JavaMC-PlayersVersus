@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(SwordItem.class)
 public class SwordItemMixin extends ToolItem {
-    public SwordItemMixin(ToolMaterial material, Settings settings) {
+    public SwordItemMixin(ToolMaterial material, net.minecraft.item.Item.Settings settings) {
         super(material, settings);
     }
 

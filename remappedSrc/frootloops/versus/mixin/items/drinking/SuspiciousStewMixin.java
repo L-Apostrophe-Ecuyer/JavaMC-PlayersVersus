@@ -19,7 +19,7 @@ import java.util.List;
 
 @Mixin(SuspiciousStewItem.class)
 public class SuspiciousStewMixin extends Item {
-    public SuspiciousStewMixin(Settings settings) {
+    public SuspiciousStewMixin(net.minecraft.item.Item.Settings settings) {
         super(settings);
     }
 

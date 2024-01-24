@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(HoeItem.class)
 public class HoeItemMixin extends ToolItem {
-    public HoeItemMixin(ToolMaterial material, Settings settings) {
+    public HoeItemMixin(ToolMaterial material, net.minecraft.item.Item.Settings settings) {
         super(material, settings);
     }
 

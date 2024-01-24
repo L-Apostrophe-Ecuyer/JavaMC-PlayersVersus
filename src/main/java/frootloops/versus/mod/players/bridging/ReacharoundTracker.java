@@ -37,7 +37,7 @@ public class ReacharoundTracker {
         Pair<Vec3d, Vec3d> rayDetails = RayTraceHandler.getEntityParams(player);
         World world = player.getWorld();
 
-        double range = RayTraceHandler.getEntityRange(player);
+        double range = player.getEntityInteractionRange();
         Vec3d rayPos = rayDetails.getLeft();
         Vec3d ray = rayDetails.getRight().multiply(range);
 

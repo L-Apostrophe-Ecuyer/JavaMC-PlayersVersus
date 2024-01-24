@@ -42,9 +42,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
         if (amount >= 3.0F) {
             int i = 1 + MathHelper.floor(amount);
             Hand hand = this.getActiveHand();
-            this.activeItemStack.damage(i, this, (player) -> {
-                player.sendToolBreakStatus(hand);
-            });
+            this.activeItemStack.damage(i, this, LivingEntity.getSlotForHand(hand));
             if (this.activeItemStack.isEmpty()) {
                 if (hand == Hand.MAIN_HAND) {
                     this.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
@@ -61,12 +59,12 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
 
     @Inject(method = "takeShieldHit", at = @At(value = "HEAD"), cancellable = false)
     protected void takeShieldHitMixin(LivingEntity attacker, CallbackInfo info) {
-        if (activeItemStack.getItem() instanceof SwordItem)  ((PlayerEntity)((Object)this)).disableShield(true);
+        if (activeItemStack.getItem() instanceof SwordItem)  ((PlayerEntity)((Object)this)).disableShield();
 
     }
 
     @Inject(method = "disableShield", at = @At(value = "HEAD"), cancellable = true)
-    private void disableShieldMixin(boolean sprinting, CallbackInfo info) {
+    private void disableShieldMixin(CallbackInfo info) {
 
         int disableForTicks = 40;
         if(this.getAttacker() != null)

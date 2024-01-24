@@ -17,10 +17,10 @@ public class ZombieSoundListener {
     public static void OnGameEvent(ServerWorld serverWorld, GameEvent event, Vec3d emitterPos, GameEvent.Emitter emitter) {
 
         // Optimization for walking:
-        if(event == GameEvent.STEP && serverWorld.getTime() % 10 != 0) return;
+        if(event == GameEvent.STEP.value() && serverWorld.getTime() % 10 != 0) return;
 
         // If the sound comes from an entity, skip if the entity is sneaking or on wool:
-        boolean heardProjectileLanding = (event == GameEvent.PROJECTILE_LAND);
+        boolean heardProjectileLanding = (event == GameEvent.PROJECTILE_LAND.value());
         boolean heardPlayerSprinting = false;
         PlayerEntity player = null;
         if(emitter.sourceEntity() != null) {
@@ -37,7 +37,7 @@ public class ZombieSoundListener {
             }
 
             // For consistency with wool occlusion and sneaking mechanics:
-            if (event == GameEvent.STEP || event == GameEvent.HIT_GROUND) {
+            if (event == GameEvent.STEP.value() || event == GameEvent.HIT_GROUND.value()) {
                 if (emitter.sourceEntity().bypassesSteppingEffects()) return; // Sneaking
                 if (emitter.affectedState() != null && emitter.affectedState().isIn(BlockTags.DAMPENS_VIBRATIONS)) return; // Walking on wool
                 heardPlayerSprinting = emitter.sourceEntity().isSprinting();
@@ -47,8 +47,8 @@ public class ZombieSoundListener {
 
 
         // How much zombies should be attracted to the sound:
-        boolean isHighPriority = (heardProjectileLanding || event == GameEvent.DRINK || event == GameEvent.EAT);
-        boolean isPriority = !isHighPriority && (heardPlayerSprinting || event == GameEvent.ENTITY_DAMAGE || event == GameEvent.BLOCK_DESTROY);
+        boolean isHighPriority = (heardProjectileLanding || event == GameEvent.DRINK.value() || event == GameEvent.EAT.value());
+        boolean isPriority = !isHighPriority && (heardPlayerSprinting || event == GameEvent.ENTITY_DAMAGE.value() || event == GameEvent.BLOCK_DESTROY.value());
         double range = isHighPriority ? 32d : isPriority? 24d : 12d;
         double speedMultiplier = isHighPriority ? 1.3d : isPriority ? 1.2d : 0.9d;
         if(!isPriority && !isHighPriority && serverWorld.getTime() % 2 != 0) return; // Optimization: chance for zombies to ignore certain sounds/events

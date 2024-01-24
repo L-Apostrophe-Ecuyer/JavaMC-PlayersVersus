@@ -27,7 +27,7 @@ public class KnifeItem extends SwordItem {
     @Override
     public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
         if (!world.isClient && !state.isIn(BlockTags.FIRE)) {
-            stack.damage(1, miner, e -> e.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND));
+            stack.damage(2, miner, EquipmentSlot.MAINHAND);
         }
         if (state.isIn(BlockTags.LEAVES) || state.isOf(Blocks.COBWEB) || state.isOf(Blocks.SHORT_GRASS) || state.isOf(Blocks.FERN) || state.isOf(Blocks.DEAD_BUSH) || state.isOf(Blocks.HANGING_ROOTS) || state.isOf(Blocks.VINE) || state.isOf(Blocks.TRIPWIRE) || state.isIn(BlockTags.WOOL)) {
             return true;
@@ -74,7 +74,7 @@ public class KnifeItem extends SwordItem {
             BlockState blockState2 = abstractPlantStemBlock.withMaxAge(blockState);
             world.setBlockState(blockPos, blockState2);
             world.emitGameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Emitter.of(context.getPlayer(), blockState2));
-            if (playerEntity != null) itemStack.damage(1, playerEntity, player -> player.sendToolBreakStatus(context.getHand()));
+            if (playerEntity != null) itemStack.damage(1, playerEntity, LivingEntity.getSlotForHand(context.getHand()));
             return ActionResult.success(world.isClient);
         }
 
@@ -94,7 +94,7 @@ public class KnifeItem extends SwordItem {
             ItemEntity itemEntity = new ItemEntity(world, (double)blockPos.getX() + 0.5 + (double)direction2.getOffsetX() * 0.65, (double)blockPos.getY() + 0.1, (double)blockPos.getZ() + 0.5 + (double)direction2.getOffsetZ() * 0.65, new ItemStack(Items.PUMPKIN_SEEDS, 4));
             itemEntity.setVelocity(0.05 * (double)direction2.getOffsetX() + world.random.nextDouble() * 0.02, 0.05, 0.05 * (double)direction2.getOffsetZ() + world.random.nextDouble() * 0.02);
             world.spawnEntity(itemEntity);
-            itemStack.damage(1, playerEntity, player -> player.sendToolBreakStatus(context.getHand()));
+            itemStack.damage(1, playerEntity, LivingEntity.getSlotForHand(context.getHand()));
             world.emitGameEvent((Entity)playerEntity, GameEvent.SHEAR, blockPos);
             playerEntity.incrementStat(Stats.USED.getOrCreateStat(Items.SHEARS));
         }

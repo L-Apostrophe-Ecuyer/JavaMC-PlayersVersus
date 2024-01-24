@@ -1,16 +1,19 @@
 package frootloops.versus.mod.enchantments.tools;
 
 import net.minecraft.enchantment.DamageEnchantment;
-import net.minecraft.entity.EntityGroup;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 
+import java.util.Optional;
+
 
 public class CleavingEnchantment extends DamageEnchantment {
 
+
     public CleavingEnchantment() {
-        super(Rarity.COMMON, 0, EquipmentSlot.MAINHAND);
+        super(Rarity.UNCOMMON, 15, 11, 20, Optional.empty(), new EquipmentSlot[]{EquipmentSlot.MAINHAND});
     }
 
     @Override
@@ -34,7 +37,7 @@ public class CleavingEnchantment extends DamageEnchantment {
     }
 
     @Override
-    public float getAttackDamage(int level, EntityGroup group) {
+    public float getAttackDamage(int level, EntityType type) {
         return  1F + (float)(level)/2F;
     }
 }

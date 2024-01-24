@@ -3,12 +3,15 @@ package frootloops.versus.mixin.enchantments.tools;
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.*;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.registry.tag.TagKey;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(LuckEnchantment.class)
 public class LuckMixin extends Enchantment {
-    protected LuckMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
-        super(weight, type, slotTypes);
+
+    protected LuckMixin(Rarity rarity, TagKey<Item> applicableItems, EquipmentSlot[] slotTypes) {
+        super(rarity, applicableItems, slotTypes);
     }
 
     @Override
@@ -33,14 +36,12 @@ public class LuckMixin extends Enchantment {
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        if (this.target == EnchantmentTarget.FISHING_ROD){
-            return (stack.getItem() instanceof FishingRodItem);
-        }
-        else if (this.target == EnchantmentTarget.WEAPON){
+        TagKey<Item> applicableItems = this.getApplicableItems();
+        if (applicableItems == ItemTags.SWORD_ENCHANTABLE){
             return (stack.getItem() instanceof AxeItem || stack.getItem() instanceof HoeItem || stack.getItem() instanceof TridentItem);
         }
         else {
-            return (stack.getItem() instanceof ShovelItem || stack.getItem() instanceof HoeItem || stack.getItem() instanceof PickaxeItem);
+            return super.isAcceptableItem(stack);
         }
     }
 }

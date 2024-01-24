@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 public class RayTraceHandler {
 
     public static HitResult rayTrace(Entity entity, World world, PlayerEntity player, RaycastContext.ShapeType blockMode, RaycastContext.FluidHandling fluidMode) {
-        return rayTrace(entity, world, player, blockMode, fluidMode, getEntityRange(player));
+        return rayTrace(entity, world, player, blockMode, fluidMode, player.getBlockInteractionRange());
     }
 
     public static HitResult rayTrace(Entity entity, World world, Entity player, RaycastContext.ShapeType blockMode, RaycastContext.FluidHandling fluidMode, double range) {
@@ -33,21 +33,6 @@ public class RayTraceHandler {
         RaycastContext context = new RaycastContext(startPos, endPos, blockMode, fluidMode, entity);
 
         return world.raycast(context);
-    }
-
-    /**
-     * Gets the maximum place distance for a given player.
-     * @param player the player to check
-     * @return the distance at which the player can place.
-     */
-    public static double getEntityRange(PlayerEntity player) {
-        if(player.getWorld().isClient) {
-            MinecraftClient cli = MinecraftClient.getInstance();
-            ClientPlayerInteractionManager interact = cli.interactionManager;
-            if (interact != null)
-                return interact.getReachDistance();
-        }
-        return 4.5d;
     }
 
     /**

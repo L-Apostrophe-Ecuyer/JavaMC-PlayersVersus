@@ -35,12 +35,4 @@ public abstract class SuspiciousBlocksMixin extends BlockEntity {
 
     @ModifyConstant(method = "brush", constant = @Constant(longValue = 10L))
     private long immediateFeedback(long tickDelayAfterUpdate) {return 1L;}
-
-    @ModifyConstant(method = "brush", constant = @Constant(intValue = 40))
-    private int immediateFeedbackTwo(int tickDelayToUpdateAfterBrushing) {return 1;}
-
-    @ModifyConstant(method = "scheduledTick", constant = @Constant(longValue = 4L))
-    private long immediateFeedbackThree(long tickDelayAfterUpdate) {
-        return 1L;
-    }
 }

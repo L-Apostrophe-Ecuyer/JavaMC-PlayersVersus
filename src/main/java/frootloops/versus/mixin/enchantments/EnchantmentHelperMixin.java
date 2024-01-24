@@ -1,13 +1,11 @@
 package frootloops.versus.mixin.enchantments;
 
 import com.google.common.collect.Lists;
-import frootloops.versus.VersusMod;
 import net.minecraft.enchantment.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.collection.Weighting;
 import net.minecraft.util.math.MathHelper;

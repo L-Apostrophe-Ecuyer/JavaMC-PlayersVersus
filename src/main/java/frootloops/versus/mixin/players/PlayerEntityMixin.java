@@ -21,6 +21,7 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.world.GameRules;
@@ -46,6 +47,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow private ItemStack selectedItem;
 
     @Shadow public int totalExperience;
+
+    @Overwrite
+    public double getEntityInteractionRange() {
+        return Combat.getAttackRange((PlayerEntity) ((Object)this));
+    }
 
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
@@ -138,7 +144,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
             ItemStack helmet = this.getEquippedStack(EquipmentSlot.HEAD);
             if(helmet != null) {
-                Multimap<EntityAttribute, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);
+                Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);
 
                 float armorAmount = 0.0f;
                 for (EntityAttributeModifier modifier:helmetAttributeModifiers.get(EntityAttributes.GENERIC_ARMOR))

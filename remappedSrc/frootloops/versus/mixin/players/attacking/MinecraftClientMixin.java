@@ -54,12 +54,12 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     private void holdToAttack(boolean bl, CallbackInfo ci) {
         boolean tryAttacking = false;
         double attackChargeProgress = Combat.getAttackChargeProgress(player);
-        if(attackChargeProgress > 0.75d) {
+        if(attackChargeProgress > Combat.MIN_COOLDOWN_TO_SWING) {
             if (options.attackKey.isPressed() && ClientSettings.CAN_HOLD_TO_ATTACK) {
                 ticksAttackKeyPressed++;
 
                 // If the cooldown is complete, swing:
-                if (ticksAttackKeyPressed >= 1 && ticksAttackKeyPressed >= Combat.getTicksPerAttackOf(player))
+                if (ticksAttackKeyPressed > 1 && ticksAttackKeyPressed >= Combat.getTicksPerAttackOf(player))
                     tryAttacking = true;
 
                 // Otherwise, if at some point we can attack something, we do:
@@ -94,15 +94,15 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         this.ticksAttackKeyPressed = 0;
         double attackProgress =  Combat.getAttackChargeProgress(player);
         double attackRange = Combat.getAttackRange(player, attackProgress);
-        boolean canAttackEntities = attackProgress > 0.5;
+        boolean canAttackEntities = attackProgress > Combat.MIN_COOLDOWN_TO_SWING;
 
         if(ClientSettings.CAN_AIM_ASSIST && canAttackEntities) {
-            if(this.crosshairTarget.getType() != ENTITY && attackProgress < 3.0 && prevTargettedEntity != null) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
+            if(this.crosshairTarget.getType() != ENTITY && attackProgress < 4.0 && prevTargettedEntity != null) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
             if(this.crosshairTarget.getType() != ENTITY && player.getAttacker() != null) attemptToAimAssistTarget(player.getAttacker(), attackRange);
             if(this.crosshairTarget.getType() != ENTITY) prevTargettedEntity = null;
         }
 
-        boolean resetAttackCooldown = false;
+        boolean breakingBlock = false;
         boolean missedSwing = true;
         switch (this.crosshairTarget.getType()) {
             case ENTITY: {
@@ -120,7 +120,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 interactionManager.attackBlock(pos, blockHitResult.getSide());
                 if(isMineableBlock(pos, this.world.getBlockState(pos))) {
                     missedSwing = false;
-                    resetAttackCooldown = true;
+                    breakingBlock = true;
                     break;
                 }
                 // Tweaked code from Rongmario's Clean Cut:
@@ -141,14 +141,14 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 break;
             }
         }
-        if(missedSwing) {
+        if(missedSwing && canAttackEntities) {
             if (!interactionManager.hasLimitedAttackSpeed()) this.attackCooldown = 1;
             else this.attackCooldown = 5;
             this.player.resetLastAttackedTicks();
         }
 
-        this.player.swingHand(Hand.MAIN_HAND);
-        cir.setReturnValue(resetAttackCooldown);
+        if(canAttackEntities || breakingBlock) this.player.swingHand(Hand.MAIN_HAND);
+        cir.setReturnValue(breakingBlock);
         cir.cancel();
     }
 

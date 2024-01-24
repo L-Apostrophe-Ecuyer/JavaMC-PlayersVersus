@@ -27,6 +27,7 @@ import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 import net.minecraft.recipe.BrewingRecipeRegistry;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.StructureTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
@@ -150,7 +151,7 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.TUBE_CORAL_BLOCK, 1, 1, 15),
                                 new BuyForOneEmeraldFactory(Items.TROPICAL_FISH, 4, 16, 15)},
                         4, new Factory[]{
-                                new SellItemFactory(Items.SCUTE, 16, 1, 15),
+                                new SellItemFactory(Items.TURTLE_SCUTE, 16, 1, 15),
                                 new SellItemFactory(Items.PRISMARINE_SHARD, 1, 2, 15),
                                 new SellItemFactory(Items.PRISMARINE_CRYSTALS, 1, 3, 15),
                                 new BuyForMutlipleEmeraldsFactory(Items.PUFFERFISH, 3, 16, 15)},
@@ -289,7 +290,7 @@ public class RevampedTradeOffers {
                                         VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.LURE, 3))).build()),
                                 new TypeAwareSellItemFactory(18, 1, 3, 14, ImmutableMap.builder().put(
                                         VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SMITE, 2))).put(
-                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SWEEPING, 2))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SWEEPING_EDGE, 2))).put(
                                         VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.FROST_ASPECT, 1))).put(
                                         VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FLAME, 1))).put(
                                         VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PIERCING, 3))).put(
@@ -768,7 +769,7 @@ public class RevampedTradeOffers {
         final int experience;
         private final float multiplier;
 
-        public SellSuspiciousStewFactory(StatusEffect effect, int duration, int experience) {
+        public SellSuspiciousStewFactory(RegistryEntry<StatusEffect> effect, int duration, int experience) {
             this.stewEffects.add(new SuspiciousStewIngredient.StewEffect(effect, duration));
             this.duration = duration;
             this.experience = experience;
@@ -909,9 +910,9 @@ public class RevampedTradeOffers {
         @Override
         public TradeOffer create(Entity entity, Random random) {
             ItemStack itemStack = new ItemStack(Items.EMERALD, this.price);
-            List list = Registries.POTION.stream().filter(potion -> !potion.getEffects().isEmpty() && BrewingRecipeRegistry.isBrewable(potion)).collect(Collectors.toList());
-            Potion potion2 = (Potion)list.get(random.nextInt(list.size()));
-            ItemStack itemStack2 = PotionUtil.setPotion(new ItemStack(this.sell.getItem(), this.sellCount), potion2);
+            List list = Registries.POTION.streamEntries().filter(potion -> !((Potion)potion.value()).getEffects().isEmpty() && BrewingRecipeRegistry.isBrewable(potion)).collect(Collectors.toList());
+            RegistryEntry registryEntry = (RegistryEntry)Util.getRandom(list, random);
+            ItemStack itemStack2 = PotionUtil.setPotion(new ItemStack(this.sell.getItem(), this.sellCount), registryEntry);
             return new TradeOffer(itemStack, new ItemStack(this.secondBuy, this.secondCount), itemStack2, this.maxUses, this.experience, this.priceMultiplier);
         }
     }

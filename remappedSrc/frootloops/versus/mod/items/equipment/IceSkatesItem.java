@@ -5,7 +5,7 @@ import net.minecraft.item.ArmorMaterial;
 
 public class IceSkatesItem extends ArmorItem {
 
-    public IceSkatesItem(ArmorMaterial material, Type type, Settings settings) {
+    public IceSkatesItem(ArmorMaterial material, Type type, net.minecraft.item.Item.Settings settings) {
         super(material, type, settings);
     }
 }

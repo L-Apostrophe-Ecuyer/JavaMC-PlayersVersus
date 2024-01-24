@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MilkBucketItem.class)
 public class MilkBucketMixin extends Item {
-    public MilkBucketMixin(Settings settings) {
+    public MilkBucketMixin(net.minecraft.item.Item.Settings settings) {
         super(settings);
     }
     @Override

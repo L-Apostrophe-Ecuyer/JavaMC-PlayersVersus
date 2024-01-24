@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(StewItem.class)
 public class StewMixin extends Item {
-    public StewMixin(Settings settings) {
+    public StewMixin(net.minecraft.item.Item.Settings settings) {
         super(settings);
     }
 

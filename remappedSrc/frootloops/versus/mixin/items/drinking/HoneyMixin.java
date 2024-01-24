@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(HoneyBottleItem.class)
 public class HoneyMixin extends Item {
-    public HoneyMixin(Settings settings) {
+    public HoneyMixin(net.minecraft.item.Item.Settings settings) {
         super(settings);
     }
 

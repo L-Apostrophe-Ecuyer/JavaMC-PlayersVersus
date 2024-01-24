@@ -11,7 +11,7 @@ import java.util.List;
 
 @Mixin(PotionItem.class)
 public class PotionMixin extends Item {
-    public PotionMixin(Settings settings) {
+    public PotionMixin(net.minecraft.item.Item.Settings settings) {
         super(settings);
     }
 

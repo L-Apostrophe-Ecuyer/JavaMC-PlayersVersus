@@ -1,19 +1,21 @@
 package frootloops.versus.mod.enchantments.tools;
 
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShovelItem;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.sound.SoundEvents;
+
+import java.util.Optional;
 
 
 public class TossingEnchantment extends Enchantment {
     public TossingEnchantment() {
-        super(Rarity.COMMON, EnchantmentTarget.WEAPON, new EquipmentSlot[] {EquipmentSlot.MAINHAND});
+        super(Rarity.COMMON, ItemTags.SHOVELS, new EquipmentSlot[] {EquipmentSlot.MAINHAND});
     }
 
     @Override

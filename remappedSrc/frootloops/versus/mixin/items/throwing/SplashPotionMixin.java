@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SplashPotionItem.class)
 public class SplashPotionMixin extends Item {
-    public SplashPotionMixin(Settings settings) {
+    public SplashPotionMixin(net.minecraft.item.Item.Settings settings) {
         super(settings);
     }
 
