@@ -34,7 +34,7 @@ import java.util.UUID;
 
 public abstract class Combat {
 
-    protected static final UUID ATTACK_REACH_MODIFIER_ID = UUID.fromString("NTTREACH-0526-0706-0505-BCCE9785ACA3");
+    protected static final UUID ATTACK_REACH_MODIFIER_ID = UUID.fromString("159ff4d0-df5c-4ce3-a2a6-88bd7b4c60f2");
 
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
 

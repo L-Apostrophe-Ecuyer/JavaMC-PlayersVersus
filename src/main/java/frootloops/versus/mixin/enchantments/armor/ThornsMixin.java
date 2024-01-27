@@ -27,4 +27,10 @@ public class ThornsMixin extends Enchantment {
         if (stack.getItem() instanceof ArmorItem && !((ArmorItem)stack.getItem()).getSlotType().equals(EquipmentSlot.CHEST))
             cir.setReturnValue(false);
     }
+
+    @Override
+    public boolean isAcceptableItem(ItemStack stack) {
+        if (stack.getItem() instanceof ShieldItem) return true;
+        return super.isAcceptableItem(stack);
+    }
 }

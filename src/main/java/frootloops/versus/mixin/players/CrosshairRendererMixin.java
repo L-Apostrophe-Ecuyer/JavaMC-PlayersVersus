@@ -25,9 +25,6 @@ public class CrosshairRendererMixin {
     private final MinecraftClient client;
 
     @Shadow
-    private int scaledWidth,scaledHeight;
-
-    @Shadow
     private final DebugHud debugHud;
 
     @Shadow private static final Identifier CROSSHAIR_TEXTURE = new Identifier("hud/crosshair");
@@ -40,13 +37,11 @@ public class CrosshairRendererMixin {
     private boolean shouldRenderSpectatorCrosshair(HitResult hitResult) {return false;}
     public CrosshairRendererMixin(MinecraftClient client, int scaledWidth, int scaledHeight, DebugHud debugHud) {
         this.client = client;
-        this.scaledWidth = scaledWidth;
-        this.scaledHeight = scaledHeight;
         this.debugHud = debugHud;
     }
 
     @Overwrite
-    private void renderCrosshair(DrawContext context) {
+    private void renderCrosshair(DrawContext context, float tickDelta) {
         GameOptions gameOptions = this.client.options;
         if (gameOptions.getPerspective().isFirstPerson()) {
             if (this.client.interactionManager.getCurrentGameMode() != GameMode.SPECTATOR || this.shouldRenderSpectatorCrosshair(this.client.crosshairTarget)) {
@@ -57,7 +52,7 @@ public class CrosshairRendererMixin {
                     MatrixStack matrixStack = RenderSystem.getModelViewStack();
                     matrixStack.push();
                     matrixStack.multiplyPositionMatrix(context.getMatrices().peek().getPositionMatrix());
-                    matrixStack.translate((float)(this.scaledWidth / 2), (float)(this.scaledHeight / 2), 0.0F);
+                    matrixStack.translate((float)(context.getScaledWindowWidth() / 2), (float)(context.getScaledWindowHeight() / 2), 0.0F);
                     matrixStack.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(camera.getPitch()));
                     matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw()));
                     matrixStack.scale(-1.0F, -1.0F, -1.0F);
@@ -73,12 +68,13 @@ public class CrosshairRendererMixin {
                     // This is the code that makes the crosshair's size depend on the attack cooldown:
                     float attackCooldownProgress = this.client.player.getAttackCooldownProgress(-1.0F);
                     int crosshairSize = 1 + 2 * (int)(7f * attackCooldownProgress);
-                    context.drawGuiTexture(CROSSHAIR_TEXTURE, (this.scaledWidth - crosshairSize) / 2, (this.scaledHeight - crosshairSize) / 2, crosshairSize, crosshairSize);
+                    context.drawGuiTexture(CROSSHAIR_TEXTURE, (context.getScaledWindowWidth() - crosshairSize) / 2, (context.getScaledWindowHeight() - crosshairSize) / 2, crosshairSize, crosshairSize);
+
 
                     // This is the code to make sure the attack indicator only shows when a target can be hit:
                     if(this.client.targetedEntity != null && Combat.isInAttackRangeOf(client.player, client.targetedEntity)) {
-                        int j = this.scaledHeight / 2 - 7 + 16;
-                        int k = this.scaledWidth / 2 - 8;
+                        int j = context.getScaledWindowHeight() / 2 - 7 + 16;
+                        int k = context.getScaledWindowHeight()/ 2 - 8;
                         if (attackCooldownProgress >= 1.0F) {
                             context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_FULL_TEXTURE, k, j, 16, 16);
                         } else {
@@ -91,6 +87,7 @@ public class CrosshairRendererMixin {
                     //if(ReacharoundTracker.currentTarget != null) this.drawExtraCrosshairIcon(matrices);
                     RenderSystem.defaultBlendFunc();
                 }
+                RenderSystem.disableBlend();
             }
         }
     }
