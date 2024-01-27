@@ -36,6 +36,9 @@ public abstract class Combat {
 
     protected static final UUID ATTACK_REACH_MODIFIER_ID = UUID.fromString("NTTREACH-0526-0706-0505-BCCE9785ACA3");
 
+    public static boolean CAN_HOLD_TO_ATTACK = true;
+    public static boolean CAN_AIM_ASSIST = true;
+
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
