@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.players.attacking;
 
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
-import frootloops.versus.ClientSettings;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -55,7 +55,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean tryAttacking = false;
         double attackChargeProgress = Combat.getAttackChargeProgress(player);
         if(attackChargeProgress > Combat.MIN_COOLDOWN_TO_SWING) {
-            if (options.attackKey.isPressed() && ClientSettings.CAN_HOLD_TO_ATTACK) {
+            if (options.attackKey.isPressed() && VersusSettings.CAN_HOLD_TO_ATTACK) {
                 ticksAttackKeyPressed++;
 
                 // If the cooldown is complete, swing:
@@ -96,7 +96,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         double attackRange = Combat.getAttackRange(player, attackProgress);
         boolean canAttackEntities = attackProgress > Combat.MIN_COOLDOWN_TO_SWING;
 
-        if(ClientSettings.CAN_AIM_ASSIST && canAttackEntities) {
+        if(VersusSettings.CAN_AIM_ASSIST && canAttackEntities) {
             if(this.crosshairTarget.getType() != ENTITY && attackProgress < 4.0 && prevTargettedEntity != null) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
             if(this.crosshairTarget.getType() != ENTITY && player.getAttacker() != null) attemptToAimAssistTarget(player.getAttacker(), attackRange);
             if(this.crosshairTarget.getType() != ENTITY) prevTargettedEntity = null;

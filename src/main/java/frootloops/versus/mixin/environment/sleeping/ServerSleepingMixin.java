@@ -1,12 +1,8 @@
 package frootloops.versus.mixin.environment.sleeping;
 
-import frootloops.versus.ServerSettings;
-import frootloops.versus.VersusMod;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.DynamicRegistryManager;
