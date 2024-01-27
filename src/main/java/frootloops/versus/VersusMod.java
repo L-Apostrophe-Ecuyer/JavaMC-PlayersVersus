@@ -41,9 +41,6 @@ public class VersusMod implements ModInitializer {
 		MOD_LOGGER.info("Implementing item changes and adding new ones...");
 		Items.onInitialize();
 
-		MOD_LOGGER.info("Setting up server settings...");
-		ServerSettings.onInitialize();
-
 		MOD_LOGGER.info("Done! This mod is ready to party.");
 	}
 }

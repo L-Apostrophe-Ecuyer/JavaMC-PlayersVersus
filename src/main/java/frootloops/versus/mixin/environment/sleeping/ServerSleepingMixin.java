@@ -1,7 +1,6 @@
 package frootloops.versus.mixin.environment.sleeping;
 
-import frootloops.versus.ServerSettings;
-import frootloops.versus.VersusMod;
+import frootloops.versus.VersusSettings;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HostileEntity;
@@ -73,8 +72,8 @@ public abstract class ServerSleepingMixin extends World {
         if(canSleepThroughNight) {
             // If everyone is asleep, make time go by quick
             // And make nearby hostiles target players, to test their shelters
-            if(!ServerSettings.isTimeFastForwarding) {
-                ServerSettings.isTimeFastForwarding = true;
+            if(!VersusSettings.isTimeFastForwarding()) {
+                VersusSettings.setTimeFastForwarding(true);
                 this.setTimeOfDay(this.properties.getTimeOfDay() + 1);
 
                 for (PlayerEntity player : players) {
@@ -92,8 +91,8 @@ public abstract class ServerSleepingMixin extends World {
         }
 
         // Otherwise, wake everyone up:
-        else if(ServerSettings.isTimeFastForwarding) {
-            ServerSettings.isTimeFastForwarding = false;
+        else if(VersusSettings.isTimeFastForwarding()) {
+            VersusSettings.setTimeFastForwarding(false);
             if(cachedSleepManager != null) cachedSleepManager.clearSleeping();
             (this.getPlayers().stream().filter(LivingEntity::isSleeping).collect(Collectors.toList())).forEach((PlayerEntity player) -> {player.wakeUp(false, false);});
         }
