@@ -89,7 +89,7 @@ public abstract class Combat {
 
         itemBuilder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE.value(), new EntityAttributeModifier(((ItemAccessor) item).getATTACK_DAMAGE_MODIFIER_ID(), modifierType, damageModifier, EntityAttributeModifier.Operation.ADDITION));
         itemBuilder.put(EntityAttributes.GENERIC_ATTACK_SPEED.value(), new EntityAttributeModifier(((ItemAccessor) item).getATTACK_SPEED_MODIFIER_ID(), modifierType, speedModifier, EntityAttributeModifier.Operation.ADDITION));
-        if(reachModifier > 0) itemBuilder.put(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE.value(), new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, modifierType, speedModifier, EntityAttributeModifier.Operation.ADDITION));
+        if(reachModifier > 0) itemBuilder.put(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE.value(), new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, modifierType, reachModifier, EntityAttributeModifier.Operation.ADDITION));
 
         if (item instanceof MiningToolItem) {
             ((MiningToolAccessor) item).setAttackDamage(damageModifier);

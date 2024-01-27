@@ -55,6 +55,7 @@ public class ItemStackMixin {
         }
     }
 
+    /*
     @Inject(method = "getTooltip", at = @At("RETURN"), cancellable = true)
     private void addAttackReachTooltip(CallbackInfoReturnable<List<Text>> cir) {
         if(isSectionVisible(this.getHideFlags(), ItemStack.TooltipSection.MODIFIERS)) {
@@ -72,7 +73,6 @@ public class ItemStackMixin {
 
                 double value = -1d;
 
-
                 if (item instanceof TridentItem || item instanceof HoeItem) {
                     value = 3.5d;
                 } else if (item instanceof SwordItem) {
@@ -89,5 +89,5 @@ public class ItemStackMixin {
                 }
             }
         }
-    }
+    }*/
 }
