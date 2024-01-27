@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
@@ -163,7 +164,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
     private void onDamageInterruptEating(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (source.getAttacker() != null && amount > 1.0F) {
+        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
             Item item = this.activeItemStack.getItem();
             if (item.isFood() || item instanceof PotionItem) {
                 this.clearActiveItem();
