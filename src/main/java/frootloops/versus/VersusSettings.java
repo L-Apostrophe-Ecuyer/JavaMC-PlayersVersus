@@ -4,18 +4,11 @@ import frootloops.versus.mod.Combat;
 
 public abstract class VersusSettings {
 
-    private static boolean IS_TICK_TIME_FAST = false; // Accessed and modified by mixins in "environment.sleeping"
-
-    public static boolean isTimeFastForwarding() {
-        return IS_TICK_TIME_FAST;
-    }
-
-    public static void setTimeFastForwarding(boolean newValue) {
-        IS_TICK_TIME_FAST = newValue;
-    }
-
     public static boolean CAN_AIM_ASSIST = true;
     public static boolean CAN_HOLD_TO_ATTACK = true;
+    public static boolean DO_SLEEP_OVERHAUL = true;
+    public static boolean DO_FOOD_EATING_INTERRUPTION = true;
+    public static boolean DO_BEDROCK_BRIDGING = true;
 
     public static void setAimAssist(boolean newValue) {
         CAN_AIM_ASSIST = newValue;
@@ -26,7 +19,7 @@ public abstract class VersusSettings {
     }
 
     public static void setSleepOverhaul(boolean newValue) {
-        // TODO
+        DO_SLEEP_OVERHAUL = newValue;
     }
 
     public static void setFoodAndHealthOverhaul(boolean newValue) {
@@ -34,10 +27,26 @@ public abstract class VersusSettings {
     }
 
     public static void setFoodInterruptedByDamage(boolean newValue) {
-        // TODO
+        DO_FOOD_EATING_INTERRUPTION = newValue;
     }
 
     public static void setBedrockBlockBridging(boolean newValue) {
-        // TODO
+        DO_BEDROCK_BRIDGING = newValue;
+    }
+
+
+
+    /*
+    ------------------------------------------------------------------------------------------------------------
+    PURELY FOR VERSIONS >1.20.4, WHERE THE TICK COMMAND WASN'T YET INTRODUCTED
+     */
+    private static boolean IS_TICK_TIME_FAST = false; // Accessed and modified by mixins in "environment.sleeping"
+
+    public static boolean isTimeFastForwarding() {
+        return IS_TICK_TIME_FAST;
+    }
+
+    public static void setTimeFastForwarding(boolean newValue) {
+        IS_TICK_TIME_FAST = newValue;
     }
 }

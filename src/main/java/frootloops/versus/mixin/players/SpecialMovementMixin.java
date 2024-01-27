@@ -50,7 +50,10 @@ public abstract class SpecialMovementMixin extends LivingEntity {
     private void tickMovement(CallbackInfo ci) {
         if(!isCrawling() && !isSwimming()) {
 
-            if(isSneaking()) ticksLeftToLeap = 8;
+            if(isSneaking()) {
+                if(ticksLeftToLeap == 0) ticksLeftToLeap = 32;
+                else if(ticksLeftToLeap > 1) ticksLeftToLeap--;
+            }
             else if(ticksLeftToLeap > 0) ticksLeftToLeap--;
 
             if(!isSprinting() || isSneaking()) ticksLeftToDash = 8;
@@ -89,7 +92,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         }
 
         // Crouch-jump:
-        if(ticksLeftToLeap > 0 && !this.isSneaking()) {
+        if(ticksLeftToLeap > 1 && !this.isSneaking()) {
             velocityY *= 1.25 + 0.15 * boundingStridesLevel;
             this.playBlockFallSound();
             ticksLeftToLeap = -1;

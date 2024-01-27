@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.players.bridging;
 
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.players.bridging.ReacharoundTracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -29,8 +30,9 @@ public abstract class MinecraftClientMixin {
 
     @Inject(at = @At("TAIL"), method = "tick()V")
     public void onTick(CallbackInfo ci) {
-        ReacharoundTracker.currentTarget = null;
+        if(VersusSettings.DO_BEDROCK_BRIDGING == false) return;
 
+        ReacharoundTracker.currentTarget = null;
         PlayerEntity player = MinecraftClient.getInstance().player;
         if(player != null) {
             ReacharoundTracker.currentTarget = ReacharoundTracker.getPlayerReacharoundTarget(player);
@@ -47,8 +49,9 @@ public abstract class MinecraftClientMixin {
 
     @Inject(at = @At("HEAD"), method = "doItemUse()V")
     public void onItemUse(CallbackInfo info) {
-        if(this.player != null) {
+        if(VersusSettings.DO_BEDROCK_BRIDGING == false) return;
 
+        if(this.player != null) {
             for(Hand hand : Hand.values()) {
                 ItemStack itemStack = this.player.getStackInHand(hand);
                 Pair<BlockPos, Direction> pair = ReacharoundTracker.getPlayerReacharoundTarget(this.player);

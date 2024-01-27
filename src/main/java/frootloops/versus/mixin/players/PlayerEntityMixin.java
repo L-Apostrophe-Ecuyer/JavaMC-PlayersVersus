@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
@@ -149,7 +150,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
     private void onDamageInterruptEating(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (source.getAttacker() != null && amount > 1.0F) {
+        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && amount > 1.0F && source.getAttacker() != null) {
             Item item = this.activeItemStack.getItem();
             if (item.isFood() || item instanceof PotionItem) {
                 this.clearActiveItem();
@@ -178,7 +179,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         // Attacking while walking backwards deals less knockback:
         boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
-        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.6d, 0.8d, 0.6d));
+        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.4d, 0.6d, 0.4d));
 
         // Toss attack and enchantment:
         if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {
