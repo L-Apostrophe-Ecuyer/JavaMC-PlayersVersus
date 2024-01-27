@@ -1,19 +1,23 @@
 package frootloops.versus;
 
-import frootloops.versus.mod.Combat;
-
 public abstract class VersusSettings {
 
+    public static boolean CAN_AIM_ASSIST = true;
+    public static boolean CAN_HOLD_TO_ATTACK = true;
+    public static boolean DO_SLEEP_OVERHAUL = true;
+    public static boolean DO_FOOD_EATING_INTERRUPTION = true;
+    public static boolean DO_BEDROCK_BRIDGING = true;
+
     public static void setAimAssist(boolean newValue) {
-        Combat.CAN_AIM_ASSIST = newValue;
+        CAN_AIM_ASSIST = newValue;
     }
 
     public static void setHoldToAttack(boolean newValue) {
-        Combat.CAN_HOLD_TO_ATTACK = newValue;
+        CAN_HOLD_TO_ATTACK = newValue;
     }
 
     public static void setSleepOverhaul(boolean newValue) {
-        // TODO
+        DO_SLEEP_OVERHAUL = newValue;
     }
 
     public static void setFoodAndHealthOverhaul(boolean newValue) {
@@ -21,10 +25,11 @@ public abstract class VersusSettings {
     }
 
     public static void setFoodInterruptedByDamage(boolean newValue) {
-        // TODO
+        DO_FOOD_EATING_INTERRUPTION = newValue;
     }
 
     public static void setBedrockBlockBridging(boolean newValue) {
-        // TODO
+        DO_BEDROCK_BRIDGING = newValue;
     }
+
 }

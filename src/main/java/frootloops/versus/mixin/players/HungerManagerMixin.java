@@ -24,8 +24,8 @@ public class HungerManagerMixin {
 
     private static final int REGEN_TIME_6_HAUNCHES = 80, REGEN_TIME_7_TO_10_HAUNCHES = 64, REGEN_TIME_11_TO_14_HAUNCHES = 48, REGEN_TIME_15_TO_20_HAUNCHES = 40, REGEN_TIME_SATURATION_SLOW = 32, REGEN_TIME_SATURATION_QUICK = 24;
 
-    private static final float MINIMUM_SATURATION_TO_QUICK_HEAL = 4.0f;
-    private static final float MINIMUM_SATURATION_TO_HEAL = 2.0f;
+    private static final float MINIMUM_SATURATION_TO_QUICK_HEAL = 5.0f;
+    private static final float MINIMUM_SATURATION_TO_HEAL = 3.0f;
 
     /***
      * @author
