@@ -50,12 +50,20 @@ public abstract class ServerSleepingMixin extends World {
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/SleepManager;canResetTime(ILjava/util/List;)Z"))
     public boolean checkOnEepyPlayers(SleepManager sleepManager, int percentage, List<ServerPlayerEntity> players) {
-        cachedSleepManager = sleepManager;
-        return false; // Return false to cancel vanilla time skip
+        if(VersusSettings.DO_SLEEP_OVERHAUL) {
+            cachedSleepManager = sleepManager;
+            return false; // Return false to cancel vanilla time skip
+        }
+        else {
+            return sleepManager.canResetTime(percentage,players);
+        }
     }
 
     @Inject(method = "tick", at = @At(value = "TAIL"))
     public void stopIfPlayerWokeUp(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
+        if(VersusSettings.DO_SLEEP_OVERHAUL == false) {
+            return;
+        }
         if(players.size() == 0) return;
 
         long timeOfDay = this.properties.getTimeOfDay();
