@@ -7,6 +7,7 @@ import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.BrushableBlock;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -88,7 +89,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         if(blockState.getBlock() instanceof ShulkerBoxBlock) {
-            cir.setReturnValue(cir.getReturnValue() + 5f);
+            cir.setReturnValue(cir.getReturnValue() + 8f);
+            return;
+        }
+
+        if(blockState.getBlock() instanceof BrushableBlock) {
+            cir.setReturnValue(cir.getReturnValue() - 0.5f);
             return;
         }
 
