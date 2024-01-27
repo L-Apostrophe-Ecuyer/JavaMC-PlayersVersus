@@ -157,7 +157,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     private void attemptToAimAssistTarget(Entity entity, double range) {
         if(entity == null) return;
         if(entity.squaredDistanceTo(player) > range * range) return;
-        if(!Combat.isLookingTowards(player, entity.getEyePos(),0.85)) return;
+        if(!Combat.isLookingTowards(player, entity.getEyePos(),-0.85)) return;
         if(!player.canSee(entity)) return;
         this.crosshairTarget = new EntityHitResult(entity);
     }

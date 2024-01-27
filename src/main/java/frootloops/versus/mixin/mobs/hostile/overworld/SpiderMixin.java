@@ -77,7 +77,7 @@ public class SpiderMixin extends HostileEntity {
         }
         if (entityData instanceof SpiderEntity.SpiderData) {
             SpiderEntity.SpiderData spiderData = (SpiderEntity.SpiderData)entityData;
-            if (spiderData.effect.hasKeyAndValue()) {
+            if (spiderData.effect != null && spiderData.effect.hasKeyAndValue()) {
                 this.addStatusEffect(new StatusEffectInstance(spiderData.effect, -1));
             }
         }

@@ -59,6 +59,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, Combat.PLAYER_BASE_ATTACK_SPEED)
+                .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 5.0)
+                .add(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, Combat.PLAYER_BASE_ATTACK_REACH)
                 .add(EntityAttributes.GENERIC_LUCK));
     }
 

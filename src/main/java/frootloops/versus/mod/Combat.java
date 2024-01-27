@@ -19,6 +19,7 @@ import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
@@ -66,8 +67,8 @@ public abstract class Combat {
     public static float getShovelDamageModifier() { return toolsDamage[4] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getTridentDamageModifier() { return 9.0F - (float)PLAYER_BASE_ATTACK_DAMAGE;}
 
-    public static float getSwordReachModifier() { return (float)PLAYER_BASE_ATTACK_REACH + toolsReachBonus[4];}
-    public static float getTridentReachModifier() { return (float)PLAYER_BASE_ATTACK_REACH + toolsSpeed[4];}
+    public static float getSwordReachModifier() { return toolsReachBonus[4];}
+    public static float getTridentReachModifier() { return 1.0f;}
 
     public static void onInitialize() {
         for(int toolIndex = 0; toolIndex < tools.length; toolIndex++) {
@@ -75,7 +76,7 @@ public abstract class Combat {
                 String name = "minecraft:" + toolTiers[tierIndex] + "_" + tools[toolIndex];
                 float damage = toolsDamage[toolIndex] + toolTierDamageBonuses[tierIndex] - (float)PLAYER_BASE_ATTACK_DAMAGE;
                 float speed = toolsSpeed[toolIndex] - (float)PLAYER_BASE_ATTACK_SPEED - (tierIndex == 0 ? 0.2f : 0.0f);
-                float reach = toolTierDamageBonuses[tierIndex] + (float)PLAYER_BASE_ATTACK_REACH;
+                float reach = toolsReachBonus[toolIndex];
                 setAttributes(name, damage, speed, reach);
             }
         }
@@ -83,13 +84,13 @@ public abstract class Combat {
     }
 
     private static void setAttributes(String itemName, float damageModifier, float speedModifier, float reachModifier) {
-        ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> itemBuilder = ImmutableMultimap.builder();
+        ImmutableMultimap.Builder<RegistryEntry<EntityAttribute>, EntityAttributeModifier> itemBuilder = ImmutableMultimap.builder();
         Item item = Registries.ITEM.get(new Identifier(itemName));
         String modifierType = item instanceof MiningToolItem ? "Tool modifier" : "Weapon modifier";
 
-        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE.value(), new EntityAttributeModifier(((ItemAccessor) item).getATTACK_DAMAGE_MODIFIER_ID(), modifierType, damageModifier, EntityAttributeModifier.Operation.ADDITION));
-        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_SPEED.value(), new EntityAttributeModifier(((ItemAccessor) item).getATTACK_SPEED_MODIFIER_ID(), modifierType, speedModifier, EntityAttributeModifier.Operation.ADDITION));
-        if(reachModifier > 0) itemBuilder.put(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE.value(), new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, modifierType, reachModifier, EntityAttributeModifier.Operation.ADDITION));
+        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_DAMAGE_MODIFIER_ID(), modifierType, damageModifier, EntityAttributeModifier.Operation.ADDITION));
+        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_SPEED_MODIFIER_ID(), modifierType, speedModifier, EntityAttributeModifier.Operation.ADDITION));
+        if(reachModifier > 0) itemBuilder.put(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, modifierType, reachModifier, EntityAttributeModifier.Operation.ADDITION));
 
         if (item instanceof MiningToolItem) {
             ((MiningToolAccessor) item).setAttackDamage(damageModifier);
@@ -127,7 +128,10 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
         double reachAttributeValue = player.getAttributeValue(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE);
-        attackChargeProgress = Math.min(1.0d, attackChargeProgress);
+        VersusMod.MOD_LOGGER.warn("Reach value: " + reachAttributeValue);
+
+
+        attackChargeProgress = Math.min(1.0d, attackChargeProgress - 0.5d);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
         return reachAttributeValue + chargeTimeBonus + ridingBonus;
@@ -139,6 +143,11 @@ public abstract class Combat {
 
     public static boolean isInAttackRangeOf(PlayerEntity player, Entity target) {
         double range = Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
+        return player.squaredDistanceTo(target) < range * range;
+    }
+
+    public static boolean isInAttackRangeOf(PlayerEntity player, Entity target, double attackChargeProgress) {
+        double range = Combat.getAttackRange(player, attackChargeProgress);
         return player.squaredDistanceTo(target) < range * range;
     }
 

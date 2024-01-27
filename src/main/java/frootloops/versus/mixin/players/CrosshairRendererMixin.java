@@ -10,6 +10,7 @@ import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.RotationAxis;
@@ -66,29 +67,34 @@ public class CrosshairRendererMixin {
 
                     // Changes start here:
                     // This is the code that makes the crosshair's size depend on the attack cooldown:
-                    float attackCooldownProgress = this.client.player.getAttackCooldownProgress(-1.0F);
-                    int crosshairSize = 1 + 2 * (int)(7f * attackCooldownProgress);
+                    double attackCooldownProgress = Combat.getAttackChargeProgress(client.player);
+                    double attackCooldownProgressCapped = attackCooldownProgress > 1.0d ? 1.0d : attackCooldownProgress;
+                    int crosshairSize = 1 + 2 * (int)(7d * attackCooldownProgressCapped);
                     context.drawGuiTexture(CROSSHAIR_TEXTURE, (context.getScaledWindowWidth() - crosshairSize) / 2, (context.getScaledWindowHeight() - crosshairSize) / 2, crosshairSize, crosshairSize);
 
-
                     // This is the code to make sure the attack indicator only shows when a target can be hit:
-                    if(this.client.targetedEntity != null && Combat.isInAttackRangeOf(client.player, client.targetedEntity)) {
-                        int j = context.getScaledWindowHeight() / 2 - 7 + 16;
-                        int k = context.getScaledWindowHeight()/ 2 - 8;
-                        if (attackCooldownProgress >= 1.0F) {
-                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_FULL_TEXTURE, k, j, 16, 16);
-                        } else {
-                            int l = (int)(attackCooldownProgress * 17.0F);
-                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_TEXTURE, k, j, 16, 4);
-                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE, 16, 4, 0, 0, k, j, l, 4);
-                        }
+                    boolean isEntityTargettable = false;
+                    if (this.client.targetedEntity != null && Combat.isInAttackRangeOf(client.player, client.targetedEntity, attackCooldownProgress)) {
+                        isEntityTargettable = this.client.player.getAttackCooldownProgressPerTick() > 5.0f;
+                        isEntityTargettable &= this.client.targetedEntity.isAlive();
                     }
 
+                    if(isEntityTargettable) {
+                        int posY = context.getScaledWindowHeight() / 2 - 7 + 16;
+                        int posX = context.getScaledWindowWidth() / 2 - 8;
+                        if (attackCooldownProgress >= 1.0F) {
+                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_FULL_TEXTURE, posX, posY, 16, 16);
+                        } else {
+                            int swordIconWhitePixels = (int)(attackCooldownProgressCapped * 17.0D);
+                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_TEXTURE, posX, posY, 16, 4);
+                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE, 16, 4, 0, 0, posX, posY, swordIconWhitePixels, 4);
+                        }
+                    }
                     //if(ReacharoundTracker.currentTarget != null) this.drawExtraCrosshairIcon(matrices);
-                    RenderSystem.defaultBlendFunc();
                 }
-                RenderSystem.disableBlend();
             }
+            RenderSystem.defaultBlendFunc();
         }
+        RenderSystem.disableBlend();
     }
 }

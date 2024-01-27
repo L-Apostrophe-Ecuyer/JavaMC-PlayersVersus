@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.TridentItem;
+import net.minecraft.registry.entry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -12,5 +13,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface TridentAccessor {
     @Accessor
     @Mutable
-    void setAttributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> newAttributeModifiers);
+    void setAttributeModifiers(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> newAttributeModifiers);
 }
