@@ -31,20 +31,4 @@ public abstract class VersusSettings {
     public static void setBedrockBlockBridging(boolean newValue) {
         DO_BEDROCK_BRIDGING = newValue;
     }
-
-
-
-    /*
-    ------------------------------------------------------------------------------------------------------------
-    PURELY FOR VERSIONS >1.20.4, WHERE THE TICK COMMAND WASN'T YET INTRODUCTED
-     */
-    private static boolean IS_TICK_TIME_FAST = false; // Accessed and modified by mixins in "environment.sleeping"
-
-    public static boolean isTimeFastForwarding() {
-        return IS_TICK_TIME_FAST;
-    }
-
-    public static void setTimeFastForwarding(boolean newValue) {
-        IS_TICK_TIME_FAST = newValue;
-    }
 }

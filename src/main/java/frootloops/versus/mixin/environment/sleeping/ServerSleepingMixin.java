@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.environment.sleeping;
 
+import frootloops.versus.VersusSettings;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HostileEntity;
