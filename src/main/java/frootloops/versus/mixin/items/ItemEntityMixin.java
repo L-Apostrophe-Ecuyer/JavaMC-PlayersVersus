@@ -73,7 +73,7 @@ public abstract class ItemEntityMixin extends Entity {
 
 
     @Inject(method = "damage",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ItemEntity;emitGameEvent(Lnet/minecraft/world/event/GameEvent;Lnet/minecraft/entity/Entity;)V"),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ItemEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;Lnet/minecraft/entity/Entity;)V"),
             cancellable = true)
     public void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(this.health == 0) {

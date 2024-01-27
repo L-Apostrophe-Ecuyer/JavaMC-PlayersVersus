@@ -4,9 +4,6 @@ import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.minecraft.class_9168;
-import net.minecraft.class_9169;
 import net.minecraft.entity.*;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.registry.tag.BiomeTags;
@@ -17,7 +14,7 @@ public class MobSpawning {
 
     public static void addCustomSpawns() {
 
-        class_9168 locationOnGround = class_9169.field_48745;
+        SpawnLocation locationOnGround = SpawnLocationTypes.ON_GROUND;
 
         // Deep caves:
         BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, EntityType.WITHER_SKELETON, 100, 1, 1);
