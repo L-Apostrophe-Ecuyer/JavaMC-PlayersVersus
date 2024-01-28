@@ -2,7 +2,7 @@
   "feature": {
     "type": "minecraft:ore",
     "config": {
-      "size": 16,
+      "size": 14,
       "discard_chance_on_air_exposure": 0.4,
       "targets": [
         {
@@ -72,7 +72,7 @@
           "absolute": -16
         },
         "max_inclusive": {
-          "absolute": 24
+          "absolute": 32
         }
       }
     },
