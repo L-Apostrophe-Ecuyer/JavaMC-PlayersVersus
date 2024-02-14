@@ -1,0 +1,131 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/archaeology_a",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/archaeology_b",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/archaeology_treasure_a",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/archaeology_treasure_b",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/archaeology_treasure_c",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/empty_a",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/empty_b",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/opening",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/opening_and_chest",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/spawner_breeze",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/spawner_skeleton",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/trap_tnt_1",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/trap_tnt_2",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/side_challenges/trap_tnt_gold",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ],
+  "fallback": "minecraft:empty"
+}
