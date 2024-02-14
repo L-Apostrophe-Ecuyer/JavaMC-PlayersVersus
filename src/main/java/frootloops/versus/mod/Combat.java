@@ -128,8 +128,6 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
         double reachAttributeValue = player.getAttributeValue(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE);
-        VersusMod.MOD_LOGGER.warn("Reach value: " + reachAttributeValue);
-
 
         attackChargeProgress = Math.min(1.0d, attackChargeProgress - 0.5d);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
