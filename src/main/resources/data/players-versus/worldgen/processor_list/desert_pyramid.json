@@ -23,12 +23,53 @@
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:sand",
-            "probability": 0.3
+            "probability": 0.25
           },
           "output_state": {
             "Name": "minecraft:suspicious_sand",
             "Properties": {
               "dusted": "0"
+            }
+          },
+          "block_entity_modifier": {
+            "type": "minecraft:append_loot",
+            "loot_table": "players-versus:archaeology/desert_pyramid_common"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:sand",
+            "probability": 0.1
+          },
+          "output_state": {
+            "Name": "minecraft:suspicious_sand",
+            "Properties": {
+              "dusted": "0"
+            }
+          },
+          "block_entity_modifier": {
+            "type": "minecraft:append_loot",
+            "loot_table": "players-versus:archaeology/desert_pyramid_rare"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:decorated_pot"
+          },
+          "output_state": {
+            "Name": "minecraft:decorated_pot",
+            "Properties": {
+              "cracked": "false",
+              "facing": "north",
+              "waterlogged": "false"
             }
           },
           "block_entity_modifier": {

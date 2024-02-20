@@ -7,7 +7,7 @@
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },
-      "weight": 12
+      "weight": 4
     },
     {
       "element": {
@@ -16,7 +16,7 @@
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },
-      "weight": 3
+      "weight": 2
     },
     {
       "element": {
@@ -25,7 +25,7 @@
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },
-      "weight": 2
+      "weight": 1
     },
     {
       "element": {
@@ -53,24 +53,6 @@
         "projection": "rigid"
       },
       "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "players-versus:pyramid/basement_7",
-        "processors": "players-versus:desert_pyramid",
-        "projection": "rigid"
-      },
-      "weight": 3
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "players-versus:pyramid/basement_8",
-        "processors": "players-versus:desert_pyramid",
-        "projection": "rigid"
-      },
-      "weight": 3
     }
   ],
   "fallback": "minecraft:empty"
