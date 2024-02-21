@@ -25,6 +25,7 @@
     "environment.sleeping.TimePerTickMixin",
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",
+    "environment.worldgen.structures.StructureWaterloggingFixMixin",
     "environment.BlockExplosivityMixin",
     "environment.TntMixin",
     "environment.TorchMixin",
