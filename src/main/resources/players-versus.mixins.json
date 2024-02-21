@@ -97,10 +97,12 @@
     "players.accessors.TridentAccessor",
     "players.attacking.MinecraftClientMixin",
     "players.attacking.CrosshairTargetMixin",
+    "players.attacking.CrosshairRendererMixin",
     "players.bridging.MinecraftClientMixin",
     "players.HungerManagerMixin",
+    "players.HungerSprintingMixin",
+    "players.HungerBarRendererMixin",
     "players.PlayerEntityMixin",
-    "players.CrosshairRendererMixin",
     "players.SpecialMovementMixin"
   ],
   "client": [],
