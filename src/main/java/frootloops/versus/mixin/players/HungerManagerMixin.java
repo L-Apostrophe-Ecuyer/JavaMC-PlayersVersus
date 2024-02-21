@@ -64,7 +64,6 @@ public class HungerManagerMixin {
     }
 
     private void doHungerExhaustion(PlayerEntity player) {
-        if(this.foodLevel == 0)
 
         // Starvation: When starving, activities deal damage.
         if(foodLevel == 0) {
