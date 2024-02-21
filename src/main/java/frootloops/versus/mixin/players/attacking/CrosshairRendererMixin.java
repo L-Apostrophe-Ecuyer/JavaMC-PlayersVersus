@@ -68,7 +68,7 @@ public class CrosshairRendererMixin {
                     float attackCooldownProgress = this.client.player.getAttackCooldownProgress(-1.0F);
                     int crosshairSize = 1 + 2 * (int)(7f * attackCooldownProgress);
                     int uv = 7 - crosshairSize/2;
-                    drawTexture(matrices, (this.scaledWidth - crosshairSize) / 2, (this.scaledHeight - crosshairSize) / 2, uv, uv, crosshairSize, crosshairSize);
+                    drawTexture(matrices, (this.scaledWidth - crosshairSize) / 2, (this.scaledHeight - crosshairSize) / 2, 0, uv, uv, crosshairSize, crosshairSize, 256, 256);
 
                     // This is the code to make sure the attack indicator only shows when a target can be hit:
                     if (this.client.options.getAttackIndicator().getValue() == AttackIndicator.CROSSHAIR && this.client.targetedEntity != null && this.client.targetedEntity.isAlive()) {
@@ -91,26 +91,15 @@ public class CrosshairRendererMixin {
 
 
     private void drawExtraCrosshairIcon(MatrixStack matrices) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, VersusMod.CROSSHAIR_BLOCK_ICONS_TEXTURE);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE_MINUS_DST_COLOR, GlStateManager.DstFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-
         int w = this.scaledWidth;
         int h = this.scaledHeight;
-
         if (ReacharoundTracker.isInVerticalOrientation()) {
             drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 0, 0, ICON_SIZE, ICON_SIZE);
 
         } else {
             drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 32, 0, ICON_SIZE, ICON_SIZE);
         }
-
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, DrawableHelper.GUI_ICONS_TEXTURE);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE_MINUS_DST_COLOR, GlStateManager.DstFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SrcFactor.ZERO, GlStateManager.DstFactor.ONE);
     }
 }
