@@ -34,9 +34,9 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     private final boolean DEBUG = false;
 
     private final int TICKS_ENDLAG = 8;
-    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 10;
-    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 12;
-    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 16;
+    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 12;
+    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 14;
+    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 18;
 
     @Shadow
     private final double speed;
@@ -123,7 +123,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         // If the mob started attacking or blocking, it can't properly adjust its aim mid-swing anymore:
         if (this.cooldown < 0 || this.cooldown > TICKS_ENDLAG) {
             LookControl lookControl = this.mob.getLookControl();
-            if (lookControl.isLookingAtSpecificPosition()) lookControl.lookAt(lookControl.getLookX(), lookControl.getLookY(), lookControl.getLookZ(),15f,15f);
+            if (lookControl.isLookingAtSpecificPosition()) lookControl.lookAt(lookControl.getLookX(), lookControl.getLookY(), lookControl.getLookZ(),10f,10f);
         }
     }
 
