@@ -35,7 +35,7 @@ public class HungerManagerMixin {
     private static final int FOOD_LEVEL_FOR_SLOW_REGEN = 0;
     private static boolean IS_STARVATION_ENABLED = false;
 
-    @Inject(method = "update", at = @At("HEAD"), cancellable = false)
+    @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
     public void eat(Item item, ItemStack stack, CallbackInfo info) {
         if(item.isFood()) foodTickTimer = Math.max(8, foodTickTimer);
     }
