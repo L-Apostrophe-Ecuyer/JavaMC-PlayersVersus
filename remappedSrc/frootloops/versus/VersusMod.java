@@ -1,6 +1,7 @@
 package frootloops.versus;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.CustomWorldgen;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.Combat;
@@ -15,8 +16,10 @@ public class VersusMod implements ModInitializer {
 	public static final String MOD_ID = "players-versus";
 	public static final String MOD_FOLDER = "data/" + MOD_ID;
 	public static final Logger MOD_LOGGER = LoggerFactory.getLogger(MOD_ID);
-
-	public static final Identifier CROSSHAIR_BLOCK_ICONS_TEXTURE = Identifier.of(MOD_ID, "textures/gui/block_placement_icons.png");
+	public static final Identifier HUD_TEXTURE_DISABLED_FOOD = new Identifier(MOD_ID, "hud/disabled_food_empty");
+	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HALF = Identifier.of(MOD_ID, "hud/disabled_food_empty_half");
+	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HUNGER = Identifier.of(MOD_ID, "hud/disabled_food_empty_hunger");
+	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HALF_HUNGER = Identifier.of(MOD_ID, "hud/disabled_food_empty_half_hunger");
 
 	@Override
 	public void onInitialize() {
@@ -28,6 +31,9 @@ public class VersusMod implements ModInitializer {
 		MOD_LOGGER.info("Initializing custom blocks...");
 		CustomBlocks.onInitialize();
 
+		MOD_LOGGER.info("Initializing custom worldgen features...");
+		CustomWorldgen.onInitialize();
+
 		MOD_LOGGER.info("Initializing custom enchantments...");
 		Enchants.onInitialize();
 
@@ -36,9 +42,6 @@ public class VersusMod implements ModInitializer {
 
 		MOD_LOGGER.info("Implementing item changes and adding new ones...");
 		Items.onInitialize();
-
-		MOD_LOGGER.info("Setting up server settings...");
-		ServerSettings.onInitialize();
 
 		MOD_LOGGER.info("Done! This mod is ready to party.");
 	}

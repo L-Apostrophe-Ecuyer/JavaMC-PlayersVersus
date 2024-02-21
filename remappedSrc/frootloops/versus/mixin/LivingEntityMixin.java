@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.damage.DamageType;
@@ -18,10 +19,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
@@ -38,6 +41,11 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
         return this.isSprinting() ? h : h + 0.4f;
+    }
+
+    @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0)
+    private double takeMoreKnockback(double strength) {
+        return strength * 1.2;
     }
 
     @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)

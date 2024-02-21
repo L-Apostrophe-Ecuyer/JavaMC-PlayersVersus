@@ -70,7 +70,7 @@ public class CreepingAndExplodingGoal extends Goal {
 
         // If the creeper was attacked, drop all pretenses and rush them:
         if (this.creeper.getAttacker() != null) this.wasCoverBlown = true;
-        if (this.creeper.getFuseSpeed() > 0) this.wasCoverBlown = true;
+        if (this.creeper.getFuseSpeed() > 0 || this.creeper.isInFluid()) this.wasCoverBlown = true;
 
         double squaredDistance = this.creeper.squaredDistanceTo(targetEntity);
         boolean isPlayerLooking = Combat.isLookingTowards(targetEntity, this.creeper.getPos());

@@ -5,6 +5,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.mob.DrownedEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.TridentEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,9 +21,10 @@ public abstract class TridentEntityMixin extends PersistentProjectileEntity {
     @Shadow
     private boolean dealtDamage;
 
-    protected TridentEntityMixin(EntityType<? extends PersistentProjectileEntity> entityType, World world) {
-        super(entityType, world);
+    protected TridentEntityMixin(EntityType<? extends PersistentProjectileEntity> type, World world, ItemStack stack) {
+        super(type, world, stack);
     }
+
 
     @ModifyVariable(method = "tick", at = @At("STORE"), ordinal = 0)
     private int alwaysLoyal(int loyaltyLevel) {

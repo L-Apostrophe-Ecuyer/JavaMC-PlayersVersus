@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
-import frootloops.versus.VersusMod;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
@@ -18,14 +18,17 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,6 +36,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
@@ -42,9 +48,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     @Shadow private final ItemCooldownManager itemCooldownManager;
+    @Shadow private HungerManager hungerManager;
     @Shadow private ItemStack selectedItem;
 
     @Shadow public int totalExperience;
+
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(LivingEntity.createLivingAttributes()
@@ -105,7 +113,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                     cir.setReturnValue(cir.getReturnValue() * 1.15f);
                 }
             }
-            return;
         }
     }
 
@@ -157,7 +164,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
     private void onDamageInterruptEating(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (source.getAttacker() != null && amount > 1.0F) {
+        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
             Item item = this.activeItemStack.getItem();
             if (item.isFood() || item instanceof PotionItem) {
                 this.clearActiveItem();
@@ -191,6 +198,24 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         // Toss attack and enchantment:
         if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {
             TossingEnchantment.performTossAttack(this, target, 0.2 + 0.1 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
+        }
+    }
+
+    @Inject(method = "setLastDeathPos", at = @At("TAIL"))
+    public void setFoodLevelAfterDeath(Optional<GlobalPos> lastDeathPos, CallbackInfo ci) {
+        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+    }
+
+    @Override
+    public void setUuid(UUID uuid) {
+        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+        super.setUuid(uuid);
+    }
+
+    @Inject(method = "canConsume", at = @At("HEAD"), cancellable = true)
+    public void canConsume(boolean ignoreHunger, CallbackInfoReturnable<Boolean> cir) {
+        if(VersusSettings.DO_FOOD_OVERHAUL) {
+            cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 || this.hungerManager.getFoodLevel() < this.getMaxHealth() - this.getHealth())));
         }
     }
 }

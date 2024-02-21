@@ -1,7 +1,5 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
-import frootloops.versus.mod.Combat;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -10,15 +8,11 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,11 +30,6 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @Shadow
-    protected HungerManager hungerManager;
-
-    @Shadow public void addExhaustion(float exhaustion) {}
-
     @Shadow public void incrementStat(Identifier stat) {}
 
     private int ticksLeftToLeap = 0;
@@ -50,7 +39,10 @@ public abstract class SpecialMovementMixin extends LivingEntity {
     private void tickMovement(CallbackInfo ci) {
         if(!isCrawling() && !isSwimming()) {
 
-            if(isSneaking()) ticksLeftToLeap = 8;
+            if(isSneaking()) {
+                if(ticksLeftToLeap == 0) ticksLeftToLeap = 32;
+                else if(ticksLeftToLeap > 1) ticksLeftToLeap--;
+            }
             else if(ticksLeftToLeap > 0) ticksLeftToLeap--;
 
             if(!isSprinting() || isSneaking()) ticksLeftToDash = 8;
@@ -89,7 +81,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         }
 
         // Crouch-jump:
-        if(ticksLeftToLeap > 0 && !this.isSneaking()) {
+        if(ticksLeftToLeap > 1 && !this.isSneaking()) {
             velocityY *= 1.25 + 0.15 * boundingStridesLevel;
             this.playBlockFallSound();
             ticksLeftToLeap = -1;
