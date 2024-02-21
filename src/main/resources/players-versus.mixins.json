@@ -102,6 +102,7 @@
     "players.HungerManagerMixin",
     "players.HungerSprintingMixin",
     "players.HungerBarRendererMixin",
+    "players.HungerBarRendererDefaultMixin",
     "players.PlayerEntityMixin",
     "players.SpecialMovementMixin"
   ],

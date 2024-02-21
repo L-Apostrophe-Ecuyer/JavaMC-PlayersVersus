@@ -16,10 +16,10 @@ public class VersusMod implements ModInitializer {
 	public static final String MOD_ID = "players-versus";
 	public static final String MOD_FOLDER = "data/" + MOD_ID;
 	public static final Logger MOD_LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static final Identifier HUD_TEXTURE_DISABLED_FOOD = new Identifier(MOD_ID, "hud/disabled_food_empty");
-	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HALF = Identifier.of(MOD_ID, "hud/disabled_food_empty_half");
-	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HUNGER = Identifier.of(MOD_ID, "hud/disabled_food_empty_hunger");
-	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HALF_HUNGER = Identifier.of(MOD_ID, "hud/disabled_food_empty_half_hunger");
+
+	public static final Identifier CROSSHAIR_BLOCK_ICONS_TEXTURE = Identifier.of(MOD_ID, "textures/gui/block_placement_icons.png");
+
+	public static final Identifier HUD_TEXTURE_OVERHAULED_FOOD = Identifier.of(MOD_ID, "textures/gui/sprites/hud/overhauled_food_bar.png");
 
 	@Override
 	public void onInitialize() {
