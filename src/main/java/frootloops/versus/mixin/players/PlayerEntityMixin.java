@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
