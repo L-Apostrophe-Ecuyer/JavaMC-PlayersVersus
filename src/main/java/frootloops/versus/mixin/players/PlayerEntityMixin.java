@@ -18,12 +18,14 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,6 +38,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world, ItemCooldownManager itemCooldownManager) {
@@ -44,6 +49,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     @Shadow private final ItemCooldownManager itemCooldownManager;
+    @Shadow private HungerManager hungerManager;
     @Shadow private ItemStack selectedItem;
 
     @Shadow public int totalExperience;
@@ -200,6 +206,24 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         // Toss attack and enchantment:
         if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {
             TossingEnchantment.performTossAttack(this, target, 0.2 + 0.1 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
+        }
+    }
+
+    @Inject(method = "setLastDeathPos", at = @At("TAIL"))
+    public void setFoodLevelAfterDeath(Optional<GlobalPos> lastDeathPos, CallbackInfo ci) {
+        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+    }
+
+    @Override
+    public void setUuid(UUID uuid) {
+        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+        super.setUuid(uuid);
+    }
+
+    @Inject(method = "canConsume", at = @At("HEAD"), cancellable = true)
+    public void canConsume(boolean ignoreHunger, CallbackInfoReturnable<Boolean> cir) {
+        if(VersusSettings.DO_FOOD_OVERHAUL) {
+            cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 || this.hungerManager.getFoodLevel() < this.getMaxHealth() - this.getHealth())));
         }
     }
 }

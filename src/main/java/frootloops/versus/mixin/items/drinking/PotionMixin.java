@@ -19,9 +19,9 @@ public class PotionMixin extends Item {
     public int getMaxUseTime(ItemStack stack) {
         List<StatusEffectInstance> list = PotionUtil.getPotionEffects(stack);
         for (StatusEffectInstance statusEffectInstance : list)
-            if (statusEffectInstance.getAmplifier() > 0) return 32;
+            if (statusEffectInstance.getAmplifier() > 0) return 40;
 
-        return 24;
+        return 32;
     }
 }
 

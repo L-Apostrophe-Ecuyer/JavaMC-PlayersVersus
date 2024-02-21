@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players;
+package frootloops.versus.mixin.players.attacking;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
