@@ -61,11 +61,11 @@ public class ZombieSoundListener {
         List<ZombieEntity> zombiesNearby = serverWorld.getEntitiesByClass(ZombieEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
         for (ZombieEntity zombie : zombiesNearby) {
             if(zombie instanceof ZombifiedPiglinEntity) continue;
-            if(zombie.getTarget() == null) {
+            if(zombie.getTarget() == null && zombie.getNavigation().isIdle()) {
                 if((isHighPriority || isPriority) && player != null) {
                     double dx = x - zombie.getX();
                     double dz = y - zombie.getY();
-                    if ((dx * dx + dz * dz) < 256d) zombie.setTarget(player);
+                    if ((dx * dx + dz * dz) < 64d) zombie.setTarget(player);
                     else {
                         zombie.getNavigation().startMovingTo(x, y, z, speedMultiplier);
                         zombie.ambientSoundChance += 1000;
