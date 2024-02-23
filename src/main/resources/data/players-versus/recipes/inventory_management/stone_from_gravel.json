@@ -1,6 +1,6 @@
 {
     "type": "minecraft:crafting_shaped",
-    "group": "stones_to_cobble",
+    "group": "stone_from_gravel",
     "pattern": [
       "XX",
       "XX"
@@ -11,7 +11,7 @@
       }
     },
     "result": {
-      "item": "minecraft:cobblestone",
+      "item": "minecraft:stone",
       "count": 1
     }
   }
