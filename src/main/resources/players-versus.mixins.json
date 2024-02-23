@@ -99,6 +99,7 @@
     "players.attacking.CrosshairTargetMixin",
     "players.attacking.CrosshairRendererMixin",
     "players.bridging.MinecraftClientMixin",
+    "players.death.DeathScreenMixin",
     "players.HungerManagerMixin",
     "players.HungerSprintingMixin",
     "players.HungerBarRendererMixin",

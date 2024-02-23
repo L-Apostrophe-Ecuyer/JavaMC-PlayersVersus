@@ -29,5 +29,9 @@
   "enchantment.players-versus.piercing_protection": "Protection contre les perforations",
   "enchantment.minecraft.protection": "Protection totale",
   "entity.players-versus.deeper_creeper": "Dreeper",
-  "entity.players-versus.frosted_zombie": "Surgelé"
+  "entity.players-versus.frosted_zombie": "Surgelé",
+  "players-versus.deathScreen.spectateNearby": "Devenir spectateur (près d'ici)",
+  "players-versus.deathScreen.spectateHome": "Devenir spectateur",
+  "players-versus.deathScreen.respawnNearby": "Ressusciter près d'ici",
+  "players-versus.deathScreen.respawnHome": "Ressusciter chez soi"
 }
