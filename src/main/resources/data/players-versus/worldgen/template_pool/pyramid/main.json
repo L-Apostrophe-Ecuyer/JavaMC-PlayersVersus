@@ -7,7 +7,7 @@
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },
-      "weight": 1
+      "weight": 2
     },
     {
       "element": {
@@ -25,12 +25,21 @@
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },
-      "weight": 1
+      "weight": 2
     },
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "players-versus:pyramid/main_4",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/main_5",
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },
