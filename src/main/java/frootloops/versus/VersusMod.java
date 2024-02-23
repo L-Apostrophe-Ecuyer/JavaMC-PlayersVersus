@@ -17,6 +17,8 @@ public class VersusMod implements ModInitializer {
 	public static final String MOD_FOLDER = "data/" + MOD_ID;
 	public static final Logger MOD_LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	public static final Identifier RESPAWN_NEAR_DEATH_PACKET_ID = new Identifier(MOD_ID, "respawn_near_death");
+
 	public static final Identifier CROSSHAIR_BLOCK_ICONS_TEXTURE = Identifier.of(MOD_ID, "textures/gui/block_placement_icons.png");
 
 	public static final Identifier HUD_TEXTURE_OVERHAULED_FOOD = Identifier.of(MOD_ID, "textures/gui/sprites/hud/overhauled_food_bar.png");

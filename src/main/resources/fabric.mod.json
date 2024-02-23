@@ -20,6 +20,12 @@
   "entrypoints": {
     "main": [
       "frootloops.versus.VersusMod"
+    ],
+    "server": [
+      "frootloops.versus.VersusModServer"
+    ],
+    "client": [
+      "frootloops.versus.VersusModClient"
     ]
   },
   "mixins": [
