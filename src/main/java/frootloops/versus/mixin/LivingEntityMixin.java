@@ -5,6 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.PathAwareEntity;
@@ -52,7 +53,7 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
         if(timeUntilRegen > 10 && source.getAttacker() instanceof LivingEntity){
-            if(source.isIn(DamageTypeTags.IS_PROJECTILE)) timeUntilRegen = 0;
+            if(source.isOf(DamageTypes.ARROW)) timeUntilRegen = 0;
             else if(timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
         }
     }

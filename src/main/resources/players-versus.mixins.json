@@ -26,6 +26,7 @@
     "environment.worldgen.structures.StructurePieceMixin",
     "environment.worldgen.structures.StructureWaterloggingFixMixin",
     "environment.BlockExplosivityMixin",
+    "environment.MinecartMixin",
     "environment.TntMixin",
     "environment.TorchMixin",
     "environment.DarknessFogMixin",

@@ -66,8 +66,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
             if (attacker.disablesShield()) {
                 if (this.getWorld() instanceof ServerWorld) {
 
-                    // Drop the shield
-
+                    // Drop the shield:
                     ItemStack shieldItemStack = ((LivingEntity) ((Object) this)).getOffHandStack();
                     ItemEntity itemEntity = new ItemEntity(this.getWorld(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
                     itemEntity.setPickupDelay(40);
