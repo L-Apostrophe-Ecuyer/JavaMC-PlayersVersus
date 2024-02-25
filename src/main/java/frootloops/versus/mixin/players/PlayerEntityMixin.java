@@ -20,6 +20,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
+import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -49,6 +50,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow private final ItemCooldownManager itemCooldownManager;
     @Shadow private HungerManager hungerManager;
     @Shadow private ItemStack selectedItem;
+
+    @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
 
     @Shadow public int totalExperience;
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
@@ -84,8 +87,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
     public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
+        if(abilities.creativeMode) cir.setReturnValue(Float.MAX_VALUE);
         if (!this.isOnGround()) cir.setReturnValue(cir.getReturnValue() * 3f);
-        if(this.getMainHandStack().getItem() instanceof ToolItem toolItem && toolItem.getMaterial() == ToolMaterials.STONE) cir.setReturnValue(cir.getReturnValue() * 1.2f);
 
         if(blockState.isOf(Blocks.COBWEB)) {
             cir.setReturnValue(cir.getReturnValue() * 0.75f + 6f);
@@ -100,17 +103,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(blockState.getBlock() instanceof BrushableBlock) {
             cir.setReturnValue(cir.getReturnValue() - 0.5f);
             return;
-        }
-
-        if(blockState.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
-            if(this.getMainHandStack().getItem() instanceof PickaxeItem pickaxeItem) {
-                if(pickaxeItem.getMaterial().getMiningLevel() < 2) {
-                    cir.setReturnValue(cir.getReturnValue()/3f);
-                }
-                else if(pickaxeItem.getMaterial().getMiningLevel() >= 4) {
-                    cir.setReturnValue(cir.getReturnValue() * 1.15f);
-                }
-            }
         }
     }
 

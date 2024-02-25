@@ -49,7 +49,7 @@ public abstract class PillagerMixin extends IllagerEntity {
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
             this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(rand + 10);
-            this.getEquippedStack(EquipmentSlot.OFFHAND).setDamage(rand + 20);
+            this.getEquippedStack(EquipmentSlot.OFFHAND).setDamage(rand + 30);
             this.goalSelector.add(3, new  MeleeAttackGoal(this, 1.1, false));
         }
         else {
