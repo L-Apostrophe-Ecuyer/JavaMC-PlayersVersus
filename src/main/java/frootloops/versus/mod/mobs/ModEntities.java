@@ -18,6 +18,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
 public class ModEntities {
