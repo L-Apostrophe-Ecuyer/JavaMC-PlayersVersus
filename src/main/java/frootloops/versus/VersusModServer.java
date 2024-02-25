@@ -13,11 +13,12 @@ public class VersusModServer implements DedicatedServerModInitializer {
     }
 
     public static void addPacketRecievers(){
+        /*
         ServerPlayNetworking.registerGlobalReceiver(VersusMod.RESPAWN_NEAR_DEATH_PACKET_ID, (server, player, handler, buf, responseSender) -> {
             server.execute(() -> {
                 UUID playerUUID = buf.readUuid();
                 RespawnNearLastDeath.respawnPlayerNearTheirDeath(player, player.getServer(), playerUUID);
             });
-        });
+        });*/
     }
 }

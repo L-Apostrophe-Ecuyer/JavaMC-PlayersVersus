@@ -1,17 +1,21 @@
 package frootloops.versus.mixin.players.death;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.players.death.CustomRespawnRequestPayloadC2S;
 import frootloops.versus.mod.players.death.RespawnNearLastDeath;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.impl.networking.CommonVersionPayload;
+import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientPayloadC2S;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ServerCommonPacketListener;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -67,11 +71,11 @@ public class DeathScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"), cancellable = false)
     public void addRespawnNearbyButton(CallbackInfo info) {
-        if(client.player.getWorld().getRegistryKey().equals(World.OVERWORLD)) {
+        if(client.player.getWorld().getRegistryKey().equals(World.OVERWORLD) && false) {
             MutableText text = this.isHardcore ? Text.translatable("players-versus.deathScreen.spectateNearby") : Text.translatable("players-versus.deathScreen.respawnNearby");
             this.buttons.add(this.addDrawableChild(ButtonWidget.builder(text, button -> {
                 this.client.player.requestRespawn();
-                ClientPlayNetworking.send(VersusMod.RESPAWN_NEAR_DEATH_PACKET_ID, PacketByteBufs.create().writeUuid(this.client.player.getUuid()));
+                ClientPlayNetworking.send(new CustomRespawnRequestPayloadC2S(this.client.player.getUuid()));
                 button.active = false;
             }).dimensions(this.width / 2 - 100, this.height / 4 + 60, 200, 20).build()));
             this.buttons.get(this.buttons.size() - 1).active = false;

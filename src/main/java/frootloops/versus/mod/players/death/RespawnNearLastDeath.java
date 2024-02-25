@@ -25,11 +25,16 @@ import java.util.UUID;
 
 public class RespawnNearLastDeath {
 
+    public static void respawnPlayerNearTheirDeath(ServerPlayerEntity player) {
+        if(player == null) return;
+        respawnPlayerNearTheirDeath(player,player.server,player.getUuid());
+    }
+
     public static void respawnPlayerNearTheirDeath(ServerPlayerEntity player, MinecraftServer server, UUID playerUUID) {
         if(server == null || player == null || !player.getUuid().equals(playerUUID)) return;
         Optional<GlobalPos> lastDeathPos = player.getLastDeathPos();
-        RegistryKey<World> deathDimension = lastDeathPos.get().getDimension();
-        BlockPos deathPosition = lastDeathPos.get().getPos();
+        RegistryKey<World> deathDimension = lastDeathPos.get().dimension();
+        BlockPos deathPosition = lastDeathPos.get().pos();
 
         if(deathDimension != World.OVERWORLD || deathDimension != player.getWorld().getRegistryKey()) return;
         RespawnNearLastDeath.moveToOverworldDeathLocation(player,deathPosition, server.getOverworld());
