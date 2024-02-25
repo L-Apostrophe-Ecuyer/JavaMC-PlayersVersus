@@ -16,10 +16,8 @@ public class MobSpawning {
 
         // Deep caves:
         BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, EntityType.WITHER_SKELETON, 100, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.DEEPER_CREEPER, 120, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.spawnsOneOf(EntityType.CREEPER), SpawnGroup.MONSTER, ModEntities.DEEPER_CREEPER, 120, 1, 1);
         SpawnRestriction.register(ModEntities.DEEPER_CREEPER, SpawnRestriction.Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canMobSpawn);
-
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.CREATURE, EntityType.WARDEN, 20, 1, 1);
 
         // Surface:
         BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.VILLAGE_SNOWY_HAS_STRUCTURE), SpawnGroup.MONSTER, ModEntities.FROSTED_ZOMBIE, 140, 4, 4);
