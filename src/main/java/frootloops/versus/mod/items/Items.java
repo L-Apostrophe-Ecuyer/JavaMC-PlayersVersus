@@ -77,9 +77,8 @@ public abstract class Items {
         ((ItemAccessor) net.minecraft.item.Items.COOKED_SALMON).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.COD).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.COOKED_COD).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.PUFFERFISH).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.TROPICAL_FISH).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.ROTTEN_FLESH).setMaxCount(64);
+        ((ItemAccessor) net.minecraft.item.Items.TROPICAL_FISH).setMaxCount(Math.max(maxSnacks,maxMeals));
+        ((ItemAccessor) net.minecraft.item.Items.ROTTEN_FLESH).setMaxCount(Math.max(maxSnacks,maxMeals));
 
         // Bottles:
         ((ItemAccessor) net.minecraft.item.Items.POTION).setMaxCount(maxBottled);
@@ -89,13 +88,16 @@ public abstract class Items {
         ((ItemAccessor) net.minecraft.item.Items.EGG).setMaxCount(maxThrowables);
         ((ItemAccessor) net.minecraft.item.Items.SNOWBALL).setMaxCount(maxThrowables);
         ((ItemAccessor) net.minecraft.item.Items.ENDER_PEARL).setMaxCount(maxThrowables);
+        ((ItemAccessor) net.minecraft.item.Items.FIRE_CHARGE).setMaxCount(maxThrowables);
+        ((ItemAccessor) net.minecraft.item.Items.PUFFERFISH).setMaxCount(maxThrowables);
 
         // Empty buckets
         ((ItemAccessor) net.minecraft.item.Items.BUCKET).setMaxCount(64);
         ((ItemAccessor) net.minecraft.item.Items.POWDER_SNOW_BUCKET).setMaxCount(16);
 
         // Rarities
-        ((ItemAccessor) net.minecraft.item.Items.HEART_OF_THE_SEA).setMaxCount(1);
-        ((ItemAccessor) net.minecraft.item.Items.NETHER_STAR).setMaxCount(1);
+        // ((ItemAccessor) net.minecraft.item.Items.HEART_OF_THE_SEA).setMaxCount(1);
+        // ((ItemAccessor) net.minecraft.item.Items.NETHER_STAR).setMaxCount(1);
+        ((ItemAccessor) net.minecraft.item.Items.SADDLE).setMaxCount(64);
     }
 }

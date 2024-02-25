@@ -1,19 +1,16 @@
 package frootloops.versus.mixin.items;
 
 import frootloops.versus.VersusMod;
+import net.fabricmc.yarn.constants.MiningLevels;
+import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
 import net.minecraft.item.*;
-import net.minecraft.recipe.RecipeManager;
 import net.minecraft.screen.ScreenTexts;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -52,6 +49,21 @@ public class ItemStackMixin {
     public void itemsCanBeReEnchanted(CallbackInfoReturnable<Boolean> cir) {
         if(this.hasEnchantments()) {
             cir.setReturnValue(!EnchantmentHelper.getPossibleEntries(33, (ItemStack) ((Object)this), false).isEmpty());
+        }
+    }
+
+    @Inject(method = "getMiningSpeedMultiplier", at = @At("RETURN"), cancellable = true)
+    public void getMiningSpeedMultiplier(BlockState state, CallbackInfoReturnable<Float> cir) {
+        float miningSpeed = cir.getReturnValue();
+        if(miningSpeed != 1.0f && this.item instanceof MiningToolItem miningToolItem) {
+            ToolMaterial material = miningToolItem.getMaterial();
+            if(material == ToolMaterials.WOOD) miningSpeed *= 1.25f;
+            else if(material == ToolMaterials.STONE) miningSpeed *= 1.1f;
+            else if(state.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
+                if(material.getMiningLevel() < MiningLevels.IRON) miningSpeed *= 0.6f;
+                else if(material.getMiningLevel() >= MiningLevels.NETHERITE) miningSpeed *= 1.2f;
+            }
+            cir.setReturnValue(miningSpeed);
         }
     }
 
