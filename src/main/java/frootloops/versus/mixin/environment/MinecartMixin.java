@@ -9,20 +9,13 @@ import net.minecraft.entity.vehicle.AbstractMinecartEntity;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
 @Mixin(AbstractMinecartEntity.class)
 public abstract class MinecartMixin extends Entity {
-
-    @Shadow private boolean onRail;
-    @Shadow @Nullable public Vec3d snapPositionToRail(double x, double y, double z) {return null;}
-
-    @Shadow protected void applySlowdown(){}
 
     public MinecartMixin(EntityType<?> type, World world) {super(type, world);}
 
