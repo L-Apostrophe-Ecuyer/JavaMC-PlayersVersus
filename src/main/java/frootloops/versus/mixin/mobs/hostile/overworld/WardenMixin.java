@@ -89,7 +89,7 @@ public class WardenMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason == SpawnReason.NATURAL && this.getBlockPos().getY() > -16) return false;
+        if(spawnReason != SpawnReason.TRIGGERED && this.getBlockPos().getY() > -32) return false;
         else return super.canSpawn(world, spawnReason);
     }
 
