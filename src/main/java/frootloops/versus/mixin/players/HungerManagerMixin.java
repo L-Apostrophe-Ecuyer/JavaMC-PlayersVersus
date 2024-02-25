@@ -1,8 +1,6 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -10,12 +8,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(HungerManager.class)
 public class HungerManagerMixin {
@@ -31,13 +27,13 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_SLOW = 80, REGEN_TIME_7_TO_10_HAUNCHES = 24, REGEN_TIME_11_TO_14_HAUNCHES = 20, REGEN_TIME_15_TO_20_HAUNCHES = 16;
+    private static final int REGEN_TIME_SLOW = 100, REGEN_TIME_7_TO_10_HAUNCHES = 24, REGEN_TIME_11_TO_14_HAUNCHES = 20, REGEN_TIME_15_TO_20_HAUNCHES = 16;
     private static final int FOOD_LEVEL_FOR_SLOW_REGEN = 0;
     private static boolean IS_STARVATION_ENABLED = false;
 
     @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
     public void eat(Item item, ItemStack stack, CallbackInfo info) {
-        if(item.isFood()) foodTickTimer = Math.max(8, foodTickTimer);
+        if(item.isFood()) foodTickTimer = Math.max(4, foodTickTimer);
     }
 
 
@@ -95,9 +91,11 @@ public class HungerManagerMixin {
         boolean canPlayerSlowHeal = canPlayerRegenHealth && (foodLevel == FOOD_LEVEL_FOR_SLOW_REGEN || (foodLevel > FOOD_LEVEL_FOR_SLOW_REGEN && !canPlayerFoodHeal)) && (FOOD_LEVEL_FOR_SLOW_REGEN != 0 || !player.isSprinting());
         if (canPlayerFoodHeal || canPlayerSlowHeal) {
             foodTickTimer++;
-            if(foodLevel == 20) foodTickTimer = Math.max(foodTickTimer, 0);
-            else if(player.isOnFire()) foodTickTimer = -8;
-            else if(player.hurtTime > 0) foodTickTimer = -32;
+
+            // Damage resets slow regen, but not quick regen:
+            if (canPlayerFoodHeal) foodTickTimer = Math.max(foodTickTimer, 0);
+            else if (player.isOnFire()) foodTickTimer = -8;
+            else if (player.hurtTime > 0) foodTickTimer = -32;
 
             if(canPlayerFoodHeal) {
                 if ((foodTickTimer > REGEN_TIME_15_TO_20_HAUNCHES && foodLevel > 14)
