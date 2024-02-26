@@ -7,7 +7,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
     },
     {
       "element": {
@@ -16,7 +16,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
     },
     {
       "element": {
@@ -25,7 +25,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
     },
     {
       "element": {
@@ -34,7 +34,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
     },
     {
       "element": {
@@ -43,7 +43,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
     },
     {
       "element": {
@@ -52,7 +52,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 3
+      "weight": 5
     },
     {
       "element": {
@@ -61,7 +61,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
     },
     {
       "element": {
@@ -70,7 +70,61 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_small_house_9",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_small_house_10",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_small_house_11",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_small_house_12",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_small_house_13",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_small_house_14",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 5
     },
     {
       "element": {
@@ -79,7 +133,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 6
     },
     {
       "element": {
@@ -88,7 +142,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 6
     },
     {
       "element": {
@@ -97,16 +151,16 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
     },
     {
       "element": {
         "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_butcher_shop_1",
+        "location": "minecraft:village/plains/zombie/houses/plains_butcher_shop_1",
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 6
     },
     {
       "element": {
@@ -115,16 +169,16 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 6
     },
     {
       "element": {
         "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_tool_smith_1",
+        "location": "minecraft:village/plains/zombie/houses/plains_tool_smith_1",
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 5
     },
     {
       "element": {
@@ -133,7 +187,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 6
     },
     {
       "element": {
@@ -142,52 +196,43 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_armorer_house_1",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
       "weight": 4
     },
     {
       "element": {
         "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_armorer_house_1",
+        "location": "minecraft:village/plains/zombie/houses/plains_library_1",
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 1
+      "weight": 4
     },
     {
       "element": {
         "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_fisher_cottage_1",
+        "location": "minecraft:village/plains/zombie/houses/plains_library_2",
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 1
+      "weight": 4
     },
     {
       "element": {
         "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_library_1",
+        "location": "minecraft:village/plains/zombie/houses/plains_masons_house_1",
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_library_2",
-        "processors": "minecraft:zombie_plains",
-        "projection": "rigid"
-      },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_masons_house_1",
-        "processors": "minecraft:zombie_plains",
-        "projection": "rigid"
-      },
-      "weight": 1
+      "weight": 4
     },
     {
       "element": {
@@ -196,7 +241,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 2
+      "weight": 1
     },
     {
       "element": {
@@ -205,16 +250,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 2
-    },
-    {
-      "element": {
-        "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_temple_4",
-        "processors": "minecraft:zombie_plains",
-        "projection": "rigid"
-      },
-      "weight": 2
+      "weight": 1
     },
     {
       "element": {
@@ -223,21 +259,12 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 3
-    },
-    {
-      "element": {
-        "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_stable_2",
-        "processors": "minecraft:zombie_plains",
-        "projection": "rigid"
-      },
       "weight": 1
     },
     {
       "element": {
         "element_type": "minecraft:legacy_single_pool_element",
-        "location": "minecraft:village/plains/houses/plains_large_farm_1",
+        "location": "minecraft:village/plains/zombie/houses/plains_stable_2",
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
@@ -259,7 +286,7 @@
         "processors": "minecraft:zombie_plains",
         "projection": "rigid"
       },
-      "weight": 4
+      "weight": 6
     },
     {
       "element": {
@@ -272,9 +299,45 @@
     },
     {
       "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_armorer_house_1",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/zombie/houses/plains_library_1",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/houses/plains_masons_house_1",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "minecraft:village/plains/houses/plains_masons_house_2",
+        "processors": "minecraft:zombie_plains",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
         "element_type": "minecraft:empty_pool_element"
       },
-      "weight": 10
+      "weight": 12
     }
   ],
   "fallback": "minecraft:village/plains/terminators",
