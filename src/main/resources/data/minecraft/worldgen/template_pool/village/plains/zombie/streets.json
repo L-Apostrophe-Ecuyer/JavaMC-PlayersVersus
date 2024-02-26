@@ -2,6 +2,12 @@
   "elements": [
     {
       "element": {
+        "element_type": "minecraft:empty_pool_element"
+      },
+      "weight": 6
+    },
+    {
+      "element": {
         "element_type": "minecraft:legacy_single_pool_element",
         "location": "minecraft:village/plains/zombie/streets/corner_01",
         "processors": "minecraft:street_plains",
@@ -52,7 +58,7 @@
         "processors": "minecraft:street_plains",
         "projection": "terrain_matching"
       },
-      "weight": 7
+      "weight": 5
     },
     {
       "element": {
@@ -61,7 +67,7 @@
         "processors": "minecraft:street_plains",
         "projection": "terrain_matching"
       },
-      "weight": 7
+      "weight": 5
     },
     {
       "element": {
