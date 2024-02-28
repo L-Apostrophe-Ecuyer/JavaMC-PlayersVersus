@@ -41,7 +41,7 @@ public class  CreeperEntityMixin extends HostileEntity {
         if(spawnReason == SpawnReason.NATURAL) {
             if (this.getBlockPos().getY() > 96 || this.getBlockPos().getY() < 24)
                 return false;
-            if (this.getBlockPos().getY() > 54 && (world.getLightLevel(LightType.SKY, this.getBlockPos()) > 0 || world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)))
+            if (this.getBlockPos().getY() > 60 && (world.getLightLevel(LightType.SKY, this.getBlockPos()) > 4 || world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)))
                 return false;
         }
         return super.canSpawn(world, spawnReason);
