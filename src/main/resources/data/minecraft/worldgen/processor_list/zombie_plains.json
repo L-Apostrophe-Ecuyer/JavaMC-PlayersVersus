@@ -8,6 +8,30 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:lava"
+          },
+          "output_state": {
+            "Name": "minecraft:obsidian"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:water"
+          },
+          "output_state": {
+            "Name": "minecraft:packed_mud"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:gravel",
             "probability": 0.2
@@ -85,21 +109,6 @@
           },
           "output_state": {
             "Name": "minecraft:mossy_cobblestone"
-          }
-        },
-        {
-          "location_predicate": {
-            "predicate_type": "minecraft:always_true"
-          },
-          "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:dirt_path"
-          },
-          "output_state": {
-            "Name": "minecraft:grass_block",
-            "Properties": {
-              "snowy": "false"
-            }
           }
         },
         {
