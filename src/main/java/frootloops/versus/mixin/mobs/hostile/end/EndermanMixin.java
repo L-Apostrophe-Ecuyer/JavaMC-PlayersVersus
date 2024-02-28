@@ -39,28 +39,19 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
     @Nullable
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
-
         EntityAttributeInstance instanceKnockback = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
         if (instanceKnockback != null) instanceKnockback.setBaseValue(0.6D);
-
-        EntityAttributeInstance instanceHealth = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-        if (instanceHealth != null) {
-            instanceHealth.setBaseValue(32.0D);
-            this.setHealth(this.getMaxHealth());
-        }
-
         return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        if(!super.canSpawn(world, spawnReason)) return false;
         if(spawnReason == SpawnReason.NATURAL && world.getDimension().hasSkyLight()) {
-            if(!world.getServer().getSaveProperties().getDragonFight().dragonKilled()) {
-                int moonPhase = world.getMoonPhase();
-                if((moonPhase + 2) % 8 < 6) return false;
-            }
+            int moonPhase = world.getMoonPhase();
+            if((moonPhase + 2) % 8 < 6 && this.random.nextInt(4) < 1) return false; // Fewer endermen when not nearing new moons
         }
-        return super.canSpawn(world, spawnReason);
+        return true;
     }
 
     @Override
@@ -93,6 +84,7 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
             if (dotProduct > 1.0 - 0.035 / distance) {
                 if (squaredDistance > 64.0f) {
                     if(this.age % 20 < 10) teleportTo(player);
+                    this.playAmbientSound();
                     return false;
                 }
                 else return player.canSee(this);
@@ -122,5 +114,10 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
             super.dropLoot(source, causedByPlayer); // Triple loot for the big boys!
             super.dropLoot(source, causedByPlayer);
         }
+    }
+
+    @Override
+    public int getMinAmbientSoundDelay() {
+        return 200;
     }
 }
