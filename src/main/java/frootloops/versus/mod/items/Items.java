@@ -2,6 +2,7 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.mixin.players.accessors.ItemAccessor;
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.items.equipment.copper.CopperArmorMaterial;
 import frootloops.versus.mod.items.equipment.copper.CopperToolMaterial;
 import frootloops.versus.mod.items.equipment.slime.SlimeArmorMaterial;
@@ -9,8 +10,8 @@ import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 import static frootloops.versus.VersusMod.MOD_ID;
 
@@ -30,6 +31,9 @@ public abstract class Items {
     public static ToolItem COPPER_SHOVEL = new ShovelItem(COPPER_TOOL_MATERIAL, (int)Combat.getShovelDamageModifier(), Combat.getShovelSpeedModifier(), new Item.Settings());
     public static ToolItem COPPER_PICKAXE = new PickaxeItem(COPPER_TOOL_MATERIAL, (int)Combat.getPickaxeDamageModifier(), Combat.getPickaxeSpeedModifier(), new Item.Settings());
 
+    public static final VerticallyAttachableBlockItem SMOLDERING_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH, new Item.Settings(), Direction.DOWN);
+    public static final VerticallyAttachableBlockItem EXTINGUISHED_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, new Item.Settings(), Direction.DOWN);
+
     public static void onInitialize() {
         int maxSnacks = 64, maxMeals = 64, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
         setStackSizes(maxSnacks, maxMeals, maxBottled, maxStews, maxThrowables, maxPlaceableEntities);
@@ -43,6 +47,8 @@ public abstract class Items {
         registerCustomItem("copper_sword", COPPER_SWORD, ItemGroups.COMBAT);
         registerCustomItem("copper_shovel", COPPER_SHOVEL, ItemGroups.TOOLS);
         registerCustomItem("copper_pickaxe", COPPER_PICKAXE, ItemGroups.TOOLS);
+        registerCustomItem("smoldering_torch", SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
+        registerCustomItem("extinguished_torch", EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);
     }
 
     private static Item registerCustomItem(String name, Item item, ItemGroup group) {//RegistryKey<ItemGroup> group) {
