@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "count": 2,
+  "ingredient": {
+    "tag": "players-versus:regular_stone_plus_polished"
+  },
+  "result": "minecraft:stone_brick_slab"
+}

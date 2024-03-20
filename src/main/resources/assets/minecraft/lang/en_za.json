@@ -1,0 +1,10 @@
+{
+  "block.minecraft.andesite": "Claystone",
+  "block.minecraft.andesite_slab": "Claystone Slab",
+  "block.minecraft.andesite_wall": "Claystone Wall",
+  "block.minecraft.andesite_stairs": "Claystone Stairs",
+  "block.minecraft.polished_andesite": "Polished Stone",
+  "block.minecraft.polished_andesite_slab": "Polished Stone Slab",
+  "block.minecraft.polished_andesite_stairs": "Polished Stone Stairs",
+  "minecraft.advancements.story.iron_tools.description": "Upgrade to an Iron Pickaxe"
+}
