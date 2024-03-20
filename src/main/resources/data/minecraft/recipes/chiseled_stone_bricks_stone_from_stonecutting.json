@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "count": 1,
+  "ingredient": {
+    "tag": "players-versus:regular_stone_plus_polished"
+  },
+  "result": "minecraft:chiseled_stone_bricks"
+}

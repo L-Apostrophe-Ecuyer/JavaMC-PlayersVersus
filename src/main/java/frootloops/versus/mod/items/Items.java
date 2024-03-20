@@ -103,8 +103,8 @@ public abstract class Items {
         ((ItemAccessor) net.minecraft.item.Items.POWDER_SNOW_BUCKET).setMaxCount(16);
 
         // Rarities
-        // ((ItemAccessor) net.minecraft.item.Items.HEART_OF_THE_SEA).setMaxCount(1);
-        // ((ItemAccessor) net.minecraft.item.Items.NETHER_STAR).setMaxCount(1);
+        // ((ItemAccessor) net.minecraft.item.FutureItems.HEART_OF_THE_SEA).setMaxCount(1);
+        // ((ItemAccessor) net.minecraft.item.FutureItems.NETHER_STAR).setMaxCount(1);
         ((ItemAccessor) net.minecraft.item.Items.SADDLE).setMaxCount(64);
     }
 }

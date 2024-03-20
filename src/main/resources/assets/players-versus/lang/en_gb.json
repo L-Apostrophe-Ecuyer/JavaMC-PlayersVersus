@@ -1,4 +1,11 @@
 {
+  "block.minecraft.andesite": "Claystone",
+  "block.minecraft.andesite_slab": "Claystone Slab",
+  "block.minecraft.andesite_wall": "Claystone Wall",
+  "block.minecraft.andesite_stairs": "Claystone Stairs",
+  "block.minecraft.polished_andesite": "Polished Stone",
+  "block.minecraft.polished_andesite_slab": "Polished Stone Slab",
+  "block.minecraft.polished_andesite_stairs": "Polished Stone Stairs",
   "players-versus.advancements.story.craft_a_furnace.title": "To Build a Fire",
   "players-versus.advancements.story.craft_a_furnace.description": "Craft a Furnace",
   "players-versus.advancements.story.upgrade_to_copper.title": "Bronze Age",
