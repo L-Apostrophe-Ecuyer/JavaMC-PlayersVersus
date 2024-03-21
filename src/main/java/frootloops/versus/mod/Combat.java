@@ -109,7 +109,7 @@ public abstract class Combat {
         if(item instanceof TridentItem) return 1.0d;
         if(item instanceof HoeItem) return 1.0d;
         if(item instanceof SwordItem) return 0.5d;
-        if(item instanceof MaceItem && !isOnGround) return 1.0d;
+        if(item instanceof MaceItem && !isOnGround) return 2.0d;
         return 0.0d;
     }
 
