@@ -1,5 +1,6 @@
 package frootloops.versus;
 
+import frootloops.versus.backported.entities.FutureEntitiesClient;
 import frootloops.versus.mod.players.death.RespawnNearLastDeath;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -17,6 +18,6 @@ public class VersusModClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-
+        FutureEntitiesClient.onInitializeClient();
     }
 }
