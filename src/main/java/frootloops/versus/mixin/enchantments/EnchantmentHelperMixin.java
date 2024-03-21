@@ -43,10 +43,7 @@ public class EnchantmentHelperMixin {
         for (EnchantmentLevelEntry candidate : listCandidateEnchantments) {
             if(!currentEnchantments.containsKey(candidate.enchantment) || candidate.level > currentEnchantments.get(candidate.enchantment)) {
                 if(candidate.enchantment instanceof ProtectionEnchantment) {
-                    if(numProtectionEnchantments >= 2) {
-                        listCandidateEnchantments.remove(candidate);
-                        continue;
-                    }
+                    if(numProtectionEnchantments >= 2) continue;
                     else numProtectionEnchantments += 1;
                 }
                 currentEnchantments.put(candidate.enchantment, candidate.level);
