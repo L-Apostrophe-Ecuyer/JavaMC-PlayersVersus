@@ -1,7 +1,9 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
+import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
+import frootloops.versus.backported.items.equipment.MaceItem;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
@@ -25,6 +27,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -173,6 +176,22 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             this.clearActiveItem();
             itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
         }
+    }
+
+    @Override
+    public void onAttacking(Entity target) {
+        // After attacking with a mace, fall distance is reset to cancel fall damage:
+        if(this.getMainHandStack().getItem() instanceof MaceItem && !this.isOnGround()) {
+            float velocity = (float)this.getVelocity().y;
+            if(velocity < -0.4 && !this.isFallFlying()) {
+                float extraDamage = (velocity * -8.0f) + (velocity * velocity * 10.0f) + (velocity * velocity * velocity * -4.0f);
+                target.damage(this.getDamageSources().playerAttack((PlayerEntity)((Object) this)), extraDamage);
+                this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, this.getSoundCategory(), 1.0f, 1.0f);
+                this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_ANVIL_LAND, this.getSoundCategory(), 0.1f, 0.05f);
+            }
+            fallDistance = -3.0f;
+        }
+        super.onAttacking(target);
     }
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 4)

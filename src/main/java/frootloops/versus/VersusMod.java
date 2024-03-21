@@ -1,5 +1,6 @@
 package frootloops.versus;
 
+import frootloops.versus.backported.items.FutureItems;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.CustomWorldgen;
 import frootloops.versus.mod.mobs.ModEntities;
@@ -49,6 +50,9 @@ public class VersusMod implements ModInitializer {
 
 		MOD_LOGGER.info("Implementing item changes and adding new ones...");
 		Items.onInitialize();
+
+		MOD_LOGGER.info("Adding features from future versions...");
+		FutureItems.onInitialize();
 
 		MOD_LOGGER.info("Done! This mod is ready to party.");
 		VersusModServer.addPacketRecievers();

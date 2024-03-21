@@ -3,6 +3,7 @@ package frootloops.versus.mod;
 
 import com.google.common.collect.ImmutableMultimap;
 import frootloops.versus.VersusMod;
+import frootloops.versus.backported.items.equipment.MaceItem;
 import frootloops.versus.mixin.players.accessors.*;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -102,17 +103,18 @@ public abstract class Combat {
         return (attackSpeed * (double)lastAttackTicks) / 20.0d;
     }
 
-    public static double getAttackRangeBonusOf(ItemStack itemStack) {
+    public static double getAttackRangeBonusOf(ItemStack itemStack, boolean isOnGround) {
         if(itemStack == null || itemStack.isEmpty() || !itemStack.isDamageable()) return 0.0d;
         Item item = itemStack.getItem();
         if(item instanceof TridentItem) return 1.0d;
         if(item instanceof HoeItem) return 1.0d;
         if(item instanceof SwordItem) return 0.5d;
+        if(item instanceof MaceItem && !isOnGround) return 1.0d;
         return 0.0d;
     }
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
-        double toolReachBonus = Combat.getAttackRangeBonusOf(player.getEquippedStack(EquipmentSlot.MAINHAND));
+        double toolReachBonus = Combat.getAttackRangeBonusOf(player.getEquippedStack(EquipmentSlot.MAINHAND), player.isOnGround());
         attackChargeProgress = Math.min(1.0d, attackChargeProgress);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
@@ -249,7 +251,7 @@ public abstract class Combat {
         else {
             attackBox = mob.getBoundingBox().offset(0d, mob.getEyeHeight(mob.getPose())/2, 0d);
         }
-        double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND));
+        double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND), false);
         return attackBox.expand(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);
     }
 

@@ -43,6 +43,11 @@ public abstract class LivingEntityMixin extends Entity {
         return this.isSprinting() ? h : h + 0.4f;
     }
 
+    @Inject(method = "travel", at = @At("TAIL"), cancellable = false)
+    private void getHandSwingDuration(CallbackInfo ci) {
+        if(this.isOnGround() && fallDistance < 0f) super.onLanding();
+    }
+
     @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0)
     private double takeMoreKnockback(double strength) {
         return strength * 1.2;
@@ -64,5 +69,11 @@ public abstract class LivingEntityMixin extends Entity {
             if(source.isOf(DamageTypes.ARROW)) timeUntilRegen = 0;
             else if(timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
         }
+    }
+
+    @Override
+    public void onLanding() {
+        if(fallDistance < 0.0f && !this.isOnGround()) return;
+        super.onLanding();
     }
 }
