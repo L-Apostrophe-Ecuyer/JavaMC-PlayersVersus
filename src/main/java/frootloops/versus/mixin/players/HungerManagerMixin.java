@@ -27,7 +27,7 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_SLOW = 100, REGEN_TIME_7_TO_10_HAUNCHES = 24, REGEN_TIME_11_TO_14_HAUNCHES = 20, REGEN_TIME_15_TO_20_HAUNCHES = 16;
+    private static final int REGEN_TIME_SLOW = 120, REGEN_TIME_7_TO_10_HAUNCHES = 24, REGEN_TIME_11_TO_14_HAUNCHES = 20, REGEN_TIME_15_TO_20_HAUNCHES = 16;
     private static final int FOOD_LEVEL_FOR_SLOW_REGEN = 0;
     private static boolean IS_STARVATION_ENABLED = false;
 
@@ -88,14 +88,14 @@ public class HungerManagerMixin {
         float playerHealth = player.getHealth();
         boolean canPlayerRegenHealth = player.canFoodHeal() && player.getWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         boolean canPlayerFoodHeal = canPlayerRegenHealth && (foodLevel > FOOD_LEVEL_FOR_SLOW_REGEN) && !player.hasStatusEffect(StatusEffects.HUNGER);
-        boolean canPlayerSlowHeal = canPlayerRegenHealth && (foodLevel == FOOD_LEVEL_FOR_SLOW_REGEN || (foodLevel > FOOD_LEVEL_FOR_SLOW_REGEN && !canPlayerFoodHeal)) && (FOOD_LEVEL_FOR_SLOW_REGEN != 0 || !player.isSprinting());
+        boolean canPlayerSlowHeal = canPlayerRegenHealth && (foodLevel > FOOD_LEVEL_FOR_SLOW_REGEN && !canPlayerFoodHeal) || (foodLevel == FOOD_LEVEL_FOR_SLOW_REGEN && (FOOD_LEVEL_FOR_SLOW_REGEN != 0 || !player.isSprinting()));
         if (canPlayerFoodHeal || canPlayerSlowHeal) {
             foodTickTimer++;
 
             // Damage resets slow regen, but not quick regen:
             if (canPlayerFoodHeal) foodTickTimer = Math.max(foodTickTimer, 0);
             else if (player.isOnFire()) foodTickTimer = -8;
-            else if (player.hurtTime > 0) foodTickTimer = -32;
+            else if (player.hurtTime > 0) foodTickTimer = -64;
 
             if(canPlayerFoodHeal) {
                 if ((foodTickTimer > REGEN_TIME_15_TO_20_HAUNCHES && foodLevel > 14)
