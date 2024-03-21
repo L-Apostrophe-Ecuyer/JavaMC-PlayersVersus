@@ -6,5 +6,8 @@
   "block.minecraft.polished_andesite": "Pierre polie",
   "block.minecraft.polished_andesite_slab": "Dalle de pierre polie",
   "block.minecraft.polished_andesite_stairs": "Escaliers de pierre polie",
-  "minecraft.advancements.story.iron_tools.description": "Fabriquez une pioche en fer."
+  "minecraft.advancements.story.iron_tools.description": "Fabriquez une pioche en fer.",
+  "item.minecraft.mace": "Masse",
+  "item.minecraft.breeze_rod": "Bâton de Breeze",
+  "item.minecraft.wind_charge": "Charge de vent"
 }

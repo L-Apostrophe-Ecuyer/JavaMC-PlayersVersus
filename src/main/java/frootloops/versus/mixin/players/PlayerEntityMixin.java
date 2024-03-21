@@ -184,7 +184,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(this.getMainHandStack().getItem() instanceof MaceItem && !this.isOnGround()) {
             float velocity = (float)this.getVelocity().y;
             if(velocity < -0.4 && !this.isFallFlying()) {
-                float extraDamage = (velocity * -8.0f) + (velocity * velocity * 10.0f) + (velocity * velocity * velocity * -4.0f);
+                float extraDamage = (velocity * -24.0f) + (velocity * velocity * 8.0f) + (velocity * velocity * velocity * -4.0f);
                 target.damage(this.getDamageSources().playerAttack((PlayerEntity)((Object) this)), extraDamage);
                 this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, this.getSoundCategory(), 1.0f, 1.0f);
                 this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_ANVIL_LAND, this.getSoundCategory(), 0.1f, 0.05f);

@@ -6,5 +6,8 @@
   "block.minecraft.polished_andesite": "Polished Stone",
   "block.minecraft.polished_andesite_slab": "Polished Stone Slab",
   "block.minecraft.polished_andesite_stairs": "Polished Stone Stairs",
+  "item.minecraft.mace": "Mace",
+  "item.minecraft.breeze_rod": "Breeze Rod",
+  "item.minecraft.wind_charge": "Wind Charge",
   "minecraft.advancements.story.iron_tools.description": "Upgrade to an Iron Pickaxe"
 }
