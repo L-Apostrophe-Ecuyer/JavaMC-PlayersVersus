@@ -10,6 +10,8 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 
+import static frootloops.versus.VersusMod.MOD_ID;
+
 public abstract class FutureItems {
 
     public static final MaceToolMaterial MACE_TOOL_MATERIAL = new MaceToolMaterial();
@@ -20,17 +22,18 @@ public abstract class FutureItems {
     public static void onInitialize() {
         registerFutureItem("mace", MACE, ItemGroups.COMBAT);
         registerFutureItem("breeze_rod", BREEZE_ROD, ItemGroups.INGREDIENTS);
-        registerFutureItem("wind_charge", WIND_CHARGE, ItemGroups.FUNCTIONAL);
+        registerFutureItem("wind_charge", WIND_CHARGE, ItemGroups.TOOLS);
     }
 
-    public static Item registerFutureItem(String name, Item item, RegistryKey<ItemGroup> group) {
+    private static Item registerFutureItem(String name, Item item, ItemGroup group) {//RegistryKey<ItemGroup> group) {
         if(group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, new Identifier("minecraft", name), item);
     }
 
-    public static Item registerFutureItem(String name, Item item, RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
+    private static Item registerFutureItem(String name, Item item, ItemGroup group1, ItemGroup group2){//RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
         if(group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.add(item));
         if(group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, new Identifier("minecraft", name), item);
     }
+
 }
