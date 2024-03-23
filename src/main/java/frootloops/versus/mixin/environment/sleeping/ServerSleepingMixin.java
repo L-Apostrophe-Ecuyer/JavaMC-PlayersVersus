@@ -69,6 +69,7 @@ public abstract class ServerSleepingMixin extends World {
 
         long timeOfDay = this.properties.getTimeOfDay();
         if(timeOfDay % 20l != 0) return;
+        timeOfDay = timeOfDay % 24000l;
 
         TickManager tickManager = this.getTickManager();
         boolean startSleepingThroughNight = true;
