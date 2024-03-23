@@ -9,6 +9,7 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.SleepManager;
@@ -61,7 +62,8 @@ public abstract class ServerSleepingMixin extends World {
         if(players.size() == 0) return;
 
         long timeOfDay = this.properties.getTimeOfDay();
-        if(timeOfDay % 8l != 0) return;
+        if(timeOfDay % 20l != 0) return;
+        timeOfDay = timeOfDay % 24000l;
 
         boolean canSleepThroughNight = true;
         if(timeOfDay > 12999l && timeOfDay < 23300l) {
