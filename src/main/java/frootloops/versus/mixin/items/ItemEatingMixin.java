@@ -1,14 +1,18 @@
 package frootloops.versus.mixin.items;
 
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import frootloops.versus.VersusMod;
+import frootloops.versus.backported.items.throwing.WindChargeItem;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.*;
+import net.minecraft.util.UseAction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
@@ -35,6 +39,27 @@ public class ItemEatingMixin {
             else if(foodComponent.getHunger() < 5)  cir.setReturnValue(14);
             else cir.setReturnValue(18);
 
+        }
+    }
+
+    @Inject(method = "finishUsing", at = @At("RETURN"), cancellable = false)
+    public void dontUseOffhandItemAfterExhausted(ItemStack stack, World world, LivingEntity user, CallbackInfoReturnable cir) {
+        // This should hopefully stop players from accidentally using an item in their offhand right after eating:
+        if(user instanceof PlayerEntity player) {;
+            boolean canPlayerStillUseItem = !player.getItemCooldownManager().isCoolingDown(stack.getItem());
+            if(stack.isFood() && canPlayerStillUseItem) canPlayerStillUseItem = (stack.getItem().getFoodComponent() != null && player.canConsume(stack.getItem().getFoodComponent().isAlwaysEdible()));
+            if(!canPlayerStillUseItem) {
+
+                ItemStack stackToPutOnCooldown = player.getOffHandStack();
+                if (stack == user.getOffHandStack()) stackToPutOnCooldown = player.getMainHandStack();
+                if (stackToPutOnCooldown.getMaxUseTime() > 4) return;
+
+                int timeToSetCooldown = 4;
+                Item itemToPutOnCooldown = stackToPutOnCooldown.getItem();
+                if(itemToPutOnCooldown instanceof BlockItem) timeToSetCooldown = 6;
+                else if(itemToPutOnCooldown instanceof WindChargeItem || itemToPutOnCooldown instanceof FireChargeItem || itemToPutOnCooldown instanceof EnderPearlItem || itemToPutOnCooldown instanceof ThrowablePotionItem) timeToSetCooldown = 8;
+                player.getItemCooldownManager().set(itemToPutOnCooldown, timeToSetCooldown);
+            }
         }
     }
 }

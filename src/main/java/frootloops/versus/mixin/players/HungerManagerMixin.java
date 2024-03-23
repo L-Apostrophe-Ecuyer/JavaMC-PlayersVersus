@@ -33,7 +33,7 @@ public class HungerManagerMixin {
 
     @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
     public void eat(Item item, ItemStack stack, CallbackInfo info) {
-        if(item.isFood()) foodTickTimer = Math.max(4, foodTickTimer);
+        if(item.isFood()) foodTickTimer = Math.max(8, foodTickTimer);
     }
 
 
