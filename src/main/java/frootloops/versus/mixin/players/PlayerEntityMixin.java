@@ -32,7 +32,6 @@ import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -43,6 +42,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import static frootloops.versus.backported.items.FutureItems.LAST_WIND_CHARGE_USE_TIME;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
@@ -58,6 +59,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
 
     @Shadow public int totalExperience;
+
+
 
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
@@ -121,12 +124,23 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
 
+    @Inject(method = "handleFallDamage", at = @At("HEAD"), cancellable = true)
+    public void handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+        if(fallDistance > 4 && LAST_WIND_CHARGE_USE_TIME.containsKey(this.uuid)) {
+            if (this.getWorld().getTime() - LAST_WIND_CHARGE_USE_TIME.get(this.uuid) < 60L) {
+                cir.setReturnValue(false);
+                cir.cancel();
+            }
+        }
+    }
+
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
 
         // Falling doesn't hurt as much:
-        if (source.isIn(DamageTypeTags.IS_FALL))
-            return amount/1.75f;
+        if (source.isIn(DamageTypeTags.IS_FALL)) {
+            return amount / 1.75f;
+        }
 
         // Explosions don't hurt as much, or at least, the damage is more consistent:
         if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 3.0f) {
@@ -183,9 +197,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         // After attacking with a mace, fall distance is reset to cancel fall damage:
         if(this.getMainHandStack().getItem() instanceof MaceItem && !this.isOnGround()) {
             float velocity = (float)this.getVelocity().y;
-            if(velocity < -0.4 && !this.isFallFlying()) {
-                float extraDamage = (velocity * -24.0f) + (velocity * velocity * 8.0f) + (velocity * velocity * velocity * -4.0f);
-                target.damage(this.getDamageSources().playerAttack((PlayerEntity)((Object) this)), extraDamage);
+            if((velocity < -0.4 || this.fallDistance > 1.5F) && !this.isFallFlying()) {
+
+                float extraDamageVelocity = (velocity * -24.0f) + (velocity * velocity * 8.0f) + (velocity * velocity * velocity * -4.0f);
+                float extraDamageFallDistance = (this.fallDistance * 3F);
+
+                target.damage(this.getDamageSources().playerAttack((PlayerEntity)((Object) this)), Math.max(extraDamageVelocity, extraDamageFallDistance));
                 this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, this.getSoundCategory(), 1.0f, 1.0f);
                 this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_ANVIL_LAND, this.getSoundCategory(), 0.1f, 0.05f);
             }
