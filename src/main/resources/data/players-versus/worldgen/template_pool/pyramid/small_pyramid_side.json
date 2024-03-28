@@ -1,0 +1,32 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/plain_wall",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 5
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/decorated_wall_1",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "players-versus:pyramid/decorated_wall_2",
+        "processors": "players-versus:desert_pyramid",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ],
+  "fallback": "minecraft:empty"
+}
