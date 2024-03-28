@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "tag": "players-versus:calcites"
+    }
+  },
+  "result": {
+    "item": "minecraft:diorite_wall",
+    "count": 6
+  }
+}
