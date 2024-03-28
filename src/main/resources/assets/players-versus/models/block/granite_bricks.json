@@ -1,6 +1,6 @@
 {
     "parent": "minecraft:block/cube_all",
     "textures": {
-      "all": "minecraft:block/claystone"
+      "all": "players-versus:block/granite_bricks"
     }
 }

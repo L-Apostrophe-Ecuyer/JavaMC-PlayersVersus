@@ -27,7 +27,7 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_SLOW = 120, REGEN_TIME_7_TO_10_HAUNCHES = 24, REGEN_TIME_11_TO_14_HAUNCHES = 20, REGEN_TIME_15_TO_20_HAUNCHES = 16;
+    private static final int REGEN_TIME_SLOW = 120, REGEN_TIME_7_TO_10_HAUNCHES = 40, REGEN_TIME_11_TO_14_HAUNCHES = 30, REGEN_TIME_15_TO_20_HAUNCHES = 20;
     private static final int FOOD_LEVEL_FOR_SLOW_REGEN = 0;
     private static boolean IS_STARVATION_ENABLED = false;
 
@@ -102,9 +102,10 @@ public class HungerManagerMixin {
                         || (foodTickTimer > REGEN_TIME_11_TO_14_HAUNCHES && foodLevel > 10)
                         || (foodTickTimer > REGEN_TIME_7_TO_10_HAUNCHES && foodLevel > FOOD_LEVEL_FOR_SLOW_REGEN)) {
                     player.setHealth((float) Math.ceil(playerHealth) + 1);
-                    foodLevel--;
                     foodTickTimer = 0;
                     exhaustion = (exhaustion + 0.5F)/2.0f;
+                    if(saturationLevel > 1.0F) saturationLevel = Math.max(1.0F, saturationLevel - 1.0F);
+                    else foodLevel--;
                 }
             }
             else if(canPlayerSlowHeal) {

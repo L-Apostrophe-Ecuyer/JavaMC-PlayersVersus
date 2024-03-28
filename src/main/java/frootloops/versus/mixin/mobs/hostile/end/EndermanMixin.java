@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.end;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
@@ -75,13 +76,13 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
         // Untargeted players, Endermen will teleport up to them until they're in range for aggro:
         else {
             if (player.prevHeadYaw != player.headYaw) return false;
-            else if(squaredDistance > 2304.0) return false;
+            else if(squaredDistance > 4096.0) return false;
 
             Vec3d playerRotationVect = player.getRotationVec(1.0f).normalize();
             Vec3d directionVect = new Vec3d(this.getX() - player.getX(), this.getEyeY() - player.getEyeY(), this.getZ() - player.getZ());
             double distance = directionVect.length();
             double dotProduct = (playerRotationVect).dotProduct(directionVect.normalize());
-            if (dotProduct > 1.0 - 0.04 / distance) {
+            if (dotProduct > 1.0 - 0.03 / Math.max(distance - 8, 1)) {
                 if (squaredDistance > 576.0f) {
                     if(this.age % 20 < 10) teleportToEntity(player, distance * 0.8);
                     this.lookAtEntity(player, 100f, 100f);

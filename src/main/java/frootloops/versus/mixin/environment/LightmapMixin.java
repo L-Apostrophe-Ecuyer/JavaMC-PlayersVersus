@@ -40,7 +40,7 @@ public abstract class LightmapMixin {
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getSkyBrightness(F)F"))
     private float getSkyBrightness(ClientWorld world, float tickDelta) {
         float result = world.getSkyBrightness(tickDelta);
-        if(result < 0.7f && world.getDimension().hasSkyLight()) {
+        if(result < 0.99f && world.getDimension().hasSkyLight()) {
             float moonPhaseDarkness = Math.abs(4.0f - (float)((world.getLunarTime() + 6000L + (24000L * 3L)) % (24000L * 8L))/24000.0f);
             float moonHeight = 0.3f/(0.25f + Math.abs(((float)(world.getTimeOfDay()%12000L) - 6000f)/12000f));
             result -= 0.08f + moonHeight * (moonPhaseDarkness/64f + (moonPhaseDarkness * moonPhaseDarkness)/96f);
