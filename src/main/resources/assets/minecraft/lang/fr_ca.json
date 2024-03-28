@@ -7,6 +7,13 @@
   "block.minecraft.polished_andesite_slab": "Dalle de pierre polie",
   "block.minecraft.polished_andesite_stairs": "Escaliers de pierre polie",
   "minecraft.advancements.story.iron_tools.description": "Fabriquez une pioche en fer.",
+  "block.minecraft.diorite": "Calcite",
+  "block.minecraft.diorite_slab": "Dalle de calcite",
+  "block.minecraft.diorite_wall": "Mur de calcite",
+  "block.minecraft.diorite_stairs": "Escaliers de calcite",
+  "block.minecraft.polished_diorite": "Calcite polie",
+  "block.minecraft.polished_diorite_slab": "Dalle de calcite polie",
+  "block.minecraft.polished_diorite_stairs": "Escaliers de calcite polie",
   "item.minecraft.mace": "Masse",
   "item.minecraft.breeze_rod": "Bâton de Breeze",
   "item.minecraft.wind_charge": "Charge de vent"

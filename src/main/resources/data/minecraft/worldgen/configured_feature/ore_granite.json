@@ -18,7 +18,7 @@
         "target": {
           "predicate_type": "minecraft:random_block_match",
           "block": "minecraft:stone",
-          "probability": 0.025
+          "probability": 0.03
         },
         "state": {
           "Name": "minecraft:copper_ore"
@@ -27,11 +27,11 @@
       {
         "target": {
           "predicate_type": "minecraft:random_block_match",
-          "block": "minecraft:raw_copper_block",
-          "probability": 0.005
+          "block": "minecraft:stone",
+          "probability": 0.0025
         },
         "state": {
-          "Name": "minecraft:stone"
+          "Name": "minecraft:raw_copper_block"
         }
       },
       {
