@@ -9,7 +9,7 @@
         }
     },
     "result": {
-        "item": "minecraft:stick",
+        "id": "minecraft:stick",
         "count": 1
     }
 }

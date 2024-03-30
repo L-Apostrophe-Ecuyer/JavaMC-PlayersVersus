@@ -2,16 +2,26 @@ package frootloops.versus.mod.enchantments.armor;
 
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.ItemTags;
+
+import static frootloops.versus.mod.enchantments.Enchants.ALL_ARMOR;
 
 
 public class MagicProtectionEnchantment extends ProtectionEnchantment {
     public MagicProtectionEnchantment() {
-        super(Rarity.VERY_RARE, Type.PROJECTILE);
+        super(
+                Enchantment.properties(ItemTags.ARMOR_ENCHANTABLE, 3, 1,
+                        Enchantment.leveledCost(12, 10),
+                        Enchantment.leveledCost(50, 10), 10,
+                        ALL_ARMOR),
+                Type.ALL
+        );
     }
 
     @Override
@@ -22,11 +32,6 @@ public class MagicProtectionEnchantment extends ProtectionEnchantment {
     @Override
     public boolean isAvailableForRandomSelection() {
         return true;
-    }
-
-    @Override
-    public int getMinPower(int level) {
-        return 12 + (8 * (level - 1));
     }
 
     @Override

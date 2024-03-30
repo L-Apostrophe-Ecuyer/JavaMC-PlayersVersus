@@ -3,6 +3,8 @@
   "ingredient": {
     "tag": "players-versus:calcites"
   },
-  "result": "minecraft:diorite_slab",
-  "count": 2
+  "result": {
+    "id": "minecraft:diorite_slab",
+    "count": 2
+  }
 }

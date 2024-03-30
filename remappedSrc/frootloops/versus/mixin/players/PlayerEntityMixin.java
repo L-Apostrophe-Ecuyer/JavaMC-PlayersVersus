@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
-import frootloops.versus.VersusMod;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
@@ -18,11 +18,15 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
+import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +39,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world, ItemCooldownManager itemCooldownManager) {
@@ -43,9 +50,17 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     @Shadow private final ItemCooldownManager itemCooldownManager;
+    @Shadow private HungerManager hungerManager;
     @Shadow private ItemStack selectedItem;
 
+    @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
+
     @Shadow public int totalExperience;
+
+    @Overwrite
+    public double getEntityInteractionRange() {
+        return Combat.getAttackRange((PlayerEntity) ((Object)this));
+    }
 
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
@@ -53,6 +68,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, Combat.PLAYER_BASE_ATTACK_SPEED)
+                .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 5.0)
+                .add(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, Combat.PLAYER_BASE_ATTACK_REACH)
                 .add(EntityAttributes.GENERIC_LUCK));
     }
 
@@ -80,8 +97,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
     public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
+        if(abilities.creativeMode) cir.setReturnValue(Float.MAX_VALUE);
         if (!this.isOnGround()) cir.setReturnValue(cir.getReturnValue() * 3f);
-        if(this.getMainHandStack().getItem() instanceof ToolItem toolItem && toolItem.getMaterial() == ToolMaterials.STONE) cir.setReturnValue(cir.getReturnValue() * 1.2f);
 
         if(blockState.isOf(Blocks.COBWEB)) {
             cir.setReturnValue(cir.getReturnValue() * 0.75f + 6f);
@@ -95,18 +112,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         if(blockState.getBlock() instanceof BrushableBlock) {
             cir.setReturnValue(cir.getReturnValue() - 0.5f);
-            return;
-        }
-
-        if(blockState.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
-            if(this.getMainHandStack().getItem() instanceof PickaxeItem pickaxeItem) {
-                if(pickaxeItem.getMaterial().getMiningLevel() < 2) {
-                    cir.setReturnValue(cir.getReturnValue()/3f);
-                }
-                else if(pickaxeItem.getMaterial().getMiningLevel() >= 4) {
-                    cir.setReturnValue(cir.getReturnValue() * 1.15f);
-                }
-            }
             return;
         }
     }
@@ -138,7 +143,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
             ItemStack helmet = this.getEquippedStack(EquipmentSlot.HEAD);
             if(helmet != null) {
-                Multimap<EntityAttribute, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);
+                Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);
 
                 float armorAmount = 0.0f;
                 for (EntityAttributeModifier modifier:helmetAttributeModifiers.get(EntityAttributes.GENERIC_ARMOR))
@@ -159,7 +164,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
     private void onDamageInterruptEating(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (source.getAttacker() != null && amount > 1.0F) {
+        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
             Item item = this.activeItemStack.getItem();
             if (item.isFood() || item instanceof PotionItem) {
                 this.clearActiveItem();
@@ -193,6 +198,24 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         // Toss attack and enchantment:
         if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {
             TossingEnchantment.performTossAttack(this, target, 0.2 + 0.1 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
+        }
+    }
+
+    @Inject(method = "setLastDeathPos", at = @At("TAIL"))
+    public void setFoodLevelAfterDeath(Optional<GlobalPos> lastDeathPos, CallbackInfo ci) {
+        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+    }
+
+    @Override
+    public void setUuid(UUID uuid) {
+        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+        super.setUuid(uuid);
+    }
+
+    @Inject(method = "canConsume", at = @At("HEAD"), cancellable = true)
+    public void canConsume(boolean ignoreHunger, CallbackInfoReturnable<Boolean> cir) {
+        if(VersusSettings.DO_FOOD_OVERHAUL) {
+            cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 || this.hungerManager.getFoodLevel() < this.getMaxHealth() - this.getHealth())));
         }
     }
 }

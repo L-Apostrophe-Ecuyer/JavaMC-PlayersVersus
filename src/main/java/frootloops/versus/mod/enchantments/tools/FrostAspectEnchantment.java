@@ -1,7 +1,8 @@
 package frootloops.versus.mod.enchantments.tools;
 
+import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.FireAspectEnchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -15,21 +16,16 @@ import net.minecraft.sound.SoundEvents;
 
 public class FrostAspectEnchantment extends Enchantment {
     public FrostAspectEnchantment() {
-        super(Rarity.RARE, ItemTags.AXES, new EquipmentSlot[] {EquipmentSlot.MAINHAND});
+        super(
+                Enchantment.properties(ItemTags.AXES, ItemTags.SWORD_ENCHANTABLE, 3, 2,
+                        Enchantment.leveledCost(10, 8),
+                        Enchantment.leveledCost(18, 40), 1,
+                        EquipmentSlot.MAINHAND)
+        );
     }
 
     public boolean isTreasure() {
         return true;
-    }
-
-    @Override
-    public int getMinPower(int level) {
-        return 10 + 12 * (level - 1);
-    }
-
-    @Override
-    public int getMaxPower(int level) {
-        return super.getMinPower(level) + 50;
     }
 
     @Override
@@ -44,12 +40,7 @@ public class FrostAspectEnchantment extends Enchantment {
 
     @Override
     public boolean canAccept(Enchantment other) {
-        return !(other instanceof FrostAspectEnchantment || other instanceof FireAspectEnchantment);
-    }
-
-    @Override
-    public int getMaxLevel() {
-        return 2;
+        return !(other == Enchants.FROST_ASPECT || other == Enchantments.FIRE_ASPECT);
     }
 
     @Override

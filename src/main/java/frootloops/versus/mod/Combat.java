@@ -1,15 +1,11 @@
 package frootloops.versus.mod;
 
 
-import com.google.common.collect.ImmutableMultimap;
-import frootloops.versus.VersusMod;
-import frootloops.versus.mixin.players.accessors.*;
+import frootloops.versus.mixin.players.attacking.LivingEntityAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import net.minecraft.entity.mob.EndermanEntity;
@@ -18,11 +14,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -35,7 +28,7 @@ import java.util.UUID;
 
 public abstract class Combat {
 
-    protected static final UUID ATTACK_REACH_MODIFIER_ID = UUID.fromString("159ff4d0-df5c-4ce3-a2a6-88bd7b4c60f2");
+    public static final UUID ATTACK_REACH_MODIFIER_ID = UUID.fromString("159ff4d0-df5c-4ce3-a2a6-88bd7b4c60f2");
 
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
 
@@ -47,7 +40,7 @@ public abstract class Combat {
     private static final float[] toolsSpeed  =
             new float[]{1.0F,   1.5F,   2.0F,   1.5F,   1.5F};
     private static final float[] toolsDamage =
-            new float[]{8.0F,   4.0F,   3.0F,   4.0F,   3.0F};
+            new float[]{8.0F,   4.0F,   2.0F,   4.0F,   3.0F};
 
     private static final float[] toolsReachBonus =
             new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
@@ -57,6 +50,7 @@ public abstract class Combat {
     public static float getAxeSpeedModifier() { return toolsSpeed[0] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getSwordSpeedModifier() { return toolsSpeed[1] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getHoeSpeedModifier() { return toolsSpeed[2] - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getHoeReachModifier() { return toolsReachBonus[2];}
     public static float getPickaxeSpeedModifier() { return toolsSpeed[3] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getShovelSpeedModifier() { return toolsSpeed[4] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getTridentSpeedModifier() { return 1.0F - (float)PLAYER_BASE_ATTACK_SPEED;}
@@ -71,6 +65,7 @@ public abstract class Combat {
     public static float getTridentReachModifier() { return 1.0f;}
 
     public static void onInitialize() {
+        /*
         for(int toolIndex = 0; toolIndex < tools.length; toolIndex++) {
             for (int tierIndex = 0; tierIndex < toolTiers.length; tierIndex++) {
                 String name = "minecraft:" + toolTiers[tierIndex] + "_" + tools[toolIndex];
@@ -80,27 +75,25 @@ public abstract class Combat {
                 setAttributes(name, damage, speed, reach);
             }
         }
-        setAttributes("minecraft:trident", Combat.getTridentDamageModifier(), Combat.getTridentSpeedModifier(), Combat.getTridentReachModifier());
+        setAttributes("minecraft:trident", Combat.getTridentDamageModifier(), Combat.getTridentSpeedModifier(), Combat.getTridentReachModifier());*/
     }
 
     private static void setAttributes(String itemName, float damageModifier, float speedModifier, float reachModifier) {
-        ImmutableMultimap.Builder<RegistryEntry<EntityAttribute>, EntityAttributeModifier> itemBuilder = ImmutableMultimap.builder();
+        /*ImmutableMultimap.Builder<RegistryEntry<EntityAttribute>, EntityAttributeModifier> itemBuilder = ImmutableMultimap.builder();
         Item item = Registries.ITEM.get(new Identifier(itemName));
         String modifierType = item instanceof MiningToolItem ? "Tool modifier" : "Weapon modifier";
 
-        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_DAMAGE_MODIFIER_ID(), modifierType, damageModifier, EntityAttributeModifier.Operation.ADDITION));
-        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_SPEED_MODIFIER_ID(), modifierType, speedModifier, EntityAttributeModifier.Operation.ADDITION));
-        if(reachModifier > 0) itemBuilder.put(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, modifierType, reachModifier, EntityAttributeModifier.Operation.ADDITION));
+        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_DAMAGE_MODIFIER_ID(), modifierType, damageModifier, EntityAttributeModifier.Operation.ADD_VALUE));
+        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_SPEED_MODIFIER_ID(), modifierType, speedModifier, EntityAttributeModifier.Operation.ADD_VALUE));
+        if(reachModifier > 0) itemBuilder.put(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, modifierType, reachModifier, EntityAttributeModifier.Operation.ADD_VALUE));
 
         if (item instanceof MiningToolItem) {
-            ((MiningToolAccessor) item).setAttackDamage(damageModifier);
             ((MiningToolAccessor) item).setAttributeModifiers(itemBuilder.build());
         } else if (item instanceof SwordItem) {
-            ((SwordAccessor) item).setAttackDamage(damageModifier);
             ((SwordAccessor) item).setAttributeModifiers(itemBuilder.build());
         } else if (item instanceof TridentItem) {
             ((TridentAccessor) item).setAttributeModifiers(itemBuilder.build());
-        }
+        }*/
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {

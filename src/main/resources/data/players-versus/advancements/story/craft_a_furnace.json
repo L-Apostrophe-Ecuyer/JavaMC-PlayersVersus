@@ -19,7 +19,7 @@
       "translate": "players-versus.advancements.story.craft_a_furnace.description"
     },
     "icon": {
-      "item": "minecraft:furnace"
+      "id": "minecraft:furnace"
     },
     "title": {
       "translate": "players-versus.advancements.story.craft_a_furnace.title"

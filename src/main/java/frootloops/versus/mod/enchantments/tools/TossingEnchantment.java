@@ -15,22 +15,12 @@ import java.util.Optional;
 
 public class TossingEnchantment extends Enchantment {
     public TossingEnchantment() {
-        super(Rarity.COMMON, ItemTags.SHOVELS, new EquipmentSlot[] {EquipmentSlot.MAINHAND});
-    }
-
-    @Override
-    public int getMinPower(int level) {
-        return 5 + 10 * (level - 1);
-    }
-
-    @Override
-    public int getMaxPower(int level) {
-        return super.getMinPower(level) + 50;
-    }
-
-    @Override
-    public int getMaxLevel() {
-        return 2;
+        super(
+                Enchantment.properties(ItemTags.SHOVELS, 4, 2,
+                        Enchantment.leveledCost(5, 10),
+                        Enchantment.leveledCost(10, 10), 2,
+                        EquipmentSlot.MAINHAND)
+        );
     }
 
     @Override

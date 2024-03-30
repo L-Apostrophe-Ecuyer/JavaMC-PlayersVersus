@@ -5,19 +5,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageSources;
-import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.registry.tag.TagKey;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,6 +35,11 @@ public abstract class LivingEntityMixin extends Entity {
         return this.isSprinting() ? h : h + 0.4f;
     }
 
+    @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0)
+    private double takeMoreKnockback(double strength) {
+        return strength * 1.2;
+    }
+
     @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)
     private void getHandSwingDuration(CallbackInfoReturnable<Integer> cir) {
         ItemStack mainHand = ((LivingEntity)((Object)this)).getMainHandStack();
@@ -53,7 +53,7 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
         if(timeUntilRegen > 10 && source.getAttacker() instanceof LivingEntity){
-            if(source.isIn(DamageTypeTags.IS_PROJECTILE)) timeUntilRegen = 0;
+            if(source.isOf(DamageTypes.ARROW)) timeUntilRegen = 0;
             else if(timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
         }
     }

@@ -2,10 +2,11 @@ package frootloops.versus.mod.enchantments.armor;
 
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.registry.tag.ItemTags;
 
 public class BoundingStridesEnchantment extends Enchantment {
     public BoundingStridesEnchantment() {
-        super(Rarity.RARE, EnchantmentTarget.ARMOR_LEGS, new EquipmentSlot[]{EquipmentSlot.LEGS});
+        super(Rarity.RARE, ItemTags.LEG_ARMOR_ENCHANTABLE, new EquipmentSlot[]{EquipmentSlot.LEGS});
     }
 
     public boolean isTreasure() {

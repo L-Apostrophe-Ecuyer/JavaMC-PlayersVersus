@@ -77,7 +77,7 @@ public abstract class PhantomMixin extends FlyingEntity {
 
     @Nullable
     @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
         this.moveControl = new PhantomMoveControlRevamp((PhantomEntity) ((Object)this));
         this.circlingCenter = this.getBlockPos().up(16);
         this.noClip = true;
@@ -93,7 +93,7 @@ public abstract class PhantomMixin extends FlyingEntity {
             instanceDmg.setBaseValue(4.0D);
         }
 
-        return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
+        return super.initialize(world, difficulty, spawnReason, entityData);
     }
 
     @Override

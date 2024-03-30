@@ -3,6 +3,8 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
@@ -15,20 +17,6 @@ import org.spongepowered.asm.mixin.Shadow;
 public class  CreeperEntityMixin extends HostileEntity {
     protected CreeperEntityMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
-    }
-
-    @Shadow
-    private int fuseTime;
-    @Shadow
-    private int explosionRadius;
-
-    @Nullable
-    @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
-        fuseTime = 34;
-        explosionRadius = 3;
-        this.experiencePoints = 10;
-        return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
 
     @Override

@@ -39,7 +39,7 @@ public abstract class FlintAndSteelItemMixin extends Item {
             else world.setBlockState(blockPos, Blocks.TORCH.getStateWithProperties(state), Block.NOTIFY_ALL | Block.REDRAW_ON_MAIN_THREAD);
             world.emitGameEvent((Entity)playerEntity, GameEvent.BLOCK_CHANGE, blockPos);
             world.playSound(playerEntity, blockPos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0f, world.getRandom().nextFloat() * 0.4f + 0.8f);
-            if (playerEntity != null) context.getStack().damage(1, playerEntity, p -> p.sendToolBreakStatus(context.getHand()));
+            if (playerEntity != null) context.getStack().damage(1, playerEntity, LivingEntity.getSlotForHand(context.getHand()));
             cir.setReturnValue(ActionResult.success(world.isClient()));
             cir.cancel();
         }
@@ -50,7 +50,7 @@ public abstract class FlintAndSteelItemMixin extends Item {
         if(entity.isAlive()) {
             entity.setOnFireFor(2);
             entity.setAttacker(user);
-            if (user != null) stack.damage(1, user, p -> p.sendToolBreakStatus(hand));
+            if (user != null) stack.damage(1, user, LivingEntity.getSlotForHand(hand));
             return ActionResult.SUCCESS;
         }
         return ActionResult.PASS;

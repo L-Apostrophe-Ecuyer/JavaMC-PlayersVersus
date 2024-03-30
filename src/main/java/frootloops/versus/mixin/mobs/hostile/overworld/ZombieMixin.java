@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
@@ -37,6 +38,9 @@ public abstract class ZombieMixin extends HostileEntity {
     }
 
     @Shadow
+    private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
+
+    @Shadow
     protected boolean canConvertInWater() {return true;}
 
     @Override
@@ -44,25 +48,14 @@ public abstract class ZombieMixin extends HostileEntity {
         return 500;
     }
 
-    @Shadow
-    private static final TrackedData<Boolean> BABY = DataTracker.registerData(ZombieEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-
-    private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
-    private static final UUID BABY_HEALTH_ID = UUID.fromString("AA766B59-9566-4402-BC1F-2EE2A276D836");
-
-    // Reduced:
-    private static final EntityAttributeModifier BABY_SPEED_BONUS_REDUCED = new EntityAttributeModifier(BABY_SPEED_ID, "Baby speed boost", 0.2, EntityAttributeModifier.Operation.MULTIPLY_BASE);
-    private static final EntityAttributeModifier BABY_HEALTH_REDUCED = new EntityAttributeModifier(BABY_HEALTH_ID, "Baby health nerf", -12, EntityAttributeModifier.Operation.ADDITION);
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-        cir.setReturnValue(
-                HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
+        cir.setReturnValue(HostileEntity.createHostileAttributes()
+                        .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
                         .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.34f)
-                        .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0)
-                        .add(EntityAttributes.GENERIC_MAX_HEALTH, 24.0)
-                        .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 4.0)
-                        .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.2)
+                        .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
+                        .add(EntityAttributes.GENERIC_ARMOR, 4.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
     }
 
@@ -73,7 +66,6 @@ public abstract class ZombieMixin extends HostileEntity {
         this.ambientSoundChance = -1000;
 
         if(this.getY() > 56d || this.getSteppingBlockState().getSoundGroup() == BlockSoundGroup.GRASS) {
-            this.goalSelector.add(1, new FleeEntityGoal(this, PigEntity.class, 6.0F, 1.0, 1.2));
             this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, ((ZombieEntity) ((Object)this))::canBreakDoors));
         }
 
@@ -90,6 +82,7 @@ public abstract class ZombieMixin extends HostileEntity {
     protected void loot(ItemEntity itemEntity) {
         if(itemEntity.getItemAge() > 160) super.loot(itemEntity);
     }
+
 
     @Override
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
@@ -130,7 +123,7 @@ public abstract class ZombieMixin extends HostileEntity {
 
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
             if (isAtDiamondDepth && rand % 23 == 0) {
-                ItemStack enchantedBook = EnchantmentHelper.enchant(this.getWorld().random, new ItemStack(Items.BOOK), 16, true);;
+                ItemStack enchantedBook = EnchantmentHelper.enchant(this.getWorld().getEnabledFeatures(), this.getWorld().random, new ItemStack(Items.BOOK), 16, true);
 ;               this.equipStack(EquipmentSlot.OFFHAND, enchantedBook);
                 this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
             }
@@ -159,17 +152,12 @@ public abstract class ZombieMixin extends HostileEntity {
         return random.nextFloat() < 0.02f;
     }
 
-    @Override
-    public void setBaby(boolean baby) {
-        this.getDataTracker().set(BABY, baby);
+
+    @Inject(method = "setBaby", at = @At(value = "TAIL"), cancellable = false)
+    public void babiesArentNinjas(boolean baby, CallbackInfo info) {
         if (this.getWorld() != null && !this.getWorld().isClient) {
             EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
             entityAttributeInstance.removeModifier(BABY_SPEED_ID);
-            if (baby) entityAttributeInstance.addTemporaryModifier(BABY_SPEED_BONUS_REDUCED);
-
-            entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-            if (baby) entityAttributeInstance.addTemporaryModifier(BABY_HEALTH_REDUCED);
-            if (baby) this.setHealth(12.0f);
         }
     }
 }

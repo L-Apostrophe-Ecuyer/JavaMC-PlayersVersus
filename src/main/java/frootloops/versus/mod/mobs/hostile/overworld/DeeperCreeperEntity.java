@@ -30,8 +30,8 @@ import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class DeeperCreeperEntity extends CreeperEntity {
-    private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    //private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    //private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private int lastFuseTime, currentFuseTime, fuseTime = 34, explosionRadius = 5;
     public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.of(new Identifier("ambient.cave"), 32);
 
@@ -40,9 +40,9 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
         this.experiencePoints = 29;
-        return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
+        return super.initialize(world, difficulty, spawnReason, entityData);
     }
 
     public static DefaultAttributeContainer.Builder createDeeperCreeperAttributes() {
@@ -69,10 +69,10 @@ public class DeeperCreeperEntity extends CreeperEntity {
 
 
     @Override
-    protected void initDataTracker() {
-        super.initDataTracker();
-        this.dataTracker.startTracking(FUSE_SPEED, -1);
-        this.dataTracker.startTracking(IGNITED, false);
+    protected void initDataTracker(DataTracker.Builder builder) {
+        super.initDataTracker(builder);
+        //builder.add(FUSE_SPEED, -1);
+        //builder.add(IGNITED, false);
     }
 
     @Override

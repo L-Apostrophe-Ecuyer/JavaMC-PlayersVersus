@@ -9,10 +9,8 @@
       "spread_rounds": 1,
       "extra_rare_growths": {
         "type": "minecraft:uniform",
-        "value": {
-          "min_inclusive": 0,
-          "max_inclusive": 2
-        }
+        "min_inclusive": 0,
+        "max_inclusive": 2
       },
       "catalyst_chance": 0.5
     }

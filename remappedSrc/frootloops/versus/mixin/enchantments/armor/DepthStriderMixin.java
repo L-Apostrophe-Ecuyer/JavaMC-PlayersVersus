@@ -3,25 +3,22 @@ package frootloops.versus.mixin.enchantments.armor;
 import com.google.common.collect.Maps;
 import net.minecraft.enchantment.DepthStriderEnchantment;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
-import net.minecraft.enchantment.ThornsEnchantment;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShieldItem;
+import net.minecraft.registry.tag.TagKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 @Mixin(DepthStriderEnchantment.class)
 public class DepthStriderMixin extends Enchantment {
-    protected DepthStriderMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
-        super(weight, type, slotTypes);
+
+    protected DepthStriderMixin(Rarity rarity, TagKey<Item> applicableItems, EquipmentSlot[] slotTypes) {
+        super(rarity, applicableItems, slotTypes);
     }
 
     @Override

@@ -19,8 +19,7 @@
       "translate": "players-versus.advancements.story.upgrade_to_copper.description"
     },
     "icon": {
-      "item": "players-versus:copper_pickaxe",
-      "nbt": "{Damage:0}"
+      "id": "players-versus:copper_pickaxe"
     },
     "title": {
       "translate": "players-versus.advancements.story.upgrade_to_copper.title"

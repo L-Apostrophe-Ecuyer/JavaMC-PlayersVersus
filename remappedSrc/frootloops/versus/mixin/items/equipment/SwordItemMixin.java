@@ -20,14 +20,14 @@ public class SwordItemMixin extends ToolItem {
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING, stack);
+        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack);
         return sweepLevel > 0 ? UseAction.BRUSH : UseAction.BLOCK;
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING, stack);
+        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack);
         double attackCharge = Combat.getAttackChargeProgress(user);
         double attackChargeRequired = sweepLevel > 0 ? 1d + 0.2d * (3 - sweepLevel) : 1d;
         if(attackCharge >= attackChargeRequired) {
@@ -45,7 +45,7 @@ public class SwordItemMixin extends ToolItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if((EnchantmentHelper.getLevel(Enchantments.SWEEPING, stack) > 0)) {
+        if((EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack) > 0)) {
             if (user instanceof PlayerEntity player) player.resetLastAttackedTicks();
             else user.onAttacking(user.getAttacking());
         }

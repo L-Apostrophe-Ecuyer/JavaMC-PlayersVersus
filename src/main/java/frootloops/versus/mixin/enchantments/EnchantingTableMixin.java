@@ -1,16 +1,24 @@
 package frootloops.versus.mixin.enchantments;
 
+import frootloops.versus.VersusMod;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.EnchantingTableBlock;
+import net.minecraft.component.Component;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.screen.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -27,8 +35,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Mixin(EnchantmentScreenHandler.class)
 public abstract class EnchantingTableMixin extends ScreenHandler {
@@ -50,7 +60,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
     @Shadow private final ScreenHandlerContext context;
     @Shadow private final Property seed;
 
-    @Shadow private List<EnchantmentLevelEntry> generateEnchantments(ItemStack stack, int slot, int level) { return null;}
+    @Shadow private List<EnchantmentLevelEntry> generateEnchantments(FeatureSet enabledFeatures, ItemStack stack, int slot, int level) { return null;}
 
     @Overwrite
     public boolean onButtonClick(PlayerEntity player, int index) {
@@ -70,34 +80,26 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
             this.context.run((world, pos) -> {
 
                 ItemStack stack = inputStack;
-                List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(inventory.getStack(0), index, this.enchantmentPower[index]);
+                List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(world.getEnabledFeatures(), stack, index, this.enchantmentPower[index]);
                 if (!listCandidateEnchantments.isEmpty()) {
 
+                    // Apply costs:
                     player.applyEnchantmentCosts(stack, lapisCost);
 
-                    boolean isBook = stack.isOf(Items.BOOK);
-                    if (isBook) {
-                        stack = new ItemStack(Items.ENCHANTED_BOOK);
-                        NbtCompound nbtCompound = inputStack.getNbt();
-                        if (nbtCompound != null) {
-                            stack.setNbt(nbtCompound.copy());
-                        }
+                    // Switching to a book:
+                    if (stack.isOf(Items.BOOK)) {
+                        stack = stack.copyComponentsToNewStack(Items.ENCHANTED_BOOK, 1);
                         this.inventory.setStack(0, stack);
                     }
 
                     // Add new enchantments, or improve old ones:
-                    Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(inputStack);
-                    for (EnchantmentLevelEntry entry : listCandidateEnchantments) {
-                        if(!enchantments.containsKey(entry.enchantment) || entry.level > enchantments.get(entry.enchantment)) {
-                            enchantments.put(entry.enchantment, entry.level);
-                        }
+                    Iterator enchantmentLevelEntryIterator = listCandidateEnchantments.iterator();
+                    while(enchantmentLevelEntryIterator.hasNext()) {
+                        EnchantmentLevelEntry entry = (EnchantmentLevelEntry)enchantmentLevelEntryIterator.next();
+                        stack.addEnchantment(entry.enchantment, entry.level);
                     }
 
-                    stack.removeSubNbt("Enchantments");
-                    stack.removeSubNbt("StoredEnchantments");
-                    EnchantmentHelper.set(enchantments, stack);
-                    if (stack.isOf(Items.BOOK)) stack = new ItemStack(Items.ENCHANTED_BOOK);
-
+                    // Update the item:
                     if (!player.getAbilities().creativeMode) {
                         lapisStack.decrement(lapisCost);
                         if (lapisStack.isEmpty()) {
@@ -105,11 +107,9 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
                         }
                     }
 
+                    // Update player and client effects:
                     player.incrementStat(Stats.ENCHANT_ITEM);
-                    if (player instanceof ServerPlayerEntity) {
-                        Criteria.ENCHANTED_ITEM.trigger((ServerPlayerEntity)player, stack, lapisCost);
-                    }
-
+                    if (player instanceof ServerPlayerEntity)  Criteria.ENCHANTED_ITEM.trigger((ServerPlayerEntity)player, stack, lapisCost);
                     this.inventory.markDirty();
                     this.seed.set(player.getEnchantmentTableSeed());
                     this.onContentChanged(this.inventory);
@@ -126,7 +126,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
         this.context.run((world, pos) -> {
             List<EnchantmentLevelEntry> list;
             for (int j = 0; j < 3; ++j) {
-                if (this.enchantmentPower[j] <= 0 || (list = this.generateEnchantments(inventory.getStack(0), j, this.enchantmentPower[j])) == null || list.isEmpty()) {
+                if (this.enchantmentPower[j] <= 0 || (list = this.generateEnchantments(world.getEnabledFeatures(), inventory.getStack(0), j, this.enchantmentPower[j])) == null || list.isEmpty()) {
                     this.enchantmentPower[j] = 0;
                     this.enchantmentLevel[j] = -1;
                     this.enchantmentId[j] = -1;

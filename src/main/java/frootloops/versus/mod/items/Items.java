@@ -1,37 +1,51 @@
 package frootloops.versus.mod.items;
 
-import frootloops.versus.mixin.players.accessors.ItemAccessor;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.environment.CustomBlocks;
-import frootloops.versus.mod.items.equipment.copper.CopperArmorMaterial;
 import frootloops.versus.mod.items.equipment.copper.CopperToolMaterial;
-import frootloops.versus.mod.items.equipment.slime.SlimeArmorMaterial;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.*;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.Direction;
+
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class Items {
 
+    private static Map<Item, Integer> DEFAULT_MAX_STACK_SIZE = new HashMap<>();
     public static final CopperToolMaterial COPPER_TOOL_MATERIAL = new CopperToolMaterial();
-    public static final CopperArmorMaterial COPPER_ARMOR_MATERIAL = new CopperArmorMaterial();
-    public static final SlimeArmorMaterial SLIME_ARMOR_MATERIAL = new SlimeArmorMaterial();
+    public static final RegistryEntry<ArmorMaterial> COPPER_ARMOR_MATERIAL = registerCustomArmorMaterial("copper", Util.make(new EnumMap(ArmorItem.Type.class), map -> {
+        map.put(ArmorItem.Type.BOOTS, 1);
+        map.put(ArmorItem.Type.LEGGINGS, 3);
+        map.put(ArmorItem.Type.CHESTPLATE, 5);
+        map.put(ArmorItem.Type.HELMET, 2);
+        map.put(ArmorItem.Type.BODY, 7);
+    }), -4, SoundEvents.ITEM_ARMOR_EQUIP_TURTLE, 0.0f, 0.0f, () -> Ingredient.ofItems(net.minecraft.item.Items.COPPER_INGOT));
 
-    public static final Item COPPER_HELMET = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Settings());
-    public static final Item COPPER_CHESTPLATE = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings());
-    public static final Item COPPER_LEGGINGS = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Settings());
-    public static final Item COPPER_BOOTS = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings());
-    public static ToolItem COPPER_HOE = new HoeItem(COPPER_TOOL_MATERIAL, (int)Combat.getHoeDamageModifier(), Combat.getHoeSpeedModifier(), new Item.Settings());
-    public static ToolItem COPPER_AXE = new AxeItem(COPPER_TOOL_MATERIAL, (int)Combat.getAxeDamageModifier(), Combat.getAxeSpeedModifier(), new Item.Settings());
-    public static ToolItem COPPER_SWORD = new SwordItem(COPPER_TOOL_MATERIAL, (int)Combat.getSwordDamageModifier(), Combat.getSwordSpeedModifier(), new Item.Settings());
-    public static ToolItem COPPER_SHOVEL = new ShovelItem(COPPER_TOOL_MATERIAL, (int)Combat.getShovelDamageModifier(), Combat.getShovelSpeedModifier(), new Item.Settings());
-    public static ToolItem COPPER_PICKAXE = new PickaxeItem(COPPER_TOOL_MATERIAL, (int)Combat.getPickaxeDamageModifier(), Combat.getPickaxeSpeedModifier(), new Item.Settings());
-
+    public static final Item COPPER_HELMET = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Settings().maxDamage(ArmorItem.Type.HELMET.getMaxDamage(10)));
+    public static final Item COPPER_CHESTPLATE = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings().maxDamage(ArmorItem.Type.CHESTPLATE.getMaxDamage(10)));
+    public static final Item COPPER_LEGGINGS = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Settings().maxDamage(ArmorItem.Type.LEGGINGS.getMaxDamage(10)));
+    public static final Item COPPER_BOOTS = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings().maxDamage(ArmorItem.Type.BOOTS.getMaxDamage(10)));
+    public static HoeItem COPPER_HOE = new HoeItem(COPPER_TOOL_MATERIAL, new Item.Settings().attributeModifiers(HoeItem.createAttributeModifiers(COPPER_TOOL_MATERIAL, Combat.getHoeDamageModifier(), Combat.getHoeSpeedModifier())));
+    public static AxeItem COPPER_AXE = new AxeItem(COPPER_TOOL_MATERIAL, new Item.Settings().attributeModifiers(HoeItem.createAttributeModifiers(COPPER_TOOL_MATERIAL, Combat.getAxeDamageModifier(), Combat.getAxeSpeedModifier())));
+    public static PickaxeItem COPPER_PICKAXE = new PickaxeItem(COPPER_TOOL_MATERIAL, new Item.Settings().attributeModifiers(HoeItem.createAttributeModifiers(COPPER_TOOL_MATERIAL, Combat.getPickaxeDamageModifier(), Combat.getPickaxeSpeedModifier())));
+    public static SwordItem COPPER_SWORD = new SwordItem(COPPER_TOOL_MATERIAL, new Item.Settings().attributeModifiers(HoeItem.createAttributeModifiers(COPPER_TOOL_MATERIAL, Combat.getSwordDamageModifier(), Combat.getSwordSpeedModifier())));
+    public static ShovelItem COPPER_SHOVEL = new ShovelItem(COPPER_TOOL_MATERIAL, new Item.Settings().attributeModifiers(HoeItem.createAttributeModifiers(COPPER_TOOL_MATERIAL, Combat.getShovelDamageModifier(), Combat.getShovelSpeedModifier())));
     public static final VerticallyAttachableBlockItem SMOLDERING_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH, new Item.Settings(), Direction.DOWN);
     public static final VerticallyAttachableBlockItem EXTINGUISHED_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, new Item.Settings(), Direction.DOWN);
     public static final BlockItem GRANITE_BRICKS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICKS, new Item.Settings());
@@ -39,9 +53,7 @@ public abstract class Items {
     public static final BlockItem GRANITE_BRICK_STAIRS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_STAIRS, new Item.Settings());
 
     public static void onInitialize() {
-        int maxSnacks = 64, maxMeals = 64, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
-        setStackSizes(maxSnacks, maxMeals, maxBottled, maxStews, maxThrowables, maxPlaceableEntities);
-
+        setStackSizes(64, 64, 8, 8, 64, 16, 99);
         registerCustomItem("copper_chestplate", COPPER_CHESTPLATE, ItemGroups.COMBAT);
         registerCustomItem("copper_leggings", COPPER_LEGGINGS, ItemGroups.COMBAT);
         registerCustomItem("copper_helmet", COPPER_HELMET, ItemGroups.COMBAT);
@@ -59,58 +71,78 @@ public abstract class Items {
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
-        if(group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
+        if (group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
-        if(group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.add(item));
-        if(group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.add(item));
+        if (group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.add(item));
+        if (group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);
     }
 
-    private static void setStackSizes(final int maxSnacks, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities){
+    public static RegistryEntry<ArmorMaterial> registerCustomArmorMaterial(String name, EnumMap<ArmorItem.Type, Integer> defense, int enchantability, RegistryEntry<SoundEvent> equipSound, float toughness, float knockbackResistance, Supplier<Ingredient> repairIngredient) {
+        Identifier id = new Identifier(MOD_ID, name);
+        List<ArmorMaterial.Layer> layers = List.of(new ArmorMaterial.Layer(id));
+        EnumMap<ArmorItem.Type, Integer> enumMap = new EnumMap<ArmorItem.Type, Integer>(ArmorItem.Type.class);
+        for (ArmorItem.Type type : ArmorItem.Type.values()) {
+            enumMap.put(type, defense.get(type));
+        }
+        return Registry.registerReference(Registries.ARMOR_MATERIAL, id, new ArmorMaterial(enumMap, enchantability, equipSound, repairIngredient, layers, toughness, knockbackResistance));
+    }
+
+    private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
         for (Item item : Registries.ITEM) {
 
-            if(item.getFoodComponent() != null) {
-                if(item.getFoodComponent().isMeat()) ((ItemAccessor) item).setMaxCount(maxMeals);
-                else if(item instanceof StewItem || item instanceof SuspiciousStewItem) ((ItemAccessor) item).setMaxCount(maxStews);
-                else ((ItemAccessor) item).setMaxCount(maxSnacks);
-            }
+            if (item.getComponents().contains(DataComponentTypes.FOOD)) {
+                if (item.getTranslationKey().contains("cooked")) setDefaultMaxStackSize(item, maxMeals);
+                else if (item instanceof StewItem || item instanceof SuspiciousStewItem)
+                    setDefaultMaxStackSize(item, maxStews);
+                else setDefaultMaxStackSize(item, maxFoods);
+            } else if (item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem)
+                setDefaultMaxStackSize(item, maxPlaceableEntities);
 
-            else if(item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem)
-                ((ItemAccessor) item).setMaxCount(maxPlaceableEntities);
+            else if (item instanceof BlockItem) setDefaultMaxStackSize(item, maxPlaceableBlocks);
         }
 
         // Other foods:
-        ((ItemAccessor) net.minecraft.item.Items.CAKE).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.BREAD).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.PUMPKIN_PIE).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.SALMON).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.COOKED_SALMON).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.COD).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.COOKED_COD).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.TROPICAL_FISH).setMaxCount(Math.max(maxSnacks,maxMeals));
-        ((ItemAccessor) net.minecraft.item.Items.ROTTEN_FLESH).setMaxCount(Math.max(maxSnacks,maxMeals));
+        setDefaultMaxStackSize(net.minecraft.item.Items.CAKE, maxMeals);
+        setDefaultMaxStackSize(net.minecraft.item.Items.CAKE, maxMeals);
+        setDefaultMaxStackSize(net.minecraft.item.Items.BREAD, maxMeals);
+        setDefaultMaxStackSize(net.minecraft.item.Items.PUMPKIN_PIE, maxMeals);
+        setDefaultMaxStackSize(net.minecraft.item.Items.SALMON, maxMeals);
+        setDefaultMaxStackSize(net.minecraft.item.Items.COOKED_SALMON, maxMeals);
+        setDefaultMaxStackSize(net.minecraft.item.Items.COD, maxMeals);
+        setDefaultMaxStackSize(net.minecraft.item.Items.COOKED_COD, maxMeals);
+        setDefaultMaxStackSize(net.minecraft.item.Items.TROPICAL_FISH, Math.max(maxFoods, maxMeals));
+        setDefaultMaxStackSize(net.minecraft.item.Items.ROTTEN_FLESH, Math.max(maxFoods, maxMeals));
 
         // Bottles:
-        ((ItemAccessor) net.minecraft.item.Items.POTION).setMaxCount(maxBottled);
-        ((ItemAccessor) net.minecraft.item.Items.HONEY_BOTTLE).setMaxCount(maxBottled);
+        setDefaultMaxStackSize(net.minecraft.item.Items.POTION, maxBottled);
+        setDefaultMaxStackSize(net.minecraft.item.Items.HONEY_BOTTLE, maxBottled);
 
         // Throwables:
-        ((ItemAccessor) net.minecraft.item.Items.EGG).setMaxCount(maxThrowables);
-        ((ItemAccessor) net.minecraft.item.Items.SNOWBALL).setMaxCount(maxThrowables);
-        ((ItemAccessor) net.minecraft.item.Items.ENDER_PEARL).setMaxCount(maxThrowables);
-        ((ItemAccessor) net.minecraft.item.Items.FIRE_CHARGE).setMaxCount(maxThrowables);
-        ((ItemAccessor) net.minecraft.item.Items.PUFFERFISH).setMaxCount(maxThrowables);
+        setDefaultMaxStackSize(net.minecraft.item.Items.EGG, maxThrowables);
+        setDefaultMaxStackSize(net.minecraft.item.Items.SNOWBALL, maxThrowables);
+        setDefaultMaxStackSize(net.minecraft.item.Items.ENDER_PEARL, maxThrowables);
+        setDefaultMaxStackSize(net.minecraft.item.Items.FIRE_CHARGE, maxThrowables);
+        setDefaultMaxStackSize(net.minecraft.item.Items.PUFFERFISH, maxThrowables);
 
         // Empty buckets
-        ((ItemAccessor) net.minecraft.item.Items.BUCKET).setMaxCount(64);
-        ((ItemAccessor) net.minecraft.item.Items.POWDER_SNOW_BUCKET).setMaxCount(16);
+        setDefaultMaxStackSize(net.minecraft.item.Items.BUCKET, maxPlaceableBlocks);
+        setDefaultMaxStackSize(net.minecraft.item.Items.POWDER_SNOW_BUCKET, maxPlaceableEntities);
 
         // Rarities
-        // ((ItemAccessor) net.minecraft.item.FutureItems.HEART_OF_THE_SEA).setMaxCount(1);
-        // ((ItemAccessor) net.minecraft.item.FutureItems.NETHER_STAR).setMaxCount(1);
-        ((ItemAccessor) net.minecraft.item.Items.SADDLE).setMaxCount(64);
+        // setDefaultMaxStackSize(net.minecraft.item.FutureItems.HEART_OF_THE_SEA, 1);
+        // setDefaultMaxStackSize(net.minecraft.item.FutureItems.NETHER_STAR, 1);
+        setDefaultMaxStackSize(net.minecraft.item.Items.SADDLE, maxThrowables);
+    }
+
+    private static void setDefaultMaxStackSize(Item item, int maxCount) {
+        DEFAULT_MAX_STACK_SIZE.put(item, maxCount);
+    }
+
+    public static int getDefaultMaxStackSize(Item item) {
+        return DEFAULT_MAX_STACK_SIZE.getOrDefault(item, -1);
     }
 }

@@ -5,10 +5,8 @@
       "surface": "ceiling",
       "depth": {
         "type": "minecraft:uniform",
-        "value": {
-          "min_inclusive": 1,
-          "max_inclusive": 2
-        }
+        "min_inclusive": 1,
+        "max_inclusive": 2
       },
       "vertical_range": 5,
       "extra_bottom_block_chance": 0,
@@ -16,10 +14,8 @@
       "vegetation_chance": 0.3,
       "xz_radius": {
         "type": "minecraft:uniform",
-        "value": {
-          "min_inclusive": 3,
-          "max_inclusive": 8
-        }
+        "min_inclusive": 3,
+        "max_inclusive": 8
       },
       "replaceable": "#minecraft:stone_ore_replaceables",
       "ground_state": {

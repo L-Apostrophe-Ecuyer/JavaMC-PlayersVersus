@@ -9,7 +9,7 @@
         }
     ],
     "result": {
-        "item": "minecraft:white_dye",
+        "id": "minecraft:white_dye",
         "count": 2
     },
     "group": "dye_util"

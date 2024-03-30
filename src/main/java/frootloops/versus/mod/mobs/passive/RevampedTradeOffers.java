@@ -9,6 +9,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SuspiciousStewIngredient;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
@@ -19,14 +21,14 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.WitchEntity;
 import net.minecraft.item.*;
-import net.minecraft.item.map.MapIcon;
 import net.minecraft.item.map.MapState;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 import net.minecraft.recipe.BrewingRecipeRegistry;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.StructureTags;
 import net.minecraft.registry.tag.TagKey;
@@ -52,6 +54,7 @@ import java.util.stream.Collectors;
 
 public class RevampedTradeOffers {
 
+    /*
     public static final Map<VillagerProfession, Int2ObjectMap<Factory[]>> REVAMPED_PROFESSION_TO_LEVELED_TRADE = Util.make(Maps.newHashMap(), map -> {
         map.put(VillagerProfession.FARMER, copyToFastUtilMap(
                 ImmutableMap.of(
@@ -138,7 +141,7 @@ public class RevampedTradeOffers {
                         2, new Factory[]{
                                 new BuyForOneEmeraldFactory(Items.SALMON, 6, 16, 8),
                                 new SellItemFactory(Items.SEAGRASS, 1, 26, 5),
-                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER_BREATHING).getItem(), 5, 1, 10),
+                                new SellItemFactory(PotionContentsComponent.createStack(Items.POTION, Potions.WATER_BREATHING), 5, 1, 3, 10),
                                 new SellItemFactory(Items.SEA_PICKLE, 1, 4, 8),
                                 new BuyForMutlipleEmeraldsFactory(Items.NAUTILUS_SHELL, 18, 16, 50),
                                 new BuyForMutlipleEmeraldsFactory(Items.AXOLOTL_BUCKET, 16, 16, 50),
@@ -352,7 +355,7 @@ public class RevampedTradeOffers {
         map.put(VillagerProfession.CARTOGRAPHER, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Raid.getOminousBanner(), 24, 16, 6),
+                                new BuyForMutlipleEmeraldsFactory(Items.OMINOUS_BOTTLE, 24, 16, 15),
                                 new SellItemFactory(Items.SPYGLASS, 2, 1, 8),
                                 new SellItemFactory(Items.COMPASS, 1, 1, 3),
                                 new SellItemFactory(Items.PAPER, 1, 12, 3),
@@ -1098,7 +1101,7 @@ public class RevampedTradeOffers {
             ItemStack emeraldStack = new ItemStack(Items.EMERALD, this.price);
             ItemStack armorStack = new ItemStack(this.sell);
 
-            if (this.sell instanceof DyeableItem) {
+            if (this.sell.getComponents().contains(DataComponentTypes.DYED_COLOR)) {
                 ArrayList<DyeItem> list = Lists.newArrayList();
                 list.add(SellSpecialLeatherArmorFactory.getDye(random));
                 if (random.nextFloat() > 0.7f) {
@@ -1246,5 +1249,5 @@ public class RevampedTradeOffers {
         private static DyeItem getDye(Random random) {
             return DyeItem.byColor(DyeColor.byId(random.nextInt(16)));
         }
-    }
+    }*/
 }

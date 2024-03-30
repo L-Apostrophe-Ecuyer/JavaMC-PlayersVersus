@@ -1,13 +1,11 @@
 package frootloops.versus.mixin.enchantments;
 
 import com.google.common.collect.Lists;
-import frootloops.versus.VersusMod;
 import net.minecraft.enchantment.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.collection.Weighting;
 import net.minecraft.util.math.MathHelper;
@@ -37,10 +35,7 @@ public class EnchantmentHelperMixin {
         for (EnchantmentLevelEntry candidate : listCandidateEnchantments) {
             if(!currentEnchantments.containsKey(candidate.enchantment) || candidate.level > currentEnchantments.get(candidate.enchantment)) {
                 if(candidate.enchantment instanceof ProtectionEnchantment) {
-                    if(numProtectionEnchantments >= 2) {
-                        listCandidateEnchantments.remove(candidate);
-                        continue;
-                    }
+                    if(numProtectionEnchantments >= 2) continue;
                     else numProtectionEnchantments += 1;
                 }
                 currentEnchantments.put(candidate.enchantment, candidate.level);

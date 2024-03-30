@@ -14,10 +14,8 @@ public abstract class CrosshairTargetMixin {
     @Final
     private MinecraftClient client;
 
-    private double playerAttackRange = 0.0d;
-
-    @ModifyVariable(method = "updateTargetedEntity", at = @At("STORE"), ordinal = 0)
-    private double getActualAttackRange(double x) {
+    @ModifyVariable(method = "findCrosshairTarget", at = @At("HEAD"), ordinal = 1)
+    private double getActualAttackRange(double entityInteractionRange) {
         return Combat.getAttackRange(client.player);
     }
 }

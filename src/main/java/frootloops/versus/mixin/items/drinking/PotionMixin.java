@@ -1,13 +1,12 @@
 package frootloops.versus.mixin.items.drinking;
 
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.PotionItem;
-import net.minecraft.potion.PotionUtil;
 import org.spongepowered.asm.mixin.Mixin;
-
-import java.util.List;
 
 @Mixin(PotionItem.class)
 public class PotionMixin extends Item {
@@ -17,8 +16,10 @@ public class PotionMixin extends Item {
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        List<StatusEffectInstance> list = PotionUtil.getPotionEffects(stack);
-        for (StatusEffectInstance statusEffectInstance : list)
+        PotionContentsComponent potionContents = stack.getComponents().get(DataComponentTypes.POTION_CONTENTS);
+        if(potionContents == null) return 32;
+
+        for (StatusEffectInstance statusEffectInstance : potionContents.getEffects())
             if (statusEffectInstance.getAmplifier() > 0) return 40;
 
         return 32;

@@ -65,7 +65,7 @@ public class WardenMixin extends HostileEntity {
     private void reduceAngerTowardsSneakyPlayers(CallbackInfo ci){
         if(this.getAngriness() == Angriness.ANGRY && this.age % 3 == 0) {
             Entity target = this.getTarget();
-            if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getPos()) > 600)) {
+            if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getPos()) > 400)) {
                 this.angerManager.increaseAngerAt(target, -1);
             }
         }
@@ -89,7 +89,7 @@ public class WardenMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason == SpawnReason.NATURAL && this.getBlockPos().getY() > -16) return false;
+        if(spawnReason != SpawnReason.TRIGGERED && this.getBlockPos().getY() > -32) return false;
         else return super.canSpawn(world, spawnReason);
     }
 
@@ -101,7 +101,7 @@ public class WardenMixin extends HostileEntity {
      * why you're being attacked, and have a way to avoiding it. In vanilla, these sonic
      * booms are simply too punishing.
      */
-    private static final double NEW_RANGE_HORIZONTAL = 10.0d, NEW_RANGE_VERTICAL = 12.0d,
+    private static final double NEW_RANGE_HORIZONTAL = 8.0d, NEW_RANGE_VERTICAL = 10.0d,
             NEW_RANGE_HORIZONTAL_SQUARED = NEW_RANGE_HORIZONTAL * NEW_RANGE_HORIZONTAL;
 
     protected WardenMixin(EntityType<? extends HostileEntity> entityType, World world) {

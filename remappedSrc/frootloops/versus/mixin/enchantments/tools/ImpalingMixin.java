@@ -1,20 +1,20 @@
 package frootloops.versus.mixin.enchantments.tools;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.ImpalingEnchantment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundEvents;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ImpalingEnchantment.class)
 public class ImpalingMixin extends Enchantment {
-    protected ImpalingMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
-        super(weight, type, slotTypes);
+
+    protected ImpalingMixin(Rarity rarity, TagKey<Item> applicableItems, EquipmentSlot[] slotTypes) {
+        super(rarity, applicableItems, slotTypes);
     }
 
     @Override

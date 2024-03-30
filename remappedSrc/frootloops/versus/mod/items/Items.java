@@ -2,6 +2,7 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.mixin.players.accessors.ItemAccessor;
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.items.equipment.copper.CopperArmorMaterial;
 import frootloops.versus.mod.items.equipment.copper.CopperToolMaterial;
 import frootloops.versus.mod.items.equipment.slime.SlimeArmorMaterial;
@@ -11,6 +12,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 import static frootloops.versus.VersusMod.MOD_ID;
 
@@ -30,6 +32,12 @@ public abstract class Items {
     public static ToolItem COPPER_SHOVEL = new ShovelItem(COPPER_TOOL_MATERIAL, (int)Combat.getShovelDamageModifier(), Combat.getShovelSpeedModifier(), new Item.Settings());
     public static ToolItem COPPER_PICKAXE = new PickaxeItem(COPPER_TOOL_MATERIAL, (int)Combat.getPickaxeDamageModifier(), Combat.getPickaxeSpeedModifier(), new Item.Settings());
 
+    public static final VerticallyAttachableBlockItem SMOLDERING_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH, new Item.Settings(), Direction.DOWN);
+    public static final VerticallyAttachableBlockItem EXTINGUISHED_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, new Item.Settings(), Direction.DOWN);
+    public static final BlockItem GRANITE_BRICKS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICKS, new Item.Settings());
+    public static final BlockItem GRANITE_BRICK_SLAB_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_SLAB, new Item.Settings());
+    public static final BlockItem GRANITE_BRICK_STAIRS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_STAIRS, new Item.Settings());
+
     public static void onInitialize() {
         int maxSnacks = 64, maxMeals = 64, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
         setStackSizes(maxSnacks, maxMeals, maxBottled, maxStews, maxThrowables, maxPlaceableEntities);
@@ -43,14 +51,19 @@ public abstract class Items {
         registerCustomItem("copper_sword", COPPER_SWORD, ItemGroups.COMBAT);
         registerCustomItem("copper_shovel", COPPER_SHOVEL, ItemGroups.TOOLS);
         registerCustomItem("copper_pickaxe", COPPER_PICKAXE, ItemGroups.TOOLS);
+        registerCustomItem("smoldering_torch", SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
+        registerCustomItem("extinguished_torch", EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);
+        registerCustomItem("granite_bricks", GRANITE_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_brick_slab", GRANITE_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_brick_stairs", GRANITE_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
     }
 
-    private static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
+    public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
         if(group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);
     }
 
-    private static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
+    public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
         if(group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.add(item));
         if(group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);
@@ -77,9 +90,8 @@ public abstract class Items {
         ((ItemAccessor) net.minecraft.item.Items.COOKED_SALMON).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.COD).setMaxCount(maxMeals);
         ((ItemAccessor) net.minecraft.item.Items.COOKED_COD).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.PUFFERFISH).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.TROPICAL_FISH).setMaxCount(maxMeals);
-        ((ItemAccessor) net.minecraft.item.Items.ROTTEN_FLESH).setMaxCount(64);
+        ((ItemAccessor) net.minecraft.item.Items.TROPICAL_FISH).setMaxCount(Math.max(maxSnacks,maxMeals));
+        ((ItemAccessor) net.minecraft.item.Items.ROTTEN_FLESH).setMaxCount(Math.max(maxSnacks,maxMeals));
 
         // Bottles:
         ((ItemAccessor) net.minecraft.item.Items.POTION).setMaxCount(maxBottled);
@@ -89,13 +101,16 @@ public abstract class Items {
         ((ItemAccessor) net.minecraft.item.Items.EGG).setMaxCount(maxThrowables);
         ((ItemAccessor) net.minecraft.item.Items.SNOWBALL).setMaxCount(maxThrowables);
         ((ItemAccessor) net.minecraft.item.Items.ENDER_PEARL).setMaxCount(maxThrowables);
+        ((ItemAccessor) net.minecraft.item.Items.FIRE_CHARGE).setMaxCount(maxThrowables);
+        ((ItemAccessor) net.minecraft.item.Items.PUFFERFISH).setMaxCount(maxThrowables);
 
         // Empty buckets
         ((ItemAccessor) net.minecraft.item.Items.BUCKET).setMaxCount(64);
         ((ItemAccessor) net.minecraft.item.Items.POWDER_SNOW_BUCKET).setMaxCount(16);
 
         // Rarities
-        ((ItemAccessor) net.minecraft.item.Items.HEART_OF_THE_SEA).setMaxCount(1);
-        ((ItemAccessor) net.minecraft.item.Items.NETHER_STAR).setMaxCount(1);
+        // ((ItemAccessor) net.minecraft.item.FutureItems.HEART_OF_THE_SEA).setMaxCount(1);
+        // ((ItemAccessor) net.minecraft.item.FutureItems.NETHER_STAR).setMaxCount(1);
+        ((ItemAccessor) net.minecraft.item.Items.SADDLE).setMaxCount(64);
     }
 }

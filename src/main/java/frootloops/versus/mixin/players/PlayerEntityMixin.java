@@ -9,6 +9,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.BrushableBlock;
 import net.minecraft.block.ShulkerBoxBlock;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -32,10 +34,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -66,12 +65,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(LivingEntity.createLivingAttributes()
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, Combat.PLAYER_BASE_ATTACK_SPEED)
                 .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 5.0)
                 .add(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, Combat.PLAYER_BASE_ATTACK_REACH)
-                .add(EntityAttributes.GENERIC_LUCK));
+                .add(EntityAttributes.GENERIC_LUCK)
+                .add(EntityAttributes.PLAYER_BLOCK_BREAK_SPEED));
     }
+
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
     private boolean switchHeldItemsWithoutResettingCooldown(ItemStack selectedItem, ItemStack itemStack) {
@@ -141,22 +142,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         // Hitting blocks while flying no longer neglects helmet protection:
         if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
-            ItemStack helmet = this.getEquippedStack(EquipmentSlot.HEAD);
-            if(helmet != null) {
-                Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> helmetAttributeModifiers = helmet.getAttributeModifiers(EquipmentSlot.HEAD);
+            ItemStack helmetStack = this.getEquippedStack(EquipmentSlot.HEAD);
+            if(helmetStack != null && helmetStack.getItem() != null && helmetStack.getItem() instanceof ArmorItem helmetItem) {
 
-                float armorAmount = 0.0f;
-                for (EntityAttributeModifier modifier:helmetAttributeModifiers.get(EntityAttributes.GENERIC_ARMOR))
-                    armorAmount += modifier.getValue();
-
-                float toughnessAmount = 0.0f;
-                for (EntityAttributeModifier modifier:helmetAttributeModifiers.get(EntityAttributes.GENERIC_ARMOR_TOUGHNESS))
-                    toughnessAmount += modifier.getValue();
-
-                float protectionAmount = (float)Math.max(EnchantmentHelper.getLevel(Enchants.IMPACT_PROTECTION, helmet), EnchantmentHelper.getLevel(Enchantments.PROTECTION, helmet));
-                if (protectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, protectionAmount);
-
-                return DamageUtil.getDamageLeft(amount, armorAmount, toughnessAmount);
+                float armorAmount = helmetItem.getProtection();
+                float toughnessAmount = helmetItem.getToughness();
+                float enchantmentProtectionAmount = (float)Math.max(EnchantmentHelper.getLevel(Enchants.IMPACT_PROTECTION, helmetStack), EnchantmentHelper.getLevel(Enchantments.PROTECTION, helmetStack));
+                if (enchantmentProtectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, enchantmentProtectionAmount);
+                return DamageUtil.getDamageLeft(amount, source, armorAmount, toughnessAmount);
             }
         }
         return amount;
@@ -166,7 +159,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private void onDamageInterruptEating(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
             Item item = this.activeItemStack.getItem();
-            if (item.isFood() || item instanceof PotionItem) {
+            if (item.getComponents().contains(DataComponentTypes.FOOD) || item instanceof PotionItem) {
                 this.clearActiveItem();
                 itemCooldownManager.set(item, 32);
             }

@@ -36,7 +36,7 @@ public class PillagerPatrolMixin {
 
             if (patrolEntity != null) {
                 patrolEntity.setPosition(pos.getX(), pos.getY(), pos.getZ());
-                patrolEntity.initialize(world, world.getLocalDifficulty(pos), SpawnReason.PATROL, null, null);
+                patrolEntity.initialize(world, world.getLocalDifficulty(pos), SpawnReason.PATROL, null);
                 world.spawnEntityAndPassengers(patrolEntity);
             }
         }

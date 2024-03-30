@@ -1,8 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:wooden_pickaxe",
-      "nbt": "{Damage:0}"
+      "id": "minecraft:wooden_pickaxe"
     },
     "title": {
       "translate": "advancements.story.mine_stone.title"
@@ -17,9 +16,7 @@
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
-          {
-            "tag": "minecraft:stone_tool_materials"
-          }
+          {}
         ]
       }
     },

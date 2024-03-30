@@ -2,31 +2,44 @@
   "type": "minecraft:chest",
   "pools": [
     {
-      "rolls": {
-        "min": 0.0,
-        "max": 1.0,
-        "type": "minecraft:uniform"
-      },
+      "rolls": 1,
+      "bonus_rolls": 0,
       "entries": [
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{StoredEnchantments:[{id:mending,lvl:1}]}"
-            }
-          ],
-          "name": "minecraft:enchanted_book"
+          "name": "minecraft:eye_armor_trim_smithing_template"
         }
       ]
     },
     {
       "rolls": {
-        "min": 0.0,
-        "max": 1.0,
-        "type": "minecraft:uniform"
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
       },
-      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_book",
+          "functions": [
+            {
+              "function": "minecraft:set_enchantments",
+              "enchantments": {
+                "minecraft:mending": 1
+              },
+              "add": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
+      },
+      "bonus_rolls": 0,
       "entries": [
         {
           "type": "minecraft:item",
@@ -37,57 +50,46 @@
           "type": "minecraft:item",
           "weight": 8,
           "name": "minecraft:globe_banner_pattern"
-        },
-	{
-          "type": "minecraft:item",
-          "weight": 2,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{Recipes:[\"minecraft:end_portal_frame\"]}"
-            }
-          ],
-          "name": "minecraft:knowledge_book"
         }
       ]
     },
     {
       "rolls": {
-        "min": 5.0,
-        "max": 11.0,
-        "type": "minecraft:uniform"
+        "type": "minecraft:uniform",
+        "min": 5,
+        "max": 11
       },
-      "bonus_rolls": 0.0,
+      "bonus_rolls": 0,
       "entries": [
         {
           "type": "minecraft:item",
           "weight": 10,
+          "name": "minecraft:book",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
-                "min": 1.0,
-                "max": 3.0,
-                "type": "minecraft:uniform"
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
               }
             }
-          ],
-          "name": "minecraft:book"
+          ]
         },
         {
           "type": "minecraft:item",
           "weight": 12,
+          "name": "minecraft:paper",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
-                "min": 2.0,
-                "max": 7.0,
-                "type": "minecraft:uniform"
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 7
               }
             }
-          ],
-          "name": "minecraft:paper"
+          ]
         },
         {
           "type": "minecraft:item",
@@ -113,11 +115,11 @@
     },
     {
       "rolls": {
-        "min": 3.0,
-        "max": 5.0,
-        "type": "minecraft:uniform"
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 5
       },
-      "bonus_rolls": 0.0,
+      "bonus_rolls": 0,
       "entries": [
         {
           "type": "minecraft:item",
@@ -143,24 +145,25 @@
     },
     {
       "rolls": {
-        "min": 0.0,
-        "max": 3.0,
-        "type": "minecraft:uniform"
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 3
       },
-      "bonus_rolls": 0.0,
+      "bonus_rolls": 0,
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "minecraft:book",
           "functions": [
             {
               "function": "minecraft:enchant_with_levels",
               "levels": 35,
               "treasure": true
             }
-          ],
-          "name": "minecraft:book"
+          ]
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "minecraft:chests/stronghold_library"
 }

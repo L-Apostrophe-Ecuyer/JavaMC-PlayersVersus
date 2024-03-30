@@ -7,11 +7,20 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.RavagerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.ItemTags;
+
+import static frootloops.versus.mod.enchantments.Enchants.ALL_ARMOR;
 
 
 public class ImpactProtectionEnchantment extends ProtectionEnchantment {
     public ImpactProtectionEnchantment() {
-        super(Rarity.RARE, Type.PROJECTILE);
+        super(
+                Enchantment.properties(ItemTags.ARMOR_ENCHANTABLE, 4, 2,
+                        Enchantment.leveledCost(10, 18),
+                        Enchantment.leveledCost(40, 16), 6,
+                        ALL_ARMOR),
+                Type.PROJECTILE
+        );
     }
 
     @Override
@@ -22,11 +31,6 @@ public class ImpactProtectionEnchantment extends ProtectionEnchantment {
     @Override
     public boolean isAvailableForRandomSelection() {
         return true;
-    }
-
-    @Override
-    public int getMinPower(int level) {
-        return 6 + (8 * level);
     }
 
     @Override
@@ -42,10 +46,11 @@ public class ImpactProtectionEnchantment extends ProtectionEnchantment {
                 if(attacker instanceof RavagerEntity) return level + level/2;
 
                 ItemStack mainHandStack = attacker.getMainHandStack();
-                if(!mainHandStack.isEmpty() && mainHandStack.getItem().isDamageable()) {
+                if(!mainHandStack.isEmpty() && mainHandStack.isDamageable()) {
                     Item weapon = mainHandStack.getItem();
+                    if(weapon instanceof MaceItem) return level * 2;
                     if(weapon instanceof AxeItem || weapon instanceof ShovelItem) return level;
-                    if(weapon instanceof ToolItem || weapon instanceof TridentItem) return level/2;
+                    return level/2;
                 }
                 else return level + level/2;
             }

@@ -1,15 +1,11 @@
 package frootloops.versus.mod.enchantments.armor;
 
 import net.minecraft.enchantment.*;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityGroup;
-import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.WardenEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.DamageTypeTags;
 
 
@@ -45,7 +41,7 @@ public class MagicProtectionEnchantment extends ProtectionEnchantment {
                     return (level * 2)/3 + amplifier;
                 }
                 if (attacker.getMainHandStack().hasEnchantments()) {
-                    float attackDamage = EnchantmentHelper.getAttackDamage(attacker.getMainHandStack(), EntityGroup.DEFAULT);
+                    float attackDamage = EnchantmentHelper.getAttackDamage(attacker.getMainHandStack(), EntityType.PLAYER);
                     if(attackDamage > 0f) return (int)(attackDamage * level/2f);
                 }
             }

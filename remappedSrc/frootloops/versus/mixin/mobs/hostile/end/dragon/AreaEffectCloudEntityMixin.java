@@ -11,6 +11,7 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -41,7 +42,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
     @Shadow
     private final Map<Entity, Integer> affectedEntities = Maps.newHashMap();
     @Shadow
-    private final Potion potion = Potions.EMPTY;
+    private RegistryEntry<Potion> potion;
     @Shadow @Nullable
     private LivingEntity owner;
     @Shadow @Nullable
@@ -95,7 +96,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
     @Override
     public void calculateDimensions() {
         super.calculateDimensions();
-        double radius = (double)this.getDimensions(EntityPose.STANDING).width / 2.0D;
+        double radius = (double)this.getDimensions(EntityPose.STANDING).width() / 2.0D;
         this.setBoundingBox(new Box(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + radius, this.getZ() + radius));
     }
 
@@ -181,7 +182,7 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
 
                 List<StatusEffectInstance> list = Lists.newArrayList();
 
-                for(StatusEffectInstance effectinstance1 : this.potion.getEffects()) {
+                for(StatusEffectInstance effectinstance1 : this.potion.value().getEffects()) {
                     list.add(new StatusEffectInstance(effectinstance1.getEffectType(), effectinstance1.getDuration() / 4, effectinstance1.getAmplifier(), effectinstance1.isAmbient(), effectinstance1.shouldShowParticles()));
                 }
 
@@ -195,13 +196,13 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
                             if (!this.affectedEntities.containsKey(livingentity) && livingentity.isAffectedBySplashPotions()) {
                                 this.affectedEntities.put(livingentity, this.age + 20);
                                 double x = livingentity.getX() - this.getX();
-                                double y = livingentity.getY() + (livingentity.getDimensions(livingentity.getPose()).height / 2) - (this.getY());
+                                double y = livingentity.getY() + (livingentity.getDimensions(livingentity.getPose()).height() / 2) - (this.getY());
                                 double z = livingentity.getZ() - this.getZ();
                                 double d2 = x * x + y * y + z * z;
                                 if (d2 <= (double)(radius * radius)) {
                                     for (StatusEffectInstance effectinstance : list) {
-                                        if (effectinstance.getEffectType().isInstant()) {
-                                            effectinstance.getEffectType().applyInstantEffect(this, this.getOwner(), livingentity, effectinstance.getAmplifier(), 0.5D);
+                                        if (effectinstance.getEffectType().value().isInstant()) {
+                                            effectinstance.getEffectType().value().applyInstantEffect(this, this.getOwner(), livingentity, effectinstance.getAmplifier(), 0.5D);
                                         }
                                         else {
                                             livingentity.addStatusEffect(new StatusEffectInstance(effectinstance));
@@ -229,7 +230,6 @@ public abstract class AreaEffectCloudEntityMixin extends Entity {
                 }
             }
         }
-
     }
 
     @Override

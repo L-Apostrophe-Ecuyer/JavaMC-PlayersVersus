@@ -9,7 +9,7 @@
         }
     ],
     "result": {
-        "item": "minecraft:green_dye",
+        "id": "minecraft:green_dye",
         "count": 2
     },
     "group": "dye_util"

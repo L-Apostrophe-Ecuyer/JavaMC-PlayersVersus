@@ -13,6 +13,7 @@
     "###"
   ],
   "result": {
-    "item": "minecraft:clay"
+    "count": 1,
+    "id": "minecraft:clay"
   }
 }

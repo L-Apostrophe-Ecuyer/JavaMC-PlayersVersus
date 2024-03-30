@@ -81,8 +81,9 @@ public class WardenMixin extends HostileEntity {
     }
 
     @Inject(method = "initialize", at = @At("TAIL"))
-    private void dontDespawnWhenSummonedByCheats(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt, CallbackInfoReturnable cir){
-        if (spawnReason != SpawnReason.TRIGGERED) {
+    private void dontDespawnWhenSummonedByCheats(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, CallbackInfoReturnable cir){
+        if (spawnReason != SpawnReason.TRIGGERED && spawnReason != SpawnReason.SPAWNER) {
+            this.setHealth(300.0f); // Bit easier to kill compared to regular shrieker Wardens
             this.setPersistent();
         }
     }

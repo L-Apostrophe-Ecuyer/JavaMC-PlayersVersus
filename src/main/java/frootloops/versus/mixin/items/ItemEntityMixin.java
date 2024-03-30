@@ -3,6 +3,7 @@ package frootloops.versus.mixin.items;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
@@ -68,7 +69,7 @@ public abstract class ItemEntityMixin extends Entity {
             else if (this.getStack().isOf(Items.ENCHANTING_TABLE)) return true;
             else if (this.getStack().isOf(Items.ENCHANTED_GOLDEN_APPLE)) return true;
         }
-        return this.getStack().getItem().isFireproof() || super.isFireImmune();
+        return this.getStack().getItem().getComponents().contains(DataComponentTypes.FIRE_RESISTANT) || super.isFireImmune();
     }
 
 
@@ -102,7 +103,7 @@ public abstract class ItemEntityMixin extends Entity {
             }
 
             // Foods and organics turn to soot:
-            if(currentItemStack.isFood() && !currentItemStack.isOf(Items.ENCHANTED_GOLDEN_APPLE)){
+            if(currentItemStack.contains(DataComponentTypes.FOOD) && !currentItemStack.isOf(Items.ENCHANTED_GOLDEN_APPLE)){
                 ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.BLACK_DYE, currentItemStack.getCount()));
                 health = 60;
             }

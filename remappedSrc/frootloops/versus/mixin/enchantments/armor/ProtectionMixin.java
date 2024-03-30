@@ -1,12 +1,14 @@
 package frootloops.versus.mixin.enchantments.armor;
 
+import Rarity;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.Item;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.TagKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -14,8 +16,8 @@ import org.spongepowered.asm.mixin.Shadow;
 public class ProtectionMixin extends Enchantment {
     @Shadow public final ProtectionEnchantment.Type protectionType;
 
-    protected ProtectionMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes, ProtectionEnchantment.Type protectionType) {
-        super(weight, type, slotTypes);
+    protected ProtectionMixin(Rarity rarity, TagKey<Item> applicableItems, EquipmentSlot[] slotTypes, ProtectionEnchantment.Type protectionType) {
+        super(rarity, applicableItems, slotTypes);
         this.protectionType = protectionType;
     }
 

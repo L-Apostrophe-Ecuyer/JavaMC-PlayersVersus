@@ -10,6 +10,8 @@ import frootloops.versus.mod.items.throwing.SlimeballEntity;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -18,6 +20,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.Identifier;
 
 public class ModEntities {
@@ -29,12 +32,12 @@ public class ModEntities {
 
     public static final EntityType<DeeperCreeperEntity> DEEPER_CREEPER = Registry.register(
             Registries.ENTITY_TYPE, new Identifier(VersusMod.MOD_ID, "deeper_creeper"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, DeeperCreeperEntity::new).dimensions(EntityDimensions.fixed(1, 2)).build()
+            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, DeeperCreeperEntity::new).dimensions(EntityDimensions.fixed(1, 2)).specificSpawnBlocks(new Block[]{Blocks.DEEPSLATE}).build()
     );
 
     public static final EntityType<FrostedZombieEntity> FROSTED_ZOMBIE = Registry.register(
             Registries.ENTITY_TYPE, new Identifier(VersusMod.MOD_ID, "frosted_zombie"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, FrostedZombieEntity::new).dimensions(EntityDimensions.fixed(1, 2)).build()
+            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, FrostedZombieEntity::new).dimensions(EntityDimensions.fixed(1, 2)).specificSpawnBlocks(new Block[]{Blocks.GRASS_BLOCK, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.DIRT, Blocks.ICE}).build()
     );
 
     public static void onInitialize() {

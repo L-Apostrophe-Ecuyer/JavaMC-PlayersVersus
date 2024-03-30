@@ -9,7 +9,7 @@
         }
     ],
     "result": {
-        "item": "minecraft:orange_dye",
+        "id": "minecraft:orange_dye",
         "count": 2
     },
     "group": "dye_util"

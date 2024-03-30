@@ -1,12 +1,9 @@
 package frootloops.versus.mixin.environment.sleeping;
 
-import frootloops.versus.ServerSettings;
-import frootloops.versus.VersusMod;
+import frootloops.versus.VersusSettings;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.DynamicRegistryManager;
@@ -54,16 +51,25 @@ public abstract class ServerSleepingMixin extends World {
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/SleepManager;canResetTime(ILjava/util/List;)Z"))
     public boolean checkOnEepyPlayers(SleepManager sleepManager, int percentage, List<ServerPlayerEntity> players) {
-        cachedSleepManager = sleepManager;
-        return false; // Return false to cancel vanilla time skip
+        if(VersusSettings.DO_SLEEP_OVERHAUL) {
+            cachedSleepManager = sleepManager;
+            return false; // Return false to cancel vanilla time skip
+        }
+        else {
+            return sleepManager.canResetTime(percentage,players);
+        }
     }
 
     @Inject(method = "tick", at = @At(value = "TAIL"))
     public void stopIfPlayerWokeUp(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
+        if(VersusSettings.DO_SLEEP_OVERHAUL == false) {
+            return;
+        }
         if(players.size() == 0) return;
 
         long timeOfDay = this.properties.getTimeOfDay();
         if(timeOfDay % 20l != 0) return;
+        timeOfDay = timeOfDay % 24000l;
 
         TickManager tickManager = this.getTickManager();
         boolean startSleepingThroughNight = true;

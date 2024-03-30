@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.accessors;
+package frootloops.versus.mixin.items;
 
 import net.minecraft.item.Item;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,9 +13,5 @@ public interface ItemAccessor {
     UUID getATTACK_DAMAGE_MODIFIER_ID();
     @Accessor
     UUID getATTACK_SPEED_MODIFIER_ID();
-
-    @Accessor
-    @Mutable
-    void setMaxCount(int newCount);
 
 }

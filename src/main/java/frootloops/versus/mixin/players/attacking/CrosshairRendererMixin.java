@@ -15,6 +15,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.GameMode;
+import org.joml.Matrix4fStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,16 +51,16 @@ public class CrosshairRendererMixin {
                 if (this.debugHud.shouldShowDebugHud() && !gameOptions.hudHidden && !this.client.player.hasReducedDebugInfo() && !(Boolean)gameOptions.getReducedDebugInfo().getValue()) {
 
                     Camera camera = this.client.gameRenderer.getCamera();
-                    MatrixStack matrixStack = RenderSystem.getModelViewStack();
-                    matrixStack.push();
-                    matrixStack.multiplyPositionMatrix(context.getMatrices().peek().getPositionMatrix());
-                    matrixStack.translate((float)(context.getScaledWindowWidth() / 2), (float)(context.getScaledWindowHeight() / 2), 0.0F);
-                    matrixStack.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(camera.getPitch()));
-                    matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw()));
-                    matrixStack.scale(-1.0F, -1.0F, -1.0F);
+                    Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+                    matrix4fStack.pushMatrix();
+                    matrix4fStack.mul(context.getMatrices().peek().getPositionMatrix());
+                    matrix4fStack.translate(context.getScaledWindowWidth() / 2, context.getScaledWindowHeight() / 2, 0.0f);
+                    matrix4fStack.rotateX(-camera.getPitch() * ((float)Math.PI / 180));
+                    matrix4fStack.rotateY(camera.getYaw() * ((float)Math.PI / 180));
+                    matrix4fStack.scale(-1.0f, -1.0f, -1.0f);
                     RenderSystem.applyModelViewMatrix();
                     RenderSystem.renderCrosshair(10);
-                    matrixStack.pop();
+                    matrix4fStack.popMatrix();
                     RenderSystem.applyModelViewMatrix();
 
                 } else {

@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ThornsEnchantment.class)
 public class ThornsMixin extends Enchantment {
 
-    protected ThornsMixin(Rarity rarity, TagKey<Item> applicableItems, EquipmentSlot[] slotTypes) {
-        super(rarity, applicableItems, slotTypes);
+    public ThornsMixin(Properties properties) {
+        super(properties);
     }
 
     @Inject(at = @At("HEAD"), method = "isAcceptableItem", cancellable = true)

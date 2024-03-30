@@ -73,7 +73,7 @@ public abstract class ItemEntityMixin extends Entity {
 
 
     @Inject(method = "damage",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ItemEntity;emitGameEvent(Lnet/minecraft/world/event/GameEvent;Lnet/minecraft/entity/Entity;)V"),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ItemEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;Lnet/minecraft/entity/Entity;)V"),
             cancellable = true)
     public void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(this.health == 0) {
@@ -95,7 +95,7 @@ public abstract class ItemEntityMixin extends Entity {
 
         // Lava is less forgiving:
         if(!isLava) {
-            // Items should survive in the fire for a bit, and take some time to cook:
+            // FutureItems should survive in the fire for a bit, and take some time to cook:
             if(itemAge < 40) {
                 health = 40;
                 return;
@@ -114,7 +114,7 @@ public abstract class ItemEntityMixin extends Entity {
             }
         }
 
-        // Items break down into components, or get used/placed:
+        // FutureItems break down into components, or get used/placed:
         if(currentItemStack.isOf(Items.TOTEM_OF_UNDYING)) {
             this.method_48926().sendEntityStatus(this, (byte)35);
             Box boundingBox = new Box(this.getX() - 4d, this.getY() - 4d, this.getZ() - 4d, this.getX() + 4d, this.getY() + 4d, this.getZ() + 4d);

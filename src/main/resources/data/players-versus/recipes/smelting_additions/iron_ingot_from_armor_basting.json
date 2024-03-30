@@ -35,7 +35,9 @@
       "item": "minecraft:damaged_anvil"
     }
   ],
-  "result": "minecraft:iron_ingot",
+  "result": {
+    "id": "minecraft:iron_ingot"
+  },
   "experience": 0.1,
   "cookingtime": 100
 }

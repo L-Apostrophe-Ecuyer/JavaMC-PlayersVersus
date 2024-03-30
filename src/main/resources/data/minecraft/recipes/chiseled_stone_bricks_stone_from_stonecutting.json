@@ -4,5 +4,8 @@
   "ingredient": {
     "tag": "players-versus:regular_stone_plus_polished"
   },
-  "result": "minecraft:chiseled_stone_bricks"
+  "result": {
+    "count": 1,
+    "id": "minecraft:chiseled_stone_bricks"
+  }
 }

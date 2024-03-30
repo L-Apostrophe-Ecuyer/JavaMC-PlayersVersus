@@ -1,15 +1,18 @@
 package frootloops.versus.mixin.enchantments.tools;
 
+import Rarity;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.PowerEnchantment;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.Item;
+import net.minecraft.registry.tag.TagKey;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(PowerEnchantment.class)
 public class PowerMixin extends Enchantment {
-    protected PowerMixin(Rarity weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
-        super(weight, type, slotTypes);
+
+    protected PowerMixin(Rarity rarity, TagKey<Item> applicableItems, EquipmentSlot[] slotTypes) {
+        super(rarity, applicableItems, slotTypes);
     }
 
     @Override

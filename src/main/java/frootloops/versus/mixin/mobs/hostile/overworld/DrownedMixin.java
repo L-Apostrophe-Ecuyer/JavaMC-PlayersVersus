@@ -47,7 +47,7 @@ public abstract class DrownedMixin extends ZombieEntity {
             this.handDropChances[1] = 1f;
 
             EntityAttributeInstance followRange = this.getAttributeInstance(EntityAttributes.GENERIC_FOLLOW_RANGE);
-            Objects.requireNonNull(followRange).addPersistentModifier(new EntityAttributeModifier("Trident_drowned", +36.0D, EntityAttributeModifier.Operation.ADDITION));
+            Objects.requireNonNull(followRange).addPersistentModifier(new EntityAttributeModifier("Trident_drowned", +36.0D, EntityAttributeModifier.Operation.ADD_VALUE));
         }
         else if (rand < 20)
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.FISHING_ROD));
@@ -64,9 +64,9 @@ public abstract class DrownedMixin extends ZombieEntity {
 
     @Nullable
     @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
 
-        entityData = super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
+        entityData = super.initialize(world, difficulty, spawnReason, entityData);
         if (this.getEquippedStack(EquipmentSlot.OFFHAND).isEmpty() && world.getRandom().nextFloat() < 0.03F)
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
 

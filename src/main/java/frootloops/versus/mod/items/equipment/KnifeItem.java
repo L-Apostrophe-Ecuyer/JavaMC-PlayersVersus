@@ -20,8 +20,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 
 public class KnifeItem extends SwordItem {
-    public KnifeItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
-        super(toolMaterial, attackDamage, attackSpeed, settings);
+
+
+    public KnifeItem(ToolMaterial toolMaterial, Settings settings) {
+        super(toolMaterial, settings);
     }
 
     @Override
@@ -35,6 +37,7 @@ public class KnifeItem extends SwordItem {
         return super.postMine(stack, world, state, pos, miner);
     }
 
+    /*
     @Override
     public boolean isSuitableFor(BlockState state) {
         return state.isOf(Blocks.COBWEB) || state.isOf(Blocks.REDSTONE_WIRE) || state.isOf(Blocks.TRIPWIRE) || state.isOf(Blocks.VINE);
@@ -52,7 +55,7 @@ public class KnifeItem extends SwordItem {
             return 2.0f;
         }
         return super.getMiningSpeedMultiplier(stack, state);
-    }
+    }*/
 
 
     @Override

@@ -42,6 +42,7 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
     }
 
 
+    /*
     @Overwrite
     public void updateResult() {
 
@@ -177,5 +178,5 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
             }
         }
         return 1 + (rarityAdditive + Math.min(enchantment.getMinPower(level), 30))/4;
-    }
+    }*/
 }

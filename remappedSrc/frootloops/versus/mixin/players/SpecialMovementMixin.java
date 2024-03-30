@@ -1,7 +1,6 @@
 package frootloops.versus.mixin.players;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.Combat;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -10,15 +9,11 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,22 +31,18 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @Shadow
-    protected HungerManager hungerManager;
-
-    @Shadow public void addExhaustion(float exhaustion) {}
-
     @Shadow public void incrementStat(Identifier stat) {}
 
-    private int ticksLeftToLeap = 0;
+    private int ticksSinceStartedSneaking = 0;
     private int ticksLeftToDash = 0;
 
     @Inject(method = "tick", at = @At(value = "TAIL"))
     private void tickMovement(CallbackInfo ci) {
         if(!isCrawling() && !isSwimming()) {
 
-            if(isSneaking()) ticksLeftToLeap = 8;
-            else if(ticksLeftToLeap > 0) ticksLeftToLeap--;
+            if(isSneaking()) ticksSinceStartedSneaking++;
+            else if(ticksSinceStartedSneaking > 16) ticksSinceStartedSneaking = 0;
+            else ticksSinceStartedSneaking = Math.max(0, ticksSinceStartedSneaking - 1);
 
             if(!isSprinting() || isSneaking()) ticksLeftToDash = 8;
             else if(ticksLeftToDash > 0) ticksLeftToDash--;
@@ -89,10 +80,10 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         }
 
         // Crouch-jump:
-        if(ticksLeftToLeap > 0 && !this.isSneaking()) {
-            velocityY *= 1.25 + 0.15 * boundingStridesLevel;
+        if(ticksSinceStartedSneaking > 1 && ticksSinceStartedSneaking < 12 && !this.isSneaking()) {
+            velocityY *= 1.3 + 0.125 * boundingStridesLevel;
+            this.spawnSprintingParticles();
             this.playBlockFallSound();
-            ticksLeftToLeap = -1;
             hasBounded = true;
         }
 

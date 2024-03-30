@@ -27,7 +27,7 @@ public abstract class ZombieEventListenerMixin extends World {
     }
 
     @Inject(method = "emitGameEvent", at = @At("HEAD"))
-    public void emitGameEvent(GameEvent event, Vec3d emitterPos, GameEvent.Emitter emitter, CallbackInfo info) {
-        ZombieSoundListener.OnGameEvent((ServerWorld)((Object)this), event, emitterPos, emitter);
+    public void emitGameEvent(RegistryEntry<GameEvent> event, Vec3d emitterPos, GameEvent.Emitter emitter, CallbackInfo info) {
+        ZombieSoundListener.OnGameEvent((ServerWorld)((Object)this), event.value(), emitterPos, emitter);
     }
 }

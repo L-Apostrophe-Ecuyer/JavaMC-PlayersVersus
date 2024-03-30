@@ -1,14 +1,12 @@
 package frootloops.versus.mod.enchantments.armor;
 
 import net.minecraft.enchantment.*;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.RavagerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.util.math.MathHelper;
 
 
 public class ImpactProtectionEnchantment extends ProtectionEnchantment {

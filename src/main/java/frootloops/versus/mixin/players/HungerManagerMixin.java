@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import frootloops.versus.VersusSettings;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,8 +33,8 @@ public class HungerManagerMixin {
     private static boolean IS_STARVATION_ENABLED = false;
 
     @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
-    public void eat(Item item, ItemStack stack, CallbackInfo info) {
-        if(item.isFood()) foodTickTimer = Math.max(8, foodTickTimer);
+    public void eat(ItemStack stack, CallbackInfo info) {
+        if(stack.contains(DataComponentTypes.FOOD)) foodTickTimer = Math.max(8, foodTickTimer);
     }
 
 

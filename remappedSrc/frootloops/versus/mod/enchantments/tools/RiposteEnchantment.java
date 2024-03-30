@@ -5,12 +5,14 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.item.SwordItem;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.util.UseAction;
 
 
 public class RiposteEnchantment extends Enchantment {
 
     public RiposteEnchantment() {
-        super(Rarity.RARE, EnchantmentTarget.BREAKABLE, new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND});
+        super(Rarity.UNCOMMON, ItemTags.SWORDS, new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND});
     }
 
     @Override
@@ -30,7 +32,7 @@ public class RiposteEnchantment extends Enchantment {
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        return stack.getItem() instanceof SwordItem || stack.getItem() instanceof ShieldItem;
+        return stack.getItem() instanceof SwordItem || stack.getItem() instanceof ShieldItem || stack.getUseAction() == UseAction.BLOCK;
     }
 
     @Override

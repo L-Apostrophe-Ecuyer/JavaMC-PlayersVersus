@@ -21,7 +21,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
 import net.minecraft.world.event.GameEvent;
@@ -31,6 +33,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
     private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private int lastFuseTime, currentFuseTime, fuseTime = 34, explosionRadius = 5;
+    public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.of(new Identifier("ambient.cave"), 32);
 
     public DeeperCreeperEntity(EntityType<? extends CreeperEntity> entityType, World world) {
         super(entityType, world);
@@ -143,6 +146,12 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     @Override
+    public boolean canHaveStatusEffect(StatusEffectInstance effect) {
+        if (effect.getEffectType() == StatusEffects.WITHER) return false;
+        else return super.canHaveStatusEffect(effect);
+    }
+
+    @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
         this.playSound(SoundEvents.ENTITY_CREEPER_HURT, 0.1f, 1.4f);
         this.playSound(SoundEvents.BLOCK_MANGROVE_ROOTS_STEP, 0.2f, 0.8F);
@@ -152,5 +161,16 @@ public class DeeperCreeperEntity extends CreeperEntity {
     protected void playHurtSound(DamageSource source) {
         this.playSound(SoundEvents.ENTITY_CREEPER_HURT, this.getSoundVolume(), this.getSoundPitch());
         this.playSound(SoundEvents.BLOCK_MANGROVE_ROOTS_BREAK, 0.4f, 0.8F);
+    }
+
+    @Override
+    public int getMinAmbientSoundDelay() {
+        return 500;
+    }
+
+    @Override
+    public void playAmbientSound() {
+        if (this.getTarget() != null) return;
+        this.playSound(DREEPER_AMBIENCE_SOUND, 1.2f, 0.6f + this.random.nextFloat() * 0.8f);
     }
 }

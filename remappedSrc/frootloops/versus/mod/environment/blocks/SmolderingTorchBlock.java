@@ -35,7 +35,7 @@ public class SmolderingTorchBlock extends TorchBlock {
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if(world instanceof ServerWorld) {
-            if (random.nextInt(16) > 8) {
+            if (random.nextInt(10) > 8) {
                 this.tickSmolderingTorchDegradation(state, world, pos);
             }
         }

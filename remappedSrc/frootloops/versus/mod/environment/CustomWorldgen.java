@@ -13,7 +13,7 @@ public class CustomWorldgen {
     public static final StoneStalagtiteFeature STONE_STALAGTITE_FEATURE = new StoneStalagtiteFeature( StoneStalagtiteFeatureConfig.CODEC);
 
     public static final ConfiguredFeature<StoneStalagtiteFeatureConfig, StoneStalagtiteFeature> STONE_STALAGTITE_FEATURE_CONFIGURED = new ConfiguredFeature<>(STONE_STALAGTITE_FEATURE,
-            new StoneStalagtiteFeatureConfig(32)
+            new StoneStalagtiteFeatureConfig(16)
     );
 
     public static void onInitialize() {

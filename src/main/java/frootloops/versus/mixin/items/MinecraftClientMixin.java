@@ -8,10 +8,10 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.util.ActionResult;
@@ -102,8 +102,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
             }
             else if(offhandStack.getUseAction() == UseAction.EAT || offhandStack.getUseAction() == UseAction.DRINK) {
-                if(offhandStack.isFood()) {
-                    if(offhandStack.getItem().getFoodComponent().isAlwaysEdible()) return true;
+                if(offhandStack.getComponents().contains(DataComponentTypes.FOOD)) {
+                    if(offhandStack.getItem().getComponents().get(DataComponentTypes.FOOD).canAlwaysEat()) return true;
                     return player.getHungerManager().isNotFull();
                 }
                 else return true;
@@ -148,7 +148,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                     BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
                     int i = itemStack.getCount();
 
-                    if(itemStack.isFood() && !this.player.isSneaking() && this.player.getHungerManager().isNotFull())
+                    if(itemStack.getComponents().contains(DataComponentTypes.FOOD) && !this.player.isSneaking() && this.player.getHungerManager().isNotFull())
                         actionResult = this.interactionManager.interactItem(this.player, hand);
 
                     if(actionResult == null || !actionResult.isAccepted())

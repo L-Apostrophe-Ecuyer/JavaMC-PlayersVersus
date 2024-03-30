@@ -9,7 +9,7 @@
         }
     },
     "result": {
-        "item": "minecraft:leather",
+        "id": "minecraft:leather",
         "count": 1
     },
     "group": "leather_from_armor"

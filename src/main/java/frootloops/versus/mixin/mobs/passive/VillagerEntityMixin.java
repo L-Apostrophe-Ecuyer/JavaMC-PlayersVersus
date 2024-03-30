@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.*;
 
-import static frootloops.versus.mod.mobs.passive.RevampedTradeOffers.REVAMPED_PROFESSION_TO_LEVELED_TRADE;
+//import static frootloops.versus.mod.mobs.passive.RevampedTradeOffers.REVAMPED_PROFESSION_TO_LEVELED_TRADE;
 
 @Mixin(VillagerEntity.class)
 public abstract class VillagerEntityMixin extends MerchantEntity {
@@ -27,6 +27,7 @@ public abstract class VillagerEntityMixin extends MerchantEntity {
     @Shadow
     private static final TrackedData<VillagerData> VILLAGER_DATA = DataTracker.registerData(VillagerEntity.class, TrackedDataHandlerRegistry.VILLAGER_DATA);
 
+    /*
     @Override
     public void fillRecipes() {
         VillagerData villagerData = this.dataTracker.get(VILLAGER_DATA);
@@ -58,5 +59,5 @@ public abstract class VillagerEntityMixin extends MerchantEntity {
             if (tradeOffer == null) continue;
             tradeOfferList.add(tradeOffer);
         }
-    }
+    }*/
 }
