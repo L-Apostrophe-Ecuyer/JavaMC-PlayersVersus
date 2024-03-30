@@ -53,7 +53,7 @@ public abstract class Items {
     public static final BlockItem GRANITE_BRICK_STAIRS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_STAIRS, new Item.Settings());
 
     public static void onInitialize() {
-        setStackSizes(64, 64, 8, 8, 64, 16, 99);
+        setStackSizes(64, 64, 8, 8, 64, 16, 64);
         registerCustomItem("copper_chestplate", COPPER_CHESTPLATE, ItemGroups.COMBAT);
         registerCustomItem("copper_leggings", COPPER_LEGGINGS, ItemGroups.COMBAT);
         registerCustomItem("copper_helmet", COPPER_HELMET, ItemGroups.COMBAT);
