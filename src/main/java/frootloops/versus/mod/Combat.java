@@ -35,6 +35,7 @@ public abstract class Combat {
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
+    public static final double PLAYER_MAX_ATTACK_SPEED = 2.5d;
     private static final String[] tools =
             new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
     private static final float[] toolsSpeed  =
@@ -50,54 +51,22 @@ public abstract class Combat {
     public static float getAxeSpeedModifier() { return toolsSpeed[0] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getSwordSpeedModifier() { return toolsSpeed[1] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getHoeSpeedModifier() { return toolsSpeed[2] - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getHoeReachModifier() { return toolsReachBonus[2];}
     public static float getPickaxeSpeedModifier() { return toolsSpeed[3] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getShovelSpeedModifier() { return toolsSpeed[4] - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getTridentSpeedModifier() { return 1.0F - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getAxeDamageModifier() { return toolsDamage[0] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getSwordDamageModifier() { return toolsDamage[1] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getHoeDamageModifier() { return toolsDamage[2] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getPickaxeDamageModifier() { return toolsDamage[3] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getShovelDamageModifier() { return toolsDamage[4] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
-    public static float getTridentDamageModifier() { return 9.0F - (float)PLAYER_BASE_ATTACK_DAMAGE;}
 
     public static float getSwordReachModifier() { return toolsReachBonus[4];}
     public static float getTridentReachModifier() { return 1.0f;}
 
     public static void onInitialize() {
-        /*
-        for(int toolIndex = 0; toolIndex < tools.length; toolIndex++) {
-            for (int tierIndex = 0; tierIndex < toolTiers.length; tierIndex++) {
-                String name = "minecraft:" + toolTiers[tierIndex] + "_" + tools[toolIndex];
-                float damage = toolsDamage[toolIndex] + toolTierDamageBonuses[tierIndex] - (float)PLAYER_BASE_ATTACK_DAMAGE;
-                float speed = toolsSpeed[toolIndex] - (float)PLAYER_BASE_ATTACK_SPEED - (tierIndex == 0 ? 0.2f : 0.0f);
-                float reach = toolsReachBonus[toolIndex];
-                setAttributes(name, damage, speed, reach);
-            }
-        }
-        setAttributes("minecraft:trident", Combat.getTridentDamageModifier(), Combat.getTridentSpeedModifier(), Combat.getTridentReachModifier());*/
-    }
-
-    private static void setAttributes(String itemName, float damageModifier, float speedModifier, float reachModifier) {
-        /*ImmutableMultimap.Builder<RegistryEntry<EntityAttribute>, EntityAttributeModifier> itemBuilder = ImmutableMultimap.builder();
-        Item item = Registries.ITEM.get(new Identifier(itemName));
-        String modifierType = item instanceof MiningToolItem ? "Tool modifier" : "Weapon modifier";
-
-        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_DAMAGE_MODIFIER_ID(), modifierType, damageModifier, EntityAttributeModifier.Operation.ADD_VALUE));
-        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_SPEED_MODIFIER_ID(), modifierType, speedModifier, EntityAttributeModifier.Operation.ADD_VALUE));
-        if(reachModifier > 0) itemBuilder.put(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, modifierType, reachModifier, EntityAttributeModifier.Operation.ADD_VALUE));
-
-        if (item instanceof MiningToolItem) {
-            ((MiningToolAccessor) item).setAttributeModifiers(itemBuilder.build());
-        } else if (item instanceof SwordItem) {
-            ((SwordAccessor) item).setAttributeModifiers(itemBuilder.build());
-        } else if (item instanceof TridentItem) {
-            ((TridentAccessor) item).setAttributeModifiers(itemBuilder.build());
-        }*/
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {
-        return Math.min(3.0d, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+        return Math.min(PLAYER_MAX_ATTACK_SPEED, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
     }
 
     public static int getTicksPerAttackOf(PlayerEntity player) {
@@ -121,7 +90,6 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
         double reachAttributeValue = player.getAttributeValue(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE);
-
         attackChargeProgress = Math.min(1.0d, attackChargeProgress - 0.5d);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
@@ -130,16 +98,6 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player) {
         return Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
-    }
-
-    public static boolean isInAttackRangeOf(PlayerEntity player, Entity target) {
-        double range = Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
-        return player.squaredDistanceTo(target) < range * range;
-    }
-
-    public static boolean isInAttackRangeOf(PlayerEntity player, Entity target, double attackChargeProgress) {
-        double range = Combat.getAttackRange(player, attackChargeProgress);
-        return player.squaredDistanceTo(target) < range * range;
     }
 
     public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {

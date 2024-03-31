@@ -37,6 +37,7 @@ public class SmolderingWallTorchBlock extends WallTorchBlock {
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        if(pos.getY() > -32) return;
         if(world instanceof ServerWorld) this.tickSmolderingTorchDegradation(state, world, pos);
         world.playSoundAtBlockCenter(pos, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
     }
