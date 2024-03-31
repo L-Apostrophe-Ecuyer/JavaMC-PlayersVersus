@@ -31,7 +31,7 @@ public class HungerBarRendererMixin {
             int hungerLevelMin = (n - x - 9)/4; // Reverse mathing the original 0-9 value of the x position, then multiplying by 2
             if(hungerLevelMin > 5) {
                 PlayerEntity playerEntity = this.getCameraPlayer();
-                int maxHungerLevel = Math.max((int) (playerEntity.getMaxHealth() - playerEntity.getHealth()), playerEntity.getHungerManager().getFoodLevel());
+                int maxHungerLevel = Math.max((int) (6 + playerEntity.getMaxHealth() - playerEntity.getHealth()), playerEntity.getHungerManager().getFoodLevel());
                 if(hungerLevelMin + 1 >= maxHungerLevel) {
                     if(hungerLevelMin >= maxHungerLevel) {
                         if(texture == FOOD_EMPTY_TEXTURE) texture = VersusMod.HUD_TEXTURE_DISABLED_FOOD;
