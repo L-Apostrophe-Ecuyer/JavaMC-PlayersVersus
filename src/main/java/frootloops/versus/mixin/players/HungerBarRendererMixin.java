@@ -56,7 +56,7 @@ public abstract class HungerBarRendererMixin {
 
             int hungerBarPosX = this.scaledWidth / 2 + 91;
             int hungerBarPosY = this.scaledHeight - 39;
-            int maxHungerLevel = Math.max(6, Math.max((int) (playerEntity.getMaxHealth() - playerEntity.getHealth()), playerEntity.getHungerManager().getFoodLevel()));
+            int maxHungerLevel = Math.max( 6 + (int) (playerEntity.getMaxHealth() - playerEntity.getHealth()), playerEntity.getHungerManager().getFoodLevel());
             boolean wiggleHungerBar = (hungerManager.getSaturationLevel() <= 0.0f && this.ticks % (foodLevel * 3 + 1) == 0);
 
             for (int i = 0; i < 10; ++i) {
