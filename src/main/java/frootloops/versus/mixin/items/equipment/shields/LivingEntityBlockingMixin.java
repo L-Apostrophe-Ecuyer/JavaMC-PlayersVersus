@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items.shields;
+package frootloops.versus.mixin.items.equipment.shields;
 
 import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -6,6 +6,8 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.server.world.ServerWorld;
@@ -61,23 +63,25 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
     @Inject(method = "takeShieldHit", at = @At("TAIL"))
     private void shieldDisablingForMobs(LivingEntity attacker, CallbackInfo ci) {
-        if (this.getType() != EntityType.PLAYER) {
-            this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
+        if (((LivingEntity) ((Object) this)) instanceof MobEntity mob) {
+            this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 1.0F);
             if (attacker.disablesShield()) {
-                if (this.getWorld() instanceof ServerWorld) {
+                if (this.getWorld() instanceof ServerWorld serverWorld) {
 
                     // Drop the shield:
-                    ItemStack shieldItemStack = ((LivingEntity) ((Object) this)).getOffHandStack();
-                    ItemEntity itemEntity = new ItemEntity(this.getWorld(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
-                    itemEntity.setPickupDelay(40);
-                    this.getWorld().spawnEntity(itemEntity);
+                    ItemStack shieldItemStack = mob.getOffHandStack();
+                    if(mob.isPersistent() || serverWorld.getRandom().nextDouble() < 0.1) {
+                        ItemEntity itemEntity = new ItemEntity(this.getWorld(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
+                        itemEntity.setPickupDelay(40);
+                        serverWorld.spawnEntity(itemEntity);
+                    }
                     shieldItemStack.setCount(0);
 
                     // Stop blocking
-                    this.setPose(EntityPose.STANDING);
-                    ((LivingEntity) ((Object) this)).stopUsingItem();
+                    mob.setPose(EntityPose.STANDING);
+                    mob.stopUsingItem();
                 }
-                this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 1.0F);
             }
         }
     }

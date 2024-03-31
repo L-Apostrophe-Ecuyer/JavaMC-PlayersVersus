@@ -34,13 +34,13 @@ import java.util.List;
 public abstract class Combat {
 
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
-
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
+    public static final double PLAYER_MAX_ATTACK_SPEED = 2.5d;
     private static final String[] tools = new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
     private static final float[] toolsSpeed  = new float[]{1.0F, 1.5F, 2.0F, 1.5F, 1.5F};
-    private static final float[] toolsDamage = new float[]{8.0F, 4.0F, 3.0F, 4.0F, 3.0F};
+    private static final float[] toolsDamage = new float[]{8.0F, 4.0F, 2.0F, 4.0F, 3.0F};
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{-1F, 0F, 1F, 1F, 2F, 3F};
 
@@ -89,7 +89,7 @@ public abstract class Combat {
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {
-        return Math.min(2.5d, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+        return Math.min(PLAYER_MAX_ATTACK_SPEED, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
     }
 
     public static int getTicksPerAttackOf(PlayerEntity player) {
