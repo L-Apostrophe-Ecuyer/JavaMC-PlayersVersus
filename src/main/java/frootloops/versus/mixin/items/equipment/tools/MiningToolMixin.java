@@ -24,7 +24,7 @@ public abstract class MiningToolMixin extends ToolItem {
     private void getMiningSpeedMultiplier(ItemStack stack, BlockState state, CallbackInfoReturnable<Float> cir) {
         if(cir.getReturnValue() == 1.0f) {
 
-            if(stack.getItem() instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) {
+            if(stack.getItem() instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) {
                 cir.setReturnValue(this.miningSpeed);
             }
 
@@ -37,7 +37,7 @@ public abstract class MiningToolMixin extends ToolItem {
     @Inject(method = "isSuitableFor", at = @At("RETURN"), cancellable = true)
     private void isSuitableFor(BlockState state, CallbackInfoReturnable<Boolean> cir) {
         if(!cir.getReturnValue()) {
-            if((ToolItem)this instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) {
+            if((ToolItem)this instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) {
                 cir.setReturnValue(true);
             }
 

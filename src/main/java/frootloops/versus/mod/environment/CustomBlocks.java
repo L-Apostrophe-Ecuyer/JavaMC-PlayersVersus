@@ -21,7 +21,7 @@ public class CustomBlocks {
     public static final Block EXTINGUISHED_TORCH = new TorchBlock(AbstractBlock.Settings.copy(Blocks.TORCH).luminance(state -> 6), ParticleTypes.SMOKE);
     public static final Block EXTINGUISHED_WALL_TORCH = new WallTorchBlock(AbstractBlock.Settings.copy(Blocks.WALL_TORCH).dropsLike(EXTINGUISHED_TORCH).luminance(state -> 6).dropsLike(EXTINGUISHED_TORCH), ParticleTypes.SMOKE);
 
-    public static final Block GRANITE_BRICKS = new Block(AbstractBlock.Settings.create().mapColor(MapColor.DIRT_BROWN).instrument(Instrument.BASEDRUM).requiresTool().strength(1.5f, 6.0f));
+    public static final Block GRANITE_BRICKS = new SlabBlock(AbstractBlock.Settings.copy(Blocks.GRANITE));
     public static final Block GRANITE_BRICK_SLAB = new SlabBlock(AbstractBlock.Settings.copy(GRANITE_BRICKS));
     public static final Block GRANITE_BRICK_STAIRS = new StairsBlock(GRANITE_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(GRANITE_BRICKS));
 
