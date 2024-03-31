@@ -42,9 +42,9 @@ public abstract class Combat {
             new float[]{1.0F,   1.5F,   2.0F,   1.5F,   1.5F};
     private static final float[] toolsDamage =
             new float[]{8.0F,   4.0F,   2.0F,   4.0F,   3.0F};
-
     private static final float[] toolsReachBonus =
             new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
+
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{-1F, 0F, 1F, 1F, 2F, 3F};
 
@@ -59,7 +59,11 @@ public abstract class Combat {
     public static float getPickaxeDamageModifier() { return toolsDamage[3] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getShovelDamageModifier() { return toolsDamage[4] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
 
-    public static float getSwordReachModifier() { return toolsReachBonus[4];}
+    public static float getHoeReachModifier() { return toolsReachBonus[2];}
+    public static float getSwordReachModifier() { return toolsReachBonus[1];}
+    public static float getShovelReachModifier() { return toolsReachBonus[1];}
+    public static float getTridentDamageModifier() { return 9.0f - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getTridentSpeedModifier() { return 1.0f - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getTridentReachModifier() { return 1.0f;}
 
     public static void onInitialize() {
@@ -98,6 +102,11 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player) {
         return Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
+    }
+
+    public static boolean isInAttackRangeOf(PlayerEntity player, Entity entity, double attackCooldownProgress) {
+        double range = Combat.getAttackRange(player, attackCooldownProgress);
+        return (range * range) > player.getEyePos().squaredDistanceTo(entity.getEyePos());
     }
 
     public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {

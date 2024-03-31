@@ -1,7 +1,10 @@
 package frootloops.versus.mixin.items.equipment.tools;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ToolComponent;
 import net.minecraft.item.*;
 import net.minecraft.sound.BlockSoundGroup;
 import frootloops.versus.mod.Combat;
@@ -16,18 +19,19 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static net.minecraft.item.Item.ATTACK_DAMAGE_MODIFIER_ID;
 import static net.minecraft.item.Item.ATTACK_SPEED_MODIFIER_ID;
 
 @Mixin(MiningToolItem.class)
-public class MiningToolMixin {
+public abstract class MiningToolMixin extends ToolItem {
 
-    public MiningToolMixin(ToolMaterial material, Settings settings, float miningSpeed) {
+    public MiningToolMixin(ToolMaterial material, Settings settings) {
         super(material, settings);
-        this.miningSpeed = miningSpeed;
     }
 
-    @Shadow protected final float miningSpeed;
 
     @Inject(method = "createAttributeModifiers", at = @At("HEAD"), cancellable = true)
     private static void createAttributeModifiers(ToolMaterial material, float baseAttackDamage, float attackSpeed, CallbackInfoReturnable<AttributeModifiersComponent> cir) {
@@ -37,6 +41,7 @@ public class MiningToolMixin {
         if (baseAttackDamage == 1.5f && attackSpeed == -3.0f) {
             baseAttackDamage = Combat.getShovelDamageModifier();
             attackSpeed = Combat.getShovelSpeedModifier();
+            attackReachBonus = Combat.getShovelReachModifier();
         } else if (baseAttackDamage == 1.5f && attackSpeed == -2.8f) {
             baseAttackDamage = Combat.getPickaxeDamageModifier();
             attackSpeed = Combat.getPickaxeSpeedModifier();
@@ -72,30 +77,31 @@ public class MiningToolMixin {
         cir.cancel();
     }
 
-    @Inject(method = "getMiningSpeedMultiplier", at = @At("RETURN"), cancellable = true)
-    private void getMiningSpeedMultiplier(ItemStack stack, BlockState state, CallbackInfoReturnable<Float> cir) {
-        if(cir.getReturnValue() == 1.0f) {
+    @Override
+    public boolean isCorrectForDrops(ItemStack stack, BlockState state) {
+        if(!super.isCorrectForDrops(stack, state)) {
+            if(stack.getItem() instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) return true;
+            else if(stack.getItem() instanceof ShovelItem && state.isOf(Blocks.PACKED_MUD) || state.getSoundGroup() == BlockSoundGroup.MUD_BRICKS) return true;
+            return false;
+        }
+        return true;
+    }
+
+
+    @Override
+    public float getMiningSpeed(ItemStack stack, BlockState state) {
+        float miningSpeed = super.getMiningSpeed(stack,state);
+        if(miningSpeed == 1.0f) {
 
             if(stack.getItem() instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) {
-                cir.setReturnValue(this.miningSpeed);
+                return stack.get(DataComponentTypes.TOOL).getSpeed(Blocks.STONE.getDefaultState());
             }
 
             else if(stack.getItem() instanceof ShovelItem && state.isOf(Blocks.PACKED_MUD) || state.getSoundGroup() == BlockSoundGroup.MUD_BRICKS) {
-                cir.setReturnValue(this.miningSpeed);
+                return stack.get(DataComponentTypes.TOOL).getSpeed(Blocks.DIRT.getDefaultState());
             }
+            return 1.0f;
         }
-    }
-
-    @Inject(method = "isSuitableFor", at = @At("RETURN"), cancellable = true)
-    private void isSuitableFor(BlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if(!cir.getReturnValue()) {
-            if((ToolItem)this instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) {
-                cir.setReturnValue(true);
-            }
-
-            else if((ToolItem)this instanceof ShovelItem && state.isOf(Blocks.PACKED_MUD) || state.getSoundGroup() == BlockSoundGroup.MUD_BRICKS) {
-                cir.setReturnValue(true);
-            }
-        }
+        return miningSpeed;
     }
 }
