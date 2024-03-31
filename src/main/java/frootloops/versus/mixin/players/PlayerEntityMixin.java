@@ -205,7 +205,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "canConsume", at = @At("HEAD"), cancellable = true)
     public void canConsume(boolean ignoreHunger, CallbackInfoReturnable<Boolean> cir) {
         if(VersusSettings.DO_FOOD_OVERHAUL) {
-            cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 || this.hungerManager.getFoodLevel() < this.getMaxHealth() - this.getHealth())));
+            cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 + this.getMaxHealth() - this.getHealth())));
         }
     }
 }
