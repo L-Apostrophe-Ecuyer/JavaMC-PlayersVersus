@@ -71,7 +71,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:polished_tuff",
+          "name": "minecraft:polished_diorite",
           "functions": [
             {
               "function": "minecraft:set_count",
