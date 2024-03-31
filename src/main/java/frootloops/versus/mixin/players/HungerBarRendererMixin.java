@@ -40,7 +40,7 @@ public class HungerBarRendererMixin {
         HungerManager hungerManager = player.getHungerManager();
         boolean hasNoSaturation = hungerManager.getSaturationLevel() == 0.0f;
         int playerFoodLevel = hungerManager.getFoodLevel();
-        int foodPointsAvailable = !VersusSettings.DO_FOOD_OVERHAUL ? 20 : Math.max((int) (player.getMaxHealth() - player.getHealth()), playerFoodLevel);
+        int foodPointsAvailable = !VersusSettings.DO_FOOD_OVERHAUL ? 20 : Math.max((int) (player.getMaxHealth() - player.getHealth() + 6), playerFoodLevel);
 
         Identifier iconHaunchFull, iconHaunchHalf, iconHaunchEmpty, iconHaunchHalfDisabled, iconHaunchEmptyDisabled;
         if (player.hasStatusEffect(StatusEffects.HUNGER)) {
@@ -64,7 +64,7 @@ public class HungerBarRendererMixin {
 
             // Draw the border icon:
             halfHaunchFoodValue = renderedHaunch * 2 + 1;
-            if(halfHaunchFoodValue < 6 || halfHaunchFoodValue < foodPointsAvailable) context.drawGuiTexture(iconHaunchEmpty, x, y, 9, 9);
+            if(halfHaunchFoodValue < foodPointsAvailable) context.drawGuiTexture(iconHaunchEmpty, x, y, 9, 9);
             else if(halfHaunchFoodValue == foodPointsAvailable) context.drawGuiTexture(iconHaunchHalfDisabled, x, y, 9, 9);
             else context.drawGuiTexture(iconHaunchEmptyDisabled, x, y, 9, 9);
 
