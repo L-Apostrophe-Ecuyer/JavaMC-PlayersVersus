@@ -51,14 +51,6 @@ import static frootloops.versus.backported.items.FutureItems.BREEZE_ROD;
 
 public class RevampedTradeOffers {
 
-    private static final SellMapFactory SELL_DESERT_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapIcon.Type.DESERT_VILLAGE, 12, 5);
-    private static final SellMapFactory SELL_SAVANNA_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapIcon.Type.SAVANNA_VILLAGE, 12, 5);
-    private static final SellMapFactory SELL_PLAINS_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_PLAINS_VILLAGE_MAPS, "filled_map.village_plains", MapIcon.Type.PLAINS_VILLAGE, 12, 5);
-    private static final SellMapFactory SELL_TAIGA_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_TAIGA_VILLAGE_MAPS, "filled_map.village_taiga", MapIcon.Type.TAIGA_VILLAGE, 12, 5);
-    private static final SellMapFactory SELL_SNOWY_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SNOWY_VILLAGE_MAPS, "filled_map.village_snowy", MapIcon.Type.SNOWY_VILLAGE, 12, 5);
-    private static final SellMapFactory SELL_JUNGLE_TEMPLE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_JUNGLE_EXPLORER_MAPS, "filled_map.explorer_jungle", MapIcon.Type.JUNGLE_TEMPLE, 12, 5);
-    private static final SellMapFactory SELL_SWAMP_HUT_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SWAMP_EXPLORER_MAPS, "filled_map.explorer_swamp", MapIcon.Type.SWAMP_HUT, 12, 5);
-
 
     public static final Map<VillagerProfession, Int2ObjectMap<Factory[]>> REVAMPED_PROFESSION_TO_LEVELED_TRADE = Util.make(Maps.newHashMap(), map -> {
         map.put(VillagerProfession.FARMER, copyToFastUtilMap(
@@ -374,31 +366,7 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.COMPASS, 1, 1, 3),
                                 new SellItemFactory(Items.PAPER, 1, 12, 3),
                                 new SellItemFactory(Items.MAP, 1, 1, 4),
-                                new SellItemFactory(Items.CAMPFIRE, 1, 1, 10),
-                                new TypedWrapperFactory(ImmutableMap.of(
-                                        VillagerType.DESERT, SELL_SAVANNA_VILLAGE_MAP_TRADE,
-                                        VillagerType.SAVANNA, SELL_PLAINS_VILLAGE_MAP_TRADE,
-                                        VillagerType.PLAINS, SELL_TAIGA_VILLAGE_MAP_TRADE,
-                                        VillagerType.TAIGA, SELL_SNOWY_VILLAGE_MAP_TRADE,
-                                        VillagerType.SNOW, SELL_PLAINS_VILLAGE_MAP_TRADE,
-                                        VillagerType.JUNGLE, SELL_SAVANNA_VILLAGE_MAP_TRADE,
-                                        VillagerType.SWAMP, SELL_SNOWY_VILLAGE_MAP_TRADE)),
-                                new TypedWrapperFactory(ImmutableMap.of(
-                                        VillagerType.DESERT, SELL_PLAINS_VILLAGE_MAP_TRADE,
-                                        VillagerType.SAVANNA, SELL_DESERT_VILLAGE_MAP_TRADE,
-                                        VillagerType.PLAINS, SELL_SAVANNA_VILLAGE_MAP_TRADE,
-                                        VillagerType.TAIGA, SELL_PLAINS_VILLAGE_MAP_TRADE,
-                                        VillagerType.SNOW, SELL_TAIGA_VILLAGE_MAP_TRADE,
-                                        VillagerType.JUNGLE, SELL_DESERT_VILLAGE_MAP_TRADE,
-                                        VillagerType.SWAMP, SELL_TAIGA_VILLAGE_MAP_TRADE)),
-                                new TypedWrapperFactory(ImmutableMap.of(
-                                        VillagerType.DESERT, SELL_JUNGLE_TEMPLE_MAP_TRADE,
-                                        VillagerType.SAVANNA, SELL_JUNGLE_TEMPLE_MAP_TRADE,
-                                        VillagerType.PLAINS, SELL_JUNGLE_TEMPLE_MAP_TRADE,
-                                        VillagerType.TAIGA, SELL_SWAMP_HUT_MAP_TRADE,
-                                        VillagerType.SNOW, SELL_SWAMP_HUT_MAP_TRADE,
-                                        VillagerType.JUNGLE, SELL_SWAMP_HUT_MAP_TRADE,
-                                        VillagerType.SWAMP, SELL_JUNGLE_TEMPLE_MAP_TRADE))
+                                new SellItemFactory(Items.CAMPFIRE, 1, 1, 10)
                         },
                         2, new Factory[]{
                                 new SellItemFactory(Items.FLOWER_BANNER_PATTERN, 18, 1, 15),
