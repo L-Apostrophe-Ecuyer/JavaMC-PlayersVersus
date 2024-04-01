@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.environment.CustomBlocks;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
@@ -35,20 +36,29 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.village.TradeOffer;
-import net.minecraft.village.VillagerDataContainer;
-import net.minecraft.village.VillagerProfession;
-import net.minecraft.village.VillagerType;
+import net.minecraft.village.*;
 import net.minecraft.village.raid.Raid;
 import net.minecraft.world.gen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static frootloops.versus.backported.items.FutureItems.BREEZE_ROD;
+
 public class RevampedTradeOffers {
+
+    private static final SellMapFactory SELL_DESERT_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapIcon.Type.DESERT_VILLAGE, 12, 5);
+    private static final SellMapFactory SELL_SAVANNA_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapIcon.Type.SAVANNA_VILLAGE, 12, 5);
+    private static final SellMapFactory SELL_PLAINS_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_PLAINS_VILLAGE_MAPS, "filled_map.village_plains", MapIcon.Type.PLAINS_VILLAGE, 12, 5);
+    private static final SellMapFactory SELL_TAIGA_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_TAIGA_VILLAGE_MAPS, "filled_map.village_taiga", MapIcon.Type.TAIGA_VILLAGE, 12, 5);
+    private static final SellMapFactory SELL_SNOWY_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SNOWY_VILLAGE_MAPS, "filled_map.village_snowy", MapIcon.Type.SNOWY_VILLAGE, 12, 5);
+    private static final SellMapFactory SELL_JUNGLE_TEMPLE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_JUNGLE_EXPLORER_MAPS, "filled_map.explorer_jungle", MapIcon.Type.JUNGLE_TEMPLE, 12, 5);
+    private static final SellMapFactory SELL_SWAMP_HUT_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SWAMP_EXPLORER_MAPS, "filled_map.explorer_swamp", MapIcon.Type.SWAMP_HUT, 12, 5);
+
 
     public static final Map<VillagerProfession, Int2ObjectMap<Factory[]>> REVAMPED_PROFESSION_TO_LEVELED_TRADE = Util.make(Maps.newHashMap(), map -> {
         map.put(VillagerProfession.FARMER, copyToFastUtilMap(
@@ -264,7 +274,7 @@ public class RevampedTradeOffers {
                                 new SellPotionHoldingItemFactory(Items.GLASS_BOTTLE, 1, Items.SPLASH_POTION, 1, 24, 3, 18),
                                 new SellPotionHoldingItemFactory(Items.ARROW, 4, Items.TIPPED_ARROW, 4, 1, 12, 18)},
                         5, new Factory[]{
-                                new SellItemFactory(Items.TNT, 1, 5, 20)}
+                                new SellItemFactory(Items.TNT, 1, 1, 20)}
                 )));
 
         map.put(VillagerProfession.LIBRARIAN, copyToFastUtilMap(
@@ -278,6 +288,7 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.GLASS, 1, 6, 3),
                                 new SellItemFactory(Blocks.BOOKSHELF, 3, 1, 12, 6),
                                 new EnchantBookFactory(10),
+                                new EnchantBookFactory(5),
                                 new TypeAwareSellItemFactory(24, 1, 3, 16, ImmutableMap.builder().put(
                                         VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BLAST_PROTECTION, 1))).put(
                                         VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.TOSSING, 2))).put(
@@ -316,7 +327,7 @@ public class RevampedTradeOffers {
                                 new TypeAwareSellItemFactory(32, 1, 3, 20, ImmutableMap.builder().put(
                                         VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.CLEAVING, 2))).put(
                                         VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PUNCH, 2))).put(
-                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SILK_TOUCH, 1))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.CHANNELING, 1))).put(
                                         VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.INFINITY, 1))).put(
                                         VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.MULTISHOT, 1))).put(
                                         VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BINDING_CURSE, 1))).put(
@@ -335,26 +346,60 @@ public class RevampedTradeOffers {
                                 new BuyForMutlipleEmeraldsFactory(Items.ENDER_EYE, 4, 12, 20),
                                 new BuyForOneEmeraldFactory(Items.ENDER_PEARL, 1, 12, 15)},
                         5, new Factory[]{
-                                new EnchantBookFactory(22),
+                                new EnchantBookFactory(30),
                                 new TypeAwareSellItemFactory(48, 1, 3, 20, ImmutableMap.builder().put(
-                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FEATHER_FALLING, 3))).put(
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.IMPACT_PROTECTION, 2))).put(
                                         VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.THORNS, 3))).put(
                                         VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.UNBREAKING, 3))).put(
                                         VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.EFFICIENCY, 4))).put(
                                         VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FORTUNE, 2))).put(
                                         VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SHARPNESS, 3))).put(
                                         VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.MENDING, 1))).build()),
-                                new ProcessItemFactory(Items.ECHO_SHARD, 1, Items.RECOVERY_COMPASS,1, 1, 20)}
+                                new TypeAwareSellItemFactory(48, 1, 3, 20, ImmutableMap.builder().put(
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.PIERCING_PROTECTION, 2))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PIERCING, 4))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.RIPTIDE, 3))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SWEEPING, 4))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.MENDING, 1))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PROJECTILE_PROTECTION, 2))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.VANISHING_CURSE, 1))).build())
+                        }
                 )));
 
         map.put(VillagerProfession.CARTOGRAPHER, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Raid.getOminousBanner(), 24, 16, 6),
+                                new BuyForOneEmeraldFactory(Items.REDSTONE, 16, 8, 1),
                                 new SellItemFactory(Items.SPYGLASS, 2, 1, 8),
                                 new SellItemFactory(Items.COMPASS, 1, 1, 3),
                                 new SellItemFactory(Items.PAPER, 1, 12, 3),
-                                new SellItemFactory(Items.MAP, 1, 1, 4)},
+                                new SellItemFactory(Items.MAP, 1, 1, 4),
+                                new SellItemFactory(Items.CAMPFIRE, 1, 1, 10),
+                                new TypedWrapperFactory(ImmutableMap.of(
+                                        VillagerType.DESERT, SELL_SAVANNA_VILLAGE_MAP_TRADE,
+                                        VillagerType.SAVANNA, SELL_PLAINS_VILLAGE_MAP_TRADE,
+                                        VillagerType.PLAINS, SELL_TAIGA_VILLAGE_MAP_TRADE,
+                                        VillagerType.TAIGA, SELL_SNOWY_VILLAGE_MAP_TRADE,
+                                        VillagerType.SNOW, SELL_PLAINS_VILLAGE_MAP_TRADE,
+                                        VillagerType.JUNGLE, SELL_SAVANNA_VILLAGE_MAP_TRADE,
+                                        VillagerType.SWAMP, SELL_SNOWY_VILLAGE_MAP_TRADE)),
+                                new TypedWrapperFactory(ImmutableMap.of(
+                                        VillagerType.DESERT, SELL_PLAINS_VILLAGE_MAP_TRADE,
+                                        VillagerType.SAVANNA, SELL_DESERT_VILLAGE_MAP_TRADE,
+                                        VillagerType.PLAINS, SELL_SAVANNA_VILLAGE_MAP_TRADE,
+                                        VillagerType.TAIGA, SELL_PLAINS_VILLAGE_MAP_TRADE,
+                                        VillagerType.SNOW, SELL_TAIGA_VILLAGE_MAP_TRADE,
+                                        VillagerType.JUNGLE, SELL_DESERT_VILLAGE_MAP_TRADE,
+                                        VillagerType.SWAMP, SELL_TAIGA_VILLAGE_MAP_TRADE)),
+                                new TypedWrapperFactory(ImmutableMap.of(
+                                        VillagerType.DESERT, SELL_JUNGLE_TEMPLE_MAP_TRADE,
+                                        VillagerType.SAVANNA, SELL_JUNGLE_TEMPLE_MAP_TRADE,
+                                        VillagerType.PLAINS, SELL_JUNGLE_TEMPLE_MAP_TRADE,
+                                        VillagerType.TAIGA, SELL_SWAMP_HUT_MAP_TRADE,
+                                        VillagerType.SNOW, SELL_SWAMP_HUT_MAP_TRADE,
+                                        VillagerType.JUNGLE, SELL_SWAMP_HUT_MAP_TRADE,
+                                        VillagerType.SWAMP, SELL_JUNGLE_TEMPLE_MAP_TRADE))
+                        },
                         2, new Factory[]{
                                 new SellItemFactory(Items.FLOWER_BANNER_PATTERN, 18, 1, 15),
                                 new SellItemFactory(Items.GLASS_PANE, 1, 16, 8),
@@ -362,7 +407,7 @@ public class RevampedTradeOffers {
                                 new SellMapFactory(
                                         8,
                                         StructureTags.SHIPWRECK, "Shipwreck Explorer Map",
-                                        MapIcon.Type.TARGET_X, 3, 30),
+                                        MapIcon.Type.TARGET_X, 3, 14),
                                 new SellMapFactory(
                                         6,
                                         StructureTags.OCEAN_RUIN, "Ruins Explorer Map",
@@ -400,37 +445,38 @@ public class RevampedTradeOffers {
         map.put(VillagerProfession.CLERIC, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForOneEmeraldFactory(Items.SPIDER_EYE, 8, 12, 1),
-                                new BuyForOneEmeraldFactory(Items.ROTTEN_FLESH, 8, 12, 1),
-                                new BuyForOneEmeraldFactory(Items.GOLD_INGOT, 3, 24, 10),
-                                new SellItemFactory(Items.GLASS_BOTTLE, 1, 12, 1),
-                                new SellItemFactory(Items.SUGAR, 1, 24, 1),
-                                new SellItemFactory(Items.GUNPOWDER, 1, 3, 1)},
-                        2, new Factory[]{
                                 new BuyForMutlipleEmeraldsFactory(Items.GOLDEN_APPLE, 5, 16, 5),
-                                new BuyForOneEmeraldFactory(Items.GLOWSTONE_DUST, 16, 12, 3),
-                                new BuyForOneEmeraldFactory(Items.BLAZE_POWDER, 1, 16, 8),
+                                new BuyForOneEmeraldFactory(Items.SPIDER_EYE, 8, 12, 6),
+                                new BuyForOneEmeraldFactory(Items.ROTTEN_FLESH, 8, 12, 8),
+                                new BuyForOneEmeraldFactory(Items.GOLD_INGOT, 3, 24, 10),
+                                new SellItemFactory(Items.GLASS_BOTTLE, 1, 12, 2),
+                                new SellItemFactory(Items.SUGAR, 1, 24, 1),
+                                new SellItemFactory(Items.REDSTONE, 1, 8, 16, 2),
+                                new SellItemFactory(Items.GUNPOWDER, 1, 3, 2)},
+                        2, new Factory[]{
+                                new BuyForMutlipleEmeraldsFactory(BREEZE_ROD, 3, 16, 5),
+                                new BuyForOneEmeraldFactory(Items.GLOWSTONE_DUST, 16, 12, 5),
+                                new BuyForOneEmeraldFactory(Items.BLAZE_POWDER, 1, 16, 5),
                                 new BuyForOneEmeraldFactory(Blocks.NETHER_WART, 21, 16, 5),
-                                new SellItemFactory(Items.RABBIT_FOOT, 1, 1, 12, 5),
+                                new SellItemFactory(Items.RABBIT_HIDE, 1, 1, 12, 5),
                                 new SellItemFactory(Items.FERMENTED_SPIDER_EYE, 1, 1, 12, 5)},
                         3, new Factory[]{
                                 new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER_BREATHING), 3, 1, 6, 10),
-                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WEAKNESS), 15, 1, 6,10),
+                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.SPLASH_POTION), Potions.WEAKNESS), 15, 1, 6,10),
                                 new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.HEALING), 4, 1, 6,10),
                                 new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.SWIFTNESS), 5, 1, 6,10),
                                 new SellItemFactory(Items.MAGMA_CREAM, 1, 1, 12, 3),
-                                new SellItemFactory(Items.REDSTONE, 1, 14, 12, 3),
-                                new ProcessItemFactory(Items.CARROT, 8, Items.GOLDEN_CARROT,8, 16, 8),
-                                new ProcessItemFactory(Items.MELON_SLICE, 8, Items.GLISTERING_MELON_SLICE,8, 16, 8)},
+                                new ProcessItemFactory(Items.CARROT, 16, Items.GOLDEN_CARROT,16, 16, 8)},
                         4, new Factory[]{
                                 new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.LEAPING), 8, 1, 6,10),
-                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.STRENGTH), 21, 1, 6,15),
                                 new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.INVISIBILITY), 24, 1, 6,15),
-                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.SLOW_FALLING), 38, 1, 6,15),
+                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.LONG_SLOW_FALLING), 38, 1, 6,15),
                                 new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.REGENERATION), 12, 1, 6,15),
-                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.TURTLE_MASTER), 44, 1, 6,15)},
+                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.SPLASH_POTION), Potions.STRONG_HEALING), 21, 1, 6,15)},
                         5, new Factory[]{
-                                new TotemBlessingFactory()}
+                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.LONG_STRENGTH), 21, 1, 6,15),
+                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.LONG_SWIFTNESS), 24, 1, 6,15),
+                                new SellItemFactory(PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.STRONG_TURTLE_MASTER), 40, 1, 6,15)}
                 )));
 
         map.put(VillagerProfession.ARMORER, copyToFastUtilMap(ImmutableMap.of(
@@ -562,18 +608,18 @@ public class RevampedTradeOffers {
                         new SellItemFactory(Items.COOKED_SALMON, 1, 4, 1),
                         new SellItemFactory(Items.COOKED_COD, 1, 4, 1)},
                 2, new Factory[]{
-                        new BuyForOneEmeraldFactory(Items.MUTTON, 7, 16, 8),
-                        new SellItemFactory(Items.EGG, 1, 16, 3),
-                        new SellItemFactory(Items.COOKED_MUTTON, 1, 4, 4),
-                        new SellItemFactory(Items.COOKED_CHICKEN, 1, 4, 16, 4)},
+                        new BuyForOneEmeraldFactory(Items.MUTTON, 7, 16, 12),
+                        new SellItemFactory(Items.EGG, 1, 16, 8),
+                        new SellItemFactory(Items.COOKED_MUTTON, 1, 4, 8),
+                        new SellItemFactory(Items.COOKED_CHICKEN, 1, 4, 16, 8)},
                 3, new Factory[]{
                         new SellItemFactory(Items.RABBIT_STEW, 1, 1, 18),
-                        new SellItemFactory(Items.COOKED_PORKCHOP, 1, 3, 16, 6),
-                        new SellItemFactory(Items.COOKED_BEEF, 1, 3, 6)},
+                        new SellItemFactory(Items.COOKED_PORKCHOP, 1, 3, 16, 10),
+                        new SellItemFactory(Items.COOKED_BEEF, 1, 3, 10)},
                 4, new Factory[]{
-                        new SellItemFactory(Items.DRIED_KELP, 1, 9, 10),
-                        new SellItemFactory(Items.TURTLE_EGG, 1, 9, 10),
-                        new SellItemFactory(Items.RABBIT_FOOT, 1, 1, 10)},
+                        new SellItemFactory(Items.DRIED_KELP, 1, 9, 13),
+                        new SellItemFactory(Items.TURTLE_EGG, 1, 9, 13),
+                        new SellItemFactory(Items.RABBIT_FOOT, 1, 1, 13)},
                 5, new Factory[]{
                         new BuyForOneEmeraldFactory(Items.SWEET_BERRIES, 10, 12, 30)}
         )));
@@ -605,16 +651,18 @@ public class RevampedTradeOffers {
                         new SellItemFactory(Items.LIGHT_GRAY_DYE, 1, 8, 8),
                         new SellItemFactory(Items.ORANGE_DYE, 1, 8, 8),
                         new SellItemFactory(Items.PINK_DYE, 1, 8, 8),
-                        new SellSpecialLeatherArmorFactory(Items.LEATHER_BOOTS, 4, 12, 16),
-                        new SellSpecialLeatherArmorFactory(Items.LEATHER_CHESTPLATE, 16)},
+                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_BOOTS, 4, 12, 16),
+                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_CHESTPLATE, 16)
+                },
                 4, new Factory[]{
                         new SellItemFactory(Items.PURPLE_DYE, 1, 8, 9),
                         new SellItemFactory(Items.BLUE_DYE, 1, 8, 9),
                         new SellItemFactory(Items.MAGENTA_DYE, 1, 8, 9),
-                        new SellItemFactory(Items.CYAN_DYE, 1, 8, 9),
-                        new SellSpecialLeatherArmorFactory(Items.LEATHER_HELMET, 5, 12, 20),
-                        new SellSpecialLeatherArmorFactory(Items.LEATHER_LEGGINGS, 7, 12, 20),
-                        new SellSpecialLeatherArmorFactory(Items.LEATHER_CHESTPLATE, 8, 12, 20)},
+                        new SellItemFactory(Items.CYAN_DYE, 1, 8, 9)//,
+                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_HELMET, 5, 12, 20),
+                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_LEGGINGS, 7, 12, 20),
+                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_CHESTPLATE, 8, 12, 20)
+                },
                 5, new Factory[]{
                         new SellItemFactory(new ItemStack(Items.SADDLE), 6, 1, 12, 30, 0.2f),
                         new SellSpecialLeatherArmorFactory(Items.LEATHER_HORSE_ARMOR, 6, 12, 30)}
@@ -622,16 +670,17 @@ public class RevampedTradeOffers {
 
         map.put(VillagerProfession.MASON, copyToFastUtilMap(ImmutableMap.of(
                 1, new Factory[]{
-                        new BuyForOneEmeraldFactory(Blocks.DIORITE, 32, 16, 2),
+                        new BuyForOneEmeraldFactory(Blocks.COBBLESTONE, 48, 16, 1),
                         new BuyForOneEmeraldFactory(Blocks.ANDESITE, 32, 16, 2),
                         new SellItemFactory(Blocks.BRICKS, 1, 24, 32, 1),
+                        new SellItemFactory(CustomBlocks.GRANITE_BRICKS, 1, 24, 32, 1),
                         new SellItemFactory(Blocks.MUD_BRICKS, 1, 12, 32, 2),
                         new SellItemFactory(Blocks.TERRACOTTA, 1, 24, 32, 1),
                         new SellItemFactory(Blocks.SMOOTH_STONE, 1, 16, 32, 2),
-                        new SellItemFactory(Blocks.STONE, 1, 48, 32, 1),
+                        new SellItemFactory(Blocks.STONE, 1, 32, 32, 2),
                         new TypeAwareSellItemFactory(1, 8, 16, 1, ImmutableMap.builder().put(
                                 VillagerType.PLAINS, Items.CUT_SANDSTONE).put(
-                                VillagerType.TAIGA, Items.COPPER_BLOCK).put(
+                                VillagerType.TAIGA, Items.GREEN_TERRACOTTA).put(
                                 VillagerType.SNOW, Items.PRISMARINE).put(
                                 VillagerType.DESERT, Items.CUT_SANDSTONE).put(
                                 VillagerType.JUNGLE, Items.CUT_RED_SANDSTONE).put(
@@ -647,17 +696,33 @@ public class RevampedTradeOffers {
                         new SellItemFactory(Blocks.DEEPSLATE_TILES, 1, 32, 32, 8),
                         new SellItemFactory(Blocks.DEEPSLATE_BRICKS, 1, 32, 32, 8),
                         new SellItemFactory(Blocks.POLISHED_BLACKSTONE_BRICKS, 1, 24, 32, 8),
-                        new SellItemFactory(Blocks.SMOOTH_BASALT, 1, 32, 32, 8)},
+                        new SellItemFactory(Blocks.SMOOTH_BASALT, 1, 8, 32, 8)},
                 4, new Factory[]{
                         new SellItemFactory(Blocks.CUT_COPPER, 1, 48, 32, 14),
                         new SellItemFactory(Blocks.PRISMARINE_BRICKS, 1, 4, 32, 14),
-                        new SellItemFactory(Blocks.SMOOTH_BASALT, 1, 16, 12, 14)},
+                        new SellItemFactory(Blocks.TUFF, 1, 24, 12, 14)},
                 5, new Factory[]{
                         new SellItemFactory(Blocks.CALCITE, 1, 10, 32, 18),
                         new SellItemFactory(Blocks.SMOOTH_QUARTZ, 1, 16, 32, 18),
                         new SellItemFactory(Blocks.QUARTZ_PILLAR, 1, 24, 12, 18)}
         )));
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //---------------------------------------------------------------------------------------
 
     private static Int2ObjectMap<Factory[]> copyToFastUtilMap(ImmutableMap<Integer, Factory[]> map) {
         return new Int2ObjectOpenHashMap<Factory[]>(map);
@@ -971,6 +1036,28 @@ public class RevampedTradeOffers {
                 MapState.addDecorationsNbt(itemStack, blockPos, "+", this.iconType);
                 itemStack.setCustomName(Text.translatable(this.nameKey));
                 return new TradeOffer(new ItemStack(Items.EMERALD, this.price), new ItemStack(Items.COMPASS, 1), itemStack, this.maxUses, this.experience, 0.2f);
+            }
+            return null;
+        }
+    }
+
+    public record TypedWrapperFactory(Map<VillagerType, Factory> typeToFactory) implements Factory
+    {
+        public static TypedWrapperFactory of(Factory factory, VillagerType ... types) {
+            return new TypedWrapperFactory(Arrays.stream(types).collect(Collectors.toMap(type -> type, type -> factory)));
+        }
+
+        @Override
+        @Nullable
+        public TradeOffer create(Entity entity, Random random) {
+            if (entity instanceof VillagerDataContainer) {
+                VillagerDataContainer villagerDataContainer = (VillagerDataContainer)((Object)entity);
+                VillagerType villagerType = villagerDataContainer.getVillagerData().getType();
+                Factory factory = this.typeToFactory.get(villagerType);
+                if (factory == null) {
+                    return null;
+                }
+                return factory.create(entity, random);
             }
             return null;
         }
