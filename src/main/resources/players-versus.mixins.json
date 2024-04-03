@@ -14,6 +14,7 @@
     "enchantments.armor.ProtectionMixin",
     "enchantments.armor.ThornsMixin",
     "enchantments.tools.DamageEnchantMixin",
+    "enchantments.tools.BreachMixin",
     "environment.archeology.BrushesNotRequiredMixin",
     "environment.archeology.SuspiciousBlocksMixin",
     "environment.sleeping.ServerSleepingMixin",

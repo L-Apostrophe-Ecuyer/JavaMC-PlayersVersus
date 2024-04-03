@@ -39,9 +39,9 @@ public abstract class Combat {
     private static final String[] tools =
             new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
     private static final float[] toolsSpeed  =
-            new float[]{1.0F,   1.5F,   2.0F,   1.5F,   1.5F};
+            new float[]{1.0F,   1.5F,   2.0F,   1.2F,   1.5F};
     private static final float[] toolsDamage =
-            new float[]{8.0F,   4.0F,   2.0F,   4.0F,   3.0F};
+            new float[]{8.0F,   4.0F,   2.0F,   2.0F,   3.0F};
     private static final float[] toolsReachBonus =
             new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
 
