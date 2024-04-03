@@ -12,7 +12,7 @@
             "probability": 0.1
           },
           "state": {
-            "Name": "minecraft:dirt"
+            "Name": "minecraft:coarse_dirt"
           }
         },
         {
