@@ -34,12 +34,12 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
         }
 
         int floorToCeilingSearchRange = config.floorToCeilingSearchRange();
-        float maxColumnRadiusToCaveHeightRatio = 0.33f;
-        float stalactiteBluntness = 0.4f;
-        int columnRadiusMin = 2;
-        int columnRadiusMax = 4;
-        float heightScale = 12.0f;
-        float windSpeed = 0.1f;
+        float maxColumnRadiusToCaveHeightRatio = 0.6f;
+        float stalactiteBluntness = 0.3f;
+        int columnRadiusMin = 3;
+        int columnRadiusMax = 11;
+        float heightScale = 0.6f;
+        float windSpeed = 0.34f;
 
 
         Optional<CaveSurface> optional = CaveSurface.create(structureWorldAccess, blockPos, floorToCeilingSearchRange, StoneStalagtiteHelper::canGenerate, StoneStalagtiteHelper::canReplaceOrLava);

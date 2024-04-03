@@ -4,11 +4,11 @@
     "config": {
       "features": [
         {
-          "chance": 0.5,
+          "chance": 0.3,
           "feature": "players-versus:stone_overhangs_short"
         },
         {
-          "chance": 0.2,
+          "chance": 0.15,
           "feature": "players-versus:stone_overhangs_pillars"
         }
       ],
@@ -18,14 +18,14 @@
   "placement": [
     {
       "type": "minecraft:count_on_every_layer",
-      "count": 48
+      "count": 24
     },
     {
       "type": "minecraft:height_range",
       "height": {
         "type": "minecraft:uniform",
         "min_inclusive": {
-          "absolute": 56
+          "absolute": 64
         },
         "max_inclusive": {
           "absolute": 96

@@ -11,7 +11,7 @@
           "argument1": "minecraft:overworld/continents",
           "argument2": 0.1
         },
-        "argument2": -0.1
+        "argument2": -0.15
       },
       "argument2": {
         "type": "minecraft:add",
