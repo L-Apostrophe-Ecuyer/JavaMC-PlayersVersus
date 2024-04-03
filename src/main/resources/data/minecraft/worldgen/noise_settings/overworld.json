@@ -221,29 +221,29 @@
               "then_run": {
                 "type": "minecraft:condition",
                 "if_true": {
-                  "type": "minecraft:steep"
+                  "type": "minecraft:not",
+                  "invert": {
+                    "type": "minecraft:biome",
+                    "biome_is": [
+                      "minecraft:desert","minecraft:beach","minecraft:badlands","minecraft:wooded_badlands","minecraft:frozen_peaks","minecraft:stony_peaks"
+                    ]
+                  }
                 },
                 "then_run": {
                   "type": "minecraft:condition",
                   "if_true": {
                     "type": "minecraft:not",
                     "invert": {
-                      "type": "minecraft:biome",
-                      "biome_is": [
-                        "minecraft:desert","minecraft:beach","minecraft:badlands","minecraft:wooded_badlands","minecraft:frozen_peaks","minecraft:stony_peaks"
-                      ]
+                      "type": "minecraft:vertical_gradient",
+                      "random_name": "steep_stony_slopes",
+                      "true_at_and_below": {"absolute": 84},
+                      "false_at_and_above": {"absolute": 96}
                     }
                   },
                   "then_run": {
                     "type": "minecraft:condition",
                     "if_true": {
-                      "type": "minecraft:not",
-                      "invert": {
-                        "type": "minecraft:vertical_gradient",
-                        "random_name": "steep_stony_slopes",
-                        "true_at_and_below": {"absolute": 84},
-                        "false_at_and_above": {"absolute": 96}
-                      }
+                      "type": "minecraft:steep"
                     },
                     "then_run": {
                       "type": "minecraft:block",
