@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
@@ -35,6 +36,9 @@ public abstract class ZombieMixin extends HostileEntity {
     protected ZombieMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
     }
+
+    @Shadow
+    private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
 
     @Shadow
     protected boolean canConvertInWater() {return true;}
@@ -46,8 +50,6 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Shadow
     private static final TrackedData<Boolean> BABY = DataTracker.registerData(ZombieEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-
-    private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
     private static final UUID BABY_HEALTH_ID = UUID.fromString("AA766B59-9566-4402-BC1F-2EE2A276D836");
 
     // Reduced:
@@ -57,8 +59,9 @@ public abstract class ZombieMixin extends HostileEntity {
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
-                HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
-                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.34f)
+                HostileEntity.createHostileAttributes()
+                        .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
+                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.31f)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0)
                         .add(EntityAttributes.GENERIC_MAX_HEALTH, 24.0)
                         .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 4.0)
