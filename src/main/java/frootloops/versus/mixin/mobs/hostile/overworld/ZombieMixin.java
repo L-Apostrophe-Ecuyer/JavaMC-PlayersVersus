@@ -158,6 +158,7 @@ public abstract class ZombieMixin extends HostileEntity {
         if (this.getWorld() != null && !this.getWorld().isClient) {
             EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
             entityAttributeInstance.removeModifier(BABY_SPEED_ID);
+            this.setHealth(12.0f);
         }
     }
 }
