@@ -53,7 +53,7 @@ public abstract class ZombieMixin extends HostileEntity {
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(HostileEntity.createHostileAttributes()
                         .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
-                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.34f)
+                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.31f)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                         .add(EntityAttributes.GENERIC_ARMOR, 4.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
