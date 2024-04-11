@@ -9,9 +9,7 @@ import com.mojang.datafixers.util.Pair;
 import frootloops.versus.VersusMod;
 import frootloops.versus.backported.items.FutureItems;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.block.AbstractFireBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,6 +28,8 @@ import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+
+import static net.minecraft.state.property.Properties.POWERED;
 
 public class WindChargeExplosion extends Explosion {
     private final Random random = Random.create();
@@ -112,9 +112,6 @@ public class WindChargeExplosion extends Explosion {
 
             double exposure = squaredDistance < 1.0 ? 1.0 : Explosion.getExposure(explosionPos, entity);
             double distance = Math.sqrt(squaredDistance);
-
-            VersusMod.MOD_LOGGER.warn("Exposure for " + (this.world.isClient ? "client" : "server") + " entity at squared distance of " + distance + " to explosion is " + exposure);
-
             if(exposure < 0.1) continue;
 
             // Ensure that knockback is upwards:
@@ -126,13 +123,8 @@ public class WindChargeExplosion extends Explosion {
             entity.move(MovementType.SELF, addedVelocity);
             entity.setVelocity(entity.getVelocity().add(addedVelocity));
             entity.move(MovementType.SELF, addedVelocity);
-
-            VersusMod.MOD_LOGGER.warn("Entity sent flying with velocity " + explosionVelocity + " and vector " + entity.getVelocity());
-
             if (entity instanceof PlayerEntity player) {
-                this.affectedPlayers.put(player, addedVelocity);
-                VersusMod.MOD_LOGGER.warn("Added to list of affected players: " + player.getName());
-            }
+                this.affectedPlayers.put(player, addedVelocity);}
         }
     }
 

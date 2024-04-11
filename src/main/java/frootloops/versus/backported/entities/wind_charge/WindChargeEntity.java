@@ -103,11 +103,6 @@ implements FlyingItemEntity {
                 serverPlayerEntity.networkHandler.sendPacket(new ExplosionS2CPacket(x, y, z, 4.0f, explosion.getAffectedBlocks(), explosion.getAffectedPlayers().get(serverPlayerEntity)));
             }
         }
-
-        VersusMod.MOD_LOGGER.warn("Is player affected? " + explosion.getAffectedPlayers().containsKey((PlayerEntity) this.getOwner()));
-        if(this.getOwner() != null && explosion.getAffectedPlayers().containsKey(this.getOwner())) {
-            //FutureItems.LAST_WIND_CHARGE_USE_TIME.put(this.getOwner().getUuid(), this.getWorld().getTime());
-        }
         FutureItems.LAST_WIND_CHARGE_USE_TIME.put(this.getOwner().getUuid(), this.getWorld().getTime());
         hasExploded = true;
     }
