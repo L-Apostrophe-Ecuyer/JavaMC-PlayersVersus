@@ -1,6 +1,6 @@
 package frootloops.versus.mod.items;
 
-import frootloops.versus.mixin.players.accessors.ItemAccessor;
+import frootloops.versus.mixin.items.ItemAccessor;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.items.equipment.copper.CopperArmorMaterial;

@@ -71,12 +71,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 .add(EntityAttributes.GENERIC_LUCK));
     }
 
+
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
     private boolean switchHeldItemsWithoutResettingCooldown(ItemStack selectedItem, ItemStack itemStack) {
         if (!ItemStack.areEqual(selectedItem, itemStack)) {
             this.selectedItem = itemStack.copy();
         }
-        return false;
+        return false; // Always return false, to avoid resetting cooldown
     }
 
     @Inject(method = "getXpToDrop", at = @At("RETURN"), cancellable = true)
@@ -137,15 +138,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
 
-        // Falling doesn't hurt as much:
-        if (source.isIn(DamageTypeTags.IS_FALL)) {
-            return amount / 1.75f;
-        }
-
         // Explosions don't hurt as much, or at least, the damage is more consistent:
-        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 3.0f) {
-            amount = (amount + amount/4.0f + 16.0f) / 4.0f;
-            return  Math.min(amount, 30.0f);
+        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
+            return (amount + amount + 16.0f) / 4.0f;
         }
 
         // Hitting blocks while flying no longer neglects helmet protection:
@@ -245,5 +240,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(VersusSettings.DO_FOOD_OVERHAUL) {
             cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 + this.getMaxHealth() - this.getHealth())));
         }
+    }
+
+    @Override
+    public void setSprinting(boolean sprinting) {
+        if(sprinting && this.hungerManager.getFoodLevel() == 0 && this.age - this.getLastAttackedTime() < 48) return; // No sprinting when damaged and no food points
+        else super.setSprinting(sprinting);
     }
 }

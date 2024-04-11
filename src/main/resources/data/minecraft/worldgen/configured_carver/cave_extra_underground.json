@@ -1,7 +1,7 @@
 {
   "type": "minecraft:cave",
   "config": {
-    "probability": 0.12,
+    "probability": 0.06,
     "y": {
       "type": "minecraft:uniform",
       "min_inclusive": {
