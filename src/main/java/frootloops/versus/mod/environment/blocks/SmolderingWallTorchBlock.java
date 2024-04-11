@@ -38,13 +38,17 @@ public class SmolderingWallTorchBlock extends WallTorchBlock {
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if(pos.getY() > -32) return;
-        if(world instanceof ServerWorld) this.tickSmolderingTorchDegradation(state, world, pos);
+        if(!world.isClient) {
+            if (random.nextInt(63) > 60) {
+                this.tickSmolderingTorchDegradation(state, world, pos);
+            }
+        }
         world.playSoundAtBlockCenter(pos, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
     }
 
     @Override
     public void precipitationTick(BlockState state, World world, BlockPos pos, Biome.Precipitation precipitation) {
-        if(world instanceof ServerWorld) this.tickSmolderingTorchDegradation(state, (ServerWorld)world, pos);
+        if(!world.isClient) this.tickSmolderingTorchDegradation(state, (ServerWorld)world, pos);
         world.playSoundAtBlockCenter(pos, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
     }
 }

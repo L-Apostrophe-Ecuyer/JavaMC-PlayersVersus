@@ -18,7 +18,7 @@ public abstract class HungerSprintingMixin extends PlayerEntity {
 
     @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))
     private float immediateFeedback(float tickDelayAfterUpdate) {
-        if(!this.isSwimming() && this.getHungerManager().getFoodLevel() == 0 && this.age - this.getLastAttackedTime() < 48) return 128.0f; // No sprinting when damaged and no food points
+        if(this.getHungerManager().getFoodLevel() == 0 && this.age - this.getLastAttackedTime() < 48) return 128.0f; // No sprinting when damaged and no food points
         else return -128.0f; // Otherwise, can always sprint
     }
 }

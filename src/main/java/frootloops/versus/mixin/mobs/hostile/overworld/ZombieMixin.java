@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
+import frootloops.versus.VersusSettings;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -51,9 +52,11 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
+        double followRange = VersusSettings.DO_ZOMBIE_SOUND_DETECTION ? 7.0 : 30.0;
+        double mvtSpeed = VersusSettings.DO_ZOMBIE_SOUND_DETECTION ? 0.32 : 0.3;
         cir.setReturnValue(HostileEntity.createHostileAttributes()
-                        .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
-                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.31f)
+                        .add(EntityAttributes.GENERIC_FOLLOW_RANGE, followRange)
+                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, mvtSpeed)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                         .add(EntityAttributes.GENERIC_ARMOR, 4.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
@@ -63,15 +66,15 @@ public abstract class ZombieMixin extends HostileEntity {
     public void initCustomGoals() {
         this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.4F;
         this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.5F;
-        this.ambientSoundChance = -1000;
+        if(VersusSettings.DO_ZOMBIE_SOUND_DETECTION) this.ambientSoundChance = -1000;
 
         if(this.getY() > 56d || this.getSteppingBlockState().getSoundGroup() == BlockSoundGroup.GRASS) {
             this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, ((ZombieEntity) ((Object)this))::canBreakDoors));
         }
 
         this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.33F));
-        this.targetSelector.add(1, (new RevengeGoal(this, PigEntity.class)));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.8F)); // Only 20% chance of actually wandering
+        this.targetSelector.add(1, new RevengeGoal(this, PigEntity.class));
         this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, MerchantEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, IronGolemEntity.class, false));
@@ -144,6 +147,12 @@ public abstract class ZombieMixin extends HostileEntity {
                 this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
                 this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15F;
             }
+        }
+
+        // Bit less attack damage when wielding weapons:
+        if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            entityAttributeInstance.setBaseValue(1.0);
         }
     }
 

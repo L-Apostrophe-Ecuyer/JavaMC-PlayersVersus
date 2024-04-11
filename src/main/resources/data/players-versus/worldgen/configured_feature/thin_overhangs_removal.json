@@ -2,17 +2,17 @@
   "type": "minecraft:vegetation_patch",
   "config": {
     "surface": "ceiling",
-    "depth": 1,
+    "depth": 3,
     "vertical_range": 4,
     "extra_bottom_block_chance": 0,
     "extra_edge_column_chance": 0,
     "vegetation_chance": 0,
     "xz_radius": 10,
-    "replaceable": "#minecraft:rabbits_spawnable_on",
+    "replaceable": "#players-versus:overhangs_to_remove",
     "ground_state": {
       "type": "minecraft:simple_state_provider",
       "state": {
-        "Name": "minecraft:air"
+        "Name": "minecraft:pink_concrete"
       }
     },
     "vegetation_feature": "minecraft:classic_vines_cave_feature"

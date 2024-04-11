@@ -71,7 +71,6 @@ public abstract class ServerSleepingMixin extends World {
         if(timeOfDay % 20l != 0) return;
         timeOfDay = timeOfDay % 24000l;
 
-        TickManager tickManager = this.getTickManager();
         boolean startSleepingThroughNight = true;
         if(timeOfDay > 12999l && timeOfDay < 23300l) {
             for (PlayerEntity player : players) {
@@ -86,6 +85,7 @@ public abstract class ServerSleepingMixin extends World {
         }
 
         // Check if we need to update tick rate based off of sleeping players:
+        TickManager tickManager = this.getTickManager();
         if(startSleepingThroughNight) {
             // If everyone is asleep, make time go by quick
             // And make nearby hostiles target players, to test their shelters

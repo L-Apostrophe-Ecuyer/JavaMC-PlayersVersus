@@ -1,6 +1,7 @@
-package frootloops.versus.mixin.environment;
+package frootloops.versus.mixin.environment.visuals;
 
-import net.minecraft.block.Blocks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffects;
@@ -8,11 +9,18 @@ import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-
+@Environment(EnvType.CLIENT)
 @Mixin(BackgroundRenderer.class)
-public class DarknessFogMixin {
+public abstract class FogRendererMixin {
+
+    @ModifyVariable(method = "applyFog", at = @At("HEAD"), ordinal = 0)
+    private static BackgroundRenderer.FogType modifyFogType(BackgroundRenderer.FogType fogType) {
+        if(fogType == BackgroundRenderer.FogType.FOG_TERRAIN) return BackgroundRenderer.FogType.FOG_SKY;
+        return fogType;
+    }
 
     @Inject(method = "getFogModifier", at = @At("HEAD"), cancellable = true)
     private static void noMoreDarknessFog(Entity entity, float tickDelta, CallbackInfoReturnable cir) {
@@ -22,5 +30,4 @@ public class DarknessFogMixin {
                     cir.cancel();
         }
     }
-
 }

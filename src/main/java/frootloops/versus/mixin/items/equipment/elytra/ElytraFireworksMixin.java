@@ -27,14 +27,8 @@ public class ElytraFireworksMixin extends Item {
 
                 // Durability of elytra is only ever affected by fireworks:
                 int maxDamage = elytraStack.getMaxDamage();
-                for (int i = 0; i < 3; i++) {
-                    int durabilityLeft = maxDamage - elytraStack.getDamage();
-                    if (durabilityLeft > 1) {
-                        elytraStack.damage(Math.min(durabilityLeft - 1, 3), user, EquipmentSlot.CHEST);
-                    } else {
-                        break;
-                    }
-                }
+                int durabilityLeft = maxDamage - elytraStack.getDamage();
+                elytraStack.damage(Math.min(durabilityLeft - 1, 16), user, EquipmentSlot.CHEST);
             }
         }
     }

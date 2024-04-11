@@ -66,12 +66,13 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
         if (player.getEquippedStack(EquipmentSlot.HEAD).isOf(Blocks.CARVED_PUMPKIN.asItem())) return false;
         double squaredDistance = this.squaredDistanceTo(player);
 
-        // Targeted players will be attacked if returns false. We invert to make it so endermen only attack when you're looking, making chases more panicky.
+        // Targeted players will be attacked if returns false. We make it so endermen only attack when you're looking, making chases more panicky.
         if(this.getTarget() == player) {
             if(this.getAngerTime() < 10) return false;
             if(this.hurtTime > 0 && this.lastDamageTaken > 5.0f) return true;
-            if(squaredDistance > 16.0) return false;
-            else return !(Combat.isLookingTowards(player, this.getEyePos(), 0.4));
+            if(squaredDistance > 64.0) return false;
+            else if(squaredDistance > 16.0) return (Combat.isLookingTowards(player, this.getEyePos(), -0.3));
+            else return false;
         }
         // Untargeted players, Endermen will teleport up to them until they're in range for aggro:
         else {

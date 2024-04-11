@@ -1,26 +1,22 @@
-package frootloops.versus.mixin.mobs.hostile.overworld.shields;
+package frootloops.versus.mixin.mobs.hostile.shields;
 
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.SkeletonEntityModel;
+import net.minecraft.client.render.entity.model.PiglinEntityModel;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.function.Function;
 
-@Mixin(SkeletonEntityModel.class)
-public abstract class SkeletonModelMixin<T extends MobEntity> extends BipedEntityModel<T> {
+@Mixin(PiglinEntityModel.class)
+public abstract class PiglinModelMixin<T extends MobEntity> extends PlayerEntityModel<T> {
 
-
-    public SkeletonModelMixin(ModelPart root, Function<Identifier, RenderLayer> renderLayerFactory) {
-        super(root, renderLayerFactory);
+    public PiglinModelMixin(ModelPart root, boolean thinArms) {
+        super(root, thinArms);
     }
 
     @Inject(method = "setAngles", at = @At("TAIL"))

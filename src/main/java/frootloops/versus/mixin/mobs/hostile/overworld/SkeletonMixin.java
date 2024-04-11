@@ -79,5 +79,11 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
             if(rand % 4 == 1) this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.GOLDEN_LEGGINGS));
             if(rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
         }
+
+        // Bit less attack damage when wielding weapons:
+        if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            entityAttributeInstance.setBaseValue(1.0);
+        }
     }
 }
