@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -32,73 +31,66 @@ public abstract class SpecialMovementMixin extends LivingEntity {
 
     @Shadow public void incrementStat(Identifier stat) {}
 
-    private int ticksSinceStartedSneaking = 0;
-    private int ticksLeftToDash = 0;
-
-    @Inject(method = "tick", at = @At(value = "TAIL"))
-    private void tickMovement(CallbackInfo ci) {
-        if(!isCrawling() && !isSwimming()) {
-
-            if(isSneaking()) ticksSinceStartedSneaking++;
-            else if(ticksSinceStartedSneaking > 16) ticksSinceStartedSneaking = 0;
-            else ticksSinceStartedSneaking = Math.max(0, ticksSinceStartedSneaking - 1);
-
-            if(!isSprinting() || isSneaking()) ticksLeftToDash = 8;
-            else if(ticksLeftToDash > 0) ticksLeftToDash--;
-        }
-    }
-
     @Inject(method = "jump", at = @At(value = "HEAD"), cancellable = true)
     private void jump(CallbackInfo ci) {
         double velocityY = (double) this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
         double velocityX = this.getVelocity().x;
         double velocityZ = this.getVelocity().z;
+        double horizontalSpeedSquared = (velocityZ * velocityZ) + (velocityX * velocityX);
+        boolean isSprinting = isSprinting();
+        boolean hasBounded = false;
+        double boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.FEET));
+        boundingStridesLevel += EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
 
-        if (isSprinting()) {
+        // Sprint jump (regular):
+        if (isSprinting) {
             float yawRads = this.getYaw() * ((float) Math.PI / 180);
             velocityX += -MathHelper.sin(yawRads) * 0.12; // Sprint jump speed reduced
             velocityZ += MathHelper.cos(yawRads) * 0.12;
         }
 
-        // Bounding strides:
-        double boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.FEET));
-        boundingStridesLevel += EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
-        boolean hasBounded = false;
-
-        // Sprint-jump:
-        if (ticksLeftToDash > 0 && isSprinting() && boundingStridesLevel > 0) {
-            velocityX *= (10.0 + boundingStridesLevel)/ 8.5;
-            velocityZ *= (10.0 + boundingStridesLevel)/ 8.5;
-
-            ((PlayerEntity)((Object)this)).addExhaustion(0.2f);
-            this.spawnSprintingParticles();
-            this.playBlockFallSound();
-            timeUntilRegen = 12; // Invincible for two ticks
-            ticksLeftToDash = -1;
-            hasBounded = true;
-        }
-
-        // Crouch-jump:
-        if(ticksSinceStartedSneaking > 1 && ticksSinceStartedSneaking < 12 && !this.isSneaking()) {
-            velocityY *= 1.3 + 0.125 * boundingStridesLevel;
-            this.spawnSprintingParticles();
-            this.playBlockFallSound();
-            hasBounded = true;
-        }
-
-        // Bounding strides effect:
-        if(boundingStridesLevel > 0.0 && hasBounded) {
-            this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0,true, false));
-            this.playSound(SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, 1.0f, 1.0f);
-            this.playSound(SoundEvents.BLOCK_DISPENSER_LAUNCH, 1.0f, 1.0f);
-            for (int i = 0; i < 6; ++i) {
-                double d = this.random.nextGaussian() * 0.02 - velocityX;
-                double e = this.random.nextGaussian() * 0.02 + 0.01;
-                double f = this.random.nextGaussian() * 0.02 - velocityZ;
-                this.getWorld().addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
+        // Dodging:
+        else if(timeUntilRegen == 0 && horizontalSpeedSquared < 0.02d && horizontalSpeedSquared > 0.002d) {
+            double dotProduct = this.getVelocity().dotProduct(this.getRotationVec(1.0F));
+            boolean didSidewaysJump = dotProduct * dotProduct < 0.0008;
+            if(didSidewaysJump) {
+                timeUntilRegen = 12; // Invincible for two ticks
+                velocityY += 0.02d;
+                velocityX += velocityX * 0.4d;
+                velocityZ += velocityZ * 0.4d;
             }
-            this.spawnSprintingParticles();
-            this.playBlockFallSound();
+        }
+
+        // Bounding strides:
+        if(boundingStridesLevel > 0) {
+
+            if (horizontalSpeedSquared < 0.005d) { // Extra High Jump:
+                velocityY *= 1.3 + 0.125 * boundingStridesLevel;
+                hasBounded = true;
+            }
+            else if (isSprinting) { // Extra Long Jump:
+                velocityX *= (10.0 + boundingStridesLevel) / 8.5;
+                velocityZ *= (10.0 + boundingStridesLevel) / 8.5;
+                ((PlayerEntity) ((Object) this)).addExhaustion(0.2f);
+                hasBounded = true;
+            }
+
+            // Bounding strides effect:
+            if (hasBounded) {
+                this.spawnSprintingParticles();
+                this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0, true, false));
+                this.playBlockFallSound();
+                this.playSound(SoundEvents.BLOCK_AMETHYST_BLOCK_FALL, 1.0f, 1.0f);
+                this.playSound(SoundEvents.BLOCK_DISPENSER_LAUNCH, 1.0f, 1.0f);
+                for (int i = 0; i < 6; ++i) {
+                    double d = this.random.nextGaussian() * 0.02 - velocityX;
+                    double e = this.random.nextGaussian() * 0.02 + 0.01;
+                    double f = this.random.nextGaussian() * 0.02 - velocityZ;
+                    this.getWorld().addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
+                }
+                this.spawnSprintingParticles();
+                this.playBlockFallSound();
+            }
         }
 
         this.setVelocity(velocityX, velocityY, velocityZ);

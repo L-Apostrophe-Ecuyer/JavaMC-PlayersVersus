@@ -2,8 +2,11 @@
 package frootloops.versus.mixin.mobs.passive;
 
 import frootloops.versus.mod.mobs.passive.PiggingAroundGoal;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -14,6 +17,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,6 +41,15 @@ public abstract class PigMixin extends AnimalEntity {
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.28)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1.0)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 9.0));
+    }
+
+    @Override
+    public boolean tryAttack(Entity target) {
+        if(super.tryAttack(target)) {
+            this.playSound(SoundEvents.ENTITY_HOGLIN_RETREAT, 0.5F, 1.8F);
+            return true;
+        }
+        else return false;
     }
 
     @Override

@@ -1,7 +1,9 @@
 package frootloops.versus.mod.environment.worldgen.features;
 
 import com.mojang.serialization.Codec;
+import frootloops.versus.VersusMod;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
@@ -23,6 +25,8 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
         super(configCodec);
     }
 
+    private static final BlockState STALAGMITE_BLOCKSTATE = Blocks.STONE.getDefaultState();
+
     @Override
     public boolean generate(FeatureContext<StoneStalagtiteFeatureConfig> context) {
         StructureWorldAccess structureWorldAccess = context.getWorld();
@@ -34,13 +38,12 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
         }
 
         int floorToCeilingSearchRange = config.floorToCeilingSearchRange();
-        float maxColumnRadiusToCaveHeightRatio = 0.6f;
-        float stalactiteBluntness = 0.3f;
+        float maxColumnRadiusToCaveHeightRatio = 0.99f;
+        float stalactiteBluntness = 0.8f;
         int columnRadiusMin = 3;
-        int columnRadiusMax = 11;
-        float heightScale = 0.6f;
-        float windSpeed = 0.34f;
-
+        int columnRadiusMax = 7;
+        float heightScale = 1.5f;
+        float windSpeed = 0.0f;
 
         Optional<CaveSurface> optional = CaveSurface.create(structureWorldAccess, blockPos, floorToCeilingSearchRange, StoneStalagtiteHelper::canGenerate, StoneStalagtiteHelper::canReplaceOrLava);
         if (optional.isEmpty() || !(optional.get() instanceof CaveSurface.Bounded)) {
@@ -50,9 +53,9 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
         if (bounded.getHeight() < 4) {
             return false;
         }
-        int i = (int)((float)bounded.getHeight() * maxColumnRadiusToCaveHeightRatio);
-        int j = MathHelper.clamp(i, columnRadiusMin, columnRadiusMax);
-        int k = MathHelper.nextBetween(random, columnRadiusMin, j);
+        int maxRadiusForHeight = (int)((float)bounded.getHeight() * maxColumnRadiusToCaveHeightRatio);
+        int radius = MathHelper.clamp(maxRadiusForHeight, 3, columnRadiusMax);
+        int k = MathHelper.nextBetween(random, columnRadiusMin, radius);
 
         StoneStalagmiteGenerator generatorCeiling = createGenerator(blockPos.withY(bounded.getCeiling() - 1), false, random, k, stalactiteBluntness, heightScale);
         StoneStalagmiteGenerator generatorFloor = createGenerator(blockPos.withY(bounded.getFloor() + 1), true, random, k, stalactiteBluntness, heightScale);
@@ -110,9 +113,6 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
                 BlockPos.Mutable mutable = this.pos.mutableCopy();
                 int i = Math.min(10, this.getBaseScale());
                 for (int j = 0; j < i; ++j) {
-                    if (world.getBlockState(mutable).isOf(Blocks.LAVA)) {
-                        return false;
-                    }
                     if (StoneStalagtiteHelper.canGenerateBase(world, wind.modify(mutable), this.scale)) {
                         this.pos = mutable;
                         return true;
@@ -121,7 +121,7 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
                 }
                 this.scale /= 2;
             }
-            return false;
+            return !this.isStalagmite;
         }
 
         private int scale(float height) {
@@ -144,7 +144,7 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
                         BlockPos blockPos = wind.modify(mutable);
                         if (StoneStalagtiteHelper.canGenerateOrLava(world, blockPos)) {
                             hasPlacedBlock = true;
-                            world.setBlockState(blockPos, Blocks.STONE.getDefaultState(), Block.NOTIFY_LISTENERS);
+                            world.setBlockState(blockPos, STALAGMITE_BLOCKSTATE, Block.NOTIFY_LISTENERS);
                         } else if (hasPlacedBlock && world.getBlockState(blockPos).isIn(BlockTags.BASE_STONE_OVERWORLD)) {
                             continue forJ;
                         }

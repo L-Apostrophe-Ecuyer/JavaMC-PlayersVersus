@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.accessors;
+package frootloops.versus.mixin.items.equipment.tools;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.attribute.EntityAttribute;

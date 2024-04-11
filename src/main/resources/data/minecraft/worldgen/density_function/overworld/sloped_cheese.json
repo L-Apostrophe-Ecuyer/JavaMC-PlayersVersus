@@ -31,29 +31,23 @@
   "argument2": {
     "type": "minecraft:mul",
     "argument1": {
-      "type": "minecraft:add",
-      "argument1": {
-        "type": "minecraft:y_clamped_gradient",
-        "from_y": 80,
-        "to_y": 100,
-        "from_value": 0.6,
-        "to_value": 0.4
-      },
-      "argument2": {
-        "type": "minecraft:y_clamped_gradient",
-        "from_y": 50,
-        "to_y": 70,
-        "from_value": 0.2,
-        "to_value": 0.8
-      }
+      "type": "minecraft:y_clamped_gradient",
+      "from_y": 128,
+      "to_y": 72,
+      "from_value": 0.2,
+      "to_value": 1.8
     },
     "argument2": {
-      "type": "minecraft:old_blended_noise",
-      "xz_scale": 0.25,
-      "y_scale": 0.125,
-      "xz_factor": 80,
-      "y_factor": 160,
-      "smear_scale_multiplier": 8
+      "type": "minecraft:add",
+      "argument1": "minecraft:overworld/base_3d_noise",
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": 0.9,
+        "argument2": {
+          "type": "minecraft:flat_cache",
+          "argument": "minecraft:overworld/base_3d_noise"
+        }
+      }
     }
   }
 }

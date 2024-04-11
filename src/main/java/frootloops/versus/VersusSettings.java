@@ -11,6 +11,8 @@ public abstract class VersusSettings {
     public static boolean DO_FOOD_OVERHAUL = true;
     public static boolean DO_FOOD_EATING_INTERRUPTION = true;
     public static boolean DO_FOOD_REDUCED_ON_SPAWN = true;
+    public static boolean DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES = true;
+    public static boolean DO_ZOMBIE_SOUND_DETECTION = true;
 
     public static void setAimAssist(boolean newValue) {
         CAN_AIM_ASSIST = newValue;

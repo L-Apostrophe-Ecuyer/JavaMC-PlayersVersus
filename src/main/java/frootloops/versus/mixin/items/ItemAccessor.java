@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.accessors;
+package frootloops.versus.mixin.items;
 
 import net.minecraft.item.Item;
 import org.spongepowered.asm.mixin.Mixin;

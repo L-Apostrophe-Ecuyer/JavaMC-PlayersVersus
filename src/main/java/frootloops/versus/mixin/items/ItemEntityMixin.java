@@ -1,20 +1,14 @@
 package frootloops.versus.mixin.items;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageSources;
-import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.world.ServerWorld;
@@ -22,11 +16,9 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -34,6 +26,8 @@ import java.util.List;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin extends Entity {
+
+    // Note: this code is bad
 
     @Shadow
     private int health, itemAge;
@@ -151,10 +145,10 @@ public abstract class ItemEntityMixin extends Entity {
         }
         else {
             String translationKeyStr = currentItemStack.getItem().getTranslationKey();
-            if (translationKeyStr.endsWith("nugget") && this.itemAge < 200) {
-                health = 0;
+            if (translationKeyStr.endsWith("nugget")) {
+                if(this.itemAge < 200) health = 0;
             }
-            else if (translationKeyStr.contains("emerald") && this.itemAge < 200) {
+            else if (translationKeyStr.startsWith("emerald") && this.itemAge < 200) {
                 ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.EMERALD, currentItemStack.getCount()));
                 health = 400;
             }
@@ -162,31 +156,48 @@ public abstract class ItemEntityMixin extends Entity {
                 ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.LAPIS_LAZULI, currentItemStack.getCount()));
                 health = 200;
             }
-            else if (translationKeyStr.contains("diamond_")) {
+            else if (translationKeyStr.startsWith("diamond_")) {
                 if(!currentItemStack.isOf(Items.DIAMOND_BLOCK)) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.DIAMOND, currentItemStack.getCount()));
                 health = 600;
             }
-            else if(translationKeyStr.contains("iron_") || translationKeyStr.contains("hopper") || translationKeyStr.endsWith("_minecart")) {
-                if(translationKeyStr.endsWith("iron_block")) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_BLOCK, currentItemStack.getCount()));
-                else if(!currentItemStack.isOf(Items.IRON_INGOT)) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_INGOT, currentItemStack.getCount()));
-                else ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_NUGGET, currentItemStack.getCount()));
-                health = 300;
+            else if(translationKeyStr.contains("iron") || translationKeyStr.endsWith("hopper") || translationKeyStr.endsWith("_minecart")) {
+                if(currentItemStack.isOf(Items.RAW_IRON_BLOCK)) {
+                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_BLOCK, currentItemStack.getCount()));
+                    health = 80;
+                }
+                else if(!currentItemStack.isOf(Items.IRON_INGOT)) {
+                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_INGOT, currentItemStack.getCount()));
+                    health = 100;
+                }
+                else {
+                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_NUGGET, currentItemStack.getCount()));
+                    health = 400;
+                }
             }
             else if(translationKeyStr.contains("gold")) {
-                if(translationKeyStr.endsWith("gold_block")) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_BLOCK, currentItemStack.getCount()));
-                else if(!currentItemStack.isOf(Items.GOLD_INGOT)) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_INGOT, currentItemStack.getCount()));
-                else ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_NUGGET, currentItemStack.getCount()));
-                health = 150;
+                if(currentItemStack.isOf(Items.RAW_GOLD_BLOCK)) {
+                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_BLOCK, currentItemStack.getCount()));
+                    health = 80;
+                }
+                else if(!currentItemStack.isOf(Items.GOLD_INGOT)) {
+                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_INGOT, currentItemStack.getCount()));
+                    health = 100;
+                }
+                else {
+                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_NUGGET, currentItemStack.getCount()));
+                    health = 400;
+                }
             }
             else if(translationKeyStr.contains("copper")) {
-                if(translationKeyStr.endsWith("copper_block")) {
+                if(currentItemStack.isOf(Items.RAW_COPPER_BLOCK)) {
                     ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.COPPER_BLOCK, currentItemStack.getCount()));
                     health = 100;
                 }
                 else if(!currentItemStack.isOf(Items.COPPER_INGOT)) {
                     ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.COPPER_INGOT, currentItemStack.getCount()));
-                    health = 100;
+                    health = 240;
                 }
+                else health = 80;
             }
         }
 

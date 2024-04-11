@@ -4,33 +4,49 @@
     "config": {
       "features": [
         {
-          "chance": 0.35,
+          "chance": 0.9,
           "feature": "players-versus:stone_overhangs_short"
-        },
-        {
-          "chance": 0.2,
-          "feature": "players-versus:stone_overhangs_pillars"
         }
       ],
-      "default": "players-versus:thin_overhangs_removal"
+      "default": "players-versus:stone_overhangs_pillars"
     }
   },
   "placement": [
     {
-      "type": "minecraft:count_on_every_layer",
-      "count": 20
+      "type": "minecraft:count",
+      "count": 55
+    },
+    {
+      "type": "minecraft:in_square"
     },
     {
       "type": "minecraft:height_range",
       "height": {
         "type": "minecraft:uniform",
         "min_inclusive": {
-          "absolute": 64
+          "absolute": 68
         },
         "max_inclusive": {
-          "absolute": 96
+          "absolute": 128
         }
       }
+    },
+    {
+      "type": "minecraft:environment_scan",
+      "direction_of_search": "up",
+      "max_steps": 8,
+      "target_condition": {
+        "type": "minecraft:solid"
+      },
+      "allowed_search_condition": {
+        "type": "minecraft:matching_blocks",
+        "blocks": "minecraft:air"
+      }
+    },
+    {
+      "type": "minecraft:random_offset",
+      "xz_spread": 0,
+      "y_spread": -1
     },
     {
       "type": "minecraft:biome"

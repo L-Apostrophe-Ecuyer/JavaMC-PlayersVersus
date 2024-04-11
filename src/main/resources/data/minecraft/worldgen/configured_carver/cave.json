@@ -1,14 +1,14 @@
 {
     "type": "minecraft:cave",
     "config": {
-      "probability": 0.16,
+      "probability": 0.08,
       "y": {
-        "type": "minecraft:uniform",
+        "type": "minecraft:trapezoid",
         "min_inclusive": {
-          "absolute": 48
+          "absolute": 8
         },
         "max_inclusive": {
-          "absolute": 180
+          "absolute": 96
         }
       },
       "yScale": {
@@ -69,4 +69,3 @@
       }
     }
   }
-  
