@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.accessors;
+package frootloops.versus.mixin.players.attacking;
 
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;

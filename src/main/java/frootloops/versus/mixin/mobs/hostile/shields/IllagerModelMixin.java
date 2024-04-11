@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.mobs.hostile.illager.shields;
+package frootloops.versus.mixin.mobs.hostile.shields;
 
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.*;

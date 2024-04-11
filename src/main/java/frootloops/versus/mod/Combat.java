@@ -2,8 +2,12 @@ package frootloops.versus.mod;
 
 
 import com.google.common.collect.ImmutableMultimap;
-import frootloops.versus.VersusMod;
-import frootloops.versus.mixin.players.accessors.*;
+import frootloops.versus.backported.items.equipment.MaceItem;
+import frootloops.versus.mixin.items.ItemAccessor;
+import frootloops.versus.mixin.items.equipment.tools.MiningToolAccessor;
+import frootloops.versus.mixin.items.equipment.tools.SwordAccessor;
+import frootloops.versus.mixin.items.equipment.tools.TridentAccessor;
+import frootloops.versus.mixin.players.attacking.LivingEntityAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -38,9 +42,15 @@ public abstract class Combat {
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
     public static final double PLAYER_MAX_ATTACK_SPEED = 2.5d;
-    private static final String[] tools = new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
-    private static final float[] toolsSpeed  = new float[]{1.0F, 1.5F, 2.0F, 1.5F, 1.5F};
-    private static final float[] toolsDamage = new float[]{8.0F, 4.0F, 2.0F, 4.0F, 3.0F};
+    private static final String[] tools =
+            new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
+    private static final float[] toolsSpeed  =
+            new float[]{1.0F,   1.5F,   2.0F,   1.2F,   1.5F};
+    private static final float[] toolsDamage =
+            new float[]{8.0F,   4.0F,   1.0F,   2.0F,   3.0F};
+    private static final float[] toolsReachBonus =
+            new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
+
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{-1F, 0F, 1F, 1F, 2F, 3F};
 
@@ -55,7 +65,12 @@ public abstract class Combat {
     public static float getPickaxeDamageModifier() { return toolsDamage[3] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getShovelDamageModifier() { return toolsDamage[4] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
 
-    public static float getSwordReachModifier() { return (float)PLAYER_BASE_ATTACK_SPEED - toolsSpeed[4];}
+    public static float getHoeReachModifier() { return toolsReachBonus[2];}
+    public static float getSwordReachModifier() { return toolsReachBonus[1];}
+    public static float getShovelReachModifier() { return toolsReachBonus[1];}
+    public static float getTridentDamageModifier() { return 9.0f - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getTridentSpeedModifier() { return 1.0f - (float)PLAYER_BASE_ATTACK_SPEED;}
+    public static float getTridentReachModifier() { return 1.0f;}
 
     public static void onInitialize() {
         for(int toolIndex = 0; toolIndex < tools.length; toolIndex++) {
@@ -102,17 +117,18 @@ public abstract class Combat {
         return (attackSpeed * (double)lastAttackTicks) / 20.0d;
     }
 
-    public static double getAttackRangeBonusOf(ItemStack itemStack) {
+    public static double getAttackRangeBonusOf(ItemStack itemStack, boolean isOnGround) {
         if(itemStack == null || itemStack.isEmpty() || !itemStack.isDamageable()) return 0.0d;
         Item item = itemStack.getItem();
         if(item instanceof TridentItem) return 1.0d;
         if(item instanceof HoeItem) return 1.0d;
         if(item instanceof SwordItem) return 0.5d;
+        if(item instanceof MaceItem && !isOnGround) return 2.0d;
         return 0.0d;
     }
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
-        double toolReachBonus = Combat.getAttackRangeBonusOf(player.getEquippedStack(EquipmentSlot.MAINHAND));
+        double toolReachBonus = Combat.getAttackRangeBonusOf(player.getEquippedStack(EquipmentSlot.MAINHAND), player.isOnGround());
         attackChargeProgress = Math.min(1.0d, attackChargeProgress);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
@@ -199,8 +215,9 @@ public abstract class Combat {
     public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
         if(looker==null || targetPos == null) return false;
         Vec3d rotationVector = looker.getRotationVec(1.0F);
-        Vec3d positionVector = targetPos.relativize(looker.getEyePos()).normalize();
-        return (positionVector.dotProduct(rotationVector) < Math.max(1.0, dotProductThreshold));
+        Vec3d positionVector = targetPos.relativize(looker.getEyePos());
+        if(rotationVector.dotProduct(positionVector) >= 0.0F) return false;
+        else return (rotationVector.dotProduct(positionVector.normalize()) < dotProductThreshold);
     }
 
     public static HitResult getHitResultOf(LivingEntity entity, double range) {
@@ -249,7 +266,7 @@ public abstract class Combat {
         else {
             attackBox = mob.getBoundingBox().offset(0d, mob.getEyeHeight(mob.getPose())/2, 0d);
         }
-        double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND));
+        double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND), false);
         return attackBox.expand(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);
     }
 

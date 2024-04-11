@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.environment;
+package frootloops.versus.mixin.environment.visuals;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

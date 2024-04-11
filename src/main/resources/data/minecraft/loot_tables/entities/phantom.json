@@ -2,7 +2,10 @@
   "type": "minecraft:entity",
   "pools": [
     {
-      "rolls": 1,
+      "rolls": {
+        "min": 1,
+        "max": 2
+      },
       "bonus_rolls": 0,
       "entries": [
         {
@@ -12,8 +15,8 @@
             {
               "function": "minecraft:set_count",
               "count": {
-                "min": 0,
-                "max": 1
+                "min": 1,
+                "max": 2
               }
             },
             {
@@ -31,15 +34,6 @@
           "name": "minecraft:phantom_membrane",
           "functions": [
             {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 0,
-                "max": 1
-              },
-              "add": false
-            },
-            {
               "function": "minecraft:looting_enchant",
               "count": {
                 "type": "minecraft:uniform",
@@ -47,12 +41,13 @@
                 "max": 1
               }
             }
+          ],
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.8
+            }
           ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
         }
       ]
     }

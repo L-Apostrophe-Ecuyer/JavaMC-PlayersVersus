@@ -2,6 +2,7 @@ package frootloops.versus.mixin.players;
 
 import com.google.common.collect.Multimap;
 import frootloops.versus.VersusSettings;
+import frootloops.versus.backported.items.equipment.MaceItem;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
@@ -25,6 +26,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -40,6 +42,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Optional;
 import java.util.UUID;
 
+import static frootloops.versus.backported.items.FutureItems.LAST_WIND_CHARGE_USE_TIME;
+
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world, ItemCooldownManager itemCooldownManager) {
@@ -54,6 +58,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
 
     @Shadow public int totalExperience;
+
+
+
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(LivingEntity.createLivingAttributes()
@@ -116,17 +123,22 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
 
+    @Inject(method = "handleFallDamage", at = @At("HEAD"), cancellable = true)
+    public void handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+        if(fallDistance > 4 && LAST_WIND_CHARGE_USE_TIME.containsKey(this.uuid)) {
+            if (this.getWorld().getTime() - LAST_WIND_CHARGE_USE_TIME.get(this.uuid) < 60L) {
+                cir.setReturnValue(false);
+                cir.cancel();
+            }
+        }
+    }
+
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
 
-        // Falling doesn't hurt as much:
-        if (source.isIn(DamageTypeTags.IS_FALL))
-            return amount/1.75f;
-
         // Explosions don't hurt as much, or at least, the damage is more consistent:
-        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 3.0f) {
-            amount = (amount + amount/4.0f + 16.0f) / 4.0f;
-            return  Math.min(amount, 30.0f);
+        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
+            return (amount + amount + 16.0f) / 4.0f;
         }
 
         // Hitting blocks while flying no longer neglects helmet protection:
@@ -154,7 +166,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
     private void onDamageInterruptEating(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (source.getAttacker() != null && amount > 1.0F) {
+        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
             Item item = this.activeItemStack.getItem();
             if (item.isFood() || item instanceof PotionItem) {
                 this.clearActiveItem();
@@ -171,6 +183,25 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             this.clearActiveItem();
             itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
         }
+    }
+
+    @Override
+    public void onAttacking(Entity target) {
+        // After attacking with a mace, fall distance is reset to cancel fall damage:
+        if(this.getMainHandStack().getItem() instanceof MaceItem && !this.isOnGround()) {
+            float velocity = (float)this.getVelocity().y;
+            if((velocity < -0.4 || this.fallDistance > 1.5F) && !this.isFallFlying()) {
+
+                float extraDamageVelocity = (velocity * -24.0f) + (velocity * velocity * 8.0f) + (velocity * velocity * velocity * -4.0f);
+                float extraDamageFallDistance = (this.fallDistance * 3F);
+
+                target.damage(this.getDamageSources().playerAttack((PlayerEntity)((Object) this)), Math.max(extraDamageVelocity, extraDamageFallDistance));
+                this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, this.getSoundCategory(), 1.0f, 1.0f);
+                this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_ANVIL_LAND, this.getSoundCategory(), 0.1f, 0.05f);
+            }
+            fallDistance = -3.0f;
+        }
+        super.onAttacking(target);
     }
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 4)
@@ -207,5 +238,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(VersusSettings.DO_FOOD_OVERHAUL) {
             cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 + this.getMaxHealth() - this.getHealth())));
         }
+    }
+
+    @Override
+    public void setSprinting(boolean sprinting) {
+        if(sprinting && this.hungerManager.getFoodLevel() == 0 && this.age - this.getLastAttackedTime() < 48) return; // No sprinting when damaged and no food points
+        else super.setSprinting(sprinting);
     }
 }
