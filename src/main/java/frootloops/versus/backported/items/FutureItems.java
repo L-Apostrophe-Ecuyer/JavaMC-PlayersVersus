@@ -4,13 +4,17 @@ import frootloops.versus.backported.items.equipment.MaceItem;
 import frootloops.versus.backported.items.equipment.MaceToolMaterial;
 import frootloops.versus.backported.items.throwing.WindChargeItem;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.item.MiningToolItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 
-import static frootloops.versus.VersusMod.MOD_ID;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public abstract class FutureItems {
 
@@ -18,6 +22,8 @@ public abstract class FutureItems {
     public static MiningToolItem MACE = new MaceItem(MACE_TOOL_MATERIAL,  7.0f, 1.2f, new Item.Settings());
     public static Item BREEZE_ROD = new Item(new Item.Settings());
     public static Item WIND_CHARGE = new WindChargeItem(new Item.Settings());
+
+    public static Map<UUID, Long> LAST_WIND_CHARGE_USE_TIME = new HashMap<>();
 
     public static void onInitialize() {
         registerFutureItem("mace", MACE, ItemGroups.COMBAT);

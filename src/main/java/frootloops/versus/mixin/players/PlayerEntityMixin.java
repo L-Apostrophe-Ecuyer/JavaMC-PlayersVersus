@@ -119,7 +119,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "handleFallDamage", at = @At("HEAD"), cancellable = true)
     public void handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
-        if(fallDistance > 4 && LAST_WIND_CHARGE_USE_TIME.containsKey(this.uuid)) {
+        if(fallDistance > 3 && LAST_WIND_CHARGE_USE_TIME.containsKey(this.uuid)) {
             if (this.getWorld().getTime() - LAST_WIND_CHARGE_USE_TIME.get(this.uuid) < 60L) {
                 cir.setReturnValue(false);
                 cir.cancel();

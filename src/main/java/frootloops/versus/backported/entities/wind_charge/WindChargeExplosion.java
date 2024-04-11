@@ -6,6 +6,8 @@ package frootloops.versus.backported.entities.wind_charge;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
+import frootloops.versus.VersusMod;
+import frootloops.versus.backported.items.FutureItems;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
@@ -77,14 +79,11 @@ public class WindChargeExplosion extends Explosion {
                     for (float h = this.power * (0.7f + this.world.random.nextFloat() * 0.6f); h > 0.0f; h -= 0.22500001f) {
                         BlockPos blockPos = BlockPos.ofFloored(m, n, o);
                         BlockState blockState = this.world.getBlockState(blockPos);
-                        FluidState fluidState = this.world.getFluidState(blockPos);
                         if (!this.world.isInBuildLimit(blockPos)) continue block2;
-                        Optional<Float> optional = EXPLOSION_BEHAVIOR.getBlastResistance(this, this.world, blockPos, blockState, fluidState);
-                        if (optional.isPresent()) {
-                            h -= (optional.get().floatValue() + 0.3f) * 0.3f;
-                        }
-                        if (h > 0.0f && EXPLOSION_BEHAVIOR.canDestroyBlock(this, this.world, blockPos, blockState, h)) {
-                            set.add(blockPos);
+                        if(blockState.emitsRedstonePower()) {
+                            blockState.cycle(POWERED);
+                            world.setBlockState(blockPos, blockState);
+                            this.affectedBlocks.add(blockPos);
                         }
                         m += d * (double)0.3f;
                         n += e * (double)0.3f;
@@ -93,35 +92,47 @@ public class WindChargeExplosion extends Explosion {
                 }
             }
         }
-        this.affectedBlocks.addAll((Collection<BlockPos>)set);
-        float q = this.power * 2.0f;
-        k = MathHelper.floor(this.x - (double)q - 1.0);
-        l = MathHelper.floor(this.x + (double)q + 1.0);
-        int r = MathHelper.floor(this.y - (double)q - 1.0);
-        int s = MathHelper.floor(this.y + (double)q + 1.0);
-        int t = MathHelper.floor(this.z - (double)q - 1.0);
-        int u = MathHelper.floor(this.z + (double)q + 1.0);
+        double powerTimesTwo = 6.0;
+        k = MathHelper.floor(this.x - (double)powerTimesTwo - 1.0);
+        l = MathHelper.floor(this.x + (double)powerTimesTwo + 1.0);
+        int r = MathHelper.floor(this.y - (double)powerTimesTwo - 1.0);
+        int s = MathHelper.floor(this.y + (double)powerTimesTwo + 1.0);
+        int t = MathHelper.floor(this.z - (double)powerTimesTwo - 1.0);
+        int u = MathHelper.floor(this.z + (double)powerTimesTwo + 1.0);
         List<Entity> list = this.world.getOtherEntities(this.entity, new Box(k, r, t, l, s, u));
-        Vec3d vec3d = new Vec3d(this.x, this.y, this.z);
+        Vec3d explosionPos = new Vec3d(this.x, this.y, this.z);
+        PlayerEntity playerEntity;
         for (Entity entity : list) {
-            PlayerEntity playerEntity;
-            double ac;
-            double y;
-            double x;
-            double w;
-            double z;
-            double v;
-            if (entity.isImmuneToExplosion() || !((v = Math.sqrt(entity.squaredDistanceTo(vec3d)) / (double)q) <= 1.0) || (z = Math.sqrt((w = entity.getX() - this.x) * w + (x = (entity instanceof TntEntity ? entity.getY() : entity.getEyeY()) - this.y) * x + (y = entity.getZ() - this.z) * y)) == 0.0) continue;
-            w /= z;
-            x /= z;
-            y /= z;
-            double aa = Explosion.getExposure(vec3d, entity);
-            double ab = (1.0 - v) * aa;
-            ac = ab;
-            Vec3d vec3d2 = new Vec3d(w *= ac, x *= ac, y *= ac);
-            entity.setVelocity(entity.getVelocity().add(vec3d2));
-            if (!(entity instanceof PlayerEntity) || (playerEntity = (PlayerEntity)entity).isSpectator() || playerEntity.isCreative() && playerEntity.getAbilities().flying) continue;
-            this.affectedPlayers.put(playerEntity, vec3d2);
+
+            double deltaZ = entity.getZ() - this.z;
+            double deltaY = entity.getY() - this.y;
+            double deltaX = entity.getX() - this.x;
+            double squaredDistance = deltaZ * deltaZ + deltaX * deltaX + deltaY * deltaY;
+            if(squaredDistance > 16.0) continue;
+
+            double exposure = squaredDistance < 1.0 ? 1.0 : Explosion.getExposure(explosionPos, entity);
+            double distance = Math.sqrt(squaredDistance);
+
+            VersusMod.MOD_LOGGER.warn("Exposure for " + (this.world.isClient ? "client" : "server") + " entity at squared distance of " + distance + " to explosion is " + exposure);
+
+            if(exposure < 0.1) continue;
+
+            // Ensure that knockback is upwards:
+            if(entity.getY() + 0.5 > this.y) deltaY = Math.abs(deltaY);
+
+            // Set velocity:
+            double explosionVelocity = (this.power/2.0) * exposure / Math.max(1.0, distance);
+            Vec3d addedVelocity = new Vec3d((deltaX/distance) * explosionVelocity/2, (deltaY/distance) * explosionVelocity, (deltaZ/distance) * explosionVelocity/2);
+            entity.move(MovementType.SELF, addedVelocity);
+            entity.setVelocity(entity.getVelocity().add(addedVelocity));
+            entity.move(MovementType.SELF, addedVelocity);
+
+            VersusMod.MOD_LOGGER.warn("Entity sent flying with velocity " + explosionVelocity + " and vector " + entity.getVelocity());
+
+            if (entity instanceof PlayerEntity player) {
+                this.affectedPlayers.put(player, addedVelocity);
+                VersusMod.MOD_LOGGER.warn("Added to list of affected players: " + player.getName());
+            }
         }
     }
 
@@ -129,14 +140,19 @@ public class WindChargeExplosion extends Explosion {
     public void affectWorld(boolean particles) {
         if (this.world.isClient) {
             this.world.playSound(this.x, this.y, this.z, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.BLOCKS, 4.0f, (1.0f + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2f) * 0.7f, false);
-        }
-        if (particles) {
-            if (this.power < 3.0f) {
-                this.world.addParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1.0, 0.0, 0.0);
-            } else {
-                this.world.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1.0, 0.0, 0.0);
+            if (particles) {
+                if (this.power < 3.0f) {
+                    this.world.addParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1.0, 0.0, 0.0);
+                } else {
+                    this.world.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1.0, 0.0, 0.0);
+                }
             }
         }
+    }
+
+    @Override
+    public boolean shouldDestroy() {
+        return false;
     }
 }
 

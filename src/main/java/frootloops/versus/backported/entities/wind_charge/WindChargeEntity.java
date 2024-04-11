@@ -4,6 +4,7 @@
 package frootloops.versus.backported.entities.wind_charge;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.backported.items.FutureItems;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -11,6 +12,8 @@ import net.minecraft.entity.FlyingItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageSources;
+import net.minecraft.entity.mob.CreeperEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ExplosiveProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
@@ -45,10 +48,7 @@ implements FlyingItemEntity {
 
     @Override
     protected Box calculateBoundingBox() {
-        float f = 0.15f / 2.0f;
-        float g = 0.15f;
-        float h = 0.15f;
-        return new Box(this.getPos().x - (double)f, this.getPos().y - (double)0.15f, this.getPos().z - (double)f, this.getPos().x + (double)f, this.getPos().y - (double)0.15f + (double)g, this.getPos().z + (double)f);
+        return new Box(this.getPos().x - 0.075, this.getPos().y - 0.15, this.getPos().z - 0.075, this.getPos().x + 0.075, this.getPos().y, this.getPos().z + 0.075);
     }
 
     @Override
@@ -69,45 +69,51 @@ implements FlyingItemEntity {
 
     @Override
     protected void onEntityHit(EntityHitResult entityHitResult) {
-        VersusMod.MOD_LOGGER.warn("Wind charge: Entity hit!");
         this.createExplosion();
         if(entityHitResult.getEntity() == this.getOwner() && this.getOwner() != null) return;
-        LivingEntity livingEntity;
-        Entity entity;
         super.onEntityHit(entityHitResult);
-        if (this.getWorld().isClient) {return;}
-        entityHitResult.getEntity().damage(this.getDamageSources().mobProjectile(this, (entity = this.getOwner()) instanceof LivingEntity ? (livingEntity = (LivingEntity)entity) : null), 2.0f);
+        if(!this.getWorld().isClient) {
+            Entity entity;
+            entityHitResult.getEntity().damage(this.getDamageSources().mobProjectile(this, (entity = this.getOwner()) instanceof LivingEntity ? ((LivingEntity)entity) : null), 2.0f);
+            entityHitResult.getEntity().setVelocity(entityHitResult.getEntity().getVelocity().add(this.getVelocity().x, 0.1, this.getVelocity().z));
+        }
     }
 
     @Override
     protected void onBlockHit(BlockHitResult blockHitResult) {
-        VersusMod.MOD_LOGGER.warn("Wind charge: Block hit!");
         this.createExplosion();
         super.onBlockHit(blockHitResult);
         this.discard();
     }
 
     private void createExplosion() {
+
         if(hasExploded) return;
         double x, y, z;
         x = this.getX();
         y = this.getY();
         z = this.getZ();
-        WindChargeExplosion explosion = new WindChargeExplosion(this.getWorld(), this, x, y, z, 4.0f);
+        WindChargeExplosion explosion = new WindChargeExplosion(this.getWorld(), this, x, y, z, 3.0f);
         explosion.collectBlocksAndDamageEntities();
         explosion.affectWorld(true);
+
         if(this.getWorld() instanceof ServerWorld serverWorld) {
             for (ServerPlayerEntity serverPlayerEntity : serverWorld.getPlayers()) {
                 if (!(serverPlayerEntity.squaredDistanceTo(x, y, z) < 4096.0)) continue;
                 serverPlayerEntity.networkHandler.sendPacket(new ExplosionS2CPacket(x, y, z, 4.0f, explosion.getAffectedBlocks(), explosion.getAffectedPlayers().get(serverPlayerEntity)));
             }
         }
+
+        VersusMod.MOD_LOGGER.warn("Is player affected? " + explosion.getAffectedPlayers().containsKey((PlayerEntity) this.getOwner()));
+        if(this.getOwner() != null && explosion.getAffectedPlayers().containsKey(this.getOwner())) {
+            //FutureItems.LAST_WIND_CHARGE_USE_TIME.put(this.getOwner().getUuid(), this.getWorld().getTime());
+        }
+        FutureItems.LAST_WIND_CHARGE_USE_TIME.put(this.getOwner().getUuid(), this.getWorld().getTime());
         hasExploded = true;
     }
 
     @Override
     protected void onCollision(HitResult hitResult) {
-        VersusMod.MOD_LOGGER.warn("Wind charge: Collision!");
         super.onCollision(hitResult);
         this.createExplosion();
         if (!this.getWorld().isClient) {
