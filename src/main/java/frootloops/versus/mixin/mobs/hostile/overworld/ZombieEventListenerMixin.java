@@ -22,8 +22,6 @@ import java.util.function.Supplier;
 @Mixin(ServerWorld.class)
 public abstract class ZombieEventListenerMixin extends World {
 
-    private static long lastUpdateTime = -1;
-
     protected ZombieEventListenerMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates) {
         super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
     }
@@ -31,11 +29,7 @@ public abstract class ZombieEventListenerMixin extends World {
     @Inject(method = "emitGameEvent", at = @At("HEAD"))
     public void emitGameEvent(GameEvent event, Vec3d emitterPos, GameEvent.Emitter emitter, CallbackInfo info) {
         if(VersusSettings.DO_ZOMBIE_SOUND_DETECTION) {
-            long currentTime = this.getTime();
-            if (currentTime - lastUpdateTime > 5) {
-                ZombieSoundListener.OnGameEvent((ServerWorld) ((Object) this), event, emitterPos, emitter);
-                lastUpdateTime = currentTime;
-            }
+            ZombieSoundListener.OnGameEvent((ServerWorld) ((Object) this), event, emitterPos, emitter);
         }
     }
 }
