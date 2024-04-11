@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.items.equipment.tools;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -37,34 +38,39 @@ public abstract class MiningToolMixin extends ToolItem {
     private static void createAttributeModifiers(ToolMaterial material, float baseAttackDamage, float attackSpeed, CallbackInfoReturnable<AttributeModifiersComponent> cir) {
 
         float attackReachBonus = 0.0f;
-
-        if (baseAttackDamage == 1.5f && attackSpeed == -3.0f) {
+        if (attackSpeed == -3.0f & baseAttackDamage == 1.5f) {
             baseAttackDamage = Combat.getShovelDamageModifier();
             attackSpeed = Combat.getShovelSpeedModifier();
             attackReachBonus = Combat.getShovelReachModifier();
-        } else if (baseAttackDamage == 1.5f && attackSpeed == -2.8f) {
+
+        } else if (attackSpeed == -2.8f && baseAttackDamage == 1.0f) {
             baseAttackDamage = Combat.getPickaxeDamageModifier();
             attackSpeed = Combat.getPickaxeSpeedModifier();
-        } else if (baseAttackDamage == 1.5f && attackSpeed == -2.8f) {
-            baseAttackDamage = Combat.getPickaxeDamageModifier();
-            attackSpeed = Combat.getPickaxeSpeedModifier();
-        } else if ((attackSpeed <= -3.2f && attackSpeed >= -3.0f) && (baseAttackDamage <= 7.0f || baseAttackDamage >= 5.0f)) {
+
+        } else if (attackSpeed >= -3.2f && attackSpeed <= -3.0f && baseAttackDamage <= 7.0f && baseAttackDamage >= 5.0f) {
             baseAttackDamage = Combat.getAxeDamageModifier();
             attackSpeed = Combat.getAxeSpeedModifier();
+
         } else if ((material == ToolMaterials.WOOD || material == ToolMaterials.GOLD) && attackSpeed == -3.0f && baseAttackDamage == 0.0f) {
             baseAttackDamage = Combat.getHoeDamageModifier();
             attackSpeed = Combat.getHoeSpeedModifier();
             attackReachBonus = Combat.getHoeReachModifier();
+
         } else if ((material == ToolMaterials.STONE || material == ToolMaterials.IRON || material == ToolMaterials.DIAMOND) && attackSpeed + baseAttackDamage == -3.0f && baseAttackDamage <= -1.0f) {
             baseAttackDamage = Combat.getHoeDamageModifier();
             attackSpeed = Combat.getHoeSpeedModifier();
             attackReachBonus = Combat.getHoeReachModifier();
+
         } else if ((material == ToolMaterials.NETHERITE) && baseAttackDamage == -4.0f && attackSpeed == 0.0f) {
             baseAttackDamage = Combat.getHoeDamageModifier();
             attackSpeed = Combat.getHoeSpeedModifier();
-            attackReachBonus = Combat.getHoeSpeedModifier();
+            attackReachBonus = Combat.getHoeReachModifier();
+        }
+        else {
+            VersusMod.MOD_LOGGER.warn("Tool wasn't registered: Damage of " + baseAttackDamage + " and speed of " + attackSpeed);
         }
 
+        if(material == ToolMaterials.GOLD) baseAttackDamage += 2.0f;
         if (attackReachBonus != 0.0f) cir.setReturnValue(AttributeModifiersComponent.builder()
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(ATTACK_DAMAGE_MODIFIER_ID, "Tool modifier", baseAttackDamage + material.getAttackDamage(), EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(ATTACK_SPEED_MODIFIER_ID, "Tool modifier", attackSpeed, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)

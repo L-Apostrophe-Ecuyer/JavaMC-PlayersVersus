@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.items.equipment.tools;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
@@ -23,6 +24,7 @@ public class TridentItemMixin {
         float baseAttackDamage = Combat.getTridentDamageModifier();
         float attackSpeed = Combat.getTridentSpeedModifier();
         float attackReachBonus = Combat.getTridentReachModifier();
+
         if(attackReachBonus != 0.0f) cir.setReturnValue(AttributeModifiersComponent.builder()
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(ATTACK_DAMAGE_MODIFIER_ID, "Tool modifier", baseAttackDamage, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(ATTACK_SPEED_MODIFIER_ID, "Tool modifier", attackSpeed, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)

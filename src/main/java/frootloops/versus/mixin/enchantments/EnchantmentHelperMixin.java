@@ -38,6 +38,13 @@ public class EnchantmentHelperMixin {
         return protectionLevels.intValue();
     }
 
+    private static int getNumProtectionEnchantsOf(ItemStack stack) {
+        if(!stack.hasEnchantments()) return 0;
+        MutableInt protectionEnchants = new MutableInt(0);
+        forEachEnchantment((Enchantment stackEnchantment, int stackLevel) -> protectionEnchants.add(stackEnchantment instanceof ProtectionEnchantment ? 1 : 0), stack);
+        return protectionEnchants.intValue();
+    }
+
     @Overwrite
     public static List<EnchantmentLevelEntry> generateEnchantments(FeatureSet enabledFeatures, Random random, ItemStack stack, int level, boolean treasureAllowed) {
         ArrayList<EnchantmentLevelEntry> selectedEnchantments = Lists.newArrayList();
@@ -51,14 +58,16 @@ public class EnchantmentHelperMixin {
         float randomFloat = (random.nextFloat() + random.nextFloat() - 1.0f) * 0.15f;
         List<EnchantmentLevelEntry> possibleEnchantments = getPossibleEntries(enabledFeatures, level = MathHelper.clamp(Math.round((float)level + (float)level * randomFloat), 1, Integer.MAX_VALUE), stack, treasureAllowed);
 
-        int numProtectionEnchantments = getProtectionLevelsOf(stack);
+        int numProtectionLevels = getProtectionLevelsOf(stack);
+        int numProtectionEnchants = numProtectionLevels > 1 ? getNumProtectionEnchantsOf(stack) : numProtectionLevels;
+
         if (!possibleEnchantments.isEmpty()) {
             Weighting.getRandom(random, possibleEnchantments).ifPresent(selectedEnchantments::add);
             while (random.nextInt(50) <= level) {
 
                 // Make sure not to add too many protection enchantments:
                 EnchantmentLevelEntry enchantmentChosen = Util.getLast(selectedEnchantments);
-                if(enchantmentChosen.enchantment instanceof ProtectionEnchantment && enchantmentChosen.level + numProtectionEnchantments > MAX_PROTECTION_LEVELS_PER_ITEM) {
+                if(enchantmentChosen.enchantment instanceof ProtectionEnchantment && (numProtectionEnchants >= 2 || enchantmentChosen.level + numProtectionLevels > MAX_PROTECTION_LEVELS_PER_ITEM)) {
                     selectedEnchantments.remove(selectedEnchantments.size() - 1);
                     possibleEnchantments.remove(enchantmentChosen);
                 }
@@ -86,13 +95,14 @@ public class EnchantmentHelperMixin {
         boolean isBook = stack.isOf(Items.BOOK) || stack.isOf(Items.ENCHANTED_BOOK);
 
         // Power is reduced if the item already has enchantments:
-        int numProtectionEnchantments = getProtectionLevelsOf(stack);
         for (RegistryEntry<Enchantment> enchantmentRegistryEntry : currentEnchantments.getEnchantments()) {
             e = enchantmentRegistryEntry.value();
             level -= e.getMinPower(currentEnchantments.getLevel(e))/10;
         }
 
         // Loop over every possible enchantment:
+        int numProtectionLevels = getProtectionLevelsOf(stack);
+        int numProtectionEnchants = numProtectionLevels > 1 ? getNumProtectionEnchantsOf(stack) : numProtectionLevels;
         forEachEnchant: for (Enchantment enchantment : Registries.ENCHANTMENT) {
 
             // Is the enchantment allowed on this item?
@@ -106,20 +116,20 @@ public class EnchantmentHelperMixin {
             for (RegistryEntry<Enchantment> enchantmentRegistryEntry : currentEnchantments.getEnchantments()) {
                 e = enchantmentRegistryEntry.value();
                 if(e != enchantment && !e.canCombine(enchantment)) continue forEachEnchant;
-                if(enchantment instanceof ProtectionEnchantment && numProtectionEnchantments >= MAX_PROTECTION_LEVELS_PER_ITEM) continue forEachEnchant;
+                if(enchantment instanceof ProtectionEnchantment && (numProtectionEnchants >= 2 || numProtectionLevels >= MAX_PROTECTION_LEVELS_PER_ITEM)) continue forEachEnchant;
             }
 
-            // Get the level of the new enchantment, and add it to the list:
+            // Get the max possible level of the new enchantment, and add it to the list:
             int currentLevel = currentEnchantments.getLevel(enchantment);
             int minLevel = Math.max(currentLevel, enchantment.getMinLevel() - 1);
             for (int i = enchantment.getMaxLevel(); i > minLevel; --i) {
 
                 // See if it reaches the max amount of protection enchants:
-                if(enchantment instanceof ProtectionEnchantment && numProtectionEnchantments + i > MAX_PROTECTION_LEVELS_PER_ITEM) continue;
+                if(enchantment instanceof ProtectionEnchantment && numProtectionLevels + i > MAX_PROTECTION_LEVELS_PER_ITEM) continue;
 
                 // See if we can affort the new enchantment (or upgrade to old enchantment):
                 int upgradeRebate = currentLevel == 0 ? 0 : (enchantment.getMinPower(currentLevel)) * 2/3;
-                int overEnchantingCost = (enchantment instanceof ProtectionEnchantment) ? i * numProtectionEnchantments : 0;
+                int overEnchantingCost = (enchantment instanceof ProtectionEnchantment) ? i * numProtectionLevels : 0;
                 if (level + upgradeRebate < enchantment.getMinPower(i) + overEnchantingCost|| level > enchantment.getMaxPower(i) + overEnchantingCost) continue;
 
                 // Add the enchantment and level to the list:
