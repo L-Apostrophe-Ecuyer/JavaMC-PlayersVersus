@@ -71,7 +71,7 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
             if(this.getAngerTime() < 10) return false;
             if(this.hurtTime > 0 && this.lastDamageTaken > 5.0f) return true;
             if(squaredDistance > 64.0) return false;
-            else if(squaredDistance > 16.0) return (Combat.isLookingTowards(player, this.getEyePos(), -0.3));
+            else if(squaredDistance > 16.0) return !(Combat.isLookingTowards(player, this.getEyePos(), -0.3));
             else return false;
         }
         // Untargeted players, Endermen will teleport up to them until they're in range for aggro:
