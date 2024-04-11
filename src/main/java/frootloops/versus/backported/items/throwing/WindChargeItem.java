@@ -17,7 +17,7 @@ import static frootloops.versus.backported.entities.FutureEntities.WIND_CHARGE_E
 
 public class WindChargeItem
 extends Item {
-    public WindChargeItem(Item.Settings settings) {
+    public WindChargeItem(Settings settings) {
         super(settings);
     }
 

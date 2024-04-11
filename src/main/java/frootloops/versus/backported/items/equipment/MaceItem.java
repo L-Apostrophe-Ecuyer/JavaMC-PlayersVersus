@@ -1,29 +1,16 @@
 package frootloops.versus.backported.items.equipment;
 
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.block.*;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.MiningToolItem;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
 
 public class MaceItem extends MiningToolItem {
 
 
-    public MaceItem(ToolMaterial material, float attackDamage, float attackSpeed, Item.Settings settings) {
+    public MaceItem(ToolMaterial material, float attackDamage, float attackSpeed, Settings settings) {
         super(attackDamage, attackSpeed, material, BlockTags.AXE_MINEABLE, settings);
     }
 
