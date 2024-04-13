@@ -5,9 +5,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import net.minecraft.client.gui.DrawableHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.hud.InGameHud;
 
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
@@ -24,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static net.minecraft.client.gui.DrawableHelper.drawTexture;
 
 
+@Environment(EnvType.CLIENT)
 @Mixin(value = InGameHud.class)
 public abstract class HungerBarRendererMixin {
 

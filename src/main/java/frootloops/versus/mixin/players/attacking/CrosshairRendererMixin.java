@@ -2,8 +2,8 @@ package frootloops.versus.mixin.players.attacking;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import frootloops.versus.VersusMod;
-import frootloops.versus.mod.players.bridging.ReacharoundTracker;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import static net.minecraft.client.gui.DrawableHelper.drawTexture;
 
+@Environment(EnvType.CLIENT)
 @Mixin(value = InGameHud.class, priority = 9999)
 public class CrosshairRendererMixin {
 
@@ -82,24 +83,9 @@ public class CrosshairRendererMixin {
                             drawTexture(matrices, k, j, 52, 94, l, 4);
                         }
                     }
-                    if(ReacharoundTracker.currentTarget != null) this.drawExtraCrosshairIcon(matrices);
                     RenderSystem.defaultBlendFunc();
                 }
             }
         }
-    }
-
-
-    private void drawExtraCrosshairIcon(MatrixStack matrices) {
-        RenderSystem.setShaderTexture(0, VersusMod.CROSSHAIR_BLOCK_ICONS_TEXTURE);
-        int w = this.scaledWidth;
-        int h = this.scaledHeight;
-        if (ReacharoundTracker.isInVerticalOrientation()) {
-            drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 0, 0, ICON_SIZE, ICON_SIZE);
-
-        } else {
-            drawTexture(matrices, ((w - ICON_SIZE) / 2), (h - ICON_SIZE) / 2, 32, 0, ICON_SIZE, ICON_SIZE);
-        }
-        RenderSystem.setShaderTexture(0, DrawableHelper.GUI_ICONS_TEXTURE);
     }
 }
