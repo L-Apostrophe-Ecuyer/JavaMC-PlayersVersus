@@ -4,6 +4,7 @@
   "package": "frootloops.versus.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+
     "LivingEntityMixin",
 
     "enchantments.AnvilCostMixin",
@@ -20,6 +21,7 @@
     "enchantments.tools.PowerMixin",
     "enchantments.tools.SharpnessMixin",
     "enchantments.tools.SweepingMixin",
+
 
     "environment.archeology.BrushesNotRequiredMixin",
     "environment.archeology.SuspiciousBlocksMixin",
@@ -67,9 +69,12 @@
     "items.ItemEatingMixin",
     "items.ItemEntityMixin",
     "items.ItemStackMixin",
-    "items.ItemMergingMixin",
     "items.ItemAccessor",
-    "items.MinecraftClientMixin",
+
+    "items.inventory.HotbarSwappingClientMixin",
+    "items.inventory.InventoryScreenMixin",
+    "items.inventory.ItemMergingMixin",
+    "items.inventory.MinecraftClientMixin",
 
     "mobs.hostile.end.dragon.AreaEffectCloudEntityMixin",
     "mobs.hostile.end.dragon.ChargingPlayerPhaseMixin",

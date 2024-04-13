@@ -3,7 +3,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "players-versus:pyramid/plain_wall",
+        "location": "players-versus:pyramid/small_pyramid_side/plain_wall",
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },
@@ -12,7 +12,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "players-versus:pyramid/decorated_wall_1",
+        "location": "players-versus:pyramid/small_pyramid_side/decorated_wall_1",
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },
@@ -21,7 +21,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "players-versus:pyramid/decorated_wall_2",
+        "location": "players-versus:pyramid/small_pyramid_side/decorated_wall_2",
         "processors": "players-versus:desert_pyramid",
         "projection": "rigid"
       },

@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.players;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -19,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static frootloops.versus.VersusMod.DEBUG_MODE;
 import static frootloops.versus.mod.enchantments.Enchants.BOUNDING_STRIDES;
 
 
@@ -32,38 +34,26 @@ public abstract class SpecialMovementMixin extends LivingEntity {
     @Shadow public void incrementStat(Identifier stat) {}
 
     @Inject(method = "jump", at = @At(value = "HEAD"), cancellable = true)
-    private void jump(CallbackInfo ci) {
-        double velocityY = (double) this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
-        double velocityX = this.getVelocity().x;
-        double velocityZ = this.getVelocity().z;
-        double horizontalSpeedSquared = (velocityZ * velocityZ) + (velocityX * velocityX);
-        boolean isSprinting = isSprinting();
-        boolean hasBounded = false;
-        double boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.FEET));
-        boundingStridesLevel += EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
-
-        // Sprint jump (regular):
-        if (isSprinting) {
-            float yawRads = this.getYaw() * ((float) Math.PI / 180);
-            velocityX += -MathHelper.sin(yawRads) * 0.12; // Sprint jump speed reduced
-            velocityZ += MathHelper.cos(yawRads) * 0.12;
-        }
-
-        // Dodging:
-        else if(timeUntilRegen == 0 && horizontalSpeedSquared < 0.02d && horizontalSpeedSquared > 0.002d) {
-            double dotProduct = this.getVelocity().dotProduct(this.getRotationVec(1.0F));
-            boolean didSidewaysJump = dotProduct * dotProduct < 0.0008;
-            if(didSidewaysJump) {
-                timeUntilRegen = 12; // Invincible for two ticks
-                velocityY += 0.02d;
-                velocityX += velocityX * 0.4d;
-                velocityZ += velocityZ * 0.4d;
-            }
-        }
+    private void jump(CallbackInfo info) {
 
         // Bounding strides:
+        double boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
         if(boundingStridesLevel > 0) {
 
+            double velocityY = (double) this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
+            double velocityX = this.getVelocity().x;
+            double velocityZ = this.getVelocity().z;
+            double horizontalSpeedSquared = (velocityZ * velocityZ) + (velocityX * velocityX);
+            boolean isSprinting = isSprinting();
+
+            // Sprint jump (regular):
+            if (isSprinting) {
+                float yawRads = this.getYaw() * ((float) Math.PI / 180);
+                velocityX += -MathHelper.sin(yawRads) * 0.12; // Sprint jump speed reduced
+                velocityZ += MathHelper.cos(yawRads) * 0.12;
+            }
+
+            boolean hasBounded = false;
             if (horizontalSpeedSquared < 0.005d) { // Extra High Jump:
                 velocityY *= 1.3 + 0.125 * boundingStridesLevel;
                 hasBounded = true;
@@ -77,6 +67,12 @@ public abstract class SpecialMovementMixin extends LivingEntity {
 
             // Bounding strides effect:
             if (hasBounded) {
+                this.setVelocity(velocityX, velocityY, velocityZ);
+                this.velocityDirty = true;
+                this.incrementStat(Stats.JUMP);
+                if (this.isSprinting()) ((PlayerEntity)((Object)this)).addExhaustion(0.15f);
+                else ((PlayerEntity)((Object)this)).addExhaustion(0.075f);
+
                 this.spawnSprintingParticles();
                 this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 8, 0, true, false));
                 this.playBlockFallSound();
@@ -90,14 +86,8 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                 }
                 this.spawnSprintingParticles();
                 this.playBlockFallSound();
+                info.cancel();
             }
         }
-
-        this.setVelocity(velocityX, velocityY, velocityZ);
-        this.velocityDirty = true;
-        this.incrementStat(Stats.JUMP);
-        if (this.isSprinting()) ((PlayerEntity)((Object)this)).addExhaustion(0.15f);
-        else ((PlayerEntity)((Object)this)).addExhaustion(0.075f);
-        ci.cancel();
     }
 }

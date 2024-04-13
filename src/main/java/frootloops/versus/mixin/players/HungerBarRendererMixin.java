@@ -2,6 +2,9 @@ package frootloops.versus.mixin.players;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 
@@ -14,8 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-
-
+@Environment(EnvType.CLIENT)
 @Mixin(value = InGameHud.class)
 public class HungerBarRendererMixin {
 
