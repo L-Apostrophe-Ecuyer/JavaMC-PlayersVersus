@@ -17,7 +17,7 @@ public class MagicProtectionEnchantment extends ProtectionEnchantment {
     public MagicProtectionEnchantment() {
         super(
                 Enchantment.properties(ItemTags.ARMOR_ENCHANTABLE, 3, 1,
-                        Enchantment.leveledCost(12, 10),
+                        Enchantment.leveledCost(16, 10),
                         Enchantment.leveledCost(50, 10), 10,
                         ALL_ARMOR),
                 Type.ALL
@@ -26,7 +26,7 @@ public class MagicProtectionEnchantment extends ProtectionEnchantment {
 
     @Override
     public boolean isTreasure() {
-        return true;
+        return false;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class MagicProtectionEnchantment extends ProtectionEnchantment {
                 }
                 if (attacker.getMainHandStack().hasEnchantments()) {
                     float attackDamage = EnchantmentHelper.getAttackDamage(attacker.getMainHandStack(), EntityType.PLAYER);
-                    if(attackDamage > 0f) return (int)(attackDamage * level/2f);
+                    if(attackDamage > 0f) return (int)(attackDamage * ((float)level/2f));
                 }
             }
         }

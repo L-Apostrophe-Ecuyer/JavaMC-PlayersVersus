@@ -16,7 +16,7 @@ public class PiercingProtectionEnchantment extends ProtectionEnchantment {
     public PiercingProtectionEnchantment() {
         super(
                 Enchantment.properties(ItemTags.ARMOR_ENCHANTABLE, 3, 1,
-                        Enchantment.leveledCost(8, 18),
+                        Enchantment.leveledCost(10, 18),
                         Enchantment.leveledCost(40, 16), 6,
                         ALL_ARMOR),
                 Type.PROJECTILE
@@ -45,7 +45,7 @@ public class PiercingProtectionEnchantment extends ProtectionEnchantment {
                 if(!mainHandStack.isEmpty() && mainHandStack.isDamageable()) {
                     Item weapon = mainHandStack.getItem();
                     if(weapon instanceof PickaxeItem || weapon instanceof TridentItem) return level * 2;
-                    if(weapon instanceof SwordItem) return (level * 3)/2;
+                    if(weapon instanceof SwordItem) return level;
                     if(weapon instanceof ToolItem) return level - 1;
                     return 0;
                 }
