@@ -41,25 +41,11 @@ public class ProtectionMixin extends Enchantment {
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
-        if(stack.getItem() instanceof ArmorItem armorItem && armorItem.getSlotType() != EquipmentSlot.BODY) {
-            if(!stack.hasEnchantments()) return true;
-            int numProtectionEnchants = 0;
-            Iterator<RegistryEntry<Enchantment>> iterator = stack.getEnchantments().getEnchantments().iterator();
-            while(iterator.hasNext()) {
-                if(iterator.next().value() instanceof ProtectionEnchantment) numProtectionEnchants++;
-                if(numProtectionEnchants >= MAX_PROTECTION_LEVELS_PER_ITEM) return false;
-            }
-            return true;
+        if(stack.getItem() instanceof ArmorItem armorItem) {
+            if(this.protectionType == ProtectionEnchantment.Type.FALL) return armorItem.getSlotType() == EquipmentSlot.FEET;
+            if(this.protectionType == ProtectionEnchantment.Type.PROJECTILE) return armorItem.getSlotType() == EquipmentSlot.CHEST;
         }
         return false;
-    }
-
-    @Override
-    public boolean isAvailableForRandomSelection() {
-        // Effectively disabled these two enchantments, as they were aimed at too narrow a problem.
-        //  > Piercing Protection now reduces all piercing damage, including arrows
-        //  > Impact Protection now reduces all impact damage, including falling
-        return (this != Enchantments.PROJECTILE_PROTECTION && this != Enchantments.FEATHER_FALLING);
     }
 
     @Override
@@ -79,7 +65,7 @@ public class ProtectionMixin extends Enchantment {
             return level * 2 + 1;
         }
         if (this.protectionType == ProtectionEnchantment.Type.FALL && source.isIn(DamageTypeTags.IS_FALL)) {
-            return level * 3;
+            return level * 4;
         }
         if (this.protectionType == ProtectionEnchantment.Type.EXPLOSION && source.isIn(DamageTypeTags.IS_EXPLOSION)) {
             return level * 2;

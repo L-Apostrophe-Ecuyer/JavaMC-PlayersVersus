@@ -112,46 +112,45 @@ public abstract class Combat {
     public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {
         if(level < 1) return;
 
+        World world = player.getWorld();
         player.spawnSweepAttackParticles();
-        player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
+        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
 
-        if(player.getWorld() instanceof ServerWorld serverWorld) {
-            attackRange = attackRange - (0.5d * (double)(4 - level));
-            double attackRangeSquared = attackRange * attackRange;
+        attackRange = attackRange - (0.5d * (double)(4 - level));
+        double attackRangeSquared = attackRange * attackRange;
 
-            // Attack entities:
-            Vec3d playerPos = player.getPos();
-            Box boundingBox = new Box(playerPos.x - attackRange, playerPos.y - attackRange, playerPos.z - attackRange, playerPos.x + attackRange, playerPos.y + attackRange, playerPos.z + attackRange);
-            List<LivingEntity> entitiesInRange = serverWorld.getEntitiesByClass(LivingEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
-            for (LivingEntity targetEntity : entitiesInRange) {
-                if(!player.isTeammate(targetEntity)) {
-                    if (targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
-                        if(player.canSee(targetEntity)) {
-                            player.setSprinting(true);
-                            ((LivingEntityAccessor) player).setLastAttackedTicks(20);
-                            player.attack(targetEntity);
-                        }
+        // Attack entities:
+        Vec3d playerPos = player.getPos();
+        Box boundingBox = new Box(playerPos.x - attackRange, playerPos.y - attackRange, playerPos.z - attackRange, playerPos.x + attackRange, playerPos.y + attackRange, playerPos.z + attackRange);
+        List<LivingEntity> entitiesInRange = world.getEntitiesByClass(LivingEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
+        for (LivingEntity targetEntity : entitiesInRange) {
+            if(!player.isTeammate(targetEntity)) {
+                if (targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
+                    if(player.canSee(targetEntity)) {
+                        player.setSprinting(true);
+                        ((LivingEntityAccessor) player).setLastAttackedTicks(20);
+                        player.attack(targetEntity);
                     }
                 }
             }
+        }
 
-            // Break foliage:
-            if(player.getActiveItem().getItem() instanceof HoeItem) {
-                Vec3d hitPos = Combat.getHitResultOf(player, attackRange - 1d).getPos();
-                BlockPos blockPosOfHit = new BlockPos((int) hitPos.x, (int) hitPos.y, (int) hitPos.z);
-                BlockPos blockPos, above;
-                BlockState blockState;
-                for (int x = -2; x <= 2; x++) {
-                    for (int z = -2; z <= 2; z++) {
-                        for (int y = -1; y <= 1; y++) {
-                            blockPos = blockPosOfHit.add(x, y, z);
-                            blockState = serverWorld.getBlockState(blockPos);
-                            if (blockState.getHardness(serverWorld, blockPos) == 0.0) {
-                                serverWorld.breakBlock(blockPos, true, player);
-                                above = blockPos.add(0, 1, 0);
-                                if (serverWorld.getBlockState(above).getHardness(serverWorld, above) == 0.0F) {
-                                    serverWorld.breakBlock(above, true, player);
-                                }
+        // Break foliage:
+        if(player.getActiveItem().getItem() instanceof HoeItem) {
+            Vec3d hitPos = Combat.getHitResultOf(player, attackRange - 1d).getPos();
+            BlockPos blockPosOfHit = new BlockPos((int) hitPos.x, (int) hitPos.y, (int) hitPos.z);
+            BlockPos blockPos, above;
+            BlockState blockState;
+            for (int x = -2; x <= 2; x++) {
+                for (int z = -2; z <= 2; z++) {
+                    for (int y = -1; y <= 1; y++) {
+                        blockPos = blockPosOfHit.add(x, y, z);
+                        blockState = world.getBlockState(blockPos);
+                        if (blockState.getHardness(world, blockPos) == 0.0) {
+                            world.breakBlock(blockPos, true, player);
+                            above = blockPos.add(0, 1, 0);
+                            if (world.getBlockState(above).getHardness(world, above) == 0.0F) {
+                                world.breakBlock(above, true, player);
                             }
                         }
                     }

@@ -1,6 +1,8 @@
 package frootloops.versus.mixin.players;
 
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -9,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
+@Environment(EnvType.CLIENT)
 @Mixin(ClientPlayerEntity.class)
 public abstract class HungerSprintingMixin extends PlayerEntity {
 

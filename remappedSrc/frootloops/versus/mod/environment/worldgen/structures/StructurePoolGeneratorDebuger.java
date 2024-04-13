@@ -111,7 +111,7 @@ public class StructurePoolGeneratorDebuger {
                 for (BlockRotation randomBlockRotation : BlockRotation.randomRotationOrder(this.random)) {
                     List<StructureTemplate.StructureBlockInfo> jigsawsOfConnectingElement = connectingStructurePoolElement.getStructureBlockInfos(this.structureTemplateManager, BlockPos.ORIGIN, randomBlockRotation, this.random);
 
-                    VersusMod.MOD_LOGGER.warn("    - GENERATING JIGSAW PIECES: In direction " + randomBlockRotation.asString() + ", connecting piece has jigsaws: " + jigsawsOfConnectingElement.toString() +"\n");
+                    VersusMod.MOD_LOGGER.warn("    - GENERATING JIGSAW PIECES: In direction " + randomBlockRotation.asString() + ", connecting piece has jigsaws: " + jigsawsOfConnectingElement.toString() +"");
 
                     BlockBox connectingStructureBoundingBox = connectingStructurePoolElement.getBoundingBox(this.structureTemplateManager, BlockPos.ORIGIN, randomBlockRotation);
 
