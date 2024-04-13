@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items;
+package frootloops.versus.mixin.items.inventory;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = MinecraftClient.class, priority = 100000)
+@Mixin(value = MinecraftClient.class)
 public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runnable> implements WindowEventHandler {
     @Shadow public ClientPlayerEntity player;
     @Shadow public ClientWorld world;

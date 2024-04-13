@@ -46,11 +46,6 @@ public class ProtectionMixin extends Enchantment {
     }
 
     @Override
-    public boolean isAvailableForRandomSelection() {
-        return (this != Enchantments.PROJECTILE_PROTECTION); // Effectively disabled, it was too situational
-    }
-
-    @Override
     public boolean canAccept(Enchantment other) {
         return super.canAccept(other); // Protection enchantments can be combined
     }
@@ -58,6 +53,7 @@ public class ProtectionMixin extends Enchantment {
     @Override
     public Rarity getRarity() {
         if(this.protectionType == ProtectionEnchantment.Type.ALL) return Rarity.VERY_RARE;
+        if(this.protectionType == ProtectionEnchantment.Type.FIRE) return Rarity.VERY_RARE;
         return Rarity.RARE;
     }
 
@@ -73,13 +69,13 @@ public class ProtectionMixin extends Enchantment {
             return level * 2 + 1;
         }
         if (this.protectionType == ProtectionEnchantment.Type.FALL && source.isIn(DamageTypeTags.IS_FALL)) {
-            return level * 2;
+            return level * 4;
         }
         if (this.protectionType == ProtectionEnchantment.Type.EXPLOSION && source.isIn(DamageTypeTags.IS_EXPLOSION)) {
             return level * 2;
         }
         if (this.protectionType == ProtectionEnchantment.Type.PROJECTILE && source.isIn(DamageTypeTags.IS_PROJECTILE)) {
-            return level * 2 + 1;
+            return level * 3 + 1;
         }
         return 0;
     }

@@ -2,7 +2,10 @@ package frootloops.versus.mixin.players.attacking;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.DebugHud;
@@ -12,12 +15,14 @@ import net.minecraft.client.render.Camera;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.GameMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import static frootloops.versus.VersusMod.DEBUG_MODE;
+
+@Environment(EnvType.CLIENT)
 @Mixin(value = InGameHud.class, priority = 9999)
 public class CrosshairRendererMixin {
 
@@ -87,8 +92,6 @@ public class CrosshairRendererMixin {
                             context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE, 16, 4, 0, 0, k, j, l, 4);
                         }
                     }
-
-                    //if(ReacharoundTracker.currentTarget != null) this.drawExtraCrosshairIcon(matrices);
                     RenderSystem.defaultBlendFunc();
                 }
             }

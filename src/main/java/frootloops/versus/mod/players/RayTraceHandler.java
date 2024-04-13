@@ -1,4 +1,4 @@
-package frootloops.versus.mod.players.bridging;
+package frootloops.versus.mod.players;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
