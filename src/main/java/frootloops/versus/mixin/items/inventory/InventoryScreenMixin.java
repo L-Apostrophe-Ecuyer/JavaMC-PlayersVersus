@@ -20,18 +20,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler>  implements RecipeBookProvider {
-    public InventoryScreenMixin(PlayerScreenHandler screenHandler, PlayerInventory playerInventory, Text text, boolean mouseDown, RecipeBookWidget recipeBook) {
+    public InventoryScreenMixin(PlayerScreenHandler screenHandler, PlayerInventory playerInventory, Text text, boolean mouseDown) {
         super(screenHandler, playerInventory, text);
-        this.recipeBook = recipeBook;
     }
-    private static final Identifier RECIPE_BUTTON_TEXTURE = new Identifier("players-versus", "container/hotbar_swap_down_combined");
-    @Shadow private final RecipeBookWidget recipeBook;
+    private static final Identifier HOTBAR_BUTTON_TEXTURE = new Identifier("players-versus", "textures/gui/sprites/container/hotbar_swap_down_combined.png");
 
     private TexturedButtonWidget buttonHotbarSwap = null;
 
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
-        this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 22, this.height / 2 - 22, 20, 18, 0, 0, 19, RECIPE_BUTTON_TEXTURE, button -> {
+        this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 22, this.height / 2 - 22, 20, 18, 0, 0, 18, HOTBAR_BUTTON_TEXTURE, button -> {
             PlayerInventory playerInventory = client.player.getInventory();
             for (int i = 0; i < 9; i++) {
                 swapItemsFromSlots(playerInventory, i, i + 9);
