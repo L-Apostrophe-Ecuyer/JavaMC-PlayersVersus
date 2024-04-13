@@ -11,8 +11,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.BlockItem;
@@ -43,18 +41,12 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
     @Shadow public ClientWorld world;
     @Shadow @Nullable public HitResult crosshairTarget;
     @Shadow @Nullable public ClientPlayerInteractionManager interactionManager;
-    @Shadow private static final Text NBT_TOOLTIP_TEXT = Text.literal("(+NBT)");
 
     public HotbarSwappingClientMixin(String string) {
         super(string);
     }
 
-    @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity, DynamicRegistryManager registryManager) {
-        NbtCompound nbtCompound = blockEntity.createComponentlessNbt(registryManager);
-        blockEntity.removeFromCopiedStackNbt(nbtCompound);
-        BlockItem.setBlockEntityData(stack, blockEntity.getType(), nbtCompound);
-        stack.applyComponentsFrom(blockEntity.createComponentMap());
-        stack.apply(DataComponentTypes.LORE, LoreComponent.DEFAULT, NBT_TOOLTIP_TEXT, LoreComponent::with);
+    @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity) {
     }
 
     /**
@@ -125,7 +117,7 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
 
             if (isCreativeMode && Screen.hasControlDown() && blockState.hasBlockEntity()) {
                 blockEntity = this.world.getBlockEntity(blockPos);
-                if (blockEntity != null) addBlockEntityNbt(itemStack, blockEntity, this.world.getRegistryManager());
+                if (blockEntity != null) addBlockEntityNbt(itemStack, blockEntity);
             }
             return itemStack;
 

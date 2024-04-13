@@ -84,7 +84,7 @@ public abstract class MinecraftClientMixin {
         Pair<Vec3d, Vec3d> rayDetails = RayTraceHandler.getEntityParams(player);
         World world = player.getWorld();
 
-        double range = player.getBlockInteractionRange();
+        double range = player.getReachDistance(true);
         Vec3d rayPos = rayDetails.getLeft();
         Vec3d ray = rayDetails.getRight().multiply(range);
         HitResult regularCollision = RayTraceHandler.rayTrace(player, world, rayPos, rayPos.add(ray), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE);

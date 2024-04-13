@@ -61,7 +61,7 @@ public class StructurePoolBasedGeneratorMixin {
             CallbackInfoReturnable<Optional<Structure.StructurePosition>> cir) {
 
         if(SHOW_DEBUG_MESSAGES) {
-            VersusMod.MOD_LOGGER.warn("STARTED GENERATING JIGSAW: " + structurePool.getIdAsString() + " OF SIZE " + structurePool.value().getElementCount());
+            VersusMod.MOD_LOGGER.warn("STARTED GENERATING JIGSAW: " + id.toString() + " OF SIZE " + structurePool.value().getElementCount());
         }
 
         DynamicRegistryManager dynamicRegistryManager = context.dynamicRegistryManager();
