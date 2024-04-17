@@ -11,7 +11,6 @@
     "enchantments.EnchantingTableMixin",
     "enchantments.EnchantmentBottleMixin",
     "enchantments.EnchantmentHelperMixin",
-    "enchantments.EnchantmentPropertiesMixin",
     "enchantments.armor.DepthStriderMixin",
     "enchantments.armor.ProtectionMixin",
     "enchantments.armor.ThornsMixin",
