@@ -17,14 +17,13 @@
     "enchantments.armor.ThornsMixin",
     "enchantments.tools.DamageEnchantMixin",
     "enchantments.tools.BreachMixin",
-
+    "environment.worldgen.structures.DungeonsMixin",
+    "environment.worldgen.structures.StructurePieceMixin",
+    "environment.worldgen.structures.StructureWaterloggingFixMixin",
 
     "environment.archeology.BrushesNotRequiredMixin",
     "environment.archeology.SuspiciousBlocksMixin",
     "environment.sleeping.ServerSleepingMixin",
-    "environment.worldgen.structures.DungeonsMixin",
-    "environment.worldgen.structures.StructurePieceMixin",
-    "environment.worldgen.structures.StructureWaterloggingFixMixin",
     "environment.visuals.ClientWorldMixin",
     "environment.visuals.FogRendererMixin",
     "environment.visuals.WorldRendererMixin",
@@ -89,6 +88,7 @@
     "mobs.hostile.overworld.SpiderMixin",
     "mobs.hostile.overworld.SpiderRenderMixin",
     "mobs.hostile.overworld.WardenMixin",
+    "mobs.hostile.overworld.WardenSniffMixin",
 
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
