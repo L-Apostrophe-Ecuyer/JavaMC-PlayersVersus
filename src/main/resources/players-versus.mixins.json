@@ -97,6 +97,8 @@
     "mobs.hostile.overworld.SpiderMixin",
     "mobs.hostile.overworld.SpiderRenderMixin",
     "mobs.hostile.overworld.WardenMixin",
+    "mobs.hostile.overworld.WardenSniffMixin",
+
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
     "mobs.hostile.overworld.ZombieEventListenerMixin",
