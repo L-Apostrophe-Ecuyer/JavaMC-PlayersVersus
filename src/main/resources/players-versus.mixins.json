@@ -11,6 +11,7 @@
     "enchantments.EnchantingTableMixin",
     "enchantments.EnchantmentBottleMixin",
     "enchantments.EnchantmentHelperMixin",
+    "enchantments.EnchantmentPropertiesMixin",
     "enchantments.armor.DepthStriderMixin",
     "enchantments.armor.ProtectionMixin",
     "enchantments.armor.ThornsMixin",
@@ -22,13 +23,12 @@
     "enchantments.tools.SharpnessMixin",
     "enchantments.tools.SweepingMixin",
 
-
-    "environment.archeology.BrushesNotRequiredMixin",
-    "environment.archeology.SuspiciousBlocksMixin",
-    "environment.sleeping.ServerSleepingMixin",
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",
     "environment.worldgen.structures.StructureWaterloggingFixMixin",
+    "environment.archeology.BrushesNotRequiredMixin",
+    "environment.archeology.SuspiciousBlocksMixin",
+    "environment.sleeping.ServerSleepingMixin",
     "environment.visuals.ClientWorldMixin",
     "environment.visuals.FogRendererMixin",
     "environment.visuals.WorldRendererMixin",
@@ -97,6 +97,8 @@
     "mobs.hostile.overworld.SpiderMixin",
     "mobs.hostile.overworld.SpiderRenderMixin",
     "mobs.hostile.overworld.WardenMixin",
+    "mobs.hostile.overworld.WardenSniffMixin",
+
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
     "mobs.hostile.overworld.ZombieEventListenerMixin",
