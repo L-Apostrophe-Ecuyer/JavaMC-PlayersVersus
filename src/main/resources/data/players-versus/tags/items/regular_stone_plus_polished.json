@@ -2,6 +2,6 @@
   "values": [
     "minecraft:stone",
     "minecraft:cobblestone",
-    "minecraft:polished_andesite"
+    "players-versus:polished_stone"
   ]
 }

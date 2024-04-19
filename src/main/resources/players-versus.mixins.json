@@ -30,6 +30,7 @@
     "environment.visuals.LightmapMixin",
     "environment.BlockExplosivityMixin",
     "environment.MinecartMixin",
+    "environment.MossMixin",
     "environment.TntMixin",
     "environment.TorchMixin",
 

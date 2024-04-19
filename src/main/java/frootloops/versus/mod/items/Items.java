@@ -51,6 +51,9 @@ public abstract class Items {
     public static final BlockItem GRANITE_BRICKS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICKS, new Item.Settings());
     public static final BlockItem GRANITE_BRICK_SLAB_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_SLAB, new Item.Settings());
     public static final BlockItem GRANITE_BRICK_STAIRS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_STAIRS, new Item.Settings());
+    public static final BlockItem POLISHED_STONE_ITEM = new BlockItem(CustomBlocks.POLISHED_STONE, new Item.Settings());
+    public static final BlockItem POLISHED_STONE_SLAB_ITEM = new BlockItem(CustomBlocks.POLISHED_STONE_SLAB, new Item.Settings());
+    public static final BlockItem POLISHED_STONE_STAIRS_ITEM = new BlockItem(CustomBlocks.POLISHED_STONE_STAIRS, new Item.Settings());
 
     public static void onInitialize() {
         setStackSizes(64, 64, 8, 8, 64, 16, 64);
@@ -68,6 +71,9 @@ public abstract class Items {
         registerCustomItem("granite_bricks", GRANITE_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("granite_brick_slab", GRANITE_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("granite_brick_stairs", GRANITE_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_stone", POLISHED_STONE_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_stone_slab", POLISHED_STONE_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_stone_stairs", POLISHED_STONE_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
