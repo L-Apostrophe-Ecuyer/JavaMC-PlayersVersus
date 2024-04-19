@@ -62,7 +62,7 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
 
         PlayerInventory playerInventory = this.player.getInventory();
         int slotToSwapTo = isStackEmpty ? -1: playerInventory.getSlotWithStack(stackToSwapTo);
-        if (slotToSwapTo == -1 && isCreativeMode && !isStackEmpty && (Screen.hasControlDown() || playerInventory.getStack(playerInventory.selectedSlot).isEmpty())) {
+        if (slotToSwapTo == -1 && isCreativeMode && !isStackEmpty && (Screen.hasControlDown() || playerInventory.getStack(playerInventory.selectedSlot).isEmpty() || !isRowFull(playerInventory, 0))) {
             playerInventory.addPickBlock(stackToSwapTo);
             this.interactionManager.clickCreativeStack(this.player.getStackInHand(Hand.MAIN_HAND), 36 + playerInventory.selectedSlot);
         }
@@ -71,6 +71,13 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
         }
         else {
             int numRowsToSwitch = slotToSwapTo == -1 ? 1 : 1 + (35 - slotToSwapTo) / 9;
+            if(slotToSwapTo == -1) {
+                while (numRowsToSwitch < 4) {
+                    if(isRowEmpty(playerInventory, 36 - numRowsToSwitch * 9)) numRowsToSwitch += 1;
+                    else break;
+                }
+            }
+
             if (numRowsToSwitch < 1 || numRowsToSwitch > 3) return;
             for (int i = 0; i < 9; i++) {
                 if (numRowsToSwitch == 1) {
@@ -91,6 +98,21 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
             if(slotToSwapTo != -1) playerInventory.selectedSlot = slotToSwapTo % 9;
         }
         info.cancel();
+    }
+
+
+    private static boolean isRowEmpty(PlayerInventory inventory, int firstSlotOfRow) {
+        for(int i = 0; i < 9; i++) {
+            if(!inventory.getStack(i + firstSlotOfRow).isEmpty()) return false;
+        }
+        return true;
+    }
+
+    private static boolean isRowFull(PlayerInventory inventory, int firstSlotOfRow) {
+        for(int i = 0; i < 9; i++) {
+            if(inventory.getStack(i + firstSlotOfRow).isEmpty()) return false;
+        }
+        return true;
     }
 
     private void swapItemsFromSlots(PlayerInventory inventory, int hotbarSlot, int slotTwo) {

@@ -58,8 +58,8 @@ public abstract class LightmapMixin {
     @Overwrite
     private float getDarkness(LivingEntity entity, float factor, float delta) {
         if(factor > 0f) return Math.max(0.0f, MathHelper.cos(((float)entity.age - delta) * (float)Math.PI * 0.025f) * 0.45f * factor);
-        else if(entity.getY() < -32d) return 48f/384f;
-        else if(entity.getY() < 16d) return -((float)entity.getY() - 16f)/384f;
+        else if(entity.getY() < -32d) return 32f/384f;
+        else if(entity.getY() < 0d) return -((float)entity.getY())/384f;
         else return 0f;
     }
 }

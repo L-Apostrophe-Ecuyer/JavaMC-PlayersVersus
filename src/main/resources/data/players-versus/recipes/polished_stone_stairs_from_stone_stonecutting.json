@@ -4,5 +4,5 @@
   "ingredient": {
     "tag": "players-versus:regular_stone"
   },
-  "result": "minecraft:polished_andesite"
+  "result": "players-versus:polished_stone_stairs"
 }
