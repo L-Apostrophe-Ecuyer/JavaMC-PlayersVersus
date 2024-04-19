@@ -1,51 +1,59 @@
 {
-  "type": "minecraft:add",
-  "argument1": {
-    "type": "minecraft:mul",
-    "argument1": 3,
-    "argument2": {
-      "type": "minecraft:quarter_negative",
-      "argument": {
-        "type": "minecraft:mul",
-        "argument1": {
-          "type": "minecraft:add",
-          "argument1": "minecraft:overworld/depth",
-          "argument2": {
-            "type": "minecraft:mul",
-            "argument1": "minecraft:overworld/jaggedness",
+  "type": "minecraft:min",
+  "argument1": 2,
+  "argument2": {
+    "type": "minecraft:add",
+    "argument1": {
+      "type": "minecraft:mul",
+      "argument1": 3,
+      "argument2": {
+        "type": "minecraft:quarter_negative",
+        "argument": {
+          "type": "minecraft:mul",
+          "argument1": {
+            "type": "minecraft:add",
+            "argument1": "minecraft:overworld/depth",
             "argument2": {
-              "type": "minecraft:half_negative",
-              "argument": {
-                "type": "minecraft:noise",
-                "noise": "minecraft:jagged",
-                "xz_scale": 1500,
-                "y_scale": 0
+              "type": "minecraft:mul",
+              "argument1": "minecraft:overworld/jaggedness",
+              "argument2": {
+                "type": "minecraft:half_negative",
+                "argument": {
+                  "type": "minecraft:noise",
+                  "noise": "minecraft:jagged",
+                  "xz_scale": 1500,
+                  "y_scale": 0
+                }
               }
             }
-          }
-        },
-        "argument2": "minecraft:overworld/factor"
+          },
+          "argument2": "minecraft:overworld/factor"
+        }
       }
-    }
-  },
-  "argument2": {
-    "type": "minecraft:mul",
-    "argument1": {
-      "type": "minecraft:y_clamped_gradient",
-      "from_y": 128,
-      "to_y": 72,
-      "from_value": 0.2,
-      "to_value": 1.8
     },
     "argument2": {
-      "type": "minecraft:add",
-      "argument1": "minecraft:overworld/base_3d_noise",
+      "type": "minecraft:mul",
+      "argument1": {
+        "type": "minecraft:y_clamped_gradient",
+        "from_y": 96,
+        "to_y": 72,
+        "from_value": 0.5,
+        "to_value": 1.8
+      },
       "argument2": {
-        "type": "minecraft:mul",
-        "argument1": 0.4,
+        "type": "minecraft:add",
+        "argument1": {
+          "type": "minecraft:mul",
+          "argument1": 0.2,
+          "argument2": "minecraft:overworld/base_3d_noise"
+        },
         "argument2": {
-          "type": "minecraft:flat_cache",
-          "argument": "minecraft:overworld/base_3d_noise"
+          "type": "minecraft:mul",
+          "argument1": 0.8,
+          "argument2": {
+            "type": "minecraft:flat_cache",
+            "argument": "minecraft:overworld/base_3d_noise"
+          }
         }
       }
     }
