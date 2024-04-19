@@ -25,6 +25,10 @@ public class CustomBlocks {
     public static final Block GRANITE_BRICK_SLAB = new SlabBlock(AbstractBlock.Settings.copy(GRANITE_BRICKS));
     public static final Block GRANITE_BRICK_STAIRS = new StairsBlock(GRANITE_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(GRANITE_BRICKS));
 
+    public static final Block POLISHED_STONE = new Block(AbstractBlock.Settings.create().mapColor(MapColor.GRAY).instrument(Instrument.BASEDRUM).requiresTool().strength(1.5f, 6.0f));
+    public static final Block POLISHED_STONE_SLAB = new SlabBlock(AbstractBlock.Settings.copy(POLISHED_STONE));
+    public static final Block POLISHED_STONE_STAIRS = new StairsBlock(POLISHED_STONE.getDefaultState(), AbstractBlock.Settings.copy(POLISHED_STONE));
+
     private static void registerBlock(String name, Block block) {
         Registry.register(Registries.BLOCK, new Identifier(VersusMod.MOD_ID, name), block);
     }
@@ -37,6 +41,9 @@ public class CustomBlocks {
         registerBlock("granite_bricks", GRANITE_BRICKS);
         registerBlock("granite_brick_slab", GRANITE_BRICK_SLAB);
         registerBlock("granite_brick_stairs", GRANITE_BRICK_STAIRS);
+        registerBlock("polished_stone", POLISHED_STONE);
+        registerBlock("polished_stone_slab", POLISHED_STONE_SLAB);
+        registerBlock("polished_stone_stairs", POLISHED_STONE_STAIRS);
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), SMOLDERING_TORCH, SMOLDERING_WALL_TORCH, EXTINGUISHED_TORCH, EXTINGUISHED_WALL_TORCH);
     }
 

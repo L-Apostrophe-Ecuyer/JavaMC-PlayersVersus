@@ -1,8 +1,8 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 2,
+  "count": 1,
   "ingredient": {
     "tag": "players-versus:regular_stone"
   },
-  "result": "minecraft:polished_andesite_slab"
+  "result": "players-versus:polished_stone"
 }
