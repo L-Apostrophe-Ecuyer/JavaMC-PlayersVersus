@@ -25,7 +25,7 @@ public class CustomBlocks {
     public static final Block GRANITE_BRICK_SLAB = new SlabBlock(AbstractBlock.Settings.copy(GRANITE_BRICKS));
     public static final Block GRANITE_BRICK_STAIRS = new StairsBlock(GRANITE_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(GRANITE_BRICKS));
 
-    public static final Block POLISHED_STONE = new Block(AbstractBlock.Settings.create().mapColor(MapColor.GRAY).instrument(Instrument.BASEDRUM).requiresTool().strength(1.5f, 6.0f));
+    public static final Block POLISHED_STONE = new Block(AbstractBlock.Settings.copy(Blocks.STONE));
     public static final Block POLISHED_STONE_SLAB = new SlabBlock(AbstractBlock.Settings.copy(POLISHED_STONE));
     public static final Block POLISHED_STONE_STAIRS = new StairsBlock(POLISHED_STONE.getDefaultState(), AbstractBlock.Settings.copy(POLISHED_STONE));
 
