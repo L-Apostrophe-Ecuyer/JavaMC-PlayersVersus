@@ -14,10 +14,27 @@
     },
     "replaceable": "#minecraft:base_stone_overworld",
     "ground_state": {
-      "type": "minecraft:simple_state_provider",
-      "state": {
-        "Name": "minecraft:dirt"
-      }
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "weight": 2,
+          "data": {
+            "Name": "minecraft:stone"
+          }
+        },
+        {
+          "weight": 2,
+          "data": {
+            "Name": "minecraft:dirt"
+          }
+        },
+        {
+          "weight": 6,
+          "data": {
+            "Name": "players-versus:brown_mud"
+          }
+        }
+      ]
     },
     "vegetation_feature": {
       "feature": "minecraft:moss_vegetation",

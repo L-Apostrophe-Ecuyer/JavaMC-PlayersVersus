@@ -9,10 +9,10 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
-            "block": "minecraft:lava"
+            "block": "minecraft:dirt_path"
           },
           "output_state": {
-            "Name": "minecraft:obsidian"
+            "Name": "players-versus:brown_mud"
           }
         },
         {
@@ -21,10 +21,10 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
-            "block": "minecraft:water"
+            "block": "minecraft:lava"
           },
           "output_state": {
-            "Name": "minecraft:packed_mud"
+            "Name": "minecraft:obsidian"
           }
         },
         {

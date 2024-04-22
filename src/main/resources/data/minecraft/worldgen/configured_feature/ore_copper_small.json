@@ -1,7 +1,7 @@
 {
   "type": "minecraft:ore",
   "config": {
-    "size": 12,
+    "size": 22,
     "discard_chance_on_air_exposure": 0.2,
     "targets": [
       {
@@ -18,7 +18,7 @@
         "target": {
           "predicate_type": "minecraft:random_block_match",
           "block": "minecraft:stone",
-          "probability": 0.6
+          "probability": 0.65
         },
         "state": {
           "Name": "minecraft:granite"

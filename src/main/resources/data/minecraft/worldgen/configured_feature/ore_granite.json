@@ -26,16 +26,6 @@
       },
       {
         "target": {
-          "predicate_type": "minecraft:random_block_match",
-          "block": "minecraft:stone",
-          "probability": 0.0025
-        },
-        "state": {
-          "Name": "minecraft:raw_copper_block"
-        }
-      },
-      {
-        "target": {
           "predicate_type": "minecraft:tag_match",
           "tag": "minecraft:base_stone_overworld"
         },
