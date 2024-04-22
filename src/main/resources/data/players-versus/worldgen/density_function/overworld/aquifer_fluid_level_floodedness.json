@@ -1,6 +1,6 @@
 {
   "type": "minecraft:range_choice",
-  "input": "players-versus:overworld/underground_rivers",
+  "input": "players-versus:overworld/river_carver",
   "min_inclusive": -1.0,
   "max_exclusive": -0.01,
   "when_in_range": 0.85,
@@ -28,3 +28,4 @@
     }
   }
 }
+
