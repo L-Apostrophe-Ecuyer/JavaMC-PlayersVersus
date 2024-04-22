@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "players-versus:brown_mud"
+  },
+  "result": {
+    "id": "minecraft:packed_mud"
+  },
+  "experience": 0,
+  "cookingtime": 100
+}

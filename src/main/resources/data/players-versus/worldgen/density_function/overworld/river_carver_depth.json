@@ -1,0 +1,69 @@
+{
+  "type": "minecraft:range_choice",
+  "input": "minecraft:overworld/ridges",
+  "min_inclusive": -0.125,
+  "max_exclusive": 0.125,
+  "when_in_range": {
+    "type": "minecraft:range_choice",
+    "input": "minecraft:y",
+    "min_inclusive": 42,
+    "max_exclusive": 256,
+    "when_in_range": {
+      "type": "minecraft:min",
+      "argument1": {
+        "type": "minecraft:add",
+        "argument1": {
+          "type": "minecraft:add",
+          "argument1": {
+            "type": "minecraft:y_clamped_gradient",
+            "from_y": 50,
+            "to_y": 60,
+            "from_value": 0,
+            "to_value": -0.4
+          },
+          "argument2": {
+            "type": "minecraft:y_clamped_gradient",
+            "from_y": 50,
+            "to_y": 128,
+            "from_value": 0,
+            "to_value": -0.5
+          }
+        },
+        "argument2": {
+          "type": "minecraft:add",
+          "argument1": {
+            "type": "minecraft:square",
+            "argument": {
+              "type": "minecraft:mul",
+              "argument1": {
+                "type": "minecraft:shifted_noise",
+                "noise": "minecraft:ridge",
+                "xz_scale": 0.25,
+                "y_scale": 0,
+                "shift_x": "minecraft:shift_x",
+                "shift_y": 0,
+                "shift_z": "minecraft:shift_z"
+              },
+              "argument2": 12
+            }
+          },
+          "argument2": {
+            "type": "minecraft:abs",
+            "argument": {
+              "type": "minecraft:shifted_noise",
+              "noise": "minecraft:ridge",
+              "xz_scale": 0.25,
+              "y_scale": 0,
+              "shift_x": "minecraft:shift_x",
+              "shift_y": 0,
+              "shift_z": "minecraft:shift_z"
+            }
+          }
+        }
+      },
+      "argument2": 0
+    },
+    "when_out_of_range": 0
+  },
+  "when_out_of_range": 0
+}

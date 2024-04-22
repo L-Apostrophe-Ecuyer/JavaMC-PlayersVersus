@@ -1,6 +1,6 @@
 {
   "type": "minecraft:min",
-  "argument1": 2,
+  "argument1": "players-versus:overworld/river_carver",
   "argument2": {
     "type": "minecraft:add",
     "argument1": {
@@ -44,12 +44,12 @@
         "type": "minecraft:add",
         "argument1": {
           "type": "minecraft:mul",
-          "argument1": 0.2,
+          "argument1": 0.4,
           "argument2": "minecraft:overworld/base_3d_noise"
         },
         "argument2": {
           "type": "minecraft:mul",
-          "argument1": 0.8,
+          "argument1": 0.6,
           "argument2": {
             "type": "minecraft:flat_cache",
             "argument": "minecraft:overworld/base_3d_noise"
@@ -59,3 +59,4 @@
     }
   }
 }
+
