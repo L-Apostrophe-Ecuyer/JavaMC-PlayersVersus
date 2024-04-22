@@ -5,7 +5,7 @@
     "item": "minecraft:mud"
   },
   "result": {
-    "id": "minecraft:clay"
+    "item": "minecraft:clay"
   },
   "experience": 0,
   "cookingtime": 100
