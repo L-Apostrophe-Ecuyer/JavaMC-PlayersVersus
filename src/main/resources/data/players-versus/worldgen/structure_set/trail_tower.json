@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "players-versus:trial_tower",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 83469867,
+    "spacing": 36,
+    "separation": 16
+  }
+}
