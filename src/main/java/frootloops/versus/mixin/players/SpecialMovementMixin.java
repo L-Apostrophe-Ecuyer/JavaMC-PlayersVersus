@@ -54,16 +54,14 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             }
 
             boolean hasBounded = false;
-            if (horizontalSpeedSquared < 0.005d) { // Extra High Jump:
-                velocityY *= 1.3 + 0.125 * boundingStridesLevel;
-                hasBounded = true;
-            }
-            else if (isSprinting) { // Extra Long Jump:
+            if (isSprinting) { // Extra Long Jump:
+                if(this.horizontalCollision || horizontalSpeedSquared < 0.02) velocityY *= 1.3 + 0.125 * boundingStridesLevel;
                 velocityX *= (10.0 + boundingStridesLevel) / 8.5;
                 velocityZ *= (10.0 + boundingStridesLevel) / 8.5;
                 ((PlayerEntity) ((Object) this)).addExhaustion(0.2f);
                 hasBounded = true;
             }
+            else VersusMod.MOD_LOGGER.warn("Speed was " + horizontalSpeedSquared);
 
             // Bounding strides effect:
             if (hasBounded) {
