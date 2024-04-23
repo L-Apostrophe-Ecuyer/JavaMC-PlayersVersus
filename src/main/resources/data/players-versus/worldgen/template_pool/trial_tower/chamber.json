@@ -27,6 +27,15 @@
         "location": "players-versus:trial_tower/base_water_1",
         "processors": "players-versus:trial_tower"
       }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/base_water_2",
+        "processors": "players-versus:trial_tower"
+      }
     }
   ]
 }
