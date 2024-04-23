@@ -6,7 +6,25 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "projection": "rigid",
-        "location": "players-versus:trial_tower/base_1",
+        "location": "players-versus:trial_tower/base_slime_1",
+        "processors": "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/base_slime_2",
+        "processors": "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/base_water_1",
         "processors": "players-versus:trial_tower"
       }
     }
