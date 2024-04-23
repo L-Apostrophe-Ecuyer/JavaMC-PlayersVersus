@@ -47,7 +47,7 @@ public abstract class Combat {
     private static final float[] toolsSpeed  =
             new float[]{1.0F,   1.5F,   2.0F,   1.2F,   1.5F};
     private static final float[] toolsDamage =
-            new float[]{8.0F,   4.0F,   1.0F,   2.0F,   3.0F};
+            new float[]{8.0F,   4.0F,   1.0F,   1.0F,   3.0F};
     private static final float[] toolsReachBonus =
             new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
 
@@ -68,7 +68,7 @@ public abstract class Combat {
     public static float getHoeReachModifier() { return toolsReachBonus[2];}
     public static float getSwordReachModifier() { return toolsReachBonus[1];}
     public static float getShovelReachModifier() { return toolsReachBonus[1];}
-    public static float getTridentDamageModifier() { return 9.0f - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getTridentDamageModifier() { return 10.0f - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getTridentSpeedModifier() { return 1.0f - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getTridentReachModifier() { return 1.0f;}
 
