@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "players-versus:packed_mud_tiles"
+    }
+  },
+  "result": {
+    "id": "players-versus:packed_mud_tile_slab",
+    "count": 6
+  }
+}

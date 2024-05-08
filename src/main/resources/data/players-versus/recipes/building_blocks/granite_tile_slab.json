@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "players-versus:granite_tiles"
+    }
+  },
+  "result": {
+    "id": "players-versus:granite_tile_slab",
+    "count": 6
+  }
+}
