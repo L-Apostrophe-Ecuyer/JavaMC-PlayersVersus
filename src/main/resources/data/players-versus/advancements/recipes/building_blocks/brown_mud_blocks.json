@@ -1,0 +1,40 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "players-versus:building_blocks/brown_mud_bricks"
+      }
+    },
+    "has_ingredient": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "players-versus:brown_mud"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_ingredient"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "players-versus:building_blocks/terracotta_green_from_mud_smelting",
+      "players-versus:building_blocks/brown_mud_bricks",
+      "players-versus:building_blocks/brown_mud_brick_stairs",
+      "players-versus:building_blocks/brown_mud_brick_slab",
+      "players-versus:building_blocks/brown_mud_tiles",
+      "players-versus:building_blocks/brown_mud_tile_stairs",
+      "players-versus:building_blocks/brown_mud_tile_slab"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "players-versus:block/packed_mud_tiles",
+    "side": "players-versus:block/packed_mud_tiles",
+    "top": "players-versus:block/packed_mud_tiles"
+  }
+}

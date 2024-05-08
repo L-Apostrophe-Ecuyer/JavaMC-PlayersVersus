@@ -29,10 +29,17 @@ public class CustomBlocks {
     public static final Block POLISHED_STONE_SLAB = new SlabBlock(AbstractBlock.Settings.copy(POLISHED_STONE));
     public static final Block POLISHED_STONE_STAIRS = new StairsBlock(POLISHED_STONE.getDefaultState(), AbstractBlock.Settings.copy(POLISHED_STONE));
 
-    public static final Block BROWN_MUD = new MudBlock(AbstractBlock.Settings.copy(Blocks.MUD).mapColor(MapColor.BROWN));
+    public static final Block BROWN_MUD = new MudBlock(AbstractBlock.Settings.copy(Blocks.MUD).mapColor(MapColor.BROWN).slipperiness(0.92f).velocityMultiplier(0.94f));
     public static final Block BROWN_MUD_BRICKS = new Block(AbstractBlock.Settings.copy(Blocks.MUD_BRICKS));
     public static final Block BROWN_MUD_BRICK_SLAB = new SlabBlock(AbstractBlock.Settings.copy(BROWN_MUD_BRICKS));
     public static final Block BROWN_MUD_BRICK_STAIRS = new StairsBlock(BROWN_MUD_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(BROWN_MUD_BRICKS));
+    public static final Block BROWN_MUD_TILES = new Block(AbstractBlock.Settings.copy(Blocks.MUD_BRICKS));
+    public static final Block BROWN_MUD_TILES_SLAB = new SlabBlock(AbstractBlock.Settings.copy(BROWN_MUD_TILES));
+    public static final Block BROWN_MUD_TILES_STAIRS = new StairsBlock(BROWN_MUD_TILES.getDefaultState(), AbstractBlock.Settings.copy(BROWN_MUD_TILES));
+    public static final Block PACKED_MUD_TILES = new Block(AbstractBlock.Settings.copy(Blocks.MUD_BRICKS));
+    public static final Block PACKED_MUD_TILES_SLAB = new SlabBlock(AbstractBlock.Settings.copy(PACKED_MUD_TILES));
+    public static final Block PACKED_MUD_TILES_STAIRS = new StairsBlock(PACKED_MUD_TILES.getDefaultState(), AbstractBlock.Settings.copy(PACKED_MUD_TILES));
+
 
     private static void registerBlock(String name, Block block) {
         Registry.register(Registries.BLOCK, new Identifier(VersusMod.MOD_ID, name), block);
@@ -44,10 +51,12 @@ public class CustomBlocks {
         registerBlock("smoldering_wall_torch", SMOLDERING_WALL_TORCH);
         registerBlock("extinguished_torch", EXTINGUISHED_TORCH);
         registerBlock("extinguished_wall_torch", EXTINGUISHED_WALL_TORCH);
-        registerBlock("granite_tiles", GRANITE_TILES);
         registerBlock("granite_bricks", GRANITE_BRICKS);
         registerBlock("granite_brick_slab", GRANITE_BRICK_SLAB);
         registerBlock("granite_brick_stairs", GRANITE_BRICK_STAIRS);
+        registerBlock("granite_tiles", GRANITE_TILES);
+        registerBlock("granite_tile_slab", GRANITE_TILES_SLAB);
+        registerBlock("granite_tile_stairs", GRANITE_TILES_STAIRS);
         registerBlock("polished_stone", POLISHED_STONE);
         registerBlock("polished_stone_slab", POLISHED_STONE_SLAB);
         registerBlock("polished_stone_stairs", POLISHED_STONE_STAIRS);
@@ -55,6 +64,12 @@ public class CustomBlocks {
         registerBlock("brown_mud_bricks", BROWN_MUD_BRICKS);
         registerBlock("brown_mud_brick_slab", BROWN_MUD_BRICK_SLAB);
         registerBlock("brown_mud_brick_stairs", BROWN_MUD_BRICK_STAIRS);
+        registerBlock("brown_mud_tiles", BROWN_MUD_TILES);
+        registerBlock("brown_mud_tile_slab", BROWN_MUD_TILES_SLAB);
+        registerBlock("brown_mud_tile_stairs", BROWN_MUD_TILES_STAIRS);
+        registerBlock("packed_mud_tiles", PACKED_MUD_TILES);
+        registerBlock("packed_mud_tile_slab", PACKED_MUD_TILES_SLAB);
+        registerBlock("packed_mud_tile_stairs", PACKED_MUD_TILES_STAIRS);
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), SMOLDERING_TORCH, SMOLDERING_WALL_TORCH, EXTINGUISHED_TORCH, EXTINGUISHED_WALL_TORCH);
     }
 

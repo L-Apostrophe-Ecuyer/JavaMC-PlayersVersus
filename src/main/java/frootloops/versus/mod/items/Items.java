@@ -33,10 +33,12 @@ public abstract class Items {
 
     public static final VerticallyAttachableBlockItem SMOLDERING_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH, new Item.Settings(), Direction.DOWN);
     public static final VerticallyAttachableBlockItem EXTINGUISHED_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, new Item.Settings(), Direction.DOWN);
-    public static final BlockItem GRANITE_TILES_ITEM = new BlockItem(CustomBlocks.GRANITE_TILES, new Item.Settings());
     public static final BlockItem GRANITE_BRICKS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICKS, new Item.Settings());
     public static final BlockItem GRANITE_BRICK_SLAB_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_SLAB, new Item.Settings());
     public static final BlockItem GRANITE_BRICK_STAIRS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_STAIRS, new Item.Settings());
+    public static final BlockItem GRANITE_TILES_ITEM = new BlockItem(CustomBlocks.GRANITE_TILES, new Item.Settings());
+    public static final BlockItem GRANITE_TILES_SLAB_ITEM = new BlockItem(CustomBlocks.GRANITE_TILES_SLAB, new Item.Settings());
+    public static final BlockItem GRANITE_TILES_STAIRS_ITEM = new BlockItem(CustomBlocks.GRANITE_TILES_STAIRS, new Item.Settings());
     public static final BlockItem POLISHED_STONE_ITEM = new BlockItem(CustomBlocks.POLISHED_STONE, new Item.Settings());
     public static final BlockItem POLISHED_STONE_SLAB_ITEM = new BlockItem(CustomBlocks.POLISHED_STONE_SLAB, new Item.Settings());
     public static final BlockItem POLISHED_STONE_STAIRS_ITEM = new BlockItem(CustomBlocks.POLISHED_STONE_STAIRS, new Item.Settings());
@@ -44,6 +46,12 @@ public abstract class Items {
     public static final BlockItem BROWN_MUD_BRICKS_ITEM = new BlockItem(CustomBlocks.BROWN_MUD_BRICKS, new Item.Settings());
     public static final BlockItem BROWN_MUD_BRICK_SLAB_ITEM = new BlockItem(CustomBlocks.BROWN_MUD_BRICK_SLAB, new Item.Settings());
     public static final BlockItem BROWN_MUD_BRICK_STAIRS_ITEM = new BlockItem(CustomBlocks.BROWN_MUD_BRICK_STAIRS, new Item.Settings());
+    public static final BlockItem BROWN_MUD_TILES_ITEM = new BlockItem(CustomBlocks.BROWN_MUD_TILES, new Item.Settings());
+    public static final BlockItem BROWN_MUD_TILES_SLAB_ITEM = new BlockItem(CustomBlocks.BROWN_MUD_TILES_SLAB, new Item.Settings());
+    public static final BlockItem BROWN_MUD_TILES_STAIRS_ITEM = new BlockItem(CustomBlocks.BROWN_MUD_TILES_STAIRS, new Item.Settings());
+    public static final BlockItem PACKED_MUD_TILES_ITEM = new BlockItem(CustomBlocks.PACKED_MUD_TILES, new Item.Settings());
+    public static final BlockItem PACKED_MUD_TILES_SLAB_ITEM = new BlockItem(CustomBlocks.PACKED_MUD_TILES_SLAB, new Item.Settings());
+    public static final BlockItem PACKED_MUD_TILES_STAIRS_ITEM = new BlockItem(CustomBlocks.PACKED_MUD_TILES_STAIRS, new Item.Settings());
 
     public static void onInitialize() {
         int maxSnacks = 64, maxMeals = 64, maxStews = 8, maxBottled = 8, maxThrowables = 64, maxPlaceableEntities = 16;
@@ -60,17 +68,25 @@ public abstract class Items {
         registerCustomItem("copper_pickaxe", COPPER_PICKAXE, ItemGroups.TOOLS);
         registerCustomItem("smoldering_torch", SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
         registerCustomItem("extinguished_torch", EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);
-        registerCustomItem("granite_tiles", GRANITE_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_bricks", GRANITE_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_brick_slab", GRANITE_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_brick_stairs", GRANITE_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("polished_stone", POLISHED_STONE_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("polished_stone_slab", POLISHED_STONE_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("polished_stone_stairs", POLISHED_STONE_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_bricks", GRANITE_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_brick_slab", GRANITE_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_brick_stairs", GRANITE_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_tiles", GRANITE_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_tile_slab", GRANITE_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_tile_stairs", GRANITE_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("brown_mud", BROWN_MUD_ITEM, ItemGroups.NATURAL);
         registerCustomItem("brown_mud_bricks", BROWN_MUD_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("brown_mud_brick_slab", BROWN_MUD_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("brown_mud_brick_stairs", BROWN_MUD_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_tiles", BROWN_MUD_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_tile_slab", BROWN_MUD_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_tile_stairs", BROWN_MUD_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("packed_mud_tiles", PACKED_MUD_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("packed_mud_tile_slab", PACKED_MUD_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("packed_mud_tile_stairs", PACKED_MUD_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
     }
 
     private static Item registerCustomItem(String name, Item item, ItemGroup group) {//RegistryKey<ItemGroup> group) {

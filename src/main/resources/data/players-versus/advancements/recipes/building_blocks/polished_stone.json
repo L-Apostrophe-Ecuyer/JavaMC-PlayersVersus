@@ -1,0 +1,52 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "players-versus:building_blocks/polished_stone"
+      }
+    },
+    "has_stone": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:stone"
+            ]
+          }
+        ]
+      }
+    },
+    "has_ingredient": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "players-versus:polished_stone"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_stone",
+      "has_ingredient"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "players-versus:building_blocks/polished_stone",
+      "players-versus:building_blocks/polished_stone_stairs",
+      "players-versus:building_blocks/polished_stone_slab",
+      "players-versus:building_blocks/polished_stone_from_stonecutting",
+      "players-versus:building_blocks/polished_stone_stairs_from_stonecutting",
+      "players-versus:building_blocks/polished_stone_slab_from_stonecutting"
+    ]
+  }
+}
