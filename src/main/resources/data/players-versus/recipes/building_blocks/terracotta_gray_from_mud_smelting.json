@@ -1,12 +1,11 @@
 {
   "type": "minecraft:smelting",
-  "category": "misc",
+  "category": "blocks",
+  "group": "mud_smelting",
   "ingredient": {
     "item": "minecraft:mud"
   },
-  "result": {
-    "item": "minecraft:clay"
-  },
+  "result": "minecraft:gray_terracotta",
   "experience": 0,
   "cookingtime": 100
 }

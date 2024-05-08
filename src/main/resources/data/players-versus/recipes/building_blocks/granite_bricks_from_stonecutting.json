@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "granite_bricks",
+  "ingredient": [
+    {
+      "item": "minecraft:granite"
+    },
+    {
+      "item": "minecraft:polished_granite"
+    }
+  ],
+  "count": 1,
+  "result": "players-versus:granite_bricks"
+}

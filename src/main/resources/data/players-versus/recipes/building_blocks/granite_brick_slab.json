@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "players-versus:granite_bricks"
+    }
+  },
+  "result": {
+    "item": "players-versus:granite_brick_slab",
+    "count": 6
+  }
+}

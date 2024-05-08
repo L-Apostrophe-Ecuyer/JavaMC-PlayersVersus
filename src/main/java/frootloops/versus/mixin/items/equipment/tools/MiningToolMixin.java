@@ -37,11 +37,11 @@ public abstract class MiningToolMixin extends ToolItem {
     @Inject(method = "isSuitableFor", at = @At("RETURN"), cancellable = true)
     private void isSuitableFor(BlockState state, CallbackInfoReturnable<Boolean> cir) {
         if(!cir.getReturnValue()) {
-            if((ToolItem)this instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) {
+            if((ToolItem)this instanceof PickaxeItem && (state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE)) {
                 cir.setReturnValue(true);
             }
 
-            else if((ToolItem)this instanceof ShovelItem && state.isOf(Blocks.PACKED_MUD) || state.getSoundGroup() == BlockSoundGroup.MUD_BRICKS) {
+            else if((ToolItem)this instanceof ShovelItem && (state.isOf(Blocks.PACKED_MUD) || state.getSoundGroup() == BlockSoundGroup.MUD_BRICKS)) {
                 cir.setReturnValue(true);
             }
         }
