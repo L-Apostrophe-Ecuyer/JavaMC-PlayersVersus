@@ -2,16 +2,17 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "pattern": [
-    "SS",
-    "SS"
+    "#  ",
+    "## ",
+    "###"
   ],
   "key": {
-    "S": {
-      "item": "players-versus:brown_mud"
+    "#": {
+      "item": "players-versus:polished_stone"
     }
   },
   "result": {
-    "id": "players-versus:brown_mud_bricks",
+    "id": "players-versus:polished_stone_stairs",
     "count": 4
   }
 }

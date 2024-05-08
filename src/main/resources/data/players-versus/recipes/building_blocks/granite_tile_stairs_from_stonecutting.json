@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "granite_tile_stairs",
+  "ingredient": [
+    {
+      "item": "minecraft:granite"
+    },
+    {
+      "item": "minecraft:polished_granite"
+    },
+    {
+      "item": "players-versus:granite_bricks"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "players-versus:granite_tile_stairs"
+  }
+}

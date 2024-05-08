@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "players-versus:building_blocks/granite_bricks"
+      }
+    },
+    "has_ingredient": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:granite"
+          }
+        ]
+      }
+    },
+    "has_ingredient": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:polished_granite"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_ingredient"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "players-versus:building_blocks/granite_bricks",
+      "players-versus:building_blocks/granite_brick_stairs",
+      "players-versus:building_blocks/granite_brick_slab",
+      "players-versus:building_blocks/granite_tiles",
+      "players-versus:building_blocks/granite_tile_stairs",
+      "players-versus:building_blocks/granite_tile_slab"
+    ]
+  }
+}

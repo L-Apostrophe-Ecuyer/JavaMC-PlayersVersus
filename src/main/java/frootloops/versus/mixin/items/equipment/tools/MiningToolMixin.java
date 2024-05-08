@@ -86,8 +86,8 @@ public abstract class MiningToolMixin extends ToolItem {
     @Override
     public boolean isCorrectForDrops(ItemStack stack, BlockState state) {
         if(!super.isCorrectForDrops(stack, state)) {
-            if(stack.getItem() instanceof PickaxeItem && state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE) return true;
-            else if(stack.getItem() instanceof ShovelItem && state.isOf(Blocks.PACKED_MUD) || state.getSoundGroup() == BlockSoundGroup.MUD_BRICKS) return true;
+            if(stack.getItem() instanceof PickaxeItem && (state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.SUSPICIOUS_GRAVEL) || state.getSoundGroup() == BlockSoundGroup.STONE || state.getSoundGroup() == BlockSoundGroup.MUD_BRICKS)) return true;
+            else if(stack.getItem() instanceof ShovelItem && (state.isOf(Blocks.PACKED_MUD) || state.getSoundGroup() == BlockSoundGroup.MUD_BRICKS || state.getSoundGroup() == BlockSoundGroup.MUD)) return true;
             return false;
         }
         return true;

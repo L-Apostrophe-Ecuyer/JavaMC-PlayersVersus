@@ -1,5 +1,6 @@
 {
   "type": "minecraft:blasting",
+  "category": "equipment",
   "ingredient": [
     {
       "item": "minecraft:golden_helmet"
