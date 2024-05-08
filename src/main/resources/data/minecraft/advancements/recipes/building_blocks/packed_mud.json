@@ -1,0 +1,41 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_mud": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:mud"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "minecraft:packed_mud"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_mud"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:packed_mud",
+      "minecraft:packed_mud_bricks",
+      "minecraft:packed_mud_brick_stairs",
+      "minecraft:packed_mud_brick_slab",
+      "players-versus:building_blocks/packed_mud_tiles",
+      "players-versus:building_blocks/packed_mud_tile_stairs",
+      "players-versus:building_blocks/packed_mud_tile_slab",
+      "players-versus:building_blocks/terracotta_white_from_mud_smelting"
+    ]
+  }
+}
