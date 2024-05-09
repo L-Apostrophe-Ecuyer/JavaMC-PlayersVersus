@@ -1,8 +1,9 @@
 package frootloops.versus.mixin.enchantments;
 
 import frootloops.versus.VersusMod;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
@@ -10,17 +11,21 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.*;
 import net.minecraft.text.Text;
+import net.minecraft.util.StringHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-@Mixin(value = AnvilScreenHandler.class)
+@Mixin(AnvilScreenHandler.class)
 public abstract class AnvilCostMixin extends ForgingScreenHandler {
 
     @Shadow
@@ -42,7 +47,7 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
     }
 
 
-    /*
+
     @Overwrite
     public void updateResult() {
 
@@ -73,55 +78,59 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
             }
 
             if (resultDamage < 0) resultDamage = 0;
-            if (resultDamage < resultStack.getDamage()) {
+            if (resultDamage < resultStack.getDamage() && !resultStack.isEmpty()) {
+                int repairCost = resultStack.getOrDefault(DataComponentTypes.REPAIR_COST, 0) + repairItemUsage;
                 resultStack.setDamage(resultDamage);
-                resultStack.setRepairCost(resultStack.getRepairCost() + repairItemUsage);
-                levelCostValue += 1 + resultStack.getRepairCost()/3;
+                resultStack.set(DataComponentTypes.REPAIR_COST, repairCost);
+                levelCostValue += 1 + repairCost/3;
                 canSmithResult = true;
             }
         }
 
         // ENCHANTMENTS:
-        boolean isApplyingEnchantedBook = repairStack.isOf(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantmentNbt(repairStack).isEmpty();
+        boolean isApplyingEnchantedBook = repairStack.isOf(Items.ENCHANTED_BOOK) && repairStack.hasEnchantments();
         boolean isEnchanting = (isApplyingEnchantedBook) || (repairStack.hasEnchantments() && toolStack.isOf(repairStack.getItem()));
         if(isEnchanting) {
-            Map<Enchantment, Integer> enchantmentsMapTool = EnchantmentHelper.get(toolStack);
-            Map<Enchantment, Integer> enchantmentsMapRepair = EnchantmentHelper.get(repairStack);
+
+            ItemEnchantmentsComponent toolEnchantmentComponent = toolStack.getEnchantments();
+            ItemEnchantmentsComponent repairEnchantmentComponent = repairStack.getEnchantments();
+            ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(EnchantmentHelper.getEnchantments(resultStack));
+
+            Set<RegistryEntry<Enchantment>> enchantmentsMapTool = toolEnchantmentComponent.getEnchantments();
+            Set<RegistryEntry<Enchantment>> enchantmentsMapRepair = repairEnchantmentComponent.getEnchantments();
 
             // For the end result:
             int numEnchantsAdded = 0;
             int levelCostForEnchants = 1;
 
             // Check if we're merging with a higher level enchant:
-            for (Enchantment toolEnchant : enchantmentsMapTool.keySet()) {
-                if (toolEnchant == null) continue;
-                if(enchantmentsMapRepair.containsKey(toolEnchant)) {
-                    int levelTool = enchantmentsMapTool.get(toolEnchant);
-                    int levelRepair = enchantmentsMapRepair.get(toolEnchant);
-                    if(levelRepair > levelTool) {
-                        enchantmentsMapTool.put(toolEnchant, enchantmentsMapRepair.get(toolEnchant));
-                        int levelCostForUpgraded = getLevelCostForApplying(toolEnchant, levelRepair);
-                        int levelCostForCurrent = getLevelCostForApplying(toolEnchant, levelTool);
-                        levelCostForEnchants += Math.max(1 + levelRepair - levelTool, levelCostForUpgraded - levelCostForCurrent);
-                        numEnchantsAdded++;
-                    }
+            for (RegistryEntry<Enchantment> toolEnchant : enchantmentsMapTool) {
+                int levelTool = toolEnchantmentComponent.getLevel(toolEnchant.value());
+                int levelRepair = repairEnchantmentComponent.getLevel(toolEnchant.value());
+                if(levelRepair > levelTool) {
+                    builder.set(toolEnchant.value(), levelRepair);
+                    int levelCostForUpgraded = getLevelCostForApplying(toolEnchant, levelRepair);
+                    int levelCostForCurrent = getLevelCostForApplying(toolEnchant, levelTool);
+                    levelCostForEnchants += Math.max(1 + levelRepair - levelTool, levelCostForUpgraded - levelCostForCurrent);
+                    numEnchantsAdded++;
                 }
             }
 
             // Check if we're adding a new enchantment:
-            for (Enchantment repairEnchant : enchantmentsMapRepair.keySet()) {
-                if(repairEnchant == null) continue;
-                if(!enchantmentsMapTool.containsKey(repairEnchant) && repairEnchant.isAcceptableItem(toolStack)) {
+            for (RegistryEntry<Enchantment> repairEnchant : enchantmentsMapRepair) {
+                int levelTool = toolEnchantmentComponent.getLevel(repairEnchant.value());
+                int levelRepair = repairEnchantmentComponent.getLevel(repairEnchant.value());
+                if(levelTool == 0 && repairEnchant.value().isAcceptableItem(toolStack)) {
                     boolean canAddNewEnchant = true;
-                    for (Enchantment toolEnchant : enchantmentsMapTool.keySet()) {
-                        if (toolEnchant != repairEnchant && !toolEnchant.canCombine(repairEnchant)) {
+                    for (RegistryEntry<Enchantment> toolEnchant : builder.getEnchantments()) {
+                        if (!toolEnchant.equals(repairEnchant) && !repairEnchant.value().canCombine(toolEnchant.value())) {
                             canAddNewEnchant = false;
                             break;
                         }
                     }
                     if (canAddNewEnchant) {
-                        enchantmentsMapTool.put(repairEnchant, enchantmentsMapRepair.get(repairEnchant));
-                        levelCostForEnchants += getLevelCostForApplying(repairEnchant, enchantmentsMapRepair.get(repairEnchant));
+                        builder.add(repairEnchant.value(), levelRepair);
+                        levelCostForEnchants += getLevelCostForApplying(repairEnchant, levelRepair);
                         numEnchantsAdded++;
                     }
                 }
@@ -129,23 +138,19 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
 
             // Set the enchantments for the result:
             if(numEnchantsAdded > 0) {
-                EnchantmentHelper.set(enchantmentsMapTool, resultStack);
+                EnchantmentHelper.set(resultStack, builder.build());
                 levelCostValue += levelCostForEnchants / numEnchantsAdded;
                 canSmithResult = true;
             }
         }
 
         // NAME
-        if (StringUtils.isBlank(newItemName)) {
-            if (toolStack.hasCustomName()) {
-                resultStack.removeCustomName();
-                canSmithResult = true;
+        if (this.newItemName == null || StringHelper.isBlank(this.newItemName)) {
+            if (toolStack.contains(DataComponentTypes.CUSTOM_NAME)) {
+                resultStack.remove(DataComponentTypes.CUSTOM_NAME);
             }
-        } else {
-            if (!newItemName.equals(toolStack.getName().getString())) {
-                resultStack.setCustomName(Text.literal(newItemName));
-                canSmithResult = true;
-            }
+        } else if (!this.newItemName.equals(toolStack.getName().getString())) {
+            resultStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(this.newItemName));
         }
 
         // UPDATE RESULT:
@@ -157,26 +162,14 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
     }
 
 
-    private static int getLevelCostForApplying(Enchantment enchantment, int level) {
+    private static int getLevelCostForApplying(RegistryEntry<Enchantment> enchantment, int level) {
         if(enchantment == null || level == 0) return 0;
-        int rarityAdditive = 0;
-        switch (enchantment.getRarity()) {
-            case COMMON: {
-                rarityAdditive = 1;
-                break;
-            }
-            case UNCOMMON: {
-                rarityAdditive = 2;
-                break;
-            }
-            case RARE: {
-                rarityAdditive = enchantment.isTreasure() ? 6 : 3;
-                break;
-            }
-            case VERY_RARE: {
-                rarityAdditive = enchantment.isTreasure() ? 8 : 6;
-            }
-        }
-        return 1 + (rarityAdditive + Math.min(enchantment.getMinPower(level), 30))/4;
-    }*/
+
+        int rarityAdditive;
+        if(enchantment == Enchantments.MENDING) rarityAdditive = 11;
+        else if(enchantment == Enchantments.UNBREAKING) rarityAdditive = 4;
+        else rarityAdditive = enchantment.value().getAnvilCost();
+
+        return 1 + (rarityAdditive + Math.min(enchantment.value().getMinPower(level), 30))/4;
+    }
 }

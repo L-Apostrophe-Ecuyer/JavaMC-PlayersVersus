@@ -1,6 +1,6 @@
 {
   "type": "minecraft:jigsaw",
-  "biomes": "#minecraft:has_structure/pillager_outpost",
+  "biomes": "#minecraft:spawns_warm_variant_frogs",
   "step": "underground_structures",
   "spawn_overrides": {
     "monster": {
@@ -29,7 +29,7 @@
     }
   },
   "terrain_adaptation": "bury",
-  "start_pool": "players-versus:trial_tower/chamber",
+  "start_pool": "players-versus:trial_tower/chamber_warm",
   "size": 3,
   "start_height": {
     "absolute": -36

@@ -1,8 +1,9 @@
 package frootloops.versus.mixin.players.death;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.players.death.CustomRespawnRequestPayloadC2S;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.players.death.RespawnNearLastDeath;
+import frootloops.versus.mod.players.death.RespawnNearbyPayload;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -71,11 +72,11 @@ public class DeathScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"), cancellable = false)
     public void addRespawnNearbyButton(CallbackInfo info) {
-        if(client.player.getWorld().getRegistryKey().equals(World.OVERWORLD) && false) {
+        if(client.player.getWorld().getRegistryKey().equals(World.OVERWORLD)) {
             MutableText text = this.isHardcore ? Text.translatable("players-versus.deathScreen.spectateNearby") : Text.translatable("players-versus.deathScreen.respawnNearby");
             this.buttons.add(this.addDrawableChild(ButtonWidget.builder(text, button -> {
                 this.client.player.requestRespawn();
-                ClientPlayNetworking.send(new CustomRespawnRequestPayloadC2S(this.client.player.getUuid()));
+                ClientPlayNetworking.send(new RespawnNearbyPayload(this.client.player.getUuid()));
                 button.active = false;
             }).dimensions(this.width / 2 - 100, this.height / 4 + 60, 200, 20).build()));
             this.buttons.get(this.buttons.size() - 1).active = false;

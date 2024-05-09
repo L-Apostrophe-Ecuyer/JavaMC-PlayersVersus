@@ -7,14 +7,20 @@ import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.items.Items;
 import frootloops.versus.mod.players.death.RespawnNearLastDeath;
+import frootloops.versus.mod.players.death.RespawnNearbyPayload;
 import io.netty.buffer.EmptyByteBuf;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.command.TeleportCommand;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.UUID;
 
 public class VersusMod implements ModInitializer {
 	public static final boolean DEBUG_MODE = false;
@@ -50,7 +56,10 @@ public class VersusMod implements ModInitializer {
 		MOD_LOGGER.info("Implementing item changes and adding new ones...");
 		Items.onInitialize();
 
-		MOD_LOGGER.info("Done! This mod is ready to party.");
+		MOD_LOGGER.info("Registering networking packets...");
+		PayloadTypeRegistry.playC2S().register(RespawnNearbyPayload.ID, RespawnNearbyPayload.CODEC);
 		VersusModServer.addPacketRecievers();
+
+		MOD_LOGGER.info("Done! This mod is ready to party.");
 	}
 }

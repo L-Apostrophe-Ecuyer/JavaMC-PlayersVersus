@@ -5,6 +5,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import java.util.UUID;
@@ -17,6 +18,5 @@ public class VersusModClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-
     }
 }
