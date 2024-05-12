@@ -25,7 +25,7 @@ public class CreepingAndExplodingGoal extends Goal {
     @Override
     public boolean canStart() {
         long l = this.creeper.method_48926().getTime();
-        if (l - this.lastUpdateTime < 20L) {
+        if (l - this.lastUpdateTime < 40L) {
             return false;
         }
         this.lastUpdateTime = l;

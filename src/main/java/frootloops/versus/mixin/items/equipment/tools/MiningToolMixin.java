@@ -83,6 +83,7 @@ public abstract class MiningToolMixin extends ToolItem {
         cir.cancel();
     }
 
+    /*
     @Override
     public boolean isCorrectForDrops(ItemStack stack, BlockState state) {
         if(!super.isCorrectForDrops(stack, state)) {
@@ -109,5 +110,6 @@ public abstract class MiningToolMixin extends ToolItem {
             return 1.0f;
         }
         return miningSpeed;
-    }
+    }*/
+
 }

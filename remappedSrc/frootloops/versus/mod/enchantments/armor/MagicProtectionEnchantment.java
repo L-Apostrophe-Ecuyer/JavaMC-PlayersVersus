@@ -2,31 +2,36 @@ package frootloops.versus.mod.enchantments.armor;
 
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.ItemTags;
+
+import static frootloops.versus.mod.enchantments.Enchants.ALL_ARMOR;
 
 
 public class MagicProtectionEnchantment extends ProtectionEnchantment {
     public MagicProtectionEnchantment() {
-        super(Rarity.VERY_RARE, Type.PROJECTILE);
+        super(
+                Enchantment.properties(ItemTags.ARMOR_ENCHANTABLE, 3, 1,
+                        Enchantment.leveledCost(16, 10),
+                        Enchantment.leveledCost(50, 10), 10,
+                        ALL_ARMOR),
+                Type.ALL
+        );
     }
 
     @Override
     public boolean isTreasure() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isAvailableForRandomSelection() {
         return true;
-    }
-
-    @Override
-    public int getMinPower(int level) {
-        return 12 + (8 * (level - 1));
     }
 
     @Override
@@ -42,7 +47,7 @@ public class MagicProtectionEnchantment extends ProtectionEnchantment {
                 }
                 if (attacker.getMainHandStack().hasEnchantments()) {
                     float attackDamage = EnchantmentHelper.getAttackDamage(attacker.getMainHandStack(), EntityType.PLAYER);
-                    if(attackDamage > 0f) return (int)(attackDamage * level/2f);
+                    if(attackDamage > 0f) return (int)(attackDamage * ((float)level/2f));
                 }
             }
         }

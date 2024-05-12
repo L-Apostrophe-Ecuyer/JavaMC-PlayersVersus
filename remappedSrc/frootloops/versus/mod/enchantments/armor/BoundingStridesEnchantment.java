@@ -6,7 +6,12 @@ import net.minecraft.registry.tag.ItemTags;
 
 public class BoundingStridesEnchantment extends Enchantment {
     public BoundingStridesEnchantment() {
-        super(Rarity.RARE, ItemTags.LEG_ARMOR_ENCHANTABLE, new EquipmentSlot[]{EquipmentSlot.LEGS});
+        super(
+                Enchantment.properties(ItemTags.LEG_ARMOR_ENCHANTABLE, 2, 2,
+                        Enchantment.leveledCost(10, 20),
+                        Enchantment.leveledCost(32, 26), 8,
+                        EquipmentSlot.LEGS)
+        );
     }
 
     public boolean isTreasure() {
@@ -14,28 +19,8 @@ public class BoundingStridesEnchantment extends Enchantment {
     }
 
     @Override
-    public int getMinPower(int level) {
-        return 10 + 20 * (level - 1);
-    }
-
-    @Override
-    public int getMaxPower(int level) {
-        return super.getMinPower(level) + 50;
-    }
-
-    @Override
     public boolean isAvailableForEnchantedBookOffer() {
         return false;
     }
 
-    @Override
-    public int getMaxLevel() {
-        return 2;
-    }
-
-    @Override
-    public boolean canAccept(Enchantment other) {
-        return super.canAccept(other);
-        //return !(other instanceof BoundingStridesEnchantment || other instanceof DepthStriderEnchantment || other instanceof SoulSpeedEnchantment);
-    }
 }

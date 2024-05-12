@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.features;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -8,27 +9,26 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.gen.feature.ConfiguredFeatures;
+import net.minecraft.world.gen.feature.LargeDripstoneFeature;
+import net.minecraft.world.gen.feature.util.DripstoneHelper;
+
 
 public class StoneStalagtiteHelper {
     public static double scaleHeightFromRadius(double radius, double scale, double heightScale, double bluntness) {
-        if (radius < bluntness) {
-            radius = bluntness;
-        }
+        //if (radius < bluntness ) radius = bluntness;
+
         double d = 0.384;
-        double e = radius / scale * 0.384;
+        double e = radius / scale * d;
         double f = 0.75 * Math.pow(e, 1.3333333333333333);
         double g = Math.pow(e, 0.6666666666666666);
         double h = 0.3333333333333333 * Math.log(e);
         double i = heightScale * (f - g - h);
         i = Math.max(i, 0.0);
-        return i / 0.384 * scale;
+        return i / d * scale;
     }
 
     public static boolean canGenerateBase(StructureWorldAccess world, BlockPos pos, int height) {
-        if (StoneStalagtiteHelper.canGenerateOrLava(world, pos)) {
-            return false;
-        }
-        float f = 6.0f;
         float g = 6.0f / (float)height;
         for (float h = 0.0f; h < (float)Math.PI * 2; h += g) {
             int j;
@@ -57,11 +57,11 @@ public class StoneStalagtiteHelper {
     }
 
     public static boolean canReplaceOrLava(BlockState state) {
-        return StoneStalagtiteHelper.canReplace(state) || state.isOf(Blocks.LAVA);
+        return DripstoneHelper.canReplace(state) || state.isOf(Blocks.LAVA);
     }
 
     public static boolean canReplace(BlockState state) {
-        return state.isIn(BlockTags.CONVERTABLE_TO_MUD) || state.isIn(BlockTags.BASE_STONE_OVERWORLD);
+        return state.isOf(Blocks.STONE) || state.isIn(BlockTags.CONVERTABLE_TO_MUD) || state.isOf(Blocks.SAND) || state.isIn(BlockTags.BASE_STONE_OVERWORLD);
     }
 
     public static boolean canGenerate(BlockState state) {
@@ -73,6 +73,6 @@ public class StoneStalagtiteHelper {
     }
 
     public static boolean canGenerateOrLava(BlockState state) {
-        return state.isAir() || state.isOf(Blocks.WATER) || state.isIn(BlockTags.DIRT) || state.isIn(BlockTags.RABBITS_SPAWNABLE_ON);
+        return state.isAir() || state.isOf(Blocks.WATER) || state.isOf(Blocks.LAVA);
     }
 }

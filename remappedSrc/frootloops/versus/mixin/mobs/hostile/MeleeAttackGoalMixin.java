@@ -35,8 +35,8 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     private final int TICKS_ENDLAG = 8;
     private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 12;
-    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 18;
-    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 22;
+    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 24;
+    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 30;
 
     @Shadow
     private final double speed;
@@ -166,15 +166,16 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         boolean willTryLandingAnAttack = this.mob.isAttacking() && (this.cooldown == (cooldownAmount - TICKS_ENDLAG) || this.cooldown == (cooldownAmount - TICKS_ENDLAG) - 1);
 
         // Attack interruption, if the player swung right after the mob did:
-        if(this.mob.hurtTime > 12 && cooldownAmount > TICKS_SWING_QUICK - 4) {
-            cooldown = TICKS_ENDLAG;
+        if(this.mob.hurtTime > 14 && cooldownAmount > TICKS_ENDLAG) {
+            cooldown = TICKS_ENDLAG - 2;
             mob.setAttacking(false);
             mob.handSwingProgress = 0f;
+            if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: interrupted.");
         }
 
         // Otherwise, see if we can attack (cooldown is reduced in tick()):
         else if (canTrySwinging || willTryLandingAnAttack) {
-            boolean isInCloseQuarters = (target.getEyePos().squaredDistanceTo(mob.getEyePos()) < 1.5d) || (target.getPos().squaredDistanceTo(mob.getEyePos()) < 1.5d);
+            boolean isInCloseQuarters = (target.getEyePos().squaredDistanceTo(mob.getEyePos()) < 1.5d) || (target.getPos().squaredDistanceTo(mob.getPos()) < 1.5d);
             if(isInCloseQuarters || Combat.isLookingTowards(this.mob, target.getEyePos(), true)) {
 
                 if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("-------------------- SWING ATTEMPT");
@@ -193,7 +194,6 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                 }
                 else if(canTrySwinging && target.getVehicle() == null && Combat.getMobAttackBox(mob, true).intersects(Combat.getEntityHitbox(target))) {
                     if(DEBUG) VersusMod.MOD_LOGGER.warn("Jump attack!");
-
                     double jumpBlockMultiplier = mob.method_48926().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
                     double jumpVelocity = 0.5 * jumpBlockMultiplier + mob.getJumpBoostVelocityModifier();
                     mob.getVelocity().multiply(1.6);
@@ -231,10 +231,9 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                 }
             }
             else if (willTryLandingAnAttack) {
+                if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: neither in close quarters, nor looking towards target");
                 this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
             }
-
-
         }
     }
 

@@ -1,9 +1,12 @@
 package frootloops.versus.mod.items.equipment.copper;
 
 import net.fabricmc.yarn.constants.MiningLevels;
+import net.minecraft.block.Block;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.TagKey;
 
 public class CopperToolMaterial implements ToolMaterial {
     @Override
@@ -22,8 +25,8 @@ public class CopperToolMaterial implements ToolMaterial {
     }
 
     @Override
-    public int getMiningLevel() {
-        return MiningLevels.STONE;
+    public TagKey<Block> getInverseTag() {
+        return BlockTags.INCORRECT_FOR_STONE_TOOL;
     }
 
     @Override

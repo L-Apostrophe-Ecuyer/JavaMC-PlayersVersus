@@ -6,6 +6,7 @@ import frootloops.versus.mod.enchantments.tools.CleavingEnchantment;
 import frootloops.versus.mod.enchantments.tools.FrostAspectEnchantment;
 import frootloops.versus.mod.enchantments.tools.RiposteEnchantment;
 import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -13,6 +14,8 @@ import net.minecraft.util.Identifier;
 
 public abstract class Enchants {
 
+    public static final int MAX_PROTECTION_LEVELS_PER_ITEM = 3;
+    public static final EquipmentSlot[] ALL_ARMOR = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     public static final TossingEnchantment TOSSING = new TossingEnchantment();
     public static final CleavingEnchantment CLEAVING = new CleavingEnchantment();
     public static final RiposteEnchantment RIPOSTE = new RiposteEnchantment();

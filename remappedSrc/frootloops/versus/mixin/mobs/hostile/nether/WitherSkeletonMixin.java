@@ -12,6 +12,9 @@ import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WitherSkeletonEntity.class)
 public class WitherSkeletonMixin extends HostileEntity {
@@ -19,18 +22,16 @@ public class WitherSkeletonMixin extends HostileEntity {
         super(entityType, world);
     }
 
-    @Nullable
-    @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
-        EntityAttributeInstance instanceHealth = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-        if (instanceHealth != null) {
-            instanceHealth.setBaseValue(40.0D);
+    @Inject(method = "initialize", at = @At("TAIL"))
+    private void decreaseHealth(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
+        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        if (instanceHP != null) {
+            instanceHP.setBaseValue(40.0D);
             this.setHealth(this.getMaxHealth());
         }
+
         EntityAttributeInstance instanceKnockback = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
         if (instanceKnockback != null) instanceKnockback.setBaseValue(0.5D);
-
-        return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
 
     @Override

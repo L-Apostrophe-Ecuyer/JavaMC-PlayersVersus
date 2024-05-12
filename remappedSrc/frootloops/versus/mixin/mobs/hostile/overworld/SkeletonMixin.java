@@ -26,13 +26,13 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
 
     @Nullable
     @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
         EntityAttributeInstance instance = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instance != null) {
             instance.setBaseValue(22.0D);
             this.setHealth(this.getMaxHealth());
         }
-        return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
+        return super.initialize(world, difficulty, spawnReason, entityData);
     }
 
     @Override
@@ -78,6 +78,12 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
             if(rand % 3 == 1) this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
             if(rand % 4 == 1) this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.GOLDEN_LEGGINGS));
             if(rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+        }
+
+        // Bit less attack damage when wielding weapons:
+        if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            entityAttributeInstance.setBaseValue(1.0);
         }
     }
 }

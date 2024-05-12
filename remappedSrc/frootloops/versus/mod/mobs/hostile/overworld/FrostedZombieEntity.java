@@ -23,7 +23,7 @@ import net.minecraft.world.World;
 public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob {
     public FrostedZombieEntity(EntityType<? extends ZombieEntity> entityType, World world) {
         super(entityType, world);
-        this.setFrozenTicks(-72000);
+        //this.setFrozenTicks(-72000);
     }
 
     static class SnowballAttackGoal extends ProjectileAttackGoal {

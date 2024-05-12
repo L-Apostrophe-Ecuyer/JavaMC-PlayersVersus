@@ -1,5 +1,6 @@
 package frootloops.versus.mod.enchantments.tools;
 
+import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -12,22 +13,12 @@ import net.minecraft.util.UseAction;
 public class RiposteEnchantment extends Enchantment {
 
     public RiposteEnchantment() {
-        super(Rarity.UNCOMMON, ItemTags.SWORDS, new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND});
-    }
-
-    @Override
-    public int getMinPower(int level) {
-        return 6 + ((level - 1) * 8);
-    }
-
-    @Override
-    public int getMaxPower(int level) {
-        return super.getMinPower(level) + 50;
-    }
-
-    @Override
-    public int getMaxLevel() {
-        return 3;
+        super(
+                Enchantment.properties(ItemTags.SWORD_ENCHANTABLE, 10, 3,
+                        Enchantment.leveledCost(4, 8),
+                        Enchantment.leveledCost(12, 20), 1,
+                        EquipmentSlot.MAINHAND)
+        );
     }
 
     @Override
@@ -37,6 +28,6 @@ public class RiposteEnchantment extends Enchantment {
 
     @Override
     public boolean canAccept(Enchantment other) {
-        return !(other instanceof ThornsEnchantment || other instanceof RiposteEnchantment || other instanceof SweepingEnchantment);
+        return !(other instanceof ThornsEnchantment || other == Enchants.RIPOSTE || other == Enchantments.SWEEPING_EDGE);
     }
 }

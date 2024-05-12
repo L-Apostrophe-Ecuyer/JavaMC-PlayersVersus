@@ -100,18 +100,18 @@ public class StructurePoolGeneratorDebuger {
             }
             list.addAll(registryEntry2.value().getElementIndicesInRandomOrder(this.random));
 
-            VersusMod.MOD_LOGGER.warn("    - GENERATING JIGSAW PIECES: List of registryEntries has " + list.size() + " elements");
+            VersusMod.MOD_LOGGER.warn("    GENERATING JIGSAW PIECES: List of registryEntries has " + list.size() + " elements");
 
             int placementPriorityIndex = jigsawBlocksOfCurrentStructure.nbt() != null ? jigsawBlocksOfCurrentStructure.nbt().getInt("placement_priority") : 0;
             Iterator iterator = list.iterator();
             while (iterator.hasNext() && (connectingStructurePoolElement = (StructurePoolElement)iterator.next()) != EmptyPoolElement.INSTANCE) {
 
-                VersusMod.MOD_LOGGER.warn("GENERATING JIGSAW PIECES: Checking if we can connect with " + connectingStructurePoolElement.toString());
+                VersusMod.MOD_LOGGER.warn("    GENERATING JIGSAW PIECES: Checking if we can connect with " + connectingStructurePoolElement.toString());
 
                 for (BlockRotation randomBlockRotation : BlockRotation.randomRotationOrder(this.random)) {
                     List<StructureTemplate.StructureBlockInfo> jigsawsOfConnectingElement = connectingStructurePoolElement.getStructureBlockInfos(this.structureTemplateManager, BlockPos.ORIGIN, randomBlockRotation, this.random);
 
-                    VersusMod.MOD_LOGGER.warn("    - GENERATING JIGSAW PIECES: In direction " + randomBlockRotation.asString() + ", connecting piece has jigsaws: " + jigsawsOfConnectingElement.toString() +"");
+                    VersusMod.MOD_LOGGER.warn("    GENERATING JIGSAW PIECES: In direction " + randomBlockRotation.asString() + ", connecting piece has jigsaws: " + jigsawsOfConnectingElement.toString() +"");
 
                     BlockBox connectingStructureBoundingBox = connectingStructurePoolElement.getBoundingBox(this.structureTemplateManager, BlockPos.ORIGIN, randomBlockRotation);
 
@@ -132,8 +132,6 @@ public class StructurePoolGeneratorDebuger {
                         int s;
                         int q;
                         if (!JigsawBlock.attachmentMatches(jigsawBlocksOfCurrentStructure, connectingJigsawBlock)) {
-                            VersusMod.MOD_LOGGER.warn("    GENERATING JIGSAW PIECES: Failure. Jigsaws don't connect: " + jigsawBlocksOfCurrentStructure.nbt().getString("name") + " mismatch with " + connectingJigsawBlock.nbt().getString("name"));
-
                             Direction direction = JigsawBlock.getFacing(jigsawBlocksOfCurrentStructure.state());
                             Direction direction2 = JigsawBlock.getFacing(connectingJigsawBlock.state());
                             Direction direction3 = JigsawBlock.getRotation(jigsawBlocksOfCurrentStructure.state());
@@ -147,12 +145,13 @@ public class StructurePoolGeneratorDebuger {
                             boolean areTargetsCompatible = jigsawBlocksOfCurrentStructure.nbt().getString("target").equals(connectingJigsawBlock.nbt().getString("name"));
                             boolean doAttachmentsMatch = areFacingOppositeDirections && areRotatedSameDirection && areTargetsCompatible;
 
-                            if(!areTargetsCompatible) VersusMod.MOD_LOGGER.warn(("    GENERATING JIGSAW PIECES: Failure. Jigsaws don't connect: " + jigsawBlocksOfCurrentStructure.nbt().getString("name") + " mismatch with " + connectingJigsawBlock.nbt().getString("name")) + "  ->  Incompatible target and name. Target is '" + jigsawBlocksOfCurrentStructure.nbt().getString("target") + "', while name is '" + connectingJigsawBlock.nbt().getString("name") + "'\n");
-                            else if(!areFacingOppositeDirections) VersusMod.MOD_LOGGER.warn(("    GENERATING JIGSAW PIECES: Failure. Jigsaws don't connect: " + jigsawBlocksOfCurrentStructure.nbt().getString("name") + " mismatch with " + connectingJigsawBlock.nbt().getString("name")) + "  ->  Not facing opposing directions. " + direction + " != " + direction2.getOpposite() + "\n");
-                            else if(!areRotatedSameDirection) VersusMod.MOD_LOGGER.warn(("    GENERATING JIGSAW PIECES: Failure. Jigsaws don't connect: " + jigsawBlocksOfCurrentStructure.nbt().getString("name") + " mismatch with " + connectingJigsawBlock.nbt().getString("name")) + ("  ->  Not rotated the same, and not rollable. " + direction3 + " != " + direction4) + "\n");
+                            if(!areTargetsCompatible) VersusMod.MOD_LOGGER.warn(("              - Failure. Jigsaws don't connect: " + jigsawBlocksOfCurrentStructure.nbt().getString("name") + " mismatch with " + connectingJigsawBlock.nbt().getString("name")) + "  ->  Incompatible target and name. Target is '" + jigsawBlocksOfCurrentStructure.nbt().getString("target") + "', while name is '" + connectingJigsawBlock.nbt().getString("name") + "'\n");
+                            else if(!areFacingOppositeDirections) VersusMod.MOD_LOGGER.warn(("              - Failure. Jigsaws don't connect: " + jigsawBlocksOfCurrentStructure.nbt().getString("name") + " mismatch with " + connectingJigsawBlock.nbt().getString("name")) + "  ->  Not facing opposing directions. " + direction + " != " + direction2.getOpposite() + "\n");
+                            else if(!areRotatedSameDirection) VersusMod.MOD_LOGGER.warn(("              - Failure. Jigsaws don't connect: " + jigsawBlocksOfCurrentStructure.nbt().getString("name") + " mismatch with " + connectingJigsawBlock.nbt().getString("name")) + ("  ->  Not rotated the same, and not rollable. " + direction3 + " != " + direction4) + "\n");
+                            else VersusMod.MOD_LOGGER.warn("              - Failure. Jigsaws don't connect: " + jigsawBlocksOfCurrentStructure.nbt().getString("name") + " mismatch with " + connectingJigsawBlock.nbt().getString("name") + " (reason unclear)\n");
                             continue;
                         }
-                        VersusMod.MOD_LOGGER.warn("    GENERATING JIGSAW PIECES: Found connection!****");
+                        VersusMod.MOD_LOGGER.warn("              - Found connection!");
 
                         BlockPos blockPos4 = connectingJigsawBlock.pos();
                         BlockPos blockPos5 = jigsawConnectionPos.subtract(blockPos4);
@@ -179,8 +178,8 @@ public class StructurePoolGeneratorDebuger {
                             blockBox4.encompass(new BlockPos(blockBox4.getMinX(), blockBox4.getMinY() + s, blockBox4.getMinZ()));
                         }
 
-                        if (VoxelShapes.matchesAnywhere((VoxelShape)mutableObject2.getValue(), VoxelShapes.cuboid(Box.from(blockBox4).contract(0.25)), BooleanBiFunction.ONLY_SECOND)) {
-                            VersusMod.MOD_LOGGER.warn("    GENERATING JIGSAW PIECES: Failure. Weird issue, where " + ((VoxelShape)mutableObject2.getValue()).toString() + " seems to overlap with " + (VoxelShapes.cuboid(Box.from(blockBox4).contract(0.25))).toString() + "\n");
+                        if (VoxelShapes.matchesAnywhere((VoxelShape)mutableObject2.getValue(), VoxelShapes.cuboid(Box.from(blockBox4).contract(0.2)), BooleanBiFunction.ONLY_SECOND)) {
+                            VersusMod.MOD_LOGGER.warn("              - Failure. Weird issue, where " + ((VoxelShape)mutableObject2.getValue()).toString() + " seems to overlap with " + (VoxelShapes.cuboid(Box.from(blockBox4).contract(0.2))).toString() + "\n");
                             continue;
                         }
 
@@ -199,13 +198,13 @@ public class StructurePoolGeneratorDebuger {
                             }
                             u = k + p / 2;
                         }
-                        VersusMod.MOD_LOGGER.warn("    - GENERATING JIGSAW PIECES: Adding junction...");
+                        VersusMod.MOD_LOGGER.warn("              - Adding junction...");
 
                         piece.addJunction(new JigsawJunction(jigsawConnectionPos.getX(), u - yUnderJigsaw + s, jigsawConnectionPos.getZ(), p, projection2));
                         poolStructurePiece.addJunction(new JigsawJunction(jigsawPos.getX(), u - o + t, jigsawPos.getZ(), -p, projection));
                         this.children.add(poolStructurePiece);
                         if (minY + 1 > this.maxSize) {
-                            VersusMod.MOD_LOGGER.warn("    GENERATING JIGSAW PIECES: Failure. MinY is bigger then the maximum size: " + minY + " + 1 > " + this.maxSize +"\n");
+                            VersusMod.MOD_LOGGER.warn("              - Failure. MinY is bigger then the maximum size: " + minY + " + 1 > " + this.maxSize +"\n");
                             continue block0;
                         }
                         ShapedPoolStructurePiece shapedPoolStructurePiece = new ShapedPoolStructurePiece(poolStructurePiece, mutableObject2, minY + 1);

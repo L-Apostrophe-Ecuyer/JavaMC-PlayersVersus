@@ -24,9 +24,13 @@ import net.minecraft.item.map.MapDecorationTypes;
 import net.minecraft.item.map.MapState;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
-import net.minecraft.recipe.BrewingRecipeRegistry;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.registry.tag.StructureTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
@@ -78,7 +82,7 @@ public class RevampedTradeOffers {
                                         VillagerType.SAVANNA, Items.CLAY_BALL).put(
                                         VillagerType.SWAMP, Items.MUD).build())},
                         2, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Items.BEE_NEST, 8, 12, 10),
+                                new BuyForMultipleEmeraldsFactory(Items.BEE_NEST, 8, 12, 10),
                                 new SellItemFactory(Items.HONEY_BOTTLE, 1, 8, 4),
                                 new SellItemFactory(Items.MOSS_BLOCK, 1, 12, 3),
                                 new TypeAwareSellItemFactory(1, 15, 32, 5, ImmutableMap.builder().put(
@@ -141,9 +145,9 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.SEAGRASS, 1, 26, 5),
                                 new SellItemFactory(PotionContentsComponent.createStack(Items.POTION, Potions.WATER_BREATHING), 5, 1, 3, 10),
                                 new SellItemFactory(Items.SEA_PICKLE, 1, 4, 8),
-                                new BuyForMutlipleEmeraldsFactory(Items.NAUTILUS_SHELL, 18, 16, 50),
-                                new BuyForMutlipleEmeraldsFactory(Items.AXOLOTL_BUCKET, 16, 16, 50),
-                                new BuyForMutlipleEmeraldsFactory(Items.PUFFERFISH_BUCKET, 12, 16, 30)},
+                                new BuyForMultipleEmeraldsFactory(Items.NAUTILUS_SHELL, 18, 16, 50),
+                                new BuyForMultipleEmeraldsFactory(Items.AXOLOTL_BUCKET, 16, 16, 50),
+                                new BuyForMultipleEmeraldsFactory(Items.PUFFERFISH_BUCKET, 12, 16, 30)},
                         3, new Factory[]{
                                 new SellItemFactory(Items.BRAIN_CORAL_BLOCK, 1, 1, 15),
                                 new SellItemFactory(Items.BUBBLE_CORAL_BLOCK, 1, 1, 15),
@@ -155,7 +159,7 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.TURTLE_SCUTE, 16, 1, 15),
                                 new SellItemFactory(Items.PRISMARINE_SHARD, 1, 2, 15),
                                 new SellItemFactory(Items.PRISMARINE_CRYSTALS, 1, 3, 15),
-                                new BuyForMutlipleEmeraldsFactory(Items.PUFFERFISH, 3, 16, 15)},
+                                new BuyForMultipleEmeraldsFactory(Items.PUFFERFISH, 3, 16, 15)},
                         5, new Factory[]{
                                 new SellEnchantedToolFactory(Items.FISHING_ROD, 4, 1, 30, 0.2f)}
                 )));
@@ -173,7 +177,7 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.PAINTING, 1, 8, 16, 8),
                                 new SellItemFactory(Items.STRING, 1, 10, 16, 4),
                                 new SellItemFactory(Items.LEAD, 1, 1, 6),
-                                new BuyForMutlipleEmeraldsFactory(Items.GOAT_HORN, 12, 16, 15)},
+                                new BuyForMultipleEmeraldsFactory(Items.GOAT_HORN, 12, 16, 15)},
                         3, new Factory[]{
                                 new SellItemFactory(Items.POPPY, 1, 4, 5),
                                 new SellItemFactory(Items.DANDELION, 1, 4, 5),
@@ -256,8 +260,8 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.FIRE_CHARGE, 1, 4, 8),
                                 new SellItemFactory(Items.STRING, 1, 6, 16, 4),
                                 new SellItemFactory(Items.GUNPOWDER, 1, 3, 5),
-                                new BuyForMutlipleEmeraldsFactory(Items.CROSSBOW, 16, 16, 10),
-                                new BuyForMutlipleEmeraldsFactory(Items.BOW, 16, 16, 10)},
+                                new BuyForMultipleEmeraldsFactory(Items.CROSSBOW, 16, 16, 10),
+                                new BuyForMultipleEmeraldsFactory(Items.BOW, 16, 16, 10)},
                         3, new Factory[]{
                                 new SellPotionHoldingItemFactory(Items.ARROW, 4, Items.TIPPED_ARROW, 4, 2, 12, 8),
                                 new SellItemFactory(Items.TARGET, 1, 1, 10),
@@ -273,42 +277,42 @@ public class RevampedTradeOffers {
         map.put(VillagerProfession.LIBRARIAN, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Items.LAPIS_LAZULI, 4, 12, 8),
+                                new BuyForMultipleEmeraldsFactory(Items.LAPIS_LAZULI, 4, 12, 8),
                                 new BuyForOneEmeraldFactory(Items.AMETHYST_SHARD, 1, 12, 5),
                                 new SellItemFactory(Items.BOOK, 1, 3, 3),
                                 new SellItemFactory(Items.LANTERN, 1, 3, 4),
                                 new SellItemFactory(Items.CLOCK, 1, 1, 4),
                                 new SellItemFactory(Items.GLASS, 1, 6, 3),
                                 new SellItemFactory(Blocks.BOOKSHELF, 3, 1, 12, 6),
-                                new EnchantBookFactory(10),
-                                new EnchantBookFactory(5),
+                                new EnchantBookFactory(10, EnchantmentTags.DOUBLE_TRADE_PRICE),
+                                new EnchantBookFactory(5, EnchantmentTags.PLAINS_COMMON_TRADE),
                                 new TypeAwareSellItemFactory(24, 1, 3, 16, ImmutableMap.builder().put(
-                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BLAST_PROTECTION, 1))).put(
-                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.TOSSING, 2))).put(
-                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SILK_TOUCH, 1))).put(
-                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FIRE_PROTECTION, 1))).put(
-                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.POWER, 2))).put(
-                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.KNOCKBACK, 2))).put(
-                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.LURE, 3))).build()),
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.BLAST_PROTECTION, 1))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.TOSSING, 2))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.SILK_TOUCH, 1))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.FIRE_PROTECTION, 1))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.POWER, 2))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.KNOCKBACK, 2))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.LURE, 3))).build()),
                                 new TypeAwareSellItemFactory(18, 1, 3, 14, ImmutableMap.builder().put(
-                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SMITE, 2))).put(
-                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SWEEPING_EDGE, 2))).put(
-                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.FROST_ASPECT, 1))).put(
-                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FLAME, 1))).put(
-                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PIERCING, 3))).put(
-                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.KNOCKBACK, 2))).put(
-                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.RESPIRATION, 1))).build())},
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.SMITE, 2))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, 2))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.FROST_ASPECT, 1))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.FLAME, 1))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.PIERCING, 3))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.KNOCKBACK, 2))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.RESPIRATION, 1))).build())},
                         2, new Factory[]{
                                 new TypeAwareSellItemFactory(27, 1, 3, 18, ImmutableMap.builder().put(
-                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.RIPOSTE, 3))).put(
-                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BINDING_CURSE, 1))).put(
-                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FROST_WALKER, 2))).put(
-                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FIRE_ASPECT, 2))).put(
-                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.QUICK_CHARGE, 2))).put(
-                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.BOUNDING_STRIDES, 1))).put(
-                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.RIPTIDE, 2))).build()),
-                                new BuyForMutlipleEmeraldsFactory(Items.MUSIC_DISC_11, 8, 1, 20),
-                                new BuyForMutlipleEmeraldsFactory(Items.EXPERIENCE_BOTTLE, 3, 12, 15),
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.RIPOSTE, 3))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.BINDING_CURSE, 1))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.FROST_WALKER, 2))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.FIRE_ASPECT, 2))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.QUICK_CHARGE, 2))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.BOUNDING_STRIDES, 1))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.RIPTIDE, 2))).build()),
+                                new BuyForMultipleEmeraldsFactory(Items.MUSIC_DISC_11, 8, 1, 20),
+                                new BuyForMultipleEmeraldsFactory(Items.EXPERIENCE_BOTTLE, 3, 12, 15),
                                 new BuyForOneEmeraldFactory(Items.SOUL_SAND, 8, 12, 10),
                                 new BuyForOneEmeraldFactory(Items.SOUL_SOIL, 8, 12, 10),
                                 new BuyForOneEmeraldFactory(Items.GLOW_INK_SAC, 5, 12, 10),
@@ -318,51 +322,53 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.GRAY_CANDLE, 1, 8, 5)},
                         3, new Factory[]{
                                 new TypeAwareSellItemFactory(32, 1, 3, 20, ImmutableMap.builder().put(
-                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.CLEAVING, 2))).put(
-                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PUNCH, 2))).put(
-                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.CHANNELING, 1))).put(
-                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.INFINITY, 1))).put(
-                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.MULTISHOT, 1))).put(
-                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.BINDING_CURSE, 1))).put(
-                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.DEPTH_STRIDER, 2))).build()),
-                                new EnchantBookFactory(15),
-                                new EnchantBookFactory(15),
-                                new BuyForMutlipleEmeraldsFactory(Items.SCULK_CATALYST, 6, 16, 20),
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.CLEAVING, 2))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.PUNCH, 2))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.CHANNELING, 1))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.INFINITY, 1))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.MULTISHOT, 1))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.BINDING_CURSE, 1))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.DEPTH_STRIDER, 2))).build()),
+                                new EnchantBookFactory(15, EnchantmentTags.TRADEABLE),
+                                new EnchantBookFactory(15, EnchantmentTags.TRADEABLE),
+                                new BuyForMultipleEmeraldsFactory(Items.SCULK_CATALYST, 6, 16, 20),
                                 new SellItemFactory(Items.NAME_TAG, 20, 1, 15),
                                 new SellItemFactory(Items.TINTED_GLASS, 1, 2, 10)},
                         4, new Factory[]{
-                                new EnchantBookFactory(20),
-                                new EnchantBookFactory(20),
-                                new EnchantBookFactory(20),
-                                new EnchantBookFactory(20),
-                                new BuyForMutlipleEmeraldsFactory(Items.MUSIC_DISC_5, 52, 1, 50),
-                                new BuyForMutlipleEmeraldsFactory(Items.ENDER_EYE, 4, 12, 20),
+                                new EnchantBookFactory(20, EnchantmentTags.PLAINS_SPECIAL_TRADE),
+                                new EnchantBookFactory(20, EnchantmentTags.SAVANNA_SPECIAL_TRADE),
+                                new EnchantBookFactory(20, EnchantmentTags.SNOW_SPECIAL_TRADE),
+                                new EnchantBookFactory(20, EnchantmentTags.DESERT_SPECIAL_TRADE),
+                                new EnchantBookFactory(20, EnchantmentTags.TAIGA_SPECIAL_TRADE),
+                                new EnchantBookFactory(20, EnchantmentTags.DOUBLE_TRADE_PRICE),
+                                new BuyForMultipleEmeraldsFactory(Items.MUSIC_DISC_5, 52, 1, 50),
+                                new BuyForMultipleEmeraldsFactory(Items.ENDER_EYE, 4, 12, 20),
                                 new BuyForOneEmeraldFactory(Items.ENDER_PEARL, 1, 12, 15)},
                         5, new Factory[]{
-                                new EnchantBookFactory(30),
+                                new EnchantBookFactory(30, EnchantmentTags.TREASURE),
                                 new TypeAwareSellItemFactory(48, 1, 3, 20, ImmutableMap.builder().put(
-                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.IMPACT_PROTECTION, 2))).put(
-                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.THORNS, 3))).put(
-                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.UNBREAKING, 3))).put(
-                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.EFFICIENCY, 4))).put(
-                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.FORTUNE, 2))).put(
-                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SHARPNESS, 3))).put(
-                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.MENDING, 1))).build()),
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.IMPACT_PROTECTION, 2))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.THORNS, 3))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.UNBREAKING, 3))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.EFFICIENCY, 4))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.FORTUNE, 2))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.SHARPNESS, 3))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.MENDING, 1))).build()),
                                 new TypeAwareSellItemFactory(48, 1, 3, 20, ImmutableMap.builder().put(
-                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchants.PIERCING_PROTECTION, 2))).put(
-                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.WIND_BURST, 3))).put(
-                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.RIPTIDE, 3))).put(
-                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.SWEEPING_EDGE, 4))).put(
-                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.DENSITY, 3))).put(
-                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.PROJECTILE_PROTECTION, 2))).put(
-                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(Enchantments.VANISHING_CURSE, 1))).build())
+                                        VillagerType.PLAINS, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.PIERCING_PROTECTION, 2))).put(
+                                        VillagerType.TAIGA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.WIND_BURST, 3))).put(
+                                        VillagerType.SNOW, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.RIPTIDE, 3))).put(
+                                        VillagerType.DESERT, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, 4))).put(
+                                        VillagerType.JUNGLE, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.DENSITY, 3))).put(
+                                        VillagerType.SAVANNA, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.PROJECTILE_PROTECTION, 2))).put(
+                                        VillagerType.SWAMP, EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.VANISHING_CURSE, 1))).build())
                         }
                 )));
 
         map.put(VillagerProfession.CARTOGRAPHER, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Items.OMINOUS_BOTTLE, 24, 16, 15),
+                                new BuyForMultipleEmeraldsFactory(Items.OMINOUS_BOTTLE, 24, 16, 15),
                                 new BuyForOneEmeraldFactory(Items.REDSTONE, 16, 8, 1),
                                 new SellItemFactory(Items.SPYGLASS, 2, 1, 8),
                                 new SellItemFactory(Items.COMPASS, 1, 1, 3),
@@ -433,7 +439,7 @@ public class RevampedTradeOffers {
         map.put(VillagerProfession.CLERIC, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Items.GOLDEN_APPLE, 5, 16, 5),
+                                new BuyForMultipleEmeraldsFactory(Items.GOLDEN_APPLE, 5, 16, 5),
                                 new BuyForOneEmeraldFactory(Items.SPIDER_EYE, 8, 12, 6),
                                 new BuyForOneEmeraldFactory(Items.ROTTEN_FLESH, 8, 12, 8),
                                 new BuyForOneEmeraldFactory(Items.GOLD_INGOT, 3, 24, 10),
@@ -442,7 +448,7 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.REDSTONE, 1, 8, 16, 2),
                                 new SellItemFactory(Items.GUNPOWDER, 1, 3, 2)},
                         2, new Factory[]{
-                                new BuyForMutlipleEmeraldsFactory(Items.BREEZE_ROD, 3, 16, 5),
+                                new BuyForMultipleEmeraldsFactory(Items.BREEZE_ROD, 3, 16, 5),
                                 new BuyForOneEmeraldFactory(Items.GLOWSTONE_DUST, 16, 12, 5),
                                 new BuyForOneEmeraldFactory(Items.BLAZE_POWDER, 1, 16, 5),
                                 new BuyForOneEmeraldFactory(Blocks.NETHER_WART, 21, 16, 5),
@@ -510,30 +516,30 @@ public class RevampedTradeOffers {
                         new SellItemFactory(new ItemStack(Items.IRON_SWORD), 6, 1, 12, 1, 0.2f),
                         new SellItemFactory(new ItemStack(Items.IRON_AXE), 7, 1, 12, 1, 0.2f)},
                 2, new Factory[]{
-                        new BuyForMutlipleEmeraldsFactory(Items.EXPERIENCE_BOTTLE, 5, 12, 10),
+                        new BuyForMultipleEmeraldsFactory(Items.EXPERIENCE_BOTTLE, 5, 12, 10),
                         new SellItemFactory(EnchantedBookItem.forEnchantment(
-                                new EnchantmentLevelEntry(Enchantments.SHARPNESS, 2)), 11, 1, 6, 6),
+                                new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.SHARPNESS, 2)), 11, 1, 6, 6),
                         new SellItemFactory(EnchantedBookItem.forEnchantment(
-                                new EnchantmentLevelEntry(Enchantments.SMITE, 3)), 14, 1, 6,6)},
+                                new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.SMITE, 3)), 14, 1, 6,6)},
                 3, new Factory[]{
-                        new BuyForMutlipleEmeraldsFactory(Items.DIAMOND, 14, 12, 15),
+                        new BuyForMultipleEmeraldsFactory(Items.DIAMOND, 14, 12, 15),
                         new SellEnchantedToolFactory(Items.IRON_AXE, 4, 3, 10),
                         new SellEnchantedToolFactory(Items.IRON_SWORD, 4, 3, 10),
                         new SellItemFactory(EnchantedBookItem.forEnchantment(
-                                new EnchantmentLevelEntry(Enchantments.KNOCKBACK, 1)), 24, 1, 6,10),
+                                new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.KNOCKBACK, 1)), 24, 1, 6,10),
                         new SellItemFactory(EnchantedBookItem.forEnchantment(
-                                new EnchantmentLevelEntry(Enchantments.LOOTING, 3)), 40, 1, 6,15)},
+                                new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.LOOTING, 3)), 40, 1, 6,15)},
                 4, new Factory[]{
                         new SellItemFactory(new ItemStack(Items.DIAMOND_HOE), 19, 1, 3, 15, 0.2f),
                         new SellItemFactory(new ItemStack(Items.DIAMOND_AXE), 28, 1, 3, 15, 0.2f),
                         new SellItemFactory(EnchantedBookItem.forEnchantment(
-                                new EnchantmentLevelEntry(Enchantments.RIPTIDE, 3)), 36, 1, 6,20),
+                                new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.RIPTIDE, 3)), 36, 1, 6,20),
                         new SellItemFactory(EnchantedBookItem.forEnchantment(
-                                new EnchantmentLevelEntry(Enchantments.LOYALTY, 3)), 36, 1,6, 20),
+                                new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchantments.LOYALTY, 3)), 36, 1,6, 20),
                         new SellItemFactory(EnchantedBookItem.forEnchantment(
-                                new EnchantmentLevelEntry(Enchants.FROST_ASPECT, 1)), 36, 1, 6,20),
+                                new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.FROST_ASPECT, 1)), 36, 1, 6,20),
                         new SellItemFactory(EnchantedBookItem.forEnchantment(
-                                new EnchantmentLevelEntry(Enchants.TOSSING, 1)), 10, 1, 6,20)},
+                                new EnchantmentLevelEntry((RegistryEntry<Enchantment>) Enchants.TOSSING, 1)), 10, 1, 6,20)},
                 5, new Factory[]{
                         new SellEnchantedToolFactory(Items.DIAMOND_SWORD, 14, 1, 30)}
         )));
@@ -570,12 +576,12 @@ public class RevampedTradeOffers {
                         new SellItemFactory(new ItemStack(Items.GOLDEN_SHOVEL), 2, 1, 12, 4, 0.2f),
                         new SellItemFactory(new ItemStack(Items.BELL), 15, 1, 12, 10, 0.2f)},
                 3, new Factory[]{
-                        new BuyForMutlipleEmeraldsFactory(Items.DIAMOND, 13, 12, 15),
+                        new BuyForMultipleEmeraldsFactory(Items.DIAMOND, 13, 12, 15),
                         new SellEnchantedToolFactory(Items.IRON_AXE, 4, 3, 10, 0.2f),
                         new SellEnchantedToolFactory(Items.IRON_SHOVEL, 2, 3, 10, 0.2f),
                         new SellEnchantedToolFactory(Items.IRON_PICKAXE, 4, 3, 10, 0.2f)},
                 4, new Factory[]{
-                        new BuyForMutlipleEmeraldsFactory(Items.IRON_BLOCK, 8, 12, 20),
+                        new BuyForMultipleEmeraldsFactory(Items.IRON_BLOCK, 8, 12, 20),
                         new SellEnchantedToolFactory(Items.DIAMOND_HOE, 6, 3, 15, 0.2f),
                         new SellEnchantedToolFactory(Items.DIAMOND_SHOVEL, 7, 3, 15, 0.2f)},
                 5, new Factory[]{
@@ -728,9 +734,9 @@ public class RevampedTradeOffers {
         return PotionContentsComponent.createStack(Items.SPLASH_POTION, potion);
     }
 
-    private static ItemStack enchant(Item item, Enchantment enchantment, int level) {
+    private static ItemStack enchant(Item item, RegistryKey<Enchantment> enchantment, int level) {
         ItemStack itemStack = new ItemStack(item);
-        itemStack.addEnchantment(enchantment, level);
+        itemStack.addEnchantment((RegistryEntry<Enchantment>) enchantment, level);
         return itemStack;
     }
 
@@ -761,7 +767,7 @@ public class RevampedTradeOffers {
         }
     }
 
-    static class BuyForMutlipleEmeraldsFactory
+    static class BuyForMultipleEmeraldsFactory
             implements Factory {
         private final Item buy;
         private final int emeralds;
@@ -769,7 +775,7 @@ public class RevampedTradeOffers {
         private final int experience;
         private final float multiplier;
 
-        public BuyForMutlipleEmeraldsFactory(Item item, int emeralds, int maxUses, int experience) {
+        public BuyForMultipleEmeraldsFactory(Item item, int emeralds, int maxUses, int experience) {
             this.buy = item;
             this.emeralds = emeralds;
             this.maxUses = maxUses;
@@ -924,8 +930,7 @@ public class RevampedTradeOffers {
         }
     }
 
-    public static class SellEnchantedToolFactory
-            implements Factory {
+    public static class SellEnchantedToolFactory implements Factory {
         private final ItemStack tool;
         private final int basePrice;
         private final int maxUses;
@@ -933,7 +938,7 @@ public class RevampedTradeOffers {
         private final float multiplier;
 
         public SellEnchantedToolFactory(Item item, int basePrice, int maxUses, int experience) {
-            this(item, basePrice, maxUses, experience, 0.05f);
+            this(item, basePrice, maxUses, experience, 0.05F);
         }
 
         public SellEnchantedToolFactory(Item item, int basePrice, int maxUses, int experience, float multiplier) {
@@ -944,10 +949,11 @@ public class RevampedTradeOffers {
             this.multiplier = multiplier;
         }
 
-        @Override
         public TradeOffer create(Entity entity, Random random) {
             int i = 5 + random.nextInt(15);
-            ItemStack itemStack = EnchantmentHelper.enchant(entity.getWorld().getEnabledFeatures(), random, new ItemStack(this.tool.getItem()), i, false);
+            DynamicRegistryManager dynamicRegistryManager = entity.getWorld().getRegistryManager();
+            Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.get(RegistryKeys.ENCHANTMENT).getEntryList(EnchantmentTags.ON_TRADED_EQUIPMENT);
+            ItemStack itemStack = EnchantmentHelper.enchant(random, new ItemStack(this.tool.getItem()), i, dynamicRegistryManager, optional);
             int j = Math.min(this.basePrice + i, 64);
             TradedItem tradedItem = new TradedItem(Items.EMERALD, j);
             return new TradeOffer(tradedItem, itemStack, this.maxUses, this.experience, this.multiplier);
@@ -1036,51 +1042,58 @@ public class RevampedTradeOffers {
         @Override
         public TradeOffer create(Entity entity, Random random) {
             TradedItem tradedItem = new TradedItem(Items.EMERALD, this.price);
-            List list = Registries.POTION.streamEntries().filter(potion -> !((Potion)potion.value()).getEffects().isEmpty() && BrewingRecipeRegistry.isBrewable(potion)).collect(Collectors.toList());
-            RegistryEntry registryEntry = (RegistryEntry)Util.getRandom(list, random);
+            List<RegistryEntry<Potion>> list = (List)Registries.POTION.streamEntries().filter((entry) -> {
+                return !((Potion)entry.value()).getEffects().isEmpty() && entity.getWorld().getBrewingRecipeRegistry().isBrewable(entry);
+            }).collect(Collectors.toList());
+            RegistryEntry<Potion> registryEntry = (RegistryEntry)Util.getRandom(list, random);
             ItemStack itemStack = new ItemStack(this.sell.getItem(), this.sellCount);
             itemStack.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(registryEntry));
             return new TradeOffer(tradedItem, Optional.of(new TradedItem(this.secondBuy, this.secondCount)), itemStack, this.maxUses, this.experience, this.priceMultiplier);
         }
     }
 
-    public static class EnchantBookFactory
-            implements Factory {
+    public static class EnchantBookFactory implements Factory {
         private final int experience;
-        private final List<Enchantment> possibleEnchantments;
+        private final TagKey<Enchantment> possibleEnchantments;
         private final int minLevel;
         private final int maxLevel;
 
-        public EnchantBookFactory(int experience) {
-            this(experience, (Enchantment[])Registries.ENCHANTMENT.stream().filter(Enchantment::isAvailableForEnchantedBookOffer).toArray(Enchantment[]::new));
-        }
-
-        public EnchantBookFactory(int experience, Enchantment ... possibleEnchantments) {
+        public EnchantBookFactory(int experience, TagKey<Enchantment> possibleEnchantments) {
             this(experience, 0, Integer.MAX_VALUE, possibleEnchantments);
         }
 
-        public EnchantBookFactory(int experience, int minLevel, int maxLevel, Enchantment ... possibleEnchantments) {
+        public EnchantBookFactory(int experience, int minLevel, int maxLevel, TagKey<Enchantment> possibleEnchantments) {
             this.minLevel = minLevel;
             this.maxLevel = maxLevel;
             this.experience = experience;
-            this.possibleEnchantments = Arrays.asList(possibleEnchantments);
+            this.possibleEnchantments = possibleEnchantments;
         }
 
-        @Override
         public TradeOffer create(Entity entity, Random random) {
-            Enchantment enchantment = this.possibleEnchantments.get(random.nextInt(this.possibleEnchantments.size()));
-            int i = Math.max(enchantment.getMinLevel(), this.minLevel);
-            int j = Math.min(enchantment.getMaxLevel(), this.maxLevel);
-            int k = MathHelper.nextInt(random, i, j);
-            ItemStack itemStack = EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(enchantment, k));
-            int l = 2 + random.nextInt(5 + k * 10) + 3 * k;
-            if (enchantment.isTreasure()) {
-                l *= 2;
+            Optional<RegistryEntry<Enchantment>> optional = entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getRandomEntry(this.possibleEnchantments, random);
+            int l;
+            ItemStack itemStack;
+            if (!optional.isEmpty()) {
+                RegistryEntry<Enchantment> registryEntry = (RegistryEntry)optional.get();
+                Enchantment enchantment = (Enchantment)registryEntry.value();
+                int i = Math.max(enchantment.getMinLevel(), this.minLevel);
+                int j = Math.min(enchantment.getMaxLevel(), this.maxLevel);
+                int k = MathHelper.nextInt(random, i, j);
+                itemStack = EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(registryEntry, k));
+                l = 2 + random.nextInt(5 + k * 10) + 3 * k;
+                if (registryEntry.isIn(EnchantmentTags.DOUBLE_TRADE_PRICE)) {
+                    l *= 2;
+                }
+
+                if (l > 64) {
+                    l = 64;
+                }
+            } else {
+                l = 1;
+                itemStack = new ItemStack(Items.BOOK);
             }
-            if (l > 64) {
-                l = 64;
-            }
-            return new TradeOffer(new TradedItem(Items.EMERALD, l), Optional.empty(), itemStack, 12, this.experience, 0.2f);
+
+            return new TradeOffer(new TradedItem(Items.EMERALD, l), Optional.of(new TradedItem(Items.BOOK)), itemStack, 12, this.experience, 0.2F);
         }
     }
 

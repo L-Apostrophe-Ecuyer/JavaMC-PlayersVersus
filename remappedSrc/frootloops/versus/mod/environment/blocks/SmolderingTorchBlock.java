@@ -3,8 +3,7 @@ package frootloops.versus.mod.environment.blocks;
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TorchBlock;
-import net.minecraft.particle.DefaultParticleType;
-import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -16,7 +15,7 @@ import net.minecraft.world.biome.Biome;
 
 public class SmolderingTorchBlock extends TorchBlock {
 
-    public SmolderingTorchBlock(DefaultParticleType particle, Settings settings) {
+    public SmolderingTorchBlock(SimpleParticleType particle, Settings settings) {
         super(particle, settings);
     }
 
@@ -34,8 +33,9 @@ public class SmolderingTorchBlock extends TorchBlock {
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        if(world instanceof ServerWorld) {
-            if (random.nextInt(10) > 8) {
+        if(pos.getY() > -32) return;
+        if(!world.isClient) {
+            if (random.nextInt(63) > 60) {
                 this.tickSmolderingTorchDegradation(state, world, pos);
             }
         }
@@ -44,7 +44,7 @@ public class SmolderingTorchBlock extends TorchBlock {
 
     @Override
     public void precipitationTick(BlockState state, World world, BlockPos pos, Biome.Precipitation precipitation) {
-        if(world instanceof ServerWorld) this.tickSmolderingTorchDegradation(state, (ServerWorld)world, pos);
+        if(!world.isClient) this.tickSmolderingTorchDegradation(state, (ServerWorld)world, pos);
         world.playSoundAtBlockCenter(pos, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
     }
 }

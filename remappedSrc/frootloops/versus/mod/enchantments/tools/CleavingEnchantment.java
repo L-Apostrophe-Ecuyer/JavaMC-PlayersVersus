@@ -1,10 +1,12 @@
 package frootloops.versus.mod.enchantments.tools;
 
 import net.minecraft.enchantment.DamageEnchantment;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.ItemTags;
 
 import java.util.Optional;
 
@@ -13,22 +15,12 @@ public class CleavingEnchantment extends DamageEnchantment {
 
 
     public CleavingEnchantment() {
-        super(Rarity.UNCOMMON, 15, 11, 20, Optional.empty(), new EquipmentSlot[]{EquipmentSlot.MAINHAND});
-    }
-
-    @Override
-    public int getMinPower(int level) {
-        return 15 + (level - 1) * 11;
-    }
-
-    @Override
-    public int getMaxPower(int level) {
-        return super.getMinPower(level) + 50;
-    }
-
-    @Override
-    public int getMaxLevel() {
-        return 3;
+        super(
+                Enchantment.properties(ItemTags.AXES, 2, 3,
+                        Enchantment.leveledCost(15, 11),
+                        Enchantment.leveledCost(26, 20), 6,
+                        EquipmentSlot.MAINHAND), Optional.empty()
+        );
     }
 
     @Override

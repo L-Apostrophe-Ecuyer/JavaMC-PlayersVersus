@@ -1,15 +1,11 @@
 package frootloops.versus.mod;
 
 
-import com.google.common.collect.ImmutableMultimap;
-import frootloops.versus.VersusMod;
-import frootloops.versus.mixin.players.accessors.*;
+import frootloops.versus.mixin.players.attacking.LivingEntityAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import net.minecraft.entity.mob.EndermanEntity;
@@ -18,11 +14,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -35,22 +28,23 @@ import java.util.UUID;
 
 public abstract class Combat {
 
-    protected static final UUID ATTACK_REACH_MODIFIER_ID = UUID.fromString("159ff4d0-df5c-4ce3-a2a6-88bd7b4c60f2");
+    public static final UUID ATTACK_REACH_MODIFIER_ID = UUID.fromString("159ff4d0-df5c-4ce3-a2a6-88bd7b4c60f2");
 
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
+    public static final double PLAYER_MAX_ATTACK_SPEED = 2.5d;
     private static final String[] tools =
             new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
     private static final float[] toolsSpeed  =
-            new float[]{1.0F,   1.5F,   2.0F,   1.5F,   1.5F};
+            new float[]{1.0F,   1.5F,   2.0F,   1.2F,   1.5F};
     private static final float[] toolsDamage =
-            new float[]{8.0F,   4.0F,   3.0F,   4.0F,   3.0F};
-
+            new float[]{8.0F,   4.0F,   1.0F,   1.0F,   3.0F};
     private static final float[] toolsReachBonus =
             new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
+
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
     private static final float[] toolTierDamageBonuses = new float[]{-1F, 0F, 1F, 1F, 2F, 3F};
 
@@ -59,52 +53,24 @@ public abstract class Combat {
     public static float getHoeSpeedModifier() { return toolsSpeed[2] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getPickaxeSpeedModifier() { return toolsSpeed[3] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getShovelSpeedModifier() { return toolsSpeed[4] - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getTridentSpeedModifier() { return 1.0F - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getAxeDamageModifier() { return toolsDamage[0] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getSwordDamageModifier() { return toolsDamage[1] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getHoeDamageModifier() { return toolsDamage[2] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getPickaxeDamageModifier() { return toolsDamage[3] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getShovelDamageModifier() { return toolsDamage[4] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
-    public static float getTridentDamageModifier() { return 9.0F - (float)PLAYER_BASE_ATTACK_DAMAGE;}
 
-    public static float getSwordReachModifier() { return toolsReachBonus[4];}
+    public static float getHoeReachModifier() { return toolsReachBonus[2];}
+    public static float getSwordReachModifier() { return toolsReachBonus[1];}
+    public static float getShovelReachModifier() { return toolsReachBonus[1];}
+    public static float getTridentDamageModifier() { return 10.0f - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getTridentSpeedModifier() { return 1.0f - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getTridentReachModifier() { return 1.0f;}
 
     public static void onInitialize() {
-        for(int toolIndex = 0; toolIndex < tools.length; toolIndex++) {
-            for (int tierIndex = 0; tierIndex < toolTiers.length; tierIndex++) {
-                String name = "minecraft:" + toolTiers[tierIndex] + "_" + tools[toolIndex];
-                float damage = toolsDamage[toolIndex] + toolTierDamageBonuses[tierIndex] - (float)PLAYER_BASE_ATTACK_DAMAGE;
-                float speed = toolsSpeed[toolIndex] - (float)PLAYER_BASE_ATTACK_SPEED - (tierIndex == 0 ? 0.2f : 0.0f);
-                float reach = toolsReachBonus[toolIndex];
-                setAttributes(name, damage, speed, reach);
-            }
-        }
-        setAttributes("minecraft:trident", Combat.getTridentDamageModifier(), Combat.getTridentSpeedModifier(), Combat.getTridentReachModifier());
-    }
-
-    private static void setAttributes(String itemName, float damageModifier, float speedModifier, float reachModifier) {
-        ImmutableMultimap.Builder<RegistryEntry<EntityAttribute>, EntityAttributeModifier> itemBuilder = ImmutableMultimap.builder();
-        Item item = Registries.ITEM.get(new Identifier(itemName));
-        String modifierType = item instanceof MiningToolItem ? "Tool modifier" : "Weapon modifier";
-
-        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_DAMAGE_MODIFIER_ID(), modifierType, damageModifier, EntityAttributeModifier.Operation.ADDITION));
-        itemBuilder.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(((ItemAccessor) item).getATTACK_SPEED_MODIFIER_ID(), modifierType, speedModifier, EntityAttributeModifier.Operation.ADDITION));
-        if(reachModifier > 0) itemBuilder.put(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, modifierType, reachModifier, EntityAttributeModifier.Operation.ADDITION));
-
-        if (item instanceof MiningToolItem) {
-            ((MiningToolAccessor) item).setAttackDamage(damageModifier);
-            ((MiningToolAccessor) item).setAttributeModifiers(itemBuilder.build());
-        } else if (item instanceof SwordItem) {
-            ((SwordAccessor) item).setAttackDamage(damageModifier);
-            ((SwordAccessor) item).setAttributeModifiers(itemBuilder.build());
-        } else if (item instanceof TridentItem) {
-            ((TridentAccessor) item).setAttributeModifiers(itemBuilder.build());
-        }
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {
-        return Math.min(3.0d, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+        return Math.min(PLAYER_MAX_ATTACK_SPEED, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
     }
 
     public static int getTicksPerAttackOf(PlayerEntity player) {
@@ -128,7 +94,6 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
         double reachAttributeValue = player.getAttributeValue(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE);
-
         attackChargeProgress = Math.min(1.0d, attackChargeProgress - 0.5d);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
@@ -139,59 +104,53 @@ public abstract class Combat {
         return Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
     }
 
-    public static boolean isInAttackRangeOf(PlayerEntity player, Entity target) {
-        double range = Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
-        return player.squaredDistanceTo(target) < range * range;
-    }
-
-    public static boolean isInAttackRangeOf(PlayerEntity player, Entity target, double attackChargeProgress) {
-        double range = Combat.getAttackRange(player, attackChargeProgress);
-        return player.squaredDistanceTo(target) < range * range;
+    public static boolean isInAttackRangeOf(PlayerEntity player, Entity entity, double attackCooldownProgress) {
+        double range = Combat.getAttackRange(player, attackCooldownProgress);
+        return (range * range) > player.getEyePos().squaredDistanceTo(entity.getEyePos());
     }
 
     public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {
         if(level < 1) return;
 
+        World world = player.method_48926();
         player.spawnSweepAttackParticles();
-        player.method_48926().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
+        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
 
-        if(player.method_48926() instanceof ServerWorld serverWorld) {
-            attackRange = attackRange - (0.5d * (double)(4 - level));
-            double attackRangeSquared = attackRange * attackRange;
+        attackRange = attackRange - (0.5d * (double)(4 - level));
+        double attackRangeSquared = attackRange * attackRange;
 
-            // Attack entities:
-            Vec3d playerPos = player.getPos();
-            Box boundingBox = new Box(playerPos.x - attackRange, playerPos.y - attackRange, playerPos.z - attackRange, playerPos.x + attackRange, playerPos.y + attackRange, playerPos.z + attackRange);
-            List<LivingEntity> entitiesInRange = serverWorld.getEntitiesByClass(LivingEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
-            for (LivingEntity targetEntity : entitiesInRange) {
-                if(!player.isTeammate(targetEntity)) {
-                    if (targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
-                        if(player.canSee(targetEntity)) {
-                            player.setSprinting(true);
-                            ((LivingEntityAccessor) player).setLastAttackedTicks(20);
-                            player.attack(targetEntity);
-                        }
+        // Attack entities:
+        Vec3d playerPos = player.getPos();
+        Box boundingBox = new Box(playerPos.x - attackRange, playerPos.y - attackRange, playerPos.z - attackRange, playerPos.x + attackRange, playerPos.y + attackRange, playerPos.z + attackRange);
+        List<LivingEntity> entitiesInRange = world.getEntitiesByClass(LivingEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
+        for (LivingEntity targetEntity : entitiesInRange) {
+            if(!player.isTeammate(targetEntity)) {
+                if (targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
+                    if(player.canSee(targetEntity)) {
+                        player.setSprinting(true);
+                        ((LivingEntityAccessor) player).setLastAttackedTicks(20);
+                        player.attack(targetEntity);
                     }
                 }
             }
+        }
 
-            // Break foliage:
-            if(player.getActiveItem().getItem() instanceof HoeItem) {
-                Vec3d hitPos = Combat.getHitResultOf(player, attackRange - 1d).getPos();
-                BlockPos blockPosOfHit = new BlockPos((int) hitPos.x, (int) hitPos.y, (int) hitPos.z);
-                BlockPos blockPos, above;
-                BlockState blockState;
-                for (int x = -2; x <= 2; x++) {
-                    for (int z = -2; z <= 2; z++) {
-                        for (int y = -1; y <= 1; y++) {
-                            blockPos = blockPosOfHit.add(x, y, z);
-                            blockState = serverWorld.getBlockState(blockPos);
-                            if (blockState.getHardness(serverWorld, blockPos) == 0.0) {
-                                serverWorld.breakBlock(blockPos, true, player);
-                                above = blockPos.add(0, 1, 0);
-                                if (serverWorld.getBlockState(above).getHardness(serverWorld, above) == 0.0F) {
-                                    serverWorld.breakBlock(above, true, player);
-                                }
+        // Break foliage:
+        if(player.getActiveItem().getItem() instanceof HoeItem) {
+            Vec3d hitPos = Combat.getHitResultOf(player, attackRange - 1d).getPos();
+            BlockPos blockPosOfHit = new BlockPos((int) hitPos.x, (int) hitPos.y, (int) hitPos.z);
+            BlockPos blockPos, above;
+            BlockState blockState;
+            for (int x = -2; x <= 2; x++) {
+                for (int z = -2; z <= 2; z++) {
+                    for (int y = -1; y <= 1; y++) {
+                        blockPos = blockPosOfHit.add(x, y, z);
+                        blockState = world.getBlockState(blockPos);
+                        if (blockState.getHardness(world, blockPos) == 0.0) {
+                            world.breakBlock(blockPos, true, player);
+                            above = blockPos.add(0, 1, 0);
+                            if (world.getBlockState(above).getHardness(world, above) == 0.0F) {
+                                world.breakBlock(above, true, player);
                             }
                         }
                     }
@@ -220,8 +179,9 @@ public abstract class Combat {
     public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
         if(looker==null || targetPos == null) return false;
         Vec3d rotationVector = looker.getRotationVec(1.0F);
-        Vec3d positionVector = targetPos.relativize(looker.getEyePos()).normalize();
-        return (positionVector.dotProduct(rotationVector) < Math.max(1.0, dotProductThreshold));
+        Vec3d positionVector = targetPos.relativize(looker.getEyePos());
+        if(rotationVector.dotProduct(positionVector) >= 0.0F) return false;
+        else return (rotationVector.dotProduct(positionVector.normalize()) < dotProductThreshold);
     }
 
     public static HitResult getHitResultOf(LivingEntity entity, double range) {

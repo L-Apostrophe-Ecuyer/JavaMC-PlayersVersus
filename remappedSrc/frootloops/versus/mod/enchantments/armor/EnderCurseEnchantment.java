@@ -4,7 +4,6 @@ import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.enchantment.BindingCurseEnchantment;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.world.ServerWorld;
@@ -13,9 +12,17 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.event.GameEvent;
 
+import static frootloops.versus.mod.enchantments.Enchants.ALL_ARMOR;
+
 public class EnderCurseEnchantment extends Enchantment {
     public EnderCurseEnchantment() {
-        super(Rarity.RARE, ItemTags.ARMOR_ENCHANTABLE, new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET});
+        super(
+                Enchantment.properties(ItemTags.ARMOR_ENCHANTABLE, 5, 1,
+                        Enchantment.leveledCost(10, 8),
+                        Enchantment.leveledCost(18, 20), 5,
+                        ALL_ARMOR
+                )
+        );
     }
 
     @Override

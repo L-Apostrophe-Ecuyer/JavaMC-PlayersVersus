@@ -17,8 +17,9 @@ import java.util.Map;
 @Mixin(DepthStriderEnchantment.class)
 public class DepthStriderMixin extends Enchantment {
 
-    protected DepthStriderMixin(Rarity rarity, TagKey<Item> applicableItems, EquipmentSlot[] slotTypes) {
-        super(rarity, applicableItems, slotTypes);
+
+    public DepthStriderMixin(Properties properties) {
+        super(properties);
     }
 
     @Override

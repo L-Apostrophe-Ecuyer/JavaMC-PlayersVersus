@@ -12,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import static frootloops.versus.VersusSettings.DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES;
+
 @Mixin(ZombieSiegeManager.class)
 public class ZombieHordeMixin implements SpecialSpawner {
 
@@ -27,8 +29,6 @@ public class ZombieHordeMixin implements SpecialSpawner {
     @Shadow
     private void trySpawnZombie(ServerWorld world) {}
 
-    private static final boolean ONLY_DO_ZOMBIE_SEIGES_NEAR_VILLAGES = false;
-
 
     @Override
     public int spawn(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals) {
@@ -41,7 +41,7 @@ public class ZombieHordeMixin implements SpecialSpawner {
         }
 
         float skyAngle = world.getSkyAngle(0.0f);
-        if (skyAngle < 0.4f || skyAngle > 0.5f || world.random.nextInt(40) != 0) return 0;
+        if (skyAngle < 0.4f || skyAngle > 0.5f || world.random.nextInt(20) != 0) return 0;
         if (!this.tryGettingSpawnLocation(world)) return 0;
         if (--this.countdown > 0) return 0;
 
@@ -58,7 +58,7 @@ public class ZombieHordeMixin implements SpecialSpawner {
         for (PlayerEntity playerEntity : world.getPlayers()) {
             BlockPos blockPos;
             if (playerEntity.isSpectator() || world.getBiome(blockPos = playerEntity.getBlockPos()).isIn(BiomeTags.WITHOUT_ZOMBIE_SIEGES)) continue;
-            if(ONLY_DO_ZOMBIE_SEIGES_NEAR_VILLAGES && !world.isNearOccupiedPointOfInterest(blockPos)) continue;
+            if(!DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES && !world.isNearOccupiedPointOfInterest(blockPos)) continue;
             for (int i = 0; i < 10; ++i) {
                 float f = world.random.nextFloat() * ((float)Math.PI * 2);
                 this.startX = blockPos.getX() + MathHelper.floor(MathHelper.cos(f) * 32.0f);

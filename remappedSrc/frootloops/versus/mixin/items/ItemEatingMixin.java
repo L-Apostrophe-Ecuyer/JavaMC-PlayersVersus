@@ -1,43 +1,34 @@
 package frootloops.versus.mixin.items;
 
-import FoodComponent;
-import frootloops.versus.VersusMod;
-import frootloops.versus.backported.items.throwing.WindChargeItem;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
 @Mixin(Item.class)
 public class ItemEatingMixin {
-    public ItemEatingMixin(@Nullable FoodComponent foodComponent) {
-        this.foodComponent = foodComponent;
-    }
-
-    @Shadow @Nullable
-    private final FoodComponent foodComponent;
-
 
     @Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable = true)
     public void getMaxUseTime(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-        if (stack.getItem().isFood()) {
+        if (stack.contains(DataComponentTypes.FOOD)) {
 
-            if(foodComponent.isMeat()) cir.setReturnValue(28);
-            else if(foodComponent.isSnack()) cir.setReturnValue(10);
+            FoodComponent foodComponent = stack.getComponents().get(DataComponentTypes.FOOD);
+            boolean isCookedMeat = stack.getItem().getTranslationKey().contains("cooked");
+
+            if(isCookedMeat) cir.setReturnValue(28);
+            else if(foodComponent.eatSeconds() == 0.8f) cir.setReturnValue(10);
             else if(stack.isOf(Items.PUMPKIN_PIE)) cir.setReturnValue(14);
             else if(stack.isOf(Items.POTATO)) cir.setReturnValue(32);
             else if(stack.isOf(Items.GOLDEN_APPLE)) cir.setReturnValue(24);
             else if(stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) cir.setReturnValue(24);
-            else if(foodComponent.getHunger() < 5)  cir.setReturnValue(14);
+            else if(foodComponent.nutrition() < 5)  cir.setReturnValue(14);
             else cir.setReturnValue(18);
 
         }
@@ -48,7 +39,11 @@ public class ItemEatingMixin {
         // This should hopefully stop players from accidentally using an item in their offhand right after eating:
         if(user instanceof PlayerEntity player) {;
             boolean canPlayerStillUseItem = !player.getItemCooldownManager().isCoolingDown(stack.getItem());
-            if(stack.isFood() && canPlayerStillUseItem) canPlayerStillUseItem = (stack.getItem().getFoodComponent() != null && player.canConsume(stack.getItem().getFoodComponent().isAlwaysEdible()));
+            if(stack.contains(DataComponentTypes.FOOD) && canPlayerStillUseItem) {
+                canPlayerStillUseItem = stack.getComponents().get(DataComponentTypes.FOOD).canAlwaysEat();
+                canPlayerStillUseItem = player.canConsume(canPlayerStillUseItem);
+            }
+
             if(!canPlayerStillUseItem) {
 
                 ItemStack stackToPutOnCooldown = player.getOffHandStack();

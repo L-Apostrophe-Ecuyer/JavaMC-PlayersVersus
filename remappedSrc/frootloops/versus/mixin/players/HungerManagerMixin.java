@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import frootloops.versus.VersusSettings;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,13 +28,13 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_SLOW = 120, REGEN_TIME_7_TO_10_HAUNCHES = 40, REGEN_TIME_11_TO_14_HAUNCHES = 30, REGEN_TIME_15_TO_20_HAUNCHES = 20;
+    private static final int REGEN_TIME_SLOW = 160, REGEN_TIME_7_TO_10_HAUNCHES = 40, REGEN_TIME_11_TO_14_HAUNCHES = 30, REGEN_TIME_15_TO_20_HAUNCHES = 20;
     private static final int FOOD_LEVEL_FOR_SLOW_REGEN = 0;
     private static boolean IS_STARVATION_ENABLED = false;
 
     @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
-    public void eat(Item item, ItemStack stack, CallbackInfo info) {
-        if(item.isFood()) foodTickTimer = Math.max(8, foodTickTimer);
+    public void eat(ItemStack stack, CallbackInfo info) {
+        if(stack.contains(DataComponentTypes.FOOD)) foodTickTimer = Math.max(8, foodTickTimer);
     }
 
 
@@ -86,9 +87,10 @@ public class HungerManagerMixin {
 
     private void doHealthRegeneration(PlayerEntity player) {
         float playerHealth = player.getHealth();
+        boolean isSprinting = player.isSprinting();
         boolean canPlayerRegenHealth = player.canFoodHeal() && player.method_48926().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         boolean canPlayerFoodHeal = canPlayerRegenHealth && (foodLevel > FOOD_LEVEL_FOR_SLOW_REGEN) && !player.hasStatusEffect(StatusEffects.HUNGER);
-        boolean canPlayerSlowHeal = canPlayerRegenHealth && (foodLevel > FOOD_LEVEL_FOR_SLOW_REGEN && !canPlayerFoodHeal) || (foodLevel == FOOD_LEVEL_FOR_SLOW_REGEN && (FOOD_LEVEL_FOR_SLOW_REGEN != 0 || !player.isSprinting()));
+        boolean canPlayerSlowHeal = canPlayerRegenHealth && (foodLevel > FOOD_LEVEL_FOR_SLOW_REGEN && !canPlayerFoodHeal) || (foodLevel == FOOD_LEVEL_FOR_SLOW_REGEN && (FOOD_LEVEL_FOR_SLOW_REGEN != 0 || !isSprinting));
         if (canPlayerFoodHeal || canPlayerSlowHeal) {
             foodTickTimer++;
 
@@ -117,7 +119,7 @@ public class HungerManagerMixin {
             }
         }
         else {
-            foodTickTimer = 0;
+            foodTickTimer = (FOOD_LEVEL_FOR_SLOW_REGEN == 0 && isSprinting) ? -128 : 0;
         }
     }
 }

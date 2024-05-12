@@ -2,23 +2,27 @@ package frootloops.versus.mixin.players.attacking;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.GameMode;
+import org.joml.Matrix4fStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import static frootloops.versus.VersusMod.DEBUG_MODE;
+
+@Environment(EnvType.CLIENT)
 @Mixin(value = InGameHud.class, priority = 9999)
 public class CrosshairRendererMixin {
 
@@ -50,16 +54,16 @@ public class CrosshairRendererMixin {
                 if (this.debugHud.shouldShowDebugHud() && !gameOptions.hudHidden && !this.client.player.hasReducedDebugInfo() && !(Boolean)gameOptions.getReducedDebugInfo().getValue()) {
 
                     Camera camera = this.client.gameRenderer.getCamera();
-                    MatrixStack matrixStack = RenderSystem.getModelViewStack();
-                    matrixStack.push();
-                    matrixStack.multiplyPositionMatrix(context.getMatrices().peek().getPositionMatrix());
-                    matrixStack.translate((float)(context.getScaledWindowWidth() / 2), (float)(context.getScaledWindowHeight() / 2), 0.0F);
-                    matrixStack.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(camera.getPitch()));
-                    matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw()));
-                    matrixStack.scale(-1.0F, -1.0F, -1.0F);
+                    Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+                    matrix4fStack.pushMatrix();
+                    matrix4fStack.mul(context.getMatrices().peek().getPositionMatrix());
+                    matrix4fStack.translate(context.getScaledWindowWidth() / 2, context.getScaledWindowHeight() / 2, 0.0f);
+                    matrix4fStack.rotateX(-camera.getPitch() * ((float)Math.PI / 180));
+                    matrix4fStack.rotateY(camera.getYaw() * ((float)Math.PI / 180));
+                    matrix4fStack.scale(-1.0f, -1.0f, -1.0f);
                     RenderSystem.applyModelViewMatrix();
                     RenderSystem.renderCrosshair(10);
-                    matrixStack.pop();
+                    matrix4fStack.popMatrix();
                     RenderSystem.applyModelViewMatrix();
 
                 } else {

@@ -34,9 +34,8 @@ public class ItemMergingMixin {
         if(slot.getStack() == cursorStack) return false;
         if(!clickType.equals(ClickType.LEFT)) return false;
 
-        Item itemToMergeInto = null;
-        int amountRequired = 999;
-        int amountBetweenBoth = 0;
+        Item itemToMergeInto;
+        int amountRequired, amountBetweenBoth;
 
         // TODO: Make this a dict lookup
         Item cursorItem = cursorStack.getItem();

@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.mobs.hostile.ai.ZombieSoundListener;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
@@ -21,13 +22,14 @@ import java.util.function.Supplier;
 @Mixin(ServerWorld.class)
 public abstract class ZombieEventListenerMixin extends World {
 
-
     protected ZombieEventListenerMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates) {
         super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
     }
 
     @Inject(method = "emitGameEvent", at = @At("HEAD"))
     public void emitGameEvent(RegistryEntry<GameEvent> event, Vec3d emitterPos, GameEvent.Emitter emitter, CallbackInfo info) {
-        ZombieSoundListener.OnGameEvent((ServerWorld)((Object)this), event.value(), emitterPos, emitter);
+        if(VersusSettings.DO_ZOMBIE_SOUND_DETECTION) {
+            ZombieSoundListener.OnGameEvent((ServerWorld) ((Object) this), event.value(), emitterPos, emitter);
+        }
     }
 }

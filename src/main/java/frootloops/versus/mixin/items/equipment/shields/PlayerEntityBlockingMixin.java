@@ -68,7 +68,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
 
         int disableForTicks = 40;
         if(this.getAttacker() != null)
-            disableForTicks += 20 * EnchantmentHelper.getLevel(Enchants.CLEAVING, this.getAttacker().getMainHandStack());
+            disableForTicks += 20 *  EnchantmentHelper.getLevel(Enchants.CLEAVING, this.getAttacker().getMainHandStack());
 
         this.itemCooldownManager.set(this.activeItemStack.getItem(), disableForTicks);
         this.clearActiveItem();
