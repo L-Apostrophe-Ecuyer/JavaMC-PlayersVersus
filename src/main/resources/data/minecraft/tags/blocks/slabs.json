@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:polished_stone_slab",
+    "players-versus:granite_brick_slab",
+    "players-versus:granite_tile_slab",
+    "players-versus:brown_mud_brick_slab",
+    "players-versus:brown_mud_tile_slab",
+    "players-versus:packed_mud_brick_slab",
+    "players-versus:packed_mud_tile_slab"
+  ]
+}
