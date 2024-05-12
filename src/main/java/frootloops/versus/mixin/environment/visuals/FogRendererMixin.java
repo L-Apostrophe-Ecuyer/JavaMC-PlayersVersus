@@ -7,9 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Environment(EnvType.CLIENT)
@@ -29,5 +27,10 @@ public abstract class FogRendererMixin {
                 if(!player.hasStatusEffect(StatusEffects.BLINDNESS))
                     cir.cancel();
         }
+    }
+
+    @ModifyConstant(method = "applyFog", constant = @Constant(floatValue = 192.0f))
+    private static float lessDenseNetherFog(float maxRenderDistance) {
+        return 384.0f;
     }
 }
