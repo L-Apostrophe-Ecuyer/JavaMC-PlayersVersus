@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.items.equipment.shields;
 
 import frootloops.versus.mod.enchantments.Enchants;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
@@ -9,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
@@ -68,7 +70,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
 
         int disableForTicks = 40;
         if(this.getAttacker() != null)
-            disableForTicks += 20 *  EnchantmentHelper.getLevel(Enchants.CLEAVING, this.getAttacker().getMainHandStack());
+            disableForTicks += 20 *  EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.CLEAVING, this.getAttacker().getMainHandStack());
 
         this.itemCooldownManager.set(this.activeItemStack.getItem(), disableForTicks);
         this.clearActiveItem();
@@ -82,7 +84,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
         if (!this.isInvulnerableTo(source) && this.blockedByShield(source)) {
 
             // If you blocked within 8 ticks of an attack, you take no damage:
-            if (activeItemStack.getItem().getMaxUseTime(activeItemStack) - itemUseTimeLeft < PARRY_TIME_TICKS)
+            if (activeItemStack.getItem().getMaxUseTime(activeItemStack, this) - itemUseTimeLeft < PARRY_TIME_TICKS)
                 info.cancel();
         }
     }

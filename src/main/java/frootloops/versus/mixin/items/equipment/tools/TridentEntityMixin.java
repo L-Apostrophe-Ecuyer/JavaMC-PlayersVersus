@@ -21,8 +21,8 @@ public abstract class TridentEntityMixin extends PersistentProjectileEntity {
     @Shadow
     private boolean dealtDamage;
 
-    protected TridentEntityMixin(EntityType<? extends PersistentProjectileEntity> type, World world, ItemStack stack) {
-        super(type, world, stack);
+    protected TridentEntityMixin(EntityType<? extends PersistentProjectileEntity> entityType, World world) {
+        super(entityType, world);
     }
 
 

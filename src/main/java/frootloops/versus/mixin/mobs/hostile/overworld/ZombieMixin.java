@@ -1,7 +1,10 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.VersusSettings;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.EnchantmentLevelEntry;
+import net.minecraft.enchantment.provider.EnchantmentProviders;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
@@ -18,6 +21,9 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Difficulty;
@@ -30,6 +36,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(ZombieEntity.class)
@@ -126,8 +135,11 @@ public abstract class ZombieMixin extends HostileEntity {
 
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
             if (isAtDiamondDepth && rand % 23 == 0) {
-                ItemStack enchantedBook = EnchantmentHelper.enchant(this.getWorld().getEnabledFeatures(), this.getWorld().random, new ItemStack(Items.BOOK), 16, true);
-;               this.equipStack(EquipmentSlot.OFFHAND, enchantedBook);
+                this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + random.nextInt(5)));
+                this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
+            }
+            else if (isAtDiamondDepth && rand % 29 == 0 || true) {
+                this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.OMINOUS_BOTTLE, 1));
                 this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
             }
 

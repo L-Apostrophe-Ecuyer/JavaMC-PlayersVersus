@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.items.equipment.shields;
 
 import frootloops.versus.mod.enchantments.Enchants;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -10,6 +11,7 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.UseAction;
@@ -95,8 +97,8 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
         if( activeItemStack.getItem() instanceof ShieldItem) return 0.0f;
 
-        int levelRiposte = EnchantmentHelper.getLevel(Enchants.RIPOSTE, activeItemStack);
-        int useTime =  activeItemStack.getMaxUseTime() - itemUseTimeLeft;
+        int levelRiposte = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.RIPOSTE, activeItemStack);
+        int useTime =  activeItemStack.getMaxUseTime((LivingEntity) ((Object)this)) - itemUseTimeLeft;
         boolean hasParried = useTime < PARRY_TIME_TICKS + levelRiposte && useTime > 0;
         if(hasParried) return 0;
 
@@ -115,15 +117,15 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         }
 
         // If your shield has thorns, deal some damage to the attacker
-        int levelThorns = EnchantmentHelper.getLevel(Enchantments.THORNS, shieldItemStack);
+        int levelThorns = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.THORNS, shieldItemStack);
         float reflectedDamage = 0.1F * damageAmount * levelThorns;
 
         // If your shield has riposte, deal some damage to the attacker, on parrying
-        int levelRiposte = EnchantmentHelper.getLevel(Enchants.RIPOSTE, shieldItemStack);
+        int levelRiposte = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.RIPOSTE, shieldItemStack);
         float paryingDamage = levelRiposte > 0 ? 0.2F * damageAmount * levelRiposte : 0.0F;
 
         // If you blocked within 8 ticks of an attack, you reflect the attack back (partially)
-        int useTime =  shieldItem.getMaxUseTime(shieldItemStack) - itemUseTimeLeft;
+        int useTime =  shieldItem.getMaxUseTime(shieldItemStack, (LivingEntity) ((Object)this)) - itemUseTimeLeft;
         boolean hasParried = useTime < PARRY_TIME_TICKS + levelRiposte && useTime > 0;
         if(hasParried) {
             if ((LivingEntity) (Object) this instanceof PlayerEntity player) player.getItemCooldownManager().set(shieldItem, PARRY_TIME_TICKS << 1);

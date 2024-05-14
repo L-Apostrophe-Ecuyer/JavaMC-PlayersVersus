@@ -1,0 +1,36 @@
+{
+  "description": {
+    "translate": "enchantment.players-versus.tossing"
+  },
+  "exclusive_set": "minecraft:knockback",
+  "supported_items": "#minecraft:shovels",
+  "primary_items": "#minecraft:shovels",
+  "weight": 5,
+  "max_level": 2,
+  "min_cost": {
+    "base": 5,
+    "per_level_above_first": 20
+  },
+  "max_cost": {
+    "base": 55,
+    "per_level_above_first": 20
+  },
+  "anvil_cost": 2,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {
+    "minecraft:knockback": [
+      {
+        "effect": {
+          "type": "minecraft:add",
+          "value": {
+            "type": "minecraft:linear",
+            "base": 0.25,
+            "per_level_above_first": 0.25
+          }
+        }
+      }
+    ]
+  }
+}

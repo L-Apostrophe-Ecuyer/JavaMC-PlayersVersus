@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import frootloops.versus.VersusMod;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -9,6 +10,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
@@ -37,7 +39,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
     private void jump(CallbackInfo info) {
 
         // Bounding strides:
-        double boundingStridesLevel = EnchantmentHelper.getLevel(BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
+        double boundingStridesLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
         if(boundingStridesLevel > 0) {
 
             double velocityY = (double) this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
@@ -61,7 +63,6 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                 ((PlayerEntity) ((Object) this)).addExhaustion(0.2f);
                 hasBounded = true;
             }
-            else VersusMod.MOD_LOGGER.warn("Speed was " + horizontalSpeedSquared);
 
             // Bounding strides effect:
             if (hasBounded) {

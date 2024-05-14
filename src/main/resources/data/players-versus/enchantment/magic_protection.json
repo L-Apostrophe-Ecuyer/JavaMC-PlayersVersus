@@ -1,0 +1,46 @@
+{
+  "description": {
+    "translate": "enchantment.players-versus.magic_protection"
+  },
+  "exclusive_set": "#minecraft:exclusive_set/armor",
+  "supported_items": "#minecraft:enchantable/armor",
+  "weight": 3,
+  "max_level": 4,
+  "min_cost": {
+    "base": 8,
+    "per_level_above_first": 4
+  },
+  "max_cost": {
+    "base": 14,
+    "per_level_above_first": 5
+  },
+  "anvil_cost": 3,
+  "slots": [
+    "armor"
+  ],
+  "effects": {
+    "minecraft:damage_protection": [
+      {
+        "effect": {
+          "type": "minecraft:add",
+          "value": {
+            "type": "minecraft:linear",
+            "base": 3,
+            "per_level_above_first": 2
+          }
+        },
+        "requirements": {
+          "condition": "minecraft:damage_source_properties",
+          "predicate": {
+            "tags": [
+              {
+                "id": "players-versus:is_protected_by_magic_enchant",
+                "expected": true
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

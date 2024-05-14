@@ -127,9 +127,9 @@ public abstract class Items {
         for (Item item : Registries.ITEM) {
 
             if (item.getComponents().contains(DataComponentTypes.FOOD)) {
-                if (item.getTranslationKey().contains("cooked")) setDefaultMaxStackSize(item, maxMeals);
-                else if (item instanceof StewItem || item instanceof SuspiciousStewItem)
-                    setDefaultMaxStackSize(item, maxStews);
+                if (item.getTranslationKey().startsWith("cooked_") || item.getTranslationKey().startsWith("raw_")) setDefaultMaxStackSize(item, maxMeals);
+                else if (item.getTranslationKey().contains("stew")) setDefaultMaxStackSize(item, maxStews);
+                else if (item.getTranslationKey().contains("soup")) setDefaultMaxStackSize(item, maxStews);
                 else setDefaultMaxStackSize(item, maxFoods);
             } else if (item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem)
                 setDefaultMaxStackSize(item, maxPlaceableEntities);

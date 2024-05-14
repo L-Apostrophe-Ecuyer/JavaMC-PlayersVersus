@@ -1,16 +1,14 @@
 package frootloops.versus.mixin.players;
 
-import com.google.common.collect.Multimap;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.Enchants;
-import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.BrushableBlock;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -24,6 +22,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
@@ -116,8 +115,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     protected float modifyAppliedDamage(DamageSource source, float amount) {
-        if(source.isOf(DamageTypes.SONIC_BOOM)) {
-            int protectionAmount = EnchantmentHelper.getProtectionAmount(this.getArmorItems(), source);
+        if(source.isOf(DamageTypes.SONIC_BOOM) && this.getWorld() instanceof ServerWorld serverWorld) {
+            float protectionAmount = EnchantmentHelper.getProtectionAmount(serverWorld, this, source);
             if (protectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, protectionAmount);
         }
         return super.modifyAppliedDamage(source, amount);
@@ -139,9 +138,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
                 float armorAmount = helmetItem.getProtection();
                 float toughnessAmount = helmetItem.getToughness();
-                float enchantmentProtectionAmount = (float)Math.max(EnchantmentHelper.getLevel(Enchants.IMPACT_PROTECTION, helmetStack), EnchantmentHelper.getLevel(Enchantments.PROTECTION, helmetStack));
+                float enchantmentProtectionAmount = (float)Math.max(EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.IMPACT_PROTECTION, helmetStack), EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.PROTECTION, helmetStack));
                 if (enchantmentProtectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, enchantmentProtectionAmount);
-                return DamageUtil.getDamageLeft(amount, source, armorAmount, toughnessAmount);
+                return DamageUtil.getDamageLeft(this, amount, source, armorAmount, toughnessAmount);
             }
         }
         return amount;
@@ -175,15 +174,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "attack", at = @At("TAIL"))
     public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {
-
         // Attacking while walking backwards deals less knockback:
         boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
         if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.6d, 0.8d, 0.6d));
-
-        // Toss attack and enchantment:
-        if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {
-            TossingEnchantment.performTossAttack(this, target, 0.2 + 0.1 * (double)EnchantmentHelper.getEquipmentLevel(Enchants.TOSSING, this));
-        }
     }
 
     @Inject(method = "setLastDeathPos", at = @At("TAIL"))

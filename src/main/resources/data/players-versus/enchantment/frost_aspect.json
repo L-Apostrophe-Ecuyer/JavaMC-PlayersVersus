@@ -1,0 +1,78 @@
+{
+  "description": {
+    "translate": "enchantment.players-versus.frost_aspect"
+  },
+  "supported_items": "#minecraft:enchantable/sharp_weapon",
+  "primary_items": "#minecraft:axes",
+  "weight": 2,
+  "max_level": 2,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 20
+  },
+  "max_cost": {
+    "base": 60,
+    "per_level_above_first": 20
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {
+    "minecraft:hit_block": [
+      {
+        "effect": {
+          "type": "minecraft:all_of",
+          "effects": [
+            {
+              "type": "minecraft:set_block_properties",
+              "properties": {
+                "lit": "false"
+              },
+              "trigger_game_event": "minecraft:block_change"
+            },
+            {
+              "type": "minecraft:damage_item",
+              "amount": 1
+            }
+          ]
+        },
+        "requirements": {
+          "condition": "minecraft:location_check",
+          "predicate": {
+            "block": {
+              "blocks": "#minecraft:fire_aspect_lightable",
+              "state": {
+                "lit": "true"
+              }
+            },
+            "fluid": {
+              "fluids": "minecraft:empty"
+            }
+          }
+        }
+      },
+      {
+        "effect": {
+          "type": "minecraft:replace_block",
+          "block_state": {
+            "type": "minecraft:simple_state_provider",
+            "state": {
+              "Name": "minecraft:frosted_ice"
+            }
+          },
+          "predicate": {
+            "type": "minecraft:matching_blocks",
+            "offset": [
+              0,
+              0,
+              0
+            ],
+            "blocks": "minecraft:water"
+          },
+          "trigger_game_event": "minecraft:block_change"
+        }
+      }
+    ]
+  }
+}

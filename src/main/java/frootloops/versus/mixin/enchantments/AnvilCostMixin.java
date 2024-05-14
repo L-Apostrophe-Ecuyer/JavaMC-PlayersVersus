@@ -1,28 +1,20 @@
 package frootloops.versus.mixin.enchantments;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.CraftingResultInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 @Mixin(AnvilScreenHandler.class)
@@ -105,10 +97,10 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
 
             // Check if we're merging with a higher level enchant:
             for (RegistryEntry<Enchantment> toolEnchant : enchantmentsMapTool) {
-                int levelTool = toolEnchantmentComponent.getLevel(toolEnchant.value());
-                int levelRepair = repairEnchantmentComponent.getLevel(toolEnchant.value());
+                int levelTool = toolEnchantmentComponent.getLevel(toolEnchant);
+                int levelRepair = repairEnchantmentComponent.getLevel(toolEnchant);
                 if(levelRepair > levelTool) {
-                    builder.set(toolEnchant.value(), levelRepair);
+                    builder.set(toolEnchant, levelRepair);
                     int levelCostForUpgraded = getLevelCostForApplying(toolEnchant, levelRepair);
                     int levelCostForCurrent = getLevelCostForApplying(toolEnchant, levelTool);
                     levelCostForEnchants += Math.max(1 + levelRepair - levelTool, levelCostForUpgraded - levelCostForCurrent);
@@ -118,18 +110,18 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
 
             // Check if we're adding a new enchantment:
             for (RegistryEntry<Enchantment> repairEnchant : enchantmentsMapRepair) {
-                int levelTool = toolEnchantmentComponent.getLevel(repairEnchant.value());
-                int levelRepair = repairEnchantmentComponent.getLevel(repairEnchant.value());
+                int levelTool = toolEnchantmentComponent.getLevel(repairEnchant);
+                int levelRepair = repairEnchantmentComponent.getLevel(repairEnchant);
                 if(levelTool == 0 && repairEnchant.value().isAcceptableItem(toolStack)) {
                     boolean canAddNewEnchant = true;
                     for (RegistryEntry<Enchantment> toolEnchant : builder.getEnchantments()) {
-                        if (!toolEnchant.equals(repairEnchant) && !repairEnchant.value().canCombine(toolEnchant.value())) {
+                        if (!toolEnchant.equals(repairEnchant) && !!Enchantment.canBeCombined(repairEnchant, toolEnchant)) {
                             canAddNewEnchant = false;
                             break;
                         }
                     }
                     if (canAddNewEnchant) {
-                        builder.add(repairEnchant.value(), levelRepair);
+                        builder.add(repairEnchant, levelRepair);
                         levelCostForEnchants += getLevelCostForApplying(repairEnchant, levelRepair);
                         numEnchantsAdded++;
                     }

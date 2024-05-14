@@ -57,7 +57,7 @@ public class SlimeballsAndFireChargesMixin {
             double vx = -MathHelper.sin(user.getYaw() * ((float)Math.PI / 180)) * MathHelper.cos(user.getPitch() * ((float)Math.PI / 180));
             double vy = -MathHelper.sin((user.getPitch()) * ((float)Math.PI / 180));
             double vz = MathHelper.cos(user.getYaw() * ((float)Math.PI / 180)) * MathHelper.cos(user.getPitch() * ((float)Math.PI / 180));
-            FireballEntity fireballEntity = new FireballEntity(world, user, vx, vy, vz, 1);
+            FireballEntity fireballEntity = new FireballEntity(world, user, new Vec3d(vx, vy, vz), 1);
             fireballEntity.setPosition(user.getEyePos().add(0.0, -0.05, 0.0));
             world.spawnEntity(fireballEntity);
         }

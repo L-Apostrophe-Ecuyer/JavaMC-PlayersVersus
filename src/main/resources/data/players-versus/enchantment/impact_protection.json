@@ -1,0 +1,168 @@
+{
+  "description": {
+    "translate": "enchantment.players-versus.impact_protection"
+  },
+  "exclusive_set": "#minecraft:exclusive_set/armor",
+  "supported_items": "#minecraft:enchantable/armor",
+  "weight": 4,
+  "max_level": 4,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 5
+  },
+  "max_cost": {
+    "base": 18,
+    "per_level_above_first": 7
+  },
+  "anvil_cost": 6,
+  "slots": [
+    "armor"
+  ],
+  "effects": {
+    "minecraft:attributes": [
+      {
+        "name": "enchantment.impact_protection",
+        "attribute": "minecraft:generic.knockback_resistance",
+        "amount": {
+          "type": "minecraft:linear",
+          "base": 0.01,
+          "per_level_above_first": 0.01
+        },
+        "operation": "add_value",
+        "uuid": "824de891-f87d-41fc-9b53-0c7740daff15"
+      }
+    ],
+    "minecraft:damage_protection": [
+      {
+        "effect": {
+          "type": "minecraft:add",
+          "value": {
+            "type": "minecraft:linear",
+            "base": 2.0,
+            "per_level_above_first": 1.0
+          }
+        },
+        "requirements": {
+          "condition": "minecraft:damage_source_properties",
+          "predicate": {
+            "tags": [
+              {
+                "id": "players-versus:is_melee_attack",
+                "expected": true
+              }
+            ],
+            "source_entity": {
+              "equipment": {
+                "mainhand": {
+                  "items": "minecraft:mace"
+                }
+              }
+            },
+            "is_direct": true
+          }
+        }
+      },
+      {
+        "effect": {
+          "type": "minecraft:add",
+          "value": {
+            "type": "minecraft:linear",
+            "base": 1.0,
+            "per_level_above_first": 1.0
+          }
+        },
+        "requirements": {
+          "condition": "minecraft:damage_source_properties",
+          "predicate": {
+            "tags": [
+              {
+                "id": "players-versus:is_protected_by_impact_enchant",
+                "expected": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "effect": {
+          "type": "minecraft:add",
+          "value": {
+            "type": "minecraft:linear",
+            "base": 2.0,
+            "per_level_above_first": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "equipment": {
+                "head": {
+                  "predicates": {
+                    "minecraft:enchantments": [
+                      {
+                        "enchantments": "players-versus:impact_protection"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "condition": "minecraft:damage_source_properties",
+            "predicate": {
+              "tags": [
+                {
+                  "id": "players-versus:is_head_impact",
+                  "expected": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "effect": {
+          "type": "minecraft:add",
+          "value": {
+            "type": "minecraft:linear",
+            "base": 2.0,
+            "per_level_above_first": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "equipment": {
+                "feet": {
+                  "predicates": {
+                    "minecraft:enchantments": [
+                      {
+                        "enchantments": "players-versus:impact_protection"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "condition": "minecraft:damage_source_properties",
+            "predicate": {
+              "tags": [
+                {
+                  "id": "minecraft:is_fall",
+                  "expected": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

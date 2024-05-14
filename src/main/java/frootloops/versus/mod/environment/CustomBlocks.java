@@ -5,7 +5,7 @@ import frootloops.versus.mod.environment.blocks.SmolderingTorchBlock;
 import frootloops.versus.mod.environment.blocks.SmolderingWallTorchBlock;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.particle.ParticleTypes;
@@ -30,7 +30,7 @@ public class CustomBlocks {
     public static final Block GRANITE_TILES_SLAB = new SlabBlock(AbstractBlock.Settings.copy(GRANITE_TILES));
     public static final Block GRANITE_TILES_STAIRS = new StairsBlock(GRANITE_TILES.getDefaultState(), AbstractBlock.Settings.copy(GRANITE_TILES));
 
-    public static final Block POLISHED_STONE = new Block(AbstractBlock.Settings.create().mapColor(MapColor.GRAY).instrument(Instrument.BASEDRUM).requiresTool().strength(1.5f, 6.0f));
+    public static final Block POLISHED_STONE = new Block(AbstractBlock.Settings.create().mapColor(MapColor.GRAY).instrument(NoteBlockInstrument.BASEDRUM).requiresTool().strength(1.5f, 6.0f));
     public static final Block POLISHED_STONE_SLAB = new SlabBlock(AbstractBlock.Settings.copy(POLISHED_STONE));
     public static final Block POLISHED_STONE_STAIRS = new StairsBlock(POLISHED_STONE.getDefaultState(), AbstractBlock.Settings.copy(POLISHED_STONE));
 

@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.players-versus.riposte"
+  },
+  "exclusive_set": "minecraft:thorns",
+  "supported_items": "#players-versus:enchantable/riposte_applicable",
+  "primary_items": "#players-versus:enchantable/riposte_applicable",
+  "weight": 10,
+  "max_level": 3,
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 11
+  },
+  "max_cost": {
+    "base": 21,
+    "per_level_above_first": 11
+  },
+  "anvil_cost": 1,
+  "slots": [
+    "mainhand"
+  ]
+}

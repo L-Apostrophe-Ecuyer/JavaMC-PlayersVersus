@@ -1,0 +1,11 @@
+{
+  "values": [
+    "#minecraft:is_lightning",
+    "minecraft:magic",
+    "minecraft:indirect_magic",
+    "minecraft:sonic_boom",
+    "minecraft:thorns",
+    "minecraft:wither",
+    "minecraft:dragon_breath"
+  ]
+}
