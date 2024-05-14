@@ -47,6 +47,9 @@ public class VersusMod implements ModInitializer {
 		MOD_LOGGER.info("Initializing custom worldgen features...");
 		CustomWorldgen.onInitialize();
 
+		MOD_LOGGER.info("Initializing custom enchantments...");
+		Enchants.onInitialize();
+
 		MOD_LOGGER.info("Initializing custom entities and mobs...");
 		ModEntities.onInitialize();
 

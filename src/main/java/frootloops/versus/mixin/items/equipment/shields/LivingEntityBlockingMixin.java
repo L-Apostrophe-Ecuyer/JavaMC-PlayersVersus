@@ -117,11 +117,11 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         }
 
         // If your shield has thorns, deal some damage to the attacker
-        int levelThorns = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.THORNS, shieldItemStack);
+        int levelThorns = 0;//EnchantmentHelper.getLevel(Enchantments.THORNS, shieldItemStack);
         float reflectedDamage = 0.1F * damageAmount * levelThorns;
 
         // If your shield has riposte, deal some damage to the attacker, on parrying
-        int levelRiposte = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.RIPOSTE, shieldItemStack);
+        int levelRiposte = 0;//EnchantmentHelper.getLevel(Enchants.RIPOSTE, shieldItemStack);
         float paryingDamage = levelRiposte > 0 ? 0.2F * damageAmount * levelRiposte : 0.0F;
 
         // If you blocked within 8 ticks of an attack, you reflect the attack back (partially)

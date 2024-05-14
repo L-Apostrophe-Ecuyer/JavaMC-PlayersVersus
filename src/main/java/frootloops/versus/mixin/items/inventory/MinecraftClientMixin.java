@@ -44,14 +44,12 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Shadow @Nullable public ClientPlayerInteractionManager interactionManager;
     @Shadow @Nullable public final GameRenderer gameRenderer;
     @Shadow public final GameOptions options;
-    @Shadow private static final Text NBT_TOOLTIP_TEXT = Text.literal("(+NBT)");
 
     @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity, DynamicRegistryManager registryManager) {
-        NbtCompound nbtCompound = blockEntity.createComponentlessNbt(registryManager);
+        NbtCompound nbtCompound = blockEntity.createComponentlessNbtWithIdentifyingData(registryManager);
         blockEntity.removeFromCopiedStackNbt(nbtCompound);
         BlockItem.setBlockEntityData(stack, blockEntity.getType(), nbtCompound);
         stack.applyComponentsFrom(blockEntity.createComponentMap());
-        stack.apply(DataComponentTypes.LORE, LoreComponent.DEFAULT, NBT_TOOLTIP_TEXT, LoreComponent::with);
     }
 
     public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, GameOptions options) { super(string);

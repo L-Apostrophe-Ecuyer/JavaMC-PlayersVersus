@@ -4,7 +4,6 @@ import frootloops.versus.VersusMod;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKey;
@@ -18,9 +17,6 @@ import net.minecraft.world.event.GameEvent;
 
 
 public abstract class Enchants {
-
-    public static final int MAX_PROTECTION_LEVELS_PER_ITEM = 3;
-    public static final EquipmentSlot[] ALL_ARMOR = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     public static final RegistryKey<Enchantment> TOSSING = of("tossing");
     public static final RegistryKey<Enchantment> RIPOSTE = of("riposte");
     public static final RegistryKey<Enchantment> CLEAVING = of("cleaving");
@@ -33,6 +29,9 @@ public abstract class Enchants {
 
     private static RegistryKey<Enchantment> of(String id) {
         return RegistryKey.of(RegistryKeys.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, id));
+    }
+
+    public static void onInitialize(){
     }
 
     public final static void performTossAttack(LivingEntity user, Entity target, double magnitude){
@@ -62,7 +61,7 @@ public abstract class Enchants {
         }
     }
 
-    public static void onUserDamaged(LivingEntity user, Entity attacker) {
+    public static void onCurseOfEnderUserDamaged(LivingEntity user, Entity attacker) {
         if(attacker instanceof LivingEntity && user != null & user.isAlive()) {
             if (!user.getWorld().isClient) {
                 user.damage(user.getDamageSources().magic(), 2.0f);

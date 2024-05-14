@@ -1,8 +1,11 @@
 package frootloops.versus.mixin.players;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.EnchantmentLevelEntry;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -10,6 +13,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
@@ -39,7 +43,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
     private void jump(CallbackInfo info) {
 
         // Bounding strides:
-        double boundingStridesLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) BOUNDING_STRIDES, this.getEquippedStack(EquipmentSlot.LEGS));
+        double boundingStridesLevel = 0; //, this.getEquippedStack(EquipmentSlot.LEGS));
         if(boundingStridesLevel > 0) {
 
             double velocityY = (double) this.getJumpVelocity() + this.getJumpBoostVelocityModifier();

@@ -20,7 +20,8 @@
               }
             },
             {
-              "function": "minecraft:looting_enchant",
+              "function": "minecraft:enchanted_count_increase",
+              "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
@@ -34,7 +35,8 @@
           "name": "minecraft:phantom_membrane",
           "functions": [
             {
-              "function": "minecraft:looting_enchant",
+              "function": "minecraft:enchanted_count_increase",
+              "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,

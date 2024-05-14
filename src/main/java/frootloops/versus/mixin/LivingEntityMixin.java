@@ -17,17 +17,17 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShovelItem;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -58,31 +58,50 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @Inject(method = "attack", at = @At("TAIL"))
-    public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {
-        LivingEntity self =  ((LivingEntity)(Object)this);
-        ItemStack mainhandStack = self.getMainHandStack();
-        if(mainhandStack.isEmpty()) return;
+    @Inject(method = "tryAttack", at = @At("TAIL"))
+    public void attackEnchantmentEffects(Entity target, CallbackInfoReturnable<Boolean> cir) {
+        if(cir.getReturnValue()) {
+            int level;
+            Optional<RegistryEntry.Reference<Enchantment>> enchant;
 
-        // Shovel attack and Tossing Enchantment:
-        if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
-            Enchants.performTossAttack(self, target, 0.2 + 0.1 * (double) EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.TOSSING, mainhandStack));
+            LivingEntity self = ((LivingEntity) (Object) this);
+            ItemStack mainhandStack = self.getMainHandStack();
+            if (mainhandStack.isEmpty()) return;
+
+            // Shovel attack and Tossing Enchantment:
+            if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
+                if(mainhandStack.hasEnchantments()) {
+                    enchant = getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchants.TOSSING);
+                    if (enchant.isPresent()) {
+                        level = EnchantmentHelper.getLevel(enchant.get(), mainhandStack);
+                        if (level > 0) Enchants.performTossAttack(self, target, 0.2 + 0.1 * (double)level);
+                    }
+                }
+                else Enchants.performTossAttack(self, target, 0.2);
+            }
+
+            // Other enchantments: Frost Aspect, Impaling
+            if (!mainhandStack.hasEnchantments()) return;
+
+            enchant = getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchants.FROST_ASPECT);
+            if(enchant.isPresent()) {
+                level = EnchantmentHelper.getLevel(enchant.get(), mainhandStack);
+                if (level > 0) Enchants.performFrostAttack(self, target, level);
+            }
+
+            enchant = getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.IMPALING);
+            if(enchant.isPresent()) {
+                level = EnchantmentHelper.getLevel(enchant.get(), mainhandStack);
+                if (level > 0) Enchants.performImpalingAttack(self, target, level);
+            }
         }
-
-        // Other enchantments: Frost Aspect, Impaling
-        if(!mainhandStack.hasEnchantments()) return;
-
-        int level;
-        level = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.FROST_ASPECT, mainhandStack);
-        if (level > 0)  Enchants.performFrostAttack(self, target, level);
-
-        level = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.IMPALING, mainhandStack);
-        if (level > 0)  Enchants.performImpalingAttack(self, target, level);
     }
 
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
         if(source.getAttacker() instanceof LivingEntity attacker) {
+
+            getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchants.CURSE_OF_ENDER);
 
             // Modify Invincibility Frames:
             if (timeUntilRegen > 10) {
@@ -91,8 +110,9 @@ public abstract class LivingEntityMixin extends Entity {
             }
 
             // Curse of Ender Enchantment:
-            if(EnchantmentHelper.getEquipmentLevel((RegistryEntry<Enchantment>) Enchants.CURSE_OF_ENDER,  ((LivingEntity)(Object)this)) > 0) {
-                Enchants.onUserDamaged(((LivingEntity)(Object)this), attacker);
+            Optional<RegistryEntry.Reference<Enchantment>> enchant = getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchants.CURSE_OF_ENDER);
+            if(enchant.isPresent() && EnchantmentHelper.getEquipmentLevel(enchant.get(), ((LivingEntity)(Object)this)) > 0) {
+                Enchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
             }
         }
     }

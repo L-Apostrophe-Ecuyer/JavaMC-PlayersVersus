@@ -2,7 +2,7 @@
   "description": {
     "translate": "enchantment.players-versus.riposte"
   },
-  "exclusive_set": "minecraft:thorns",
+  "exclusive_set": "#players-versus:exclusive_set/riposte",
   "supported_items": "#players-versus:enchantable/riposte_applicable",
   "primary_items": "#players-versus:enchantable/riposte_applicable",
   "weight": 10,

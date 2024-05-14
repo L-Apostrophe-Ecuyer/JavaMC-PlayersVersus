@@ -1,6 +1,10 @@
 package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
+import frootloops.versus.mod.enchantments.Enchants;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -12,11 +16,15 @@ import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ShovelItem;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
@@ -50,11 +58,44 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
+    @Inject(method = "tryAttack", at = @At("TAIL"))
+    public void attackEnchantmentEffects(Entity target, CallbackInfoReturnable<Boolean> cir) {
+        if(cir.getReturnValue()) {
+            LivingEntity self = ((LivingEntity) (Object) this);
+            ItemStack mainhandStack = self.getMainHandStack();
+            if (mainhandStack.isEmpty()) return;
+
+            // Shovel attack and Tossing Enchantment:
+            if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
+                Enchants.performTossAttack(self, target, 0.2 + 0.1 * (double) EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.TOSSING, mainhandStack));
+            }
+
+            // Other enchantments: Frost Aspect, Impaling
+            if (!mainhandStack.hasEnchantments()) return;
+
+            int level;
+            level = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.FROST_ASPECT, mainhandStack);
+            if (level > 0) Enchants.performFrostAttack(self, target, level);
+
+            level = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.IMPALING, mainhandStack);
+            if (level > 0) Enchants.performImpalingAttack(self, target, level);
+        }
+    }
+
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
-        if(timeUntilRegen > 10 && source.getAttacker() instanceof LivingEntity){
-            if(source.isOf(DamageTypes.ARROW)) timeUntilRegen = 0;
-            else if(timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
+        if(source.getAttacker() instanceof LivingEntity attacker) {
+
+            // Modify Invincibility Frames:
+            if (timeUntilRegen > 10) {
+                if (source.isOf(DamageTypes.ARROW)) timeUntilRegen = 0;
+                else if (timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
+            }
+
+            // Curse of Ender Enchantment:
+            if(EnchantmentHelper.getEquipmentLevel((RegistryEntry<Enchantment>) Enchants.CURSE_OF_ENDER,  ((LivingEntity)(Object)this)) > 0) {
+                Enchants.onUserDamaged(((LivingEntity)(Object)this), attacker);
+            }
         }
     }
 }

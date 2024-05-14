@@ -43,18 +43,16 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
     @Shadow public ClientWorld world;
     @Shadow @Nullable public HitResult crosshairTarget;
     @Shadow @Nullable public ClientPlayerInteractionManager interactionManager;
-    @Shadow private static final Text NBT_TOOLTIP_TEXT = Text.literal("(+NBT)");
 
     public HotbarSwappingClientMixin(String string) {
         super(string);
     }
 
     @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity, DynamicRegistryManager registryManager) {
-        NbtCompound nbtCompound = blockEntity.createComponentlessNbt(registryManager);
+        NbtCompound nbtCompound = blockEntity.createComponentlessNbtWithIdentifyingData(registryManager);
         blockEntity.removeFromCopiedStackNbt(nbtCompound);
         BlockItem.setBlockEntityData(stack, blockEntity.getType(), nbtCompound);
         stack.applyComponentsFrom(blockEntity.createComponentMap());
-        stack.apply(DataComponentTypes.LORE, LoreComponent.DEFAULT, NBT_TOOLTIP_TEXT, LoreComponent::with);
     }
 
     /**

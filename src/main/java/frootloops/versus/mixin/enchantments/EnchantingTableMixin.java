@@ -16,6 +16,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.featuretoggle.FeatureSet;
@@ -60,27 +61,27 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
     @Shadow private final ScreenHandlerContext context;
     @Shadow private final Property seed;
 
-    @Shadow private List<EnchantmentLevelEntry> generateEnchantments(FeatureSet enabledFeatures, ItemStack stack, int slot, int level) { return null;}
+    @Shadow private List<EnchantmentLevelEntry> generateEnchantments(DynamicRegistryManager registryManager, ItemStack stack, int slot, int level) { return null;}
 
     @Overwrite
-    public boolean onButtonClick(PlayerEntity player, int index) {
-        if (index < 0 || index >= this.enchantmentPower.length) {
-            Util.error(player.getName() + " pressed invalid button id: " + index);
+    public boolean onButtonClick(PlayerEntity player, int id) {
+        if (id < 0 || id >= this.enchantmentPower.length) {
+            Util.error(player.getName() + " pressed invalid button id: " + id);
             return false;
         }
 
         ItemStack inputStack = this.inventory.getStack(0);
         ItemStack lapisStack = this.inventory.getStack(1);
-        int lapisCost = index + 1;
+        int lapisCost = id + 1;
         if ((lapisStack.isEmpty() || lapisStack.getCount() < lapisCost) && !player.getAbilities().creativeMode) {
             return false;
         }
 
-        if (this.enchantmentPower[index] > 0 && !inputStack.isEmpty() && (player.experienceLevel >= lapisCost && player.experienceLevel >= this.enchantmentPower[index] || player.getAbilities().creativeMode)) {
+        if (this.enchantmentPower[id] > 0 && !inputStack.isEmpty() && (player.experienceLevel >= lapisCost && player.experienceLevel >= this.enchantmentPower[id] || player.getAbilities().creativeMode)) {
             this.context.run((world, pos) -> {
 
                 ItemStack stack = inputStack;
-                List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(world.getEnabledFeatures(), stack, index, this.enchantmentPower[index]);
+                List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id, this.enchantmentPower[id]);
                 if (!listCandidateEnchantments.isEmpty()) {
 
                     // Apply costs:
@@ -125,8 +126,9 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
     private void updateUnavailableEnchantments(Inventory inventory, CallbackInfo ci) {
         this.context.run((world, pos) -> {
             List<EnchantmentLevelEntry> list;
+            ItemStack itemStack = inventory.getStack(0);
             for (int j = 0; j < 3; ++j) {
-                if (this.enchantmentPower[j] <= 0 || (list = this.generateEnchantments(world.getEnabledFeatures(), inventory.getStack(0), j, this.enchantmentPower[j])) == null || list.isEmpty()) {
+                if (this.enchantmentPower[j] <= 0 || (list = this.generateEnchantments(world.getRegistryManager(), itemStack, j, this.enchantmentPower[j])) == null || list.isEmpty()) {
                     this.enchantmentPower[j] = 0;
                     this.enchantmentLevel[j] = -1;
                     this.enchantmentId[j] = -1;

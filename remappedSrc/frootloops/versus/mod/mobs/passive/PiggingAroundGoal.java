@@ -3,6 +3,8 @@ package frootloops.versus.mod.mobs.passive;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.pathing.Path;
@@ -91,7 +93,7 @@ public class PiggingAroundGoal extends Goal {
             BlockState blockState = this.world.getBlockState(blockPos);
             if (blockState.getBlock() == Blocks.CARROTS) {
                 this.world.setBlockState(blockPos, Blocks.CARROTS.getDefaultState());
-                this.mob.eatFood(world, new ItemStack(Items.CARROT, 1));
+                this.mob.eatFood(world, Items.CARROT.getDefaultStack(), Items.CARROT.getComponents().get(DataComponentTypes.FOOD));
 
             } else {
                 blockPos = blockPos.down();

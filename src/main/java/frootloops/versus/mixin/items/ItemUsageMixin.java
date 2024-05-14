@@ -53,8 +53,13 @@ public class ItemUsageMixin {
         MAX_USE_TIME_MAP.put(Items.RECOVERY_COMPASS, 32);
     }
 
+    @Inject(method = "getUseAction", at = @At("HEAD"), cancellable = true)
+    public void getUseAction(ItemStack stack, CallbackInfoReturnable<UseAction> cir) {
+        if(cir.getReturnValue() == UseAction.NONE && stack.isOf(Items.RECOVERY_COMPASS)) cir.setReturnValue(UseAction.BOW);
+    }
+
     @Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable = true)
-    public void getMaxUseTime(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+    public void getMaxUseTime(ItemStack stack, LivingEntity user, CallbackInfoReturnable<Integer> cir) {
         Item item = stack.getItem();
         if(MAX_USE_TIME_MAP.containsKey(item)) {
             cir.setReturnValue(MAX_USE_TIME_MAP.get(item));

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import java.util.Set;
 
-@Mixin(AnvilScreenHandler.class)
+@Mixin(value = AnvilScreenHandler.class, priority = 999)
 public abstract class AnvilCostMixin extends ForgingScreenHandler {
 
     @Shadow

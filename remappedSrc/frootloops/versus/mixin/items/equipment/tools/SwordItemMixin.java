@@ -3,6 +3,7 @@ package frootloops.versus.mixin.items.equipment.tools;
 import frootloops.versus.mod.Combat;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
@@ -10,6 +11,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -45,14 +47,14 @@ public class SwordItemMixin extends ToolItem {
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack);
+        int sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
         return sweepLevel > 0 ? UseAction.BRUSH : UseAction.BLOCK;
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        int sweepLevel = EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack);
+        int sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
         double attackCharge = Combat.getAttackChargeProgress(user);
         double attackChargeRequired = sweepLevel > 0 ? 1d + 0.2d * (3 - sweepLevel) : 1d;
         if(attackCharge >= attackChargeRequired) {
@@ -64,13 +66,8 @@ public class SwordItemMixin extends ToolItem {
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack) {
-        return this.getUseAction(stack) == UseAction.BLOCK ? 72000 : 6;
-    }
-
-    @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if((EnchantmentHelper.getLevel(Enchantments.SWEEPING_EDGE, stack) > 0)) {
+        if((EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack) > 0)) {
             if (user instanceof PlayerEntity player) player.resetLastAttackedTicks();
             else user.onAttacking(user.getAttacking());
         }

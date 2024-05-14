@@ -1,16 +1,13 @@
 package frootloops.versus.mixin.players;
 
-import com.google.common.collect.Multimap;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.Enchants;
-import frootloops.versus.mod.enchantments.tools.TossingEnchantment;
 import frootloops.versus.mod.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.BrushableBlock;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -62,14 +59,20 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-        cir.setReturnValue(LivingEntity.createLivingAttributes()
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, Combat.PLAYER_BASE_ATTACK_SPEED)
-                .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 5.0)
-                .add(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, Combat.PLAYER_BASE_ATTACK_REACH)
-                .add(EntityAttributes.GENERIC_LUCK)
-                .add(EntityAttributes.PLAYER_BLOCK_BREAK_SPEED));
+        cir.setReturnValue(
+            LivingEntity.createLivingAttributes()
+                    .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
+                    .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
+                    .add(EntityAttributes.GENERIC_ATTACK_SPEED,  Combat.PLAYER_BASE_ATTACK_SPEED)
+                    .add(EntityAttributes.GENERIC_LUCK)
+                    .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 5.0)
+                    .add(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE,  Combat.PLAYER_BASE_ATTACK_REACH)
+                    .add(EntityAttributes.PLAYER_BLOCK_BREAK_SPEED)
+                    .add(EntityAttributes.PLAYER_SUBMERGED_MINING_SPEED)
+                    .add(EntityAttributes.PLAYER_SNEAKING_SPEED)
+                    .add(EntityAttributes.PLAYER_MINING_EFFICIENCY)
+                    .add(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO)
+        );
     }
 
 
@@ -177,15 +180,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "attack", at = @At("TAIL"))
     public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {
-
         // Attacking while walking backwards deals less knockback:
         boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
         if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.6d, 0.8d, 0.6d));
-
-        // Toss attack and enchantment:
-        if (!this.isSneaking() && this.isOnGround() && this.getMainHandStack().getItem() instanceof ShovelItem) {
-            TossingEnchantment.performTossAttack(this, target, 0.2 + 0.1 * (double)EnchantmentHelper.getEquipmentLevel((RegistryEntry<Enchantment>) Enchants.TOSSING, this));
-        }
     }
 
     @Inject(method = "setLastDeathPos", at = @At("TAIL"))

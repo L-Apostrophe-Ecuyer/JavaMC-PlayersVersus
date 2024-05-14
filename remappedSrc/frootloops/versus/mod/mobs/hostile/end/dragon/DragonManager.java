@@ -102,7 +102,7 @@ public class DragonManager {
 			dragon.method_48926().syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
 		}
 
-		DragonFireballEntity dragonfireballentity = new DragonFireballEntity(dragon.method_48926(), dragon, xPower, yPower, zPower);
+		DragonFireballEntity dragonfireballentity = new DragonFireballEntity(dragon.method_48926(), dragon, new Vec3d(xPower, yPower, zPower));
 		dragonfireballentity.refreshPositionAndAngles(x, y, z, 0.0F, 0.0F);
 		dragon.method_48926().spawnEntity(dragonfireballentity);
 
@@ -121,7 +121,7 @@ public class DragonManager {
 				dragon.method_48926().syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
 			}
 
-			dragonfireballentity = new DragonFireballEntity(dragon.method_48926(), dragon, xPower, yPower, zPower);
+			dragonfireballentity = new DragonFireballEntity(dragon.method_48926(), dragon, new Vec3d(xPower, yPower, zPower));
 			dragonfireballentity.refreshPositionAndAngles(x, y, z, 0.0F, 0.0F);
 			dragon.method_48926().spawnEntity(dragonfireballentity);
 		}

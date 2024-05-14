@@ -1,8 +1,22 @@
 {
-  "anvil_cost": 2,
   "description": {
     "translate": "enchantment.minecraft.bane_of_arthropods"
   },
+  "supported_items": "minecraft:stick",
+  "weight": 1,
+  "max_level": 5,
+  "min_cost": {
+    "base": 500,
+    "per_level_above_first": 500
+  },
+  "max_cost": {
+    "base": 500,
+    "per_level_above_first": 8
+  },
+  "anvil_cost": 2,
+  "slots": [
+    "mainhand"
+  ],
   "effects": {
     "minecraft:damage": [
       {
@@ -25,20 +39,20 @@
     ],
     "minecraft:post_attack": [
       {
+        "enchanted": "attacker",
         "affected": "victim",
         "effect": {
           "type": "minecraft:apply_mob_effect",
-          "max_amplifier": 3.0,
+          "to_apply": "minecraft:slowness",
+          "min_duration": 1.5,
           "max_duration": {
             "type": "minecraft:linear",
             "base": 1.5,
             "per_level_above_first": 0.5
           },
-          "min_amplifier": 3.0,
-          "min_duration": 1.5,
-          "to_apply": "minecraft:slowness"
+          "min_amplifier": 3,
+          "max_amplifier": 3
         },
-        "enchanted": "attacker",
         "requirements": {
           "condition": "minecraft:all_of",
           "terms": [
@@ -59,21 +73,5 @@
         }
       }
     ]
-  },
-  "exclusive_set": "#minecraft:exclusive_set/damage",
-  "max_cost": {
-    "base": 25,
-    "per_level_above_first": 8
-  },
-  "max_level": 5,
-  "min_cost": {
-    "base": 5,
-    "per_level_above_first": 8
-  },
-  "primary_items": "#minecraft:enchantable/sword",
-  "slots": [
-    "mainhand"
-  ],
-  "supported_items": "#minecraft:enchantable/weapon",
-  "weight": 0
+  }
 }

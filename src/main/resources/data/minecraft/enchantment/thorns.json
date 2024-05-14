@@ -46,10 +46,10 @@
     "base": 10,
     "per_level_above_first": 20
   },
-  "primary_items": "#minecraft:enchantable/chest_armor",
+  "primary_items": "#players-versus:enchantable/thorns_applicable",
   "slots": [
     "any"
   ],
-  "supported_items": "#minecraft:enchantable/armor",
+  "supported_items": "#players-versus:enchantable/thorns_applicable",
   "weight": 1
 }
