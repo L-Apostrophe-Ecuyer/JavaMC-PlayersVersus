@@ -12,6 +12,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -43,7 +44,10 @@ public abstract class SpecialMovementMixin extends LivingEntity {
     private void jump(CallbackInfo info) {
 
         // Bounding strides:
-        double boundingStridesLevel = 0; //, this.getEquippedStack(EquipmentSlot.LEGS));
+        ItemStack leggings = this.getEquippedStack(EquipmentSlot.LEGS);
+        if(leggings.isEmpty() || !leggings.hasEnchantments()) return;
+
+        double boundingStridesLevel = Enchants.getLevel(getWorld(), leggings, BOUNDING_STRIDES);
         if(boundingStridesLevel > 0) {
 
             double velocityY = (double) this.getJumpVelocity() + this.getJumpBoostVelocityModifier();

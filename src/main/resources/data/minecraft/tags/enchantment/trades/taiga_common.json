@@ -1,0 +1,11 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:binding_curse",
+    "minecraft:sweeping_edge",
+    "minecraft:knockback",
+    "minecraft:thorns",
+    "players-versus:piercing_protection",
+    "players-versus:tossing"
+  ]
+}

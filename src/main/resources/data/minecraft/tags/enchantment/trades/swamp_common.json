@@ -1,0 +1,11 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:aqua_affinity",
+    "minecraft:respiration",
+    "minecraft:depth_strider",
+    "minecraft:riptide",
+    "minecraft:lure",
+    "minecraft:mending"
+  ]
+}

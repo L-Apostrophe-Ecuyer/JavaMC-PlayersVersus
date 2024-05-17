@@ -1,0 +1,9 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:wind_burst",
+    "minecraft:thorns",
+    "minecraft:silk_touch",
+    "players-versus:cleaving"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:sharpness",
+    "players-versus.bounding_strides"
+  ]
+}

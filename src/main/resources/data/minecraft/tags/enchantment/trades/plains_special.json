@@ -1,0 +1,8 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:breach",
+    "players-versus:cleaving",
+    "minecraft:silk_touch"
+  ]
+}

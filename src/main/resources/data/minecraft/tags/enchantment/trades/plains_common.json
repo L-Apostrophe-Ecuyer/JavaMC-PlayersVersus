@@ -1,0 +1,11 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:sweeping_edge",
+    "minecraft:smite",
+    "minecraft:blast_protection",
+    "minecraft:projectile_protection",
+    "players-versus:impact_protection",
+    "players-versus:riposte"
+  ]
+}

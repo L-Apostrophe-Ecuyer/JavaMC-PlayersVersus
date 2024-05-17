@@ -1,0 +1,10 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:vanishing_curse",
+    "minecraft:binding_curse",
+    "minecraft:fortune",
+    "minecraft:infinity",
+    "players-versus:magic_protection"
+  ]
+}

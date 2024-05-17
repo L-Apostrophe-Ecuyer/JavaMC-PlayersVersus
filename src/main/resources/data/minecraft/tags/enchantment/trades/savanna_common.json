@@ -1,0 +1,12 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:feather_falling",
+    "minecraft:punch",
+    "minecraft:knockback",
+    "minecraft:sweeping_edge",
+    "minecraft:projectile_protection",
+    "players-versus:tossing",
+    "players-versus:impact_protection"
+  ]
+}

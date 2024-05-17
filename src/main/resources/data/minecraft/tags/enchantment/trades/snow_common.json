@@ -1,0 +1,11 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:aqua_affinity",
+    "minecraft:looting",
+    "minecraft:channeling",
+    "minecraft:frost_walker",
+    "players-versus:frost_aspect",
+    "players-versus:piercing_protection"
+  ]
+}

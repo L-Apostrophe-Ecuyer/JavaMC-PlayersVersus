@@ -1,0 +1,11 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:fire_protection",
+    "minecraft:fire_aspect",
+    "minecraft:thorns",
+    "minecraft:flame",
+    "minecraft:sweeping_edge",
+    "players-versus:piercing_protection"
+  ]
+}

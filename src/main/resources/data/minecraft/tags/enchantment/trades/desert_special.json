@@ -1,0 +1,8 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:efficiency",
+    "minecraft:infinity",
+    "minecraft:vanishing_curse"
+  ]
+}

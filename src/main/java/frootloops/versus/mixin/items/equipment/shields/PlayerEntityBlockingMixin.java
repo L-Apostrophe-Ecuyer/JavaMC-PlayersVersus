@@ -75,11 +75,8 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
         if(this.getAttacker() != null) {
             ItemStack mainhandStack = this.getAttacker().getMainHandStack();
             if(!mainhandStack.isEmpty() && mainhandStack.hasEnchantments()) {
-                Optional<RegistryEntry.Reference<Enchantment>> enchant = getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchants.TOSSING);
-                if (enchant.isPresent()) {
-                    int level = EnchantmentHelper.getLevel(enchant.get(), mainhandStack);
-                    if (level > 0)  disableForTicks += 20 * level;
-                }
+                int cleaveLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchants.CLEAVING);
+                if (cleaveLevel > 0)  disableForTicks += 20 * cleaveLevel;
             }
         }
 

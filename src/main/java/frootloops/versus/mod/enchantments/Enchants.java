@@ -3,17 +3,24 @@ package frootloops.versus.mod.enchantments;
 import frootloops.versus.VersusMod;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
+
+import java.util.Optional;
 
 
 public abstract class Enchants {
@@ -27,11 +34,45 @@ public abstract class Enchants {
     public static final RegistryKey<Enchantment> IMPACT_PROTECTION = of("impact_protection");
     public static final RegistryKey<Enchantment> PIERCING_PROTECTION = of("piercing_protection");
 
+    private static Registry<Enchantment> dynamicEnchantmentRegistry = null;
+
+
     private static RegistryKey<Enchantment> of(String id) {
         return RegistryKey.of(RegistryKeys.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, id));
     }
 
-    public static void onInitialize(){
+
+    public static Optional<RegistryEntry.Reference<Enchantment>> getRegistryEntry(World world, RegistryKey<Enchantment> enchantment) {
+        if(dynamicEnchantmentRegistry == null) dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
+        if(!enchantmentEntry.isPresent()) {
+            dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+            enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
+        }
+        return enchantmentEntry;
+    }
+
+    public static int getLevel(World world, ItemStack stack, RegistryKey<Enchantment> enchantment) {
+        if(!stack.hasEnchantments()) return 0;
+        if(dynamicEnchantmentRegistry == null) dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
+        if(!enchantmentEntry.isPresent()) {
+            dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+            enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
+            if(!enchantmentEntry.isPresent()) return 0;
+        }
+        return EnchantmentHelper.getLevel(enchantmentEntry.get(), stack);
+    }
+
+    public static int getEquipmentLevel(World world, LivingEntity user, RegistryKey<Enchantment> enchantment) {
+        if(dynamicEnchantmentRegistry == null) dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
+        if(!enchantmentEntry.isPresent()) {
+            dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+            enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
+            if(!enchantmentEntry.isPresent()) return 0;
+        }
+        return EnchantmentHelper.getEquipmentLevel(enchantmentEntry.get(), user);
     }
 
     public final static void performTossAttack(LivingEntity user, Entity target, double magnitude){

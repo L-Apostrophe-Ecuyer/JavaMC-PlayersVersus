@@ -1,10 +1,12 @@
 package frootloops.versus.mixin.items.equipment.tools;
 
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -21,6 +23,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Iterator;
 
 @Mixin(SwordItem.class)
 public class SwordItemMixin extends ToolItem {
@@ -47,14 +51,23 @@ public class SwordItemMixin extends ToolItem {
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        int sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
-        return sweepLevel > 0 ? UseAction.BRUSH : UseAction.BLOCK;
+        if(stack.hasEnchantments()) {
+            Iterator<RegistryEntry<Enchantment>> iterator = stack.getEnchantments().getEnchantments().iterator();
+            while (iterator.hasNext()) {
+                RegistryEntry<Enchantment> enchant = iterator.next();
+                if (enchant.getKey().get() == Enchantments.SWEEPING_EDGE) return UseAction.BRUSH;
+            }
+        }
+        return UseAction.BLOCK;
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        int sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
+        int sweepLevel = 0;
+        if(stack.hasEnchantments()) {
+            sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
+        }
         double attackCharge = Combat.getAttackChargeProgress(user);
         double attackChargeRequired = sweepLevel > 0 ? 1d + 0.2d * (3 - sweepLevel) : 1d;
         if(attackCharge >= attackChargeRequired) {
@@ -67,7 +80,7 @@ public class SwordItemMixin extends ToolItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if((EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack) > 0)) {
+        if(stack.hasEnchantments() && Enchants.getLevel(world, stack, Enchantments.SWEEPING_EDGE) > 0) {
             if (user instanceof PlayerEntity player) player.resetLastAttackedTicks();
             else user.onAttacking(user.getAttacking());
         }
