@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:snow",
+    "#minecraft:leaves",
+    "players-versus:brown_mud"
+  ]
+}
