@@ -17,11 +17,9 @@ in vec4 normal;
 out vec4 fragColor;
 
 void main() {
-    vec4 color = texture(Sampler0, texCoord0) * ColorModulator;
 
     // Adaptive Brightness
-    float adaptiveBrightnessMultiplier = (vertexDistance + 10.0) / (vertexDistance + 2.0 + vertexColor[1] * 6.0) + (vertexColor[1] - 0.6)/2.0;
-    color *= vertexColor * adaptiveBrightnessMultiplier;
+    vec4 color = texture(Sampler0, texCoord0) * ColorModulator * (vertexColor * ((vertexDistance + 16.0) / (vertexDistance + 4.0 + vertexColor[1] * 12.0) + (vertexColor[1] - 0.6)/2.0));
 
     // Atmosphere
     float atmosphereAmount = (vertexDistance * vertexDistance) / ((color[0] + color[1] + color[2] + 2.0) * (FogEnd * FogEnd));
