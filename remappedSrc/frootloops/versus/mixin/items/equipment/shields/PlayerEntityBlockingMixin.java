@@ -10,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stat;
@@ -22,6 +23,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Optional;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityBlockingMixin extends LivingEntity {
@@ -69,8 +72,13 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
     private void disableShieldMixin(CallbackInfo info) {
 
         int disableForTicks = 40;
-        if(this.getAttacker() != null)
-            disableForTicks += 20 *  EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.CLEAVING, this.getAttacker().getMainHandStack());
+        if(this.getAttacker() != null) {
+            ItemStack mainhandStack = this.getAttacker().getMainHandStack();
+            if(!mainhandStack.isEmpty() && mainhandStack.hasEnchantments()) {
+                int cleaveLevel = Enchants.getLevel(method_48926(), mainhandStack, Enchants.CLEAVING);
+                if (cleaveLevel > 0)  disableForTicks += 20 * cleaveLevel;
+            }
+        }
 
         this.itemCooldownManager.set(this.activeItemStack.getItem(), disableForTicks);
         this.clearActiveItem();

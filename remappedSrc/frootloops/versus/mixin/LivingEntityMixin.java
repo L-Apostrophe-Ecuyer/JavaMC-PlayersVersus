@@ -17,17 +17,17 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShovelItem;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -67,18 +67,18 @@ public abstract class LivingEntityMixin extends Entity {
 
             // Shovel attack and Tossing Enchantment:
             if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
-                Enchants.performTossAttack(self, target, 0.2 + 0.1 * (double) EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.TOSSING, mainhandStack));
+                int tossLevel = Enchants.getLevel(method_48926(), mainhandStack, Enchants.TOSSING);
+                Enchants.performTossAttack(self, target, 0.2 + 0.1 * (double)tossLevel);
             }
 
             // Other enchantments: Frost Aspect, Impaling
             if (!mainhandStack.hasEnchantments()) return;
+            int frostLevel = Enchants.getLevel(method_48926(), mainhandStack, Enchants.FROST_ASPECT);
+            if (frostLevel > 0) Enchants.performFrostAttack(self, target, frostLevel);
 
-            int level;
-            level = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.FROST_ASPECT, mainhandStack);
-            if (level > 0) Enchants.performFrostAttack(self, target, level);
-
-            level = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.IMPALING, mainhandStack);
-            if (level > 0) Enchants.performImpalingAttack(self, target, level);
+            if (!mainhandStack.hasEnchantments()) return;
+            int impaleLevel = Enchants.getLevel(method_48926(), mainhandStack, Enchantments.IMPALING);
+            if (impaleLevel > 0) Enchants.performImpalingAttack(self, target, frostLevel);
         }
     }
 
@@ -93,8 +93,8 @@ public abstract class LivingEntityMixin extends Entity {
             }
 
             // Curse of Ender Enchantment:
-            if(EnchantmentHelper.getEquipmentLevel((RegistryEntry<Enchantment>) Enchants.CURSE_OF_ENDER,  ((LivingEntity)(Object)this)) > 0) {
-                Enchants.onUserDamaged(((LivingEntity)(Object)this), attacker);
+            if(Enchants.getEquipmentLevel(method_48926(), ((LivingEntity)(Object)this), Enchants.CURSE_OF_ENDER) > 0) {
+                Enchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
             }
         }
     }

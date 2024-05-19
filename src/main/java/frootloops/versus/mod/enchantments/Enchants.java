@@ -8,7 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -34,45 +34,29 @@ public abstract class Enchants {
     public static final RegistryKey<Enchantment> IMPACT_PROTECTION = of("impact_protection");
     public static final RegistryKey<Enchantment> PIERCING_PROTECTION = of("piercing_protection");
 
-    private static Registry<Enchantment> dynamicEnchantmentRegistry = null;
-
-
     private static RegistryKey<Enchantment> of(String id) {
         return RegistryKey.of(RegistryKeys.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, id));
     }
 
+    private static RegistryEntryLookup enchRegistryLookup = null;
 
-    public static Optional<RegistryEntry.Reference<Enchantment>> getRegistryEntry(World world, RegistryKey<Enchantment> enchantment) {
-        if(dynamicEnchantmentRegistry == null) dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-        Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
-        if(!enchantmentEntry.isPresent()) {
-            dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-            enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
+    public static RegistryEntry<Enchantment> getRegistryEntry(World world, RegistryKey<Enchantment> enchantment) {
+        if(enchRegistryLookup == null) enchRegistryLookup = world.getRegistryManager().createRegistryLookup().getOrThrow(RegistryKeys.ENCHANTMENT);
+        Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = enchRegistryLookup.getOptional(enchantment);
+        if(enchantmentEntry.isPresent()) return enchantmentEntry.get();
+        else {
+            enchRegistryLookup = world.getRegistryManager().createRegistryLookup().getOrThrow(RegistryKeys.ENCHANTMENT);
+            return enchRegistryLookup.getOrThrow(enchantment);
         }
-        return enchantmentEntry;
     }
 
     public static int getLevel(World world, ItemStack stack, RegistryKey<Enchantment> enchantment) {
         if(!stack.hasEnchantments()) return 0;
-        if(dynamicEnchantmentRegistry == null) dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-        Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
-        if(!enchantmentEntry.isPresent()) {
-            dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-            enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
-            if(!enchantmentEntry.isPresent()) return 0;
-        }
-        return EnchantmentHelper.getLevel(enchantmentEntry.get(), stack);
+        return EnchantmentHelper.getLevel(getRegistryEntry(world, enchantment), stack);
     }
 
     public static int getEquipmentLevel(World world, LivingEntity user, RegistryKey<Enchantment> enchantment) {
-        if(dynamicEnchantmentRegistry == null) dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-        Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
-        if(!enchantmentEntry.isPresent()) {
-            dynamicEnchantmentRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-            enchantmentEntry = dynamicEnchantmentRegistry.getEntry(enchantment);
-            if(!enchantmentEntry.isPresent()) return 0;
-        }
-        return EnchantmentHelper.getEquipmentLevel(enchantmentEntry.get(), user);
+        return EnchantmentHelper.getEquipmentLevel(getRegistryEntry(world, enchantment), user);
     }
 
     public final static void performTossAttack(LivingEntity user, Entity target, double magnitude){

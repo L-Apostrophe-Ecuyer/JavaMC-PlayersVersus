@@ -138,17 +138,21 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         // Hitting blocks while flying no longer neglects helmet protection:
-        if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
+        // Should be datadriven
+        /*if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
             ItemStack helmetStack = this.getEquippedStack(EquipmentSlot.HEAD);
             if(helmetStack != null && helmetStack.getItem() != null && helmetStack.getItem() instanceof ArmorItem helmetItem) {
 
                 float armorAmount = helmetItem.getProtection();
                 float toughnessAmount = helmetItem.getToughness();
-                float enchantmentProtectionAmount = (float)Math.max(EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchants.IMPACT_PROTECTION, helmetStack), EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.PROTECTION, helmetStack));
+                float enchantmentProtectionAmount = (float)Math.max(
+                        Enchants.getLevel(getWorld(), helmetStack, Enchants.IMPACT_PROTECTION),
+                        Enchants.getLevel(getWorld(), helmetStack, Enchantments.PROTECTION)
+                );
                 if (enchantmentProtectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, enchantmentProtectionAmount);
                 return DamageUtil.getDamageLeft(this, amount, source, armorAmount, toughnessAmount);
             }
-        }
+        }*/
         return amount;
     }
 
