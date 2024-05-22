@@ -26,12 +26,14 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
 
     @Override
     protected int getHardAttackInterval() {
-        return 20 + (int)(this.getTarget().distanceTo(this));
+        if(this.getTarget() == null) return 20;
+        else return 20 + (int)(this.getTarget().distanceTo(this));
     }
 
     @Override
     protected int getRegularAttackInterval() {
-        return 30 + (int)(this.getTarget().distanceTo(this));
+        if(this.getTarget() == null) return 30;
+        else return 30 + (int)(this.getTarget().distanceTo(this));
     }
 
     @Nullable
