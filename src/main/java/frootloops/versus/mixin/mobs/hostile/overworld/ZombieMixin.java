@@ -61,13 +61,14 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-        double followRange = VersusSettings.DO_ZOMBIE_SOUND_DETECTION ? 7.0 : 30.0;
-        double mvtSpeed = VersusSettings.DO_ZOMBIE_SOUND_DETECTION ? 0.32 : 0.3;
+        double followRange = VersusSettings.DO_ZOMBIE_SOUND_DETECTION ? 8.0 : 30.0;
+        double mvtSpeed = VersusSettings.DO_ZOMBIE_SOUND_DETECTION ? 0.33 : 0.3;
         cir.setReturnValue(HostileEntity.createHostileAttributes()
                         .add(EntityAttributes.GENERIC_FOLLOW_RANGE, followRange)
                         .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, mvtSpeed)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
-                        .add(EntityAttributes.GENERIC_ARMOR, 4.0)
+                        .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.0)
+                        .add(EntityAttributes.GENERIC_ARMOR, 6.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
     }
 

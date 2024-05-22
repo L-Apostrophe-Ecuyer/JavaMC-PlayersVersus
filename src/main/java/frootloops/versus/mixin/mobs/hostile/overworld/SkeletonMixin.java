@@ -24,14 +24,27 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
         super(entityType, world);
     }
 
+    @Override
+    protected int getHardAttackInterval() {
+        return 20 + (int)(this.getTarget().distanceTo(this));
+    }
+
+    @Override
+    protected int getRegularAttackInterval() {
+        return 30 + (int)(this.getTarget().distanceTo(this));
+    }
+
     @Nullable
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
-        EntityAttributeInstance instance = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-        if (instance != null) {
-            instance.setBaseValue(22.0D);
+        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        if (instanceHP != null) {
+            instanceHP.setBaseValue(22.0D);
             this.setHealth(this.getMaxHealth());
         }
+
+        EntityAttributeInstance instanceFollow = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_FOLLOW_RANGE);
+        if (instanceFollow != null) instanceFollow.setBaseValue(30.0d);
         return super.initialize(world, difficulty, spawnReason, entityData);
     }
 
