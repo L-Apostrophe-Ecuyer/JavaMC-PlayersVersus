@@ -1,9 +1,13 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 1,
-  "ingredient": {
-    "tag": "players-versus:calcites"
-  },
+  "ingredient": [
+    {
+      "item": "minecraft:calcite"
+    },
+    {
+      "item": "minecraft:diorite"
+    }
+  ],
   "result": {
     "count": 1,
     "id": "minecraft:polished_diorite"

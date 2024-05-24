@@ -1,17 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "building",
-  "key": {
-    "S": {
-      "tag": "players-versus:calcites"
-    }
-  },
   "pattern": [
     "SS",
     "SS"
   ],
+  "key": {
+    "S": [
+      {
+        "item": "minecraft:calcite"
+      },
+      {
+        "item": "minecraft:diorite"
+      }
+    ]
+  },
   "result": {
-    "count": 4,
-    "id": "minecraft:polished_diorite"
+    "id": "minecraft:polished_diorite",
+    "count": 4
   }
 }

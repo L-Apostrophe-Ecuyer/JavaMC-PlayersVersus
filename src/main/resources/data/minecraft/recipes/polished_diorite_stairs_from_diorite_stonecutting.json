@@ -1,9 +1,16 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 1,
-  "ingredient": {
-    "tag": "players-versus:calcites_plus_polished"
-  },
+  "ingredient": [
+    {
+      "item": "minecraft:calcite"
+    },
+    {
+      "item": "minecraft:diorite"
+    },
+    {
+      "item": "minecraft:polished_diorite"
+    }
+  ],
   "result": {
     "count": 1,
     "id": "minecraft:polished_diorite_stairs"
