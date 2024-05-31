@@ -7,7 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.ZombieSiegeManager;
-import net.minecraft.world.spawner.SpecialSpawner;
+import net.minecraft.world.spawner.Spawner;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static frootloops.versus.VersusSettings.DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES;
 
 @Mixin(ZombieSiegeManager.class)
-public class ZombieHordeMixin implements SpecialSpawner {
+public class ZombieHordeMixin implements Spawner {
 
     @Shadow
     private int remaining, countdown, startX, startY, startZ;
@@ -58,14 +58,16 @@ public class ZombieHordeMixin implements SpecialSpawner {
         for (PlayerEntity playerEntity : world.getPlayers()) {
             BlockPos blockPos;
             if (playerEntity.isSpectator() || world.getBiome(blockPos = playerEntity.getBlockPos()).isIn(BiomeTags.WITHOUT_ZOMBIE_SIEGES)) continue;
-            if(!DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES && !world.isNearOccupiedPointOfInterest(blockPos)) continue;
+
+            boolean nearVillage = world.isNearOccupiedPointOfInterest(blockPos);
+            if(!DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES && !nearVillage) continue;
             for (int i = 0; i < 10; ++i) {
                 float f = world.random.nextFloat() * ((float)Math.PI * 2);
                 this.startX = blockPos.getX() + MathHelper.floor(MathHelper.cos(f) * 32.0f);
                 this.startY = blockPos.getY();
                 this.startZ = blockPos.getZ() + MathHelper.floor(MathHelper.sin(f) * 32.0f);
                 if(this.getSpawnVector(world, new BlockPos(this.startX, this.startY, this.startZ)) == null) continue;
-                if(!this.spawned) this.remaining = world.isNearOccupiedPointOfInterest(blockPos) ? 32 : 24;
+                if(!this.spawned) this.remaining = nearVillage ? 32 : 20;
                 break;
             }
             return true;

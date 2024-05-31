@@ -1,0 +1,32 @@
+{
+	"required": true,
+	"package": "frootloops.versus.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"environment.visuals.ClientWorldMixin",
+		"environment.visuals.FogRendererMixin",
+		"environment.visuals.WorldRendererMixin",
+		"environment.visuals.LightmapMixin",
+
+		"mobs.hostile.shields.IllagerModelMixin",
+		"mobs.hostile.shields.SkeletonModelMixin",
+		"mobs.hostile.shields.ZombieModelMixin",
+		"mobs.hostile.shields.PiglinModelMixin",
+		"mobs.hostile.overworld.SpiderRenderMixin",
+
+		"items.FirstPersonAnimationsMixin",
+		"items.inventory.HotbarSwappingClientMixin",
+		"items.inventory.InventoryScreenMixin",
+		"items.inventory.ItemMergingMixin",
+		"items.inventory.MinecraftClientMixin",
+
+		"players.attacking.CrosshairTargetMixin",
+		"players.attacking.CrosshairRendererMixin",
+		"players.death.DeathScreenMixin",
+		"players.HungerBarRendererMixin",
+		"players.HungerSprintingMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

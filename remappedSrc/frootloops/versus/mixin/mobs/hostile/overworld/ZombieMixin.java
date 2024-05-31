@@ -1,30 +1,18 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
-import frootloops.versus.VersusSettings;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.enchantment.provider.EnchantmentProviders;
+import frootloops.versus.mod.mobs.ModEntities;
+import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.*;
-import net.minecraft.entity.passive.*;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.LocalDifficulty;
@@ -36,9 +24,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(ZombieEntity.class)
@@ -61,33 +46,25 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-        double followRange = VersusSettings.DO_ZOMBIE_SOUND_DETECTION ? 7.0 : 30.0;
-        double mvtSpeed = VersusSettings.DO_ZOMBIE_SOUND_DETECTION ? 0.32 : 0.3;
+        double followRange = 48.0;
+        double mvtSpeed = 0.28;
         cir.setReturnValue(HostileEntity.createHostileAttributes()
                         .add(EntityAttributes.GENERIC_FOLLOW_RANGE, followRange)
                         .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, mvtSpeed)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
-                        .add(EntityAttributes.GENERIC_ARMOR, 4.0)
+                        .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.1)
+                        .add(EntityAttributes.GENERIC_ARMOR, 6.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
     }
 
-    @Overwrite
-    public void initCustomGoals() {
-        this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.4F;
-        this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.5F;
-        if(VersusSettings.DO_ZOMBIE_SOUND_DETECTION) this.ambientSoundChance = -1000;
-
-        if(this.getY() > 56d || this.getSteppingBlockState().getSoundGroup() == BlockSoundGroup.GRASS) {
-            this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, ((ZombieEntity) ((Object)this))::canBreakDoors));
+    @Inject(method = "damage", at = @At("TAIL"), cancellable = true)
+    private void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if(source.isOf(DamageTypes.FREEZE)) {
+            this.convertTo(ModEntities.FROSTED_ZOMBIE, true);
         }
-
-        this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.8F)); // Only 20% chance of actually wandering
-        this.targetSelector.add(1, new RevengeGoal(this, PigEntity.class));
-        this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, false));
-        this.targetSelector.add(3, new ActiveTargetGoal(this, MerchantEntity.class, false));
-        this.targetSelector.add(3, new ActiveTargetGoal(this, IronGolemEntity.class, false));
-        this.targetSelector.add(5, new ActiveTargetGoal(this, TurtleEntity.class, 10, true, false, TurtleEntity.BABY_TURTLE_ON_LAND_FILTER));
+        else if(source.isOf(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
+            this.convertTo(ModEntities.DEEPER_CREEPER, false);
+        }
     }
 
     @Override
@@ -103,7 +80,6 @@ public abstract class ZombieMixin extends HostileEntity {
 
         float difficulty = this.method_48926().getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
         ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
-        this.setCanPickUpLoot(true);
 
         float depth = Math.max(16.0f, 96.0f - (float)this.getBlockPos().getY());
         float worldDepthExtraDifficulty = (depth * depth)/32768.0f;
@@ -136,10 +112,6 @@ public abstract class ZombieMixin extends HostileEntity {
             boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
             if (isAtDiamondDepth && rand % 23 == 0) {
                 this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + random.nextInt(5)));
-                this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
-            }
-            else if (isAtDiamondDepth && rand % 29 == 0 || true) {
-                this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.OMINOUS_BOTTLE, 1));
                 this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
             }
 

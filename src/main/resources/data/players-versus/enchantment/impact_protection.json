@@ -21,15 +21,14 @@
   "effects": {
     "minecraft:attributes": [
       {
-        "name": "enchantment.impact_protection",
+        "id": "enchantments.impact_protection",
         "attribute": "minecraft:generic.knockback_resistance",
         "amount": {
           "type": "minecraft:linear",
           "base": 0.01,
           "per_level_above_first": 0.01
         },
-        "operation": "add_value",
-        "uuid": "824de891-f87d-41fc-9b53-0c7740daff15"
+        "operation": "add_value"
       }
     ],
     "minecraft:damage_protection": [
@@ -38,8 +37,8 @@
           "type": "minecraft:add",
           "value": {
             "type": "minecraft:linear",
-            "base": 2.0,
-            "per_level_above_first": 1.0
+            "base": 2,
+            "per_level_above_first": 1
           }
         },
         "requirements": {
@@ -67,8 +66,8 @@
           "type": "minecraft:add",
           "value": {
             "type": "minecraft:linear",
-            "base": 1.0,
-            "per_level_above_first": 1.0
+            "base": 1,
+            "per_level_above_first": 1
           }
         },
         "requirements": {
@@ -88,8 +87,8 @@
           "type": "minecraft:add",
           "value": {
             "type": "minecraft:linear",
-            "base": 2.0,
-            "per_level_above_first": 1.0
+            "base": 2,
+            "per_level_above_first": 1
           }
         },
         "requirements": [
@@ -128,8 +127,8 @@
           "type": "minecraft:add",
           "value": {
             "type": "minecraft:linear",
-            "base": 2.0,
-            "per_level_above_first": 1.0
+            "base": 2,
+            "per_level_above_first": 1
           }
         },
         "requirements": [

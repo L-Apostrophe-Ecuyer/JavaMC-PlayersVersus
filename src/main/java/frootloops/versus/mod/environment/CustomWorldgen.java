@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 
 public class CustomWorldgen {
-    public static final Identifier STONE_STALAGTITE_ID = new Identifier(VersusMod.MOD_ID, "stone_stalagtite");
+    public static final Identifier STONE_STALAGTITE_ID = Identifier.of(VersusMod.MOD_ID, "stone_stalagtite");
     public static final StoneStalagtiteFeature STONE_STALAGTITE_FEATURE = new StoneStalagtiteFeature( StoneStalagtiteFeatureConfig.CODEC);
 
     public static final ConfiguredFeature<StoneStalagtiteFeatureConfig, StoneStalagtiteFeature> STONE_STALAGTITE_FEATURE_CONFIGURED = new ConfiguredFeature<>(STONE_STALAGTITE_FEATURE,

@@ -62,7 +62,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         cir.setReturnValue(
             LivingEntity.createLivingAttributes()
                     .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
-                    .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.10000000149011612)
+                    .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1f)
                     .add(EntityAttributes.GENERIC_ATTACK_SPEED,  Combat.PLAYER_BASE_ATTACK_SPEED)
                     .add(EntityAttributes.GENERIC_LUCK)
                     .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 5.0)
@@ -74,7 +74,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                     .add(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO)
         );
     }
-
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
     private boolean switchHeldItemsWithoutResettingCooldown(ItemStack selectedItem, ItemStack itemStack) {

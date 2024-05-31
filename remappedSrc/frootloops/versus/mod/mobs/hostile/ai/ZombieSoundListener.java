@@ -61,8 +61,8 @@ public class ZombieSoundListener {
         // How much zombies should be attracted to the sound:
         boolean isHighPriority = (heardProjectileLanding || event == DRINK_EVENT || event == EAT_EVENT);
         boolean isPriority = !isHighPriority && (heardPlayerSprinting || event == DAMAGE_EVENT || event == BREAK_EVENT);
-        double range = isHighPriority ? 24d : isPriority? 18d : 12d;
-        double speedMultiplier = isHighPriority ? 1.4d : isPriority ? 1.3d : 1.1d;
+        double range = isHighPriority ? 40d : isPriority? 20d : 12d;
+        double speedMultiplier = isHighPriority ? 1.4d : isPriority ? 1.3d : 1.0d;
         if(!isPriority && !isHighPriority && currentTime % 2 != 0) return false; // Optimization: chance for zombies to ignore certain sounds/events
 
         // Create a bounding box surrounding the event's position:

@@ -1,7 +1,6 @@
 package frootloops.versus.mixin.items;
 
 import frootloops.versus.mod.items.Items;
-import net.fabricmc.yarn.constants.MiningLevels;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;

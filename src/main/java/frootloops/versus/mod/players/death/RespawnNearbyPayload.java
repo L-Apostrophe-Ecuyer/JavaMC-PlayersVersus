@@ -10,7 +10,7 @@ import net.minecraft.network.packet.CustomPayload;
 import java.util.UUID;
 
 public record RespawnNearbyPayload(UUID playerUUID) implements CustomPayload {
-    public static final Id<RespawnNearbyPayload> ID = CustomPayload.id(VersusMod.MOD_ID + ":request_nearby_respawn");
+    public static final Id<RespawnNearbyPayload> ID = CustomPayload.id("request_nearby_respawn");
     public static final PacketCodec<PacketByteBuf, RespawnNearbyPayload> CODEC = PacketCodec.of((value, buf) -> buf.writeUuid(value.playerUUID), buf -> new RespawnNearbyPayload(buf.readUuid()));
     @Override
     public Id<? extends CustomPayload> getId() { return ID; }

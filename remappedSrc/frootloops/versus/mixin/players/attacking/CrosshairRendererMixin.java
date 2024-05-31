@@ -12,6 +12,7 @@ import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.GameMode;
@@ -46,7 +47,7 @@ public class CrosshairRendererMixin {
     }
 
     @Overwrite
-    private void renderCrosshair(DrawContext context, float tickDelta) {
+    private void renderCrosshair(DrawContext context, RenderTickCounter tickCounter) {
         GameOptions gameOptions = this.client.options;
         if (gameOptions.getPerspective().isFirstPerson()) {
             if (this.client.interactionManager.getCurrentGameMode() != GameMode.SPECTATOR || this.shouldRenderSpectatorCrosshair(this.client.crosshairTarget)) {

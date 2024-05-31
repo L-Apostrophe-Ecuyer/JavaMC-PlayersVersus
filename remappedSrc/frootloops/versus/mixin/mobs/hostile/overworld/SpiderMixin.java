@@ -155,12 +155,12 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    public void method_5674(TrackedData<?> data) {
+    public void onTrackedDataSet(TrackedData<?> data) {
         if (BABY.equals(data)) {
             this.calculateDimensions();
         }
 
-        super.method_5674(data);
+        super.onTrackedDataSet(data);
     }
 
     @Override

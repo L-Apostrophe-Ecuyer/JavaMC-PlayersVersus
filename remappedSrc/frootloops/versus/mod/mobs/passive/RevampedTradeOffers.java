@@ -43,6 +43,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.village.*;
+import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 
@@ -832,7 +833,8 @@ public class RevampedTradeOffers {
         }
     }
 
-    public static class SellItemFactory implements Factory {
+    public static class SellItemFactory
+            implements Factory {
         private final ItemStack sell;
         private final int price;
         private final int maxUses;
@@ -845,7 +847,7 @@ public class RevampedTradeOffers {
         }
 
         public SellItemFactory(Item item, int price, int count, int experience) {
-            this((ItemStack)(new ItemStack(item)), price, count, 12, experience);
+            this(new ItemStack(item), price, count, 12, experience);
         }
 
         public SellItemFactory(Item item, int price, int count, int maxUses, int experience) {
@@ -853,7 +855,7 @@ public class RevampedTradeOffers {
         }
 
         public SellItemFactory(ItemStack stack, int price, int count, int maxUses, int experience) {
-            this(stack, price, count, maxUses, experience, 0.05F);
+            this(stack, price, count, maxUses, experience, 0.05f);
         }
 
         public SellItemFactory(Item item, int price, int count, int maxUses, int experience, float multiplier) {
@@ -878,17 +880,16 @@ public class RevampedTradeOffers {
             this.enchantmentProviderKey = enchantmentProviderKey;
         }
 
+        @Override
         public TradeOffer create(Entity entity, Random random) {
             ItemStack itemStack = this.sell.copy();
-            this.enchantmentProviderKey.ifPresent((key) -> {
-                EnchantmentHelper.applyEnchantmentProvider(itemStack, key, entity.method_48926(), entity.getBlockPos(), random);
-            });
+            World world = entity.method_48926();
+            this.enchantmentProviderKey.ifPresent(key -> EnchantmentHelper.applyEnchantmentProvider(itemStack, world.getRegistryManager(), key, world.getLocalDifficulty(entity.getBlockPos()), random));
             return new TradeOffer(new TradedItem(Items.EMERALD, this.price), itemStack, this.maxUses, this.experience, this.multiplier);
         }
     }
 
-    public static class SellSuspiciousStewFactory
-            implements Factory {
+    public static class SellSuspiciousStewFactory implements Factory {
         private final SuspiciousStewEffectsComponent stewEffects;
         private final int experience;
         private final float multiplier;
@@ -943,12 +944,12 @@ public class RevampedTradeOffers {
             this.enchantmentProviderKey = enchantmentProviderKey;
         }
 
+        @Override
         @Nullable
         public TradeOffer create(Entity entity, Random random) {
             ItemStack itemStack = this.processed.copy();
-            this.enchantmentProviderKey.ifPresent((key) -> {
-                EnchantmentHelper.applyEnchantmentProvider(itemStack, key, entity.method_48926(), entity.getBlockPos(), random);
-            });
+            World world = entity.method_48926();
+            this.enchantmentProviderKey.ifPresent(key -> EnchantmentHelper.applyEnchantmentProvider(itemStack, world.getRegistryManager(), key, world.getLocalDifficulty(entity.getBlockPos()), random));
             return new TradeOffer(new TradedItem(Items.EMERALD, this.price), Optional.of(this.toBeProcessed), itemStack, 0, this.maxUses, this.experience, this.multiplier);
         }
     }

@@ -2,9 +2,8 @@
   "required": true,
   "minVersion": "0.8",
   "package": "frootloops.versus.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
-
     "LivingEntityMixin",
 
     "enchantments.AnvilCostMixin",
@@ -13,15 +12,10 @@
 
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",
-    "environment.worldgen.structures.StructureWaterloggingFixMixin",
 
     "environment.archeology.BrushesNotRequiredMixin",
     "environment.archeology.SuspiciousBlocksMixin",
     "environment.sleeping.ServerSleepingMixin",
-    "environment.visuals.ClientWorldMixin",
-    "environment.visuals.FogRendererMixin",
-    "environment.visuals.WorldRendererMixin",
-    "environment.visuals.LightmapMixin",
     "environment.BlockExplosivityMixin",
     "environment.MinecartMixin",
     "environment.MossMixin",
@@ -46,16 +40,9 @@
     "items.equipment.tools.TridentItemMixin",
     "items.equipment.ArmorProtectionMixin",
     "items.equipment.FlintAndSteelItemMixin",
-    "items.FirstPersonAnimationsMixin",
     "items.ItemEntityMixin",
     "items.ItemStackMixin",
-    "items.ItemAccessor",
     "items.ItemUsageMixin",
-
-    "items.inventory.HotbarSwappingClientMixin",
-    "items.inventory.InventoryScreenMixin",
-    "items.inventory.ItemMergingMixin",
-    "items.inventory.MinecraftClientMixin",
 
     "mobs.hostile.end.dragon.ChargingPlayerPhaseMixin",
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",
@@ -74,7 +61,6 @@
     "mobs.hostile.overworld.PhantomMixin",
     "mobs.hostile.overworld.SkeletonMixin",
     "mobs.hostile.overworld.SpiderMixin",
-    "mobs.hostile.overworld.SpiderRenderMixin",
     "mobs.hostile.overworld.WardenMixin",
     "mobs.hostile.overworld.WardenSniffMixin",
 
@@ -82,11 +68,6 @@
     "mobs.hostile.overworld.ZombieMixin",
     "mobs.hostile.overworld.ZombieEventListenerMixin",
     "mobs.hostile.nether.WitherSkeletonMixin",
-
-    "mobs.hostile.shields.IllagerModelMixin",
-    "mobs.hostile.shields.SkeletonModelMixin",
-    "mobs.hostile.shields.ZombieModelMixin",
-    "mobs.hostile.shields.PiglinModelMixin",
 
     "mobs.hostile.MobEntityMixin",
     "mobs.hostile.MeleeAttackGoalMixin",
@@ -96,18 +77,10 @@
     "mobs.passive.PolarBearMixin",
 
     "players.attacking.LivingEntityAccessor",
-    "players.attacking.MinecraftClientMixin",
-    "players.attacking.CrosshairTargetMixin",
-    "players.attacking.CrosshairRendererMixin",
-    "players.bridging.MinecraftClientMixin",
-    "players.death.DeathScreenMixin",
     "players.HungerManagerMixin",
-    "players.HungerSprintingMixin",
-    "players.HungerBarRendererMixin",
     "players.PlayerEntityMixin",
     "players.SpecialMovementMixin"
   ],
-  "client": [],
   "injectors": {
     "defaultRequire": 1
   }

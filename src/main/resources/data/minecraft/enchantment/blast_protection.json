@@ -21,7 +21,7 @@
   "effects": {
     "minecraft:attributes": [
       {
-        "name": "enchantment.blast_protection",
+        "id": "enchantment.blast_protection",
         "attribute": "minecraft:generic.explosion_knockback_resistance",
         "amount": {
           "type": "minecraft:linear",

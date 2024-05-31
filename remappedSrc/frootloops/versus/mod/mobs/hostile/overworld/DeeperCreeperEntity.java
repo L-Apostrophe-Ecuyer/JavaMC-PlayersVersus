@@ -17,14 +17,17 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.RabbitEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
@@ -33,16 +36,11 @@ public class DeeperCreeperEntity extends CreeperEntity {
     //private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     //private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private int lastFuseTime, currentFuseTime, fuseTime = 34, explosionRadius = 5;
-    public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.of(new Identifier("ambient.cave"), 32);
+    public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.of(Identifier.of("ambient.cave"), 32);
 
     public DeeperCreeperEntity(EntityType<? extends CreeperEntity> entityType, World world) {
         super(entityType, world);
-    }
-
-    @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
         this.experiencePoints = 29;
-        return super.initialize(world, difficulty, spawnReason, entityData);
     }
 
     public static DefaultAttributeContainer.Builder createDeeperCreeperAttributes() {
@@ -54,6 +52,10 @@ public class DeeperCreeperEntity extends CreeperEntity {
         if(spawnReason == SpawnReason.NATURAL && (this.getBlockPos().getY() > -16 || this.method_48926().getLightLevel(this.getBlockPos()) > 10)) return false;
         if(!this.getSteppingBlockState().isOf(Blocks.DEEPSLATE)) return false;
         return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0f;
+    }
+
+    public static boolean canSpawn(EntityType<RabbitEntity> entity, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) {
+        return pos.getY() < 0 && world.getBlockState(pos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
     }
 
     @Override
@@ -72,6 +74,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
     protected void initDataTracker(DataTracker.Builder builder) {
         super.initDataTracker(builder);
         //builder.add(FUSE_SPEED, -1);
+        //builder.add(CHARGED, false);
         //builder.add(IGNITED, false);
     }
 

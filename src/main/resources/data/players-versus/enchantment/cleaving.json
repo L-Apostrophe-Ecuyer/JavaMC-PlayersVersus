@@ -34,15 +34,14 @@
     ],
     "minecraft:attributes": [
       {
-        "name": "enchantment.attack_speed",
+        "id": "enchantment.attack_speed",
         "attribute": "minecraft:generic.attack_speed",
         "amount": {
           "type": "minecraft:linear",
           "base": -0.1,
           "per_level_above_first": -0.1
         },
-        "operation": "add_value",
-        "uuid": "100b9ba9-8bf0-430f-86c1-09eb9bd8ad97"
+        "operation": "add_value"
       }
     ],
     "minecraft:post_attack": [
