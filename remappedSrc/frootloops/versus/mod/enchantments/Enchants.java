@@ -35,7 +35,7 @@ public abstract class Enchants {
     public static final RegistryKey<Enchantment> PIERCING_PROTECTION = of("piercing_protection");
 
     private static RegistryKey<Enchantment> of(String id) {
-        return RegistryKey.of(RegistryKeys.ENCHANTMENT, new Identifier(VersusMod.MOD_ID, id));
+        return RegistryKey.of(RegistryKeys.ENCHANTMENT, Identifier.of(VersusMod.MOD_ID, id));
     }
 
     private static RegistryEntryLookup enchRegistryLookup = null;

@@ -33,10 +33,4 @@ public class WitherSkeletonMixin extends HostileEntity {
         EntityAttributeInstance instanceKnockback = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
         if (instanceKnockback != null) instanceKnockback.setBaseValue(0.5D);
     }
-
-    @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason == SpawnReason.NATURAL && this.getBlockPos().getY() > -24 && this.method_48926().getDimension().hasSkyLight()) return false;
-        else return super.canSpawn(world, spawnReason);
-    }
 }

@@ -7,7 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.ZombieSiegeManager;
-import net.minecraft.world.spawner.Spawner;
+import net.minecraft.world.spawner.SpecialSpawner;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static frootloops.versus.VersusSettings.DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES;
 
 @Mixin(ZombieSiegeManager.class)
-public class ZombieHordeMixin implements Spawner {
+public class ZombieHordeMixin implements SpecialSpawner {
 
     @Shadow
     private int remaining, countdown, startX, startY, startZ;

@@ -1,7 +1,6 @@
 package frootloops.versus.mixin.items.throwing;
 
 import frootloops.versus.mod.items.throwing.SlimeballEntity;
-import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.item.Item;

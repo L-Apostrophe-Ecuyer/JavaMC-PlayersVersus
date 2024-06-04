@@ -21,12 +21,12 @@ public class MobSpawning {
         //SpawnLocation locationOnGround = SpawnLocationTypes.ON_GROUND;
 
         // Deep caves:
-        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, VanillaEntities.WITHER_SKELETON, 50, 1, 1);
+        // BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, VanillaEntities.WITHER_SKELETON, 50, 1, 1);
         BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.DEEPER_CREEPER, 80, 1, 1);
         // BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.WITHERED_ZOMBIE, 50, 4, 4);
         SpawnRestriction.register(ModEntities.DEEPER_CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnDeeperCreeper);
-        SpawnRestriction.register(VanillaEntities.CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnCreeper);
-        SpawnRestriction.register(VanillaEntities.WITHER_SKELETON, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitherSkelly);
+        //SpawnRestriction.register(VanillaEntities.CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnCreeper);
+        //SpawnRestriction.register(VanillaEntities.WITHER_SKELETON, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitherSkelly);
 
 
         // SpawnRestriction.register(ModEntities.DEEPER_CREEPER, SpawnRestriction.Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canMobSpawn);
@@ -34,18 +34,18 @@ public class MobSpawning {
         // SpawnRestriction.register(EntityType.BOGGED, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
 
         // Surface:
-        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.VILLAGE_SNOWY_HAS_STRUCTURE), SpawnGroup.MONSTER, ModEntities.FROSTED_ZOMBIE, 140, 4, 4);
+        //BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.VILLAGE_SNOWY_HAS_STRUCTURE), SpawnGroup.MONSTER, ModEntities.FROSTED_ZOMBIE, 140, 4, 4);
         //SpawnRestriction.register(ModEntities.FROSTED_ZOMBIE, SpawnRestriction.Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, FrostedZombieEntity::canMobSpawn);
 
 
         // Desert:
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAVE_SPIDER, 60, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.HUSK, 100, 4, 4);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAMEL, 40, 3, 4);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAT, 40, 1, 3);
+        //BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAVE_SPIDER, 60, 1, 1);
+        //BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.HUSK, 100, 4, 4);
+        //BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAMEL, 40, 3, 4);
+        //BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAT, 40, 1, 3);
 
         // Air:
-        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, EntityType.PHANTOM, 160, 1, 2);
+        //BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, EntityType.PHANTOM, 160, 1, 2);
 
     }
 

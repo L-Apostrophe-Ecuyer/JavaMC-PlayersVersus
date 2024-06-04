@@ -48,17 +48,6 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason == SpawnReason.NATURAL && (this.getBlockPos().getY() > -16 || this.method_48926().getLightLevel(this.getBlockPos()) > 10)) return false;
-        if(!this.getSteppingBlockState().isOf(Blocks.DEEPSLATE)) return false;
-        return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0f;
-    }
-
-    public static boolean canSpawn(EntityType<RabbitEntity> entity, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) {
-        return pos.getY() < 0 && world.getBlockState(pos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
-    }
-
-    @Override
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new CreepingAndExplodingGoal(this, 1.0));

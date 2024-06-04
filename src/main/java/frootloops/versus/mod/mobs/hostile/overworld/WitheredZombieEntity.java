@@ -16,7 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-;
+
 
 public class WitheredZombieEntity extends ZombieEntity {
     public WitheredZombieEntity(EntityType<? extends ZombieEntity> entityType, World world) {

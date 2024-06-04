@@ -4,11 +4,10 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import frootloops.versus.mod.items.throwing.SlimeballEntity;
+
+
+import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.Item;
@@ -19,24 +18,25 @@ import net.minecraft.util.Identifier;
 
 public class ModEntities {
 
+
     public static final EntityType<SlimeballEntity> SLIMEBALL = Registry.register(
             Registries.ENTITY_TYPE, Identifier.of(VersusMod.MOD_ID, "slimeball"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MISC, (EntityType.EntityFactory<SlimeballEntity>)SlimeballEntity::new).dimensions(EntityDimensions.fixed(0.25f, 0.25f)).trackRangeChunks(4).trackedUpdateRate(10).build()
+            EntityType.Builder.create((EntityType.EntityFactory<SlimeballEntity>)SlimeballEntity::new, SpawnGroup.MISC).dimensions(0.25f, 0.25f).maxTrackingRange(4).trackingTickInterval(10).build()
     );
 
     public static final EntityType<DeeperCreeperEntity> DEEPER_CREEPER = Registry.register(
             Registries.ENTITY_TYPE, Identifier.of(VersusMod.MOD_ID, "deeper_creeper"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, DeeperCreeperEntity::new).dimensions(EntityDimensions.fixed(1, 2)).specificSpawnBlocks(new Block[]{Blocks.DEEPSLATE}).build()
+            EntityType.Builder.create(DeeperCreeperEntity::new, SpawnGroup.MONSTER).dimensions(0.6f, 1.7f).maxTrackingRange(6).build()
     );
 
     public static final EntityType<FrostedZombieEntity> FROSTED_ZOMBIE = Registry.register(
             Registries.ENTITY_TYPE, Identifier.of(VersusMod.MOD_ID, "frosted_zombie"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, FrostedZombieEntity::new).dimensions(EntityDimensions.fixed(1, 2)).specificSpawnBlocks(new Block[]{Blocks.GRASS_BLOCK, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.DIRT, Blocks.ICE}).build()
+            EntityType.Builder.create(FrostedZombieEntity::new, SpawnGroup.MONSTER).dimensions(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.0125f).vehicleAttachment(-0.7f).maxTrackingRange(8).build()
     );
 
-    public static final EntityType<FrostedZombieEntity> WITHERED_ZOMBIE = Registry.register(
+    public static final EntityType<WitheredZombieEntity> WITHERED_ZOMBIE = Registry.register(
             Registries.ENTITY_TYPE, Identifier.of(VersusMod.MOD_ID, "withered_zombie"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, FrostedZombieEntity::new).dimensions(EntityDimensions.fixed(1, 2)).specificSpawnBlocks(new Block[]{Blocks.GRASS_BLOCK, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.DIRT, Blocks.ICE}).build()
+            EntityType.Builder.create(WitheredZombieEntity::new, SpawnGroup.MONSTER).dimensions(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.0125f).vehicleAttachment(-0.7f).maxTrackingRange(8).build()
     );
 
     public static void onInitialize() {
@@ -52,4 +52,5 @@ public class ModEntities {
         // Make them spawn in the world:
         MobSpawning.addCustomSpawns();
     }
+
 }

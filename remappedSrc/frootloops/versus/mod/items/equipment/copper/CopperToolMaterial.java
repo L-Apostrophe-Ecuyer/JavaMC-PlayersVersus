@@ -1,6 +1,5 @@
 package frootloops.versus.mod.items.equipment.copper;
 
-import net.fabricmc.yarn.constants.MiningLevels;
 import net.minecraft.block.Block;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;

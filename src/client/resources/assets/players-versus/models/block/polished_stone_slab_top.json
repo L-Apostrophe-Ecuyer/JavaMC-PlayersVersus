@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab_top",
-  "textures": {
-    "bottom": "players-versus:block/polished_stone",
-    "side": "players-versus:block/polished_stone_slab_side",
-    "top": "players-versus:block/polished_stone"
-  }
-}

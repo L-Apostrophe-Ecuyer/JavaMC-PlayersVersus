@@ -45,9 +45,6 @@ public abstract class DrownedMixin extends ZombieEntity {
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.TRIDENT));
             this.handDropChances[0] = 1f;
             this.handDropChances[1] = 1f;
-
-            EntityAttributeInstance followRange = this.getAttributeInstance(EntityAttributes.GENERIC_FOLLOW_RANGE);
-            Objects.requireNonNull(followRange).addPersistentModifier(new EntityAttributeModifier("Trident_drowned", +36.0D, EntityAttributeModifier.Operation.ADD_VALUE));
         }
         else if (rand < 20)
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.FISHING_ROD));

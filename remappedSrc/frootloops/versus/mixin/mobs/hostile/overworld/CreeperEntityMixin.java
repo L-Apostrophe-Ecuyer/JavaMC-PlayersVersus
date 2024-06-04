@@ -31,20 +31,13 @@ public class  CreeperEntityMixin extends HostileEntity {
     }
 
     @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason == SpawnReason.NATURAL) {
-            if (this.getBlockPos().getY() > 96 || this.getBlockPos().getY() < 24)
-                return false;
-            if (this.getBlockPos().getY() > 60 && (world.getLightLevel(LightType.SKY, this.getBlockPos()) > 4))
-                return false;
+    public boolean damage(DamageSource source, float amount) {
+        if(super.damage(source,amount)) {
+            if (source.isOf(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
+                this.convertTo(ModEntities.DEEPER_CREEPER, false);
+            }
+            return true;
         }
-        return super.canSpawn(world, spawnReason);
-    }
-
-    @Inject(method = "damage", at = @At("TAIL"), cancellable = true)
-    private void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if(source.isOf(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
-            this.convertTo(ModEntities.DEEPER_CREEPER, false);
-        }
+        else return false;
     }
 }

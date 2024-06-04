@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "frootloops.versus.mixin",
+	"package": "frootloops.versus.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"environment.visuals.ClientWorldMixin",

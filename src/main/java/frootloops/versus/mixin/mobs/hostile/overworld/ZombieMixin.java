@@ -61,7 +61,7 @@ public abstract class ZombieMixin extends HostileEntity {
             this.convertTo(ModEntities.FROSTED_ZOMBIE, true);
         }
         else if(source.isOf(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
-            this.convertTo(ModEntities.DEEPER_CREEPER, false);
+            this.convertTo(ModEntities.WITHERED_ZOMBIE, false);
         }
     }
 

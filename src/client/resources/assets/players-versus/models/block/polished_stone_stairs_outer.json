@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "players-versus:block/polished_stone",
-    "side": "players-versus:block/polished_stone",
-    "top": "players-versus:block/polished_stone"
-  }
-}

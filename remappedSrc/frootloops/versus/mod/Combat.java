@@ -16,6 +16,7 @@ import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -28,7 +29,7 @@ import java.util.UUID;
 
 public abstract class Combat {
 
-    public static final UUID ATTACK_REACH_MODIFIER_ID = UUID.fromString("159ff4d0-df5c-4ce3-a2a6-88bd7b4c60f2");
+    public static final Identifier ATTACK_REACH_MODIFIER_ID = Identifier.of("base_attack_reach");
 
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
 

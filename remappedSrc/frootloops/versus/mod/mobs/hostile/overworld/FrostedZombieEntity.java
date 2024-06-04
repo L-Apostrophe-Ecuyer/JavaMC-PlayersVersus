@@ -26,6 +26,21 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
         //this.setFrozenTicks(-72000);
     }
 
+    @Override
+    public void shootAt(LivingEntity target, float pullProgress) {
+        SnowballEntity snowballEntity = new SnowballEntity(this.method_48926(), this);
+        double d = target.getEyeY() - (double)1.1f;
+        double e = target.getX() - this.getX();
+        double f = d - snowballEntity.getY();
+        double g = target.getZ() - this.getZ();
+        double h = Math.sqrt(e * e + g * g) * (double)0.2f;
+        snowballEntity.setVelocity(e, f + h, g, 1.6f, 12.0f);
+        this.playSound(SoundEvents.ENTITY_SNOW_GOLEM_SHOOT, 1.0f, 0.4f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
+        this.method_48926().spawnEntity(snowballEntity);
+        this.swingHand(Hand.OFF_HAND);
+        this.getOffHandStack().setCount(this.getOffHandStack().getCount() - 1);
+    }
+
     static class SnowballAttackGoal extends ProjectileAttackGoal {
         private final FrostedZombieEntity frostedZombie;
         public SnowballAttackGoal(FrostedZombieEntity frostedZombie, double mobSpeed, int intervalTicks, float maxShootRange) {
@@ -46,21 +61,6 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
 
     public static DefaultAttributeContainer.Builder createFrostedAttributes() {
         return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 14.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25f).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0).add(EntityAttributes.GENERIC_ARMOR, 2.0).add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
-    }
-
-    @Override
-    public void attack(LivingEntity target, float pullProgress) {
-        SnowballEntity snowballEntity = new SnowballEntity(this.method_48926(), this);
-        double d = target.getEyeY() - (double)1.1f;
-        double e = target.getX() - this.getX();
-        double f = d - snowballEntity.getY();
-        double g = target.getZ() - this.getZ();
-        double h = Math.sqrt(e * e + g * g) * (double)0.2f;
-        snowballEntity.setVelocity(e, f + h, g, 1.6f, 12.0f);
-        this.playSound(SoundEvents.ENTITY_SNOW_GOLEM_SHOOT, 1.0f, 0.4f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
-        this.method_48926().spawnEntity(snowballEntity);
-        this.swingHand(Hand.OFF_HAND);
-        this.getOffHandStack().setCount(this.getOffHandStack().getCount() - 1);
     }
 
     @Override

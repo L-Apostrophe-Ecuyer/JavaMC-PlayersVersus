@@ -13,6 +13,7 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.LocalDifficulty;
@@ -31,9 +32,6 @@ public abstract class ZombieMixin extends HostileEntity {
     protected ZombieMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
     }
-
-    @Shadow
-    private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
 
     @Shadow
     protected boolean canConvertInWater() {return true;}
@@ -63,7 +61,7 @@ public abstract class ZombieMixin extends HostileEntity {
             this.convertTo(ModEntities.FROSTED_ZOMBIE, true);
         }
         else if(source.isOf(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
-            this.convertTo(ModEntities.DEEPER_CREEPER, false);
+            this.convertTo(ModEntities.WITHERED_ZOMBIE, false);
         }
     }
 
@@ -149,8 +147,6 @@ public abstract class ZombieMixin extends HostileEntity {
     @Inject(method = "setBaby", at = @At(value = "TAIL"), cancellable = false)
     public void babiesArentNinjas(boolean baby, CallbackInfo info) {
         if (this.method_48926() != null && !this.method_48926().isClient) {
-            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-            entityAttributeInstance.removeModifier(BABY_SPEED_ID);
             this.setHealth(12.0f);
         }
     }

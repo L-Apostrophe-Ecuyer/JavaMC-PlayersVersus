@@ -42,7 +42,8 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
     }
 
     static class SnowballAttackGoal extends ProjectileAttackGoal {
-        private final FrostedZombieEntity frostedZombie;
+        public final FrostedZombieEntity frostedZombie;
+
         public SnowballAttackGoal(FrostedZombieEntity frostedZombie, double mobSpeed, int intervalTicks, float maxShootRange) {
             super(frostedZombie, mobSpeed, intervalTicks, maxShootRange);
             this.frostedZombie = frostedZombie;

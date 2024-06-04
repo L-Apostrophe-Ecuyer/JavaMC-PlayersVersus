@@ -3,11 +3,9 @@ package frootloops.versus.mod.environment;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.SmolderingTorchBlock;
 import frootloops.versus.mod.environment.blocks.SmolderingWallTorchBlock;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -47,7 +45,7 @@ public class CustomBlocks {
 
 
     private static void registerBlock(String name, Block block) {
-        Registry.register(Registries.BLOCK, new Identifier(VersusMod.MOD_ID, name), block);
+        Registry.register(Registries.BLOCK,  Identifier.of(VersusMod.MOD_ID, name), block);
     }
 
 
@@ -75,7 +73,6 @@ public class CustomBlocks {
         registerBlock("packed_mud_tiles", PACKED_MUD_TILES);
         registerBlock("packed_mud_tile_slab", PACKED_MUD_TILES_SLAB);
         registerBlock("packed_mud_tile_stairs", PACKED_MUD_TILES_STAIRS);
-        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), SMOLDERING_TORCH, SMOLDERING_WALL_TORCH, EXTINGUISHED_TORCH, EXTINGUISHED_WALL_TORCH);
     }
 
 }

@@ -104,17 +104,17 @@ public abstract class Items {
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
         if (group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
-        return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);
+        return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
         if (group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.add(item));
         if (group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.add(item));
-        return Registry.register(Registries.ITEM, new Identifier(MOD_ID, name), item);
+        return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
     }
 
     public static RegistryEntry<ArmorMaterial> registerCustomArmorMaterial(String name, EnumMap<ArmorItem.Type, Integer> defense, int enchantability, RegistryEntry<SoundEvent> equipSound, float toughness, float knockbackResistance, Supplier<Ingredient> repairIngredient) {
-        Identifier id = new Identifier(MOD_ID, name);
+        Identifier id = Identifier.of(MOD_ID, name);
         List<ArmorMaterial.Layer> layers = List.of(new ArmorMaterial.Layer(id));
         EnumMap<ArmorItem.Type, Integer> enumMap = new EnumMap<ArmorItem.Type, Integer>(ArmorItem.Type.class);
         for (ArmorItem.Type type : ArmorItem.Type.values()) {

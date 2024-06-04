@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/inner_stairs",
-  "textures": {
-    "bottom": "players-versus:block/granite_tiles",
-    "side": "players-versus:block/granite_tiles",
-    "top": "players-versus:block/granite_tiles"
-  }
-}

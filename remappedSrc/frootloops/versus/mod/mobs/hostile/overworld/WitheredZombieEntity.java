@@ -77,7 +77,7 @@ public class WitheredZombieEntity extends ZombieEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.PARTICLE_SOUL_ESCAPE;
+        return SoundEvents.PARTICLE_SOUL_ESCAPE.value();
     }
 
     @Override
