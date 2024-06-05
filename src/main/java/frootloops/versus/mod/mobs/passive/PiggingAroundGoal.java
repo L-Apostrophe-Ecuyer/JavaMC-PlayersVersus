@@ -44,6 +44,7 @@ public class PiggingAroundGoal extends Goal {
     public boolean canStart() {
         if (!this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) return false;
         if (this.mob.isBaby()) return false;
+        if (this.mob.getLovingPlayer() == null || this.mob.getLovingPlayer().squaredDistanceTo(this.mob) > 400.0) return false;
 
         // If the pig is in a crop, eat it:
         BlockPos blockPos = this.mob.getBlockPos();

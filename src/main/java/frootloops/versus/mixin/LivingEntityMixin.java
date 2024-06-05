@@ -1,6 +1,7 @@
 package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -40,7 +41,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
-        return this.isSprinting() ? h : h + 0.4f;
+        return isPlayer() && isSwimming() ? h : h + 0.3f;
     }
 
     @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0)

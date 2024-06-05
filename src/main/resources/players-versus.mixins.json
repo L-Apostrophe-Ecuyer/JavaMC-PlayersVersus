@@ -6,6 +6,10 @@
   "mixins": [
 
     "LivingEntityMixin",
+    "players.attacking.LivingEntityAccessor",
+    "players.HungerManagerMixin",
+    "players.PlayerEntityMixin",
+    "players.SpecialMovementMixin",
 
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",
@@ -75,12 +79,7 @@
     "mobs.passive.VillagerEntityMixin",
     "mobs.passive.SheepMixin",
     "mobs.passive.PigMixin",
-    "mobs.passive.PolarBearMixin",
-
-    "players.attacking.LivingEntityAccessor",
-    "players.HungerManagerMixin",
-    "players.PlayerEntityMixin",
-    "players.SpecialMovementMixin"
+    "mobs.passive.PolarBearMixin"
   ],
   "injectors": {
     "defaultRequire": 1

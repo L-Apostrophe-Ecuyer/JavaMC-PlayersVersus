@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.client.players;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import frootloops.versus.VersusMod;
+import frootloops.versus.VersusModClient;
 import frootloops.versus.VersusSettings;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,9 +30,6 @@ public class HungerBarRendererMixin {
 
     @Overwrite
     private void renderFood(DrawContext context, PlayerEntity player, int top, int left) {
-
-        VersusMod.MOD_LOGGER.warn("Drawing hunger");
-
         RenderSystem.enableBlend();
 
         HungerManager hungerManager = player.getHungerManager();
@@ -45,14 +42,14 @@ public class HungerBarRendererMixin {
             iconHaunchEmpty = FOOD_EMPTY_HUNGER_TEXTURE;
             iconHaunchHalf = FOOD_HALF_HUNGER_TEXTURE;
             iconHaunchFull = FOOD_FULL_HUNGER_TEXTURE;
-            iconHaunchEmptyDisabled = VersusMod.HUD_TEXTURE_DISABLED_FOOD_HUNGER;
-            iconHaunchHalfDisabled = VersusMod.HUD_TEXTURE_DISABLED_FOOD_HALF_HUNGER;
+            iconHaunchEmptyDisabled = VersusModClient.HUD_TEXTURE_DISABLED_FOOD_HUNGER;
+            iconHaunchHalfDisabled = VersusModClient.HUD_TEXTURE_DISABLED_FOOD_HALF_HUNGER;
         } else {
             iconHaunchEmpty = FOOD_EMPTY_TEXTURE;
             iconHaunchHalf = FOOD_HALF_TEXTURE;
             iconHaunchFull = FOOD_FULL_TEXTURE;
-            iconHaunchEmptyDisabled = VersusMod.HUD_TEXTURE_DISABLED_FOOD;
-            iconHaunchHalfDisabled = VersusMod.HUD_TEXTURE_DISABLED_FOOD_HALF;
+            iconHaunchEmptyDisabled = VersusModClient.HUD_TEXTURE_DISABLED_FOOD;
+            iconHaunchHalfDisabled = VersusModClient.HUD_TEXTURE_DISABLED_FOOD_HALF;
         }
         int halfHaunchFoodValue;
         for (int renderedHaunch = 0; renderedHaunch < 10; ++renderedHaunch) {

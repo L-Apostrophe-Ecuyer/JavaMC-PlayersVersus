@@ -29,10 +29,6 @@ public class VersusMod implements ModInitializer {
 	public static final Logger MOD_LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	public static final Identifier RESPAWN_NEAR_DEATH_PACKET_ID = Identifier.of(MOD_ID, "respawn_near_death");
-	public static final Identifier HUD_TEXTURE_DISABLED_FOOD = Identifier.of(MOD_ID, "hud/disabled_food_empty");
-	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HALF = Identifier.of(MOD_ID, "hud/disabled_food_empty_half");
-	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HUNGER = Identifier.of(MOD_ID, "hud/disabled_food_empty_hunger");
-	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HALF_HUNGER = Identifier.of(MOD_ID, "hud/disabled_food_empty_half_hunger");
 
 	@Override
 	public void onInitialize() {
