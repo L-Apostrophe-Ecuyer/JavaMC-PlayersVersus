@@ -5,6 +5,8 @@ import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.*;
@@ -27,24 +29,26 @@ public class WitheredZombieEntity extends ZombieEntity {
         return HostileEntity.createHostileAttributes()
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 8.0)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.33f)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.2)
-                .add(EntityAttributes.GENERIC_ARMOR, 6.0)
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 2.0)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.5);
+                .add(EntityAttributes.GENERIC_ARMOR, 12.0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 6.0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.75)
+                .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
     }
 
     @Override
     public boolean tryAttack(Entity target) {
         boolean hasAttacked = super.tryAttack(target);
         if (hasAttacked && this.getMainHandStack().isEmpty() && target instanceof LivingEntity livingEntity) {
-            livingEntity.setFrozenTicks(livingEntity.getFrozenTicks() + 80);
+            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 60), this);
         }
         return hasAttacked;
     }
 
     @Override
     public void initCustomGoals() {
+        this.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, -1, 127));
         this.ambientSoundChance = -1000;
         this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.4F;
         this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.5F;
@@ -78,17 +82,17 @@ public class WitheredZombieEntity extends ZombieEntity {
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_PLAYER_HURT;
+        return SoundEvents.ENTITY_PLAYER_BREATH;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ENTITY_PLAYER_DEATH;
+        return SoundEvents.ENTITY_PLAYER_BREATH;
     }
 
     @Override
     protected SoundEvent getStepSound() {
-        return SoundEvents.ENTITY_PLAYER_DEATH;
+        return SoundEvents.ENTITY_HUSK_STEP;
     }
 
 }

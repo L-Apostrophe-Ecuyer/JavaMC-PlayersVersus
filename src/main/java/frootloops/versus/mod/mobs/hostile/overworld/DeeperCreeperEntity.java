@@ -1,10 +1,12 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.hostile.ai.CreepingAndExplodingGoal;
 import frootloops.versus.mod.mobs.hostile.ai.FollowTargetThroughWallsGoal;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AreaEffectCloudEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
@@ -35,7 +37,7 @@ import net.minecraft.world.event.GameEvent;
 public class DeeperCreeperEntity extends CreeperEntity {
     //private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     //private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private int lastFuseTime, currentFuseTime, fuseTime = 34, explosionRadius = 5;
+    private int lastFuseTime, currentFuseTime, fuseTime = 29, explosionRadius = 5;
     public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.of(Identifier.of("ambient.cave"), 32);
 
     public DeeperCreeperEntity(EntityType<? extends CreeperEntity> entityType, World world) {
@@ -62,9 +64,6 @@ public class DeeperCreeperEntity extends CreeperEntity {
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
         super.initDataTracker(builder);
-        //builder.add(FUSE_SPEED, -1);
-        //builder.add(CHARGED, false);
-        //builder.add(IGNITED, false);
     }
 
     @Override
@@ -118,10 +117,12 @@ public class DeeperCreeperEntity extends CreeperEntity {
 
     private void explode() {
         if (!this.getWorld().isClient) {
+            float f = this.shouldRenderOverlay() ? 2.0f : 1.0f;
             this.dead = true;
-            this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius, World.ExplosionSourceType.MOB);
-            this.discard();
+            this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * f, World.ExplosionSourceType.MOB);
             this.spawnEffectsCloud();
+            this.onRemoval(Entity.RemovalReason.KILLED);
+            this.discard();
         }
     }
 
@@ -130,8 +131,8 @@ public class DeeperCreeperEntity extends CreeperEntity {
         areaEffectCloudEntity.setRadius(5f);
         areaEffectCloudEntity.setRadiusOnUse(-0.5f);
         areaEffectCloudEntity.setWaitTime(10);
-        areaEffectCloudEntity.setDuration(areaEffectCloudEntity.getDuration()/2);
-        areaEffectCloudEntity.setRadiusGrowth(-areaEffectCloudEntity.getRadius() / (float)areaEffectCloudEntity.getDuration());
+        areaEffectCloudEntity.setDuration(300);
+        areaEffectCloudEntity.setRadiusGrowth(-areaEffectCloudEntity.getRadius() / 300.0f);
         areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 120, 0, true, false));
         areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 120, 0, true, false));
         this.getWorld().spawnEntity(areaEffectCloudEntity);

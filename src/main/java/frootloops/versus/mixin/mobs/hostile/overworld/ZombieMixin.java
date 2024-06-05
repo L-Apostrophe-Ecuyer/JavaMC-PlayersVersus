@@ -52,7 +52,7 @@ public abstract class ZombieMixin extends HostileEntity {
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                         .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.1)
                         .add(EntityAttributes.GENERIC_ARMOR, 6.0)
-                        .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
+                        .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS));
     }
 
     @Inject(method = "damage", at = @At("TAIL"), cancellable = true)
