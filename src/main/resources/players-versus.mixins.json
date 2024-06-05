@@ -4,6 +4,7 @@
   "package": "frootloops.versus.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+
     "LivingEntityMixin",
 
     "enchantments.AnvilCostMixin",
