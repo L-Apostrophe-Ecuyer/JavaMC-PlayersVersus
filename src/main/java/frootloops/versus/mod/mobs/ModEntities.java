@@ -49,6 +49,10 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(FROSTED_ZOMBIE, FrostedZombieEntity.createFrostedAttributes());
         Registry.register(Registries.ITEM, Identifier.of(VersusMod.MOD_ID, "frosted_zombie_spawn_egg"), new SpawnEggItem(FROSTED_ZOMBIE, 0x3B4978, 0x191A1C, new Item.Settings()));
 
+        // Register custom hostile entities and their renderers:
+        FabricDefaultAttributeRegistry.register(WITHERED_ZOMBIE, WitheredZombieEntity.createWitheredAttributes());
+        Registry.register(Registries.ITEM, Identifier.of(VersusMod.MOD_ID, "withered_zombie_spawn_egg"), new SpawnEggItem(WITHERED_ZOMBIE, 0x3B4978, 0x191A1C, new Item.Settings()));
+
         // Make them spawn in the world:
         MobSpawning.addCustomSpawns();
     }

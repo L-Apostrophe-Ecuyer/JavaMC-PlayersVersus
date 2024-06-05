@@ -23,7 +23,7 @@ public class WitheredZombieEntity extends ZombieEntity {
         super(entityType, world);
     }
 
-    public static DefaultAttributeContainer.Builder createFrostedAttributes() {
+    public static DefaultAttributeContainer.Builder createWitheredAttributes() {
         return HostileEntity.createHostileAttributes()
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 8.0)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.33f)
@@ -32,10 +32,6 @@ public class WitheredZombieEntity extends ZombieEntity {
                 .add(EntityAttributes.GENERIC_ARMOR, 6.0)
                 .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 2.0)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.5);
-    }
-
-    public static boolean canSpawn(EntityType<RabbitEntity> entity, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) {
-        return pos.getY() < 0 && world.getBlockState(pos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
     }
 
     @Override
