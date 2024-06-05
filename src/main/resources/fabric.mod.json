@@ -17,21 +17,21 @@
   "icon": "assets/players-versus/icon.png",
 
   "environment": "*",
-  "entrypoints": {
-    "main": [
-      "frootloops.versus.VersusMod"
-    ],
-    "server": [
-      "frootloops.versus.VersusModServer"
-    ],
-    "client": [
-      "frootloops.versus.VersusModClient"
-    ]
-  },
-  "mixins": [
-    "players-versus.mixins.json"
-  ],
-
+	"entrypoints": {
+		"main": [
+			"frootloops.versus.VersusMod"
+		],
+		"client": [
+			"frootloops.versus.VersusModClient"
+		]
+	},
+	"mixins": [
+		"players-versus.mixins.json",
+		{
+			"config": "players-versus.client.mixins.json",
+			"environment": "client"
+		}
+	],
   "depends": {
     "fabricloader": "0.15.11",
     "fabric-api": "*",
