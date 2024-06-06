@@ -1,7 +1,7 @@
 package frootloops.versus.mod;
 
 
-import frootloops.versus.mixin.players.attacking.LivingEntityAccessor;
+import frootloops.versus.mixin.LivingEntityAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;

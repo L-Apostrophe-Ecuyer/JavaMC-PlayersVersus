@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.players.attacking;
+package frootloops.versus.mixin;
 
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -6,6 +6,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(LivingEntity.class)
 public interface LivingEntityAccessor {
+
+    @Accessor("jumping")
+    boolean isJumping();
+
     @Accessor("lastAttackedTicks")
     int getLastAttackedTicks();
 

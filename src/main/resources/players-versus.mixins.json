@@ -6,7 +6,7 @@
   "mixins": [
 
     "LivingEntityMixin",
-    "players.attacking.LivingEntityAccessor",
+    "LivingEntityAccessor",
     "players.HungerManagerMixin",
     "players.PlayerEntityMixin",
     "players.SpecialMovementMixin",
@@ -21,6 +21,7 @@
     "environment.archeology.BrushesNotRequiredMixin",
     "environment.archeology.SuspiciousBlocksMixin",
     "environment.sleeping.ServerSleepingMixin",
+    "environment.CropMixin",
     "environment.BlockExplosivityMixin",
     "environment.MinecartMixin",
     "environment.MossMixin",

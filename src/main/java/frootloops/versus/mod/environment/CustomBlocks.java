@@ -1,6 +1,7 @@
 package frootloops.versus.mod.environment;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.blocks.BrownMudBlock;
 import frootloops.versus.mod.environment.blocks.SmolderingTorchBlock;
 import frootloops.versus.mod.environment.blocks.SmolderingWallTorchBlock;
 import net.minecraft.block.*;
@@ -32,11 +33,12 @@ public class CustomBlocks {
     public static final Block POLISHED_STONE_SLAB = new SlabBlock(AbstractBlock.Settings.copy(POLISHED_STONE));
     public static final Block POLISHED_STONE_STAIRS = new StairsBlock(POLISHED_STONE.getDefaultState(), AbstractBlock.Settings.copy(POLISHED_STONE));
 
-    public static final Block BROWN_MUD = new MudBlock(AbstractBlock.Settings.copy(Blocks.MUD).mapColor(MapColor.BROWN).slipperiness(0.92f).velocityMultiplier(0.94f));
-    public static final Block BROWN_MUD_BRICKS = new Block(AbstractBlock.Settings.copy(Blocks.MUD_BRICKS));
+    //public static final Block BROWN_MUD = new MudBlock(AbstractBlock.Settings.copy(Blocks.MUD).mapColor(MapColor.BROWN).slipperiness(0.92f).velocityMultiplier(0.94f));
+    public static final Block BROWN_MUD = new BrownMudBlock(AbstractBlock.Settings.copy(Blocks.MUD).mapColor(MapColor.BROWN).slipperiness(0.92f).velocityMultiplier(0.94f).dynamicBounds().solidBlock(Blocks::never));
+    public static final Block BROWN_MUD_BRICKS = new Block(AbstractBlock.Settings.copy(Blocks.MUD_BRICKS).strength(1.1f, 2.5f));
     public static final Block BROWN_MUD_BRICK_SLAB = new SlabBlock(AbstractBlock.Settings.copy(BROWN_MUD_BRICKS));
     public static final Block BROWN_MUD_BRICK_STAIRS = new StairsBlock(BROWN_MUD_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(BROWN_MUD_BRICKS));
-    public static final Block BROWN_MUD_TILES = new Block(AbstractBlock.Settings.copy(Blocks.MUD_BRICKS));
+    public static final Block BROWN_MUD_TILES = new Block(AbstractBlock.Settings.copy(BROWN_MUD_BRICKS));
     public static final Block BROWN_MUD_TILES_SLAB = new SlabBlock(AbstractBlock.Settings.copy(BROWN_MUD_TILES));
     public static final Block BROWN_MUD_TILES_STAIRS = new StairsBlock(BROWN_MUD_TILES.getDefaultState(), AbstractBlock.Settings.copy(BROWN_MUD_TILES));
     public static final Block PACKED_MUD_TILES = new Block(AbstractBlock.Settings.copy(Blocks.MUD_BRICKS));

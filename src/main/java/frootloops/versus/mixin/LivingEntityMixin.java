@@ -3,12 +3,17 @@ package frootloops.versus.mixin;
 import com.google.common.collect.Maps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.blocks.BrownMudBlock;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.PowderSnowBlock;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
@@ -21,6 +26,7 @@ import net.minecraft.item.ShovelItem;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,6 +48,14 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
         return isPlayer() && isSwimming() ? h : h + 0.3f;
+    }
+
+    @Inject(method = "applyMovementInput", at = @At("RETURN"), cancellable = true)
+    private void applyMovementInput(Vec3d movementInput, float slipperiness, CallbackInfoReturnable<Vec3d> cir) {
+        if (this.getBlockStateAtPos().isOf(CustomBlocks.BROWN_MUD) && BrownMudBlock.canWalkOnWetMud(this)) {
+            Vec3d vec3d = this.getVelocity();
+            cir.setReturnValue(new Vec3d(vec3d.x, 0.2, vec3d.z));
+        }
     }
 
     @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0)

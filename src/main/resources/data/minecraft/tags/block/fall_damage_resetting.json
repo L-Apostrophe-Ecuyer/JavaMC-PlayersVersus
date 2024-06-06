@@ -3,6 +3,7 @@
   "values": [
     "#minecraft:snow",
     "#minecraft:leaves",
+    "minecraft:mud",
     "players-versus:brown_mud"
   ]
 }
