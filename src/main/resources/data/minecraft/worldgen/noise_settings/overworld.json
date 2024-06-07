@@ -2665,7 +2665,10 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "players-versus:brown_mud"
+                                "Name": "players-versus:brown_mud",
+                                "Properties": {
+                                  "moisture": "4"
+                                }
                               }
                             }
                           }
