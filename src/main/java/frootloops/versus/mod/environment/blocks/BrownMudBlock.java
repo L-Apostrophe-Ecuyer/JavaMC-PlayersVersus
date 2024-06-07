@@ -1,9 +1,7 @@
 package frootloops.versus.mod.environment.blocks;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
 import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.passive.PigEntity;
@@ -11,7 +9,6 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -27,7 +24,8 @@ public class BrownMudBlock extends FarmlandBlock {
     public BrownMudBlock(Settings settings) {
         super(settings);
     }
-    protected static final VoxelShape SHAPE_FULL_CUBE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+
+    protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 
     @Override
     protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
@@ -109,14 +107,14 @@ public class BrownMudBlock extends FarmlandBlock {
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if(state.get(MOISTURE) == 0) return SHAPE_FULL_CUBE;
+        if(state.get(MOISTURE) == 0) return SHAPE;
 
         Entity entity;
         if (context instanceof EntityShapeContext && (entity = ((EntityShapeContext)context).getEntity()) != null) {
-            if (entity.fallDistance > 2.5f || BrownMudBlock.canWalkOnWetMud(entity) || entity instanceof FallingBlockEntity) return SHAPE_FULL_CUBE;
+            if (entity.fallDistance > 2.5f || BrownMudBlock.canWalkOnWetMud(entity) || entity instanceof FallingBlockEntity) return SHAPE;
             return VoxelShapes.empty();
         }
-        return SHAPE_FULL_CUBE;
+        return SHAPE;
     }
 
 
