@@ -59,12 +59,14 @@ public class BrownMudBlock extends FarmlandBlock {
 
     private static int getMoistureAmountNearby(WorldView world, BlockPos pos) {
         Optional<Integer> moisture;
+        int moistureAmount = -1;
         for (BlockPos blockPos : BlockPos.iterate(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
-            moisture = world.getBlockState(blockPos).getOrEmpty(MOISTURE);
-            if (moisture.isPresent() && moisture.get() > 0) return moisture.get() - 1;
             if (world.getFluidState(blockPos).isIn(FluidTags.WATER)) return 4;
+            moisture = world.getBlockState(blockPos).getOrEmpty(MOISTURE);
+            if (moisture.isPresent() && moisture.get() > 0) moistureAmount += moisture.get();
+            if (moistureAmount == 4) return 4;
         }
-        return -1;
+        return moistureAmount;
     }
 
     @Override

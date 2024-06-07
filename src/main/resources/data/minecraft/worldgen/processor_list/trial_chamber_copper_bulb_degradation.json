@@ -64,7 +64,7 @@
             "probability": 0.4
           },
           "output_state": {
-            "Name": "minecraft:waxed_weathered_copper_block"
+            "Name": "minecraft:waxed_weathered_copper"
           }
         },
         {
@@ -77,7 +77,7 @@
             "probability": 0.5
           },
           "output_state": {
-            "Name": "minecraft:waxed_exposed_copper_block"
+            "Name": "minecraft:waxed_exposed_copper"
           }
         }
       ]
