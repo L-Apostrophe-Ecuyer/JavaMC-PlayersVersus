@@ -82,26 +82,6 @@
       {
         "type": "minecraft:beehive",
         "probability": 0.002
-      },
-      {
-        "type": "minecraft:alter_ground",
-        "provider": {
-          "type": "minecraft:weighted_state_provider",
-          "entries": [
-            {
-              "weight": 4,
-              "data": {
-                "Name": "minecraft:grass_block"
-              }
-            },
-            {
-              "weight": 1,
-              "data": {
-                "Name": "minecraft:rooted_dirt"
-              }
-            }
-          ]
-        }
       }
     ]
   }
