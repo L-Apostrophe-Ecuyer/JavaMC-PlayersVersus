@@ -3,32 +3,19 @@ package frootloops.versus;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.CustomWorldgen;
 import frootloops.versus.mod.mobs.ModEntities;
-import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.items.Items;
-import frootloops.versus.mod.players.death.RespawnNearLastDeath;
 import frootloops.versus.mod.players.death.RespawnNearbyPayload;
-import io.netty.buffer.EmptyByteBuf;
-import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.command.TeleportCommand;
-import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
 
 public class VersusMod implements ModInitializer {
 	public static final boolean DEBUG_MODE = false;
 	public static final String MOD_ID = "players-versus";
-	public static final String MOD_FOLDER = "data/" + MOD_ID;
 	public static final Logger MOD_LOGGER = LoggerFactory.getLogger(MOD_ID);
-
-	public static final Identifier RESPAWN_NEAR_DEATH_PACKET_ID = Identifier.of(MOD_ID, "respawn_near_death");
 
 	@Override
 	public void onInitialize() {
