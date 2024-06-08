@@ -30,7 +30,10 @@ public class WitherSkeletonMixin extends HostileEntity {
             this.setHealth(this.getMaxHealth());
         }
 
-        EntityAttributeInstance instanceKnockback = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
-        if (instanceKnockback != null) instanceKnockback.setBaseValue(0.5D);
+        EntityAttributeInstance instanceKnockbackRes = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
+        if (instanceKnockbackRes != null) instanceKnockbackRes.setBaseValue(0.5D);
+
+        EntityAttributeInstance instanceKnockbackAtk = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_KNOCKBACK);
+        if (instanceKnockbackAtk != null) instanceKnockbackAtk.setBaseValue(1.25D);
     }
 }
