@@ -14,7 +14,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -98,7 +100,7 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "damage", at = @At("TAIL"))
-    private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
+    private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(source.getAttacker() instanceof LivingEntity attacker) {
 
             // Modify Invincibility Frames:

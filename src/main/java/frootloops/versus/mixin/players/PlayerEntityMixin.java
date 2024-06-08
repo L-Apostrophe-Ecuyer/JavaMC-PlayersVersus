@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.players;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.Combat;
@@ -24,6 +25,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -173,6 +175,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(this.getOffHandStack().getItem() instanceof ShieldItem) {
             this.clearActiveItem();
             itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
+        }
+
+        double amount = this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        if(amount < 0.75f && target instanceof LivingEntity livingEntity) {
+            double strength = this.isSprinting() ? 0.8 : 0.6;
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
+            livingEntity.takeKnockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
         }
     }
 

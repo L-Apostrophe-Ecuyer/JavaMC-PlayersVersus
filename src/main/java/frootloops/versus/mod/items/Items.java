@@ -35,7 +35,7 @@ public abstract class Items {
         map.put(ArmorItem.Type.CHESTPLATE, 5);
         map.put(ArmorItem.Type.HELMET, 2);
         map.put(ArmorItem.Type.BODY, 7);
-    }), -4, SoundEvents.ITEM_ARMOR_EQUIP_TURTLE, 0.0f, 0.0f, () -> Ingredient.ofItems(net.minecraft.item.Items.COPPER_INGOT));
+    }), 1, SoundEvents.ITEM_ARMOR_EQUIP_TURTLE, 0.0f, 0.0f, () -> Ingredient.ofItems(net.minecraft.item.Items.COPPER_INGOT));
 
     public static final Item COPPER_HELMET = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Settings().maxDamage(ArmorItem.Type.HELMET.getMaxDamage(10)));
     public static final Item COPPER_CHESTPLATE = new ArmorItem(COPPER_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings().maxDamage(ArmorItem.Type.CHESTPLATE.getMaxDamage(10)));

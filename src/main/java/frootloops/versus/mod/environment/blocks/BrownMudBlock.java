@@ -25,8 +25,6 @@ public class BrownMudBlock extends FarmlandBlock {
         super(settings);
     }
 
-    protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
-
     @Override
     protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         BlockState blockState = world.getBlockState(pos.up());
@@ -77,10 +75,7 @@ public class BrownMudBlock extends FarmlandBlock {
                 entity.setVelocity(velocity.multiply(1.0, 0.3, 1.0));
             }
             if(entity instanceof LivingEntityAccessor livingEntityAccessor) {
-                if(velocity.y > 0.0 || livingEntityAccessor.isJumping()) {
-                    entity.slowMovement(state, new Vec3d(1.1, 1.0, 1.1)); // Resets movement multiplier
-                    entity.setVelocity(entity.getVelocity().x, 0.28, entity.getVelocity().z);
-                }
+                if(velocity.y > 0.0 || livingEntityAccessor.isJumping()) entity.slowMovement(state, new Vec3d(1.1, 0.0, 1.1));
                 else if(hasEntityMoved(entity)) entity.slowMovement(state, new Vec3d(1.0, 0.8, 1.0));
                 else entity.slowMovement(state, new Vec3d(1.0, 0.1, 1.0));
             }
@@ -98,11 +93,14 @@ public class BrownMudBlock extends FarmlandBlock {
         if(entity.getType().isIn(EntityTypeTags.FALL_DAMAGE_IMMUNE)) return;
 
         BlockState blockState;
-        int moisture = state.get(MOISTURE);
-        if(moisture == 0 && fallDistance > 16.0f) blockState = FarmlandBlock.pushEntitiesUpBeforeBlockChange(state, Blocks.PACKED_MUD.getDefaultState(), world, pos);
-        else if(moisture > 0 && fallDistance < 8.0f) blockState = FarmlandBlock.pushEntitiesUpBeforeBlockChange(state, Blocks.FARMLAND.getDefaultState(), world, pos);
-        else if(moisture > 0) return;
-        else blockState = FarmlandBlock.pushEntitiesUpBeforeBlockChange(state, Blocks.DIRT.getDefaultState(), world, pos);
+        if(state.get(MOISTURE) == 0) {
+            if( fallDistance > 16.0f) blockState = FarmlandBlock.pushEntitiesUpBeforeBlockChange(state, Blocks.PACKED_MUD.getDefaultState(), world, pos);
+            else blockState = FarmlandBlock.pushEntitiesUpBeforeBlockChange(state, Blocks.DIRT.getDefaultState(), world, pos);
+        }
+        else {
+            if(fallDistance < 8.0f) blockState = FarmlandBlock.pushEntitiesUpBeforeBlockChange(state, Blocks.FARMLAND.getDefaultState(), world, pos);
+            else return;
+        }
         world.setBlockState(pos, blockState);
         world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(entity, blockState));
     }
@@ -110,14 +108,14 @@ public class BrownMudBlock extends FarmlandBlock {
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if(state.get(MOISTURE) == 0) return SHAPE;
+        if(state.get(MOISTURE) == 0) return VoxelShapes.fullCube();
 
         Entity entity;
         if (context instanceof EntityShapeContext && (entity = ((EntityShapeContext)context).getEntity()) != null) {
-            if (entity.fallDistance > 2.5f || BrownMudBlock.canWalkOnWetMud(entity) || entity instanceof FallingBlockEntity) return SHAPE;
+            if (entity.fallDistance > 2.5f || BrownMudBlock.canWalkOnWetMud(entity) || entity instanceof FallingBlockEntity) return VoxelShapes.fullCube();
             return VoxelShapes.empty();
         }
-        return SHAPE;
+        return VoxelShapes.fullCube();
     }
 
 
@@ -150,6 +148,11 @@ public class BrownMudBlock extends FarmlandBlock {
 
     @Override
     protected VoxelShape getCullingShape(BlockState state, BlockView world, BlockPos pos) {
+        return VoxelShapes.fullCube();
+    }
+
+    @Override
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return VoxelShapes.fullCube();
     }
 
