@@ -132,28 +132,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
     private float rebalancedDamage(float amount2, DamageSource source, float amount) {
-
         // Explosions don't hurt as much, or at least, the damage is more consistent:
         if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
             return (amount + amount + 16.0f) / 4.0f;
         }
-
-        // Hitting blocks while flying no longer neglects helmet protection:
-        // Should be datadriven
-        /*if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
-            ItemStack helmetStack = this.getEquippedStack(EquipmentSlot.HEAD);
-            if(helmetStack != null && helmetStack.getItem() != null && helmetStack.getItem() instanceof ArmorItem helmetItem) {
-
-                float armorAmount = helmetItem.getProtection();
-                float toughnessAmount = helmetItem.getToughness();
-                float enchantmentProtectionAmount = (float)Math.max(
-                        Enchants.getLevel(getWorld(), helmetStack, Enchants.IMPACT_PROTECTION),
-                        Enchants.getLevel(getWorld(), helmetStack, Enchantments.PROTECTION)
-                );
-                if (enchantmentProtectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, enchantmentProtectionAmount);
-                return DamageUtil.getDamageLeft(this, amount, source, armorAmount, toughnessAmount);
-            }
-        }*/
         return amount;
     }
 
@@ -195,11 +177,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         // Attacking while walking backwards deals less knockback:
         boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
         if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.6d, 0.8d, 0.6d));
-    }
-
-    @Inject(method = "setLastDeathPos", at = @At("TAIL"))
-    public void setFoodLevelAfterDeath(Optional<GlobalPos> lastDeathPos, CallbackInfo ci) {
-        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
     }
 
     @Override
