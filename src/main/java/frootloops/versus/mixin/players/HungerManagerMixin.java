@@ -45,9 +45,6 @@ public class HungerManagerMixin {
 
         if(!VersusSettings.DO_FOOD_OVERHAUL) return;
 
-        // Tick
-        foodTickTimer++;
-
         // Hunger effect is more punishing:
         if (player.getStatusEffect(StatusEffects.HUNGER) != null) this.exhaustion += 0.025f;
 
@@ -98,9 +95,10 @@ public class HungerManagerMixin {
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFoodHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
 
         // Damage resets slow regen, but not quick regen:
+        foodTickTimer++;
         if (canPlayerFoodHeal) foodTickTimer = Math.max(foodTickTimer, 0);
         else if (player.isOnFire()) foodTickTimer = -20;
-        else if (player.hurtTime > 0) foodTickTimer = 80;
+        else if (player.hurtTime > 0) foodTickTimer = -100;
 
         if(canPlayerFoodHeal) {
             if (foodTickTimer > REGEN_TIME_FAST) {
