@@ -15,23 +15,24 @@
                 {
                   "condition": "minecraft:match_tool",
                   "predicate": {
-                    "enchantments": [
-                      {
-                        "enchantment": "minecraft:silk_touch"
-                      }
-                    ]
+                    "predicates": {
+                      "minecraft:enchantments": [
+                        {
+                          "enchantments": "minecraft:silk_touch",
+                          "levels": {
+                            "min": 1
+                          }
+                        }
+                      ]
+                    }
                   }
                 }
               ]
             },
             {
               "type": "minecraft:item",
-              "name": "minecraft:charcoal",
+              "name": "minecraft:stick",
               "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.15
-                },
                 {
                   "condition": "minecraft:survives_explosion"
                 }
@@ -41,5 +42,7 @@
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "minecraft:blocks/stone"
 }
+
