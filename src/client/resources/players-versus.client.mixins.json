@@ -22,6 +22,8 @@
 
 		"players.attacking.CrosshairTargetMixin",
 		"players.attacking.CrosshairRendererMixin",
+		"players.attacking.MinecraftClientMixin",
+		"players.building.MinecraftClientMixin",
 		"players.death.DeathScreenMixin",
 		"players.HungerBarRendererMixin",
 		"players.HungerSprintingMixin"

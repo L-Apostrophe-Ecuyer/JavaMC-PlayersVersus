@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.client.players.bridging;
+package frootloops.versus.mixin.client.players.building;
 
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.players.RayTraceHandler;

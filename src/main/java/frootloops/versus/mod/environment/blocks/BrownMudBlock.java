@@ -1,9 +1,12 @@
 package frootloops.versus.mod.environment.blocks;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.pathing.NavigationType;
+import net.minecraft.entity.mob.WaterCreatureEntity;
+import net.minecraft.entity.passive.FishEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.EntityTypeTags;
@@ -47,11 +50,11 @@ public class BrownMudBlock extends FarmlandBlock {
     @Override
     protected void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         int currentMoisture = state.get(MOISTURE);
-        int nearbyMoisture = world.hasRain(pos.up()) ? 1 : getMoistureAmountNearby(world, pos);
+        int nearbyMoisture = world.hasRain(pos.up()) ? 4 : getMoistureAmountNearby(world, pos);
         if (nearbyMoisture > 0) {
-            if (currentMoisture + nearbyMoisture <= 4) world.setBlockState(pos, (BlockState)state.with(MOISTURE, currentMoisture + nearbyMoisture), Block.NOTIFY_LISTENERS);
+            if (currentMoisture < 4) world.setBlockState(pos, state.with(MOISTURE, Math.min(4, currentMoisture + nearbyMoisture)), Block.NOTIFY_LISTENERS);
         } else if (currentMoisture > 0) {
-            world.setBlockState(pos, (BlockState)state.with(MOISTURE, currentMoisture - 1), Block.NOTIFY_LISTENERS);
+            world.setBlockState(pos, state.with(MOISTURE, currentMoisture - 1), Block.NOTIFY_LISTENERS);
         }
     }
 
@@ -75,14 +78,17 @@ public class BrownMudBlock extends FarmlandBlock {
                 entity.setVelocity(velocity.multiply(1.0, 0.3, 1.0));
             }
             if(entity instanceof LivingEntityAccessor livingEntityAccessor) {
-                if(velocity.y > 0.0 || livingEntityAccessor.isJumping()) entity.slowMovement(state, new Vec3d(1.1, 0.0, 1.1));
-                else if(hasEntityMoved(entity)) entity.slowMovement(state, new Vec3d(1.0, 0.8, 1.0));
-                else entity.slowMovement(state, new Vec3d(1.0, 0.1, 1.0));
-            }
-            if (hasEntityMoved(entity) || world.getRandom().nextFloat() < 0.2) {
-                if (entity instanceof LivingEntity livingEntity && shouldDamage(world, livingEntity)) {
-                    livingEntity.damage(livingEntity.getDamageSources().inWall(), 0.5f);
+                if(livingEntityAccessor.isJumping())  {
+                    if(entity.isInFluid()) {
+                        entity.slowMovement(state, new Vec3d(1.1, 1.0, 1.1));
+                        entity.setVelocity(velocity.add(0.0, 0.05, 0.0));
+                    }
+                    else {
+                        entity.slowMovement(state, new Vec3d(1.1, 0.0, 1.1));
+                    }
                 }
+                else if(hasEntityMoved(entity)) entity.slowMovement(state, new Vec3d(0.95, 0.5, 0.95));
+                else entity.slowMovement(state, new Vec3d(0.95, 0.05, 0.95));
             }
         }
     }

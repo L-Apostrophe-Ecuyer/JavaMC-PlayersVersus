@@ -217,7 +217,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     public void setSprinting(boolean sprinting) {
-        if(sprinting && this.hungerManager.getFoodLevel() == 0 && this.age - this.getLastAttackedTime() < 48) return; // No sprinting when damaged and no food points
-        else super.setSprinting(sprinting);
+        //if(sprinting && this.hungerManager.getFoodLevel() == 0 && this.getHealth() < 20.0f && (this.age - this.lastDamageTime > 160)) return;  // No sprinting when damaged and no food points
+        if(sprinting && !Combat.canPlayerSprint(this.hungerManager)) return;
+        super.setSprinting(sprinting);
     }
 }

@@ -69,7 +69,7 @@ public abstract class Items {
     public static final BlockItem PACKED_MUD_TILES_STAIRS_ITEM = new BlockItem(CustomBlocks.PACKED_MUD_TILES_STAIRS, new Item.Settings());
 
     public static void onInitialize() {
-        setStackSizes(64, 64, 8, 8, 64, 16, 64);
+        setStackSizes(16, 8, 8, 8, 64, 16, 64);
         registerCustomItem("copper_chestplate", COPPER_CHESTPLATE, ItemGroups.COMBAT);
         registerCustomItem("copper_leggings", COPPER_LEGGINGS, ItemGroups.COMBAT);
         registerCustomItem("copper_helmet", COPPER_HELMET, ItemGroups.COMBAT);
@@ -125,12 +125,13 @@ public abstract class Items {
 
     private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
         for (Item item : Registries.ITEM) {
-
             if (item.getComponents().contains(DataComponentTypes.FOOD)) {
                 if (item.getTranslationKey().startsWith("cooked_") || item.getTranslationKey().startsWith("raw_")) setDefaultMaxStackSize(item, maxMeals);
                 else if (item.getTranslationKey().contains("stew")) setDefaultMaxStackSize(item, maxStews);
                 else if (item.getTranslationKey().contains("soup")) setDefaultMaxStackSize(item, maxStews);
+                else if (item instanceof BlockItem) setDefaultMaxStackSize(item, maxPlaceableBlocks);
                 else setDefaultMaxStackSize(item, maxFoods);
+
             } else if (item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem)
                 setDefaultMaxStackSize(item, maxPlaceableEntities);
 

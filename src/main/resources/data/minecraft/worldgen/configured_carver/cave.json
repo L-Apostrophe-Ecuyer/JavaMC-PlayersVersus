@@ -5,7 +5,7 @@
     "y": {
       "type": "minecraft:trapezoid",
       "min_inclusive": {
-        "absolute": 8
+        "absolute": 16
       },
       "max_inclusive": {
         "absolute": 96

@@ -89,17 +89,11 @@
                 "minecraft:attribute_modifiers": {
                   "modifiers": [
                     {
+                      "id": "lucky_rabbit_foot",
                       "type": "minecraft:generic.luck",
-                      "uuid": [
-                        32783,
-                        89781,
-                        53446,
-                        92365
-                      ],
-                      "name": "minecraft.rabbit.luck",
                       "amount": 1,
                       "operation": "add_value",
-                      "slot": "mainhand"
+                      "slot": "offhand"
                     }
                   ],
                   "show_in_tooltip": true
@@ -114,13 +108,14 @@
           "condition": "minecraft:killed_by_player"
         },
         {
-          "function": "minecraft:enchanted_count_increase",
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.05,
+            "per_level_above_first": 0.02
+          },
           "enchantment": "minecraft:looting",
-          "count": {
-            "type": "minecraft:uniform",
-            "min": 0,
-            "max": 1
-          }
+          "unenchanted_chance": 0.04
         }
       ]
     }

@@ -1,8 +1,7 @@
 package frootloops.versus.mixin.client.players;
 
 import com.mojang.authlib.GameProfile;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import frootloops.versus.mod.Combat;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -19,8 +18,8 @@ public abstract class HungerSprintingMixin extends PlayerEntity {
     }
 
     @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))
-    private float immediateFeedback(float tickDelayAfterUpdate) {
-        if(this.getHungerManager().getFoodLevel() == 0 && this.age - this.getLastAttackedTime() < 48) return 128.0f; // No sprinting when damaged and no food points
-        else return -128.0f; // Otherwise, can always sprint
+    private float foodRequiedToSprint(float foodLevel) {
+        if(Combat.canPlayerSprint(this.hungerManager)) return -1.0f;  // Sprinting allowed
+        return 128.0f; // No sprinting when damaged and no food points
     }
 }

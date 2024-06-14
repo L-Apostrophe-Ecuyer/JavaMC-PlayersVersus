@@ -1,14 +1,14 @@
 {
   "type": "minecraft:canyon",
   "config": {
-    "probability": 0.01,
+    "probability": 0.0125,
     "y": {
       "type": "minecraft:uniform",
       "min_inclusive": {
-        "above_bottom": 48
+        "above_bottom": 56
       },
       "max_inclusive": {
-        "above_bottom": 64
+        "above_bottom": 96
       }
     },
     "yScale": 1,
@@ -44,7 +44,7 @@
     "vertical_rotation": {
       "type": "minecraft:uniform",
       "min_inclusive": 0.5,
-      "max_exclusive": 0.9
+      "max_exclusive": 0.95
     },
     "shape": {
       "distance_factor": {

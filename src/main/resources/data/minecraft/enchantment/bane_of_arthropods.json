@@ -1,19 +1,21 @@
 {
   "description": {
-    "translate": "enchantment.minecraft.bane_of_arthropods"
+    "translate": "enchantment.minecraft.sharpness"
   },
-  "supported_items": "minecraft:stick",
-  "weight": 1,
+  "exclusive_set": "#minecraft:exclusive_set/damage",
+  "supported_items": "#minecraft:enchantable/weapon",
+  "primary_items": "#minecraft:enchantable/sharp_weapon",
+  "weight": 10,
   "max_level": 5,
   "min_cost": {
-    "base": 500,
-    "per_level_above_first": 500
+    "base": 1,
+    "per_level_above_first": 11
   },
   "max_cost": {
-    "base": 500,
-    "per_level_above_first": 8
+    "base": 21,
+    "per_level_above_first": 11
   },
-  "anvil_cost": 2,
+  "anvil_cost": 1,
   "slots": [
     "mainhand"
   ],
@@ -24,52 +26,9 @@
           "type": "minecraft:add",
           "value": {
             "type": "minecraft:linear",
-            "base": 2.5,
-            "per_level_above_first": 2.5
-          }
-        },
-        "requirements": {
-          "condition": "minecraft:entity_properties",
-          "entity": "this",
-          "predicate": {
-            "type": "#minecraft:sensitive_to_bane_of_arthropods"
-          }
-        }
-      }
-    ],
-    "minecraft:post_attack": [
-      {
-        "enchanted": "attacker",
-        "affected": "victim",
-        "effect": {
-          "type": "minecraft:apply_mob_effect",
-          "to_apply": "minecraft:slowness",
-          "min_duration": 1.5,
-          "max_duration": {
-            "type": "minecraft:linear",
-            "base": 1.5,
+            "base": 0.5,
             "per_level_above_first": 0.5
-          },
-          "min_amplifier": 3,
-          "max_amplifier": 3
-        },
-        "requirements": {
-          "condition": "minecraft:all_of",
-          "terms": [
-            {
-              "condition": "minecraft:entity_properties",
-              "entity": "this",
-              "predicate": {
-                "type": "#minecraft:sensitive_to_bane_of_arthropods"
-              }
-            },
-            {
-              "condition": "minecraft:damage_source_properties",
-              "predicate": {
-                "is_direct": true
-              }
-            }
-          ]
+          }
         }
       }
     ]

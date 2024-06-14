@@ -7,23 +7,46 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:seagrass"
+          "name": "minecraft:seagrass",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": 2,
+              "add": false
+            }
+          ]
         }
       ],
       "conditions": [
         {
           "condition": "minecraft:match_tool",
           "predicate": {
-            "items": [
-              "players-versus:copper_hoe",
-              "minecraft:shears",	
-              "minecraft:wooden_hoe",
-              "minecraft:golden_hoe",
-              "minecraft:iron_hoe",
-              "minecraft:stone_hoe",
-              "minecraft:diamond_hoe",
-              "minecraft:netherite_hoe"
-            ]
+            "items": "minecraft:shears"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:seagrass",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": 2,
+              "add": false
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:match_tool",
+          "predicate": {
+            "items": "#minecraft:hoes"
           }
         }
       ]
