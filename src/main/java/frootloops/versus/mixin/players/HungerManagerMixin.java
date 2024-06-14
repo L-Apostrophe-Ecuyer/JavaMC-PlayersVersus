@@ -29,7 +29,7 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_SLOW = 100, REGEN_TIME_FAST = 24;
+    private static final int REGEN_TIME_SLOW = 160, REGEN_TIME_FAST = 24;
     private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 1;
     private static final int FOOD_REQUIRED_FOR_SLOW_REGEN = -1;
     private static boolean IS_SLOW_REGEN_ENABLED = false;
@@ -44,6 +44,9 @@ public class HungerManagerMixin {
     public void update(PlayerEntity player, CallbackInfo ci) {
 
         if(!VersusSettings.DO_FOOD_OVERHAUL) return;
+
+        // Tick
+        foodTickTimer++;
 
         // Hunger effect is more punishing:
         if (player.getStatusEffect(StatusEffects.HUNGER) != null) this.exhaustion += 0.025f;
@@ -95,10 +98,9 @@ public class HungerManagerMixin {
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFoodHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
 
         // Damage resets slow regen, but not quick regen:
-        foodTickTimer++;
         if (canPlayerFoodHeal) foodTickTimer = Math.max(foodTickTimer, 0);
-        else if (player.isOnFire()) foodTickTimer = -8;
-        else if (player.hurtTime > 0) foodTickTimer = -128;
+        else if (player.isOnFire()) foodTickTimer = -20;
+        else if (player.hurtTime > 0) foodTickTimer = 80;
 
         if(canPlayerFoodHeal) {
             if (foodTickTimer > REGEN_TIME_FAST) {
