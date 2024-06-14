@@ -29,7 +29,7 @@ public class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel;
 
-    private static final int REGEN_TIME_SLOW = 160, REGEN_TIME_FAST = 24;
+    private static final int REGEN_TIME_SLOW = 100, REGEN_TIME_FAST = 24;
     private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 1;
     private static final int FOOD_REQUIRED_FOR_SLOW_REGEN = -1;
     private static boolean IS_SLOW_REGEN_ENABLED = false;
@@ -116,5 +116,6 @@ public class HungerManagerMixin {
                 exhaustion += 0.25F;
             }
         }
+        else foodTickTimer = Math.min(foodTickTimer, 0);
     }
 }

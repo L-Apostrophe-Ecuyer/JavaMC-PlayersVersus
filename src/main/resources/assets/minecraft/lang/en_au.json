@@ -45,6 +45,7 @@
   "minecraft.advancements.story.iron_tools.description": "Upgrade to an Iron Pickaxe",
   "block.players-versus.smoldering_torch" : "Smoldering Torch",
   "block.players-versus.extinguished_torch" : "Extinguished Torch",
+  "item.minecraft.bone_meal": "Fertilizer",
   "item.players-versus.smoldering_torch" : "Smoldering Torch",
   "item.players-versus.extinguished_torch" : "Extinguished Torch",
   "item.players-versus.copper_axe": "Copper Axe",
