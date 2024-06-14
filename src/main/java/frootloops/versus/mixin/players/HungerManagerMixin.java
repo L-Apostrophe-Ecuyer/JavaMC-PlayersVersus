@@ -98,7 +98,7 @@ public class HungerManagerMixin {
         foodTickTimer++;
         if (canPlayerFoodHeal) foodTickTimer = Math.max(foodTickTimer, 0);
         else if (player.isOnFire()) foodTickTimer = -20;
-        else if (player.hurtTime > 0) foodTickTimer = -100;
+        else if (player.hurtTime > 0) foodTickTimer = -80;
 
         if(canPlayerFoodHeal) {
             if (foodTickTimer > REGEN_TIME_FAST) {

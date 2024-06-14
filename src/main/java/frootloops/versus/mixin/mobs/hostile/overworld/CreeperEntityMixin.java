@@ -39,7 +39,7 @@ public class  CreeperEntityMixin extends HostileEntity {
         BlockPos pos = this.getBlockPos();
         int y = pos.getY();
         if (y > 96 || y < 24) return false;
-        if (y > 60 && world.getLightLevel(pos) > 1) return false;
+        if (y > 60 && world.getLightLevel(LightType.SKY, pos) > 4) return false;
         return world.getBlockState(pos.down()).isIn(BlockTags.OVERWORLD_CARVER_REPLACEABLES);
     }
 }
