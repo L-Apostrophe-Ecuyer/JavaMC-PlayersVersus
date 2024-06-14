@@ -2,10 +2,7 @@
   "type": "minecraft:entity",
   "pools": [
     {
-      "rolls": {
-        "min": 0,
-        "max": 1
-      },
+      "rolls": 1,
       "bonus_rolls": 0,
       "entries": [
         {
@@ -13,15 +10,27 @@
           "name": "minecraft:rotten_flesh",
           "functions": [
             {
-              "function": "minecraft:set_count",
+              "function": "minecraft:enchanted_count_increase",
+              "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              },
-              "add": false
+              }
             }
           ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.25,
+            "per_level_above_first": 0.05
+          },
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.15
         }
       ]
     },
@@ -81,12 +90,13 @@
         },
         {
           "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.12,
+            "per_level_above_first": 0.01
+          },
           "enchantment": "minecraft:looting",
-          "chance": {
-            "type": "minecraft:fraction",
-            "numerator": 1,
-            "denominator": 3
-          }
+          "unenchanted_chance": 0.08
         }
       ]
     }
