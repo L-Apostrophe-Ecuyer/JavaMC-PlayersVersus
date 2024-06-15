@@ -5,7 +5,7 @@
   ],
   "step": "surface_structures",
   "spawn_overrides": {},
-  "terrain_adaptation": "beard_thin",
+  "terrain_adaptation": "bury",
   "start_pool": "players-versus:pyramid/basement",
   "size": 7,
   "start_height": {

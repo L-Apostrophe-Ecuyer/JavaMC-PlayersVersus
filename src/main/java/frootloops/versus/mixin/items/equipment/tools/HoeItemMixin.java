@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.items.equipment.tools;
 
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -18,6 +19,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Iterator;
+
 @Mixin(HoeItem.class)
 public class HoeItemMixin extends ToolItem {
     public HoeItemMixin(ToolMaterial material, Settings settings) {
@@ -26,8 +29,14 @@ public class HoeItemMixin extends ToolItem {
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        int sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
-        return sweepLevel > 0 ? UseAction.BRUSH : UseAction.NONE;
+        if(stack.hasEnchantments()) {
+            Iterator<RegistryEntry<Enchantment>> iterator = stack.getEnchantments().getEnchantments().iterator();
+            while (iterator.hasNext()) {
+                RegistryEntry<Enchantment> enchant = iterator.next();
+                if (enchant.getKey().get() == Enchantments.SWEEPING_EDGE) return UseAction.BRUSH;
+            }
+        }
+        return UseAction.BLOCK;
     }
 
     @Inject(method = "useOnBlock", at = @At("RETURN"), cancellable = true)
@@ -35,7 +44,7 @@ public class HoeItemMixin extends ToolItem {
         if(!context.getPlayer().isSneaking()) {
             ItemStack stack = context.getStack();
             PlayerEntity user = context.getPlayer();
-            int sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
+            int sweepLevel = Enchants.getLevel(user.getWorld(), stack, Enchantments.SWEEPING_EDGE);
             if(sweepLevel > 0) {
                 double attackCharge = Combat.getAttackChargeProgress(user);
                 double attackChargeRequired = 1d + 0.2d * (3 - sweepLevel);
@@ -50,7 +59,7 @@ public class HoeItemMixin extends ToolItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        int sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
+        int sweepLevel = Enchants.getLevel(world, stack, Enchantments.SWEEPING_EDGE);
         if(sweepLevel > 0) {
             double attackCharge = Combat.getAttackChargeProgress(user);
             double attackChargeRequired = 1d + 0.2d * (3 - sweepLevel);
@@ -65,7 +74,7 @@ public class HoeItemMixin extends ToolItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if((EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack) > 0)) {
+        if(Enchants.getLevel(user.getWorld(), stack, Enchantments.SWEEPING_EDGE) > 0) {
             if (user instanceof PlayerEntity player) player.resetLastAttackedTicks();
             else user.onAttacking(user.getAttacking());
         }
