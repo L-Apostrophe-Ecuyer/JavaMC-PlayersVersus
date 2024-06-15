@@ -81,7 +81,7 @@ public class HungerManagerMixin {
         }
 
         // Regular food exhaustion, accelerated, to disincentive players filling their food bar unnecessarily:
-        else if(exhaustion > 2.0F){
+        else if(exhaustion > 4.0F){
             exhaustion = 0.0F;
             saturationLevel = 0.0F;
             foodLevel--;
