@@ -29,13 +29,7 @@ public class HoeItemMixin extends ToolItem {
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        if(stack.hasEnchantments()) {
-            Iterator<RegistryEntry<Enchantment>> iterator = stack.getEnchantments().getEnchantments().iterator();
-            while (iterator.hasNext()) {
-                RegistryEntry<Enchantment> enchant = iterator.next();
-                if (enchant.getKey().get() == Enchantments.SWEEPING_EDGE) return UseAction.BRUSH;
-            }
-        }
+        if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return UseAction.BRUSH;
         return UseAction.BLOCK;
     }
 
