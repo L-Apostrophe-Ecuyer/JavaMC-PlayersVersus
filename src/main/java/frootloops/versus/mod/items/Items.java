@@ -31,7 +31,7 @@ public abstract class Items {
     private static Map<Item, Integer> DEFAULT_MAX_STACK_SIZE = new HashMap<>();
 
     public static void onInitialize() {
-        setStackSizes(16, 8, 8, 8, 64, 16, 64);
+        setStackSizes(16, 8, 4, 4, 64, 16, 64);
         CustomItems.registerAllCustomItems();
         CustomStatusEffects.registerCustomStatusEffects();
     }
@@ -65,7 +65,7 @@ public abstract class Items {
 
         // Bottles:
         setDefaultMaxStackSize(net.minecraft.item.Items.POTION, maxBottled);
-        setDefaultMaxStackSize(net.minecraft.item.Items.HONEY_BOTTLE, maxBottled);
+        setDefaultMaxStackSize(net.minecraft.item.Items.HONEY_BOTTLE, Math.max(maxFoods, maxBottled));
 
         // Throwables:
         setDefaultMaxStackSize(net.minecraft.item.Items.EGG, maxThrowables);
