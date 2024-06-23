@@ -1,17 +1,13 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
-import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.Combat;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.BrushableBlock;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
@@ -21,12 +17,10 @@ import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,7 +30,6 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(PlayerEntity.class)

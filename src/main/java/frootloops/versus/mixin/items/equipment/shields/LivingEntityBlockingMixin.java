@@ -1,8 +1,7 @@
 package frootloops.versus.mixin.items.equipment.shields;
 
+import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
@@ -10,9 +9,6 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.UseAction;
@@ -23,8 +19,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Optional;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityBlockingMixin extends Entity {
@@ -100,7 +94,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
         if( activeItemStack.getItem() instanceof ShieldItem) return 0.0f;
 
-        int levelRiposte = Enchants.getLevel(getWorld(), activeItemStack, Enchants.RIPOSTE);
+        int levelRiposte = Enchants.getLevel(getWorld(), activeItemStack, CustomEnchants.RIPOSTE);
         int useTime =  activeItemStack.getMaxUseTime((LivingEntity) ((Object)this)) - itemUseTimeLeft;
         boolean hasParried = useTime < PARRY_TIME_TICKS + levelRiposte && useTime > 0;
         if(hasParried) return 0;
@@ -119,7 +113,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
             shieldItem = shieldItemStack.getItem();
         }
         int levelThorns = Enchants.getLevel(getWorld(), shieldItemStack, Enchantments.THORNS);
-        int levelRiposte = Enchants.getLevel(getWorld(), shieldItemStack, Enchants.RIPOSTE);
+        int levelRiposte = Enchants.getLevel(getWorld(), shieldItemStack, CustomEnchants.RIPOSTE);
         float reflectedDamage = 0.1F * damageAmount * levelThorns;
         float paryingDamage = 0.2F * damageAmount * levelRiposte;
 

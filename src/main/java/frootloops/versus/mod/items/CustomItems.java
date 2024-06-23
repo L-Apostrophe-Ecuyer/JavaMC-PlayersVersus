@@ -1,0 +1,57 @@
+package frootloops.versus.mod.items;
+
+import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.items.equipment.CustomEquipment;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.item.*;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.Identifier;
+import static frootloops.versus.VersusMod.MOD_ID;
+
+public abstract class CustomItems {
+    public static void registerAllCustomItems() {
+        registerCustomItem("copper_chestplate", CustomEquipment.COPPER_CHESTPLATE, ItemGroups.COMBAT);
+        registerCustomItem("copper_leggings", CustomEquipment.COPPER_LEGGINGS, ItemGroups.COMBAT);
+        registerCustomItem("copper_helmet", CustomEquipment.COPPER_HELMET, ItemGroups.COMBAT);
+        registerCustomItem("copper_boots", CustomEquipment.COPPER_BOOTS, ItemGroups.COMBAT);
+        registerCustomItem("copper_hoe", CustomEquipment.COPPER_HOE, ItemGroups.TOOLS);
+        registerCustomItem("copper_axe", CustomEquipment.COPPER_AXE, ItemGroups.TOOLS, ItemGroups.COMBAT);
+        registerCustomItem("copper_sword", CustomEquipment.COPPER_SWORD, ItemGroups.COMBAT);
+        registerCustomItem("copper_shovel", CustomEquipment.COPPER_SHOVEL, ItemGroups.TOOLS);
+        registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);
+        registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
+        registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);
+        registerCustomItem("polished_stone", CustomBlockItems.POLISHED_STONE_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_stone_slab", CustomBlockItems.POLISHED_STONE_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_stone_stairs", CustomBlockItems.POLISHED_STONE_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_bricks", CustomBlockItems.GRANITE_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_brick_slab", CustomBlockItems.GRANITE_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_brick_stairs", CustomBlockItems.GRANITE_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_tiles", CustomBlockItems.GRANITE_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_tile_slab", CustomBlockItems.GRANITE_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("granite_tile_stairs", CustomBlockItems.GRANITE_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud", CustomBlockItems.BROWN_MUD_ITEM, ItemGroups.NATURAL);
+        registerCustomItem("brown_mud_bricks", CustomBlockItems.BROWN_MUD_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_brick_slab", CustomBlockItems.BROWN_MUD_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_brick_stairs", CustomBlockItems.BROWN_MUD_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_tiles", CustomBlockItems.BROWN_MUD_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_tile_slab", CustomBlockItems.BROWN_MUD_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_tile_stairs", CustomBlockItems.BROWN_MUD_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("packed_mud_tiles", CustomBlockItems.PACKED_MUD_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("packed_mud_tile_slab", CustomBlockItems.PACKED_MUD_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("packed_mud_tile_stairs", CustomBlockItems.PACKED_MUD_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+    }
+
+    public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
+        if (group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
+        return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
+    }
+
+    public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
+        if (group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.add(item));
+        if (group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.add(item));
+        return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
+    }
+}

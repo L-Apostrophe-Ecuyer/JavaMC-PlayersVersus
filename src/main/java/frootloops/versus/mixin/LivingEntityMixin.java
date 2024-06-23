@@ -1,22 +1,15 @@
 package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
-import frootloops.versus.VersusMod;
+import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.BrownMudBlock;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.PowderSnowBlock;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MovementType;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -25,8 +18,6 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShovelItem;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -36,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -84,18 +74,18 @@ public abstract class LivingEntityMixin extends Entity {
 
             // Shovel attack and Tossing Enchantment:
             if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
-                int tossLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchants.TOSSING);
-                Enchants.performTossAttack(self, target, 0.2 + 0.1 * (double)tossLevel);
+                int tossLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.TOSSING);
+                CustomEnchants.performTossAttack(self, target, 0.2 + 0.1 * (double)tossLevel);
             }
 
             // Other enchantments: Frost Aspect, Impaling
             if (!mainhandStack.hasEnchantments()) return;
-            int frostLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchants.FROST_ASPECT);
-            if (frostLevel > 0) Enchants.performFrostAttack(self, target, frostLevel);
+            int frostLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.FROST_ASPECT);
+            if (frostLevel > 0) CustomEnchants.performFrostAttack(self, target, frostLevel);
 
             if (!mainhandStack.hasEnchantments()) return;
             int impaleLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchantments.IMPALING);
-            if (impaleLevel > 0) Enchants.performImpalingAttack(self, target, frostLevel);
+            if (impaleLevel > 0) CustomEnchants.performImpalingAttack(self, target, frostLevel);
         }
     }
 
@@ -110,8 +100,8 @@ public abstract class LivingEntityMixin extends Entity {
             }
 
             // Curse of Ender Enchantment:
-            if(Enchants.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), Enchants.CURSE_OF_ENDER) > 0) {
-                Enchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
+            if(Enchants.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
+                CustomEnchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
             }
         }
     }

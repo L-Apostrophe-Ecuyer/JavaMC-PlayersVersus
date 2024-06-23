@@ -2,7 +2,6 @@ package frootloops.versus.mod.mobs.passive;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.environment.CustomBlocks;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -14,7 +13,6 @@ import net.minecraft.component.type.SuspiciousStewEffectsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.enchantment.provider.EnchantmentProvider;
 import net.minecraft.enchantment.provider.TradeRebalanceEnchantmentProviders;
 import net.minecraft.entity.Entity;

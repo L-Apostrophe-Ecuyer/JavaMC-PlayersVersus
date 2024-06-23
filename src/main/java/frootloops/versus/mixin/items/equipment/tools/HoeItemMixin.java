@@ -2,13 +2,10 @@ package frootloops.versus.mixin.items.equipment.tools;
 
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.Enchants;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -18,8 +15,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Iterator;
 
 @Mixin(HoeItem.class)
 public class HoeItemMixin extends ToolItem {

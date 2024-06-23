@@ -1,8 +1,7 @@
 package frootloops.versus.mixin.items.equipment.shields;
 
+import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
@@ -10,8 +9,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
@@ -23,8 +20,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Optional;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityBlockingMixin extends LivingEntity {
@@ -75,7 +70,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
         if(this.getAttacker() != null) {
             ItemStack mainhandStack = this.getAttacker().getMainHandStack();
             if(!mainhandStack.isEmpty() && mainhandStack.hasEnchantments()) {
-                int cleaveLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchants.CLEAVING);
+                int cleaveLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.CLEAVING);
                 if (cleaveLevel > 0)  disableForTicks += 20 * cleaveLevel;
             }
         }
