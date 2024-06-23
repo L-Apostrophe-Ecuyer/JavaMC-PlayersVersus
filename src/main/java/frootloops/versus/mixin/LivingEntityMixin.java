@@ -5,6 +5,8 @@ import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.BrownMudBlock;
+import frootloops.versus.mod.items.brewing.CustomStatusEffects;
+import frootloops.versus.mod.items.brewing.effects.PhantomStatusEffect;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -18,12 +20,15 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShovelItem;
+import net.minecraft.network.packet.s2c.play.RemoveEntityStatusEffectS2CPacket;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
@@ -103,6 +108,13 @@ public abstract class LivingEntityMixin extends Entity {
             if(Enchants.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
                 CustomEnchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
             }
+        }
+    }
+
+    @Inject(method = "onStatusEffectRemoved", at = @At("HEAD"))
+    private void onStatusEffectRemoved(StatusEffectInstance effect, CallbackInfo info) {
+        if(effect.getEffectType() == CustomStatusEffects.HAUNTING) {
+            PhantomStatusEffect.removeEffect(((LivingEntity)(Object)this));
         }
     }
 }

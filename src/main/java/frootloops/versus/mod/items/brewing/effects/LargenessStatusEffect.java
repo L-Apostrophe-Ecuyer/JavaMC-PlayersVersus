@@ -5,14 +5,15 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.Identifier;
 
-public class BignessStatusEffect extends StatusEffect  {
+public class LargenessStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
     private static final int color = 0;
 
-    public BignessStatusEffect(String id) {
-        super(category, color);
+    public LargenessStatusEffect(String id) {
+        super(category, color, ParticleTypes.ITEM_COBWEB);
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
@@ -31,7 +32,7 @@ public class BignessStatusEffect extends StatusEffect  {
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_ATTACK_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                -0.4, EntityAttributeModifier.Operation.ADD_VALUE
+                -0.2, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(

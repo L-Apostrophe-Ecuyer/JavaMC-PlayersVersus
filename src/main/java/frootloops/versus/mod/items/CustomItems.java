@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.*;
@@ -21,6 +22,40 @@ public abstract class CustomItems {
         registerCustomItem("copper_sword", CustomEquipment.COPPER_SWORD, ItemGroups.COMBAT);
         registerCustomItem("copper_shovel", CustomEquipment.COPPER_SHOVEL, ItemGroups.TOOLS);
         registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);
+
+        registerCustomItem("powder_of_death", CustomBrewingItems.POWDER_OF_UNDYING, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_omen", CustomBrewingItems.POWDER_OF_OMEN, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_health", CustomBrewingItems.POWDER_OF_HEALTH, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_harm", CustomBrewingItems.POWDER_OF_HARM, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_regeneration", CustomBrewingItems.POWDER_OF_REGENERATION, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_poison", CustomBrewingItems.POWDER_OF_POISON, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_mining_speed", CustomBrewingItems.POWDER_OF_MINING_SPEED, ItemGroups.INGREDIENTS);    // New potion!
+        registerCustomItem("powder_of_mining_fatigue", CustomBrewingItems.POWDER_OF_MINING_FATIGUE, ItemGroups.INGREDIENTS);  // New potion!
+        registerCustomItem("powder_of_toughness", CustomBrewingItems.POWDER_OF_TOUGHNESS, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_vulnerability", CustomBrewingItems.POWDER_OF_VULNERABILITY, ItemGroups.INGREDIENTS);   // New potion!
+        registerCustomItem("powder_of_vision", CustomBrewingItems.POWDER_OF_VISION, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_darkness", CustomBrewingItems.POWDER_OF_DARKNESS, ItemGroups.INGREDIENTS);        // New potion!
+        registerCustomItem("powder_of_leaping", CustomBrewingItems.POWDER_OF_LEAPING, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_slow_fall", CustomBrewingItems.POWDER_OF_SLOW_FALL, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_speed", CustomBrewingItems.POWDER_OF_SPEED, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_slowness", CustomBrewingItems.POWDER_OF_SLOWNESS, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_breath", CustomBrewingItems.POWDER_OF_BREATH, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_affinity", CustomBrewingItems.POWDER_OF_AFFINITY, ItemGroups.INGREDIENTS);   // New potion & effect!
+        registerCustomItem("powder_of_swimming", CustomBrewingItems.POWDER_OF_SWIMMING, ItemGroups.INGREDIENTS);   // New potion!
+        registerCustomItem("powder_of_sinking", CustomBrewingItems.POWDER_OF_SINKING, ItemGroups.INGREDIENTS);     // New potion & effect!
+        registerCustomItem("powder_of_largeness", CustomBrewingItems.POWDER_OF_LARGENESS, ItemGroups.INGREDIENTS);   // New potion & effect!
+        registerCustomItem("powder_of_smallness", CustomBrewingItems.POWDER_OF_SMALLNESS, ItemGroups.INGREDIENTS);   // New potion & effect!
+        registerCustomItem("powder_of_invisibility", CustomBrewingItems.POWDER_OF_INVISIBILITY, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_glowing", CustomBrewingItems.POWDER_OF_GLOWING, ItemGroups.INGREDIENTS);     // New potion!
+        registerCustomItem("powder_of_strength", CustomBrewingItems.POWDER_OF_STRENGTH, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_weakness", CustomBrewingItems.POWDER_OF_WEAKNESS, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_flame", CustomBrewingItems.POWDER_OF_FLAME, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_burning", CustomBrewingItems.POWDER_OF_BURNING, ItemGroups.INGREDIENTS);     // New potion & effect!
+        registerCustomItem("powder_of_wind", CustomBrewingItems.POWDER_OF_WIND, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_ooze", CustomBrewingItems.POWDER_OF_OOZE, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_infestation", CustomBrewingItems.POWDER_OF_INFESTATION, ItemGroups.INGREDIENTS);
+        registerCustomItem("powder_of_weaving", CustomBrewingItems.POWDER_OF_WEAVING, ItemGroups.INGREDIENTS);
+
         registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
         registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);
         registerCustomItem("polished_stone", CustomBlockItems.POLISHED_STONE_ITEM, ItemGroups.BUILDING_BLOCKS);

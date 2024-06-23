@@ -31,7 +31,7 @@ public abstract class Items {
     private static Map<Item, Integer> DEFAULT_MAX_STACK_SIZE = new HashMap<>();
 
     public static void onInitialize() {
-        setStackSizes(16, 8, 4, 4, 64, 16, 64);
+        setStackSizes(16, 8, 8, 8, 64, 16, 64);
         CustomItems.registerAllCustomItems();
         CustomStatusEffects.registerCustomStatusEffects();
     }

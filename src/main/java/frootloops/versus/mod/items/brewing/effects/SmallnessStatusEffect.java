@@ -31,7 +31,7 @@ public class SmallnessStatusEffect extends StatusEffect  {
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_ATTACK_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                0.4, EntityAttributeModifier.Operation.ADD_VALUE
+                0.2, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(

@@ -1,8 +1,11 @@
 package frootloops.versus.mod.items.brewing;
 
 import net.minecraft.item.*;
+import net.minecraft.potion.Potions;
 
 public abstract class CustomBrewingItems {
+
+    public static final Item POWDER_OF_UNDYING = new Item(new Item.Settings());
 
     public static final Item POWDER_OF_OMEN = new Item(new Item.Settings());
 
