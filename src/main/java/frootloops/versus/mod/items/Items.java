@@ -2,6 +2,7 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.items.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items.equipment.copper.CopperToolMaterial;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.component.DataComponentTypes;
@@ -32,6 +33,7 @@ public abstract class Items {
     public static void onInitialize() {
         setStackSizes(16, 8, 8, 8, 64, 16, 64);
         CustomItems.registerAllCustomItems();
+        CustomStatusEffects.registerCustomStatusEffects();
     }
 
     private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
