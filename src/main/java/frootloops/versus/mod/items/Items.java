@@ -39,10 +39,11 @@ public abstract class Items {
     private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
         for (Item item : Registries.ITEM) {
             if (item.getComponents().contains(DataComponentTypes.FOOD)) {
-                if (item.getTranslationKey().contains("cooked_") || item.getTranslationKey().contains("raw_")) setDefaultMaxStackSize(item, maxMeals);
+                if (item instanceof BlockItem) setDefaultMaxStackSize(item, maxPlaceableBlocks);
+                else if(item.getComponents().get(DataComponentTypes.FOOD).eatSeconds() ==  0.8f) setDefaultMaxStackSize(item, maxFoods);
+                else if (item.getTranslationKey().contains("cooked_") || item.getTranslationKey().contains("raw_")) setDefaultMaxStackSize(item, maxMeals);
                 else if (item.getTranslationKey().contains("stew")) setDefaultMaxStackSize(item, maxStews);
                 else if (item.getTranslationKey().contains("soup")) setDefaultMaxStackSize(item, maxStews);
-                else if (item instanceof BlockItem) setDefaultMaxStackSize(item, maxPlaceableBlocks);
                 else setDefaultMaxStackSize(item, maxFoods);
 
             } else if (item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem)
