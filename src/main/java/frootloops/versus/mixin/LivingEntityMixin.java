@@ -55,6 +55,15 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
+    @ModifyConstant(method = "travel", constant = @Constant(floatValue = 0.02f))
+    private float applyBuoyancyEffect(float thisMixinIsOnlyCalledWhenInWater) {
+        if(((LivingEntity)((Object)this)).hasStatusEffect(CustomStatusEffects.BUOYANCY)) {
+            double amplifier = 1.0 + ((LivingEntity)((Object)this)).getStatusEffect(CustomStatusEffects.BUOYANCY).getAmplifier();
+            this.setVelocity(this.getVelocity().add(0.0, this.getVelocity().getY() * 0.025 + 0.05 * amplifier, 0.0));
+        }
+        return 0.02f;
+    }
+
     @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0)
     private double takeMoreKnockback(double strength) {
         return strength * 1.2;
