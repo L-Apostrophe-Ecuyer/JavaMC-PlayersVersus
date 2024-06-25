@@ -2,9 +2,11 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
+import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.*;
+import net.minecraft.potion.Potions;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -23,35 +25,37 @@ public abstract class CustomItems {
         registerCustomItem("copper_shovel", CustomEquipment.COPPER_SHOVEL, ItemGroups.TOOLS);
         registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);
 
-        registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_UNDYING, ItemGroups.INGREDIENTS);          // New potion & effect!
-        registerCustomItem("concentrate_of_omen", CustomBrewingItems.CONCENTRATE_OF_OMEN, ItemGroups.INGREDIENTS);              // New potion!
-        registerCustomItem("concentrate_of_health", CustomBrewingItems.CONCENTRATE_OF_HEALTH, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_harm", CustomBrewingItems.CONCENTRATE_OF_HARM, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_regeneration", CustomBrewingItems.CONCENTRATE_OF_REGENERATION, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_mining_speed", CustomBrewingItems.CONCENTRATE_OF_MINING_SPEED, ItemGroups.INGREDIENTS);     // New potion!
-        registerCustomItem("concentrate_of_mining_fatigue", CustomBrewingItems.CONCENTRATE_OF_MINING_FATIGUE, ItemGroups.INGREDIENTS); // New potion!
-        registerCustomItem("concentrate_of_toughness", CustomBrewingItems.CONCENTRATE_OF_TOUGHNESS, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_vulnerability", CustomBrewingItems.CONCENTRATE_OF_VULNERABILITY, ItemGroups.INGREDIENTS);   // New potion!
-        registerCustomItem("concentrate_of_vision", CustomBrewingItems.CONCENTRATE_OF_VISION, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_darkness", CustomBrewingItems.CONCENTRATE_OF_DARKNESS, ItemGroups.INGREDIENTS);      // New potion!
-        registerCustomItem("concentrate_of_leaping", CustomBrewingItems.CONCENTRATE_OF_LEAPING, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_slow_fall", CustomBrewingItems.CONCENTRATE_OF_SLOW_FALL, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_speed", CustomBrewingItems.CONCENTRATE_OF_SPEED, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_slowness", CustomBrewingItems.CONCENTRATE_OF_SLOWNESS, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_breath", CustomBrewingItems.CONCENTRATE_OF_BREATH, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_buoyancy", CustomBrewingItems.CONCENTRATE_OF_BUOYANCY, ItemGroups.INGREDIENTS);      // New potion & effect!
-        registerCustomItem("concentrate_of_largeness", CustomBrewingItems.CONCENTRATE_OF_LARGENESS, ItemGroups.INGREDIENTS);    // New potion & effect!
-        registerCustomItem("concentrate_of_smallness", CustomBrewingItems.CONCENTRATE_OF_SMALLNESS, ItemGroups.INGREDIENTS);    // New potion & effect!
-        registerCustomItem("concentrate_of_invisibility", CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_glowing", CustomBrewingItems.CONCENTRATE_OF_GLOWING, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_weakness", CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_infestation", CustomBrewingItems.CONCENTRATE_OF_INFESTATION, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_weaving", CustomBrewingItems.CONCENTRATE_OF_WEAVING, ItemGroups.INGREDIENTS);
+        registerCustomItem("bottle_of_ender", CustomPotions.BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
+
+        registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_UNDYING, ItemGroups.FOOD_AND_DRINK);          // New potion & effect!
+        registerCustomItem("concentrate_of_omen", CustomBrewingItems.CONCENTRATE_OF_OMEN, ItemGroups.FOOD_AND_DRINK);              // New potion!
+        registerCustomItem("concentrate_of_health", CustomBrewingItems.CONCENTRATE_OF_HEALTH, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_harm", CustomBrewingItems.CONCENTRATE_OF_HARM, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_regeneration", CustomBrewingItems.CONCENTRATE_OF_REGENERATION, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_mining_speed", CustomBrewingItems.CONCENTRATE_OF_MINING_SPEED, ItemGroups.FOOD_AND_DRINK);     // New potion!
+        registerCustomItem("concentrate_of_mining_fatigue", CustomBrewingItems.CONCENTRATE_OF_MINING_FATIGUE, ItemGroups.FOOD_AND_DRINK); // New potion!
+        registerCustomItem("concentrate_of_toughness", CustomBrewingItems.CONCENTRATE_OF_TOUGHNESS, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_vulnerability", CustomBrewingItems.CONCENTRATE_OF_VULNERABILITY, ItemGroups.FOOD_AND_DRINK);   // New potion!
+        registerCustomItem("concentrate_of_vision", CustomBrewingItems.CONCENTRATE_OF_VISION, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_darkness", CustomBrewingItems.CONCENTRATE_OF_DARKNESS, ItemGroups.FOOD_AND_DRINK);      // New potion!
+        registerCustomItem("concentrate_of_leaping", CustomBrewingItems.CONCENTRATE_OF_LEAPING, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_slow_fall", CustomBrewingItems.CONCENTRATE_OF_SLOW_FALL, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_speed", CustomBrewingItems.CONCENTRATE_OF_SPEED, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_slowness", CustomBrewingItems.CONCENTRATE_OF_SLOWNESS, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_breath", CustomBrewingItems.CONCENTRATE_OF_BREATH, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_buoyancy", CustomBrewingItems.CONCENTRATE_OF_BUOYANCY, ItemGroups.FOOD_AND_DRINK);      // New potion & effect!
+        registerCustomItem("concentrate_of_largeness", CustomBrewingItems.CONCENTRATE_OF_LARGENESS, ItemGroups.FOOD_AND_DRINK);    // New potion & effect!
+        registerCustomItem("concentrate_of_smallness", CustomBrewingItems.CONCENTRATE_OF_SMALLNESS, ItemGroups.FOOD_AND_DRINK);    // New potion & effect!
+        registerCustomItem("concentrate_of_invisibility", CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_glowing", CustomBrewingItems.CONCENTRATE_OF_GLOWING, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_weakness", CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_infestation", CustomBrewingItems.CONCENTRATE_OF_INFESTATION, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_weaving", CustomBrewingItems.CONCENTRATE_OF_WEAVING, ItemGroups.FOOD_AND_DRINK);
 
         registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
 

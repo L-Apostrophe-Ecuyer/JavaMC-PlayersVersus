@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.items;
 
-import frootloops.versus.mod.items.ModItems;
+import frootloops.versus.mod.items.ItemsAndStacks;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.ComponentMapImpl;
 import net.minecraft.entity.player.PlayerEntity;
@@ -38,15 +38,15 @@ public class ItemStackMixin {
 
     @Inject(method = "onClicked", at = @At("HEAD"), cancellable = false)
     public void onClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference, CallbackInfoReturnable<Boolean> cir) {
-        if(ModItems.hasReplacementItem(item)) {
-            ItemStack newStack = new ItemStack(ModItems.getReplacementItem(item).getRegistryEntry(), count, components.copy().getChanges());
+        if(ItemsAndStacks.hasReplacementItem(item)) {
+            ItemStack newStack = new ItemStack(ItemsAndStacks.getReplacementItem(item).getRegistryEntry(), count, components.copy().getChanges());
             slot.setStack(newStack);
         }
     }
 
     @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
     public void getMaxCount(CallbackInfoReturnable<Integer> cir) {
-        int customMaxCount = ModItems.getDefaultMaxStackSize(item);
+        int customMaxCount = ItemsAndStacks.getDefaultMaxStackSize(item);
         if(customMaxCount > 0) {
             cir.setReturnValue(customMaxCount);
             cir.cancel();
@@ -58,8 +58,8 @@ public class ItemStackMixin {
         float miningSpeed = cir.getReturnValue();
         if(miningSpeed != 1.0f && this.item instanceof MiningToolItem miningToolItem) {
             ToolMaterial material = miningToolItem.getMaterial();
-            if(material == ToolMaterials.WOOD) miningSpeed *= 1.25f;
-            else if(material == ToolMaterials.STONE) miningSpeed *= 1.1f;
+            if(material == ToolMaterials.WOOD) miningSpeed *= 1.4f;
+            else if(material == ToolMaterials.STONE) miningSpeed *= 1.2f;
             else if(state.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
                 if(material.getInverseTag() == BlockTags.INCORRECT_FOR_STONE_TOOL) miningSpeed *= 0.6f;
                 else if(material == ToolMaterials.NETHERITE) miningSpeed *= 1.25f;

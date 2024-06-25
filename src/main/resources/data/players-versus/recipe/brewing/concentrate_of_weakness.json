@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:smelting",
+    "category": "food",
+    "group": "concentrates",
+    "ingredient": [
+      {
+        "item": "minecraft:coal"
+      },
+      {
+        "item": "minecraft:black_dye"
+      }
+    ],
+    "result": {
+      "id": "players-versus:concentrate_of_weakness"
+    },
+    "experience": 5,
+    "cookingtime": 200
+}
+  

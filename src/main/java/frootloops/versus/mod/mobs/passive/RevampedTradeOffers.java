@@ -635,9 +635,9 @@ public class RevampedTradeOffers {
                         new SellItemFactory(Items.LEATHER, 1, 6, 2),
                         new SellItemFactory(Items.LEATHER_HORSE_ARMOR, 12, 1, 12),
                         new BuyForOneEmeraldFactory(Items.RABBIT_HIDE, 4, 12, 6),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_HORSE_ARMOR, 5),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_HELMET, 5, 12, 5),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_BOOTS, 4, 12, 5),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_HORSE_ARMOR, 5),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_HELMET, 5, 12, 5),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_BOOTS, 4, 12, 5),
                         new SellItemFactory(Items.BUNDLE, 4, 1, 3)},
                 2, new Factory[]{
                         new SellItemFactory(Items.GRAY_DYE, 1, 8, 4),
@@ -646,30 +646,30 @@ public class RevampedTradeOffers {
                         new SellItemFactory(Items.LIME_DYE, 1, 8, 4),
                         new SellItemFactory(Items.ITEM_FRAME, 1, 5, 6),
                         new SellItemFactory(Items.GLOW_ITEM_FRAME, 1, 3, 8),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_CHESTPLATE, 12),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_LEGGINGS, 12),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_BOOTS, 4, 12, 12)
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_CHESTPLATE, 12),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_LEGGINGS, 12),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_BOOTS, 4, 12, 12)
                 },
                 3, new Factory[]{
                         new SellItemFactory(Items.GREEN_DYE, 1, 8, 8),
                         new SellItemFactory(Items.LIGHT_GRAY_DYE, 1, 8, 8),
                         new SellItemFactory(Items.ORANGE_DYE, 1, 8, 8),
                         new SellItemFactory(Items.PINK_DYE, 1, 8, 8),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_BOOTS, 4, 12, 16),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_CHESTPLATE, 16)
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_BOOTS, 4, 12, 16),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_CHESTPLATE, 16)
                 },
                 4, new Factory[]{
                         new SellItemFactory(Items.PURPLE_DYE, 1, 8, 9),
                         new SellItemFactory(Items.BLUE_DYE, 1, 8, 9),
                         new SellItemFactory(Items.MAGENTA_DYE, 1, 8, 9),
                         new SellItemFactory(Items.CYAN_DYE, 1, 8, 9)//,
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_HELMET, 5, 12, 20),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_LEGGINGS, 7, 12, 20),
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_CHESTPLATE, 8, 12, 20)
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_HELMET, 5, 12, 20),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_LEGGINGS, 7, 12, 20),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_CHESTPLATE, 8, 12, 20)
                 },
                 5, new Factory[]{
                         new SellItemFactory(new ItemStack(Items.SADDLE), 6, 1, 12, 30, 0.2f)//,
-                        //new SellSpecialLeatherArmorFactory(ModItems.LEATHER_HORSE_ARMOR, 6, 12, 30)
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_HORSE_ARMOR, 6, 12, 30)
                 }
         )));
 

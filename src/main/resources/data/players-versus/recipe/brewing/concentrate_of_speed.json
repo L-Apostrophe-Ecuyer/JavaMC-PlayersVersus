@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "group": "concentrates",
+  "ingredient": [
+    {
+      "item": "minecraft:glow_ink_sac"
+    },
+    {
+      "item": "minecraft:warped_roots"
+    },
+    {
+      "item": "minecraft:blue_orchid"
+    }
+  ],
+  "result": {
+    "id": "players-versus:concentrate_of_speed"
+  },
+  "experience": 5,
+  "cookingtime": 200
+}

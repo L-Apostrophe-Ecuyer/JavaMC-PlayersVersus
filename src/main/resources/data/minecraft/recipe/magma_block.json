@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "category": "misc",
+    "pattern": [
+      "###",
+      "#X#",
+      "###"
+    ],
+    "key": {
+      "#": {
+        "item": "minecraft:cobbled_deepslate"
+      },
+      "X": {
+        "item": "minecraft:lava_bucket"
+      }
+    },
+    "result": {
+      "id": "minecraft:magma_block",
+      "count": 8
+    }
+  }
+  

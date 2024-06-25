@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "group": "concentrates",
+  "ingredient": [
+    {
+      "item": "minecraft:beetroot"
+    },
+    {
+      "item": "minecraft:weeping_vines"
+    }
+  ],
+  "result": {
+    "id": "players-versus:concentrate_of_health"
+  },
+  "experience": 5,
+  "cookingtime": 200
+}

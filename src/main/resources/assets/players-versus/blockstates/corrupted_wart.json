@@ -1,7 +1,7 @@
 {
   "variants": {
     "age=0": {
-      "crop": "players-versus:block/corrupted_wart_stage0"
+      "model": "players-versus:block/corrupted_wart_stage0"
     },
     "age=1": {
       "model": "players-versus:block/corrupted_wart_stage1"

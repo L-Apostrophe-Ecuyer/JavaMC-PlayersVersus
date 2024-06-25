@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "group": "concentrates",
+  "ingredient": [
+    {
+      "item": "minecraft:ink_sac"
+    },
+    {
+      "item": "minecraft:twisting_vines"
+    },
+    {
+      "item": "minecraft:cornflower"
+    },
+    {
+      "item": "minecraft:clay_ball"
+    }
+  ],
+  "result": {
+    "id": "players-versus:concentrate_of_slowness"
+  },
+  "experience": 5,
+  "cookingtime": 200
+}

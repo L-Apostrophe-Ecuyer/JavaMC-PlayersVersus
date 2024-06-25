@@ -54,6 +54,7 @@ public class CustomBlocks {
 
 
     public static void onInitialize() {
+        registerBlock("corrupted_wart", CORRUPTED_WART_PLANT);
         registerBlock("smoldering_torch", SMOLDERING_TORCH);
         registerBlock("smoldering_wall_torch", SMOLDERING_WALL_TORCH);
         registerBlock("extinguished_torch", EXTINGUISHED_TORCH);

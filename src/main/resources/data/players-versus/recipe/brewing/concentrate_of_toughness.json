@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "group": "concentrates",
+  "ingredient": [
+    {
+      "item": "minecraft:turtle_scute"
+    },
+    {
+      "item": "minecraft:shulker_shell"
+    }
+  ],
+  "result": {
+    "id": "players-versus:concentrate_of_toughness"
+  },
+  "experience": 5,
+  "cookingtime": 200
+}

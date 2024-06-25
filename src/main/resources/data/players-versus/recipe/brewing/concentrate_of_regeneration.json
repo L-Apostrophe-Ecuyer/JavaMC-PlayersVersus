@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "group": "concentrates",
+  "ingredient": [
+    {
+      "item": "minecraft:ghast_tear"
+    },
+    {
+      "item": "minecraft:popped_chorus_fruit"
+    }
+  ],
+  "result": {
+    "id": "players-versus:concentrate_of_regeneration"
+  },
+  "experience": 5,
+  "cookingtime": 200
+}

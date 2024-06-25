@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
+import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.*;
@@ -9,23 +10,28 @@ import net.minecraft.registry.Registries;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ModItems {
+public abstract class ItemsAndStacks {
 
     private static Map<Item, Integer> DEFAULT_MAX_STACK_SIZE = new HashMap<>();
 
     private static Map<Item, Item> TRANSFORM_VANILLA_ITEMS_TO_MODDED = new HashMap<>();
 
+    public static int MAX_POTION_STACK_SIZE = 8;
+
 
     public static void onInitialize() {
-        setStackSizes(16, 8, 8, 8, 64, 16, 64);
+        // Order is important here:
         setUpTransformVanillaItemsToModded();
-        CustomItems.registerAllCustomItems();
         CustomStatusEffects.registerCustomStatusEffects();
+        CustomPotions.registerCustomPotions();
+        CustomItems.registerAllCustomItems();
+        setStackSizes(16, 8, MAX_POTION_STACK_SIZE, 8, 64, 16, 64);
     }
 
     private static void setUpTransformVanillaItemsToModded() {
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.BLAZE_POWDER, CustomBrewingItems.CONCENTRATE_OF_STRENGTH);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLOWSTONE_DUST, CustomBrewingItems.CONCENTRATE_OF_GLOWING);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLISTERING_MELON_SLICE, CustomBrewingItems.CONCENTRATE_OF_HEALTH);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.DIORITE, Items.CALCITE);
     }
 
@@ -46,33 +52,34 @@ public abstract class ModItems {
         }
 
         // Other foods:
-        setDefaultMaxStackSize(net.minecraft.item.Items.CAKE, maxMeals);
-        setDefaultMaxStackSize(net.minecraft.item.Items.BREAD, maxFoods);
-        setDefaultMaxStackSize(net.minecraft.item.Items.PUMPKIN_PIE, maxMeals);
-        setDefaultMaxStackSize(net.minecraft.item.Items.SALMON, maxMeals);
-        setDefaultMaxStackSize(net.minecraft.item.Items.COOKED_SALMON, maxMeals);
-        setDefaultMaxStackSize(net.minecraft.item.Items.COD, maxMeals);
-        setDefaultMaxStackSize(net.minecraft.item.Items.COOKED_COD, maxMeals);
-        setDefaultMaxStackSize(net.minecraft.item.Items.TROPICAL_FISH, Math.max(maxFoods, maxMeals));
-        setDefaultMaxStackSize(net.minecraft.item.Items.ROTTEN_FLESH, Math.max(maxFoods, maxMeals));
+        setDefaultMaxStackSize(Items.CAKE, maxMeals);
+        setDefaultMaxStackSize(Items.BREAD, maxFoods);
+        setDefaultMaxStackSize(Items.PUMPKIN_PIE, maxMeals);
+        setDefaultMaxStackSize(Items.SALMON, maxMeals);
+        setDefaultMaxStackSize(Items.COOKED_SALMON, maxMeals);
+        setDefaultMaxStackSize(Items.COD, maxMeals);
+        setDefaultMaxStackSize(Items.COOKED_COD, maxMeals);
+        setDefaultMaxStackSize(Items.TROPICAL_FISH, Math.max(maxFoods, maxMeals));
+        setDefaultMaxStackSize(Items.ROTTEN_FLESH, Math.max(maxFoods, maxMeals));
+        setDefaultMaxStackSize(Items.MELON_SLICE, Math.max(maxFoods, maxPlaceableBlocks));
 
         // Bottles:
-        setDefaultMaxStackSize(net.minecraft.item.Items.POTION, maxBottled);
-        setDefaultMaxStackSize(net.minecraft.item.Items.HONEY_BOTTLE, Math.max(maxFoods, maxBottled));
+        setDefaultMaxStackSize(Items.POTION, maxBottled);
+        setDefaultMaxStackSize(Items.HONEY_BOTTLE, Math.max(maxFoods, maxBottled));
 
         // Throwables:
-        setDefaultMaxStackSize(net.minecraft.item.Items.EGG, maxThrowables);
-        setDefaultMaxStackSize(net.minecraft.item.Items.SNOWBALL, maxThrowables);
-        setDefaultMaxStackSize(net.minecraft.item.Items.ENDER_PEARL, maxThrowables);
-        setDefaultMaxStackSize(net.minecraft.item.Items.FIRE_CHARGE, maxThrowables);
-        setDefaultMaxStackSize(net.minecraft.item.Items.PUFFERFISH, maxThrowables);
+        setDefaultMaxStackSize(Items.EGG, maxThrowables);
+        setDefaultMaxStackSize(Items.SNOWBALL, maxThrowables);
+        setDefaultMaxStackSize(Items.ENDER_PEARL, maxThrowables);
+        setDefaultMaxStackSize(Items.FIRE_CHARGE, maxThrowables);
+        setDefaultMaxStackSize(Items.PUFFERFISH, maxThrowables);
 
         // Empty buckets
-        setDefaultMaxStackSize(net.minecraft.item.Items.BUCKET, maxPlaceableBlocks);
-        setDefaultMaxStackSize(net.minecraft.item.Items.POWDER_SNOW_BUCKET, maxPlaceableEntities);
+        setDefaultMaxStackSize(Items.BUCKET, maxPlaceableBlocks);
+        setDefaultMaxStackSize(Items.POWDER_SNOW_BUCKET, maxPlaceableEntities);
 
         // Rarities
-        setDefaultMaxStackSize(net.minecraft.item.Items.SADDLE, maxThrowables);
+        setDefaultMaxStackSize(Items.SADDLE, maxThrowables);
     }
 
     private static void setDefaultMaxStackSize(Item item, int maxCount) {

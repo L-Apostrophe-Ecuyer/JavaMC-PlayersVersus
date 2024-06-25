@@ -1,0 +1,14 @@
+{
+    "type": "minecraft:smelting",
+    "category": "food",
+    "group": "concentrates",
+    "ingredient": {
+      "item": "minecraft:ender_pearl"
+    },
+    "result": {
+      "id": "players-versus:concentrate_of_invisibility"
+    },
+    "experience": 5,
+    "cookingtime": 200
+}
+  

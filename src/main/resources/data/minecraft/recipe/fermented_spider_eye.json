@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "category": "misc",
+    "ingredients": [
+      {
+        "item": "minecraft:spider_eye"
+      },
+      {
+        "item": "minecraft:brown_mushroom"
+      },
+      {
+        "item": "minecraft:sugar"
+      }
+    ],
+    "result": {
+      "id": "players-versus:concentrate_of_poison",
+      "count": 2
+    }
+  }
+  

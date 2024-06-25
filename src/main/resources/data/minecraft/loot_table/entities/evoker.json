@@ -8,6 +8,10 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:totem_of_undying"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:ender_eye"
         }
       ],
       "conditions": [
@@ -22,8 +26,8 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 99,
           "name": "minecraft:vex_armor_trim_smithing_template",
+          "weight": 99,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -36,9 +40,7 @@
           "conditions": [
             {
               "condition": "minecraft:location_check",
-              "predicate": {
-                "structure": "minecraft:mansion"
-              }
+              "predicate": {}
             },
             {
               "condition": "minecraft:killed_by_player"
@@ -47,8 +49,8 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 1,
           "name": "minecraft:filled_map",
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:exploration_map",
@@ -66,8 +68,8 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 2,
           "name": "minecraft:enchanted_book",
+          "weight": 2,
           "functions": [
             {
               "function": "minecraft:enchant_randomly"
@@ -85,33 +87,8 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 12,
-          "name": "minecraft:emerald",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 0,
-                "max": 1
-              },
-              "add": false
-            },
-            {
-              "function": "minecraft:enchanted_count_increase",
-              "enchantment": "minecraft:looting",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 0,
-                "max": 1
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 5,
           "name": "minecraft:gold_ingot",
+          "weight": 5,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -124,22 +101,8 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 3,
-          "name": "minecraft:paper",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 3,
-                "max": 6
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 1,
-          "name": "minecraft:map"
+          "name": "players-versus:concentrate_of_death",
+          "weight": 3
         }
       ]
     }

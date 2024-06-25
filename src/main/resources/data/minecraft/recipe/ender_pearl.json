@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "#X#",
+    "XEX",
+    "#X#"
+  ],
+  "key": {
+    "#": {
+      "item": "players-versus:bottle_of_ender"
+    },
+    "X": {
+      "item": "players-versus:concentrate_of_strength"
+    },
+    "E": {
+      "item": "minecraft:ender_pearl"
+    }
+  },
+  "result": {
+    "id": "minecraft:ender_eye",
+    "count": 4
+  }
+}

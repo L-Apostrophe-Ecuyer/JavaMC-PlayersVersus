@@ -1,0 +1,14 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "category": "misc",
+    "ingredients": [
+      {
+        "item": "minecraft:magma_block"
+      }
+    ],
+    "result": {
+      "id": "minecraft:cobbled_deepslate",
+      "count": 1
+    }
+}
+  

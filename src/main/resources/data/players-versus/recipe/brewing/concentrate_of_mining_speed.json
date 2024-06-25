@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "group": "concentrates",
+  "ingredient": {
+    "item": "minecraft:golden_apple"
+  },
+  "result": {
+    "id": "players-versus:concentrate_of_mining_speed"
+  },
+  "experience": 5,
+  "cookingtime": 200
+}

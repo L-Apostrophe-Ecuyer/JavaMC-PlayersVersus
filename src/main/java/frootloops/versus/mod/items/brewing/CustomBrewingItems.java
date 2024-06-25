@@ -1,10 +1,14 @@
 package frootloops.versus.mod.items.brewing;
 
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.PotionContentsComponent;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.Potions;
 
 public abstract class CustomBrewingItems {
-
     public static final Item CONCENTRATE_OF_UNDYING = new ConcentrateItem(StatusEffects.WITHER, 2, 80);
     public static final Item CONCENTRATE_OF_OMEN = new ConcentrateItem(StatusEffects.UNLUCK);
 

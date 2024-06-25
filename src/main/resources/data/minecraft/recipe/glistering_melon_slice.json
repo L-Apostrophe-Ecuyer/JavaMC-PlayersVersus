@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "category": "misc",
+    "group": "sugar_from_honey",
+    "ingredients": [
+      [
+        {
+          "item": "minecraft:honeycomb"
+        },
+        {
+          "item": "minecraft:honey_bottle"
+        }
+      ]
+    ],
+    "result": {
+      "id": "minecraft:sugar",
+      "count": 2
+    }
+  }
+  
