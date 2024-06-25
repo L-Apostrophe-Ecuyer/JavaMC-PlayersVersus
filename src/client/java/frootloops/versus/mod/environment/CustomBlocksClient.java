@@ -10,7 +10,7 @@ import net.minecraft.client.render.RenderLayer;
 public class CustomBlocksClient {
 
     public static void onInitialize() {
-        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH, CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, CustomBlocks.CORRUPTED_WART_PLANT);
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH, CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, CustomBlocks.CORRUPTED_WART_PLANT, CustomBlocks.WITHERED_WART_PLANT);
     }
 
 }
