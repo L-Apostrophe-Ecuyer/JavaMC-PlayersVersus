@@ -25,11 +25,11 @@ public abstract class ItemsAndStacks {
         CustomStatusEffects.registerCustomStatusEffects();
         CustomPotions.registerCustomPotions();
         CustomItems.registerAllCustomItems();
+
         setStackSizes(16, 8, MAX_POTION_STACK_SIZE, 8, 64, 16, 64);
     }
 
     private static void setUpTransformVanillaItemsToModded() {
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLOWSTONE_DUST, CustomBrewingItems.CONCENTRATE_OF_GLOWING);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLISTERING_MELON_SLICE, CustomBrewingItems.CONCENTRATE_OF_HEALTH);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.DIORITE, Items.CALCITE);

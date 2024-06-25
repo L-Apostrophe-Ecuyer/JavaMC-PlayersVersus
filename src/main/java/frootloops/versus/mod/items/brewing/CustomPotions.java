@@ -1,15 +1,13 @@
 package frootloops.versus.mod.items.brewing;
 
-import frootloops.versus.mod.items.brewing.effects.*;
+import frootloops.versus.VersusMod;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.PotionItem;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.Potions;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -38,7 +36,7 @@ public abstract class CustomPotions {
 
     public static RegistryEntry<Potion> HAUNTING;
 
-    public static final Item BOTTLE_OF_ENDER = new PotionItem(new Item.Settings().maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+    public static Item BOTTLE_OF_ENDER;
 
     public static void registerCustomPotions() {
         LARGENESS = registerCustomPotion( "largeness", CustomStatusEffects.LARGENESS, 0, 2400);
@@ -56,15 +54,19 @@ public abstract class CustomPotions {
 
         BUOYANCY = registerCustomPotion("buoyancy", CustomStatusEffects.BUOYANCY, 0, 3000);
         BUOYANCY_LONG = registerCustomPotion("buoyancy_long", CustomStatusEffects.BUOYANCY, 0, 7200);
-        BUOYANCY_STRONG = registerCustomPotion("buoyancy", CustomStatusEffects.BUOYANCY, 1, 1800);
+        BUOYANCY_STRONG = registerCustomPotion("buoyancy_strong", CustomStatusEffects.BUOYANCY, 1, 1800);
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
+
+        BOTTLE_OF_ENDER = new PotionItem(new Item.Settings().maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
     }
 
     private static RegistryEntry<Potion> registerCustomPotion(String name, RegistryEntry<StatusEffect> effect, int amplifier, int duration) {
         Potion customPotion = new Potion(new StatusEffectInstance(effect, duration, amplifier));
         Registry.register(Registries.POTION, Identifier.of(MOD_ID, name), customPotion);
-        return Registries.POTION.getEntry(customPotion);
+        RegistryEntry<Potion> entry = Registries.POTION.getEntry(customPotion);
+        if(entry == null) VersusMod.MOD_LOGGER.error("ERROR: Potion Entry for '" + name + "' was returned as null by the registry upon launching the game.");
+        return entry;
     }
 
 }
