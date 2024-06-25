@@ -1,39 +1,32 @@
 package frootloops.versus.mod.items;
 
-import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
-import frootloops.versus.mod.items.equipment.copper.CopperToolMaterial;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.*;
-import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Direction;
 
-import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
-import static frootloops.versus.VersusMod.MOD_ID;
-
-public abstract class Items {
+public abstract class ModItems {
 
     private static Map<Item, Integer> DEFAULT_MAX_STACK_SIZE = new HashMap<>();
 
+    private static Map<Item, Item> TRANSFORM_VANILLA_ITEMS_TO_MODDED = new HashMap<>();
+
+
     public static void onInitialize() {
         setStackSizes(16, 8, 8, 8, 64, 16, 64);
+        setUpTransformVanillaItemsToModded();
         CustomItems.registerAllCustomItems();
         CustomStatusEffects.registerCustomStatusEffects();
+    }
+
+    private static void setUpTransformVanillaItemsToModded() {
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.BLAZE_POWDER, CustomBrewingItems.CONCENTRATE_OF_STRENGTH);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLOWSTONE_DUST, CustomBrewingItems.CONCENTRATE_OF_GLOWING);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.DIORITE, Items.CALCITE);
     }
 
     private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
@@ -88,5 +81,13 @@ public abstract class Items {
 
     public static int getDefaultMaxStackSize(Item item) {
         return DEFAULT_MAX_STACK_SIZE.getOrDefault(item, -1);
+    }
+
+    public static boolean hasReplacementItem(Item item) {
+        return TRANSFORM_VANILLA_ITEMS_TO_MODDED.containsKey(item);
+    }
+
+    public static Item getReplacementItem(Item item) {
+        return TRANSFORM_VANILLA_ITEMS_TO_MODDED.getOrDefault(item, null);
     }
 }

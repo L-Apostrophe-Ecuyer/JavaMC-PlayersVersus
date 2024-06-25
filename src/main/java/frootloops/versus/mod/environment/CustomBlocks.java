@@ -21,6 +21,8 @@ public class CustomBlocks {
     public static final Block EXTINGUISHED_TORCH = new TorchBlock(ParticleTypes.SMOKE, AbstractBlock.Settings.create().noCollision().breakInstantly().luminance((state) -> 6).sounds(BlockSoundGroup.WOOD).pistonBehavior(PistonBehavior.DESTROY));
     public static final Block EXTINGUISHED_WALL_TORCH = new WallTorchBlock(ParticleTypes.SMOKE, AbstractBlock.Settings.create().noCollision().breakInstantly().luminance((state) -> 6).sounds(BlockSoundGroup.WOOD).pistonBehavior(PistonBehavior.DESTROY));
 
+    public static final Block CORRUPTED_WART_PLANT = new NetherWartBlock(AbstractBlock.Settings.copy(Blocks.NETHER_WART));
+
     public static final Block GRANITE_BRICKS = new Block(AbstractBlock.Settings.copy(Blocks.GRANITE));
     public static final Block GRANITE_BRICK_SLAB = new SlabBlock(AbstractBlock.Settings.copy(GRANITE_BRICKS));
     public static final Block GRANITE_BRICK_STAIRS = new StairsBlock(GRANITE_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(GRANITE_BRICKS));

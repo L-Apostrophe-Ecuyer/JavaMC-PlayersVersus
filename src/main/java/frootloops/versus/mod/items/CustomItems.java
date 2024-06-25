@@ -44,12 +44,16 @@ public abstract class CustomItems {
         registerCustomItem("concentrate_of_largeness", CustomBrewingItems.CONCENTRATE_OF_LARGENESS, ItemGroups.INGREDIENTS);    // New potion & effect!
         registerCustomItem("concentrate_of_smallness", CustomBrewingItems.CONCENTRATE_OF_SMALLNESS, ItemGroups.INGREDIENTS);    // New potion & effect!
         registerCustomItem("concentrate_of_invisibility", CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, ItemGroups.INGREDIENTS);
+        registerCustomItem("concentrate_of_glowing", CustomBrewingItems.CONCENTRATE_OF_GLOWING, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_weakness", CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, ItemGroups.INGREDIENTS);
+        registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_infestation", CustomBrewingItems.CONCENTRATE_OF_INFESTATION, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_weaving", CustomBrewingItems.CONCENTRATE_OF_WEAVING, ItemGroups.INGREDIENTS);
+
+        registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
 
         registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
         registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);

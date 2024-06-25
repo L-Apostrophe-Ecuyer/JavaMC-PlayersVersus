@@ -4,7 +4,7 @@ import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.CustomWorldgen;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.items.Items;
+import frootloops.versus.mod.items.ModItems;
 import frootloops.versus.mod.players.death.RespawnNearbyPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -34,7 +34,7 @@ public class VersusMod implements ModInitializer {
 		ModEntities.onInitialize();
 
 		MOD_LOGGER.info("Implementing item changes and adding new ones...");
-		Items.onInitialize();
+		ModItems.onInitialize();
 
 		MOD_LOGGER.info("Registering networking packets...");
 		PayloadTypeRegistry.playC2S().register(RespawnNearbyPayload.ID, RespawnNearbyPayload.CODEC);

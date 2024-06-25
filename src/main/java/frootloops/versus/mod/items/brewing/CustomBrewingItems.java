@@ -36,6 +36,9 @@ public abstract class CustomBrewingItems {
     public static final Item CONCENTRATE_OF_SMALLNESS = new ConcentrateItem(CustomStatusEffects.SMALLNESS);     // New potion & effect!
 
     public static final Item CONCENTRATE_OF_INVISIBILITY = new ConcentrateItem(StatusEffects.INVISIBILITY);
+    public static final Item CONCENTRATE_OF_GLOWING = new ConcentrateItem(StatusEffects.GLOWING);
+
+    public static final Item CONCENTRATE_OF_STRENGTH = new ConcentrateItem(StatusEffects.STRENGTH);
     public static final Item CONCENTRATE_OF_WEAKNESS = new ConcentrateItem(StatusEffects.WEAKNESS);
 
     public static final Item CONCENTRATE_OF_FIRE = new ConcentrateItem(StatusEffects.FIRE_RESISTANCE);

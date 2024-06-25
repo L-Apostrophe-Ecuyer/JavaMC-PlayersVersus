@@ -6,6 +6,9 @@ import net.minecraft.util.math.Direction;
 public abstract class CustomBlockItems {
     public static final VerticallyAttachableBlockItem SMOLDERING_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH, new Item.Settings(), Direction.DOWN);
     public static final VerticallyAttachableBlockItem EXTINGUISHED_TORCH_ITEM = new VerticallyAttachableBlockItem(CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, new Item.Settings(), Direction.DOWN);
+
+    public static final BlockItem CORRUPTED_WART_ITEM = new AliasedBlockItem(CustomBlocks.CORRUPTED_WART_PLANT, new Item.Settings());
+
     public static final BlockItem GRANITE_BRICKS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICKS, new Item.Settings());
     public static final BlockItem GRANITE_BRICK_SLAB_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_SLAB, new Item.Settings());
     public static final BlockItem GRANITE_BRICK_STAIRS_ITEM = new BlockItem(CustomBlocks.GRANITE_BRICK_STAIRS, new Item.Settings());

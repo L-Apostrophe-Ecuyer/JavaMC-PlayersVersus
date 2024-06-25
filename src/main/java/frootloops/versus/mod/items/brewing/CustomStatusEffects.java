@@ -20,7 +20,7 @@ public abstract class CustomStatusEffects {
     public static RegistryEntry<StatusEffect> BUOYANCY;
 
     public static void registerCustomStatusEffects() {
-        LARGENESS = registerCustomEffect(new LargenessStatusEffect("largeness"), "bigness");
+        LARGENESS = registerCustomEffect(new LargenessStatusEffect("largeness"), "largeness");
         SMALLNESS = registerCustomEffect(new SmallnessStatusEffect("smallness"), "smallness");
         VULNERABILITY = registerCustomEffect(new VulnerabilityStatusEffect("vulnerability"), "vulnerability");
         BUOYANCY = registerCustomEffect(new BuoyancyStatusEffect("buoyancy"), "buoyancy");

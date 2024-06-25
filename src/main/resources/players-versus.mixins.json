@@ -25,6 +25,7 @@
     "environment.BlockExplosivityMixin",
     "environment.MinecartMixin",
     "environment.MossMixin",
+    "environment.NetherWartMixin",
     "environment.TntMixin",
     "environment.TorchMixin",
 

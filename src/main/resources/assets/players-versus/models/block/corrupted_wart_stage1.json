@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/crop",
+  "textures": {
+    "crop": "players-versus:block/corrupted_wart_stage1"
+  }
+}
