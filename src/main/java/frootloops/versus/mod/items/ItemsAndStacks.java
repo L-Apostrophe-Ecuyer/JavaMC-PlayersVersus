@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items;
 
+import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
@@ -45,10 +46,15 @@ public abstract class ItemsAndStacks {
                 else if (item.getTranslationKey().contains("soup")) setDefaultMaxStackSize(item, maxStews);
                 else setDefaultMaxStackSize(item, maxFoods);
 
-            } else if (item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem)
+            }
+            else if (item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem)
                 setDefaultMaxStackSize(item, maxPlaceableEntities);
 
-            else if (item instanceof BlockItem) setDefaultMaxStackSize(item, maxPlaceableBlocks);
+            else if (item instanceof BlockItem)
+                setDefaultMaxStackSize(item, maxPlaceableBlocks);
+
+            else if (item instanceof ConcentrateItem)
+                setDefaultMaxStackSize(item, 64);
         }
 
         // Other foods:

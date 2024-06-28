@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.brewing.recipes;
+package frootloops.versus.mod.items.brewing;
 
 
 import frootloops.versus.VersusMod;
@@ -12,7 +12,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 
 import java.util.HashMap;
 
-public abstract class CustomBrewingSystem {
+public abstract class BrewingSystem {
 
     private record RelatedPotions(RegistryEntry<Potion> strongPotion, RegistryEntry<Potion> longPotion,  RegistryEntry<Potion> invertedPotion) {}
     public static void setBrewingRecipeRegistry(BrewingRecipeRegistry.Builder builder) {

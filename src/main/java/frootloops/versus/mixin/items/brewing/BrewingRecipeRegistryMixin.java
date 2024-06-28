@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.items.brewing;
 
-import frootloops.versus.mod.items.brewing.recipes.CustomBrewingSystem;
+import frootloops.versus.mod.items.brewing.BrewingSystem;
 import net.minecraft.recipe.BrewingRecipeRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -10,7 +10,7 @@ public class BrewingRecipeRegistryMixin {
 
     @Overwrite
     public static void registerDefaults(BrewingRecipeRegistry.Builder builder) {
-        CustomBrewingSystem.setBrewingRecipeRegistry(builder);
+        BrewingSystem.setBrewingRecipeRegistry(builder);
         builder.build();
     }
 }
