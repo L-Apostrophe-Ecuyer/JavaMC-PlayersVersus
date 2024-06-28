@@ -7,8 +7,17 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "players-versus:withered_wart",
+          "name": "players-versus:concentrate_of_decay",
           "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 2
+              },
+              "add": false
+            },
             {
               "function": "minecraft:apply_bonus",
               "enchantment": "minecraft:fortune",

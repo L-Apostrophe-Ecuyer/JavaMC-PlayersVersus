@@ -3,7 +3,6 @@ package frootloops.versus.mod.items.brewing;
 
 import frootloops.versus.mod.items.brewing.effects.*;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -24,7 +23,7 @@ public abstract class CustomStatusEffects {
         SMALLNESS = registerCustomEffect(new SmallnessStatusEffect("smallness"), "smallness");
         VULNERABILITY = registerCustomEffect(new VulnerabilityStatusEffect("vulnerability"), "vulnerability");
         BUOYANCY = registerCustomEffect(new BuoyancyStatusEffect("buoyancy"), "buoyancy");
-        HAUNTING = registerCustomEffect(new PhantomStatusEffect(), "haunting");
+        HAUNTING = registerCustomEffect(new HauntingStatusEffect(), "haunting");
     }
 
     private static RegistryEntry<StatusEffect> registerCustomEffect(StatusEffect effect, String name) {

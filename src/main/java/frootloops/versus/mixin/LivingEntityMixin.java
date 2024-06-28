@@ -6,7 +6,7 @@ import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.BrownMudBlock;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
-import frootloops.versus.mod.items.brewing.effects.PhantomStatusEffect;
+import frootloops.versus.mod.items.brewing.effects.HauntingStatusEffect;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -20,9 +20,7 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShovelItem;
-import net.minecraft.network.packet.s2c.play.RemoveEntityStatusEffectS2CPacket;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -123,7 +121,7 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "onStatusEffectRemoved", at = @At("HEAD"))
     private void onStatusEffectRemoved(StatusEffectInstance effect, CallbackInfo info) {
         if(effect.getEffectType() == CustomStatusEffects.HAUNTING) {
-            PhantomStatusEffect.removeEffect(((LivingEntity)(Object)this));
+            HauntingStatusEffect.removeEffect(((LivingEntity)(Object)this));
         }
     }
 }

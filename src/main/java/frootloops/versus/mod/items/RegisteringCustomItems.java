@@ -6,14 +6,13 @@ import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.*;
-import net.minecraft.potion.Potions;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import static frootloops.versus.VersusMod.MOD_ID;
 
-public abstract class CustomItems {
+public abstract class RegisteringCustomItems {
     public static void registerAllCustomItems() {
         registerCustomItem("copper_chestplate", CustomEquipment.COPPER_CHESTPLATE, ItemGroups.COMBAT);
         registerCustomItem("copper_leggings", CustomEquipment.COPPER_LEGGINGS, ItemGroups.COMBAT);
@@ -26,13 +25,19 @@ public abstract class CustomItems {
         registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);
 
         registerCustomItem("bottle_of_ender", CustomPotions.BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("splash_bottle_of_ender", CustomPotions.SPLASH_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("lingering_bottle_of_ender", CustomPotions.LINGERING_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
 
-        registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_UNDYING, ItemGroups.FOOD_AND_DRINK);          // New potion & effect!
-        registerCustomItem("concentrate_of_omen", CustomBrewingItems.CONCENTRATE_OF_OMEN, ItemGroups.FOOD_AND_DRINK);              // New potion!
+        registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
+        registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART_ITEM, ItemGroups.INGREDIENTS);
+        registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.FOOD_AND_DRINK);
+
+        registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_DEATH, ItemGroups.FOOD_AND_DRINK);          // New potion & effect!
+        //registerCustomItem("concentrate_of_omen", CustomBrewingItems.CONCENTRATE_OF_OMEN, ItemGroups.FOOD_AND_DRINK);              // New potion!
         registerCustomItem("concentrate_of_health", CustomBrewingItems.CONCENTRATE_OF_HEALTH, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_harm", CustomBrewingItems.CONCENTRATE_OF_HARM, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_regeneration", CustomBrewingItems.CONCENTRATE_OF_REGENERATION, ItemGroups.FOOD_AND_DRINK);
-        registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_decay", CustomBrewingItems.CONCENTRATE_OF_DECAY, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_mining_speed", CustomBrewingItems.CONCENTRATE_OF_MINING_SPEED, ItemGroups.FOOD_AND_DRINK);     // New potion!
         registerCustomItem("concentrate_of_mining_fatigue", CustomBrewingItems.CONCENTRATE_OF_MINING_FATIGUE, ItemGroups.FOOD_AND_DRINK); // New potion!
         registerCustomItem("concentrate_of_toughness", CustomBrewingItems.CONCENTRATE_OF_TOUGHNESS, ItemGroups.FOOD_AND_DRINK);
@@ -54,11 +59,9 @@ public abstract class CustomItems {
         registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_infestation", CustomBrewingItems.CONCENTRATE_OF_INFESTATION, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_weaving", CustomBrewingItems.CONCENTRATE_OF_WEAVING, ItemGroups.FOOD_AND_DRINK);
-
-        registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
-        registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART_ITEM, ItemGroups.INGREDIENTS);
 
         registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
         registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);

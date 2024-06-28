@@ -1,32 +1,24 @@
 package frootloops.versus.mod.items.brewing.effects;
 
-import frootloops.versus.VersusMod;
-import frootloops.versus.mod.items.brewing.CustomStatusEffects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.AttributeContainer;
-import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.event.GameEvent;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-
-public class PhantomStatusEffect extends StatusEffect  {
+public class HauntingStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
     private static final int color = 0;
 
-    public PhantomStatusEffect() {
+    public HauntingStatusEffect() {
         super(category, color, ParticleTypes.SCULK_SOUL);
     }
 
@@ -56,6 +48,13 @@ public class PhantomStatusEffect extends StatusEffect  {
         else {
             entity.setInvisible(true);
             entity.setNoGravity(true);
+            if(entity.getWorld() instanceof ServerWorld serverWorld) {
+                int xpToDrop = (entity.getXpToDrop(serverWorld, null) * 3) / 5;
+                if (xpToDrop > 0 && !entity.isExperienceDroppingDisabled()) {
+                    ExperienceOrbEntity.spawn(serverWorld, entity.getPos(), xpToDrop);
+                }
+                entity.disableExperienceDropping();
+            }
         }
     }
 

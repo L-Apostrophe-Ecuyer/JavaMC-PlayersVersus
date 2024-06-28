@@ -24,7 +24,7 @@ public abstract class ItemsAndStacks {
         setUpTransformVanillaItemsToModded();
         CustomStatusEffects.registerCustomStatusEffects();
         CustomPotions.registerCustomPotions();
-        CustomItems.registerAllCustomItems();
+        RegisteringCustomItems.registerAllCustomItems();
 
         setStackSizes(16, 8, MAX_POTION_STACK_SIZE, 8, 64, 16, 64);
     }

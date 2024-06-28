@@ -29,6 +29,10 @@
     "environment.TntMixin",
     "environment.TorchMixin",
 
+    "items.brewing.BrewingRecipeRegistryMixin",
+    "items.brewing.BrewingStandScreenHandlerMixin",
+    "items.brewing.BrewingStandBlockEntityAccessor",
+    "items.brewing.BrewingStandBlockEntityMixin",
     "items.throwing.FireballEntityMixin",
     "items.throwing.SnowballEntityMixin",
     "items.throwing.SnowballMixin",
