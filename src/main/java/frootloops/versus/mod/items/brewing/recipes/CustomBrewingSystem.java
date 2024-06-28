@@ -139,10 +139,12 @@ public abstract class CustomBrewingSystem {
 
             if (hasLongPotion) {
                 builder.registerPotionRecipe(potion, Items.SUGAR, current.longPotion);
+                builder.registerPotionRecipe(Potions.THICK, ingredient, current.longPotion);
                 builder.registerPotionRecipe(potion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_LONG);
             }
             if (hasStrongPotion) {
                 builder.registerPotionRecipe(potion, Items.GLOWSTONE_DUST, current.strongPotion);
+                builder.registerPotionRecipe(Potions.AWKWARD, ingredient, current.strongPotion);
                 builder.registerPotionRecipe(potion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_STRONG);
             }
 
