@@ -33,6 +33,8 @@
     "items.brewing.BrewingStandScreenHandlerMixin",
     "items.brewing.BrewingStandBlockEntityAccessor",
     "items.brewing.BrewingStandBlockEntityMixin",
+    "items.brewing.VanillaStatusEffectsMixin",
+
     "items.throwing.FireballEntityMixin",
     "items.throwing.SnowballEntityMixin",
     "items.throwing.SnowballMixin",
@@ -54,6 +56,7 @@
     "items.ItemEntityMixin",
     "items.ItemStackMixin",
     "items.ItemUsageMixin",
+    "items.VanillaItemsMixin",
 
     "mobs.hostile.end.dragon.ChargingPlayerPhaseMixin",
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",

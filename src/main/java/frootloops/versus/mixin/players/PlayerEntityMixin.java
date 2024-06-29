@@ -122,16 +122,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         return super.modifyAppliedDamage(source, amount);
     }
 
-
-    @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
-    private float rebalancedDamage(float amount2, DamageSource source, float amount) {
-        // Explosions don't hurt as much, or at least, the damage is more consistent:
-        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
-            return (amount + amount + 16.0f) / 4.0f;
-        }
-        return amount;
-    }
-
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
     private void onDamageInterruptEating(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {

@@ -53,7 +53,7 @@ public abstract class BrewingSystem {
             put(Potions.STRENGTH, new RelatedPotions(Potions.STRONG_STRENGTH, Potions.LONG_STRENGTH, Potions.SLOWNESS));
             put(Potions.WEAKNESS,  new RelatedPotions(null, Potions.LONG_WEAKNESS, Potions.STRENGTH));
 
-            put(Potions.FIRE_RESISTANCE,  new RelatedPotions(Potions.LONG_FIRE_RESISTANCE, Potions.LONG_FIRE_RESISTANCE, Potions.WIND_CHARGED));
+            put(Potions.FIRE_RESISTANCE,  new RelatedPotions(CustomPotions.FIRE_RESISTANCE_STRONG, Potions.LONG_FIRE_RESISTANCE, Potions.WIND_CHARGED));
             put(Potions.WIND_CHARGED,  new RelatedPotions(null, null, Potions.FIRE_RESISTANCE));
 
             put(Potions.OOZING,  new RelatedPotions(null, null, Potions.INFESTED));
@@ -83,7 +83,7 @@ public abstract class BrewingSystem {
         builder.registerItemRecipe(CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER);
         builder.registerItemRecipe(CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER, Items.REDSTONE, CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER);
 
-        registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_HEALTH, Potions.HEALING);
+        registerConcentrateRecipe(builder, brewablePotionTypes, Items.GLISTERING_MELON_SLICE, Potions.HEALING);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_HARM, Potions.HARMING);
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_REGENERATION, Potions.REGENERATION);
@@ -113,10 +113,10 @@ public abstract class BrewingSystem {
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, Potions.INVISIBILITY);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_GLOWING, CustomPotions.GLOWING);
 
-        registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_STRENGTH, Potions.STRENGTH);
+        registerConcentrateRecipe(builder, brewablePotionTypes, Items.BLAZE_POWDER, Potions.STRENGTH);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, Potions.WEAKNESS);
 
-        registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_FIRE, Potions.FIRE_RESISTANCE);
+        registerConcentrateRecipe(builder, brewablePotionTypes, Items.MAGMA_CREAM, Potions.FIRE_RESISTANCE);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_WIND, Potions.WIND_CHARGED);
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_OOZE, Potions.OOZING);
@@ -149,19 +149,19 @@ public abstract class BrewingSystem {
             }
 
             if (current.invertedPotion != null && current.invertedPotion != potion) {
-                builder.registerPotionRecipe(potion, CustomBrewingItems.CORRUPTED_WART_POWDER, current.invertedPotion);
+                builder.registerPotionRecipe(potion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
 
                 if(Potions.WEAKNESS == potion) VersusMod.MOD_LOGGER.error("Registered inverted Potion");
 
                 if(brewablePotionTypes.containsKey(current.invertedPotion)) {
                     RelatedPotions inverted = brewablePotionTypes.get(current.invertedPotion);
                     if (hasLongPotion) {
-                        if(inverted.longPotion != null) builder.registerPotionRecipe(current.longPotion, CustomBrewingItems.CORRUPTED_WART_POWDER, inverted.longPotion);
-                        else builder.registerPotionRecipe(current.longPotion, CustomBrewingItems.CORRUPTED_WART_POWDER, current.invertedPotion);
+                        if(inverted.longPotion != null) builder.registerPotionRecipe(current.longPotion, Items.FERMENTED_SPIDER_EYE, inverted.longPotion);
+                        else builder.registerPotionRecipe(current.longPotion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
                     }
                     if (hasStrongPotion) {
-                        if(inverted.strongPotion != null) builder.registerPotionRecipe(current.strongPotion, CustomBrewingItems.CORRUPTED_WART_POWDER, inverted.strongPotion);
-                        else builder.registerPotionRecipe(current.strongPotion, CustomBrewingItems.CORRUPTED_WART_POWDER, current.invertedPotion);
+                        if(inverted.strongPotion != null) builder.registerPotionRecipe(current.strongPotion, Items.FERMENTED_SPIDER_EYE, inverted.strongPotion);
+                        else builder.registerPotionRecipe(current.strongPotion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
                     }
                 }
             }

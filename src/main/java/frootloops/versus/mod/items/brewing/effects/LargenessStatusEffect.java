@@ -13,7 +13,7 @@ public class LargenessStatusEffect extends StatusEffect  {
     private static final int color = 10359374;
 
     public LargenessStatusEffect(String id) {
-        super(category, color, ParticleTypes.ITEM_COBWEB);
+        super(category, color);
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),

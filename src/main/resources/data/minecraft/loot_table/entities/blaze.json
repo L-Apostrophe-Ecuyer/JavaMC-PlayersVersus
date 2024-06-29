@@ -45,7 +45,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "players-versus:concentrate_of_strength",
+          "name": "minecraft:blaze_powder",
           "functions": [
             {
               "function": "minecraft:set_count",

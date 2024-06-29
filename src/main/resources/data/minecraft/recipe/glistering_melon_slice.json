@@ -1,20 +1,26 @@
 {
-    "type": "minecraft:crafting_shapeless",
-    "category": "misc",
-    "group": "sugar_from_honey",
-    "ingredients": [
-      [
-        {
-          "item": "minecraft:honeycomb"
-        },
-        {
-          "item": "minecraft:honey_bottle"
-        }
-      ]
-    ],
-    "result": {
-      "id": "minecraft:sugar",
-      "count": 2
-    }
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "#X#",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:gold_nugget"
+    },
+    "X": [
+      {
+        "item": "minecraft:melon_slice"
+      },
+      {
+        "item": "minecraft:beetroot"
+      }
+    ]
+  },
+  "result": {
+    "id": "minecraft:glistering_melon_slice",
+    "count": 1
   }
-  
+}

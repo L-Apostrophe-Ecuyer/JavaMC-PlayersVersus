@@ -19,15 +19,20 @@ public abstract class CustomStatusEffects {
     public static RegistryEntry<StatusEffect> BUOYANCY;
 
     public static void registerCustomStatusEffects() {
-        LARGENESS = registerCustomEffect(new LargenessStatusEffect("largeness"), "largeness");
-        SMALLNESS = registerCustomEffect(new SmallnessStatusEffect("smallness"), "smallness");
-        VULNERABILITY = registerCustomEffect(new VulnerabilityStatusEffect("vulnerability"), "vulnerability");
-        BUOYANCY = registerCustomEffect(new BuoyancyStatusEffect("buoyancy"), "buoyancy");
-        HAUNTING = registerCustomEffect(new HauntingStatusEffect(), "haunting");
+        LARGENESS = registerCustomEffect("largeness", new LargenessStatusEffect("largeness"));
+        SMALLNESS = registerCustomEffect("smallness", new SmallnessStatusEffect("smallness"));
+        VULNERABILITY = registerCustomEffect("vulnerability", new VulnerabilityStatusEffect("vulnerability"));
+        BUOYANCY = registerCustomEffect("buoyancy", new BuoyancyStatusEffect("buoyancy"));
+        HAUNTING = registerCustomEffect("haunting", new HauntingStatusEffect());
     }
 
-    private static RegistryEntry<StatusEffect> registerCustomEffect(StatusEffect effect, String name) {
+    private static RegistryEntry<StatusEffect> registerCustomEffect(String name, StatusEffect effect) {
         Registry.register(Registries.STATUS_EFFECT, Identifier.of(MOD_ID, name), effect);
+        return Registries.STATUS_EFFECT.getEntry(effect);
+    }
+
+    public static RegistryEntry<StatusEffect> registerOverhauledVanillaEffect(String name, StatusEffect effect) {
+        Registry.register(Registries.STATUS_EFFECT, Identifier.of("minecraft", name), effect);
         return Registries.STATUS_EFFECT.getEntry(effect);
     }
 

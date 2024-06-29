@@ -11,6 +11,7 @@ import net.minecraft.item.LingeringPotionItem;
 import net.minecraft.item.PotionItem;
 import net.minecraft.item.SplashPotionItem;
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.Potions;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -35,6 +36,7 @@ public abstract class CustomPotions {
     public static RegistryEntry<Potion> GLOWING, GLOWING_LONG, GLOWING_STRONG;
     public static RegistryEntry<Potion> DECAY, DECAY_LONG, DECAY_STRONG;
     public static RegistryEntry<Potion> HAUNTING, HAUNTING_SHORT;
+    public static RegistryEntry<Potion> FIRE_RESISTANCE_STRONG;
 
     public static void registerCustomPotions() {
         if(werePotionsRegistered) return;
@@ -76,6 +78,8 @@ public abstract class CustomPotions {
         DECAY = registerCustomPotion("decay", StatusEffects.WITHER, 0, 240);
         DECAY_LONG = registerCustomPotion("decay_long", StatusEffects.WITHER, 0, 360);
         DECAY_STRONG = registerCustomPotion("decay_strong", StatusEffects.WITHER, 1, 160);
+
+        FIRE_RESISTANCE_STRONG = registerCustomPotion("fire_resistance_strong", StatusEffects.FIRE_RESISTANCE, 1, 2400);
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
         HAUNTING_SHORT = registerCustomPotion("haunting_short", CustomStatusEffects.HAUNTING, 0, 120);

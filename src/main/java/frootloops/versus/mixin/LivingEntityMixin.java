@@ -1,6 +1,7 @@
 package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.environment.CustomBlocks;
@@ -15,11 +16,10 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.HoeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShovelItem;
+import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -28,6 +28,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.Map;
 
@@ -101,14 +102,40 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
+
+    @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
+    private float rebalancedDamage(float amount2, DamageSource source, float amount) {
+        // Explosions don't hurt as much, or at least, the damage is more consistent:
+        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
+            return (amount + amount + 16.0f) / 4.0f;
+        }
+        if (source.isIn(DamageTypeTags.IS_FIRE)) {
+            StatusEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getStatusEffect(StatusEffects.FIRE_RESISTANCE);
+            if(fireResistanceEffect != null) return (fireResistanceEffect.getAmplifier() > 0) ? 0.0f : 0.6f;
+        }
+        return amount;
+    }
+
+    @ModifyArg(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/registry/entry/RegistryEntry;)Z"), index = 0)
+    private RegistryEntry<StatusEffect> rebalancedFireResistance(RegistryEntry<StatusEffect> effect) {
+        if(effect == StatusEffects.FIRE_RESISTANCE) {
+            StatusEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getStatusEffect(StatusEffects.FIRE_RESISTANCE);
+            if(fireResistanceEffect != null && fireResistanceEffect.getAmplifier() == 0) return StatusEffects.LUCK;
+        }
+        return effect;
+    }
+
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(source.getAttacker() instanceof LivingEntity attacker) {
 
             // Modify Invincibility Frames:
             if (timeUntilRegen > 10) {
-                if (source.isOf(DamageTypes.ARROW)) timeUntilRegen = 0;
-                else if (timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
+                if (source.isOf(DamageTypes.ARROW)) {
+                    if(attacker.getMainHandStack().isOf(Items.CROSSBOW)) timeUntilRegen = 9;
+                    else timeUntilRegen = 11;
+                }
+                else if (timeUntilRegen > 18 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 18;
             }
 
             // Curse of Ender Enchantment:
@@ -116,6 +143,7 @@ public abstract class LivingEntityMixin extends Entity {
                 CustomEnchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
             }
         }
+        else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 9;
     }
 
     @Inject(method = "onStatusEffectRemoved", at = @At("HEAD"))

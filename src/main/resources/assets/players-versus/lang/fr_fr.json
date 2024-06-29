@@ -48,6 +48,7 @@
   "block.players-versus.extinguished_torch" : "Torche éteinte",
   "item.players-versus.smoldering_torch" : "Torche en fin de vie",
   "item.players-versus.extinguished_torch" : "Torche éteinte",
+
   "item.players-versus.copper_axe": "Hache en cuivre",
   "item.players-versus.copper_pickaxe": "Pioche en cuivre",
   "item.players-versus.copper_sword": "Épée en cuivre",
@@ -64,9 +65,14 @@
   "effect.players-versus.buoyancy" : "Flottation",
   "effect.players-versus.haunting" : "Mort subite",
 
-  "item.minecraft.blaze_powder": "Flamme ancienne",
+  "item.players-versus.living_flame": "Flamme ancienne",
+  "item.minecraft.blaze_powder": "Concentré ardent",
   "item.minecraft.magma_cream": "Concentré brûlant",
   "item.minecraft.glistering_melon_slice": "Concentré sucré",
+  "item.minecraft.fermented_spider_eye": "Poudre de verrue corrompue",
+  "item.players-versus.corrupted_wart_powder": "Poudre de verrue corrompue",
+  "block.players-versus.corrupted_wart": "Verrue corrompue",
+  "block.players-versus.withered_wart": "Verrue décomposée",
 
   "item.players-versus.concentrate_of_omen" : "Concentré sinistre",
   "item.players-versus.concentrate_of_death" : "Concentré mortel",
@@ -93,10 +99,10 @@
   "item.players-versus.concentrate_of_strength": "Concentré ardent",
   "item.players-versus.concentrate_of_weakness" : "Concentré faible",
   "item.players-versus.concentrate_of_fire" : "Concentré brûlant",
-  "item.players-versus.extract_of_wind" : "Concentré aérien",
-  "item.players-versus.extract_of_ooze" : "Concentré visqueux",
-  "item.players-versus.extract_of_infestation" : "Concentré terrifiant",
-  "item.players-versus.extract_of_weaving" : "Concentré collant",
+  "item.players-versus.concentrate_of_wind" : "Concentré aérien",
+  "item.players-versus.concentrate_of_ooze" : "Concentré visqueux",
+  "item.players-versus.concentrate_of_infestation" : "Concentré terrifiant",
+  "item.players-versus.concentrate_of_weaving" : "Concentré collant",
   "item.players-versus.concentrate_of_luck" : "Concentré de bonne étoile",
 
   "enchantment.minecraft.protection": "Protection totale",

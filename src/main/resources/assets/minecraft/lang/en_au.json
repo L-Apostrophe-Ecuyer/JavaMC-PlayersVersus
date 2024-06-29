@@ -64,9 +64,14 @@
   "effect.players-versus.buoyancy" : "Buoyancy",
   "effect.players-versus.haunting" : "Haunting",
 
-  "item.minecraft.blaze_powder": "Ancient Flame",
+  "item.players-versus.living_flame": "Living Flame",
+  "item.minecraft.blaze_powder": "Fiery Concentrate",
   "item.minecraft.magma_cream": "Blistering Concentrate",
   "item.minecraft.glistering_melon_slice": "Sweet Concentrate",
+  "item.minecraft.fermented_spider_eye": "Corrupted Wart Powder",
+  "item.players-versus.corrupted_wart_powder": "Corrupted Wart Powder",
+  "block.players-versus.corrupted_wart": "Corrupted Wart",
+  "block.players-versus.withered_wart": "Withered Wart",
 
   "item.players-versus.concentrate_of_omen" : "Ominous Concentrate",
   "item.players-versus.concentrate_of_death" : "Deadly Concentrate",
