@@ -29,7 +29,7 @@ public class ConcentrateItem extends Item {
         if(registeredEffect != null) {
             this.effect = registeredEffect;
             this.amplifier = 0;
-            this.duration = registeredEffect.value().isInstant() ? 1 : 10;
+            this.duration = registeredEffect.value().isInstant() ? 1 : 30;
         }
     }
 
@@ -66,7 +66,7 @@ public class ConcentrateItem extends Item {
         ConcentrateItem item = (ConcentrateItem) stack.getItem();
         if(user.getRandom().nextInt(10) < 7 && item.effect != null) {
             user.addStatusEffect(new StatusEffectInstance(item.effect, item.duration, item.amplifier));
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 20, 1));
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 40, 1));
         }
         else user.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 80, 1));
         return super.finishUsing(stack,world,user);

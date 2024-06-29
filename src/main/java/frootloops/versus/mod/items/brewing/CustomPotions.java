@@ -35,7 +35,7 @@ public abstract class CustomPotions {
     public static RegistryEntry<Potion> DARKNESS, DARKNESS_LONG, DARKNESS_STRONG;
     public static RegistryEntry<Potion> GLOWING, GLOWING_LONG, GLOWING_STRONG;
     public static RegistryEntry<Potion> DECAY, DECAY_LONG, DECAY_STRONG;
-    public static RegistryEntry<Potion> HAUNTING, HAUNTING_SHORT;
+    public static RegistryEntry<Potion> HAUNTING;
     public static RegistryEntry<Potion> FIRE_RESISTANCE_STRONG;
 
     public static void registerCustomPotions() {
@@ -82,10 +82,9 @@ public abstract class CustomPotions {
         FIRE_RESISTANCE_STRONG = registerCustomPotion("fire_resistance_strong", StatusEffects.FIRE_RESISTANCE, 1, 2400);
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
-        HAUNTING_SHORT = registerCustomPotion("haunting_short", CustomStatusEffects.HAUNTING, 0, 120);
         CustomBrewingItems.BOTTLE_OF_ENDER = new PotionItem(new Item.Settings().maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
-        CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING_SHORT)));
-        CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING_SHORT)));
+        CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+        CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
     }
 
     private static RegistryEntry<Potion> registerCustomPotion(String name, RegistryEntry<StatusEffect> effect, int amplifier, int duration) {

@@ -74,8 +74,6 @@ public abstract class BrewingSystem {
         builder.registerItemRecipe(Items.POTION, Items.REDSTONE, Items.LINGERING_POTION);
         builder.registerItemRecipe(Items.LINGERING_POTION, Items.GUNPOWDER, Items.SPLASH_POTION);
         builder.registerItemRecipe(Items.SPLASH_POTION, Items.REDSTONE, Items.LINGERING_POTION);
-        VersusMod.MOD_LOGGER.warn("    -> Registered Recipes for Potions With No Effect");
-
 
         builder.registerItemRecipe(Items.POTION, CustomBrewingItems.CONCENTRATE_OF_DEATH, CustomBrewingItems.BOTTLE_OF_ENDER);
         builder.registerItemRecipe(CustomBrewingItems.BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER);
@@ -83,7 +81,7 @@ public abstract class BrewingSystem {
         builder.registerItemRecipe(CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER);
         builder.registerItemRecipe(CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER, Items.REDSTONE, CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER);
 
-        registerConcentrateRecipe(builder, brewablePotionTypes, Items.GLISTERING_MELON_SLICE, Potions.HEALING);
+        registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_HEALTH, Potions.HEALING);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_HARM, Potions.HARMING);
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_REGENERATION, Potions.REGENERATION);
@@ -150,9 +148,6 @@ public abstract class BrewingSystem {
 
             if (current.invertedPotion != null && current.invertedPotion != potion) {
                 builder.registerPotionRecipe(potion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
-
-                if(Potions.WEAKNESS == potion) VersusMod.MOD_LOGGER.error("Registered inverted Potion");
-
                 if(brewablePotionTypes.containsKey(current.invertedPotion)) {
                     RelatedPotions inverted = brewablePotionTypes.get(current.invertedPotion);
                     if (hasLongPotion) {

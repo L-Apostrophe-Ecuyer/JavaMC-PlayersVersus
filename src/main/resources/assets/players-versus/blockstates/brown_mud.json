@@ -17,6 +17,12 @@
     },
     "moisture=5": {
       "model": "players-versus:block/brown_mud_moist"
+    },
+    "moisture=6": {
+      "model": "players-versus:block/brown_mud_moist"
+    },
+    "moisture=7": {
+      "model": "players-versus:block/brown_mud_moist"
     }
   }
 }

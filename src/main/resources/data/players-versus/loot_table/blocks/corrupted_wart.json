@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "players-versus:corrupted_wart_powder",
+          "name": "minecraft:fermented_spider_eye",
           "functions": [
             {
               "function": "minecraft:set_count",

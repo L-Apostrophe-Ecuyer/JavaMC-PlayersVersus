@@ -100,7 +100,7 @@
           },
           {
             "type": "minecraft:item",
-            "name": "players-versus:concentrate_of_health",
+            "name": "minecraft:glistering_melon_slice",
             "functions": [
               {
                 "function": "minecraft:set_count",

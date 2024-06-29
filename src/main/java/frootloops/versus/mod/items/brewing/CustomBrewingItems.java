@@ -1,5 +1,7 @@
 package frootloops.versus.mod.items.brewing;
 
+import net.minecraft.component.type.FoodComponent;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 
@@ -9,11 +11,14 @@ public abstract class CustomBrewingItems {
     public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
     public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
 
+    public static final Item LIVING_FLAME = new Item(new Item.Settings());
+    public static final Item GLISTERING_BEETROOT = new Item(new Item.Settings().food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).statusEffect(new StatusEffectInstance(StatusEffects.POISON, 60, 0), 0.2f).build()));
+
     public static final Item CONCENTRATE_OF_DEATH = new ConcentrateItem(StatusEffects.WITHER, 2, 80);
     //public static final Item CORRUPTED_WART_POWDER = new ConcentrateItem(StatusEffects.HUNGER, 4, 120);
 
     public static final Item CONCENTRATE_OF_HARM = new ConcentrateItem(StatusEffects.INSTANT_DAMAGE);
-    //public static final Item CONCENTRATE_OF_HEALTH = new ConcentrateItem(StatusEffects.INSTANT_HEALTH);
+    public static final Item CONCENTRATE_OF_HEALTH = new ConcentrateItem(StatusEffects.INSTANT_HEALTH);
 
     public static final Item CONCENTRATE_OF_REGENERATION = new ConcentrateItem(StatusEffects.REGENERATION);
     public static final Item CONCENTRATE_OF_DECAY = new ConcentrateItem(StatusEffects.WITHER, 0, 160);

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "players-versus:item/lingering_bottle_of_ender"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:ender_pearl"
+    },
+    {
+      "item": "players-versus:living_flame"
+    }
+  ],
+  "result": {
+    "id": "minecraft:ender_eye",
+    "count": 1
+  }
+}

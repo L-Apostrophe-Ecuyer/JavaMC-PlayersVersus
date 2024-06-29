@@ -4,10 +4,10 @@
 
   "ingredient": [
     {
-      "item": "minecraft:beetroot"
+      "item": "minecraft:glistering_melon_slice"
     },
     {
-      "item": "minecraft:weeping_vines"
+      "item": "players-versus:glistering_beetroot"
     }
   ],
   "result": {

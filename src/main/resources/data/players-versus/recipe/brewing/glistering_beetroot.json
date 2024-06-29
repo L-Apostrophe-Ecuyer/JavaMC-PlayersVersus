@@ -11,12 +11,11 @@
       "item": "minecraft:gold_nugget"
     },
     "X": {
-      "item": "minecraft:melon_slice"
+      "item": "minecraft:beetroot"
     }
   },
   "result": {
-    "id": "minecraft:glistering_melon_slice",
+    "id": "players-versus:glistering_beetroot",
     "count": 1
   }
 }
-
