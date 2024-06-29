@@ -25,7 +25,7 @@ public abstract class NetherWartMixin extends PlantBlock {
             if(world.getLightLevel(LightType.BLOCK, pos) < 10) {
                 world.setBlockState(pos, CustomBlocks.WITHERED_WART_PLANT.getStateWithProperties(state), Block.NOTIFY_LISTENERS);
             }
-            else if(state.isOf(Blocks.NETHER_WART)) {
+            else if(state.isOf(Blocks.NETHER_WART) && random.nextBoolean()) {
                 world.setBlockState(pos, CustomBlocks.CORRUPTED_WART_PLANT.getDefaultState(), Block.NOTIFY_LISTENERS);
                 info.cancel();
             }
