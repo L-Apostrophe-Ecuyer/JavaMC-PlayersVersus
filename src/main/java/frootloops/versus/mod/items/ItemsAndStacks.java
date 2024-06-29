@@ -40,6 +40,7 @@ public abstract class ItemsAndStacks {
         for (Item item : Registries.ITEM) {
             if (item.getComponents().contains(DataComponentTypes.FOOD)) {
                 if (item instanceof BlockItem) setDefaultMaxStackSize(item, maxPlaceableBlocks);
+                else if (item instanceof ConcentrateItem) setDefaultMaxStackSize(item, 64);
                 else if(item.getComponents().get(DataComponentTypes.FOOD).eatSeconds() ==  0.8f) setDefaultMaxStackSize(item, maxFoods);
                 else if (item.getTranslationKey().contains("cooked_") || item.getTranslationKey().contains("raw_")) setDefaultMaxStackSize(item, maxMeals);
                 else if (item.getTranslationKey().contains("stew")) setDefaultMaxStackSize(item, maxStews);
@@ -52,9 +53,6 @@ public abstract class ItemsAndStacks {
 
             else if (item instanceof BlockItem)
                 setDefaultMaxStackSize(item, maxPlaceableBlocks);
-
-            else if (item instanceof ConcentrateItem)
-                setDefaultMaxStackSize(item, 64);
         }
 
         // Other foods:
