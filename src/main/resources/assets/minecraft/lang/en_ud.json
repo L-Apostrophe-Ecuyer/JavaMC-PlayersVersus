@@ -64,6 +64,7 @@
   "effect.players-versus.buoyancy" : "Buoyancy",
   "effect.players-versus.haunting" : "Haunting",
 
+  "item.minecraft.potion.effect.haunting": "Potion of Untimely Death",
   "item.minecraft.potion.effect.largeness": "Potion of Big",
   "item.minecraft.potion.effect.largeness_long": "Potion of Big",
   "item.minecraft.potion.effect.largeness_strong": "Potion of Big",

@@ -65,6 +65,7 @@
   "effect.players-versus.buoyancy" : "Flottation",
   "effect.players-versus.haunting" : "Mort subite",
 
+  "item.minecraft.potion.effect.haunting": "Potion de mort subite",
   "item.minecraft.potion.effect.largeness": "Potion de taille maxi",
   "item.minecraft.potion.effect.largeness_long": "Potion de taille maxi",
   "item.minecraft.potion.effect.largeness_strong": "Potion de taille maxi",
