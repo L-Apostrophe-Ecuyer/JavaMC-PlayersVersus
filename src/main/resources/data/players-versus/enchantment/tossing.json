@@ -2,7 +2,7 @@
   "description": {
     "translate": "enchantment.players-versus.tossing"
   },
-  "exclusive_set": "minecraft:knockback",
+  "exclusive_set": "#players-versus:exclusive_set/knockback",
   "supported_items": "#minecraft:shovels",
   "primary_items": "#minecraft:shovels",
   "weight": 5,

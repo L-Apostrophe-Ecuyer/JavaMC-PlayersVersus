@@ -3,6 +3,7 @@
     "translate": "enchantment.players-versus.frost_aspect"
   },
   "supported_items": "#minecraft:enchantable/sharp_weapon",
+  "exclusive_set": "#minecraft:exclusive_set/mining",
   "primary_items": "#minecraft:axes",
   "weight": 2,
   "max_level": 2,
