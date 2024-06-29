@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "players-versus:item/concentrate_of_strength"
+    "layer0": "players-versus:item/concentrate_of_fire"
   }
 }
