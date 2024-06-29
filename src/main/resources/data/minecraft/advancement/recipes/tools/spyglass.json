@@ -41,7 +41,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_gold_ingot"
+      "has_gold"
     ],
     [
       "has_the_recipe",
