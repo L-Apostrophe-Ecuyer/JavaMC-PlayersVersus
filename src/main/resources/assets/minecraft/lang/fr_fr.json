@@ -92,7 +92,7 @@
   "item.minecraft.potion.effect.decay": "Potion de décomposition",
   "item.minecraft.potion.effect.decay_long": "Potion de décomposition",
   "item.minecraft.potion.effect.decay_strong": "Potion de décomposition",
-  "item.minecraft.potion.effect.fire_resistance_long": "Potion de résistance au feu",
+  "item.minecraft.potion.effect.fire_resistance_strong": "Potion de résistance au feu",
 
   "item.minecraft.tipped_arrow.effect.largeness": "Flèche de taille maxi",
   "item.minecraft.tipped_arrow.effect.largeness_long": "Flèche de taille maxi",
@@ -121,7 +121,7 @@
   "item.minecraft.tipped_arrow.effect.decay": "Flèche de décomposition",
   "item.minecraft.tipped_arrow.effect.decay_long": "Flèche de décomposition",
   "item.minecraft.tipped_arrow.effect.decay_strong": "Flèche de décomposition",
-  "item.minecraft.tipped_arrow.effect.fire_resistance_long": "Flèche de résistance au feu",
+  "item.minecraft.tipped_arrow.effect.fire_resistance_strong": "Flèche de résistance au feu",
 
   "item.minecraft.splash_potion.effect.largeness": "Potion de taille maxi jetable",
   "item.minecraft.splash_potion.effect.largeness_long": "Potion de taille maxi jetable",
@@ -150,7 +150,7 @@
   "item.minecraft.splash_potion.effect.decay": "Potion de décomposition jetable",
   "item.minecraft.splash_potion.effect.decay_long": "Potion de décomposition jetable",
   "item.minecraft.splash_potion.effect.decay_strong": "Potion de décomposition jetable",
-  "item.minecraft.splash_potion.effect.fire_resistance_long": "Potion de résistance au feu jetable",
+  "item.minecraft.splash_potion.effect.fire_resistance_strong": "Potion de résistance au feu jetable",
 
   "item.minecraft.lingering_potion.effect.largeness": "Potion de taille maxi persistante",
   "item.minecraft.lingering_potion.effect.largeness_long": "Potion de taille maxi persistante",
@@ -179,7 +179,7 @@
   "item.minecraft.lingering_potion.effect.decay": "Potion de décomposition persistante",
   "item.minecraft.lingering_potion.effect.decay_long": "Potion de décomposition persistante",
   "item.minecraft.lingering_potion.effect.decay_strong": "Potion de décomposition persistante",
-  "item.minecraft.lingering_potion.effect.fire_resistance_long": "Potion de résistance au feu persistante",
+  "item.minecraft.lingering_potion.effect.fire_resistance_strong": "Potion de résistance au feu persistante",
 
   "item.players-versus.living_flame": "Flamme ancienne",
   "item.minecraft.blaze_powder": "Concentré ardent",
