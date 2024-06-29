@@ -17,17 +17,17 @@ public class LargenessStatusEffect extends StatusEffect  {
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                0.5, EntityAttributeModifier.Operation.ADD_VALUE
+                0.3, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_STEP_HEIGHT, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                1.0, EntityAttributeModifier.Operation.ADD_VALUE
+                0.25, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_ATTACK_DAMAGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                1.0, EntityAttributeModifier.Operation.ADD_VALUE
+                2.0, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
@@ -37,7 +37,7 @@ public class LargenessStatusEffect extends StatusEffect  {
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_MOVEMENT_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                -0.01, EntityAttributeModifier.Operation.ADD_VALUE
+                -0.005, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
