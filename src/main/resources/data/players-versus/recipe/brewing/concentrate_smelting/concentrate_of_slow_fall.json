@@ -1,12 +1,12 @@
 {
   "type": "minecraft:smelting",
   "category": "food",
-  "group": "concentrates",
+
   "ingredient": {
-    "item": "minecraft:echo_shard"
+    "item": "minecraft:phantom_membrane"
   },
   "result": {
-    "id": "players-versus:concentrate_of_darkness"
+    "id": "players-versus:concentrate_of_slow_fall"
   },
   "experience": 5,
   "cookingtime": 200

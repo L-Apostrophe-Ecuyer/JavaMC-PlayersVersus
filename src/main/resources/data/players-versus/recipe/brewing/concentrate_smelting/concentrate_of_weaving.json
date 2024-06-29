@@ -1,12 +1,12 @@
 {
     "type": "minecraft:smelting",
     "category": "food",
-    "group": "concentrates",
+  
     "ingredient": {
-      "item": "minecraft:slime_ball"
+      "item": "minecraft:cobweb"
     },
     "result": {
-      "id": "players-versus:concentrate_of_ooze"
+      "id": "players-versus:concentrate_of_weaving"
     },
     "experience": 5,
     "cookingtime": 200

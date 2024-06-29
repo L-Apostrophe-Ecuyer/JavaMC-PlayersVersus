@@ -1,12 +1,12 @@
 {
   "type": "minecraft:smelting",
   "category": "food",
-  "group": "concentrates",
+
   "ingredient": {
-    "item": "minecraft:armadillo_scute"
+    "item": "minecraft:echo_shard"
   },
   "result": {
-    "id": "players-versus:concentrate_of_vulnerability"
+    "id": "players-versus:concentrate_of_darkness"
   },
   "experience": 5,
   "cookingtime": 200

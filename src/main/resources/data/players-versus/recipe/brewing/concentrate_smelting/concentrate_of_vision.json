@@ -1,12 +1,12 @@
 {
   "type": "minecraft:smelting",
   "category": "food",
-  "group": "concentrates",
+
   "ingredient": {
-    "item": "minecraft:golden_apple"
+    "item": "minecraft:golden_carrot"
   },
   "result": {
-    "id": "players-versus:concentrate_of_mining_speed"
+    "id": "players-versus:concentrate_of_vision"
   },
   "experience": 5,
   "cookingtime": 200

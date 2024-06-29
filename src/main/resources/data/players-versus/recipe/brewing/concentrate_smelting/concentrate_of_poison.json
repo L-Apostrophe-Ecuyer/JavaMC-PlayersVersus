@@ -1,17 +1,17 @@
 {
   "type": "minecraft:smelting",
   "category": "food",
-  "group": "concentrates",
+
   "ingredient": [
     {
-      "item": "minecraft:ghast_tear"
+      "item": "minecraft:poisonous_potato"
     },
     {
-      "item": "minecraft:popped_chorus_fruit"
+      "item": "minecraft:spider_eye"
     }
   ],
   "result": {
-    "id": "players-versus:concentrate_of_regeneration"
+    "id": "players-versus:concentrate_of_poison"
   },
   "experience": 5,
   "cookingtime": 200

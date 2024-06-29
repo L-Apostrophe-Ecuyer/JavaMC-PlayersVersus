@@ -1,17 +1,17 @@
 {
   "type": "minecraft:smelting",
   "category": "food",
-  "group": "concentrates",
+
   "ingredient": [
     {
-      "item": "minecraft:turtle_scute"
+      "item": "minecraft:lapis_lazuli"
     },
     {
-      "item": "minecraft:shulker_shell"
+      "item": "minecraft:prismarine_crystals"
     }
   ],
   "result": {
-    "id": "players-versus:concentrate_of_toughness"
+    "id": "players-versus:concentrate_of_breath"
   },
   "experience": 5,
   "cookingtime": 200

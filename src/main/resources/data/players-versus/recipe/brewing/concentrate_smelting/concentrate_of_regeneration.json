@@ -1,17 +1,17 @@
 {
   "type": "minecraft:smelting",
   "category": "food",
-  "group": "concentrates",
+
   "ingredient": [
     {
-      "item": "minecraft:beetroot"
+      "item": "minecraft:ghast_tear"
     },
     {
-      "item": "minecraft:weeping_vines"
+      "item": "minecraft:popped_chorus_fruit"
     }
   ],
   "result": {
-    "id": "players-versus:concentrate_of_health"
+    "id": "players-versus:concentrate_of_regeneration"
   },
   "experience": 5,
   "cookingtime": 200

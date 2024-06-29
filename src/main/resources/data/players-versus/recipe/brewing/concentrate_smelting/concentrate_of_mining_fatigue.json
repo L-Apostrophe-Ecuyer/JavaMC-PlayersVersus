@@ -1,12 +1,12 @@
 {
   "type": "minecraft:smelting",
   "category": "food",
-  "group": "concentrates",
+
   "ingredient": {
-    "item": "minecraft:phantom_membrane"
+    "item": "minecraft:prismarine_shard"
   },
   "result": {
-    "id": "players-versus:concentrate_of_slow_fall"
+    "id": "players-versus:concentrate_of_mining_speed"
   },
   "experience": 5,
   "cookingtime": 200
