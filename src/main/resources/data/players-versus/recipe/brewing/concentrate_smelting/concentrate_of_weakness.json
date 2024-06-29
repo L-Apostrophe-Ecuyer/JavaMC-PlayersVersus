@@ -2,14 +2,9 @@
     "type": "minecraft:smelting",
     "category": "food",
   
-    "ingredient": [
-      {
-        "item": "minecraft:coal"
-      },
-      {
-        "item": "minecraft:black_dye"
-      }
-    ],
+    "ingredient": {
+      "item": "minecraft:armadillo_scute"
+    },
     "result": {
       "id": "players-versus:concentrate_of_weakness"
     },

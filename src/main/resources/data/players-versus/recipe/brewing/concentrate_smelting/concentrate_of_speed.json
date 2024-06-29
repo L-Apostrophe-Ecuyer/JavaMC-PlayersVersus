@@ -5,12 +5,6 @@
   "ingredient": [
     {
       "item": "minecraft:glow_ink_sac"
-    },
-    {
-      "item": "minecraft:warped_roots"
-    },
-    {
-      "item": "minecraft:blue_orchid"
     }
   ],
   "result": {

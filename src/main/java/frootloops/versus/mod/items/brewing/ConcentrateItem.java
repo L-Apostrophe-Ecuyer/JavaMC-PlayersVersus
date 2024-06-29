@@ -58,7 +58,7 @@ public class ConcentrateItem extends Item {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        user.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 10, 4));
+        if(remainingUseTicks % 8 == 0) user.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 16, 4));
     }
 
     @Override

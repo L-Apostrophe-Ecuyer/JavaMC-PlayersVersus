@@ -4,11 +4,11 @@
 
   "ingredient": [
     {
-      "item": "minecraft:prismarine_shard"
+      "item": "minecraft:nether_wart"
     }
   ],
   "result": {
-    "id": "players-versus:concentrate_of_mining_fatigue"
+    "id": "players-versus:concentrate_of_harm"
   },
   "experience": 5,
   "cookingtime": 200

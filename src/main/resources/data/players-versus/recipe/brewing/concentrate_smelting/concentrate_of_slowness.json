@@ -5,15 +5,6 @@
   "ingredient": [
     {
       "item": "minecraft:ink_sac"
-    },
-    {
-      "item": "minecraft:twisting_vines"
-    },
-    {
-      "item": "minecraft:cornflower"
-    },
-    {
-      "item": "minecraft:clay_ball"
     }
   ],
   "result": {
