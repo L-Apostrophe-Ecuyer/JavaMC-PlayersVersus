@@ -5,7 +5,9 @@ import net.minecraft.item.*;
 
 public abstract class CustomBrewingItems {
 
-    //public static final Item CONCENTRATE_OF_OMEN = new ConcentrateItem(StatusEffects.UNLUCK);
+    public static PotionItem BOTTLE_OF_ENDER;
+    public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
+    public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
 
     public static final Item CONCENTRATE_OF_DEATH = new ConcentrateItem(StatusEffects.WITHER, 2, 80);
     public static final Item CORRUPTED_WART_POWDER = new ConcentrateItem(StatusEffects.HUNGER, 4, 120);

@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 
 public class LargenessStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
-    private static final int color = 0;
+    private static final int color = 10359374;
 
     public LargenessStatusEffect(String id) {
         super(category, color, ParticleTypes.ITEM_COBWEB);

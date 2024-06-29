@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 
 public class SmallnessStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
-    private static final int color = 0;
+    private static final int color = 22790024;
 
     public SmallnessStatusEffect(String id) {
         super(category, color);

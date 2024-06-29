@@ -77,11 +77,11 @@ public abstract class BrewingSystem {
         VersusMod.MOD_LOGGER.warn("    -> Registered Recipes for Potions With No Effect");
 
 
-        builder.registerItemRecipe(Items.POTION, CustomBrewingItems.CONCENTRATE_OF_DEATH, CustomPotions.BOTTLE_OF_ENDER);
-        builder.registerItemRecipe(CustomPotions.BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomPotions.SPLASH_BOTTLE_OF_ENDER);
-        builder.registerItemRecipe(CustomPotions.BOTTLE_OF_ENDER, Items.REDSTONE, CustomPotions.LINGERING_BOTTLE_OF_ENDER);
-        builder.registerItemRecipe(CustomPotions.LINGERING_BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomPotions.SPLASH_BOTTLE_OF_ENDER);
-        builder.registerItemRecipe(CustomPotions.SPLASH_BOTTLE_OF_ENDER, Items.REDSTONE, CustomPotions.LINGERING_BOTTLE_OF_ENDER);
+        builder.registerItemRecipe(Items.POTION, CustomBrewingItems.CONCENTRATE_OF_DEATH, CustomBrewingItems.BOTTLE_OF_ENDER);
+        builder.registerItemRecipe(CustomBrewingItems.BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER);
+        builder.registerItemRecipe(CustomBrewingItems.BOTTLE_OF_ENDER, Items.REDSTONE, CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER);
+        builder.registerItemRecipe(CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER);
+        builder.registerItemRecipe(CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER, Items.REDSTONE, CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER);
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_HEALTH, Potions.HEALING);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_HARM, Potions.HARMING);

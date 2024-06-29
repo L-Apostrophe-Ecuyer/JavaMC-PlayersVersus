@@ -36,10 +36,6 @@ public abstract class CustomPotions {
     public static RegistryEntry<Potion> DECAY, DECAY_LONG, DECAY_STRONG;
     public static RegistryEntry<Potion> HAUNTING, HAUNTING_SHORT;
 
-    public static PotionItem BOTTLE_OF_ENDER;
-    public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
-    public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
-
     public static void registerCustomPotions() {
         if(werePotionsRegistered) return;
         werePotionsRegistered = true;
@@ -83,9 +79,9 @@ public abstract class CustomPotions {
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
         HAUNTING_SHORT = registerCustomPotion("haunting_short", CustomStatusEffects.HAUNTING, 0, 120);
-        BOTTLE_OF_ENDER = new PotionItem(new Item.Settings().maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
-        SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING_SHORT)));
-        LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING_SHORT)));
+        CustomBrewingItems.BOTTLE_OF_ENDER = new PotionItem(new Item.Settings().maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+        CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING_SHORT)));
+        CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING_SHORT)));
     }
 
     private static RegistryEntry<Potion> registerCustomPotion(String name, RegistryEntry<StatusEffect> effect, int amplifier, int duration) {

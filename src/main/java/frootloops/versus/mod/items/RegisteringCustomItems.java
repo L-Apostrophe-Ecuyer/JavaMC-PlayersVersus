@@ -24,16 +24,15 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("copper_shovel", CustomEquipment.COPPER_SHOVEL, ItemGroups.TOOLS);
         registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);
 
-        registerCustomItem("bottle_of_ender", CustomPotions.BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
-        registerCustomItem("splash_bottle_of_ender", CustomPotions.SPLASH_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
-        registerCustomItem("lingering_bottle_of_ender", CustomPotions.LINGERING_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("bottle_of_ender", CustomBrewingItems.BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("splash_bottle_of_ender", CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("lingering_bottle_of_ender", CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
 
         registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
         registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART_ITEM, ItemGroups.INGREDIENTS);
         registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.FOOD_AND_DRINK);
 
         registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_DEATH, ItemGroups.FOOD_AND_DRINK);          // New potion & effect!
-        //registerCustomItem("concentrate_of_omen", CustomBrewingItems.CONCENTRATE_OF_OMEN, ItemGroups.FOOD_AND_DRINK);              // New potion!
         registerCustomItem("concentrate_of_health", CustomBrewingItems.CONCENTRATE_OF_HEALTH, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_harm", CustomBrewingItems.CONCENTRATE_OF_HARM, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("concentrate_of_regeneration", CustomBrewingItems.CONCENTRATE_OF_REGENERATION, ItemGroups.FOOD_AND_DRINK);

@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 
 public class BuoyancyStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
-    private static final int color = 1950417;
+    private static final int color = 15985696;
 
     public BuoyancyStatusEffect(String id) {
         super(category, color, ParticleTypes.BUBBLE_COLUMN_UP);
