@@ -1,12 +1,13 @@
 {
   "type": "minecraft:smelting",
+  "group": "concentrate_of_toughness",
   "category": "food",
 
   "ingredient": {
-    "item": "minecraft:glow_berries"
+    "item": "minecraft:turtle_scute"
   },
   "result": {
-    "id": "players-versus:concentrate_of_glowing"
+    "id": "players-versus:concentrate_of_toughness"
   },
   "experience": 5,
   "cookingtime": 200

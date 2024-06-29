@@ -1,17 +1,14 @@
 {
   "type": "minecraft:smelting",
   "category": "food",
-
+  "group": "concentrate_of_buoyancy",
   "ingredient": [
     {
-      "item": "minecraft:lapis_lazuli"
-    },
-    {
-      "item": "minecraft:prismarine_crystals"
+      "item": "minecraft:pufferfish"
     }
   ],
   "result": {
-    "id": "players-versus:concentrate_of_breath"
+    "id": "players-versus:concentrate_of_buoyancy"
   },
   "experience": 5,
   "cookingtime": 200
