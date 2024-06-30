@@ -1,6 +1,13 @@
 {
   "type": "minecraft:jigsaw",
-  "biomes": "#minecraft:spawns_warm_variant_frogs",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:stony_peaks"
+  ],
   "step": "underground_structures",
   "spawn_overrides": {
     "monster": {

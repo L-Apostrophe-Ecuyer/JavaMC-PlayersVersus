@@ -38,6 +38,8 @@
     "items.throwing.FireballEntityMixin",
     "items.throwing.SnowballEntityMixin",
     "items.throwing.SnowballMixin",
+    "items.throwing.SplashPotionMixin",
+    "items.throwing.LingeringPotionMixin",
     "items.throwing.ThrowablePotionItemMixin",
     "items.throwing.SlimeballsAndFireChargesMixin",
 
