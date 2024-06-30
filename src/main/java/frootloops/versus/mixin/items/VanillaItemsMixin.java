@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.items;
 
 import frootloops.versus.mod.items.brewing.ConcentrateItem;
+import frootloops.versus.mod.items.equipment.RecoveryCompassItem;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.component.type.FoodComponents;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -13,7 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(Items.class)
 public class VanillaItemsMixin {
 
-    //@Shadow public static final Item RECOVERY_COMPASS = Items.register("recovery_compass", new Item(new Item.Settings()));
+    @Shadow public static final Item RECOVERY_COMPASS = Items.register("recovery_compass", new RecoveryCompassItem(new Item.Settings()));
 
     @Shadow public static final Item GOLDEN_CARROT = Items.register("golden_carrot", new Item(new Item.Settings().food(new FoodComponent.Builder().nutrition(6).saturationModifier(1.2f).statusEffect(new StatusEffectInstance(StatusEffects.POISON, 60, 0), 0.2f).build())));
 

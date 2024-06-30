@@ -48,7 +48,7 @@ public class ItemStackMixin {
     public void getMaxCount(CallbackInfoReturnable<Integer> cir) {
         int customMaxCount = ItemsAndStacks.getDefaultMaxStackSize(item);
         if(customMaxCount > 0) {
-            cir.setReturnValue(customMaxCount);
+            cir.setReturnValue(ItemsAndStacks.getDefaultMaxStackSize(item));
             cir.cancel();
         }
     }

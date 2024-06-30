@@ -85,6 +85,7 @@ public abstract class ItemsAndStacks {
 
         // Rarities
         setDefaultMaxStackSize(Items.SADDLE, maxThrowables);
+        setDefaultMaxStackSize(Items.RECOVERY_COMPASS, 1);
     }
 
     private static void setDefaultMaxStackSize(Item item, int maxCount) {

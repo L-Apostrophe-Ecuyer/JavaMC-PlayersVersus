@@ -6,6 +6,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleType;
+import net.minecraft.particle.ParticleTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,7 +33,8 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "addParticle", at = @At("HEAD"), cancellable = true)
     public void tickRainSplashing(ParticleEffect parameters, boolean shouldAlwaysSpawn, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfo info) {
-        if(this.client.cameraEntity.getEyePos().squaredDistanceTo(x,y,z) < 2.0) {
+        ParticleType type = parameters.getType();
+        if((type == ParticleTypes.EFFECT || type == ParticleTypes.RAIN) && this.client.cameraEntity.getEyePos().squaredDistanceTo(x,y,z) < 2.0) {
             info.cancel();
         }
     }

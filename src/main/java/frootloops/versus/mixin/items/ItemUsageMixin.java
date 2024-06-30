@@ -50,7 +50,6 @@ public class ItemUsageMixin {
         MAX_USE_TIME_MAP.put(Items.HONEY_BOTTLE, 16);
         MAX_USE_TIME_MAP.put(Items.POTION, 36);
         MAX_USE_TIME_MAP.put(Items.MILK_BUCKET, 12);
-        MAX_USE_TIME_MAP.put(Items.RECOVERY_COMPASS, 32);
     }
 
     @Inject(method = "getUseAction", at = @At("HEAD"), cancellable = true)

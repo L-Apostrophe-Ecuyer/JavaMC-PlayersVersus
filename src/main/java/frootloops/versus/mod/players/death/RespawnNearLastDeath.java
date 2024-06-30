@@ -36,13 +36,10 @@ public class RespawnNearLastDeath {
         BlockPos deathPosition = lastDeathPos.get().pos();
 
         if(deathDimension != World.OVERWORLD || deathDimension != player.getWorld().getRegistryKey()) return;
-        RespawnNearLastDeath.moveToOverworldDeathLocation(player,deathPosition, server.getOverworld());
+        RespawnNearLastDeath.moveToOverworldDeathLocation(player, deathPosition, server.getOverworld(), 128, 17);
     }
 
-    private static void moveToOverworldDeathLocation(ServerPlayerEntity player, BlockPos blockPos, ServerWorld world) {
-        int spawnRadius = 150;
-        int spawnOffsetMultiplier = 17;
-
+    public static void moveToOverworldDeathLocation(ServerPlayerEntity player, BlockPos blockPos, ServerWorld world, int spawnRadius, int spawnOffsetMultiplier) {
         long l;
         long m;
         int spawnDiameterSquared = (m = (l = (long)(spawnRadius * 2 + 1)) * l) > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)m;
