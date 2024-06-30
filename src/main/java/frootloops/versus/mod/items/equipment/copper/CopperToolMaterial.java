@@ -10,12 +10,12 @@ import net.minecraft.registry.tag.TagKey;
 public class CopperToolMaterial implements ToolMaterial {
     @Override
     public int getDurability() {
-        return 108;
+        return 128;
     }
 
     @Override
     public float getMiningSpeedMultiplier() {
-        return 12.0f;
+        return 14.0f;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class CopperToolMaterial implements ToolMaterial {
 
     @Override
     public int getEnchantability() {
-        return -4;
+        return 1;
     }
 
     @Override
