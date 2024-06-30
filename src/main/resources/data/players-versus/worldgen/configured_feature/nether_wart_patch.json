@@ -2,14 +2,14 @@
   "type": "minecraft:vegetation_patch",
   "config": {
     "surface": "floor",
-    "depth": 3,
+    "depth": 2,
     "vertical_range": 4,
     "extra_bottom_block_chance": 0,
     "extra_edge_column_chance": 0,
-    "vegetation_chance": 0.2,
+    "vegetation_chance": 0.4,
     "xz_radius": {
       "type": "minecraft:uniform",
-      "min_inclusive": 2,
+      "min_inclusive": 3,
       "max_inclusive": 8
     },
     "replaceable": "#minecraft:base_stone_nether",
@@ -17,21 +17,15 @@
       "type": "minecraft:weighted_state_provider",
       "entries": [
         {
-          "weight": 6,
-          "data": {
-            "Name": "minecraft:soul_sand"
-          }
-        },
-        {
-          "weight": 8,
+          "weight": 14,
           "data": {
             "Name": "minecraft:netherrack"
           }
         },
         {
-          "weight": 3,
+          "weight": 6,
           "data": {
-            "Name": "minecraft:crimson_nylium"
+            "Name": "minecraft:soul_sand"
           }
         },
         {
@@ -44,37 +38,58 @@
     },
     "vegetation_feature": {
       "feature": {
-        "type": "minecraft:simple_block",
+        "type": "minecraft:random_selector",
         "config": {
-          "to_place": {
-            "type": "minecraft:weighted_state_provider",
-            "entries": [
-              {
-                "weight": 3,
-                "data": {
-                  "Name": "minecraft:nether_wart",
-                  "Properties": {
-                    "age": "3"
+          "features": [
+            {
+              "chance": 0.8,
+              "feature": {
+                "feature": {
+                  "type": "minecraft:simple_block",
+                  "config": {
+                    "to_place": {
+                      "type": "minecraft:weighted_state_provider",
+                      "entries": [
+                        {
+                          "weight": 3,
+                          "data": {
+                            "Name": "minecraft:nether_wart",
+                            "Properties": {
+                              "age": "3"
+                            }
+                          }
+                        },
+                        {
+                          "weight": 1,
+                          "data": {
+                            "Name": "minecraft:nether_wart",
+                            "Properties": {
+                              "age": "1"
+                            }
+                          }
+                        }
+                      ]
+                    }
                   }
-                }
-              },
-              {
-                "weight": 1,
-                "data": {
-                  "Name": "minecraft:nether_wart",
-                  "Properties": {
-                    "age": "1"
+                },
+                "placement": [
+                  {
+                    "type": "minecraft:block_predicate_filter",
+                    "predicate": {
+                      "type": "minecraft:matching_blocks",
+                      "offset": [
+                        0,
+                        -1,
+                        0
+                      ],
+                      "blocks": "minecraft:soul_sand"
+                    }
                   }
-                }
-              },
-              {
-                "weight": 1,
-                "data": {
-                  "Name": "minecraft:crimson_roots"
-                }
+                ]
               }
-            ]
-          }
+            }
+          ],
+          "default": "minecraft:brown_mushroom_nether"
         }
       },
       "placement": [
@@ -88,13 +103,7 @@
                 "blocks": "minecraft:air"
               },
               {
-                "type": "minecraft:matching_blocks",
-                "offset": [
-                  0,
-                  -1,
-                  0
-                ],
-                "blocks": "minecraft:soul_sand"
+                "type": "minecraft:true"
               }
             ]
           }
