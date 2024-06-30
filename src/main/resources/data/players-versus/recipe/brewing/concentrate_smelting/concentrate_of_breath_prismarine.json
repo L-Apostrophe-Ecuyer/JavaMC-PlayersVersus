@@ -5,6 +5,9 @@
   "ingredient": [
     {
       "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
     }
   ],
   "result": {

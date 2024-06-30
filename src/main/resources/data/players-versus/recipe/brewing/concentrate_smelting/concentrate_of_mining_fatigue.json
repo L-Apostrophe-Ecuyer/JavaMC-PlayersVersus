@@ -2,11 +2,9 @@
   "type": "minecraft:smelting",
   "category": "food",
 
-  "ingredient": [
-    {
-      "item": "minecraft:prismarine_shard"
-    }
-  ],
+  "ingredient": {
+    "item": "minecraft:nautilus_shell"
+  },
   "result": {
     "id": "players-versus:concentrate_of_mining_fatigue"
   },
