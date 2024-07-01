@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.items.throwing;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
@@ -23,8 +24,9 @@ public abstract class ThrowablePotionItemMixin extends PotionItem implements Pro
     @Override
     public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int remainingUseTicks) {
         if (user instanceof PlayerEntity playerEntity) {
-            float pullProgress = Math.max(1.0F, ((float)(this.getMaxUseTime(itemStack, user) - remainingUseTicks) / 64.0F));
-            throwPotion(world, user, itemStack, 0.5f + pullProgress);
+            float pullProgress = Math.min(1.0F, (72000.0F - remainingUseTicks) / 64.0F);
+            VersusMod.MOD_LOGGER.warn("Throwing a potion! Pull progress is: " + pullProgress);
+            throwPotion(world, user, itemStack, 0.4f + pullProgress);
             world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ENTITY_WITCH_THROW, SoundCategory.PLAYERS, 1.0f, 1.0f / (world.getRandom().nextFloat() * 0.4f + 1.2f) + pullProgress * 0.5f);
             playerEntity.incrementStat(Stats.USED.getOrCreateStat(this));
             playerEntity.getItemCooldownManager().set(Items.SPLASH_POTION, 20);

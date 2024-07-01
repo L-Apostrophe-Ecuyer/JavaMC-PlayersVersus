@@ -23,13 +23,14 @@ public class VanillaBlocksMixin {
 
     // Diorite replaced by Calcite:
     @Shadow public static final Block DIORITE = Blocks.register("diorite", new Block(AbstractBlock.Settings.create().mapColor(MapColor.TERRACOTTA_WHITE).instrument(NoteBlockInstrument.BASEDRUM).sounds(BlockSoundGroup.CALCITE).requiresTool().strength(0.75f)));
-    @Shadow public static final Block POLISHED_DIORITE = Blocks.register("polished_diorite", new Block(AbstractBlock.Settings.create().mapColor(MapColor.TERRACOTTA_WHITE).instrument(NoteBlockInstrument.BASEDRUM).sounds(BlockSoundGroup.CALCITE).requiresTool().strength(0.75f)));
+    @Shadow public static final Block POLISHED_DIORITE = Blocks.register("polished_diorite", new Block(AbstractBlock.Settings.create().mapColor(MapColor.OFF_WHITE).instrument(NoteBlockInstrument.BASEDRUM).sounds(BlockSoundGroup.CALCITE).requiresTool().strength(0.75f)));
 
     // Torchflowers give off light:
     @Shadow public static final Block TORCHFLOWER = Blocks.register("torchflower", (Block)new FlowerBlock(StatusEffects.NIGHT_VISION, 24.0f, AbstractBlock.Settings.create().luminance(state -> 8).mapColor(MapColor.DARK_GREEN).noCollision().breakInstantly().sounds(BlockSoundGroup.GRASS).offset(AbstractBlock.OffsetType.XZ).pistonBehavior(PistonBehavior.DESTROY)));
 
+    /*
     @Inject(method = "getBlastResistance()F", at = @At("RETURN"), cancellable = true)
     private void lowerBlastResistance(CallbackInfoReturnable<Float> cir) {
         cir.setReturnValue(cir.getReturnValue() * 0.4f);
-    }
+    }*/
 }
