@@ -1,11 +1,9 @@
 package frootloops.versus.mixin.players;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BrushableBlock;
-import net.minecraft.block.ShulkerBoxBlock;
+import net.minecraft.block.*;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
@@ -97,27 +95,35 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
     public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
         if(abilities.creativeMode) cir.setReturnValue(Float.MAX_VALUE);
-        if (!this.isOnGround()) cir.setReturnValue(cir.getReturnValue() * 3f);
+        float breakingSpeed = cir.getReturnValue();
+        if (!this.isOnGround()) breakingSpeed *= 3f;
 
-        if(blockState.isOf(Blocks.COBWEB)) {
-            cir.setReturnValue(cir.getReturnValue() * 0.75f + 6f);
+        Block block = blockState.getBlock();
+        if(block == Blocks.COBWEB) {
+            cir.setReturnValue(breakingSpeed * 0.75f + 6f);
             return;
         }
 
-        if(blockState.isIn(BlockTags.LOGS_THAT_BURN)) {
-            cir.setReturnValue(cir.getReturnValue() + 4f);
+        if(blockState.isBurnable() && blockState.getSoundGroup() == BlockSoundGroup.WOOD) {
+            cir.setReturnValue(breakingSpeed + 4f);
             return;
         }
 
-        if(blockState.getBlock() instanceof ShulkerBoxBlock) {
-            cir.setReturnValue(cir.getReturnValue() + 8f);
+        if(block.getHardness() == 6.0F && block.getDefaultMapColor() == MapColor.OFF_WHITE) {
+            cir.setReturnValue(breakingSpeed * 2.4f);
             return;
         }
 
-        if(blockState.getBlock() instanceof BrushableBlock) {
-            cir.setReturnValue(cir.getReturnValue() - 0.5f);
+        if(block instanceof ShulkerBoxBlock) {
+            cir.setReturnValue(breakingSpeed + 8f);
             return;
         }
+
+        if(block instanceof BrushableBlock) {
+            cir.setReturnValue(breakingSpeed - 0.5f);
+            return;
+        }
+        cir.setReturnValue(breakingSpeed);
     }
 
     @Override
