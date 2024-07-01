@@ -24,7 +24,7 @@ public class LingeringPotionMixin extends ThrowablePotionItem {
 
     @Override
     public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int remainingUseTicks) {
-        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_LINGERING_POTION_THROW, SoundCategory.PLAYERS, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
+        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_LINGERING_POTION_THROW, SoundCategory.PLAYERS, 1.0f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
         super.onStoppedUsing(itemStack, world, user, remainingUseTicks);
     }
 }
