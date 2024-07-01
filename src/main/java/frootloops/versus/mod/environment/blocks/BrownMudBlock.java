@@ -50,9 +50,11 @@ public class BrownMudBlock extends FarmlandBlock {
     @Override
     protected void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         int currentMoisture = state.get(MOISTURE);
-        int nearbyMoisture = world.hasRain(pos.up()) ? 4 : getMoistureAmountNearby(world, pos);
+        int nearbyMoisture = world.getDimension().ultrawarm() ? -4 : world.hasRain(pos.up()) ? 4 : getMoistureAmountNearby(world, pos);
         if (nearbyMoisture > 0) {
             if (currentMoisture < 4) world.setBlockState(pos, state.with(MOISTURE, Math.min(4, currentMoisture + nearbyMoisture)), Block.NOTIFY_LISTENERS);
+        } else if (nearbyMoisture == -4 && currentMoisture == 0) {
+            world.setBlockState(pos, Blocks.PACKED_MUD.getDefaultState(), Block.NOTIFY_LISTENERS);
         } else if (currentMoisture > 0) {
             world.setBlockState(pos, state.with(MOISTURE, currentMoisture - 1), Block.NOTIFY_LISTENERS);
         }
@@ -60,9 +62,12 @@ public class BrownMudBlock extends FarmlandBlock {
 
     private static int getMoistureAmountNearby(WorldView world, BlockPos pos) {
         Optional<Integer> moisture;
+        BlockState state;
         int moistureAmount = -1;
         for (BlockPos blockPos : BlockPos.iterate(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
-            if (world.getFluidState(blockPos).isIn(FluidTags.WATER)) return 4;
+            state = world.getBlockState(blockPos);
+            if (state.isOf(Blocks.FIRE)) return -4;
+            if (state.getFluidState().isIn(FluidTags.WATER)) return 4;
             moisture = world.getBlockState(blockPos).getOrEmpty(MOISTURE);
             if (moisture.isPresent() && moisture.get() > 0) moistureAmount += moisture.get();
             if (moistureAmount == 4) return 4;

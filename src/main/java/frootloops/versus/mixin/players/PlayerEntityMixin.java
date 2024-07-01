@@ -17,6 +17,7 @@ import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
@@ -78,12 +79,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         return false; // Always return false, to avoid resetting cooldown
     }
 
-    @Inject(method = "getXpToDrop", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getXpToDrop", at = @At("HEAD"), cancellable = true)
     public void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
-        if (this.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+        PlayerEntity player = (PlayerEntity)((Object)this);
+        if(this.totalExperience == 0 || this.isExperienceDroppingDisabled() || this.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || this.isSpectator()) {
             cir.setReturnValue(0);
         } else {
-            cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1));
+            cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1) - 8);
         }
     }
 
@@ -99,6 +101,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         if(blockState.isOf(Blocks.COBWEB)) {
             cir.setReturnValue(cir.getReturnValue() * 0.75f + 6f);
+            return;
+        }
+
+        if(blockState.isIn(BlockTags.LOGS_THAT_BURN)) {
+            cir.setReturnValue(cir.getReturnValue() + 4f);
             return;
         }
 

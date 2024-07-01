@@ -22,12 +22,12 @@
     "environment.archeology.SuspiciousBlocksMixin",
     "environment.sleeping.ServerSleepingMixin",
     "environment.CropMixin",
-    "environment.BlockExplosivityMixin",
     "environment.MinecartMixin",
     "environment.MossMixin",
     "environment.NetherWartMixin",
     "environment.TntMixin",
     "environment.TorchMixin",
+    "environment.VanillaBlocksMixin",
 
     "items.brewing.BrewingRecipeRegistryMixin",
     "items.brewing.BrewingStandScreenHandlerMixin",
