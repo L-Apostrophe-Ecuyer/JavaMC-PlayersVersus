@@ -16,7 +16,8 @@
 
 		"items.FirstPersonAnimationsMixin",
 		"items.inventory.HotbarSwappingClientMixin",
-		"items.inventory.InventoryScreenMixin",
+		"items.inventory.InventoryScreenSurvivalMixin",
+		"items.inventory.InventoryScreenCreativeMixin",
 		"items.inventory.ItemMergingMixin",
 		"items.inventory.MinecraftClientMixin",
 

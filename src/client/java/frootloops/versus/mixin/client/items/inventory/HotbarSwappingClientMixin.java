@@ -80,7 +80,6 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
                     else break;
                 }
             }
-
             if (numRowsToSwitch < 1 || numRowsToSwitch > 3) return;
             for (int i = 0; i < 9; i++) {
                 if (numRowsToSwitch == 1) {
