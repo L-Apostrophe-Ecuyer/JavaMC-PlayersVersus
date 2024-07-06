@@ -42,7 +42,14 @@ public abstract class InventoryScreenSurvivalMixin extends AbstractInventoryScre
             InventorySorting.doHotbarSwap(client, client.player.getInventory());
             if(buttonHotbarSwap != null) buttonHotbarSwap.setFocused(false);
         });
+
+        this.buttonSortInventory = new TexturedButtonWidget(this.x + 104 + 44, this.height / 2 - 22, 20, 18, TEXTURE_SORT_BUTTON, button -> {
+            if(client.player != null) InventorySorting.sortInventory(this.handler, client, client.player.getInventory());
+            if(buttonSortInventory != null) buttonSortInventory.setFocused(false);
+        });
+
         this.addDrawableChild(buttonHotbarSwap);
+        this.addDrawableChild(buttonSortInventory);
     }
 
     @Inject(method = "mouseClicked",at = @At("RETURN"), cancellable = false)
@@ -52,9 +59,15 @@ public abstract class InventoryScreenSurvivalMixin extends AbstractInventoryScre
         }
         else {
             int posButtonsMinY = this.height / 2 - 22 - 1;
-            if (buttonHotbarSwap != null && mouseY > posButtonsMinY && mouseY < posButtonsMinY + 18 + 1) {
-                buttonHotbarSwap.setPosition(this.x + 104 + 22, this.height / 2 - 22);
-                buttonHotbarSwap.setFocused(false);
+            if (mouseY > posButtonsMinY && mouseY < posButtonsMinY + 18 + 1) {
+                if(buttonHotbarSwap != null) {
+                    buttonHotbarSwap.setPosition(this.x + 104 + 22, this.height / 2 - 22);
+                    buttonHotbarSwap.setFocused(false);
+                }
+                if(buttonHotbarSwap != null) {
+                    buttonSortInventory.setPosition(this.x + 104 + 44, this.height / 2 - 22);
+                    buttonSortInventory.setFocused(false);
+                }
             }
         }
     }
