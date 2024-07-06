@@ -19,9 +19,6 @@ public class InventorySorting {
         ItemStack stackOne = inventory.getStack(slotOne);
         ItemStack stackTwo = inventory.getStack(slotTwo);
         if(stackOne.isEmpty() && stackTwo.isEmpty()) return;
-
-        VersusMod.MOD_LOGGER.warn("        Swapping between slots " + slotOne + " and " + slotTwo + "("  + (stackOne.isEmpty() ? "Empty" : stackOne.getItem().getName().getString()) + " -> " + (stackTwo.isEmpty() ? "Empty" : stackTwo.getItem().getName().getString()) + ")");
-
         client.interactionManager.clickSlot(0, slotTwo, slotOne, SlotActionType.SWAP, client.player);
 
         // Fall back:

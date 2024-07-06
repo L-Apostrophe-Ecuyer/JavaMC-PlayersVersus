@@ -31,7 +31,6 @@ public class ItemUsageMixin {
         Item item = stack.getItem();
         int maxUseTime = ItemsAndStacks.getOverhauledMaxUseTime(item);
         if(maxUseTime > 0) {
-            VersusMod.MOD_LOGGER.warn("New use time: " + maxUseTime);
             cir.setReturnValue(maxUseTime);
         }
         else if(item instanceof SwordItem || item instanceof HoeItem) {
