@@ -177,7 +177,7 @@ public class ItemSortingGroups {
         @Override
         public boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
-            if(item instanceof PickaxeItem) {
+            if(item instanceof AxeItem) {
                 this.insertWithinBounds(slot, 0, indexAxesEnd);
                 indexAxesEnd++;
                 indexBuildingBlocksEnd++;

@@ -106,8 +106,7 @@ public class InventorySorting {
                 continue;
             }
             for (SortedItemGroup group : sortedGroups) {
-                VersusMod.MOD_LOGGER.warn("    Trying to insert " + stack.getItem().getName().getString()  + " of slot " + i + " into group " + group.getClass().getName().replace("frootloops.versus.mod.items.inventory.ItemSortingGroups$", ""));
-
+                //VersusMod.MOD_LOGGER.warn("    Trying to insert " + stack.getItem().getName().getString()  + " of slot " + i + " into group " + group.getClass().getName().replace("frootloops.versus.mod.items.inventory.ItemSortingGroups$", ""));
                 if(group.tryInsert(new InventorySlot(i, stack))) {
                     VersusMod.MOD_LOGGER.warn("     -> Inserted " + stack.getItem().getName().getString()  + " of slot " + i + " into group " + group.getClass().getName().replace("frootloops.versus.mod.items.inventory.ItemSortingGroups$", ""));
                     break;
