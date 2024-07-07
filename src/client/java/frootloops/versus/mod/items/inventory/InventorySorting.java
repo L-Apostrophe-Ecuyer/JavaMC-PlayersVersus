@@ -88,8 +88,14 @@ public class InventorySorting {
     }
 
     public static void sortStacksIntoRows(ScreenHandler handler, MinecraftClient client, PlayerInventory inventory) {
+
+        VersusMod.MOD_LOGGER.warn("Started sorting!");
         ItemSortingGroups.SortedItemGroup[] sortedGroups = new ItemSortingGroups.SortedItemGroup[]{sortedPickaxeGroup, sortedCombatGroup, sortedAxeGroup, sortedShovelGroup, sortedRedstoneGroup, sortedMiscGroup};
-        VersusMod.MOD_LOGGER.warn("Started sorting! Groups: " + sortedGroups);
+        for (SortedItemGroup group : sortedGroups) {
+            group.clear();
+        }
+        VersusMod.MOD_LOGGER.warn("Groups: " + sortedGroups);
+
 
         // Sort stacks into groups:
         List<Integer> emptySlotsIndexes = new LinkedList<>();
@@ -99,17 +105,18 @@ public class InventorySorting {
                 emptySlotsIndexes.add(i);
                 continue;
             }
-
-            VersusMod.MOD_LOGGER.warn("   Trying to insert " + stack.getItem().getName().getString() + " of slot " + i);
             for (SortedItemGroup group : sortedGroups) {
+                VersusMod.MOD_LOGGER.warn("    Trying to insert " + stack.getItem().getName().getString()  + " of slot " + i + " into group " + group.getClass().getName().replace("frootloops.versus.mod.items.inventory.ItemSortingGroups$", ""));
+
                 if(group.tryInsert(new InventorySlot(i, stack))) {
-                    VersusMod.MOD_LOGGER.warn("     -> Inserted " + stack.getItem().getName().getString()  + " into group " + group.getClass().getName());
+                    VersusMod.MOD_LOGGER.warn("     -> Inserted " + stack.getItem().getName().getString()  + " of slot " + i + " into group " + group.getClass().getName().replace("frootloops.versus.mod.items.inventory.ItemSortingGroups$", ""));
                     break;
                 }
             }
         }
 
         // Give items to similar groups when possible:
+        VersusMod.MOD_LOGGER.warn("Giving items to similar groups when possible.");
         if(sortedPickaxeGroup.size() > 9 && sortedPickaxeGroup.size() - 9 + sortedRedstoneGroup.size() <= 9) {
             sortedPickaxeGroup.giveExtrasTo(sortedRedstoneGroup);
         }
@@ -122,6 +129,7 @@ public class InventorySorting {
 
 
         // Merge similar groups together when possible:
+        VersusMod.MOD_LOGGER.warn("Merging similar groups when possible.");
         if(sortedPickaxeGroup.size() > 0 && sortedRedstoneGroup.size() > 0 && sortedPickaxeGroup.size() + sortedRedstoneGroup.size() <= 9) {
             sortedPickaxeGroup.merge(sortedRedstoneGroup);
         }
@@ -141,11 +149,33 @@ public class InventorySorting {
             sortedShovelGroup.merge(sortedMiscGroup);
         }
 
+
+        VersusMod.MOD_LOGGER.warn("Groups before sorting:");
+        int filledSlotNum = 0;
+        for (SortedItemGroup group : sortedGroups) {
+            if(group.size() == 0) continue;
+            String groupItems = "     -> Group " + group.getClass().getSimpleName() + ": ";
+            for(InventorySlot slot : group.inventorySlots) {
+                groupItems += slot.stack().getItem().getName().getString() + ", ";
+                filledSlotNum ++;
+            }
+            VersusMod.MOD_LOGGER.warn(groupItems.substring(0, groupItems.length() - 2));
+        }
+
+        VersusMod.MOD_LOGGER.warn("Empty slots:");
+        String emptySlots = "     -> Empty slots: ";
+        for(int slotId : emptySlotsIndexes) {
+            emptySlots += slotId + ", ";
+        }
+        emptySlots = emptySlots.substring(0, emptySlots.length() - 2) + (" (There are " + emptySlotsIndexes.size() + " empty slots and " + filledSlotNum + " filled ones, total: " + (emptySlotsIndexes.size() + filledSlotNum)+ ") ");
+        VersusMod.MOD_LOGGER.warn(emptySlots);
+
+
         // Sort groups into the four hotbars:
         int[][] hotbars = new int[4][9];
         int hotbarIndex = 0, hotbarSlotIndex = 0, numEmptySlots = emptySlotsIndexes.size(), numSlotsLeft = 36;
         for (SortedItemGroup group : sortedGroups) {
-            while(group.size() > 0 && hotbarIndex < 3) {
+            while(group.size() > 0 && hotbarIndex < 4) {
                 hotbars[hotbarIndex][hotbarSlotIndex] = group.popFirst().slodId() + 9;
                 hotbarSlotIndex++;
                 numSlotsLeft--;
@@ -161,14 +191,13 @@ public class InventorySorting {
                 hotbarIndex++;
             }
         }
+        VersusMod.MOD_LOGGER.warn("Sorted items into hotbars!");
 
 
         // Sort the player's inventory accordingly!
         Map<Integer, Integer> newSlotIds = new HashMap<>();
         for(int i = 0; i < 4; i ++ ) {
             for(int j = 0; j < 9; j++) {
-
-
                 int slot = ((i + 1) * 9) + j;
                 int slotToSwapWith = hotbars[i][j] - 9;
                 if(slotToSwapWith < 0) {

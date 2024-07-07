@@ -1,19 +1,13 @@
 package frootloops.versus.mod.items.inventory;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.*;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,7 +24,8 @@ public class ItemSortingGroups {
 
 
     public static boolean isItemInGroup(RegistryKey<ItemGroup> itemGroupKey, Item item) {
-        return Registries.ITEM_GROUP.getOrThrow(itemGroupKey).getDisplayStacks().stream().anyMatch(stack -> stack.getItem().equals(item));
+        return false;
+        //return Registries.ITEM_GROUP.getOrThrow(itemGroupKey).getDisplayStacks().stream().anyMatch(stack -> stack.getItem().equals(item));
     }
 
 
@@ -41,6 +36,17 @@ public class ItemSortingGroups {
         public boolean tryInsert(InventorySlot slot) {
             inventorySlots.add(slot);
             return true;
+        }
+
+        protected void insertWithinBounds(InventorySlot slot, int startIndex, int maxIndex) {
+            String itemName = slot.stack.getItem().getName().getString();
+            for(int i = startIndex; i < maxIndex; i++) {
+                if(itemName.compareTo(inventorySlots.get(i).stack.getItem().getName().getString()) < 1) {
+                    inventorySlots.add(i, slot);
+                    return;
+                }
+            }
+            inventorySlots.add(maxIndex, slot);
         }
 
         private void forceInsert(InventorySlot slot) {
@@ -81,15 +87,7 @@ public class ItemSortingGroups {
             Item item = slot.stack.getItem();
             if(item != Items.OAK_BUTTON && item != Items.OAK_DOOR && ItemSortingGroups.isItemInGroup(net.minecraft.item.ItemGroups.REDSTONE, item)) {
                 if(inventorySlots.size() == 0) inventorySlots.add(slot);
-                else {
-                    for(int i = 0; i < inventorySlots.size(); i++) {
-                        if(item.getName().getString().compareTo(inventorySlots.get(i).stack.getItem().getName().getString()) < 1) {
-                            inventorySlots.add(Math.min(inventorySlots.size(), i), slot);
-                            return true;
-                        }
-                    }
-                    inventorySlots.add(slot);
-                }
+                else this.insertWithinBounds(slot, 0, this.size());
                 return true;
             }
             return false;
@@ -97,34 +95,30 @@ public class ItemSortingGroups {
     }
 
     public static class PickaxeMineableItems extends SortedItemGroup {
-        int indexPickaxes = 0;
-        int indexBuildingBlocks = 0;
-        int indexNaturalBlocks = 0;
+        int indexPickaxesEnd = 0;
+        int indexBuildingBlocksEnd = 0;
+        int indexNaturalBlocksEnd = 0;
 
         @Override
         public boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof PickaxeItem) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexPickaxes), slot);
-                indexPickaxes++;
-                indexBuildingBlocks++;
-                indexNaturalBlocks++;
+                this.insertWithinBounds(slot, 0, indexPickaxesEnd);
+                indexPickaxesEnd++;
+                indexBuildingBlocksEnd++;
+                indexNaturalBlocksEnd++;
                 return true;
             }
             else if(item instanceof BlockItem blockItem) {
                 if(blockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
                     if(isItemInGroup(net.minecraft.item.ItemGroups.BUILDING_BLOCKS, blockItem)) {
-                        for(int i = indexBuildingBlocks; i <= indexNaturalBlocks; i++) {
-                            if(i == indexNaturalBlocks || item.getName().getString().compareTo(inventorySlots.get(i).stack.getItem().getName().getString()) < 1) {
-                                this.inventorySlots.add(Math.min(inventorySlots.size(), i), slot);
-                            }
-                        }
-                        indexBuildingBlocks++;
-                        indexNaturalBlocks++;
+                        this.insertWithinBounds(slot, indexPickaxesEnd + 1, indexBuildingBlocksEnd);
+                        indexBuildingBlocksEnd++;
+                        indexNaturalBlocksEnd++;
                     }
                     if(isItemInGroup(net.minecraft.item.ItemGroups.NATURAL, blockItem)) {
-                        this.inventorySlots.add(Math.min(inventorySlots.size(), indexNaturalBlocks), slot);
-                        indexNaturalBlocks++;
+                        this.insertWithinBounds(slot, indexBuildingBlocksEnd + 1, indexNaturalBlocksEnd);
+                        indexNaturalBlocksEnd++;
                     }
                     else {
                         this.inventorySlots.add(slot);
@@ -137,34 +131,30 @@ public class ItemSortingGroups {
 
         @Override
         public void clear() {
-            indexPickaxes = 0;
-            indexBuildingBlocks = 0;
-            indexNaturalBlocks = 0;
+            indexPickaxesEnd = 0;
+            indexBuildingBlocksEnd = 0;
+            indexNaturalBlocksEnd = 0;
             inventorySlots.clear();
         }
     }
 
     public static class ShovelMineableItems extends SortedItemGroup {
-        int indexShovels = 0;
-        int indexBlocks = 0;
+        int indexShovelsEnd = 0;
+        int indexBlocksEnd = 0;
 
         @Override
         public boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof ShovelItem) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexShovels), slot);
-                indexShovels++;
-                indexBlocks++;
+                this.insertWithinBounds(slot, 0, indexShovelsEnd);
+                indexShovelsEnd++;
+                indexBlocksEnd++;
                 return true;
             }
             else if(item instanceof BlockItem blockItem) {
                 if(blockItem.getBlock().getDefaultState().isIn(BlockTags.SHOVEL_MINEABLE)) {
-                    for(int i = indexBlocks; i <= this.inventorySlots.size(); i++) {
-                        if(i == this.inventorySlots.size() || item.getName().getString().compareTo(inventorySlots.get(i).stack.getItem().getName().getString()) < 1) {
-                            this.inventorySlots.add(Math.min(inventorySlots.size(), i), slot);
-                        }
-                    }
-                    indexBlocks++;
+                    this.insertWithinBounds(slot, indexShovelsEnd + 1, indexBlocksEnd);
+                    indexBlocksEnd++;
                     return true;
                 }
             }
@@ -173,43 +163,40 @@ public class ItemSortingGroups {
 
         @Override
         public void clear() {
-            indexShovels = 0;
-            indexBlocks = 0;
+            indexShovelsEnd = 0;
+            indexBlocksEnd = 0;
             inventorySlots.clear();
         }
     }
 
     public static class AxeMineableItems extends SortedItemGroup {
-        int indexAxes = 0;
-        int indexBuildingBlocks = 0;
-        int indexNaturalBlocks = 0;
+        int indexAxesEnd = 0;
+        int indexBuildingBlocksEnd = 0;
+        int indexNaturalBlocksEnd = 0;
 
         @Override
         public boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof PickaxeItem) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexAxes), slot);
-                indexAxes++;
-                indexBuildingBlocks++;
-                indexNaturalBlocks++;
+                this.insertWithinBounds(slot, 0, indexAxesEnd);
+                indexAxesEnd++;
+                indexBuildingBlocksEnd++;
+                indexNaturalBlocksEnd++;
                 return true;
             }
             else if(item instanceof BlockItem blockItem) {
                 if(blockItem.getBlock().getDefaultState().isIn(BlockTags.AXE_MINEABLE)) {
                     if(isItemInGroup(net.minecraft.item.ItemGroups.BUILDING_BLOCKS, blockItem)) {
-                        for(int i = indexBuildingBlocks; i <= indexNaturalBlocks; i++) {
-                            if(i == indexNaturalBlocks || item.getName().getString().compareTo(inventorySlots.get(i).stack.getItem().getName().getString()) < 1) {
-                                this.inventorySlots.add(Math.min(inventorySlots.size(), i), slot);
-                            }
-                        }
-                        indexBuildingBlocks++;
-                        indexNaturalBlocks++;
+                        this.insertWithinBounds(slot, indexAxesEnd + 1, indexBuildingBlocksEnd);
+                        indexBuildingBlocksEnd++;
+                        indexNaturalBlocksEnd++;
                     }
                     if(isItemInGroup(net.minecraft.item.ItemGroups.NATURAL, blockItem)) {
-                        this.inventorySlots.add(Math.min(inventorySlots.size(), indexNaturalBlocks), slot);
-                        indexNaturalBlocks++;
+                        this.insertWithinBounds(slot, indexBuildingBlocksEnd + 1, indexNaturalBlocksEnd);
+                        indexNaturalBlocksEnd++;
                     }
                     else {
+                        this.insertWithinBounds(slot, indexNaturalBlocksEnd + 1, this.size());
                         this.inventorySlots.add(slot);
                     }
                     return true;
@@ -220,16 +207,16 @@ public class ItemSortingGroups {
 
         @Override
         public void clear() {
-            indexAxes = 0;
-            indexBuildingBlocks = 0;
-            indexNaturalBlocks = 0;
+            indexAxesEnd = 0;
+            indexBuildingBlocksEnd = 0;
+            indexNaturalBlocksEnd = 0;
             inventorySlots.clear();
         }
     }
 
     public static class CombatItems extends SortedItemGroup {
-        int indexWeapons = 0;
-        int indexShieldsAndRanged = 0;
+        int indexWeaponsEnd = 0;
+        int indexShieldsAndRangedEnd = 0;
         int indexConsumables = 0;
         int indexFoods = 0;
         int indexMisc = 0;
@@ -238,17 +225,17 @@ public class ItemSortingGroups {
         public boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof SwordItem || item instanceof TridentItem || item instanceof MaceItem) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexWeapons), slot);
-                indexWeapons++;
-                indexShieldsAndRanged++;
+                this.inventorySlots.add(Math.min(inventorySlots.size(), indexWeaponsEnd), slot);
+                indexWeaponsEnd++;
+                indexShieldsAndRangedEnd++;
                 indexConsumables++;
                 indexFoods++;
                 indexMisc++;
                 return true;
             }
             else if(item instanceof ShieldItem || item instanceof CrossbowItem || item instanceof BowItem) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexShieldsAndRanged), slot);
-                indexShieldsAndRanged++;
+                this.inventorySlots.add(Math.min(inventorySlots.size(), indexShieldsAndRangedEnd), slot);
+                indexShieldsAndRangedEnd++;
                 indexConsumables++;
                 indexFoods++;
                 indexMisc++;
@@ -280,8 +267,8 @@ public class ItemSortingGroups {
 
         @Override
         public void clear() {
-            indexWeapons = 0;
-            indexShieldsAndRanged = 0;
+            indexWeaponsEnd = 0;
+            indexShieldsAndRangedEnd = 0;
             indexConsumables = 0;
             indexFoods = 0;
             indexMisc = 0;
