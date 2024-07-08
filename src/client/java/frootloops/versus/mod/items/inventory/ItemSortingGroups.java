@@ -94,10 +94,14 @@ public class ItemSortingGroups {
         }
     }
 
+
+    /**
+     * PICKAXES
+     */
     public static class PickaxeMineableItems extends SortedItemGroup {
         int indexPickaxesEnd = 0;
-        int indexBuildingBlocksEnd = 0;
-        int indexNaturalBlocksEnd = 0;
+        int indexSortedStonesEnd = 0;
+        int indexSortedCopperEnd = 0;
 
         @Override
         public boolean tryInsert(InventorySlot slot) {
@@ -105,23 +109,40 @@ public class ItemSortingGroups {
             if(item instanceof PickaxeItem) {
                 this.insertWithinBounds(slot, 0, indexPickaxesEnd);
                 indexPickaxesEnd++;
-                indexBuildingBlocksEnd++;
-                indexNaturalBlocksEnd++;
+                indexSortedStonesEnd++;
+                indexSortedCopperEnd++;
                 return true;
             }
             else if(item instanceof BlockItem blockItem) {
                 if(blockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
-                    if(isItemInGroup(net.minecraft.item.ItemGroups.BUILDING_BLOCKS, blockItem)) {
-                        this.insertWithinBounds(slot, indexPickaxesEnd + 1, indexBuildingBlocksEnd);
-                        indexBuildingBlocksEnd++;
-                        indexNaturalBlocksEnd++;
+                    if(ItemSortingGroups.ITEMS_PICKAXE_MINEABLE.containsKey(item)) {
+                        for(int i = indexPickaxesEnd + 1; i < indexSortedStonesEnd; i++) {
+                            if(ITEMS_PICKAXE_MINEABLE.get(item) <= ITEMS_PICKAXE_MINEABLE.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256)) {
+                                this.inventorySlots.add(i, slot);
+                                indexSortedStonesEnd++;
+                                indexSortedCopperEnd++;
+                                return true;
+                            }
+                        }
+                        this.inventorySlots.add(indexSortedStonesEnd, slot);
+                        indexSortedStonesEnd++;
+                        indexSortedCopperEnd++;
+                        return true;
                     }
-                    if(isItemInGroup(net.minecraft.item.ItemGroups.NATURAL, blockItem)) {
-                        this.insertWithinBounds(slot, indexBuildingBlocksEnd + 1, indexNaturalBlocksEnd);
-                        indexNaturalBlocksEnd++;
+                    else if(ItemSortingGroups.ITEMS_COPPER_BLOCKS.containsKey(item)) {
+                        for(int i = indexSortedStonesEnd + 1; i < indexSortedCopperEnd; i++) {
+                            if(ITEMS_COPPER_BLOCKS.get(item) <= ITEMS_COPPER_BLOCKS.get(this.inventorySlots.get(i).stack.getItem())) {
+                                this.inventorySlots.add(i, slot);
+                                indexSortedCopperEnd++;
+                                return true;
+                            }
+                        }
+                        this.inventorySlots.add(indexSortedCopperEnd, slot);
+                        indexSortedCopperEnd++;
+                        return true;
                     }
                     else {
-                        this.inventorySlots.add(slot);
+                        this.insertWithinBounds(slot, indexSortedCopperEnd + 1, this.inventorySlots.size());
                     }
                     return true;
                 }
@@ -132,12 +153,16 @@ public class ItemSortingGroups {
         @Override
         public void clear() {
             indexPickaxesEnd = 0;
-            indexBuildingBlocksEnd = 0;
-            indexNaturalBlocksEnd = 0;
+            indexSortedStonesEnd = 0;
+            indexSortedCopperEnd = 0;
             inventorySlots.clear();
         }
     }
 
+
+    /**
+     * SHOVELS
+     */
     public static class ShovelMineableItems extends SortedItemGroup {
         int indexShovelsEnd = 0;
         int indexBlocksEnd = 0;
@@ -169,6 +194,9 @@ public class ItemSortingGroups {
         }
     }
 
+    /**
+     * AXES
+     */
     public static class AxeMineableItems extends SortedItemGroup {
         int indexAxesEnd = 0;
         int indexBuildingBlocksEnd = 0;
@@ -213,6 +241,10 @@ public class ItemSortingGroups {
             inventorySlots.clear();
         }
     }
+
+    /**
+     * COMBAT
+     */
 
     public static class CombatItems extends SortedItemGroup {
         int indexWeaponsEnd = 0;
@@ -390,103 +422,344 @@ public class ItemSortingGroups {
 
     private static final Map<Item, Integer> ITEMS_REDSTONE = new HashMap<>();
     static {
-        ITEMS_REDSTONE.put(Items.TNT, 0);
-        ITEMS_REDSTONE.put(Items.REDSTONE, 1);
-        ITEMS_REDSTONE.put(Items.REDSTONE_BLOCK, 2);
-        ITEMS_REDSTONE.put(Items.REDSTONE_TORCH, 2);
-        ITEMS_REDSTONE.put(Items.TARGET, 3);
-        ITEMS_REDSTONE.put(Items.REPEATER, 3);
-        ITEMS_REDSTONE.put(Items.COMPARATOR, 4);
-        ITEMS_REDSTONE.put(Items.OBSERVER, 5);
-        ITEMS_REDSTONE.put(Items.PISTON, 6);
-        ITEMS_REDSTONE.put(Items.STICKY_PISTON, 7);
-        ITEMS_REDSTONE.put(Items.SLIME_BLOCK, 8);
-        ITEMS_REDSTONE.put(Items.HONEY_BLOCK, 9);
-        ITEMS_REDSTONE.put(Items.DISPENSER, 10);
-        ITEMS_REDSTONE.put(Items.DROPPER, 11);
-        ITEMS_REDSTONE.put(Items.HOPPER, 12);
-        ITEMS_REDSTONE.put(Items.CRAFTER, 13);
-        ITEMS_REDSTONE.put(Items.CHEST, 14);
-        ITEMS_REDSTONE.put(Items.TRAPPED_CHEST, 15);
-        ITEMS_REDSTONE.put(Items.BARREL, 16);
-        ITEMS_REDSTONE.put(Items.NOTE_BLOCK, 17);
-        ITEMS_REDSTONE.put(Items.COMPOSTER, 18);
-        ITEMS_REDSTONE.put(Items.CAULDRON, 19);
-        ITEMS_REDSTONE.put(Items.BREWING_STAND, 20);
-        ITEMS_REDSTONE.put(Items.RAIL, 21);
-        ITEMS_REDSTONE.put(Items.POWERED_RAIL, 22);
-        ITEMS_REDSTONE.put(Items.DETECTOR_RAIL, 23);
-        ITEMS_REDSTONE.put(Items.ACTIVATOR_RAIL, 24);
-        ITEMS_REDSTONE.put(Items.MINECART, 25);
-        ITEMS_REDSTONE.put(Items.HOPPER_MINECART, 26);
-        ITEMS_REDSTONE.put(Items.CHEST_MINECART, 27);
-        ITEMS_REDSTONE.put(Items.FURNACE_MINECART, 28);
-        ITEMS_REDSTONE.put(Items.TNT_MINECART, 29);
-        ITEMS_REDSTONE.put(Items.WAXED_COPPER_BULB, 30);
-        ITEMS_REDSTONE.put(Items.WAXED_EXPOSED_COPPER_BULB, 31);
-        ITEMS_REDSTONE.put(Items.WAXED_WEATHERED_COPPER_BULB, 32);
-        ITEMS_REDSTONE.put(Items.WAXED_OXIDIZED_COPPER_BULB, 33);
-        ITEMS_REDSTONE.put(Items.LEVER, 34);
-        ITEMS_REDSTONE.put(Items.STONE_PRESSURE_PLATE, 35);
-        ITEMS_REDSTONE.put(Items.SCULK_SENSOR, 36);
-        ITEMS_REDSTONE.put(Items.CALIBRATED_SCULK_SENSOR, 37);
-
+        int indexRedstone = 1;
+        ITEMS_REDSTONE.put(Items.TNT, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.REDSTONE, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.REDSTONE_BLOCK, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.REDSTONE_TORCH, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.TARGET, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.REPEATER, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.COMPARATOR, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.OBSERVER, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.PISTON, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.STICKY_PISTON, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.SLIME_BLOCK, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.HONEY_BLOCK, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.DISPENSER, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.DROPPER, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.HOPPER, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.CRAFTER, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.CHEST, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.TRAPPED_CHEST, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.BARREL, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.NOTE_BLOCK, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.COMPOSTER, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.CAULDRON, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.BREWING_STAND, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.RAIL, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.POWERED_RAIL, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.DETECTOR_RAIL, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.ACTIVATOR_RAIL, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.MINECART, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.HOPPER_MINECART, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.CHEST_MINECART, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.FURNACE_MINECART, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.TNT_MINECART, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.WAXED_COPPER_BULB, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.WAXED_EXPOSED_COPPER_BULB, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.WAXED_WEATHERED_COPPER_BULB, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.WAXED_OXIDIZED_COPPER_BULB, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.LEVER, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.STONE_PRESSURE_PLATE, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.SCULK_SENSOR, indexRedstone++);
+        ITEMS_REDSTONE.put(Items.CALIBRATED_SCULK_SENSOR, indexRedstone++);
     }
 
-    private static final Map<Item, Integer> ITEMS_STONES = new HashMap<>();
+    private static final Map<Item, Integer> ITEMS_PICKAXE_MINEABLE = new HashMap<>();
     static {
-        ITEMS_REDSTONE.put(Items.COBBLESTONE, 1);
-        ITEMS_REDSTONE.put(Items.GRANITE, 4);
-        ITEMS_REDSTONE.put(Items.POLISHED_GRANITE, 4);
-        ITEMS_REDSTONE.put(CustomBlockItems.GRANITE_BRICKS_ITEM, 4);
-        ITEMS_REDSTONE.put(CustomBlockItems.GRANITE_TILES_ITEM, 4);
-        ITEMS_REDSTONE.put(Items.POLISHED_ANDESITE, 4);
-        ITEMS_REDSTONE.put(Items.STONE_BRICKS, 2);
-        ITEMS_REDSTONE.put(Items.CRACKED_STONE_BRICKS, 3);
-        ITEMS_REDSTONE.put(Items.MOSSY_STONE_BRICKS, 4);
-        ITEMS_REDSTONE.put(Items.CHISELED_STONE_BRICKS, 3);
+
+        int indexPickaxeBlocks = 1;
+        ITEMS_PICKAXE_MINEABLE.put(Items.NETHERRACK, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_NETHER_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_NETHER_BRICK_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_NETHER_BRICK_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.NETHER_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.NETHER_BRICK_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.NETHER_BRICK_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.NETHER_BRICK_FENCE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BASALT, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BLACKSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BLACKSTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BLACKSTONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BLACKSTONE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BLACKSTONE_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BLACKSTONE_BRICK_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BLACKSTONE_BRICK_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_BLACKSTONE_BRICK_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CRACKED_POLISHED_BLACKSTONE_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CHISELED_POLISHED_BLACKSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GILDED_BLACKSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLACKSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLACKSTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLACKSTONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLACKSTONE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SMOOTH_BASALT, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BASALT, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.COBBLED_DEEPSLATE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.COBBLED_DEEPSLATE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.COBBLED_DEEPSLATE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.COBBLED_DEEPSLATE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TUFF, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TUFF_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TUFF_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TUFF_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MOSSY_COBBLESTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MOSSY_COBBLESTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MOSSY_COBBLESTONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MOSSY_COBBLESTONE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.COBBLESTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.COBBLESTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.COBBLESTONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.COBBLESTONE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEAD_TUBE_CORAL_BLOCK, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEAD_BRAIN_CORAL_BLOCK, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEAD_BUBBLE_CORAL_BLOCK, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEAD_FIRE_CORAL_BLOCK, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEAD_HORN_CORAL_BLOCK, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.STONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.STONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.STONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.ANDESITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.ANDESITE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.ANDESITE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.ANDESITE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CALCITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SMOOTH_SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SMOOTH_SANDSTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SMOOTH_SANDSTONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SANDSTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SANDSTONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.PACKED_MUD, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DRIPSTONE_BLOCK, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POINTED_DRIPSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GRANITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GRANITE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GRANITE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GRANITE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_GRANITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_GRANITE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_GRANITE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BRICK_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BRICK_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BRICK_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SMOOTH_RED_SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SMOOTH_RED_SANDSTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.SMOOTH_RED_SANDSTONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_SANDSTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_SANDSTONE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.ORANGE_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.YELLOW_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.WHITE_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.LIGHT_GRAY_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GRAY_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BROWN_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GREEN_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.LIME_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CYAN_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLACK_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.PINK_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MAGENTA_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.PURPLE_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLUE_TERRACOTTA, indexPickaxeBlocks++);
+
+        ITEMS_PICKAXE_MINEABLE.put(Items.CRACKED_DEEPSLATE_TILES, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_TILES, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_TILE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_TILE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_TILE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_DEEPSLATE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_DEEPSLATE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_DEEPSLATE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_DEEPSLATE_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CRACKED_DEEPSLATE_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_BRICK_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_BRICK_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_BRICK_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TUFF_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TUFF_BRICK_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TUFF_BRICK_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.TUFF_BRICK_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CHISELED_TUFF, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CHISELED_TUFF_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_TUFF, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_TUFF_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_TUFF_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_TUFF_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_ANDESITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_ANDESITE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_ANDESITE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MOSSY_STONE_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CRACKED_STONE_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.STONE_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.STONE_BRICK_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.STONE_BRICK_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.STONE_BRICK_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CHISELED_STONE_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_DIORITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_DIORITE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_DIORITE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CUT_SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CUT_SANDSTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CHISELED_SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CUT_RED_SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CUT_RED_SANDSTONE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CHISELED_RED_SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MUD_BRICKS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MUD_BRICK_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MUD_BRICK_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MUD_BRICK_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.PACKED_MUD_TILES_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.PACKED_MUD_TILES_SLAB_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.PACKED_MUD_TILES_STAIRS_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_BRICKS_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_BRICK_SLAB_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_BRICK_STAIRS_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_TILES_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_TILES_SLAB_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_TILES_STAIRS_ITEM, indexPickaxeBlocks++);
     }
 
-    private static final Map<Item, Integer> ITEMS_NATURAL_STONES = new HashMap<>();
+    private static final Map<Item, Integer> ITEMS_NATURAL_SOIL = new HashMap<>();
     static {
-        ITEMS_REDSTONE.put(Items.SANDSTONE, 2);
-        ITEMS_REDSTONE.put(Items.SMOOTH_SANDSTONE, 2);
-        ITEMS_REDSTONE.put(Items.STONE, 2);
-        ITEMS_REDSTONE.put(Items.DRIPSTONE_BLOCK, 2);
-        ITEMS_REDSTONE.put(Items.POINTED_DRIPSTONE, 2);
-        ITEMS_REDSTONE.put(Items.DRIPSTONE_BLOCK, 2);
+        int indexNaturalSoils = 1;
+        ITEMS_NATURAL_SOIL.put(Items.CLAY, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.GRAVEL, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.SUSPICIOUS_GRAVEL, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.SAND, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.SUSPICIOUS_SAND, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.RED_SAND, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.DIRT, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.DIRT_PATH, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.MYCELIUM, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.PODZOL, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(CustomBlockItems.BROWN_MUD_ITEM, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.FARMLAND, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.COARSE_DIRT, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.ROOTED_DIRT, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.GRASS_BLOCK, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.MOSS_BLOCK, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.MOSS_CARPET, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.MOSS_BLOCK, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.MOSS_CARPET, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.SOUL_SAND, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.SOUL_SOIL, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.SNOW_BLOCK, indexNaturalSoils++);
+        ITEMS_NATURAL_SOIL.put(Items.SNOW, indexNaturalSoils++);
     }
 
-    private static final Map<Item, Integer> ITEMS_NATURAL_OTHER = new HashMap<>();
+    private static final Map<Item, Integer> ITEMS_COPPER_BLOCKS = new HashMap<>();
     static {
-        ;
-        ITEMS_NATURAL_OTHER.put(Items.MOSSY_COBBLESTONE, -10);
-        ITEMS_NATURAL_OTHER.put(Items.MOSS_BLOCK, -8);
-        ITEMS_NATURAL_OTHER.put(Items.MOSS_CARPET, -7);
-
-        ITEMS_NATURAL_OTHER.put(Items.SAND, 1);
-        ITEMS_NATURAL_OTHER.put(Items.GRASS_BLOCK, 2);
-        ITEMS_NATURAL_OTHER.put(Items.PODZOL, 3);
-        ITEMS_NATURAL_OTHER.put(Items.MYCELIUM, 4);
-        ITEMS_NATURAL_OTHER.put(Items.DIRT_PATH, 5);
-        ITEMS_NATURAL_OTHER.put(Items.DIRT, 6);
-        ITEMS_NATURAL_OTHER.put(CustomBlockItems.BROWN_MUD_ITEM, 6);
-        ITEMS_NATURAL_OTHER.put(Items.COARSE_DIRT, 8);
-        ITEMS_NATURAL_OTHER.put(Items.ROOTED_DIRT, 9);
-        ITEMS_NATURAL_OTHER.put(Items.FARMLAND, 10);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_CUT_COPPER, 1);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_CUT_COPPER, 2);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_CUT_COPPER, 3);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_CUT_COPPER, 4);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_COPPER_BLOCK, 5);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_COPPER, 6);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_COPPER, 7);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_COPPER, 8);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_CUT_COPPER_SLAB, 9);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_CUT_COPPER_SLAB, 10);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_CUT_COPPER_SLAB, 11);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_CUT_COPPER_SLAB, 12);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_CUT_COPPER_STAIRS, 13);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_CUT_COPPER_STAIRS, 14);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_CUT_COPPER_STAIRS, 15);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_CUT_COPPER_STAIRS, 16);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_COPPER_TRAPDOOR, 17);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_COPPER_TRAPDOOR, 18);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_COPPER_TRAPDOOR, 19);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_COPPER_TRAPDOOR, 20);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_COPPER_DOOR, 21);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_COPPER_DOOR, 22);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_COPPER_DOOR, 23);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_COPPER_DOOR, 24);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_COPPER_GRATE, 25);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_COPPER_GRATE, 26);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_COPPER_GRATE, 27);
+        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_COPPER_GRATE, 28);
+        ITEMS_COPPER_BLOCKS.put(Items.CUT_COPPER, 29);
+        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_CUT_COPPER, 30);
+        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_CUT_COPPER, 31);
+        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_CUT_COPPER, 32);
+        ITEMS_COPPER_BLOCKS.put(Items.COPPER_BLOCK, 33);
+        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_COPPER, 34);
+        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_COPPER, 35);
+        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_COPPER, 36);
+        ITEMS_COPPER_BLOCKS.put(Items.CUT_COPPER_SLAB, 37);
+        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_CUT_COPPER_SLAB, 38);
+        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_CUT_COPPER_SLAB, 39);
+        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_CUT_COPPER_SLAB, 40);
+        ITEMS_COPPER_BLOCKS.put(Items.CUT_COPPER_STAIRS, 41);
+        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_CUT_COPPER_STAIRS, 42);
+        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_CUT_COPPER_STAIRS, 43);
+        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_CUT_COPPER_STAIRS, 44);
+        ITEMS_COPPER_BLOCKS.put(Items.COPPER_TRAPDOOR, 45);
+        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_COPPER_TRAPDOOR, 46);
+        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_COPPER_TRAPDOOR, 47);
+        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_COPPER_TRAPDOOR, 48);
+        ITEMS_COPPER_BLOCKS.put(Items.COPPER_DOOR, 49);
+        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_COPPER_DOOR, 50);
+        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_COPPER_DOOR, 51);
+        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_COPPER_DOOR, 52);
+        ITEMS_COPPER_BLOCKS.put(Items.COPPER_GRATE, 53);
+        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_COPPER_GRATE, 54);
+        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_COPPER_GRATE, 55);
+        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_COPPER_GRATE, 56);
     }
 
-    private static final Map<Item, Integer> ITEMS_RESSOURCES = new HashMap<>();
+    private static final Map<Item, Integer> ITEMS_MINERAL_RESSOURCES = new HashMap<>();
     static {
-        ITEMS_REDSTONE.put(Items.ANDESITE, 1);
-        ITEMS_REDSTONE.put(Items.STONE, 2);
-        ITEMS_REDSTONE.put(Items.REDSTONE_ORE, 2);
-        ITEMS_REDSTONE.put(Items.COPPER_ORE, 3);
-        ITEMS_REDSTONE.put(Items.IRON_ORE, 3);
-        ITEMS_REDSTONE.put(Items.GOLD_ORE, 4);
-        ITEMS_REDSTONE.put(Items.EMERALD_ORE, 5);
-        ITEMS_REDSTONE.put(Items.PISTON, 6);
-        ITEMS_REDSTONE.put(Items.STICKY_PISTON, 7);
-        ITEMS_REDSTONE.put(Items.SLIME_BLOCK, 8);
+        ITEMS_MINERAL_RESSOURCES.put(Items.GOLD_BLOCK, 1);
+        ITEMS_MINERAL_RESSOURCES.put(Items.GOLD_INGOT, 2);
+        ITEMS_MINERAL_RESSOURCES.put(Items.GOLD_NUGGET, 3);
+        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_GOLD_BLOCK, 4);
+        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_GOLD, 5);
+        ITEMS_MINERAL_RESSOURCES.put(Items.GOLD_ORE, 6);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_GOLD_ORE, 7);
+        ITEMS_MINERAL_RESSOURCES.put(Items.NETHER_GOLD_ORE, 8);
+        ITEMS_MINERAL_RESSOURCES.put(Items.IRON_BLOCK, 9);
+        ITEMS_MINERAL_RESSOURCES.put(Items.IRON_INGOT, 10);
+        ITEMS_MINERAL_RESSOURCES.put(Items.IRON_NUGGET, 11);
+        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_IRON_BLOCK, 12);
+        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_IRON, 13);
+        ITEMS_MINERAL_RESSOURCES.put(Items.IRON_ORE, 14);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_IRON_ORE, 15);
+        ITEMS_MINERAL_RESSOURCES.put(Items.EMERALD_BLOCK, 16);
+        ITEMS_MINERAL_RESSOURCES.put(Items.EMERALD, 17);
+        ITEMS_MINERAL_RESSOURCES.put(Items.EMERALD_ORE, 18);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_EMERALD_ORE, 19);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DIAMOND_BLOCK, 20);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DIAMOND, 21);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DIAMOND_ORE, 22);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_DIAMOND_ORE, 23);
+        ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_BLOCK, 24);
+        ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_LAZULI, 25);
+        ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_ORE, 26);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_LAPIS_ORE, 27);
+        ITEMS_MINERAL_RESSOURCES.put(Items.COPPER_INGOT, 28);
+        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_COPPER_BLOCK, 29);
+        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_COPPER, 30);
+        ITEMS_MINERAL_RESSOURCES.put(Items.COPPER_ORE, 31);
+        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_COPPER_ORE, 32);
+        ITEMS_MINERAL_RESSOURCES.put(Items.AMETHYST_BLOCK, 33);
+        ITEMS_MINERAL_RESSOURCES.put(Items.AMETHYST_SHARD, 34);
+        ITEMS_MINERAL_RESSOURCES.put(Items.AMETHYST_CLUSTER, 35);
+        ITEMS_MINERAL_RESSOURCES.put(Items.ANCIENT_DEBRIS, 36);
+        ITEMS_MINERAL_RESSOURCES.put(Items.NETHERITE_SCRAP, 37);
+        ITEMS_MINERAL_RESSOURCES.put(Items.NETHERITE_INGOT, 38);
+        ITEMS_MINERAL_RESSOURCES.put(Items.NETHERITE_BLOCK, 39);
+        ITEMS_MINERAL_RESSOURCES.put(Items.NETHER_STAR, 40);
+        ITEMS_MINERAL_RESSOURCES.put(Items.BEACON, 41);
     }
 }
