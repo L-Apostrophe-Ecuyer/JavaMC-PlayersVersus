@@ -2,6 +2,8 @@ package frootloops.versus.mod.items.inventory;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items.brewing.ConcentrateItem;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffectCategory;
@@ -19,7 +21,10 @@ public class ItemSortingGroups {
     public static SortedItemGroup sortedPickaxeGroup = new PickaxeMineableItems();
     public static SortedItemGroup sortedAxeGroup = new AxeMineableItems();
     public static SortedItemGroup sortedShovelGroup = new ShovelMineableItems();
+    public static SortedItemGroup sortedHoesGroup = new ShearsMineableItems();
+    public static SortedItemGroup sortedShearsGroup = new ShearsMineableItems();
     public static SortedItemGroup sortedRedstoneGroup = new RedstoneItems();
+    public static SortedItemGroup sortedRareGroup = new RareItems();
     public static SortedItemGroup sortedMiscGroup = new MiscItems();
 
 
@@ -85,9 +90,14 @@ public class ItemSortingGroups {
         @Override
         public boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
-            if(item != Items.OAK_BUTTON && item != Items.OAK_DOOR && ItemSortingGroups.isItemInGroup(net.minecraft.item.ItemGroups.REDSTONE, item)) {
-                if(inventorySlots.size() == 0) inventorySlots.add(slot);
-                else this.insertWithinBounds(slot, 0, this.size());
+            if(ItemSortingGroups.ITEMS_REDSTONE.containsKey(item)) {
+                for(int i = 0; i < inventorySlots.size(); i++) {
+                    if(ITEMS_REDSTONE.get(item) <= ITEMS_REDSTONE.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256)) {
+                        this.inventorySlots.add(i, slot);
+                        return true;
+                    }
+                }
+                this.inventorySlots.add(slot);
                 return true;
             }
             return false;
@@ -161,6 +171,95 @@ public class ItemSortingGroups {
 
 
     /**
+     * HOES
+     */
+    public static class HoeMineableItems extends SortedItemGroup {
+        int indexHoesEnd = 0;
+
+        @Override
+        public boolean tryInsert(InventorySlot slot) {
+            Item item = slot.stack.getItem();
+            if(item instanceof PickaxeItem ) {
+                this.insertWithinBounds(slot, 0, indexHoesEnd);
+                indexHoesEnd++;
+                return true;
+            }
+            else if(item instanceof BlockItem blockItem) {
+                if(blockItem.getBlock().getDefaultState().isIn(BlockTags.HOE_MINEABLE)) {
+                    this.insertWithinBounds(slot, indexHoesEnd + 1, this.inventorySlots.size());
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void clear() {
+            indexHoesEnd = 0;
+            inventorySlots.clear();
+        }
+    }
+
+
+    /**
+     * SHEARS
+     */
+    public static class ShearsMineableItems extends SortedItemGroup {
+        int indexShearsEnd = 0;
+        int indexCobwebEnd = 0;
+        int indexWoolEnd = 0;
+        int indexLeavesEnd = 0;
+
+        @Override
+        public boolean tryInsert(InventorySlot slot) {
+            Item item = slot.stack.getItem();
+            if(item instanceof ShearsItem) {
+                this.insertWithinBounds(slot, 0, indexShearsEnd);
+                indexShearsEnd++;
+                indexCobwebEnd++;
+                indexWoolEnd++;
+                indexLeavesEnd++;
+                return true;
+            }
+            else if(item instanceof BlockItem blockItem) {
+                BlockState state = blockItem.getBlock().getDefaultState();
+                if(state.isOf(Blocks.COBWEB)) {
+                    this.insertWithinBounds(slot, indexShearsEnd + 1, indexCobwebEnd);
+                    indexCobwebEnd++;
+                    indexWoolEnd++;
+                    indexLeavesEnd++;
+                    return true;
+                }
+                else if(state.isIn(BlockTags.WOOL)) {
+                    this.insertWithinBounds(slot, indexCobwebEnd + 1, indexWoolEnd);
+                    indexWoolEnd++;
+                    indexLeavesEnd++;
+                    return true;
+                }
+                else if(state.isIn(BlockTags.LEAVES)) {
+                    this.insertWithinBounds(slot, indexWoolEnd + 1,indexLeavesEnd);
+                    indexLeavesEnd++;
+                    return true;
+                }
+                else if(state.isOf(Blocks.SHORT_GRASS) || state.isOf(Blocks.FERN) || state.isOf(Blocks.DEAD_BUSH) || state.isOf(Blocks.HANGING_ROOTS) || state.isOf(Blocks.VINE) || state.isOf(Blocks.GLOW_LICHEN) || state.isOf(Blocks.CAVE_VINES)){
+                    this.insertWithinBounds(slot, indexLeavesEnd + 1, this.inventorySlots.size());
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void clear() {
+            indexShearsEnd = 0;
+            indexWoolEnd = 0;
+            indexLeavesEnd = 0;
+            inventorySlots.clear();
+        }
+    }
+
+
+    /**
      * SHOVELS
      */
     public static class ShovelMineableItems extends SortedItemGroup {
@@ -193,6 +292,7 @@ public class ItemSortingGroups {
             inventorySlots.clear();
         }
     }
+
 
     /**
      * AXES
@@ -242,10 +342,10 @@ public class ItemSortingGroups {
         }
     }
 
+
     /**
      * COMBAT
      */
-
     public static class CombatItems extends SortedItemGroup {
         int indexWeaponsEnd = 0;
         int indexShieldsAndRangedEnd = 0;
@@ -308,11 +408,67 @@ public class ItemSortingGroups {
         }
     }
 
+
+    /**
+     * GOODIES
+     */
+    public static class RareItems extends SortedItemGroup {
+        int indexShulkersEnd = 0;
+        int indexRessourcesEnd = 0;
+        int indexConcentratesEnd = 0;
+
+        @Override
+        public boolean tryInsert(InventorySlot slot) {
+            Item item = slot.stack.getItem();
+            if(item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ShulkerBoxBlock) {
+                this.insertWithinBounds(slot, 0, indexShulkersEnd);
+                indexShulkersEnd++;
+                indexRessourcesEnd++;
+                indexConcentratesEnd++;
+                return true;
+            }
+            else if(ItemSortingGroups.ITEMS_MINERAL_RESSOURCES.containsKey(item)) {
+                for(int i = indexShulkersEnd + 1; i < indexRessourcesEnd; i++) {
+                    if(ITEMS_MINERAL_RESSOURCES.get(item) <= ITEMS_MINERAL_RESSOURCES.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256)) {
+                        this.inventorySlots.add(i, slot);
+                        indexRessourcesEnd++;
+                        indexConcentratesEnd++;
+                        return true;
+                    }
+                }
+                this.inventorySlots.add(indexRessourcesEnd, slot);
+                indexRessourcesEnd++;
+                indexConcentratesEnd++;
+                return true;
+            }
+            else if(item instanceof ConcentrateItem) {
+                this.insertWithinBounds(slot, indexRessourcesEnd + 1, indexConcentratesEnd);
+                indexConcentratesEnd++;
+                return true;
+            }
+            else if(item.getComponents().contains(DataComponentTypes.RARITY) && !item.getComponents().contains(DataComponentTypes.FOOD)) {
+                this.insertWithinBounds(slot, indexConcentratesEnd + 1, this.size());
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void clear() {
+            indexShulkersEnd = 0;
+            indexConcentratesEnd = 0;
+            indexRessourcesEnd = 0;
+            inventorySlots.clear();
+        }
+    }
+
+
+    /**
+     * MISC
+     */
     public static class MiscItems extends SortedItemGroup {
-        int indexStorage = 0;
-        int indexTools = 0;
-        int indexShears = 0;
-        int indexWool = 0;
+        int indexStorageEnd = 0;
+        int indexToolsEnd = 0;
         int indexIron = 0;
         int indexCopper = 0;
         int indexGoldAndOther = 0;
@@ -323,11 +479,10 @@ public class ItemSortingGroups {
         public boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof BundleItem || (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof ShulkerBoxBlock)) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexStorage), slot);
-                indexStorage++;
-                indexTools++;
-                indexShears++;
-                indexWool++;
+                this.inventorySlots.add(Math.min(inventorySlots.size(), indexStorageEnd), slot);
+                this.insertWithinBounds(slot, 0, this.inventorySlots.size());
+                indexStorageEnd++;
+                indexToolsEnd++;
                 indexIron++;
                 indexCopper++;
                 indexGoldAndOther++;
@@ -335,32 +490,9 @@ public class ItemSortingGroups {
                 indexMisc++;
                 return true;
             }
-            else if(!(item instanceof ShearsItem) && (item.getMaxCount() == 1 ||(item.getComponents().contains(DataComponentTypes.DAMAGE)))) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexTools), slot);
-                indexTools++;
-                indexShears++;
-                indexWool++;
-                indexIron++;
-                indexCopper++;
-                indexGoldAndOther++;
-                indexNatural++;
-                indexMisc++;
-                return true;
-            }
-            else if(item instanceof ShearsItem) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexShears), slot);
-                indexShears++;
-                indexWool++;
-                indexIron++;
-                indexCopper++;
-                indexGoldAndOther++;
-                indexNatural++;
-                indexMisc++;
-                return true;
-            }
-            else if(item instanceof BlockItem && ((BlockItem)item).getBlock().getTranslationKey().contains("wool")) {
-                this.inventorySlots.add(Math.min(inventorySlots.size(), indexWool), slot);
-                indexWool++;
+            else if(item.getMaxCount() == 1 ||(item.getComponents().contains(DataComponentTypes.DAMAGE))) {
+                this.inventorySlots.add(Math.min(inventorySlots.size(), indexToolsEnd), slot);
+                indexToolsEnd++;
                 indexIron++;
                 indexCopper++;
                 indexGoldAndOther++;
@@ -407,10 +539,8 @@ public class ItemSortingGroups {
 
         @Override
         public void clear() {
-            indexStorage = 0;
-            indexTools = 0;
-            indexShears = 0;
-            indexWool = 0;
+            indexStorageEnd = 0;
+            indexToolsEnd = 0;
             indexIron = 0;
             indexCopper = 0;
             indexGoldAndOther = 0;
@@ -537,7 +667,6 @@ public class ItemSortingGroups {
         ITEMS_PICKAXE_MINEABLE.put(Items.SANDSTONE_STAIRS, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.PACKED_MUD, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.DRIPSTONE_BLOCK, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.POINTED_DRIPSTONE, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.GRANITE, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.GRANITE_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.GRANITE_STAIRS, indexPickaxeBlocks++);

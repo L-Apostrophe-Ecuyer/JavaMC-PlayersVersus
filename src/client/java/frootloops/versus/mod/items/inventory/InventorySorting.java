@@ -90,7 +90,9 @@ public class InventorySorting {
     public static void sortStacksIntoRows(ScreenHandler handler, MinecraftClient client, PlayerInventory inventory) {
 
         VersusMod.MOD_LOGGER.warn("Started sorting!");
-        ItemSortingGroups.SortedItemGroup[] sortedGroups = new ItemSortingGroups.SortedItemGroup[]{sortedPickaxeGroup, sortedCombatGroup, sortedAxeGroup, sortedShovelGroup, sortedRedstoneGroup, sortedMiscGroup};
+
+        // Note: Group order is important here
+        ItemSortingGroups.SortedItemGroup[] sortedGroups = new ItemSortingGroups.SortedItemGroup[]{sortedRedstoneGroup, sortedPickaxeGroup, sortedCombatGroup, sortedAxeGroup, sortedShovelGroup, sortedHoesGroup, sortedShearsGroup, sortedRareGroup, sortedMiscGroup};
         for (SortedItemGroup group : sortedGroups) {
             group.clear();
         }
@@ -127,16 +129,43 @@ public class InventorySorting {
         }
 
 
+        VersusMod.MOD_LOGGER.warn("Groups before merging:");
+        int filledSlotNum = 0;
+        for (SortedItemGroup group : sortedGroups) {
+            if(group.size() == 0) continue;
+            String groupItems = "     -> Group " + group.getClass().getSimpleName() + ": ";
+            for(InventorySlot slot : group.inventorySlots) {
+                groupItems += slot.stack().getItem().getName().getString() + ", ";
+                filledSlotNum ++;
+            }
+            VersusMod.MOD_LOGGER.warn(groupItems.substring(0, groupItems.length() - 2));
+        }
+
         // Merge similar groups together when possible:
         VersusMod.MOD_LOGGER.warn("Merging similar groups when possible.");
         if(sortedPickaxeGroup.size() > 0 && sortedRedstoneGroup.size() > 0 && sortedPickaxeGroup.size() + sortedRedstoneGroup.size() <= 9) {
             sortedPickaxeGroup.merge(sortedRedstoneGroup);
+        }
+        if(sortedHoesGroup.size() > 0 && sortedShearsGroup.size() > 0 && sortedHoesGroup.size() + sortedShearsGroup.size() <= 9) {
+            sortedHoesGroup.merge(sortedShearsGroup);
+        }
+        if(sortedHoesGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedHoesGroup.size() + sortedShovelGroup.size() <= 9) {
+            sortedHoesGroup.merge(sortedShovelGroup);
+        }
+        if(sortedCombatGroup.size() > 0 && sortedAxeGroup.size() > 0 && sortedCombatGroup.size() + sortedAxeGroup.size() <= 9) {
+            sortedCombatGroup.merge(sortedAxeGroup);
         }
         if(sortedCombatGroup.size() > 0 && sortedAxeGroup.size() > 0 && sortedCombatGroup.size() + sortedAxeGroup.size() <= 9) {
             sortedCombatGroup.merge(sortedAxeGroup);
         }
         if(sortedCombatGroup.size() > 0 && sortedMiscGroup.size() > 0 && sortedCombatGroup.size() + sortedMiscGroup.size() <= 9) {
             sortedCombatGroup.merge(sortedMiscGroup);
+        }
+        if(sortedHoesGroup.size() > 0 && sortedAxeGroup.size() > 0 && sortedHoesGroup.size() + sortedAxeGroup.size() <= 9) {
+            sortedHoesGroup.merge(sortedAxeGroup);
+        }
+        if(sortedRedstoneGroup.size() > 0 && sortedRareGroup.size() > 0 && sortedRedstoneGroup.size() + sortedRareGroup.size() <= 9) {
+            sortedRedstoneGroup.merge(sortedRareGroup);
         }
         if(sortedRedstoneGroup.size() > 0 && sortedMiscGroup.size() > 0 && sortedRedstoneGroup.size() + sortedMiscGroup.size() <= 9) {
             sortedRedstoneGroup.merge(sortedMiscGroup);
@@ -147,10 +176,19 @@ public class InventorySorting {
         if(sortedMiscGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedMiscGroup.size() + sortedShovelGroup.size() <= 9) {
             sortedShovelGroup.merge(sortedMiscGroup);
         }
+        if(sortedMiscGroup.size() > 0 && sortedHoesGroup.size() > 0 && sortedMiscGroup.size() + sortedHoesGroup.size() <= 9) {
+            sortedShovelGroup.merge(sortedMiscGroup);
+        }
+        if(sortedMiscGroup.size() > 0 && sortedShearsGroup.size() > 0 && sortedMiscGroup.size() + sortedShearsGroup.size() <= 9) {
+            sortedShovelGroup.merge(sortedMiscGroup);
+        }
+        if(sortedMiscGroup.size() > 0 && sortedRareGroup.size() > 0 && sortedMiscGroup.size() + sortedRareGroup.size() <= 9) {
+            sortedRareGroup.merge(sortedMiscGroup);
+        }
 
 
-        VersusMod.MOD_LOGGER.warn("Groups before sorting:");
-        int filledSlotNum = 0;
+        VersusMod.MOD_LOGGER.warn("Groups after merging:");
+        filledSlotNum = 0;
         for (SortedItemGroup group : sortedGroups) {
             if(group.size() == 0) continue;
             String groupItems = "     -> Group " + group.getClass().getSimpleName() + ": ";
