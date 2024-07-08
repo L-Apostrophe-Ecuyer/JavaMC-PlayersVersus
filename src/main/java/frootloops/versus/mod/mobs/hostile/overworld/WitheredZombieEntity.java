@@ -5,6 +5,7 @@ import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
@@ -31,8 +32,8 @@ public class WitheredZombieEntity extends ZombieEntity {
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.33f)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.2)
-                .add(EntityAttributes.GENERIC_ARMOR, 12.0)
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 6.0)
+                .add(EntityAttributes.GENERIC_ARMOR, 8.0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 4.0)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.75)
                 .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
     }
@@ -58,6 +59,12 @@ public class WitheredZombieEntity extends ZombieEntity {
         this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, MerchantEntity.class, false));
         this.targetSelector.add(3, new ActiveTargetGoal(this, IronGolemEntity.class, false));
+    }
+
+    @Override
+    public boolean damage(DamageSource source, float amount) {
+        if(source.isOf(DamageTypes.WITHER)) return false;
+        return super.damage(source, amount);
     }
 
     @Override

@@ -16,6 +16,7 @@ import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -59,6 +60,18 @@ public class DeeperCreeperEntity extends CreeperEntity {
         this.targetSelector.add(1, new FollowTargetThroughWallsGoal<PlayerEntity>((MobEntity)this, PlayerEntity.class, true));
     }
 
+
+    @Override
+    public boolean damage(DamageSource source, float amount) {
+        if(source.isOf(DamageTypes.WITHER)) return false;
+        return super.damage(source, amount);
+    }
+
+    @Override
+    public boolean canHaveStatusEffect(StatusEffectInstance effect) {
+        if (effect.getEffectType() == StatusEffects.WITHER) return false;
+        else return super.canHaveStatusEffect(effect);
+    }
 
 
     @Override
@@ -136,12 +149,6 @@ public class DeeperCreeperEntity extends CreeperEntity {
         areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 120, 0, true, false));
         areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 120, 0, true, false));
         this.getWorld().spawnEntity(areaEffectCloudEntity);
-    }
-
-    @Override
-    public boolean canHaveStatusEffect(StatusEffectInstance effect) {
-        if (effect.getEffectType() == StatusEffects.WITHER) return false;
-        else return super.canHaveStatusEffect(effect);
     }
 
     @Override
