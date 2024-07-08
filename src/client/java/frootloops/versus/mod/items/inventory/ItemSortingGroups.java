@@ -10,6 +10,7 @@ import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.item.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.util.Rarity;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -446,7 +447,7 @@ public class ItemSortingGroups {
                 indexConcentratesEnd++;
                 return true;
             }
-            else if(item.getComponents().contains(DataComponentTypes.RARITY) && !item.getComponents().contains(DataComponentTypes.FOOD)) {
+            else if(item.getComponents().contains(DataComponentTypes.RARITY) && !item.getComponents().contains(DataComponentTypes.FOOD) && slot.stack.getOrDefault(DataComponentTypes.RARITY, Rarity.COMMON) != Rarity.COMMON) {
                 this.insertWithinBounds(slot, indexConcentratesEnd + 1, this.size());
                 return true;
             }

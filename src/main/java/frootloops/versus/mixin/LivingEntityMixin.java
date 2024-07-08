@@ -133,7 +133,7 @@ public abstract class LivingEntityMixin extends Entity {
             if (timeUntilRegen > 10) {
                 if (source.isOf(DamageTypes.ARROW)) {
                     if(attacker.getMainHandStack().isOf(Items.CROSSBOW)) timeUntilRegen = 9;
-                    else timeUntilRegen = 11;
+                    else timeUntilRegen = 14;
                 }
                 else if (timeUntilRegen > 18 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 18;
             }
@@ -143,7 +143,7 @@ public abstract class LivingEntityMixin extends Entity {
                 CustomEnchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
             }
         }
-        else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 9;
+        else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 12;
     }
 
     @Inject(method = "onStatusEffectRemoved", at = @At("HEAD"))
