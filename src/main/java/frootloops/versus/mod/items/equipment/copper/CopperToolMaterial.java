@@ -10,7 +10,7 @@ import net.minecraft.registry.tag.TagKey;
 public class CopperToolMaterial implements ToolMaterial {
     @Override
     public int getDurability() {
-        return 128;
+        return 108;
     }
 
     @Override
@@ -20,7 +20,7 @@ public class CopperToolMaterial implements ToolMaterial {
 
     @Override
     public float getAttackDamage() {
-        return 0.0f;
+        return 1.0f;
     }
 
     @Override

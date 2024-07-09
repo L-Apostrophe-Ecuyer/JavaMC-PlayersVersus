@@ -51,7 +51,7 @@ public abstract class Combat {
             new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
 
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
-    private static final float[] toolTierDamageBonuses = new float[]{0F, 0F, 1F, 1F, 2F, 3F};
+    private static final float[] toolTierDamageBonuses = new float[]{1F, 1F, 2F, 2F, 3F, 4F};
 
     public static float getAxeSpeedModifier() { return toolsSpeed[0] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getSwordSpeedModifier() { return toolsSpeed[1] - (float)PLAYER_BASE_ATTACK_SPEED;}
