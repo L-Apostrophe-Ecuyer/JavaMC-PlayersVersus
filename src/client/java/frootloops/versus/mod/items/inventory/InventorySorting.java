@@ -92,17 +92,16 @@ public class InventorySorting {
 
 
         // Sort stacks into groups:
-        int numFilledSlots = 0;
-        List<Integer> emptySlotsIndexes = new LinkedList<>();
+        int numFilledSlots = 0, numEmptySlots = 0;
         for(int i = 0; i < 36; i++) {
             ItemStack stack = inventory.getStack(i);
             if(stack.isEmpty()) {
-                emptySlotsIndexes.add(i);
+                numEmptySlots++;
                 continue;
             }
+
             numFilledSlots++;
             for (SortedItemGroup group : sortedGroups) {
-                //VersusMod.MOD_LOGGER.warn("    Trying to insert " + stack.getItem().getName().getString()  + " of slot " + i + " into group " + group.getClass().getName().replace("frootloops.versus.mod.items.inventory.ItemSortingGroups$", ""));
                 if(group.tryInsert(new InventorySlot(i, stack))) {
                     VersusMod.MOD_LOGGER.warn("     -> "+numFilledSlots +": Inserted " + stack.getItem().getName().getString()  + " of slot " + i + " into group " + group.getClass().getName().replace("frootloops.versus.mod.items.inventory.ItemSortingGroups$", ""));
                     break;
@@ -123,8 +122,7 @@ public class InventorySorting {
 
         // Merge similar groups together when possible:
         VersusMod.MOD_LOGGER.warn("Merging similar groups when possible.");
-        int numEmptySlotsLeft = emptySlotsIndexes.size();
-        InventorySorting.tryCombiningSortedGroups(numEmptySlotsLeft);
+        InventorySorting.tryCombiningSortedGroups(numEmptySlots);
 
 
         VersusMod.MOD_LOGGER.warn("Groups after merging:");
@@ -146,26 +144,17 @@ public class InventorySorting {
         if(numFilledSlotsAfterMerge != numFilledSlots) VersusMod.MOD_LOGGER.error("ERROR: The number of filled slots has changed! From " + numFilledSlots + " to " + numFilledSlotsAfterMerge);
 
 
-        VersusMod.MOD_LOGGER.warn("Empty slots:");
-        String emptySlots = "     -> Empty slots: ";
-        for(int slotId : emptySlotsIndexes) {
-            emptySlots += slotId + ", ";
-        }
-        emptySlots = emptySlots.substring(0, emptySlots.length() - 2) + (" (There are " + emptySlotsIndexes.size() + " empty slots and " + numFilledSlots + " filled ones, total: " + (emptySlotsIndexes.size() + numFilledSlots)+ ") ");
-        VersusMod.MOD_LOGGER.warn(emptySlots);
-
-
         // Organize groups into the four hotbars:
         VersusMod.MOD_LOGGER.warn("Organizing items into hotbars!");
-        int[][] hotbars = new int[4][9];
+        int[] remappedSlots = new int[36];
         int hotbarIndex = 0, hotbarSlotIndex = 0, numSlotsLeft = 36;
         for (SortedItemGroup group : sortedGroups) {
 
             // Check if we should skip to another hotbar:
-            boolean canSkip = hotbarIndex < 3 && hotbarSlotIndex > 0 && numEmptySlotsLeft > 8 - hotbarSlotIndex && numSlotsLeft > 8 - hotbarSlotIndex;
-            if(canSkip && (group.size() + hotbarSlotIndex) > 8 && (group.size() + hotbarSlotIndex - 8) < 3 + numEmptySlotsLeft) {
+            boolean canSkip = hotbarIndex < 3 && hotbarSlotIndex > 0 && numEmptySlots > 8 - hotbarSlotIndex && numSlotsLeft > 8 - hotbarSlotIndex;
+            if(canSkip && (group.size() + hotbarSlotIndex) > 8 && (group.size() + hotbarSlotIndex - 8) < 3 + numEmptySlots) {
                 VersusMod.MOD_LOGGER.warn("     -> Skip to next hotbar!");
-                numEmptySlotsLeft -= 8 - hotbarSlotIndex;
+                numEmptySlots -= 8 - hotbarSlotIndex;
                 numSlotsLeft -= 8 - hotbarSlotIndex;
                 hotbarSlotIndex = 0;
                 hotbarIndex++;
@@ -173,8 +162,8 @@ public class InventorySorting {
 
             // Attribute each ordered item of the group to the best positions in hotbars array:
             while(hotbarIndex < 4 && group.size() > 0) {
-                hotbars[hotbarIndex][hotbarSlotIndex] = group.popFirst().slodId() + 9;
-                VersusMod.MOD_LOGGER.warn("            -> Will move slot " + (hotbars[hotbarIndex][hotbarSlotIndex] - 9) + " to " + (hotbarIndex * 9 + hotbarSlotIndex) + " to populate it with " + (hotbars[hotbarIndex][hotbarSlotIndex] < 9 ? "Air" : (inventory.getStack(hotbars[hotbarIndex][hotbarSlotIndex] - 9).isEmpty()? "Air" : inventory.getStack(hotbars[hotbarIndex][hotbarSlotIndex] - 9).getItem().getName().getString())));
+                remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] = group.popFirst().slodId() + 9;
+                VersusMod.MOD_LOGGER.warn("            -> Will move slot " + (remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] - 9) + " to " + (hotbarIndex * 9 + hotbarSlotIndex) + " to populate it with " + (remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] < 9 ? "Air" : (inventory.getStack(remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] - 9).isEmpty()? "Air" : inventory.getStack(remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] - 9).getItem().getName().getString())));
                 hotbarSlotIndex++;
                 numSlotsLeft--;
                 if(hotbarSlotIndex > 8) {
@@ -184,48 +173,21 @@ public class InventorySorting {
             }
 
             // Check if we organized every item:
-            if(numSlotsLeft == numEmptySlotsLeft) break;
-        }
-
-        VersusMod.MOD_LOGGER.warn("Final setup:");
-        for(int i = 0; i < 4; i ++ ) {
-            String hotbarItems = "     -> Hotbar " + i + ": ";
-            for (int j = 0; j < 9; j++) {
-                int slotId = hotbars[i][j] - 9;
-                hotbarItems += (slotId < 0 ? "Air" : (inventory.getStack(slotId).isEmpty()? "Air" : inventory.getStack(slotId).getItem().getName().getString())) + ",";
-            }
-            VersusMod.MOD_LOGGER.warn(hotbarItems);
-        }
-
-        VersusMod.MOD_LOGGER.warn("Current inventory:");
-        for(int i = 0; i < 4; i ++ ) {
-            String hotbarItems = "     -> Hotbar " + i + ": ";
-            for (int j = 0; j < 9; j++) {
-                int slotId = (i * 9) + j;
-                hotbarItems += (inventory.getStack(slotId).isEmpty()? "Air" : inventory.getStack(slotId).getItem().getName().getString()) + ",";
-            }
-            VersusMod.MOD_LOGGER.warn(hotbarItems);
+            if(numSlotsLeft == numEmptySlots) break;
         }
 
 
         // Sort the player's inventory accordingly!
         VersusMod.MOD_LOGGER.warn("Now actually modifying the player's inventory:");
         int[] displacedSlots = new int[36];
-        for(int i = 0; i < 4; i ++ ) {
+        for(int slotDestination = 0; slotDestination < 36; slotDestination ++ ) {
 
-            String hotbarItems = "     -> Hotbar " + i + ": ";
-
-            for(int j = 0; j < 9; j++) {
-                int slotDestination = (i * 9) + j;
-                int slotOrigin = hotbars[i][j] - 9;
+                int slotOrigin = remappedSlots[slotDestination] - 9;
                 if(slotOrigin < 0) {
-                    if(emptySlotsIndexes.size() > 0) slotOrigin = emptySlotsIndexes.removeFirst();
-                    else {
-                        for(int slotId = 0; slotId < 36; slotId++) {
-                            if(inventory.getStack(slotId).isEmpty()) {
-                                slotOrigin = slotId;
-                                break;
-                            }
+                    for(int slotId = 0; slotId < 36; slotId++) {
+                        if(inventory.getStack(slotId).isEmpty()) {
+                            slotOrigin = slotId;
+                            break;
                         }
                     }
                 }
@@ -261,9 +223,6 @@ public class InventorySorting {
                     }
                 }
 
-                hotbarItems += (slotOrigin < 9) ? " " + slotOrigin + ", " : slotOrigin + ", ";
-            }
-            VersusMod.MOD_LOGGER.warn(hotbarItems.substring(0, hotbarItems.length() - 2));
         }
 
 
