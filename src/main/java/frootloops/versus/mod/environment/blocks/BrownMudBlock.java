@@ -83,6 +83,9 @@ public class BrownMudBlock extends FarmlandBlock {
                 entity.setVelocity(velocity.multiply(1.0, 0.3, 1.0));
             }
             if(entity instanceof LivingEntityAccessor livingEntityAccessor) {
+                if(entity.getY() - Math.floor(entity.getY()) < 0.5 && world.getBlockState(pos.up()).getBlock() instanceof PlantBlock) {
+                    world.breakBlock(pos.up(), true);
+                }
                 if(livingEntityAccessor.isJumping())  {
                     if(entity.isInFluid()) {
                         entity.slowMovement(state, new Vec3d(1.1, 1.0, 1.1));
@@ -92,8 +95,12 @@ public class BrownMudBlock extends FarmlandBlock {
                         entity.slowMovement(state, new Vec3d(1.1, 0.0, 1.1));
                     }
                 }
-                else if(hasEntityMoved(entity)) entity.slowMovement(state, new Vec3d(0.95, 0.5, 0.95));
-                else entity.slowMovement(state, new Vec3d(0.95, 0.05, 0.95));
+                else if(hasEntityMoved(entity)) {
+                    entity.slowMovement(state, new Vec3d(0.95, 0.5, 0.95));
+                }
+                else {
+                    entity.slowMovement(state, new Vec3d(0.95, 0.05, 0.95));
+                }
             }
         }
     }
