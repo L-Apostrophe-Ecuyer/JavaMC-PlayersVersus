@@ -7,6 +7,10 @@
     {
       "structure": "players-versus:trial_tower_cold",
       "weight": 1
+    },
+    {
+      "structure": "players-versus:trial_tower_warm",
+      "weight": 1
     }
   ],
   "placement": {

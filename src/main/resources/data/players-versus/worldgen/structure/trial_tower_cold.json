@@ -1,15 +1,10 @@
 {
   "type": "minecraft:jigsaw",
   "biomes": [
-    "minecraft:forest",
-    "minecraft:birch_forest",
-    "minecraft:old_growth_birch_forest",
-    "minecraft:taiga",
     "minecraft:snowy_taiga",
-    "minecraft:old_growth_pine_taiga",
-    "minecraft:old_growth_spruce_taiga",
     "minecraft:windswept_forest",
-    "minecraft:windswept_gravelly_hills"
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes"
   ],
   "step": "underground_structures",
   "spawn_overrides": {
