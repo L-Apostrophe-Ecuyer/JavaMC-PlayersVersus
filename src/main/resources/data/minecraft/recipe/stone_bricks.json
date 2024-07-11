@@ -1,17 +1,17 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "building",
-  "key": {
-    "#": {
-      "item": "minecraft:polished_andesite"
-    }
-  },
   "pattern": [
     "##",
     "##"
   ],
+  "key": {
+    "#": {
+      "item": "players-versus:polished_stone"
+    }
+  },
   "result": {
-    "count": 4,
-    "id": "minecraft:stone_bricks"
+    "id": "minecraft:stone_bricks",
+    "count": 4
   }
 }
