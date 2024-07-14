@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/flowerbed_4",
+  "textures": {
+    "flowerbed": "players-versus:block/clover_leaves",
+    "stem": "players-versus:block/clover_stems"
+  }
+}

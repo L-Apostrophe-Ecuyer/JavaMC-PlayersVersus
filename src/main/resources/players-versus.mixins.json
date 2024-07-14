@@ -24,6 +24,7 @@
     "environment.BlockMixin",
     "environment.CropMixin",
     "environment.ShortPlantMixin",
+    "environment.TallFlowerMixin",
     "environment.MinecartMixin",
     "environment.MossMixin",
     "environment.NetherWartMixin",

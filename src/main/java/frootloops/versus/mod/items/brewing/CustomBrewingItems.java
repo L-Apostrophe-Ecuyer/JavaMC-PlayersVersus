@@ -7,6 +7,7 @@ import net.minecraft.item.*;
 
 public abstract class CustomBrewingItems {
 
+    public static final Item FOUR_LEAF_CLOVER = new Item(new Item.Settings());
     public static PotionItem BOTTLE_OF_ENDER;
     public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
     public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
@@ -48,10 +49,10 @@ public abstract class CustomBrewingItems {
     public static final Item CONCENTRATE_OF_GLOWING = new ConcentrateItem(StatusEffects.GLOWING);
 
     public static final Item CONCENTRATE_OF_WEAKNESS = new ConcentrateItem(StatusEffects.WEAKNESS);
-    //public static final Item CONCENTRATE_OF_STRENGTH = new ConcentrateItem(StatusEffects.STRENGTH);
+    //public static final Item CONCENTRATE_OF_STRENGTH = new ConcentrateItem(StatusEffects.STRENGTH); -> Will be replacing Blaze Powder
 
     public static final Item CONCENTRATE_OF_WIND = new ConcentrateItem(StatusEffects.WIND_CHARGED);
-    //public static final Item CONCENTRATE_OF_FIRE = new ConcentrateItem(StatusEffects.FIRE_RESISTANCE);
+    //public static final Item CONCENTRATE_OF_FIRE = new ConcentrateItem(StatusEffects.FIRE_RESISTANCE); -> Will be replacing Magma Cream
 
     public static final Item CONCENTRATE_OF_OOZE = new ConcentrateItem(StatusEffects.OOZING);
     public static final Item CONCENTRATE_OF_INFESTATION = new ConcentrateItem(StatusEffects.INFESTED);

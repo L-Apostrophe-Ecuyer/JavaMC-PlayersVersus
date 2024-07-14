@@ -10,7 +10,7 @@
           "children": [
             {
               "type": "minecraft:item",
-              "name": "minecraft:short_grass",
+              "name": "players-versus:flowering_short_grass",
               "conditions": [
                 {
                   "condition": "minecraft:match_tool",
@@ -24,7 +24,7 @@
             },
             {
               "type": "minecraft:item",
-              "name": "minecraft:short_grass",
+              "name": "players-versus:flowering_short_grass",
               "conditions": [
                 {
                   "condition": "minecraft:match_tool",
@@ -52,36 +52,10 @@
             {
               "type": "minecraft:item",
               "name": "minecraft:wheat_seeds",
-              "functions": [
-                {
-                  "function": "minecraft:apply_bonus",
-                  "enchantment": "minecraft:fortune",
-                  "formula": "minecraft:uniform_bonus_count",
-                  "parameters": {
-                    "bonusMultiplier": 2
-                  }
-                }
-              ],
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "items": "#minecraft:hoes"
-                  }
-                },
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.08
-                }
-              ]
-            },
-            {
-              "type": "minecraft:item",
-              "name": "minecraft:wheat_seeds",
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.03
+                  "chance": 0.025
                 }
               ]
             }

@@ -1,0 +1,83 @@
+{
+  "type": "minecraft:flower",
+  "config": {
+    "tries": 64,
+    "xz_spread": 6,
+    "y_spread": 2,
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "config": {
+          "to_place": {
+            "type": "minecraft:noise_threshold_provider",
+            "seed": 2345,
+            "noise": {
+              "firstOctave": 0,
+              "amplitudes": [
+                1
+              ]
+            },
+            "scale": 0.005,
+            "threshold": -0.8,
+            "high_chance": 0.33333334,
+            "default_state": {
+              "Name": "minecraft:dandelion"
+            },
+            "low_states": [
+              {
+                "Name": "players-versus:wheat_grass"
+              },
+              {
+                "Name": "players-versus:wild_wheat"
+              },
+              {
+                "Name": "players-versus:wheat_grass"
+              },
+              {
+                "Name": "minecraft:orange_tulip"
+              },
+              {
+                "Name": "minecraft:red_tulip"
+              },
+              {
+                "Name": "players-versus:wheat_grass"
+              },
+              {
+                "Name": "minecraft:dandelion"
+              }
+            ],
+            "high_states": [
+              {
+                "Name": "players-versus:wheat_grass"
+              },
+              {
+                "Name": "players-versus:flowering_short_grass"
+              },
+              {
+                "Name": "minecraft:azure_bluet"
+              },
+              {
+                "Name": "minecraft:oxeye_daisy"
+              },
+              {
+                "Name": "minecraft:dandelion"
+              },
+              {
+                "Name": "players-versus:flowering_short_grass"
+              }
+            ]
+          }
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:air"
+          }
+        }
+      ]
+    }
+  }
+}

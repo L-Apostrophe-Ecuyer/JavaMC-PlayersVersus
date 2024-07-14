@@ -10,7 +10,7 @@
           "children": [
             {
               "type": "minecraft:item",
-              "name": "minecraft:short_grass",
+              "name": "players-versus:wheat_grass",
               "conditions": [
                 {
                   "condition": "minecraft:match_tool",
@@ -24,7 +24,7 @@
             },
             {
               "type": "minecraft:item",
-              "name": "minecraft:short_grass",
+              "name": "players-versus:wheat_grass",
               "conditions": [
                 {
                   "condition": "minecraft:match_tool",
@@ -71,7 +71,7 @@
                 },
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.08
+                  "chance": 1.0
                 }
               ]
             },
@@ -81,7 +81,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.03
+                  "chance": 0.6
                 }
               ]
             }

@@ -30,9 +30,10 @@ public abstract class RegisteringCustomItems {
 
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("four_leaf_clover", CustomBrewingItems.FOUR_LEAF_CLOVER, ItemGroups.INGREDIENTS);
         registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
         registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART_ITEM, ItemGroups.INGREDIENTS);
-        //registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.INGREDIENTS);
+        //registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.INGREDIENTS); -> Replacing Fermented Spider Eyes
 
         registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_DEATH, ItemGroups.INGREDIENTS);          // New potion & effect!
         registerCustomItem("concentrate_of_health", CustomBrewingItems.CONCENTRATE_OF_HEALTH, ItemGroups.INGREDIENTS);
@@ -56,8 +57,8 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_invisibility", CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_glowing", CustomBrewingItems.CONCENTRATE_OF_GLOWING, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_weakness", CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, ItemGroups.INGREDIENTS);
-        //registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH, ItemGroups.INGREDIENTS);
-        //registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.INGREDIENTS);
+        //registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH, ItemGroups.INGREDIENTS); -> Replacing Blaze Powder
+        //registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.INGREDIENTS); -> Replacing Magma Cream
         registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.INGREDIENTS);
@@ -85,6 +86,10 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("packed_mud_tiles", CustomBlockItems.PACKED_MUD_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("packed_mud_tile_slab", CustomBlockItems.PACKED_MUD_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("packed_mud_tile_stairs", CustomBlockItems.PACKED_MUD_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("wheat_grass", CustomBlockItems.WHEAT_GRASS_ITEM, ItemGroups.NATURAL);
+        registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT_ITEM, ItemGroups.NATURAL);
+        registerCustomItem("flowering_short_grass", CustomBlockItems.FLOWERING_GRASS_ITEM, ItemGroups.NATURAL);
+        registerCustomItem("clovers", CustomBlockItems.CLOVERS_ITEM, ItemGroups.NATURAL);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {

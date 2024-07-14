@@ -83,10 +83,7 @@
                             {
                               "weight": 3,
                               "data": {
-                                "Name": "minecraft:wheat",
-                                "Properties": {
-                                  "age": "4"
-                                }
+                                "Name": "players-versus:wheat_grass"
                               }
                             },
                             {

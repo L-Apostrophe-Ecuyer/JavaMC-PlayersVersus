@@ -1,0 +1,81 @@
+{
+  "type": "minecraft:flower",
+  "config": {
+    "tries": 96,
+    "xz_spread": 6,
+    "y_spread": 2,
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "config": {
+          "to_place": {
+            "type": "minecraft:dual_noise_provider",
+            "seed": 2345,
+            "noise": {
+              "firstOctave": -3,
+              "amplitudes": [
+                1
+              ]
+            },
+            "scale": 1,
+            "variety": {
+              "min_inclusive": 1,
+              "max_inclusive": 1
+            },
+            "slow_noise": {
+              "firstOctave": -10,
+              "amplitudes": [
+                1
+              ]
+            },
+            "slow_scale": 1,
+            "states": [
+              {
+                "Name": "minecraft:tall_grass",
+                "Properties": {
+                  "half": "lower"
+                }
+              },
+              {
+                "Name": "players-versus:flowering_short_grass"
+              },
+              {
+                "Name": "players-versus:clovers"
+              },
+              {
+                "Name": "minecraft:azure_bluet"
+              },
+              {
+                "Name": "minecraft:dandelion"
+              },
+              {
+                "Name": "players-versus:flowering_short_grass"
+              },
+              {
+                "Name": "minecraft:oxeye_daisy"
+              },
+              {
+                "Name": "minecraft:short_grass"
+              },
+              {
+                "Name": "players-versus:clovers"
+              },
+              {
+                "Name": "players-versus:flowering_short_grass"
+              }
+            ]
+          }
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:air"
+          }
+        }
+      ]
+    }
+  }
+}

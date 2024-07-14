@@ -764,6 +764,9 @@ public class ItemSortingGroups {
         ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_TUFF_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_TUFF_STAIRS, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_TUFF_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.POLISHED_STONE_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.POLISHED_STONE_SLAB_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.POLISHED_STONE_STAIRS_ITEM, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_ANDESITE, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_ANDESITE_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_ANDESITE_STAIRS, indexPickaxeBlocks++);
@@ -783,6 +786,15 @@ public class ItemSortingGroups {
         ITEMS_PICKAXE_MINEABLE.put(Items.CUT_RED_SANDSTONE, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.CUT_RED_SANDSTONE_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.CHISELED_RED_SANDSTONE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_GRANITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_GRANITE_SLAB, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.POLISHED_GRANITE_STAIRS, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.GRANITE_BRICKS_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.GRANITE_BRICK_SLAB_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.GRANITE_BRICK_STAIRS_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.GRANITE_TILES_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.GRANITE_TILES_SLAB_ITEM, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.GRANITE_TILES_STAIRS_ITEM, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.MUD_BRICKS, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.MUD_BRICK_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.MUD_BRICK_STAIRS, indexPickaxeBlocks++);
