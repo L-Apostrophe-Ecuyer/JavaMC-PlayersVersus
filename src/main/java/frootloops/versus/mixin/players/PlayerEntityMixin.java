@@ -105,7 +105,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         if(blockState.isBurnable() && blockState.getSoundGroup() == BlockSoundGroup.WOOD) {
-            cir.setReturnValue(breakingSpeed + 4f);
+            cir.setReturnValue(breakingSpeed + 2f);
             return;
         }
 

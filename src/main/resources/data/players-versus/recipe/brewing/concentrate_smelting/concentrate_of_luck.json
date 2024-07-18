@@ -1,0 +1,14 @@
+{
+    "type": "minecraft:smelting",
+    "category": "food",
+  
+    "ingredient": {
+      "item": "players-versus:four_leaf_clover"
+    },
+    "result": {
+      "id": "players-versus:concentrate_of_luck"
+    },
+    "experience": 5,
+    "cookingtime": 200
+}
+  

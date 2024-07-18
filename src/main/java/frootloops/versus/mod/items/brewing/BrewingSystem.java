@@ -61,6 +61,9 @@ public abstract class BrewingSystem {
 
             put(Potions.POISON,  new RelatedPotions(Potions.STRONG_POISON, Potions.LONG_POISON, Potions.WEAVING));
             put(Potions.WEAVING,  new RelatedPotions(null,null, Potions.POISON));
+
+            put(Potions.LUCK, new RelatedPotions(Potions.LUCK, Potions.LUCK,  CustomPotions.UNLUCK));
+            put(CustomPotions.UNLUCK,  new RelatedPotions(CustomPotions.UNLUCK, CustomPotions.UNLUCK, Potions.LUCK));
         }};
 
         builder.registerPotionType(Items.POTION);
@@ -122,6 +125,9 @@ public abstract class BrewingSystem {
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_POISON, Potions.POISON);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_WEAVING, Potions.WEAVING);
+
+        registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_LUCK, Potions.LUCK);
+        registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_UNLUCK, CustomPotions.UNLUCK);
 
         brewablePotionTypes.clear();
     }

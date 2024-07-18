@@ -4,7 +4,13 @@ package frootloops.versus.mod.environment;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.GrassColors;
 
 @Environment(EnvType.CLIENT)
 public class CustomBlocksClient {
@@ -22,6 +28,11 @@ public class CustomBlocksClient {
                 CustomBlocks.WHEAT_GRASS,
                 CustomBlocks.FLOWERING_SHORT_GRASS
         );
+
+        ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> {
+            if (view == null || pos == null) return GrassColors.getDefaultColor();
+            else return BiomeColors.getGrassColor(view, pos);
+        }, CustomBlocks.WHEAT_GRASS);
     }
 
 }

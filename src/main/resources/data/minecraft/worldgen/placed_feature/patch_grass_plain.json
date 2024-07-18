@@ -19,21 +19,9 @@
                   }
                 },
                 {
-                  "weight": 5,
+                  "weight": 4,
                   "data": {
                     "Name": "players-versus:wheat_grass"
-                  }
-                },
-                {
-                  "weight": 2,
-                  "data": {
-                    "Name": "players-versus:wild_wheat"
-                  }
-                },
-                {
-                  "weight": 3,
-                  "data": {
-                    "Name": "players-versus:flowering_short_grass"
                   }
                 }
               ]
@@ -55,7 +43,7 @@
   "placement": [
     {
       "type": "minecraft:count",
-      "count": 10
+      "count": 12
     },
     {
       "type": "minecraft:in_square"

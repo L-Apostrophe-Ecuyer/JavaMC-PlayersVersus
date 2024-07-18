@@ -31,6 +31,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("four_leaf_clover", CustomBrewingItems.FOUR_LEAF_CLOVER, ItemGroups.INGREDIENTS);
+        registerCustomItem("three_leaf_clover", CustomBrewingItems.THREE_LEAF_CLOVER, ItemGroups.INGREDIENTS);
         registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
         registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART_ITEM, ItemGroups.INGREDIENTS);
         //registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.INGREDIENTS); -> Replacing Fermented Spider Eyes
@@ -64,6 +65,8 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_infestation", CustomBrewingItems.CONCENTRATE_OF_INFESTATION, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_weaving", CustomBrewingItems.CONCENTRATE_OF_WEAVING, ItemGroups.INGREDIENTS);
+        registerCustomItem("concentrate_of_luck", CustomBrewingItems.CONCENTRATE_OF_LUCK, ItemGroups.INGREDIENTS);
+        registerCustomItem("concentrate_of_unluck", CustomBrewingItems.CONCENTRATE_OF_UNLUCK, ItemGroups.INGREDIENTS);
 
         registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
         registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);

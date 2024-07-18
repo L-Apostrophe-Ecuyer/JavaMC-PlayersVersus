@@ -1,7 +1,7 @@
 {
-  "parent": "minecraft:block/flowerbed_4",
+  "parent": "players-versus:block/clovers_cross",
   "textures": {
     "flowerbed": "players-versus:block/clover_leaves",
-    "stem": "players-versus:block/clover_stems"
+    "cross": "players-versus:block/clovers"
   }
 }

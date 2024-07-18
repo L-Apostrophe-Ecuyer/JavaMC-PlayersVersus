@@ -36,6 +36,7 @@ public abstract class CustomPotions {
     public static RegistryEntry<Potion> GLOWING, GLOWING_LONG, GLOWING_STRONG;
     public static RegistryEntry<Potion> DECAY, DECAY_LONG, DECAY_STRONG;
     public static RegistryEntry<Potion> HAUNTING;
+    public static RegistryEntry<Potion> UNLUCK;
     public static RegistryEntry<Potion> FIRE_RESISTANCE_STRONG;
 
     public static void registerCustomPotions() {
@@ -80,6 +81,8 @@ public abstract class CustomPotions {
         DECAY_STRONG = registerCustomPotion("decay_strong", StatusEffects.WITHER, 1, 160);
 
         FIRE_RESISTANCE_STRONG = registerCustomPotion("fire_resistance_strong", StatusEffects.FIRE_RESISTANCE, 1, 2400);
+
+        UNLUCK = registerCustomPotion("unluck", StatusEffects.UNLUCK, 0, 3000);
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
         CustomBrewingItems.BOTTLE_OF_ENDER = new PotionItem(new Item.Settings().maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));

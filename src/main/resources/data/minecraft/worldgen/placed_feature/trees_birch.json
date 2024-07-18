@@ -4,11 +4,11 @@
     "config": {
       "features": [
         {
-          "chance": 0.05,
+          "chance": 0.08,
           "feature": "minecraft:spruce"
         },
         {
-          "chance": 0.65,
+          "chance": 0.5,
           "feature": "minecraft:birch_bees_0002"
         }
       ],

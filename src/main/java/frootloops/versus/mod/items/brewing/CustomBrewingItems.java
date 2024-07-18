@@ -1,13 +1,20 @@
 package frootloops.versus.mod.items.brewing;
 
+import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.FoodComponent;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 
+import static net.minecraft.item.Item.BASE_ATTACK_DAMAGE_MODIFIER_ID;
+
 public abstract class CustomBrewingItems {
 
-    public static final Item FOUR_LEAF_CLOVER = new Item(new Item.Settings());
+    public static final Item FOUR_LEAF_CLOVER = new Item(new Item.Settings().attributeModifiers(AttributeModifiersComponent.builder().add(EntityAttributes.GENERIC_LUCK, new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, 1.0, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.OFFHAND).build()));
+    public static final Item THREE_LEAF_CLOVER = new Item(new Item.Settings());
     public static PotionItem BOTTLE_OF_ENDER;
     public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
     public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
@@ -59,5 +66,8 @@ public abstract class CustomBrewingItems {
 
     public static final Item CONCENTRATE_OF_POISON = new ConcentrateItem(StatusEffects.POISON, 0, 200);
     public static final Item CONCENTRATE_OF_WEAVING = new ConcentrateItem(StatusEffects.WEAVING);
+
+    public static final Item CONCENTRATE_OF_LUCK = new ConcentrateItem(StatusEffects.LUCK);
+    public static final Item CONCENTRATE_OF_UNLUCK = new ConcentrateItem(StatusEffects.UNLUCK);
 
 }

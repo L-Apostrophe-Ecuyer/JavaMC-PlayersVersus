@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "players-versus:four_leaf_clover"
+    }
+  ],
+  "result": {
+    "id": "players-versus:concentrate_of_luck",
+    "count": 1
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_ingredient": {
+      "conditions": {
+        "items": [
+          {
+            "items": "players-versus:four_leaf_clover"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_ingredient"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "players-versus:brewing/concentrate_smelting/concentrate_of_luck",
+      "players-versus:brewing/concentrate_crafting/concentrate_of_luck"
+    ]
+  }
+}

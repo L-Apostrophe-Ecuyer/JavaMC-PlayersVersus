@@ -40,11 +40,19 @@
   "block.players-versus.polished_stone_slab": "Dalle de pierre taillée",
   "block.players-versus.polished_stone_stairs": "Escaliers de pierre taillée",
 
+  "block.minecraft.poppy": "Rose",
+  "item.minecraft.poppy": "Rose",
+
   "block.players-versus.wheat_grass": "Gazon de blé",
   "block.players-versus.wheat_grass_flowering": "Gazon de blé en fleurs",
   "block.players-versus.wild_wheat": "Blé sauvage",
   "block.players-versus.clovers": "Trèfles",
   "item.players-versus.four_leaf_clover": "Trèfle à quatre feuilles",
+  "item.players-versus.wheat_grass": "Gazon de blé",
+  "item.players-versus.wheat_grass_flowering": "Gazon de blé en fleurs",
+  "item.players-versus.wild_wheat": "Blé sauvage",
+  "item.players-versus.three_leaf_clover": "Trèfle",
+  "item.players-versus.clovers": "Trèfles",
 
   "block.minecraft.blue_glazed_terracotta": "Terre cuite sculptée bleue",
   "block.minecraft.black_glazed_terracotta": "Terre cuite sculptée noire",
