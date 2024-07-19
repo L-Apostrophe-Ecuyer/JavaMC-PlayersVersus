@@ -54,10 +54,7 @@ public class SwordItemMixin extends ToolItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        int sweepLevel = 0;
-        if(stack.hasEnchantments()) {
-            sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
-        }
+        int sweepLevel = Enchants.getLevel(world, stack, Enchantments.SWEEPING_EDGE);
         double attackCharge = Combat.getAttackChargeProgress(user);
         double attackChargeRequired = sweepLevel > 0 ? 1d + 0.2d * (3 - sweepLevel) : 1d;
         if(attackCharge >= attackChargeRequired) {
