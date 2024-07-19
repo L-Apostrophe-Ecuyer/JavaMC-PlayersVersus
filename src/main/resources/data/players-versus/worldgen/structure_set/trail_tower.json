@@ -2,7 +2,7 @@
   "structures": [
     {
       "structure": "players-versus:trial_tower",
-      "weight": 3
+      "weight": 1
     },
     {
       "structure": "players-versus:trial_tower_cold",
@@ -15,8 +15,8 @@
   ],
   "placement": {
     "type": "minecraft:random_spread",
-    "salt": 83469867,
-    "spacing": 36,
+    "salt": 741493289,
+    "spacing": 48,
     "separation": 18
   }
 }

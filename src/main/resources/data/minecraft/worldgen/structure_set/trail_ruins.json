@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "minecraft:trail_ruins",
+      "weight": 1
+    },
+    {
+      "structure": "players-versus:trail_ruins_cold",
+      "weight": 2
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 83469867,
+    "frequency_reduction_method": "default",
+    "spacing": 64,
+    "separation": 0
+  }
+}
