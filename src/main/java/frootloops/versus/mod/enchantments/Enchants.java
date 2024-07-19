@@ -2,6 +2,8 @@ package frootloops.versus.mod.enchantments;
 
 import frootloops.versus.VersusMod;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -41,6 +43,12 @@ public abstract class Enchants {
     public static int getLevel(World world, ItemStack stack, RegistryKey<Enchantment> enchantment) {
         if(!stack.hasEnchantments()) return 0;
         return EnchantmentHelper.getLevel(getRegistryEntry(world, enchantment), stack);
+    }
+
+    public static int getLevel(ItemStack stack, RegistryEntry<Enchantment> enchantmentRegistryEntry) {
+        ItemEnchantmentsComponent itemEnchantmentsComponent = stack.get(DataComponentTypes.ENCHANTMENTS);
+        if(itemEnchantmentsComponent == null || itemEnchantmentsComponent.isEmpty()) return 0;
+        return itemEnchantmentsComponent.getLevel(enchantmentRegistryEntry);
     }
 
     public static boolean hasEnchantment(ItemStack stack, RegistryKey<Enchantment> enchantment) {

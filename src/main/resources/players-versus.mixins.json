@@ -13,6 +13,7 @@
 
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",
+    "enchantments.EnchantmentHelperMixin",
     "enchantments.EnchantmentBottleMixin",
 
     "environment.worldgen.structures.DungeonsMixin",

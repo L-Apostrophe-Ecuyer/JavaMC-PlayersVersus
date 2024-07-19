@@ -2,10 +2,15 @@ package frootloops.versus.mixin.items;
 
 import frootloops.versus.mod.items.ItemsAndStacks;
 import net.minecraft.block.BlockState;
+import net.minecraft.component.ComponentHolder;
 import net.minecraft.component.ComponentMapImpl;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.BlockSoundGroup;
@@ -18,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ItemStack.class)
-public class ItemStackMixin {
+public abstract class ItemStackMixin implements ComponentHolder {
 
     public ItemStackMixin(Item item, int count, ComponentMapImpl components) {
         this.item = item;
@@ -35,6 +40,28 @@ public class ItemStackMixin {
 
     @Shadow
     public boolean hasEnchantments() {return false;}
+
+
+    @Inject(method = "isEnchantable", at = @At("RETURN"), cancellable = true)
+    public void isEnchantable(CallbackInfoReturnable<Boolean> cir) {
+        if(!cir.getReturnValue()) {
+            ItemEnchantmentsComponent itemEnchantmentsComponent = this.get(DataComponentTypes.ENCHANTMENTS);
+            if(itemEnchantmentsComponent == null || itemEnchantmentsComponent.isEmpty()) {
+                cir.setReturnValue(true);
+                return;
+            }
+            else {
+                int enchantmentPower = 1;
+                for (RegistryEntry<Enchantment> enchant : itemEnchantmentsComponent.getEnchantments()) {
+                    enchantmentPower += enchant.value().getMinPower(itemEnchantmentsComponent.getLevel(enchant));
+                }
+                int maxLevel = 50;
+                if(item instanceof ArmorItem armorItem) maxLevel = 4 * armorItem.getEnchantability();
+                else if(item instanceof ToolItem toolItem) maxLevel = 4 * toolItem.getEnchantability();
+                if(enchantmentPower < maxLevel) cir.setReturnValue(true);
+            }
+        }
+    }
 
     @Inject(method = "onClicked", at = @At("HEAD"), cancellable = false)
     public void onClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference, CallbackInfoReturnable<Boolean> cir) {
