@@ -25,6 +25,12 @@
                   }
                 },
                 {
+                  "weight": 6,
+                  "data": {
+                    "Name": "players-versus:white_clovers"
+                  }
+                },
+                {
                   "weight": 12,
                   "data": {
                     "Name": "players-versus:clovers"

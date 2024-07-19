@@ -47,7 +47,7 @@ public class CustomBlocks {
     public static final Block PACKED_MUD_TILES_SLAB = registerBlock("packed_mud_tile_slab", new SlabBlock(AbstractBlock.Settings.copy(PACKED_MUD_TILES)));
     public static final Block PACKED_MUD_TILES_STAIRS = registerBlock("packed_mud_tile_stairs", new StairsBlock(PACKED_MUD_TILES.getDefaultState(), AbstractBlock.Settings.copy(PACKED_MUD_TILES)));
 
-    public static final Block FLOWERING_SHORT_GRASS = registerBlock("flowering_short_grass",new ShortPlantBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
+    public static final Block WHITE_CLOVERS = registerBlock("white_clovers",new ShortPlantBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
     public static final Block WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrass(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
     public static final Block WILD_WHEAT = registerBlock("wild_wheat",new WheatGrass(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
     public static final Block CLOVERS = registerBlock("clovers",new ShortPlantBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));

@@ -20,19 +20,25 @@
             "scale": 0.020833334,
             "states": [
               {
-                "Name": "players-versus:flowering_short_grass"
-              },
-              {
                 "Name": "minecraft:cornflower"
               },
               {
                 "Name": "minecraft:dandelion"
               },
               {
-                "Name": "minecraft:poppy"
+                "Name": "players-versus:white_clovers"
+              },
+              {
+                "Name": "players-versus:clovers"
               },
               {
                 "Name": "minecraft:azure_bluet"
+              },
+              {
+                "Name": "players-versus:white_clovers"
+              },
+              {
+                "Name": "players-versus:clovers"
               },
               {
                 "Name": "minecraft:red_tulip"
@@ -51,9 +57,6 @@
               },
               {
                 "Name": "minecraft:cornflower"
-              },
-              {
-                "Name": "players-versus:flowering_short_grass"
               },
               {
                 "Name": "minecraft:lily_of_the_valley"

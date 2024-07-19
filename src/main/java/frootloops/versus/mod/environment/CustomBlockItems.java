@@ -32,7 +32,7 @@ public abstract class CustomBlockItems {
 
     public static final BlockItem WHEAT_GRASS_ITEM = new BlockItem(CustomBlocks.WHEAT_GRASS, new Item.Settings());
     public static final BlockItem WILD_WHEAT_ITEM = new BlockItem(CustomBlocks.WILD_WHEAT, new Item.Settings());
-    public static final BlockItem FLOWERING_GRASS_ITEM = new BlockItem(CustomBlocks.FLOWERING_SHORT_GRASS, new Item.Settings());
+    public static final BlockItem WHITE_CLOVERS_ITEM = new BlockItem(CustomBlocks.WHITE_CLOVERS, new Item.Settings());
     public static final BlockItem CLOVERS_ITEM = new BlockItem(CustomBlocks.CLOVERS, new Item.Settings());
 
 }

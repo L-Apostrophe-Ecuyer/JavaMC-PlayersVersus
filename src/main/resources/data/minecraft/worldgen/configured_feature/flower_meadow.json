@@ -37,7 +37,7 @@
                 }
               },
               {
-                "Name": "players-versus:flowering_short_grass"
+                "Name": "players-versus:white_clovers"
               },
               {
                 "Name": "players-versus:clovers"
@@ -49,7 +49,7 @@
                 "Name": "minecraft:dandelion"
               },
               {
-                "Name": "players-versus:flowering_short_grass"
+                "Name": "players-versus:white_clovers"
               },
               {
                 "Name": "minecraft:oxeye_daisy"
@@ -61,7 +61,7 @@
                 "Name": "players-versus:clovers"
               },
               {
-                "Name": "players-versus:flowering_short_grass"
+                "Name": "players-versus:white_clovers"
               }
             ]
           }

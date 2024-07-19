@@ -41,14 +41,16 @@
 
   "block.minecraft.poppy": "Rose",
   "item.minecraft.poppy": "Rose",
+  "block.minecraft.azure_bluet": "White Clover Flowers",
+  "item.minecraft.azure_bluet": "White Clover Flowers",
 
   "block.players-versus.wheat_grass": "Wheat Grass",
-  "block.players-versus.wheat_grass_flowering": "Wheat Grass Flowering",
   "block.players-versus.wild_wheat": "Wild Wheat",
+  "block.players-versus.white_clovers": "White Clovers",
   "block.players-versus.clovers": "Clovers",
   "item.players-versus.wheat_grass": "Wheat Grass",
-  "item.players-versus.wheat_grass_flowering": "Wheat Grass Flowering",
   "item.players-versus.wild_wheat": "Wild Wheat",
+  "item.players-versus.white_clovers": "White Clovers",
   "item.players-versus.clovers": "Clovers",
   "item.players-versus.three_leaf_clover": "Clover",
   "item.players-versus.four_leaf_clover": "Four Leaf Clover",

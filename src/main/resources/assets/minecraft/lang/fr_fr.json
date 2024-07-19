@@ -42,15 +42,17 @@
 
   "block.minecraft.poppy": "Rose",
   "item.minecraft.poppy": "Rose",
+  "block.minecraft.azure_bluet": "Fleures de trèfle",
+  "item.minecraft.azure_bluet": "Fleures de trèfle",
 
   "block.players-versus.wheat_grass": "Gazon de blé",
-  "block.players-versus.wheat_grass_flowering": "Gazon de blé en fleurs",
   "block.players-versus.wild_wheat": "Blé sauvage",
+  "block.players-versus.white_clovers": "Trèfles blancs",
   "block.players-versus.clovers": "Trèfles",
   "item.players-versus.four_leaf_clover": "Trèfle à quatre feuilles",
   "item.players-versus.wheat_grass": "Gazon de blé",
-  "item.players-versus.wheat_grass_flowering": "Gazon de blé en fleurs",
   "item.players-versus.wild_wheat": "Blé sauvage",
+  "item.players-versus.white_clovers": "Trèfles blancs",
   "item.players-versus.three_leaf_clover": "Trèfle",
   "item.players-versus.clovers": "Trèfles",
 

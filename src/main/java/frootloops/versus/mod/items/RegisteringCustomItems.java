@@ -2,7 +2,6 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
-import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.*;
@@ -91,7 +90,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("packed_mud_tile_stairs", CustomBlockItems.PACKED_MUD_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("wheat_grass", CustomBlockItems.WHEAT_GRASS_ITEM, ItemGroups.NATURAL);
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT_ITEM, ItemGroups.NATURAL);
-        registerCustomItem("flowering_short_grass", CustomBlockItems.FLOWERING_GRASS_ITEM, ItemGroups.NATURAL);
+        registerCustomItem("white_clovers", CustomBlockItems.WHITE_CLOVERS_ITEM, ItemGroups.NATURAL);
         registerCustomItem("clovers", CustomBlockItems.CLOVERS_ITEM, ItemGroups.NATURAL);
     }
 

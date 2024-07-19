@@ -14,39 +14,6 @@
                 "type": "minecraft:simple_block",
                 "config": {
                   "to_place": {
-                    "type": "minecraft:simple_state_provider",
-                    "state": {
-                      "Name": "players-versus:flowering_short_grass"
-                    }
-                  }
-                }
-              },
-              "placement": [
-                {
-                  "type": "minecraft:block_predicate_filter",
-                  "predicate": {
-                    "type": "minecraft:matching_blocks",
-                    "blocks": "minecraft:air"
-                  }
-                }
-              ]
-            }
-          }
-        },
-        "placement": []
-      },
-      {
-        "feature": {
-          "type": "minecraft:random_patch",
-          "config": {
-            "tries": 96,
-            "xz_spread": 7,
-            "y_spread": 3,
-            "feature": {
-              "feature": {
-                "type": "minecraft:simple_block",
-                "config": {
-                  "to_place": {
                     "type": "minecraft:weighted_state_provider",
                     "entries": [
                       {
@@ -99,7 +66,7 @@
                       {
                         "weight": 1,
                         "data": {
-                          "Name": "players-versus:flowering_short_grass"
+                          "Name": "players-versus:white_clovers"
                         }
                       },
                       {
@@ -137,7 +104,7 @@
           "type": "minecraft:no_bonemeal_flower",
           "config": {
             "tries": 96,
-            "xz_spread": 7,
+            "xz_spread": 8,
             "y_spread": 3,
             "feature": {
               "feature": {
@@ -149,13 +116,25 @@
                       {
                         "weight": 1,
                         "data": {
-                          "Name": "players-versus:flowering_short_grass"
+                          "Name": "minecraft:short_grass"
+                        }
+                      },
+                      {
+                        "weight": 1,
+                        "data": {
+                          "Name": "minecraft:dandelion"
+                        }
+                      },
+                      {
+                        "weight": 2,
+                        "data": {
+                          "Name": "minecraft:oxeye_daisy"
                         }
                       },
                       {
                         "weight": 6,
                         "data": {
-                          "Name": "players-versus:clovers"
+                          "Name": "minecraft:azure_bluet"
                         }
                       }
                     ]
