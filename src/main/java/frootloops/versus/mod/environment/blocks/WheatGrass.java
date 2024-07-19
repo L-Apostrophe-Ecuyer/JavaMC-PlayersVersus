@@ -16,8 +16,12 @@ public class WheatGrass extends ShortPlantBlock {
 
     @Override
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
-        BlockState blockToTurnInto = (state.getBlock() == CustomBlocks.WHEAT_GRASS) ? CustomBlocks.WILD_WHEAT.getDefaultState() : Blocks.WHEAT.getDefaultState().with(CropBlock.AGE, 7);
-        world.setBlockState(pos, blockToTurnInto, NOTIFY_LISTENERS);
+        if((state.getBlock() == CustomBlocks.WILD_WHEAT)) {
+            if(random.nextFloat() < 0.33f) world.setBlockState(pos, Blocks.WHEAT.getDefaultState().with(CropBlock.AGE, 7), NOTIFY_LISTENERS);
+        }
+        else {
+            world.setBlockState(pos, CustomBlocks.WILD_WHEAT.getDefaultState(), NOTIFY_LISTENERS);
+        }
     }
 
     @Override
