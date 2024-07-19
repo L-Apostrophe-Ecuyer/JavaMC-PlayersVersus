@@ -146,13 +146,14 @@ public class DeeperCreeperEntity extends CreeperEntity {
         areaEffectCloudEntity.setWaitTime(10);
         areaEffectCloudEntity.setDuration(300);
         areaEffectCloudEntity.setRadiusGrowth(-areaEffectCloudEntity.getRadius() / 300.0f);
-        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 120, 0, true, false));
-        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 120, 0, true, false));
+        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 600, 0, false, false));
+        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 600, 0, false, true));
         this.getWorld().spawnEntity(areaEffectCloudEntity);
     }
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
+        this.playSound(SoundEvents.BLOCK_STONE_STEP, 0.2f, 1.2f);
         this.playSound(SoundEvents.ENTITY_CREEPER_HURT, 0.1f, 1.4f);
         this.playSound(SoundEvents.BLOCK_MANGROVE_ROOTS_STEP, 0.2f, 0.8F);
     }

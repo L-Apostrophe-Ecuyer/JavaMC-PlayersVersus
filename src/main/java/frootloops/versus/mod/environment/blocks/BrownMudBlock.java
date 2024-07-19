@@ -1,13 +1,13 @@
 package frootloops.versus.mod.environment.blocks;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
+import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.mob.WaterCreatureEntity;
-import net.minecraft.entity.passive.FishEntity;
 import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.registry.tag.FluidTags;
@@ -20,6 +20,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.*;
 import net.minecraft.world.event.GameEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -192,6 +193,34 @@ public class BrownMudBlock extends FarmlandBlock {
     @Override
     protected float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {
         return 0.2f;
+    }
+
+
+    @Override
+    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+        if(placer.isSneaking()) return;
+        BlockState blockStateUp = world.getBlockState(pos.up());
+        if(blockStateUp.isOf(Blocks.FIRE) || world.getDimension().ultrawarm()) return;
+
+        int moisture = 0;
+        if(blockStateUp.getFluidState().isIn(FluidTags.WATER)) {
+            moisture = 4;
+            world.setBlockState(pos, state.with(MOISTURE, 4), Block.NOTIFY_LISTENERS);
+        }
+
+
+        BrownMudBlock.mudifyNeighborBlock(world, pos.west(), moisture);
+        BrownMudBlock.mudifyNeighborBlock(world, pos.south(), moisture);
+        BrownMudBlock.mudifyNeighborBlock(world, pos.west(), moisture);
+        BrownMudBlock.mudifyNeighborBlock(world, pos.east(), moisture);
+        BrownMudBlock.mudifyNeighborBlock(world, pos.down(), moisture);
+    }
+
+    private static void mudifyNeighborBlock(World world, BlockPos pos, int moisture) {
+        if(moisture < 0) return;
+        BlockState blockState = world.getBlockState(pos);
+        Block block = blockState.getBlock();
+        if(block == Blocks.DIRT) world.setBlockState(pos, CustomBlocks.BROWN_MUD.getDefaultState().with(MOISTURE, moisture), Block.NOTIFY_LISTENERS);
     }
 
 }
