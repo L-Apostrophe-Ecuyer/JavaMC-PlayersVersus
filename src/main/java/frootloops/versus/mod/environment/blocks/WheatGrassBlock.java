@@ -9,8 +9,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 
-public class WheatGrass extends ShortPlantBlock {
-    public WheatGrass(Settings settings) {
+public class WheatGrassBlock extends ShortPlantBlock {
+    public WheatGrassBlock(Settings settings) {
         super(settings);
     }
 

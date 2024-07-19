@@ -1,10 +1,7 @@
 package frootloops.versus.mod.environment;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.environment.blocks.BrownMudBlock;
-import frootloops.versus.mod.environment.blocks.SmolderingTorchBlock;
-import frootloops.versus.mod.environment.blocks.SmolderingWallTorchBlock;
-import frootloops.versus.mod.environment.blocks.WheatGrass;
+import frootloops.versus.mod.environment.blocks.*;
 import net.minecraft.block.*;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.particle.ParticleTypes;
@@ -47,10 +44,10 @@ public class CustomBlocks {
     public static final Block PACKED_MUD_TILES_SLAB = registerBlock("packed_mud_tile_slab", new SlabBlock(AbstractBlock.Settings.copy(PACKED_MUD_TILES)));
     public static final Block PACKED_MUD_TILES_STAIRS = registerBlock("packed_mud_tile_stairs", new StairsBlock(PACKED_MUD_TILES.getDefaultState(), AbstractBlock.Settings.copy(PACKED_MUD_TILES)));
 
-    public static final Block WHITE_CLOVERS = registerBlock("white_clovers",new ShortPlantBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
-    public static final Block WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrass(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
-    public static final Block WILD_WHEAT = registerBlock("wild_wheat",new WheatGrass(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
-    public static final Block CLOVERS = registerBlock("clovers",new ShortPlantBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
+    public static final Block WHITE_CLOVERS = registerBlock("white_clovers",new CloverBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
+    public static final Block WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrassBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
+    public static final Block WILD_WHEAT = registerBlock("wild_wheat",new WheatGrassBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
+    public static final Block CLOVERS = registerBlock("clovers",new CloverBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
 
 
     private static Block registerBlock(String name, Block block) {
