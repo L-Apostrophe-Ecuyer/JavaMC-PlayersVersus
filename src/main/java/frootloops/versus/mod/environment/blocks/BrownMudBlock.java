@@ -71,7 +71,7 @@ public class BrownMudBlock extends FarmlandBlock {
             if (state.getFluidState().isIn(FluidTags.WATER)) return 4;
             moisture = world.getBlockState(blockPos).getOrEmpty(MOISTURE);
             if (moisture.isPresent() && moisture.get() > 0) moistureAmount += moisture.get();
-            if (moistureAmount == 4) return 4;
+            if (moistureAmount >= 4) return 4;
         }
         return moistureAmount;
     }
@@ -200,20 +200,20 @@ public class BrownMudBlock extends FarmlandBlock {
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if(placer.isSneaking()) return;
         BlockState blockStateUp = world.getBlockState(pos.up());
-        if(blockStateUp.isOf(Blocks.FIRE) || world.getDimension().ultrawarm()) return;
-
-        int moisture = 0;
-        if(blockStateUp.getFluidState().isIn(FluidTags.WATER)) {
-            moisture = 4;
-            world.setBlockState(pos, state.with(MOISTURE, 4), Block.NOTIFY_LISTENERS);
+        if(blockStateUp.isOf(Blocks.FIRE) || world.getDimension().ultrawarm()) {
+            world.setBlockState(pos, Blocks.PACKED_MUD.getDefaultState(), Block.NOTIFY_LISTENERS);
+            return;
         }
 
-
-        BrownMudBlock.mudifyNeighborBlock(world, pos.west(), moisture);
-        BrownMudBlock.mudifyNeighborBlock(world, pos.south(), moisture);
-        BrownMudBlock.mudifyNeighborBlock(world, pos.west(), moisture);
-        BrownMudBlock.mudifyNeighborBlock(world, pos.east(), moisture);
-        BrownMudBlock.mudifyNeighborBlock(world, pos.down(), moisture);
+        int moisture = BrownMudBlock.getMoistureAmountNearby(world, pos);
+        if(moisture > 0) {
+            world.setBlockState(pos, state.with(MOISTURE, moisture), Block.NOTIFY_LISTENERS);
+            BrownMudBlock.mudifyNeighborBlock(world, pos.north(), moisture - 3);
+            BrownMudBlock.mudifyNeighborBlock(world, pos.south(), moisture - 3);
+            BrownMudBlock.mudifyNeighborBlock(world, pos.west(), moisture - 3);
+            BrownMudBlock.mudifyNeighborBlock(world, pos.east(), moisture - 3);
+            BrownMudBlock.mudifyNeighborBlock(world, pos.down(), moisture - 1);
+        }
     }
 
     private static void mudifyNeighborBlock(World world, BlockPos pos, int moisture) {

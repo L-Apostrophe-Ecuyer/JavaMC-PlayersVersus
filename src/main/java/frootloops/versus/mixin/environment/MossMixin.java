@@ -24,7 +24,7 @@ public abstract class MossMixin extends Block implements Fertilizable {
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if(placer.isSneaking()) return;
         if(world.getBlockState(pos.up()).isAir()) {
-            MossMixin.mossifyNeighborBlock(world, pos.west());
+            MossMixin.mossifyNeighborBlock(world, pos.north());
             MossMixin.mossifyNeighborBlock(world, pos.south());
             MossMixin.mossifyNeighborBlock(world, pos.west());
             MossMixin.mossifyNeighborBlock(world, pos.east());
