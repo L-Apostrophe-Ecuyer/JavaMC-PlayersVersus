@@ -212,7 +212,7 @@ public class BrownMudBlock extends FarmlandBlock {
             BrownMudBlock.mudifyNeighborBlock(world, pos.south(), moisture - 3);
             BrownMudBlock.mudifyNeighborBlock(world, pos.west(), moisture - 3);
             BrownMudBlock.mudifyNeighborBlock(world, pos.east(), moisture - 3);
-            BrownMudBlock.mudifyNeighborBlock(world, pos.down(), moisture - 1);
+            BrownMudBlock.mudifyNeighborBlock(world, pos.down(), moisture - 2);
         }
     }
 
