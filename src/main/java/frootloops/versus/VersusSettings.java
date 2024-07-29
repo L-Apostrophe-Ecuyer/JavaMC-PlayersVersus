@@ -5,6 +5,7 @@ public abstract class VersusSettings {
     public static boolean CAN_HOLD_TO_ATTACK = true;
     public static boolean DO_HOTBAR_SWAPPING_ON_PICK_KEY = true;
     public static boolean DO_BEDROCK_BRIDGING = true;
+    public static boolean DO_SMARTER_BLOCK_PLACING = true;
     public static boolean DO_SLEEP_OVERHAUL = true;
 
     public static boolean DO_FOOD_OVERHAUL = true;

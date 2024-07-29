@@ -10,6 +10,7 @@
     "players.HungerManagerMixin",
     "players.PlayerEntityMixin",
     "players.SpecialMovementMixin",
+    "players.building.BlockItemMixin",
 
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",
