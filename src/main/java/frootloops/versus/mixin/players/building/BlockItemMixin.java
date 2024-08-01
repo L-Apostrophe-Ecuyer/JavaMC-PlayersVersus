@@ -1,8 +1,10 @@
 package frootloops.versus.mixin.players.building;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.StairsBlock;
+import net.minecraft.block.enums.StairShape;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
@@ -58,7 +60,7 @@ public abstract class BlockItemMixin extends Item {
 
             int maxScore = Math.max(Math.max(scoreAxisX, scoreAxisY), scoreAxisZ);
             int placementAxisScore = (placementAxis == Direction.Axis.X) ? scoreAxisX : (placementAxis == Direction.Axis.Y) ? scoreAxisY : scoreAxisZ;
-            if(maxScore <= placementAxisScore + 5) return;
+            if(maxScore <= placementAxisScore + 5) return; // Scores are too similar to warrant changing the block's orientation
             else if(maxScore == scoreAxisX) {
                 if(placementAxis != Direction.Axis.X) cir.setReturnValue(blockState.with(Properties.AXIS, Direction.Axis.X));
             }
@@ -68,12 +70,13 @@ public abstract class BlockItemMixin extends Item {
             else if(maxScore == scoreAxisZ) {
                 if(placementAxis != Direction.Axis.Z) cir.setReturnValue(blockState.with(Properties.AXIS, Direction.Axis.Z));
             }
+            return;
         }
 
 
         // Other Directional Blocks: Try to match the neighboring blocks' axis
-        Optional<Direction> placementDirectionOptional = blockState.getOrEmpty(Properties.FACING);
-        if(placementDirectionOptional.isPresent() && blockState.getBlock() instanceof StairsBlock) {
+        Optional<Direction> placementDirectionOptional = blockState.getOrEmpty(Properties.HORIZONTAL_FACING);
+        if(placementDirectionOptional.isPresent()) {
             Direction placementDirection = placementDirectionOptional.get();
             BlockPos placementPos = context.getBlockPos();
             World world = context.getWorld();
@@ -87,11 +90,12 @@ public abstract class BlockItemMixin extends Item {
             if(scoreAxisX.getLeft() <= 4 && scoreAxisZ.getLeft() <= 4) return;
             else if((scoreAxisX.getRight() == placementDirection || scoreAxisZ.getRight() == placementDirection) && Math.abs(scoreAxisX.getLeft() - scoreAxisZ.getLeft()) < 5) return;
             else if(scoreAxisX.getLeft() > scoreAxisZ.getLeft()){
-                if(placementDirection != scoreAxisX.getRight()) cir.setReturnValue(blockState.with(Properties.FACING, scoreAxisX.getRight()));
+                if(placementDirection != scoreAxisX.getRight()) cir.setReturnValue(blockState.with(Properties.HORIZONTAL_FACING, scoreAxisX.getRight()).with(StairsBlock.SHAPE, StairShape.STRAIGHT));
             }
             else {
-                if(placementDirection != scoreAxisZ.getRight()) cir.setReturnValue(blockState.with(Properties.FACING, scoreAxisZ.getRight()));
+                if(placementDirection != scoreAxisZ.getRight()) cir.setReturnValue(blockState.with(Properties.HORIZONTAL_FACING, scoreAxisZ.getRight()).with(StairsBlock.SHAPE, StairShape.STRAIGHT));
             }
+            return;
         }
     }
 
@@ -129,7 +133,7 @@ public abstract class BlockItemMixin extends Item {
         for(int i = -1; i < 2; i += 2) {
 
             neighborState = world.getBlockState(placementPos.offset(axisToEvaluate, i));
-            neighborFacing = neighborState.getOrEmpty(Properties.FACING);
+            neighborFacing = neighborState.getOrEmpty(Properties.HORIZONTAL_FACING);
             isSameBlock = neighborState.isOf(this.block);
 
             if(!neighborFacing.isPresent()) continue;
