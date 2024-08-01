@@ -80,15 +80,16 @@ public abstract class BlockItemMixin extends Item {
             Direction placementDirection = placementDirectionOptional.get();
             BlockPos placementPos = context.getBlockPos();
             World world = context.getWorld();
+            boolean isPlacingStairs = blockState.getBlock() instanceof StairsBlock;
 
-            Pair<Integer, Direction> scoreAxisX = this.getBestFacingScore(Direction.Axis.X, placementDirection, placementPos, world);
+            Pair<Integer, Direction> scoreAxisX = this.getBestFacingScore(Direction.Axis.X, placementDirection, placementPos, world, isPlacingStairs);
             if(scoreAxisX.getLeft() >= 50) return;
 
-            Pair<Integer, Direction> scoreAxisZ = this.getBestFacingScore(Direction.Axis.Z, placementDirection, placementPos, world);
+            Pair<Integer, Direction> scoreAxisZ = this.getBestFacingScore(Direction.Axis.Z, placementDirection, placementPos, world, isPlacingStairs);
             if(scoreAxisZ.getLeft() >= 50) return;
 
-            if(scoreAxisX.getLeft() <= 4 && scoreAxisZ.getLeft() <= 4) return;
-            else if((scoreAxisX.getRight() == placementDirection || scoreAxisZ.getRight() == placementDirection) && Math.abs(scoreAxisX.getLeft() - scoreAxisZ.getLeft()) < 5) return;
+            if(scoreAxisX.getLeft() <= 3 && scoreAxisZ.getLeft() <= 3) return;
+            else if((scoreAxisX.getRight() == placementDirection || scoreAxisZ.getRight() == placementDirection) && Math.abs(scoreAxisX.getLeft() - scoreAxisZ.getLeft()) < 4) return;
             else if(scoreAxisX.getLeft() > scoreAxisZ.getLeft()){
                 if(placementDirection != scoreAxisX.getRight()) cir.setReturnValue(blockState.with(Properties.HORIZONTAL_FACING, scoreAxisX.getRight()).with(StairsBlock.SHAPE, StairShape.STRAIGHT));
             }
@@ -122,21 +123,22 @@ public abstract class BlockItemMixin extends Item {
         return score;
     }
 
-    private Pair<Integer, Direction> getBestFacingScore(Direction.Axis axisToEvaluate, Direction placementDirection, BlockPos placementPos, World world) {
+    private Pair<Integer, Direction> getBestFacingScore(Direction.Axis axisToEvaluate, Direction placementDirection, BlockPos placementPos, World world, boolean isPlacingStairs) {
         Direction clockwise = (axisToEvaluate == Direction.Axis.X) ? Direction.NORTH : Direction.EAST;
         Direction counterClockwise = (axisToEvaluate == Direction.Axis.X) ? Direction.SOUTH : Direction.WEST;
         int scoreClockwise = 0, scoreCounterClockwise = 0;
         boolean isSameBlock;
+        BlockPos pos;
         BlockState neighborState;
         Optional<Direction> neighborFacing;
 
+        // Check neighboring directional blocks and align with them:
         for(int i = -1; i < 2; i += 2) {
-
             neighborState = world.getBlockState(placementPos.offset(axisToEvaluate, i));
             neighborFacing = neighborState.getOrEmpty(Properties.HORIZONTAL_FACING);
             isSameBlock = neighborState.isOf(this.block);
 
-            if(!neighborFacing.isPresent()) continue;
+            if(!neighborFacing.isPresent())  continue;
             else if (neighborFacing.get() == clockwise) {
                 if (placementDirection == clockwise && isSameBlock) return new Pair<>(50, clockwise);
                 else scoreClockwise += (isSameBlock) ? 10 : 4;
@@ -156,6 +158,42 @@ public abstract class BlockItemMixin extends Item {
                 }
             }
         }
+
+        // If placing stairs, check diagonal blocks: this can usually happen when roofing, where you would want your stairs to line up diagonally
+        if(isPlacingStairs) {
+            pos = placementPos.offset(counterClockwise).down();
+            neighborState = world.getBlockState(pos);
+            if(neighborState.getBlock() instanceof StairsBlock && neighborState.get(Properties.HORIZONTAL_FACING) == clockwise) scoreClockwise += 3;
+
+            pos = placementPos.offset(clockwise).up();
+            neighborState = world.getBlockState(pos);
+            if(neighborState.getBlock() instanceof StairsBlock && neighborState.get(Properties.HORIZONTAL_FACING) == clockwise) scoreClockwise += 3;
+
+            pos = placementPos.offset(clockwise).down();
+            neighborState = world.getBlockState(pos);
+            if(neighborState.getBlock() instanceof StairsBlock && neighborState.get(Properties.HORIZONTAL_FACING) == counterClockwise) scoreCounterClockwise += 3;
+
+            pos = placementPos.offset(counterClockwise).up();
+            neighborState = world.getBlockState(pos);
+            if(neighborState.getBlock() instanceof StairsBlock && neighborState.get(Properties.HORIZONTAL_FACING) == counterClockwise) scoreCounterClockwise += 3;
+        }
+
+        // If placing stairs, check opposing blocks: we'd usually want the flat side of the stairs to be resting on a full block:
+        if(isPlacingStairs) {
+            pos = placementPos.offset(clockwise);
+            neighborState = world.getBlockState(pos);
+            if(!neighborState.isAir() && neighborState.isSideSolidFullSquare(world, pos, counterClockwise)) scoreClockwise += 2;
+
+            pos = placementPos.offset(counterClockwise);
+            neighborState = world.getBlockState(pos);
+            if(!neighborState.isAir() && neighborState.isSideSolidFullSquare(world, pos, clockwise)) scoreCounterClockwise += 2;
+        }
+
+        // Try to lower the chances of blocks getting placed the complete opposite of where the player is facing, since that might feel arbitrary
+        if(clockwise == placementDirection.getOpposite()) scoreClockwise -= 1;
+        if(counterClockwise == placementDirection.getOpposite()) scoreCounterClockwise -= 1;
+
+        // Check which direction has the best score and return it:
         if(scoreClockwise == scoreCounterClockwise &&  (placementDirection == clockwise || placementDirection == counterClockwise)) return new Pair<>(scoreClockwise, placementDirection);
         else if(scoreCounterClockwise > scoreClockwise) return new Pair<>(scoreCounterClockwise, counterClockwise);
         else if(scoreClockwise > scoreCounterClockwise) return new Pair<>(scoreClockwise, clockwise);
