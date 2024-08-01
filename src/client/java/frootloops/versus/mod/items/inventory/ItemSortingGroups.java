@@ -27,12 +27,6 @@ public class ItemSortingGroups {
     public static SortedItemGroup sortedMiscGroup = new MiscItems();
 
 
-    public static boolean isItemInGroup(RegistryKey<ItemGroup> itemGroupKey, Item item) {
-        return false;
-        //return Registries.ITEM_GROUP.getOrThrow(itemGroupKey).getDisplayStacks().stream().anyMatch(stack -> stack.getItem().equals(item));
-    }
-
-
     public record InventorySlot(int slodId, ItemStack stack) {}
     public static abstract class SortedItemGroup {
         public LinkedList<InventorySlot> inventorySlots = new LinkedList<>();
@@ -50,6 +44,7 @@ public class ItemSortingGroups {
             for(int i = startIndex; i < maxIndex; i++) {
                 InventorySlot otherSlot = inventorySlots.get(i);
                 if(otherSlot.slodId == slot.slodId) return;
+                if(otherSlot.stack.isOf(slot.stack.getItem()) && otherSlot.stack.getCount() > slot.stack.getCount()) continue;
                 if(itemName.compareTo(otherSlot.stack.getItem().getName().getString()) < 1) {
                     inventorySlots.add(i, slot);
                     return;

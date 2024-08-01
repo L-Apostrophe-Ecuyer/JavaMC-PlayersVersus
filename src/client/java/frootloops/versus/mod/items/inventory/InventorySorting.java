@@ -12,7 +12,7 @@ import static frootloops.versus.mod.items.inventory.ItemSortingGroups.*;
 
 public class InventorySorting {
 
-    private static final boolean DEBUG_MODE = false;
+    private static final boolean DEBUG_MODE = true;
 
     public static void swapItemsFromSlots(MinecraftClient client, PlayerInventory inventory, int slotOne, int slotTwo) {
         if(slotOne == slotTwo) return;
@@ -82,7 +82,7 @@ public class InventorySorting {
 
     public static void sortStacksIntoRows(ScreenHandler handler, MinecraftClient client, PlayerInventory inventory) {
 
-        if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("Started sorting!");
+        if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("Started sorting! 8==============================================================================================D");
 
         // Note: Group order is important here
         ItemSortingGroups.SortedItemGroup[] sortedGroups = new ItemSortingGroups.SortedItemGroup[]{sortedRedstoneGroup, sortedPickaxeGroup, sortedCombatGroup, sortedAxeGroup, sortedShovelGroup, sortedHoesGroup, sortedShearsGroup, sortedRareGroup, sortedMiscGroup};
@@ -194,16 +194,16 @@ public class InventorySorting {
                     slotOrigin = displacedSlots[slotOrigin] - 9;
                 }
 
-                if(DEBUG_MODE) {
-                    if (prevOrigin != slotOrigin) VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + prevOrigin + " (moved to " + slotOrigin + ")");
-                    else VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + slotOrigin);
-                }
-
 
                 if(slotDestination != slotOrigin && (!inventory.getStack(slotOrigin).isEmpty() || !inventory.getStack(slotDestination).isEmpty())) {
                     displacedSlots[slotDestination] = slotOrigin + 9;
 
-                    if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("               Moving Item! " + inventory.getStack(slotOrigin).getItem().getName().getString() + " moving from " + slotOrigin + " to " + slotDestination);
+                    if(DEBUG_MODE) {
+                        if (prevOrigin != slotOrigin) VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + prevOrigin + " (moved to " + slotOrigin + ")");
+                        else VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + slotOrigin);
+                        VersusMod.MOD_LOGGER.warn("               Moving '" + inventory.getStack(slotOrigin).getItem().getName().getString() + "' from " + slotOrigin + " to " + slotDestination);
+                    }
+
                     if(slotDestination < 9 && slotOrigin < 9) {
                         client.interactionManager.clickSlot(handler.syncId, slotDestination + 36, slotOrigin, SlotActionType.SWAP, client.player);
                     }

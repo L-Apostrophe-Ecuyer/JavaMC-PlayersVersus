@@ -48,6 +48,7 @@ public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScre
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
         if (this.client.interactionManager.hasCreativeInventory()) {
+
             this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 24, this.height / 2 - 36, 20, 18, TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
                 InventorySorting.doHotbarSwap(client, client.player.getInventory());
                 if(buttonHotbarSwap != null) buttonHotbarSwap.setFocused(false);
