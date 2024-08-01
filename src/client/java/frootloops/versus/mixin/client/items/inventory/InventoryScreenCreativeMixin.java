@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.client.items.inventory;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -38,6 +39,7 @@ public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScre
 
     private TexturedButtonWidget buttonHotbarSwap = null;
     private TexturedButtonWidget buttonSortInventory = null;
+    private boolean areButtonsVisible = false;
 
     public InventoryScreenCreativeMixin(CreativeInventoryScreen.CreativeScreenHandler screenHandler, PlayerInventory playerInventory, Text text) {
         super(screenHandler, playerInventory, text);
@@ -46,7 +48,6 @@ public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScre
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
         if (this.client.interactionManager.hasCreativeInventory()) {
-
             this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 24, this.height / 2 - 36, 20, 18, TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
                 InventorySorting.doHotbarSwap(client, client.player.getInventory());
                 if(buttonHotbarSwap != null) buttonHotbarSwap.setFocused(false);
@@ -56,30 +57,35 @@ public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScre
 
     @Inject(method = "populateDisplay",at = @At("RETURN"), cancellable = false)
     private void populateDisplay(CallbackInfoReturnable cir) {
-        if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
-            if(buttonHotbarSwap != null) this.addDrawableChild(buttonHotbarSwap);
-        }
-        else {
-            if(buttonHotbarSwap != null) this.remove(buttonHotbarSwap);
-        }
+        this.updateButtonVisibility();
     }
 
 
 
     @Inject(method = "setSelectedTab",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(ItemGroup group, CallbackInfo info) {
-        if (group.getType() == ItemGroup.Type.INVENTORY) {
-            if(buttonHotbarSwap != null) this.addDrawableChild(buttonHotbarSwap);
-        }
-        else {
-            if(buttonHotbarSwap != null) this.remove(buttonHotbarSwap);
-        }
+        this.updateButtonVisibility();
     }
 
     @Inject(method = "mouseClicked",at = @At("RETURN"), cancellable = false)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable info) {
         if (selectedTab.getType() == ItemGroup.Type.INVENTORY && button == 2 && this.handler.getCursorStack().isEmpty()) {
             InventorySorting.doHotbarSwap(client, client.player.getInventory());
+        }
+    }
+
+    private void updateButtonVisibility() {
+        if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
+            if(buttonHotbarSwap != null && !areButtonsVisible) {
+                this.addDrawableChild(buttonHotbarSwap);
+                areButtonsVisible = true;
+            }
+        }
+        else {
+            if(buttonHotbarSwap != null && areButtonsVisible) {
+                this.remove(buttonHotbarSwap);
+                areButtonsVisible = false;
+            }
         }
     }
 }
