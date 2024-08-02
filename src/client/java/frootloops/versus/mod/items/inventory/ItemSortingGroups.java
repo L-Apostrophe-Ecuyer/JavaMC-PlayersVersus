@@ -151,6 +151,11 @@ public class ItemSortingGroups {
                     if(ItemSortingGroups.ITEMS_PICKAXE_MINEABLE.containsKey(item)) {
                         for(int i = indexPickaxesEnd + 1; i < indexSortedStonesEnd; i++) {
                             if(ITEMS_PICKAXE_MINEABLE.get(item) <= ITEMS_PICKAXE_MINEABLE.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256)) {
+                                while(item == this.inventorySlots.get(i).stack.getItem() && i < indexSortedStonesEnd) {
+                                    if(slot.stack.getCount() < this.inventorySlots.get(i).stack.getCount()) i++;
+                                    else break;
+                                }
+
                                 this.inventorySlots.add(i, slot);
                                 indexSortedStonesEnd++;
                                 indexSortedCopperEnd++;
@@ -165,6 +170,11 @@ public class ItemSortingGroups {
                     else if(ItemSortingGroups.ITEMS_COPPER_BLOCKS.containsKey(item)) {
                         for(int i = indexSortedStonesEnd + 1; i < indexSortedCopperEnd; i++) {
                             if(ITEMS_COPPER_BLOCKS.get(item) <= ITEMS_COPPER_BLOCKS.get(this.inventorySlots.get(i).stack.getItem())) {
+                                while(item == this.inventorySlots.get(i).stack.getItem() && i < indexSortedCopperEnd) {
+                                    if(slot.stack.getCount() < this.inventorySlots.get(i).stack.getCount()) i++;
+                                    else break;
+                                }
+
                                 this.inventorySlots.add(i, slot);
                                 indexSortedCopperEnd++;
                                 return true;

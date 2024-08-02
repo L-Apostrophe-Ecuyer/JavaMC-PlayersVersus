@@ -1,6 +1,7 @@
 package frootloops.versus;
 
 public abstract class VersusSettings {
+    public static boolean DO_SWEEP_ON_REGULAR_SWORD_SWINGS = false;
     public static boolean CAN_AIM_ASSIST = true;
     public static boolean CAN_HOLD_TO_ATTACK = true;
     public static boolean DO_HOTBAR_SWAPPING_ON_PICK_KEY = true;

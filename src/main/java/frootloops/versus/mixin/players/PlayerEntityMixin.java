@@ -1,11 +1,12 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.block.*;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
@@ -15,8 +16,6 @@ import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
@@ -163,10 +162,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
     }
 
-    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 4)
-    private boolean noSweepOnRegularAttacks(boolean sweepLevel) {
-        return false;
+
+    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 3)
+    private boolean doSweepingAttacksOnRegularSwings(boolean isSweep) {
+        return isSweep && (VersusSettings.DO_SWEEP_ON_REGULAR_SWORD_SWINGS || Enchants.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= 3);
     }
+
 
     @Inject(method = "attack", at = @At("TAIL"))
     public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {

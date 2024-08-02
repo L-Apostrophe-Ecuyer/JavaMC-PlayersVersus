@@ -12,7 +12,7 @@ import static frootloops.versus.mod.items.inventory.ItemSortingGroups.*;
 
 public class InventorySorting {
 
-    private static final boolean DEBUG_MODE = true;
+    private static final boolean DEBUG_MODE = false;
 
     public static void swapItemsFromSlots(MinecraftClient client, PlayerInventory inventory, int slotOne, int slotTwo) {
         if(slotOne == slotTwo) return;
@@ -173,25 +173,61 @@ public class InventorySorting {
             if(numSlotsLeft == numEmptySlots) break;
         }
 
+        if(DEBUG_MODE) {
+
+            VersusMod.MOD_LOGGER.warn("");
+            VersusMod.MOD_LOGGER.warn("     Planned: ");
+
+            String remappedSlotsStr = "";
+            String remappedSlotsAndItemsStr = "";
+            for(int i = 0; i < 36; i++){
+                remappedSlotsStr += (remappedSlots[i] == 0 ? "  -," : (remappedSlots[i] - 9 < 10 ? "  " + (remappedSlots[i] - 9) + "," : " " + (remappedSlots[i] - 9) + ","));
+                remappedSlotsAndItemsStr  += (remappedSlots[i] < 9 ? " -," : " " + (inventory.getStack(remappedSlots[i] - 9).getItem().getName().getString() + ","));
+                if((i + 1) % 9 == 0) {
+                    VersusMod.MOD_LOGGER.warn("     -> [" + (remappedSlotsStr.substring(0, remappedSlotsStr.length() - 1)) + " ]   -->   {" + (remappedSlotsAndItemsStr.substring(0, remappedSlotsAndItemsStr.length() - 1)) + " }");
+                    remappedSlotsStr ="";
+                    remappedSlotsAndItemsStr = "";
+                }
+            }
+
+            VersusMod.MOD_LOGGER.warn("");
+            VersusMod.MOD_LOGGER.warn("     Current: ");
+
+            for(int i = 0; i < 36; i++){
+                remappedSlotsStr += inventory.getStack(i).isEmpty() ? "  -," : (i < 10 ? "  " + i + "," : " " + i + ",");
+                remappedSlotsAndItemsStr  += (inventory.getStack(i).isEmpty() ? " -," : " " + (inventory.getStack(i).getItem().getName().getString() + ","));
+                if((i + 1) % 9 == 0) {
+                    VersusMod.MOD_LOGGER.warn("     -> [" + (remappedSlotsStr.substring(0, remappedSlotsStr.length() - 1)) + " ]   -->   {" + (remappedSlotsAndItemsStr.substring(0, remappedSlotsAndItemsStr.length() - 1)) + " }");
+                    remappedSlotsStr ="";
+                    remappedSlotsAndItemsStr = "";
+                }
+            }
+        }
+
+
 
         // Sort the player's inventory accordingly!
         if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("Now actually modifying the player's inventory:");
         int[] displacedSlots = new int[36];
+        int slotOrigin = -1, prevOrigin = -1;
         for(int slotDestination = 0; slotDestination < 36; slotDestination ++ ) {
 
-                int slotOrigin = remappedSlots[slotDestination] - 9;
+                slotOrigin = remappedSlots[slotDestination] - 9;
                 if(slotOrigin < 0) {
-                    for(int slotId = 0; slotId < 36; slotId++) {
+                    slotOrigin = slotDestination; // This is to make sure that, if for some reason there are no empty slots ahead (normally, impossible), then at least nothing breaks
+                    prevOrigin = -1;
+                    for(int slotId = 35; slotId > slotDestination; slotId--) {
                         if(inventory.getStack(slotId).isEmpty()) {
                             slotOrigin = slotId;
                             break;
                         }
                     }
                 }
-
-                int prevOrigin = slotOrigin;
-                while(displacedSlots[slotOrigin] != 0 && displacedSlots[slotOrigin] - 9 !=  slotOrigin) {
-                    slotOrigin = displacedSlots[slotOrigin] - 9;
+                else {
+                    prevOrigin = slotOrigin;
+                    while (displacedSlots[slotOrigin] != 0 && displacedSlots[slotOrigin] - 9 != slotOrigin && displacedSlots[slotOrigin] - 9 != prevOrigin) {
+                        slotOrigin = displacedSlots[slotOrigin] - 9;
+                    }
                 }
 
 
@@ -199,9 +235,11 @@ public class InventorySorting {
                     displacedSlots[slotDestination] = slotOrigin + 9;
 
                     if(DEBUG_MODE) {
-                        if (prevOrigin != slotOrigin) VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + prevOrigin + " (moved to " + slotOrigin + ")");
+                        if (prevOrigin == -1) VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with empty slot " + slotOrigin);
+                        else if (prevOrigin != slotOrigin) VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + prevOrigin + " (moved to " + slotOrigin + ")");
                         else VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + slotOrigin);
-                        VersusMod.MOD_LOGGER.warn("               Moving '" + inventory.getStack(slotOrigin).getItem().getName().getString() + "' from " + slotOrigin + " to " + slotDestination);
+                        VersusMod.MOD_LOGGER.warn("                   Origin: " + slotOrigin + " (" + inventory.getStack(slotOrigin).getItem().getName().getString() + ")");
+                        VersusMod.MOD_LOGGER.warn("                   Dest. : " + slotDestination + " (" + inventory.getStack(slotDestination).getItem().getName().getString() + ")");
                     }
 
                     if(slotDestination < 9 && slotOrigin < 9) {
