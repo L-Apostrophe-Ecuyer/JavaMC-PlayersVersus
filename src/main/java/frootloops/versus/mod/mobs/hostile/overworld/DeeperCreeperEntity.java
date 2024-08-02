@@ -130,9 +130,9 @@ public class DeeperCreeperEntity extends CreeperEntity {
 
     private void explode() {
         if (!this.getWorld().isClient) {
-            float f = this.shouldRenderOverlay() ? 2.0f : 1.0f;
+            float explosionMultiplier = this.shouldRenderOverlay() ? 2.0f : this.hurtTime > 0 ? 0.5f : 1.0f;
             this.dead = true;
-            this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * f, World.ExplosionSourceType.MOB);
+            this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * explosionMultiplier, World.ExplosionSourceType.MOB);
             this.spawnEffectsCloud();
             this.onRemoval(Entity.RemovalReason.KILLED);
             this.discard();
