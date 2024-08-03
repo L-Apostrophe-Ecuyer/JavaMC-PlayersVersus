@@ -18,7 +18,6 @@ import net.minecraft.util.Identifier;
 
 public class ModEntities {
 
-
     public static final EntityType<SlimeballEntity> SLIMEBALL = Registry.register(
             Registries.ENTITY_TYPE, Identifier.of(VersusMod.MOD_ID, "slimeball"),
             EntityType.Builder.create((EntityType.EntityFactory<SlimeballEntity>)SlimeballEntity::new, SpawnGroup.MISC).dimensions(0.25f, 0.25f).maxTrackingRange(4).trackingTickInterval(10).build()
@@ -39,19 +38,17 @@ public class ModEntities {
             EntityType.Builder.create(WitheredZombieEntity::new, SpawnGroup.MONSTER).dimensions(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.0125f).vehicleAttachment(-0.7f).maxTrackingRange(8).build()
     );
 
+    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(DEEPER_CREEPER, 0x3B4978, 0x191A1C, new Item.Settings());
+    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(FROSTED_ZOMBIE, 0x3B4978, 0x191A1C, new Item.Settings());
+    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(WITHERED_ZOMBIE, 0x3B4978, 0x191A1C, new Item.Settings());
+
+
     public static void onInitialize() {
 
-        // Register custom hostile entities and their renderers:
+        // Register custom entities:
         FabricDefaultAttributeRegistry.register(DEEPER_CREEPER, DeeperCreeperEntity.createDeeperCreeperAttributes());
-        Registry.register(Registries.ITEM, Identifier.of(VersusMod.MOD_ID, "deeper_creeper_spawn_egg"), new SpawnEggItem(DEEPER_CREEPER, 0x3B4978, 0x191A1C, new Item.Settings()));
-
-        // Register custom hostile entities and their renderers:
         FabricDefaultAttributeRegistry.register(FROSTED_ZOMBIE, FrostedZombieEntity.createFrostedAttributes());
-        Registry.register(Registries.ITEM, Identifier.of(VersusMod.MOD_ID, "frosted_zombie_spawn_egg"), new SpawnEggItem(FROSTED_ZOMBIE, 0x3B4978, 0x191A1C, new Item.Settings()));
-
-        // Register custom hostile entities and their renderers:
         FabricDefaultAttributeRegistry.register(WITHERED_ZOMBIE, WitheredZombieEntity.createWitheredAttributes());
-        Registry.register(Registries.ITEM, Identifier.of(VersusMod.MOD_ID, "withered_zombie_spawn_egg"), new SpawnEggItem(WITHERED_ZOMBIE, 0x3B4978, 0x191A1C, new Item.Settings()));
 
         // Make them spawn in the world:
         MobSpawning.addCustomSpawns();

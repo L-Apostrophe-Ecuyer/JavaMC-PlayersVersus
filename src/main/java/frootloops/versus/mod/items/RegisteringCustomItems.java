@@ -3,6 +3,7 @@ package frootloops.versus.mod.items;
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
+import frootloops.versus.mod.mobs.ModEntities;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
@@ -13,6 +14,11 @@ import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class RegisteringCustomItems {
     public static void registerAllCustomItems() {
+
+        registerCustomItem("withered_zombie_spawn_egg", ModEntities.WITHERED_ZOMBIE_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
+        registerCustomItem("frosted_zombie_spawn_egg", ModEntities.FROSTED_ZOMBIE_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
+        registerCustomItem("deeper_creeper_spawn_egg", ModEntities.DEEPER_CREEPER_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
+
         registerCustomItem("copper_chestplate", CustomEquipment.COPPER_CHESTPLATE, ItemGroups.COMBAT);
         registerCustomItem("copper_leggings", CustomEquipment.COPPER_LEGGINGS, ItemGroups.COMBAT);
         registerCustomItem("copper_helmet", CustomEquipment.COPPER_HELMET, ItemGroups.COMBAT);
