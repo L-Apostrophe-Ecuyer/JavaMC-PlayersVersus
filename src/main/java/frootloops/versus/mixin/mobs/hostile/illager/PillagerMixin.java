@@ -1,19 +1,19 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
-import net.minecraft.entity.EntityData;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.SpawnReason;
+import frootloops.versus.VersusMod;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.FleeEntityGoal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.IllagerEntity;
 import net.minecraft.entity.mob.PillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
@@ -34,7 +34,7 @@ public abstract class PillagerMixin extends IllagerEntity {
     @Inject(method = "initialize", at = @At("HEAD"))
     private void increaseAttributes(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
         EntityAttributeInstance instance = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (instance != null) instance.setBaseValue(0.4);
+        if (instance != null) instance.setBaseValue(0.36);
 
         EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instanceHP != null) {
@@ -55,8 +55,23 @@ public abstract class PillagerMixin extends IllagerEntity {
         }
         else {
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
-            this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 2, 0.8, 0.9, (livingEntity) -> true));
+            if(this.hasNoRaid()) this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 6, 0.7, 0.9, (livingEntity) -> true));
         }
+        if(this.isCaptain() && this.hasNoRaid()) {
+            this.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, -1));
+        }
+    }
+
+    @Override
+    public void onDeath(DamageSource damageSource) {
+        if (this.isRemoved() || this.dead) return;
+        if (!this.getWorld().isClient) {
+            LivingEntity primeAdversary = this.getPrimeAdversary();
+            if(this.isCaptain() && primeAdversary instanceof PlayerEntity && this.hasNoRaid()) {
+                primeAdversary.addStatusEffect(new StatusEffectInstance(StatusEffects.BAD_OMEN, 3600));
+            }
+        }
+        super.onDeath(damageSource);
     }
 
     @ModifyArg(method = "enchantMainHandItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I"))

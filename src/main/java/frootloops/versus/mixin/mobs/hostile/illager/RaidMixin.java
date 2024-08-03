@@ -1,13 +1,12 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
-import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.entity.boss.ServerBossBar;
-import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.entity.raid.RaiderEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.Stats;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -43,6 +42,7 @@ public abstract class RaidMixin {
     @Inject(method = "getMaxWaves", at = @At("HEAD"), cancellable = true)
     public void start(Difficulty difficulty, CallbackInfoReturnable<Integer> cir) {
         numPlayerDeaths = 0;
+        if(this.wavesSpawned > 0) return;
 
         Box boundingBox = new Box(center.getX() - 48.0, center.getY() - 24.0, center.getZ() - 48.0, center.getX() + 48.0, center.getY() + 24.0, center.getZ() + 48.0);
         int numVillagers = world.getEntitiesByClass(VillagerEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY).size();
@@ -62,23 +62,34 @@ public abstract class RaidMixin {
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;isNearOccupiedPointOfInterest(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean shouldContinueRaid(ServerWorld world, BlockPos pos) {
         if (this.wavesSpawned == 0) return true;
+        boolean hasSomeoneDied = false;
 
         int numParticipatingPlayers = this.bar.getPlayers().size();
         if(numParticipatingPlayers == 0 && world.getTime() % 120L == 0) this.numPlayerDeaths++;
         for (ServerPlayerEntity player : this.bar.getPlayers()) {
             if(!player.isCreative() && !player.isSpectator()) {
-                if(player.isDead() && player.getLastAttackedTime() == world.getTime()) this.numPlayerDeaths++;
+                if(player.deathTime == 2 && player.getLastAttacker() instanceof RaiderEntity) {
+                    this.numPlayerDeaths++;
+                    hasSomeoneDied = true;
+                }
             }
         }
 
-        if(numPlayerDeaths > 5 + numParticipatingPlayers) return false;
-        if(world.getOccupiedPointOfInterestDistance(ChunkSectionPos.from(pos)) <= 5) return true;
+        if(numPlayerDeaths > 5 + numParticipatingPlayers) {
+            if(hasSomeoneDied)  bar.setName(Text.of("Raid - " + (5 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
+            return false;
+        }
+        else if(world.getOccupiedPointOfInterestDistance(ChunkSectionPos.from(pos)) <= 2) {
+            if(hasSomeoneDied)  bar.setName(Text.of("Raid - " + (5 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
+            return true;
+        }
+        if(hasSomeoneDied)  bar.setName(Text.of("Raid - " + (3 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
         return numPlayerDeaths < 3 + numParticipatingPlayers;
     }
 
 
     @Inject(method = "moveRaidCenter", at = @At("HEAD"), cancellable = true)
     private void moveRaidCenter(CallbackInfo info) {
-        if(isRaidingBase && !isRaidingVillage) info.cancel();
+        if(isRaidingBase || !isRaidingVillage) info.cancel(); // This is so that the game doesn't keep trying to find a village where there isn't one
     }
 }
