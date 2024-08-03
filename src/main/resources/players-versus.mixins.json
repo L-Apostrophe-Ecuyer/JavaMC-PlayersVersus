@@ -75,6 +75,7 @@
     "mobs.hostile.illager.VindicatorMixin",
     "mobs.hostile.illager.VexMixin",
     "mobs.hostile.illager.WitchMixin",
+    "mobs.hostile.illager.RaidMixin",
 
     "mobs.hostile.overworld.CreeperEntityMixin",
     "mobs.hostile.overworld.DrownedMixin",

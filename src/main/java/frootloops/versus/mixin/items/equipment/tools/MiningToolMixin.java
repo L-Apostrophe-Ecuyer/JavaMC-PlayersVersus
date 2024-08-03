@@ -66,9 +66,6 @@ public abstract class MiningToolMixin extends ToolItem {
             attackSpeed = Combat.getHoeSpeedModifier();
             attackReachBonus = Combat.getHoeReachModifier();
         }
-        else {
-            VersusMod.MOD_LOGGER.warn("Tool wasn't registered: Damage of " + baseAttackDamage + " and speed of " + attackSpeed);
-        }
 
         if(material == ToolMaterials.GOLD) baseAttackDamage += 2.0f;
         if (attackReachBonus != 0.0f) cir.setReturnValue(AttributeModifiersComponent.builder()

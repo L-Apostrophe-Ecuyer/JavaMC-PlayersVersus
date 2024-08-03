@@ -55,7 +55,7 @@ public abstract class PillagerMixin extends IllagerEntity {
         }
         else {
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
-            this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 3, 1.1, 1.1, (livingEntity) -> true));
+            this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 2, 0.8, 0.9, (livingEntity) -> true));
         }
     }
 

@@ -79,7 +79,7 @@ public abstract class BlockItemMixin extends Item {
 
         // Other Directional Blocks: Try to match the neighboring blocks' axis
         Optional<Direction> placementDirectionOptional = blockState.getOrEmpty(Properties.HORIZONTAL_FACING);
-        if(placementDirectionOptional.isPresent()) {
+        if(placementDirectionOptional.isPresent() && block instanceof StairsBlock) {
             Direction placementDirection = placementDirectionOptional.get();
             BlockPos placementPos = context.getBlockPos();
             World world = context.getWorld();
