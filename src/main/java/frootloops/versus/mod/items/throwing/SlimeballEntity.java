@@ -77,7 +77,8 @@ public class SlimeballEntity extends ThrownItemEntity {
         super.onEntityHit(entityHitResult);
         Entity entity = entityHitResult.getEntity();
         if(entity instanceof LivingEntity livingEntity) {
-            double strength = 0.2 + this.getVelocity().lengthSquared();
+            double strength = 0.3 + 0.5 * Math.max(1.0, this.getVelocity().lengthSquared());
+            livingEntity.setVelocity(livingEntity.getVelocity().add(0.0, 0.05 + 0.3 * this.getVelocity().y, 0.0));
             livingEntity.takeKnockback(strength, -this.getVelocity().x, -this.getVelocity().z);
         }
     }
@@ -103,9 +104,9 @@ public class SlimeballEntity extends ThrownItemEntity {
 
                     // Bounce!
                     Direction direction = blockHitResult.getSide();
-                    if(direction.getAxis() == Direction.Axis.X) this.setVelocity(this.getVelocity().multiply(-0.5, 0.8, 0.8));
-                    else if(direction.getAxis() == Direction.Axis.Y) this.setVelocity(this.getVelocity().multiply(0.8, -0.5, 0.8));
-                    else if(direction.getAxis() == Direction.Axis.Z) this.setVelocity(this.getVelocity().multiply(0.8, 0.8, -0.5));
+                    if(direction.getAxis() == Direction.Axis.X) this.setVelocity(this.getVelocity().multiply(-0.4, 0.6, 0.6));
+                    else if(direction.getAxis() == Direction.Axis.Y) this.setVelocity(this.getVelocity().multiply(0.6, -0.4, 0.6));
+                    else if(direction.getAxis() == Direction.Axis.Z) this.setVelocity(this.getVelocity().multiply(0.6, 0.6, -0.4));
                     this.velocityDirty = true;
                 }
             }
