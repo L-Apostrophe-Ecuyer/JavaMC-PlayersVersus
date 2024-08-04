@@ -33,6 +33,7 @@
     "environment.TntMixin",
     "environment.TorchMixin",
 
+    "items.brewing.BadOmenEffectInstanceMixin",
     "items.brewing.BrewingRecipeRegistryMixin",
     "items.brewing.BrewingStandScreenHandlerMixin",
     "items.brewing.BrewingStandBlockEntityAccessor",
