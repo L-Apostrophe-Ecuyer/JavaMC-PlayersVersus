@@ -1,16 +1,20 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.mobs.hostile.ai.PillagerCaptainBlowHornGoal;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.FleeEntityGoal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.IllagerEntity;
 import net.minecraft.entity.mob.PillagerEntity;
+import net.minecraft.entity.mob.WitchEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -23,6 +27,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PillagerEntity.class)
@@ -46,7 +51,7 @@ public abstract class PillagerMixin extends IllagerEntity {
     @Override
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
         int rand = random.nextInt(100);
-        if(random.nextInt(100) < 20) {
+        if(rand < 20) {
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
             this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(rand + 10);
@@ -55,23 +60,9 @@ public abstract class PillagerMixin extends IllagerEntity {
         }
         else {
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
-            if(this.hasNoRaid()) this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 6, 0.7, 0.9, (livingEntity) -> true));
+            if(this.hasNoRaid() && !this.isCaptain()) this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 6, 0.7, 0.9, (livingEntity) -> true));
         }
-        if(this.isCaptain() && this.hasNoRaid()) {
-            this.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, -1));
-        }
-    }
-
-    @Override
-    public void onDeath(DamageSource damageSource) {
-        if (this.isRemoved() || this.dead) return;
-        if (!this.getWorld().isClient) {
-            LivingEntity primeAdversary = this.getPrimeAdversary();
-            if(this.isCaptain() && primeAdversary instanceof PlayerEntity && this.hasNoRaid()) {
-                primeAdversary.addStatusEffect(new StatusEffectInstance(StatusEffects.BAD_OMEN, 3600));
-            }
-        }
-        super.onDeath(damageSource);
+        this.goalSelector.add(1, new PillagerCaptainBlowHornGoal(this));
     }
 
     @ModifyArg(method = "enchantMainHandItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I"))

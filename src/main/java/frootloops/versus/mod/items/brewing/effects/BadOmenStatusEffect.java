@@ -36,17 +36,14 @@ public class BadOmenStatusEffect extends StatusEffect  {
 
     @Override
     public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
-        VersusMod.MOD_LOGGER.warn("Checking for raids.");
         if (entity instanceof ServerPlayerEntity serverPlayer) {
             if(serverPlayer.isSpectator()) return false;
-            ServerWorld serverWorld;
-            if((serverWorld = serverPlayer.getServerWorld()).getDifficulty() == Difficulty.PEACEFUL || !serverPlayer.getWorld().getDimension().hasRaids()) return true;
+
+            ServerWorld serverWorld = serverPlayer.getServerWorld();
+            if(serverWorld.getTime() % 97 != 0 || serverWorld.getDifficulty() == Difficulty.PEACEFUL || !serverPlayer.getWorld().getDimension().hasRaids()) return true;
 
             boolean isPlayerInsideVillage = serverWorld.isNearOccupiedPointOfInterest(serverPlayer.getBlockPos());
-            boolean isPlayerInsideTheirBase = !isPlayerInsideVillage && (serverPlayer.getSpawnPointPosition().isWithinDistance(serverPlayer.getBlockPos(), 48)) && !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 48, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
-
-            VersusMod.MOD_LOGGER.warn("Raid attempt. Is player inside their base? " + isPlayerInsideTheirBase);
-
+            boolean isPlayerInsideTheirBase = !isPlayerInsideVillage && (serverPlayer.getSpawnPointPosition().isWithinDistance(serverPlayer.getBlockPos(), 32)) && !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
             if ((isPlayerInsideVillage || isPlayerInsideTheirBase) && serverWorld.getRaidAt(serverPlayer.getBlockPos()) == null) {
                 if(isPlayerInsideVillage) serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 600, amplifier));
                 else serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 3000, 0));
