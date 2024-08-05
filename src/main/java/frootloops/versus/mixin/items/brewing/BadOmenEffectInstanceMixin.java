@@ -53,9 +53,10 @@ public abstract class BadOmenEffectInstanceMixin {
 
             if (type == StatusEffects.BAD_OMEN) {
                 if(serverWorld.getTime() % 57L != 0) return;
+
+                // RAIDS: Check if Bad Omen can be replaced by Raid Omen
                 boolean isPlayerInsideVillage = serverWorld.isNearOccupiedPointOfInterest(serverPlayer.getBlockPos());
                 boolean isPlayerInsideTheirBase = !isPlayerInsideVillage && (serverPlayer.getSpawnPointPosition().isWithinDistance(serverPlayer.getBlockPos(), 32)) && !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
-
                 if ((isPlayerInsideVillage || isPlayerInsideTheirBase) && serverWorld.getRaidAt(serverPlayer.getBlockPos()) == null) {
                     if(isPlayerInsideVillage) serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 600, amplifier));
                     else serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 3000, 0));
@@ -65,12 +66,8 @@ public abstract class BadOmenEffectInstanceMixin {
                     cir.setReturnValue(false);
                 }
 
-                if (isPlayerInsideTheirBase && serverWorld.getRaidAt(serverPlayer.getBlockPos()) == null) {
-                    serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 3000, 0));
-                    serverPlayer.setStartRaidPos(serverPlayer.getBlockPos());
-                    entity.removeStatusEffect(this.type);
-                    cir.setReturnValue(false);
-                }
+                // You can add more Bad Omen variants here ;-)
+
             }
             else if (type == StatusEffects.RAID_OMEN && duration > 2995 && duration < 2999) {
                 if(duration > 2995 && duration < 2999) {
