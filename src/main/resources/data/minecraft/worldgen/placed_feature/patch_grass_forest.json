@@ -21,13 +21,7 @@
                 {
                   "weight": 3,
                   "data": {
-                    "Name": "players-versus:clovers"
-                  }
-                },
-                {
-                  "weight": 1,
-                  "data": {
-                    "Name": "players-versus:white_clovers"
+                    "Name": "minecraft:brown_mushroom"
                   }
                 }
               ]

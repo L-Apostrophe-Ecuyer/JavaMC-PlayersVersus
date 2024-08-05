@@ -51,56 +51,6 @@
       },
       {
         "feature": {
-          "type": "minecraft:random_patch",
-          "config": {
-            "tries": 96,
-            "xz_spread": 7,
-            "y_spread": 3,
-            "feature": {
-              "feature": {
-                "type": "minecraft:simple_block",
-                "config": {
-                  "to_place": {
-                    "type": "minecraft:weighted_state_provider",
-                    "entries": [
-                      {
-                        "weight": 1,
-                        "data": {
-                          "Name": "players-versus:white_clovers"
-                        }
-                      },
-                      {
-                        "weight": 3,
-                        "data": {
-                          "Name": "players-versus:clovers"
-                        }
-                      },
-                      {
-                        "weight": 2,
-                        "data": {
-                          "Name": "minecraft:short_grass"
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              "placement": [
-                {
-                  "type": "minecraft:block_predicate_filter",
-                  "predicate": {
-                    "type": "minecraft:matching_blocks",
-                    "blocks": "minecraft:air"
-                  }
-                }
-              ]
-            }
-          }
-        },
-        "placement": []
-      },
-      {
-        "feature": {
           "type": "minecraft:no_bonemeal_flower",
           "config": {
             "tries": 96,

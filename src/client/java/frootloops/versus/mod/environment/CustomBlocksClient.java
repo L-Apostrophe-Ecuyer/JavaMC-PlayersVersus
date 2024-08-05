@@ -29,7 +29,7 @@ public class CustomBlocksClient {
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> {
             if (view == null || pos == null) return GrassColors.getDefaultColor();
             else return BiomeColors.getGrassColor(view, pos);
-        }, CustomBlocks.WHEAT_GRASS);
+        }, CustomBlocks.WHEAT_GRASS, CustomBlocks.CLOVERS, CustomBlocks.WHITE_CLOVERS);
     }
 
 }

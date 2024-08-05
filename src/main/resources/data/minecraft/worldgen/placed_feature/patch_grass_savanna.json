@@ -1,61 +1,33 @@
 {
   "feature": {
-    "type": "minecraft:random_patch",
+    "type": "minecraft:random_selector",
     "config": {
-      "tries": 32,
-      "xz_spread": 7,
-      "y_spread": 3,
-      "feature": {
-        "feature": {
-          "type": "minecraft:simple_block",
-          "config": {
-            "to_place": {
-              "type": "minecraft:weighted_state_provider",
-              "entries": [
-                {
-                  "weight": 32,
-                  "data": {
-                    "Name": "minecraft:short_grass"
-                  }
-                },
-                {
-                  "weight": 18,
-                  "data": {
-                    "Name": "players-versus:wheat_grass"
-                  }
-                },
-                {
-                  "weight": 2,
-                  "data": {
-                    "Name": "players-versus:wild_wheat"
-                  }
-                },
-                {
-                  "weight": 1,
-                  "data": {
-                    "Name": "minecraft:dead_bush"
-                  }
-                }
-              ]
-            }
+      "features": [
+        {
+          "chance": 0.1,
+          "feature": {
+            "feature": "players-versus:patch_wheat_grass_savanna",
+            "placement": []
           }
         },
-        "placement": [
-          {
-            "type": "minecraft:block_predicate_filter",
-            "predicate": {
-              "type": "minecraft:matching_blocks",
-              "blocks": "minecraft:air"
-            }
+        {
+          "chance": 0.2,
+          "feature": {
+            "feature": "players-versus:patch_wheat_grass",
+            "placement": []
           }
-        ]
+        }
+      ],
+      "default": {
+        "feature": "minecraft:patch_grass",
+        "placement": []
       }
     }
   },
   "placement": [
     {
       "type": "minecraft:count",
-      "count": 16
+      "count": 12
     },
     {
       "type": "minecraft:in_square"

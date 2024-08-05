@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "players-versus:block/clovers"
+    "layer0": "players-versus:item/clovers"
   }
 }

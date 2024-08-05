@@ -38,8 +38,8 @@ public class CloverBlock extends ShortPlantBlock {
         else {
             float rand = random.nextFloat();
             if(rand < 0.01f) Block.dropStack(world, pos, CustomBrewingItems.FOUR_LEAF_CLOVER.getDefaultStack());
-            else if(rand < 0.08f) Block.dropStack(world, pos, CustomBrewingItems.THREE_LEAF_CLOVER.getDefaultStack());
-            else if(rand < 0.4f) Block.dropStack(world, pos, Items.AZURE_BLUET.getDefaultStack());
+            else if(rand < 0.3f) Block.dropStack(world, pos, CustomBlockItems.CLOVERS_ITEM.getDefaultStack());
+            else if(rand < 0.4f) Block.dropStack(world, pos, CustomBlockItems.WHITE_CLOVERS_ITEM.getDefaultStack());
         }
     }
 

@@ -36,7 +36,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("four_leaf_clover", CustomBrewingItems.FOUR_LEAF_CLOVER, ItemGroups.INGREDIENTS);
-        registerCustomItem("three_leaf_clover", CustomBrewingItems.THREE_LEAF_CLOVER, ItemGroups.INGREDIENTS);
+        //registerCustomItem("three_leaf_clover", CustomBrewingItems.THREE_LEAF_CLOVER, ItemGroups.INGREDIENTS);  // Removed/cancelled
         registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
         registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART_ITEM, ItemGroups.INGREDIENTS);
         //registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.INGREDIENTS); -> Replacing Fermented Spider Eyes

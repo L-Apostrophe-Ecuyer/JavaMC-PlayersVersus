@@ -51,7 +51,7 @@
             },
             {
               "type": "minecraft:item",
-              "name": "players-versus:three_leaf_clover",
+              "name": "players-versus:clovers",
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
@@ -79,7 +79,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.008
+                  "chance": 0.007
                 },
                 {
                   "condition": "minecraft:inverted",
@@ -108,7 +108,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.005
+                  "chance": 0.004
                 }
               ]
             }

@@ -14,7 +14,7 @@ import static net.minecraft.item.Item.BASE_ATTACK_DAMAGE_MODIFIER_ID;
 public abstract class CustomBrewingItems {
 
     public static final Item FOUR_LEAF_CLOVER = new Item(new Item.Settings().attributeModifiers(AttributeModifiersComponent.builder().add(EntityAttributes.GENERIC_LUCK, new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, 1.0, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.OFFHAND).build()));
-    public static final Item THREE_LEAF_CLOVER = new Item(new Item.Settings());
+    //public static final Item THREE_LEAF_CLOVER = new Item(new Item.Settings());
     public static PotionItem BOTTLE_OF_ENDER;
     public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
     public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
