@@ -26,10 +26,12 @@
     "environment.BlockMixin",
     "environment.CropMixin",
 
-    "environment.TallFlowerMixin",
+
+    "environment.PointedDripstoneMixin",
     "environment.MinecartMixin",
     "environment.MossMixin",
     "environment.NetherWartMixin",
+    "environment.TallFlowerMixin",
     "environment.TntMixin",
     "environment.TorchMixin",
 
