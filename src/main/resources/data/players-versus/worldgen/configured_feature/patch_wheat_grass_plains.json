@@ -1,9 +1,9 @@
 {
   "type": "minecraft:random_patch",
   "config": {
-    "tries": 24,
+    "tries": 32,
     "xz_spread": 5,
-    "y_spread": 2,
+    "y_spread": 3,
     "feature": {
       "feature": {
         "type": "minecraft:simple_block",
@@ -12,15 +12,27 @@
             "type": "minecraft:weighted_state_provider",
             "entries": [
               {
-                "weight": 12,
+                "weight": 16,
                 "data": {
                   "Name": "minecraft:short_grass"
                 }
               },
               {
-                "weight": 10,
+                "weight": 14,
                 "data": {
                   "Name": "players-versus:wheat_grass"
+                }
+              },
+              {
+                "weight": 3,
+                "data": {
+                  "Name": "players-versus:wild_wheat"
+                }
+              },
+              {
+                "weight": 4,
+                "data": {
+                  "Name": "minecraft:dandelion"
                 }
               }
             ]
