@@ -1,4 +1,7 @@
 {
+  "death.attack.mud_suffocation": "%1$s suffocated while taking a mud bath",
+  "death.attack.mud_suffocation.item": "%1$s suffocated while taking a mud bath",
+
   "block.players-versus.brown_mud" : "Mud",
   "block.players-versus.brown_mud_bricks": "Mud Bricks",
   "block.players-versus.brown_mud_brick_slab": "Mud Brick Slab",

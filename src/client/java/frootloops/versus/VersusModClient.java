@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.CustomBlocksClient;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import static frootloops.versus.VersusMod.MOD_ID;

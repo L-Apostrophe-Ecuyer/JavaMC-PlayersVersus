@@ -4,9 +4,12 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.*;
 import net.minecraft.block.*;
 import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.entity.damage.DamageType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 
@@ -33,7 +36,7 @@ public class CustomBlocks {
     public static final Block POLISHED_STONE_SLAB = registerBlock("polished_stone_slab", new SlabBlock(AbstractBlock.Settings.copy(POLISHED_STONE)));
     public static final Block POLISHED_STONE_STAIRS = registerBlock("polished_stone_stairs", new StairsBlock(POLISHED_STONE.getDefaultState(), AbstractBlock.Settings.copy(POLISHED_STONE)));
 
-    public static final Block BROWN_MUD = registerBlock("brown_mud", new BrownMudBlock(AbstractBlock.Settings.copy(Blocks.MUD).mapColor(MapColor.BROWN).slipperiness(0.92f).velocityMultiplier(0.94f).dynamicBounds().solidBlock(Blocks::never)));
+    public static final Block BROWN_MUD = registerBlock("brown_mud", new BrownMudBlock(AbstractBlock.Settings.copy(Blocks.DIRT).mapColor(MapColor.BROWN).slipperiness(0.92f).velocityMultiplier(0.94f).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).suffocates(Blocks::never).sounds(BlockSoundGroup.MUD)));
     public static final Block BROWN_MUD_BRICKS = registerBlock("brown_mud_bricks",new Block(AbstractBlock.Settings.copy(Blocks.MUD_BRICKS).strength(1.1f, 2.5f)));
     public static final Block BROWN_MUD_BRICK_SLAB = registerBlock("brown_mud_brick_slab",new SlabBlock(AbstractBlock.Settings.copy(BROWN_MUD_BRICKS)));
     public static final Block BROWN_MUD_BRICK_STAIRS = registerBlock("brown_mud_brick_stairs", new StairsBlock(BROWN_MUD_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(BROWN_MUD_BRICKS)));

@@ -27,6 +27,6 @@ public abstract class CropMixin extends PlantBlock {
 
     @Override
     public boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) {
-        return (floor.getBlock() instanceof FarmlandBlock);
+        return (floor.isOf(Blocks.FARMLAND) || floor.isOf(CustomBlocks.BROWN_MUD));
     }
 }
