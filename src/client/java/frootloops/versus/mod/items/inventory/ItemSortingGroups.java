@@ -151,7 +151,7 @@ public class ItemSortingGroups {
                     if(ItemSortingGroups.ITEMS_PICKAXE_MINEABLE.containsKey(item)) {
                         for(int i = indexPickaxesEnd + 1; i < indexSortedStonesEnd; i++) {
                             if(ITEMS_PICKAXE_MINEABLE.get(item) <= ITEMS_PICKAXE_MINEABLE.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256)) {
-                                while(item == this.inventorySlots.get(i).stack.getItem() && i < indexSortedStonesEnd) {
+                                while(i < inventorySlots.size() && item == this.inventorySlots.get(i).stack.getItem() && i < indexSortedStonesEnd) {
                                     if(slot.stack.getCount() < this.inventorySlots.get(i).stack.getCount()) i++;
                                     else break;
                                 }
@@ -170,7 +170,7 @@ public class ItemSortingGroups {
                     else if(ItemSortingGroups.ITEMS_COPPER_BLOCKS.containsKey(item)) {
                         for(int i = indexSortedStonesEnd + 1; i < indexSortedCopperEnd; i++) {
                             if(ITEMS_COPPER_BLOCKS.get(item) <= ITEMS_COPPER_BLOCKS.get(this.inventorySlots.get(i).stack.getItem())) {
-                                while(item == this.inventorySlots.get(i).stack.getItem() && i < indexSortedCopperEnd) {
+                                while(i < inventorySlots.size() && item == this.inventorySlots.get(i).stack.getItem() && i < indexSortedCopperEnd) {
                                     if(slot.stack.getCount() < this.inventorySlots.get(i).stack.getCount()) i++;
                                     else break;
                                 }
@@ -396,6 +396,22 @@ public class ItemSortingGroups {
         int indexSpecialConsumables = 0;
         int indexFoods = 0;
         int indexMisc = 0;
+
+        @Override
+        public void merge(SortedItemGroup other) {
+            if(other instanceof AxeMineableItems axeGroup) {
+                for(int i = 0; i < axeGroup.indexAxesEnd; i++) {
+                    inventorySlots.add(indexWeaponsEnd, axeGroup.popFirst());
+                    indexWeaponsEnd++;
+                    indexShieldsAndRangedEnd++;
+                    indexSpecialConsumables++;
+                    indexFoods++;
+                    indexMisc++;
+                }
+            }
+            inventorySlots.addAll(other.inventorySlots);
+            other.clear();
+        }
 
         @Override
         public boolean tryInsert(InventorySlot slot) {

@@ -10,27 +10,16 @@
         ]
       },
       "trigger": "minecraft:inventory_changed"
-    },
-    "has_three_leaf_clovers": {
-      "conditions": {
-        "items": [
-          {
-            "items": "players-versus:three_leaf_clover"
-          }
-        ]
-      },
-      "trigger": "minecraft:inventory_changed"
     }
   },
   "requirements": [
     [
-      "has_clovers",
-      "has_three_leaf_clovers"
+      "has_clovers"
     ]
   ],
   "rewards": {
     "recipes": [
-      "players-versus:coloured_blocks/black_dye_from_bone_smelting"
+      "players-versus:coloured_blocks/green_dye_from_clovers"
     ]
   }
 }

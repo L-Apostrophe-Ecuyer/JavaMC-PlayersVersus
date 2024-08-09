@@ -1,24 +1,15 @@
 package frootloops.versus.mixin.client.items.inventory;
 
-import frootloops.versus.VersusMod;
+import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.search.SearchManager;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.resource.featuretoggle.FeatureSet;
+import net.minecraft.item.*;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,16 +17,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
-
 @Environment(EnvType.CLIENT)
 @Mixin(CreativeInventoryScreen.class)
 public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler>  {
 
     @Shadow private static ItemGroup selectedTab;
-
-    private static final ButtonTextures TEXTURE_HOTBAR_SWAP_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/hotbar_swap_down"), Identifier.of("players-versus", "container/hotbar_swap_down_highlighted"));
-    private static final ButtonTextures TEXTURE_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory"), Identifier.of("players-versus", "container/sort_inventory_highlighted"));
 
     private TexturedButtonWidget buttonHotbarSwap = null;
     private TexturedButtonWidget buttonSortInventory = null;
@@ -45,13 +31,24 @@ public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScre
         super(screenHandler, playerInventory, text);
     }
 
+    private static final Item[] itemArray = new Item[]{
+            Items.QUARTZ_BLOCK, Items.CALCITE, Items.CLAY, Items.ANDESITE, Items.STONE, Items.COBBLESTONE, Items.TUFF, Items.DEEPSLATE, Items.BLACKSTONE,
+            Items.RED_WOOL, Items.ORANGE_WOOL, Items.YELLOW_WOOL, Items.LIME_WOOL, Items.CYAN_WOOL, Items.BLUE_WOOL, Items.PURPLE_WOOL, Items.PINK_WOOL, Items.MAGENTA_WOOL,
+            Items.RED_TERRACOTTA, Items.ORANGE_TERRACOTTA, Items.YELLOW_TERRACOTTA, Items.LIME_TERRACOTTA, Items.CYAN_TERRACOTTA, Items.BLUE_TERRACOTTA, Items.PURPLE_TERRACOTTA, Items.PINK_TERRACOTTA, Items.MAGENTA_TERRACOTTA,
+            Items.APPLE, Items.GOLDEN_APPLE, Items.CARROT, Items.GOLDEN_CARROT, Items.BEETROOT, CustomBrewingItems.GLISTERING_BEETROOT, Items.MELON_SLICE, Items.GLISTERING_MELON_SLICE, Items.GOLD_INGOT};
+
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
         if (this.client.interactionManager.hasCreativeInventory()) {
 
-            this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 24, this.height / 2 - 36, 20, 18, TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
+            this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 24, this.height / 2 - 36, 20, 18, InventorySorting.TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
                 InventorySorting.doHotbarSwap(client, client.player.getInventory());
                 if(buttonHotbarSwap != null) buttonHotbarSwap.setFocused(false);
+            });
+
+            this.buttonSortInventory = new TexturedButtonWidget(this.x + 104 + 46, this.height / 2 - 36, 20, 18, InventorySorting.TEXTURE_INVENTORY_SORT_BUTTON, button -> {
+                if(client.player != null) InventorySorting.sortInventory(this.handler, client, client.player.getInventory(), InventorySorting.InventoryToSort.CREATIVE_INVENTORY);
+                if(buttonSortInventory != null) buttonSortInventory.setFocused(false);
             });
         }
     }
@@ -79,12 +76,14 @@ public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScre
         if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
             if(buttonHotbarSwap != null && !areButtonsVisible) {
                 this.addDrawableChild(buttonHotbarSwap);
+                this.addDrawableChild(buttonSortInventory);
                 areButtonsVisible = true;
             }
         }
         else {
             if(buttonHotbarSwap != null && areButtonsVisible) {
                 this.remove(buttonHotbarSwap);
+                this.remove(buttonSortInventory);
                 areButtonsVisible = false;
             }
         }

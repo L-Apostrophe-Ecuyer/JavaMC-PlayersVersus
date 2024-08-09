@@ -2,10 +2,13 @@ package frootloops.versus.mod.items.inventory;
 
 import frootloops.versus.VersusMod;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.Identifier;
 
 
 import static frootloops.versus.mod.items.inventory.ItemSortingGroups.*;
@@ -13,6 +16,19 @@ import static frootloops.versus.mod.items.inventory.ItemSortingGroups.*;
 public class InventorySorting {
 
     private static final boolean DEBUG_MODE = false;
+
+    public static final ButtonTextures TEXTURE_HOTBAR_SWAP_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/hotbar_swap_down"), Identifier.of("players-versus", "container/hotbar_swap_down_highlighted"));
+    public static final ButtonTextures TEXTURE_INVENTORY_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory"), Identifier.of("players-versus", "container/sort_inventory_highlighted"));
+    public static final ButtonTextures TEXTURE_SMALL_INVENTORY_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory_small"), Identifier.of("players-versus", "container/sort_inventory_small_highlighted"));
+    public static final ButtonTextures TEXTURE_CHEST_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_chest"), Identifier.of("players-versus", "container/sort_chest_highlighted"));
+    public static final ButtonTextures TEXTURE_SHULKER_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_shulker"), Identifier.of("players-versus", "container/sort_shulker_highlighted"));
+
+    public static enum InventoryToSort {
+        SURVIVAL_INVENTORY,
+        CREATIVE_INVENTORY,
+        INVENTORY_WHILE_CHEST_OPEN,
+        CONTAINER_INVENTORY,
+    }
 
     public static void swapItemsFromSlots(MinecraftClient client, PlayerInventory inventory, int slotOne, int slotTwo) {
         if(slotOne == slotTwo) return;
@@ -31,13 +47,18 @@ public class InventorySorting {
     }
 
 
-    public static void sortInventory(ScreenHandler handler, MinecraftClient client, PlayerInventory inventory) {
-        placeOrDropCursorStack(handler, client, inventory);
-        mergeStacksTogether(handler, client, inventory);
-        sortStacksIntoRows(handler, client, inventory);
+    public static void sortInventory(ScreenHandler handler, MinecraftClient client, Inventory inventory, InventoryToSort inventoryType) {
+        sortInventory(handler, client, inventory, inventoryType, 0, (inventoryType == InventoryToSort.CONTAINER_INVENTORY ? inventory.size() : 36));
     }
 
-    private static void placeOrDropCursorStack(ScreenHandler handler, MinecraftClient client, PlayerInventory inventory) {
+    public static void sortInventory(ScreenHandler handler, MinecraftClient client, Inventory inventory,  InventoryToSort inventoryType, int startingSlotIndex, int numSlots) {
+        placeOrDropCursorStack(handler, client, inventory);
+        mergeStacksTogether(handler, client, inventory, startingSlotIndex, numSlots);
+        sortStacksIntoRows(handler, client, inventory, startingSlotIndex, numSlots, inventoryType);
+    }
+
+
+    private static void placeOrDropCursorStack(ScreenHandler handler, MinecraftClient client, Inventory inventory) {
         ItemStack cursorStack = handler.getCursorStack();
         if(cursorStack.isEmpty()) return;
 
@@ -64,13 +85,14 @@ public class InventorySorting {
         client.interactionManager.clickSlot(handler.syncId, -999, 0, SlotActionType.THROW, client.player);
     }
 
-    private static void mergeStacksTogether(ScreenHandler handler, MinecraftClient client, PlayerInventory inventory) {
+    private static void mergeStacksTogether(ScreenHandler handler, MinecraftClient client, Inventory inventory, int startingSlotIndex, int totalNumSlots) {
         ItemStack stackOne, stackTwo;
-        for (int i = 9; i < 44; i++) {
+        int maxSlotIndex = startingSlotIndex + totalNumSlots + 9 + 1;
+        for (int i = startingSlotIndex + 9; i < maxSlotIndex; i++) {
             stackOne = inventory.getStack(i);
             if(stackOne.isEmpty() || !stackOne.isStackable() || stackOne.getCount() == stackOne.getMaxCount()) continue;
 
-            for (int j = i + 1; j < 44; j++) {
+            for (int j = i + 1; j < maxSlotIndex; j++) {
                 stackTwo = inventory.getStack(j);
                 if(stackTwo.isEmpty() || !stackTwo.isStackable() || stackTwo.getCount() == stackTwo.getMaxCount() || !ItemStack.areItemsAndComponentsEqual(stackOne, stackTwo)) continue;
                 client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP, client.player); // Grab the stack
@@ -80,9 +102,11 @@ public class InventorySorting {
         }
     }
 
-    public static void sortStacksIntoRows(ScreenHandler handler, MinecraftClient client, PlayerInventory inventory) {
+    public static void sortStacksIntoRows(ScreenHandler handler, MinecraftClient client, Inventory inventory, int startingSlotIndex, int totalNumSlots, InventoryToSort inventoryToSort) {
 
         if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("Started sorting! 8==============================================================================================D");
+        int numHotbars =  totalNumSlots / 9;
+        if(totalNumSlots < 2) return;
 
         // Note: Group order is important here
         ItemSortingGroups.SortedItemGroup[] sortedGroups = new ItemSortingGroups.SortedItemGroup[]{sortedRedstoneGroup, sortedPickaxeGroup, sortedCombatGroup, sortedAxeGroup, sortedShovelGroup, sortedHoesGroup, sortedShearsGroup, sortedRareGroup, sortedMiscGroup};
@@ -94,7 +118,7 @@ public class InventorySorting {
 
         // Sort stacks into groups:
         int numFilledSlots = 0, numEmptySlots = 0;
-        for(int i = 0; i < 36; i++) {
+        for(int i = 0; i < totalNumSlots; i++) {
             ItemStack stack = inventory.getStack(i);
             if(stack.isEmpty()) {
                 numEmptySlots++;
@@ -143,8 +167,8 @@ public class InventorySorting {
 
         // Organize groups into the four hotbars:
         if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("Organizing items into hotbars!");
-        int[] remappedSlots = new int[36];
-        int hotbarIndex = 0, hotbarSlotIndex = 0, numSlotsLeft = 36;
+        int[] remappedSlots = new int[totalNumSlots];
+        int hotbarIndex = 0, hotbarSlotIndex = 0, numSlotsLeft = totalNumSlots;
         for (SortedItemGroup group : sortedGroups) {
 
             // Check if we should skip to another hotbar:
@@ -158,7 +182,7 @@ public class InventorySorting {
             }
 
             // Attribute each ordered item of the group to the best positions in hotbars array:
-            while(hotbarIndex < 4 && group.size() > 0) {
+            while(hotbarIndex < numHotbars && group.size() > 0) {
                 remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] = group.popFirst().slodId() + 9;
                 if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Will move slot " + (remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] - 9) + " to " + (hotbarIndex * 9 + hotbarSlotIndex) + " to populate it with " + (remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] < 9 ? "Air" : (inventory.getStack(remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] - 9).isEmpty()? "Air" : inventory.getStack(remappedSlots[hotbarIndex * 9 + hotbarSlotIndex] - 9).getItem().getName().getString())));
                 hotbarSlotIndex++;
@@ -180,7 +204,7 @@ public class InventorySorting {
 
             String remappedSlotsStr = "";
             String remappedSlotsAndItemsStr = "";
-            for(int i = 0; i < 36; i++){
+            for(int i = 0; i < totalNumSlots; i++){
                 remappedSlotsStr += (remappedSlots[i] == 0 ? "  -," : (remappedSlots[i] - 9 < 10 ? "  " + (remappedSlots[i] - 9) + "," : " " + (remappedSlots[i] - 9) + ","));
                 remappedSlotsAndItemsStr  += (remappedSlots[i] < 9 ? " -," : " " + (inventory.getStack(remappedSlots[i] - 9).getItem().getName().getString() + ","));
                 if((i + 1) % 9 == 0) {
@@ -193,7 +217,7 @@ public class InventorySorting {
             VersusMod.MOD_LOGGER.warn("");
             VersusMod.MOD_LOGGER.warn("     Current: ");
 
-            for(int i = 0; i < 36; i++){
+            for(int i = 0; i < totalNumSlots; i++){
                 remappedSlotsStr += inventory.getStack(i).isEmpty() ? "  -," : (i < 10 ? "  " + i + "," : " " + i + ",");
                 remappedSlotsAndItemsStr  += (inventory.getStack(i).isEmpty() ? " -," : " " + (inventory.getStack(i).getItem().getName().getString() + ","));
                 if((i + 1) % 9 == 0) {
@@ -208,15 +232,16 @@ public class InventorySorting {
 
         // Sort the player's inventory accordingly!
         if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("Now actually modifying the player's inventory:");
-        int[] displacedSlots = new int[36];
+        int[] displacedSlots = new int[totalNumSlots];
         int slotOrigin = -1, prevOrigin = -1;
-        for(int slotDestination = 0; slotDestination < 36; slotDestination ++ ) {
+        for(int slotDestination = 0; slotDestination < totalNumSlots; slotDestination ++ ) {
 
                 slotOrigin = remappedSlots[slotDestination] - 9;
                 if(slotOrigin < 0) {
+                    if(inventory.getStack(slotDestination).isEmpty()) continue; // If the slot is meant to be empty, and already is, then no need to go through any more work
                     slotOrigin = slotDestination; // This is to make sure that, if for some reason there are no empty slots ahead (normally, impossible), then at least nothing breaks
                     prevOrigin = -1;
-                    for(int slotId = 35; slotId > slotDestination; slotId--) {
+                    for(int slotId = totalNumSlots - 1; slotId > slotDestination; slotId--) {
                         if(inventory.getStack(slotId).isEmpty()) {
                             slotOrigin = slotId;
                             break;
@@ -235,30 +260,65 @@ public class InventorySorting {
                     displacedSlots[slotDestination] = slotOrigin + 9;
 
                     if(DEBUG_MODE) {
-                        if (prevOrigin == -1) VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with empty slot " + slotOrigin);
+                        if (prevOrigin == -1) VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with empty slot " + slotOrigin + ((prevOrigin != slotOrigin) ? " (in array, slot was " + (remappedSlots[slotDestination] - 9) +")": ""));
                         else if (prevOrigin != slotOrigin) VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + prevOrigin + " (moved to " + slotOrigin + ")");
                         else VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + slotOrigin);
                         VersusMod.MOD_LOGGER.warn("                   Origin: " + slotOrigin + " (" + inventory.getStack(slotOrigin).getItem().getName().getString() + ")");
                         VersusMod.MOD_LOGGER.warn("                   Dest. : " + slotDestination + " (" + inventory.getStack(slotDestination).getItem().getName().getString() + ")");
                     }
 
-                    if(slotDestination < 9 && slotOrigin < 9) {
-                        client.interactionManager.clickSlot(handler.syncId, slotDestination + 36, slotOrigin, SlotActionType.SWAP, client.player);
+                    if(inventoryToSort == InventoryToSort.CREATIVE_INVENTORY) {
+                        ItemStack stackOrigin = inventory.getStack(slotOrigin).copy();
+                        inventory.setStack(slotOrigin, inventory.getStack(slotDestination).copy());
+                        inventory.setStack(slotDestination, stackOrigin);
                     }
-                    else if(slotDestination < 9) {
-                        client.interactionManager.clickSlot(handler.syncId, slotOrigin, slotDestination, SlotActionType.SWAP, client.player);
-                    }
-                    else if(slotOrigin < 9) {
-                        client.interactionManager.clickSlot(handler.syncId, slotDestination, slotOrigin, SlotActionType.SWAP, client.player);
-                    }
-                    else {
+                    else if(inventoryToSort == InventoryToSort.CONTAINER_INVENTORY) {
                         client.interactionManager.clickSlot(handler.syncId, slotOrigin, 8, SlotActionType.SWAP, client.player);
                         client.interactionManager.clickSlot(handler.syncId, slotDestination, 8, SlotActionType.SWAP, client.player);
                         client.interactionManager.clickSlot(handler.syncId, slotOrigin, 8, SlotActionType.SWAP, client.player);
                     }
+                    else if(inventoryToSort == InventoryToSort.INVENTORY_WHILE_CHEST_OPEN) {
+
+                        // Inversed hotbar: in containers and chests, the hotbar slot indexes go AFTER regular inventory slots rather than before.
+                        int actualSlotOrigin = (slotOrigin < 9) ? (slotOrigin + startingSlotIndex + 27) : slotOrigin + startingSlotIndex - 9;
+                        int actualSlotDest = (slotDestination < 9) ? (slotDestination + startingSlotIndex + 27) : slotDestination + startingSlotIndex - 9;
+                        int hotBarStartingIndex = startingSlotIndex + totalNumSlots - 9;
+
+                        if(actualSlotDest >= hotBarStartingIndex && actualSlotOrigin >= hotBarStartingIndex) {
+                            client.interactionManager.clickSlot(handler.syncId, actualSlotDest, (actualSlotOrigin - hotBarStartingIndex) % 9, SlotActionType.SWAP, client.player);
+                        }
+                        else if(actualSlotDest >= hotBarStartingIndex) {
+                            client.interactionManager.clickSlot(handler.syncId, actualSlotOrigin, (actualSlotDest - hotBarStartingIndex) % 9, SlotActionType.SWAP, client.player);
+                        }
+                        else if(slotOrigin >= hotBarStartingIndex) {
+                            client.interactionManager.clickSlot(handler.syncId, actualSlotDest, (actualSlotOrigin - hotBarStartingIndex) % 9, SlotActionType.SWAP, client.player);
+                        }
+                        else {
+                            client.interactionManager.clickSlot(handler.syncId, actualSlotOrigin, 8, SlotActionType.SWAP, client.player);
+                            client.interactionManager.clickSlot(handler.syncId, actualSlotDest, 8, SlotActionType.SWAP, client.player);
+                            client.interactionManager.clickSlot(handler.syncId, actualSlotOrigin, 8, SlotActionType.SWAP, client.player);
+                        }
+                    }
+                    else {
+                        if(slotDestination < 9 && slotOrigin < 9) {
+                            client.interactionManager.clickSlot(handler.syncId, slotDestination + totalNumSlots, slotOrigin, SlotActionType.SWAP, client.player);
+                        }
+                        else if(slotDestination < 9) {
+                            client.interactionManager.clickSlot(handler.syncId, slotOrigin, slotDestination, SlotActionType.SWAP, client.player);
+                        }
+                        else if(slotOrigin < 9) {
+                            client.interactionManager.clickSlot(handler.syncId, slotDestination, slotOrigin, SlotActionType.SWAP, client.player);
+                        }
+                        else {
+                            client.interactionManager.clickSlot(handler.syncId, slotOrigin, 8, SlotActionType.SWAP, client.player);
+                            client.interactionManager.clickSlot(handler.syncId, slotDestination, 8, SlotActionType.SWAP, client.player);
+                            client.interactionManager.clickSlot(handler.syncId, slotOrigin, 8, SlotActionType.SWAP, client.player);
+                        }
+                    }
                 }
 
         }
+        if(inventoryToSort == InventoryToSort.CREATIVE_INVENTORY) client.player.playerScreenHandler.sendContentUpdates();
 
         // Reset:
         for (SortedItemGroup group : sortedGroups) {

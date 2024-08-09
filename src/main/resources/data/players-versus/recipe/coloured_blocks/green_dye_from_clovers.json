@@ -1,11 +1,9 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    [
-      {
-        "item": "players-versus:clovers"
-      }
-    ]
+    {
+      "item": "players-versus:clovers"
+    }
   ],
   "result": {
     "id": "minecraft:green_dye",

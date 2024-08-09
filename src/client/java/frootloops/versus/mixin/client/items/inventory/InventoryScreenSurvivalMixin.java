@@ -3,7 +3,6 @@ package frootloops.versus.mixin.client.items.inventory;
 import frootloops.versus.mod.items.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
@@ -12,13 +11,13 @@ import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 
 @Environment(EnvType.CLIENT)
 @Mixin(InventoryScreen.class)
@@ -28,9 +27,6 @@ public abstract class InventoryScreenSurvivalMixin extends AbstractInventoryScre
         this.recipeBook = recipeBook;
     }
 
-    private static final ButtonTextures TEXTURE_HOTBAR_SWAP_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/hotbar_swap_down"), Identifier.of("players-versus", "container/hotbar_swap_down_highlighted"));
-    private static final ButtonTextures TEXTURE_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory"), Identifier.of("players-versus", "container/sort_inventory_highlighted"));
-
     @Shadow private final RecipeBookWidget recipeBook;
 
     private TexturedButtonWidget buttonHotbarSwap = null;
@@ -38,13 +34,13 @@ public abstract class InventoryScreenSurvivalMixin extends AbstractInventoryScre
 
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
-        this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 22, this.height / 2 - 22, 20, 18, TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
+        this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 22, this.height / 2 - 22, 20, 18, InventorySorting.TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
             InventorySorting.doHotbarSwap(client, client.player.getInventory());
             if(buttonHotbarSwap != null) buttonHotbarSwap.setFocused(false);
         });
 
-        this.buttonSortInventory = new TexturedButtonWidget(this.x + 104 + 44, this.height / 2 - 22, 20, 18, TEXTURE_SORT_BUTTON, button -> {
-            if(client.player != null) InventorySorting.sortInventory(this.handler, client, client.player.getInventory());
+        this.buttonSortInventory = new TexturedButtonWidget(this.x + 104 + 44, this.height / 2 - 22, 20, 18, InventorySorting.TEXTURE_INVENTORY_SORT_BUTTON, button -> {
+            if(client.player != null) InventorySorting.sortInventory(this.handler, client, client.player.getInventory(), InventorySorting.InventoryToSort.SURVIVAL_INVENTORY);
             if(buttonSortInventory != null) buttonSortInventory.setFocused(false);
         });
 
