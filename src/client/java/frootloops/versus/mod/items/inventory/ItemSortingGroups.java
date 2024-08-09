@@ -409,6 +409,36 @@ public class ItemSortingGroups {
                     indexMisc++;
                 }
             }
+            else if(other instanceof PickaxeMineableItems pickaxeGroup) {
+                for(int i = 0; i < pickaxeGroup.indexPickaxesEnd; i++) {
+                    inventorySlots.add(indexWeaponsEnd, pickaxeGroup.popFirst());
+                    indexWeaponsEnd++;
+                    indexShieldsAndRangedEnd++;
+                    indexSpecialConsumables++;
+                    indexFoods++;
+                    indexMisc++;
+                }
+            }
+            else if(other instanceof HoeMineableItems hoeGroup) {
+                for(int i = 0; i < hoeGroup.indexHoesEnd; i++) {
+                    inventorySlots.add(indexWeaponsEnd, hoeGroup.popFirst());
+                    indexWeaponsEnd++;
+                    indexShieldsAndRangedEnd++;
+                    indexSpecialConsumables++;
+                    indexFoods++;
+                    indexMisc++;
+                }
+            }
+            else if(other instanceof ShovelMineableItems shovelGroup) {
+                for(int i = 0; i < shovelGroup.indexShovelsEnd; i++) {
+                    inventorySlots.add(indexWeaponsEnd, shovelGroup.popFirst());
+                    indexWeaponsEnd++;
+                    indexShieldsAndRangedEnd++;
+                    indexSpecialConsumables++;
+                    indexFoods++;
+                    indexMisc++;
+                }
+            }
             inventorySlots.addAll(other.inventorySlots);
             other.clear();
         }
@@ -436,7 +466,7 @@ public class ItemSortingGroups {
             else if(item instanceof ConcentrateItem || item == Items.ROTTEN_FLESH || item == Items.SPIDER_EYE) {
                 return false;
             }
-            else if(item instanceof PotionItem || (item.getComponents().contains(DataComponentTypes.FOOD) && !item.getComponents().get(DataComponentTypes.FOOD).effects().stream().anyMatch(statusEffectEntry -> statusEffectEntry.effect().getEffectType().value().getCategory() == StatusEffectCategory.HARMFUL))) {
+            else if(item instanceof PotionItem || (item.getComponents().contains(DataComponentTypes.FOOD) && item.getComponents().get(DataComponentTypes.FOOD).effects().stream().anyMatch(statusEffectEntry -> statusEffectEntry.effect().getEffectType().value().getCategory() == StatusEffectCategory.BENEFICIAL))) {
                 this.inventorySlots.add(Math.min(inventorySlots.size(), indexSpecialConsumables), slot);
                 indexSpecialConsumables++;
                 indexFoods++;

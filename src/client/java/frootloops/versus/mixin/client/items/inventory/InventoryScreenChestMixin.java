@@ -31,7 +31,7 @@ public abstract class InventoryScreenChestMixin extends HandledScreen<GenericCon
             if(buttonSortChest != null) buttonSortChest.setFocused(false);
         });
 
-        this.buttonSortInventory = new TexturedButtonWidget(this.x + 155, this.y + 21 + (17 * handler.getRows()), 13, 11, InventorySorting.TEXTURE_SMALL_INVENTORY_SORT_BUTTON, button -> {
+        this.buttonSortInventory = new TexturedButtonWidget(this.x + 155, this.y + 21 + (17 * handler.getRows()) + (handler.getRows() > 4 ? 3 : 0), 13, 11, InventorySorting.TEXTURE_SMALL_INVENTORY_SORT_BUTTON, button -> {
             if(client.player != null) InventorySorting.sortInventory(this.handler, client, client.player.getInventory(), InventorySorting.InventoryToSort.INVENTORY_WHILE_CHEST_OPEN, handler.getRows() * 9, 36);
             if(buttonSortInventory != null) buttonSortInventory.setFocused(false);
         });

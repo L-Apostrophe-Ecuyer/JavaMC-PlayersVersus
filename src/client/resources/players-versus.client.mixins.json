@@ -20,8 +20,6 @@
 		"items.inventory.InventoryScreenSurvivalMixin",
 		"items.inventory.InventoryScreenCreativeMixin",
 
-		"items.inventory.InteractionManagerMixin",
-
 		"items.inventory.ItemMergingMixin",
 		"items.inventory.MinecraftClientMixin",
 
