@@ -15,7 +15,7 @@ import static frootloops.versus.mod.items.inventory.ItemSortingGroups.*;
 
 public class InventorySorting {
 
-    private static final boolean DEBUG_MODE = true;
+    private static final boolean DEBUG_MODE = false;
 
     public static final ButtonTextures TEXTURE_HOTBAR_SWAP_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/hotbar_swap_down"), Identifier.of("players-versus", "container/hotbar_swap_down_highlighted"));
     public static final ButtonTextures TEXTURE_INVENTORY_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory"), Identifier.of("players-versus", "container/sort_inventory_highlighted"));
@@ -135,7 +135,7 @@ public class InventorySorting {
         }
 
 
-        if(DEBUG_MODE) {
+        if(DEBUG_MODE || true) {
             VersusMod.MOD_LOGGER.warn("Groups before merging:");
             for (SortedItemGroup group : sortedGroups) {
                 if(group.size() == 0) continue;

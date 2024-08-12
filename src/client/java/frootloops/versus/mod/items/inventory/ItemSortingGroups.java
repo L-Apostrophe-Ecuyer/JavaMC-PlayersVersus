@@ -1,12 +1,12 @@
 package frootloops.versus.mod.items.inventory;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import net.minecraft.block.*;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.item.*;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.Rarity;
 
@@ -73,6 +73,38 @@ public class ItemSortingGroups {
             inventorySlots.add(maxIndex, slot);
         }
 
+        protected void insertMappedItemWithinBounds(InventorySlot slot, int startIndex, int maxIndex, Map<Item, Integer> mapping) {
+            if(!mapping.containsKey(slot.stack.getItem()) || startIndex == maxIndex) {
+                inventorySlots.add(maxIndex, slot);
+                return;
+            }
+
+            maxIndex = Math.min(maxIndex + 1, inventorySlots.size());
+            int score = mapping.get(slot.stack.getItem());
+            for(int i = startIndex; i < maxIndex; i++) {
+                int scoreOther = mapping.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256);
+
+                // If there's a match, then sort by stack size:
+                if(score == scoreOther) {
+                    while(i < inventorySlots.size() && slot.stack.getItem().getName() == this.inventorySlots.get(i).stack.getItem() && i < maxIndex) {
+                        if(slot.stack.getCount() < this.inventorySlots.get(i).stack.getCount()) i++;
+                        else {
+                            scoreOther = 256;
+                            break;
+                        }
+                    }
+                }
+
+                // If the slot's score is lower than the score of slot at position i, then insert right before i:
+                if(score < scoreOther) {
+                    this.inventorySlots.add(i, slot);
+                    return;
+                }
+            }
+            if(maxIndex >= inventorySlots.size()) inventorySlots.add(slot);
+            else inventorySlots.add(maxIndex, slot);
+        }
+
         private void forceInsert(InventorySlot slot) {
             if(!this.tryInsert(slot)) inventorySlots.add(slot);
         }
@@ -105,6 +137,10 @@ public class ItemSortingGroups {
         }
     }
 
+    /**
+     * -------------------------------------------------------------------------------------------------------------------------------------------------
+     */
+
 
     /**
      * REDSTONE
@@ -112,15 +148,8 @@ public class ItemSortingGroups {
     public static class RedstoneItems extends SortedItemGroup {
         @Override
         public boolean tryInsert(InventorySlot slot) {
-            Item item = slot.stack.getItem();
-            if(ItemSortingGroups.ITEMS_REDSTONE.containsKey(item)) {
-                for(int i = 0; i < inventorySlots.size(); i++) {
-                    if(ITEMS_REDSTONE.get(item) <= ITEMS_REDSTONE.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256)) {
-                        this.inventorySlots.add(i, slot);
-                        return true;
-                    }
-                }
-                this.inventorySlots.add(slot);
+            if(ItemSortingGroups.ITEMS_REDSTONE.containsKey(slot.stack.getItem())) {
+                this.insertMappedItemWithinBounds(slot, 0, inventorySlots.size(), ITEMS_REDSTONE);
                 return true;
             }
             return false;
@@ -148,39 +177,14 @@ public class ItemSortingGroups {
             }
             else if(item instanceof BlockItem blockItem) {
                 if(blockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
-                    if(ItemSortingGroups.ITEMS_PICKAXE_MINEABLE.containsKey(item)) {
-                        for(int i = indexPickaxesEnd + 1; i < indexSortedStonesEnd; i++) {
-                            if(ITEMS_PICKAXE_MINEABLE.get(item) <= ITEMS_PICKAXE_MINEABLE.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256)) {
-                                while(i < inventorySlots.size() && item == this.inventorySlots.get(i).stack.getItem() && i < indexSortedStonesEnd) {
-                                    if(slot.stack.getCount() < this.inventorySlots.get(i).stack.getCount()) i++;
-                                    else break;
-                                }
-
-                                this.inventorySlots.add(i, slot);
-                                indexSortedStonesEnd++;
-                                indexSortedCopperEnd++;
-                                return true;
-                            }
-                        }
-                        this.inventorySlots.add(indexSortedStonesEnd, slot);
+                    if(ItemSortingGroups.ITEMS_PICKAXE_MINEABLE.containsKey(item) && blockItem != Items.GRAVEL) {
+                        this.insertMappedItemWithinBounds(slot, indexPickaxesEnd + 1, indexSortedStonesEnd, ITEMS_PICKAXE_MINEABLE);
                         indexSortedStonesEnd++;
                         indexSortedCopperEnd++;
                         return true;
                     }
                     else if(ItemSortingGroups.ITEMS_COPPER_BLOCKS.containsKey(item)) {
-                        for(int i = indexSortedStonesEnd + 1; i < indexSortedCopperEnd; i++) {
-                            if(ITEMS_COPPER_BLOCKS.get(item) <= ITEMS_COPPER_BLOCKS.get(this.inventorySlots.get(i).stack.getItem())) {
-                                while(i < inventorySlots.size() && item == this.inventorySlots.get(i).stack.getItem() && i < indexSortedCopperEnd) {
-                                    if(slot.stack.getCount() < this.inventorySlots.get(i).stack.getCount()) i++;
-                                    else break;
-                                }
-
-                                this.inventorySlots.add(i, slot);
-                                indexSortedCopperEnd++;
-                                return true;
-                            }
-                        }
-                        this.inventorySlots.add(indexSortedCopperEnd, slot);
+                        this.insertMappedItemWithinBounds(slot, indexSortedStonesEnd + 1, indexSortedCopperEnd, ITEMS_COPPER_BLOCKS);
                         indexSortedCopperEnd++;
                         return true;
                     }
@@ -297,7 +301,7 @@ public class ItemSortingGroups {
      */
     public static class ShovelMineableItems extends SortedItemGroup {
         int indexShovelsEnd = 0;
-        int indexBlocksEnd = 0;
+        int indexMappedBlocksEnd = 0;
 
         @Override
         public boolean tryInsert(InventorySlot slot) {
@@ -305,14 +309,16 @@ public class ItemSortingGroups {
             if(item instanceof ShovelItem) {
                 this.insertToolWithinBounds(slot, 0, indexShovelsEnd);
                 indexShovelsEnd++;
-                indexBlocksEnd++;
+                indexMappedBlocksEnd++;
                 return true;
             }
             else if(item instanceof BlockItem blockItem) {
-                if(blockItem.getBlock().getDefaultState().isIn(BlockTags.SHOVEL_MINEABLE)) {
-                    this.insertWithinBounds(slot, indexShovelsEnd + 1, indexBlocksEnd);
-                    indexBlocksEnd++;
+                if(ItemSortingGroups.ITEMS_SHOVEL_MINEABLE.containsKey(blockItem)) {
+                    this.insertMappedItemWithinBounds(slot, indexShovelsEnd + 1, indexMappedBlocksEnd, ITEMS_SHOVEL_MINEABLE);
                     return true;
+                }
+                else if(blockItem.getBlock().getDefaultState().isIn(BlockTags.SHOVEL_MINEABLE)) {
+                    inventorySlots.add(indexMappedBlocksEnd + 1, slot);
                 }
             }
             return false;
@@ -321,7 +327,7 @@ public class ItemSortingGroups {
         @Override
         public void clear() {
             indexShovelsEnd = 0;
-            indexBlocksEnd = 0;
+            indexMappedBlocksEnd = 0;
             inventorySlots.clear();
         }
     }
@@ -518,15 +524,7 @@ public class ItemSortingGroups {
                 return true;
             }
             else if(ItemSortingGroups.ITEMS_MINERAL_RESSOURCES.containsKey(item)) {
-                for(int i = indexShulkersEnd + 1; i < indexRessourcesEnd; i++) {
-                    if(ITEMS_MINERAL_RESSOURCES.get(item) <= ITEMS_MINERAL_RESSOURCES.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256)) {
-                        this.inventorySlots.add(i, slot);
-                        indexRessourcesEnd++;
-                        indexConcentratesEnd++;
-                        return true;
-                    }
-                }
-                this.inventorySlots.add(indexRessourcesEnd, slot);
+                this.insertMappedItemWithinBounds(slot, indexShulkersEnd + 1, indexRessourcesEnd, ITEMS_MINERAL_RESSOURCES);
                 indexRessourcesEnd++;
                 indexConcentratesEnd++;
                 return true;
@@ -744,8 +742,8 @@ public class ItemSortingGroups {
         ITEMS_PICKAXE_MINEABLE.put(Items.ANDESITE_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.ANDESITE_STAIRS, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.ANDESITE_WALL, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.CALCITE, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE_STAIRS, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.DIORITE_WALL, indexPickaxeBlocks++);
@@ -775,21 +773,6 @@ public class ItemSortingGroups {
         ITEMS_PICKAXE_MINEABLE.put(Items.SMOOTH_RED_SANDSTONE_STAIRS, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.RED_SANDSTONE_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.RED_SANDSTONE_STAIRS, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.ORANGE_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.RED_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.YELLOW_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.WHITE_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.LIGHT_GRAY_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.GRAY_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.BROWN_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.GREEN_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.LIME_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.CYAN_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.BLACK_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.PINK_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.MAGENTA_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.PURPLE_TERRACOTTA, indexPickaxeBlocks++);
-        ITEMS_PICKAXE_MINEABLE.put(Items.BLUE_TERRACOTTA, indexPickaxeBlocks++);
 
         ITEMS_PICKAXE_MINEABLE.put(Items.CRACKED_DEEPSLATE_TILES, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.DEEPSLATE_TILES, indexPickaxeBlocks++);
@@ -859,6 +842,38 @@ public class ItemSortingGroups {
         ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_TILES_ITEM, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_TILES_SLAB_ITEM, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.BROWN_MUD_TILES_STAIRS_ITEM, indexPickaxeBlocks++);
+
+        ITEMS_PICKAXE_MINEABLE.put(Items.ORANGE_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.YELLOW_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.WHITE_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.LIGHT_GRAY_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GRAY_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BROWN_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GREEN_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.LIME_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CYAN_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLACK_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.PINK_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MAGENTA_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.PURPLE_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLUE_TERRACOTTA, indexPickaxeBlocks++);
+
+        ITEMS_PICKAXE_MINEABLE.put(Items.ORANGE_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.RED_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.YELLOW_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.WHITE_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.LIGHT_GRAY_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GRAY_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BROWN_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.GREEN_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.LIME_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.CYAN_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLACK_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.PINK_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.MAGENTA_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.PURPLE_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(Items.BLUE_GLAZED_TERRACOTTA, indexPickaxeBlocks++);
     }
 
     private static final Map<Item, Integer> ITEMS_SHOVEL_MINEABLE = new HashMap<>();
