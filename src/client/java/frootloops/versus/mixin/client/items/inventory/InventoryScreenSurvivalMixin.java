@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.client.items.inventory;
 
+import frootloops.versus.mod.items.inventory.HotbarCycling;
 import frootloops.versus.mod.items.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -35,7 +36,7 @@ public abstract class InventoryScreenSurvivalMixin extends AbstractInventoryScre
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
         this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 22, this.height / 2 - 22, 20, 18, InventorySorting.TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
-            InventorySorting.doHotbarSwap(client, client.player.getInventory());
+            HotbarCycling.doHotbarSwap(client, client.player.getInventory());
             if(buttonHotbarSwap != null) buttonHotbarSwap.setFocused(false);
         });
 
@@ -51,7 +52,7 @@ public abstract class InventoryScreenSurvivalMixin extends AbstractInventoryScre
     @Inject(method = "mouseClicked",at = @At("RETURN"), cancellable = false)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable info) {
         if(button == 2) {
-            InventorySorting.doHotbarSwap(client, client.player.getInventory());
+            HotbarCycling.doHotbarSwap(client, client.player.getInventory());
         }
         else {
             int posButtonsMinY = this.height / 2 - 22 - 1;

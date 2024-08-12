@@ -22,8 +22,6 @@
 		"items.inventory.InventoryScreenShulkerMixin",
 		"items.inventory.InventoryScreenShulkerAccessor",
 
-		"items.inventory.InteractionManagerMixin",
-
 		"items.inventory.ItemMergingMixin",
 		"items.inventory.MinecraftClientMixin",
 

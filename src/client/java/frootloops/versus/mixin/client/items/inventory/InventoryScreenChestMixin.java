@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.client.items.inventory;
 
+import frootloops.versus.mod.items.inventory.ContainerDumping;
 import frootloops.versus.mod.items.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,6 +18,9 @@ public abstract class InventoryScreenChestMixin extends HandledScreen<GenericCon
 
     private TexturedButtonWidget buttonSortChest = null;
     private TexturedButtonWidget buttonSortInventory = null;
+
+    private TexturedButtonWidget buttonQuickMoveToStorage = null;
+    private TexturedButtonWidget buttonQuickMoveToPlayer = null;
 
     public InventoryScreenChestMixin(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -36,7 +40,19 @@ public abstract class InventoryScreenChestMixin extends HandledScreen<GenericCon
             if(buttonSortInventory != null) buttonSortInventory.setFocused(false);
         });
 
+        this.buttonQuickMoveToPlayer = new TexturedButtonWidget(buttonSortInventory.getX() - 15, buttonSortInventory.getY(), 13, 11, ContainerDumping.TEXTURE_DUMP_TO_PLAYER_BUTTON, button -> {
+            if(client.player != null) ContainerDumping.quickDumpIntoPlayerInventory(this.handler, client, client.player.getInventory(), ((InventoryScreenShulkerAccessor)this.handler).getInventory());
+            if(buttonQuickMoveToPlayer != null) buttonQuickMoveToPlayer.setFocused(false);
+        });
+
+        this.buttonQuickMoveToStorage = new TexturedButtonWidget(buttonSortChest.getX() - 15, buttonSortChest.getY(), 13, 11, ContainerDumping.TEXTURE_DUMP_TO_STORAGE_BUTTON, button -> {
+            if(client.player != null) ContainerDumping.quickDumpIntoContainer(this.handler, client, client.player.getInventory(), ((InventoryScreenShulkerAccessor)this.handler).getInventory());
+            if(buttonQuickMoveToPlayer != null) buttonQuickMoveToPlayer.setFocused(false);
+        });
+
         this.addDrawableChild(buttonSortChest);
         this.addDrawableChild(buttonSortInventory);
+        this.addDrawableChild(buttonQuickMoveToPlayer);
+        this.addDrawableChild(buttonQuickMoveToStorage);
     }
 }

@@ -16,22 +16,22 @@ import java.util.Map;
 
 public class ItemSortingGroups {
 
-    public static SortedItemGroup sortedCombatGroup = new CombatItems();
-    public static SortedItemGroup sortedPickaxeGroup = new PickaxeMineableItems();
-    public static SortedItemGroup sortedAxeGroup = new AxeMineableItems();
-    public static SortedItemGroup sortedShovelGroup = new ShovelMineableItems();
-    public static SortedItemGroup sortedHoesGroup = new HoeMineableItems();
-    public static SortedItemGroup sortedShearsGroup = new ShearsMineableItems();
-    public static SortedItemGroup sortedRedstoneGroup = new RedstoneItems();
-    public static SortedItemGroup sortedRareGroup = new RareItems();
-    public static SortedItemGroup sortedMiscGroup = new MiscItems();
+    protected static SortedItemGroup sortedCombatGroup = new CombatItems();
+    protected static SortedItemGroup sortedPickaxeGroup = new PickaxeMineableItems();
+    protected static SortedItemGroup sortedAxeGroup = new AxeMineableItems();
+    protected static SortedItemGroup sortedShovelGroup = new ShovelMineableItems();
+    protected static SortedItemGroup sortedHoesGroup = new HoeMineableItems();
+    protected static SortedItemGroup sortedShearsGroup = new ShearsMineableItems();
+    protected static SortedItemGroup sortedRedstoneGroup = new RedstoneItems();
+    protected static SortedItemGroup sortedRareGroup = new RareItems();
+    protected static SortedItemGroup sortedMiscGroup = new MiscItems();
 
 
-    public record InventorySlot(int slodId, ItemStack stack) {}
-    public static abstract class SortedItemGroup {
-        public LinkedList<InventorySlot> inventorySlots = new LinkedList<>();
+    protected record InventorySlot(int slodId, ItemStack stack) {}
+    protected static abstract class SortedItemGroup {
+        protected LinkedList<InventorySlot> inventorySlots = new LinkedList<>();
 
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             for(int i = 0; i < inventorySlots.size(); i++) {
                 if(inventorySlots.get(i).slodId == slot.slodId) return true;
             }
@@ -74,12 +74,13 @@ public class ItemSortingGroups {
         }
 
         protected void insertMappedItemWithinBounds(InventorySlot slot, int startIndex, int maxIndex, Map<Item, Integer> mapping) {
-            if(!mapping.containsKey(slot.stack.getItem()) || startIndex == maxIndex) {
+            if(!mapping.containsKey(slot.stack.getItem()) || startIndex >= maxIndex) {
                 inventorySlots.add(maxIndex, slot);
                 return;
             }
+            maxIndex = Math.min(maxIndex + 1, inventorySlots.size() - 1);
+            startIndex = (startIndex > 0 && inventorySlots.size() > 0 && mapping.containsKey(inventorySlots.get(startIndex - 1).stack.getItem())) ? startIndex - 1 : startIndex; // If the previous stack's item belongs in the mapping, make sure to include it while sorting
 
-            maxIndex = Math.min(maxIndex + 1, inventorySlots.size());
             int score = mapping.get(slot.stack.getItem());
             for(int i = startIndex; i < maxIndex; i++) {
                 int scoreOther = mapping.getOrDefault(this.inventorySlots.get(i).stack.getItem(), 256);
@@ -109,28 +110,28 @@ public class ItemSortingGroups {
             if(!this.tryInsert(slot)) inventorySlots.add(slot);
         }
 
-        public int size() {
+        protected int size() {
             return inventorySlots.size();
         }
 
-        public InventorySlot popFirst() {
+        protected InventorySlot popFirst() {
             return inventorySlots.removeFirst();
         }
 
-        public InventorySlot popLast() {
+        protected InventorySlot popLast() {
             return inventorySlots.removeLast();
         }
 
-        public void merge(SortedItemGroup other) {
+        protected void merge(SortedItemGroup other) {
             inventorySlots.addAll(other.inventorySlots);
             other.clear();
         }
 
-        public void clear() {
+        protected void clear() {
             inventorySlots.clear();
         }
 
-        public void giveExtrasTo(SortedItemGroup other) {
+        protected void giveExtrasTo(SortedItemGroup other) {
             while(this.size() > 9) {
                 other.forceInsert(this.popLast());
             }
@@ -145,9 +146,9 @@ public class ItemSortingGroups {
     /**
      * REDSTONE
      */
-    public static class RedstoneItems extends SortedItemGroup {
+    protected static class RedstoneItems extends SortedItemGroup {
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             if(ItemSortingGroups.ITEMS_REDSTONE.containsKey(slot.stack.getItem())) {
                 this.insertMappedItemWithinBounds(slot, 0, inventorySlots.size(), ITEMS_REDSTONE);
                 return true;
@@ -160,13 +161,13 @@ public class ItemSortingGroups {
     /**
      * PICKAXES
      */
-    public static class PickaxeMineableItems extends SortedItemGroup {
+    protected static class PickaxeMineableItems extends SortedItemGroup {
         int indexPickaxesEnd = 0;
         int indexSortedStonesEnd = 0;
         int indexSortedCopperEnd = 0;
 
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof PickaxeItem) {
                 this.insertToolWithinBounds(slot, 0, indexPickaxesEnd);
@@ -175,9 +176,9 @@ public class ItemSortingGroups {
                 indexSortedCopperEnd++;
                 return true;
             }
-            else if(item instanceof BlockItem blockItem) {
+            else if(item instanceof BlockItem blockItem && blockItem != Items.GRAVEL) {
                 if(blockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
-                    if(ItemSortingGroups.ITEMS_PICKAXE_MINEABLE.containsKey(item) && blockItem != Items.GRAVEL) {
+                    if(ItemSortingGroups.ITEMS_PICKAXE_MINEABLE.containsKey(item)) {
                         this.insertMappedItemWithinBounds(slot, indexPickaxesEnd + 1, indexSortedStonesEnd, ITEMS_PICKAXE_MINEABLE);
                         indexSortedStonesEnd++;
                         indexSortedCopperEnd++;
@@ -198,7 +199,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public void clear() {
+        protected void clear() {
             indexPickaxesEnd = 0;
             indexSortedStonesEnd = 0;
             indexSortedCopperEnd = 0;
@@ -210,11 +211,11 @@ public class ItemSortingGroups {
     /**
      * HOES
      */
-    public static class HoeMineableItems extends SortedItemGroup {
+    protected static class HoeMineableItems extends SortedItemGroup {
         int indexHoesEnd = 0;
 
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof HoeItem) {
                 this.insertToolWithinBounds(slot, 0, indexHoesEnd);
@@ -231,7 +232,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public void clear() {
+        protected void clear() {
             indexHoesEnd = 0;
             inventorySlots.clear();
         }
@@ -241,14 +242,14 @@ public class ItemSortingGroups {
     /**
      * SHEARS
      */
-    public static class ShearsMineableItems extends SortedItemGroup {
+    protected static class ShearsMineableItems extends SortedItemGroup {
         int indexShearsEnd = 0;
         int indexCobwebEnd = 0;
         int indexWoolEnd = 0;
         int indexLeavesEnd = 0;
 
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof ShearsItem) {
                 this.insertToolWithinBounds(slot, 0, indexShearsEnd);
@@ -287,7 +288,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public void clear() {
+        protected void clear() {
             indexShearsEnd = 0;
             indexWoolEnd = 0;
             indexLeavesEnd = 0;
@@ -299,12 +300,12 @@ public class ItemSortingGroups {
     /**
      * SHOVELS
      */
-    public static class ShovelMineableItems extends SortedItemGroup {
+    protected static class ShovelMineableItems extends SortedItemGroup {
         int indexShovelsEnd = 0;
         int indexMappedBlocksEnd = 0;
 
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof ShovelItem) {
                 this.insertToolWithinBounds(slot, 0, indexShovelsEnd);
@@ -325,7 +326,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public void clear() {
+        protected void clear() {
             indexShovelsEnd = 0;
             indexMappedBlocksEnd = 0;
             inventorySlots.clear();
@@ -336,14 +337,14 @@ public class ItemSortingGroups {
     /**
      * AXES
      */
-    public static class AxeMineableItems extends SortedItemGroup {
+    protected static class AxeMineableItems extends SortedItemGroup {
         int indexAxesEnd = 0;
         int indexPlanksEnd = 0;
         int indexLogsEnd = 0;
         int indexSlabsAndStairsEnd = 0;
 
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof AxeItem) {
                 this.insertToolWithinBounds(slot, 0, indexAxesEnd);
@@ -383,7 +384,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public void clear() {
+        protected void clear() {
             indexAxesEnd = 0;
             indexPlanksEnd = 0;
             indexLogsEnd = 0;
@@ -396,7 +397,7 @@ public class ItemSortingGroups {
     /**
      * COMBAT
      */
-    public static class CombatItems extends SortedItemGroup {
+    protected static class CombatItems extends SortedItemGroup {
         int indexWeaponsEnd = 0;
         int indexShieldsAndRangedEnd = 0;
         int indexSpecialConsumables = 0;
@@ -404,7 +405,7 @@ public class ItemSortingGroups {
         int indexMisc = 0;
 
         @Override
-        public void merge(SortedItemGroup other) {
+        protected void merge(SortedItemGroup other) {
             if(other instanceof AxeMineableItems axeGroup) {
                 for(int i = 0; i < axeGroup.indexAxesEnd; i++) {
                     inventorySlots.add(indexWeaponsEnd, axeGroup.popFirst());
@@ -450,7 +451,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof SwordItem || item instanceof TridentItem || item instanceof MaceItem) {
                 this.insertToolWithinBounds(slot, 0, indexWeaponsEnd);
@@ -494,7 +495,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public void clear() {
+        protected void clear() {
             indexWeaponsEnd = 0;
             indexShieldsAndRangedEnd = 0;
             indexSpecialConsumables = 0;
@@ -508,13 +509,13 @@ public class ItemSortingGroups {
     /**
      * GOODIES
      */
-    public static class RareItems extends SortedItemGroup {
+    protected static class RareItems extends SortedItemGroup {
         int indexShulkersEnd = 0;
         int indexRessourcesEnd = 0;
         int indexConcentratesEnd = 0;
 
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ShulkerBoxBlock) {
                 this.insertWithinBounds(slot, 0, indexShulkersEnd);
@@ -542,7 +543,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public void clear() {
+        protected void clear() {
             indexShulkersEnd = 0;
             indexConcentratesEnd = 0;
             indexRessourcesEnd = 0;
@@ -554,7 +555,7 @@ public class ItemSortingGroups {
     /**
      * MISC
      */
-    public static class MiscItems extends SortedItemGroup {
+    protected static class MiscItems extends SortedItemGroup {
         int indexStorageEnd = 0;
         int indexToolsEnd = 0;
         int indexSingleStacksEnd = 0;
@@ -564,7 +565,7 @@ public class ItemSortingGroups {
         int indexMisc = 0;
 
         @Override
-        public boolean tryInsert(InventorySlot slot) {
+        protected boolean tryInsert(InventorySlot slot) {
             Item item = slot.stack.getItem();
             if(item instanceof BundleItem) {
                 this.inventorySlots.add(0, slot);
@@ -626,7 +627,7 @@ public class ItemSortingGroups {
         }
 
         @Override
-        public void clear() {
+        protected void clear() {
             indexStorageEnd = 0;
             indexToolsEnd = 0;
             indexSingleStacksEnd = 0;

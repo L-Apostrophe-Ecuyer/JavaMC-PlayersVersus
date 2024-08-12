@@ -1,5 +1,4 @@
 package frootloops.versus.mod.items.inventory;
-
 import frootloops.versus.VersusMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ButtonTextures;
@@ -30,79 +29,18 @@ public class InventorySorting {
         CONTAINER_INVENTORY,
     }
 
-    public static void swapItemsFromSlots(MinecraftClient client, PlayerInventory inventory, int slotOne, int slotTwo) {
-        if(slotOne == slotTwo) return;
-        ItemStack stackOne = inventory.getStack(slotOne);
-        ItemStack stackTwo = inventory.getStack(slotTwo);
-        if(stackOne.isEmpty() && stackTwo.isEmpty()) return;
-        client.interactionManager.clickSlot(0, slotTwo, slotOne, SlotActionType.SWAP, client.player);
-    }
-
-    public static void doHotbarSwap(MinecraftClient client, PlayerInventory inventory) {
-        for (int i = 0; i < 9; i++) {
-            swapItemsFromSlots(client, inventory, i, i + 9);
-            swapItemsFromSlots(client, inventory, i, i + 18);
-            swapItemsFromSlots(client, inventory, i, i + 27);
-        }
-    }
-
 
     public static void sortInventory(ScreenHandler handler, MinecraftClient client, Inventory inventory, InventoryToSort inventoryType) {
         sortInventory(handler, client, inventory, inventoryType, 0, (inventoryType == InventoryToSort.CONTAINER_INVENTORY ? inventory.size() : 36));
     }
 
     public static void sortInventory(ScreenHandler handler, MinecraftClient client, Inventory inventory,  InventoryToSort inventoryType, int startingSlotIndex, int numSlots) {
-        placeOrDropCursorStack(handler, client, inventory);
-        mergeStacksTogether(handler, client, inventory, startingSlotIndex, numSlots);
+        InventoryManagementHelper.placeOrDropCursorStack(handler, client, inventory);
+        InventoryManagementHelper.mergeStacksTogether(handler, client, inventory, startingSlotIndex, numSlots);
         sortStacksIntoRows(handler, client, inventory, startingSlotIndex, numSlots, inventoryType);
     }
 
-
-    private static void placeOrDropCursorStack(ScreenHandler handler, MinecraftClient client, Inventory inventory) {
-        ItemStack cursorStack = handler.getCursorStack();
-        if(cursorStack.isEmpty()) return;
-
-        // Find another stack to merge the cursor stack with:
-        if(cursorStack.isStackable() && cursorStack.getCount() < cursorStack.getMaxCount()) {
-            for (int i = 9; i < 44; i++) {
-                ItemStack otherStack = inventory.getStack(i);
-                if(!otherStack.isEmpty() && ItemStack.areItemsAndComponentsEqual(cursorStack, otherStack)) {
-                    client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP, client.player);
-                    if(cursorStack.getCount() == 0 || cursorStack.isEmpty()) return;
-                }
-            }
-        }
-
-        // Find an empty slot to insert the cursor stack in:
-        for (int i = 9; i < 44; i++) {
-            if(inventory.getStack(i).isEmpty()) {
-                client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP, client.player);
-                return;
-            }
-        }
-
-        // Drop the cursor stack:
-        client.interactionManager.clickSlot(handler.syncId, -999, 0, SlotActionType.THROW, client.player);
-    }
-
-    private static void mergeStacksTogether(ScreenHandler handler, MinecraftClient client, Inventory inventory, int startingSlotIndex, int totalNumSlots) {
-        ItemStack stackOne, stackTwo;
-        int maxSlotIndex = startingSlotIndex + totalNumSlots + 9 + 1;
-        for (int i = startingSlotIndex + 9; i < maxSlotIndex; i++) {
-            stackOne = inventory.getStack(i);
-            if(stackOne.isEmpty() || !stackOne.isStackable() || stackOne.getCount() == stackOne.getMaxCount()) continue;
-
-            for (int j = i + 1; j < maxSlotIndex; j++) {
-                stackTwo = inventory.getStack(j);
-                if(stackTwo.isEmpty() || !stackTwo.isStackable() || stackTwo.getCount() == stackTwo.getMaxCount() || !ItemStack.areItemsAndComponentsEqual(stackOne, stackTwo)) continue;
-                client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP, client.player); // Grab the stack
-                client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP_ALL, client.player); // Grab all matching items
-                if(!handler.getCursorStack().isEmpty()) client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP, client.player); // Place them back down
-            }
-        }
-    }
-
-    public static void sortStacksIntoRows(ScreenHandler handler, MinecraftClient client, Inventory inventory, int startingSlotIndex, int totalNumSlots, InventoryToSort inventoryToSort) {
+    private static void sortStacksIntoRows(ScreenHandler handler, MinecraftClient client, Inventory inventory, int startingSlotIndex, int totalNumSlots, InventoryToSort inventoryToSort) {
 
         if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("Started sorting! 8==============================================================================================D");
         int numHotbars =  totalNumSlots / 9;
