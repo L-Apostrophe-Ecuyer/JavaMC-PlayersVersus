@@ -98,6 +98,7 @@
     "mobs.hostile.MobEntityMixin",
     "mobs.hostile.MeleeAttackGoalMixin",
     "mobs.passive.VillagerEntityMixin",
+    "mobs.passive.WanderingTraderEntityMixin",
     "mobs.passive.SheepMixin",
     "mobs.passive.PigMixin",
     "mobs.passive.PolarBearMixin"

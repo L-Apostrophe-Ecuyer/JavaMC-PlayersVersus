@@ -1,0 +1,17 @@
+{
+  "values": [
+    "minecraft:ruined_portal_desert",
+    "minecraft:ruined_portal_jungle",
+    "minecraft:ruined_portal_mountain",
+    "minecraft:ruined_portal_swamp",
+    "minecraft:shipwreck_beached",
+    "minecraft:mineshaft_mesa",
+    "minecraft:trail_ruins",
+    "minecraft:desert_pyramid",
+    "minecraft:jungle_pyramid",
+    "players-versus:pyramid",
+    "players-versus:trail_ruins_cold",
+    "players-versus:trial_tower_cold",
+    "players-versus:trial_tower_warm"
+  ]
+}
