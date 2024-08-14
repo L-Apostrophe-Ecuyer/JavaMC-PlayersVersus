@@ -12,7 +12,10 @@
 		"mobs.hostile.shields.SkeletonModelMixin",
 		"mobs.hostile.shields.ZombieModelMixin",
 		"mobs.hostile.shields.PiglinModelMixin",
+
 		"mobs.hostile.overworld.SpiderRenderMixin",
+		"mobs.hostile.overworld.IllagerModelMixin",
+		"mobs.passive.VillagerRessemblingModelMixin",
 
 		"items.FirstPersonAnimationsMixin",
 		"items.inventory.HotbarSwappingClientMixin",
