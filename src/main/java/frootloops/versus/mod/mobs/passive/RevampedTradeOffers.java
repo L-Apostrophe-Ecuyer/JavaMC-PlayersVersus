@@ -81,9 +81,9 @@ public class RevampedTradeOffers {
         return Registries.MAP_DECORATION_TYPE.getEntry(decoration);
     }
 
-    private static final SellMapFactory SELL_RUINS_EXPLORER_MAP_TRADE = new SellMapFactory(7, ON_RUINS_EXPLORER_MAPS, "filled_map.custom_pv_ruins_explorer", MapDecorationTypes.JUNGLE_TEMPLE, 1, 5);
-    private static final SellMapFactory SELL_DANGEROUS_LOCATIONS_MAP_TRADE = new SellMapFactory(11, ON_DANGEROUS_LOCATIONS_MAPS, "filled_map.custom_pv_pillager", MapDecorationTypes.MANSION, 1, 10);
-    private static final SellMapFactory SELL_FORBIDDEN_CITY_MAP_TRADE = new SellMapFactory(51, ON_FORBIDDEN_CITY_MAPS, "filled_map.custom_pv_forbidden_city", MapDecorationTypes.BANNER_LIGHT_BLUE, 1, 15, Color.BLUE.getRGB());
+    private static final SellMapFactory SELL_RUINS_EXPLORER_MAP_TRADE = new SellMapFactory(7, ON_RUINS_EXPLORER_MAPS, "filled_map.custom_pv_ruins_explorer", MapDecorationTypes.JUNGLE_TEMPLE, 1, 5, MapColor.TERRACOTTA_BROWN.color);
+    private static final SellMapFactory SELL_DANGEROUS_LOCATIONS_MAP_TRADE = new SellMapFactory(11, ON_DANGEROUS_LOCATIONS_MAPS, "filled_map.custom_pv_pillager", MapDecorationTypes.MANSION, 1, 10, MapColor.TERRACOTTA_CYAN.color);
+    private static final SellMapFactory SELL_FORBIDDEN_CITY_MAP_TRADE = new SellMapFactory(41, ON_FORBIDDEN_CITY_MAPS, "filled_map.custom_pv_forbidden_city", MapDecorationTypes.BANNER_LIGHT_BLUE, 1, 15, MapColor.CYAN.color, false);
 
     private static final SellMapFactory SELL_DESERT_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapDecorationTypes.VILLAGE_DESERT, 12, 5);
     private static final SellMapFactory SELL_SAVANNA_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapDecorationTypes.VILLAGE_SAVANNA, 12, 5);
@@ -1240,12 +1240,17 @@ public class RevampedTradeOffers {
         private final int maxUses;
         private final int experience;
         private final int mapColor;
+        private final boolean useRegularCompass;
 
         public SellMapFactory(int price, TagKey<Structure> structure, String nameKey, RegistryEntry<MapDecorationType> decoration, int maxUses, int experience) {
-            this(price,structure,nameKey,decoration,maxUses,experience, decoration.value().hasMapColor() ? decoration.value().mapColor() : Colors.BLACK);
+            this(price,structure,nameKey,decoration,maxUses,experience, decoration.value().hasMapColor() ? decoration.value().mapColor() : Colors.BLACK, true);
         }
 
         public SellMapFactory(int price, TagKey<Structure> structure, String nameKey, RegistryEntry<MapDecorationType> decoration, int maxUses, int experience, int mapColor) {
+            this(price,structure,nameKey,decoration,maxUses,experience, mapColor, true);
+        }
+
+        public SellMapFactory(int price, TagKey<Structure> structure, String nameKey, RegistryEntry<MapDecorationType> decoration, int maxUses, int experience, int mapColor, boolean useRegularCompass) {
             this.price = price;
             this.structure = structure;
             this.nameKey = nameKey;
@@ -1253,6 +1258,7 @@ public class RevampedTradeOffers {
             this.maxUses = maxUses;
             this.experience = experience;
             this.mapColor = mapColor;
+            this.useRegularCompass = useRegularCompass;
         }
 
         @Override
@@ -1268,7 +1274,7 @@ public class RevampedTradeOffers {
                 FilledMapItem.fillExplorationMap(serverWorld, itemStack);
                 MapState.addDecorationsNbt(itemStack, blockPos, "+", this.decoration);
                 itemStack.set(DataComponentTypes.ITEM_NAME, Text.translatable(this.nameKey));
-                return new TradeOffer(new TradedItem(Items.EMERALD, this.price), Optional.of(new TradedItem(Items.COMPASS)), itemStack, this.maxUses, this.experience, 0.2f);
+                return new TradeOffer(new TradedItem(Items.EMERALD, this.price), (useRegularCompass ? Optional.of(new TradedItem(Items.COMPASS)) : Optional.of(new TradedItem(Items.RECOVERY_COMPASS))), itemStack, this.maxUses, this.experience, 0.2f);
             }
             return null;
         }
