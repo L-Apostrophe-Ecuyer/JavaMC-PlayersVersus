@@ -6,6 +6,7 @@ import net.minecraft.client.render.entity.model.IllagerEntityModel;
 import net.minecraft.client.render.entity.model.SinglePartEntityModel;
 import net.minecraft.client.render.entity.model.VillagerResemblingModel;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.mob.IllagerEntity;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(IllagerEntityModel.class)
-public abstract class IllagerModelMixin<T extends Entity> extends SinglePartEntityModel<T>  {
+public abstract class IllagerModelMixin<T extends IllagerEntity> extends SinglePartEntityModel<T>  {
 
     @Shadow private final ModelPart root;
 
@@ -35,8 +36,8 @@ public abstract class IllagerModelMixin<T extends Entity> extends SinglePartEnti
     }
 
 
-    @Inject(method = "getModelData", at = @At("RETURN"), cancellable = true)
-    private static void constructorHead(CallbackInfoReturnable<ModelData> cir) {
+    @Inject(method = "getTexturedModelData", at = @At("RETURN"), cancellable = true)
+    private static void getTexturedModelData(CallbackInfoReturnable<ModelData> cir) {
         ModelData modelData = cir.getReturnValue();
         ModelPartData modelPartData = modelData.getRoot().getChild(EntityModelPartNames.HEAD);
         modelPartData.addChild(EntityModelPartNames.LEFT_EAR, ModelPartBuilder.create().uv(56, 0).cuboid(0.0f, 0.0f, -2.0f, 1.0f, 5.0f, 3.0f, Dilation.NONE), ModelTransform.of(4.5f, -6.0f, 0.0f, 0.0f, 0.0f, -0.5235988f));
@@ -46,7 +47,7 @@ public abstract class IllagerModelMixin<T extends Entity> extends SinglePartEnti
 
 
     @Inject(method = "setAngles", at = @At("HEAD"))
-    public void setAngles(T mobEntity, float f, float g, float h, float i, float j, CallbackInfo info) {
+    public void setAngles(T illagerEntity, float f, float g, float h, float i, float j, CallbackInfo info) {
         float k = 0.5235988f;
         float l = h * 0.1f + f * 0.5f;
         float m = 0.08f + g * 0.4f;
