@@ -41,8 +41,8 @@ public abstract class VillagerRessemblingModelMixin<T extends Entity> extends Si
     private static void constructorHead(CallbackInfoReturnable<ModelData> cir) {
         ModelData modelData = cir.getReturnValue();
         ModelPartData modelPartData = modelData.getRoot().getChild(EntityModelPartNames.HEAD);
-        modelPartData.addChild(EntityModelPartNames.LEFT_EAR, ModelPartBuilder.create().uv(56, 0).cuboid(0.0f, 0.0f, -2.0f, 1.0f, 5.0f, 3.0f, Dilation.NONE), ModelTransform.of(4.5f, -6.0f, 0.0f, 0.0f, 0.0f, -0.5235988f));
-        modelPartData.addChild(EntityModelPartNames.RIGHT_EAR, ModelPartBuilder.create().uv(56, 0).cuboid(-1.0f, 0.0f, -2.0f, 1.0f, 5.0f, 3.0f, Dilation.NONE), ModelTransform.of(-4.5f, -6.0f, 0.0f, 0.0f, 0.0f, 0.5235988f));
+        modelPartData.addChild(EntityModelPartNames.LEFT_EAR, ModelPartBuilder.create().uv(56, 0).cuboid(0.0f, 0.0f, -2.0f, 1.0f, 4.0f, 3.0f, Dilation.NONE), ModelTransform.of(3.9f, -6.0f, 0.0f, 0.0f, 0.0f, -0.5235988f));
+        modelPartData.addChild(EntityModelPartNames.RIGHT_EAR, ModelPartBuilder.create().uv(56, 0).cuboid(-1.0f, 0.0f, -2.0f, 1.0f, 4.0f, 3.0f, Dilation.NONE), ModelTransform.of(-3.9f, -6.0f, 0.0f, 0.0f, 0.0f, 0.5235988f));
         cir.setReturnValue(modelData);
     }
 
