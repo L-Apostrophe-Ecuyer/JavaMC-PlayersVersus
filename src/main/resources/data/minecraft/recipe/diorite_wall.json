@@ -6,9 +6,14 @@
     "###"
   ],
   "key": {
-    "#": {
-      "tag": "players-versus:calcites"
-    }
+    "#": [
+      {
+        "item": "minecraft:calcite"
+      },
+      {
+        "item": "minecraft:diorite"
+      }
+    ]
   },
   "result": {
     "id": "minecraft:diorite_wall",

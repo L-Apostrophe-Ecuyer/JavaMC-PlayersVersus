@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(HoeItem.class)
-public class HoeItemMixin extends ToolItem {
-    public HoeItemMixin(ToolMaterial material, Settings settings) {
+public class Deprecated_HoeItemMixin extends ToolItem {
+    public Deprecated_HoeItemMixin(ToolMaterial material, Settings settings) {
         super(material, settings);
     }
 
@@ -39,7 +39,7 @@ public class HoeItemMixin extends ToolItem {
                 double attackChargeRequired = 1d + 0.2d * (3 - sweepLevel);
                 if (attackCharge >= attackChargeRequired) {
                     user.setCurrentHand(context.getHand());
-                    Combat.doSweepAttack(user, Combat.getAttackRange(user, attackCharge), sweepLevel);
+                    Combat.doSpecialSweepAttack(user, Combat.getAttackRange(user, attackCharge), sweepLevel);
                 }
             }
         }
@@ -54,7 +54,7 @@ public class HoeItemMixin extends ToolItem {
             double attackChargeRequired = 1d + 0.2d * (3 - sweepLevel);
             if (attackCharge >= attackChargeRequired) {
                 user.setCurrentHand(hand);
-                Combat.doSweepAttack(user, Combat.getAttackRange(user, attackCharge), sweepLevel);
+                Combat.doSpecialSweepAttack(user, Combat.getAttackRange(user, attackCharge), sweepLevel);
                 return TypedActionResult.consume(stack);
             }
         }

@@ -4,15 +4,12 @@ import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -24,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SwordItem.class)
 public class SwordItemMixin extends ToolItem {
+
     public SwordItemMixin(ToolMaterial material, Settings settings) {
         super(material, settings);
     }
@@ -47,10 +45,25 @@ public class SwordItemMixin extends ToolItem {
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return UseAction.BRUSH;
+        if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return UseAction.NONE;
         return UseAction.BLOCK;
     }
 
+    @Override
+    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+        if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return 0;
+        return 72000;
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return TypedActionResult.fail(stack);
+        user.setCurrentHand(hand);
+        return TypedActionResult.consume(stack);
+    }
+
+    /*
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
@@ -59,7 +72,7 @@ public class SwordItemMixin extends ToolItem {
         double attackChargeRequired = sweepLevel > 0 ? 1d + 0.2d * (3 - sweepLevel) : 1d;
         if(attackCharge >= attackChargeRequired) {
             user.setCurrentHand(hand);
-            Combat.doSweepAttack(user, Combat.getAttackRange(user,attackCharge), sweepLevel);
+            Combat.doSpecialSweepAttack(user, Combat.getAttackRange(user,attackCharge), sweepLevel);
             return TypedActionResult.consume(stack);
         }
         return TypedActionResult.fail(stack);
@@ -71,7 +84,7 @@ public class SwordItemMixin extends ToolItem {
             if (user instanceof PlayerEntity player) player.resetLastAttackedTicks();
             else user.onAttacking(user.getAttacking());
         }
-    }
+    }*/
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {

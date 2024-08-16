@@ -24,6 +24,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.raid.Raid;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
@@ -173,15 +174,17 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 3)
     private boolean doSweepingAttacksOnRegularSwings(boolean isSweep) {
-        return isSweep && (VersusSettings.DO_SWEEP_ON_REGULAR_SWORD_SWINGS || Enchants.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= 3);
+        return isSweep && (Enchants.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= VersusSettings.MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS);
     }
 
-
     @Inject(method = "attack", at = @At("TAIL"))
-    public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {
+    public void attackKnockbackKitingNerf(Entity target, CallbackInfo ci) {
         // Attacking while walking backwards deals less knockback:
         boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
-        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.6d, 0.8d, 0.6d));
+
+        // Attacking while walking backwards deals less knockback:
+        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.4d, 0.8d, 0.4d));
+        else if(target.getVelocity().lengthSquared() < 1.0 && target instanceof LivingEntity livingEntity) livingEntity.takeKnockback(0.5, this.getX() - target.getX(), this.getZ() - target.getZ());
     }
 
     @Override
