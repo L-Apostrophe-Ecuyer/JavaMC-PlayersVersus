@@ -83,7 +83,7 @@ public abstract class PigMixin extends AnimalEntity {
             else if (rand > 88) dugUpItem = Items.APPLE;
             else if (rand > 74) dugUpItem = Items.CARROT;
             else if (rand > 60) dugUpItem = Items.POTATO;
-            else dugUpItem = Items.WHEAT_SEEDS;
+            else dugUpItem = Items.BEETROOT_SEEDS;
         }
 
         for(int j = 0; j < count; ++j) {
