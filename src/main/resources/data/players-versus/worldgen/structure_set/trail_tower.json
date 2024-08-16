@@ -6,17 +6,23 @@
     },
     {
       "structure": "players-versus:trial_tower_cold",
-      "weight": 1
+      "weight": 2
     },
     {
       "structure": "players-versus:trial_tower_warm",
-      "weight": 1
+      "weight": 2
     }
   ],
   "placement": {
     "type": "minecraft:random_spread",
     "salt": 741493289,
-    "spacing": 64,
-    "separation": 24
+    "frequency_reduction_method": "default",
+    "frequency": 0.5,
+    "exclusion_zone": {
+      "other_set": "minecraft:villages",
+      "chunk_count": 8
+    },
+    "spacing": 48,
+    "separation": 16
   }
 }
