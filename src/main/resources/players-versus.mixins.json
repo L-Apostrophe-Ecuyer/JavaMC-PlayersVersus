@@ -92,6 +92,7 @@
 
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
+    "mobs.hostile.overworld.ZombieVillagerMixin",
     "mobs.hostile.overworld.ZombieEventListenerMixin",
     "mobs.hostile.nether.WitherSkeletonMixin",
 
