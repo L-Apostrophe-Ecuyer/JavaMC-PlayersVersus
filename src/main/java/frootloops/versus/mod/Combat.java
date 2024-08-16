@@ -17,7 +17,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
@@ -28,7 +27,6 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
 import java.util.List;
-import java.util.UUID;
 
 public abstract class Combat {
 
@@ -116,26 +114,37 @@ public abstract class Combat {
         return (range * range) > player.getEyePos().squaredDistanceTo(entity.getEyePos());
     }
 
-    public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {
+    public static void doSpecialSweepAttack(PlayerEntity player, double attackRange, int level) {
         if(level < 1) return;
 
         World world = player.getWorld();
         player.spawnSweepAttackParticles();
+        player.swingHand(player.getActiveHand());
+        //player.getItemCooldownManager().set(player.getActiveItem().getItem(), 19 - level * 2);
         world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
 
-        attackRange = attackRange - (0.5d * (double)(4 - level));
+        VersusMod.MOD_LOGGER.warn("SWEEP ATTACK: With range " + attackRange);
+
+        attackRange = attackRange - (0.5d * (double)(3 - level));
         double attackRangeSquared = attackRange * attackRange;
 
         // Attack entities:
-        Vec3d playerPos = player.getPos();
+        Vec3d playerPos = player.getEyePos();
         Box boundingBox = new Box(playerPos.x - attackRange, playerPos.y - attackRange, playerPos.z - attackRange, playerPos.x + attackRange, playerPos.y + attackRange, playerPos.z + attackRange);
         List<LivingEntity> entitiesInRange = world.getEntitiesByClass(LivingEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
         for (LivingEntity targetEntity : entitiesInRange) {
-            if(!player.isTeammate(targetEntity)) {
-                if (targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
+            if(!targetEntity.isTeammate(player) && targetEntity != player) {
+
+                VersusMod.MOD_LOGGER.warn("    -> Entity " + targetEntity.getName().getString() + " is in range? " + targetEntity.getEyePos().squaredDistanceTo(playerPos) + " < " + attackRangeSquared + "? " + (targetEntity.getEyePos().squaredDistanceTo(playerPos) < attackRangeSquared));
+                if(targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared) VersusMod.MOD_LOGGER.warn("       Entity " + targetEntity.getName().getString() + " is in sight? " + Combat.isLookingTowards(player, targetEntity.getPos()));
+
+                if (targetEntity.getEyePos().squaredDistanceTo(playerPos) - 2.0 < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
                     if(player.canSee(targetEntity)) {
+
+                        VersusMod.MOD_LOGGER.warn("       * Entity Attacked!!!");
+
                         player.setSprinting(true);
-                        ((LivingEntityAccessor) player).setLastAttackedTicks(20);
+                        ((LivingEntityAccessor) player).setLastAttackedTicks(8 + 2 * level);
                         player.attack(targetEntity);
                     }
                 }

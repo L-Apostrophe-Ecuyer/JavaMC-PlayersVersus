@@ -18,6 +18,7 @@
 		"mobs.passive.VillagerRessemblingModelMixin",
 
 		"items.FirstPersonAnimationsMixin",
+
 		"items.inventory.HotbarSwappingClientMixin",
 		"items.inventory.InventoryScreenChestMixin",
 		"items.inventory.InventoryScreenSurvivalMixin",

@@ -9,8 +9,7 @@ import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ToolItem;
+import net.minecraft.item.*;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import net.minecraft.util.UseAction;
@@ -44,14 +43,22 @@ public abstract class FirstPersonAnimationsMixin {
 
     @Inject(method = "renderFirstPersonItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getUseAction()Lnet/minecraft/util/UseAction;"), cancellable = true)
     private void renderFirstPersonItem(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack itemStack, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
-        if (itemStack.getItem() instanceof ToolItem) {
+        if (itemStack.getItem() instanceof ToolItem toolItem && (toolItem instanceof SwordItem || toolItem instanceof HoeItem)) {
             Arm arm = (hand == Hand.MAIN_HAND) ? player.getMainArm() : player.getMainArm().getOpposite();
             boolean isRightArm = arm == Arm.RIGHT;
-            this.applyEquipOffset(matrices, arm, equipProgress);
 
             UseAction action = itemStack.getUseAction();
-            if (action == UseAction.BLOCK) this.applyToolBlockingTransformation(matrices, arm);
-            else if(action == UseAction.BRUSH) this.applySweepingTransformation(matrices, tickDelta, arm, itemStack, equipProgress);
+            if (action == UseAction.BLOCK && toolItem instanceof SwordItem) {
+                this.applyEquipOffset(matrices, arm, equipProgress);
+                this.applyToolBlockingTransformation(matrices, arm);
+            }
+            /*
+            else if(action == UseAction.BRUSH && (toolItem instanceof SwordItem || toolItem instanceof HoeItem)) {
+                if(!itemStack.hasEnchantments()) return;
+                this.applyEquipOffset(matrices, arm, equipProgress);
+                this.applySweepingTransformation(matrices, tickDelta, arm, itemStack, equipProgress);
+            }*/
+            else return;
 
             ((HeldItemRenderer)((Object)this)).renderItem(player, itemStack, isRightArm ? ModelTransformationMode.FIRST_PERSON_RIGHT_HAND : ModelTransformationMode.FIRST_PERSON_LEFT_HAND, !isRightArm, matrices, vertexConsumers, light);
             matrices.pop();
@@ -78,6 +85,7 @@ public abstract class FirstPersonAnimationsMixin {
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0F));
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(m));
             matrices.translate(-0.3, 0.42, 0.35);
+
         } else {
             float f = (180f + (float)this.client.player.getItemUseTimeLeft()) - tickDelta + 1.0F;
             float g = 1.0F - f / (1000f);

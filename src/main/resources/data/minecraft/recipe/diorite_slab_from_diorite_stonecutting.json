@@ -1,8 +1,13 @@
 {
   "type": "minecraft:stonecutting",
-  "ingredient": {
-    "tag": "players-versus:calcites"
-  },
+  "ingredient": [
+    {
+      "item": "minecraft:calcite"
+    },
+    {
+      "item": "minecraft:diorite"
+    }
+  ],
   "result": {
     "id": "minecraft:diorite_slab",
     "count": 2

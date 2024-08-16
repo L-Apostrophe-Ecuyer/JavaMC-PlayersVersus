@@ -5,6 +5,9 @@
       "item": "minecraft:stone"
     },
     {
+      "item": "minecraft:stone_bricks"
+    },
+    {
       "item": "players-versus:polished_stone"
     }
   ],

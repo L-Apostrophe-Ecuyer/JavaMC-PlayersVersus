@@ -2,8 +2,6 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "pattern": [
-    "#  ",
-    "## ",
     "###"
   ],
   "key": {
@@ -17,7 +15,7 @@
     ]
   },
   "result": {
-    "id": "minecraft:diorite_stairs",
-    "count": 4
+    "id": "minecraft:diorite_slab",
+    "count": 6
   }
 }
