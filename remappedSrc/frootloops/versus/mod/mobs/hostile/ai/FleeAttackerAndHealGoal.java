@@ -68,7 +68,7 @@ public class FleeAttackerAndHealGoal<T extends LivingEntity> extends Goal {
             if (!isDrinkingPotion && canDrinkPotion) {
                 isDrinkingPotion = true;
                 drinkTimeLeft = 32;
-                if (!mob.isSilent()) mob.method_48926().playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENTITY_WITCH_DRINK, mob.getSoundCategory(), 1.0f, 1.0f);
+                if (!mob.isSilent()) mob.getWorld().playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENTITY_WITCH_DRINK, mob.getSoundCategory(), 1.0f, 1.0f);
             }
             else if (isDrinkingPotion && --this.drinkTimeLeft <= 0) {
                 isDrinkingPotion = false;

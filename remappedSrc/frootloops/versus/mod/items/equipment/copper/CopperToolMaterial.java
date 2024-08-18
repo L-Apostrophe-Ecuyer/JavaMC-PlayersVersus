@@ -15,12 +15,12 @@ public class CopperToolMaterial implements ToolMaterial {
 
     @Override
     public float getMiningSpeedMultiplier() {
-        return 12.0f;
+        return 13.0f;
     }
 
     @Override
     public float getAttackDamage() {
-        return 0.0f;
+        return 1.0f;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class CopperToolMaterial implements ToolMaterial {
 
     @Override
     public int getEnchantability() {
-        return -4;
+        return 1;
     }
 
     @Override

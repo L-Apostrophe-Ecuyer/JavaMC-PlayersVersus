@@ -115,7 +115,7 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
                 if(levelTool == 0 && repairEnchant.value().isAcceptableItem(toolStack)) {
                     boolean canAddNewEnchant = true;
                     for (RegistryEntry<Enchantment> toolEnchant : builder.getEnchantments()) {
-                        if (!toolEnchant.equals(repairEnchant) && !!Enchantment.canBeCombined(repairEnchant, toolEnchant)) {
+                        if (!toolEnchant.equals(repairEnchant) || !Enchantment.canBeCombined(repairEnchant, toolEnchant)) {
                             canAddNewEnchant = false;
                             break;
                         }

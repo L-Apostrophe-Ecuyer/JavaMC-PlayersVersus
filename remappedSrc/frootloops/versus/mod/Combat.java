@@ -1,7 +1,9 @@
 package frootloops.versus.mod;
 
 
-import frootloops.versus.mixin.players.attacking.LivingEntityAccessor;
+import frootloops.versus.VersusMod;
+import frootloops.versus.VersusSettings;
+import frootloops.versus.mixin.LivingEntityAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -10,11 +12,11 @@ import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
@@ -25,7 +27,6 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
 import java.util.List;
-import java.util.UUID;
 
 public abstract class Combat {
 
@@ -33,21 +34,22 @@ public abstract class Combat {
 
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
 
-    public static final double PLAYER_BASE_ATTACK_DAMAGE = 1.0d;
+    public static final double PLAYER_BASE_ATTACK_DAMAGE = 0.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
     public static final double PLAYER_MAX_ATTACK_SPEED = 2.5d;
+
     private static final String[] tools =
             new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
     private static final float[] toolsSpeed  =
             new float[]{1.0F,   1.5F,   2.0F,   1.2F,   1.5F};
     private static final float[] toolsDamage =
-            new float[]{8.0F,   4.0F,   1.0F,   1.0F,   3.0F};
+            new float[]{6.0F,   3.0F,   0.0F,   1.0F,   2.0F};
     private static final float[] toolsReachBonus =
             new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
 
     private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
-    private static final float[] toolTierDamageBonuses = new float[]{-1F, 0F, 1F, 1F, 2F, 3F};
+    private static final float[] toolTierDamageBonuses = new float[]{1F, 1F, 2F, 2F, 3F, 4F};
 
     public static float getAxeSpeedModifier() { return toolsSpeed[0] - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getSwordSpeedModifier() { return toolsSpeed[1] - (float)PLAYER_BASE_ATTACK_SPEED;}
@@ -63,11 +65,13 @@ public abstract class Combat {
     public static float getHoeReachModifier() { return toolsReachBonus[2];}
     public static float getSwordReachModifier() { return toolsReachBonus[1];}
     public static float getShovelReachModifier() { return toolsReachBonus[1];}
-    public static float getTridentDamageModifier() { return 10.0f - (float)PLAYER_BASE_ATTACK_DAMAGE;}
+    public static float getTridentDamageModifier() { return 9.0f - (float)PLAYER_BASE_ATTACK_DAMAGE;}
     public static float getTridentSpeedModifier() { return 1.0f - (float)PLAYER_BASE_ATTACK_SPEED;}
     public static float getTridentReachModifier() { return 1.0f;}
 
     public static void onInitialize() {
+
+
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {
@@ -110,26 +114,37 @@ public abstract class Combat {
         return (range * range) > player.getEyePos().squaredDistanceTo(entity.getEyePos());
     }
 
-    public static void doSweepAttack(PlayerEntity player, double attackRange, int level) {
+    public static void doSpecialSweepAttack(PlayerEntity player, double attackRange, int level) {
         if(level < 1) return;
 
-        World world = player.method_48926();
+        World world = player.getWorld();
         player.spawnSweepAttackParticles();
+        player.swingHand(player.getActiveHand());
+        //player.getItemCooldownManager().set(player.getActiveItem().getItem(), 19 - level * 2);
         world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
 
-        attackRange = attackRange - (0.5d * (double)(4 - level));
+        VersusMod.MOD_LOGGER.warn("SWEEP ATTACK: With range " + attackRange);
+
+        attackRange = attackRange - (0.5d * (double)(3 - level));
         double attackRangeSquared = attackRange * attackRange;
 
         // Attack entities:
-        Vec3d playerPos = player.getPos();
+        Vec3d playerPos = player.getEyePos();
         Box boundingBox = new Box(playerPos.x - attackRange, playerPos.y - attackRange, playerPos.z - attackRange, playerPos.x + attackRange, playerPos.y + attackRange, playerPos.z + attackRange);
         List<LivingEntity> entitiesInRange = world.getEntitiesByClass(LivingEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
         for (LivingEntity targetEntity : entitiesInRange) {
-            if(!player.isTeammate(targetEntity)) {
-                if (targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
+            if(!targetEntity.isTeammate(player) && targetEntity != player) {
+
+                VersusMod.MOD_LOGGER.warn("    -> Entity " + targetEntity.getName().getString() + " is in range? " + targetEntity.getEyePos().squaredDistanceTo(playerPos) + " < " + attackRangeSquared + "? " + (targetEntity.getEyePos().squaredDistanceTo(playerPos) < attackRangeSquared));
+                if(targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared) VersusMod.MOD_LOGGER.warn("       Entity " + targetEntity.getName().getString() + " is in sight? " + Combat.isLookingTowards(player, targetEntity.getPos()));
+
+                if (targetEntity.getEyePos().squaredDistanceTo(playerPos) - 2.0 < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
                     if(player.canSee(targetEntity)) {
+
+                        VersusMod.MOD_LOGGER.warn("       * Entity Attacked!!!");
+
                         player.setSprinting(true);
-                        ((LivingEntityAccessor) player).setLastAttackedTicks(20);
+                        ((LivingEntityAccessor) player).setLastAttackedTicks(8 + 2 * level);
                         player.attack(targetEntity);
                     }
                 }
@@ -201,7 +216,7 @@ public abstract class Combat {
         double dz = range * Math.cos(yawRadians) * Math.cos(pitchRadians);
         Vec3d direction = new Vec3d(dx, dy, dz);
 
-        World world = entity.method_48926();
+        World world = entity.getWorld();
         Vec3d posStart = entity.getEyePos();
         Vec3d posStop = posStart.add(direction);
 
@@ -244,5 +259,16 @@ public abstract class Combat {
         } else {
             return box;
         }
+    }
+
+    public static boolean canPlayerSprint(PlayerEntity player) {
+        return canPlayerSprint(player.getHungerManager());
+    }
+
+    public static boolean canPlayerSprint( HungerManager hungerManager) {
+        if(!VersusSettings.DO_FOOD_OVERHAUL) return hungerManager.getFoodLevel() > 6;
+        if(hungerManager.getFoodLevel() != 0) return true;
+        if(hungerManager.getSaturationLevel() > 0.0f) return true;
+        return false;
     }
 }

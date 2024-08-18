@@ -98,7 +98,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                 this.mob.setPose(EntityPose.CROUCHING);
                 this.mob.setVelocity(0, velocity.y, 0);
                 this.mob.setAttacking(false);
-                this.mob.getOffHandStack().usageTick(this.mob.method_48926(), this.mob, 8);
+                this.mob.getOffHandStack().usageTick(this.mob.getWorld(), this.mob, 8);
                 this.mob.setCurrentHand(Hand.OFF_HAND);
                 info.cancel();
 
@@ -139,7 +139,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         if(this.mob.timeUntilRegen > 4) return false;
 
         LivingEntity opponent = mob.getLastAttacker();
-        if(opponent == null) opponent = mob.method_48926().getClosestPlayer(mob, 8d);
+        if(opponent == null) opponent = mob.getWorld().getClosestPlayer(mob, 8d);
         if(opponent != null) {
 
             // If the enemy already attacked, and mob wasn't hurt, exit (attack of opportunity);
@@ -194,7 +194,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                 }
                 else if(canTrySwinging && target.getVehicle() == null && Combat.getMobAttackBox(mob, true).intersects(Combat.getEntityHitbox(target))) {
                     if(DEBUG) VersusMod.MOD_LOGGER.warn("Jump attack!");
-                    double jumpBlockMultiplier = mob.method_48926().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
+                    double jumpBlockMultiplier = mob.getWorld().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
                     double jumpVelocity = 0.5 * jumpBlockMultiplier + mob.getJumpBoostVelocityModifier();
                     mob.getVelocity().multiply(1.6);
                     mob.addVelocity(0.0, jumpVelocity, 0.0);

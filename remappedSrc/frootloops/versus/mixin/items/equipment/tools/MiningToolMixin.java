@@ -29,7 +29,7 @@ import static net.minecraft.item.Item.BASE_ATTACK_SPEED_MODIFIER_ID;
 @Mixin(MiningToolItem.class)
 public abstract class MiningToolMixin extends ToolItem {
 
-    public MiningToolMixin(ToolMaterial material, net.minecraft.item.Item.Settings settings) {
+    public MiningToolMixin(ToolMaterial material, Settings settings) {
         super(material, settings);
     }
 
@@ -65,9 +65,6 @@ public abstract class MiningToolMixin extends ToolItem {
             baseAttackDamage = Combat.getHoeDamageModifier();
             attackSpeed = Combat.getHoeSpeedModifier();
             attackReachBonus = Combat.getHoeReachModifier();
-        }
-        else {
-            VersusMod.MOD_LOGGER.warn("Tool wasn't registered: Damage of " + baseAttackDamage + " and speed of " + attackSpeed);
         }
 
         if(material == ToolMaterials.GOLD) baseAttackDamage += 2.0f;

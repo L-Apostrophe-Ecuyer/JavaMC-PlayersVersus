@@ -1,32 +1,35 @@
 package frootloops.versus.mixin.players;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
-import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.Combat;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BrushableBlock;
-import net.minecraft.block.ShulkerBoxBlock;
+import frootloops.versus.mod.enchantments.Enchants;
+import net.minecraft.block.*;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.PointOfInterestTypeTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.math.GlobalPos;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.village.raid.Raid;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.poi.PointOfInterestStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +37,6 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(PlayerEntity.class)
@@ -83,12 +85,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         return false; // Always return false, to avoid resetting cooldown
     }
 
-    @Inject(method = "getXpToDrop", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getXpToDrop", at = @At("HEAD"), cancellable = true)
     public void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
-        if (this.method_48926().getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+        PlayerEntity player = (PlayerEntity)((Object)this);
+        if(this.totalExperience == 0 || this.isExperienceDroppingDisabled() || this.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || this.isSpectator()) {
             cir.setReturnValue(0);
         } else {
-            cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1));
+            cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1) - 8);
         }
     }
 
@@ -100,59 +103,44 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
     public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
         if(abilities.creativeMode) cir.setReturnValue(Float.MAX_VALUE);
-        if (!this.isOnGround()) cir.setReturnValue(cir.getReturnValue() * 3f);
+        float breakingSpeed = cir.getReturnValue();
+        if (!this.isOnGround()) breakingSpeed *= 3f;
 
-        if(blockState.isOf(Blocks.COBWEB)) {
-            cir.setReturnValue(cir.getReturnValue() * 0.75f + 6f);
+        Block block = blockState.getBlock();
+        if(block == Blocks.COBWEB) {
+            cir.setReturnValue(breakingSpeed * 0.75f + 6f);
             return;
         }
 
-        if(blockState.getBlock() instanceof ShulkerBoxBlock) {
-            cir.setReturnValue(cir.getReturnValue() + 8f);
+        if(blockState.isBurnable() && blockState.getSoundGroup() == BlockSoundGroup.WOOD) {
+            cir.setReturnValue(breakingSpeed + 2f);
             return;
         }
 
-        if(blockState.getBlock() instanceof BrushableBlock) {
-            cir.setReturnValue(cir.getReturnValue() - 0.5f);
+        if(block.getHardness() == 6.0F && block.getDefaultMapColor() == MapColor.OFF_WHITE) {
+            cir.setReturnValue(breakingSpeed * 2.4f);
             return;
         }
+
+        if(block instanceof ShulkerBoxBlock) {
+            cir.setReturnValue(breakingSpeed + 8f);
+            return;
+        }
+
+        if(block instanceof BrushableBlock) {
+            cir.setReturnValue(breakingSpeed - 0.5f);
+            return;
+        }
+        cir.setReturnValue(breakingSpeed);
     }
 
     @Override
     protected float modifyAppliedDamage(DamageSource source, float amount) {
-        if(source.isOf(DamageTypes.SONIC_BOOM) && this.method_48926() instanceof ServerWorld serverWorld) {
+        if(source.isOf(DamageTypes.SONIC_BOOM) && this.getWorld() instanceof ServerWorld serverWorld) {
             float protectionAmount = EnchantmentHelper.getProtectionAmount(serverWorld, this, source);
             if (protectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, protectionAmount);
         }
         return super.modifyAppliedDamage(source, amount);
-    }
-
-
-    @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
-    private float rebalancedDamage(float amount2, DamageSource source, float amount) {
-
-        // Explosions don't hurt as much, or at least, the damage is more consistent:
-        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
-            return (amount + amount + 16.0f) / 4.0f;
-        }
-
-        // Hitting blocks while flying no longer neglects helmet protection:
-        // Should be datadriven
-        /*if(source.isOf(DamageTypes.FLY_INTO_WALL)) {
-            ItemStack helmetStack = this.getEquippedStack(EquipmentSlot.HEAD);
-            if(helmetStack != null && helmetStack.getItem() != null && helmetStack.getItem() instanceof ArmorItem helmetItem) {
-
-                float armorAmount = helmetItem.getProtection();
-                float toughnessAmount = helmetItem.getToughness();
-                float enchantmentProtectionAmount = (float)Math.max(
-                        Enchants.getLevel(getWorld(), helmetStack, Enchants.IMPACT_PROTECTION),
-                        Enchants.getLevel(getWorld(), helmetStack, Enchantments.PROTECTION)
-                );
-                if (enchantmentProtectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, enchantmentProtectionAmount);
-                return DamageUtil.getDamageLeft(this, amount, source, armorAmount, toughnessAmount);
-            }
-        }*/
-        return amount;
     }
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
@@ -174,23 +162,29 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             this.clearActiveItem();
             itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
         }
+
+        double amount = this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        if(amount < 0.75f && target instanceof LivingEntity livingEntity) {
+            double strength = this.isSprinting() ? 0.8 : 0.6;
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
+            livingEntity.takeKnockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
+        }
     }
 
-    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 4)
-    private boolean noSweepOnRegularAttacks(boolean sweepLevel) {
-        return false;
+
+    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 3)
+    private boolean doSweepingAttacksOnRegularSwings(boolean isSweep) {
+        return isSweep && (Enchants.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= VersusSettings.MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS);
     }
 
     @Inject(method = "attack", at = @At("TAIL"))
-    public void attackEnchantmentEffects(Entity target, CallbackInfo ci) {
+    public void attackKnockbackKitingNerf(Entity target, CallbackInfo ci) {
         // Attacking while walking backwards deals less knockback:
         boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
-        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.6d, 0.8d, 0.6d));
-    }
 
-    @Inject(method = "setLastDeathPos", at = @At("TAIL"))
-    public void setFoodLevelAfterDeath(Optional<GlobalPos> lastDeathPos, CallbackInfo ci) {
-        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+        // Attacking while walking backwards deals less knockback:
+        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.4d, 0.8d, 0.4d));
+        else if(target.getVelocity().lengthSquared() < 1.0 && target instanceof LivingEntity livingEntity) livingEntity.takeKnockback(0.5, this.getX() - target.getX(), this.getZ() - target.getZ());
     }
 
     @Override
@@ -208,7 +202,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     public void setSprinting(boolean sprinting) {
-        if(sprinting && this.hungerManager.getFoodLevel() == 0 && this.age - this.getLastAttackedTime() < 48) return; // No sprinting when damaged and no food points
-        else super.setSprinting(sprinting);
+        //if(sprinting && this.hungerManager.getFoodLevel() == 0 && this.getHealth() < 20.0f && (this.age - this.lastDamageTime > 160)) return;  // No sprinting when damaged and no food points
+        if(sprinting && !Combat.canPlayerSprint(this.hungerManager)) return;
+        super.setSprinting(sprinting);
     }
 }

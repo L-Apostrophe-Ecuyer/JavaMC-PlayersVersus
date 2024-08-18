@@ -5,6 +5,7 @@ import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -13,11 +14,11 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.World;
+import net.minecraft.world.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -52,7 +53,7 @@ public abstract class ZombieMixin extends HostileEntity {
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                         .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.1)
                         .add(EntityAttributes.GENERIC_ARMOR, 6.0)
-                        .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS, 0.06));
+                        .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS));
     }
 
     @Inject(method = "damage", at = @At("TAIL"), cancellable = true)
@@ -66,6 +67,15 @@ public abstract class ZombieMixin extends HostileEntity {
     }
 
     @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
+        BlockPos pos = this.getBlockPos();
+        if(pos.getY() < -16) return false;
+        if(world.getBlockState(pos.down()).isIn(BlockTags.AXE_MINEABLE)) return false;
+        return super.canSpawn(world, spawnReason);
+    }
+
+    @Override
     protected void loot(ItemEntity itemEntity) {
         if(itemEntity.getItemAge() > 160) super.loot(itemEntity);
     }
@@ -76,15 +86,15 @@ public abstract class ZombieMixin extends HostileEntity {
         super.initEquipment(random, localDifficulty);
         if(this.isBaby()) return;
 
-        float difficulty = this.method_48926().getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
+        float difficulty = this.getWorld().getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
         ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
 
-        float depth = Math.max(16.0f, 96.0f - (float)this.getBlockPos().getY());
-        float worldDepthExtraDifficulty = (depth * depth)/32768.0f;
+        float depth = Math.max(8.0f, 96.0f - (float)this.getBlockPos().getY());
+        float worldDepthExtraDifficulty = (depth * depth)/16384.0f;
         boolean haDifficultyBonusFromDepth = random.nextFloat() < (difficulty + worldDepthExtraDifficulty);
 
+        int rand = random.nextInt(150);
         if (haDifficultyBonusFromDepth) {
-            int rand = random.nextInt(150);
             if(rand % 2 == 0 || rand % 7 == 0) {
                 this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
                 this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 80);
@@ -130,6 +140,16 @@ public abstract class ZombieMixin extends HostileEntity {
                 this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15F;
             }
         }
+        else if(rand <= 55) {
+
+            if(rand % 4 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.OAK_LOG,  random.nextInt(3) + rand));
+            else if(rand % 5 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.OAK_PLANKS,  random.nextInt(8) + rand));
+            else if(rand % 7 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICKS,  random.nextInt(4) + rand));
+            else if(rand % 11 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICK,  random.nextInt(6) + rand));
+            else this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.COPPER_INGOT,  random.nextInt(4)));
+
+            this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.9F;
+        }
 
         // Bit less attack damage when wielding weapons:
         if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
@@ -146,7 +166,7 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Inject(method = "setBaby", at = @At(value = "TAIL"), cancellable = false)
     public void babiesArentNinjas(boolean baby, CallbackInfo info) {
-        if (this.method_48926() != null && !this.method_48926().isClient) {
+        if (this.getWorld() != null && !this.getWorld().isClient) {
             this.setHealth(12.0f);
         }
     }

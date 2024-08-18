@@ -31,10 +31,10 @@ public abstract class MinecartMixin extends VehicleEntity {
         int i = MathHelper.floor(this.getX());
         int j = MathHelper.floor(this.getY());
         int k = MathHelper.floor(this.getZ());
-        if (this.method_48926().getBlockState(new BlockPos(i, j - 1, k)).isIn(BlockTags.RAILS)) {
+        if (this.getWorld().getBlockState(new BlockPos(i, j - 1, k)).isIn(BlockTags.RAILS)) {
             --j;
         }
-        BlockState blockState = this.method_48926().getBlockState(new BlockPos(i, j, k));
+        BlockState blockState = this.getWorld().getBlockState(new BlockPos(i, j, k));
         if(AbstractRailBlock.isRail(blockState)) {
             RailShape railShape = blockState.get(((AbstractRailBlock)blockState.getBlock()).getShapeProperty());
             if(railShape == RailShape.EAST_WEST || railShape == RailShape.NORTH_SOUTH) return 24.0;

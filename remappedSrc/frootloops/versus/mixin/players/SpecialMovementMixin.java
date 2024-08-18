@@ -1,11 +1,7 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
+import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -14,8 +10,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
@@ -27,8 +21,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static frootloops.versus.VersusMod.DEBUG_MODE;
-import static frootloops.versus.mod.enchantments.Enchants.BOUNDING_STRIDES;
+import static frootloops.versus.mod.enchantments.CustomEnchants.BOUNDING_STRIDES;
 
 
 @Mixin(PlayerEntity.class)
@@ -47,7 +40,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         ItemStack leggings = this.getEquippedStack(EquipmentSlot.LEGS);
         if(leggings.isEmpty() || !leggings.hasEnchantments()) return;
 
-        double boundingStridesLevel = Enchants.getLevel(method_48926(), leggings, BOUNDING_STRIDES);
+        double boundingStridesLevel = Enchants.getLevel(getWorld(), leggings, BOUNDING_STRIDES);
         if(boundingStridesLevel > 0) {
 
             double velocityY = (double) this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
@@ -89,7 +82,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                     double d = this.random.nextGaussian() * 0.02 - velocityX;
                     double e = this.random.nextGaussian() * 0.02 + 0.01;
                     double f = this.random.nextGaussian() * 0.02 - velocityZ;
-                    this.method_48926().addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
+                    this.getWorld().addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
                 }
                 this.spawnSprintingParticles();
                 this.playBlockFallSound();
