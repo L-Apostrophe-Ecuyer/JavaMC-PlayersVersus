@@ -24,7 +24,7 @@ public abstract class VexMixin extends HostileEntity {
 
     @Inject(method = "initialize", at = @At("HEAD"))
     private void decreaseHealth(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
-        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
         if (instanceHP != null) {
             instanceHP.setBaseValue(8.0D);
             this.setHealth(this.getMaxHealth());

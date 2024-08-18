@@ -43,7 +43,8 @@ public abstract class FirstPersonAnimationsMixin {
 
     @Inject(method = "renderFirstPersonItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getUseAction()Lnet/minecraft/util/UseAction;"), cancellable = true)
     private void renderFirstPersonItem(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack itemStack, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
-        if (itemStack.getItem() instanceof ToolItem toolItem && (toolItem instanceof SwordItem || toolItem instanceof HoeItem)) {
+        Item toolItem = itemStack.getItem();
+        if (toolItem instanceof SwordItem) {
             Arm arm = (hand == Hand.MAIN_HAND) ? player.getMainArm() : player.getMainArm().getOpposite();
             boolean isRightArm = arm == Arm.RIGHT;
 

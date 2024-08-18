@@ -14,6 +14,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,16 +34,23 @@ public abstract class SpecialMovementMixin extends LivingEntity {
 
     @Shadow public void incrementStat(Identifier stat) {}
 
-    @Inject(method = "jump", at = @At(value = "HEAD"), cancellable = true)
-    private void jump(CallbackInfo info) {
+
+
+    @Override
+    public void jump() {
 
         // Bounding strides:
         ItemStack leggings = this.getEquippedStack(EquipmentSlot.LEGS);
-        if(leggings.isEmpty() || !leggings.hasEnchantments()) return;
+        if(leggings.isEmpty()) {
+            super.jump();
+            return;
+        }
 
         double boundingStridesLevel = Enchants.getLevel(getWorld(), leggings, BOUNDING_STRIDES);
-        if(boundingStridesLevel > 0) {
-
+        if(boundingStridesLevel <= 0) {
+            super.jump();
+        }
+        else {
             double velocityY = (double) this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
             double velocityX = this.getVelocity().x;
             double velocityZ = this.getVelocity().z;
@@ -86,7 +94,6 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                 }
                 this.spawnSprintingParticles();
                 this.playBlockFallSound();
-                info.cancel();
             }
         }
     }

@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.equipment;
+package frootloops.versus.mod.items.equipment.custom;
 
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;

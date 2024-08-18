@@ -28,7 +28,7 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
 
     @Override
     public void shootAt(LivingEntity target, float pullProgress) {
-        SnowballEntity snowballEntity = new SnowballEntity(this.getWorld(), this);
+        SnowballEntity snowballEntity = new SnowballEntity(this.getWorld(), this, this.getOffHandStack());
         double d = target.getEyeY() - (double)1.1f;
         double e = target.getX() - this.getX();
         double f = d - snowballEntity.getY();
@@ -61,7 +61,7 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
     }
 
     public static DefaultAttributeContainer.Builder createFrostedAttributes() {
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 14.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25f).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0).add(EntityAttributes.GENERIC_ARMOR, 2.0).add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.FOLLOW_RANGE, 14.0).add(EntityAttributes.MOVEMENT_SPEED, 0.25f).add(EntityAttributes.ATTACK_DAMAGE, 2.0).add(EntityAttributes.ARMOR, 2.0).add(EntityAttributes.SPAWN_REINFORCEMENTS);
     }
 
     @Override

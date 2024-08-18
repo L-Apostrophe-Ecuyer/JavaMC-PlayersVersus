@@ -4,7 +4,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +20,7 @@ public class ElytraFireworksMixin extends Item {
     }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    private void fireworksTweak(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
+    private void fireworksTweak(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         if(!world.isClient && user.isFallFlying() && !user.getAbilities().creativeMode) {
             ItemStack elytraStack = user.getEquippedStack(EquipmentSlot.CHEST);
             if(elytraStack.isOf(Items.ELYTRA)) {

@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.equipment;
+package frootloops.versus.mod.items.equipment.custom;
 
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -14,9 +14,9 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Rarity;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -71,12 +71,12 @@ public class RecoveryCompassItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         Optional<GlobalPos> lastDeathPos = user.getLastDeathPos(); // Check if in same dimension as last death location:
-        if(!lastDeathPos.isPresent() || lastDeathPos.get().dimension() != world.getRegistryKey()) return TypedActionResult.fail(itemStack);
+        if(!lastDeathPos.isPresent() || lastDeathPos.get().dimension() != world.getRegistryKey()) return ActionResult.FAIL;
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return ActionResult.CONSUME;
     }
 
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {

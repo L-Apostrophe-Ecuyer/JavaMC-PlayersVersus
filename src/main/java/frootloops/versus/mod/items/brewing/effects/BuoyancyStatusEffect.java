@@ -16,7 +16,7 @@ public class BuoyancyStatusEffect extends StatusEffect  {
         super(category, color, ParticleTypes.BUBBLE_COLUMN_UP);
 
         this.addAttributeModifier(
-                EntityAttributes.GENERIC_WATER_MOVEMENT_EFFICIENCY, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.WATER_MOVEMENT_EFFICIENCY, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 0.2, EntityAttributeModifier.Operation.ADD_VALUE
         );
     }

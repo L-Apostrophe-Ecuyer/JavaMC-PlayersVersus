@@ -24,16 +24,16 @@ public class WitherSkeletonMixin extends HostileEntity {
 
     @Inject(method = "initialize", at = @At("TAIL"))
     private void decreaseHealth(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
-        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
         if (instanceHP != null) {
             instanceHP.setBaseValue(40.0D);
             this.setHealth(this.getMaxHealth());
         }
 
-        EntityAttributeInstance instanceKnockbackRes = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
+        EntityAttributeInstance instanceKnockbackRes = this.getAttributes().getCustomInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
         if (instanceKnockbackRes != null) instanceKnockbackRes.setBaseValue(0.5D);
 
-        EntityAttributeInstance instanceKnockbackAtk = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_KNOCKBACK);
+        EntityAttributeInstance instanceKnockbackAtk = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_KNOCKBACK);
         if (instanceKnockbackAtk != null) instanceKnockbackAtk.setBaseValue(1.25D);
     }
 }

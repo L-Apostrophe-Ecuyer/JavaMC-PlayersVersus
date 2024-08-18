@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -59,13 +60,13 @@ public class HungerBarRendererMixin {
 
             // Draw the border icon:
             halfHaunchFoodValue = renderedHaunch * 2 + 1;
-            if(halfHaunchFoodValue < foodPointsAvailable) context.drawGuiTexture(iconHaunchEmpty, x, y, 9, 9);
-            else if(halfHaunchFoodValue == foodPointsAvailable) context.drawGuiTexture(iconHaunchHalfDisabled, x, y, 9, 9);
-            else context.drawGuiTexture(iconHaunchEmptyDisabled, x, y, 9, 9);
+            if(halfHaunchFoodValue < foodPointsAvailable) context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchEmpty, x, y, 9, 9);
+            else if(halfHaunchFoodValue == foodPointsAvailable) context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchHalfDisabled, x, y, 9, 9);
+            else context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchEmptyDisabled, x, y, 9, 9);
 
             // Draw the food points icon:
-            if (halfHaunchFoodValue < playerFoodLevel) context.drawGuiTexture(iconHaunchFull, x, y, 9, 9);
-            else if (halfHaunchFoodValue == playerFoodLevel) context.drawGuiTexture(iconHaunchHalf, x, y, 9, 9);
+            if (halfHaunchFoodValue < playerFoodLevel) context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchFull, x, y, 9, 9);
+            else if (halfHaunchFoodValue == playerFoodLevel) context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchHalf, x, y, 9, 9);
         }
         RenderSystem.disableBlend();
     }

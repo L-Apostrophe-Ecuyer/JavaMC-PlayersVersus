@@ -1,12 +1,11 @@
-package frootloops.versus.mixin.client.mobs.hostile.overworld;
+package frootloops.versus.mixin.client.mobs.hostile;
 
 import net.minecraft.client.model.*;
+import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.client.render.entity.model.IllagerEntityModel;
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.client.render.entity.model.VillagerResemblingModel;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.IllagerEntity;
+import net.minecraft.client.render.entity.state.IllagerEntityRenderState;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -14,20 +13,28 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(IllagerEntityModel.class)
-public abstract class IllagerModelMixin<T extends IllagerEntity> extends SinglePartEntityModel<T>  {
+public abstract class IllagerModelMixin<S extends IllagerEntityRenderState> extends EntityModel<S> {
 
     @Shadow private final ModelPart root;
 
     private ModelPart rightEar;
     private ModelPart leftEar;
 
-    public IllagerModelMixin(ModelPart root, ModelPart rightEar, ModelPart leftEar) {
+    @Shadow private final ModelPart leftArm;
+    @Shadow private final ModelPart rightArm;
+    @Shadow private final ModelPart arms;
+    @Shadow private final ModelPart head;
+
+    public IllagerModelMixin(ModelPart root, ModelPart rightEar, ModelPart leftEar, ModelPart leftArm, ModelPart rightArm, ModelPart arms, ModelPart head) {
         this.root = root;
         this.rightEar = rightEar;
         this.leftEar = leftEar;
+        this.leftArm = leftArm;
+        this.rightArm = rightArm;
+        this.arms = arms;
+        this.head = head;
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -59,12 +66,38 @@ public abstract class IllagerModelMixin<T extends IllagerEntity> extends SingleP
 
 
     @Inject(method = "setAngles", at = @At("HEAD"))
-    public void setAngles(T illagerEntity, float f, float g, float h, float i, float j, CallbackInfo info) {
-        float k = 0.5235988f;
-        float l = h * 0.1f + f * 0.5f;
-        float m = 0.08f + g * 0.4f;
-        this.leftEar.roll = k - MathHelper.cos((float)(l * 1.2f)) * m;
-        this.rightEar.roll = -k + MathHelper.cos((float)l) * m;
+    public void setAngles(S renderState, CallbackInfo info) {
+        float f = renderState.limbFrequency;
+        float g = renderState.limbAmplitudeMultiplier;
+        float i = renderState.age * 0.1F + f * 0.5F;
+        float j = 0.08F + g * 0.4F;
+        this.leftEar.roll = (float) (-Math.PI / 6) - MathHelper.cos(i * 1.2F) * j;
+        this.rightEar.roll = (float) (Math.PI / 6) + MathHelper.cos(i) * j;
     }
 
+    @Inject(method = "setAngles", at = @At("TAIL"))
+    private void setAnglesForTool(S renderState, CallbackInfo info) {
+        if(renderState.pose == EntityPose.CROAKING) {
+            this.arms.visible = true;
+            this.leftArm.visible = true;
+            this.rightArm.visible = true;
+
+            this.rightArm.pitch = MathHelper.clamp((float)(this.head.pitch - 1.9198622f), (float)-2.4f, (float)3.3f);
+            this.rightArm.yaw = this.head.yaw - 0.2617994f;
+
+            this.leftArm.pitch = MathHelper.clamp((float)(this.head.pitch - 1.9198622f), (float)-2.4f, (float)3.3f);
+            this.leftArm.yaw = this.head.yaw + 0.2617994f;
+        }
+        else if(renderState.pose == EntityPose.CROUCHING) {
+            this.arms.visible = true;
+            this.leftArm.visible = true;
+            this.rightArm.visible = true;
+            this.positionBlockingArm(leftArm, false);
+        }
+    }
+
+    private void positionBlockingArm(ModelPart arm, boolean rightArm) {
+        arm.pitch = arm.pitch * 0.5F - 0.9424779F + MathHelper.clamp(this.head.pitch, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
+        arm.yaw = (rightArm ? -30.0F : 30.0F) * (float) (Math.PI / 180.0) + MathHelper.clamp(this.head.yaw, (float) (-Math.PI / 6), (float) (Math.PI / 6));
+    }
 }

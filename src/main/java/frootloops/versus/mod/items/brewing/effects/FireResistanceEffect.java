@@ -17,7 +17,7 @@ public class FireResistanceEffect extends StatusEffect {
         super(category, color, ParticleTypes.SMOKE);
 
         this.addAttributeModifier(
-                EntityAttributes.GENERIC_BURNING_TIME, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.BURNING_TIME, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 -0.4, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
         );
     }

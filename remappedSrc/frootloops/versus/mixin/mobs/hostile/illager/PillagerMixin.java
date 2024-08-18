@@ -38,10 +38,10 @@ public abstract class PillagerMixin extends IllagerEntity {
 
     @Inject(method = "initialize", at = @At("HEAD"))
     private void increaseAttributes(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
-        EntityAttributeInstance instance = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        EntityAttributeInstance instance = this.getAttributes().getCustomInstance(EntityAttributes.MOVEMENT_SPEED);
         if (instance != null) instance.setBaseValue(0.36);
 
-        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
         if (instanceHP != null) {
             instanceHP.setBaseValue(26.0D);
             this.setHealth(this.getMaxHealth());

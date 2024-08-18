@@ -24,9 +24,9 @@ public abstract class PolarBearMixin extends PassiveEntity {
     private static void createPolarBearAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
                 MobEntity.createMobAttributes()
-                        .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 30.0)
-                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.36f)
-                        .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 12.0)
-                        .add(EntityAttributes.GENERIC_MAX_HEALTH, 60.0));
+                        .add(EntityAttributes.FOLLOW_RANGE, 30.0)
+                        .add(EntityAttributes.MOVEMENT_SPEED, 0.36f)
+                        .add(EntityAttributes.ATTACK_DAMAGE, 12.0)
+                        .add(EntityAttributes.MAX_HEALTH, 60.0));
     }
 }

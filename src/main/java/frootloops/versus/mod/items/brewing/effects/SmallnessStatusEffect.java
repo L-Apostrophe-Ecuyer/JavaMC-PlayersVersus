@@ -16,37 +16,37 @@ public class SmallnessStatusEffect extends StatusEffect  {
         super(category, color, ParticleTypes.SMOKE);
 
         this.addAttributeModifier(
-                EntityAttributes.GENERIC_SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 -0.3, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.GENERIC_STEP_HEIGHT, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.STEP_HEIGHT, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 -0.25, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.GENERIC_ATTACK_DAMAGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.ATTACK_DAMAGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 -2.0, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.GENERIC_ATTACK_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.ATTACK_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 0.2, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.GENERIC_MOVEMENT_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.MOVEMENT_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 0.005, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.ENTITY_INTERACTION_RANGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 -1.0, EntityAttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
+                EntityAttributes.BLOCK_INTERACTION_RANGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 -1.0, EntityAttributeModifier.Operation.ADD_VALUE
         );
     }

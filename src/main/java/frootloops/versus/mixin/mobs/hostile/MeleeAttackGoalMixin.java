@@ -60,7 +60,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
             Item weapon = this.mob.getMainHandStack().getItem();
             if(weapon instanceof AxeItem || weapon instanceof TridentItem) return TICKS_SWING_HEAVY;
             else if(weapon instanceof HoeItem) return TICKS_SWING_QUICK;
-            else if(weapon instanceof ToolItem) return TICKS_SWING_TOOLS;
+            else if(weapon instanceof MiningToolItem) return TICKS_SWING_TOOLS;
         }
         return TICKS_SWING_QUICK;
     }
@@ -97,7 +97,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                 Vec3d velocity = this.mob.getVelocity();
                 this.mob.setPose(EntityPose.CROUCHING);
                 this.mob.setVelocity(0, velocity.y, 0);
-                this.mob.setAttacking(false);
+                this.mob.setAttacking(mob instanceof IllagerEntity);
                 this.mob.getOffHandStack().usageTick(this.mob.getWorld(), this.mob, 8);
                 this.mob.setCurrentHand(Hand.OFF_HAND);
                 info.cancel();

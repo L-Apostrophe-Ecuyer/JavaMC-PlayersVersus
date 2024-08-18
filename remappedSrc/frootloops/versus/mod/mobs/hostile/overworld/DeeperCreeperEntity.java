@@ -47,7 +47,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     public static DefaultAttributeContainer.Builder createDeeperCreeperAttributes() {
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.36).add(EntityAttributes.GENERIC_FOLLOW_RANGE, 40.0).add(EntityAttributes.GENERIC_ARMOR, 10.0).add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 3.0);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.MOVEMENT_SPEED, 0.36).add(EntityAttributes.FOLLOW_RANGE, 40.0).add(EntityAttributes.ARMOR, 10.0).add(EntityAttributes.ARMOR_TOUGHNESS, 3.0);
     }
 
     @Override

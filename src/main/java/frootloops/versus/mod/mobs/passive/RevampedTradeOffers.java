@@ -1191,29 +1191,21 @@ public class RevampedTradeOffers {
             this.possibleEnchantments = possibleEnchantments;
         }
 
+        @Override
         public TradeOffer create(Entity entity, Random random) {
-            Optional<RegistryEntry<Enchantment>> optional = entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getRandomEntry(this.possibleEnchantments, random);
-            Optional<RegistryEntry<Enchantment>> finalOptional = optional;
-            if(optional.isPresent() && entity instanceof MerchantEntity merchant && merchant.getOffers().stream().anyMatch(new Predicate<TradeOffer>() {
-                @Override
-                public boolean test(TradeOffer tradeOffer) {
-                    ItemStack sellItemStack =  tradeOffer.getSellItem();
-                    if(!sellItemStack.hasEnchantments() || !sellItemStack.isOf(Items.ENCHANTED_BOOK)) return false;
-                    return sellItemStack.getEnchantments().getLevel(finalOptional.get()) > 0;
-                }
-            })) {
-                optional = entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getRandomEntry(this.possibleEnchantments, random);
-            }
-
+            Optional<RegistryEntry<Enchantment>> optional = entity.getWorld()
+                    .getRegistryManager()
+                    .get(RegistryKeys.ENCHANTMENT)
+                    .getRandomEntry(this.possibleEnchantments, random);
             int l;
             ItemStack itemStack;
             if (!optional.isEmpty()) {
-                RegistryEntry<Enchantment> registryEntry = (RegistryEntry)optional.get();
-                Enchantment enchantment = (Enchantment)registryEntry.value();
+                RegistryEntry<Enchantment> registryEntry = (RegistryEntry<Enchantment>)optional.get();
+                Enchantment enchantment = registryEntry.value();
                 int i = Math.max(enchantment.getMinLevel(), this.minLevel);
                 int j = Math.min(enchantment.getMaxLevel(), this.maxLevel);
                 int k = MathHelper.nextInt(random, i, j);
-                itemStack = EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(registryEntry, k));
+                itemStack = EnchantmentHelper.getEnchantedBookWith(new EnchantmentLevelEntry(registryEntry, k));
                 l = 2 + random.nextInt(5 + k * 10) + 3 * k;
                 if (registryEntry.isIn(EnchantmentTags.DOUBLE_TRADE_PRICE)) {
                     l *= 2;

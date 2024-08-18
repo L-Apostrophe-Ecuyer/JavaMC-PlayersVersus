@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.client.mobs.hostile.shields;
+package frootloops.versus.mixin.client.mobs.hostile;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -6,6 +6,7 @@ import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.SkeletonEntityModel;
+import net.minecraft.client.render.entity.state.SkeletonEntityRenderState;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.util.Identifier;
@@ -19,7 +20,7 @@ import java.util.function.Function;
 
 @Environment(EnvType.CLIENT)
 @Mixin(SkeletonEntityModel.class)
-public abstract class SkeletonModelMixin<T extends MobEntity> extends BipedEntityModel<T> {
+public abstract class SkeletonModelMixin<S extends SkeletonEntityRenderState> extends BipedEntityModel<S> {
 
 
     public SkeletonModelMixin(ModelPart root, Function<Identifier, RenderLayer> renderLayerFactory) {
@@ -27,11 +28,14 @@ public abstract class SkeletonModelMixin<T extends MobEntity> extends BipedEntit
     }
 
     @Inject(method = "setAngles", at = @At("TAIL"))
-    private void setAnglesForShield(T hostileEntity, float f, float g, float h, float i, float j, CallbackInfo ci) {
-        if(hostileEntity.getPose() == EntityPose.CROUCHING && hostileEntity.isBlocking()) {
-            this.leftArm.pitch = MathHelper.cos(f * 0.6662f) * 2.0f * g * 0.5f;
-            this.leftArm.pitch = this.leftArm.pitch * 0.5f - 0.9424779f;
-            this.leftArm.yaw = 0.5235988f;
+    private void setAnglesForShield(S renderState, CallbackInfo info) {
+        if(renderState.pose == EntityPose.CROUCHING) {
+            this.positionBlockingArm(this.leftArm, false);
         }
+    }
+
+    private void positionBlockingArm(ModelPart arm, boolean rightArm) {
+        arm.pitch = arm.pitch * 0.5F - 0.9424779F + MathHelper.clamp(this.head.pitch, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
+        arm.yaw = (rightArm ? -30.0F : 30.0F) * (float) (Math.PI / 180.0) + MathHelper.clamp(this.head.yaw, (float) (-Math.PI / 6), (float) (Math.PI / 6));
     }
 }

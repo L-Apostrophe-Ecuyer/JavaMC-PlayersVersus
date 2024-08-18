@@ -82,13 +82,13 @@ public abstract class PhantomMixin extends FlyingEntity {
         this.circlingCenter = this.getBlockPos().up(16);
         this.noClip = true;
 
-        EntityAttributeInstance instanceHp = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        EntityAttributeInstance instanceHp = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
         if (instanceHp != null) {
             instanceHp.setBaseValue(10.0D);
             this.setHealth(this.getMaxHealth());
         }
 
-        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_DAMAGE);
         if (instanceDmg != null) {
             instanceDmg.setBaseValue(4.0D);
         }

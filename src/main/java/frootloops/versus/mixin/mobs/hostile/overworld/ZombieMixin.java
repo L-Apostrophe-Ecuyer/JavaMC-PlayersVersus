@@ -48,12 +48,12 @@ public abstract class ZombieMixin extends HostileEntity {
         double followRange = 48.0;
         double mvtSpeed = 0.28;
         cir.setReturnValue(HostileEntity.createHostileAttributes()
-                        .add(EntityAttributes.GENERIC_FOLLOW_RANGE, followRange)
-                        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, mvtSpeed)
-                        .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
-                        .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.1)
-                        .add(EntityAttributes.GENERIC_ARMOR, 6.0)
-                        .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS));
+                        .add(EntityAttributes.FOLLOW_RANGE, followRange)
+                        .add(EntityAttributes.MOVEMENT_SPEED, mvtSpeed)
+                        .add(EntityAttributes.ATTACK_DAMAGE, 3.0)
+                        .add(EntityAttributes.ATTACK_KNOCKBACK, 1.1)
+                        .add(EntityAttributes.ARMOR, 6.0)
+                        .add(EntityAttributes.SPAWN_REINFORCEMENTS));
     }
 
     @Inject(method = "damage", at = @At("TAIL"), cancellable = true)
@@ -153,7 +153,7 @@ public abstract class ZombieMixin extends HostileEntity {
 
         // Bit less attack damage when wielding weapons:
         if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
-            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
             entityAttributeInstance.setBaseValue(1.0);
         }
     }

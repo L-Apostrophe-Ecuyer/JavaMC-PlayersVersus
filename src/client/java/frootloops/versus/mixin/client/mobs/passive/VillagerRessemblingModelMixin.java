@@ -1,15 +1,13 @@
 package frootloops.versus.mixin.client.mobs.passive;
 
-import frootloops.versus.VersusMod;
+
 import net.minecraft.client.model.*;
+import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.EntityModelPartNames;
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
 import net.minecraft.client.render.entity.model.VillagerResemblingModel;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.WanderingTraderEntity;
+import net.minecraft.client.render.entity.state.VillagerEntityRenderState;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(VillagerResemblingModel.class)
-public abstract class VillagerRessemblingModelMixin<T extends Entity> extends SinglePartEntityModel<T>  {
+public abstract class VillagerRessemblingModelMixin extends EntityModel<VillagerEntityRenderState> {
 
     @Shadow private final ModelPart root;
 
@@ -48,12 +46,13 @@ public abstract class VillagerRessemblingModelMixin<T extends Entity> extends Si
 
 
     @Inject(method = "setAngles", at = @At("HEAD"))
-    public void setAngles(T mobEntity, float f, float g, float h, float i, float j, CallbackInfo info) {
-        float k = 0.5235988f;
-        float l = h * 0.1f + f * 0.5f;
-        float m = 0.08f + g * 0.4f;
-        this.leftEar.roll = k - MathHelper.cos((float)(l * 1.2f)) * m;
-        this.rightEar.roll = -k + MathHelper.cos((float)l) * m;
+    public void setAngles(VillagerEntityRenderState renderState, CallbackInfo info) {
+        float f = renderState.limbFrequency;
+        float g = renderState.limbAmplitudeMultiplier;
+        float i = renderState.age * 0.1F + f * 0.5F;
+        float j = 0.08F + g * 0.4F;
+        this.leftEar.roll = (float) (-Math.PI / 6) - MathHelper.cos(i * 1.2F) * j;
+        this.rightEar.roll = (float) (Math.PI / 6) + MathHelper.cos(i) * j;
     }
 
 }

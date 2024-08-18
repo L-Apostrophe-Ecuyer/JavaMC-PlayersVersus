@@ -62,7 +62,7 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
         }
         else {
 
-            EntityAttributeInstance instanceFollow = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_FOLLOW_RANGE);
+            EntityAttributeInstance instanceFollow = this.getAttributes().getCustomInstance(EntityAttributes.FOLLOW_RANGE);
             if (instanceFollow != null) instanceFollow.setBaseValue(32.0d);
 
             if (rand < 12) {
@@ -98,7 +98,7 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
 
         // Bit less attack damage when wielding weapons:
         if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
-            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
             entityAttributeInstance.setBaseValue(1.0);
         }
     }

@@ -9,7 +9,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,14 +45,14 @@ public abstract class ThrowablePotionItemMixin extends PotionItem implements Pro
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(user.getStackInHand(hand));
+        return ActionResult.CONSUME;
     }
 
     private static void throwPotion(World world, LivingEntity user, ItemStack stack, float velocity) {
         if (!world.isClient) {
-            PotionEntity potionEntity = new PotionEntity(world, user);
+            PotionEntity potionEntity = new PotionEntity(world, user, stack);
             potionEntity.setItem(stack);
             potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), -20.0f, velocity, 1.0f);
             world.spawnEntity(potionEntity);

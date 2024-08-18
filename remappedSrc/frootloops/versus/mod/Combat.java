@@ -75,7 +75,7 @@ public abstract class Combat {
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {
-        return Math.min(PLAYER_MAX_ATTACK_SPEED, player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+        return Math.min(PLAYER_MAX_ATTACK_SPEED, player.getAttributeValue(EntityAttributes.ATTACK_SPEED));
     }
 
     public static int getTicksPerAttackOf(PlayerEntity player) {
@@ -98,7 +98,7 @@ public abstract class Combat {
     }
 
     public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
-        double reachAttributeValue = player.getAttributeValue(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE);
+        double reachAttributeValue = player.getAttributeValue(EntityAttributes.ENTITY_INTERACTION_RANGE);
         attackChargeProgress = Math.min(1.0d, attackChargeProgress - 0.5d);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;

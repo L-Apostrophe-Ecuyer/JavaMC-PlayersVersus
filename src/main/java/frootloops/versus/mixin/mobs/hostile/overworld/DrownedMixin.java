@@ -67,7 +67,7 @@ public abstract class DrownedMixin extends ZombieEntity {
         if (this.getEquippedStack(EquipmentSlot.OFFHAND).isEmpty() && world.getRandom().nextFloat() < 0.03F)
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
 
-        EntityAttributeInstance followRange = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_FOLLOW_RANGE);
+        EntityAttributeInstance followRange = this.getAttributes().getCustomInstance(EntityAttributes.FOLLOW_RANGE);
         if (followRange != null) followRange.setBaseValue(32.0d);
 
         return entityData;

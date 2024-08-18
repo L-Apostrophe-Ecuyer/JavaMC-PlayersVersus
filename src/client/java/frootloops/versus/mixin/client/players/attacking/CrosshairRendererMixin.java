@@ -11,6 +11,7 @@ import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
@@ -55,14 +56,12 @@ public class CrosshairRendererMixin {
                     Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
                     matrix4fStack.pushMatrix();
                     matrix4fStack.mul(context.getMatrices().peek().getPositionMatrix());
-                    matrix4fStack.translate(context.getScaledWindowWidth() / 2, context.getScaledWindowHeight() / 2, 0.0f);
-                    matrix4fStack.rotateX(-camera.getPitch() * ((float)Math.PI / 180));
-                    matrix4fStack.rotateY(camera.getYaw() * ((float)Math.PI / 180));
-                    matrix4fStack.scale(-1.0f, -1.0f, -1.0f);
-                    RenderSystem.applyModelViewMatrix();
+                    matrix4fStack.translate((float)(context.getScaledWindowWidth() / 2), (float)(context.getScaledWindowHeight() / 2), 0.0F);
+                    matrix4fStack.rotateX(-camera.getPitch() * (float) (Math.PI / 180.0));
+                    matrix4fStack.rotateY(camera.getYaw() * (float) (Math.PI / 180.0));
+                    matrix4fStack.scale(-1.0F, -1.0F, -1.0F);
                     RenderSystem.renderCrosshair(10);
                     matrix4fStack.popMatrix();
-                    RenderSystem.applyModelViewMatrix();
 
                 } else {
                     RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE_MINUS_DST_COLOR, GlStateManager.DstFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
@@ -72,7 +71,7 @@ public class CrosshairRendererMixin {
                     double attackCooldownProgress = Combat.getAttackChargeProgress(client.player);
                     double attackCooldownProgressCapped = attackCooldownProgress > 1.0d ? 1.0d : attackCooldownProgress;
                     int crosshairSize = 1 + 2 * (int)(7d * attackCooldownProgressCapped);
-                    context.drawGuiTexture(CROSSHAIR_TEXTURE, (context.getScaledWindowWidth() - crosshairSize) / 2, (context.getScaledWindowHeight() - crosshairSize) / 2, crosshairSize, crosshairSize);
+                    context.drawGuiTexture(RenderLayer::getCrosshair, CROSSHAIR_TEXTURE, (context.getScaledWindowWidth() - crosshairSize) / 2, (context.getScaledWindowHeight() - crosshairSize) / 2, crosshairSize, crosshairSize);
 
                     // This is the code to make sure the attack indicator only shows when a target can be hit:
                     boolean isEntityTargettable = false;
@@ -85,11 +84,11 @@ public class CrosshairRendererMixin {
                         int posY = context.getScaledWindowHeight() / 2 - 7 + 16;
                         int posX = context.getScaledWindowWidth() / 2 - 8;
                         if (attackCooldownProgress >= 1.0F) {
-                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_FULL_TEXTURE, posX, posY, 16, 16);
+                            context.drawGuiTexture(RenderLayer::getCrosshair, CROSSHAIR_ATTACK_INDICATOR_FULL_TEXTURE, posX, posY, 16, 16);
                         } else {
                             int swordIconWhitePixels = (int)(attackCooldownProgressCapped * 17.0D);
-                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_TEXTURE, posX, posY, 16, 4);
-                            context.drawGuiTexture(CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE, 16, 4, 0, 0, posX, posY, swordIconWhitePixels, 4);
+                            context.drawGuiTexture(RenderLayer::getCrosshair, CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_TEXTURE, posX, posY, 16, 4);
+                            context.drawGuiTexture(RenderLayer::getCrosshair, CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE, 16, 4, 0, 0, posX, posY, swordIconWhitePixels, 4);
                         }
                     }
                     //if(ReacharoundTracker.currentTarget != null) this.drawExtraCrosshairIcon(matrices);

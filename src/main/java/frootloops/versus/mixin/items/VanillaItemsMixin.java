@@ -26,43 +26,41 @@ public class VanillaItemsMixin {
 
 
     // Tools:
-
-    //int durability, float speed, float attackDamageBonus, int enchantmentValue;
     
-    @Shadow public static final Item WOODEN_SWORD = Items.register("wooden_sword", new SwordItem(RebalancedTools.WOOD, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings()));
+    @Shadow public static final Item WOODEN_SWORD = Items.register("wooden_sword", new SwordItem(RebalancedTools.WOOD, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getSwordReachModifier())));
     @Shadow public static final Item WOODEN_SHOVEL = Items.register("wooden_shovel", new ShovelItem(RebalancedTools.WOOD, RebalancedTools.getShovelDamageModifier(), RebalancedTools.getShovelSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item WOODEN_PICKAXE = Items.register("wooden_pickaxe", new PickaxeItem(RebalancedTools.WOOD, RebalancedTools.getPickaxeDamageModifier(), RebalancedTools.getPickaxeSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item WOODEN_AXE = Items.register("wooden_axe", new AxeItem(RebalancedTools.WOOD, RebalancedTools.getAxeDamageModifier(), RebalancedTools.getAxeSpeedModifier(), new Item.Settings()));
-    @Shadow public static final Item WOODEN_HOE = Items.register("wooden_hoe", new HoeItem(RebalancedTools.WOOD, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeDamageModifier(), new Item.Settings()));
+    @Shadow public static final Item WOODEN_HOE = Items.register("wooden_hoe", new HoeItem(RebalancedTools.WOOD, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getHoeReachModifier())));
 
-    @Shadow public static final Item STONE_SWORD = Items.register("stone_sword", new SwordItem(RebalancedTools.STONE, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings()));
+    @Shadow public static final Item STONE_SWORD = Items.register("stone_sword", new SwordItem(RebalancedTools.STONE, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getSwordReachModifier())));
     @Shadow public static final Item STONE_SHOVEL = Items.register("stone_shovel", new ShovelItem(RebalancedTools.STONE, RebalancedTools.getShovelDamageModifier(), RebalancedTools.getShovelSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item STONE_PICKAXE = Items.register("stone_pickaxe", new PickaxeItem(RebalancedTools.STONE, RebalancedTools.getPickaxeDamageModifier(), RebalancedTools.getPickaxeSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item STONE_AXE = Items.register("stone_axe", new AxeItem(RebalancedTools.STONE, RebalancedTools.getAxeDamageModifier(), RebalancedTools.getAxeSpeedModifier(), new Item.Settings()));
-    @Shadow public static final Item STONE_HOE = Items.register("stone_hoe", new HoeItem(RebalancedTools.STONE, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeDamageModifier(), new Item.Settings()));
+    @Shadow public static final Item STONE_HOE = Items.register("stone_hoe", new HoeItem(RebalancedTools.STONE, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getHoeReachModifier())));
 
-    @Shadow public static final Item GOLDEN_SWORD = Items.register("golden_sword", new SwordItem(RebalancedTools.GOLD, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings()));
+    @Shadow public static final Item GOLDEN_SWORD = Items.register("golden_sword", new SwordItem(RebalancedTools.GOLD, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getSwordReachModifier())));
     @Shadow public static final Item GOLDEN_SHOVEL = Items.register("golden_shovel", new ShovelItem(RebalancedTools.GOLD, RebalancedTools.getShovelDamageModifier(), RebalancedTools.getShovelSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item GOLDEN_PICKAXE = Items.register("golden_pickaxe", new PickaxeItem(RebalancedTools.GOLD, RebalancedTools.getPickaxeDamageModifier(), RebalancedTools.getPickaxeSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item GOLDEN_AXE = Items.register("golden_axe", new AxeItem(RebalancedTools.GOLD, RebalancedTools.getAxeDamageModifier(), RebalancedTools.getAxeSpeedModifier(), new Item.Settings()));
-    @Shadow public static final Item GOLDEN_HOE = Items.register("golden_hoe", new HoeItem(RebalancedTools.GOLD, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeDamageModifier(), new Item.Settings()));
+    @Shadow public static final Item GOLDEN_HOE = Items.register("golden_hoe", new HoeItem(RebalancedTools.GOLD, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getHoeReachModifier())));
 
-    @Shadow public static final Item IRON_SWORD = Items.register("iron_sword", new SwordItem(RebalancedTools.IRON, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings()));
+    @Shadow public static final Item IRON_SWORD = Items.register("iron_sword", new SwordItem(RebalancedTools.IRON, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getSwordReachModifier())));
     @Shadow public static final Item IRON_SHOVEL = Items.register("iron_shovel", new ShovelItem(RebalancedTools.IRON, RebalancedTools.getShovelDamageModifier(), RebalancedTools.getShovelSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item IRON_PICKAXE = Items.register("iron_pickaxe", new PickaxeItem(RebalancedTools.IRON, RebalancedTools.getPickaxeDamageModifier(), RebalancedTools.getPickaxeSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item IRON_AXE = Items.register("iron_axe", new AxeItem(RebalancedTools.IRON, RebalancedTools.getAxeDamageModifier(), RebalancedTools.getAxeSpeedModifier(), new Item.Settings()));
-    @Shadow public static final Item IRON_HOE = Items.register("iron_hoe", new HoeItem(RebalancedTools.IRON, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeDamageModifier(), new Item.Settings()));
+    @Shadow public static final Item IRON_HOE = Items.register("iron_hoe", new HoeItem(RebalancedTools.IRON, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getHoeReachModifier())));
 
-    @Shadow public static final Item DIAMOND_SWORD = Items.register("diamond_sword", new SwordItem(RebalancedTools.DIAMOND, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings()));
+    @Shadow public static final Item DIAMOND_SWORD = Items.register("diamond_sword", new SwordItem(RebalancedTools.DIAMOND, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getSwordReachModifier())));
     @Shadow public static final Item DIAMOND_SHOVEL = Items.register("diamond_shovel", new ShovelItem(RebalancedTools.DIAMOND, RebalancedTools.getShovelDamageModifier(), RebalancedTools.getShovelSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item DIAMOND_PICKAXE = Items.register("diamond_pickaxe", new PickaxeItem(RebalancedTools.DIAMOND, RebalancedTools.getPickaxeDamageModifier(), RebalancedTools.getPickaxeSpeedModifier(), new Item.Settings()));
     @Shadow public static final Item DIAMOND_AXE = Items.register("diamond_axe", new AxeItem(RebalancedTools.DIAMOND, RebalancedTools.getAxeDamageModifier(), RebalancedTools.getAxeSpeedModifier(), new Item.Settings()));
-    @Shadow public static final Item DIAMOND_HOE = Items.register("diamond_hoe", new HoeItem(RebalancedTools.DIAMOND, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeDamageModifier(), new Item.Settings()));
+    @Shadow public static final Item DIAMOND_HOE = Items.register("diamond_hoe", new HoeItem(RebalancedTools.DIAMOND, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getHoeReachModifier())));
     
-    @Shadow public static final Item NETHERITE_SWORD = Items.register("netherite_sword", new SwordItem(RebalancedTools.NETHERITE, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings().fireproof()));
+    @Shadow public static final Item NETHERITE_SWORD = Items.register("netherite_sword", new SwordItem(RebalancedTools.NETHERITE, RebalancedTools.getSwordDamageModifier(), RebalancedTools.getSwordSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getSwordReachModifier()).fireproof()));
     @Shadow public static final Item NETHERITE_SHOVEL = Items.register("netherite_shovel", new ShovelItem(RebalancedTools.NETHERITE, RebalancedTools.getShovelDamageModifier(), RebalancedTools.getShovelSpeedModifier(), new Item.Settings().fireproof()));
     @Shadow public static final Item NETHERITE_PICKAXE = Items.register("netherite_pickaxe", new PickaxeItem(RebalancedTools.NETHERITE, RebalancedTools.getPickaxeDamageModifier(), RebalancedTools.getPickaxeSpeedModifier(), new Item.Settings().fireproof()));
     @Shadow public static final Item NETHERITE_AXE = Items.register("netherite_axe", new AxeItem(RebalancedTools.NETHERITE, RebalancedTools.getAxeDamageModifier(), RebalancedTools.getAxeSpeedModifier(), new Item.Settings().fireproof()));
-    @Shadow public static final Item NETHERITE_HOE = Items.register("netherite_hoe", new HoeItem(RebalancedTools.NETHERITE, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeDamageModifier(), new Item.Settings().fireproof()));
+    @Shadow public static final Item NETHERITE_HOE = Items.register("netherite_hoe", new HoeItem(RebalancedTools.NETHERITE, RebalancedTools.getHoeDamageModifier(), RebalancedTools.getHoeSpeedModifier(), new Item.Settings().attributeModifiers(RebalancedTools.getHoeReachModifier()).fireproof()));
 
 }

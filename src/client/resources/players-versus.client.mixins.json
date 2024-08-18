@@ -8,34 +8,30 @@
 		"environment.visuals.WorldRendererMixin",
 		"environment.visuals.LightmapMixin",
 
-		"mobs.hostile.shields.IllagerModelMixin",
-		"mobs.hostile.shields.SkeletonModelMixin",
-		"mobs.hostile.shields.ZombieModelMixin",
-		"mobs.hostile.shields.PiglinModelMixin",
-
-		"mobs.hostile.overworld.SpiderRenderMixin",
-		"mobs.hostile.overworld.IllagerModelMixin",
+		"mobs.hostile.SkeletonModelMixin",
+		"mobs.hostile.ZombieModelMixin",
+		"mobs.hostile.PiglinModelMixin",
+		"mobs.hostile.SpiderRenderMixin",
+		"mobs.hostile.IllagerModelMixin",
 		"mobs.passive.VillagerRessemblingModelMixin",
 
 		"items.FirstPersonAnimationsMixin",
-
 		"items.inventory.HotbarSwappingClientMixin",
 		"items.inventory.InventoryScreenChestMixin",
 		"items.inventory.InventoryScreenSurvivalMixin",
 		"items.inventory.InventoryScreenCreativeMixin",
 		"items.inventory.InventoryScreenShulkerMixin",
 		"items.inventory.InventoryScreenShulkerAccessor",
-
 		"items.inventory.ItemMergingMixin",
-		"items.inventory.MinecraftClientMixin",
 
 		"players.attacking.CrosshairTargetMixin",
 		"players.attacking.CrosshairRendererMixin",
 		"players.attacking.MinecraftClientMixin",
-		"players.building.MinecraftClientMixin",
 		"players.death.DeathScreenMixin",
 		"players.HungerBarRendererMixin",
-		"players.HungerSprintingMixin"
+		"players.HungerSprintingMixin",
+
+		"players.MinecraftClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

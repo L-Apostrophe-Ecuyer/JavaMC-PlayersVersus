@@ -9,8 +9,8 @@ import net.minecraft.item.Items;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -23,22 +23,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SlimeballsAndFireChargesMixin {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    public void use(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
+    public void use(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         ItemStack itemStack = user.getStackInHand(hand);
         if(itemStack.isOf(Items.SLIME_BALL)) {
             throwSnowball(world, user, itemStack);
-            cir.setReturnValue(TypedActionResult.success(itemStack, world.isClient()));
+            cir.setReturnValue(ActionResult.SUCCESS);
         }
         else if(itemStack.isOf(Items.FIRE_CHARGE)) {
             throwFireCharge(world, user, itemStack);
-            cir.setReturnValue(TypedActionResult.success(itemStack, world.isClient()));
+            cir.setReturnValue(ActionResult.SUCCESS);
         }
     }
 
     private static void throwSnowball(World world, PlayerEntity user, ItemStack itemStack) {
         world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_EGG_THROW, SoundCategory.NEUTRAL, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
         if (!world.isClient) {
-            SlimeballEntity slimeballEntity = new SlimeballEntity(world, user);
+            SlimeballEntity slimeballEntity = new SlimeballEntity(world, user, itemStack);
             slimeballEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0f, 1.5f, 1.0f);
             world.spawnEntity(slimeballEntity);
         }

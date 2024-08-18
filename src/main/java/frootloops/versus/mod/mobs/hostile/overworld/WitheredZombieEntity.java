@@ -33,14 +33,14 @@ public class WitheredZombieEntity extends ZombieEntity {
 
     public static DefaultAttributeContainer.Builder createWitheredAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.33f)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
-                .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.2)
-                .add(EntityAttributes.GENERIC_ARMOR, 8.0)
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 4.0)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.5)
-                .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
+                .add(EntityAttributes.FOLLOW_RANGE, 7.0)
+                .add(EntityAttributes.MOVEMENT_SPEED, 0.33f)
+                .add(EntityAttributes.ATTACK_DAMAGE, 3.0)
+                .add(EntityAttributes.ATTACK_KNOCKBACK, 1.2)
+                .add(EntityAttributes.ARMOR, 8.0)
+                .add(EntityAttributes.ARMOR_TOUGHNESS, 4.0)
+                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.5)
+                .add(EntityAttributes.SPAWN_REINFORCEMENTS);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class WitheredZombieEntity extends ZombieEntity {
 
         // Bit less attack damage when wielding weapons:
         if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
-            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
             entityAttributeInstance.setBaseValue(1.0);
         }
     }

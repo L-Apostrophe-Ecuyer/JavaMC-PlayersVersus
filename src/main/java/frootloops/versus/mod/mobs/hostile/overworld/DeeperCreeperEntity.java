@@ -47,7 +47,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     public static DefaultAttributeContainer.Builder createDeeperCreeperAttributes() {
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.36).add(EntityAttributes.GENERIC_FOLLOW_RANGE, 40.0).add(EntityAttributes.GENERIC_ARMOR, 10.0).add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 3.0);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.MOVEMENT_SPEED, 0.36).add(EntityAttributes.FOLLOW_RANGE, 40.0).add(EntityAttributes.ARMOR, 10.0).add(EntityAttributes.ARMOR_TOUGHNESS, 3.0);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
 
     private void explode() {
         if (!this.getWorld().isClient) {
-            float explosionMultiplier = this.shouldRenderOverlay() ? 2.0f : this.hurtTime > 0 ? 0.5f : 1.0f;
+            float explosionMultiplier = this.isCharged() ? 2.0f : this.hurtTime > 0 ? 0.5f : 1.0f;
             this.dead = true;
             this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * explosionMultiplier, World.ExplosionSourceType.MOB);
             this.spawnEffectsCloud();

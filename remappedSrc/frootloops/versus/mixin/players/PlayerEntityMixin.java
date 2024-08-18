@@ -63,12 +63,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
             LivingEntity.createLivingAttributes()
-                    .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
-                    .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1f)
-                    .add(EntityAttributes.GENERIC_ATTACK_SPEED,  Combat.PLAYER_BASE_ATTACK_SPEED)
-                    .add(EntityAttributes.GENERIC_LUCK)
-                    .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 5.0)
-                    .add(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE,  Combat.PLAYER_BASE_ATTACK_REACH)
+                    .add(EntityAttributes.ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
+                    .add(EntityAttributes.MOVEMENT_SPEED, 0.1f)
+                    .add(EntityAttributes.ATTACK_SPEED,  Combat.PLAYER_BASE_ATTACK_SPEED)
+                    .add(EntityAttributes.LUCK)
+                    .add(EntityAttributes.BLOCK_INTERACTION_RANGE, 5.0)
+                    .add(EntityAttributes.ENTITY_INTERACTION_RANGE,  Combat.PLAYER_BASE_ATTACK_REACH)
                     .add(EntityAttributes.PLAYER_BLOCK_BREAK_SPEED)
                     .add(EntityAttributes.PLAYER_SUBMERGED_MINING_SPEED)
                     .add(EntityAttributes.PLAYER_SNEAKING_SPEED)
@@ -163,7 +163,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
         }
 
-        double amount = this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        double amount = this.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
         if(amount < 0.75f && target instanceof LivingEntity livingEntity) {
             double strength = this.isSprinting() ? 0.8 : 0.6;
             this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);

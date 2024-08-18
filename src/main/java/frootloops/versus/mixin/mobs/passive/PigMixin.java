@@ -37,10 +37,10 @@ public abstract class PigMixin extends AnimalEntity {
     @Inject(method = "createPigAttributes", at = @At("HEAD"), cancellable = true)
     private static void createPigAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 16.0)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.28)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1.0)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 9.0));
+                .add(EntityAttributes.MAX_HEALTH, 16.0)
+                .add(EntityAttributes.MOVEMENT_SPEED, 0.28)
+                .add(EntityAttributes.ATTACK_DAMAGE, 1.0)
+                .add(EntityAttributes.FOLLOW_RANGE, 9.0));
     }
 
     @Override

@@ -8,7 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,7 +46,7 @@ public class Deprecated_HoeItemMixin extends ToolItem {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
         int sweepLevel = Enchants.getLevel(world, stack, Enchantments.SWEEPING_EDGE);
         if(sweepLevel > 0) {
@@ -55,10 +55,10 @@ public class Deprecated_HoeItemMixin extends ToolItem {
             if (attackCharge >= attackChargeRequired) {
                 user.setCurrentHand(hand);
                 Combat.doSpecialSweepAttack(user, Combat.getAttackRange(user, attackCharge), sweepLevel);
-                return TypedActionResult.consume(stack);
+                return ActionResult.CONSUME;
             }
         }
-        return TypedActionResult.fail(stack);
+        return ActionResult.FAIL;
     }
 
     @Override

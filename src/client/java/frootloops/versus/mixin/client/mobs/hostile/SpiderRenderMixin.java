@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.client.mobs.hostile.overworld;
+package frootloops.versus.mixin.client.mobs.hostile;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

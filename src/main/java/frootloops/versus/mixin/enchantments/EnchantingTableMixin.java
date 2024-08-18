@@ -65,10 +65,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
 
     @Overwrite
     public boolean onButtonClick(PlayerEntity player, int id) {
-        if (id < 0 || id >= this.enchantmentPower.length) {
-            Util.error(player.getName() + " pressed invalid button id: " + id);
-            return false;
-        }
+        if (id < 0 || id >= this.enchantmentPower.length) return false;
 
         ItemStack inputStack = this.inventory.getStack(0);
         ItemStack lapisStack = this.inventory.getStack(1);

@@ -26,10 +26,10 @@ public abstract class VindicatorMixin extends IllagerEntity {
 
     @Inject(method = "initialize", at = @At("TAIL"))
     private void increaseAttributes(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
-        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_DAMAGE);
         if (instanceDmg != null) instanceDmg.setBaseValue(3.0);
 
-        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
         if (instanceHP != null) {
             instanceHP.setBaseValue(30.0D);
             this.setHealth(this.getMaxHealth());
