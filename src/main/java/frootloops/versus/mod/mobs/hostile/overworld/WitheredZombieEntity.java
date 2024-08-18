@@ -3,6 +3,7 @@ package frootloops.versus.mod.mobs.hostile.overworld;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
@@ -12,11 +13,15 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
@@ -65,6 +70,39 @@ public class WitheredZombieEntity extends ZombieEntity {
     public boolean damage(DamageSource source, float amount) {
         if(source.isOf(DamageTypes.WITHER)) return false;
         return super.damage(source, amount);
+    }
+
+    @Override
+    public void initEquipment(Random random, LocalDifficulty localDifficulty) {
+        int rand = random.nextInt(150);
+        boolean isAtDiamondDepth = this.getBlockPos().getY() < -32;
+        if (isAtDiamondDepth && rand % 23 == 0) {
+            this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + random.nextInt(5)));
+            this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
+        }
+
+        if(isAtDiamondDepth && rand < 60) {
+            this.armorDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15f;
+            if (rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+            else if (rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
+            else if (rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
+        }
+        else if(rand < 20) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+        else if(rand < 40) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+        else if(rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+        else if(rand < 80) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
+        else if(rand < 90)this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
+        if(rand < 90) {
+            int damageAmount = (isAtDiamondDepth && rand < 60) ? rand + 900 : rand/2 + 150;
+            this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
+            this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15F;
+        }
+
+        // Bit less attack damage when wielding weapons:
+        if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            entityAttributeInstance.setBaseValue(1.0);
+        }
     }
 
     @Override

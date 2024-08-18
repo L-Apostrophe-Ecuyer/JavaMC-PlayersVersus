@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.*;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.particle.ParticleTypes;
@@ -51,6 +52,9 @@ public class CustomBlocks {
     public static final Block WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrassBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
     public static final Block WILD_WHEAT = registerBlock("wild_wheat",new WheatGrassBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
     public static final Block CLOVERS = registerBlock("clovers",new CloverBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
+
+    public static final Block WITHERING_DEEPSLATE = registerBlock("withering_deepslate", new WitheringDeepslateBlock(AbstractBlock.Settings.create().mapColor(MapColor.BLACK).instrument(NoteBlockInstrument.BASS).sounds(BlockSoundGroup.DEEPSLATE_TILES).requiresTool().strength(3.5f, 2.5f).allowsSpawning((state, world, pos, entityType) -> false)));
+
 
 
     private static Block registerBlock(String name, Block block) {

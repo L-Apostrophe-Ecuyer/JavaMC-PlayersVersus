@@ -35,4 +35,6 @@ public abstract class CustomBlockItems {
     public static final BlockItem WHITE_CLOVERS_ITEM = new BlockItem(CustomBlocks.WHITE_CLOVERS, new Item.Settings());
     public static final BlockItem CLOVERS_ITEM = new BlockItem(CustomBlocks.CLOVERS, new Item.Settings());
 
+    public static final BlockItem WITHERING_DEEPSLATE_ITEM = new BlockItem(CustomBlocks.WITHERING_DEEPSLATE, new Item.Settings());
+
 }

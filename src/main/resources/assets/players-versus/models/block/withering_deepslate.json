@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "minecraft:block/deepslate_top",
+    "east": "players-versus:block/withering_deepslate",
+    "north": "players-versus:block/withering_deepslate",
+    "particle": "players-versus:block/withering_deepslate",
+    "south": "players-versus:block/withering_deepslate",
+    "up": "players-versus:block/withering_deepslate_top",
+    "west": "players-versus:block/withering_deepslate"
+  }
+}

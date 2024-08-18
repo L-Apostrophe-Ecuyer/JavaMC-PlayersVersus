@@ -38,7 +38,7 @@ import net.minecraft.world.event.GameEvent;
 public class DeeperCreeperEntity extends CreeperEntity {
     //private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     //private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private int lastFuseTime, currentFuseTime, fuseTime = 29, explosionRadius = 5;
+    private int lastFuseTime, currentFuseTime, fuseTime = 29, explosionRadius = 4;
     public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.of(Identifier.of("ambient.cave"), 32);
 
     public DeeperCreeperEntity(EntityType<? extends CreeperEntity> entityType, World world) {
