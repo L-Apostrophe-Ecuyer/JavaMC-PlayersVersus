@@ -1,0 +1,47 @@
+{
+  "feature": {
+    "type": "minecraft:delta_feature",
+    "config": {
+      "contents": {
+        "Name": "minecraft:lava"
+      },
+      "rim": {
+        "Name": "minecraft:cobbled_deepslate"
+      },
+      "size": {
+        "type": "minecraft:uniform",
+        "min_inclusive": 0,
+        "max_inclusive": 4
+      },
+      "rim_size": {
+        "type": "minecraft:uniform",
+        "min_inclusive": 0,
+        "max_inclusive": 3
+      }
+    }
+  },
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 2
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "above_bottom": 9
+        },
+        "max_inclusive": {
+          "above_bottom": 14
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
