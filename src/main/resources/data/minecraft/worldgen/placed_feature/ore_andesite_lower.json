@@ -1,29 +1,91 @@
 {
   "feature": {
-    "type": "minecraft:delta_feature",
+    "type": "minecraft:vegetation_patch",
     "config": {
-      "contents": {
-        "Name": "minecraft:lava"
-      },
-      "rim": {
-        "Name": "minecraft:cobbled_deepslate"
-      },
-      "size": {
+      "surface": "floor",
+      "depth": 1,
+      "vertical_range": 3,
+      "extra_bottom_block_chance": 0.0,
+      "extra_edge_column_chance": 0.3,
+      "vegetation_chance": 0.3,
+      "xz_radius": {
         "type": "minecraft:uniform",
-        "min_inclusive": 0,
-        "max_inclusive": 4
+        "min_inclusive": 6,
+        "max_inclusive": 16
       },
-      "rim_size": {
-        "type": "minecraft:uniform",
-        "min_inclusive": 0,
-        "max_inclusive": 3
+      "replaceable": "#minecraft:deepslate_ore_replaceables",
+      "ground_state": {
+        "type": "minecraft:noise_provider",
+        "seed": 0,
+        "noise": {
+          "firstOctave": -2,
+          "amplitudes": [
+            1,
+            1.5
+          ]
+        },
+        "scale": 1,
+        "states": [
+          {
+            "Name": "minecraft:deepslate",
+            "Properties": {
+              "axis": "y"
+            }
+          },
+          {
+            "Name": "minecraft:deepslate",
+            "Properties": {
+              "axis": "y"
+            }
+          },
+          {
+            "Name": "minecraft:deepslate",
+            "Properties": {
+              "axis": "y"
+            }
+          },
+          {
+            "Name": "minecraft:deepslate_coal_ore"
+          },
+          {
+            "Name": "players-versus:withering_deepslate"
+          },
+          {
+            "Name": "minecraft:deepslate",
+            "Properties": {
+              "axis": "y"
+            }
+          },
+          {
+            "Name": "minecraft:deepslate_coal_ore"
+          },
+          {
+            "Name": "minecraft:deepslate",
+            "Properties": {
+              "axis": "y"
+            }
+          },
+          {
+            "Name": "minecraft:deepslate",
+            "Properties": {
+              "axis": "y"
+            }
+          }
+        ]
+      },
+      "vegetation_feature": {
+        "feature": {
+          "type": "minecraft:no_op",
+          "config": {}
+        },
+        "placement": []
       }
     }
   },
   "placement": [
     {
-      "type": "minecraft:count",
-      "count": 2
+      "type": "minecraft:rarity_filter",
+      "chance": 8
     },
     {
       "type": "minecraft:in_square"
@@ -33,10 +95,10 @@
       "height": {
         "type": "minecraft:uniform",
         "min_inclusive": {
-          "above_bottom": 9
+          "above_bottom": 12
         },
         "max_inclusive": {
-          "above_bottom": 14
+          "above_bottom": 18
         }
       }
     },

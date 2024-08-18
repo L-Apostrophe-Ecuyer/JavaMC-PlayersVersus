@@ -98,6 +98,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT_ITEM, ItemGroups.NATURAL);
         registerCustomItem("white_clovers", CustomBlockItems.WHITE_CLOVERS_ITEM, ItemGroups.NATURAL);
         registerCustomItem("clovers", CustomBlockItems.CLOVERS_ITEM, ItemGroups.NATURAL);
+        registerCustomItem("withering_deepslate", CustomBlockItems.WITHERING_DEEPSLATE_ITEM, ItemGroups.NATURAL);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {

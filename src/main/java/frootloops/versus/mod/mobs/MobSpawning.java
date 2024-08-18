@@ -25,7 +25,7 @@ public class MobSpawning {
 
         // Deep caves:
         // BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, VanillaEntities.WITHER_SKELETON, 50, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.DEEPER_CREEPER, 260, 1, 2);
+        BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.DEEPER_CREEPER, 200, 1, 2);
         SpawnRestriction.register(ModEntities.DEEPER_CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnDeeperCreeper);
 
         BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.WITHERED_ZOMBIE, 180, 4, 4);
@@ -52,14 +52,24 @@ public class MobSpawning {
 
     public static boolean canSpawnDeeperCreeper(EntityType<DeeperCreeperEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
-        if(SpawnReason.isTrialSpawner(spawnReason)) return true;
-        return blockPos.getY() < -16 && world.getBlockState(blockPos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
+        if(spawnReason != SpawnReason.NATURAL) return true;
+        return blockPos.getY() < -16 && (world.getLightLevel(blockPos) == 0 || world.getBlockState(blockPos.down()).isOf(Blocks.DEEPSLATE));
     }
 
     public static boolean canSpawnWitheredZombie(EntityType<WitheredZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
-        if(SpawnReason.isTrialSpawner(spawnReason)) return true;
-        return blockPos.getY() < 0 && world.getBlockState(blockPos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
+        if(spawnReason != SpawnReason.NATURAL) return true;
+        if(world.getLightLevel(blockPos) > 0) return false;
+        if(blockPos.getY() > 16) {
+            long dayTime = world.getLunarTime() % 24000l;
+            if(dayTime < 18000l || dayTime > 20000l) return false;
+
+            int moonPhase = world.getMoonPhase();
+            if((moonPhase + 2) % 8 < 6) return false;
+            if(moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
+            return true;
+        }
+        else return world.getBlockState(blockPos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
     }
 
     public static boolean canSpawnFrostedZombie(EntityType<FrostedZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
@@ -71,7 +81,7 @@ public class MobSpawning {
 
     public static boolean canSpawnCreeper(EntityType<CreeperEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
-        if(SpawnReason.isTrialSpawner(spawnReason)) return true;
+        if(spawnReason != SpawnReason.NATURAL ) return true;
         int y = blockPos.getY();
         if (y > 96 || y < 24) return false;
         if (y > 60 && world.getLightLevel(blockPos) > 1) return false;
