@@ -45,9 +45,6 @@
             }
           },
           {
-            "Name": "minecraft:deepslate_coal_ore"
-          },
-          {
             "Name": "players-versus:withering_deepslate"
           },
           {
@@ -57,7 +54,7 @@
             }
           },
           {
-            "Name": "minecraft:deepslate_coal_ore"
+            "Name": "players-versus:withering_deepslate"
           },
           {
             "Name": "minecraft:deepslate",
@@ -98,7 +95,7 @@
           "above_bottom": 12
         },
         "max_inclusive": {
-          "above_bottom": 18
+          "above_bottom": 32
         }
       }
     },

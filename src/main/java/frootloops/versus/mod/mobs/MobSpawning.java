@@ -22,13 +22,12 @@ public class MobSpawning {
 
     public static void addCustomSpawns() {
 
-
         // Deep caves:
         // BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, VanillaEntities.WITHER_SKELETON, 50, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.DEEPER_CREEPER, 200, 1, 2);
+        BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.DEEPER_CREEPER, 100, 1, 1);
         SpawnRestriction.register(ModEntities.DEEPER_CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnDeeperCreeper);
 
-        BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.WITHERED_ZOMBIE, 180, 4, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.WITHERED_ZOMBIE, 200, 4, 4);
         SpawnRestriction.register(ModEntities.WITHERED_ZOMBIE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitheredZombie);
 
         // SpawnRestriction.register(VanillaEntities.CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnCreeper);
@@ -67,7 +66,7 @@ public class MobSpawning {
             int moonPhase = world.getMoonPhase();
             if((moonPhase + 2) % 8 < 6) return false;
             if(moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
-            return true;
+            return world.getBlockState(blockPos.down()).isIn(BlockTags.MOSS_REPLACEABLE);
         }
         else return world.getBlockState(blockPos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
     }

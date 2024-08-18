@@ -86,7 +86,7 @@ public class CreepingAndExplodingGoal extends Goal {
             // If the player can't see the creeper, creep up on them:
             else {
                 if(this.creeper.getNavigation().isIdle()) {
-                    this.creeper.getNavigation().startMovingTo(targetEntity, this.wasCoverBlown ? this.speed * 1.2 : this.speed);
+                    this.creeper.getNavigation().startMovingTo(targetEntity, this.wasCoverBlown ? this.speed * 1.05 : this.speed * 0.9);
                     this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
                 }
             }
@@ -94,7 +94,7 @@ public class CreepingAndExplodingGoal extends Goal {
 
         // If the player is looking, but the creeper is close enough, start charging:
         else {
-            if (targetEntity.handSwinging) this.wasCoverBlown = true;
+            if (targetEntity.handSwinging && isPlayerLooking && canPlayerSeeCreeper) this.wasCoverBlown = true;
             if(this.wasCoverBlown && !canPlayerSeeCreeper) this.wasCoverBlown = false;
             if(this.wasCoverBlown || !(isPlayerLooking && canPlayerSeeCreeper) || this.creeper.getNavigation().isIdle()) {
                 this.creeper.getNavigation().startMovingTo(targetEntity, this.speed);
