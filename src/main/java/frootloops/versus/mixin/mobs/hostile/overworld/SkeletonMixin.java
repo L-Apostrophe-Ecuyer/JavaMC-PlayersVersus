@@ -11,11 +11,14 @@ import net.minecraft.entity.mob.SkeletonEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.UseAction;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -35,6 +38,15 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
     protected int getRegularAttackInterval() {
         if(this.getTarget() == null) return 30;
         else return 30 + (int)(this.getTarget().squaredDistanceTo(this))/10;
+    }
+
+    @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
+        BlockPos pos = this.getBlockPos();
+        if(pos.getY() < -32) return false;
+        if(world.getBlockState(pos.down()).isIn(BlockTags.AXE_MINEABLE)) return false;
+        return super.canSpawn(world, spawnReason);
     }
 
     @Override

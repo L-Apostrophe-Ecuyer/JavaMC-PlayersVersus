@@ -70,7 +70,7 @@ public abstract class ZombieMixin extends HostileEntity {
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
         BlockPos pos = this.getBlockPos();
-        if(pos.getY() < -24) return false;
+        if(pos.getY() < -16) return false;
         if(world.getBlockState(pos.down()).isIn(BlockTags.AXE_MINEABLE)) return false;
         return super.canSpawn(world, spawnReason);
     }

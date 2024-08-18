@@ -33,13 +33,13 @@ public class WitheredZombieEntity extends ZombieEntity {
 
     public static DefaultAttributeContainer.Builder createWitheredAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 8.0)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 7.0)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.33f)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.2)
                 .add(EntityAttributes.GENERIC_ARMOR, 8.0)
                 .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 4.0)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.75)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.5)
                 .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
     }
 
@@ -122,7 +122,7 @@ public class WitheredZombieEntity extends ZombieEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.PARTICLE_SOUL_ESCAPE.value();
+        return SoundEvents.ENTITY_PLAYER_BREATH;
     }
 
     @Override
