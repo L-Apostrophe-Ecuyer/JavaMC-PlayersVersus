@@ -41,12 +41,12 @@ public abstract class InventoryScreenChestMixin extends HandledScreen<GenericCon
         });
 
         this.buttonQuickMoveToPlayer = new TexturedButtonWidget(buttonSortInventory.getX() - 15, buttonSortInventory.getY(), 13, 11, ContainerDumping.TEXTURE_DUMP_TO_PLAYER_BUTTON, button -> {
-            if(client.player != null) ContainerDumping.quickDumpIntoPlayerInventory(this.handler, client, client.player.getInventory(), ((InventoryScreenShulkerAccessor)this.handler).getInventory());
+            if(client.player != null) ContainerDumping.quickDumpIntoPlayerInventory(this.handler, client, client.player.getInventory(), this.handler.getInventory());
             if(buttonQuickMoveToPlayer != null) buttonQuickMoveToPlayer.setFocused(false);
         });
 
         this.buttonQuickMoveToStorage = new TexturedButtonWidget(buttonSortChest.getX() - 15, buttonSortChest.getY(), 13, 11, ContainerDumping.TEXTURE_DUMP_TO_STORAGE_BUTTON, button -> {
-            if(client.player != null) ContainerDumping.quickDumpIntoContainer(this.handler, client, client.player.getInventory(), ((InventoryScreenShulkerAccessor)this.handler).getInventory());
+            if(client.player != null) ContainerDumping.quickDumpIntoContainer(this.handler, client, client.player.getInventory(), this.handler.getInventory());
             if(buttonQuickMoveToPlayer != null) buttonQuickMoveToPlayer.setFocused(false);
         });
 
