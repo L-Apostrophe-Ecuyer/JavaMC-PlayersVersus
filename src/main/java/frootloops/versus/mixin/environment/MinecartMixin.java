@@ -94,6 +94,10 @@ public abstract class MinecartMixin extends VehicleEntity {
         return abstractMinecartEntity;
     }
 
+    public MinecartController getController() {
+        return this.controller;
+    }
+
     @Override
     protected Entity.MoveEffect getMoveEffect() {
         return Entity.MoveEffect.EVENTS;
