@@ -44,6 +44,7 @@ public abstract class MinecartMixin extends VehicleEntity {
 
     @ModifyConstant(method = "moveOffRail", constant = @Constant(doubleValue = 0.95))
     private double noSlowdownWhenInAir(double speedMultiplier) {
+
         return 1.0;
     }
 
