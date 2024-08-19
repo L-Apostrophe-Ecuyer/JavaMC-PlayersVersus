@@ -1,8 +1,8 @@
 package frootloops.versus.mixin.environment;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import frootloops.versus.mod.environment.class_9882;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.AbstractRailBlock;
 import net.minecraft.block.BlockState;
@@ -12,10 +12,13 @@ import net.minecraft.block.enums.RailShape;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.AbstractMinecartEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Util;
@@ -48,6 +51,8 @@ public abstract class MinecartMixin extends VehicleEntity {
         return this.getWorld().getBlockState(pos).isSolidBlock(this.getWorld(), pos);
     }
 
+    @Shadow public abstract AbstractMinecartEntity.Type getMinecartType();
+
     private final List<Step> stepsList = new LinkedList();
     private final List<Step> field_52530 = new LinkedList();
 
@@ -55,6 +60,9 @@ public abstract class MinecartMixin extends VehicleEntity {
 
     @ModifyConstant(method = "getMaxSpeed", constant = @Constant(doubleValue = 8.0))
     private double fasterMinecarts(double maxSpeed) {
+        return getNewMaxSpeed();
+
+        /*
         int i = MathHelper.floor(this.getX());
         int j = MathHelper.floor(this.getY());
         int k = MathHelper.floor(this.getZ());
@@ -66,20 +74,21 @@ public abstract class MinecartMixin extends VehicleEntity {
             RailShape railShape = blockState.get(((AbstractRailBlock)blockState.getBlock()).getShapeProperty());
             if(railShape == RailShape.EAST_WEST || railShape == RailShape.NORTH_SOUTH) return 24.0;
         }
-        return 8.0;
+        return 8.0; */
     }
 
-    private double getMaxSpeed() {
+    private double getNewMaxSpeed() {
         return 48.0 * (this.isTouchingWater() ? 0.3 : 1.0) / 20.0;
     }
 
-    @ModifyConstant(method = "moveOffRail", constant = @Constant(doubleValue = 0.95))
+    /*@ModifyConstant(method = "moveOffRail", constant = @Constant(doubleValue = 0.95))
     private double noSlowdownWhenInAir(double speedMultiplier) {
         return 1.0;
-    }
+    }*/
 
-    protected void moveOffRail() {
-        double d = this.getMaxSpeed();
+    @Overwrite
+    public void moveOffRail() {
+        double d = this.getNewMaxSpeed();
         Vec3d vec3d = this.getVelocity();
         this.setVelocity(MathHelper.clamp(vec3d.x, -d, d), vec3d.y, MathHelper.clamp(vec3d.z, -d, d));
         if (this.isOnGround()) {
@@ -122,7 +131,7 @@ public abstract class MinecartMixin extends VehicleEntity {
 
 
     @Overwrite
-    protected void moveOnRail(BlockPos pos, BlockState state) {
+    public void moveOnRail(BlockPos pos, BlockState state) {
         for (class_9882 classInstance = new class_9882(); classInstance.method_61618(); classInstance.field_52543 = false) {
             BlockPos blockPos = this.decelerateFromPoweredRail();
             BlockState blockState = this.getWorld().getBlockState(blockPos);
@@ -189,6 +198,46 @@ public abstract class MinecartMixin extends VehicleEntity {
         }
     }
 
+    @Override
+    public void move(MovementType movementType, Vec3d movement) {
+        Vec3d vec3d = this.getPos().add(movement);
+        super.move(movementType, movement);
+        if (this.horizontalCollision || this.verticalCollision) {
+            boolean bl = this.method_61562(this.getBoundingBox().expand(1.0E-7), 0.0);
+            if (bl) {
+                super.move(movementType, vec3d.subtract(this.getPos()));
+            }
+        }
+    }
+
+    public boolean method_61562(Box box, double d) {
+        boolean bl = false;
+        if (this.getMinecartType() == AbstractMinecartEntity.Type.RIDEABLE && this.getVelocity().horizontalLengthSquared() >= d) {
+            List<Entity> list = this.getWorld().getOtherEntities(this, box, EntityPredicates.canBePushedBy(this));
+            if (!list.isEmpty()) {
+                for (Entity entity : list) {
+                    if (!(entity instanceof PlayerEntity)
+                            && !(entity instanceof IronGolemEntity)
+                            && !(entity instanceof AbstractMinecartEntity)
+                            && !this.hasPassengers()
+                            && !entity.hasVehicle()) {
+                        entity.startRiding(this);
+                        bl = true;
+                    } else {
+                        entity.pushAwayFrom(this);
+                    }
+                }
+            }
+        } else {
+            for (Entity entity2 : this.getWorld().getOtherEntities(this, box)) {
+                if (!this.hasPassenger(entity2) && entity2.isPushable() && entity2 instanceof AbstractMinecartEntity) {
+                    entity2.pushAwayFrom(this);
+                }
+            }
+        }
+        return bl;
+    }
+
     public void method_61409() {
         if (!this.isRemoved() && !this.noClip) {
             boolean bl = this.isOnFire();
@@ -197,20 +246,17 @@ public abstract class MinecartMixin extends VehicleEntity {
                 BlockState blockState = this.getWorld().getBlockState(blockPos);
                 blockState.getBlock().onSteppedOn(this.getWorld(), blockPos, blockState, this);
             }
-
-            this.method_61408(this.field_52442);
-            boolean bl2 = Iterables.any(this.field_52442, blockStatex -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA));
-            this.field_52442.clear();
-            if (!bl2) {
-                if (this.fireTicks <= 0) {
+            this.tryCheckBlockCollision();
+            float h = this.getVelocityMultiplier();
+            this.setVelocity(this.getVelocity().multiply(h, 1.0, h));
+            if (this.getWorld().getStatesInBoxIfLoaded(this.getBoundingBox().contract(1.0E-6)).noneMatch(state -> state.isIn(BlockTags.FIRE) || state.isOf(Blocks.LAVA))) {
+                if (this.getFireTicks() <= 0) {
                     this.setFireTicks(-this.getBurningDuration());
                 }
-
-                if (bl && (this.inPowderSnow || this.isWet())) {
+                if (this.wasOnFire && (this.inPowderSnow || this.isWet())) {
                     this.playExtinguishSound();
                 }
             }
-
             if (this.isOnFire() && (this.inPowderSnow || this.isWet())) {
                 this.setFireTicks(-this.getBurningDuration());
             }
@@ -246,7 +292,7 @@ public abstract class MinecartMixin extends VehicleEntity {
         if (arg.field_52543) {
             vec3d2 = this.applySlowdown(vec3d2);
             if (vec3d2.lengthSquared() > 0.0) {
-                double d = Math.min(vec3d2.length(), getMaxSpeed());
+                double d = Math.min(vec3d2.length(), getNewMaxSpeed());
                 vec3d2 = vec3d2.normalize().multiply(d);
             }
         }
@@ -360,8 +406,8 @@ public abstract class MinecartMixin extends VehicleEntity {
             Pair<Vec3i, Vec3i> pair = getAdjacentRailPositionsByShape(railShape);
             Vec3i vec3i = pair.getFirst();
             Vec3i vec3i2 = pair.getSecond();
-            Vec3d vec3d = new Vec3d(vec3i).multiply(0.5, 0.0, 0.5);
-            Vec3d vec3d2 = new Vec3d(vec3i2).multiply(0.5, 0.0, 0.5);
+            Vec3d vec3d = new Vec3d(vec3i.getX() * 0.5, 0.0, vec3i.getZ() * 0.5);
+            Vec3d vec3d2 = new Vec3d(vec3i2.getX() * 0.5, 0.0, vec3i2.getZ() * 0.5);
             if (this.getVelocity().length() > 1.0E-5F && this.getVelocity().dotProduct(vec3d) < this.getVelocity().dotProduct(vec3d2)) {
                 vec3d = vec3d2;
             }
@@ -399,7 +445,7 @@ public abstract class MinecartMixin extends VehicleEntity {
             Pair<Vec3i, Vec3i> pair = getAdjacentRailPositionsByShape(railShape);
             Vec3i vec3i = pair.getFirst();
             Vec3i vec3i2 = pair.getSecond();
-            Vec3d vec3d2 = this.getVelocity().getHorizontal();
+            Vec3d vec3d2 = this.getVelocity().multiply(1.0, 0.0, 1.0);
             if (vec3d2.length() < 1.0E-5F) {
                 this.setVelocity(Vec3d.ZERO);
                 return 0.0;
@@ -463,19 +509,7 @@ public abstract class MinecartMixin extends VehicleEntity {
 
     private static record Step(Vec3d position, Vec3d movement, float yRot, float xRot, float weight) {
         public static final PacketCodec<ByteBuf, Float> DEGREES_AS_BYTE_PACKET_CODEC = PacketCodecs.BYTE.xmap(Step::byteToDegrees, Step::degreesToByte);
-        public static final PacketCodec<ByteBuf, Step> PACKET_CODEC = PacketCodec.tuple(
-                Vec3d.PACKET_CODEC,
-                Step::position,
-                Vec3d.PACKET_CODEC,
-                Step::movement,
-                DEGREES_AS_BYTE_PACKET_CODEC,
-                Step::yRot,
-                DEGREES_AS_BYTE_PACKET_CODEC,
-                Step::xRot,
-                PacketCodecs.FLOAT,
-                Step::weight,
-                Step::new
-        );
+        //public static final PacketCodec<ByteBuf, Step> PACKET_CODEC = PacketCodec.tuple(Vec3d.PACKET_CODEC, Step::position, Vec3d.PACKET_CODEC, Step::movement, DEGREES_AS_BYTE_PACKET_CODEC, Step::yRot, DEGREES_AS_BYTE_PACKET_CODEC, Step::xRot, PacketCodecs.FLOAT, Step::weight, Step::new);
         public static Step ZERO = new Step(Vec3d.ZERO, Vec3d.ZERO, 0.0F, 0.0F, 0.0F);
 
         private static byte degreesToByte(float degrees) {
@@ -484,18 +518,6 @@ public abstract class MinecartMixin extends VehicleEntity {
 
         private static float byteToDegrees(byte b) {
             return (float)b * 360.0F / 256.0F;
-        }
-    }
-
-    static class class_9882 {
-        double field_52542 = 0.0;
-        boolean field_52543 = true;
-        boolean field_52544 = false;
-        boolean field_52545 = false;
-        boolean field_52546 = false;
-
-        public boolean method_61618() {
-            return this.field_52543 || this.field_52542 > 1.0E-5F;
         }
     }
 
