@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.environment;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.ByteBuf;
@@ -184,6 +185,34 @@ public abstract class MinecartMixin extends VehicleEntity {
 
             if (deltaPos > 1.0E-5F || classInstance.field_52543) {
                 this.method_61409();
+            }
+        }
+    }
+
+    public void method_61409() {
+        if (!this.isRemoved() && !this.noClip) {
+            boolean bl = this.isOnFire();
+            if (this.isOnGround()) {
+                BlockPos blockPos = this.getLandingPos();
+                BlockState blockState = this.getWorld().getBlockState(blockPos);
+                blockState.getBlock().onSteppedOn(this.getWorld(), blockPos, blockState, this);
+            }
+
+            this.method_61408(this.field_52442);
+            boolean bl2 = Iterables.any(this.field_52442, blockStatex -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA));
+            this.field_52442.clear();
+            if (!bl2) {
+                if (this.fireTicks <= 0) {
+                    this.setFireTicks(-this.getBurningDuration());
+                }
+
+                if (bl && (this.inPowderSnow || this.isWet())) {
+                    this.playExtinguishSound();
+                }
+            }
+
+            if (this.isOnFire() && (this.inPowderSnow || this.isWet())) {
+                this.setFireTicks(-this.getBurningDuration());
             }
         }
     }
