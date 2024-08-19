@@ -2,7 +2,8 @@ package frootloops.versus.mixin.environment;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import frootloops.versus.mod.environment.class_9882;
+import frootloops.versus.mod.environment.Minecarts.Step;
+import frootloops.versus.mod.environment.Minecarts.class_9882;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.AbstractRailBlock;
 import net.minecraft.block.BlockState;
@@ -505,20 +506,6 @@ public abstract class MinecartMixin extends VehicleEntity {
     }
 
     static record InterpolatedStep(float partialTicksInStep, Step currentStep, Step previousStep) {
-    }
-
-    private static record Step(Vec3d position, Vec3d movement, float yRot, float xRot, float weight) {
-        public static final PacketCodec<ByteBuf, Float> DEGREES_AS_BYTE_PACKET_CODEC = PacketCodecs.BYTE.xmap(Step::byteToDegrees, Step::degreesToByte);
-        //public static final PacketCodec<ByteBuf, Step> PACKET_CODEC = PacketCodec.tuple(Vec3d.PACKET_CODEC, Step::position, Vec3d.PACKET_CODEC, Step::movement, DEGREES_AS_BYTE_PACKET_CODEC, Step::yRot, DEGREES_AS_BYTE_PACKET_CODEC, Step::xRot, PacketCodecs.FLOAT, Step::weight, Step::new);
-        public static Step ZERO = new Step(Vec3d.ZERO, Vec3d.ZERO, 0.0F, 0.0F, 0.0F);
-
-        private static byte degreesToByte(float degrees) {
-            return (byte)MathHelper.floor(degrees * 256.0F / 360.0F);
-        }
-
-        private static float byteToDegrees(byte b) {
-            return (float)b * 360.0F / 256.0F;
-        }
     }
 
     private static final Map<RailShape, Pair<Vec3i, Vec3i>> ADJACENT_RAIL_POSITIONS_BY_SHAPE = Util.make(Maps.newEnumMap(RailShape.class), map -> {

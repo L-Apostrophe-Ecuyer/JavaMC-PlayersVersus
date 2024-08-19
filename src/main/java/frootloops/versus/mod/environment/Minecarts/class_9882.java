@@ -1,4 +1,4 @@
-package frootloops.versus.mod.environment;
+package frootloops.versus.mod.environment.Minecarts;
 
 public class class_9882 {
     public double field_52542 = 0.0;
