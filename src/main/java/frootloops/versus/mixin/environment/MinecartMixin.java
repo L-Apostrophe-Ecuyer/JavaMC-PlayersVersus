@@ -139,7 +139,7 @@ public abstract class MinecartMixin extends VehicleEntity {
                 }
 
                 RailShape railShape = blockState.get(((AbstractRailBlock)blockState.getBlock()).getShapeProperty());
-                Vec3d vec3d = this.method_61601(this.getVelocity().getHorizontal(), classInstance, blockPos, blockState, railShape);
+                Vec3d vec3d = this.method_61601(new Vec3d(this.getVelocity().x, 0.0,this.getVelocity().z), classInstance, blockPos, blockState, railShape);
                 if (classInstance.field_52543) {
                     classInstance.field_52542 = vec3d.horizontalLength();
                 } else {
@@ -331,8 +331,8 @@ public abstract class MinecartMixin extends VehicleEntity {
             Pair<Vec3i, Vec3i> pair = getAdjacentRailPositionsByShape(railShape);
             Vec3i vec3i = pair.getFirst();
             Vec3i vec3i2 = pair.getSecond();
-            Vec3d vec3d = new Vec3d(vec3i).multiply(0.5).getHorizontal();
-            Vec3d vec3d2 = new Vec3d(vec3i2).multiply(0.5).getHorizontal();
+            Vec3d vec3d = new Vec3d(vec3i).multiply(0.5, 0.0, 0.5);
+            Vec3d vec3d2 = new Vec3d(vec3i2).multiply(0.5, 0.0, 0.5);
             if (this.getVelocity().length() > 1.0E-5F && this.getVelocity().dotProduct(vec3d) < this.getVelocity().dotProduct(vec3d2)) {
                 vec3d = vec3d2;
             }
@@ -376,8 +376,8 @@ public abstract class MinecartMixin extends VehicleEntity {
                 return 0.0;
             } else {
                 boolean bl = vec3i.getY() != vec3i2.getY();
-                Vec3d vec3d3 = new Vec3d(vec3i2.getX(), vec3i2.getY(), vec3i2.getZ()).multiply(0.5).getHorizontal();
-                Vec3d vec3d4 = new Vec3d(vec3i.getX(), vec3i.getY(), vec3i.getZ()).multiply(0.5).getHorizontal();
+                Vec3d vec3d3 = new Vec3d(vec3i2.getX(), vec3i2.getY(), vec3i2.getZ()).multiply(0.5, 0.0, 0.5);
+                Vec3d vec3d4 = new Vec3d(vec3i.getX(), vec3i.getY(), vec3i.getZ()).multiply(0.5, 0.0, 0.5);
                 if (vec3d2.dotProduct(vec3d4) < vec3d2.dotProduct(vec3d3)) {
                     vec3d4 = vec3d3;
                 }
