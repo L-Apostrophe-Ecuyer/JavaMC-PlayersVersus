@@ -2,7 +2,6 @@ package frootloops.versus.mod.environment.Minecarts;
 
 import java.util.List;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.vehicle.ExperimentalMinecartController;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
