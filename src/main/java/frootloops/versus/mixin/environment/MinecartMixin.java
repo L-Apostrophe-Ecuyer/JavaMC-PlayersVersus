@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.environment;
 
+import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.AbstractRailBlock;
@@ -11,24 +12,23 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.vehicle.AbstractMinecartEntity;
-import net.minecraft.entity.vehicle.ExperimentalMinecartController;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.*;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 @Mixin(AbstractMinecartEntity.class)
@@ -321,10 +321,14 @@ public abstract class MinecartMixin extends VehicleEntity {
         }
     }
 
+    private static Pair<Vec3i, Vec3i> getAdjacentRailPositionsByShape(RailShape shape) {
+        return ADJACENT_RAIL_POSITIONS_BY_SHAPE.get(shape);
+    }
+
     private void method_61605(BlockPos blockPos, BlockState blockState) {
         if (AbstractRailBlock.isRail(blockState)) {
             RailShape railShape = blockState.get(((AbstractRailBlock)blockState.getBlock()).getShapeProperty());
-            Pair<Vec3i, Vec3i> pair = AbstractMinecartEntity.getAdjacentRailPositionsByShape(railShape);
+            Pair<Vec3i, Vec3i> pair = getAdjacentRailPositionsByShape(railShape);
             Vec3i vec3i = pair.getFirst();
             Vec3i vec3i2 = pair.getSecond();
             Vec3d vec3d = new Vec3d(vec3i).multiply(0.5).getHorizontal();
@@ -363,7 +367,7 @@ public abstract class MinecartMixin extends VehicleEntity {
             return 0.0;
         } else {
             Vec3d vec3d = this.getPos();
-            Pair<Vec3i, Vec3i> pair = AbstractMinecartEntity.getAdjacentRailPositionsByShape(railShape);
+            Pair<Vec3i, Vec3i> pair = getAdjacentRailPositionsByShape(railShape);
             Vec3i vec3i = pair.getFirst();
             Vec3i vec3i2 = pair.getSecond();
             Vec3d vec3d2 = this.getVelocity().getHorizontal();
@@ -372,8 +376,8 @@ public abstract class MinecartMixin extends VehicleEntity {
                 return 0.0;
             } else {
                 boolean bl = vec3i.getY() != vec3i2.getY();
-                Vec3d vec3d3 = new Vec3d(vec3i2).multiply(0.5).getHorizontal();
-                Vec3d vec3d4 = new Vec3d(vec3i).multiply(0.5).getHorizontal();
+                Vec3d vec3d3 = new Vec3d(vec3i2.getX(), vec3i2.getY(), vec3i2.getZ()).multiply(0.5).getHorizontal();
+                Vec3d vec3d4 = new Vec3d(vec3i.getX(), vec3i.getY(), vec3i.getZ()).multiply(0.5).getHorizontal();
                 if (vec3d2.dotProduct(vec3d4) < vec3d2.dotProduct(vec3d3)) {
                     vec3d4 = vec3d3;
                 }
@@ -429,8 +433,7 @@ public abstract class MinecartMixin extends VehicleEntity {
     }
 
     private static record Step(Vec3d position, Vec3d movement, float yRot, float xRot, float weight) {
-        public static final PacketCodec<ByteBuf, Float> DEGREES_AS_BYTE_PACKET_CODEC = PacketCodecs.BYTE
-                .xmap(Step::byteToDegrees, Step::degreesToByte);
+        public static final PacketCodec<ByteBuf, Float> DEGREES_AS_BYTE_PACKET_CODEC = PacketCodecs.BYTE.xmap(Step::byteToDegrees, Step::degreesToByte);
         public static final PacketCodec<ByteBuf, Step> PACKET_CODEC = PacketCodec.tuple(
                 Vec3d.PACKET_CODEC,
                 Step::position,
@@ -466,4 +469,25 @@ public abstract class MinecartMixin extends VehicleEntity {
             return this.field_52543 || this.field_52542 > 1.0E-5F;
         }
     }
+
+    private static final Map<RailShape, Pair<Vec3i, Vec3i>> ADJACENT_RAIL_POSITIONS_BY_SHAPE = Util.make(Maps.newEnumMap(RailShape.class), map -> {
+        Vec3i vec3i = Direction.WEST.getVector();
+        Vec3i vec3i2 = Direction.EAST.getVector();
+        Vec3i vec3i3 = Direction.NORTH.getVector();
+        Vec3i vec3i4 = Direction.SOUTH.getVector();
+        Vec3i vec3i5 = vec3i.down();
+        Vec3i vec3i6 = vec3i2.down();
+        Vec3i vec3i7 = vec3i3.down();
+        Vec3i vec3i8 = vec3i4.down();
+        map.put(RailShape.NORTH_SOUTH, Pair.of(vec3i3, vec3i4));
+        map.put(RailShape.EAST_WEST, Pair.of(vec3i, vec3i2));
+        map.put(RailShape.ASCENDING_EAST, Pair.of(vec3i5, vec3i2));
+        map.put(RailShape.ASCENDING_WEST, Pair.of(vec3i, vec3i6));
+        map.put(RailShape.ASCENDING_NORTH, Pair.of(vec3i3, vec3i8));
+        map.put(RailShape.ASCENDING_SOUTH, Pair.of(vec3i7, vec3i4));
+        map.put(RailShape.SOUTH_EAST, Pair.of(vec3i4, vec3i2));
+        map.put(RailShape.SOUTH_WEST, Pair.of(vec3i4, vec3i));
+        map.put(RailShape.NORTH_WEST, Pair.of(vec3i3, vec3i));
+        map.put(RailShape.NORTH_EAST, Pair.of(vec3i3, vec3i2));
+    });
 }
