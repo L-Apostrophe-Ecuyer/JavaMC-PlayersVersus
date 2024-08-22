@@ -2,11 +2,56 @@
   "fallback": "minecraft:empty",
   "elements": [
     {
-      "weight": 4,
+      "weight": 9,
       "element": {
         "element_type": "minecraft:single_pool_element",
         "projection": "rigid",
-        "location": "players-versus:trial_tower/tower_snowy_1",
+        "location": "players-versus:trial_tower/tower_cold_1",
+        "processors":  "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 7,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/tower_cold_2",
+        "processors":  "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/tower_cold_3",
+        "processors":  "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/tower_1",
+        "processors":  "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/tower_2",
+        "processors":  "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/tower_3",
         "processors":  "players-versus:trial_tower"
       }
     }

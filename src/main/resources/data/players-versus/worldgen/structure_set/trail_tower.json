@@ -6,11 +6,15 @@
     },
     {
       "structure": "players-versus:trial_tower_cold",
-      "weight": 2
+      "weight": 1
     },
     {
-      "structure": "players-versus:trial_tower_warm",
-      "weight": 2
+      "structure": "players-versus:trial_tower_snowy",
+      "weight": 1
+    },
+    {
+      "structure": "players-versus:trial_tower_desert",
+      "weight": 1
     }
   ],
   "placement": {

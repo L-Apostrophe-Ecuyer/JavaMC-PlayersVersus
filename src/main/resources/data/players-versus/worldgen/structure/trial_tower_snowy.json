@@ -1,9 +1,9 @@
 {
   "type": "minecraft:jigsaw",
   "biomes": [
-    "minecraft:birch_forest",
-    "minecraft:old_growth_birch_forest",
-    "minecraft:forest"
+    "minecraft:snowy_taiga",
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes"
   ],
   "step": "underground_structures",
   "spawn_overrides": {
@@ -33,10 +33,10 @@
     }
   },
   "terrain_adaptation": "bury",
-  "start_pool": "players-versus:trial_tower/tower",
+  "start_pool": "players-versus:trial_tower/tower_snowy",
   "size": 3,
   "start_height": {
-    "absolute": -32
+    "absolute": -28
   },
   "project_start_to_heightmap": "WORLD_SURFACE_WG",
   "max_distance_from_center": 80,
