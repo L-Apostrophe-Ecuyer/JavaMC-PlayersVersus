@@ -1,12 +1,9 @@
 {
   "type": "minecraft:jigsaw",
   "biomes": [
-    "minecraft:taiga",
-    "minecraft:old_growth_pine_taiga",
-    "minecraft:old_growth_spruce_taiga",
-    "minecraft:windswept_forest",
-    "minecraft:windswept_gravelly_hills",
-    "minecraft:windswept_hills"
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:savanna"
   ],
   "step": "underground_structures",
   "spawn_overrides": {
@@ -36,7 +33,7 @@
     }
   },
   "terrain_adaptation": "bury",
-  "start_pool": "players-versus:trial_tower/tower_cold",
+  "start_pool": "players-versus:trial_tower/tower_warm",
   "size": 3,
   "start_height": {
     "absolute": -22
