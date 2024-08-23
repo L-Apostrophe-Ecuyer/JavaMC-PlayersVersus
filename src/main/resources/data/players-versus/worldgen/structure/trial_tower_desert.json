@@ -36,7 +36,7 @@
   "start_pool": "players-versus:trial_tower/tower_desert",
   "size": 3,
   "start_height": {
-    "absolute": -22
+    "absolute": -12
   },
   "project_start_to_heightmap": "WORLD_SURFACE_WG",
   "max_distance_from_center": 80,
