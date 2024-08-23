@@ -20,7 +20,7 @@ import net.minecraft.world.WorldView;
 
 public class WitheringDeepslateBlock extends Block {
 
-    private final EntityEffectParticleEffect PARTICLE = EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, ColorHelper.Argb.fullAlpha(1841692));
+    private final EntityEffectParticleEffect PARTICLE = EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, ColorHelper.fullAlpha(1841692));
     public WitheringDeepslateBlock(Settings settings) {
         super(settings);
     }

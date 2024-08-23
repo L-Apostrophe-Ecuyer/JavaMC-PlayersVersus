@@ -33,7 +33,7 @@ public class WitherSkeletonMixin extends HostileEntity {
         EntityAttributeInstance instanceKnockbackRes = this.getAttributes().getCustomInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
         if (instanceKnockbackRes != null) instanceKnockbackRes.setBaseValue(0.5D);
 
-        EntityAttributeInstance instanceKnockbackAtk = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_KNOCKBACK);
+        EntityAttributeInstance instanceKnockbackAtk = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_DAMAGE);
         if (instanceKnockbackAtk != null) instanceKnockbackAtk.setBaseValue(1.25D);
     }
 }

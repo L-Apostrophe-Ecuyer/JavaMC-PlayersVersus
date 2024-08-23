@@ -1,13 +1,11 @@
 package frootloops.versus.mixin.items;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.ItemsAndStacks;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.util.UseAction;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,7 +46,7 @@ public class ItemUsageMixin {
     public void dontUseOffhandItemAfterExhausted(ItemStack stack, World world, LivingEntity user, CallbackInfoReturnable cir) {
         // This should hopefully stop players from accidentally using an item in their offhand right after eating:
         if(user instanceof PlayerEntity player) {;
-            boolean canPlayerStillUseItem = !player.getItemCooldownManager().isCoolingDown(stack.getItem());
+            boolean canPlayerStillUseItem = !player.getItemCooldownManager().isCoolingDown(stack);
             if(stack.contains(DataComponentTypes.FOOD) && canPlayerStillUseItem) {
                 canPlayerStillUseItem = stack.getComponents().get(DataComponentTypes.FOOD).canAlwaysEat();
                 canPlayerStillUseItem = player.canConsume(canPlayerStillUseItem);
@@ -64,7 +62,7 @@ public class ItemUsageMixin {
                 Item itemToPutOnCooldown = stackToPutOnCooldown.getItem();
                 if(itemToPutOnCooldown instanceof BlockItem) timeToSetCooldown = 6;
                 else if(itemToPutOnCooldown instanceof WindChargeItem || itemToPutOnCooldown instanceof FireChargeItem || itemToPutOnCooldown instanceof EnderPearlItem || itemToPutOnCooldown instanceof ThrowablePotionItem) timeToSetCooldown = 8;
-                player.getItemCooldownManager().set(itemToPutOnCooldown, timeToSetCooldown);
+                player.getItemCooldownManager().set(stackToPutOnCooldown, timeToSetCooldown);
             }
         }
     }

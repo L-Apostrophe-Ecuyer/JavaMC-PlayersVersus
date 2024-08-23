@@ -24,10 +24,10 @@ public class PillagerPatrolMixin {
             int rand = random.nextInt(100);
 
             PatrolEntity patrolEntity = null;
-            if(rand < 15) patrolEntity = EntityType.VINDICATOR.create(world);
-            else if(rand < 40) patrolEntity = EntityType.WITCH.create(world);
+            if(rand < 15) patrolEntity = EntityType.VINDICATOR.create(world, SpawnReason.PATROL);
+            else if(rand < 40) patrolEntity = EntityType.WITCH.create(world, SpawnReason.PATROL);
             else if(rand < 65){
-                patrolEntity = EntityType.VINDICATOR.create(world);
+                patrolEntity = EntityType.VINDICATOR.create(world, SpawnReason.PATROL);
                 patrolEntity.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
                 patrolEntity.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
                 patrolEntity.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(180);

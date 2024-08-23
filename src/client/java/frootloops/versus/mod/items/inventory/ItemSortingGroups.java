@@ -6,7 +6,9 @@ import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import net.minecraft.block.*;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
+import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.Rarity;
 
@@ -473,7 +475,9 @@ public class ItemSortingGroups {
             else if(item instanceof ConcentrateItem || item == Items.ROTTEN_FLESH || item == Items.SPIDER_EYE) {
                 return false;
             }
-            else if(item instanceof PotionItem || (item.getComponents().contains(DataComponentTypes.FOOD) && item.getComponents().get(DataComponentTypes.FOOD).effects().stream().anyMatch(statusEffectEntry -> statusEffectEntry.effect().getEffectType().value().getCategory() == StatusEffectCategory.BENEFICIAL))) {
+
+            // Potions and foods with positive effects:
+            else if(item instanceof PotionItem || (item.getComponents().contains(DataComponentTypes.FOOD) && item.getComponents().get(DataComponentTypes.CONSUMABLE).onConsumeEffects().stream().anyMatch(consumeEffect -> consumeEffect instanceof ApplyEffectsConsumeEffect effectsConsumeEffect &&  effectsConsumeEffect.effects().stream().anyMatch(statusEffectInstance -> statusEffectInstance.getEffectType().value().getCategory() == StatusEffectCategory.BENEFICIAL)))) {
                 this.inventorySlots.add(Math.min(inventorySlots.size(), indexSpecialConsumables), slot);
                 indexSpecialConsumables++;
                 indexFoods++;

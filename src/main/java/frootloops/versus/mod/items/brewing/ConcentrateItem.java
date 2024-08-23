@@ -1,6 +1,10 @@
 package frootloops.versus.mod.items.brewing;
 
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ConsumableComponent;
+import net.minecraft.component.type.ConsumableComponents;
 import net.minecraft.component.type.FoodComponent;
+import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -10,22 +14,27 @@ import net.minecraft.inventory.StackReference;
 import net.minecraft.item.BundleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
 
+import java.util.List;
+import java.util.Optional;
+
 
 public class ConcentrateItem extends Item {
 
-    public static final FoodComponent CONCENTRATE_FOOD_COMPONENT = new FoodComponent.Builder().nutrition(0).saturationModifier(0.5f).alwaysEdible().statusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 120, 2), 1.0f).statusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 140, 2), 1.0f).build();
+    public static final ConsumableComponent CONCENTRATE_COMPONENT = ConsumableComponents.food().consumeSeconds(2.0f).consumeEffect(new ApplyEffectsConsumeEffect(List.of(new StatusEffectInstance(StatusEffects.HUNGER, 120, 2),new StatusEffectInstance(StatusEffects.NAUSEA, 140, 2)))).build();
 
     protected RegistryEntry<StatusEffect> effect;
     protected int amplifier;
     protected int duration;
 
     public ConcentrateItem(RegistryEntry<StatusEffect> registeredEffect) {
-        super(new Item.Settings().rarity(Rarity.UNCOMMON).food(CONCENTRATE_FOOD_COMPONENT));
+        super(new Item.Settings().rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, CONCENTRATE_COMPONENT));
         if(registeredEffect != null) {
             this.effect = registeredEffect;
             this.amplifier = 0;
@@ -34,7 +43,7 @@ public class ConcentrateItem extends Item {
     }
 
     public ConcentrateItem(RegistryEntry<StatusEffect> registeredEffect, int amplifier, int duration) {
-        super(new Item.Settings().rarity(Rarity.UNCOMMON).food(CONCENTRATE_FOOD_COMPONENT));
+        super(new Item.Settings().rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, CONCENTRATE_COMPONENT));
         if(registeredEffect != null) {
             this.effect = registeredEffect;
             this.amplifier = amplifier;

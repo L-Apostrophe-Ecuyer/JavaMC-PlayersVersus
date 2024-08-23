@@ -69,11 +69,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                     .add(EntityAttributes.LUCK)
                     .add(EntityAttributes.BLOCK_INTERACTION_RANGE, 5.0)
                     .add(EntityAttributes.ENTITY_INTERACTION_RANGE,  Combat.PLAYER_BASE_ATTACK_REACH)
-                    .add(EntityAttributes.PLAYER_BLOCK_BREAK_SPEED)
-                    .add(EntityAttributes.PLAYER_SUBMERGED_MINING_SPEED)
-                    .add(EntityAttributes.PLAYER_SNEAKING_SPEED)
-                    .add(EntityAttributes.PLAYER_MINING_EFFICIENCY)
-                    .add(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO)
+                    .add(EntityAttributes.BLOCK_BREAK_SPEED)
+                    .add(EntityAttributes.SUBMERGED_MINING_SPEED)
+                    .add(EntityAttributes.SNEAKING_SPEED)
+                    .add(EntityAttributes.MINING_EFFICIENCY)
+                    .add(EntityAttributes.SWEEPING_DAMAGE_RATIO)
         );
     }
 
@@ -149,7 +149,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             Item item = this.activeItemStack.getItem();
             if (item.getComponents().contains(DataComponentTypes.FOOD) || item instanceof PotionItem) {
                 this.clearActiveItem();
-                itemCooldownManager.set(item, 32);
+                itemCooldownManager.set(this.activeItemStack, 32);
             }
         }
     }
@@ -160,7 +160,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         // After attacking, the shield is interrupted:
         if(this.getOffHandStack().getItem() instanceof ShieldItem) {
             this.clearActiveItem();
-            itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
+            itemCooldownManager.set(this.getOffHandStack(), 6);
         }
 
         double amount = this.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);

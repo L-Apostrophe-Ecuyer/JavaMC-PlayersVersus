@@ -45,7 +45,7 @@ public class SlimeballsAndFireChargesMixin {
         user.incrementStat(Stats.USED.getOrCreateStat(Items.SLIME_BALL));
         if (!user.getAbilities().creativeMode) {
             itemStack.decrement(1);
-            user.getItemCooldownManager().set(Items.SLIME_BALL, 8);
+            user.getItemCooldownManager().set(itemStack, 8);
         }
     }
 
@@ -63,7 +63,7 @@ public class SlimeballsAndFireChargesMixin {
         user.incrementStat(Stats.USED.getOrCreateStat(Items.FIRE_CHARGE));
         if (!user.getAbilities().creativeMode) {
             itemStack.decrement(1);
-            user.getItemCooldownManager().set(Items.FIRE_CHARGE, 20);
+            user.getItemCooldownManager().set(itemStack, 20);
         }
     }
 

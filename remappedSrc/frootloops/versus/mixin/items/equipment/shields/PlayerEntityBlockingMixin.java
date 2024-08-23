@@ -75,7 +75,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
             }
         }
 
-        this.itemCooldownManager.set(this.activeItemStack.getItem(), disableForTicks);
+        this.itemCooldownManager.set(this.activeItemStack, disableForTicks);
         this.clearActiveItem();
         this.getWorld().sendEntityStatus(this, (byte)30);
         info.cancel();

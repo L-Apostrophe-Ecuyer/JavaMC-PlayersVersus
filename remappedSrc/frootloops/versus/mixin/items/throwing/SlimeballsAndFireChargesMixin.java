@@ -9,8 +9,8 @@ import net.minecraft.item.Items;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -38,14 +38,14 @@ public class SlimeballsAndFireChargesMixin {
     private static void throwSnowball(World world, PlayerEntity user, ItemStack itemStack) {
         world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_EGG_THROW, SoundCategory.NEUTRAL, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
         if (!world.isClient) {
-            SlimeballEntity slimeballEntity = new SlimeballEntity(world, user);
+            SlimeballEntity slimeballEntity = new SlimeballEntity(world, user, itemStack);
             slimeballEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0f, 1.5f, 1.0f);
             world.spawnEntity(slimeballEntity);
         }
         user.incrementStat(Stats.USED.getOrCreateStat(Items.SLIME_BALL));
         if (!user.getAbilities().creativeMode) {
             itemStack.decrement(1);
-            user.getItemCooldownManager().set(Items.SLIME_BALL, 8);
+            user.getItemCooldownManager().set(itemStack, 8);
         }
     }
 
@@ -63,7 +63,7 @@ public class SlimeballsAndFireChargesMixin {
         user.incrementStat(Stats.USED.getOrCreateStat(Items.FIRE_CHARGE));
         if (!user.getAbilities().creativeMode) {
             itemStack.decrement(1);
-            user.getItemCooldownManager().set(Items.FIRE_CHARGE, 20);
+            user.getItemCooldownManager().set(itemStack, 20);
         }
     }
 

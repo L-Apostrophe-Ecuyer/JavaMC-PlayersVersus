@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items.brewing;
 
+import UseAction;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;

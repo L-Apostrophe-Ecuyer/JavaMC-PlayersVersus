@@ -56,8 +56,8 @@ public abstract class ItemStackMixin implements ComponentHolder {
                     enchantmentPower += enchant.value().getMinPower(itemEnchantmentsComponent.getLevel(enchant));
                 }
                 int maxLevel = 50;
-                if(item instanceof ArmorItem armorItem) maxLevel = 4 * armorItem.getEnchantability();
-                else if(item instanceof ToolItem toolItem) maxLevel = 4 * toolItem.getEnchantability();
+                if(item instanceof ArmorItem armorItem) maxLevel = 4 * armorItem.getMaterial().getEnchantability();
+                else if(item instanceof MiningToolItem toolItem) maxLevel = 4 * toolItem.getEnchantability();
                 if(enchantmentPower < maxLevel) cir.setReturnValue(true);
             }
         }
@@ -80,18 +80,17 @@ public abstract class ItemStackMixin implements ComponentHolder {
         }
     }
 
+
     @Inject(method = "getMiningSpeedMultiplier", at = @At("RETURN"), cancellable = true)
     public void getMiningSpeedMultiplier(BlockState state, CallbackInfoReturnable<Float> cir) {
         float miningSpeed = cir.getReturnValue();
         if(miningSpeed != 1.0f && this.item instanceof MiningToolItem miningToolItem) {
-            ToolMaterial material = miningToolItem.getMaterial();
-            if(material == ToolMaterials.WOOD) miningSpeed *= 1.4f;
-            else if(material == ToolMaterials.STONE) miningSpeed *= 1.2f;
-            else if(state.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
-                if(material.getInverseTag() == BlockTags.INCORRECT_FOR_STONE_TOOL) miningSpeed *= 0.6f;
-                else if(material == ToolMaterials.NETHERITE) miningSpeed *= 1.25f;
+            if(state.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
+                if(miningToolItem == Items.NETHERITE_PICKAXE) miningSpeed *= 1.3f;
+                else if(miningToolItem == Items.DIAMOND_PICKAXE) miningSpeed *= 1.1f;
+                else miningSpeed *= 0.6f;
+                cir.setReturnValue(miningSpeed);
             }
-            cir.setReturnValue(miningSpeed);
         }
     }
 }

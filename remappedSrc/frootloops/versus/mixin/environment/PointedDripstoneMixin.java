@@ -63,9 +63,11 @@ public abstract class PointedDripstoneMixin extends Block {
         Fluid fluid = null;
         BlockPos.Mutable mutableBlockPos = pos.mutableCopy();
         BlockState mutableBlockState = null;
+        int maxWorldHeight = world.getDimension().logicalHeight();
+
         for (int i = 1; i < 11; ++i) {
             mutableBlockPos.move(Direction.UP);
-            if(world.getTopY() >= mutableBlockPos.getY()) return; // No fluid here.
+            if(maxWorldHeight >= mutableBlockPos.getY()) return; // No fluid here.
 
             mutableBlockState = world.getBlockState(mutableBlockPos);
             if(mutableBlockState.isOf(Blocks.DRIPSTONE_BLOCK) || (mutableBlockState.isOf(Blocks.POINTED_DRIPSTONE) && mutableBlockState.get(VERTICAL_DIRECTION) == Direction.UP)) continue;

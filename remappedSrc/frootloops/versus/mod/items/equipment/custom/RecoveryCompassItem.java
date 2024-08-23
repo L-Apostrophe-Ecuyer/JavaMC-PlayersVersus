@@ -33,7 +33,7 @@ public class RecoveryCompassItem extends Item {
     private static final double ENDERMAN_AGGRO_RANGE = 8.0;
     private static final int USE_TIME_TICKS = 160;
 
-    public RecoveryCompassItem(Settings settings) {
+    public RecoveryCompassItem(net.minecraft.item.Item.Settings settings) {
         super(settings.maxDamage(USE_TIME_TICKS * 2).rarity(Rarity.RARE));
     }
 
@@ -50,7 +50,7 @@ public class RecoveryCompassItem extends Item {
 
         // If attacked while using, cancel and apply cooldown:
         if(remainingUseTicks < USE_TIME_TICKS - 20 && world.getTime() - user.getLastAttackedTime() < 2 && user instanceof PlayerEntity player) {
-            player.getItemCooldownManager().set(stack, 240);
+            player.getItemCooldownManager().set(stack.getItem(), 240);
         }
 
         // Otherwise: Add effects
@@ -64,7 +64,7 @@ public class RecoveryCompassItem extends Item {
 
                 Optional<GlobalPos> lastDeathPos = serverPlayer.getLastDeathPos();
                 if(!lastDeathPos.isPresent() || lastDeathPos.get().dimension() != world.getRegistryKey()) {
-                    serverPlayer.getItemCooldownManager().set(stack, 60);
+                    serverPlayer.getItemCooldownManager().set(stack.getItem(), 60);
                 }
             }
         }

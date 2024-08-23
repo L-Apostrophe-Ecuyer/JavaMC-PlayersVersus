@@ -10,7 +10,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.UseAction;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -27,8 +27,7 @@ public abstract class ThrowablePotionItemMixin extends PotionItem implements Pro
             float pullProgress = Math.min(0.8F, (72000.0F - remainingUseTicks) / 64.0F);
             throwPotion(world, user, itemStack, 0.4f + pullProgress);
             playerEntity.incrementStat(Stats.USED.getOrCreateStat(this));
-            playerEntity.getItemCooldownManager().set(Items.SPLASH_POTION, 20);
-            playerEntity.getItemCooldownManager().set(Items.LINGERING_POTION, 20);
+            playerEntity.getItemCooldownManager().set(itemStack, 20);
 
         }
         else throwPotion(world, user, itemStack, 0.5f);

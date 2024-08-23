@@ -30,14 +30,14 @@ public class SlimeballEntity extends ThrownItemEntity {
 
     private int numBouncesLeft;
 
-    public SlimeballEntity(World world, LivingEntity owner) {
-        super((EntityType<SlimeballEntity>) ModEntities.SLIMEBALL, owner, world);
+    public SlimeballEntity(World world, LivingEntity owner, ItemStack stack) {
+        super((EntityType<SlimeballEntity>) ModEntities.SLIMEBALL, owner, world, stack);
         this.setItem(slimeballStack);
         this.numBouncesLeft = 2 + world.getRandom().nextInt(2);
     }
 
-    public SlimeballEntity(World world, double x, double y, double z) {
-        super((EntityType<SlimeballEntity>) ModEntities.SLIMEBALL, x, y, z, world);
+    public SlimeballEntity(World world, double x, double y, double z,  ItemStack stack) {
+        super((EntityType<SlimeballEntity>) ModEntities.SLIMEBALL, x, y, z, world, stack);
         this.setItem(slimeballStack);
         this.numBouncesLeft = 2 + world.getRandom().nextInt(2);
     }

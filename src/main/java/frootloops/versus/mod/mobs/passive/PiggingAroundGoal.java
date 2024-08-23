@@ -94,7 +94,7 @@ public class PiggingAroundGoal extends Goal {
             BlockState blockState = this.world.getBlockState(blockPos);
             if (blockState.getBlock() == Blocks.CARROTS) {
                 this.world.setBlockState(blockPos, Blocks.CARROTS.getDefaultState());
-                this.mob.eatFood(world, Items.CARROT.getDefaultStack(), Items.CARROT.getComponents().get(DataComponentTypes.FOOD));
+                this.mob.lovePlayer(null);
 
             } else {
                 blockPos = blockPos.down();

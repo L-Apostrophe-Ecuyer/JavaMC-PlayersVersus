@@ -57,12 +57,6 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
         }
     }
 
-    @Inject(method = "takeShieldHit", at = @At(value = "HEAD"), cancellable = false)
-    protected void takeShieldHitMixin(LivingEntity attacker, CallbackInfo info) {
-        if (activeItemStack.getItem() instanceof SwordItem)  ((PlayerEntity)((Object)this)).disableShield();
-
-    }
-
     @Inject(method = "disableShield", at = @At(value = "HEAD"), cancellable = true)
     private void disableShieldMixin(CallbackInfo info) {
 
@@ -75,7 +69,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
             }
         }
 
-        this.itemCooldownManager.set(this.activeItemStack.getItem(), disableForTicks);
+        this.itemCooldownManager.set(this.activeItemStack, disableForTicks);
         this.clearActiveItem();
         this.getWorld().sendEntityStatus(this, (byte)30);
         info.cancel();

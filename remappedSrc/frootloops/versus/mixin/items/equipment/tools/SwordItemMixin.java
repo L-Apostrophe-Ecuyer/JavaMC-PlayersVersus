@@ -10,9 +10,10 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.UseAction;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,27 +21,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SwordItem.class)
-public class SwordItemMixin extends ToolItem {
+public abstract class SwordItemMixin extends Item {
 
-    public SwordItemMixin(ToolMaterial material, Settings settings) {
-        super(material, settings);
-    }
-
-    @Inject(method = "createAttributeModifiers", at = @At("HEAD"), cancellable = true)
-    private static void createAttributeModifiers(ToolMaterial material, int baseAttackDamage, float attackSpeed, CallbackInfoReturnable<AttributeModifiersComponent> cir) {
-        baseAttackDamage = (int)Combat.getSwordDamageModifier();
-        attackSpeed = Combat.getSwordSpeedModifier();
-        float attackReachBonus = Combat.getSwordReachModifier();
-        if (attackReachBonus != 0.0f) cir.setReturnValue(AttributeModifiersComponent.builder()
-                .add(EntityAttributes.ATTACK_DAMAGE, new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, baseAttackDamage + material.getAttackDamage(), EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
-                .add(EntityAttributes.ATTACK_SPEED, new EntityAttributeModifier(BASE_ATTACK_SPEED_MODIFIER_ID, attackSpeed, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
-                .add(EntityAttributes.ENTITY_INTERACTION_RANGE, new EntityAttributeModifier(Combat.ATTACK_REACH_MODIFIER_ID, attackReachBonus, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
-                .build());
-        else cir.setReturnValue(AttributeModifiersComponent.builder()
-                .add(EntityAttributes.ATTACK_DAMAGE, new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, baseAttackDamage + material.getAttackDamage(), EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
-                .add(EntityAttributes.ATTACK_SPEED, new EntityAttributeModifier(BASE_ATTACK_SPEED_MODIFIER_ID, attackSpeed, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
-                .build());
-        cir.cancel();
+    public SwordItemMixin(net.minecraft.item.Item.Settings settings) {
+        super(settings);
     }
 
     @Override
@@ -62,29 +46,6 @@ public class SwordItemMixin extends ToolItem {
         user.setCurrentHand(hand);
         return ActionResult.CONSUME;
     }
-
-    /*
-    @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        ItemStack stack = user.getStackInHand(hand);
-        int sweepLevel = Enchants.getLevel(world, stack, Enchantments.SWEEPING_EDGE);
-        double attackCharge = Combat.getAttackChargeProgress(user);
-        double attackChargeRequired = sweepLevel > 0 ? 1d + 0.2d * (3 - sweepLevel) : 1d;
-        if(attackCharge >= attackChargeRequired) {
-            user.setCurrentHand(hand);
-            Combat.doSpecialSweepAttack(user, Combat.getAttackRange(user,attackCharge), sweepLevel);
-            return ActionResult.CONSUME;
-        }
-        return ActionResult.FAIL;
-    }
-
-    @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if(stack.hasEnchantments() && Enchants.getLevel(world, stack, Enchantments.SWEEPING_EDGE) > 0) {
-            if (user instanceof PlayerEntity player) player.resetLastAttackedTicks();
-            else user.onAttacking(user.getAttacking());
-        }
-    }*/
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {

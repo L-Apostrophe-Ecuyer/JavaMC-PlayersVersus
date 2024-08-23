@@ -11,6 +11,7 @@ import net.minecraft.entity.mob.IllagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.world.event.GameEvent;
@@ -60,11 +61,12 @@ public class PillagerCaptainBlowHornGoal extends Goal {
         this.prevOffhandStack = this.illager.getOffHandStack();
         this.prevMainhandStack = this.illager.getMainHandStack();
 
-        ItemStack goatHornStack = GoatHornItem.getStackForInstrument(Items.GOAT_HORN, Registries.INSTRUMENT.entryOf(Instruments.SEEK_GOAT_HORN));
+        ItemStack goatHornStack = GoatHornItem.getStackForInstrument(Items.GOAT_HORN, illager.getWorld().getRegistryManager().get(RegistryKeys.INSTRUMENT).entryOf(Instruments.SEEK_GOAT_HORN));
         this.illager.equipStack(EquipmentSlot.OFFHAND, goatHornStack);
         this.illager.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 
         timeLeftToStart = 20;
+        illager.setAttacking(true);
         this.illager.setPose(EntityPose.STANDING);
     }
 
@@ -78,6 +80,7 @@ public class PillagerCaptainBlowHornGoal extends Goal {
         if(timeLeftToStart > 0) timeLeftToStart--;
         else {
             if(timeSpentTootingHorn == 0) {
+                illager.setAttacking(true);
                 this.illager.setPose(EntityPose.CROAKING);
                 RegistryEntry<Instrument> instrumentRegistryEntry = this.illager.getOffHandStack().get(DataComponentTypes.INSTRUMENT);
                 if (instrumentRegistryEntry != null) {

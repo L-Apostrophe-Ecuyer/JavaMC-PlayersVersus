@@ -20,6 +20,7 @@ public class SnowballMixin extends Item {
 
     @Inject(method = "use", at = @At("HEAD"))
     private void setSplashCooldown(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        user.getItemCooldownManager().set(this, 8);
+        ItemStack stack = user.getStackInHand(hand);
+        user.getItemCooldownManager().set(user.getStackInHand(hand), 8);
     }
 }

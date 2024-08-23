@@ -107,7 +107,7 @@ public class SpiderMixin extends HostileEntity {
                 this.setHealth(50.0f);
             }
             SkeletonEntity skeletonEntity;
-            if (random.nextInt(100) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getWorld())) != null) {
+            if (random.nextInt(80) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getWorld(), SpawnReason.JOCKEY)) != null) {
                 skeletonEntity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.getYaw(), 0.0f);
                 skeletonEntity.initialize(world, difficulty, spawnReason, null);
                 skeletonEntity.startRiding(this);

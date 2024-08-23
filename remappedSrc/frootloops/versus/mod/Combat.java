@@ -39,39 +39,8 @@ public abstract class Combat {
     public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
     public static final double PLAYER_MAX_ATTACK_SPEED = 2.5d;
 
-    private static final String[] tools =
-            new String[]{"axe", "sword", "hoe", "pickaxe", "shovel"};
-    private static final float[] toolsSpeed  =
-            new float[]{1.0F,   1.5F,   2.0F,   1.2F,   1.5F};
-    private static final float[] toolsDamage =
-            new float[]{6.0F,   3.0F,   0.0F,   1.0F,   2.0F};
-    private static final float[] toolsReachBonus =
-            new float[]{0.0F,   0.5F,   1.0F,   0.0F,   0.5F};
-
-    private static final String[] toolTiers = new String[]{"wooden", "stone", "golden", "iron", "diamond", "netherite"};
-    private static final float[] toolTierDamageBonuses = new float[]{1F, 1F, 2F, 2F, 3F, 4F};
-
-    public static float getAxeSpeedModifier() { return toolsSpeed[0] - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getSwordSpeedModifier() { return toolsSpeed[1] - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getHoeSpeedModifier() { return toolsSpeed[2] - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getPickaxeSpeedModifier() { return toolsSpeed[3] - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getShovelSpeedModifier() { return toolsSpeed[4] - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getAxeDamageModifier() { return toolsDamage[0] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
-    public static float getSwordDamageModifier() { return toolsDamage[1] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
-    public static float getHoeDamageModifier() { return toolsDamage[2] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
-    public static float getPickaxeDamageModifier() { return toolsDamage[3] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
-    public static float getShovelDamageModifier() { return toolsDamage[4] - (float)PLAYER_BASE_ATTACK_DAMAGE;}
-
-    public static float getHoeReachModifier() { return toolsReachBonus[2];}
-    public static float getSwordReachModifier() { return toolsReachBonus[1];}
-    public static float getShovelReachModifier() { return toolsReachBonus[1];}
-    public static float getTridentDamageModifier() { return 9.0f - (float)PLAYER_BASE_ATTACK_DAMAGE;}
-    public static float getTridentSpeedModifier() { return 1.0f - (float)PLAYER_BASE_ATTACK_SPEED;}
-    public static float getTridentReachModifier() { return 1.0f;}
 
     public static void onInitialize() {
-
-
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {

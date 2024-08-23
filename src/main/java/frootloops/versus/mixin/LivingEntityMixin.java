@@ -30,6 +30,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import java.util.Collection;
 import java.util.Map;
 
 @Mixin(LivingEntity.class)
@@ -146,10 +147,14 @@ public abstract class LivingEntityMixin extends Entity {
         else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 12;
     }
 
-    @Inject(method = "onStatusEffectRemoved", at = @At("HEAD"))
-    private void onStatusEffectRemoved(StatusEffectInstance effect, CallbackInfo info) {
-        if(effect.getEffectType() == CustomStatusEffects.HAUNTING) {
-            HauntingStatusEffect.removeEffect(((LivingEntity)(Object)this));
+    @Inject(method = "onStatusEffectsRemoved", at = @At("HEAD"))
+    private void onStatusEffectsRemoved(Collection<StatusEffectInstance> effects, CallbackInfo info) {
+        if(this.getWorld().isClient) return;
+        for(StatusEffectInstance statusEffectInstance : effects) {
+            if (statusEffectInstance.getEffectType() == CustomStatusEffects.HAUNTING) {
+                HauntingStatusEffect.removeEffect(((LivingEntity) (Object) this));
+                return;
+            }
         }
     }
 }

@@ -149,7 +149,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             Item item = this.activeItemStack.getItem();
             if (item.getComponents().contains(DataComponentTypes.FOOD) || item instanceof PotionItem) {
                 this.clearActiveItem();
-                itemCooldownManager.set(item, 32);
+                itemCooldownManager.set(this.activeItemStack, 32);
             }
         }
     }
@@ -160,7 +160,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         // After attacking, the shield is interrupted:
         if(this.getOffHandStack().getItem() instanceof ShieldItem) {
             this.clearActiveItem();
-            itemCooldownManager.set(this.getOffHandStack().getItem(), 6);
+            itemCooldownManager.set(this.getOffHandStack(), 6);
         }
 
         double amount = this.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);

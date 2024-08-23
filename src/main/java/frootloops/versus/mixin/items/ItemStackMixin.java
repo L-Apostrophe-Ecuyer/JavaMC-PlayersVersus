@@ -41,10 +41,10 @@ public abstract class ItemStackMixin implements ComponentHolder {
     @Shadow
     public boolean hasEnchantments() {return false;}
 
-
+    /*
     @Inject(method = "isEnchantable", at = @At("RETURN"), cancellable = true)
     public void isEnchantable(CallbackInfoReturnable<Boolean> cir) {
-        if(!cir.getReturnValue()) {
+        if(!cir.getReturnValue() && item.getComponents().contains(DataComponentTypes.ENCHANTABLE)) {
             ItemEnchantmentsComponent itemEnchantmentsComponent = this.get(DataComponentTypes.ENCHANTMENTS);
             if(itemEnchantmentsComponent == null || itemEnchantmentsComponent.isEmpty()) {
                 cir.setReturnValue(true);
@@ -56,12 +56,14 @@ public abstract class ItemStackMixin implements ComponentHolder {
                     enchantmentPower += enchant.value().getMinPower(itemEnchantmentsComponent.getLevel(enchant));
                 }
                 int maxLevel = 50;
-                if(item instanceof ArmorItem armorItem) maxLevel = 4 * armorItem.getEnchantability();
+                if(item instanceof ArmorItem armorItem) maxLevel = 4 * armorItem.getMaterial().getEnchantability();
                 else if(item instanceof MiningToolItem toolItem) maxLevel = 4 * toolItem.getEnchantability();
+                if(item.getComponents().contains(DataComponentTypes.ENCHANTABLE))
+
                 if(enchantmentPower < maxLevel) cir.setReturnValue(true);
             }
         }
-    }
+    } */
 
     @Inject(method = "onClicked", at = @At("HEAD"), cancellable = false)
     public void onClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference, CallbackInfoReturnable<Boolean> cir) {
