@@ -77,99 +77,69 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
     @Inject(method = "doItemUse", at = @At("HEAD"), cancellable = true)
     private void doItemUse(CallbackInfo info) {
-        if (!this.interactionManager.isBreakingBlock()) {
-            this.itemUseCooldown = 4;
-            if (!this.player.isRiding()) {
-                if (this.crosshairTarget == null) {
-                    VersusMod.MOD_LOGGER.error("Null returned as 'hitResult', this shouldn't happen!");
-                }
+        this.itemUseCooldown = 4;
+        if (!this.interactionManager.isBreakingBlock() && !this.player.isRiding()) {
 
-                ActionResult actionResult = null;
-                Hand[] hands = this.shouldPrioritizeOffhand() ? new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND} :  new Hand[] {Hand.MAIN_HAND, Hand.OFF_HAND};
-                for (Hand hand : hands) {
-                    ItemStack itemStack = this.player.getStackInHand(hand);
-                    if (this.crosshairTarget != null) {
-                        switch (this.crosshairTarget.getType()) {
-                            case ENTITY:
-                                EntityHitResult entityHitResult = (EntityHitResult)this.crosshairTarget;
-                                Entity entity = entityHitResult.getEntity();
-                                if (!this.world.getWorldBorder().contains(entity.getBlockPos())) {
-                                    return;
-                                }
+            if (this.crosshairTarget == null) {
+                VersusMod.MOD_LOGGER.error("Null returned as 'hitResult', this shouldn't happen!");
+            }
 
-                                actionResult = this.interactionManager.interactEntityAtLocation(this.player, entity, entityHitResult, hand);
-                                if (!actionResult.isAccepted()) {
-                                    actionResult = this.interactionManager.interactEntity(this.player, entity, hand);
-                                }
+            ActionResult actionResult = null;
+            Hand[] hands = this.shouldPrioritizeOffhand() ? new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND} :  new Hand[] {Hand.MAIN_HAND, Hand.OFF_HAND};
+            for (Hand hand : hands) {
+                ItemStack itemStack = this.player.getStackInHand(hand);
+                if (!itemStack.isItemEnabled(this.world.getEnabledFeatures())) continue;
+                if (this.crosshairTarget != null) {
+                    switch (this.crosshairTarget.getType()) {
+                        case ENTITY:
+                            EntityHitResult entityHitResult = (EntityHitResult)this.crosshairTarget;
+                            Entity entity = entityHitResult.getEntity();
+                            if (!this.world.getWorldBorder().contains(entity.getBlockPos())) {
+                                info.cancel();
+                                return;
+                            }
 
-                                if (actionResult instanceof ActionResult.Success success) {
-                                    if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
-                                        this.player.swingHand(hand);
-                                    }
-
-                                    return;
-                                }
-                                break;
-
-
-                            case BLOCK:
-                                BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
-                                int count = itemStack.getCount();
-
-                                if(itemStack.getComponents().contains(DataComponentTypes.FOOD) && !this.player.isSneaking() && this.player.getHungerManager().isNotFull())
-                                    actionResult = this.interactionManager.interactItem(this.player, hand);
-
-                                if(actionResult == null || !actionResult.isAccepted())
-                                    actionResult = this.interactionManager.interactBlock(this.player, hand, blockHitResult);
-
-                                if (actionResult instanceof ActionResult.Success successfulBlockInteraction) {
-                                    if (successfulBlockInteraction.swingSource() == ActionResult.SwingSource.CLIENT) {
-                                        this.player.swingHand(hand);
-                                        if (!itemStack.isEmpty() && (itemStack.getCount() != count || this.interactionManager.hasCreativeInventory())) {
-                                            this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
-                                        }
-                                    }
-                                    return;
-                                }
-
-                                if (actionResult instanceof ActionResult.Fail) {
-                                    return;
-                                }
-                        }
-                    }
-                    else if(itemStack.getItem() instanceof BlockItem) {
-                        Pair<BlockPos, Direction> pair = getBlockPlacingReacharoundTarget(this.player);
-                        if (pair != null) {
-                            BlockPos pos = pair.getLeft();
-                            Direction dir = pair.getRight();
-
-                            if (!this.player.canPlaceOn(pos, dir, itemStack)) return;
-                            BlockHitResult blockHitResult = new BlockHitResult(new Vec3d(0, 1F, 0).add(Vec3d.ofCenter(pos)), dir, pos, false);
-
-                            int count = itemStack.getCount();
-                            actionResult = this.interactionManager.interactBlock(this.player, hand, blockHitResult);
-
-                            if (actionResult instanceof ActionResult.Success successfulBlockInteraction) {
-                                if (successfulBlockInteraction.swingSource() == ActionResult.SwingSource.CLIENT) {
+                            actionResult = this.interactionManager.interactEntityAtLocation(this.player, entity, entityHitResult, hand);
+                            if (!actionResult.isAccepted()) actionResult = this.interactionManager.interactEntity(this.player, entity, hand);
+                            if (actionResult instanceof ActionResult.Success success) {
+                                if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
                                     this.player.swingHand(hand);
-                                    if (!itemStack.isEmpty() && (itemStack.getCount() != count || this.interactionManager.hasCreativeInventory())) {
+                                }
+                                info.cancel();
+                                return;
+                            }
+                            break;
+                        case BLOCK:
+                            BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
+                            int i = itemStack.getCount();
+                            actionResult = this.interactionManager.interactBlock(this.player, hand, blockHitResult);
+                            if (actionResult instanceof ActionResult.Success success) {
+                                if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
+                                    this.player.swingHand(hand);
+                                    if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.interactionManager.hasCreativeInventory())) {
                                         this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
                                     }
                                 }
+                                info.cancel();
                                 return;
                             }
-                        }
-                    }
-
-                    if (!itemStack.isEmpty() && this.interactionManager.interactItem(this.player, hand) instanceof ActionResult.Success success3) {
-                        if (success3.swingSource() == ActionResult.SwingSource.CLIENT) {
-                            this.player.swingHand(hand);
-                        }
-
-                        this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
-                        return;
+                            if (actionResult instanceof ActionResult.Fail) {
+                                info.cancel();
+                                return;
+                            }
                     }
                 }
+
+                if (!itemStack.isEmpty() && this.interactionManager.interactItem(this.player, hand) instanceof ActionResult.Success success3) {
+                    if (success3.swingSource() == ActionResult.SwingSource.CLIENT) {
+                        this.player.swingHand(hand);
+                    }
+
+                    this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
+                    info.cancel();
+                    return;
+                }
+
             }
         }
         info.cancel();
