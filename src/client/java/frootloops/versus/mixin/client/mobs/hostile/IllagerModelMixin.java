@@ -71,8 +71,8 @@ public abstract class IllagerModelMixin<S extends IllagerEntityRenderState> exte
         float g = renderState.limbAmplitudeMultiplier;
         float i = renderState.age * 0.1F + f * 0.5F;
         float j = 0.08F + g * 0.4F;
-        this.leftEar.roll = (float) (-Math.PI / 6) - MathHelper.cos(i * 1.2F) * j;
-        this.rightEar.roll = (float) (Math.PI / 6) + MathHelper.cos(i) * j;
+        this.rightEar.roll = (float) (-Math.PI / 6) - MathHelper.cos(i * 1.2F) * j;
+        this.leftEar.roll = (float) (Math.PI / 6) + MathHelper.cos(i) * j;
     }
 
     @Inject(method = "setAngles", at = @At("TAIL"))
