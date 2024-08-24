@@ -8,6 +8,8 @@
 		"environment.visuals.WorldRendererMixin",
 		"environment.visuals.LightmapMixin",
 
+		"environment.audio.MusicTrackerMixin",
+
 		"mobs.hostile.shields.IllagerModelMixin",
 		"mobs.hostile.shields.SkeletonModelMixin",
 		"mobs.hostile.shields.ZombieModelMixin",
