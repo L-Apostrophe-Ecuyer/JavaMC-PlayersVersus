@@ -251,6 +251,8 @@
   "block.players-versus.corrupted_wart": "Corrupted Wart",
   "block.players-versus.withered_wart": "Withered Wart",
   "item.players-versus.glistering_beetroot": "Glistering Beetroot",
+  "item.players-versus.glistering_melon_slice": "Glistering Melon Slice",
+  "item.players-versus.recovery_compass": "Recovery Compass",
 
   "item.players-versus.concentrate_of_omen" : "Ominous Concentrate",
   "item.players-versus.concentrate_of_death" : "Deadly Concentrate",
@@ -282,6 +284,7 @@
   "item.players-versus.concentrate_of_infestation" : "Creepy Concentrate",
   "item.players-versus.concentrate_of_weaving" : "Gooey Concentrate",
   "item.players-versus.concentrate_of_luck" : "Lucky Concentrate",
+  "item.players-versus.concentrate_of_luck" : "Unfortunate Concentrate",
 
   "enchantment.minecraft.protection": "Total Protection",
   "enchantment.minecraft.breach": "Armor Breaching",
