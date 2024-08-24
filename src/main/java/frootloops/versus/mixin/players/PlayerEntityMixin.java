@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.Enchants;
@@ -12,24 +11,18 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.tag.PointOfInterestTypeTags;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.village.raid.Raid;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-import net.minecraft.world.poi.PointOfInterestStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -164,10 +157,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         double amount = this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-        if(amount < 0.75f && target instanceof LivingEntity livingEntity) {
-            double strength = this.isSprinting() ? 0.8 : 0.6;
-            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
-            livingEntity.takeKnockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
+        if(amount < 0.75f) {
+            if (target instanceof LivingEntity livingEntity) {
+                double strength = this.isSprinting() ? 0.8 : 0.5;
+                this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
+                livingEntity.takeKnockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
+            }
+            else if (target instanceof VehicleEntity || target instanceof ArmorStandEntity) {
+                target.damage(this.getDamageSources().playerAttack((PlayerEntity)((Object)this)), 2.0f);
+            }
         }
     }
 
@@ -184,7 +182,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         // Attacking while walking backwards deals less knockback:
         if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.4d, 0.8d, 0.4d));
-        else if(target.getVelocity().lengthSquared() < 1.0 && target instanceof LivingEntity livingEntity) livingEntity.takeKnockback(0.5, this.getX() - target.getX(), this.getZ() - target.getZ());
+        else if(target.getVelocity().lengthSquared() < 1.0 && target instanceof LivingEntity livingEntity) livingEntity.takeKnockback(0.4, this.getX() - target.getX(), this.getZ() - target.getZ());
     }
 
     @Override
