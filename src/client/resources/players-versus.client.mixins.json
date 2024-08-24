@@ -7,6 +7,7 @@
 		"environment.visuals.FogRendererMixin",
 		"environment.visuals.WorldRendererMixin",
 		"environment.visuals.LightmapMixin",
+		"environment.audio.MusicTrackerMixin",
 
 		"mobs.hostile.SkeletonModelMixin",
 		"mobs.hostile.ZombieModelMixin",
@@ -26,6 +27,7 @@
 		"players.attacking.CrosshairTargetMixin",
 		"players.attacking.CrosshairRendererMixin",
 		"players.attacking.MinecraftClientMixin",
+		"players.building.MinecraftClientMixin",
 		"players.death.DeathScreenMixin",
 		"players.HungerBarRendererMixin",
 		"players.HungerSprintingMixin",
