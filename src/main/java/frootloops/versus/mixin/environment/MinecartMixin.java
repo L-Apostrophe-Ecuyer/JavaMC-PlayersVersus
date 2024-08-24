@@ -42,11 +42,6 @@ public abstract class MinecartMixin extends VehicleEntity {
         return 8.0;
     }
 
-    @ModifyConstant(method = "moveOffRail", constant = @Constant(doubleValue = 0.95))
-    private double noSlowdownWhenInAir(double speedMultiplier) {
-        return 1.0;
-    }
-
     @Inject(method = "moveOnRail", at = @At("HEAD"), cancellable = false)
     protected void avoidDerailing(BlockPos pos, BlockState state, CallbackInfo info) {
         if(this.getVelocity().horizontalLengthSquared() > 0.99) {
@@ -64,5 +59,11 @@ public abstract class MinecartMixin extends VehicleEntity {
         double slowdownAmount = this.isTouchingWater() ? 0.91 : 0.997;
         this.setVelocity(this.getVelocity().multiply(slowdownAmount));
         info.cancel();
+    }
+
+    @ModifyConstant(method = "moveOffRail", constant = @Constant(doubleValue = 0.95))
+    private double lessSlowdownWhenInAir(double speedMultiplier) {
+        if(this.getVelocity().lengthSquared() < 0.6) return 0.97;
+        return 0.96;
     }
 }
