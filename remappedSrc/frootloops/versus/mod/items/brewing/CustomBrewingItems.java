@@ -20,7 +20,7 @@ public abstract class CustomBrewingItems {
     public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
 
     public static final Item LIVING_FLAME = new Item(new Item.Settings());
-    public static final Item GLISTERING_BEETROOT = new Item(new Item.Settings().food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).statusEffect(new StatusEffectInstance(StatusEffects.POISON, 60, 0), 0.2f).build()));
+    public static final Item GLISTERING_BEETROOT = new Item(new Item.Settings().food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).build()));
 
     public static final Item CONCENTRATE_OF_DEATH = new ConcentrateItem(StatusEffects.WITHER, 2, 80);
     //public static final Item CORRUPTED_WART_POWDER = new ConcentrateItem(StatusEffects.HUNGER, 4, 120);

@@ -6,15 +6,9 @@
         "SSS"
     ],
     "key": {
-        "#": {
-            "item": "minecraft:redstone"
-        },
-        "/": {
-            "item": "minecraft:stick"
-        },
-        "S": {
-            "item": "minecraft:stone"
-        }
+        "#": "minecraft:redstone",
+        "/": "minecraft:stick",
+        "S": "minecraft:stone"
     },
     "result": {
         "id": "minecraft:repeater",

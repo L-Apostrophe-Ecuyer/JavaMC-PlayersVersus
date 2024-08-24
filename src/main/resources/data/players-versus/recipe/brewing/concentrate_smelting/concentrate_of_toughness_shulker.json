@@ -3,9 +3,7 @@
   "group": "concentrate_of_toughness",
   "category": "food",
 
-  "ingredient": {
-    "item": "minecraft:shulker_shell"
-  },
+  "ingredient":"minecraft:shulker_shell",
   "result": {
     "id": "players-versus:concentrate_of_toughness"
   },

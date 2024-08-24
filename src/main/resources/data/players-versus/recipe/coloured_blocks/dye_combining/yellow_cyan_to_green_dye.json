@@ -1,12 +1,8 @@
 {
     "type": "minecraft:crafting_shapeless",
     "ingredients": [
-        {
-            "item": "minecraft:yellow_dye"
-        },
-        {
-            "item": "minecraft:cyan_dye"
-        }
+        "minecraft:yellow_dye",
+        "minecraft:cyan_dye"
     ],
     "result": {
         "id": "minecraft:green_dye",

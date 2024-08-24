@@ -1,8 +1,6 @@
 {
     "type": "minecraft:smelting",
-    "ingredient": {
-        "item": "minecraft:bone"
-    },
+    "ingredient": "minecraft:bone",
     "result": {
         "id": "minecraft:black_dye"
     },

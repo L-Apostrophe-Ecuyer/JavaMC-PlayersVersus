@@ -3,9 +3,7 @@
   "category": "food",
   "group": "concentrate_of_buoyancy",
   "ingredient": [
-    {
-      "item": "minecraft:pufferfish"
-    }
+    "minecraft:pufferfish"
   ],
   "result": {
     "id": "players-versus:concentrate_of_buoyancy"

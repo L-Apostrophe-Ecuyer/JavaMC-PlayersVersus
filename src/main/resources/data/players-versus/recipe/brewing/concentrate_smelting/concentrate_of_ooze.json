@@ -2,9 +2,7 @@
     "type": "minecraft:smelting",
     "category": "food",
   
-    "ingredient": {
-      "item": "minecraft:slime_ball"
-    },
+    "ingredient": "minecraft:slime_ball",
     "result": {
       "id": "players-versus:concentrate_of_ooze"
     },

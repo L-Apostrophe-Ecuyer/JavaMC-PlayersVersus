@@ -42,7 +42,7 @@ public abstract class LivingEntityMixin extends Entity {
         super(type, world);
     }
 
-    @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
+    @ModifyVariable(method = "travelInFluid", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
         return isPlayer() && isSwimming() ? h : h + 0.3f;
     }
@@ -55,7 +55,7 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @ModifyConstant(method = "travel", constant = @Constant(floatValue = 0.02f))
+    @ModifyConstant(method = "travelInFluid", constant = @Constant(floatValue = 0.02f))
     private float applyBuoyancyEffect(float thisMixinIsOnlyCalledWhenInWater) {
         if(((LivingEntity)((Object)this)).hasStatusEffect(CustomStatusEffects.BUOYANCY)) {
             double amplifier = 1.0 + ((LivingEntity)((Object)this)).getStatusEffect(CustomStatusEffects.BUOYANCY).getAmplifier();

@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "ingredients": [
-    {
-      "item": "minecraft:clay_ball"
-    },
-    {
-      "item": "minecraft:cobblestone"
-    }
+    "minecraft:clay_ball",
+    "minecraft:cobblestone"
   ],
   "result": {
     "count": 1,

@@ -2,21 +2,11 @@
   "type": "minecraft:blasting",
   "category": "equipment",
   "ingredient": [
-    {
-      "item": "minecraft:golden_helmet"
-    },
-    {
-      "item": "minecraft:golden_leggings"
-    },
-    {
-      "item": "minecraft:golden_boots"
-    },
-    {
-      "item": "minecraft:golden_chestplate"
-    },
-    {
-      "item": "minecraft:golden_horse_armor"
-    }
+    "minecraft:golden_helmet",
+    "minecraft:golden_leggings",
+    "minecraft:golden_boots",
+    "minecraft:golden_chestplate",
+    "minecraft:golden_horse_armor"
   ],
   "result": {
     "id": "minecraft:gold_ingot"

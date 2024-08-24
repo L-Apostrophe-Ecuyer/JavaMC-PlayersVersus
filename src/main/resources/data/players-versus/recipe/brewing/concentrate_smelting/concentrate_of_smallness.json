@@ -2,9 +2,7 @@
     "type": "minecraft:smelting",
     "category": "food",
   
-    "ingredient": {
-      "item": "minecraft:warped_fungus"
-    },
+    "ingredient": "minecraft:warped_fungus",
     "result": {
       "id": "players-versus:concentrate_of_smallness"
     },

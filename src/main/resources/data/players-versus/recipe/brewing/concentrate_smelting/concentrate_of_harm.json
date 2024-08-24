@@ -3,9 +3,7 @@
   "category": "food",
 
   "ingredient": [
-    {
-      "item": "minecraft:nether_wart"
-    }
+    "minecraft:nether_wart"
   ],
   "result": {
     "id": "players-versus:concentrate_of_harm"

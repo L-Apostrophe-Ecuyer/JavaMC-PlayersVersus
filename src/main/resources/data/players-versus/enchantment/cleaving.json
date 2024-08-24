@@ -35,7 +35,7 @@
     "minecraft:attributes": [
       {
         "id": "enchantment.attack_speed",
-        "attribute": "minecraft:generic.attack_speed",
+        "attribute": "minecraft:attack_speed",
         "amount": {
           "type": "minecraft:linear",
           "base": -0.1,

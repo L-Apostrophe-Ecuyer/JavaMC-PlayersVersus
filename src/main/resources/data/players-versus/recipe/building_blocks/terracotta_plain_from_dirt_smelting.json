@@ -3,24 +3,12 @@
   "category": "blocks",
   "group": "mud_smelting",
   "ingredient": [
-    {
-      "item": "minecraft:dirt"
-    },
-    {
-      "item": "minecraft:coarse_dirt"
-    },
-    {
-      "item": "minecraft:rooted_dirt"
-    },
-    {
-      "item": "minecraft:grass_block"
-    },
-    {
-      "item": "minecraft:dirt_path"
-    },
-    {
-      "item": "minecraft:mycelium"
-    }
+    "minecraft:dirt",
+    "minecraft:coarse_dirt",
+    "minecraft:rooted_dirt",
+    "minecraft:grass_block",
+    "minecraft:dirt_path",
+    "minecraft:mycelium"
   ],
   "result": {
     "id": "minecraft:packed_mud"

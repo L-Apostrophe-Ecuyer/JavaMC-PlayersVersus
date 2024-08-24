@@ -1,12 +1,8 @@
 {
     "type": "minecraft:crafting_shapeless",
     "ingredients": [
-        {
-            "item": "minecraft:pink_dye"
-        },
-        {
-            "item": "minecraft:light_gray_dye"
-        }
+        "minecraft:pink_dye",
+        "minecraft:light_gray_dye"
     ],
     "result": {
         "id": "minecraft:magenta_dye",

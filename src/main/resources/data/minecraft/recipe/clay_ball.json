@@ -3,9 +3,7 @@
   "category": "building",
   "group": "clay",
   "ingredients": [
-    {
-      "item": "minecraft:clay"
-    }
+    "minecraft:clay"
   ],
   "result": {
     "count": 9,

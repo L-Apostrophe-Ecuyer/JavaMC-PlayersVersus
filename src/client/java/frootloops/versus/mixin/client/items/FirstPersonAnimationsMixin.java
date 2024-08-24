@@ -41,7 +41,7 @@ public abstract class FirstPersonAnimationsMixin {
     @Shadow
     private void applyBrushTransformation(MatrixStack matrices, float tickDelta, Arm arm, ItemStack stack, PlayerEntity player, float equipProgress) {}
 
-    @Inject(method = "renderFirstPersonItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getUseAction()Lnet/minecraft/util/UseAction;"), cancellable = true)
+    @Inject(method = "renderFirstPersonItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getUseAction()Lnet/minecraft/item/consume/UseAction;"), cancellable = true)
     private void renderFirstPersonItem(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack itemStack, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
         Item toolItem = itemStack.getItem();
         if (toolItem instanceof SwordItem) {
@@ -53,12 +53,6 @@ public abstract class FirstPersonAnimationsMixin {
                 this.applyEquipOffset(matrices, arm, equipProgress);
                 this.applyToolBlockingTransformation(matrices, arm);
             }
-            /*
-            else if(action == UseAction.BRUSH && (toolItem instanceof SwordItem || toolItem instanceof HoeItem)) {
-                if(!itemStack.hasEnchantments()) return;
-                this.applyEquipOffset(matrices, arm, equipProgress);
-                this.applySweepingTransformation(matrices, tickDelta, arm, itemStack, equipProgress);
-            }*/
             else return;
 
             ((HeldItemRenderer)((Object)this)).renderItem(player, itemStack, isRightArm ? ModelTransformationMode.FIRST_PERSON_RIGHT_HAND : ModelTransformationMode.FIRST_PERSON_LEFT_HAND, !isRightArm, matrices, vertexConsumers, light);

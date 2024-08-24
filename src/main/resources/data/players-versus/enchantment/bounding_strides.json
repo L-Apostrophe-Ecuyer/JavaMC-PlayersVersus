@@ -22,7 +22,7 @@
     "minecraft:attributes": [
       {
         "id": "enchantment.bounding_strides",
-        "attribute": "minecraft:generic.step_height",
+        "attribute": "minecraft:step_height",
         "amount": {
           "type": "minecraft:linear",
           "base": 0.15,

@@ -35,12 +35,19 @@ public abstract class LightmapMixin {
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 6)
     private float reducedNightVision(float l) {return l > 0f && this.client.player.hasStatusEffect(StatusEffects.CONDUIT_POWER) ? l : 0f;}
 
+    @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 8)
+    private float reducedAmbientLight(float n) {
+        if(this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) return n + 0.3f;
+        return n * 0.5f - 0.065f;
+    }
+
+    /*
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/LightmapTextureManager;getBrightness(Lnet/minecraft/world/dimension/DimensionType;I)F"))
     private float getBrightness(DimensionType type, int lightLevel) {
         float lightPercent = (float)lightLevel/32f + (float)(lightLevel + 6f)/ 32.0f;
         float ambientLight = this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION) ? type.ambientLight() + 0.065f : type.ambientLight() - 0.05f;
         return MathHelper.lerp(ambientLight, lightPercent / (4.0f - 3.0f * lightPercent), 1.5f);
-    }
+    } */
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getSkyBrightness(F)F"))
     private float getSkyBrightness(ClientWorld world, float tickDelta) {
@@ -58,6 +65,7 @@ public abstract class LightmapMixin {
     @Overwrite
     private float getDarkness(LivingEntity entity, float factor, float delta) {
         if(factor > 0f) return Math.max(0.0f, MathHelper.cos(((float)entity.age - delta) * (float)Math.PI * 0.025f) * 0.45f * factor);
+        else if(this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) return 0f;
         else if(entity.getY() < -32d) return 32f/384f;
         else if(entity.getY() < 0d) return -((float)entity.getY())/384f;
         else return 0f;

@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "group": "stones_to_cobble",
   "ingredients": [
-    {
-      "item": "minecraft:tuff"
-    }
+    "minecraft:tuff"
   ],
   "result": {
     "id": "minecraft:cobblestone",

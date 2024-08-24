@@ -3,9 +3,7 @@
   "category": "equipment",
   "group": "diamond_armor",
   "key": {
-    "X": {
-      "item": "minecraft:diamond"
-    }
+    "X" : "minecraft:diamond"
   },
   "pattern": [
     "X X",

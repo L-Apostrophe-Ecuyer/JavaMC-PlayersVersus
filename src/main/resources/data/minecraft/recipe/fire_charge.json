@@ -3,9 +3,7 @@
   "category": "misc",
   "group": "fire_charge",
   "ingredients": [
-    {
-      "item": "minecraft:blaze_rod"
-    }
+    "minecraft:blaze_rod"
   ],
   "result": {
     "id": "minecraft:fire_charge",

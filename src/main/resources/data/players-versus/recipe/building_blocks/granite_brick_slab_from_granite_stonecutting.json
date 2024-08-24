@@ -2,15 +2,9 @@
   "type": "minecraft:stonecutting",
   "group": "granite_brick_slab",
   "ingredient": [
-    {
-      "item": "minecraft:granite"
-    },
-    {
-      "item": "minecraft:polished_granite"
-    },
-    {
-      "item": "players-versus:granite_bricks"
-    }
+    "minecraft:granite",
+    "minecraft:polished_granite",
+    "players-versus:granite_bricks"
   ],
   "result": {
     "count": 2,

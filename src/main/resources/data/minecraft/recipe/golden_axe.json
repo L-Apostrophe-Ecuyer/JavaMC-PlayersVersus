@@ -3,12 +3,8 @@
   "category": "equipment",
   "group": "golden_tools",
   "key": {
-    "#": {
-      "item": "minecraft:stick"
-    },
-    "X": {
-      "item": "minecraft:gold_ingot"
-    }
+    "#" : "minecraft:stick",
+    "X" : "minecraft:gold_ingot"
   },
   "pattern": [
     "XX",

@@ -74,7 +74,7 @@ public abstract class ItemsAndStacks {
             if (item.getComponents().contains(DataComponentTypes.FOOD)) {
                 if (item instanceof BlockItem) setNewMaxStackSize(item, maxPlaceableBlocks);
                 else if (item instanceof ConcentrateItem) setNewMaxStackSize(item, 64);
-                else if(item.getComponents().get(DataComponentTypes.FOOD).eatSeconds() ==  0.8f) setNewMaxStackSize(item, maxFoods);
+                else if(item.getComponents().get(DataComponentTypes.CONSUMABLE).consumeSeconds() ==  0.8f) setNewMaxStackSize(item, maxFoods);
                 else if (item.getTranslationKey().contains("cooked_") || item.getTranslationKey().contains("raw_")) setNewMaxStackSize(item, maxMeals);
                 else if (item.getTranslationKey().contains("stew")) setNewMaxStackSize(item, maxStews);
                 else if (item.getTranslationKey().contains("soup")) setNewMaxStackSize(item, maxStews);

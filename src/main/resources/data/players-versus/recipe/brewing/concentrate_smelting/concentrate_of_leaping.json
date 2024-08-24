@@ -3,15 +3,9 @@
   "category": "food",
 
   "ingredient": [
-    {
-      "item": "minecraft:frogspawn"
-    },
-    {
-      "item": "minecraft:rabbit_hide"
-    },
-    {
-      "item": "minecraft:big_dripleaf"
-    }
+    "minecraft:frogspawn",
+    "minecraft:rabbit_hide",
+    "minecraft:big_dripleaf"
   ],
   "result": {
     "id": "players-versus:concentrate_of_leaping"

@@ -11,7 +11,6 @@
 		"mobs.hostile.SkeletonModelMixin",
 		"mobs.hostile.ZombieModelMixin",
 		"mobs.hostile.PiglinModelMixin",
-		"mobs.hostile.SpiderRenderMixin",
 		"mobs.hostile.IllagerModelMixin",
 		"mobs.passive.VillagerRessemblingModelMixin",
 

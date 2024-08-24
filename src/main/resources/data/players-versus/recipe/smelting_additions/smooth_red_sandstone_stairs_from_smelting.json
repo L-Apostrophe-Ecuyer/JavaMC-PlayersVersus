@@ -1,8 +1,6 @@
 {
     "type": "minecraft:smelting",
-    "ingredient": {
-        "item": "minecraft:red_sandstone_stairs"
-    },
+    "ingredient": "minecraft:red_sandstone_stairs",
     "result": {
         "id": "minecraft:smooth_red_sandstone_stairs"
     },

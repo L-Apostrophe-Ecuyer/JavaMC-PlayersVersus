@@ -5,9 +5,7 @@
     "MM"
   ],
   "key": {
-    "M": {
-      "item": "minecraft:melon_slice"
-    }
+    "M" : "minecraft:melon_slice"
   },
   "result": {
     "id": "minecraft:melon",

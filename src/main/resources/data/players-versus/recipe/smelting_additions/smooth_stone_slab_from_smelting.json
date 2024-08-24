@@ -1,8 +1,6 @@
 {
     "type": "minecraft:smelting",
-    "ingredient": {
-        "item": "minecraft:stone_slab"
-    },
+    "ingredient": "minecraft:stone_slab",
     "result": {
         "id": "minecraft:smooth_stone_slab"
     },

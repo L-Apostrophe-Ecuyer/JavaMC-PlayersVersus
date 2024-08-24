@@ -1,8 +1,10 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.mod.items.brewing.ConcentrateItem;
+import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
+import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
@@ -63,8 +65,11 @@ public abstract class ItemsAndStacks {
     }
 
     private static void setUpTransformVanillaItemsToModded() {
-        //TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLISTERING_MELON_SLICE, CustomBrewingItems.CONCENTRATE_OF_HEALTH);
-        //TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.FERMENTED_SPIDER_EYE, CustomBrewingItems.CORRUPTED_WART_POWDER);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLISTERING_MELON_SLICE, CustomBrewingItems.GLISTERING_MELON_SLICE);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.RECOVERY_COMPASS, CustomEquipment.RECOVERY_COMPASS);
+
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.DIORITE, Items.CALCITE);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.CHARCOAL, Items.COAL);
     }
@@ -137,6 +142,6 @@ public abstract class ItemsAndStacks {
     }
 
     public static Item getReplacementItem(Item item) {
-        return TRANSFORM_VANILLA_ITEMS_TO_MODDED.getOrDefault(item, null);
+        return TRANSFORM_VANILLA_ITEMS_TO_MODDED.getOrDefault(item, item);
     }
 }

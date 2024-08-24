@@ -5,9 +5,7 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "players-versus:granite_bricks"
-    }
+    "#" : "players-versus:granite_bricks"
   },
   "result": {
     "id": "players-versus:granite_brick_slab",

@@ -2,9 +2,7 @@
     "type": "minecraft:smelting",
     "category": "food",
   
-    "ingredient": {
-      "item": "players-versus:four_leaf_clover"
-    },
+    "ingredient": "players-versus:four_leaf_clover",
     "result": {
       "id": "players-versus:concentrate_of_luck"
     },

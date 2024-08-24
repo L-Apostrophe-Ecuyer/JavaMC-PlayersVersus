@@ -10,10 +10,18 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ShieldItem.class)
 public abstract class ShieldItemMixin extends Item {
     public ShieldItemMixin(net.minecraft.item.Item.Settings settings) { super(settings); }
+
+    @Inject(method = "<init>",at = @At("HEAD"), cancellable = false)
+    public void constructorMixin(net.minecraft.item.Item.Settings settings, CallbackInfo info) {
+        settings.enchantable(4);
+    }
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
@@ -28,15 +36,5 @@ public abstract class ShieldItemMixin extends Item {
             return ActionResult.CONSUME;
         }
         else return ActionResult.FAIL;
-    }
-
-    @Override
-    public boolean isEnchantable(ItemStack item) {
-        return true;
-    }
-
-    @Override
-    public int getEnchantability() {
-        return 1;
     }
 }

@@ -7,12 +7,8 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "minecraft:gold_nugget"
-    },
-    "X": {
-      "item": "minecraft:beetroot"
-    }
+    "#" : "minecraft:gold_nugget",
+    "X" : "minecraft:beetroot"
   },
   "result": {
     "id": "players-versus:glistering_beetroot",

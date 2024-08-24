@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "ingredients": [
-    {
-      "item": "minecraft:gravel"
-    },
-    {
-      "item": "players-versus:brown_mud"
-    }
+    "minecraft:gravel",
+    "players-versus:brown_mud"
   ],
   "result": {
     "id": "minecraft:packed_mud",

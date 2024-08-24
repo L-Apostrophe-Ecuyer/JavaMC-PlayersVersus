@@ -7,12 +7,8 @@
   ],
   "key": {
     "#": [
-      {
-        "item": "minecraft:calcite"
-      },
-      {
-        "item": "minecraft:diorite"
-      }
+      "minecraft:calcite",
+      "minecraft:diorite"
     ]
   },
   "result": {

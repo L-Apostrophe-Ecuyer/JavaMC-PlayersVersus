@@ -1,9 +1,8 @@
 {
   "type": "minecraft:smelting",
   "category": "misc",
-  "ingredient": {
-    "item": "minecraft:clay_ball"
-  },
+
+  "ingredient":"minecraft:clay_ball",
   "result": {
     "count": 1,
     "id": "minecraft:brick"

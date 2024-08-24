@@ -8,12 +8,8 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "minecraft:dirt"
-    },
-    "X": {
-      "item": "minecraft:water_bucket"
-    }
+    "#" : "minecraft:dirt",
+    "X" : "minecraft:water_bucket"
   },
   "result": {
     "id": "minecraft:brown_terracotta",

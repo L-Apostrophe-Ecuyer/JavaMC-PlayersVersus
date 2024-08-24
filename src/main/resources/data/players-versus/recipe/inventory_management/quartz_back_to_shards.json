@@ -3,9 +3,7 @@
   "category": "building",
   "group": "quartz_block",
   "ingredients": [
-    {
-      "item": "minecraft:quartz_block"
-    }
+    "minecraft:quartz_block"
   ],
   "result": {
     "id": "minecraft:quartz",

@@ -8,9 +8,7 @@
       "X X"
     ],
     "key": {
-      "X": {
-        "item": "minecraft:leather"
-      }
+      "X": "minecraft:leather"
     },
     "result": {
       "id": "minecraft:leather_leggings"

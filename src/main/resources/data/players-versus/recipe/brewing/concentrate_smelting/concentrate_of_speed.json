@@ -3,9 +3,7 @@
   "category": "food",
 
   "ingredient": [
-    {
-      "item": "minecraft:glow_ink_sac"
-    }
+    "minecraft:glow_ink_sac"
   ],
   "result": {
     "id": "players-versus:concentrate_of_speed"

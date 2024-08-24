@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "group": "stones_to_cobble",
   "ingredients": [
-    {
-      "item": "minecraft:deepslate"
-    }
+    "minecraft:deepslate"
   ],
   "result": {
     "id": "minecraft:cobbled_deepslate",

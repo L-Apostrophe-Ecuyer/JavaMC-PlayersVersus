@@ -4,9 +4,7 @@
         "#"
     ],
     "key": {
-        "#": {
-            "item": "minecraft:leather_leggings"
-        }
+        "#": "minecraft:leather_leggings"
     },
     "result": {
         "id": "minecraft:leather",

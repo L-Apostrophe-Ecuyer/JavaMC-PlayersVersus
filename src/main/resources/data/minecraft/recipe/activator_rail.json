@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:redstone_torch"
-    },
-    "S": {
-      "item": "minecraft:stick"
-    },
-    "X": {
-      "item": "minecraft:iron_nugget"
-    }
+    "#" : "minecraft:redstone_torch",
+    "S" : "minecraft:stick",
+    "X" : "minecraft:iron_nugget"
   },
   "pattern": [
     "XSX",

@@ -50,7 +50,7 @@ public class RecoveryCompassItem extends Item {
 
         // If attacked while using, cancel and apply cooldown:
         if(remainingUseTicks < USE_TIME_TICKS - 20 && world.getTime() - user.getLastAttackedTime() < 2 && user instanceof PlayerEntity player) {
-            player.getItemCooldownManager().set(stack.getItem(), 240);
+            player.getItemCooldownManager().set(stack, 240);
         }
 
         // Otherwise: Add effects
@@ -64,7 +64,7 @@ public class RecoveryCompassItem extends Item {
 
                 Optional<GlobalPos> lastDeathPos = serverPlayer.getLastDeathPos();
                 if(!lastDeathPos.isPresent() || lastDeathPos.get().dimension() != world.getRegistryKey()) {
-                    serverPlayer.getItemCooldownManager().set(stack.getItem(), 60);
+                    serverPlayer.getItemCooldownManager().set(stack, 60);
                 }
             }
         }

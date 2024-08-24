@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "group": "stones_to_cobble",
   "ingredients": [
-    {
-      "item": "minecraft:andesite"
-    }
+    "minecraft:andesite"
   ],
   "result": {
     "id": "minecraft:cobblestone",

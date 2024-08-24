@@ -7,9 +7,7 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "players-versus:packed_mud_tiles"
-    }
+    "#" : "players-versus:packed_mud_tiles"
   },
   "result": {
     "id": "players-versus:packed_mud_tile_stairs",

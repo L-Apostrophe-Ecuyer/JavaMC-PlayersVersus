@@ -4,9 +4,7 @@
         "#"
     ],
     "key": {
-        "#": {
-            "item": "minecraft:diamond_horse_armor"
-        }
+        "#": "minecraft:diamond_horse_armor"
     },
     "result": {
         "id": "minecraft:diamond",

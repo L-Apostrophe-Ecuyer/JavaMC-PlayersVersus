@@ -3,9 +3,7 @@
   "category": "equipment",
   "group": "iron_armor",
   "key": {
-    "X": {
-      "item": "minecraft:iron_ingot"
-    }
+    "X" : "minecraft:iron_ingot"
   },
   "pattern": [
     "X X",

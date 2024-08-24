@@ -7,9 +7,7 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "players-versus:brown_mud_bricks"
-    }
+    "#" : "players-versus:brown_mud_bricks"
   },
   "result": {
     "id": "players-versus:brown_mud_brick_stairs",

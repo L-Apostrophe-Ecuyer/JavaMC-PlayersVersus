@@ -8,9 +8,7 @@
       "X X"
     ],
     "key": {
-      "X": {
-        "item": "minecraft:copper_ingot"
-      }
+      "X": "minecraft:copper_ingot"
     },
     "result": {
       "id": "players-versus:copper_leggings"

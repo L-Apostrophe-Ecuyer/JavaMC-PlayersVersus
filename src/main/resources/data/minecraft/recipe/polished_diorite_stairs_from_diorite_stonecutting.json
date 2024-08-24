@@ -1,15 +1,9 @@
 {
   "type": "minecraft:stonecutting",
   "ingredient": [
-    {
-      "item": "minecraft:calcite"
-    },
-    {
-      "item": "minecraft:diorite"
-    },
-    {
-      "item": "minecraft:polished_diorite"
-    }
+    "minecraft:calcite",
+    "minecraft:diorite",
+    "minecraft:polished_diorite"
   ],
   "result": {
     "count": 1,

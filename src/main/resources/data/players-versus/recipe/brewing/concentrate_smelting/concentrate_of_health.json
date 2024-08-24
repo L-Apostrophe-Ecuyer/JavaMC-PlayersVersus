@@ -3,12 +3,8 @@
   "category": "food",
 
   "ingredient": [
-    {
-      "item": "minecraft:glistering_melon_slice"
-    },
-    {
-      "item": "players-versus:glistering_beetroot"
-    }
+    "minecraft:glistering_melon_slice",
+    "players-versus:glistering_beetroot"
   ],
   "result": {
     "id": "players-versus:concentrate_of_health"

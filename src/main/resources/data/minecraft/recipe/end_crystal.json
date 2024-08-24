@@ -7,15 +7,9 @@
     "GTG"
   ],
   "key": {
-    "E": {
-      "item": "players-versus:concentrate_of_health"
-    },
-    "G": {
-      "item": "minecraft:amethyst_shard"
-    },
-    "T": {
-      "item": "minecraft:ghast_tear"
-    }
+    "E" : "players-versus:concentrate_of_health",
+    "G" : "minecraft:amethyst_shard",
+    "T" : "minecraft:ghast_tear"
   },
   "result": {
     "id": "minecraft:end_crystal",

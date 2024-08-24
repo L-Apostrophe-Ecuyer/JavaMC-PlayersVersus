@@ -2,9 +2,7 @@
     "type": "minecraft:smelting",
     "category": "food",
   
-    "ingredient": {
-      "item": "minecraft:armadillo_scute"
-    },
+    "ingredient": "minecraft:armadillo_scute",
     "result": {
       "id": "players-versus:concentrate_of_weakness"
     },

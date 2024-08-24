@@ -1,11 +1,12 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 1,
-  "ingredient": {
-    "tag": "players-versus:regular_stone"
-  },
+  "ingredient": [
+    "minecraft:cobblestone",
+    "minecraft:stone",
+    "players-versus:polished_stone"
+  ],
   "result": {
-    "count": 1,
-    "id": "players-versus:polished_stone_stairs"
+    "id": "players-versus:polished_stone_stairs",
+    "count": 1
   }
 }

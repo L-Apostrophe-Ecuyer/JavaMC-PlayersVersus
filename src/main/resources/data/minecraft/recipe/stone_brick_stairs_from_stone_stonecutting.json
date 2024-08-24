@@ -1,15 +1,9 @@
 {
   "type": "minecraft:stonecutting",
   "ingredient": [
-    {
-      "item": "minecraft:stone"
-    },
-    {
-      "item": "minecraft:stone_bricks"
-    },
-    {
-      "item": "players-versus:polished_stone"
-    }
+    "minecraft:stone",
+    "minecraft:stone_bricks",
+    "players-versus:polished_stone"
   ],
   "result": {
     "id": "minecraft:stone_brick_stairs",

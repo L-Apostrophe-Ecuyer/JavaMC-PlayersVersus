@@ -3,9 +3,7 @@
   "category": "food",
   "group": "concentrate_of_breath",
   "ingredient": [
-    {
-      "item": "minecraft:lapis_lazuli"
-    }
+    "minecraft:lapis_lazuli"
   ],
   "result": {
     "id": "players-versus:concentrate_of_breath"

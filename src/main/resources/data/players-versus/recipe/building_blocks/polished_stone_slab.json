@@ -5,9 +5,7 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "players-versus:polished_stone"
-    }
+    "#" : "players-versus:polished_stone"
   },
   "result": {
     "id": "players-versus:polished_stone_slab",

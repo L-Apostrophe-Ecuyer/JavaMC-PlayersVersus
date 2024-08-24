@@ -6,9 +6,7 @@
     "SS"
   ],
   "key": {
-    "S": {
-      "item": "players-versus:brown_mud_bricks"
-    }
+    "S" : "players-versus:brown_mud_bricks"
   },
   "result": {
     "id": "players-versus:brown_mud_tiles",

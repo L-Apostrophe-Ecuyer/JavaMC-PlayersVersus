@@ -2,9 +2,7 @@
   "type": "minecraft:smelting",
   "category": "blocks",
   "group": "mud_smelting",
-  "ingredient": {
-    "item": "players-versus:brown_mud"
-  },
+  "ingredient":"players-versus:brown_mud",
   "result": {
     "id": "minecraft:green_terracotta"
   },

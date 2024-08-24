@@ -3,12 +3,8 @@
   "group": "wooden_tools",
   "category": "equipment",
   "key": {
-    "#": {
-      "item": "minecraft:stick"
-    },
-    "X": {
-      "tag": "minecraft:planks"
-    }
+    "#" : "minecraft:stick",
+    "X" : "#minecraft:planks"
   },
   "pattern": [
     "XXX",

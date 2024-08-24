@@ -2,39 +2,17 @@
   "type": "minecraft:smelting",
   "category": "equipment",
   "ingredient": [
-    {
-      "item": "minecraft:iron_helmet"
-    },
-    {
-      "item": "minecraft:iron_leggings"
-    },
-    {
-      "item": "minecraft:iron_boots"
-    },
-    {
-      "item": "minecraft:iron_chestplate"
-    },
-    {
-      "item": "minecraft:iron_horse_armor"
-    },
-    {
-      "item": "minecraft:iron_trapdoor"
-    },
-    {
-      "item": "minecraft:iron_door"
-    },
-    {
-      "item": "minecraft:compass"
-    },
-    {
-      "item": "minecraft:bucket"
-    },
-    {
-      "item": "minecraft:cauldron"
-    },
-    {
-      "item": "minecraft:damaged_anvil"
-    }
+    "minecraft:iron_helmet",
+    "minecraft:iron_leggings",
+    "minecraft:iron_boots",
+    "minecraft:iron_chestplate",
+    "minecraft:iron_horse_armor",
+    "minecraft:iron_trapdoor",
+    "minecraft:iron_door",
+    "minecraft:compass",
+    "minecraft:bucket",
+    "minecraft:cauldron",
+    "minecraft:damaged_anvil"
   ],
   "result": {
     "id": "minecraft:iron_ingot"

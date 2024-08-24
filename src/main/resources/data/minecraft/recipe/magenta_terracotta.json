@@ -3,12 +3,8 @@
   "category": "building",
   "group": "stained_terracotta",
   "ingredients": [
-    {
-      "item": "minecraft:terracotta"
-    },
-    {
-      "item": "minecraft:magenta_dye"
-    }
+    "minecraft:terracotta",
+    "minecraft:magenta_dye"
   ],
   "result": {
     "id": "minecraft:magenta_terracotta"

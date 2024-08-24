@@ -2,9 +2,7 @@
   "type": "minecraft:smelting",
   "category": "blocks",
   "group": "mud_smelting",
-  "ingredient": {
-    "item": "minecraft:packed_mud"
-  },
+  "ingredient":"minecraft:packed_mud",
   "result": {
     "id": "minecraft:white_terracotta"
   },

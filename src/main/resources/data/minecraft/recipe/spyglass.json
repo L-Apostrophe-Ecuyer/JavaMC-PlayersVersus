@@ -7,15 +7,9 @@
     " C "
   ],
   "key": {
-    "#": {
-      "item": "minecraft:glass_pane"
-    },
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "C": {
-      "item": "minecraft:copper_ingot"
-    }
+    "#" : "minecraft:glass_pane",
+    "G" : "minecraft:gold_ingot",
+    "C" : "minecraft:copper_ingot"
   },
   "result": {
     "id": "minecraft:spyglass"

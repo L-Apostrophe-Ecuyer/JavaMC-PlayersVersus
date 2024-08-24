@@ -3,9 +3,7 @@
   "category": "food",
 
   "ingredient": [
-    {
-      "item": "minecraft:flint"
-    }
+    "minecraft:flint"
   ],
   "result": {
     "id": "players-versus:concentrate_of_infestation"

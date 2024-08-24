@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "#": {
-      "item": "minecraft:rabbit_hide"
-    },
-    "-": {
-      "item": "minecraft:string"
-    }
+    "#" : "minecraft:rabbit_hide",
+    "-": "minecraft:string"
   },
   "pattern": [
     "-#",

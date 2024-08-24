@@ -2,9 +2,7 @@
   "type": "minecraft:smelting",
   "category": "blocks",
   "ingredient": [
-    {
-      "item": "minecraft:gravel"
-    }
+    "minecraft:gravel"
   ],
   "result": {
     "id": "minecraft:stone"

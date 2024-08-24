@@ -3,9 +3,7 @@
     "category": "food",
   
     "ingredient": [
-      {
-        "item": "minecraft:breeze_rod"
-      }
+      "minecraft:breeze_rod"
     ],
     "result": {
       "id": "players-versus:concentrate_of_wind"

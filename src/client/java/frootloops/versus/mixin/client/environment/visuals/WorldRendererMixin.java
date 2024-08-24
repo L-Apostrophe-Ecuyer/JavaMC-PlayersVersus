@@ -24,12 +24,13 @@ public abstract class WorldRendererMixin {
         this.client = client;
     }
 
+    /*
     @Inject(method = "tickRainSplashing", at = @At("HEAD"), cancellable = true)
     public void tickRainSplashing(Camera camera, CallbackInfo info) {
         if(this.client.world.getThunderGradient(1.0f) == 0.0f) {
             if(this.client.world.getTime() % 5 != 0) info.cancel();
         }
-    }
+    }*/
 
     @Inject(method = "addParticle", at = @At("HEAD"), cancellable = true)
     public void tickRainSplashing(ParticleEffect parameters, boolean shouldAlwaysSpawn, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfo info) {
