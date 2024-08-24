@@ -250,6 +250,8 @@
   "block.players-versus.corrupted_wart": "Verrue corrompue",
   "block.players-versus.withered_wart": "Verrue décomposée",
   "item.players-versus.glistering_beetroot": "Betterave scintillante",
+  "item.players-versus.glistering_melon_slice": "Tranche de pastèque scintillante",
+  "item.players-versus.recovery_compass": "Boussole de récupération",
 
   "item.players-versus.concentrate_of_omen" : "Concentré sinistre",
   "item.players-versus.concentrate_of_death" : "Concentré mortel",
@@ -281,6 +283,8 @@
   "item.players-versus.concentrate_of_infestation" : "Concentré terrifiant",
   "item.players-versus.concentrate_of_weaving" : "Concentré collant",
   "item.players-versus.concentrate_of_luck" : "Concentré de bonne étoile",
+  "item.players-versus.concentrate_of_unluck" : "Concentré de mauvaise étoile",
+  "item.players-versus.concentrate_of_decay" : "Concentré dépéri",
 
   "enchantment.minecraft.protection": "Protection totale",
   "enchantment.minecraft.breach": "Brèche d'armure",
