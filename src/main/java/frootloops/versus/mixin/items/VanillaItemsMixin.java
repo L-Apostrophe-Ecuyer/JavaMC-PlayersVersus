@@ -1,42 +1,64 @@
 package frootloops.versus.mixin.items;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.ItemsAndStacks;
-import frootloops.versus.mod.items.equipment.RebalancedTools;
-import frootloops.versus.mod.items.brewing.ConcentrateItem;
-import frootloops.versus.mod.items.equipment.custom.RecoveryCompassItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemStack;
 import net.minecraft.component.ComponentHolder;
 import net.minecraft.component.ComponentMapImpl;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.resource.featuretoggle.FeatureSet;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.ClickType;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 
 @Mixin(ItemStack.class)
 public abstract class VanillaItemsMixin implements ComponentHolder, FabricItemStack {
 
+        @Shadow private final Item item;
+        @Shadow private int count;
+        @Shadow final ComponentMapImpl components;
+
+        protected VanillaItemsMixin(@Nullable Item item, int count, ComponentMapImpl components) {
+                this.item = item;
+                this.count = count;
+                this.components = components;
+        }
 
         @ModifyVariable(method = "Lnet/minecraft/item/ItemStack;<init>(Lnet/minecraft/item/ItemConvertible;I)V", at = @At("HEAD"), ordinal = 0)
         private static ItemConvertible injected(ItemConvertible item) {
                 return (ItemConvertible) ItemsAndStacks.getReplacementItem(item.asItem());
         }
+
+        @Inject(method = "isItemEnabled", at = @At("HEAD"), cancellable = true)
+        public void isItemEnabled(FeatureSet enabledFeatures, CallbackInfoReturnable<Boolean> cir) {
+                if(ItemsAndStacks.hasReplacementItem(item)) cir.setReturnValue(false);
+        }
+
+        @Inject(method = "onClicked", at = @At("HEAD"), cancellable = false)
+        public void onClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference, CallbackInfoReturnable<Boolean> cir) {
+                if(ItemsAndStacks.hasVanillaReplacementItem(item)) {
+                        ItemStack newStack = new ItemStack(ItemsAndStacks.getVanillaReplacementItem(item).getRegistryEntry(), count, components.getChanges());
+                        slot.setStack(newStack);
+                }
+        }
+
+        @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
+        public void getMaxCount(CallbackInfoReturnable<Integer> cir) {
+                int customMaxCount = ItemsAndStacks.getOverhauledMaxStackSize(item);
+                if(customMaxCount > 0) {
+                        cir.setReturnValue(ItemsAndStacks.getOverhauledMaxStackSize(item));
+                        cir.cancel();
+                }
+        }
+
 
 
         /*
