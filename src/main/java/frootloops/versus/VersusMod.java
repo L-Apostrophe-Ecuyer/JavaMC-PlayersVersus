@@ -1,6 +1,7 @@
 package frootloops.versus;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.CustomSpecialEffects;
 import frootloops.versus.mod.environment.CustomWorldgen;
 import frootloops.versus.mod.items.ItemsAndStacks;
 import frootloops.versus.mod.mobs.ModEntities;
@@ -24,8 +25,9 @@ public class VersusMod implements ModInitializer {
 		MOD_LOGGER.info("Setting up combat parameters...");
 		Combat.onInitialize();
 
-		MOD_LOGGER.info("Initializing custom blocks...");
+		MOD_LOGGER.info("Initializing custom blocks, sounds, and particles...");
 		CustomBlocks.onInitialize();
+		CustomSpecialEffects.onInitialize();
 
 		MOD_LOGGER.info("Initializing custom worldgen features...");
 		CustomWorldgen.onInitialize();

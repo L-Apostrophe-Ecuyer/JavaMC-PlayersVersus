@@ -1,0 +1,8 @@
+{
+    "rail_turning_sound" : {
+        "subtitle": "subtitles.players-versus.rail_turning_sound",
+        "sounds" : [
+            "players-versus:rail_turning_sound"
+        ]
+    }
+}
