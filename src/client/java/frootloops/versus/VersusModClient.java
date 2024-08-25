@@ -1,6 +1,6 @@
 package frootloops.versus;
 
-import frootloops.versus.mod.environment.CustomParticles;
+import frootloops.versus.mod.environment.CustomSpecialEffects;
 import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.environment.CustomBlocksClient;
@@ -8,10 +8,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
-import net.minecraft.client.particle.EndRodParticle;
-import net.minecraft.client.particle.FlameParticle;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
 
 import static frootloops.versus.VersusMod.MOD_ID;
@@ -30,6 +26,6 @@ public class VersusModClient implements ClientModInitializer {
 		ModEntitiesRenderers.onInitialize();
 		CustomBlocksClient.onInitialize();
 
-		ParticleFactoryRegistry.getInstance().register(CustomParticles.SPARKS, SparksParticle.Factory::new);
+		ParticleFactoryRegistry.getInstance().register(CustomSpecialEffects.SPARKS_PARTICLE, SparksParticle.Factory::new);
 	}
 }
