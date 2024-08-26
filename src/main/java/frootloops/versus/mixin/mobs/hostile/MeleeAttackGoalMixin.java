@@ -37,6 +37,8 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 24;
     private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 30;
 
+    private int maxCooldown = 0;
+
     @Shadow
     private final double speed;
 
@@ -53,15 +55,17 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     private int cooldown;
 
     private int getCooldownAmount(){
-        if(this.mob instanceof WardenEntity || this.mob instanceof IronGolemEntity || this.mob instanceof HoglinEntity)
-            return TICKS_SWING_HEAVY;
+        if(maxCooldown > 0) return maxCooldown;
+        else if(this.mob instanceof WardenEntity || this.mob instanceof IronGolemEntity || this.mob instanceof HoglinEntity)
+            maxCooldown = TICKS_SWING_HEAVY;
         else if(this.mob.getMainHandStack() != null) {
             Item weapon = this.mob.getMainHandStack().getItem();
-            if(weapon instanceof AxeItem || weapon instanceof TridentItem) return TICKS_SWING_HEAVY;
-            else if(weapon instanceof HoeItem) return TICKS_SWING_QUICK;
-            else if(weapon instanceof MiningToolItem) return TICKS_SWING_TOOLS;
+            if(weapon instanceof AxeItem || weapon instanceof TridentItem) maxCooldown = TICKS_SWING_HEAVY;
+            else if(weapon instanceof HoeItem) maxCooldown = TICKS_SWING_QUICK;
+            else if(weapon instanceof MiningToolItem) maxCooldown = TICKS_SWING_TOOLS;
         }
-        return TICKS_SWING_QUICK;
+        maxCooldown = TICKS_SWING_QUICK;
+        return maxCooldown;
     }
 
     @Inject(method = "shouldContinue", at = @At("HEAD"), cancellable = true)
