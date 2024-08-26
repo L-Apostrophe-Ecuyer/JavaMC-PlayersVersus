@@ -78,7 +78,7 @@ public abstract class MinecartMixin extends VehicleEntity {
                     this.setDamageWobbleTicks(10);
                     this.setDamageWobbleStrength(20.0F);
                     if (this.getWorld() instanceof ServerWorld serverWorld) {
-                        if(velocitySlowdownAmount > 0.4f) serverWorld.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), CustomSpecialEffects.RAIL_TURNING_SOUND, this.getSoundCategory(), velocitySlowdownAmount - 0.4f, 0.4f + random.nextFloat() * 0.4f);
+                        if(velocitySlowdownAmount > 0.45f) serverWorld.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), CustomSpecialEffects.RAIL_TURNING_SOUND, this.getSoundCategory(), velocitySlowdownAmount - 0.4f, 0.4f + random.nextFloat() * 0.4f);
                         serverWorld.spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getPos().getX(), this.getPos().getY() + 0.1, this.getPos().getZ(), 2, 0.1, 0.05, 0.1, 0.1);
                     }
                 }
