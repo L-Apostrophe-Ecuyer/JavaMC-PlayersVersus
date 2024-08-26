@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items.equipment;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.items.equipment.custom.RecoveryCompassItem;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -20,6 +21,8 @@ import java.util.function.Predicate;
 import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class CustomEquipment {
+
+    public static final Item RECOVERY_COMPASS =  new RecoveryCompassItem(new Item.Settings().maxCount(1));
 
     public static final int COPPER_ENCHANTABILITY = 1;
     public static final TagKey<Item> COPPER_TOOL_MATERIALS_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(VersusMod.MOD_ID, "copper_tool_materials"));

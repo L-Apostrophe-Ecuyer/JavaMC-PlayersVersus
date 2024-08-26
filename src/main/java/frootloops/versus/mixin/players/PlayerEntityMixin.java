@@ -19,6 +19,7 @@ import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.PointOfInterestTypeTags;
@@ -26,6 +27,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.raid.Raid;
 import net.minecraft.world.Difficulty;
@@ -96,6 +98,17 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1) - 8);
         }
     }
+
+    @Inject(method = "travel", at = @At("HEAD"), cancellable = false)
+    public void jumpInVehicles(Vec3d movementInput, CallbackInfo info) {
+        if(this.jumping && this.hasVehicle() && this.getVehicle() instanceof VehicleEntity vehicleEntity && vehicleEntity.isOnGround()) {
+            float jumpStrength = 0.125f;
+            Vec3d velocity = vehicleEntity.getVelocity();
+            vehicleEntity.setVelocity(velocity.x, Math.max((double)jumpStrength, velocity.y), velocity.z);
+            vehicleEntity.velocityDirty = true;
+        }
+    }
+
 
     @Inject(method = "canHarvest", at = @At("RETURN"), cancellable = true)
     public void canMineCopperWithWood(BlockState state, CallbackInfoReturnable<Boolean> cir) {

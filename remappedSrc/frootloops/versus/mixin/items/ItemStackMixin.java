@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.component.ComponentHolder;
 import net.minecraft.component.ComponentMapImpl;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.EnchantableComponent;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.PlayerEntity;
@@ -41,7 +42,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
     @Shadow
     public boolean hasEnchantments() {return false;}
 
-    /*
+
     @Inject(method = "isEnchantable", at = @At("RETURN"), cancellable = true)
     public void isEnchantable(CallbackInfoReturnable<Boolean> cir) {
         if(!cir.getReturnValue() && item.getComponents().contains(DataComponentTypes.ENCHANTABLE)) {
@@ -55,33 +56,13 @@ public abstract class ItemStackMixin implements ComponentHolder {
                 for (RegistryEntry<Enchantment> enchant : itemEnchantmentsComponent.getEnchantments()) {
                     enchantmentPower += enchant.value().getMinPower(itemEnchantmentsComponent.getLevel(enchant));
                 }
-                int maxLevel = 50;
-                if(item instanceof ArmorItem armorItem) maxLevel = 4 * armorItem.getMaterial().getEnchantability();
-                else if(item instanceof MiningToolItem toolItem) maxLevel = 4 * toolItem.getEnchantability();
-                if(item.getComponents().contains(DataComponentTypes.ENCHANTABLE))
 
+                EnchantableComponent enchantabilityComponent = item.getComponents().get(DataComponentTypes.ENCHANTABLE);
+                int maxLevel = 4 * enchantabilityComponent.value();
                 if(enchantmentPower < maxLevel) cir.setReturnValue(true);
             }
         }
-    } */
-
-    @Inject(method = "onClicked", at = @At("HEAD"), cancellable = false)
-    public void onClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference, CallbackInfoReturnable<Boolean> cir) {
-        if(ItemsAndStacks.hasReplacementItem(item)) {
-            ItemStack newStack = new ItemStack(ItemsAndStacks.getReplacementItem(item).getRegistryEntry(), count, components.copy().getChanges());
-            slot.setStack(newStack);
-        }
     }
-
-    @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
-    public void getMaxCount(CallbackInfoReturnable<Integer> cir) {
-        int customMaxCount = ItemsAndStacks.getOverhauledMaxStackSize(item);
-        if(customMaxCount > 0) {
-            cir.setReturnValue(ItemsAndStacks.getOverhauledMaxStackSize(item));
-            cir.cancel();
-        }
-    }
-
 
     @Inject(method = "getMiningSpeedMultiplier", at = @At("RETURN"), cancellable = true)
     public void getMiningSpeedMultiplier(BlockState state, CallbackInfoReturnable<Float> cir) {

@@ -32,11 +32,6 @@ public abstract class SheepMixin extends AnimalEntity implements Shearable {
         super(entityType, world);
     }
 
-    @ModifyArg(method = "sheared", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I"))
-    private int muchMoreWool(int three) {
-        return 8;
-    }
-
     public Predicate<Entity> NOTICEABLE_PLAYER_FILTER = (entity) -> {
         return !entity.isSneaky() && EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(entity);
     };

@@ -1,8 +1,10 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.mod.items.brewing.ConcentrateItem;
+import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
+import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
@@ -15,6 +17,7 @@ public abstract class ItemsAndStacks {
     private static Map<Item, Integer> DEFAULT_MAX_STACK_SIZE = new HashMap<>();
 
     private static Map<Item, Item> TRANSFORM_VANILLA_ITEMS_TO_MODDED = new HashMap<>();
+    private static Map<Item, Item> TRANSFORM_VANILLA_ITEMS_TO_VANILLA = new HashMap<>();
 
     private static final Map<Item,Integer> MAX_USE_TIME_MAP = new HashMap<>();
     static {
@@ -63,10 +66,16 @@ public abstract class ItemsAndStacks {
     }
 
     private static void setUpTransformVanillaItemsToModded() {
-        //TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLISTERING_MELON_SLICE, CustomBrewingItems.CONCENTRATE_OF_HEALTH);
-        //TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.DIORITE, Items.CALCITE);
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.CHARCOAL, Items.COAL);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.FERMENTED_SPIDER_EYE, CustomBrewingItems.CORRUPTED_WART_POWDER);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLISTERING_MELON_SLICE, CustomBrewingItems.GLISTERING_MELON_SLICE);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.BLAZE_POWDER, CustomBrewingItems.CONCENTRATE_OF_STRENGTH);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.RECOVERY_COMPASS, CustomEquipment.RECOVERY_COMPASS);
+    }
+
+    private static void setUpTransformVanillaItemsToVanilla() {
+        TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.DIORITE, Items.CALCITE);
+        TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.CHARCOAL, Items.COAL);
     }
 
     private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
@@ -137,6 +146,14 @@ public abstract class ItemsAndStacks {
     }
 
     public static Item getReplacementItem(Item item) {
-        return TRANSFORM_VANILLA_ITEMS_TO_MODDED.getOrDefault(item, null);
+        return TRANSFORM_VANILLA_ITEMS_TO_MODDED.getOrDefault(item, item);
+    }
+
+    public static boolean hasVanillaReplacementItem(Item item) {
+        return TRANSFORM_VANILLA_ITEMS_TO_VANILLA.containsKey(item);
+    }
+
+    public static Item getVanillaReplacementItem(Item item) {
+        return TRANSFORM_VANILLA_ITEMS_TO_VANILLA.getOrDefault(item, item);
     }
 }

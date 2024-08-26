@@ -2,6 +2,7 @@ package frootloops.versus.mixin.mobs.hostile;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.Leashable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.MobEntity;
@@ -16,7 +17,10 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MobEntity.class)
 public abstract class MobEntityMixin extends LivingEntity {
@@ -28,15 +32,13 @@ public abstract class MobEntityMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @Override
-    public boolean startRiding(Entity entity) {
-        if(this.hurtTime > 0) return false;
-        if(entity instanceof BoatEntity) {
-           if(target == null) return false;
-           if(visibilityCache.canSee(target)) return false;
-           return super.startRiding(entity, false);
+    @Inject(method = "startRiding", at = @At("HEAD"), cancellable = true)
+    public void startRiding(Entity entity, boolean force, CallbackInfoReturnable<Boolean> cir) {
+        if(this.hurtTime > 0) cir.setReturnValue(force);
+        else if(entity instanceof BoatEntity) {
+           if(target == null || visibilityCache.canSee(target)) cir.setReturnValue(false);
+           else cir.setReturnValue(super.startRiding(entity, false));
         }
-        else return false;
     }
 
     @Override

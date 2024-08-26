@@ -15,15 +15,17 @@ public abstract class CustomBrewingItems {
 
     public static final Item FOUR_LEAF_CLOVER = new Item(new Item.Settings().attributeModifiers(AttributeModifiersComponent.builder().add(EntityAttributes.LUCK, new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, 1.0, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.OFFHAND).build()));
     //public static final Item THREE_LEAF_CLOVER = new Item(new Item.Settings());
+
     public static PotionItem BOTTLE_OF_ENDER;
     public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
     public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
 
     public static final Item LIVING_FLAME = new Item(new Item.Settings());
     public static final Item GLISTERING_BEETROOT = new Item(new Item.Settings().food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).build()));
+    public static final Item GLISTERING_MELON_SLICE = new Item(new Item.Settings().food(new FoodComponent.Builder().nutrition(3).saturationModifier(0.8f).build()));
 
     public static final Item CONCENTRATE_OF_DEATH = new ConcentrateItem(StatusEffects.WITHER, 2, 80);
-    //public static final Item CORRUPTED_WART_POWDER = new ConcentrateItem(StatusEffects.HUNGER, 4, 120);
+    public static final Item CORRUPTED_WART_POWDER = new ConcentrateItem(StatusEffects.HUNGER, 4, 120); //-> Will be replacing Fermented Spider Eye
 
     public static final Item CONCENTRATE_OF_HARM = new ConcentrateItem(StatusEffects.INSTANT_DAMAGE);
     public static final Item CONCENTRATE_OF_HEALTH = new ConcentrateItem(StatusEffects.INSTANT_HEALTH);
@@ -56,10 +58,10 @@ public abstract class CustomBrewingItems {
     public static final Item CONCENTRATE_OF_GLOWING = new ConcentrateItem(StatusEffects.GLOWING);
 
     public static final Item CONCENTRATE_OF_WEAKNESS = new ConcentrateItem(StatusEffects.WEAKNESS);
-    //public static final Item CONCENTRATE_OF_STRENGTH = new ConcentrateItem(StatusEffects.STRENGTH); -> Will be replacing Blaze Powder
+    public static final Item CONCENTRATE_OF_STRENGTH = new ConcentrateItem(StatusEffects.STRENGTH); //-> Will be replacing Blaze Powder
 
     public static final Item CONCENTRATE_OF_WIND = new ConcentrateItem(StatusEffects.WIND_CHARGED);
-    //public static final Item CONCENTRATE_OF_FIRE = new ConcentrateItem(StatusEffects.FIRE_RESISTANCE); -> Will be replacing Magma Cream
+    public static final Item CONCENTRATE_OF_FIRE = new ConcentrateItem(StatusEffects.FIRE_RESISTANCE); //-> Will be replacing Magma Cream
 
     public static final Item CONCENTRATE_OF_OOZE = new ConcentrateItem(StatusEffects.OOZING);
     public static final Item CONCENTRATE_OF_INFESTATION = new ConcentrateItem(StatusEffects.INFESTED);

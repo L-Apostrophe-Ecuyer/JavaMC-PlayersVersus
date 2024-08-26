@@ -1,10 +1,14 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
+import frootloops.versus.mod.items.equipment.custom.RecoveryCompassItem;
 import frootloops.versus.mod.mobs.ModEntities;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.component.type.FoodComponent;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -14,6 +18,8 @@ import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class RegisteringCustomItems {
     public static void registerAllCustomItems() {
+
+        registerCustomItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS, ItemGroups.TOOLS);
 
         registerCustomItem("withered_zombie_spawn_egg", ModEntities.WITHERED_ZOMBIE_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
         registerCustomItem("frosted_zombie_spawn_egg", ModEntities.FROSTED_ZOMBIE_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
@@ -35,11 +41,13 @@ public abstract class RegisteringCustomItems {
 
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
+        registerCustomItem("glistering_melon_slice", CustomBrewingItems.GLISTERING_MELON_SLICE, ItemGroups.FOOD_AND_DRINK);
+
         registerCustomItem("four_leaf_clover", CustomBrewingItems.FOUR_LEAF_CLOVER, ItemGroups.INGREDIENTS);
         //registerCustomItem("three_leaf_clover", CustomBrewingItems.THREE_LEAF_CLOVER, ItemGroups.INGREDIENTS);  // Removed/cancelled
         registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
         registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART_ITEM, ItemGroups.INGREDIENTS);
-        //registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.INGREDIENTS); -> Replacing Fermented Spider Eyes
+        registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.INGREDIENTS); //-> Replacing Fermented Spider Eyes
 
         registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_DEATH, ItemGroups.INGREDIENTS);          // New potion & effect!
         registerCustomItem("concentrate_of_health", CustomBrewingItems.CONCENTRATE_OF_HEALTH, ItemGroups.INGREDIENTS);
@@ -63,8 +71,8 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_invisibility", CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_glowing", CustomBrewingItems.CONCENTRATE_OF_GLOWING, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_weakness", CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, ItemGroups.INGREDIENTS);
-        //registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH, ItemGroups.INGREDIENTS); -> Replacing Blaze Powder
-        //registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.INGREDIENTS); -> Replacing Magma Cream
+        registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH, ItemGroups.INGREDIENTS); //-> Replacing Blaze Powder
+        registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.INGREDIENTS);// -> Replacing Magma Cream
         registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.INGREDIENTS);

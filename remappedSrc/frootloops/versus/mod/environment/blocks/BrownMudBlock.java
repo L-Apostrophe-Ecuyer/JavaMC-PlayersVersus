@@ -166,9 +166,8 @@ public class BrownMudBlock extends Block {
         if(state.get(MOISTURE) == 0) return VoxelShapes.fullCube();
 
         Entity entity;
-        if (context instanceof EntityShapeContext && (entity = ((EntityShapeContext)context).getEntity()) != null) {
-            if (entity.fallDistance > 2.5f || BrownMudBlock.canWalkOnWetMud(entity) || entity instanceof FallingBlockEntity) return VoxelShapes.fullCube();
-            return VoxelShapes.empty();
+        if (context instanceof EntityShapeContext && (entity = ((EntityShapeContext)context).getEntity()) != null && entity instanceof LivingEntity livingEntity) {
+            return BrownMudBlock.canWalkOnWetMud(livingEntity) ? VoxelShapes.fullCube() : VoxelShapes.empty();
         }
         return VoxelShapes.fullCube();
     }

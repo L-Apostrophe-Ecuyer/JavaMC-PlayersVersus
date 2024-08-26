@@ -4,10 +4,12 @@ import frootloops.versus.mod.environment.CustomSpecialEffects;
 import net.minecraft.block.enums.RailShape;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.AbstractMinecartEntity;
 import net.minecraft.entity.vehicle.ExperimentalMinecartController;
 import net.minecraft.entity.vehicle.MinecartController;
 import net.minecraft.entity.vehicle.VehicleEntity;
+import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -40,14 +42,21 @@ public abstract class MinecartMixin extends VehicleEntity {
         return true;// world.getEnabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS);
     }
 
-
-    @Inject(method = "getMaxSpeed", at = @At("RETURN"), cancellable = true)
-    public void getMaxSpeed(CallbackInfoReturnable<Double> cir) {
-        if(cir.getReturnValue() == 8.0) cir.setReturnValue(48.0);
+    @Overwrite
+    public double getMaxSpeed() {
+        if(this.getWorld().getEnabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
+            double gameruleMaxSpeed = this.controller.getMaxSpeed();
+            return gameruleMaxSpeed == 8.0 ? gameruleMaxSpeed * 8.0 : gameruleMaxSpeed;
+        }
+        return 64.0 / (this.isTouchingWater() ? 40.0 : 20.0);
     }
 
     @Inject(method = "method_61564", at = @At("HEAD"), cancellable = true)
     public void slowdownOnFastTurns(BlockPos blockPos, RailShape railShape, double d, CallbackInfoReturnable<Double> cir) {
+
+        // The goal here is twofold:
+        //    1. Immersion, make players feel how fast they're turning, and make them take that into consideration when building
+        //    2. No more particle accelerators, which are nauseating, and too easy to build
 
         boolean isMinecartDiagonal = (int)this.getYaw() % 90 != 0;
         if(isMinecartDiagonal) return;
@@ -56,30 +65,35 @@ public abstract class MinecartMixin extends VehicleEntity {
         if(isTurning) {
             float velocitySlowdownAmount = (float)this.getVelocity().lengthSquared()/4f;
 
-            // Turning at a low or medium speed has a moderate effect, and spawns a single spark:
-            if(velocitySlowdownAmount < 0.4f) {
-                if(velocitySlowdownAmount > 0.1f) {
-                    if(velocitySlowdownAmount > 0.3f) {
-                        this.setDamageWobbleSide(-this.getDamageWobbleSide());
-                        this.setDamageWobbleTicks(10);
-                        this.setDamageWobbleStrength(20.0F);
-                        if(!this.getWorld().isClient()) ((ServerWorld) this.getWorld()).spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getPos().getX(), this.getPos().getY() + 0.1, this.getPos().getZ(), 1, 0.1, 0.02, 0.1, 0.1);
+            // Tunring at low speed has no effect:
+            if(velocitySlowdownAmount < 0.1f) {
+                return;
+            }
+
+            // Turning at a medium speed has a moderate effect, and spawns a single spark:
+            if(velocitySlowdownAmount < 0.5f) {
+                this.setVelocity(this.getVelocity().multiply(Math.max(0.6f, 1.0f - velocitySlowdownAmount)));
+                if(velocitySlowdownAmount > 0.35f) {
+                    this.setDamageWobbleSide(-this.getDamageWobbleSide());
+                    this.setDamageWobbleTicks(10);
+                    this.setDamageWobbleStrength(20.0F);
+                    if (this.getWorld() instanceof ServerWorld serverWorld) {
+                        if(velocitySlowdownAmount > 0.4f) serverWorld.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), CustomSpecialEffects.RAIL_TURNING_SOUND, this.getSoundCategory(), velocitySlowdownAmount - 0.4f, 0.4f + random.nextFloat() * 0.4f);
+                        serverWorld.spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getPos().getX(), this.getPos().getY() + 0.1, this.getPos().getZ(), 2, 0.1, 0.05, 0.1, 0.1);
                     }
-                    this.setVelocity(this.getVelocity().multiply(1.05f - velocitySlowdownAmount));
                 }
             }
-            else {
 
-                // Turning at high speeds! Minecart will slow down and spawn lots of sparks:
+            // Turning at high speeds! Minecart will slow down and spawn lots of sparks:
+            else {
+                this.setVelocity(this.getVelocity().multiply(Math.max(0.5f, 0.95f - velocitySlowdownAmount)));
                 this.setDamageWobbleSide(-this.getDamageWobbleSide());
                 this.setDamageWobbleTicks(10);
                 this.setDamageWobbleStrength(30.0F);
-                this.setVelocity(this.getVelocity().multiply(Math.max(0.4f, 0.9f - velocitySlowdownAmount)));
-                if (!this.getWorld().isClient()) {
-                    this.playSound(CustomSpecialEffects.RAIL_TURNING_SOUND, 1.0f, 0.8f + random.nextFloat() * 0.2f);
-                    ((ServerWorld) this.getWorld()).spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getPos().getX(), this.getPos().getY() + 0.1, this.getPos().getZ(), 16, 0.1, 0.05, 0.1, 0.2);
+                if (this.getWorld() instanceof ServerWorld serverWorld) {
+                    serverWorld.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), CustomSpecialEffects.RAIL_TURNING_SOUND, this.getSoundCategory(), 0.6f, 0.8f + random.nextFloat() * 0.2f);
+                    serverWorld.spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getPos().getX(), this.getPos().getY() + 0.1, this.getPos().getZ(), 16, 0.1, 0.05, 0.1, 0.2);
                 }
-                this.setVelocity(this.getVelocity().multiply(Math.max(0.4f, 0.9f - velocitySlowdownAmount)));
             }
         }
     }
@@ -87,7 +101,7 @@ public abstract class MinecartMixin extends VehicleEntity {
 
     @Overwrite
     public void moveOffRail() {
-        double d = this.controller.getMaxSpeed();
+        double d = getMaxSpeed();
         if(d == 8.0) d = 32.0;
 
         Vec3d velocity = this.getVelocity();

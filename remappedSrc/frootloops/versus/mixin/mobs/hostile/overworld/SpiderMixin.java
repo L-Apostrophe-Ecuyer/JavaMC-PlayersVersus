@@ -5,6 +5,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.CobwebBlock;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
@@ -18,6 +19,7 @@ import net.minecraft.entity.mob.SkeletonEntity;
 import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +33,9 @@ import java.util.Objects;
 @Mixin(SpiderEntity.class)
 public class SpiderMixin extends HostileEntity {
     private static final TrackedData<Boolean> BABY = DataTracker.registerData(SpiderEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+
+    private static final Identifier BABY_SCALE_MODIFIER_ID = Identifier.ofVanilla("baby");
+    private static final EntityAttributeModifier BABY_SCALE_MODIFIER  = new EntityAttributeModifier(BABY_SCALE_MODIFIER_ID, -0.5, EntityAttributeModifier.Operation.ADD_VALUE);
 
     protected SpiderMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
@@ -160,10 +165,7 @@ public class SpiderMixin extends HostileEntity {
 
     @Override
     public void onTrackedDataSet(TrackedData<?> data) {
-        if (BABY.equals(data)) {
-            this.calculateDimensions();
-        }
-
+        if (BABY.equals(data)) {this.calculateDimensions();}
         super.onTrackedDataSet(data);
     }
 

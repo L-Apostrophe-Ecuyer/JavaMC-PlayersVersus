@@ -1,4 +1,7 @@
 {
+
+  "subtitle.players-versus.rail_turning_sound": "Minecart makes a sharp turn",
+
   "death.attack.mud_suffocation": "%1$s suffocated while taking a mud bath",
   "death.attack.mud_suffocation.item": "%1$s suffocated while taking a mud bath",
 
@@ -284,7 +287,8 @@
   "item.players-versus.concentrate_of_infestation" : "Creepy Concentrate",
   "item.players-versus.concentrate_of_weaving" : "Gooey Concentrate",
   "item.players-versus.concentrate_of_luck" : "Lucky Concentrate",
-  "item.players-versus.concentrate_of_luck" : "Unfortunate Concentrate",
+  "item.players-versus.concentrate_of_unluck" : "Unfortunate Concentrate",
+  "item.players-versus.concentrate_of_decay" : "Decaying Concentrate",
 
   "enchantment.minecraft.protection": "Total Protection",
   "enchantment.minecraft.breach": "Armor Breaching",
