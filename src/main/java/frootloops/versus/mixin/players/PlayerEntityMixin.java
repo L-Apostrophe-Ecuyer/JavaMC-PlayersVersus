@@ -101,11 +101,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "travel", at = @At("HEAD"), cancellable = false)
     public void jumpInVehicles(Vec3d movementInput, CallbackInfo info) {
-        if(this.jumping && this.hasVehicle() && this.getVehicle() instanceof VehicleEntity vehicleEntity && vehicleEntity.isOnGround()) {
-            float jumpStrength = 0.125f;
-            Vec3d velocity = vehicleEntity.getVelocity();
-            vehicleEntity.setVelocity(velocity.x, Math.max((double)jumpStrength, velocity.y), velocity.z);
-            vehicleEntity.velocityDirty = true;
+        if(this.jumping && this.hasVehicle() && this.getVehicle() instanceof BoatEntity boatEntity && !boatEntity.isSubmergedInWater()) {
+            if(boatEntity.isOnGround() || (boatEntity.fallDistance == 0f && boatEntity.getY() == boatEntity.prevY)) {
+                double jumpStrength = boatEntity.isOnGround() ? 0.225 : 0.425;
+                Vec3d velocity = boatEntity.getVelocity();
+                boatEntity.setVelocity(velocity.x, Math.max(jumpStrength, velocity.y), velocity.z);
+                boatEntity.velocityDirty = true;
+            }
         }
     }
 
