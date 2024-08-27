@@ -33,7 +33,7 @@ public abstract class SwordItemMixin extends Item {
         if(user.isPlayer() && stack.getUseAction() == UseAction.BLOCK) {
             ItemStack otherHandStack = user.getActiveHand() == Hand.MAIN_HAND ? user.getOffHandStack() : user.getMainHandStack();
             if(otherHandStack.getItem() instanceof ShieldItem && otherHandStack.getUseAction() == UseAction.BLOCK) {
-                if(((PlayerEntity)user).getItemCooldownManager().isCoolingDown(otherHandStack.getItem())) return;
+                if(((PlayerEntity)user).getItemCooldownManager().isCoolingDown(otherHandStack)) return;
                 user.stopUsingItem();
                 ((PlayerEntity)user).setCurrentHand(user.getActiveHand() == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
             }

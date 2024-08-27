@@ -156,7 +156,7 @@ public abstract class ZombieMixin extends HostileEntity {
 
         // Bit less attack damage when wielding weapons:
         if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
-            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
             entityAttributeInstance.setBaseValue(1.0);
         }
     }
