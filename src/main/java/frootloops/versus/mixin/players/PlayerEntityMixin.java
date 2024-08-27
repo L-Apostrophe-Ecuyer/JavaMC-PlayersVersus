@@ -16,11 +16,13 @@ import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -91,6 +93,18 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "canHarvest", at = @At("RETURN"), cancellable = true)
     public void canMineCopperWithWood(BlockState state, CallbackInfoReturnable<Boolean> cir) {
         if(!cir.getReturnValue() && this.getMainHandStack().isOf(Items.WOODEN_PICKAXE) && (state.getSoundGroup() == BlockSoundGroup.COPPER || state.isOf(Blocks.COPPER_ORE) || state.isOf(Blocks.RAW_COPPER_BLOCK))) cir.setReturnValue(true);
+    }
+
+    @Inject(method = "travel", at = @At("HEAD"), cancellable = false)
+    public void jumpInVehicles(Vec3d movementInput, CallbackInfo info) {
+        if(this.jumping && this.hasVehicle() && this.getVehicle() instanceof BoatEntity boatEntity && !boatEntity.isSubmergedInWater()) {
+            if(boatEntity.isOnGround() || (boatEntity.fallDistance == 0f && boatEntity.getY() == boatEntity.prevY)) {
+                double jumpStrength = boatEntity.isOnGround() ? 0.225 : 0.425;
+                Vec3d velocity = boatEntity.getVelocity();
+                boatEntity.setVelocity(velocity.x, Math.max(jumpStrength, velocity.y), velocity.z);
+                boatEntity.velocityDirty = true;
+            }
+        }
     }
 
     @Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
