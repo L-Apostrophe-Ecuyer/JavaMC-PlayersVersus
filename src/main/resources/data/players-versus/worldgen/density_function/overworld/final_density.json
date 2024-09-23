@@ -119,7 +119,7 @@
                             "type": "minecraft:range_choice",
                             "input": "minecraft:overworld/caves/pillars",
                             "min_inclusive": -1000000,
-                            "max_exclusive": 0.03,
+                            "max_exclusive": 0.032,
                             "when_in_range": -1000000,
                             "when_out_of_range": "minecraft:overworld/caves/pillars"
                           }

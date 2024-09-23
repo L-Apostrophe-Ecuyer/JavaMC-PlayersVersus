@@ -52,7 +52,6 @@ public abstract class ZombieMixin extends HostileEntity {
                         .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, mvtSpeed)
                         .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
                         .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.1)
-                        .add(EntityAttributes.GENERIC_ARMOR, 6.0)
                         .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS));
     }
 
@@ -142,13 +141,17 @@ public abstract class ZombieMixin extends HostileEntity {
         }
         else if(rand <= 55) {
 
-            if(rand % 4 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.OAK_LOG,  random.nextInt(3) + rand));
-            else if(rand % 5 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.OAK_PLANKS,  random.nextInt(8) + rand));
-            else if(rand % 7 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICKS,  random.nextInt(4) + rand));
+            if(rand % 4 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.OAK_LOG,  random.nextInt(4) + rand/4));
+            else if(rand % 5 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.OAK_PLANKS,  random.nextInt(12) + rand/2));
+            else if(rand % 7 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICK,  random.nextInt(8) + rand));
             else if(rand % 11 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICK,  random.nextInt(6) + rand));
             else this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.COPPER_INGOT,  random.nextInt(4)));
 
             this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.9F;
+        }
+        else {
+            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(16.0f);
+            this.setHealth(16.0f);
         }
 
         // Bit less attack damage when wielding weapons:
