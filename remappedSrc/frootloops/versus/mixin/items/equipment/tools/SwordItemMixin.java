@@ -1,18 +1,16 @@
 package frootloops.versus.mixin.items.equipment.tools;
 
+import ItemStack;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -20,14 +18,12 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Iterator;
 
 @Mixin(SwordItem.class)
 public class SwordItemMixin extends ToolItem {
-    public SwordItemMixin(ToolMaterial material, net.minecraft.item.Item.Settings settings) {
+
+    public SwordItemMixin(ToolMaterial material, Settings settings) {
         super(material, settings);
     }
 
@@ -50,28 +46,34 @@ public class SwordItemMixin extends ToolItem {
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        if(stack.hasEnchantments()) {
-            Iterator<RegistryEntry<Enchantment>> iterator = stack.getEnchantments().getEnchantments().iterator();
-            while (iterator.hasNext()) {
-                RegistryEntry<Enchantment> enchant = iterator.next();
-                if (enchant.getKey().get() == Enchantments.SWEEPING_EDGE) return UseAction.BRUSH;
-            }
-        }
+        if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return UseAction.NONE;
         return UseAction.BLOCK;
+    }
+
+    @Override
+    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+        if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return 0;
+        return 72000;
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        int sweepLevel = 0;
-        if(stack.hasEnchantments()) {
-            sweepLevel = EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.SWEEPING_EDGE, stack);
-        }
+        if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return TypedActionResult.fail(stack);
+        user.setCurrentHand(hand);
+        return TypedActionResult.consume(stack);
+    }
+
+    /*
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        int sweepLevel = Enchants.getLevel(world, stack, Enchantments.SWEEPING_EDGE);
         double attackCharge = Combat.getAttackChargeProgress(user);
         double attackChargeRequired = sweepLevel > 0 ? 1d + 0.2d * (3 - sweepLevel) : 1d;
         if(attackCharge >= attackChargeRequired) {
             user.setCurrentHand(hand);
-            Combat.doSweepAttack(user, Combat.getAttackRange(user,attackCharge), sweepLevel);
+            Combat.doSpecialSweepAttack(user, Combat.getAttackRange(user,attackCharge), sweepLevel);
             return TypedActionResult.consume(stack);
         }
         return TypedActionResult.fail(stack);
@@ -83,7 +85,7 @@ public class SwordItemMixin extends ToolItem {
             if (user instanceof PlayerEntity player) player.resetLastAttackedTicks();
             else user.onAttacking(user.getAttacking());
         }
-    }
+    }*/
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {

@@ -1,8 +1,8 @@
 package frootloops.versus.mixin.items.equipment.shields;
 
+import ItemStack;
+import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
@@ -10,9 +10,6 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.UseAction;
@@ -23,8 +20,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Optional;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityBlockingMixin extends Entity {
@@ -45,11 +40,11 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     private void blockingSound(byte status, CallbackInfo info) {
         if(status == 29) {
             if(this.activeItemStack.getItem() instanceof SwordItem) {
-                this.playSound(SoundEvents.ITEM_AXE_SCRAPE, 0.3F, 0.6F + this.method_48926().random.nextFloat() * 0.4F);
-                this.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 1.2F, 0.8F + this.method_48926().random.nextFloat() * 0.4F);
-                this.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.3F, 0.8F + this.method_48926().random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.ITEM_AXE_SCRAPE, 0.3F, 0.6F + this.getWorld().random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 1.2F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
+                this.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.3F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
             }
-            else this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.method_48926().random.nextFloat() * 0.4F);
+            else this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 0.8F + this.getWorld().random.nextFloat() * 0.4F);
             info.cancel();
         }
     }
@@ -71,12 +66,12 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         if (((LivingEntity) ((Object) this)) instanceof MobEntity mob) {
             this.playSound(SoundEvents.ITEM_SHIELD_BLOCK, 1.0F, 1.0F);
             if (attacker.disablesShield()) {
-                if (this.method_48926() instanceof ServerWorld serverWorld) {
+                if (this.getWorld() instanceof ServerWorld serverWorld) {
 
                     // Drop the shield:
                     ItemStack shieldItemStack = mob.getOffHandStack();
                     if(mob.isPersistent() || serverWorld.getRandom().nextDouble() < 0.1) {
-                        ItemEntity itemEntity = new ItemEntity(this.method_48926(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
+                        ItemEntity itemEntity = new ItemEntity(this.getWorld(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
                         itemEntity.setPickupDelay(40);
                         serverWorld.spawnEntity(itemEntity);
                     }
@@ -100,7 +95,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
         if( activeItemStack.getItem() instanceof ShieldItem) return 0.0f;
 
-        int levelRiposte = Enchants.getLevel(method_48926(), activeItemStack, Enchants.RIPOSTE);
+        int levelRiposte = Enchants.getLevel(getWorld(), activeItemStack, CustomEnchants.RIPOSTE);
         int useTime =  activeItemStack.getMaxUseTime((LivingEntity) ((Object)this)) - itemUseTimeLeft;
         boolean hasParried = useTime < PARRY_TIME_TICKS + levelRiposte && useTime > 0;
         if(hasParried) return 0;
@@ -118,8 +113,8 @@ public abstract class LivingEntityBlockingMixin extends Entity {
             shieldItemStack = ((LivingEntity)((Object)this)).getOffHandStack();
             shieldItem = shieldItemStack.getItem();
         }
-        int levelThorns = Enchants.getLevel(method_48926(), shieldItemStack, Enchantments.THORNS);
-        int levelRiposte = Enchants.getLevel(method_48926(), shieldItemStack, Enchants.RIPOSTE);
+        int levelThorns = Enchants.getLevel(getWorld(), shieldItemStack, Enchantments.THORNS);
+        int levelRiposte = Enchants.getLevel(getWorld(), shieldItemStack, CustomEnchants.RIPOSTE);
         float reflectedDamage = 0.1F * damageAmount * levelThorns;
         float paryingDamage = 0.2F * damageAmount * levelRiposte;
 

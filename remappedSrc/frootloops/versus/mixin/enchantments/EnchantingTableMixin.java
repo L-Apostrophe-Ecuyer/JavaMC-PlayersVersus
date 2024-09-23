@@ -1,5 +1,7 @@
 package frootloops.versus.mixin.enchantments;
 
+import Property;
+import ScreenHandlerContext;
 import frootloops.versus.VersusMod;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.advancement.criterion.Criteria;
@@ -79,7 +81,6 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
 
         if (this.enchantmentPower[id] > 0 && !inputStack.isEmpty() && (player.experienceLevel >= lapisCost && player.experienceLevel >= this.enchantmentPower[id] || player.getAbilities().creativeMode)) {
             this.context.run((world, pos) -> {
-
                 ItemStack stack = inputStack;
                 List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id, this.enchantmentPower[id]);
                 if (!listCandidateEnchantments.isEmpty()) {

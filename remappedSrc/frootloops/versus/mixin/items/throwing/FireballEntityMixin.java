@@ -27,7 +27,7 @@ public abstract class FireballEntityMixin extends AbstractFireballEntity {
     @Override
     public void tick() {
         if(this.isTouchingWaterOrRain()) {
-            if(this.method_48926() instanceof ServerWorld serverWorld) {
+            if(this.getWorld() instanceof ServerWorld serverWorld) {
                 serverWorld.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(), this.getY(), this.getZ(), 16, 0, 0, 0, 0.3);
             }
             this.playSound(SoundEvents.BLOCK_FIRE_EXTINGUISH, 1.0F, 0.4F);

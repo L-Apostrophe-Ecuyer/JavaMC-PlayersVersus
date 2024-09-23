@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
+import EntityData;
 import java.util.Objects;
 
 @Mixin(SpiderEntity.class)
@@ -38,7 +38,11 @@ public class SpiderMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
+
         int y = this.getBlockPos().getY();
+        if(y < -8) return false;
+
         int ySpawnBonus = world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS) ? 32 : 0;
         if(y > 96 + ySpawnBonus) return false;
         if(y > 64 + ySpawnBonus && world.getLightLevel(LightType.SKY, this.getBlockPos()) > 2) return false;
@@ -103,7 +107,7 @@ public class SpiderMixin extends HostileEntity {
                 this.setHealth(50.0f);
             }
             SkeletonEntity skeletonEntity;
-            if (random.nextInt(100) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.method_48926())) != null) {
+            if (random.nextInt(100) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getWorld())) != null) {
                 skeletonEntity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.getYaw(), 0.0f);
                 skeletonEntity.initialize(world, difficulty, spawnReason, null);
                 skeletonEntity.startRiding(this);
@@ -125,16 +129,16 @@ public class SpiderMixin extends HostileEntity {
         if (super.tryAttack(target)) {
             if (target instanceof LivingEntity && !this.isBaby()) {
                 int i = 0;
-                if (this.method_48926().getDifficulty() == Difficulty.NORMAL) i = 3;
-                else if (this.method_48926().getDifficulty() == Difficulty.HARD) i = 6;
+                if (this.getWorld().getDifficulty() == Difficulty.NORMAL) i = 3;
+                else if (this.getWorld().getDifficulty() == Difficulty.HARD) i = 6;
                 if (i > 0) {
                     ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, i * 10, 0), this);
                     ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, i * 10, 0), this);
                 }
-                if(this.method_48926().getTime() % 5 == 0) {
-                    if(this.method_48926().getBlockState(target.getBlockPos()) == Blocks.AIR.getDefaultState()) {
-                        if (Blocks.COBWEB.getDefaultState().canPlaceAt(this.method_48926(), target.getBlockPos())) {
-                            this.method_48926().setBlockState(target.getBlockPos(), Blocks.COBWEB.getDefaultState());
+                if(this.getWorld().getTime() % 5 == 0) {
+                    if(this.getWorld().getBlockState(target.getBlockPos()) == Blocks.AIR.getDefaultState()) {
+                        if (Blocks.COBWEB.getDefaultState().canPlaceAt(this.getWorld(), target.getBlockPos())) {
+                            this.getWorld().setBlockState(target.getBlockPos(), Blocks.COBWEB.getDefaultState());
                         }
                     }
                 }

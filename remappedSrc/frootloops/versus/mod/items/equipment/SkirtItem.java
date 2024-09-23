@@ -6,7 +6,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 
 public class SkirtItem extends ArmorItem {
 
-    public SkirtItem(RegistryEntry<ArmorMaterial> material, Type type, net.minecraft.item.Item.Settings settings) {
+    public SkirtItem(RegistryEntry<ArmorMaterial> material, Type type, Settings settings) {
         super(material, type, settings);
     }
 }

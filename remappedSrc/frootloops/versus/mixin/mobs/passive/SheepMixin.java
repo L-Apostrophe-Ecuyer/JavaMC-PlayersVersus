@@ -1,6 +1,7 @@
 
 package frootloops.versus.mixin.mobs.passive;
 
+import EatGrassGoal;
 import frootloops.versus.mod.items.equipment.KnifeItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -84,7 +85,7 @@ public abstract class SheepMixin extends AnimalEntity implements Shearable {
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         ItemStack itemStack = player.getStackInHand(hand);
         if (itemStack.isOf(Items.SHEARS) || itemStack.getItem() instanceof KnifeItem) {
-            if (!this.method_48926().isClient && this.isShearable()) {
+            if (!this.getWorld().isClient && this.isShearable()) {
                 this.sheared(SoundCategory.PLAYERS);
                 this.emitGameEvent(GameEvent.SHEAR, player);
                 itemStack.damage(1, player, LivingEntity.getSlotForHand(hand));

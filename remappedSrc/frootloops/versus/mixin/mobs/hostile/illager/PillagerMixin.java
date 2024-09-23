@@ -1,19 +1,23 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
-import net.minecraft.entity.EntityData;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.SpawnReason;
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.mobs.hostile.ai.PillagerCaptainBlowHornGoal;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.FleeEntityGoal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.IllagerEntity;
 import net.minecraft.entity.mob.PillagerEntity;
+import net.minecraft.entity.mob.WitchEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
@@ -23,6 +27,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PillagerEntity.class)
@@ -34,7 +39,7 @@ public abstract class PillagerMixin extends IllagerEntity {
     @Inject(method = "initialize", at = @At("HEAD"))
     private void increaseAttributes(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
         EntityAttributeInstance instance = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (instance != null) instance.setBaseValue(0.4);
+        if (instance != null) instance.setBaseValue(0.36);
 
         EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (instanceHP != null) {
@@ -46,7 +51,7 @@ public abstract class PillagerMixin extends IllagerEntity {
     @Override
     public void initEquipment(Random random, LocalDifficulty localDifficulty) {
         int rand = random.nextInt(100);
-        if(random.nextInt(100) < 20) {
+        if(rand < 20) {
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
             this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(rand + 10);
@@ -54,9 +59,11 @@ public abstract class PillagerMixin extends IllagerEntity {
             this.goalSelector.add(3, new  MeleeAttackGoal(this, 1.1, false));
         }
         else {
+            this.setHealth(16.0F);
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
-            this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 3, 1.1, 1.1, (livingEntity) -> true));
+            if(this.hasNoRaid() && !this.isCaptain()) this.goalSelector.add(1, new FleeEntityGoal<>(this, PlayerEntity.class, 6, 0.7, 0.9, (livingEntity) -> true));
         }
+        this.goalSelector.add(1, new PillagerCaptainBlowHornGoal(this));
     }
 
     @ModifyArg(method = "enchantMainHandItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I"))

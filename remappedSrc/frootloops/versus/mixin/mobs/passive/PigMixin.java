@@ -65,7 +65,7 @@ public abstract class PigMixin extends AnimalEntity {
 
         this.goalSelector.add(6, new PiggingAroundGoal(this));
         this.goalSelector.add(2, new MeleeAttackGoal(this, 1.3, true));
-        this.targetSelector.add(0, new RevengeGoal(this, AbstractPiglinEntity.class).setGroupRevenge(new Class[0]).setGroupRevenge(null));
+        this.targetSelector.add(0, new RevengeGoal(this, AbstractPiglinEntity.class).setGroupRevenge(new Class[0]).setGroupRevenge((Class<?>) null));
         this.targetSelector.add(1, new ActiveTargetGoal<ZombieEntity>((MobEntity)this, ZombieEntity.class, false));
     }
 
@@ -83,7 +83,7 @@ public abstract class PigMixin extends AnimalEntity {
             else if (rand > 88) dugUpItem = Items.APPLE;
             else if (rand > 74) dugUpItem = Items.CARROT;
             else if (rand > 60) dugUpItem = Items.POTATO;
-            else dugUpItem = Items.WHEAT_SEEDS;
+            else dugUpItem = Items.BEETROOT_SEEDS;
         }
 
         for(int j = 0; j < count; ++j) {

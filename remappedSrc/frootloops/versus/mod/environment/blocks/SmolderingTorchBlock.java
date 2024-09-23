@@ -23,6 +23,7 @@ public class SmolderingTorchBlock extends TorchBlock {
         if(world.getDimension().ultrawarm()) return;
         world.setBlockState(pos, CustomBlocks.EXTINGUISHED_TORCH.getStateWithProperties(state));
         world.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 8, 0.1, 0.2, 0.1, 0.03);
+        world.playSoundAtBlockCenter(pos, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
     }
 
 
@@ -33,13 +34,13 @@ public class SmolderingTorchBlock extends TorchBlock {
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        if(pos.getY() > -32) return;
+        int y = pos.getY();
+        if(y > 32) return;
         if(!world.isClient) {
-            if (random.nextInt(63) > 60) {
+            if (random.nextInt(63) > (y > -8 ? 60 : 56)) {
                 this.tickSmolderingTorchDegradation(state, world, pos);
             }
         }
-        world.playSoundAtBlockCenter(pos, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
     }
 
     @Override

@@ -22,7 +22,7 @@ import net.minecraft.world.event.GameEvent;
 public class KnifeItem extends SwordItem {
 
 
-    public KnifeItem(ToolMaterial toolMaterial, net.minecraft.item.Item.Settings settings) {
+    public KnifeItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
 

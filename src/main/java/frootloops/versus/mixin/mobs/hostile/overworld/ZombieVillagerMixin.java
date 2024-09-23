@@ -36,6 +36,11 @@ public abstract class ZombieVillagerMixin extends ZombieEntity {
     private void setConverting(@Nullable UUID uuid, int delay) {}
 
     @Override
+    protected boolean burnsInDaylight() {
+        return false;
+    }
+
+    @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         ItemStack itemStack = player.getStackInHand(hand);
         if (itemStack.isOf(Items.GOLDEN_APPLE)) {

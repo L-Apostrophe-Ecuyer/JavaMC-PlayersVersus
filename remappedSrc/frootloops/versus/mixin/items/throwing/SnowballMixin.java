@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SnowballItem.class)
 public class SnowballMixin extends Item {
-    public SnowballMixin(net.minecraft.item.Item.Settings settings) {
+    public SnowballMixin(Settings settings) {
         super(settings);
     }
 

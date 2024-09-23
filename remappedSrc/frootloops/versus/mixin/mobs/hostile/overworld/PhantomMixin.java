@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
+import EntityData;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.mobs.hostile.ai.PhantomMoveControlRevamp;
 import net.minecraft.block.BlockState;
@@ -103,8 +104,8 @@ public abstract class PhantomMixin extends FlyingEntity {
             float width = this.getWidth() * 0.8f;
             Box box = Box.of(this.getEyePos(), width, 1.0E-6, width);
             isInsideBlock = BlockPos.stream(box).anyMatch(pos -> {
-                BlockState blockState = this.method_48926().getBlockState((BlockPos)pos);
-                return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(this.method_48926(), (BlockPos)pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
+                BlockState blockState = this.getWorld().getBlockState((BlockPos)pos);
+                return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(this.getWorld(), (BlockPos)pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
             });
         }
         this.noClip = (this.getPitch() > 1.0f || movement.y > 0.1d || isInsideBlock || movement.squaredDistanceTo(0d,0d,0d) < 0.01d);
@@ -127,7 +128,7 @@ public abstract class PhantomMixin extends FlyingEntity {
         if (!this.isSilent()) {
             volume = 0.8f;
             pitch /= 4.0f;
-            this.method_48926().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundCategory(), volume, pitch);
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundCategory(), volume, pitch);
         }
     }
 }

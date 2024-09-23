@@ -6,7 +6,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 
 public class IceSkatesItem extends ArmorItem {
 
-    public IceSkatesItem(RegistryEntry<ArmorMaterial> material, Type type, net.minecraft.item.Item.Settings settings) {
+    public IceSkatesItem(RegistryEntry<ArmorMaterial> material, Type type, Settings settings) {
         super(material, type, settings);
     }
 }

@@ -1,41 +1,44 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
+
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.hostile.ai.CreepingAndExplodingGoal;
 import frootloops.versus.mod.mobs.hostile.ai.FollowTargetThroughWallsGoal;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.AreaEffectCloudEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LightningEntity;
+import net.minecraft.entity.ai.goal.LookAroundGoal;
+import net.minecraft.entity.ai.goal.LookAtEntityGoal;
+import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.RabbitEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 import net.minecraft.world.event.GameEvent;
-import org.jetbrains.annotations.Nullable;
+
 
 public class DeeperCreeperEntity extends CreeperEntity {
     //private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     //private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private int lastFuseTime, currentFuseTime, fuseTime = 34, explosionRadius = 5;
+    private int lastFuseTime, currentFuseTime, fuseTime = 29, explosionRadius = 4;
     public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.of(Identifier.of("ambient.cave"), 32);
 
     public DeeperCreeperEntity(EntityType<? extends CreeperEntity> entityType, World world) {
@@ -58,13 +61,22 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
 
+    @Override
+    public boolean damage(DamageSource source, float amount) {
+        if(source.isOf(DamageTypes.WITHER)) return false;
+        return super.damage(source, amount);
+    }
+
+    @Override
+    public boolean canHaveStatusEffect(StatusEffectInstance effect) {
+        if (effect.getEffectType() == StatusEffects.WITHER) return false;
+        else return super.canHaveStatusEffect(effect);
+    }
+
 
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
         super.initDataTracker(builder);
-        //builder.add(FUSE_SPEED, -1);
-        //builder.add(CHARGED, false);
-        //builder.add(IGNITED, false);
     }
 
     @Override
@@ -117,34 +129,31 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     private void explode() {
-        if (!this.method_48926().isClient) {
+        if (!this.getWorld().isClient) {
+            float explosionMultiplier = this.shouldRenderOverlay() ? 2.0f : this.hurtTime > 0 ? 0.5f : 1.0f;
             this.dead = true;
-            this.method_48926().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius, World.ExplosionSourceType.MOB);
-            this.discard();
+            this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * explosionMultiplier, World.ExplosionSourceType.MOB);
             this.spawnEffectsCloud();
+            this.onRemoval(Entity.RemovalReason.KILLED);
+            this.discard();
         }
     }
 
     private void spawnEffectsCloud() {
-        AreaEffectCloudEntity areaEffectCloudEntity = new AreaEffectCloudEntity(this.method_48926(), this.getX(), this.getY(), this.getZ());
+        AreaEffectCloudEntity areaEffectCloudEntity = new AreaEffectCloudEntity(this.getWorld(), this.getX(), this.getY(), this.getZ());
         areaEffectCloudEntity.setRadius(5f);
         areaEffectCloudEntity.setRadiusOnUse(-0.5f);
         areaEffectCloudEntity.setWaitTime(10);
-        areaEffectCloudEntity.setDuration(areaEffectCloudEntity.getDuration()/2);
-        areaEffectCloudEntity.setRadiusGrowth(-areaEffectCloudEntity.getRadius() / (float)areaEffectCloudEntity.getDuration());
-        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 120, 0, true, false));
-        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 120, 0, true, false));
-        this.method_48926().spawnEntity(areaEffectCloudEntity);
-    }
-
-    @Override
-    public boolean canHaveStatusEffect(StatusEffectInstance effect) {
-        if (effect.getEffectType() == StatusEffects.WITHER) return false;
-        else return super.canHaveStatusEffect(effect);
+        areaEffectCloudEntity.setDuration(300);
+        areaEffectCloudEntity.setRadiusGrowth(-areaEffectCloudEntity.getRadius() / 300.0f);
+        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 600, 0, false, false));
+        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 600, 0, false, true));
+        this.getWorld().spawnEntity(areaEffectCloudEntity);
     }
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
+        this.playSound(SoundEvents.BLOCK_STONE_STEP, 1.2f, 1.0f + 0.2f * random.nextFloat());
         this.playSound(SoundEvents.ENTITY_CREEPER_HURT, 0.1f, 1.4f);
         this.playSound(SoundEvents.BLOCK_MANGROVE_ROOTS_STEP, 0.2f, 0.8F);
     }

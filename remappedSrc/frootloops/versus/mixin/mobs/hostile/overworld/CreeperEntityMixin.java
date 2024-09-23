@@ -1,23 +1,18 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.mod.mobs.ModEntities;
-import net.minecraft.entity.EntityData;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.tag.BiomeTags;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(CreeperEntity.class)
 public class  CreeperEntityMixin extends HostileEntity {
@@ -39,5 +34,19 @@ public class  CreeperEntityMixin extends HostileEntity {
             return true;
         }
         else return false;
+    }
+
+    @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        if(spawnReason != SpawnReason.NATURAL) return true;
+        if(!this.getClass().equals(CreeperEntity.class)) return true;
+
+        BlockPos pos = this.getBlockPos();
+        int y = pos.getY();
+        if (y > 96 || y < 8) return false;
+        if (y > 60 && world.getLightLevel(LightType.SKY, pos) > 4) return false;
+
+        BlockState state = world.getBlockState(pos.down());
+        return state.isIn(BlockTags.OVERWORLD_CARVER_REPLACEABLES) || state.isOf(Blocks.MOSS_BLOCK) || state.isOf(Blocks.MOSSY_COBBLESTONE) || state.isOf(Blocks.MOSSY_STONE_BRICKS);
     }
 }

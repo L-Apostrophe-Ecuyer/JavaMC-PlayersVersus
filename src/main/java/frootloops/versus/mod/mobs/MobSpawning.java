@@ -1,11 +1,11 @@
 package frootloops.versus.mod.mobs;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.mob.CreeperEntity;
@@ -52,14 +52,14 @@ public class MobSpawning {
     public static boolean canSpawnDeeperCreeper(EntityType<DeeperCreeperEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
-        return blockPos.getY() < -16 && (world.getLightLevel(blockPos) == 0 || world.getBlockState(blockPos.down()).isOf(Blocks.DEEPSLATE));
+        return blockPos.getY() < -8 && (world.getLightLevel(blockPos) == 0 || world.getBlockState(blockPos.down()).isOf(Blocks.DEEPSLATE));
     }
 
     public static boolean canSpawnWitheredZombie(EntityType<WitheredZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
         if(world.getLightLevel(blockPos) > 0) return false;
-        if(blockPos.getY() > 16) {
+        if(blockPos.getY() > 32) {
             long dayTime = world.getLunarTime() % 24000l;
             if(dayTime < 18000l || dayTime > 20000l) return false;
 
@@ -68,7 +68,10 @@ public class MobSpawning {
             if(moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
             return world.getBlockState(blockPos.down()).isIn(BlockTags.MOSS_REPLACEABLE);
         }
-        else return world.getBlockState(blockPos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
+        else {
+            BlockState down = world.getBlockState(blockPos.down());
+            return down.isOf(Blocks.TUFF) || down.isOf(Blocks.STONE) || down.isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
+        }
     }
 
     public static boolean canSpawnFrostedZombie(EntityType<FrostedZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {

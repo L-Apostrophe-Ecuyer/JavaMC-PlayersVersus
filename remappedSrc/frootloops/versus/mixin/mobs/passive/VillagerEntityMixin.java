@@ -35,7 +35,7 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
         TradeOfferList tradeOfferList = getOffers();
 
         HashSet<Integer> set = Sets.newHashSet();
-        int numTradesAdded = villagerData.getLevel() > 1 ? 3 : 4;
+        int numTradesAdded = (villagerData.getLevel() > 1 ? 3 : 4) + random.nextBetween(0, 1);
 
         if (newTradesAvailable.length > numTradesAdded) {
             while (set.size() < numTradesAdded) {

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ShieldItem.class)
 public abstract class ShieldItemMixin extends Item {
-    public ShieldItemMixin(net.minecraft.item.Item.Settings settings) { super(settings); }
+    public ShieldItemMixin(Settings settings) { super(settings); }
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {

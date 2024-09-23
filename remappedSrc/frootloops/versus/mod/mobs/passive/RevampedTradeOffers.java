@@ -1,20 +1,34 @@
 package frootloops.versus.mod.mobs.passive;
 
+import Item;
+import ItemStack;
+import TradeOffer;
+import TradedItem;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import frootloops.versus.mod.enchantments.Enchants;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.items.brewing.CustomBrewingItems;
+import frootloops.versus.mod.items.equipment.CustomEquipment;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.MapColor;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.MapColorComponent;
+import net.minecraft.component.type.MapDecorationsComponent;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.enchantment.provider.EnchantmentProvider;
 import net.minecraft.enchantment.provider.TradeRebalanceEnchantmentProviders;
 import net.minecraft.entity.Entity;
@@ -22,15 +36,13 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.item.*;
+import net.minecraft.item.map.MapDecoration;
 import net.minecraft.item.map.MapDecorationType;
 import net.minecraft.item.map.MapDecorationTypes;
 import net.minecraft.item.map.MapState;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.EnchantmentTags;
@@ -38,6 +50,9 @@ import net.minecraft.registry.tag.StructureTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ColorCode;
+import net.minecraft.util.Colors;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -45,13 +60,33 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.village.*;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.Structure;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class RevampedTradeOffers {
+
+    public static final TagKey<Structure> ON_RUINS_EXPLORER_MAPS = TagKey.of(RegistryKeys.STRUCTURE, Identifier.of(VersusMod.MOD_ID, "on_ruins_explorer_maps"));
+    public static final TagKey<Structure> ON_DANGEROUS_LOCATIONS_MAPS = TagKey.of(RegistryKeys.STRUCTURE, Identifier.of(VersusMod.MOD_ID, "on_pillager_maps"));
+    public static final TagKey<Structure> ON_FORBIDDEN_CITY_MAPS = TagKey.of(RegistryKeys.STRUCTURE, Identifier.of(VersusMod.MOD_ID, "on_forbidden_city_maps"));
+
+    //public static final RegistryEntry<MapDecorationType> RUINS_DECORATION = registerCustomMapDecoration("ruins_map_decoration", MapColor.GREEN.color);
+    //public static final RegistryEntry<MapDecorationType> DANGEROUS_LOCATION_DECORATION = registerCustomMapDecoration("dangerous_locations_map_decoration", MapColor.GRAY.color);
+    //public static final RegistryEntry<MapDecorationType> ON_FORBIDDEN_CITY_DECORATION =  registerCustomMapDecoration("forbidden_city_map_decoration", MapColor.CYAN.color);
+
+    private static RegistryEntry<MapDecorationType> registerCustomMapDecoration(String id, int mapColor) {
+        MapDecorationType decoration = new MapDecorationType(Identifier.of(VersusMod.MOD_ID, id), true, mapColor, true, false);
+        Registry.register(Registries.MAP_DECORATION_TYPE, Identifier.of(VersusMod.MOD_ID, id), decoration);
+        return Registries.MAP_DECORATION_TYPE.getEntry(decoration);
+    }
+
+    private static final SellMapFactory SELL_RUINS_EXPLORER_MAP_TRADE = new SellMapFactory(7, ON_RUINS_EXPLORER_MAPS, "filled_map.custom_pv_ruins_explorer", MapDecorationTypes.JUNGLE_TEMPLE, 1, 5, MapColor.TERRACOTTA_BROWN.color);
+    private static final SellMapFactory SELL_DANGEROUS_LOCATIONS_MAP_TRADE = new SellMapFactory(11, ON_DANGEROUS_LOCATIONS_MAPS, "filled_map.custom_pv_pillager", MapDecorationTypes.MANSION, 1, 10, MapColor.TERRACOTTA_CYAN.color);
+    private static final SellMapFactory SELL_FORBIDDEN_CITY_MAP_TRADE = new SellMapFactory(41, ON_FORBIDDEN_CITY_MAPS, "filled_map.custom_pv_forbidden_city", MapDecorationTypes.BANNER_LIGHT_BLUE, 1, 15, MapColor.CYAN.color, false);
 
     private static final SellMapFactory SELL_DESERT_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapDecorationTypes.VILLAGE_DESERT, 12, 5);
     private static final SellMapFactory SELL_SAVANNA_VILLAGE_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapDecorationTypes.VILLAGE_SAVANNA, 12, 5);
@@ -62,11 +97,74 @@ public class RevampedTradeOffers {
     private static final SellMapFactory SELL_SWAMP_HUT_MAP_TRADE = new SellMapFactory(8, StructureTags.ON_SWAMP_EXPLORER_MAPS, "filled_map.explorer_swamp", MapDecorationTypes.SWAMP_HUT, 12, 5);
 
 
+    public static final List<Pair<Factory[], Integer>> REBALANCED_WANDERING_TRADER_TRADES = ((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)
+            ((ImmutableList.Builder)ImmutableList.builder().add(Pair.of(
+                    new Factory[]{
+                            new BuyItemFactory(createPotion(Potions.WATER), 1, 1, 1),
+                            new BuyItemFactory(Items.WATER_BUCKET, 1, 2, 1, 2),
+                            new BuyItemFactory(Items.MILK_BUCKET, 1, 1, 1, 2),
+                            new BuyItemFactory(CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, 1, 3, 1, 8),
+                            new BuyItemFactory(CustomBrewingItems.CONCENTRATE_OF_HEALTH, 1, 3, 1, 8),
+                            new BuyItemFactory(Items.BAKED_POTATO, 4, 1, 1),
+                            new BuyItemFactory(Items.HAY_BLOCK, 1, 1, 1)}, 3))
+            ).add(Pair.of(
+                    new Factory[]{
+                            new SellMapFactory(17, StructureTags.ON_TRIAL_CHAMBERS_MAPS, "filled_map.trial_chambers", MapDecorationTypes.TRIAL_CHAMBERS, 1, 3),
+                            SELL_DANGEROUS_LOCATIONS_MAP_TRADE,
+                            SELL_RUINS_EXPLORER_MAP_TRADE,
+                            new SellItemFactory(Items.GUNPOWDER, 1, 8, 2, 1),
+                            new SellItemFactory(Items.BUNDLE, 3, 1, 2, 1),
+                            new SellEnchantedToolFactory(Items.IRON_PICKAXE, 1, 1, 1, 0.2f),
+                            new SellItemFactory(createPotionStack(Potions.LONG_INVISIBILITY), 5, 1, 1, 1)}, 2))
+            ).add(Pair.of(
+                    new Factory[]{
+                            new SellItemFactory(Items.PACKED_ICE, 1, 1, 6, 1), new SellItemFactory(Items.BLUE_ICE, 6, 1, 6, 1),
+                            new SellItemFactory(Items.SAND, 1, 16, 8, 1), new SellItemFactory(Items.RED_SAND, 1, 6, 6, 1),
+                            new SellItemFactory(Items.LAVA_BUCKET, 5, 1, 5, 1),
+                            new SellItemFactory(Blocks.ACACIA_LOG, 1, 8, 4, 1),
+                            new SellItemFactory(Blocks.BIRCH_LOG, 1, 12, 4, 1),
+                            new SellItemFactory(Blocks.DARK_OAK_LOG, 1, 8, 4, 1),
+                            new SellItemFactory(Blocks.JUNGLE_LOG, 1, 8, 4, 1),
+                            new SellItemFactory(Blocks.OAK_LOG, 1, 12, 4, 1),
+                            new SellItemFactory(Blocks.SPRUCE_LOG, 1, 8, 4, 1),
+                            new SellItemFactory(Blocks.MANGROVE_LOG, 1, 8, 4, 1),
+                            new SellItemFactory(Items.ACACIA_SAPLING, 5, 1, 8, 1),
+                            new SellItemFactory(Items.DARK_OAK_SAPLING, 5, 1, 8, 1),
+                            new SellItemFactory(Items.JUNGLE_SAPLING, 5, 1, 8, 1),
+                            new SellItemFactory(Items.SPRUCE_SAPLING, 5, 1, 8, 1),
+                            new SellItemFactory(Items.CHERRY_SAPLING, 5, 1, 8, 1),
+                            new SellItemFactory(Items.MANGROVE_PROPAGULE, 5, 1, 8, 1)}, 2))
+            ).add(Pair.of(
+                    new Factory[]{
+                            new SellItemFactory(Items.PODZOL, 1, 14, 6, 1), new SellItemFactory(CustomBlockItems.BROWN_MUD_ITEM, 1, 24, 6, 1), new SellItemFactory(Items.CLAY, 1, 18, 6, 1),
+                            new SellItemFactory(Items.TROPICAL_FISH_BUCKET, 3, 1, 4, 1), new SellItemFactory(Items.PUFFERFISH_BUCKET, 3, 1, 4, 1),
+                            new SellItemFactory(Items.SEA_PICKLE, 2, 1, 5, 1),
+                            new SellItemFactory(Items.SLIME_BALL, 4, 1, 5, 1),
+                            new SellItemFactory(Items.NAUTILUS_SHELL, 5, 1, 5, 1),
+                            new SellItemFactory(Items.LAPIS_LAZULI, 1, 3, 5, 1),
+                            new SellItemFactory(Items.FERN, 1, 8, 12, 1), new SellItemFactory(CustomBlockItems.CLOVERS_ITEM, 1, 8, 12, 1),
+                            new SellItemFactory(Items.PUMPKIN_SEEDS, 1, 3, 4, 1), new SellItemFactory(Items.MELON_SEEDS, 1, 3, 4, 1), new SellItemFactory(Items.BEETROOT_SEEDS, 1, 3, 4, 1),
+                            new SellItemFactory(Items.SUGAR_CANE, 1, 1, 8, 1),
+                            new SellItemFactory(Items.KELP, 3, 1, 12, 1),
+                            new SellItemFactory(Items.CACTUS, 3, 1, 8, 1),
+                            new SellItemFactory(Items.DANDELION, 1, 1, 12, 1), new SellItemFactory(Items.POPPY, 1, 1, 12, 1), new SellItemFactory(Items.BLUE_ORCHID, 1, 1, 8, 1), new SellItemFactory(Items.ALLIUM, 1, 1, 12, 1), new SellItemFactory(Items.AZURE_BLUET, 1, 1, 12, 1), new SellItemFactory(Items.RED_TULIP, 1, 1, 12, 1), new SellItemFactory(Items.ORANGE_TULIP, 1, 1, 12, 1), new SellItemFactory(Items.WHITE_TULIP, 1, 1, 12, 1), new SellItemFactory(Items.PINK_TULIP, 1, 1, 12, 1), new SellItemFactory(Items.OXEYE_DAISY, 1, 1, 12, 1), new SellItemFactory(Items.CORNFLOWER, 1, 1, 12, 1), new SellItemFactory(Items.LILY_OF_THE_VALLEY, 1, 1, 7, 1), new SellItemFactory(Items.WHEAT_SEEDS, 1, 1, 12, 1), new SellItemFactory(Items.BEETROOT_SEEDS, 1, 1, 12, 1), new SellItemFactory(Items.PUMPKIN_SEEDS, 1, 1, 12, 1), new SellItemFactory(Items.MELON_SEEDS, 1, 1, 12, 1),
+                            new SellItemFactory(Items.BRAIN_CORAL_BLOCK, 3, 1, 8, 1), new SellItemFactory(Items.BUBBLE_CORAL_BLOCK, 3, 1, 8, 1), new SellItemFactory(Items.FIRE_CORAL_BLOCK, 3, 1, 8, 1), new SellItemFactory(Items.HORN_CORAL_BLOCK, 3, 1, 8, 1), new SellItemFactory(Items.TUBE_CORAL_BLOCK, 3, 1, 8, 1),
+                            new SellItemFactory(Items.VINE, 1, 3, 4, 1), new SellItemFactory(Items.GLOW_BERRIES, 1, 3, 4, 1),
+                            new SellItemFactory(Items.BROWN_MUSHROOM, 1, 3, 4, 1), new SellItemFactory(Items.RED_MUSHROOM, 1, 3, 4, 1),
+                            new SellItemFactory(Items.LILY_PAD, 1, 5, 2, 1), new SellItemFactory(Items.BIG_DRIPLEAF, 1, 1, 5, 1),
+                            new SellItemFactory(Items.POINTED_DRIPSTONE, 1, 2, 5, 1),
+                            new SellItemFactory(Items.MOSS_BLOCK, 1, 2, 5, 1)}, 8))
+            ).build();
+
+
+
     public static final Map<VillagerProfession, Int2ObjectMap<Factory[]>> REVAMPED_PROFESSION_TO_LEVELED_TRADE = Util.make(Maps.newHashMap(), map -> {
         map.put(VillagerProfession.FARMER, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new SellItemFactory(Items.BONE_MEAL, 1, 12, 1),
+                                new BuyForOneEmeraldFactory(Items.HONEY_BOTTLE, 3, 12, 4),
+                                new SellItemFactory(CustomEquipment.COPPER_HOE, 1, 1, 5),
+                                new SellItemFactory(Items.BONE_MEAL, 1, 12, 3),
                                 new SellItemFactory(Items.WHEAT, 1, 24, 2),
                                 new SellItemFactory(Items.POTATO, 1, 15, 2),
                                 new SellItemFactory(Items.BEETROOT, 1, 16, 2),
@@ -88,7 +186,6 @@ public class RevampedTradeOffers {
                                         VillagerType.SWAMP, Items.MUD).build())},
                         2, new Factory[]{
                                 new BuyForMultipleEmeraldsFactory(Items.BEE_NEST, 8, 12, 10),
-                                new SellItemFactory(Items.HONEY_BOTTLE, 1, 8, 4),
                                 new SellItemFactory(Items.MOSS_BLOCK, 1, 12, 3),
                                 new TypeAwareSellItemFactory(1, 15, 32, 5, ImmutableMap.builder().put(
                                         VillagerType.PLAINS, Items.CARROT).put(
@@ -140,13 +237,14 @@ public class RevampedTradeOffers {
         map.put(VillagerProfession.FISHERMAN, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForOneEmeraldFactory(Items.COD, 8, 8, 1),
+                                new BuyForOneEmeraldFactory(Items.COD, 8, 8, 2),
+                                new BuyForOneEmeraldFactory(Items.SALMON, 6, 16, 2),
+                                new SellItemFactory(Items.FISHING_ROD, 1, 1, 4),
                                 new SellItemFactory(Items.LILY_PAD, 1, 1, 4),
                                 new SellItemFactory(Items.INK_SAC, 1, 3, 2),
                                 new SellItemFactory(Items.CLAY_BALL, 1, 32, 2),
                                 new SellItemFactory(Items.SAND, 1, 10, 3)},
                         2, new Factory[]{
-                                new BuyForOneEmeraldFactory(Items.SALMON, 6, 16, 8),
                                 new SellItemFactory(Items.SEAGRASS, 1, 26, 5),
                                 new SellItemFactory(PotionContentsComponent.createStack(Items.POTION, Potions.WATER_BREATHING), 5, 1, 3, 10),
                                 new SellItemFactory(Items.SEA_PICKLE, 1, 4, 8),
@@ -172,45 +270,41 @@ public class RevampedTradeOffers {
         map.put(VillagerProfession.SHEPHERD, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
+                                new BuyForMultipleEmeraldsFactory(Items.GOAT_HORN, 12, 16, 15),
                                 new SellItemFactory(Blocks.WHITE_WOOL, 1, 12, 32, 2),
                                 new SellItemFactory(Blocks.BROWN_WOOL, 1, 12, 32, 2),
-                                new SellItemFactory(Blocks.BLACK_WOOL, 1, 12, 32, 2),
                                 new SellItemFactory(Blocks.GRAY_WOOL, 1, 12, 32, 2),
                                 new SellItemFactory(Blocks.LIGHT_GRAY_WOOL, 1, 12, 32, 2),
-                                new SellItemFactory(Items.SHEARS, 1, 1, 1)},
+                                new SellItemFactory(Items.SHEARS, 1, 1, 3)},
                         2, new Factory[]{
                                 new SellItemFactory(Items.PAINTING, 1, 8, 16, 8),
-                                new SellItemFactory(Items.STRING, 1, 10, 16, 4),
+                                new SellItemFactory(Items.STRING, 1, 10, 16, 3),
                                 new SellItemFactory(Items.LEAD, 1, 1, 6),
+                                new SellItemFactory(Items.MILK_BUCKET, 1, 1, 6),
                                 new BuyForMultipleEmeraldsFactory(Items.GOAT_HORN, 12, 16, 15)},
                         3, new Factory[]{
-                                new SellItemFactory(Items.POPPY, 1, 4, 5),
-                                new SellItemFactory(Items.DANDELION, 1, 4, 5),
-                                new SellItemFactory(Items.AZURE_BLUET, 1, 4, 5),
-                                new SellItemFactory(Items.OXEYE_DAISY, 1, 4, 5),
+                                new BuyForOneEmeraldFactory(Items.WHEAT, 36, 8, 3),
                                 new SellItemFactory(Blocks.ORANGE_WOOL, 1, 10, 16, 5),
-                                new SellItemFactory(Blocks.MAGENTA_WOOL, 1, 10, 16, 5),
                                 new SellItemFactory(Blocks.LIGHT_BLUE_WOOL, 1, 10, 16, 5),
                                 new SellItemFactory(Blocks.YELLOW_WOOL, 1, 10, 16, 5),
                                 new SellItemFactory(Blocks.LIME_WOOL, 1, 10, 16, 5),
-                                new SellItemFactory(Blocks.PINK_WOOL, 1, 10, 16, 5),
                                 new SellItemFactory(Blocks.CYAN_WOOL, 1, 10, 16, 5),
                                 new SellItemFactory(Blocks.PURPLE_WOOL, 1, 10, 16, 5),
                                 new SellItemFactory(Blocks.BLUE_WOOL, 1, 10, 16, 5),
                                 new SellItemFactory(Blocks.GREEN_WOOL, 1, 10, 16, 5),
                                 new SellItemFactory(Blocks.RED_WOOL, 1, 10, 16, 5)},
                         4, new Factory[]{
+                                new SellItemFactory(Items.AZURE_BLUET, 1, 4, 10),
+                                new SellItemFactory(Items.OXEYE_DAISY, 1, 4, 10),
                                 new SellItemFactory(Items.RED_TULIP, 1, 4, 10),
                                 new SellItemFactory(Items.ORANGE_TULIP, 1, 4, 10),
                                 new SellItemFactory(Items.WHITE_TULIP, 1, 4, 10),
                                 new SellItemFactory(Items.PINK_TULIP, 1, 4, 10),
                                 new SellItemFactory(Blocks.WHITE_CARPET, 1, 36, 16, 10),
                                 new SellItemFactory(Blocks.ORANGE_CARPET, 1, 36, 16, 10),
-                                new SellItemFactory(Blocks.MAGENTA_CARPET, 1, 36, 16, 10),
                                 new SellItemFactory(Blocks.LIGHT_BLUE_CARPET, 1, 36, 16, 10),
                                 new SellItemFactory(Blocks.YELLOW_CARPET, 1, 36, 16, 10),
                                 new SellItemFactory(Blocks.LIME_CARPET, 1, 36, 16, 10),
-                                new SellItemFactory(Blocks.PINK_CARPET, 1, 36, 16, 10),
                                 new SellItemFactory(Blocks.GRAY_CARPET, 1, 36, 16, 10),
                                 new SellItemFactory(Blocks.LIGHT_GRAY_CARPET, 1, 36, 16, 10),
                                 new SellItemFactory(Blocks.CYAN_CARPET, 1, 36, 16, 10),
@@ -224,7 +318,6 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.ALLIUM, 1, 4, 10),
                                 new SellItemFactory(Items.CORNFLOWER, 1, 4, 15),
                                 new SellItemFactory(Items.LILY_OF_THE_VALLEY, 1, 4, 15),
-                                new SellItemFactory(Items.ROSE_BUSH, 1, 4, 15),
                                 new SellItemFactory(Items.PEONY, 1, 4, 15),
                                 new SellItemFactory(Items.LILAC, 1, 4, 15),
                                 new SellItemFactory(Items.SUNFLOWER, 1, 4, 15),
@@ -232,13 +325,11 @@ public class RevampedTradeOffers {
                                 new SellItemFactory(Items.BLUE_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.LIGHT_BLUE_BANNER, 4, 1, 12, 15),
                                 new SellItemFactory(Items.RED_BANNER, 1, 4, 12, 15),
-                                new SellItemFactory(Items.PINK_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.GREEN_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.LIME_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.GRAY_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.BLACK_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.PURPLE_BANNER, 1, 4, 12, 15),
-                                new SellItemFactory(Items.MAGENTA_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.CYAN_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.BROWN_BANNER, 1, 4, 12, 15),
                                 new SellItemFactory(Items.YELLOW_BANNER, 1, 4, 12, 15),
@@ -276,7 +367,7 @@ public class RevampedTradeOffers {
                                 new SellPotionHoldingItemFactory(Items.GLASS_BOTTLE, 1, Items.SPLASH_POTION, 1, 24, 3, 18),
                                 new SellPotionHoldingItemFactory(Items.ARROW, 4, Items.TIPPED_ARROW, 4, 1, 12, 18)},
                         5, new Factory[]{
-                                new SellItemFactory(Items.TNT, 1, 1, 20)}
+                                new SellItemFactory(Items.TNT, 1, 1, 15)}
                 )));
 
         map.put(VillagerProfession.LIBRARIAN, copyToFastUtilMap(
@@ -358,7 +449,7 @@ public class RevampedTradeOffers {
         map.put(VillagerProfession.CARTOGRAPHER, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
-                                new BuyForMultipleEmeraldsFactory(Items.OMINOUS_BOTTLE, 24, 16, 15),
+                                new BuyForMultipleEmeraldsFactory(Items.OMINOUS_BOTTLE, 24, 16, 1200), // TODO ======================================================================================================================= REPLACE BY 12
                                 new BuyForOneEmeraldFactory(Items.REDSTONE, 16, 8, 1),
                                 new SellItemFactory(Items.SPYGLASS, 2, 1, 8),
                                 new SellItemFactory(Items.COMPASS, 1, 1, 3),
@@ -393,32 +484,20 @@ public class RevampedTradeOffers {
                         2, new Factory[]{
                                 new SellItemFactory(Items.FLOWER_BANNER_PATTERN, 18, 1, 15),
                                 new SellItemFactory(Items.GLASS_PANE, 1, 16, 8),
-                                new SellMapFactory(10,
-                                        StructureTags.ON_TRIAL_CHAMBERS_MAPS, "filled_map.trial_chambers",
-                                        MapDecorationTypes.TRIAL_CHAMBERS, 1, 12),
-                                new SellMapFactory(
-                                        8,
-                                        StructureTags.SHIPWRECK, "filled_map.custom.shipwreck",
-                                        MapDecorationTypes.TARGET_X, 3, 18),
-                                new SellMapFactory(
-                                        6,
-                                        StructureTags.OCEAN_RUIN, "Ruins Explorer Map",
-                                        MapDecorationTypes.TARGET_X, 3, 14),
-                                new SellMapFactory(
-                                        6,
-                                        StructureTags.RUINED_PORTAL, "Ruins Explorer Map",
-                                        MapDecorationTypes.TARGET_X, 3, 14)},
+                                new SellMapFactory(11, StructureTags.ON_TRIAL_CHAMBERS_MAPS, "filled_map.trial_chambers", MapDecorationTypes.TRIAL_CHAMBERS, 1, 12),
+                                SELL_DANGEROUS_LOCATIONS_MAP_TRADE,
+                                SELL_RUINS_EXPLORER_MAP_TRADE},
                         3, new Factory[]{
-                                new SellMapFactory(12, StructureTags.ON_TRIAL_CHAMBERS_MAPS, "filled_map.trial_chambers", MapDecorationTypes.TRIAL_CHAMBERS, 12, 10),
                                 new SellItemFactory(Items.SKULL_BANNER_PATTERN, 21, 1, 15),
                                 new SellItemFactory(Items.MUSIC_DISC_WAIT, 32, 1, 15),
-                                new SellMapFactory(13, StructureTags.ON_OCEAN_EXPLORER_MAPS, "filled_map.monument", MapDecorationTypes.MONUMENT, 3, 60)},
+                                new SellMapFactory(15, StructureTags.ON_OCEAN_EXPLORER_MAPS, "filled_map.monument", MapDecorationTypes.MONUMENT, 3, 60)},
                         4, new Factory[]{
                                 new SellItemFactory(Items.CREEPER_BANNER_PATTERN, 24, 1, 15),
                                 new SellItemFactory(Items.MUSIC_DISC_FAR, 32, 1, 15),
-                                new SellMapFactory(14, StructureTags.ON_WOODLAND_EXPLORER_MAPS, "filled_map.mansion", MapDecorationTypes.MANSION, 3, 100)},
+                                new SellMapFactory(17, StructureTags.ON_WOODLAND_EXPLORER_MAPS, "filled_map.mansion", MapDecorationTypes.MANSION, 3, 100)},
                         5, new Factory[]{
-                                new SellItemFactory(Items.GLOBE_BANNER_PATTERN, 8, 1, 30)}
+                                new SellItemFactory(Items.GLOBE_BANNER_PATTERN, 8, 1, 30),
+                                SELL_FORBIDDEN_CITY_MAP_TRADE}
                 )));
 
         map.put(VillagerProfession.CLERIC, copyToFastUtilMap(
@@ -558,12 +637,16 @@ public class RevampedTradeOffers {
 
         map.put(VillagerProfession.TOOLSMITH, copyToFastUtilMap(ImmutableMap.of(
                 1, new Factory[]{
+                        new BuyForOneEmeraldFactory(Items.COAL, 22, 16, 2),
+                        new BuyForOneEmeraldFactory(Items.RAW_IRON, 15, 16, 2),
+                        new BuyForOneEmeraldFactory(Items.RAW_COPPER, 50, 16, 2),
                         new SellItemFactory(Items.DIRT, 1, 17, 1),
                         new SellItemFactory(Items.COBBLESTONE, 1, 12, 1),
                         new SellItemFactory(Items.COBBLED_DEEPSLATE, 1, 9, 1),
                         new SellItemFactory(Items.LANTERN, 1, 6, 2),
-                        new SellItemFactory(new ItemStack(Items.STONE_SHOVEL), 1, 1, 12, 1, 0.2f),
-                        new SellItemFactory(new ItemStack(Items.STONE_PICKAXE), 1, 1, 12, 1, 0.2f),
+                        new SellItemFactory(new ItemStack(CustomEquipment.COPPER_AXE), 1, 1, 12, 1, 0.2f),
+                        new SellItemFactory(new ItemStack(CustomEquipment.COPPER_PICKAXE), 1, 1, 12, 1, 0.2f),
+                        new SellItemFactory(new ItemStack(CustomEquipment.COPPER_SHOVEL), 1, 1, 12, 1, 0.2f),
                         new TypeAwareSellItemFactory(1, 5, 32, 1, ImmutableMap.builder().put(
                                 VillagerType.PLAINS, Items.OAK_LOG).put(
                                 VillagerType.TAIGA, Items.SPRUCE_LOG).put(
@@ -637,9 +720,9 @@ public class RevampedTradeOffers {
                         new SellItemFactory(Items.LEATHER, 1, 6, 2),
                         new SellItemFactory(Items.LEATHER_HORSE_ARMOR, 12, 1, 12),
                         new BuyForOneEmeraldFactory(Items.RABBIT_HIDE, 4, 12, 6),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_HORSE_ARMOR, 5),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_HELMET, 5, 12, 5),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_BOOTS, 4, 12, 5),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_HORSE_ARMOR, 5),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_HELMET, 5, 12, 5),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_BOOTS, 4, 12, 5),
                         new SellItemFactory(Items.BUNDLE, 4, 1, 3)},
                 2, new Factory[]{
                         new SellItemFactory(Items.GRAY_DYE, 1, 8, 4),
@@ -648,43 +731,51 @@ public class RevampedTradeOffers {
                         new SellItemFactory(Items.LIME_DYE, 1, 8, 4),
                         new SellItemFactory(Items.ITEM_FRAME, 1, 5, 6),
                         new SellItemFactory(Items.GLOW_ITEM_FRAME, 1, 3, 8),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_CHESTPLATE, 12),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_LEGGINGS, 12),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_BOOTS, 4, 12, 12)
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_CHESTPLATE, 12),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_LEGGINGS, 12),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_BOOTS, 4, 12, 12)
                 },
                 3, new Factory[]{
                         new SellItemFactory(Items.GREEN_DYE, 1, 8, 8),
                         new SellItemFactory(Items.LIGHT_GRAY_DYE, 1, 8, 8),
                         new SellItemFactory(Items.ORANGE_DYE, 1, 8, 8),
                         new SellItemFactory(Items.PINK_DYE, 1, 8, 8),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_BOOTS, 4, 12, 16),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_CHESTPLATE, 16)
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_BOOTS, 4, 12, 16),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_CHESTPLATE, 16)
                 },
                 4, new Factory[]{
                         new SellItemFactory(Items.PURPLE_DYE, 1, 8, 9),
                         new SellItemFactory(Items.BLUE_DYE, 1, 8, 9),
                         new SellItemFactory(Items.MAGENTA_DYE, 1, 8, 9),
                         new SellItemFactory(Items.CYAN_DYE, 1, 8, 9)//,
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_HELMET, 5, 12, 20),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_LEGGINGS, 7, 12, 20),
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_CHESTPLATE, 8, 12, 20)
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_HELMET, 5, 12, 20),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_LEGGINGS, 7, 12, 20),
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_CHESTPLATE, 8, 12, 20)
                 },
                 5, new Factory[]{
                         new SellItemFactory(new ItemStack(Items.SADDLE), 6, 1, 12, 30, 0.2f)//,
-                        //new SellSpecialLeatherArmorFactory(Items.LEATHER_HORSE_ARMOR, 6, 12, 30)
+                        //new SellSpecialLeatherArmorFactory(ItemsAndStacks.LEATHER_HORSE_ARMOR, 6, 12, 30)
                 }
         )));
 
         map.put(VillagerProfession.MASON, copyToFastUtilMap(ImmutableMap.of(
                 1, new Factory[]{
-                        new BuyForOneEmeraldFactory(Blocks.COBBLESTONE, 48, 16, 1),
+                        new BuyForOneEmeraldFactory(Blocks.STONE, 48, 16, 1),
                         new BuyForOneEmeraldFactory(Blocks.ANDESITE, 32, 16, 2),
                         new SellItemFactory(Blocks.BRICKS, 1, 24, 32, 1),
                         new SellItemFactory(CustomBlocks.GRANITE_BRICKS, 1, 24, 32, 1),
                         new SellItemFactory(Blocks.MUD_BRICKS, 1, 12, 32, 2),
                         new SellItemFactory(Blocks.TERRACOTTA, 1, 24, 32, 1),
                         new SellItemFactory(Blocks.SMOOTH_STONE, 1, 16, 32, 2),
-                        new SellItemFactory(Blocks.STONE, 1, 32, 32, 2),
+                        new SellItemFactory(CustomBlocks.POLISHED_STONE, 1, 32, 32, 2),
+                        new TypeAwareSellItemFactory(1, 8, 16, 1, ImmutableMap.builder().put(
+                                VillagerType.PLAINS, Items.LIME_TERRACOTTA).put(
+                                VillagerType.TAIGA, Items.BLUE_TERRACOTTA).put(
+                                VillagerType.SNOW, Items.LIGHT_GRAY_TERRACOTTA).put(
+                                VillagerType.DESERT, Items.ORANGE_TERRACOTTA).put(
+                                VillagerType.JUNGLE, Items.PURPLE_TERRACOTTA).put(
+                                VillagerType.SAVANNA, Items.RED_TERRACOTTA).put(
+                                VillagerType.SWAMP, Items.GREEN_TERRACOTTA).build()),
                         new TypeAwareSellItemFactory(1, 8, 16, 1, ImmutableMap.builder().put(
                                 VillagerType.PLAINS, Items.CUT_SANDSTONE).put(
                                 VillagerType.TAIGA, Items.GREEN_TERRACOTTA).put(
@@ -692,22 +783,32 @@ public class RevampedTradeOffers {
                                 VillagerType.DESERT, Items.CUT_SANDSTONE).put(
                                 VillagerType.JUNGLE, Items.CUT_RED_SANDSTONE).put(
                                 VillagerType.SAVANNA, Items.CUT_RED_SANDSTONE).put(
-                                VillagerType.SWAMP, Items.CLAY).build())},
+                                VillagerType.SWAMP, CustomBlockItems.BROWN_MUD_ITEM).build())},
                 2, new Factory[]{
                         new BuyForOneEmeraldFactory(Items.QUARTZ, 12, 12, 5),
+                        new TypeAwareSellItemFactory(1, 8, 16, 1, ImmutableMap.builder().put(
+                                VillagerType.PLAINS, Items.LIME_GLAZED_TERRACOTTA).put(
+                                VillagerType.TAIGA, Items.BLUE_GLAZED_TERRACOTTA).put(
+                                VillagerType.SNOW, Items.LIGHT_GRAY_GLAZED_TERRACOTTA).put(
+                                VillagerType.DESERT, Items.ORANGE_GLAZED_TERRACOTTA).put(
+                                VillagerType.JUNGLE, Items.PURPLE_GLAZED_TERRACOTTA).put(
+                                VillagerType.SAVANNA, Items.RED_GLAZED_TERRACOTTA).put(
+                                VillagerType.SWAMP, Items.GREEN_GLAZED_TERRACOTTA).build()),
                         new SellItemFactory(Blocks.POLISHED_ANDESITE, 1, 24, 32, 3),
-                        new SellItemFactory(Blocks.POLISHED_DIORITE, 1, 24, 32, 3),
+                        new SellItemFactory(Blocks.COBBLED_DEEPSLATE, 1, 20, 32, 3),
+                        new SellItemFactory(Blocks.POLISHED_DEEPSLATE, 1, 16, 32, 3),
                         new SellItemFactory(Blocks.POLISHED_GRANITE, 1, 24, 32, 3),
                         new SellItemFactory(Blocks.CHISELED_STONE_BRICKS, 1, 4, 32, 3)},
                 3, new Factory[]{
-                        new SellItemFactory(Blocks.DEEPSLATE_TILES, 1, 32, 32, 8),
-                        new SellItemFactory(Blocks.DEEPSLATE_BRICKS, 1, 32, 32, 8),
-                        new SellItemFactory(Blocks.POLISHED_BLACKSTONE_BRICKS, 1, 24, 32, 8),
-                        new SellItemFactory(Blocks.SMOOTH_BASALT, 1, 8, 32, 8)},
+                        new SellItemFactory(Blocks.TUFF, 1, 32, 32, 8),
+                        new SellItemFactory(Blocks.POLISHED_TUFF, 1, 32, 32, 8),
+                        new SellItemFactory(Blocks.CHISELED_TUFF, 1, 32, 32, 8),
+                        new SellItemFactory(Blocks.TUFF_BRICKS, 1, 24, 32, 8)},
                 4, new Factory[]{
-                        new SellItemFactory(Blocks.CUT_COPPER, 1, 48, 32, 14),
-                        new SellItemFactory(Blocks.PRISMARINE_BRICKS, 1, 4, 32, 14),
-                        new SellItemFactory(Blocks.TUFF, 1, 24, 12, 14)},
+                        new BuyForOneEmeraldFactory(Items.HONEYCOMB, 8, 12, 5),
+                        new SellItemFactory(Blocks.CUT_COPPER, 1, 18, 32, 14),
+                        new SellItemFactory(Blocks.WAXED_CUT_COPPER, 1, 12, 32, 14),
+                        new SellItemFactory(Blocks.WEATHERED_CUT_COPPER, 1, 8, 32, 14)},
                 5, new Factory[]{
                         new SellItemFactory(Blocks.CALCITE, 1, 10, 32, 18),
                         new SellItemFactory(Blocks.SMOOTH_QUARTZ, 1, 16, 32, 18),
@@ -755,7 +856,7 @@ public class RevampedTradeOffers {
 
 
     public interface Factory {
-        @Nullable TradeOffer create(Entity var1, Random var2);
+        @Nullable TradeOffer create(Entity var1, java.util.Random var2);
     }
 
     static class BuyForOneEmeraldFactory
@@ -775,7 +876,7 @@ public class RevampedTradeOffers {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             return new TradeOffer(new TradedItem(this.buy, this.price) , new ItemStack(Items.EMERALD), this.maxUses, this.experience, this.multiplier);
         }
     }
@@ -797,7 +898,7 @@ public class RevampedTradeOffers {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             ItemStack offeredEmeralds = new ItemStack(Items.EMERALD, emeralds);
             return new TradeOffer(new TradedItem(this.buy, 1), offeredEmeralds, this.maxUses, this.experience, this.multiplier);
         }
@@ -828,7 +929,7 @@ public class RevampedTradeOffers {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             return new TradeOffer(this.stack, new ItemStack(Items.EMERALD, this.price), this.maxUses, this.experience, this.multiplier);
         }
     }
@@ -881,9 +982,9 @@ public class RevampedTradeOffers {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             ItemStack itemStack = this.sell.copy();
-            World world = entity.method_48926();
+            World world = entity.getWorld();
             this.enchantmentProviderKey.ifPresent(key -> EnchantmentHelper.applyEnchantmentProvider(itemStack, world.getRegistryManager(), key, world.getLocalDifficulty(entity.getBlockPos()), random));
             return new TradeOffer(new TradedItem(Items.EMERALD, this.price), itemStack, this.maxUses, this.experience, this.multiplier);
         }
@@ -906,7 +1007,7 @@ public class RevampedTradeOffers {
 
         @Override
         @Nullable
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
             itemStack.set(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS, this.stewEffects);
             return new TradeOffer(new TradedItem(Items.EMERALD), itemStack, 12, this.experience, this.multiplier);
@@ -946,9 +1047,9 @@ public class RevampedTradeOffers {
 
         @Override
         @Nullable
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             ItemStack itemStack = this.processed.copy();
-            World world = entity.method_48926();
+            World world = entity.getWorld();
             this.enchantmentProviderKey.ifPresent(key -> EnchantmentHelper.applyEnchantmentProvider(itemStack, world.getRegistryManager(), key, world.getLocalDifficulty(entity.getBlockPos()), random));
             return new TradeOffer(new TradedItem(Items.EMERALD, this.price), Optional.of(this.toBeProcessed), itemStack, 0, this.maxUses, this.experience, this.multiplier);
         }
@@ -973,9 +1074,9 @@ public class RevampedTradeOffers {
             this.multiplier = multiplier;
         }
 
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             int i = 5 + random.nextInt(15);
-            DynamicRegistryManager dynamicRegistryManager = entity.method_48926().getRegistryManager();
+            DynamicRegistryManager dynamicRegistryManager = entity.getWorld().getRegistryManager();
             Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.get(RegistryKeys.ENCHANTMENT).getEntryList(EnchantmentTags.ON_TRADED_EQUIPMENT);
             ItemStack itemStack = EnchantmentHelper.enchant(random, new ItemStack(this.tool.getItem()), i, dynamicRegistryManager, optional);
             int j = Math.min(this.basePrice + i, 64);
@@ -1006,7 +1107,7 @@ public class RevampedTradeOffers {
 
         @Override
         @Nullable
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             if (entity instanceof VillagerDataContainer) {
                 if(this.map.get(((VillagerDataContainer)(entity)).getVillagerData().getType()) instanceof Item item) {
                     return new TradeOffer(new TradedItem(Items.EMERALD, this.price), new ItemStack(item), this.maxUses, this.experience, 0.05f);
@@ -1027,7 +1128,7 @@ public class RevampedTradeOffers {
 
         @Override
         @Nullable
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             if (entity instanceof VillagerDataContainer) {
                 VillagerDataContainer villagerDataContainer = (VillagerDataContainer)((Object)entity);
                 VillagerType villagerType = villagerDataContainer.getVillagerData().getType();
@@ -1064,10 +1165,10 @@ public class RevampedTradeOffers {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
             TradedItem tradedItem = new TradedItem(Items.EMERALD, this.price);
             List<RegistryEntry<Potion>> list = (List)Registries.POTION.streamEntries().filter((entry) -> {
-                return !((Potion)entry.value()).getEffects().isEmpty() && entity.method_48926().getBrewingRecipeRegistry().isBrewable(entry);
+                return !((Potion)entry.value()).getEffects().isEmpty() && entity.getWorld().getBrewingRecipeRegistry().isBrewable(entry);
             }).collect(Collectors.toList());
             RegistryEntry<Potion> registryEntry = (RegistryEntry)Util.getRandom(list, random);
             ItemStack itemStack = new ItemStack(this.sell.getItem(), this.sellCount);
@@ -1093,8 +1194,8 @@ public class RevampedTradeOffers {
             this.possibleEnchantments = possibleEnchantments;
         }
 
-        public TradeOffer create(Entity entity, Random random) {
-            Optional<RegistryEntry<Enchantment>> optional = entity.method_48926().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getRandomEntry(this.possibleEnchantments, random);
+        public TradeOffer create(Entity entity, java.util.Random random) {
+            Optional<RegistryEntry<Enchantment>> optional = entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getRandomEntry(this.possibleEnchantments, random);
             Optional<RegistryEntry<Enchantment>> finalOptional = optional;
             if(optional.isPresent() && entity instanceof MerchantEntity merchant && merchant.getOffers().stream().anyMatch(new Predicate<TradeOffer>() {
                 @Override
@@ -1104,7 +1205,7 @@ public class RevampedTradeOffers {
                     return sellItemStack.getEnchantments().getLevel(finalOptional.get()) > 0;
                 }
             })) {
-                optional = entity.method_48926().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getRandomEntry(this.possibleEnchantments, random);
+                optional = entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getRandomEntry(this.possibleEnchantments, random);
             }
 
             int l;
@@ -1141,32 +1242,50 @@ public class RevampedTradeOffers {
         private final RegistryEntry<MapDecorationType> decoration;
         private final int maxUses;
         private final int experience;
+        private final int mapColor;
+        private final boolean useRegularCompass;
 
         public SellMapFactory(int price, TagKey<Structure> structure, String nameKey, RegistryEntry<MapDecorationType> decoration, int maxUses, int experience) {
+            this(price,structure,nameKey,decoration,maxUses,experience, decoration.value().hasMapColor() ? decoration.value().mapColor() : Colors.BLACK, true);
+        }
+
+        public SellMapFactory(int price, TagKey<Structure> structure, String nameKey, RegistryEntry<MapDecorationType> decoration, int maxUses, int experience, int mapColor) {
+            this(price,structure,nameKey,decoration,maxUses,experience, mapColor, true);
+        }
+
+        public SellMapFactory(int price, TagKey<Structure> structure, String nameKey, RegistryEntry<MapDecorationType> decoration, int maxUses, int experience, int mapColor, boolean useRegularCompass) {
             this.price = price;
             this.structure = structure;
             this.nameKey = nameKey;
             this.decoration = decoration;
             this.maxUses = maxUses;
             this.experience = experience;
+            this.mapColor = mapColor;
+            this.useRegularCompass = useRegularCompass;
         }
 
         @Override
         @Nullable
-        public TradeOffer create(Entity entity, Random random) {
-            if (!(entity.method_48926() instanceof ServerWorld)) {
+        public TradeOffer create(Entity entity, java.util.Random random) {
+            if (!(entity.getWorld() instanceof ServerWorld)) {
                 return null;
             }
-            ServerWorld serverWorld = (ServerWorld)entity.method_48926();
+            ServerWorld serverWorld = (ServerWorld)entity.getWorld();
             BlockPos blockPos = serverWorld.locateStructure(this.structure, entity.getBlockPos(), 100, true);
             if (blockPos != null) {
                 ItemStack itemStack = FilledMapItem.createMap(serverWorld, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
                 FilledMapItem.fillExplorationMap(serverWorld, itemStack);
                 MapState.addDecorationsNbt(itemStack, blockPos, "+", this.decoration);
                 itemStack.set(DataComponentTypes.ITEM_NAME, Text.translatable(this.nameKey));
-                return new TradeOffer(new TradedItem(Items.EMERALD, this.price), Optional.of(new TradedItem(Items.COMPASS)), itemStack, this.maxUses, this.experience, 0.2f);
+                return new TradeOffer(new TradedItem(Items.EMERALD, this.price), (useRegularCompass ? Optional.of(new TradedItem(Items.COMPASS)) : Optional.of(new TradedItem(Items.RECOVERY_COMPASS))), itemStack, this.maxUses, this.experience, 0.2f);
             }
             return null;
+        }
+
+        public void addCustomDecorationsNbt(ItemStack stack, BlockPos pos, String id, RegistryEntry<MapDecorationType> decorationType) {
+            MapDecorationsComponent.Decoration decoration = new MapDecorationsComponent.Decoration(decorationType, pos.getX(), pos.getZ(), 180.0f);
+            stack.apply(DataComponentTypes.MAP_DECORATIONS, MapDecorationsComponent.DEFAULT, decorations -> decorations.with(id, decoration));
+            stack.set(DataComponentTypes.MAP_COLOR, new MapColorComponent(mapColor));
         }
     }
 

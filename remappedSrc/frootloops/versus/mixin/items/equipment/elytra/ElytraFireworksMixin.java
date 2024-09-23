@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(FireworkRocketItem.class)
 public class ElytraFireworksMixin extends Item {
 
-    public ElytraFireworksMixin(net.minecraft.item.Item.Settings settings) {
+    public ElytraFireworksMixin(Settings settings) {
         super(settings);
     }
 

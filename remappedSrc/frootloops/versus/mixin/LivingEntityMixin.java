@@ -1,9 +1,13 @@
 package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
+import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.blocks.BrownMudBlock;
+import frootloops.versus.mod.items.brewing.CustomStatusEffects;
+import frootloops.versus.mod.items.brewing.effects.HauntingStatusEffect;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -12,22 +16,21 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.HoeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShovelItem;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -40,7 +43,24 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "travel", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
-        return this.isSprinting() ? h : h + 0.4f;
+        return isPlayer() && isSwimming() ? h : h + 0.3f;
+    }
+
+    @Inject(method = "applyMovementInput", at = @At("RETURN"), cancellable = true)
+    private void applyMovementInput(Vec3d movementInput, float slipperiness, CallbackInfoReturnable<Vec3d> cir) {
+        if (this.getBlockStateAtPos().isOf(CustomBlocks.BROWN_MUD) && BrownMudBlock.canWalkOnWetMud(this)) {
+            Vec3d vec3d = this.getVelocity();
+            cir.setReturnValue(new Vec3d(vec3d.x, 0.2, vec3d.z));
+        }
+    }
+
+    @ModifyConstant(method = "travel", constant = @Constant(floatValue = 0.02f))
+    private float applyBuoyancyEffect(float thisMixinIsOnlyCalledWhenInWater) {
+        if(((LivingEntity)((Object)this)).hasStatusEffect(CustomStatusEffects.BUOYANCY)) {
+            double amplifier = 1.0 + ((LivingEntity)((Object)this)).getStatusEffect(CustomStatusEffects.BUOYANCY).getAmplifier();
+            this.setVelocity(this.getVelocity().add(0.0, this.getVelocity().getY() * 0.025 + 0.05 * amplifier, 0.0));
+        }
+        return 0.02f;
     }
 
     @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0)
@@ -67,35 +87,69 @@ public abstract class LivingEntityMixin extends Entity {
 
             // Shovel attack and Tossing Enchantment:
             if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
-                int tossLevel = Enchants.getLevel(method_48926(), mainhandStack, Enchants.TOSSING);
-                Enchants.performTossAttack(self, target, 0.2 + 0.1 * (double)tossLevel);
+                int tossLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.TOSSING);
+                CustomEnchants.performTossAttack(self, target, 0.2 + 0.1 * (double)tossLevel);
             }
 
             // Other enchantments: Frost Aspect, Impaling
             if (!mainhandStack.hasEnchantments()) return;
-            int frostLevel = Enchants.getLevel(method_48926(), mainhandStack, Enchants.FROST_ASPECT);
-            if (frostLevel > 0) Enchants.performFrostAttack(self, target, frostLevel);
+            int frostLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.FROST_ASPECT);
+            if (frostLevel > 0) CustomEnchants.performFrostAttack(self, target, frostLevel);
 
             if (!mainhandStack.hasEnchantments()) return;
-            int impaleLevel = Enchants.getLevel(method_48926(), mainhandStack, Enchantments.IMPALING);
-            if (impaleLevel > 0) Enchants.performImpalingAttack(self, target, frostLevel);
+            int impaleLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchantments.IMPALING);
+            if (impaleLevel > 0) CustomEnchants.performImpalingAttack(self, target, frostLevel);
         }
     }
 
+
+    @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
+    private float rebalancedDamage(float amount2, DamageSource source, float amount) {
+        // Explosions don't hurt as much, or at least, the damage is more consistent:
+        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
+            return (amount + amount + 16.0f) / 4.0f;
+        }
+        if (source.isIn(DamageTypeTags.IS_FIRE)) {
+            StatusEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getStatusEffect(StatusEffects.FIRE_RESISTANCE);
+            if(fireResistanceEffect != null) return (fireResistanceEffect.getAmplifier() > 0) ? 0.0f : 0.6f;
+        }
+        return amount;
+    }
+
+    @ModifyArg(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/registry/entry/RegistryEntry;)Z"), index = 0)
+    private RegistryEntry<StatusEffect> rebalancedFireResistance(RegistryEntry<StatusEffect> effect) {
+        if(effect == StatusEffects.FIRE_RESISTANCE) {
+            StatusEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getStatusEffect(StatusEffects.FIRE_RESISTANCE);
+            if(fireResistanceEffect != null && fireResistanceEffect.getAmplifier() == 0) return StatusEffects.LUCK;
+        }
+        return effect;
+    }
+
     @Inject(method = "damage", at = @At("TAIL"))
-    private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable cir) {
+    private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(source.getAttacker() instanceof LivingEntity attacker) {
 
             // Modify Invincibility Frames:
             if (timeUntilRegen > 10) {
-                if (source.isOf(DamageTypes.ARROW)) timeUntilRegen = 0;
-                else if (timeUntilRegen > 16 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 16;
+                if (source.isOf(DamageTypes.ARROW)) {
+                    if(attacker.getMainHandStack().isOf(Items.CROSSBOW)) timeUntilRegen = 9;
+                    else timeUntilRegen = 14;
+                }
+                else if (timeUntilRegen > 18 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 18;
             }
 
             // Curse of Ender Enchantment:
-            if(Enchants.getEquipmentLevel(method_48926(), ((LivingEntity)(Object)this), Enchants.CURSE_OF_ENDER) > 0) {
-                Enchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
+            if(Enchants.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
+                CustomEnchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
             }
+        }
+        else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 12;
+    }
+
+    @Inject(method = "onStatusEffectRemoved", at = @At("HEAD"))
+    private void onStatusEffectRemoved(StatusEffectInstance effect, CallbackInfo info) {
+        if(effect.getEffectType() == CustomStatusEffects.HAUNTING) {
+            HauntingStatusEffect.removeEffect(((LivingEntity)(Object)this));
         }
     }
 }

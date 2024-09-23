@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.end;
 
+import EntityData;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
 import net.minecraft.block.Blocks;
@@ -110,7 +111,7 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
         if (!this.isSilent()) {
             volume *= 0.8f;
             pitch *= 0.75f;
-            this.method_48926().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundCategory(), volume, pitch);
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundCategory(), volume, pitch);
         }
     }
 
