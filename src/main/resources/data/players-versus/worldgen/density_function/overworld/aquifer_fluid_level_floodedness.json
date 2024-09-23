@@ -1,31 +1,19 @@
 {
-  "type": "minecraft:range_choice",
-  "input": "players-versus:overworld/river_carver",
-  "min_inclusive": -1.0,
-  "max_exclusive": -0.01,
-  "when_in_range": 0.85,
-  "when_out_of_range": {
     "type": "minecraft:range_choice",
-    "input": "minecraft:overworld/caves/entrances",
-    "min_inclusive": -0.8,
-    "max_exclusive": 0.1,
-    "when_in_range": 0.5,
-    "when_out_of_range": {
-      "type": "minecraft:add",
-      "argument1": {
-        "type": "minecraft:y_clamped_gradient",
-        "from_y": 8,
-        "to_y": -16,
-        "from_value": 0,
-        "to_value": -0.2
-      },
-      "argument2": {
-        "type": "minecraft:noise",
-        "noise": "minecraft:aquifer_fluid_level_floodedness",
-        "xz_scale": 1,
-        "y_scale": 0.67
-      }
-    }
-  }
+    "input": "minecraft:y",
+    "min_inclusive": -4,
+    "max_exclusive": 32,
+    "when_in_range": {
+        "type": "minecraft:range_choice",
+        "input": "players-versus:overworld/aquifer_floodedness_oceans_and_rivers_y64",
+        "min_inclusive": 0.0001,
+        "max_exclusive": 0.34,
+        "when_in_range": {
+            "type": "minecraft:add",
+            "argument1": "players-versus:overworld/aquifer_floodedness_oceans_and_rivers_y64",
+            "argument2": "players-versus:overworld/ramen_cave_aquifer"
+        },
+        "when_out_of_range": "players-versus:overworld/aquifer_floodedness_oceans_and_rivers_y64"
+    },
+    "when_out_of_range": "players-versus:overworld/aquifer_floodedness_oceans_and_rivers_y64"
 }
-

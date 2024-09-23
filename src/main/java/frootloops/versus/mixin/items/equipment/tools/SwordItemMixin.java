@@ -28,6 +28,19 @@ public abstract class SwordItemMixin extends Item {
     }
 
     @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if(world.getTime() % 4L != 0) return;
+        if(user.isPlayer() && stack.getUseAction() == UseAction.BLOCK) {
+            ItemStack otherHandStack = user.getActiveHand() == Hand.MAIN_HAND ? user.getOffHandStack() : user.getMainHandStack();
+            if(otherHandStack.getItem() instanceof ShieldItem && otherHandStack.getUseAction() == UseAction.BLOCK) {
+                if(((PlayerEntity)user).getItemCooldownManager().isCoolingDown(otherHandStack.getItem())) return;
+                user.stopUsingItem();
+                ((PlayerEntity)user).setCurrentHand(user.getActiveHand() == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
+            }
+        }
+    }
+
+    @Override
     public UseAction getUseAction(ItemStack stack) {
         if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return UseAction.NONE;
         return UseAction.BLOCK;

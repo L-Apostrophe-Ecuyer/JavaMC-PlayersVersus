@@ -15,15 +15,11 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.*;
+
 
 
 public class WitheredZombieEntity extends ZombieEntity {
@@ -33,12 +29,12 @@ public class WitheredZombieEntity extends ZombieEntity {
 
     public static DefaultAttributeContainer.Builder createWitheredAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.FOLLOW_RANGE, 7.0)
+                .add(EntityAttributes.FOLLOW_RANGE, 6.5)
                 .add(EntityAttributes.MOVEMENT_SPEED, 0.33f)
                 .add(EntityAttributes.ATTACK_DAMAGE, 3.0)
-                .add(EntityAttributes.ATTACK_KNOCKBACK, 1.2)
-                .add(EntityAttributes.ARMOR, 8.0)
-                .add(EntityAttributes.ARMOR_TOUGHNESS, 4.0)
+                .add(EntityAttributes.ATTACK_KNOCKBACK, 1.1)
+                .add(EntityAttributes.ARMOR, 4.0)
+                .add(EntityAttributes.ARMOR_TOUGHNESS, 3.0)
                 .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.5)
                 .add(EntityAttributes.SPAWN_REINFORCEMENTS);
     }
@@ -70,6 +66,16 @@ public class WitheredZombieEntity extends ZombieEntity {
     public boolean damage(DamageSource source, float amount) {
         if(source.isOf(DamageTypes.WITHER)) return false;
         return super.damage(source, amount);
+    }
+
+    @Override
+    public void tickMovement() {
+        super.tickMovement();
+        if(this.age % 16 == 0 && this.getTarget() != null) {
+            double distanceSquared = this.getTarget().squaredDistanceTo(this);
+            if(this.getTarget().isSneaking()) distanceSquared *= 3;
+            if(distanceSquared > 256.0) this.setTarget(null);
+        }
     }
 
     @Override
