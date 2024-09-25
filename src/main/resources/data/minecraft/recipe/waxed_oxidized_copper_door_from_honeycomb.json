@@ -3,8 +3,12 @@
   "category": "building",
   "group": "copper_waxing",
   "ingredients": [
-      "minecraft:oxidized_copper_door",
-      "minecraft:honeycomb"
+      {
+        "item": "minecraft:oxidized_copper_door"
+      },
+      {
+        "item": "minecraft:honeycomb"
+      }
   ],
   "result": {
     "count": 1,

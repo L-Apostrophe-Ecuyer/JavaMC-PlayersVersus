@@ -3,7 +3,9 @@
   "category": "building",
   "group": "copper_grates",
   "key": {
-    "M": "minecraft:exposed_copper"
+    "M": {
+      "item": "minecraft:exposed_copper"
+    }
   },
   "pattern": [
     " M ",

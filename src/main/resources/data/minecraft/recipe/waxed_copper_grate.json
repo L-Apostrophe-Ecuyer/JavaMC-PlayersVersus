@@ -3,7 +3,9 @@
   "category": "building",
   "group": "copper_grates",
   "key": {
-    "M": "minecraft:waxed_copper_block"
+    "M": {
+      "item": "minecraft:waxed_copper_block"
+    }
   },
   "pattern": [
     " M ",

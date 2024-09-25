@@ -3,8 +3,12 @@
   "category": "building",
   "group": "copper_waxing",
   "ingredients": [
-      "minecraft:exposed_copper_grate",
-      "minecraft:honeycomb"
+      {
+        "item": "minecraft:exposed_copper_grate"
+      },
+      {
+        "item": "minecraft:honeycomb"
+      }
   ],
   "result": {
     "count": 1,
