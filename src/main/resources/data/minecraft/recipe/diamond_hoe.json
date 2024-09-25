@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "diamond_tools",
-  "group": "hoes",
+  "category": "equipment",
+  "group": "diamond_tools",
   "key": {
     "#" : "minecraft:stick",
     "X" : "minecraft:diamond"
