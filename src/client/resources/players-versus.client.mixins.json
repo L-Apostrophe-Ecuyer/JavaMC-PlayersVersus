@@ -30,6 +30,7 @@
 
 		"items.inventory.ItemMergingMixin",
 		"items.inventory.MinecraftClientMixin",
+		"items.inventory.recipe_book.AnimatedResultButtonMixin",
 
 		"players.attacking.CrosshairTargetMixin",
 		"players.attacking.CrosshairRendererMixin",
