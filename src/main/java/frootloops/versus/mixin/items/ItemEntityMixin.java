@@ -1,5 +1,7 @@
 package frootloops.versus.mixin.items;
 
+import frootloops.versus.mod.items.ItemBurningConversion;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
@@ -73,9 +75,15 @@ public abstract class ItemEntityMixin extends Entity {
     public void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(this.health == 0) {
             ItemStack currentItemStack = ((ItemEntity)((Object)this)).getStack();
-            if(source.isOf(DamageTypes.LAVA)) doFireDamageTransformation(currentItemStack, true);
-            else if(source.isIn(DamageTypeTags.IS_FIRE)) doFireDamageTransformation(currentItemStack, false);
-            else doRegularDamageTransformation(currentItemStack);
+            if(source.isOf(DamageTypes.LAVA)) doFireDamageTransformation(currentItemStack, true, false);
+            else if(source.isIn(DamageTypeTags.IS_FIRE)) {
+                BlockState blockState = this.getWorld().getBlockState(this.getBlockPos());
+                boolean isExtraHot = (blockState.isOf(Blocks.SOUL_FIRE) || blockState.isOf(Blocks.SOUL_CAMPFIRE));
+                doFireDamageTransformation(currentItemStack, isExtraHot, false);
+            }
+            else {
+                doRegularDamageTransformation(currentItemStack);
+            }
             if(health > 0) {
                 cir.setReturnValue(true);
                 cir.cancel();
@@ -86,31 +94,35 @@ public abstract class ItemEntityMixin extends Entity {
 
 
 
-    private void doFireDamageTransformation(ItemStack currentItemStack, boolean isLava) {
+    private void doFireDamageTransformation(ItemStack currentItemStack, boolean isExtraHot, boolean canCookFood) {
 
-        // Lava is less forgiving:
-        if(!isLava) {
-            // FutureItems should survive in the fire for a bit, and take some time to cook:
-            if(itemAge < 40) {
-                health = 40;
+        Item burningItem = currentItemStack.getItem();
+
+        // Special effects: Buckets!
+        if(burningItem instanceof BucketItem) {
+            if (burningItem == Items.BUCKET) {
+                if(isExtraHot) {
+                    ((ItemEntity) ((Object) this)).setStack(new ItemStack(Items.LAVA_BUCKET, currentItemStack.getCount()));
+                    this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+                    health = 300;
+                    return;
+                }
+            }
+            else {
+                if(this.getWorld() instanceof ServerWorld) {
+                    ((BucketItem)burningItem).placeFluid(null, this.getWorld(), this.getBlockPos(), null);
+                    ((BucketItem)burningItem).onEmptied(null, this.getWorld(), currentItemStack, this.getBlockPos());
+                }
+                ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.BUCKET, currentItemStack.getCount()));
+                this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+                health = 300;
                 return;
-            }
-
-            // Foods and organics turn to soot:
-            if(currentItemStack.contains(DataComponentTypes.FOOD) && !currentItemStack.isOf(Items.ENCHANTED_GOLDEN_APPLE)){
-                ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.BLACK_DYE, currentItemStack.getCount()));
-                health = 60;
-            }
-
-            // Most blocks turn to charred blocks variants:
-            else if(currentItemStack.isIn(ItemTags.LOGS_THAT_BURN)) {
-                ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.CHARCOAL, currentItemStack.getCount()));
-                health = 120;
             }
         }
 
-        // FutureItems break down into components, or get used/placed:
-        if(currentItemStack.isOf(Items.TOTEM_OF_UNDYING)) {
+        // Special effects: Totems!
+        if(burningItem == Items.TOTEM_OF_UNDYING) {
+            this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
             this.getWorld().sendEntityStatus(this, (byte)35);
             Box boundingBox = new Box(this.getX() - 4d, this.getY() - 4d, this.getZ() - 4d, this.getX() + 4d, this.getY() + 4d, this.getZ() + 4d);
             List<ItemEntity> entitiesNearby = this.getWorld().getEntitiesByClass(ItemEntity.class, boundingBox, EntityPredicates.VALID_ENTITY);
@@ -119,92 +131,39 @@ public abstract class ItemEntityMixin extends Entity {
                 entity.setGlowing(true);
                 entity.setInvulnerable(true);
             }
-        }
-        else if(currentItemStack.isIn(ItemTags.ANVIL)) {
-            ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_BLOCK, Math.min(1,currentItemStack.getCount()/3)));
-            health = 300;
-        }
-        else if(currentItemStack.getItem() instanceof CompassItem || currentItemStack.isOf(Items.CLOCK)) {
-            health = 300;
-        }
-        else if(currentItemStack.getItem() instanceof BucketItem) {
-            if(this.getWorld() instanceof ServerWorld) {
-                ((BucketItem)currentItemStack.getItem()).placeFluid(null, this.getWorld(), this.getBlockPos(), null);
-                ((BucketItem)currentItemStack.getItem()).onEmptied(null, this.getWorld(), currentItemStack, this.getBlockPos());
-            }
-            if(isLava) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.LAVA_BUCKET, currentItemStack.getCount()));
-            else ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.BUCKET, currentItemStack.getCount()));
-            health = 300;
-        }
-        else if(currentItemStack.getItem() instanceof PowderSnowBucketItem) {
-            if(isLava) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.LAVA_BUCKET, currentItemStack.getCount()));
-            else if(this.getWorld() instanceof ServerWorld) {
-                this.getWorld().setBlockState(this.getBlockPos(), Blocks.AIR.getDefaultState());
-                ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.BUCKET, currentItemStack.getCount()));
-            }
-            health = 300;
-        }
-        else {
-            String translationKeyStr = currentItemStack.getItem().getTranslationKey();
-            if (translationKeyStr.endsWith("nugget")) {
-                if(this.itemAge < 200) health = 0;
-            }
-            else if (translationKeyStr.startsWith("emerald") && this.itemAge < 200) {
-                ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.EMERALD, currentItemStack.getCount()));
-                health = 400;
-            }
-            else if (translationKeyStr.contains("lapis") && this.itemAge < 200) {
-                ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.LAPIS_LAZULI, currentItemStack.getCount()));
-                health = 200;
-            }
-            else if (translationKeyStr.startsWith("diamond_")) {
-                if(!currentItemStack.isOf(Items.DIAMOND_BLOCK)) ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.DIAMOND, currentItemStack.getCount()));
-                health = 600;
-            }
-            else if(translationKeyStr.contains("iron") || translationKeyStr.endsWith("hopper") || translationKeyStr.endsWith("_minecart")) {
-                if(currentItemStack.isOf(Items.RAW_IRON_BLOCK)) {
-                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_BLOCK, currentItemStack.getCount()));
-                    health = 80;
-                }
-                else if(!currentItemStack.isOf(Items.IRON_INGOT)) {
-                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_INGOT, currentItemStack.getCount()));
-                    health = 100;
-                }
-                else {
-                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.IRON_NUGGET, currentItemStack.getCount()));
-                    health = 400;
-                }
-            }
-            else if(translationKeyStr.contains("gold")) {
-                if(currentItemStack.isOf(Items.RAW_GOLD_BLOCK)) {
-                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_BLOCK, currentItemStack.getCount()));
-                    health = 80;
-                }
-                else if(!currentItemStack.isOf(Items.GOLD_INGOT)) {
-                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_INGOT, currentItemStack.getCount()));
-                    health = 100;
-                }
-                else {
-                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.GOLD_NUGGET, currentItemStack.getCount()));
-                    health = 400;
-                }
-            }
-            else if(translationKeyStr.contains("copper")) {
-                if(currentItemStack.isOf(Items.RAW_COPPER_BLOCK)) {
-                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.COPPER_BLOCK, currentItemStack.getCount()));
-                    health = 100;
-                }
-                else if(!currentItemStack.isOf(Items.COPPER_INGOT)) {
-                    ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.COPPER_INGOT, currentItemStack.getCount()));
-                    health = 240;
-                }
-                else health = 80;
-            }
+            return;
         }
 
-        // Make some noise!
-        if(health > 40 || health == 0) {
-            this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+        // Anything else:
+        int currentItemMaxHealth = isExtraHot ? 20 : itemAge > 200 ? 40 : 80;
+        Item itemToConvertTo = null;
+        if(ItemBurningConversion.ITEM_BURNING_CONVERSION_MAP.containsKey(burningItem)) {
+            ItemBurningConversion.ItemBurningConversionRecord conversionRecord = ItemBurningConversion.ITEM_BURNING_CONVERSION_MAP.get(burningItem);
+            currentItemMaxHealth += isExtraHot ? conversionRecord.itemExtraHealth()/4 : conversionRecord.itemExtraHealth();
+            itemToConvertTo = (isExtraHot ? conversionRecord.veryHotResultItem() : conversionRecord.resultItem());
+        }
+
+        // Check if the item should survive or not (if its age is smaller than its max health)
+        if(itemAge < currentItemMaxHealth) {
+            health = currentItemMaxHealth;
+            return;
+        }
+        if(health > 0) return; // Item is spared for now
+
+        // Otherwise, the item has burnt and should be transformed.
+        this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+        if(!isExtraHot && currentItemStack.isIn(ItemTags.LOGS_THAT_BURN)) {
+            ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.COAL, currentItemStack.getCount()));
+            health = 20;
+        }
+        else if(itemToConvertTo != null && currentItemMaxHealth > 0) {
+            int newItemMaxHealth = isExtraHot ? 20 : itemAge > 200 ? 40 : 80;
+            if(ItemBurningConversion.ITEM_BURNING_CONVERSION_MAP.containsKey(itemToConvertTo)) {
+                newItemMaxHealth += ItemBurningConversion.ITEM_BURNING_CONVERSION_MAP.get(itemToConvertTo).itemExtraHealth() - Math.max(0, itemAge - 200)/5;
+                if(isExtraHot) newItemMaxHealth = newItemMaxHealth/4;
+            }
+            ((ItemEntity)((Object)this)).setStack(new ItemStack(itemToConvertTo, currentItemStack.getCount()));
+            health = Math.max(isExtraHot ? 0 : 20, newItemMaxHealth);
         }
     }
     private void doRegularDamageTransformation(ItemStack currentItemStack) {
