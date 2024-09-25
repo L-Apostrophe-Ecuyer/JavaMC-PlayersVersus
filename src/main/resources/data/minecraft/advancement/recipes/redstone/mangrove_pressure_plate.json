@@ -6,44 +6,31 @@
       "conditions": {
         "items": [
           {
-            "tag": "minecraft:doors"
-          }
-        ]
-      }
-    },
-    "has_trapdoor": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "tag": "minecraft:trapdoors"
+            "items": "minecraft:mangrove_door"
           }
         ]
       }
     },
     "has_planks": {
+      "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:mangrove_planks"
-            ]
+            "items": "minecraft:mangrove_planks"
           }
         ]
-      },
-      "trigger": "minecraft:inventory_changed"
+      }
     },
     "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
       "conditions": {
         "recipe": "minecraft:mangrove_pressure_plate"
-      },
-      "trigger": "minecraft:recipe_unlocked"
+      }
     }
   },
   "requirements": [
     [
       "has_the_recipe",
-      "has_trapdoor",
       "has_door"
     ],
     [
