@@ -23,6 +23,7 @@
 		"items.inventory.InventoryScreenShulkerMixin",
 		"items.inventory.InventoryScreenShulkerAccessor",
 		"items.inventory.ItemMergingMixin",
+		"items.inventory.recipe_book.AnimatedResultButtonMixin",
 
 		"players.attacking.CrosshairTargetMixin",
 		"players.attacking.CrosshairRendererMixin",
