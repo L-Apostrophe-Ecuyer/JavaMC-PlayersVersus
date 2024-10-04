@@ -1,6 +1,9 @@
 {
   "variants": {
-    "": {
+    "is_muddy=true": {
+      "model": "players-versus:block/wild_wheat_muddy"
+    },
+    "is_muddy=false": {
       "model": "players-versus:block/wild_wheat"
     }
   }
