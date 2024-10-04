@@ -46,11 +46,11 @@ public class PotionEffectBileBlock extends Block {
     }
 
     public PotionEffectBileBlock(int color, RegistryEntry<StatusEffect> statusEffect) {
-        this(ColorHelper.fullAlpha(color), statusEffect, 70, 0, 2, 0.6f);
+        this(ColorHelper.fullAlpha(color), statusEffect, 50, 0, 3, 0.8f);
     }
 
     public PotionEffectBileBlock(RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier) {
-        this(statusEffect, statusEffectToGrant, duration, amplifier, 2, 0.6f);
+        this(statusEffect, statusEffectToGrant, duration, amplifier, 3, 0.6f);
     }
 
     public PotionEffectBileBlock(RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
@@ -58,7 +58,7 @@ public class PotionEffectBileBlock extends Block {
     }
 
     public PotionEffectBileBlock(int color, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
-        super(AbstractBlock.Settings.create().sounds(BlockSoundGroup.SLIME).luminance(getLuminanceSupplier(luminance)).noCollision().strength(0.4f, 0.4f).pistonBehavior(PistonBehavior.DESTROY).allowsSpawning((state, world, pos, entityType) -> false));
+        super(AbstractBlock.Settings.create().sounds(BlockSoundGroup.SLIME).luminance(getLuminanceSupplier(luminance)).noCollision().strength(0.2f, 0.4f).pistonBehavior(PistonBehavior.DESTROY).allowsSpawning((state, world, pos, entityType) -> false));
         this.effect = statusEffectToGrant;
         this.PARTICLE = EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, color);
         this.DURATION = duration;
@@ -77,7 +77,7 @@ public class PotionEffectBileBlock extends Block {
                 this.grantStatusEffect(livingEntity, true);
                 world.breakBlock(pos, false);
             }
-            else if(world.getTime() % 40L == 0 || entity.fallDistance > 0.0){
+            else if(world.getTime() % 20L == 0 || entity.fallDistance > 0.0){
                 this.grantStatusEffect(livingEntity, false);
             }
         }
@@ -113,7 +113,7 @@ public class PotionEffectBileBlock extends Block {
 
     @Override
     protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        return (world.getBlockState(pos.down()).isOpaqueFullCube());
+        return world.getFluidState(pos).isEmpty() && (world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos, Direction.DOWN));
     }
 
     @Override

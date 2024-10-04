@@ -63,6 +63,15 @@
         "location": "players-versus:trial_tower/minotaur_1",
         "processors": "players-versus:trial_tower"
       }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/chamber_mud_1",
+        "processors": "players-versus:trial_tower"
+      }
     }
   ]
 }
