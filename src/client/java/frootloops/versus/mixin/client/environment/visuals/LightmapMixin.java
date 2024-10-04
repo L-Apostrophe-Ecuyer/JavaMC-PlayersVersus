@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.client.environment.visuals;
 
+import frootloops.versus.VersusMod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -35,7 +36,7 @@ public abstract class LightmapMixin {
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 6)
     private float reducedNightVision(float l) {return l > 0f && this.client.player.hasStatusEffect(StatusEffects.CONDUIT_POWER) ? l : 0f;}
 
-    @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 8)
+    @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 9)
     private float reducedAmbientLight(float n) {
         if(this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) return n + 0.3f;
         return n * 0.5f - 0.065f;
