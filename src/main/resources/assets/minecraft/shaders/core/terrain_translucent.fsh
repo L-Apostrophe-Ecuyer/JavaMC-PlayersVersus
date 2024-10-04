@@ -17,10 +17,10 @@ in vec4 normal;
 out vec4 fragColor;
 
 void main() {
-    vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator * 0.85;
+    vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator * 0.85f;
 
     // Better transparency
-    color[3] += vertexDistance/(FogEnd + vertexDistance * (color[0] + color[1] + color[2]));
+    color[3] += (vertexDistance + 12.0f)/(FogEnd + vertexDistance * (color[0] + color[1] + color[2]));
 
     // Atmosphere
     float atmosphereAmount = (vertexDistance * vertexDistance) / ((color[0] + color[1] + color[2] + 2.0) * (FogEnd * FogEnd));
