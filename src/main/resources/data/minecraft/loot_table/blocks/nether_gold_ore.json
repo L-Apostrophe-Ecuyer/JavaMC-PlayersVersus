@@ -36,7 +36,7 @@
                   "count": {
                     "type": "minecraft:uniform",
                     "max": 1.0,
-                    "min": 3.0
+                    "min": 2.0
                   },
                   "function": "minecraft:set_count"
                 },
@@ -57,5 +57,5 @@
       "rolls": 1.0
     }
   ],
-  "random_sequence": "minecraft:blocks/lapis_ore"
+  "random_sequence": "minecraft:blocks/nether_gold_ore"
 }

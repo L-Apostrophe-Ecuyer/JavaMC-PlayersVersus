@@ -22,17 +22,10 @@ import net.minecraft.world.World;
 public class CustomDamageSources {
 
     private static final RegistryKey<DamageType> MUD_SUFFOCATION_DAMAGE_TYPE = RegistryKey.of(RegistryKeys.DAMAGE_TYPE, Identifier.of(VersusMod.MOD_ID, "mud_suffocation"));
-    private static DamageSource MUD_SUFFOCATION = null;
+    //private static DamageSource MUD_SUFFOCATION = null;
 
     public static DamageSource getMudSuffocation(World world) {
-        if(MUD_SUFFOCATION == null) {
-            MUD_SUFFOCATION = new DamageSource(world.getDamageSources().registry.entryOf(MUD_SUFFOCATION_DAMAGE_TYPE));
-        }
-        if(MUD_SUFFOCATION == null) {
-            VersusMod.MOD_LOGGER.error("Unable to register mud suffocation damage type!");
-            return world.getDamageSources().inWall();
-        }
-        return MUD_SUFFOCATION;
+        return new DamageSource(world.getDamageSources().registry.entryOf(MUD_SUFFOCATION_DAMAGE_TYPE));
     }
 
 }

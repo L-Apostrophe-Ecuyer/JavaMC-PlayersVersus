@@ -1,28 +1,7 @@
 {
   "variants": {
-    "moisture=0": {
+    "": {
       "model": "players-versus:block/brown_mud"
-    },
-    "moisture=1": {
-      "model": "players-versus:block/brown_mud_moist"
-    },
-    "moisture=2": {
-      "model": "players-versus:block/brown_mud_moist"
-    },
-    "moisture=3": {
-      "model": "players-versus:block/brown_mud_moist"
-    },
-    "moisture=4": {
-      "model": "players-versus:block/brown_mud_moist"
-    },
-    "moisture=5": {
-      "model": "players-versus:block/brown_mud_moist"
-    },
-    "moisture=6": {
-      "model": "players-versus:block/brown_mud_moist"
-    },
-    "moisture=7": {
-      "model": "players-versus:block/brown_mud_moist"
     }
   }
 }

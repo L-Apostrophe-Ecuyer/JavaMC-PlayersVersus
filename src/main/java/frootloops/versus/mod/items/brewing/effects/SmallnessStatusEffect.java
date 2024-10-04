@@ -10,10 +10,10 @@ import net.minecraft.util.Identifier;
 
 public class SmallnessStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
-    private static final int color = 22790024;
+    public static final int COLOR = 22790024;
 
     public SmallnessStatusEffect(String id) {
-        super(category, color, ParticleTypes.SMOKE);
+        super(category, COLOR, ParticleTypes.SMOKE);
 
         this.addAttributeModifier(
                 EntityAttributes.SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),

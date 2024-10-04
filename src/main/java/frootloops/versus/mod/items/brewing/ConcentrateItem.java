@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items.brewing;
 
+import net.minecraft.block.Block;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ConsumableComponent;
 import net.minecraft.component.type.ConsumableComponents;
@@ -11,6 +12,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.BundleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class ConcentrateItem extends Item {
+public class ConcentrateItem extends BlockItem {
 
     public static final ConsumableComponent CONCENTRATE_COMPONENT = ConsumableComponents.food().consumeSeconds(2.0f).consumeEffect(new ApplyEffectsConsumeEffect(List.of(new StatusEffectInstance(StatusEffects.HUNGER, 120, 2),new StatusEffectInstance(StatusEffects.NAUSEA, 140, 2)))).build();
 
@@ -33,8 +35,8 @@ public class ConcentrateItem extends Item {
     protected int amplifier;
     protected int duration;
 
-    public ConcentrateItem(RegistryEntry<StatusEffect> registeredEffect) {
-        super(new Item.Settings().rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, CONCENTRATE_COMPONENT));
+    public ConcentrateItem(RegistryEntry<StatusEffect> registeredEffect, Block block) {
+        super(block, new Item.Settings().rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, CONCENTRATE_COMPONENT));
         if(registeredEffect != null) {
             this.effect = registeredEffect;
             this.amplifier = 0;
@@ -42,8 +44,8 @@ public class ConcentrateItem extends Item {
         }
     }
 
-    public ConcentrateItem(RegistryEntry<StatusEffect> registeredEffect, int amplifier, int duration) {
-        super(new Item.Settings().rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, CONCENTRATE_COMPONENT));
+    public ConcentrateItem(RegistryEntry<StatusEffect> registeredEffect, int amplifier, int duration, Block block) {
+        super(block, new Item.Settings().rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, CONCENTRATE_COMPONENT));
         if(registeredEffect != null) {
             this.effect = registeredEffect;
             this.amplifier = amplifier;
@@ -53,6 +55,11 @@ public class ConcentrateItem extends Item {
 
     public RegistryEntry<StatusEffect> getEffect() {
         return effect;
+    }
+
+    @Override
+    public String getTranslationKey() {
+        return this.getOrCreateTranslationKey();
     }
 
     @Override

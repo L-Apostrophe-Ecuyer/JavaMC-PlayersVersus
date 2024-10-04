@@ -1,14 +1,11 @@
 package frootloops.versus.mod.environment.blocks;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.CustomDamageSources;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.pathing.NavigationType;
-import net.minecraft.entity.damage.DamageSources;
-import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.item.ItemStack;
@@ -35,8 +32,8 @@ import java.util.Optional;
 public class BrownMudBlock extends Block {
 
     public static final IntProperty MOISTURE = Properties.MOISTURE;
-    protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 15.0, 16.0);
     public static final int MAX_MOISTURE = 4;
+    public static final int MAX_MOISTURE_SOLID = -1;
 
     public BrownMudBlock(Settings settings) {
         super(settings);
@@ -52,14 +49,14 @@ public class BrownMudBlock extends Block {
     protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         BlockState blockState = world.getBlockState(pos.up());
         if(!blockState.isSolid() || blockState.isOf(this) || blockState.isIn(BlockTags.DIRT)) return true;
-        else return (getMoistureAmountNearby(world, pos) > 0);
+        else return !(getMoistureAmountNearby(world, pos) < 0);
     }
 
     @Override
     protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        if (!state.canPlaceAt(world, pos)) {
-            world.setBlockState(pos, Blocks.DIRT.getDefaultState());
-        }
+        int currentMoisture = state.get(MOISTURE);
+        int nearbyMoisture = world.getDimension().ultrawarm() ? -MAX_MOISTURE : world.hasRain(pos.up()) ? MAX_MOISTURE : getMoistureAmountNearby(world, pos);
+        if(currentMoisture != nearbyMoisture) world.setBlockState(pos, state.with(MOISTURE, Math.max(0, Math.min(MAX_MOISTURE, nearbyMoisture))), Block.NOTIFY_LISTENERS);
     }
 
     @Override
@@ -70,43 +67,66 @@ public class BrownMudBlock extends Block {
 
     @Override
     protected void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        int currentMoisture = state.get(MOISTURE);
-        int nearbyMoisture = world.getDimension().ultrawarm() ? -MAX_MOISTURE : world.hasRain(pos.up()) ? MAX_MOISTURE : getMoistureAmountNearby(world, pos);
-        if (nearbyMoisture > 0) {
-            if (currentMoisture < MAX_MOISTURE) world.setBlockState(pos, state.with(MOISTURE, Math.min(MAX_MOISTURE, currentMoisture + nearbyMoisture)), Block.NOTIFY_LISTENERS);
-        } else if (nearbyMoisture == -MAX_MOISTURE && currentMoisture == 0) {
+        if(world.getDimension().ultrawarm()) {
             world.setBlockState(pos, Blocks.PACKED_MUD.getDefaultState(), Block.NOTIFY_LISTENERS);
-        } else if (currentMoisture > 0) {
-            world.setBlockState(pos, state.with(MOISTURE, currentMoisture - 1), Block.NOTIFY_LISTENERS);
+            return;
+        }
+        BlockState blockStateDown = world.getBlockState(pos.down());
+        int currentMoisture = state.get(MOISTURE);
+        int nearbyMoisture = world.hasRain(pos.up()) ? MAX_MOISTURE : getMoistureAmountNearby(world, pos, blockStateDown);
+
+        if (nearbyMoisture < 0) {
+            if(currentMoisture == 0) world.setBlockState(pos, Blocks.PACKED_MUD.getDefaultState(), Block.NOTIFY_LISTENERS);
+            else world.setBlockState(pos, this.getDefaultState(), Block.NOTIFY_LISTENERS);
+        }
+        else {
+            BlockState blockStateDownDown = world.getBlockState(pos.down().down());
+            if((blockStateDown.isOf(Blocks.POINTED_DRIPSTONE) && blockStateDown.getFluidState().isEmpty()) || (blockStateDownDown.isOf(Blocks.POINTED_DRIPSTONE) && blockStateDown.getFluidState().isEmpty())) {
+                world.setBlockState(pos, Blocks.MUD.getDefaultState(), Block.NOTIFY_LISTENERS);
+            }
+            else if (nearbyMoisture != currentMoisture) {
+                world.setBlockState(pos, state.with(MOISTURE, nearbyMoisture), Block.NOTIFY_LISTENERS);
+
+            } else if (currentMoisture == 0 && !blockStateDown.isOpaqueFullCube() && random.nextInt(200) == 1) {
+                world.setBlockState(pos, Blocks.DIRT.getDefaultState(), Block.NOTIFY_LISTENERS);
+            }
         }
     }
 
     private static int getMoistureAmountNearby(WorldView world, BlockPos pos) {
+        BlockState state = world.getBlockState(pos.down());
+        return getMoistureAmountNearby(world, pos, state);
+    }
+
+    private static int getMoistureAmountNearby(WorldView world, BlockPos pos, BlockState blockStateDown) {
+        if(blockStateDown.isIn(BlockTags.FIRE) || blockStateDown.isIn(BlockTags.CAMPFIRES) || blockStateDown.isOf(Blocks.LAVA)) return -MAX_MOISTURE;
+
         Optional<Integer> moisture;
-        BlockState state;
-        int moistureAmount = -1;
-        for (BlockPos blockPos : BlockPos.iterate(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
-            state = world.getBlockState(blockPos);
-            if (state.isOf(Blocks.FIRE)) return -MAX_MOISTURE;
-            if (state.getFluidState().isIn(FluidTags.WATER)) return MAX_MOISTURE;
-            moisture = world.getBlockState(blockPos).getOrEmpty(MOISTURE);
-            if (moisture.isPresent() && moisture.get() > 0) moistureAmount += moisture.get();
-            if (moistureAmount >= MAX_MOISTURE) return MAX_MOISTURE;
+        int moistureAmount = blockStateDown.isAir() ? -1 : 0;
+
+        BlockState neighborState;
+        BlockPos[] neighborsPos = new BlockPos[] {pos.up(), pos.north(), pos.south(), pos.west(), pos.east()};
+        for (BlockPos blockPos : neighborsPos) {
+            neighborState = world.getBlockState(blockPos);
+            if (neighborState.isOf(Blocks.FIRE)) return -MAX_MOISTURE;
+            if (neighborState.getFluidState().isIn(FluidTags.WATER)) return MAX_MOISTURE;
+
+            moisture = neighborState.getOrEmpty(MOISTURE);
+            if (moisture.isPresent() && moisture.get() > 0) moistureAmount += Math.min(2,  (moisture.get() + 1)/2);
         }
-        return moistureAmount;
+
+        return Math.min(3, Math.max(0, moistureAmount/2));
     }
 
     @Override
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
         if (!entity.isSpectator() && entity.getBlockStateAtPos().isOf(this) && !canWalkOnWetMud(entity)) {
             Vec3d velocity = entity.getVelocity();
-            if(velocity.y < 0.05) {
-                entity.setVelocity(velocity.multiply(1.0, 0.3, 1.0));
-            }
             if(entity instanceof LivingEntity livingEntity) {
 
                 // When a player goes inside mud, break a fragile block that was on top:
-                if(entity.getY() - Math.floor(entity.getY()) < 0.5) {
+                double entityRelativeY = entity.getY() - Math.floor(entity.getY());
+                if(entityRelativeY < 0.6) {
                     Block blockOnTop = world.getBlockState(pos.up()).getBlock();
                     if(blockOnTop.getHardness() < 0.2f || blockOnTop instanceof PlantBlock) world.breakBlock(pos.up(), true);
                 }
@@ -121,20 +141,20 @@ public class BrownMudBlock extends Block {
                 if(((LivingEntityAccessor)livingEntity).isJumping())  {
                     if(entity.isInFluid()) {
                         entity.slowMovement(state, new Vec3d(1.1, 1.0, 1.1));
-                        entity.setVelocity(velocity.add(0.0, 0.05, 0.0));
+                        entity.setVelocity(velocity.add(0.0, 0.03, 0.0));
                     }
                     else {
-                        entity.slowMovement(state, new Vec3d(1.1, 0.0, 1.1));
+                        entity.slowMovement(state, new Vec3d(1.1, entityRelativeY < 0.9 ? 0.15 : 0.0, 1.1));
                     }
                 }
 
                 // Otherwise, when the entity moves, they'll get hurt:
                 else if(hasEntityMoved(entity)) {
                     if(canEntityBeDamaged && world.getTime() % 5L == 0) entity.damage(CustomDamageSources.getMudSuffocation(world), 1);
-                    entity.slowMovement(state, new Vec3d(0.95, 0.5, 0.95));
+                    entity.slowMovement(state, new Vec3d(0.98, 0.95, 0.98));
                 }
                 else {
-                    entity.slowMovement(state, new Vec3d(0.95, 0.05, 0.95));
+                    entity.slowMovement(state, new Vec3d(0.95, 0.7, 0.95));
                 }
             }
         }
@@ -146,13 +166,14 @@ public class BrownMudBlock extends Block {
         if(entity.getType().isIn(EntityTypeTags.FALL_DAMAGE_IMMUNE)) return;
 
         BlockState blockState;
-        if(state.get(MOISTURE) == 0) {
+        if(state.get(MOISTURE) <= MAX_MOISTURE_SOLID) {
             if(fallDistance > 8.0f) blockState = Blocks.PACKED_MUD.getDefaultState();
             else if(entity instanceof FallingBlockEntity fallingBlock && fallingBlock.getBlockState().isIn(BlockTags.ANVIL)) blockState = Blocks.PACKED_MUD.getDefaultState();
             else blockState = Blocks.DIRT.getDefaultState();
         }
         else {
-            if(fallDistance < 12.0f) return;
+            if(fallDistance < 4.0f) return;
+            else if(fallDistance < 10.0f) blockState = CustomBlocks.BROWN_MUD.getDefaultState();
             else blockState = FarmlandBlock.pushEntitiesUpBeforeBlockChange(state, Blocks.PACKED_MUD.getDefaultState(), world, pos);
         }
         world.setBlockState(pos, blockState);
@@ -163,7 +184,7 @@ public class BrownMudBlock extends Block {
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if(state.get(MOISTURE) == 0) return VoxelShapes.fullCube();
+        if(state.get(MOISTURE) <= MAX_MOISTURE_SOLID) return VoxelShapes.fullCube();
 
         Entity entity;
         if (context instanceof EntityShapeContext && (entity = ((EntityShapeContext)context).getEntity()) != null && entity instanceof LivingEntity livingEntity) {
@@ -175,7 +196,7 @@ public class BrownMudBlock extends Block {
 
     public boolean shouldDamage(World world, LivingEntity entity) {
         if(entity instanceof PigEntity) return false;
-        return world.getBlockState(new BlockPos(entity.getBlockX(), (int) (entity.getEyeY() - 0.11), entity.getBlockZ())).isOf(this);
+        return world.getBlockState(new BlockPos(entity.getBlockX(), (int) (entity.getEyeY() - 0.04), entity.getBlockZ())).isOf(this);
     }
 
     public boolean hasEntityMoved(Entity entity) {
@@ -190,7 +211,7 @@ public class BrownMudBlock extends Block {
 
     @Override
     protected boolean canPathfindThrough(BlockState state, NavigationType type) {
-        return (state.get(MOISTURE) > 0);
+        return (state.get(MOISTURE) > MAX_MOISTURE_SOLID);
     }
 
     @Override
@@ -209,7 +230,7 @@ public class BrownMudBlock extends Block {
         }
 
         int moisture = BrownMudBlock.getMoistureAmountNearby(world, pos);
-        if(moisture > 0) {
+        if(moisture > MAX_MOISTURE_SOLID) {
             world.setBlockState(pos, state.with(MOISTURE, moisture), Block.NOTIFY_LISTENERS);
             BrownMudBlock.mudifyNeighborBlock(world, pos.north(), moisture - 3);
             BrownMudBlock.mudifyNeighborBlock(world, pos.south(), moisture - 3);
