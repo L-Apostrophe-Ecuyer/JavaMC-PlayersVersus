@@ -5,15 +5,14 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.Identifier;
 
 public class LargenessStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
-    private static final int color = 10359374;
+    public static final int COLOR = 10359374;
 
     public LargenessStatusEffect(String id) {
-        super(category, color);
+        super(category, COLOR);
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),

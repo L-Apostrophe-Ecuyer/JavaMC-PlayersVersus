@@ -69,6 +69,7 @@
     "items.ItemStackMixin",
     "items.ItemUsageMixin",
     "items.VanillaItemsMixin",
+    "items.PotionBottleUsageMixin",
 
     "mobs.hostile.end.dragon.ChargingPlayerPhaseMixin",
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",

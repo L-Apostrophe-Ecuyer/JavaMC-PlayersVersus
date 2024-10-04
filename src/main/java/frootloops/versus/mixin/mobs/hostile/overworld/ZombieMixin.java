@@ -87,6 +87,8 @@ public abstract class ZombieMixin extends HostileEntity {
 
         float difficulty = this.getWorld().getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
         ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
+        if(!this.getClass().equals(ZombieEntity.class)) return;
+        if(random.nextBoolean()) return;
 
         float depth = Math.max(8.0f, 96.0f - (float)this.getBlockPos().getY());
         float worldDepthExtraDifficulty = (depth * depth)/16384.0f;

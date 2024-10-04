@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
@@ -98,10 +99,12 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT_ITEM, ItemGroups.NATURAL);
         registerCustomItem("white_clovers", CustomBlockItems.WHITE_CLOVERS_ITEM, ItemGroups.NATURAL);
         registerCustomItem("clovers", CustomBlockItems.CLOVERS_ITEM, ItemGroups.NATURAL);
-        registerCustomItem("withering_deepslate", CustomBlockItems.WITHERING_DEEPSLATE_ITEM, ItemGroups.NATURAL);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
+        if(item == null) {
+            VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
+        }
         if (group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
     }

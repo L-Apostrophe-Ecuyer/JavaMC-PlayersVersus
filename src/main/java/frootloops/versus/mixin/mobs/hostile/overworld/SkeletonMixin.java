@@ -61,19 +61,17 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
             this.setHealth(16);
         }
         else {
-
-            EntityAttributeInstance instanceFollow = this.getAttributes().getCustomInstance(EntityAttributes.GENERIC_FOLLOW_RANGE);
-            if (instanceFollow != null) instanceFollow.setBaseValue(32.0d);
-
             if (rand < 12) {
                 this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
                 this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+                this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(0.0);
                 if (rand % 4 == 1) {
                     this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
                 }
             } else if (rand < 24) {
                 this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
                 this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+                this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(0.0);
                 if (rand % 3 == 1) {
                     this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
                     this.getEquippedStack(EquipmentSlot.OFFHAND).setDamage(rand / 2 + 100);
@@ -84,15 +82,18 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
                 else this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
                 if (rand % 4 == 1) this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
                 if (rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+                this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(0.0);
             } else if (rand < 44) {
                 this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
                 this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
+                this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(0.0);
             } else {
                 this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
                 this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
                 if (rand % 3 == 1) this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
                 if (rand % 4 == 1) this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.GOLDEN_LEGGINGS));
                 if (rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+                this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(0.0);
             }
         }
 

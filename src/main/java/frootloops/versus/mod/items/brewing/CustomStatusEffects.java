@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items.brewing;
 
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.brewing.effects.*;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
@@ -24,6 +25,7 @@ public abstract class CustomStatusEffects {
         VULNERABILITY = registerCustomEffect("vulnerability", new VulnerabilityStatusEffect("vulnerability"));
         BUOYANCY = registerCustomEffect("buoyancy", new BuoyancyStatusEffect("buoyancy"));
         HAUNTING = registerCustomEffect("haunting", new HauntingStatusEffect());
+        VersusMod.MOD_LOGGER.warn("    > Registered custom potion effects:" + !(LARGENESS == null || SMALLNESS == null || VULNERABILITY == null || BUOYANCY == null || HAUNTING == null));
     }
 
     private static RegistryEntry<StatusEffect> registerCustomEffect(String name, StatusEffect effect) {

@@ -10,16 +10,14 @@ import net.minecraft.util.Identifier;
 
 public class BuoyancyStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
-    private static final int color = 15985696;
+    public static final int COLOR = 15985696;
 
     public BuoyancyStatusEffect(String id) {
-        super(category, color, ParticleTypes.BUBBLE_COLUMN_UP);
+        super(category, COLOR, ParticleTypes.BUBBLE_COLUMN_UP);
 
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_WATER_MOVEMENT_EFFICIENCY, Identifier.of(VersusMod.MOD_ID, "effect." + id),
                 0.2, EntityAttributeModifier.Operation.ADD_VALUE
         );
     }
-
-
 }
