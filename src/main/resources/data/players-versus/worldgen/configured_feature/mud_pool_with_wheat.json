@@ -5,7 +5,7 @@
     "depth": {
       "type": "minecraft:uniform",
       "min_inclusive": 1,
-      "max_inclusive": 2
+      "max_inclusive": 3
     },
     "vertical_range": 2,
     "extra_bottom_block_chance": 0,
@@ -21,7 +21,7 @@
       "type": "minecraft:weighted_state_provider",
       "entries": [
         {
-          "weight": 2,
+          "weight": 1,
           "data": {
             "Name": "minecraft:stone"
           }
@@ -29,7 +29,7 @@
         {
           "weight": 2,
           "data": {
-            "Name": "minecraft:dirt"
+            "Name": "minecraft:packed_mud"
           }
         },
         {
@@ -67,7 +67,7 @@
                               "data": {
                                 "Name": "minecraft:wheat",
                                 "Properties": {
-                                  "age": "7"
+                                  "age": "6"
                                 }
                               }
                             },
@@ -76,18 +76,18 @@
                               "data": {
                                 "Name": "minecraft:wheat",
                                 "Properties": {
-                                  "age": "6"
+                                  "age": "4"
                                 }
                               }
                             },
                             {
-                              "weight": 3,
+                              "weight": 5,
                               "data": {
                                 "Name": "players-versus:wheat_grass"
                               }
                             },
                             {
-                              "weight": 1,
+                              "weight": 2,
                               "data": {
                                 "Name": "minecraft:short_grass"
                               }
@@ -104,11 +104,41 @@
                 {
                   "type": "minecraft:block_predicate_filter",
                   "predicate": {
-                    "type": "minecraft:would_survive",
-                    "state": {
-                      "Name": "minecraft:short_grass"
-                    }
+                    "type": "minecraft:all_of",
+                    "predicates": [
+                      {
+                        "type": "minecraft:would_survive",
+                        "state": {
+                          "Name": "minecraft:oak_sapling",
+                          "Properties": {
+                            "stage": "0"
+                          }
+                        }
+                      },
+                      {
+                        "type": "minecraft:matching_blocks",
+                        "offset": [
+                          0,
+                          0,
+                          0
+                        ],
+                        "blocks": "#minecraft:air"
+                      },
+                      {
+                        "type": "minecraft:matching_blocks",
+                        "offset": [
+                          0,
+                          -1,
+                          0
+                        ],
+                        "blocks": "players-versus:brown_mud"
+                      }
+                    ]
                   }
+                },
+                {
+                  "type": "minecraft:heightmap",
+                  "heightmap": "WORLD_SURFACE_WG"
                 }
               ]
             },

@@ -4,11 +4,11 @@
     "config": {
       "features": [
         {
-          "chance": 0.12,
+          "chance": 0.18,
           "feature": "players-versus:lake_mud_underground"
         },
         {
-          "chance": 0.03,
+          "chance": 0.04,
           "feature": "players-versus:lake_mud_surface"
         }
       ],
@@ -21,7 +21,7 @@
     },
     {
       "type": "minecraft:rarity_filter",
-      "chance": 3
+      "chance": 10
     }
   ]
 }
