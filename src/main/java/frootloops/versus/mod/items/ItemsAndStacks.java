@@ -55,7 +55,6 @@ public abstract class ItemsAndStacks {
     public static void onInitialize() {
         RegisteringCustomItems.registerAllCustomItems();
         setUpTransformVanillaItemsToModded();
-        setUpTransformVanillaItemsToVanilla();
         setStackSizes(16, 8, MAX_POTION_STACK_SIZE, 8, 64, 16, 64);
     }
 

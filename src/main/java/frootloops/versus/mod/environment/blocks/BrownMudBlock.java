@@ -87,7 +87,7 @@ public class BrownMudBlock extends Block {
             else if (nearbyMoisture != currentMoisture) {
                 world.setBlockState(pos, state.with(MOISTURE, nearbyMoisture), Block.NOTIFY_LISTENERS);
 
-            } else if (currentMoisture == 0 && !blockStateDown.isOpaqueFullCube() && random.nextInt(200) == 1) {
+            } else if (currentMoisture == 0 && !blockStateDown.isSideSolidFullSquare(world, pos, Direction.DOWN) && random.nextInt(200) == 1) {
                 world.setBlockState(pos, Blocks.DIRT.getDefaultState(), Block.NOTIFY_LISTENERS);
             }
         }

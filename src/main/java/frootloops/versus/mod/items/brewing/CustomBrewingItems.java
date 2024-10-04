@@ -25,7 +25,7 @@ public abstract class CustomBrewingItems {
     public static final Item GLISTERING_BEETROOT = new Item(new Item.Settings().food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).statusEffect(new StatusEffectInstance(StatusEffects.POISON, 60, 0), 0.2f).build()));
 
     public static final Item CONCENTRATE_OF_DEATH = new ConcentrateItem(StatusEffects.WITHER, 2, 80, CustomBlocks.DEATHLY_BILE);
-    public static final Item CORRUPTED_WART_POWDER = new ConcentrateItem(StatusEffects.HUNGER, 4, 120, CustomBlocks.CORRUPTED_BILE); //-> Will be replacing Fermented Spider Eye
+    //public static final Item CORRUPTED_WART_POWDER = new ConcentrateItem(StatusEffects.HUNGER, 4, 120, CustomBlocks.CORRUPTED_BILE); //-> Will be replacing Fermented Spider Eye
 
     public static final Item CONCENTRATE_OF_HARM = new ConcentrateItem(StatusEffects.INSTANT_DAMAGE, CustomBlocks.HARMFUL_BILE);
     public static final Item CONCENTRATE_OF_HEALTH = new ConcentrateItem(StatusEffects.INSTANT_HEALTH, CustomBlocks.HEALTHY_BILE);
@@ -58,10 +58,10 @@ public abstract class CustomBrewingItems {
     public static final Item CONCENTRATE_OF_GLOWING = new ConcentrateItem(StatusEffects.GLOWING, CustomBlocks.GLOWING_BILE);
 
     public static final Item CONCENTRATE_OF_WEAKNESS = new ConcentrateItem(StatusEffects.WEAKNESS, CustomBlocks.WEAKNESS_BILE);
-    public static final Item CONCENTRATE_OF_STRENGTH = new ConcentrateItem(StatusEffects.STRENGTH, CustomBlocks.STRENGTH_BILE); //-> Will be replacing Blaze Powder
+    //public static final Item CONCENTRATE_OF_STRENGTH = new ConcentrateItem(StatusEffects.STRENGTH, CustomBlocks.STRENGTH_BILE); //-> Will be replacing Blaze Powder
 
     public static final Item CONCENTRATE_OF_WIND = new ConcentrateItem(StatusEffects.WIND_CHARGED, CustomBlocks.WIND_BILE);
-    public static final Item CONCENTRATE_OF_FIRE = new ConcentrateItem(StatusEffects.FIRE_RESISTANCE, CustomBlocks.FIRE_BILE); //-> Will be replacing Magma Cream
+    //public static final Item CONCENTRATE_OF_FIRE = new ConcentrateItem(StatusEffects.FIRE_RESISTANCE, CustomBlocks.FIRE_BILE); //-> Will be replacing Magma Cream
 
     public static final Item CONCENTRATE_OF_OOZE = new ConcentrateItem(StatusEffects.OOZING, CustomBlocks.OOZE_BILE);
     public static final Item CONCENTRATE_OF_INFESTATION = new ConcentrateItem(StatusEffects.INFESTED, CustomBlocks.INFESTATION_BILE);

@@ -46,7 +46,7 @@ public class PotionEffectBileBlock extends Block {
     }
 
     public PotionEffectBileBlock(int color, RegistryEntry<StatusEffect> statusEffect) {
-        this(ColorHelper.fullAlpha(color), statusEffect, 70, 0, 2, 0.6f);
+        this(ColorHelper.Argb.fullAlpha(color), statusEffect, 70, 0, 2, 0.6f);
     }
 
     public PotionEffectBileBlock(RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier) {
@@ -54,7 +54,7 @@ public class PotionEffectBileBlock extends Block {
     }
 
     public PotionEffectBileBlock(RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
-        this(ColorHelper.fullAlpha(statusEffect.value().getColor()), statusEffectToGrant, duration, amplifier, luminance, ambientOcclusion);
+        this(ColorHelper.Argb.fullAlpha(statusEffect.value().getColor()), statusEffectToGrant, duration, amplifier, luminance, ambientOcclusion);
     }
 
     public PotionEffectBileBlock(int color, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
@@ -113,7 +113,7 @@ public class PotionEffectBileBlock extends Block {
 
     @Override
     protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        return (world.getBlockState(pos.down()).isOpaqueFullCube());
+        return world.getFluidState(pos).isEmpty() && (world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos, Direction.DOWN));
     }
 
     @Override
