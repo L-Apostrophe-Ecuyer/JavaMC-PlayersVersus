@@ -25,7 +25,7 @@ void main() {
     #endif
 
     // Atmosphere
-    float atmosphereAmount = (vertexDistance * vertexDistance) / ((color[0] + color[1] + color[2] + 2.0) * (FogEnd * FogEnd));
+    float atmosphereAmount = (vertexDistance * vertexDistance) / ((color[0] + color[1] + color[2] + 1.4) * (FogEnd * FogEnd));
     color[0] += (0.9 * FogColor[0] - color[0] + (vertexColor[1] - 0.4)/3.0) * atmosphereAmount;
     color[1] += (1.0 * FogColor[1] - color[1] + (vertexColor[2] - 0.4)/3.0) * atmosphereAmount;
     color[2] += (1.1 * FogColor[2] - color[2] + (vertexColor[3] - 0.4)/3.0) * atmosphereAmount;
