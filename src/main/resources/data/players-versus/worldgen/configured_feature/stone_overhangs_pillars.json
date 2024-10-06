@@ -7,7 +7,7 @@
     "extra_bottom_block_chance": 0,
     "extra_edge_column_chance": 0,
     "vegetation_chance": 0.05,
-    "xz_radius": 10,
+    "xz_radius": 5,
     "replaceable": "#players-versus:can_have_stone_pillars",
     "ground_state": {
       "type": "minecraft:simple_state_provider",

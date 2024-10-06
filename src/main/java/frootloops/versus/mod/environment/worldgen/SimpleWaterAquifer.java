@@ -3,6 +3,7 @@
  */
 package frootloops.versus.mod.environment.worldgen;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.ChunkPos;
@@ -24,10 +25,7 @@ public class SimpleWaterAquifer implements AquiferSampler {
     private final DensityFunction ridgesDensityFunction;
 
     private final static int SEA_LEVEL = 64;
-    private final static int MIN_Y_LEVEL_FOR_WATERFALLS = SEA_LEVEL + 16;
-
-    private final static double MAX_DENSITY_FOR_WATERFALLS = 0.05;
-
+    private final static int MIN_Y_LEVEL_FOR_WATERFALLS = SEA_LEVEL + 24;
     private int fluidLevelY;
 
     private boolean needsFluidTick;
@@ -68,7 +66,7 @@ public class SimpleWaterAquifer implements AquiferSampler {
     @Override
     @Nullable
     public BlockState apply(DensityFunction.NoisePos pos, double density) {
-        if (density > MAX_DENSITY_FOR_WATERFALLS) {
+        if (density > 0.0) {
             this.needsFluidTick = false;
             return null;
         }
@@ -76,10 +74,6 @@ public class SimpleWaterAquifer implements AquiferSampler {
         int x = pos.blockX();
         int y = pos.blockY();
         int z = pos.blockZ();
-        if (y < MIN_Y_LEVEL_FOR_WATERFALLS && density > 0.0) {
-            this.needsFluidTick = false;
-            return null;
-        }
 
         /*
         ------------------------------------------------------------------------------
@@ -111,9 +105,8 @@ public class SimpleWaterAquifer implements AquiferSampler {
             double seaLevelFloodedness = this.fluidLevelFloodednessFunction.sample(pos);
 
             // Set the noise thresholds for when floodedness turns into a stone barrier, versus when it's water
-            double maxFloodednessForBarrier = (y < 48 ? 0.34 : 0.34 - (double)(y - 48) * 0.0065);
-            double minFloodednessForBarrier = (y < 56 ? 0.0001 : (double)(y - 56) * 0.0285);
-
+            double maxFloodednessForBarrier = 0.34;
+            double minFloodednessForBarrier = 0.0001 + (y < 60 ? 0.0 : (double)(y - 60) * 0.015);
             if(seaLevelFloodedness > maxFloodednessForBarrier) {
                 this.needsFluidTick = (seaLevelFloodedness < maxFloodednessForBarrier + 0.2);
                 return Blocks.WATER.getDefaultState();

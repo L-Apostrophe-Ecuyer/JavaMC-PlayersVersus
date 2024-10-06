@@ -1,7 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.features;
 
 import com.mojang.serialization.Codec;
-import frootloops.versus.VersusMod;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -33,32 +32,28 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
         BlockPos blockPos = context.getOrigin();
         StoneStalagtiteFeatureConfig config = context.getConfig();
         Random random = context.getRandom();
-        if (!StoneStalagtiteHelper.canGenerate(structureWorldAccess, blockPos)) {
+        if (!StoneStalagtiteHelper.isAirOrWater(structureWorldAccess, blockPos)) {
             return false;
         }
 
         int floorToCeilingSearchRange = config.floorToCeilingSearchRange();
-        float maxColumnRadiusToCaveHeightRatio = 0.99f;
         float stalactiteBluntness = 0.8f;
-        int columnRadiusMin = 3;
-        int columnRadiusMax = 7;
+        int columnRadiusMin = 5;
+        int columnRadiusMax = 9;
         float heightScale = 1.5f;
         float windSpeed = 0.0f;
 
-        Optional<CaveSurface> optional = CaveSurface.create(structureWorldAccess, blockPos, floorToCeilingSearchRange, StoneStalagtiteHelper::canGenerate, StoneStalagtiteHelper::canReplaceOrLava);
+        Optional<CaveSurface> optional = CaveSurface.create(structureWorldAccess, blockPos, floorToCeilingSearchRange, StoneStalagtiteHelper::isAirOrWater, StoneStalagtiteHelper::canReplace);
         if (optional.isEmpty() || !(optional.get() instanceof CaveSurface.Bounded)) {
             return false;
         }
         CaveSurface.Bounded bounded = (CaveSurface.Bounded)optional.get();
-        if (bounded.getHeight() < 4) {
-            return false;
-        }
-        int maxRadiusForHeight = (int)((float)bounded.getHeight() * maxColumnRadiusToCaveHeightRatio);
-        int radius = MathHelper.clamp(maxRadiusForHeight, 3, columnRadiusMax);
-        int k = MathHelper.nextBetween(random, columnRadiusMin, radius);
+        int height = bounded.getHeight();
+        if (height < columnRadiusMin) return false;
+        int radius = MathHelper.nextBetween(random, columnRadiusMin, Math.min(height, columnRadiusMax));
 
-        StoneStalagmiteGenerator generatorCeiling = createGenerator(blockPos.withY(bounded.getCeiling() - 1), false, random, k, stalactiteBluntness, heightScale);
-        StoneStalagmiteGenerator generatorFloor = createGenerator(blockPos.withY(bounded.getFloor() + 1), true, random, k, stalactiteBluntness, heightScale);
+        StoneStalagmiteGenerator generatorCeiling = createGenerator(blockPos.withY(bounded.getCeiling() - 1), false, random, radius, stalactiteBluntness, heightScale);
+        StoneStalagmiteGenerator generatorFloor = createGenerator(blockPos.withY(bounded.getFloor() + 1), true, random, radius, stalactiteBluntness, heightScale);
         WindModifier windModifier = generatorCeiling.generateWind(config) && generatorFloor.generateWind(config) ? new WindModifier(blockPos.getY(), random, windSpeed) : WindModifier.create();
         boolean canGenerateCeiling = generatorCeiling.canGenerate(structureWorldAccess, windModifier);
         boolean canGenerateFloor = generatorFloor.canGenerate(structureWorldAccess, windModifier);
@@ -129,24 +124,25 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
         }
 
         void generate(StructureWorldAccess world, Random random, WindModifier wind) {
-            for (int i = -this.scale; i <= this.scale; ++i) {
-                forJ: for (int j = -this.scale; j <= this.scale; ++j) {
+            for (int x = -this.scale; x <= this.scale; ++x) {
+                forZ: for (int z = -this.scale; z <= this.scale; ++z) {
                     int scale;
-                    float distance = MathHelper.sqrt(i * i + j * j);
+                    float distance = (x == 0 && z == 0) ? 1.0f : MathHelper.sqrt(x * x + z * z);
                     if (distance > (float)this.scale || (scale = this.scale(distance)) <= 0) continue;
                     if ((double)random.nextFloat() < 0.2) {
                         scale = (int)((float)scale * MathHelper.nextBetween(random, 0.8f, 1.0f));
                     }
-                    BlockPos.Mutable mutable = this.pos.add(i, 0, j).mutableCopy();
+                    BlockPos.Mutable mutable = this.pos.add(x, 0, z).mutableCopy();
                     boolean hasPlacedBlock = false;
                     int topY = this.isStalagmite ? world.getTopY(Heightmap.Type.WORLD_SURFACE_WG, mutable.getX(), mutable.getZ()) : Integer.MAX_VALUE;
-                    for (int m = 0; m < scale && mutable.getY() < topY; ++m) {
+                    for (int y = 0; y < scale && mutable.getY() < topY; ++y) {
                         BlockPos blockPos = wind.modify(mutable);
-                        if (StoneStalagtiteHelper.canGenerateOrLava(world, blockPos)) {
+                        BlockState state = world.getBlockState(blockPos);
+                        if (StoneStalagtiteHelper.isAirOrWater(state)) {
                             hasPlacedBlock = true;
                             world.setBlockState(blockPos, STALAGMITE_BLOCKSTATE, Block.NOTIFY_LISTENERS);
-                        } else if (hasPlacedBlock && world.getBlockState(blockPos).isIn(BlockTags.BASE_STONE_OVERWORLD)) {
-                            continue forJ;
+                        } else if (hasPlacedBlock && StoneStalagtiteHelper.canReplace(state)) {
+                            continue forZ;
                         }
                         mutable.move(this.isStalagmite ? Direction.UP : Direction.DOWN);
                     }

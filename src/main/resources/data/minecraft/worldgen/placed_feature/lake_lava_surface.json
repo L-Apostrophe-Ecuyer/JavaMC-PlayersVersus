@@ -4,17 +4,21 @@
     "config": {
       "features": [
         {
-          "chance": 0.9,
+          "chance": 0.2,
           "feature": "players-versus:stone_overhangs_short"
+        },
+        {
+          "chance": 0.1,
+          "feature": "players-versus:stone_overhangs_pillars"
         }
       ],
-      "default": "players-versus:stone_overhangs_pillars"
+      "default": "players-versus:stone_overhangs_no_decoration"
     }
   },
   "placement": [
     {
       "type": "minecraft:count",
-      "count": 55
+      "count": 4
     },
     {
       "type": "minecraft:in_square"
@@ -24,10 +28,10 @@
       "height": {
         "type": "minecraft:uniform",
         "min_inclusive": {
-          "absolute": 68
+          "absolute": 72
         },
         "max_inclusive": {
-          "absolute": 128
+          "absolute": 96
         }
       }
     },
@@ -53,3 +57,4 @@
     }
   ]
 }
+
