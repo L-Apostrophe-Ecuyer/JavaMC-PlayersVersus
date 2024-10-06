@@ -4,11 +4,11 @@
     "config": {
       "features": [
         {
-          "chance": 0.18,
+          "chance": 0.000018,
           "feature": "players-versus:lake_mud_underground"
         },
         {
-          "chance": 0.04,
+          "chance": 0.00004,
           "feature": "players-versus:lake_mud_surface"
         }
       ],

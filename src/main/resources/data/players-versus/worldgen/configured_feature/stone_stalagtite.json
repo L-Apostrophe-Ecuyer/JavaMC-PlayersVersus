@@ -1,6 +1,6 @@
 {
   "type": "players-versus:stone_stalagtite",
   "config": {
-    "floorToCeilingSearchRange": 24
+    "floorToCeilingSearchRange": 14
   }
 }

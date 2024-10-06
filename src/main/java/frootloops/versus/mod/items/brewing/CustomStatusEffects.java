@@ -25,7 +25,6 @@ public abstract class CustomStatusEffects {
         VULNERABILITY = registerCustomEffect("vulnerability", new VulnerabilityStatusEffect("vulnerability"));
         BUOYANCY = registerCustomEffect("buoyancy", new BuoyancyStatusEffect("buoyancy"));
         HAUNTING = registerCustomEffect("haunting", new HauntingStatusEffect());
-        VersusMod.MOD_LOGGER.warn("    > Registered custom potion effects:" + !(LARGENESS == null || SMALLNESS == null || VULNERABILITY == null || BUOYANCY == null || HAUNTING == null));
     }
 
     private static RegistryEntry<StatusEffect> registerCustomEffect(String name, StatusEffect effect) {

@@ -22,10 +22,10 @@
           "data": {
             "type": "minecraft:uniform",
             "min_inclusive": {
-              "absolute": -40
+              "absolute": -38
             },
             "max_inclusive": {
-              "absolute": -32
+              "absolute": -22
             }
           }
         }

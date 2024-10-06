@@ -12,9 +12,15 @@
     "ground_state": {
       "type": "minecraft:simple_state_provider",
       "state": {
-        "Name": "minecraft:pink_concrete"
+        "Name": "minecraft:stone"
       }
     },
-    "vegetation_feature": "minecraft:classic_vines_cave_feature"
+    "vegetation_feature": {
+      "feature": {
+        "type": "minecraft:no_op",
+        "config": {}
+      },
+      "placement": []
+    }
   }
 }
