@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "players-versus:block/terracotta_chiseled_top",
+    "side": "players-versus:block/terracotta_chiseled"
+  }
+}

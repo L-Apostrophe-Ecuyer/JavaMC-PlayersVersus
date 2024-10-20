@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "group": "dirts_to_dirt",
   "ingredients": [
-    "minecraft:packed_mud"
+    "players-versus:mudstone"
   ],
   "result": {
     "id": "minecraft:dirt",

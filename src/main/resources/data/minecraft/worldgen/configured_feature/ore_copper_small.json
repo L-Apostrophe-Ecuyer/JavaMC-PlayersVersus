@@ -1,14 +1,14 @@
 {
   "type": "minecraft:ore",
   "config": {
-    "size": 16,
+    "size": 12,
     "discard_chance_on_air_exposure": 0.2,
     "targets": [
       {
         "target": {
           "predicate_type": "minecraft:random_block_match",
           "block": "minecraft:stone",
-          "probability": 0.4
+          "probability": 0.3
         },
         "state": {
           "Name": "minecraft:stone"
@@ -18,10 +18,10 @@
         "target": {
           "predicate_type": "minecraft:random_block_match",
           "block": "minecraft:stone",
-          "probability": 0.65
+          "probability": 0.5
         },
         "state": {
-          "Name": "minecraft:granite"
+          "Name": "minecraft:terracotta"
         }
       },
       {

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "players-versus:block/mudstone_tile_slab"
+    },
+    "type=double": {
+      "model": "players-versus:block/mudstone_tiles"
+    },
+    "type=top": {
+      "model": "players-versus:block/mudstone_tile_slab_top"
+    }
+  }
+}

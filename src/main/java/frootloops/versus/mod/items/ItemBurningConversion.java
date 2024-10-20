@@ -29,14 +29,7 @@ public class ItemBurningConversion {
         ITEM_BURNING_CONVERSION_MAP.put(Items.TERRACOTTA, new ItemBurningConversionRecord(20, null, null, false));
         ITEM_BURNING_CONVERSION_MAP.put(Items.CLAY_BALL, new ItemBurningConversionRecord(200, Items.BRICK, null, false));
         ITEM_BURNING_CONVERSION_MAP.put(Items.CLAY, new ItemBurningConversionRecord(200, Items.TERRACOTTA, Items.BLACK_TERRACOTTA, false));
-
-        ITEM_BURNING_CONVERSION_MAP.put(Items.PACKED_MUD, new ItemBurningConversionRecord(40, null, null, false));
-        ITEM_BURNING_CONVERSION_MAP.put(Items.MUD_BRICKS, new ItemBurningConversionRecord(40, null, null, false));
-        ITEM_BURNING_CONVERSION_MAP.put(Items.MUD_BRICK_SLAB, new ItemBurningConversionRecord(40, null, null, false));
-        ITEM_BURNING_CONVERSION_MAP.put(Items.MUD_BRICK_STAIRS, new ItemBurningConversionRecord(40, null, null, false));
-        ITEM_BURNING_CONVERSION_MAP.put(Items.MUD_BRICK_WALL, new ItemBurningConversionRecord(40, null, null, false));
-        ITEM_BURNING_CONVERSION_MAP.put(CustomBlockItems.BROWN_MUD_ITEM, new ItemBurningConversionRecord(10, Items.PACKED_MUD, Items.PACKED_MUD, false));
-        ITEM_BURNING_CONVERSION_MAP.put(CustomBlockItems.BROWN_MUD_BRICK_SLAB_ITEM, new ItemBurningConversionRecord(10, Items.MUD_BRICK_SLAB, Items.MUD_BRICK_SLAB, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomBlockItems.BROWN_MUD, new ItemBurningConversionRecord(10, Items.PACKED_MUD, Items.PACKED_MUD, false));
 
         ITEM_BURNING_CONVERSION_MAP.put(Items.GOLD_NUGGET, new ItemBurningConversionRecord(240, null, null, false));
         ITEM_BURNING_CONVERSION_MAP.put(Items.GOLD_BLOCK, new ItemBurningConversionRecord(180, Items.GOLD_INGOT, Items.GOLD_INGOT, false));

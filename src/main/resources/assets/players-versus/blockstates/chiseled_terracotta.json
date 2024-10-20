@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "players-versus:block/chiseled_terracotta"
+      "model": "players-versus:block/terracotta_chiseled"
     }
   }
 }

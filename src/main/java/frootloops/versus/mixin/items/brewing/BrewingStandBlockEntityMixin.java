@@ -51,7 +51,7 @@ public abstract class BrewingStandBlockEntityMixin
             return brewingRecipeRegistry.isValidIngredient(stack);
         }
         if (slot == 4) {
-            return stack.isOf(CustomBlockItems.CORRUPTED_WART_ITEM) || stack.isOf(CustomBlockItems.WITHERED_WART_ITEM) || stack.isOf(Items.NETHER_WART);
+            return stack.isOf(CustomBlockItems.CORRUPTED_WART) || stack.isOf(CustomBlockItems.WITHERED_WART) || stack.isOf(Items.NETHER_WART);
         }
         return (stack.isOf(Items.POTION) || stack.isOf(Items.SPLASH_POTION) || stack.isOf(Items.LINGERING_POTION)) && this.getStack(slot).isEmpty();
     }

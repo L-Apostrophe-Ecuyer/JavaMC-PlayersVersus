@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_column",
+    "textures": {
+        "end": "players-versus:block/polished_dripstone",
+        "side": "players-versus:block/polished_dripstone_slab_side"
+    }
+}

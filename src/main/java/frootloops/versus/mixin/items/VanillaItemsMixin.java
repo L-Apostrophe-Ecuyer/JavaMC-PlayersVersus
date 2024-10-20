@@ -39,7 +39,7 @@ public abstract class VanillaItemsMixin implements ComponentHolder, FabricItemSt
 
         @Inject(method = "isItemEnabled", at = @At("HEAD"), cancellable = true)
         public void isItemEnabled(FeatureSet enabledFeatures, CallbackInfoReturnable<Boolean> cir) {
-                if(ItemsAndStacks.hasReplacementItem(item)) cir.setReturnValue(false);
+                if(ItemsAndStacks.hasModdedReplacementItem(item)) cir.setReturnValue(false);
         }
 
         @Inject(method = "onClicked", at = @At("HEAD"), cancellable = false)

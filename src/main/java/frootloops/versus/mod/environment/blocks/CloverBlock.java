@@ -31,19 +31,6 @@ public class CloverBlock extends ShortPlantBlock {
     }
 
     @Override
-    public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
-        if((state.getBlock() == CustomBlocks.CLOVERS)) {
-            world.setBlockState(pos, CustomBlocks.WHITE_CLOVERS.getDefaultState(), NOTIFY_LISTENERS);
-        }
-        else {
-            float rand = random.nextFloat();
-            if(rand < 0.01f) Block.dropStack(world, pos, CustomBrewingItems.FOUR_LEAF_CLOVER.getDefaultStack());
-            else if(rand < 0.3f) Block.dropStack(world, pos, CustomBlockItems.CLOVERS_ITEM.getDefaultStack());
-            else if(rand < 0.4f) Block.dropStack(world, pos, CustomBlockItems.WHITE_CLOVERS_ITEM.getDefaultStack());
-        }
-    }
-
-    @Override
     protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) {
         return floor.isIn(BlockTags.DIRT) || floor.isOf(Blocks.MOSS_BLOCK) || floor.isOf(Blocks.MOSSY_COBBLESTONE) || floor.isOf(Blocks.MOSSY_STONE_BRICKS);
     }

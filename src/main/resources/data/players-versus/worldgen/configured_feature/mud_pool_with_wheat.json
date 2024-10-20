@@ -29,16 +29,13 @@
         {
           "weight": 2,
           "data": {
-            "Name": "minecraft:packed_mud"
+            "Name": "players-versus:mudstone"
           }
         },
         {
           "weight": 6,
           "data": {
-            "Name": "players-versus:brown_mud",
-            "Properties": {
-              "moisture": "0"
-            }
+            "Name": "players-versus:brown_mud"
           }
         }
       ]

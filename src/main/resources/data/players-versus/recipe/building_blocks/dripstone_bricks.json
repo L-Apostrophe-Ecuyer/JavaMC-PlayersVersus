@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "dripstone",
+  "category": "building",
+  "pattern": [
+    "SS",
+    "SS"
+  ],
+  "key": {
+    "S" : "players-versus:polished_dripstone"
+  },
+  "result": {
+    "id": "players-versus:dripstone_bricks",
+    "count": 4
+  }
+}
+
+
+

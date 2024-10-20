@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:dripstone_wall",
+    "players-versus:dripstone_brick_wall",
+    "players-versus:brown_mud_brick_wall",
+    "players-versus:mudstone_brick_wall",
+    "players-versus:terracotta_brick_wall"
+  ]
+}

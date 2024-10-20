@@ -1,12 +1,11 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "category": "building",
-  "ingredients": [
-    "minecraft:gravel",
-    "players-versus:brown_mud"
-  ],
+  "type": "minecraft:smelting",
+  "group": "mudstone",
+  "category": "blocks",
+  "ingredient": "players-versus:brown_mud",
   "result": {
-    "id": "minecraft:packed_mud",
-    "count": 2
-  }
+    "id": "players-versus:mudstone"
+  },
+  "experience": 0.0,
+  "cookingtime": 100
 }

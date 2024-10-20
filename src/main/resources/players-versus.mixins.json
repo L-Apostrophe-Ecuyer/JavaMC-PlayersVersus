@@ -18,6 +18,7 @@
     "enchantments.EnchantmentBottleMixin",
 
     "environment.worldgen.AquifersMixin",
+    "environment.worldgen.OreVeinMixin",
 
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",

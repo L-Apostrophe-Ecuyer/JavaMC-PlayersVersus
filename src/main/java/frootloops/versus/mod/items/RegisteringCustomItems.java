@@ -2,6 +2,7 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
@@ -20,7 +21,7 @@ import static frootloops.versus.VersusMod.MOD_ID;
 public abstract class RegisteringCustomItems {
     public static void registerAllCustomItems() {
 
-        registerCustomItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS, ItemGroups.TOOLS);
+        registerVanillaOverhaulItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS);
 
         registerCustomItem("withered_zombie_spawn_egg", ModEntities.WITHERED_ZOMBIE_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
         registerCustomItem("frosted_zombie_spawn_egg", ModEntities.FROSTED_ZOMBIE_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
@@ -42,13 +43,12 @@ public abstract class RegisteringCustomItems {
 
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
-        registerCustomItem("glistering_melon_slice", CustomBrewingItems.GLISTERING_MELON_SLICE, ItemGroups.FOOD_AND_DRINK);
+        registerVanillaOverhaulItem("glistering_melon_slice", CustomBrewingItems.GLISTERING_MELON_SLICE);
 
         registerCustomItem("four_leaf_clover", CustomBrewingItems.FOUR_LEAF_CLOVER, ItemGroups.INGREDIENTS);
-        //registerCustomItem("three_leaf_clover", CustomBrewingItems.THREE_LEAF_CLOVER, ItemGroups.INGREDIENTS);  // Removed/cancelled
-        registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART_ITEM, ItemGroups.INGREDIENTS);
-        registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART_ITEM, ItemGroups.INGREDIENTS);
-        registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER, ItemGroups.INGREDIENTS); //-> Replacing Fermented Spider Eyes
+        registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART, ItemGroups.INGREDIENTS);
+        registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART, ItemGroups.INGREDIENTS);
+        registerVanillaOverhaulItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER); //-> Replacing Fermented Spider Eyes
 
         registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_DEATH, ItemGroups.INGREDIENTS);          // New potion & effect!
         registerCustomItem("concentrate_of_health", CustomBrewingItems.CONCENTRATE_OF_HEALTH, ItemGroups.INGREDIENTS);
@@ -72,8 +72,8 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_invisibility", CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_glowing", CustomBrewingItems.CONCENTRATE_OF_GLOWING, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_weakness", CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, ItemGroups.INGREDIENTS);
-        registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH, ItemGroups.INGREDIENTS); //-> Replacing Blaze Powder
-        registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE, ItemGroups.INGREDIENTS);// -> Replacing Magma Cream
+        registerVanillaOverhaulItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH); //-> Replacing Blaze Powder
+        registerVanillaOverhaulItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE);// -> Replacing Magma Cream
         registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.INGREDIENTS);
@@ -82,37 +82,57 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_luck", CustomBrewingItems.CONCENTRATE_OF_LUCK, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_unluck", CustomBrewingItems.CONCENTRATE_OF_UNLUCK, ItemGroups.INGREDIENTS);
 
-        registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH_ITEM, ItemGroups.FUNCTIONAL);
-        registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH_ITEM, ItemGroups.FUNCTIONAL);
-        registerCustomItem("polished_stone", CustomBlockItems.POLISHED_STONE_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("polished_stone_slab", CustomBlockItems.POLISHED_STONE_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("polished_stone_stairs", CustomBlockItems.POLISHED_STONE_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_bricks", CustomBlockItems.GRANITE_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_brick_slab", CustomBlockItems.GRANITE_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_brick_stairs", CustomBlockItems.GRANITE_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_tiles", CustomBlockItems.GRANITE_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_tile_slab", CustomBlockItems.GRANITE_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("granite_tile_stairs", CustomBlockItems.GRANITE_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("brown_mud", CustomBlockItems.BROWN_MUD_ITEM, ItemGroups.NATURAL);
-        registerCustomItem("brown_mud_bricks", CustomBlockItems.BROWN_MUD_BRICKS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("brown_mud_brick_slab", CustomBlockItems.BROWN_MUD_BRICK_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("brown_mud_brick_stairs", CustomBlockItems.BROWN_MUD_BRICK_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("brown_mud_tiles", CustomBlockItems.BROWN_MUD_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("brown_mud_tile_slab", CustomBlockItems.BROWN_MUD_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("brown_mud_tile_stairs", CustomBlockItems.BROWN_MUD_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("packed_mud_tiles", CustomBlockItems.PACKED_MUD_TILES_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("packed_mud_tile_slab", CustomBlockItems.PACKED_MUD_TILES_SLAB_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("packed_mud_tile_stairs", CustomBlockItems.PACKED_MUD_TILES_STAIRS_ITEM, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("wheat_grass", CustomBlockItems.WHEAT_GRASS_ITEM, ItemGroups.NATURAL);
-        registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT_ITEM, ItemGroups.NATURAL);
-        registerCustomItem("white_clovers", CustomBlockItems.WHITE_CLOVERS_ITEM, ItemGroups.NATURAL);
-        registerCustomItem("clovers", CustomBlockItems.CLOVERS_ITEM, ItemGroups.NATURAL);
+        registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH, ItemGroups.FUNCTIONAL);
+        registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH, ItemGroups.FUNCTIONAL);
+
+        registerCustomItem("polished_stone", CustomBlockItems.POLISHED_STONE, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_stone_slab", CustomBlockItems.POLISHED_STONE_SLAB, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_stone_stairs", CustomBlockItems.POLISHED_STONE_STAIRS, ItemGroups.BUILDING_BLOCKS);
+
+        registerCustomItem("dripstone_slab", CustomBlockItems.DRIPSTONE_SLAB, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("dripstone_stairs", CustomBlockItems.DRIPSTONE_STAIRS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("dripstone_wall", CustomBlockItems.DRIPSTONE_WALL, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_dripstone", CustomBlockItems.POLISHED_DRIPSTONE, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_dripstone_slab", CustomBlockItems.POLISHED_DRIPSTONE_SLAB, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("polished_dripstone_stairs", CustomBlockItems.POLISHED_DRIPSTONE_STAIRS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("dripstone_bricks", CustomBlockItems.DRIPSTONE_BRICKS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("dripstone_brick_slab", CustomBlockItems.DRIPSTONE_BRICK_SLAB, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("dripstone_brick_stairs", CustomBlockItems.DRIPSTONE_BRICK_STAIRS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("dripstone_brick_wall", CustomBlockItems.DRIPSTONE_BRICK_WALL, ItemGroups.BUILDING_BLOCKS);
+
+        registerCustomItem("brown_mud", CustomBlockItems.BROWN_MUD, ItemGroups.NATURAL);
+        registerCustomItem("brown_mud_bricks", CustomBlockItems.BROWN_MUD_BRICKS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_brick_slab", CustomBlockItems.BROWN_MUD_BRICK_SLAB, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_brick_stairs", CustomBlockItems.BROWN_MUD_BRICK_STAIRS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("brown_mud_brick_wall", CustomBlockItems.BROWN_MUD_BRICK_WALL, ItemGroups.BUILDING_BLOCKS);
+        registerVanillaOverhaulItem("mudstone", CustomBlockItems.MUDSTONE);
+        registerVanillaOverhaulItem("mudstone_bricks", CustomBlockItems.MUDSTONE_BRICKS);
+        registerVanillaOverhaulItem("mudstone_brick_slab", CustomBlockItems.MUDSTONE_BRICK_SLAB);
+        registerVanillaOverhaulItem("mudstone_brick_stairs", CustomBlockItems.MUDSTONE_BRICK_STAIRS);
+        registerVanillaOverhaulItem("mudstone_brick_wall", CustomBlockItems.MUDSTONE_BRICK_WALL);
+
+        registerCustomItem("terracotta_bricks", CustomBlockItems.TERRACOTTA_BRICKS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("terracotta_brick_slab", CustomBlockItems.TERRACOTTA_BRICK_SLAB, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("terracotta_brick_stairs", CustomBlockItems.TERRACOTTA_BRICK_STAIRS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("terracotta_brick_wall", CustomBlockItems.TERRACOTTA_BRICK_WALL, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("terracotta_tiles", CustomBlockItems.TERRACOTTA_TILES, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("terracotta_tile_slab", CustomBlockItems.TERRACOTTA_TILE_SLAB, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("terracotta_tile_stairs", CustomBlockItems.TERRACOTTA_TILE_STAIRS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("chiseled_terracotta", CustomBlockItems.CHISELED_TERRACOTTA, ItemGroups.BUILDING_BLOCKS);
+        registerVanillaOverhaulItem("clay_block", CustomBlockItems.CLAY_BLOCK);
+
+        registerCustomItem("wheat_grass", CustomBlockItems.WHEAT_GRASS, ItemGroups.NATURAL);
+        registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT, ItemGroups.NATURAL);
+        registerCustomItem("clovers", CustomBlockItems.CLOVERS, ItemGroups.NATURAL);
+    }
+
+    public static Item registerVanillaOverhaulItem(String name, Item item) {
+        if(item == null) VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
+        return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
-        if(item == null) {
-            VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
-        }
+        if(item == null) VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
         if (group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
     }

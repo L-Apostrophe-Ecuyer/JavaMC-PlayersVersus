@@ -25,7 +25,6 @@ public class CustomBlocksClient {
                 CustomBlocks.CLOVERS,
                 CustomBlocks.WILD_WHEAT,
                 CustomBlocks.WHEAT_GRASS,
-                CustomBlocks.WHITE_CLOVERS,
 
                 CustomBlocks.HARMFUL_BILE,
                 CustomBlocks.HEALTHY_BILE,
@@ -62,7 +61,7 @@ public class CustomBlocksClient {
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> {
             if (view == null || pos == null) return GrassColors.getDefaultColor();
             else return BiomeColors.getGrassColor(view, pos);
-        }, CustomBlocks.CLOVERS, CustomBlocks.WHITE_CLOVERS);
+        }, CustomBlocks.CLOVERS);
     }
 
 }

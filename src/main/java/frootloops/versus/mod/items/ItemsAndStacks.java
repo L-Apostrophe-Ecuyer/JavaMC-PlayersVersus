@@ -1,9 +1,8 @@
 package frootloops.versus.mod.items;
 
+import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
-import frootloops.versus.mod.items.brewing.CustomPotions;
-import frootloops.versus.mod.items.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.*;
@@ -68,11 +67,26 @@ public abstract class ItemsAndStacks {
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.BLAZE_POWDER, CustomBrewingItems.CONCENTRATE_OF_STRENGTH);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.RECOVERY_COMPASS, CustomEquipment.RECOVERY_COMPASS);
+
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.CLAY, CustomBlockItems.CLAY_BLOCK);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.PACKED_MUD, CustomBlockItems.MUDSTONE);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICKS, CustomBlockItems.MUDSTONE_BRICKS);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_SLAB, CustomBlockItems.MUDSTONE_BRICK_SLAB);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_STAIRS, CustomBlockItems.MUDSTONE_BRICK_STAIRS);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_WALL, CustomBlockItems.DRIPSTONE_BRICK_WALL);
+
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GRANITE_SLAB, CustomBlockItems.DRIPSTONE_SLAB);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GRANITE_STAIRS, CustomBlockItems.DRIPSTONE_STAIRS);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GRANITE_WALL, CustomBlockItems.DRIPSTONE_WALL);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.POLISHED_GRANITE, CustomBlockItems.POLISHED_DRIPSTONE);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.POLISHED_GRANITE_SLAB, CustomBlockItems.POLISHED_DRIPSTONE_SLAB);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.POLISHED_GRANITE_STAIRS, CustomBlockItems.POLISHED_DRIPSTONE_STAIRS);
     }
 
     private static void setUpTransformVanillaItemsToVanilla() {
         TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.DIORITE, Items.CALCITE);
         TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.CHARCOAL, Items.COAL);
+        TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.GRANITE, Items.DRIPSTONE_BLOCK);
     }
 
     private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
@@ -138,7 +152,7 @@ public abstract class ItemsAndStacks {
         return MAX_USE_TIME_MAP.getOrDefault(item, -1);
     }
 
-    public static boolean hasReplacementItem(Item item) {
+    public static boolean hasModdedReplacementItem(Item item) {
         return TRANSFORM_VANILLA_ITEMS_TO_MODDED.containsKey(item);
     }
 

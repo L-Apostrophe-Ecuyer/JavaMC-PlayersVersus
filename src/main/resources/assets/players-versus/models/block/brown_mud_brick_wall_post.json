@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/template_wall_post",
+  "textures": {
+    "wall": "players-versus:block/brown_mud_bricks"
+  }
+}
+
+
+

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "dripstone",
+  "ingredient": [
+    "minecraft:dripstone_block",
+    "players-versus:polished_dripstone"
+  ],
+  "result": {
+    "count": 1,
+    "id": "players-versus:dripstone_bricks"
+  }
+}
+
+
+

@@ -2,23 +2,17 @@ package frootloops.versus.mixin.environment;
 
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.Thickness;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 import net.minecraft.world.event.GameEvent;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,8 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 @Mixin(PointedDripstoneBlock.class)
 public abstract class PointedDripstoneMixin extends Block {
@@ -36,11 +28,12 @@ public abstract class PointedDripstoneMixin extends Block {
 
     private static final Map<Block,Block> BLOCKS_THAT_DRIP_WATER = new HashMap<>();
     static {
-        BLOCKS_THAT_DRIP_WATER.put(Blocks.MUD, Blocks.CLAY);
-        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD, Blocks.PACKED_MUD);
-        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD_BRICKS, Blocks.MUD_BRICKS);
-        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD_TILES, CustomBlocks.PACKED_MUD_TILES);
-        BLOCKS_THAT_DRIP_WATER.put(Blocks.PACKED_MUD, Blocks.CLAY);
+        BLOCKS_THAT_DRIP_WATER.put(Blocks.MUD, CustomBlocks.CLAY);
+        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD, CustomBlocks.MUDSTONE);
+        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD_BRICKS, CustomBlocks.MUDSTONE_BRICKS);
+        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.MUDSTONE, Blocks.DRIPSTONE_BLOCK);
+        BLOCKS_THAT_DRIP_WATER.put(Blocks.ANDESITE, Blocks.DRIPSTONE_BLOCK);
+        BLOCKS_THAT_DRIP_WATER.put(Blocks.PACKED_MUD, Blocks.DRIPSTONE_BLOCK);
         BLOCKS_THAT_DRIP_WATER.put(Blocks.FARMLAND, Blocks.DIRT);
         BLOCKS_THAT_DRIP_WATER.put(Blocks.DIRT, Blocks.COARSE_DIRT);
     }
@@ -60,7 +53,7 @@ public abstract class PointedDripstoneMixin extends Block {
 
     private static void dripTickOverhauled(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 
-        Fluid fluid = null;
+        Fluid fluid;
         BlockPos.Mutable mutableBlockPos = pos.mutableCopy();
         BlockState mutableBlockState = null;
         int maxWorldHeight = world.getDimension().logicalHeight();

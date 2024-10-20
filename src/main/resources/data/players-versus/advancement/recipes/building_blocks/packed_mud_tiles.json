@@ -12,7 +12,7 @@
       "conditions": {
         "items": [
           {
-            "items": "minecraft:packed_mud"
+            "items": "players-versus:mudstone"
           }
         ]
       }

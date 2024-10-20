@@ -51,7 +51,7 @@ public abstract class BrewingStandScreenHandlerMixin extends ScreenHandler {
         }
 
         public static boolean matches(ItemStack itemStack) {
-            return itemStack.isOf(CustomBlockItems.CORRUPTED_WART_ITEM) || itemStack.isOf(CustomBlockItems.WITHERED_WART_ITEM) || itemStack.isOf(Items.NETHER_WART);
+            return itemStack.isOf(CustomBlockItems.CORRUPTED_WART) || itemStack.isOf(CustomBlockItems.WITHERED_WART) || itemStack.isOf(Items.NETHER_WART);
         }
     }
 }

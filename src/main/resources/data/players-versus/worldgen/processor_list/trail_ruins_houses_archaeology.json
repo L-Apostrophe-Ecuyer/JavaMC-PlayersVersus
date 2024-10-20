@@ -35,11 +35,11 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:mud_bricks",
+            "block": "players-versus:mudstone_bricks",
             "probability": 0.1
           },
           "output_state": {
-            "Name": "minecraft:packed_mud"
+            "Name": "players-versus:mudstone"
           }
         }
       ]

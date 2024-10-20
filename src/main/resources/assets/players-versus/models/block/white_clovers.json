@@ -1,7 +1,0 @@
-{
-  "parent": "players-versus:block/white_clovers_cross",
-  "textures": {
-    "flowerbed": "players-versus:block/clover_leaves",
-    "cross": "players-versus:block/white_clovers"
-  }
-}

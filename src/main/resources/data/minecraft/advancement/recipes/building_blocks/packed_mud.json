@@ -6,7 +6,7 @@
       "conditions": {
         "items": [
           {
-            "items": "minecraft:mud"
+            "items": "players-versus:mudstone"
           }
         ]
       }
@@ -14,7 +14,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:packed_mud"
+        "recipe": "players-versus:mudstone"
       }
     }
   },
@@ -26,10 +26,10 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:packed_mud",
-      "minecraft:packed_mud_bricks",
-      "minecraft:packed_mud_brick_stairs",
-      "minecraft:packed_mud_brick_slab",
+      "players-versus:mudstone",
+      "players-versus:mudstone_bricks",
+      "players-versus:mudstone_brick_stairs",
+      "players-versus:mudstone_brick_slab",
       "players-versus:building_blocks/packed_mud_tiles",
       "players-versus:building_blocks/packed_mud_tile_stairs",
       "players-versus:building_blocks/packed_mud_tile_slab",

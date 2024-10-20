@@ -2658,17 +2658,14 @@
                             "type": "minecraft:condition",
                             "if_true": {
                               "type": "minecraft:noise_threshold",
-                              "max_threshold": 0.3,
-                              "min_threshold": -0.2,
+                              "max_threshold": 0.2,
+                              "min_threshold": -0.1,
                               "noise": "minecraft:surface"
                             },
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "players-versus:brown_mud",
-                                "Properties": {
-                                  "moisture": "4"
-                                }
+                                "Name": "players-versus:brown_mud"
                               }
                             }
                           }

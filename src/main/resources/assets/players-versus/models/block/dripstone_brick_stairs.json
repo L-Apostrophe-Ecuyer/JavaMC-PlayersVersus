@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "players-versus:block/dripstone_bricks",
+    "side": "players-versus:block/dripstone_bricks",
+    "top": "players-versus:block/dripstone_bricks"
+  }
+}
+

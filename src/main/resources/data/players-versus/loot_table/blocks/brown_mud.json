@@ -6,16 +6,11 @@
       "bonus_rolls": 0,
       "entries": [
         {
-          "type": "minecraft:alternatives",
-          "children": [
+          "type": "minecraft:item",
+          "name": "players-versus:brown_mud",
+          "conditions": [
             {
-              "type": "minecraft:item",
-              "name": "players-versus:brown_mud",
-              "conditions": [
-                {
-                  "condition": "minecraft:survives_explosion"
-                }
-              ]
+              "condition": "minecraft:survives_explosion"
             }
           ]
         }

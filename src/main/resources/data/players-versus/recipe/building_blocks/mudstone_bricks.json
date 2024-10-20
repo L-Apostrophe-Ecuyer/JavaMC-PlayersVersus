@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "mudstone",
+  "category": "building",
+  "pattern": [
+    "SS",
+    "SS"
+  ],
+  "key": {
+    "S" : "players-versus:mudstone"
+  },
+  "result": {
+    "id": "players-versus:mudstone_bricks",
+    "count": 4
+  }
+}
+
+
+

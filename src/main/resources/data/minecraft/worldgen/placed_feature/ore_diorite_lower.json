@@ -31,7 +31,7 @@
             "tag": "minecraft:base_stone_overworld"
           },
           "state": {
-            "Name": "minecraft:packed_mud"
+            "Name": "players-versus:mudstone"
           }
         }
       ]

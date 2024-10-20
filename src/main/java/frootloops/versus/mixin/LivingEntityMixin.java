@@ -1,11 +1,10 @@
 package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.environment.CustomBlocks;
-import frootloops.versus.mod.environment.blocks.BrownMudBlock;
+import frootloops.versus.mod.environment.blocks.clays.BrownMudBlock;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items.brewing.effects.HauntingStatusEffect;
 import net.minecraft.enchantment.Enchantments;
@@ -28,7 +27,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.Collection;
 import java.util.Map;

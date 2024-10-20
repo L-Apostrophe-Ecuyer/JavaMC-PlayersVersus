@@ -133,13 +133,13 @@ public class RevampedTradeOffers {
                             new SellItemFactory(Items.MANGROVE_PROPAGULE, 5, 1, 8, 1)}, 2))
             ).add(Pair.of(
                     new Factory[]{
-                            new SellItemFactory(Items.PODZOL, 1, 14, 6, 1), new SellItemFactory(CustomBlockItems.BROWN_MUD_ITEM, 1, 24, 6, 1), new SellItemFactory(Items.CLAY, 1, 18, 6, 1),
+                            new SellItemFactory(Items.PODZOL, 1, 14, 6, 1), new SellItemFactory(CustomBlockItems.BROWN_MUD, 1, 24, 6, 1), new SellItemFactory(Items.CLAY, 1, 18, 6, 1),
                             new SellItemFactory(Items.TROPICAL_FISH_BUCKET, 3, 1, 4, 1), new SellItemFactory(Items.PUFFERFISH_BUCKET, 3, 1, 4, 1),
                             new SellItemFactory(Items.SEA_PICKLE, 2, 1, 5, 1),
                             new SellItemFactory(Items.SLIME_BALL, 4, 1, 5, 1),
                             new SellItemFactory(Items.NAUTILUS_SHELL, 5, 1, 5, 1),
                             new SellItemFactory(Items.LAPIS_LAZULI, 1, 3, 5, 1),
-                            new SellItemFactory(Items.FERN, 1, 8, 12, 1), new SellItemFactory(CustomBlockItems.CLOVERS_ITEM, 1, 8, 12, 1),
+                            new SellItemFactory(Items.FERN, 1, 8, 12, 1), new SellItemFactory(CustomBlockItems.CLOVERS, 1, 8, 12, 1),
                             new SellItemFactory(Items.PUMPKIN_SEEDS, 1, 3, 4, 1), new SellItemFactory(Items.MELON_SEEDS, 1, 3, 4, 1), new SellItemFactory(Items.BEETROOT_SEEDS, 1, 3, 4, 1),
                             new SellItemFactory(Items.SUGAR_CANE, 1, 1, 8, 1),
                             new SellItemFactory(Items.KELP, 3, 1, 12, 1),
@@ -759,10 +759,15 @@ public class RevampedTradeOffers {
                 1, new Factory[]{
                         new BuyForOneEmeraldFactory(Blocks.STONE, 48, 16, 1),
                         new BuyForOneEmeraldFactory(Blocks.ANDESITE, 32, 16, 2),
+                        new SellItemFactory(CustomBlocks.MUDSTONE_BRICKS, 1, 8, 32, 1),
                         new SellItemFactory(Blocks.BRICKS, 1, 24, 32, 1),
-                        new SellItemFactory(CustomBlocks.GRANITE_BRICKS, 1, 24, 32, 1),
-                        new SellItemFactory(Blocks.MUD_BRICKS, 1, 12, 32, 2),
+                        //new SellItemFactory(CustomBlocks.GRANITE_BRICKS, 1, 24, 32, 1),
                         new SellItemFactory(Blocks.TERRACOTTA, 1, 24, 32, 1),
+                        new SellItemFactory(CustomBlocks.TERRACOTTA_BRICKS, 1, 16, 32, 1),
+                        new SellItemFactory(CustomBlocks.TERRACOTTA_TILES, 1, 16, 32, 1),
+
+
+                        //new SellItemFactory(Blocks.MUD_BRICKS, 1, 12, 32, 2),
                         new SellItemFactory(Blocks.SMOOTH_STONE, 1, 16, 32, 2),
                         new SellItemFactory(CustomBlocks.POLISHED_STONE, 1, 32, 32, 2),
                         new TypeAwareSellItemFactory(1, 8, 16, 1, ImmutableMap.builder().put(
@@ -780,7 +785,7 @@ public class RevampedTradeOffers {
                                 VillagerType.DESERT, Items.CUT_SANDSTONE).put(
                                 VillagerType.JUNGLE, Items.CUT_RED_SANDSTONE).put(
                                 VillagerType.SAVANNA, Items.CUT_RED_SANDSTONE).put(
-                                VillagerType.SWAMP, CustomBlockItems.BROWN_MUD_ITEM).build())},
+                                VillagerType.SWAMP, CustomBlockItems.BROWN_MUD).build())},
                 2, new Factory[]{
                         new BuyForOneEmeraldFactory(Items.QUARTZ, 12, 12, 5),
                         new TypeAwareSellItemFactory(1, 8, 16, 1, ImmutableMap.builder().put(
