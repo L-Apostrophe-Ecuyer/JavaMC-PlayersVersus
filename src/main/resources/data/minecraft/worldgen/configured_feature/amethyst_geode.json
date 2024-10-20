@@ -81,9 +81,25 @@
     "use_alternate_layer0_chance": 0.083,
     "placements_require_layer0_alternate": true,
     "outer_wall_distance": {
-      "type": "minecraft:uniform",
-      "min_inclusive": 4,
-      "max_inclusive": 6
+      "type": "minecraft:weighted_list",
+      "distribution": [
+        {
+          "weight": 6,
+          "data": 1
+        },
+        {
+          "weight": 3,
+          "data": 4
+        },
+        {
+          "weight": 1,
+          "data": 5
+        },
+        {
+          "weight": 2,
+          "data": 6
+        }
+      ]
     },
     "distribution_points": {
       "type": "minecraft:uniform",

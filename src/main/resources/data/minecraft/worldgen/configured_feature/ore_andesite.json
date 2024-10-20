@@ -1,7 +1,7 @@
 {
   "type": "minecraft:ore",
   "config": {
-    "size": 28,
+    "size": 32,
     "discard_chance_on_air_exposure": 0,
     "targets": [
       {
@@ -18,7 +18,7 @@
         "target": {
           "predicate_type": "minecraft:random_block_match",
           "block": "minecraft:stone",
-          "probability": 0.04
+          "probability": 0.06
         },
         "state": {
           "Name": "minecraft:clay"
