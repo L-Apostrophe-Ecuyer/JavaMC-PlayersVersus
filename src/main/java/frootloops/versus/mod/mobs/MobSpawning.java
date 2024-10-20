@@ -59,13 +59,18 @@ public class MobSpawning {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
         if(world.getLightLevel(blockPos) > 0) return false;
-        if(blockPos.getY() > 16) {
-            long dayTime = world.getLunarTime() % 24000l;
-            if(dayTime < 18000l || dayTime > 20000l) return false;
 
-            int moonPhase = world.getMoonPhase();
-            if((moonPhase + 2) % 8 < 6) return false;
-            if(moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
+        int y = blockPos.getY();
+        if(y > 96) return false;
+        if(y > 16) {
+            if(y > 48) {
+                long dayTime = world.getLunarTime() % 24000l;
+                if (dayTime < 18000l || dayTime > 20000l) return false;
+
+                int moonPhase = world.getMoonPhase();
+                if ((moonPhase + 2) % 8 < 6) return false;
+                if (moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
+            }
             return world.getBlockState(blockPos.down()).isIn(BlockTags.MOSS_REPLACEABLE);
         }
         else return world.getBlockState(blockPos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);

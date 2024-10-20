@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.SpawnReason;
@@ -40,7 +41,8 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
         BlockPos pos = this.getBlockPos();
-        if(pos.getY() < -32) return false;
+        if(pos.getY() < -16) return false;
+        if(pos.getY() < 32 && !world.getBlockState(pos.down()).isOf(Blocks.STONE)) return false;
         if(world.getBlockState(pos.down()).isIn(BlockTags.AXE_MINEABLE)) return false;
         return super.canSpawn(world, spawnReason);
     }

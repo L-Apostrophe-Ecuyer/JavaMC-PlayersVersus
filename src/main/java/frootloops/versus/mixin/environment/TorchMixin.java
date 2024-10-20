@@ -46,7 +46,7 @@ public abstract class TorchMixin extends Block {
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if(world instanceof ServerWorld && state.isOf(Blocks.TORCH) || state.isOf(Blocks.WALL_TORCH)) {
-            if (random.nextInt(128) > Math.min(96, pos.getY() + 64) + 24) {
+            if (random.nextInt(128) > Math.min(75, pos.getY() + 64) + 48) {
                 this.tickTorchDegradation(state, world, pos, false);
             }
         }

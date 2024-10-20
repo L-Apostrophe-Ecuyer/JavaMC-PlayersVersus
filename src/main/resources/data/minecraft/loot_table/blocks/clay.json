@@ -13,41 +13,36 @@
               "name": "minecraft:clay",
               "conditions": [
                 {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "enchantments": [
-                      {
-                        "enchantment": "minecraft:silk_touch",
-                        "levels": 1
+                  "condition": "minecraft:any_of",
+                  "terms": [
+                    {
+                      "condition": "minecraft:match_tool",
+                      "predicate": {
+                        "items": [
+                          "players-versus:copper_shovel"
+                        ]
                       }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "type": "minecraft:item",
-              "name": "minecraft:clay",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "tag": "minecraft:shovels"
-                  }
-                }
-              ]
-            },
-            {
-              "type": "minecraft:item",
-              "name": "minecraft:clay",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "items": [
-                      "players-versus:copper_shovel"
-                    ]
-                  }
+                    },
+                    {
+                      "condition": "minecraft:match_tool",
+                      "predicate": {
+                        "items": "#minecraft:shovels"
+                      }
+                    },
+                    {
+                      "condition": "minecraft:match_tool",
+                      "predicate": {
+                        "predicates": {
+                          "minecraft:enchantments": [
+                            {
+                              "enchantments": "minecraft:silk_touch",
+                              "levels": 1
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             },

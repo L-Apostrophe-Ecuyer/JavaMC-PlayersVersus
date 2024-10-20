@@ -60,7 +60,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
     @Inject(method = "disableShield", at = @At(value = "HEAD"), cancellable = true)
     private void disableShieldMixin(CallbackInfo info) {
 
-        int disableForTicks = 40;
+        int disableForTicks = 60;
         if(this.getAttacker() != null) {
             ItemStack mainhandStack = this.getAttacker().getMainHandStack();
             if(!mainhandStack.isEmpty() && mainhandStack.hasEnchantments()) {

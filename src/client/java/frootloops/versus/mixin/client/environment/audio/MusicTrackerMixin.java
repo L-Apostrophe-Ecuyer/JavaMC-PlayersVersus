@@ -51,14 +51,15 @@ public abstract class MusicTrackerMixin {
                 this.client.getSoundManager().play(this.current);
                 info.cancel();
             }
-            if(client.player.getY() < 24.0 && random.nextBoolean()) {
-                if(random.nextBoolean()) current = PositionedSoundInstance.ambient(SoundEvents.AMBIENT_CAVE.value());
+            if(client.player.getY() < 40.0) {
+                int randomValue = random.nextBetween(0, 10);
+                if(randomValue >= 6) current = PositionedSoundInstance.ambient(SoundEvents.AMBIENT_CAVE.value());
                 else current = PositionedSoundInstance.ambient(SoundEvents.AMBIENT_BASALT_DELTAS_MOOD.value());
                 this.client.getSoundManager().play(this.current);
                 this.timeUntilNextSong = 6000;
                 info.cancel();
             }
-            else if(client.world.isNight() || client.player.getHealth() < 12f) {
+            else if(client.world.isNight() || client.world.isRaining() || client.player.getHealth() < 14f) {
                 if(random.nextBoolean()) {
                     this.timeUntilNextSong = 2000; // Skip entirely
                     info.cancel();

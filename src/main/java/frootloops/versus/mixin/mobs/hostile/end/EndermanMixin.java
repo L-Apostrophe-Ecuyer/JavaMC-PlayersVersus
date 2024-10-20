@@ -2,8 +2,10 @@ package frootloops.versus.mixin.mobs.hostile.end;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.mobs.hostile.ai.EndermanHideAndWaitGoal;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
@@ -11,9 +13,9 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.Angerable;
 import net.minecraft.entity.mob.EndermanEntity;
+import net.minecraft.entity.mob.EndermiteEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LocalDifficulty;
@@ -31,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EndermanEntity.class)
 public abstract class EndermanMixin extends HostileEntity implements Angerable {
 
+    private int angerTime = 0;
     protected EndermanMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -46,12 +49,21 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
         return super.initialize(world, difficulty, spawnReason, entityData);
     }
 
+    @Inject(method = "initGoals", at = @At("HEAD"))
+    private void addWaitForPlayerGoal(CallbackInfo ci) {
+        this.goalSelector.add(0, new EndermanHideAndWaitGoal((EndermanEntity) ((Object)this)));
+    }
+
     @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(!super.canSpawn(world, spawnReason)) return false;
-        if(spawnReason == SpawnReason.NATURAL && world.getDimension().hasSkyLight()) {
-            int moonPhase = world.getMoonPhase();
-            if((moonPhase + 2) % 8 < 6 && this.random.nextInt(4) < 1) return false; // Fewer endermen when not nearing new moons
+    public boolean canSpawn(WorldAccess worldAccess, SpawnReason spawnReason) {
+        if(!super.canSpawn(worldAccess, spawnReason)) return false;
+        if(spawnReason == SpawnReason.NATURAL && worldAccess.getDimension().hasSkyLight()) {
+            if(worldAccess instanceof World world && world.isRaining() && !world.isThundering()) { // Endermen more common when foggy or during new moons
+                return true;
+            }
+            if((worldAccess.getMoonPhase() + 2) % 8 < 6 && this.random.nextInt(4) < 1) {
+                return false;
+            }
         }
         return true;
     }
@@ -60,6 +72,7 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
     protected int computeFallDamage(float fallDistance, float damageMultiplier) {
         return super.computeFallDamage(fallDistance - 4.0f, damageMultiplier) - 5;
     }
+
 
     @Overwrite
     public boolean isPlayerStaring(PlayerEntity player) {
@@ -77,24 +90,34 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
         // Untargeted players, Endermen will teleport up to them until they're in range for aggro:
         else {
             if (player.prevHeadYaw != player.headYaw) return false;
-            else if(squaredDistance > 4096.0) return false;
+            else if(squaredDistance > 8192.0) return false;
 
             Vec3d playerRotationVect = player.getRotationVec(1.0f).normalize();
-            Vec3d directionVect = new Vec3d(this.getX() - player.getX(), this.getEyeY() - player.getEyeY(), this.getZ() - player.getZ());
+            Vec3d directionVect = new Vec3d(this.getX() - player.getX(), this.getBodyY(0.6) - player.getEyeY(), this.getZ() - player.getZ());
             double distance = directionVect.length();
-            double dotProduct = (playerRotationVect).dotProduct(directionVect.normalize());
-            if (dotProduct > 1.0 - 0.03 / Math.max(distance - 8, 1)) {
-                if (squaredDistance > 576.0f) {
-                    if(this.age % 20 < 10) teleportToEntity(player, distance * 0.8);
+            double dotProduct = (playerRotationVect).dotProduct(directionVect.multiply(1.0/distance));
+            double dotProductThreshold = distance < 10.0 ? 0.95 : 1.0 - 0.05 / (distance - 9.0);
+            if (dotProduct > dotProductThreshold) {
+                angerTime += distance < 12.0 ? 24 : distance < 24.0 ? 12 : 6;
+                if(angerTime < 120) {
+                    return false;
+                }
+                if (squaredDistance > 256.0) {
+                    angerTime = 60;
+                    Vec3d target = this.getPos().add(directionVect.multiply(0.5));
+                    teleportTo(target.x + (this.random.nextDouble() - 0.5) * 4.0, target.y + (double) this.random.nextInt(16) - 8.0, target.z + (this.random.nextDouble() - 0.5) * 4.0);
                     this.lookAtEntity(player, 100f, 100f);
                     this.playAmbientSound();
                     return false;
                 }
-                else return player.canSee(this);
+                else if(player.canSee(this)) return true;
             }
+            if(angerTime > 0) angerTime--;
         }
         return false;
     }
+
+
 
     boolean teleportToEntity(Entity entity, double distance) {
         Vec3d direction = new Vec3d(this.getX() - entity.getX(), this.getBodyY(0.5) - entity.getEyeY(), this.getZ() - entity.getZ());
@@ -117,15 +140,6 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
     @Inject(method = "setTarget", at = @At("TAIL"))
     private void darknessWhenAngered(@Nullable LivingEntity target, CallbackInfo ci) {
         if(target != null) target.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 90, 0, false, false));
-    }
-
-    @Override
-    protected void dropLoot(DamageSource source, boolean causedByPlayer) {
-        super.dropLoot(source, causedByPlayer);
-        if(!this.isBaby()) {
-            super.dropLoot(source, causedByPlayer); // Triple loot for the big boys!
-            super.dropLoot(source, causedByPlayer);
-        }
     }
 
     @Override

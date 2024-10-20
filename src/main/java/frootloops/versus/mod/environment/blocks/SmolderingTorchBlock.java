@@ -37,7 +37,7 @@ public class SmolderingTorchBlock extends TorchBlock {
         int y = pos.getY();
         if(y > 32) return;
         if(!world.isClient) {
-            if (random.nextInt(63) > (y > -8 ? 60 : 56)) {
+            if (random.nextInt(200) > y + 165) {
                 this.tickSmolderingTorchDegradation(state, world, pos);
             }
         }

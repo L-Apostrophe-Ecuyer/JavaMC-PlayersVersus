@@ -12,13 +12,14 @@ import net.minecraft.util.Identifier;
 public class CustomSpecialEffects {
 
     public static SoundEvent RAIL_TURNING_SOUND;
-
+    public static SoundEvent FOG_WIND_SOUND;
     public static final SimpleParticleType SPARKS_PARTICLE = FabricParticleTypes.simple();
 
 
     public static void onInitialize() {
         Registry.register(Registries.PARTICLE_TYPE, Identifier.of(VersusMod.MOD_ID, "sparks"), SPARKS_PARTICLE);
         RAIL_TURNING_SOUND = registerSoundEvent("rail_turning_sound");
+        FOG_WIND_SOUND = registerSoundEvent("fog_wind_sound");
     }
 
     private static SoundEvent registerSoundEvent(String name) {

@@ -26,10 +26,7 @@
     "environment.archeology.BrushesNotRequiredMixin",
     "environment.archeology.SuspiciousBlocksMixin",
     "environment.sleeping.ServerSleepingMixin",
-    "environment.BlockMixin",
     "environment.CropMixin",
-
-
     "environment.PointedDripstoneMixin",
     "environment.MinecartMixin",
     "environment.MossMixin",
@@ -37,6 +34,9 @@
     "environment.TallFlowerMixin",
     "environment.TntMixin",
     "environment.TorchMixin",
+
+    "environment.BlockMixin",
+    "environment.WorldMixin",
 
     "items.brewing.BadOmenEffectInstanceMixin",
     "items.brewing.BrewingRecipeRegistryMixin",

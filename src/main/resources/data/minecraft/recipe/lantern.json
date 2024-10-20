@@ -2,15 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#" : "minecraft:torch",
+    "#" : "minecraft:coal",
     "X" : "minecraft:iron_nugget"
   },
   "pattern": [
     " X ",
     "X#X",
-    " X "
+    "XXX"
   ],
   "result": {
-    "id": "minecraft:lantern"
+    "id": "minecraft:lantern",
+    "count": 4
   }
 }

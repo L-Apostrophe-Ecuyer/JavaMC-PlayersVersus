@@ -38,7 +38,7 @@ public abstract class WorldRendererMixin {
         if((type == ParticleTypes.ENTITY_EFFECT) && this.client.cameraEntity.getEyePos().squaredDistanceTo(x,y + 0.1,z) < 2.5) {
             info.cancel();
         }
-        else if((type == ParticleTypes.RAIN) && this.client.cameraEntity.getEyePos().squaredDistanceTo(x,y,z) < 4.0) {
+        else if((type == ParticleTypes.RAIN) && this.client.cameraEntity.getEyePos().squaredDistanceTo(x,y,z) < 80.0) {
             info.cancel();
         }
     }

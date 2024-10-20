@@ -12,6 +12,8 @@ import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import java.util.function.Supplier;
 
@@ -23,9 +25,8 @@ public abstract class ClientWorldMixin extends World {
         super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
     }
 
-    @Override
-    public float getRainGradient(float delta) { // Rain is less depressing
-        return MathHelper.lerp(delta, this.rainGradientPrev, this.rainGradient) / 2;
+    @ModifyConstant(method = "getSkyBrightness", constant = @Constant(floatValue = 16.0F))
+    private static float lessDepressingWeather(float f) {
+        return 24.0f;
     }
-
 }

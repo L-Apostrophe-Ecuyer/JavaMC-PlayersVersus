@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "group": "wheat",
+  "ingredients": [
+    [
+      "players-versus:wheat_grass"
+    ]
+  ],
+  "result": {
+    "id": "minecraft:wheat_seeds",
+    "count": 1
+  }
+}

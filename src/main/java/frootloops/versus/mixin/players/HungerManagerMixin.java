@@ -36,6 +36,7 @@ public class HungerManagerMixin {
 
     @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
     public void eat(FoodComponent foodComponent, CallbackInfo info) {
+        saturationLevel = Math.max(0.1F, saturationLevel);
         foodTickTimer = Math.max(8, foodTickTimer);
     }
 
