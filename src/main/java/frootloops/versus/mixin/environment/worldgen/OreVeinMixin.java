@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.environment.worldgen;
 
+import frootloops.versus.mod.environment.CustomWorldgen;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.MathHelper;
@@ -25,12 +26,12 @@ public class OreVeinMixin {
     private static final float VEIN_GAP_THRESHOLD = -0.3F;
 
     @Overwrite
-    protected static ChunkNoiseSampler.BlockStateSampler create(DensityFunction veinToggle, DensityFunction veinRidged, DensityFunction veinGap, RandomSplitter randomDeriver) {
+    public static ChunkNoiseSampler.BlockStateSampler create(DensityFunction veinToggle, DensityFunction veinRidged, DensityFunction veinGap, RandomSplitter randomDeriver) {
         BlockState blockState = null;
         return (pos) -> {
             double veinToggleNoiseValue = veinToggle.sample(pos);
             int y = pos.blockY();
-            VeinType veinType = veinToggleNoiseValue > 0.0 ? VeinType.COPPER : VeinType.IRON;
+            CustomWorldgen.VeinType veinType = veinToggleNoiseValue > 0.0 ? CustomWorldgen.VeinType.COPPER : CustomWorldgen.VeinType.IRON;
             double veinToggleNoiseValueAbs = Math.abs(veinToggleNoiseValue);
             int yBelowMax = veinType.maxY - y;
             int yAboveMin = y - veinType.minY;
@@ -58,25 +59,6 @@ public class OreVeinMixin {
                 return blockState;
             }
         };
-    }
-
-    protected static enum VeinType {
-        COPPER(Blocks.COPPER_ORE.getDefaultState(), Blocks.RAW_COPPER_BLOCK.getDefaultState(), Blocks.TERRACOTTA.getDefaultState(), 32, 72),
-        IRON(Blocks.DEEPSLATE_IRON_ORE.getDefaultState(), Blocks.RAW_IRON_BLOCK.getDefaultState(), Blocks.TUFF.getDefaultState(), -32, 8);
-
-        final BlockState ore;
-        final BlockState rawOreBlock;
-        final BlockState stone;
-        protected final int minY;
-        protected final int maxY;
-
-        private VeinType(final BlockState ore, final BlockState rawOreBlock, final BlockState stone, final int minY, final int maxY) {
-            this.ore = ore;
-            this.rawOreBlock = rawOreBlock;
-            this.stone = stone;
-            this.minY = minY;
-            this.maxY = maxY;
-        }
     }
     
 }
