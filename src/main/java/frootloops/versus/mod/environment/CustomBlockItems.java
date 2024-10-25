@@ -15,13 +15,13 @@ public abstract class CustomBlockItems {
     public static final BlockItem POLISHED_STONE_SLAB = new BlockItem(CustomBlocks.POLISHED_STONE_SLAB, new Item.Settings());
     public static final BlockItem POLISHED_STONE_STAIRS = new BlockItem(CustomBlocks.POLISHED_STONE_STAIRS, new Item.Settings());
 
-
     public static final BlockItem DRIPSTONE_SLAB = new BlockItem(CustomBlocks.DRIPSTONE_SLAB, new Item.Settings());
     public static final BlockItem DRIPSTONE_STAIRS = new BlockItem(CustomBlocks.DRIPSTONE_STAIRS, new Item.Settings());
     public static final BlockItem DRIPSTONE_WALL = new BlockItem(CustomBlocks.DRIPSTONE_WALL, new Item.Settings());
     public static final BlockItem POLISHED_DRIPSTONE = new BlockItem(CustomBlocks.POLISHED_DRIPSTONE, new Item.Settings());
     public static final BlockItem POLISHED_DRIPSTONE_SLAB = new BlockItem(CustomBlocks.POLISHED_DRIPSTONE_SLAB, new Item.Settings());
     public static final BlockItem POLISHED_DRIPSTONE_STAIRS = new BlockItem(CustomBlocks.POLISHED_DRIPSTONE_STAIRS, new Item.Settings());
+    public static final BlockItem DRIPSTONE_PILLAR = new BlockItem(CustomBlocks.DRIPSTONE_PILLAR, new Item.Settings());
     public static final BlockItem DRIPSTONE_BRICKS = new BlockItem(CustomBlocks.DRIPSTONE_BRICKS, new Item.Settings());
     public static final BlockItem DRIPSTONE_BRICK_SLAB = new BlockItem(CustomBlocks.DRIPSTONE_BRICK_SLAB, new Item.Settings());
     public static final BlockItem DRIPSTONE_BRICK_STAIRS = new BlockItem(CustomBlocks.DRIPSTONE_BRICK_STAIRS, new Item.Settings());

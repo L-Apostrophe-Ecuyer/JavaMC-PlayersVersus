@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "players-versus:dripstone_bricks"
+          "name": "players-versus:dripstone_pillar"
         }
       ],
       "conditions": [

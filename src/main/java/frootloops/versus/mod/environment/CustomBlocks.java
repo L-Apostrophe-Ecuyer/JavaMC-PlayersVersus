@@ -30,7 +30,7 @@ public class CustomBlocks {
     public static Block WITHERED_WART_PLANT;
 
     public static Block DRIPSTONE_SLAB, DRIPSTONE_STAIRS, DRIPSTONE_WALL;
-    public static Block POLISHED_DRIPSTONE, POLISHED_DRIPSTONE_SLAB, POLISHED_DRIPSTONE_STAIRS, POLISHED_DRIPSTONE_WALL;
+    public static Block POLISHED_DRIPSTONE, POLISHED_DRIPSTONE_SLAB, POLISHED_DRIPSTONE_STAIRS, POLISHED_DRIPSTONE_WALL, DRIPSTONE_PILLAR;
     public static Block DRIPSTONE_BRICKS, DRIPSTONE_BRICK_SLAB, DRIPSTONE_BRICK_STAIRS, DRIPSTONE_BRICK_WALL;
 
     public static Block POLISHED_STONE, POLISHED_STONE_SLAB, POLISHED_STONE_STAIRS;
@@ -77,6 +77,7 @@ public class CustomBlocks {
         POLISHED_DRIPSTONE_SLAB = registerBlock("polished_dripstone_slab", new SlabBlock(AbstractBlock.Settings.copy(POLISHED_DRIPSTONE)));
         POLISHED_DRIPSTONE_STAIRS = registerBlock("polished_dripstone_stairs", new StairsBlock(POLISHED_DRIPSTONE.getDefaultState(), AbstractBlock.Settings.copy(POLISHED_DRIPSTONE)));
         POLISHED_DRIPSTONE_WALL = registerBlock("polished_dripstone_wall", new WallBlock(AbstractBlock.Settings.copy(POLISHED_DRIPSTONE)));
+        DRIPSTONE_PILLAR = registerBlock("dripstone_pillar", new Block(AbstractBlock.Settings.copy(POLISHED_DRIPSTONE)));
         DRIPSTONE_BRICKS = registerBlock("dripstone_bricks", new Block(AbstractBlock.Settings.copy(POLISHED_DRIPSTONE)));
         DRIPSTONE_BRICK_SLAB = registerBlock("dripstone_brick_slab", new SlabBlock(AbstractBlock.Settings.copy(DRIPSTONE_BRICKS)));
         DRIPSTONE_BRICK_STAIRS = registerBlock("dripstone_brick_stairs", new StairsBlock(DRIPSTONE_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(DRIPSTONE_BRICKS)));

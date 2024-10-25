@@ -95,6 +95,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("polished_dripstone", CustomBlockItems.POLISHED_DRIPSTONE, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("polished_dripstone_slab", CustomBlockItems.POLISHED_DRIPSTONE_SLAB, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("polished_dripstone_stairs", CustomBlockItems.POLISHED_DRIPSTONE_STAIRS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("dripstone_pillar", CustomBlockItems.DRIPSTONE_PILLAR, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("dripstone_bricks", CustomBlockItems.DRIPSTONE_BRICKS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("dripstone_brick_slab", CustomBlockItems.DRIPSTONE_BRICK_SLAB, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("dripstone_brick_stairs", CustomBlockItems.DRIPSTONE_BRICK_STAIRS, ItemGroups.BUILDING_BLOCKS);

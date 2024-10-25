@@ -850,6 +850,7 @@ public class ItemSortingGroups {
         ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.DRIPSTONE_BRICK_SLAB, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.DRIPSTONE_BRICK_STAIRS, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.DRIPSTONE_BRICK_WALL, indexPickaxeBlocks++);
+        ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.DRIPSTONE_PILLAR, indexPickaxeBlocks++);
 
         ITEMS_PICKAXE_MINEABLE.put(CustomBlockItems.MUDSTONE, indexPickaxeBlocks++);
         ITEMS_PICKAXE_MINEABLE.put(Items.PACKED_MUD, indexPickaxeBlocks++);
