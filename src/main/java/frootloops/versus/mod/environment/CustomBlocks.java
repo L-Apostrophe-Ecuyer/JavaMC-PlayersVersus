@@ -48,6 +48,8 @@ public class CustomBlocks {
     public static Block CLOVERS;
 
 
+    public static Block INFESTED_OAK_WOOD, INFESTED_DARK_OAK_WOOD;
+
     public static Block DEATHLY_BILE, CORRUPTED_BILE, HARMFUL_BILE, HEALTHY_BILE, REGENERATION_BILE, WITHERING_BILE, MINING_SPEED_BILE, MINING_FATIGUE_BILE, TOUGHNESS_BILE, VISION_BILE, DARKNESS_BILE, LEAPING_BILE, SLOW_FALL_BILE, SPEED_BILE, SLOWNESS_BILE, BREATH_BILE;
     public static Block INVISIBILITY_BILE, GLOWING_BILE, WEAKNESS_BILE, STRENGTH_BILE, WIND_BILE, FIRE_BILE, OOZE_BILE, INFESTATION_BILE, POISON_BILE, WEAVING_BILE, LUCK_BILE, UNLUCK_BILE;
     public static Block LARGENESS_BILE,SMALLNESS_BILE, VULNERABILITY_BILE, BUOYANCY_BILE;
@@ -118,6 +120,9 @@ public class CustomBlocks {
         WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrassBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
         WILD_WHEAT = registerBlock("wild_wheat",new WheatGrassBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
         CLOVERS = registerBlock("clovers",new CloverBlock(AbstractBlock.Settings.copy(Blocks.SHORT_GRASS)));
+
+        INFESTED_OAK_WOOD = registerBlock("infested_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, AbstractBlock.Settings.copy(Blocks.OAK_WOOD)));
+        INFESTED_DARK_OAK_WOOD = registerBlock("infested_dark_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, AbstractBlock.Settings.copy(Blocks.OAK_WOOD)));
 
         DEATHLY_BILE = registerBlock("dealthy_bile", new PotionEffectBileBlock(0, StatusEffects.WITHER, 60, 2, 4, 0.4f));
         CORRUPTED_BILE = registerBlock("corrupted_bile", new PotionEffectBileBlock(StatusEffects.HUNGER, 10, 1));

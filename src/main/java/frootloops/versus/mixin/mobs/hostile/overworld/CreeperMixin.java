@@ -9,14 +9,13 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.*;
 import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(CreeperEntity.class)
-public class  CreeperEntityMixin extends HostileEntity {
-    protected CreeperEntityMixin(EntityType<? extends HostileEntity> entityType, World world) {
+public class CreeperMixin extends HostileEntity {
+    protected CreeperMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
     }
 

@@ -2,15 +2,10 @@ package frootloops.versus.mod.items;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlockItems;
-import frootloops.versus.mod.environment.CustomBlocks;
-import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
-import frootloops.versus.mod.items.equipment.custom.RecoveryCompassItem;
 import frootloops.versus.mod.mobs.ModEntities;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -21,7 +16,7 @@ import static frootloops.versus.VersusMod.MOD_ID;
 public abstract class RegisteringCustomItems {
     public static void registerAllCustomItems() {
 
-        registerVanillaOverhaulItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS);
+        registerCustomItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS);
 
         registerCustomItem("withered_zombie_spawn_egg", ModEntities.WITHERED_ZOMBIE_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
         registerCustomItem("frosted_zombie_spawn_egg", ModEntities.FROSTED_ZOMBIE_SPAWN_EGG, ItemGroups.SPAWN_EGGS);
@@ -43,12 +38,12 @@ public abstract class RegisteringCustomItems {
 
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
-        registerVanillaOverhaulItem("glistering_melon_slice", CustomBrewingItems.GLISTERING_MELON_SLICE);
+        registerCustomItem("glistering_melon_slice", CustomBrewingItems.GLISTERING_MELON_SLICE);
 
         registerCustomItem("four_leaf_clover", CustomBrewingItems.FOUR_LEAF_CLOVER, ItemGroups.INGREDIENTS);
         registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART, ItemGroups.INGREDIENTS);
         registerCustomItem("withered_wart", CustomBlockItems.WITHERED_WART, ItemGroups.INGREDIENTS);
-        registerVanillaOverhaulItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER); //-> Replacing Fermented Spider Eyes
+        registerCustomItem("corrupted_wart_powder", CustomBrewingItems.CORRUPTED_WART_POWDER); //-> Replacing Fermented Spider Eyes
 
         registerCustomItem("concentrate_of_death", CustomBrewingItems.CONCENTRATE_OF_DEATH, ItemGroups.INGREDIENTS);          // New potion & effect!
         registerCustomItem("concentrate_of_health", CustomBrewingItems.CONCENTRATE_OF_HEALTH, ItemGroups.INGREDIENTS);
@@ -72,8 +67,8 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_invisibility", CustomBrewingItems.CONCENTRATE_OF_INVISIBILITY, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_glowing", CustomBrewingItems.CONCENTRATE_OF_GLOWING, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_weakness", CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, ItemGroups.INGREDIENTS);
-        registerVanillaOverhaulItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH); //-> Replacing Blaze Powder
-        registerVanillaOverhaulItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE);// -> Replacing Magma Cream
+        registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH); //-> Replacing Blaze Powder
+        registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE);// -> Replacing Magma Cream
         registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, ItemGroups.INGREDIENTS);
@@ -106,11 +101,11 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("brown_mud_brick_slab", CustomBlockItems.BROWN_MUD_BRICK_SLAB, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("brown_mud_brick_stairs", CustomBlockItems.BROWN_MUD_BRICK_STAIRS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("brown_mud_brick_wall", CustomBlockItems.BROWN_MUD_BRICK_WALL, ItemGroups.BUILDING_BLOCKS);
-        registerVanillaOverhaulItem("mudstone", CustomBlockItems.MUDSTONE);
-        registerVanillaOverhaulItem("mudstone_bricks", CustomBlockItems.MUDSTONE_BRICKS);
-        registerVanillaOverhaulItem("mudstone_brick_slab", CustomBlockItems.MUDSTONE_BRICK_SLAB);
-        registerVanillaOverhaulItem("mudstone_brick_stairs", CustomBlockItems.MUDSTONE_BRICK_STAIRS);
-        registerVanillaOverhaulItem("mudstone_brick_wall", CustomBlockItems.MUDSTONE_BRICK_WALL);
+        registerCustomItem("mudstone", CustomBlockItems.MUDSTONE);
+        registerCustomItem("mudstone_bricks", CustomBlockItems.MUDSTONE_BRICKS);
+        registerCustomItem("mudstone_brick_slab", CustomBlockItems.MUDSTONE_BRICK_SLAB);
+        registerCustomItem("mudstone_brick_stairs", CustomBlockItems.MUDSTONE_BRICK_STAIRS);
+        registerCustomItem("mudstone_brick_wall", CustomBlockItems.MUDSTONE_BRICK_WALL);
 
         registerCustomItem("terracotta_bricks", CustomBlockItems.TERRACOTTA_BRICKS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("terracotta_brick_slab", CustomBlockItems.TERRACOTTA_BRICK_SLAB, ItemGroups.BUILDING_BLOCKS);
@@ -120,14 +115,17 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("terracotta_tile_slab", CustomBlockItems.TERRACOTTA_TILE_SLAB, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("terracotta_tile_stairs", CustomBlockItems.TERRACOTTA_TILE_STAIRS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("chiseled_terracotta", CustomBlockItems.CHISELED_TERRACOTTA, ItemGroups.BUILDING_BLOCKS);
-        registerVanillaOverhaulItem("clay_block", CustomBlockItems.CLAY_BLOCK);
+        registerCustomItem("clay_block", CustomBlockItems.CLAY_BLOCK);
 
         registerCustomItem("wheat_grass", CustomBlockItems.WHEAT_GRASS, ItemGroups.NATURAL);
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT, ItemGroups.NATURAL);
         registerCustomItem("clovers", CustomBlockItems.CLOVERS, ItemGroups.NATURAL);
+
+        registerCustomItem("infested_dark_oak_wood", CustomBlockItems.INFESTED_DARK_OAK_WOOD);
+        registerCustomItem("infested_oak_wood", CustomBlockItems.INFESTED_OAK_WOOD);
     }
 
-    public static Item registerVanillaOverhaulItem(String name, Item item) {
+    public static Item registerCustomItem(String name, Item item) {
         if(item == null) VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
         return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
     }

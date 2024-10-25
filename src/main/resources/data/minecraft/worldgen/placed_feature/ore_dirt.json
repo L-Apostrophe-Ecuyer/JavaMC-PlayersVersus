@@ -4,15 +4,19 @@
     "config": {
       "features": [
         {
-          "chance": 0.000018,
+          "chance": 0.00015,
           "feature": "players-versus:lake_mud_underground"
         },
         {
-          "chance": 0.00004,
+          "chance": 0.0005,
           "feature": "players-versus:lake_mud_surface"
+        },
+        {
+          "chance": 0.5,
+          "feature": "players-versus:mud_pool_with_wheat"
         }
       ],
-      "default": "players-versus:mud_pool_with_wheat"
+      "default": "players-versus:mud_pool"
     }
   },
   "placement": [
@@ -21,7 +25,7 @@
     },
     {
       "type": "minecraft:rarity_filter",
-      "chance": 10
+      "chance": 16
     }
   ]
 }

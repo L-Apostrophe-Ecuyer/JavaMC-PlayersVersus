@@ -83,15 +83,15 @@
     "mobs.hostile.illager.WitchMixin",
     "mobs.hostile.illager.RaidMixin",
 
-    "mobs.hostile.overworld.CreeperEntityMixin",
+    "mobs.hostile.overworld.CreeperMixin",
     "mobs.hostile.overworld.DrownedMixin",
     "mobs.hostile.overworld.PhantomAccessor",
     "mobs.hostile.overworld.PhantomMixin",
     "mobs.hostile.overworld.SkeletonMixin",
     "mobs.hostile.overworld.SpiderMixin",
+    "mobs.hostile.overworld.SilverfishMixin",
     "mobs.hostile.overworld.WardenMixin",
     "mobs.hostile.overworld.WardenSniffMixin",
-
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
     "mobs.hostile.overworld.ZombieVillagerMixin",

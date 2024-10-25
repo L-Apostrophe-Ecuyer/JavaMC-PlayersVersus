@@ -54,4 +54,8 @@ public abstract class CustomBlockItems {
     public static final BlockItem WILD_WHEAT = new BlockItem(CustomBlocks.WILD_WHEAT, new Item.Settings());
     public static final BlockItem CLOVERS = new BlockItem(CustomBlocks.CLOVERS, new Item.Settings());
 
+
+    public static final BlockItem INFESTED_DARK_OAK_WOOD = new BlockItem(CustomBlocks.INFESTED_DARK_OAK_WOOD, new Item.Settings());
+    public static final BlockItem INFESTED_OAK_WOOD = new BlockItem(CustomBlocks.INFESTED_OAK_WOOD, new Item.Settings());
+
 }
