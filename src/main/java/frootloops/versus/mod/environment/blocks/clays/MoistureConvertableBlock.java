@@ -29,13 +29,6 @@ public interface MoistureConvertableBlock {
             if(moisture < -6) world.setBlockState(pos, cookedBlock.getStateWithProperties(state));
             else if(moisture < -1) world.setBlockState(pos, dryBlock.getStateWithProperties(state));
             else if(moisture > 2) {
-                if(!state.isOf(CustomBlocks.BROWN_MUD)) {
-                    if(wetBlock != null) {
-                        VersusMod.MOD_LOGGER.warn("Moisture of block " + (wetBlock == null ? "null" : state.getBlock().getName().toString()) + ": " + moisture);
-                        VersusMod.MOD_LOGGER.warn("    -> Converting to block " + wetBlock == null ? "null" : wetBlock.getName().toString());
-                    }
-
-                }
                 if(moisture > 2 && wetBlock != null) world.setBlockState(pos, wetBlock.getStateWithProperties(state));
             }
         }
