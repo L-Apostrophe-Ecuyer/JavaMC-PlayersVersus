@@ -39,13 +39,13 @@ public abstract class CustomEnchants {
         return RegistryKey.of(RegistryKeys.ENCHANTMENT, Identifier.of(VersusMod.MOD_ID, id));
     }
 
-    public final static void performTossAttack(LivingEntity user, Entity target, double magnitude){
+    public final static void performTossAttack(ServerWorld world,LivingEntity user, Entity target, double magnitude){
         target.addVelocity(0.0, magnitude, 0.0);
         target.getWorld().playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, user.getSoundCategory(), 1.2f, 1.2f);
         target.getWorld().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, user.getSoundCategory(), 1.0f, 1.0f);
     }
 
-    public final static void performFrostAttack(LivingEntity user, Entity target, int level){
+    public final static void performFrostAttack(ServerWorld world,LivingEntity user, Entity target, int level){
         if (target instanceof LivingEntity targetEntity && targetEntity.canFreeze()) {
             user.getWorld().playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, user.getSoundCategory(), 1.0f, 1.0f);
             targetEntity.extinguish();
@@ -59,17 +59,17 @@ public abstract class CustomEnchants {
         }
     }
 
-    public final static void performImpalingAttack(LivingEntity user, Entity target, int level){
+    public final static void performImpalingAttack(ServerWorld world,LivingEntity user, Entity target, int level){
         if(target.isTouchingWaterOrRain()) {
-            target.damage(user.getDamageSources().trident(user, user), (float)level);
+            target.damage(world, user.getDamageSources().trident(user, user), (float)level);
             user.playSound(SoundEvents.ITEM_TRIDENT_HIT, 1.1f, 1.0f);
         }
     }
 
-    public static void onCurseOfEnderUserDamaged(LivingEntity user, Entity attacker) {
+    public static void onCurseOfEnderUserDamaged(ServerWorld world,LivingEntity user, Entity attacker) {
         if(attacker instanceof LivingEntity && user != null & user.isAlive()) {
             if (!user.getWorld().isClient) {
-                user.damage(user.getDamageSources().magic(), 2.0f);
+                user.damage(world, user.getDamageSources().magic(), 2.0f);
                 if(!user.isAlive())
                     return;
 

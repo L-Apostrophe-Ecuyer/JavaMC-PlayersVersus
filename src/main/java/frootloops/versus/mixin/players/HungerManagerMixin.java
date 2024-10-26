@@ -6,6 +6,8 @@ import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,8 +28,6 @@ public class HungerManagerMixin {
     private int foodTickTimer;
     @Shadow
     private float saturationLevel;
-    @Shadow
-    private int prevFoodLevel;
 
     private static final int REGEN_TIME_SLOW = 160, REGEN_TIME_FAST = 24;
     private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 1;
@@ -42,7 +42,7 @@ public class HungerManagerMixin {
 
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    public void update(PlayerEntity player, CallbackInfo ci) {
+    public void update(ServerPlayerEntity player, CallbackInfo ci) {
 
         if(!VersusSettings.DO_FOOD_OVERHAUL) return;
 
@@ -55,15 +55,12 @@ public class HungerManagerMixin {
         // Natural regeneration:
         this.doHealthRegeneration(player);
 
-        // Update value:
-        this.prevFoodLevel = this.foodLevel;
-
         // Disable vanilla behavior:
         ci.cancel();
 
     }
 
-    private void doHungerExhaustion(PlayerEntity player) {
+    private void doHungerExhaustion(ServerPlayerEntity player) {
 
         // Starvation: When starving, activities deal damage.
         if(foodLevel == 0) {
@@ -71,7 +68,7 @@ public class HungerManagerMixin {
                 //if(FOOD_REQUIRED_FOR_SLOW_REGEN > 0) saturationLevel = 0.0f;
                 if (exhaustion > 0.5F) {
                     exhaustion = 0.0F;
-                    if(saturationLevel == 0.0f) player.damage(player.getDamageSources().starve(), 1.0f);
+                    if(saturationLevel == 0.0f) player.damage(player.getServerWorld(), player.getDamageSources().starve(), 1.0f);
                     else saturationLevel = Math.max(0.0F, saturationLevel - 0.5F);
                 }
             }
@@ -89,9 +86,9 @@ public class HungerManagerMixin {
         }
     }
 
-    private void doHealthRegeneration(PlayerEntity player) {
+    private void doHealthRegeneration(ServerPlayerEntity player) {
         float playerHealth = player.getHealth();
-        boolean canPlayerRegenHealth = player.canFoodHeal() && player.getWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
+        boolean canPlayerRegenHealth = player.canFoodHeal() && player.getServerWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         boolean canPlayerFoodHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !player.hasStatusEffect(StatusEffects.HUNGER);
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFoodHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
 

@@ -49,7 +49,7 @@ public abstract class BlockMixin extends AbstractBlock {
     }
 
     private static void dropStackTowardsPlayer(World world, BlockPos pos, ItemStack stack, @Nullable Entity entity) {
-        if (world.isClient || stack.isEmpty() || !world.getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) return;
+        if (world.isClient || stack.isEmpty() || !((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) return;
 
         double itemHeight = 0.125;
         double posX = (double)pos.getX() + 0.5 + MathHelper.nextDouble(world.random, -0.25, 0.25);
@@ -60,8 +60,8 @@ public abstract class BlockMixin extends AbstractBlock {
 
         if(entity != null) {
             Vec3d distanceVect = itemEntity.getPos().relativize(entity.getPos()).multiply(0.1);
-            if(distanceVect.lengthSquared() < 0.09f) itemEntity.setVelocity(itemEntity.getVelocity().add(distanceVect));
-            else itemEntity.setVelocity(itemEntity.getVelocity().add(distanceVect.multiply(0.6)));
+            itemEntity.setVelocity(itemEntity.getVelocity().add(distanceVect.multiply(0.6)));
+            if(distanceVect.lengthSquared() < 1.0) itemEntity.resetPickupDelay();
         }
         world.spawnEntity(itemEntity);
     }

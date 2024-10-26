@@ -13,6 +13,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.event.GameEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class HauntingStatusEffect extends StatusEffect  {
     private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
@@ -23,8 +24,14 @@ public class HauntingStatusEffect extends StatusEffect  {
     }
 
     @Override
+    public void applyInstantEffect(
+            ServerWorld world, @Nullable Entity effectEntity, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity
+    ) {
+        target.damage(world, target.getDamageSources().outOfWorld(), 2.0f);
+    }
+
+    @Override
     public void onApplied(LivingEntity entity, int amplifier) {
-        entity.damage(entity.getDamageSources().outOfWorld(), 2.0f);
         if(!entity.isAlive()) return;
 
         entity.getWorld().emitGameEvent(entity, GameEvent.ENTITY_DIE, entity.getPos());
@@ -59,7 +66,7 @@ public class HauntingStatusEffect extends StatusEffect  {
     }
 
     @Override
-    public void onEntityRemoval(LivingEntity entity, int amplifier, Entity.RemovalReason reason) {
+    public void onEntityRemoval(ServerWorld world, LivingEntity entity, int amplifier, Entity.RemovalReason reason) {
         removeEffect(entity);
     }
 

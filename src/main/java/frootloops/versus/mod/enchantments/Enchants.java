@@ -31,11 +31,12 @@ public abstract class Enchants {
     private static RegistryEntryLookup enchRegistryLookup = null;
 
     public static RegistryEntry<Enchantment> getRegistryEntry(World world, RegistryKey<Enchantment> enchantment) {
-        if(enchRegistryLookup == null) enchRegistryLookup = world.getRegistryManager().createRegistryLookup().getOrThrow(RegistryKeys.ENCHANTMENT);
+        if(enchRegistryLookup == null) enchRegistryLookup = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+
         Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = enchRegistryLookup.getOptional(enchantment);
         if(enchantmentEntry.isPresent()) return enchantmentEntry.get();
         else {
-            enchRegistryLookup = world.getRegistryManager().createRegistryLookup().getOrThrow(RegistryKeys.ENCHANTMENT);
+            enchRegistryLookup = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
             return enchRegistryLookup.getOrThrow(enchantment);
         }
     }

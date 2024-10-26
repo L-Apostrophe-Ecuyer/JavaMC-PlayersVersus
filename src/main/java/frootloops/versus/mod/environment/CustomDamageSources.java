@@ -14,18 +14,20 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+
+import java.util.Optional;
 
 
 public class CustomDamageSources {
 
     private static final RegistryKey<DamageType> MUD_SUFFOCATION_DAMAGE_TYPE = RegistryKey.of(RegistryKeys.DAMAGE_TYPE, Identifier.of(VersusMod.MOD_ID, "mud_suffocation"));
-    //private static DamageSource MUD_SUFFOCATION = null;
 
     public static DamageSource getMudSuffocation(World world) {
-        return new DamageSource(world.getDamageSources().registry.entryOf(MUD_SUFFOCATION_DAMAGE_TYPE));
+        RegistryEntry.Reference<DamageType> entry = world.getDamageSources().registry.getEntry(Identifier.of(VersusMod.MOD_ID, "mud_suffocation")).get();
+        return new DamageSource(entry);
     }
-
 }

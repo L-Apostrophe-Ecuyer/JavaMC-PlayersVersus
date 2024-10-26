@@ -1,32 +1,17 @@
 package frootloops.versus.mixin.enchantments;
 
-import frootloops.versus.VersusMod;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.block.EnchantingTableBlock;
-import net.minecraft.component.Component;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.screen.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,14 +23,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Mixin(EnchantmentScreenHandler.class)
 public abstract class EnchantingTableMixin extends ScreenHandler {
 
-    protected EnchantingTableMixin(@Nullable ScreenHandlerType<?> type, int syncId, Inventory inventory, int[] enchantmentPower, ScreenHandlerContext context, Property seed, int[] enchantmentId, int[] enchantmentLevel) {
+    protected EnchantingTableMixin(@Nullable ScreenHandlerType<?> type, int syncId, Random random, Inventory inventory, int[] enchantmentPower, ScreenHandlerContext context, Property seed, int[] enchantmentId, int[] enchantmentLevel) {
         super(type, syncId);
+        this.random = random;
         this.inventory = inventory;
         this.enchantmentPower = enchantmentPower;
         this.context = context;
@@ -54,6 +38,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
         this.enchantmentLevel = enchantmentLevel;
     }
 
+    @Shadow private final Random random;
     @Shadow private final Inventory inventory;
     @Shadow public final int[] enchantmentPower;
     @Shadow public final int[] enchantmentId;
@@ -108,7 +93,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
                     player.incrementStat(Stats.ENCHANT_ITEM);
                     if (player instanceof ServerPlayerEntity)  Criteria.ENCHANTED_ITEM.trigger((ServerPlayerEntity)player, stack, lapisCost);
                     this.inventory.markDirty();
-                    this.seed.set(player.getEnchantmentTableSeed());
+                    this.random.setSeed((long)this.seed.get());
                     this.onContentChanged(this.inventory);
                     world.playSound(null, pos, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0f, world.random.nextFloat() * 0.1f + 0.9f);
                 }

@@ -16,16 +16,16 @@ public class MoistStairsBlock extends StairsBlock implements MoistureConvertable
     private final Block cookedVersion;
     public Block wetterVersion;
 
-    public MoistStairsBlock(BlockState state, Block dryVersion) {
-        this(state, dryVersion, dryVersion);
+    public MoistStairsBlock(Settings settings, BlockState state, Block dryVersion) {
+        this(settings, state, dryVersion, dryVersion);
     }
 
-    public MoistStairsBlock(BlockState state, Block dryVersion, Block cookedVersion) {
-        this(state, dryVersion, cookedVersion, null);
+    public MoistStairsBlock(Settings settings, BlockState state, Block dryVersion, Block cookedVersion) {
+        this(settings, state, dryVersion, cookedVersion, null);
     }
 
-    public MoistStairsBlock(BlockState state, Block dryVersion, Block cookedVersion, Block wetterVersion) {
-        super(state, AbstractBlock.Settings.copy(state.getBlock()));
+    public MoistStairsBlock(Settings settings, BlockState state, Block dryVersion, Block cookedVersion, Block wetterVersion) {
+        super(state, settings);
         this.dryVersion = dryVersion;
         this.cookedVersion = cookedVersion;
         this.wetterVersion = wetterVersion;

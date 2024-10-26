@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.Enchants;
@@ -13,8 +12,6 @@ import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -22,18 +19,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.tag.PointOfInterestTypeTags;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.village.raid.Raid;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-import net.minecraft.world.poi.PointOfInterestStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -90,9 +81,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     @Inject(method = "getXpToDrop", at = @At("HEAD"), cancellable = true)
-    public void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
+    public void getXpToDrop(ServerWorld world, CallbackInfoReturnable<Integer> cir) {
         PlayerEntity player = (PlayerEntity)((Object)this);
-        if(this.totalExperience == 0 || this.isExperienceDroppingDisabled() || this.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || this.isSpectator()) {
+        if(this.totalExperience == 0 || this.isExperienceDroppingDisabled() || world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || this.isSpectator()) {
             cir.setReturnValue(0);
         } else {
             cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1) - 8);
@@ -161,7 +152,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
-    private void onDamageInterruptEating(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void onDamageInterruptEating(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
             Item item = this.activeItemStack.getItem();
             if (item.getComponents().contains(DataComponentTypes.FOOD) || item instanceof PotionItem) {
@@ -173,6 +164,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "attack", at = @At("HEAD"))
     public void attackTypes(Entity target, CallbackInfo ci) {
+        if(this.getWorld().isClient) return;
 
         // After attacking, the shield is interrupted:
         if(this.getOffHandStack().getItem() instanceof ShieldItem) {
@@ -181,14 +173,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         double amount = this.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
-        if(amount < 0.75f) {
+        if(amount < (this.isOnGround() ? 0.5f : 0.75f)) {
             if (target instanceof LivingEntity livingEntity) {
                 double strength = this.isSprinting() ? 0.8 : 0.5;
                 this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
                 livingEntity.takeKnockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
             }
             else if (target instanceof VehicleEntity || target instanceof ArmorStandEntity) {
-                target.damage(this.getDamageSources().playerAttack((PlayerEntity)((Object)this)), 2.0f);
+                target.damage((ServerWorld) this.getWorld(), this.getDamageSources().playerAttack((PlayerEntity)((Object)this)), 2.0f);
             }
         }
     }

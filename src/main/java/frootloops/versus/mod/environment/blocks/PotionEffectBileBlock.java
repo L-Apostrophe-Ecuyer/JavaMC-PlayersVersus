@@ -15,6 +15,7 @@ import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.math.BlockPos;
@@ -23,6 +24,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.*;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.ToIntFunction;
@@ -37,28 +39,8 @@ public class PotionEffectBileBlock extends Block {
     private final float AMBIENT_OCCLUSION_AMOUNT;
     private RegistryEntry<StatusEffect> effect;
 
-    public PotionEffectBileBlock(RegistryEntry<StatusEffect> statusEffect, int duration, int amplifier) {
-        this(statusEffect, statusEffect, duration, amplifier);
-    }
-
-    public PotionEffectBileBlock(RegistryEntry<StatusEffect> statusEffect) {
-        this(statusEffect.value().getColor(), statusEffect);
-    }
-
-    public PotionEffectBileBlock(int color, RegistryEntry<StatusEffect> statusEffect) {
-        this(ColorHelper.fullAlpha(color), statusEffect, 50, 0, 3, 0.8f);
-    }
-
-    public PotionEffectBileBlock(RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier) {
-        this(statusEffect, statusEffectToGrant, duration, amplifier, 3, 0.6f);
-    }
-
-    public PotionEffectBileBlock(RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
-        this(ColorHelper.fullAlpha(statusEffect.value().getColor()), statusEffectToGrant, duration, amplifier, luminance, ambientOcclusion);
-    }
-
-    public PotionEffectBileBlock(int color, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
-        super(AbstractBlock.Settings.create().sounds(BlockSoundGroup.SLIME).luminance(getLuminanceSupplier(luminance)).noCollision().strength(0.2f, 0.4f).pistonBehavior(PistonBehavior.DESTROY).allowsSpawning((state, world, pos, entityType) -> false));
+    public PotionEffectBileBlock(Settings settings, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, float ambientOcclusion) {
+        super(settings);
         this.effect = statusEffectToGrant;
         this.PARTICLE = EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, color);
         this.DURATION = duration;
@@ -73,7 +55,7 @@ public class PotionEffectBileBlock extends Block {
     @Override
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
         if (!world.isClient && !entity.isSpectator() && entity.getBlockStateAtPos().isOf(this) && entity instanceof LivingEntity livingEntity) {
-            if(entity.fallDistance > 0.65 && (entity instanceof PlayerEntity || world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && entity.getWidth() * entity.getWidth() * entity.getHeight() > 0.512F) {
+            if(entity.fallDistance > 0.65 && (entity instanceof PlayerEntity || (!world.isClient && ((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && entity.getWidth() * entity.getWidth() * entity.getHeight() > 0.512F)) {
                 this.grantStatusEffect(livingEntity, true);
                 world.breakBlock(pos, false);
             }
@@ -90,7 +72,7 @@ public class PotionEffectBileBlock extends Block {
             return;
         }
         if (entity.bypassesSteppingEffects() || entity.hasStatusEffect(effect)) return;
-        if(effect == StatusEffects.INSTANT_DAMAGE) entity.damage(entity.getDamageSources().magic(), extraStrongEffect ? 2 : 1);
+        if(effect == StatusEffects.INSTANT_DAMAGE && !entity.getWorld().isClient) entity.damage((ServerWorld) entity.getWorld(), entity.getDamageSources().magic(), extraStrongEffect ? 2 : 1);
         else if(effect == StatusEffects.INSTANT_HEALTH) entity.heal(extraStrongEffect ? 2 : 1);
         else entity.addStatusEffect(new StatusEffectInstance(effect, extraStrongEffect ? DURATION + 20: DURATION, AMPLIFIER));
     }
@@ -107,8 +89,12 @@ public class PotionEffectBileBlock extends Block {
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        return !state.canPlaceAt(world, pos) ? Blocks.AIR.getDefaultState() : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    protected BlockState getStateForNeighborUpdate(
+            BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random
+    ) {
+        return !state.canPlaceAt(world, pos)
+                ? Blocks.AIR.getDefaultState()
+                : super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override

@@ -2,8 +2,8 @@
   "description": {
     "translate": "enchantment.players-versus.frost_aspect"
   },
-  "supported_items": "#minecraft:enchantable/sharp_weapon",
   "exclusive_set": "#minecraft:exclusive_set/mining",
+  "supported_items": "#minecraft:enchantable/sharp_weapon",
   "primary_items": "#minecraft:axes",
   "weight": 2,
   "max_level": 2,
@@ -33,8 +33,10 @@
               "trigger_game_event": "minecraft:block_change"
             },
             {
-              "type": "minecraft:damage_item",
-              "amount": 1
+              "type": "minecraft:damage_entity",
+              "damage_type": "minecraft:freeze",
+              "min_damage": 1,
+              "max_damage": 1
             }
           ]
         },

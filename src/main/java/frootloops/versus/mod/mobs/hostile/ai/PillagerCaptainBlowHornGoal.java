@@ -14,7 +14,10 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.event.GameEvent;
+
+import java.util.Optional;
 
 public class PillagerCaptainBlowHornGoal extends Goal {
 
@@ -61,7 +64,8 @@ public class PillagerCaptainBlowHornGoal extends Goal {
         this.prevOffhandStack = this.illager.getOffHandStack();
         this.prevMainhandStack = this.illager.getMainHandStack();
 
-        ItemStack goatHornStack = GoatHornItem.getStackForInstrument(Items.GOAT_HORN, illager.getWorld().getRegistryManager().get(RegistryKeys.INSTRUMENT).entryOf(Instruments.SEEK_GOAT_HORN));
+        RegistryEntry.Reference<Instrument> entry = illager.getWorld().getRegistryManager().getOrThrow(RegistryKeys.INSTRUMENT).getEntry(Identifier.ofVanilla("seek_goat_horn")).get();
+        ItemStack goatHornStack = GoatHornItem.getStackForInstrument(Items.GOAT_HORN, entry);
         this.illager.equipStack(EquipmentSlot.OFFHAND, goatHornStack);
         this.illager.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 

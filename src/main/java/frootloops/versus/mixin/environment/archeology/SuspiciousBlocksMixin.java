@@ -7,6 +7,8 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.BrushableBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BrushItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,10 +27,10 @@ public abstract class SuspiciousBlocksMixin extends BlockEntity {
     }
 
     @Inject(method = "finishBrushing", at = @At("RETURN"), cancellable = false)
-    private void finishBrushing(PlayerEntity player, CallbackInfo info) {
-        if(player.getWorld() instanceof ServerWorld serverWorld && !(player.getActiveItem().getItem() instanceof BrushItem)) {
-            if(!(this.getWorld().getBlockState(this.getPos()).getBlock() instanceof BrushableBlock)) {
-                serverWorld.breakBlock(this.getPos(), true, player);
+    private void finishBrushing(ServerWorld world, PlayerEntity player, ItemStack itemStack, CallbackInfo info) {
+        if(itemStack.getUseAction() != UseAction.BRUSH) {
+            if(!(world.getBlockState(this.getPos()).getBlock() instanceof BrushableBlock)) {
+                world.breakBlock(this.getPos(), true, player);
             }
         }
     }

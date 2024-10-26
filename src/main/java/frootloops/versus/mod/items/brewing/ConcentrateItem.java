@@ -35,8 +35,8 @@ public class ConcentrateItem extends BlockItem {
     protected int amplifier;
     protected int duration;
 
-    public ConcentrateItem(RegistryEntry<StatusEffect> registeredEffect, Block block) {
-        super(block, new Item.Settings().rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, CONCENTRATE_COMPONENT));
+    public ConcentrateItem(Settings settings, RegistryEntry<StatusEffect> registeredEffect, Block block) {
+        super(block, settings);
         if(registeredEffect != null) {
             this.effect = registeredEffect;
             this.amplifier = 0;
@@ -44,8 +44,8 @@ public class ConcentrateItem extends BlockItem {
         }
     }
 
-    public ConcentrateItem(RegistryEntry<StatusEffect> registeredEffect, int amplifier, int duration, Block block) {
-        super(block, new Item.Settings().rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, CONCENTRATE_COMPONENT));
+    public ConcentrateItem(Settings settings, RegistryEntry<StatusEffect> registeredEffect, int amplifier, int duration, Block block) {
+        super(block, settings);
         if(registeredEffect != null) {
             this.effect = registeredEffect;
             this.amplifier = amplifier;
@@ -55,11 +55,6 @@ public class ConcentrateItem extends BlockItem {
 
     public RegistryEntry<StatusEffect> getEffect() {
         return effect;
-    }
-
-    @Override
-    public String getTranslationKey() {
-        return this.getOrCreateTranslationKey();
     }
 
     @Override

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "features": [
+      {
+        "chance": 0.4,
+        "feature": "players-versus:desert_patch_oasis"
+      }
+    ],
+    "default": "players-versus:desert_patch_dirt"
+  }
+}

@@ -43,16 +43,16 @@ public abstract class MinecartMixin extends VehicleEntity {
     }
 
     @Overwrite
-    public double getMaxSpeed() {
-        if(this.getWorld().getEnabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
-            double gameruleMaxSpeed = this.controller.getMaxSpeed();
+    public double getMaxSpeed(ServerWorld world) {
+        if(!world.getEnabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
+            double gameruleMaxSpeed = this.controller.getMaxSpeed((ServerWorld) this.getWorld());
             return gameruleMaxSpeed == 8.0 ? gameruleMaxSpeed * 8.0 : gameruleMaxSpeed;
         }
         return 64.0 / (this.isTouchingWater() ? 40.0 : 20.0);
     }
 
-    @Inject(method = "method_61564", at = @At("HEAD"), cancellable = true)
-    public void slowdownOnFastTurns(BlockPos blockPos, RailShape railShape, double d, CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "moveAlongTrack", at = @At("HEAD"), cancellable = true)
+    public void slowdownOnFastTurns(BlockPos pos, RailShape railShape, double remainingMovement, CallbackInfoReturnable<Double> cir) {
 
         // The goal here is twofold:
         //    1. Immersion, make players feel how fast they're turning, and make them take that into consideration when building
@@ -100,8 +100,8 @@ public abstract class MinecartMixin extends VehicleEntity {
 
 
     @Overwrite
-    public void moveOffRail() {
-        double d = getMaxSpeed();
+    public void moveOffRail(ServerWorld world) {
+        double d = getMaxSpeed(world);
         if(d == 8.0) d = 32.0;
 
         Vec3d velocity = this.getVelocity();

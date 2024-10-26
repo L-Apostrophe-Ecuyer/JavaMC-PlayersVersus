@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items.brewing;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.items.RegisteringCustomItems;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.effect.StatusEffect;
@@ -21,6 +22,7 @@ import java.util.List;
 
 import static frootloops.versus.VersusMod.MOD_ID;
 import static frootloops.versus.mod.items.ItemsAndStacks.MAX_POTION_STACK_SIZE;
+import static frootloops.versus.mod.items.RegisteringCustomItems.getSettings;
 
 public abstract class CustomPotions {
 
@@ -70,11 +72,11 @@ public abstract class CustomPotions {
 
         DARKNESS = registerCustomPotion("darkness", StatusEffects.DARKNESS, 0, 480);
         DARKNESS_LONG = registerCustomPotion("darkness_long", StatusEffects.DARKNESS, 0, 720);
-        DARKNESS_STRONG = registerCustomPotion("darkness_strong", new Potion(new StatusEffectInstance[]{new StatusEffectInstance(StatusEffects.DARKNESS, 360), new StatusEffectInstance(StatusEffects.BLINDNESS, 80)}));
+        DARKNESS_STRONG = registerCustomPotion("darkness_strong", new Potion("glowing_strong", new StatusEffectInstance[]{new StatusEffectInstance(StatusEffects.DARKNESS, 360), new StatusEffectInstance(StatusEffects.BLINDNESS, 80)}));
 
         GLOWING = registerCustomPotion("glowing", StatusEffects.GLOWING, 0, 3000);
         GLOWING_LONG = registerCustomPotion("glowing_long", StatusEffects.GLOWING, 0, 7200);
-        GLOWING_STRONG = registerCustomPotion("glowing_strong", new Potion(new StatusEffectInstance[]{new StatusEffectInstance(StatusEffects.GLOWING, 800), new StatusEffectInstance(StatusEffects.NIGHT_VISION, 800)}));
+        GLOWING_STRONG = registerCustomPotion("glowing_strong", new Potion("glowing_strong", new StatusEffectInstance[]{new StatusEffectInstance(StatusEffects.GLOWING, 800), new StatusEffectInstance(StatusEffects.NIGHT_VISION, 800)}));
 
         DECAY = registerCustomPotion("decay", StatusEffects.WITHER, 0, 240);
         DECAY_LONG = registerCustomPotion("decay_long", StatusEffects.WITHER, 0, 360);
@@ -85,13 +87,13 @@ public abstract class CustomPotions {
         UNLUCK = registerCustomPotion("unluck", StatusEffects.UNLUCK, 0, 3000);
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
-        CustomBrewingItems.BOTTLE_OF_ENDER = new PotionItem(new Item.Settings().maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
-        CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
-        CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(new Item.Settings().maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+        CustomBrewingItems.BOTTLE_OF_ENDER = new PotionItem(getSettings("bottle_of_ender").maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+        CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(getSettings("splash_bottle_of_ender").maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+        CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(getSettings("lingering_bottle_of_ender").maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
     }
 
     private static RegistryEntry<Potion> registerCustomPotion(String name, RegistryEntry<StatusEffect> effect, int amplifier, int duration) {
-        return registerCustomPotion(name, new Potion(new StatusEffectInstance(effect, duration, amplifier)));
+        return registerCustomPotion(name, new Potion(name, new StatusEffectInstance(effect, duration, amplifier)));
     }
 
     private static RegistryEntry<Potion> registerCustomPotion(String name, Potion customPotion) {

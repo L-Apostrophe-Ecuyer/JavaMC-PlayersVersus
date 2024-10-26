@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -65,8 +66,8 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
-        boolean hasAttacked = super.tryAttack(target);
+    public boolean tryAttack(ServerWorld world, Entity target) {
+        boolean hasAttacked = super.tryAttack(world, target);
         if (hasAttacked && this.getMainHandStack().isEmpty() && target instanceof LivingEntity livingEntity) {
             livingEntity.setFrozenTicks(livingEntity.getFrozenTicks() + 80);
         }

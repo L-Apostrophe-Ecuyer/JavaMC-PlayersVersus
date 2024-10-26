@@ -19,11 +19,7 @@ import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ClientWorld.class)
-public abstract class ClientWorldMixin extends World {
-
-    protected ClientWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates) {
-        super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
-    }
+public abstract class ClientWorldMixin {
 
     @ModifyConstant(method = "getSkyBrightness", constant = @Constant(floatValue = 16.0F))
     private static float lessDepressingWeather(float f) {

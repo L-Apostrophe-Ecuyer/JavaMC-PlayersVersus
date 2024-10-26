@@ -20,6 +20,7 @@ import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -78,7 +79,7 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "tryAttack", at = @At("TAIL"))
-    public void attackEnchantmentEffects(Entity target, CallbackInfoReturnable<Boolean> cir) {
+    public void attackEnchantmentEffects(ServerWorld world, Entity target, CallbackInfoReturnable<Boolean> cir) {
         if(cir.getReturnValue()) {
             LivingEntity self = ((LivingEntity) (Object) this);
             ItemStack mainhandStack = self.getMainHandStack();
@@ -87,23 +88,23 @@ public abstract class LivingEntityMixin extends Entity {
             // Shovel attack and Tossing Enchantment:
             if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
                 int tossLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.TOSSING);
-                CustomEnchants.performTossAttack(self, target, 0.2 + 0.1 * (double)tossLevel);
+                CustomEnchants.performTossAttack(world, self, target, 0.2 + 0.1 * (double)tossLevel);
             }
 
             // Other enchantments: Frost Aspect, Impaling
             if (!mainhandStack.hasEnchantments()) return;
             int frostLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.FROST_ASPECT);
-            if (frostLevel > 0) CustomEnchants.performFrostAttack(self, target, frostLevel);
+            if (frostLevel > 0) CustomEnchants.performFrostAttack(world, self, target, frostLevel);
 
             if (!mainhandStack.hasEnchantments()) return;
             int impaleLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchantments.IMPALING);
-            if (impaleLevel > 0) CustomEnchants.performImpalingAttack(self, target, frostLevel);
+            if (impaleLevel > 0) CustomEnchants.performImpalingAttack(world, self, target, frostLevel);
         }
     }
 
 
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
-    private float rebalancedDamage(float amount2, DamageSource source, float amount) {
+    private float rebalancedDamage(float amount2, ServerWorld world, DamageSource source, float amount) {
         // Explosions don't hurt as much, or at least, the damage is more consistent:
         if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
             return (amount + amount + 16.0f) / 4.0f;
@@ -125,7 +126,7 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "damage", at = @At("TAIL"))
-    private void modifyInvincibilityFrames(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void modifyInvincibilityFrames(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(source.getAttacker() instanceof LivingEntity attacker) {
 
             // Modify Invincibility Frames:
@@ -139,7 +140,7 @@ public abstract class LivingEntityMixin extends Entity {
 
             // Curse of Ender Enchantment:
             if(Enchants.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
-                CustomEnchants.onCurseOfEnderUserDamaged(((LivingEntity)(Object)this), attacker);
+                CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), attacker);
             }
         }
         else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 12;

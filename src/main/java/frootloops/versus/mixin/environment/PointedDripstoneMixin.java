@@ -5,7 +5,7 @@ import net.minecraft.block.*;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -24,7 +24,7 @@ import java.util.Optional;
 
 @Mixin(PointedDripstoneBlock.class)
 public abstract class PointedDripstoneMixin extends Block {
-    @Shadow public static final DirectionProperty VERTICAL_DIRECTION = Properties.VERTICAL_DIRECTION;
+    @Shadow public static final EnumProperty<Direction> VERTICAL_DIRECTION = Properties.VERTICAL_DIRECTION;
 
     private static final Map<Block,Block> BLOCKS_THAT_DRIP_WATER = new HashMap<>();
     static {

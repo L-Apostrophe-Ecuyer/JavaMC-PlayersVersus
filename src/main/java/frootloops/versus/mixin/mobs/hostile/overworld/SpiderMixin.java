@@ -19,6 +19,7 @@ import net.minecraft.entity.mob.SkeletonEntity;
 import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
@@ -60,18 +61,18 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    protected void dropLoot(DamageSource source, boolean causedByPlayer) {
-        super.dropLoot(source, causedByPlayer);
+    protected void dropLoot(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+        super.dropLoot(world, source, causedByPlayer);
         if(!this.isBaby()) {
-            super.dropLoot(source, causedByPlayer); // Triple loot for the big boys!
-            super.dropLoot(source, causedByPlayer);
+            super.dropLoot(world, source, causedByPlayer); // Triple loot for the big boys!
+            super.dropLoot(world, source, causedByPlayer);
         }
     }
 
     @Override
-    public int getXpToDrop() {
+    public int getXpToDrop(ServerWorld world) {
         if (!this.isBaby()) this.experiencePoints = 17;
-        return super.getXpToDrop();
+        return super.getXpToDrop(world);
     }
 
     @Override
@@ -130,8 +131,8 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
-        if (super.tryAttack(target)) {
+    public boolean tryAttack(ServerWorld world, Entity target) {
+        if (super.tryAttack(world, target)) {
             if (target instanceof LivingEntity && !this.isBaby()) {
                 int i = 0;
                 if (this.getWorld().getDifficulty() == Difficulty.NORMAL) i = 3;

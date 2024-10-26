@@ -218,7 +218,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                         if(this.mob.canSee(target)) {
                             if(DEBUG) VersusMod.MOD_LOGGER.warn("Landing attack!");
                             this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.4F);
-                            this.mob.tryAttack(target);
+                            this.mob.tryAttack(getServerWorld(this.mob), target);
                             this.cooldown -= 2;
                         }
                         else {

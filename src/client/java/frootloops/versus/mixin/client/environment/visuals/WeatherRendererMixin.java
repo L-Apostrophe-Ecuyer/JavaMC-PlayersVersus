@@ -64,13 +64,13 @@ public abstract class WeatherRendererMixin {
         }
     }
 
-    @Redirect(method = "method_62316", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getRainGradient(F)F"))
+    @Redirect(method = "renderPrecipitation", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getRainGradient(F)F"))
     private float getRainAmount(World world, float delta) {
         return world.getThunderGradient(delta);
     }
 
     @Overwrite
-    public void method_62319(ClientWorld world, Camera camera, int ticks, ParticlesMode particlesMode) {
+    public void addParticlesAndSound(ClientWorld world, Camera camera, int ticks, ParticlesMode particlesMode) {
         float amountOfFog = world.getRainGradient(1.0F);
         if(amountOfFog < 0.1f) return;
 
@@ -82,7 +82,7 @@ public abstract class WeatherRendererMixin {
         }
 
         float amountOfRain = world.getThunderGradient(1.0F) / 2.0F;
-        if (amountOfRain > 0.0F) {
+        if (amountOfRain > 0.1F) {
             BlockPos blockPos2 = null;
 
             int numParticles = (int)(100.0F * amountOfRain * amountOfRain) / (particlesMode == ParticlesMode.DECREASED ? 3 : 2);

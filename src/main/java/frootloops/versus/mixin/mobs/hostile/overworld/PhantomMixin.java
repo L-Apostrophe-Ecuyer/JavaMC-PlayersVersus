@@ -13,6 +13,7 @@ import net.minecraft.entity.mob.FlyingEntity;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
@@ -35,8 +36,8 @@ public abstract class PhantomMixin extends FlyingEntity {
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
-        boolean wasDamaged = super.damage(source, amount);
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+        boolean wasDamaged = super.damage(world, source, amount);
         if(!source.isOf(DamageTypes.MOB_PROJECTILE) && source.getAttacker() != null && this.getTarget() != null && !Combat.isLookingTowards(this, this.getTarget().getPos(), true)) {
             // Keep attacking, instead of flying back up, to give a chance to melee attackers:
             this.hurtTime = 0;
@@ -119,7 +120,7 @@ public abstract class PhantomMixin extends FlyingEntity {
             this.verticalCollision = false;
         }
         super.move(movementType,movement);
-        if(this.isTouchingWater()) this.damage(getDamageSources().drown(), 2.0F);
+        if(this.isTouchingWater() && !this.getWorld().isClient) this.damage((ServerWorld) this.getWorld(), getDamageSources().drown(), 2.0F);
     }
 
     @Override

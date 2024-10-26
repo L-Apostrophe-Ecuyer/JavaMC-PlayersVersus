@@ -4,16 +4,14 @@ import frootloops.versus.mod.items.inventory.HotbarCycling;
 import frootloops.versus.mod.items.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
+import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -22,16 +20,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Environment(EnvType.CLIENT)
 @Mixin(InventoryScreen.class)
-public abstract class InventoryScreenSurvivalMixin extends AbstractInventoryScreen<PlayerScreenHandler>  implements RecipeBookProvider {
-    public InventoryScreenSurvivalMixin(PlayerScreenHandler screenHandler, PlayerInventory playerInventory, Text text, boolean mouseDown, RecipeBookWidget recipeBook) {
-        super(screenHandler, playerInventory, text);
-        this.recipeBook = recipeBook;
-    }
-
-    @Shadow private final RecipeBookWidget recipeBook;
+public abstract class InventoryScreenSurvivalMixin extends RecipeBookScreen<PlayerScreenHandler> {
 
     private TexturedButtonWidget buttonHotbarSwap = null;
     private TexturedButtonWidget buttonSortInventory = null;
+
+    public InventoryScreenSurvivalMixin(PlayerScreenHandler handler, RecipeBookWidget<?> recipeBook, PlayerInventory inventory, Text title) {
+        super(handler, recipeBook, inventory, title);
+    }
 
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
@@ -49,7 +45,7 @@ public abstract class InventoryScreenSurvivalMixin extends AbstractInventoryScre
         this.addDrawableChild(buttonSortInventory);
     }
 
-    @Inject(method = "mouseClicked",at = @At("RETURN"), cancellable = false)
+    @Inject(method = "mouseReleased",at = @At("RETURN"), cancellable = false)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable info) {
         if(button == 2) {
             HotbarCycling.doHotbarSwap(client, client.player.getInventory());

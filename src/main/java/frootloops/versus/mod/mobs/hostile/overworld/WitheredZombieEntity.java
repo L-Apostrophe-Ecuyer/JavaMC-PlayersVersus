@@ -15,6 +15,7 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.random.Random;
@@ -40,8 +41,8 @@ public class WitheredZombieEntity extends ZombieEntity {
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
-        boolean hasAttacked = super.tryAttack(target);
+    public boolean tryAttack(ServerWorld world, Entity target) {
+        boolean hasAttacked = super.tryAttack(world, target);
         if (hasAttacked && this.getMainHandStack().isEmpty() && target instanceof LivingEntity livingEntity) {
             livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 60), this);
         }
@@ -63,9 +64,9 @@ public class WitheredZombieEntity extends ZombieEntity {
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
         if(source.isOf(DamageTypes.WITHER)) return false;
-        return super.damage(source, amount);
+        return super.damage(world, source, amount);
     }
 
     @Override

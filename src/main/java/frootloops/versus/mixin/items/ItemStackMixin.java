@@ -1,22 +1,16 @@
 package frootloops.versus.mixin.items;
 
-import frootloops.versus.mod.items.ItemsAndStacks;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.ComponentHolder;
-import net.minecraft.component.ComponentMapImpl;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.MergedComponentMap;
 import net.minecraft.component.type.EnchantableComponent;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,15 +20,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements ComponentHolder {
 
-    public ItemStackMixin(Item item, int count, ComponentMapImpl components) {
+    @Shadow private final Item item;
+    @Shadow private int count;
+    @Shadow final MergedComponentMap components;
+
+    protected ItemStackMixin(Item item, int count, MergedComponentMap components) {
         this.item = item;
         this.count = count;
         this.components = components;
     }
-
-    @Shadow private final Item item;
-    @Shadow private int count;
-    @Shadow final ComponentMapImpl components;
 
     @Shadow
     public Text getName() { return null; }

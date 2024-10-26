@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.environment;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.HostileEntity;
@@ -32,7 +31,7 @@ public abstract class TallFlowerMixin extends PlantBlock implements Fertilizable
                 double d = Math.abs(entity.getX() - entity.lastRenderX);
                 double e = Math.abs(entity.getZ() - entity.lastRenderZ);
                 if (d >= (double) 0.03f || e >= (double) 0.03f) {
-                    entity.damage(world.getDamageSources().sweetBerryBush(), 1.0f);
+                    entity.damage((ServerWorld) world, world.getDamageSources().sweetBerryBush(), 1.0f);
                 }
             }
         }

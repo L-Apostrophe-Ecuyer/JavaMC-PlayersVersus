@@ -4,11 +4,19 @@ import com.google.common.collect.Sets;
 import frootloops.versus.mod.mobs.passive.RevampedTradeOffers;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.village.*;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
 
@@ -16,6 +24,20 @@ import static frootloops.versus.mod.mobs.passive.RevampedTradeOffers.REVAMPED_PR
 
 @Mixin(VillagerEntity.class)
 public abstract class VillagerEntityMixin extends MerchantEntity implements VillagerDataContainer {
+
+    @Shadow private int experience;
+
+    @Nullable
+    private PlayerEntity customer, lastCustomer;
+
+    @Shadow private int levelUpTimer;
+    @Shadow  private boolean levelingUp;
+
+    @Shadow private boolean canLevelUp() {
+        int i = this.getVillagerData().getLevel();
+        return VillagerData.canLevelUp(i) && this.experience >= VillagerData.getUpperLevelExperience(i);
+    }
+
     public VillagerEntityMixin(EntityType<? extends MerchantEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -51,6 +73,21 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
             TradeOffer tradeOffer = factory.create(this, this.random);
             if (tradeOffer == null) continue;
             tradeOfferList.add(tradeOffer);
+        }
+    }
+
+    @Inject(method = "talkWithVillager", at = @At("TAIL"))
+    public void talkWithVillager(ServerWorld world, VillagerEntity villager, long time, CallbackInfo info) {
+        this.experience += 3;
+    }
+
+    @Override
+    public void afterUsing(TradeOffer offer) {
+        this.experience = this.experience + offer.getMerchantExperience();
+        this.lastCustomer = customer;
+        if (this.canLevelUp()) {
+            this.levelUpTimer = 40;
+            this.levelingUp = true;
         }
     }
 }

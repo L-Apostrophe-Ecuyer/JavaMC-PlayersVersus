@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BrushableBlock;
 import net.minecraft.block.entity.BrushableBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShovelItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.particle.BlockStateParticleEffect;
@@ -51,14 +52,16 @@ public class BrushesNotRequiredMixin {
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = false)
     private void update(CallbackInfo info) {
+        if(world.isClient) return;
+
         int ticksTillBrushing = player.getMainHandStack().getItem() instanceof ShovelItem ? 2 : 6;
         if(this.tickCounter - startMiningTime > ticksTillBrushing && this.tickCounter - startMiningTime < 36 && player.handSwinging) {
             BlockState blockState = world.getBlockState(miningPos);
             if (blockState.getBlock() instanceof BrushableBlock) {
                 if (world.getBlockEntity(miningPos) instanceof BrushableBlockEntity brushableBlockEntity) {
                     addDustParticles(world, prevDirection, miningPos, blockState, player);
-                    brushableBlockEntity.brush(world.getTime(), player, prevDirection);
-                    brushableBlockEntity.scheduledTick();
+                    brushableBlockEntity.brush(world.getTime(), (ServerWorld)world, player, prevDirection, player.getMainHandStack());
+                    brushableBlockEntity.scheduledTick((ServerWorld)world);
                 }
             }
         }

@@ -10,6 +10,7 @@ import net.minecraft.entity.mob.MobVisibilityCache;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.World;
@@ -42,9 +43,9 @@ public abstract class MobEntityMixin extends LivingEntity {
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
         if (this.hasVehicle() && !(this.getVehicle() instanceof LivingEntity)) this.stopRiding();
-        return super.damage(source, amount);
+        return super.damage(world, source, amount);
     }
 
     @Redirect(at=@At(value = "INVOKE", target="Lnet/minecraft/world/LocalDifficulty;getClampedLocalDifficulty()F"), method= "Lnet/minecraft/entity/mob/MobEntity;initEquipment(Lnet/minecraft/util/math/random/Random;Lnet/minecraft/world/LocalDifficulty;)V")

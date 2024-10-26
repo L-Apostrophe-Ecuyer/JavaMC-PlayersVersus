@@ -1,12 +1,11 @@
 package frootloops.versus.mixin.client.mobs.passive;
 
 
-import frootloops.versus.VersusMod;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.EntityModelPartNames;
-import net.minecraft.client.render.entity.model.VillagerResemblingModel;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.entity.model.*;
 import net.minecraft.client.render.entity.state.VillagerEntityRenderState;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,19 +14,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(VillagerResemblingModel.class)
-public abstract class VillagerRessemblingModelMixin extends EntityModel<VillagerEntityRenderState> {
+import java.util.function.Function;
 
-    @Shadow private final ModelPart root;
+@Mixin(VillagerResemblingModel.class)
+public abstract class VillagerRessemblingModelMixin extends EntityModel<VillagerEntityRenderState> implements ModelWithHead, ModelWithHat {
 
     private ModelPart rightEar;
     private ModelPart leftEar;
 
-    public VillagerRessemblingModelMixin(ModelPart root, ModelPart rightEar, ModelPart leftEar) {
-        this.root = root;
-        this.rightEar = rightEar;
-        this.leftEar = leftEar;
+    protected VillagerRessemblingModelMixin(ModelPart modelPart, Function<Identifier, RenderLayer> function) {
+        super(modelPart, function);
     }
+
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void constructorHead(ModelPart root, CallbackInfo ci) {

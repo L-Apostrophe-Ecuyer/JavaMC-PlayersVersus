@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(LivingEntity.class)
 public class ElytraGlideDurabilityMixin {
 
-    @ModifyVariable(method = "tickFallFlying", at = @At("STORE"), ordinal = 1)
+    @ModifyVariable(method = "tickGliding", at = @At("STORE"), ordinal = 1)
     private int noDurabilityWhileGliding(int j) {
         return 1;
     }

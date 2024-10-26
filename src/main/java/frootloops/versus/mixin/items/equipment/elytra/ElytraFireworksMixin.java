@@ -21,7 +21,7 @@ public class ElytraFireworksMixin extends Item {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     private void fireworksTweak(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        if(!world.isClient && user.isFallFlying() && !user.getAbilities().creativeMode) {
+        if(!world.isClient && user.isGliding() && !user.getAbilities().creativeMode) {
             ItemStack elytraStack = user.getEquippedStack(EquipmentSlot.CHEST);
             if(elytraStack.isOf(Items.ELYTRA)) {
 

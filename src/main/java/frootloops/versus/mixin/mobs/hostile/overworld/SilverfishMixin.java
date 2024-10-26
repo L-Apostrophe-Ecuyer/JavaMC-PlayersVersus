@@ -7,6 +7,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.SilverfishEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -17,8 +18,8 @@ public class SilverfishMixin extends HostileEntity {
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
-        boolean hasAttacked = super.tryAttack(target);
+    public boolean tryAttack(ServerWorld world, Entity target) {
+        boolean hasAttacked = super.tryAttack(world, target);
         if (hasAttacked && target instanceof LivingEntity livingEntity && this.getRandom().nextBoolean()) {
             livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.INFESTED, 240), this);
         }

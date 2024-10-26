@@ -17,6 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -44,8 +45,8 @@ public abstract class PigMixin extends AnimalEntity {
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
-        if(super.tryAttack(target)) {
+    public boolean tryAttack(ServerWorld world, Entity target) {
+        if(super.tryAttack(world, target)) {
             this.playSound(SoundEvents.ENTITY_HOGLIN_RETREAT, 0.5F, 1.8F);
             return true;
         }
@@ -73,6 +74,7 @@ public abstract class PigMixin extends AnimalEntity {
         super.onEatingGrass();
         this.setPitch(60f);
         int count = 1 + this.random.nextBetween(0,1);
+        if(this.getWorld().isClient) return;
 
         Item dugUpItem = Items.BROWN_MUSHROOM;
         int rand = this.random.nextInt(100);
@@ -87,7 +89,7 @@ public abstract class PigMixin extends AnimalEntity {
         }
 
         for(int j = 0; j < count; ++j) {
-            ItemEntity itemEntity = this.dropItem(dugUpItem, 1);
+            ItemEntity itemEntity = this.dropItem((ServerWorld) this.getWorld(), dugUpItem, 1);
             if (itemEntity != null) itemEntity.setVelocity(itemEntity.getVelocity().add((double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(this.random.nextFloat() * 0.05F), (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)));
         }
     }

@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.client.items.inventory.recipe_book;
 
-import frootloops.versus.VersusMod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
@@ -11,10 +10,13 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.recipe.NetworkRecipeId;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.display.SlotDisplayContexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.context.ContextParameterMap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,19 +35,18 @@ public abstract class AnimatedResultButtonMixin extends ClickableWidget {
     @Shadow private static final Identifier SLOT_UNCRAFTABLE_TEXTURE = Identifier.ofVanilla("recipe_book/slot_uncraftable");
     @Shadow private float bounce;
     @Shadow private RecipeResultCollection resultCollection;
-    @Shadow private final CurrentIndexProvider field_52846;
-    @Shadow private List<RecipeEntry<?>> field_52845 = List.of(); // List of recipes
 
-    @Shadow public RecipeEntry<?> currentRecipe() {
-        int i = this.field_52846.currentIndex() % this.field_52845.size();
-        return (RecipeEntry)this.field_52845.get(i);
-    }
-
-    public AnimatedResultButtonMixin(int x, int y, int width, int height, Text message, RecipeResultCollection resultCollection, CurrentIndexProvider field_52846) {
+    public AnimatedResultButtonMixin(int x, int y, int width, int height, Text message, RecipeResultCollection resultCollection) {
         super(x, y, width, height, message);
         this.resultCollection = resultCollection;
-        this.field_52846 = field_52846;
     }
+
+
+    @Shadow
+    public ItemStack getDisplayStack() {
+        return ItemStack.EMPTY;
+    }
+
 
     @Overwrite
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -53,7 +54,7 @@ public abstract class AnimatedResultButtonMixin extends ClickableWidget {
         // FIRST STEP -----------------
         // Draw background:
         Identifier identifier;
-        boolean isGroupOfRecipes = this.field_52845.size() > 1;
+        boolean isGroupOfRecipes = !this.resultCollection.hasSingleOutput() || this.resultCollection.getAllRecipes().size() > 0;
         boolean isCraftable = this.resultCollection.hasCraftableRecipes();
         if (isCraftable) {
             identifier = isGroupOfRecipes ? SLOT_MANY_CRAFTABLE_TEXTURE : SLOT_CRAFTABLE_TEXTURE;
@@ -76,28 +77,32 @@ public abstract class AnimatedResultButtonMixin extends ClickableWidget {
 
         // THIRD STEP ----------------
         // Draw item or group:
-        Recipe currentRecipe = this.currentRecipe().value();
+        //Recipe currentRecipe = this.currentRecipe().value();
         if(isGroupOfRecipes) {
             int offset = 4;
             if(!this.resultCollection.hasSingleOutput()){
+                /*
+                offset = 2;
                 String recipeGroup = currentRecipe.getGroup();
                 if(recipeGroup.endsWith("copper_waxing"))  context.drawItem(Items.HONEYCOMB.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else {
-                    int nextRecipeIndex = (this.field_52846.currentIndex() + 1) % this.field_52845.size();
-                    Recipe nextRecipe = ((RecipeEntry) this.field_52845.get(nextRecipeIndex)).value();
-                    ItemStack nextItemStack = nextRecipe.getResult(this.resultCollection.getRegistryManager());
-                    context.drawItem(nextItemStack, this.getX() + 5, this.getY() + 5, 0, 10);
-                }
-                offset = 2;
+                else if(recipeGroup.contains("iron"))  context.drawItem(Items.IRON_INGOT.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
+                else if(recipeGroup.contains("copper"))  context.drawItem(Items.COPPER_INGOT.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
+                else if(recipeGroup.contains("wood"))  context.drawItem(Items.OAK_PLANKS.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
+                else if(recipeGroup.contains("gold"))  context.drawItem(Items.GOLD_INGOT.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
+                else if(recipeGroup.contains("diamond"))  context.drawItem(Items.DIAMOND.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
+                else if(recipeGroup.contains("netheri"))  context.drawItem(Items.NETHERITE_SCRAP.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
+                else if(recipeGroup.contains("brick"))  context.drawItem(Items.BRICK.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
+                else offset = 4;
+                */
             }
-            ItemStack itemStack = currentRecipe.getResult(this.resultCollection.getRegistryManager());
+            ItemStack itemStack = ((AnimatedResultButton)((Object)this)).getDisplayStack();
             context.drawItem(itemStack, this.getX() + offset, this.getY() + offset, 0, 10);
             Identifier overlayTextureID = isCraftable ? RECIPE_BOOK_CRAFTABLE_GROUP_OVERLAY : RECIPE_BOOK_UNCRAFTABLE_GROUP_OVERLAY;
             context.drawGuiTexture(RenderLayer::getGuiTexturedOverlay, overlayTextureID, this.getX(), this.getY(), this.width, this.height);
 
         }
         else {
-            ItemStack itemStack = currentRecipe.getResult(this.resultCollection.getRegistryManager());
+            ItemStack itemStack = ((AnimatedResultButton)((Object)this)).getDisplayStack();
             context.drawItemWithoutEntity(itemStack, this.getX() + 4, this.getY() + 4);
             if(!isCraftable) context.drawGuiTexture(RenderLayer::getGuiTexturedOverlay, RECIPE_BOOK_CRAFTABLE_SINGLE_OVERLAY, this.getX(), this.getY(), this.width, this.height);
         }

@@ -1,12 +1,9 @@
 package frootloops.versus.mixin.items.throwing;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.*;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
@@ -22,7 +19,7 @@ public abstract class ThrowablePotionItemMixin extends PotionItem implements Pro
     }
 
     @Override
-    public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int remainingUseTicks) {
+    public boolean onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int remainingUseTicks) {
         if (user instanceof PlayerEntity playerEntity) {
             float pullProgress = Math.min(0.8F, (72000.0F - remainingUseTicks) / 64.0F);
             throwPotion(world, user, itemStack, 0.4f + pullProgress);
@@ -31,6 +28,7 @@ public abstract class ThrowablePotionItemMixin extends PotionItem implements Pro
 
         }
         else throwPotion(world, user, itemStack, 0.5f);
+        return false;
     }
 
     @Override

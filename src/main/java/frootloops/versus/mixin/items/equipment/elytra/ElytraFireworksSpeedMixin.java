@@ -23,7 +23,7 @@ public abstract class ElytraFireworksSpeedMixin extends ProjectileEntity  {
     @Override
     public void setOwner(@Nullable Entity entity) {
         super.setOwner(entity);
-        if(entity != null && entity instanceof LivingEntity livingEntity && livingEntity.isFallFlying()) {
+        if(entity != null && entity instanceof LivingEntity livingEntity && livingEntity.isGliding()) {
 
             // More of a difference between flight 1 and flight 3 (elytra only):
             // Flight 1: Average 16 -> Average 7

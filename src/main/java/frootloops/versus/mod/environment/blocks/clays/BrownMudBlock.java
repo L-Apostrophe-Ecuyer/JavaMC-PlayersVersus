@@ -9,6 +9,7 @@ import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.EntityTypeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -37,8 +38,8 @@ public class BrownMudBlock extends MoistBlock {
 
             // When an entity has their head inside of mud, make them drown:
             boolean canEntityBeDamaged = shouldDamage(world, livingEntity);
-            if(canEntityBeDamaged && world.getTime() % 30L == 0) {
-                entity.damage(CustomDamageSources.getMudSuffocation(world), 1);
+            if(canEntityBeDamaged && !world.isClient && world.getTime() % 30L == 0) {
+                entity.damage((ServerWorld) world, CustomDamageSources.getMudSuffocation(world), 1);
             }
 
             // When an entity is jumping, they should be able to get out of the block, or at least stop falling:
@@ -55,7 +56,7 @@ public class BrownMudBlock extends MoistBlock {
 
             // Otherwise, when the entity moves, they'll get hurt:
             else if(hasEntityMoved(entity)) {
-                if(canEntityBeDamaged && world.getTime() % 5L == 0) entity.damage(CustomDamageSources.getMudSuffocation(world), 1);
+                if(canEntityBeDamaged && world.getTime() % 5L == 0 && !world.isClient) entity.damage((ServerWorld) world, CustomDamageSources.getMudSuffocation(world), 1);
                 entity.slowMovement(state, new Vec3d(0.98, 0.95, 0.98));
             }
             else {

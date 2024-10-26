@@ -3,7 +3,7 @@ package frootloops.versus.mixin.items;
 import frootloops.versus.mod.items.ItemsAndStacks;
 import net.fabricmc.fabric.api.item.v1.FabricItemStack;
 import net.minecraft.component.ComponentHolder;
-import net.minecraft.component.ComponentMapImpl;
+import net.minecraft.component.MergedComponentMap;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.*;
@@ -24,9 +24,9 @@ public abstract class VanillaItemsMixin implements ComponentHolder, FabricItemSt
 
         @Shadow private final Item item;
         @Shadow private int count;
-        @Shadow final ComponentMapImpl components;
+        @Shadow final MergedComponentMap components;
 
-        protected VanillaItemsMixin(@Nullable Item item, int count, ComponentMapImpl components) {
+        protected VanillaItemsMixin(@Nullable Item item, int count, MergedComponentMap components) {
                 this.item = item;
                 this.count = count;
                 this.components = components;

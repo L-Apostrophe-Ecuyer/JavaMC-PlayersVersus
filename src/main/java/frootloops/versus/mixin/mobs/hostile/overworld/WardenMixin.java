@@ -13,8 +13,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.TridentEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.*;
+import org.apache.logging.log4j.core.jmx.Server;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -124,7 +126,8 @@ public class WardenMixin extends HostileEntity {
             return MathHelper.squaredHypot(deltaX, deltaZ) < (4.0d) && deltaY < 2.0d;
 
         // Sonic booms:
-        if(entity instanceof PlayerEntity) return MathHelper.squaredHypot(deltaX, deltaZ) < NEW_RANGE_HORIZONTAL_SQUARED && deltaY < NEW_RANGE_VERTICAL;
+        if(this.getMoveControl().isMoving() && entity.getPos().y < this.getY() + 4.0) return false;
+        else if(entity instanceof PlayerEntity) return MathHelper.squaredHypot(deltaX, deltaZ) < NEW_RANGE_HORIZONTAL_SQUARED && deltaY < NEW_RANGE_VERTICAL;
         else return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
     }
 
@@ -134,7 +137,7 @@ public class WardenMixin extends HostileEntity {
      *  more dangerous and interesting to fight one of these things.
      */
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
         boolean hasReceivedDamage = false, mightReceiveDamage = true;
         Entity attacker = source.getAttacker();
         if (source.getSource() instanceof PersistentProjectileEntity && !(source.getSource() instanceof TridentEntity)) {
@@ -148,7 +151,7 @@ public class WardenMixin extends HostileEntity {
             }
             if(amount < 3.0f) mightReceiveDamage = false;
         }
-        if(mightReceiveDamage) hasReceivedDamage = super.damage(source, amount);
+        if(mightReceiveDamage) hasReceivedDamage = super.damage(world, source, amount);
 
         if (!(this.getWorld().isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
             this.increaseAngerAt(attacker, Angriness.ANGRY.getThreshold() + 20, false);

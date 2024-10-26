@@ -5,8 +5,9 @@ import frootloops.versus.mod.items.inventory.HotbarCycling;
 import frootloops.versus.mod.items.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
+import net.fabricmc.fabric.api.client.itemgroup.v1.FabricCreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.*;
@@ -20,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Environment(EnvType.CLIENT)
 @Mixin(CreativeInventoryScreen.class)
-public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler>  {
+public abstract class InventoryScreenCreativeMixin  extends HandledScreen<CreativeInventoryScreen.CreativeScreenHandler> implements FabricCreativeInventoryScreen {
 
     @Shadow private static ItemGroup selectedTab;
 
@@ -66,7 +67,7 @@ public abstract class InventoryScreenCreativeMixin extends AbstractInventoryScre
         this.updateButtonVisibility();
     }
 
-    @Inject(method = "mouseClicked",at = @At("RETURN"), cancellable = false)
+    @Inject(method = "mouseReleased",at = @At("RETURN"), cancellable = false)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable info) {
         if (selectedTab.getType() == ItemGroup.Type.INVENTORY && button == 2 && this.handler.getCursorStack().isEmpty()) {
             HotbarCycling.doHotbarSwap(client, client.player.getInventory());

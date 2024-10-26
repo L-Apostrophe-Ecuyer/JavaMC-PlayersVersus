@@ -12,9 +12,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SplashPotionItem.class)
 public class SplashPotionMixin extends ThrowablePotionItem {
@@ -29,8 +26,9 @@ public class SplashPotionMixin extends ThrowablePotionItem {
     }
 
     @Override
-    public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int remainingUseTicks) {
+    public boolean onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int remainingUseTicks) {
         world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_SPLASH_POTION_THROW, SoundCategory.PLAYERS, 1.0f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
         super.onStoppedUsing(itemStack, world, user, remainingUseTicks);
+        return false;
     }
 }

@@ -86,12 +86,12 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     }
 
     @Inject(method = "damage", at = @At("HEAD"))
-    private void saveDamageAmount(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void saveDamageAmount(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         damageAmount = amount;
     }
 
     @ModifyVariable(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageSource;isIn(Lnet/minecraft/registry/tag/TagKey;)Z", ordinal = 1), argsOnly = true)
-    private float reduceDamageIfBlocked(float amount2, DamageSource source, float amount) {
+    private float reduceDamageIfBlocked(float amount2, ServerWorld world, DamageSource source, float amount) {
         if( activeItemStack.getItem() instanceof ShieldItem) return 0.0f;
 
         int levelRiposte = Enchants.getLevel(getWorld(), activeItemStack, CustomEnchants.RIPOSTE);
@@ -105,7 +105,9 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
     @Inject(method = "damage", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/damage/DamageSource;getSource()Lnet/minecraft/entity/Entity;"))
-    public void shieldBlockingLogic(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
+    public void shieldBlockingLogic(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
+        if(this.getWorld().isClient) return;
+
         ItemStack shieldItemStack = activeItemStack;
         Item shieldItem = activeItemStack.getItem();
         if(shieldItem.getUseAction(activeItemStack) != UseAction.BLOCK) {
@@ -133,8 +135,8 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         double knockbackStrength = hasParried ? (paryingDamage > 0.0f ? 0.8 : 0.6) : 0.4;
         if((hasParried || reflectedDamage > 0.0f) && source.getSource() instanceof LivingEntity attacker && !attacker.equals(this)) {
             if(reflectedDamage > 0 && source.getName() != "thorns") {
-                if ((LivingEntity) (Object) this instanceof PlayerEntity player) attacker.damage(this.getDamageSources().playerAttack(player), reflectedDamage);
-                else attacker.damage(this.getDamageSources().mobAttack((LivingEntity) ((Object)this)), reflectedDamage);
+                if ((LivingEntity) (Object) this instanceof PlayerEntity player) attacker.damage((ServerWorld) this.getWorld(), this.getDamageSources().playerAttack(player), reflectedDamage);
+                else attacker.damage((ServerWorld) this.getWorld(), this.getDamageSources().mobAttack((LivingEntity) ((Object)this)), reflectedDamage);
             }
             attacker.takeKnockback(knockbackStrength, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
         }

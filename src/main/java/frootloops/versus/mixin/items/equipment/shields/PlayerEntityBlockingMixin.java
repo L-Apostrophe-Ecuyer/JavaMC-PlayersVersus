@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
@@ -77,8 +78,8 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
 
 
     @Inject(method = "applyDamage", at = @At(value = "HEAD"), cancellable = true)
-    private void noDamageOnShieldParries(DamageSource source, float amount, CallbackInfo info) {
-        if (!this.isInvulnerableTo(source) && this.blockedByShield(source)) {
+    private void noDamageOnShieldParries(ServerWorld world, DamageSource source, float amount, CallbackInfo info) {
+        if (!this.getWorld().isClient && !this.isInvulnerableTo((ServerWorld) this.getWorld(), source) && this.blockedByShield(source)) {
 
             // If you blocked within 8 ticks of an attack, you take no damage:
             if (activeItemStack.getItem().getMaxUseTime(activeItemStack, this) - itemUseTimeLeft < PARRY_TIME_TICKS)

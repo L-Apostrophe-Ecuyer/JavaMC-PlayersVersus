@@ -65,14 +65,14 @@ public abstract class ItemEntityMixin extends Entity {
             else if (this.getStack().isOf(Items.ENCHANTING_TABLE)) return true;
             else if (this.getStack().isOf(Items.ENCHANTED_GOLDEN_APPLE)) return true;
         }
-        return this.getStack().getItem().getComponents().contains(DataComponentTypes.FIRE_RESISTANT) || super.isFireImmune();
+        return this.getStack().getItem().getComponents().contains(DataComponentTypes.DAMAGE_RESISTANT ) || super.isFireImmune();
     }
 
 
     @Inject(method = "damage",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ItemEntity;emitGameEvent(Lnet/minecraft/registry/entry/RegistryEntry;Lnet/minecraft/entity/Entity;)V"),
             cancellable = true)
-    public void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    public void damage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(this.health == 0) {
             ItemStack currentItemStack = ((ItemEntity)((Object)this)).getStack();
             if(source.isOf(DamageTypes.LAVA)) doFireDamageTransformation(currentItemStack, true, false);

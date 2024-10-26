@@ -10,6 +10,7 @@ import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import static frootloops.versus.VersusMod.MOD_ID;
 
@@ -125,18 +126,20 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("infested_oak_wood", CustomBlockItems.INFESTED_OAK_WOOD);
     }
 
+    public static Item.Settings getSettings(String name) {
+        return new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(VersusMod.MOD_ID, name)));
+    }
+
     public static Item registerCustomItem(String name, Item item) {
-        if(item == null) VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
-        return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
+        return registerCustomItem(name, item, null, null);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group) {
-        if(item == null) VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
-        if (group != null) ItemGroupEvents.modifyEntriesEvent(group).register(entries -> entries.add(item));
-        return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);
+        return registerCustomItem(name, item, group, null);
     }
 
     public static Item registerCustomItem(String name, Item item, RegistryKey<ItemGroup> group1, RegistryKey<ItemGroup> group2) {
+        if(item == null) VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
         if (group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.add(item));
         if (group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.add(item));
         return Registry.register(Registries.ITEM, Identifier.of(MOD_ID, name), item);

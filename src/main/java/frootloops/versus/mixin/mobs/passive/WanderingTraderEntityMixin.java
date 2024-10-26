@@ -2,28 +2,22 @@ package frootloops.versus.mixin.mobs.passive;
 
 import com.google.common.collect.Lists;
 import frootloops.versus.mod.mobs.passive.RevampedTradeOffers;
-import net.fabricmc.fabric.api.object.builder.v1.villager.VillagerTypeHelper;
-import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ExperienceOrbEntity;
+import net.minecraft.entity.conversion.EntityConversionContext;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.passive.WanderingTraderEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.registry.tag.PointOfInterestTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.*;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Mixin;
@@ -77,7 +71,8 @@ public abstract class WanderingTraderEntityMixin extends MerchantEntity implemen
                 }
 
                 if (doesTraderWantToSettleDown) {
-                    VillagerEntity villagerEntity = this.convertTo(EntityType.VILLAGER, true);
+                    VillagerEntity villagerEntity = this.convertTo(EntityType.VILLAGER, EntityConversionContext.create(this, true, true), stray -> {});
+
                     int randomProfessionIndex = this.random.nextInt(10);
                     VillagerProfession profession = (randomProfessionIndex < 6) ? VillagerProfession.NONE : (randomProfessionIndex < 8) ? VillagerProfession.CARTOGRAPHER : (randomProfessionIndex < 9) ? VillagerProfession.FISHERMAN : VillagerProfession.FARMER;
 

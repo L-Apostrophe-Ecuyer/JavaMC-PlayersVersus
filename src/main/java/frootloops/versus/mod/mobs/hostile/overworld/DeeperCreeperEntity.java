@@ -62,15 +62,9 @@ public class DeeperCreeperEntity extends CreeperEntity {
 
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean damage(ServerWorld serverWorld, DamageSource source, float amount) {
         if(source.isOf(DamageTypes.WITHER)) return false;
-        return super.damage(source, amount);
-    }
-
-    @Override
-    public boolean canHaveStatusEffect(StatusEffectInstance effect) {
-        if (effect.getEffectType() == StatusEffects.WITHER) return false;
-        else return super.canHaveStatusEffect(effect);
+        return super.damage(serverWorld, source, amount);
     }
 
 
@@ -134,7 +128,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
             this.dead = true;
             this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * explosionMultiplier, World.ExplosionSourceType.MOB);
             this.spawnEffectsCloud();
-            this.onRemoval(Entity.RemovalReason.KILLED);
+            this.onRemoval((ServerWorld) this.getWorld(), Entity.RemovalReason.KILLED);
             this.discard();
         }
     }

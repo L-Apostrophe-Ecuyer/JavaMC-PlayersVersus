@@ -1,9 +1,7 @@
 package frootloops.versus.mixin.client.mobs.hostile;
 
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.EntityModelPartNames;
-import net.minecraft.client.render.entity.model.IllagerEntityModel;
+import net.minecraft.client.render.entity.model.*;
 import net.minecraft.client.render.entity.state.IllagerEntityRenderState;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.util.math.MathHelper;
@@ -15,10 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(IllagerEntityModel.class)
-public abstract class IllagerModelMixin<S extends IllagerEntityRenderState> extends EntityModel<S> {
-
-    @Shadow private final ModelPart root;
-
+public abstract class IllagerModelMixin<S extends IllagerEntityRenderState> extends EntityModel<S> implements ModelWithArms, ModelWithHead {
     private ModelPart rightEar;
     private ModelPart leftEar;
 
@@ -27,20 +22,19 @@ public abstract class IllagerModelMixin<S extends IllagerEntityRenderState> exte
     @Shadow private final ModelPart arms;
     @Shadow private final ModelPart head;
 
-    public IllagerModelMixin(ModelPart root, ModelPart rightEar, ModelPart leftEar, ModelPart leftArm, ModelPart rightArm, ModelPart arms, ModelPart head) {
-        this.root = root;
-        this.rightEar = rightEar;
-        this.leftEar = leftEar;
+    protected IllagerModelMixin(ModelPart root, ModelPart root1, ModelPart leftArm, ModelPart rightArm, ModelPart arms, ModelPart head) {
+        super(root);
         this.leftArm = leftArm;
         this.rightArm = rightArm;
         this.arms = arms;
         this.head = head;
     }
 
+
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void constructorHead(ModelPart root, CallbackInfo ci) {
-        this.rightEar = root.getChild(EntityModelPartNames.HEAD).getChild(EntityModelPartNames.LEFT_EAR);
-        this.leftEar = root.getChild(EntityModelPartNames.HEAD).getChild(EntityModelPartNames.RIGHT_EAR);
+    public void constructorHead(ModelPart modelPart, CallbackInfo ci) {
+        this.rightEar = modelPart.getChild(EntityModelPartNames.HEAD).getChild(EntityModelPartNames.LEFT_EAR);
+        this.leftEar = modelPart.getChild(EntityModelPartNames.HEAD).getChild(EntityModelPartNames.RIGHT_EAR);
     }
 
     @Overwrite

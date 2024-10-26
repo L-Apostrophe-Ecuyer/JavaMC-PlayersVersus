@@ -23,8 +23,9 @@ public abstract class ShieldItemMixin extends Item {
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if(user instanceof PlayerEntity player) player.getItemCooldownManager().set(stack, 4);
+        return false;
     }
 
     @Override

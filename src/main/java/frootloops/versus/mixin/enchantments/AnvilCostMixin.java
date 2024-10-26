@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.*;
+import net.minecraft.screen.slot.ForgingSlotsManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringHelper;
 import org.jetbrains.annotations.Nullable;
@@ -29,8 +30,8 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
     @Shadow
     private final Property levelCost = Property.create();
 
-    public AnvilCostMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
-        super(type, syncId, playerInventory, context);
+    public AnvilCostMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ForgingSlotsManager forgingSlotsManager) {
+        super(type, syncId, playerInventory, context, forgingSlotsManager);
     }
 
     @Override
@@ -53,7 +54,7 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
         int levelCostValue = 0;
 
         // DURABILITY
-        boolean isRepairing = (toolStack.isDamageable() && toolStack.getDamage() > 0) && (toolStack.isOf(repairStack.getItem()) || toolStack.getItem().canRepair(toolStack, repairStack));
+        boolean isRepairing = (toolStack.isDamageable() && toolStack.getDamage() > 0) && (toolStack.isOf(repairStack.getItem()) || toolStack.canRepairWith(repairStack));
         if(isRepairing) {
             int toolUsesLeft = toolStack.getMaxDamage() - toolStack.getDamage();
             int repairUsesLeft = repairStack.isDamageable()? repairStack.getMaxDamage() - repairStack.getDamage(): 0;

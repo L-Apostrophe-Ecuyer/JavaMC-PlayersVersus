@@ -15,7 +15,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.SleepManager;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
@@ -29,11 +28,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerSleepingMixin extends World {
+    protected ServerSleepingMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates, List<ServerPlayerEntity> players, MinecraftServer server) {
+        super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
+        this.players = players;
+        this.server = server;
+    }
+
     @Shadow public void setTimeOfDay(long timeOfDay) {}
     @Shadow final List<ServerPlayerEntity> players;
     private static SleepManager cachedSleepManager = null;
@@ -42,11 +46,6 @@ public abstract class ServerSleepingMixin extends World {
 
     @Shadow public TickManager getTickManager() {return this.server.getTickManager();}
 
-    protected ServerSleepingMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates, MutableWorldProperties properties1, List<ServerPlayerEntity> players, SleepManager sleepManager, List<ServerPlayerEntity> players1, MinecraftServer server) {
-        super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
-        this.players = players1;
-        this.server = server;
-    }
 
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/SleepManager;canResetTime(ILjava/util/List;)Z"))

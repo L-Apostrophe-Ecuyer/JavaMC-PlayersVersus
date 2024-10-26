@@ -10,12 +10,14 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.conversion.EntityConversionContext;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -57,12 +59,20 @@ public abstract class ZombieMixin extends HostileEntity {
     }
 
     @Inject(method = "damage", at = @At("TAIL"), cancellable = true)
-    private void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void damage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if(source.isOf(DamageTypes.FREEZE)) {
-            this.convertTo(ModEntities.FROSTED_ZOMBIE, true);
+            this.convertTo(ModEntities.FROSTED_ZOMBIE, EntityConversionContext.create(this, true, true), zombie -> {
+                if (!this.isSilent()) {
+                    this.getWorld().syncWorldEvent(null, WorldEvents.ZOMBIE_CONVERTS_TO_DROWNED, this.getBlockPos(), 0);
+                }
+            });
         }
         else if(source.isOf(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
-            this.convertTo(ModEntities.WITHERED_ZOMBIE, false);
+            this.convertTo(ModEntities.WITHERED_ZOMBIE, EntityConversionContext.create(this, true, true), zombie -> {
+                if (!this.isSilent()) {
+                    this.getWorld().syncWorldEvent(null, WorldEvents.ZOMBIE_CONVERTS_TO_DROWNED, this.getBlockPos(), 0);
+                }
+            });
         }
     }
 
@@ -77,8 +87,8 @@ public abstract class ZombieMixin extends HostileEntity {
     }
 
     @Override
-    protected void loot(ItemEntity itemEntity) {
-        if(itemEntity.getItemAge() > 160) super.loot(itemEntity);
+    protected void loot(ServerWorld world, ItemEntity itemEntity) {
+        if(itemEntity.getItemAge() > 160) super.loot(world, itemEntity);
     }
 
 

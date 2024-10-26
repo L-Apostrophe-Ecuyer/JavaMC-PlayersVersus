@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -72,20 +73,5 @@ public abstract class SheepMixin extends AnimalEntity implements Shearable {
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
         this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 6.0F));
         this.goalSelector.add(9, new LookAroundGoal(this));
-    }
-
-    @Override
-    public ActionResult interactMob(PlayerEntity player, Hand hand) {
-        ItemStack itemStack = player.getStackInHand(hand);
-        if (itemStack.isOf(Items.SHEARS)) {
-            if (!this.getWorld().isClient && this.isShearable()) {
-                this.sheared(SoundCategory.PLAYERS);
-                this.emitGameEvent(GameEvent.SHEAR, player);
-                itemStack.damage(1, player, LivingEntity.getSlotForHand(hand));
-                return ActionResult.SUCCESS;
-            }
-            return ActionResult.CONSUME;
-        }
-        return super.interactMob(player, hand);
     }
 }

@@ -8,6 +8,7 @@ import net.minecraft.entity.boss.dragon.phase.AbstractPhase;
 import net.minecraft.entity.boss.dragon.phase.Phase;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import net.minecraft.entity.boss.dragon.phase.StrafePlayerPhase;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,7 +30,7 @@ public abstract class StrafePlayerPhaseMixin extends AbstractPhase {
 	}
 
 	@Override
-	public void serverTick() {
+	public void serverTick(ServerWorld world) {
 		if (this.target == null) {
 			this.dragon.getPhaseManager().setPhase(PhaseType.HOLDING_PATTERN);
 		}
