@@ -78,7 +78,7 @@ public class CustomBlocks {
         POLISHED_DRIPSTONE_SLAB = registerBlock("polished_dripstone_slab", new SlabBlock(getSettings("polished_dripstone_slab", POLISHED_DRIPSTONE)));
         POLISHED_DRIPSTONE_STAIRS = registerBlock("polished_dripstone_stairs", new StairsBlock(POLISHED_DRIPSTONE.getDefaultState(), getSettings("polished_dripstone_stairs", POLISHED_DRIPSTONE)));
         POLISHED_DRIPSTONE_WALL = registerBlock("polished_dripstone_wall", new WallBlock(getSettings("polished_dripstone_wall", POLISHED_DRIPSTONE)));
-        DRIPSTONE_PILLAR = registerBlock("dripstone_pillar", new Block(getSettings("dripstone_pillar", POLISHED_DRIPSTONE)));
+        DRIPSTONE_PILLAR = registerBlock("dripstone_pillar", new PillarBlock(getSettings("dripstone_pillar", POLISHED_DRIPSTONE)));
         DRIPSTONE_BRICKS = registerBlock("dripstone_bricks", new Block(getSettings("dripstone_bricks", POLISHED_DRIPSTONE)));
         DRIPSTONE_BRICK_SLAB = registerBlock("dripstone_brick_slab", new SlabBlock(getSettings("dripstone_brick_slab", DRIPSTONE_BRICKS)));
         DRIPSTONE_BRICK_STAIRS = registerBlock("dripstone_brick_stairs", new StairsBlock(DRIPSTONE_BRICKS.getDefaultState(), getSettings("dripstone_brick_stairs", DRIPSTONE_BRICKS)));

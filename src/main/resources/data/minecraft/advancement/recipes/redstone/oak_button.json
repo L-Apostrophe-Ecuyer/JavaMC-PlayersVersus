@@ -6,7 +6,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "minecraft:doors"
+            "items": "minecraft:oak_door"
           }
         ]
       }
@@ -16,12 +16,13 @@
       "conditions": {
         "items": [
           {
-            "tag": "minecraft:trapdoors"
+            "items": "minecraft:oak_trapdoor"
           }
         ]
       }
     },
     "has_planks": {
+      "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
@@ -30,14 +31,23 @@
             ]
           }
         ]
-      },
-      "trigger": "minecraft:inventory_changed"
+      }
     },
     "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
       "conditions": {
         "recipe": "minecraft:oak_button"
-      },
-      "trigger": "minecraft:recipe_unlocked"
+      }
+    },
+    "knows_what_buttons_are": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:buttons"
+          }
+        ]
+      }
     }
   },
   "requirements": [
@@ -48,7 +58,8 @@
     ],
     [
       "has_the_recipe",
-      "has_planks"
+      "has_planks",
+      "knows_what_buttons_are"
     ]
   ],
   "rewards": {
@@ -57,3 +68,13 @@
     ]
   }
 }
+
+
+
+
+
+
+
+
+
+

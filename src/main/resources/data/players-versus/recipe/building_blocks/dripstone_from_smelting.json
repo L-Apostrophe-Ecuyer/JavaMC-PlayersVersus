@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:smelting",
+  "category": "blocks",
+  "group": "dripstone",
+  "ingredient": [
+    "players-versus:mudstone",
+    "players-versus:mudstone_bricks"
+  ],
+  "result": {
+    "id": "minecraft:dripstone_block"
+  },
+  "experience": 0,
+  "cookingtime": 100
+}

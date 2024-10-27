@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
+    "axis=x": {
+      "model": "players-versus:block/dripstone_pillar_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
       "model": "players-versus:block/dripstone_pillar"
+    },
+    "axis=z": {
+      "model": "players-versus:block/dripstone_pillar_horizontal",
+      "x": 90
     }
   }
 }

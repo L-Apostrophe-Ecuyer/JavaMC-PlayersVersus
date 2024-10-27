@@ -6,7 +6,6 @@
         ]
     },
     "fog_wind_sound" : {
-        "subtitle": "subtitles.players-versus.fog_wind_sound",
         "sounds" : [
             "players-versus:fog_wind_1",
             "players-versus:fog_wind_2",

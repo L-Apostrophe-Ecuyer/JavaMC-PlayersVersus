@@ -26,13 +26,10 @@
   ],
   "rewards": {
     "recipes": [
-      "players-versus:building_blocks/terracotta_green_from_mud_smelting",
       "players-versus:building_blocks/brown_mud_bricks",
       "players-versus:building_blocks/brown_mud_brick_stairs",
       "players-versus:building_blocks/brown_mud_brick_slab",
-      "players-versus:building_blocks/brown_mud_tiles",
-      "players-versus:building_blocks/brown_mud_tile_stairs",
-      "players-versus:building_blocks/brown_mud_tile_slab"
+      "players-versus:building_blocks/brown_mud_brick_wall"
     ]
   }
 }

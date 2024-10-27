@@ -25,10 +25,10 @@ public class ElytraFireworksMixin extends Item {
             ItemStack elytraStack = user.getEquippedStack(EquipmentSlot.CHEST);
             if(elytraStack.isOf(Items.ELYTRA)) {
 
-                // Durability of elytra is only ever affected by fireworks:
+                // Durability of elytra is now mainly affected by fireworks, to incentivize gliding:
                 int maxDamage = elytraStack.getMaxDamage();
                 int durabilityLeft = maxDamage - elytraStack.getDamage();
-                elytraStack.damage(Math.min(durabilityLeft - 1, 16), user, EquipmentSlot.CHEST);
+                elytraStack.damage(Math.min(durabilityLeft - 1, 8), user, EquipmentSlot.CHEST);
             }
         }
     }

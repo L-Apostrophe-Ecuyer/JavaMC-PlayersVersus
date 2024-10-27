@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "players-versus:copper"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "players-versus:copper"
+      }
+    ]
+  }
+}

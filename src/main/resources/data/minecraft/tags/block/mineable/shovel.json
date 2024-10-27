@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "players-versus:brown_mud",
     "players-versus:brown_mud_bricks",
     "players-versus:brown_mud_brick_slab",
     "players-versus:brown_mud_brick_stairs",

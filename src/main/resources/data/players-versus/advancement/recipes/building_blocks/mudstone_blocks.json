@@ -1,0 +1,39 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "players-versus:building_blocks/mudstone_bricks"
+      }
+    },
+    "has_ingredient": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "players-versus:mudstone"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_ingredient"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "players-versus:building_blocks/mudstone_bricks",
+      "players-versus:building_blocks/mudstone_brick_stairs",
+      "players-versus:building_blocks/mudstone_brick_slab",
+      "players-versus:building_blocks/mudstone_brick_wall",
+      "players-versus:building_blocks/dripstone_from_smelting",
+      "players-versus:building_blocks/dripstone_slab_from_smelting",
+      "players-versus:building_blocks/dripstone_stairs_from_smelting",
+      "players-versus:building_blocks/dripstone_wall_from_smelting"
+    ]
+  }
+}

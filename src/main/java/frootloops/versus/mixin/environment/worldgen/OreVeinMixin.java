@@ -19,10 +19,10 @@ public class OreVeinMixin {
     private static final int MAX_DENSITY_INTRUSION = 20;
     private static final double LIMINAL_DENSITY_REDUCTION = 0.2;
     private static final float BLOCK_GENERATION_CHANCE = 0.7F;
-    private static final double MIN_ORE_CHANCE = 0.1;
+    private static final double MIN_ORE_CHANCE = 0.15;
     private static final double MAX_ORE_CHANCE = 0.3;
     private static final double DENSITY_FOR_MAX_ORE_CHANCE = 0.6;
-    private static final float RAW_ORE_BLOCK_CHANCE = 0.02F;
+    private static final float RAW_ORE_BLOCK_CHANCE = 0.035F;
     private static final float VEIN_GAP_THRESHOLD = -0.3F;
 
     @Overwrite

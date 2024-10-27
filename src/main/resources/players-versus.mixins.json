@@ -59,7 +59,14 @@
     "items.equipment.elytra.ElytraFireworksMixin",
     "items.equipment.elytra.ElytraGlideDurabilityMixin",
     "items.equipment.elytra.ElytraFireworksSpeedMixin",
+
     "items.equipment.tools.SwordItemMixin",
+    "items.equipment.tools.ShovelItemMixin",
+    "items.equipment.tools.PickaxeItemMixin",
+    "items.equipment.tools.AxeItemMixin",
+    "items.equipment.tools.HoeItemMixin",
+    "items.equipment.tools.TridentItemMixin",
+
     "items.equipment.tools.TridentEntityMixin",
     "items.equipment.ArmorProtectionMixin",
     "items.equipment.FlintAndSteelItemMixin",

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "terracotta",
+  "category": "building",
+  "pattern": [
+    "SS",
+    "SS"
+  ],
+  "key": {
+    "S" : "minecraft:terracotta"
+  },
+  "result": {
+    "id": "players-versus:terracotta_bricks",
+    "count": 4
+  }
+}
+
+
+
+
+
+
+

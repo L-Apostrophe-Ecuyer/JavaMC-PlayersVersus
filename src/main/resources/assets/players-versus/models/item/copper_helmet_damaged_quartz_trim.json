@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "players-versus:item/copper_helmet_damaged",
+    "layer1": "minecraft:trims/items/helmet_trim_quartz"
+  }
+}

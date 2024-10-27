@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "terracotta",
+  "ingredient": [
+    "minecraft:terracotta"
+  ],
+  "result": {
+    "count": 1,
+    "id": "players-versus:terracotta_bricks"
+  }
+}
+
+
+
+
+
+
+

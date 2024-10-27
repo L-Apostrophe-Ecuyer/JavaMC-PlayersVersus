@@ -6,9 +6,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:cobblestone"
-            ]
+            "items": "minecraft:cobblestone"
           }
         ]
       }
@@ -18,19 +16,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:redstone"
-            ]
-          }
-        ]
-      }
-    },
-    "has_door": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "tag": "minecraft:doors"
+            "items": "minecraft:redstone"
           }
         ]
       }
@@ -48,7 +34,6 @@
       "has_the_recipe"
     ],
     [
-      "has_door",
       "has_cobblestone",
       "has_the_recipe"
     ]

@@ -1,6 +1,26 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
+    "has_door": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:jungle_door"
+          }
+        ]
+      }
+    },
+    "has_trapdoor": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:jungle_trapdoor"
+          }
+        ]
+      }
+    },
     "has_planks": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
@@ -16,15 +36,15 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:jungle_fence_gate"
+        "recipe": "minecraft:jungle_button"
       }
     },
-    "has_fence": {
+    "knows_what_fences_are": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "tag": "minecraft:fences"
+            "items": "#minecraft:fences"
           }
         ]
       }
@@ -33,11 +53,13 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_fence"
+      "has_trapdoor",
+      "has_door"
     ],
     [
       "has_the_recipe",
-      "has_planks"
+      "has_planks",
+      "knows_what_fences_are"
     ]
   ],
   "rewards": {
@@ -46,3 +68,6 @@
     ]
   }
 }
+
+
+

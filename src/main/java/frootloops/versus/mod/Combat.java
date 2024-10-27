@@ -30,8 +30,6 @@ import java.util.List;
 
 public abstract class Combat {
 
-    public static final Identifier ATTACK_REACH_MODIFIER_ID = Identifier.of("base_attack_reach");
-
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 0.0d;

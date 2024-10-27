@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "terracotta",
+  "category": "building",
+  "pattern": [
+    "S",
+    "S"
+  ],
+  "key": {
+    "S" : "players-versus:terracotta_brick_slab"
+  },
+  "result": {
+    "id": "players-versus:chiseled_terracotta",
+    "count": 2
+  }
+}
+
+
+
+
+
+
+
+
+

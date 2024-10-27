@@ -1,0 +1,82 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_door": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:pale_oak_door"
+          }
+        ]
+      }
+    },
+    "has_trapdoor": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:pale_oak_trapdoor"
+          }
+        ]
+      }
+    },
+    "has_planks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:pale_oak_planks"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "minecraft:pale_oak_button"
+      }
+    },
+    "knows_what_buttons_are": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:buttons"
+          }
+        ]
+      }
+    },
+    "knows_what_pressure_plates_are": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:wooden_pressure_plates"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_trapdoor",
+      "has_door"
+    ],
+    [
+      "has_the_recipe",
+      "has_planks",
+      "knows_what_buttons_are",
+      "knows_what_pressure_plates_are"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:pale_oak_pressure_plate"
+    ]
+  }
+}
+

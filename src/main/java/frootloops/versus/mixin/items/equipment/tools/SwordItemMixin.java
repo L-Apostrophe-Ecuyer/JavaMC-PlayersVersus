@@ -2,6 +2,7 @@ package frootloops.versus.mixin.items.equipment.tools;
 
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.items.equipment.RebalancedTools;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.enchantment.Enchantments;
@@ -18,6 +19,8 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SwordItem.class)
@@ -25,6 +28,21 @@ public abstract class SwordItemMixin extends Item {
 
     public SwordItemMixin(Settings settings) {
         super(settings);
+    }
+
+    @ModifyVariable(method = "<init>", at = @At("HEAD"), ordinal = 0)
+    private static ToolMaterial modifyToolMaterial(ToolMaterial vanillaMaterial) {
+        return RebalancedTools.getRebalancedToolMaterial(vanillaMaterial);
+    }
+
+    @ModifyVariable(method = "<init>", at = @At("HEAD"), ordinal = 0)
+    private static float modifyAttackDamage(float dmg) {
+        return RebalancedTools.getSwordDamageModifier();
+    }
+
+    @ModifyVariable(method = "<init>", at = @At("HEAD"), ordinal = 1)
+    private static float modifyAttackSpeed(float speed) {
+        return RebalancedTools.getSwordSpeedModifier();
     }
 
     @Override

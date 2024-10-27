@@ -27,6 +27,10 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("copper_leggings", CustomEquipment.COPPER_LEGGINGS, ItemGroups.COMBAT);
         registerCustomItem("copper_helmet", CustomEquipment.COPPER_HELMET, ItemGroups.COMBAT);
         registerCustomItem("copper_boots", CustomEquipment.COPPER_BOOTS, ItemGroups.COMBAT);
+        registerCustomItem("copper_chestplate_damaged", CustomEquipment.COPPER_CHESTPLATE_DAMAGED, ItemGroups.COMBAT);
+        registerCustomItem("copper_leggings_damaged", CustomEquipment.COPPER_LEGGINGS_DAMAGED, ItemGroups.COMBAT);
+        registerCustomItem("copper_helmet_damaged", CustomEquipment.COPPER_HELMET_DAMAGED, ItemGroups.COMBAT);
+        registerCustomItem("copper_boots_damaged", CustomEquipment.COPPER_BOOTS_DAMAGED, ItemGroups.COMBAT);
         registerCustomItem("copper_hoe", CustomEquipment.COPPER_HOE, ItemGroups.TOOLS);
         registerCustomItem("copper_axe", CustomEquipment.COPPER_AXE, ItemGroups.TOOLS, ItemGroups.COMBAT);
         registerCustomItem("copper_sword", CustomEquipment.COPPER_SWORD, ItemGroups.COMBAT);

@@ -1,22 +1,34 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_redstone": {
+    "has_door": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "minecraft:redstone"
+            "items": "minecraft:iron_door"
           }
         ]
       }
     },
-    "has_stone": {
+    "has_trapdoor": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "minecraft:stone"
+            "items": "minecraft:iron_trapdoor"
+          }
+        ]
+      }
+    },
+    "has_planks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:stone"
+            ]
           }
         ]
       }
@@ -24,18 +36,41 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:stone_pressure_plate"
+        "recipe": "minecraft:stone_button"
+      }
+    },
+    "knows_what_buttons_are": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:buttons"
+          }
+        ]
+      }
+    },
+    "knows_what_pressure_plates_are": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:wooden_pressure_plates"
+          }
+        ]
       }
     }
   },
   "requirements": [
     [
       "has_the_recipe",
-      "has_redstone"
+      "has_trapdoor",
+      "has_door"
     ],
     [
       "has_the_recipe",
-      "has_stone"
+      "has_planks",
+      "knows_what_buttons_are",
+      "knows_what_pressure_plates_are"
     ]
   ],
   "rewards": {

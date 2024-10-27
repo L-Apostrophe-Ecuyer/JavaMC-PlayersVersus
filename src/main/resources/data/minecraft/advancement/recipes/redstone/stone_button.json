@@ -6,7 +6,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "minecraft:doors"
+            "items": "#minecraft:doors"
           }
         ]
       }
@@ -16,12 +16,13 @@
       "conditions": {
         "items": [
           {
-            "tag": "minecraft:trapdoors"
+            "items": "#minecraft:trapdoors"
           }
         ]
       }
     },
     "has_stone": {
+      "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
@@ -30,14 +31,13 @@
             ]
           }
         ]
-      },
-      "trigger": "minecraft:inventory_changed"
+      }
     },
     "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
       "conditions": {
         "recipe": "minecraft:stone_button"
-      },
-      "trigger": "minecraft:recipe_unlocked"
+      }
     }
   },
   "requirements": [

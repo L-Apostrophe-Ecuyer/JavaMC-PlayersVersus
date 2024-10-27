@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "players-versus:block/dripstone_pillar_top",
+    "side": "players-versus:block/dripstone_pillar"
+  }
+}
