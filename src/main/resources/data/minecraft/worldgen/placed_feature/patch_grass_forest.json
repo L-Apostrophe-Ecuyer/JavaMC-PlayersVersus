@@ -13,15 +13,21 @@
               "type": "minecraft:weighted_state_provider",
               "entries": [
                 {
-                  "weight": 16,
+                  "weight": 32,
                   "data": {
                     "Name": "minecraft:short_grass"
                   }
                 },
                 {
-                  "weight": 3,
+                  "weight": 6,
                   "data": {
                     "Name": "minecraft:brown_mushroom"
+                  }
+                },
+                {
+                  "weight": 1,
+                  "data": {
+                    "Name": "minecraft:red_mushroom"
                   }
                 }
               ]

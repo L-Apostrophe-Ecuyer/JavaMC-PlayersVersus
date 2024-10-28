@@ -1,0 +1,61 @@
+{
+  "feature": "minecraft:ore_copper_small",
+  "placement": [
+    {
+      "type": "minecraft:noise_based_count",
+      "noise_to_count_ratio": 14,
+      "noise_factor": 16,
+      "noise_offset": 0.1
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:weighted_list",
+        "distribution": [
+          {
+            "weight": 3,
+            "data": {
+              "type": "minecraft:uniform",
+              "min_inclusive": {
+                "absolute": 72
+              },
+              "max_inclusive": {
+                "absolute": 80
+              }
+            }
+          },
+          {
+            "weight": 1,
+            "data": {
+              "type": "minecraft:uniform",
+              "min_inclusive": {
+                "absolute": 32
+              },
+              "max_inclusive": {
+                "absolute": 56
+              }
+            }
+          },
+          {
+            "weight": 1,
+            "data": {
+              "type": "minecraft:uniform",
+              "min_inclusive": {
+                "absolute": 90
+              },
+              "max_inclusive": {
+                "absolute": 98
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

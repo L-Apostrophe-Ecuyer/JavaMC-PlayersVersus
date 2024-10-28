@@ -51,6 +51,7 @@
   "block.players-versus.dripstone_brick_slab": "Dripstone Brick Slab",
   "block.players-versus.dripstone_brick_wall": "Dripstone Brick Wall",
   "block.players-versus.dripstone_brick_stairs": "Dripstone Brick Stairs",
+  "block.players-versus.dripstone_pillar": "Dripstone Pillar",
 
   "block.players-versus.polished_stone": "Polished Stone",
   "block.players-versus.polished_stone_slab": "Polished Stone Slab",
@@ -102,6 +103,10 @@
   "item.players-versus.copper_chestplate": "Copper Chestplate",
   "item.players-versus.copper_helmet": "Copper Helmet",
   "item.players-versus.copper_boots": "Copper Boots",
+  "item.players-versus.copper_leggings_damaged": "Copper Leggings",
+  "item.players-versus.copper_chestplate_damaged": "Copper Chestplate",
+  "item.players-versus.copper_helmet_damaged": "Copper Helmet",
+  "item.players-versus.copper_boots_damaged": "Copper Boots",
 
   "effect.players-versus.largeness" : "Largeness",
   "effect.players-versus.smallness" : "Smallness",

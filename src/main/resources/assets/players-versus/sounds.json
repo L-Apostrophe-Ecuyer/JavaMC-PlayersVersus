@@ -12,5 +12,45 @@
             "players-versus:fog_wind_3",
             "players-versus:fog_wind_4"
         ]
+    },
+    "deep_dark_music_and_ambience" : {
+        "sounds" : [
+            "players-versus:deep_dark_ambience_1",
+            "players-versus:deep_dark_ambience_2",
+            "players-versus:deep_dark_ambience_3",
+            "players-versus:deep_dark_ambience_4"
+        ]
+    },
+    "cave_music_and_ambience" : {
+        "sounds" : [
+            "players-versus:cave_ambience_1",
+            "players-versus:cave_ambience_2",
+            "players-versus:cave_ambience_3",
+            "players-versus:cave_ambience_4",
+            "players-versus:cave_ambience_5",
+            "players-versus:cave_ambience_6",
+            "players-versus:cave_music_c418_ki",
+            "players-versus:cave_music_c418_flakes",
+            "players-versus:cave_music_kevinpenkin_abyssofthesea",
+            "players-versus:cave_music_kevinpenkin_butterflyatmosphere"
+        ]
+    },
+    "menu_music" : {
+        "sounds" : [
+            "players-versus:menu_music_c418_dog",
+            "players-versus:menu_music_c418_chris",
+            "players-versus:menu_music_c418_chris",
+            "players-versus:menu_music_c418_floatingtrees",
+            "players-versus:menu_music_c418_moogcity",
+            "players-versus:menu_music_c418_moogcity",
+            "players-versus:menu_music_c418_wait",
+            "players-versus:music_menu_long_garethcoker_battlemode1",
+            "players-versus:music_menu_long_garethcoker_battlemode1"
+        ]
+    },
+    "stronghold_music_and_ambience" : {
+        "sounds" : [
+            "players-versus:stronghold_music_garethcoker_battlemode4"
+        ]
     }
 }
