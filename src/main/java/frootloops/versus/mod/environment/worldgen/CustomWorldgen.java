@@ -1,4 +1,4 @@
-package frootloops.versus.mod.environment;
+package frootloops.versus.mod.environment.worldgen;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.features.StoneStalagtiteFeature;

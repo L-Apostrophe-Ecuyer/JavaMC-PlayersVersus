@@ -1,8 +1,7 @@
 package frootloops.versus.mixin.environment.worldgen;
 
-import frootloops.versus.mod.environment.CustomWorldgen;
+import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.math.random.RandomSplitter;

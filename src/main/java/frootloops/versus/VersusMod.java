@@ -2,7 +2,7 @@ package frootloops.versus;
 
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.CustomSpecialEffects;
-import frootloops.versus.mod.environment.CustomWorldgen;
+import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
 import frootloops.versus.mod.items.ItemsAndStacks;
 import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;

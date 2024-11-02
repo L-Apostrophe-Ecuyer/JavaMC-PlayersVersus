@@ -44,13 +44,13 @@
             "players-versus:menu_music_c418_moogcity",
             "players-versus:menu_music_c418_moogcity",
             "players-versus:menu_music_c418_wait",
-            "players-versus:music_menu_long_garethcoker_battlemode1",
-            "players-versus:music_menu_long_garethcoker_battlemode1"
+            "players-versus:music_menu_c418_battlemode1",
+            "players-versus:music_menu_c418_battlemode4"
         ]
     },
     "stronghold_music_and_ambience" : {
         "sounds" : [
-            "players-versus:stronghold_music_garethcoker_battlemode4"
+            "players-versus:music_menu_c418_battlemode4"
         ]
     }
 }
