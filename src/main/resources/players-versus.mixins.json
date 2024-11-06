@@ -19,6 +19,7 @@
 
     "environment.worldgen.AquifersMixin",
     "environment.worldgen.OreVeinMixin",
+    "environment.worldgen.VanillaBiomeParametersOverworldMixin",
 
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",
@@ -28,6 +29,7 @@
     "environment.sleeping.ServerSleepingMixin",
     "environment.CropMixin",
     "environment.PointedDripstoneMixin",
+    "environment.MinecartExperimentalMixin",
     "environment.MinecartMixin",
     "environment.MossMixin",
     "environment.NetherWartMixin",

@@ -95,7 +95,7 @@ public abstract class ItemsAndStacks {
                 if (item instanceof BlockItem) setNewMaxStackSize(item, maxPlaceableBlocks);
                 else if (item instanceof ConcentrateItem) setNewMaxStackSize(item, 64);
                 else if(item.getComponents().get(DataComponentTypes.CONSUMABLE).consumeSeconds() ==  0.8f) setNewMaxStackSize(item, maxFoods);
-                else if (item.getTranslationKey().contains("cooked_") || item.getTranslationKey().contains("raw_")) setNewMaxStackSize(item, maxMeals);
+                else if (item.getTranslationKey().contains("cooked_") || item.getTranslationKey().contains("raw_")) setNewMaxStackSize(item, maxFoods);
                 else if (item.getTranslationKey().contains("stew")) setNewMaxStackSize(item, maxStews);
                 else if (item.getTranslationKey().contains("soup")) setNewMaxStackSize(item, maxStews);
                 else setNewMaxStackSize(item, maxFoods);
@@ -111,13 +111,13 @@ public abstract class ItemsAndStacks {
         // Other foods:
         setNewMaxStackSize(Items.CAKE, maxMeals);
         setNewMaxStackSize(Items.BREAD, maxFoods);
-        setNewMaxStackSize(Items.PUMPKIN_PIE, maxMeals);
+        setNewMaxStackSize(Items.PUMPKIN_PIE, maxFoods);
         setNewMaxStackSize(Items.SALMON, maxMeals);
-        setNewMaxStackSize(Items.COOKED_SALMON, maxMeals);
-        setNewMaxStackSize(Items.COD, maxMeals);
-        setNewMaxStackSize(Items.COOKED_COD, maxMeals);
-        setNewMaxStackSize(Items.TROPICAL_FISH, Math.max(maxFoods, maxMeals));
-        setNewMaxStackSize(Items.ROTTEN_FLESH, Math.max(maxFoods, maxMeals));
+        setNewMaxStackSize(Items.COOKED_SALMON, maxFoods);
+        setNewMaxStackSize(Items.COD, maxFoods);
+        setNewMaxStackSize(Items.COOKED_COD, maxFoods);
+        setNewMaxStackSize(Items.TROPICAL_FISH, Math.max(maxFoods, maxFoods));
+        setNewMaxStackSize(Items.ROTTEN_FLESH, Math.max(maxFoods, maxFoods));
         setNewMaxStackSize(Items.MELON_SLICE, Math.max(maxFoods, maxPlaceableBlocks));
 
         // Bottles:

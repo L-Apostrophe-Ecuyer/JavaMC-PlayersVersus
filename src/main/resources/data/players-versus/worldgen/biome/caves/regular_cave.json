@@ -1,25 +1,17 @@
 {
-  "temperature": 0.4,
-  "downfall": 0.8,
+  "temperature": 0.8,
+  "downfall": 0.4,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 8099793,
-    "fog_color": 12638463,
-    "water_color": 4159204,
-    "water_fog_color": 329011,
-    "foliage_color": 6718828,
-    "grass_color_modifier": "none",
+    "sky_color": 7115733,
+    "fog_color": 9018813,
+    "water_color": 5538249,
+    "water_fog_color": 724535,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
-      "tick_delay": 4000,
+      "tick_delay": 6000,
       "block_search_extent": 8,
       "offset": 2
-    },
-    "music": {
-      "sound": "minecraft:music.overworld.forest",
-      "min_delay": 12000,
-      "max_delay": 24000,
-      "replace_current_music": false
     }
   },
   "spawners": {
@@ -32,32 +24,7 @@
       }
     ],
     "axolotls": [],
-    "creature": [
-      {
-        "type": "minecraft:sheep",
-        "weight": 12,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:pig",
-        "weight": 10,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:chicken",
-        "weight": 10,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:cow",
-        "weight": 8,
-        "minCount": 4,
-        "maxCount": 4
-      }
-    ],
+    "creature": [],
     "misc": [],
     "monster": [
       {
@@ -71,12 +38,6 @@
         "weight": 95,
         "minCount": 4,
         "maxCount": 4
-      },
-      {
-        "type": "minecraft:zombie_villager",
-        "weight": 5,
-        "minCount": 1,
-        "maxCount": 1
       },
       {
         "type": "minecraft:skeleton",
@@ -98,15 +59,15 @@
       },
       {
         "type": "minecraft:enderman",
-        "weight": 10,
+        "weight": 20,
         "minCount": 1,
         "maxCount": 4
       },
       {
-        "type": "minecraft:witch",
-        "weight": 5,
-        "minCount": 1,
-        "maxCount": 1
+        "type": "minecraft:zombified_piglin",
+        "weight": 1,
+        "minCount": 3,
+        "maxCount": 7
       }
     ],
     "underground_water_creature": [
@@ -179,14 +140,8 @@
     ],
     [
       "minecraft:glow_lichen",
-      "players-versus:dark_taiga_forest_vegetation",
-      "minecraft:forest_flowers",
-      "minecraft:flower_default",
-      "minecraft:patch_grass_forest",
       "minecraft:brown_mushroom_normal",
-      "minecraft:red_mushroom_normal",
-      "minecraft:patch_sugar_cane",
-      "minecraft:patch_pumpkin"
+      "minecraft:red_mushroom_normal"
     ],
     [
       "minecraft:freeze_top_layer"

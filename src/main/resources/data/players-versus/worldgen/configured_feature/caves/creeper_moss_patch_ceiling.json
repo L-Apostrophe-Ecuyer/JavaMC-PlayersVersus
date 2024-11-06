@@ -1,0 +1,60 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "config": {
+    "surface": "ceiling",
+    "depth": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 2
+    },
+    "vertical_range": 5,
+    "extra_bottom_block_chance": 0,
+    "extra_edge_column_chance": 0.3,
+    "vegetation_chance": 0.08,
+    "xz_radius": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 4,
+      "max_inclusive": 7
+    },
+    "replaceable": "#minecraft:moss_replaceable",
+    "ground_state": {
+      "type": "minecraft:noise_provider",
+      "seed": 0,
+      "noise": {
+        "firstOctave": -5,
+        "amplitudes": [
+          1,
+          1
+        ]
+      },
+      "scale": 1,
+      "states": [
+        {
+          "Name": "minecraft:stone"
+        },
+        {
+          "Name": "minecraft:cobblestone"
+        },
+        {
+          "Name": "minecraft:mossy_cobblestone"
+        },
+        {
+          "Name": "minecraft:moss_block"
+        },
+        {
+          "Name": "minecraft:mossy_cobblestone"
+        },
+        {
+          "Name": "minecraft:cobblestone"
+        },
+        {
+          "Name": "minecraft:stone"
+        }
+      ]
+    },
+    "vegetation_feature": {
+      "feature": "minecraft:vines",
+      "placement": []
+    }
+  }
+}

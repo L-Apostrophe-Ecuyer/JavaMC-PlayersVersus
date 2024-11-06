@@ -1,25 +1,17 @@
 {
-  "temperature": 0.4,
-  "downfall": 0.8,
+  "temperature": 0.15,
+  "downfall": 0.4,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 8099793,
+    "sky_color": 8625919,
     "fog_color": 12638463,
-    "water_color": 4159204,
+    "water_color": 4020182,
     "water_fog_color": 329011,
-    "foliage_color": 6718828,
-    "grass_color_modifier": "none",
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
-      "tick_delay": 4000,
+      "tick_delay": 6000,
       "block_search_extent": 8,
       "offset": 2
-    },
-    "music": {
-      "sound": "minecraft:music.overworld.forest",
-      "min_delay": 12000,
-      "max_delay": 24000,
-      "replace_current_music": false
     }
   },
   "spawners": {
@@ -55,6 +47,24 @@
         "type": "minecraft:cow",
         "weight": 8,
         "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:wolf",
+        "weight": 8,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:rabbit",
+        "weight": 4,
+        "minCount": 2,
+        "maxCount": 3
+      },
+      {
+        "type": "minecraft:fox",
+        "weight": 8,
+        "minCount": 2,
         "maxCount": 4
       }
     ],
@@ -179,14 +189,16 @@
     ],
     [
       "minecraft:glow_lichen",
-      "players-versus:dark_taiga_forest_vegetation",
-      "minecraft:forest_flowers",
+      "minecraft:patch_large_fern",
+      "minecraft:trees_windswept_forest",
+      "players-versus:snow_piles",
       "minecraft:flower_default",
-      "minecraft:patch_grass_forest",
-      "minecraft:brown_mushroom_normal",
-      "minecraft:red_mushroom_normal",
+      "minecraft:patch_grass_taiga_2",
+      "minecraft:brown_mushroom_taiga",
+      "minecraft:red_mushroom_taiga",
       "minecraft:patch_sugar_cane",
-      "minecraft:patch_pumpkin"
+      "minecraft:patch_pumpkin",
+      "minecraft:patch_berry_rare"
     ],
     [
       "minecraft:freeze_top_layer"

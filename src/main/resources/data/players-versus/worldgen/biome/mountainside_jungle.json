@@ -1,22 +1,20 @@
 {
-  "temperature": 0.4,
-  "downfall": 0.8,
+  "temperature": 0.625,
+  "downfall": 0.6,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 8099793,
+    "sky_color": 7842047,
     "fog_color": 12638463,
     "water_color": 4159204,
     "water_fog_color": 329011,
-    "foliage_color": 6718828,
-    "grass_color_modifier": "none",
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
-      "tick_delay": 4000,
+      "tick_delay": 6000,
       "block_search_extent": 8,
       "offset": 2
     },
     "music": {
-      "sound": "minecraft:music.overworld.forest",
+      "sound": "minecraft:music.overworld.sparse_jungle",
       "min_delay": 12000,
       "max_delay": 24000,
       "replace_current_music": false
@@ -40,21 +38,15 @@
         "maxCount": 4
       },
       {
-        "type": "minecraft:pig",
+        "type": "minecraft:llama",
         "weight": 10,
         "minCount": 4,
         "maxCount": 4
       },
       {
-        "type": "minecraft:chicken",
-        "weight": 10,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:cow",
+        "type": "minecraft:wolf",
         "weight": 8,
-        "minCount": 4,
+        "minCount": 2,
         "maxCount": 4
       }
     ],
@@ -71,12 +63,6 @@
         "weight": 95,
         "minCount": 4,
         "maxCount": 4
-      },
-      {
-        "type": "minecraft:zombie_villager",
-        "weight": 5,
-        "minCount": 1,
-        "maxCount": 1
       },
       {
         "type": "minecraft:skeleton",
@@ -101,12 +87,6 @@
         "weight": 10,
         "minCount": 1,
         "maxCount": 4
-      },
-      {
-        "type": "minecraft:witch",
-        "weight": 5,
-        "minCount": 1,
-        "maxCount": 1
       }
     ],
     "underground_water_creature": [
@@ -179,14 +159,15 @@
     ],
     [
       "minecraft:glow_lichen",
-      "players-versus:dark_taiga_forest_vegetation",
-      "minecraft:forest_flowers",
-      "minecraft:flower_default",
-      "minecraft:patch_grass_forest",
+      "minecraft:trees_sparse_jungle",
+      "players-versus:flower_mountainside_warm",
+      "minecraft:patch_grass_jungle",
       "minecraft:brown_mushroom_normal",
       "minecraft:red_mushroom_normal",
       "minecraft:patch_sugar_cane",
-      "minecraft:patch_pumpkin"
+      "minecraft:patch_pumpkin",
+      "minecraft:vines",
+      "minecraft:patch_melon_sparse"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -44,7 +44,7 @@ public abstract class MinecartMixin extends VehicleEntity {
 
     @Overwrite
     public double getMaxSpeed(ServerWorld world) {
-        if(!world.getEnabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
+        if(world.getEnabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
             double gameruleMaxSpeed = this.controller.getMaxSpeed((ServerWorld) this.getWorld());
             return gameruleMaxSpeed == 8.0 ? gameruleMaxSpeed * 8.0 : gameruleMaxSpeed;
         }

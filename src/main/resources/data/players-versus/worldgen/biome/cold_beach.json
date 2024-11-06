@@ -1,25 +1,17 @@
 {
-  "temperature": 0.4,
-  "downfall": 0.8,
+  "temperature": 0.2,
+  "downfall": 0.3,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 8099793,
+    "sky_color": 8364543,
     "fog_color": 12638463,
-    "water_color": 4159204,
-    "water_fog_color": 329011,
-    "foliage_color": 6718828,
-    "grass_color_modifier": "none",
+    "water_color": 4025302,
+    "water_fog_color": 331059,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
-      "tick_delay": 4000,
+      "tick_delay": 6000,
       "block_search_extent": 8,
       "offset": 2
-    },
-    "music": {
-      "sound": "minecraft:music.overworld.forest",
-      "min_delay": 12000,
-      "max_delay": 24000,
-      "replace_current_music": false
     }
   },
   "spawners": {
@@ -32,32 +24,7 @@
       }
     ],
     "axolotls": [],
-    "creature": [
-      {
-        "type": "minecraft:sheep",
-        "weight": 12,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:pig",
-        "weight": 10,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:chicken",
-        "weight": 10,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:cow",
-        "weight": 8,
-        "minCount": 4,
-        "maxCount": 4
-      }
-    ],
+    "creature": [],
     "misc": [],
     "monster": [
       {
@@ -179,10 +146,8 @@
     ],
     [
       "minecraft:glow_lichen",
-      "players-versus:dark_taiga_forest_vegetation",
-      "minecraft:forest_flowers",
       "minecraft:flower_default",
-      "minecraft:patch_grass_forest",
+      "minecraft:patch_grass_badlands",
       "minecraft:brown_mushroom_normal",
       "minecraft:red_mushroom_normal",
       "minecraft:patch_sugar_cane",
