@@ -25,6 +25,7 @@ public class CustomBlocksClient {
                 CustomBlocks.CLOVERS,
                 CustomBlocks.WILD_WHEAT,
                 CustomBlocks.WHEAT_GRASS,
+                CustomBlocks.CREEPER_SPORE_BLOSSOM,
 
                 CustomBlocks.HARMFUL_BILE,
                 CustomBlocks.HEALTHY_BILE,

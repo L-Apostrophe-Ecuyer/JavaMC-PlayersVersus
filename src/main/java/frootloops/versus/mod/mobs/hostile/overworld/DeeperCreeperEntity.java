@@ -148,7 +148,6 @@ public class DeeperCreeperEntity extends CreeperEntity {
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
         this.playSound(SoundEvents.BLOCK_STONE_STEP, 1.2f, 1.0f + 0.2f * random.nextFloat());
-        this.playSound(SoundEvents.ENTITY_CREEPER_HURT, 0.1f, 1.4f);
         this.playSound(SoundEvents.BLOCK_MANGROVE_ROOTS_STEP, 0.2f, 0.8F);
     }
 

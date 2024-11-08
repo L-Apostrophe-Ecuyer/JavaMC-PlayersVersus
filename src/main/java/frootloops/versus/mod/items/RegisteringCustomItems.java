@@ -126,6 +126,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT, ItemGroups.NATURAL);
         registerCustomItem("clovers", CustomBlockItems.CLOVERS, ItemGroups.NATURAL);
 
+        registerCustomItem("creeper_spore_blossom", CustomBlockItems.CREEPER_SPORE_BLOSSOM, ItemGroups.FUNCTIONAL);
         registerCustomItem("infested_dark_oak_wood", CustomBlockItems.INFESTED_DARK_OAK_WOOD);
         registerCustomItem("infested_oak_wood", CustomBlockItems.INFESTED_OAK_WOOD);
     }

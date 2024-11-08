@@ -42,21 +42,13 @@ public abstract class LightmapMixin {
         return n * 0.5f - 0.065f;
     }
 
-    /*
-    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/LightmapTextureManager;getBrightness(Lnet/minecraft/world/dimension/DimensionType;I)F"))
-    private float getBrightness(DimensionType type, int lightLevel) {
-        float lightPercent = (float)lightLevel/32f + (float)(lightLevel + 6f)/ 32.0f;
-        float ambientLight = this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION) ? type.ambientLight() + 0.065f : type.ambientLight() - 0.05f;
-        return MathHelper.lerp(ambientLight, lightPercent / (4.0f - 3.0f * lightPercent), 1.5f);
-    } */
-
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getSkyBrightness(F)F"))
     private float getSkyBrightness(ClientWorld world, float tickDelta) {
         float result = world.getSkyBrightness(tickDelta);
         if(result < 0.99f && world.getDimension().hasSkyLight()) {
-            float moonPhaseDarkness = Math.abs(4.0f - (float)((world.getLunarTime() + 6000L + (24000L * 3L)) % (24000L * 8L))/24000.0f);
-            float moonHeight = 0.3f/(0.25f + Math.abs(((float)(world.getTimeOfDay()%12000L) - 6000f)/12000f));
-            result -= 0.08f + moonHeight * (moonPhaseDarkness/64f + (moonPhaseDarkness * moonPhaseDarkness)/96f);
+            float moonPhaseDarkness = Math.abs(4.0f - (float)((world.getLunarTime() + 6000L + (24000L * 3L)) % (24000L * 8L))/24000.0f) - 0.1f;
+            float moonHeight = 0.3f/(0.25f + Math.abs(((float)((world.getTimeOfDay() - 750L)%12000L) - 6000f)/12000f)) - 0.4f;
+            result -= moonHeight * (moonPhaseDarkness/24f + (moonPhaseDarkness * moonPhaseDarkness)/96f);
         }
         if(this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) result += 0.2f;
         return result;

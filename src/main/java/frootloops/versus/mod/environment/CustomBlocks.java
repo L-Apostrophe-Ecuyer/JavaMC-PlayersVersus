@@ -53,6 +53,7 @@ public class CustomBlocks {
     public static Block WILD_WHEAT;
     public static Block CLOVERS;
 
+    public static Block CREEPER_SPORE_BLOSSOM;
 
     public static Block INFESTED_OAK_WOOD, INFESTED_DARK_OAK_WOOD;
 
@@ -120,8 +121,11 @@ public class CustomBlocks {
         WILD_WHEAT = registerBlock("wild_wheat", new WheatGrassBlock(getSettings("wild_wheat", Blocks.SHORT_GRASS)));
         CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
 
+
+        CREEPER_SPORE_BLOSSOM = registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM)));
         INFESTED_OAK_WOOD = registerBlock("infested_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, getSettings("infested_oak_wood", Blocks.OAK_WOOD)));
         INFESTED_DARK_OAK_WOOD = registerBlock("infested_dark_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, getSettings("infested_dark_oak_wood", Blocks.OAK_WOOD)));
+
 
         DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, StatusEffects.WITHER, 60, 2, 4, 0.4f);
         CORRUPTED_BILE = registerBileBlock("corrupted_bile", StatusEffects.HUNGER, 10, 1);

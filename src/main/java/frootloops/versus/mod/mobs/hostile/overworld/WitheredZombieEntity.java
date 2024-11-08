@@ -66,7 +66,11 @@ public class WitheredZombieEntity extends ZombieEntity {
     @Override
     public boolean damage(ServerWorld world, DamageSource source, float amount) {
         if(source.isOf(DamageTypes.WITHER)) return false;
-        return super.damage(world, source, amount);
+        if(super.damage(world, source, amount)) {
+            this.playSound(SoundEvents.ENTITY_PLAYER_BREATH, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.4F);
+            return true;
+        }
+        else return false;
     }
 
     @Override
@@ -133,11 +137,6 @@ public class WitheredZombieEntity extends ZombieEntity {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_PLAYER_BREATH;
-    }
-
-    @Override
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_PLAYER_BREATH;
     }
@@ -146,5 +145,4 @@ public class WitheredZombieEntity extends ZombieEntity {
     protected SoundEvent getStepSound() {
         return SoundEvents.ENTITY_HUSK_STEP;
     }
-
 }

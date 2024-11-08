@@ -75,9 +75,8 @@
   },
   "spawn_costs": {},
   "carvers": [
-    "minecraft:cave",
-    "minecraft:cave_extra_underground",
-    "minecraft:canyon"
+    "players-versus:deep_caves_extra_underground",
+    "players-versus:deep_caves_canyons"
   ],
   "features": [
     [],

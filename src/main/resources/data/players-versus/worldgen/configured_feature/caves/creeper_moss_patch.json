@@ -2,7 +2,7 @@
   "type": "minecraft:vegetation_patch",
   "config": {
     "surface": "floor",
-    "depth": 3,
+    "depth": 4,
     "vertical_range": 5,
     "extra_bottom_block_chance": 0,
     "extra_edge_column_chance": 0.3,
@@ -29,13 +29,25 @@
           "Name": "minecraft:stone"
         },
         {
+          "Name": "minecraft:stone"
+        },
+        {
+          "Name": "minecraft:cobblestone"
+        },
+        {
+          "Name": "minecraft:mossy_cobblestone"
+        },
+        {
           "Name": "minecraft:lime_terracotta"
         },
         {
-          "Name": "minecraft:green_terracotta"
+          "Name": "minecraft:mossy_cobblestone"
         },
         {
-          "Name": "minecraft:lime_terracotta"
+          "Name": "minecraft:cobblestone"
+        },
+        {
+          "Name": "minecraft:stone"
         },
         {
           "Name": "minecraft:stone"

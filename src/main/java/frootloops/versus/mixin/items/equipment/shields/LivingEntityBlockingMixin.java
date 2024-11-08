@@ -1,19 +1,28 @@
 package frootloops.versus.mixin.items.equipment.shields;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
@@ -25,9 +34,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     @Unique private float damageAmount;
     @Shadow protected int itemUseTimeLeft;
     @Shadow protected ItemStack activeItemStack;
-    @Shadow public abstract boolean blockedByShield(DamageSource source);
-
-    @Shadow public boolean isBlocking() {return false;}
+    @Shadow public abstract  boolean isUsingItem();
 
     public LivingEntityBlockingMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -53,11 +60,22 @@ public abstract class LivingEntityBlockingMixin extends Entity {
         cir.setReturnValue(!this.activeItemStack.isEmpty() && this.activeItemStack.getItem().getUseAction(this.activeItemStack) == UseAction.BLOCK);
     }
 
-    @Inject(method = "blockedByShield", at = @At("HEAD"), cancellable = true)
-    private void blockSonicBooms(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-        if(source.isOf(DamageTypes.SONIC_BOOM) && this.isBlocking()) {
-            cir.setReturnValue(true);
+    @Overwrite
+    public boolean blockedByShield(DamageSource source) {
+        Entity entity = source.getSource();
+        if (entity instanceof PersistentProjectileEntity persistentProjectileEntity && persistentProjectileEntity.getPierceLevel() > 0) return false;
+        if (this.activeItemStack.isEmpty() || activeItemStack.getUseAction() != UseAction.BLOCK) return false;
+        if(activeItemStack.getMaxUseTime((LivingEntity)((Object)this)) - this.itemUseTimeLeft < 1) return false;
+        if (!source.isIn(DamageTypeTags.BYPASSES_SHIELD) && !source.isOf(DamageTypes.SONIC_BOOM)) {
+            Vec3d sourcePos = source.getPosition();
+            if (sourcePos != null) {
+                Vec3d directionVector = this.getRotationVector(0.0F, this.getHeadYaw());
+                Vec3d distanceVector = sourcePos.relativize(this.getPos());
+                distanceVector = new Vec3d(distanceVector.x, distanceVector.y, distanceVector.z).normalize();
+                return distanceVector.dotProduct(directionVector) < 0.0;
+            }
         }
+        return false;
     }
 
     @Inject(method = "takeShieldHit", at = @At("TAIL"))
@@ -92,7 +110,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
     @ModifyVariable(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageSource;isIn(Lnet/minecraft/registry/tag/TagKey;)Z", ordinal = 1), argsOnly = true)
     private float reduceDamageIfBlocked(float amount2, ServerWorld world, DamageSource source, float amount) {
-        if( activeItemStack.getItem() instanceof ShieldItem) return 0.0f;
+        if(activeItemStack.getItem() instanceof ShieldItem) return 0.0f;
 
         int levelRiposte = Enchants.getLevel(getWorld(), activeItemStack, CustomEnchants.RIPOSTE);
         int useTime =  activeItemStack.getMaxUseTime((LivingEntity) ((Object)this)) - itemUseTimeLeft;

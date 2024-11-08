@@ -70,8 +70,8 @@
 
   "block.minecraft.poppy": "Rose",
   "item.minecraft.poppy": "Rose",
-  "block.minecraft.azure_bluet": "White Clover Flowers",
-  "item.minecraft.azure_bluet": "White Clover Flowers",
+
+  "block.players-versus.creeper_spore_blossom": "Creeper Spore",
 
   "block.players-versus.wheat_grass": "Wheat Grass",
   "block.players-versus.wild_wheat": "Wild Wheat",
