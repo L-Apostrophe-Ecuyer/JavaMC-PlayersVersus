@@ -15,6 +15,7 @@
 		"mobs.hostile.PiglinModelMixin",
 		"mobs.hostile.IllagerModelMixin",
 		"mobs.passive.VillagerRessemblingModelMixin",
+		"mobs.passive.VillagerTradingScreenMixin",
 
 		"items.FirstPersonAnimationsMixin",
 		"items.inventory.HotbarSwappingClientMixin",

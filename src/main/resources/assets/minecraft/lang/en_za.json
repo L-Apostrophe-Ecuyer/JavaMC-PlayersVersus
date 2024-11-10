@@ -330,5 +330,7 @@
   "players-versus.deathScreen.spectateNearby": "Spectate nearby",
   "players-versus.deathScreen.spectateHome": "Spectate home",
   "players-versus.deathScreen.respawnNearby": "Respawn nearby",
-  "players-versus.deathScreen.respawnHome": "Respawn home"
+  "players-versus.deathScreen.respawnHome": "Respawn home",
+  "players-versus.tradeScreen.experienceBarHover" : "Will restock and learn new trades by talking to other villagers.\nEspecially if they're in a similar line of work!",
+  "merchant.deprecated" : "Needs to talk to other villagers to restock."
 }

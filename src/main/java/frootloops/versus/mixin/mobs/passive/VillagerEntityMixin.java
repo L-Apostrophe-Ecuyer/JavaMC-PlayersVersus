@@ -15,7 +15,9 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
@@ -27,6 +29,9 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
 
     @Shadow private int experience;
 
+    @Shadow private long lastRestockTime;
+    @Shadow abstract public void restock();
+    @Shadow abstract boolean needsRestock();
     @Nullable
     private PlayerEntity customer, lastCustomer;
 
@@ -40,6 +45,20 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
 
     public VillagerEntityMixin(EntityType<? extends MerchantEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    private static HashMap<VillagerProfession, VillagerProfession[]> PROFESSION_AFFINITY_MAP = new HashMap<>();
+    static {
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.ARMORER, new VillagerProfession[]{VillagerProfession.WEAPONSMITH, VillagerProfession.LEATHERWORKER, VillagerProfession.LIBRARIAN});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.WEAPONSMITH, new VillagerProfession[]{VillagerProfession.ARMORER, VillagerProfession.TOOLSMITH, VillagerProfession.LIBRARIAN});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.TOOLSMITH, new VillagerProfession[]{VillagerProfession.ARMORER, VillagerProfession.WEAPONSMITH, VillagerProfession.LIBRARIAN});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.MASON, new VillagerProfession[]{VillagerProfession.TOOLSMITH, VillagerProfession.NONE});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.LEATHERWORKER, new VillagerProfession[]{VillagerProfession.ARMORER, VillagerProfession.BUTCHER, VillagerProfession.FARMER, VillagerProfession.FISHERMAN, VillagerProfession.SHEPHERD});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.SHEPHERD, new VillagerProfession[]{VillagerProfession.BUTCHER, VillagerProfession.FARMER, VillagerProfession.FISHERMAN, VillagerProfession.LEATHERWORKER});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.FISHERMAN, new VillagerProfession[]{VillagerProfession.BUTCHER, VillagerProfession.FARMER, VillagerProfession.FLETCHER, VillagerProfession.CARTOGRAPHER});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.LIBRARIAN, new VillagerProfession[]{VillagerProfession.CLERIC, VillagerProfession.CARTOGRAPHER, VillagerProfession.FISHERMAN});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.CARTOGRAPHER, new VillagerProfession[]{VillagerProfession.LIBRARIAN, VillagerProfession.FISHERMAN});
+        PROFESSION_AFFINITY_MAP.put(VillagerProfession.CLERIC, new VillagerProfession[]{VillagerProfession.NITWIT, VillagerProfession.LIBRARIAN});
     }
 
 
@@ -77,17 +96,56 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
     }
 
     @Inject(method = "talkWithVillager", at = @At("TAIL"))
-    public void talkWithVillager(ServerWorld world, VillagerEntity villager, long time, CallbackInfo info) {
-        this.experience += 3;
+    public void talkWithVillager(ServerWorld world, VillagerEntity partner, long time, CallbackInfo info) {
+        VillagerProfession myProfession = this.getVillagerData().getProfession();
+        if(myProfession == VillagerProfession.NONE || myProfession == VillagerProfession.NITWIT) return;
+
+        int affinityAmount = 0;
+        if(this.needsRestock()) {
+            VillagerProfession[] listOfGoodProfessions = PROFESSION_AFFINITY_MAP.getOrDefault(myProfession, null);
+            if (listOfGoodProfessions != null) {
+                VillagerProfession partnerProfession = partner.getVillagerData().getProfession();
+                if(partnerProfession == myProfession){
+                    this.restock();
+                    affinityAmount = 9;
+                }
+                else {
+                    for(VillagerProfession p : listOfGoodProfessions) {
+                        if(partnerProfession == p) {
+                            this.restock();
+                            affinityAmount = 15;
+                            break;
+                        }
+                    }
+                }
+            }
+            lastRestockTime -= 1000L;
+        }
+
+        this.experience += 3 + affinityAmount;
+        if (this.canLevelUp()) {
+            this.levelUpTimer = 40;
+            this.levelingUp = true;
+        }
+    }
+
+    @ModifyConstant(method = "canRestock", constant = @Constant(longValue = 2400L))
+    private static long restockTimeWithoutGossiping(long timer) {
+        return 6000L;
     }
 
     @Override
     public void afterUsing(TradeOffer offer) {
-        this.experience = this.experience + offer.getMerchantExperience();
+        int experienceFromOffer = offer.getMerchantExperience();
+        this.experience = this.experience + experienceFromOffer;
         this.lastCustomer = customer;
         if (this.canLevelUp()) {
             this.levelUpTimer = 40;
             this.levelingUp = true;
+            this.getWorld().spawnEntity(new ExperienceOrbEntity(this.getWorld(), this.getX(), this.getY() + 0.5, this.getZ(), this.getVillagerData().getLevel() * 8));
+        }
+        else {
+            this.getWorld().spawnEntity(new ExperienceOrbEntity(this.getWorld(), this.getX(), this.getY() + 0.5, this.getZ(), experienceFromOffer));
         }
     }
 }
