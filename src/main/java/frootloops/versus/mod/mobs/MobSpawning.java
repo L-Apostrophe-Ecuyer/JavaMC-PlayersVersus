@@ -31,6 +31,9 @@ public class MobSpawning {
         BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.WITHERED_ZOMBIE, 200, 4, 4);
         SpawnRestriction.register(ModEntities.WITHERED_ZOMBIE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitheredZombie);
 
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), SpawnGroup.MONSTER, EntityType.WITHER_SKELETON, 60, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), SpawnGroup.MONSTER, EntityType.ZOMBIFIED_PIGLIN, 60, 4, 7);
+
         // SpawnRestriction.register(VanillaEntities.CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnCreeper);
         // SpawnRestriction.register(VanillaEntities.WITHER_SKELETON, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitherSkelly);
 

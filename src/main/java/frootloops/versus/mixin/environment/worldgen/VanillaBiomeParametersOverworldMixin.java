@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 @Mixin(VanillaBiomeParameters.class)
 public class VanillaBiomeParametersOverworldMixin {
 
-    private static final MultiNoiseUtil.ParameterRange DEPTH_ZERO = MultiNoiseUtil.ParameterRange.of(0.0F), DEPTH_ONE = MultiNoiseUtil.ParameterRange.of(0.1F), DEPTH_SURFACE_CAVE = MultiNoiseUtil.ParameterRange.of(0.1F, 0.25F), DEPTH_CAVE = MultiNoiseUtil.ParameterRange.of(0.25F, 0.65F), DEPTH_DEEP_CAVE = MultiNoiseUtil.ParameterRange.of(0.65F, 1.0F);
+    private static final MultiNoiseUtil.ParameterRange DEPTH_ZERO = MultiNoiseUtil.ParameterRange.of(0.0F), DEPTH_ONE = MultiNoiseUtil.ParameterRange.of(0.1F), DEPTH_SURFACE_CAVE = MultiNoiseUtil.ParameterRange.of(0.1F, 0.25F), DEPTH_CAVE = MultiNoiseUtil.ParameterRange.of(0.25F, 0.6F), DEPTH_DEEP_CAVE = MultiNoiseUtil.ParameterRange.of(0.6F, 1.0F);
 
     private static final float MIN_EROSION_FOR_MOUNTAIN_TRANSITION = -0.475f;
     private static final long MIN_EROSION_FOR_MOUNTAIN_TRANSITION_LONG = MultiNoiseUtil.toLong(MIN_EROSION_FOR_MOUNTAIN_TRANSITION);
