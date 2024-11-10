@@ -1,0 +1,61 @@
+{
+  "feature": "players-versus:caves/badlands_gold_vein",
+  "placement": [
+    {
+      "type": "minecraft:noise_based_count",
+      "noise_to_count_ratio": 8,
+      "noise_factor": 17,
+      "noise_offset": 0.1
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:weighted_list",
+        "distribution": [
+          {
+            "weight": 3,
+            "data": {
+              "type": "minecraft:uniform",
+              "min_inclusive": {
+                "absolute": 64
+              },
+              "max_inclusive": {
+                "absolute": 72
+              }
+            }
+          },
+          {
+            "weight": 2,
+            "data": {
+              "type": "minecraft:uniform",
+              "min_inclusive": {
+                "absolute": 32
+              },
+              "max_inclusive": {
+                "absolute": 40
+              }
+            }
+          },
+          {
+            "weight": 1,
+            "data": {
+              "type": "minecraft:uniform",
+              "min_inclusive": {
+                "absolute": 90
+              },
+              "max_inclusive": {
+                "absolute": 98
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

@@ -14,7 +14,7 @@
       "offset": 2
     },
     "music": {
-      "sound": "minecraft:music.overworld.deep_dark",
+      "sound": "players-versus:deep_dark_music_and_ambience",
       "min_delay": 12000,
       "max_delay": 24000,
       "replace_current_music": false
@@ -52,7 +52,7 @@
       },
       {
         "type": "minecraft:zombie",
-        "weight": 1,
+        "weight": 2,
         "minCount": 1,
         "maxCount": 2
       },
@@ -124,6 +124,7 @@
     [],
     [],
     [
+      "players-versus:caves/deep_rare_sculk_patch",
       "minecraft:glow_lichen"
     ],
     [

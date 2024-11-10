@@ -1,34 +1,21 @@
 {
-  "temperature": 0.9,
-  "downfall": 0.75,
+  "temperature": 0.4,
+  "downfall": 0.4,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 4492657,
-    "fog_color": 8426363,
-    "water_color": 4043458,
-    "water_fog_color": 538175,
+    "sky_color": 7115733,
+    "fog_color": 9018813,
+    "water_color": 5538249,
+    "water_fog_color": 724535,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 6000,
       "block_search_extent": 8,
       "offset": 2
-    },
-    "music": {
-      "sound": "minecraft:music.overworld.dripstone_caves",
-      "min_delay": 12000,
-      "max_delay": 24000,
-      "replace_current_music": false
     }
   },
   "spawners": {
-    "ambient": [
-      {
-        "type": "minecraft:bat",
-        "weight": 10,
-        "minCount": 8,
-        "maxCount": 8
-      }
-    ],
+    "ambient": [],
     "axolotls": [],
     "creature": [],
     "misc": [],
@@ -41,33 +28,57 @@
       },
       {
         "type": "minecraft:zombie",
-        "weight": 80,
+        "weight": 60,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "players-versus:frosted_zombie",
+        "weight": 40,
         "minCount": 4,
         "maxCount": 4
       },
       {
         "type": "minecraft:skeleton",
-        "weight": 80,
+        "weight": 40,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:stray",
+        "weight": 60,
         "minCount": 4,
         "maxCount": 4
       },
       {
         "type": "minecraft:creeper",
-        "weight": 140,
+        "weight": 90,
         "minCount": 4,
         "maxCount": 4
       },
       {
         "type": "minecraft:slime",
-        "weight": 120,
+        "weight": 100,
         "minCount": 4,
         "maxCount": 4
       },
       {
+        "type": "minecraft:enderman",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 4
+      },
+      {
         "type": "minecraft:drowned",
-        "weight": 95,
+        "weight": 55,
         "minCount": 4,
         "maxCount": 4
+      },
+      {
+        "type": "minecraft:zombified_piglin",
+        "weight": 1,
+        "minCount": 3,
+        "maxCount": 7
       }
     ],
     "underground_water_creature": [
@@ -94,7 +105,8 @@
       "minecraft:lake_lava_surface"
     ],
     [
-      "minecraft:amethyst_geode"
+      "minecraft:amethyst_geode",
+      "players-versus:caves/ice_spikes_ceiling"
     ],
     [
       "minecraft:monster_room",
@@ -105,7 +117,7 @@
     [
       "minecraft:ore_dirt",
       "minecraft:ore_gravel",
-      "players-versus:caves/ore_terracotta_and_copper_green",
+      "players-versus:caves/ore_terracotta_and_copper_blue",
       "minecraft:ore_granite_lower",
       "minecraft:ore_diorite_upper",
       "minecraft:ore_diorite_lower",
@@ -127,12 +139,11 @@
       "minecraft:ore_diamond_buried",
       "minecraft:ore_lapis",
       "minecraft:ore_lapis_buried",
-      "players-versus:caves/ore_copper_green",
+      "players-versus:caves/ore_copper_blue",
       "minecraft:underwater_magma",
       "minecraft:disk_sand",
       "minecraft:disk_clay",
       "minecraft:disk_gravel",
-      "minecraft:ore_emerald",
       "players-versus:caves/ore_emerald"
     ],
     [],
@@ -141,11 +152,11 @@
       "minecraft:spring_lava"
     ],
     [
+      "players-versus:caves/snowy_floor",
+      "players-versus:caves/icy_cave_lake_surface",
       "minecraft:glow_lichen",
-      "minecraft:red_mushroom_normal",
-      "minecraft:classic_vines_cave_feature",
-      "players-versus:caves/creeper_caves_floor_vegetation",
-      "players-versus:caves/creeper_caves_ceiling_vegetation"
+      "minecraft:brown_mushroom_normal",
+      "minecraft:red_mushroom_normal"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -1,7 +1,7 @@
 {
   "type": "minecraft:canyon",
   "config": {
-    "probability": 0.0125,
+    "probability": 0.025,
     "y": {
       "type": "minecraft:weighted_list",
       "distribution": [
@@ -18,14 +18,14 @@
           }
         },
         {
-          "weight": 1,
+          "weight": 3,
           "data": {
             "type": "minecraft:uniform",
             "min_inclusive": {
-              "absolute": -38
+              "absolute": -24
             },
             "max_inclusive": {
-              "absolute": -22
+              "absolute": -18
             }
           }
         }

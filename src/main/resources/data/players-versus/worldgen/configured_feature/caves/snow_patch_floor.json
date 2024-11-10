@@ -1,0 +1,86 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "config": {
+    "surface": "floor",
+    "depth": 1,
+    "vertical_range": 5,
+    "extra_bottom_block_chance": 0,
+    "extra_edge_column_chance": 0.3,
+    "vegetation_chance": 0.075,
+    "xz_radius": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 4,
+      "max_inclusive": 7
+    },
+    "replaceable": "#minecraft:moss_replaceable",
+    "ground_state": {
+      "type": "minecraft:noise_provider",
+      "seed": 0,
+      "noise": {
+        "firstOctave": -4,
+        "amplitudes": [
+          1,
+          1
+        ]
+      },
+      "scale": 1,
+      "states": [
+        {
+          "Name": "minecraft:stone"
+        },
+        {
+          "Name": "minecraft:stone"
+        },
+        {
+          "Name": "minecraft:snow_block"
+        },
+        {
+          "Name": "minecraft:powder_snow"
+        },
+        {
+          "Name": "minecraft:snow_block"
+        },
+        {
+          "Name": "minecraft:stone"
+        },
+        {
+          "Name": "minecraft:stone"
+        }
+      ]
+    },
+    "vegetation_feature": {
+      "feature": {
+        "type": "minecraft:random_patch",
+        "config": {
+          "tries": 32,
+          "xz_spread": 4,
+          "y_spread": 1,
+          "feature": {
+            "feature": {
+              "type": "minecraft:block_pile",
+              "config": {
+                "state_provider": {
+                  "type": "minecraft:simple_state_provider",
+                  "state": {
+                    "Name": "minecraft:snow"
+                  }
+                }
+              }
+            },
+            "placement": [
+              {
+                "type": "minecraft:block_predicate_filter",
+                "predicate": {
+                  "type": "minecraft:has_sturdy_face",
+                  "offset": [0, -1, 0],
+                  "direction": "up"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "placement": []
+    }
+  }
+}

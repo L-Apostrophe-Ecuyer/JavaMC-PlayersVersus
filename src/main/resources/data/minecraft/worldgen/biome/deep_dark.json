@@ -33,7 +33,7 @@
   "spawn_costs": {},
   "carvers": [
     "minecraft:cave",
-    "minecraft:canyon"
+    "players-versus:deep_dark_canyon"
   ],
   "features": [
     [],

@@ -1,34 +1,21 @@
 {
-  "temperature": 0.9,
-  "downfall": 0.75,
-  "has_precipitation": true,
+  "temperature": 1.2,
+  "downfall": 0.2,
+  "has_precipitation": false,
   "effects": {
-    "sky_color": 4492657,
-    "fog_color": 8426363,
-    "water_color": 4043458,
+    "sky_color": 5543344,
+    "fog_color": 10471638,
+    "water_color": 4037314,
     "water_fog_color": 538175,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 6000,
       "block_search_extent": 8,
       "offset": 2
-    },
-    "music": {
-      "sound": "minecraft:music.overworld.dripstone_caves",
-      "min_delay": 12000,
-      "max_delay": 24000,
-      "replace_current_music": false
     }
   },
   "spawners": {
-    "ambient": [
-      {
-        "type": "minecraft:bat",
-        "weight": 10,
-        "minCount": 8,
-        "maxCount": 8
-      }
-    ],
+    "ambient": [],
     "axolotls": [],
     "creature": [],
     "misc": [],
@@ -105,7 +92,7 @@
     [
       "minecraft:ore_dirt",
       "minecraft:ore_gravel",
-      "players-versus:caves/ore_terracotta_and_copper_green",
+      "players-versus:caves/ore_terracotta_and_copper_orange",
       "minecraft:ore_granite_lower",
       "minecraft:ore_diorite_upper",
       "minecraft:ore_diorite_lower",
@@ -127,7 +114,7 @@
       "minecraft:ore_diamond_buried",
       "minecraft:ore_lapis",
       "minecraft:ore_lapis_buried",
-      "players-versus:caves/ore_copper_green",
+      "players-versus:caves/ore_copper_orange",
       "minecraft:underwater_magma",
       "minecraft:disk_sand",
       "minecraft:disk_clay",
@@ -143,9 +130,8 @@
     [
       "minecraft:glow_lichen",
       "minecraft:red_mushroom_normal",
-      "minecraft:classic_vines_cave_feature",
-      "players-versus:caves/creeper_caves_floor_vegetation",
-      "players-versus:caves/creeper_caves_ceiling_vegetation"
+      "players-versus:caves/creeper_caves_desert_ceiling_vegetation",
+      "players-versus:caves/creeper_caves_desert_floor_vegetation"
     ],
     [
       "minecraft:freeze_top_layer"

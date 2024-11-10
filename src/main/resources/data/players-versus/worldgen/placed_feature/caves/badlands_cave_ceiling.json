@@ -1,9 +1,9 @@
 {
-  "feature": "players-versus:caves/creeper_moss_patch_ceiling",
+  "feature": "players-versus:caves/badlands_cave_ceiling",
   "placement": [
     {
       "type": "minecraft:count",
-      "count": 96
+      "count": 32
     },
     {
       "type": "minecraft:in_square"
@@ -13,7 +13,7 @@
       "height": {
         "type": "minecraft:uniform",
         "min_inclusive": {
-          "above_bottom": 0
+          "absolute": 32
         },
         "max_inclusive": {
           "absolute": 256

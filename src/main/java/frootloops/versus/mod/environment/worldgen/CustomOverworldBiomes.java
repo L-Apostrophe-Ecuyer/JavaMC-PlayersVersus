@@ -23,7 +23,10 @@ public class CustomOverworldBiomes {
     public static final RegistryKey<Biome> MOUNTAINSIDE_FOREST = keyOf("mountainside_forest");
     public static final RegistryKey<Biome> MOUNTAINSIDE_FOREST_WARM = keyOf("mountainside_forest_warm");
     public static final RegistryKey<Biome> DESERT_OASIS = keyOf("desert_oasis");
+    public static final RegistryKey<Biome> DESERT_CREEPER_CAVE = keyOf("caves/creeper_caves_desert");
+    public static final RegistryKey<Biome> BADLANDS_CAVE = keyOf("caves/badlands_cave");
     public static final RegistryKey<Biome> CREEPER_CAVE = keyOf("caves/creeper_caves");
+    public static final RegistryKey<Biome> FROSTED_CAVE = keyOf("caves/frosted_caves");
     public static final RegistryKey<Biome> REGULAR_CAVE = keyOf("caves/regular_cave");
     public static final RegistryKey<Biome> DEEP_CAVES = keyOf("caves/deep_caves");
 
@@ -31,16 +34,31 @@ public class CustomOverworldBiomes {
         SKY, SURFACE, SURFACE_CAVE, CAVE, DEEP_CAVE, GENERIC_CAVE, GENERIC_DEEP_CAVE
     }
 
-    public static PlacedBiome[] biomesToPlaceInOverorld = new PlacedBiome[]{
-            new PlacedBiome(CREEPER_CAVE, PlacedBiomeType.CAVE, false, MultiNoiseUtil.ParameterRange.of(-0.3f, 1.0f), MultiNoiseUtil.ParameterRange.of(-0.4f, 0.8f), MultiNoiseUtil.ParameterRange.of(0.35f, 0.5f), MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(0.2f, 1.0f)),
-            new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter),
-            new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter),
+    public static PlacedBiome[] landBiomesToPlaceInOverorld = new PlacedBiome[]{
+            // Add here new biomes to spawn on the surface
+    };
+
+    public static PlacedBiome[] caveBiomesToPlaceInOverorld = new PlacedBiome[]{
+            // Add here new cave biomes
+            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.4f), defaultParameter, MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.65f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.2f)),
+            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.4f), defaultParameter, MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.65f), MultiNoiseUtil.ParameterRange.of(0.2f, 1.0f)),
+            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.65f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
+            new PlacedBiome(DESERT_CREEPER_CAVE, PlacedBiomeType.CAVE, true, MultiNoiseUtil.ParameterRange.of(0.8f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.5f), MultiNoiseUtil.ParameterRange.of(0.0f, 0.5f), MultiNoiseUtil.ParameterRange.of(0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.3f)),
+            new PlacedBiome(DESERT_CREEPER_CAVE, PlacedBiomeType.CAVE, true, MultiNoiseUtil.ParameterRange.of(0.8f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.5f), MultiNoiseUtil.ParameterRange.of(0.0f, 0.5f), MultiNoiseUtil.ParameterRange.of(0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(0.2f, 1.0f)),
+            new PlacedBiome(CREEPER_CAVE, PlacedBiomeType.CAVE, true, MultiNoiseUtil.ParameterRange.of(-0.3f, 0.7f), MultiNoiseUtil.ParameterRange.of(-0.4f, 1.1f), MultiNoiseUtil.ParameterRange.of(0.35f, 0.5f), MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.3f)),
+            new PlacedBiome(CREEPER_CAVE, PlacedBiomeType.CAVE, true, MultiNoiseUtil.ParameterRange.of(-0.3f, 0.7f), MultiNoiseUtil.ParameterRange.of(-0.4f, 0.8f), MultiNoiseUtil.ParameterRange.of(0.35f, 0.5f), MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(0.2f, 1.0f)),
+            //new PlacedBiome(BiomeKeys.DEEP_DARK, PlacedBiomeType.CAVE, true, defaultParameter, defaultParameter, MultiNoiseUtil.ParameterRange.of(0.0f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.5f), defaultParameter),
+            new PlacedBiome(BiomeKeys.DEEP_DARK, PlacedBiomeType.DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.6f), defaultParameter),
+            new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, MultiNoiseUtil.ParameterRange.of(-0.8f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
+            new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, MultiNoiseUtil.ParameterRange.of(-0.7f, 1.0f), defaultParameter)
     };
 
 
     private static HashMap<RegistryKey<Biome>, RegistryKey<Biome>> MOUNTAIN_BIOME_REPLACEMENTS;
     private static HashMap<RegistryKey<Biome>, RegistryKey<Biome>> FROZEN_BIOME_REPLACEMENTS;
     private static HashMap<RegistryKey<Biome>, RegistryKey<Biome>> HUMID_BIOME_REPLACEMENTS;
+    private static HashMap<RegistryKey<Biome>, RegistryKey<Biome>> SURFACE_CAVE_BIOME_REPLACEMENTS;
+
 
     private static void tryPopulateMountainBiomeReplacements() {
         if(MOUNTAIN_BIOME_REPLACEMENTS != null) return;
@@ -84,6 +102,17 @@ public class CustomOverworldBiomes {
         HUMID_BIOME_REPLACEMENTS.put(BiomeKeys.BADLANDS, BiomeKeys.DESERT);
     }
 
+    private static void tryPopulateSurfaceCaveBiomeReplacements() {
+        if(SURFACE_CAVE_BIOME_REPLACEMENTS != null) return;
+        SURFACE_CAVE_BIOME_REPLACEMENTS = new HashMap<>();
+        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.FROZEN_PEAKS, FROSTED_CAVE);
+        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.SNOWY_SLOPES, FROSTED_CAVE);
+        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.DESERT, DESERT_CREEPER_CAVE);
+        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.BADLANDS, BADLANDS_CAVE);
+        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.ERODED_BADLANDS, BADLANDS_CAVE);
+        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.WOODED_BADLANDS, BADLANDS_CAVE);
+    }
+
 
     public static RegistryKey<Biome> getMountainTransitionBiome(RegistryKey<Biome> originalBiome) {
         tryPopulateMountainBiomeReplacements();
@@ -98,6 +127,11 @@ public class CustomOverworldBiomes {
     public static RegistryKey<Biome> getHumidTransitionBiome(RegistryKey<Biome> originalBiome) {
         tryPopulateHumidBiomeReplacements();
         return HUMID_BIOME_REPLACEMENTS.getOrDefault(originalBiome, null);
+    }
+
+    public static RegistryKey<Biome> getSurfaceCaveBiome(RegistryKey<Biome> originalBiome) {
+        tryPopulateSurfaceCaveBiomeReplacements();
+        return SURFACE_CAVE_BIOME_REPLACEMENTS.getOrDefault(originalBiome, null);
     }
 
     private static RegistryKey<Biome> keyOf(String id) {

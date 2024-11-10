@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:disk",
+  "config": {
+    "state_provider": {
+      "fallback": {
+        "type": "minecraft:simple_state_provider",
+        "state": {
+          "Name": "minecraft:ice"
+        }
+      },
+      "rules": []
+    },
+    "target": {
+      "type": "minecraft:all_of",
+      "predicates": [
+        {
+          "type": "minecraft:matching_fluids",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "fluids": "#minecraft:water"
+        },
+        {
+          "type": "minecraft:matching_blocks",
+          "offset": [
+            0,
+            1,
+            0
+          ],
+          "blocks": "minecraft:air"
+        }
+      ]
+    },
+    "radius": 2,
+    "half_height": 1
+  }
+}

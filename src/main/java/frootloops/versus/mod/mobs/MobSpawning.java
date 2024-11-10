@@ -1,6 +1,7 @@
 package frootloops.versus.mod.mobs;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieEntity;
@@ -59,11 +60,12 @@ public class MobSpawning {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
         if(world.getLightLevel(blockPos) > 0) return false;
+        if(world.getBiome(blockPos).getKey().get() == CustomOverworldBiomes.DEEP_CAVES) return true;
 
         int y = blockPos.getY();
         if(y > 96) return false;
         if(y > 16) {
-            if(y > 48) {
+            if(y > 28) {
                 long dayTime = world.getLunarTime() % 24000l;
                 if (dayTime < 18000l || dayTime > 20000l) return false;
 
@@ -80,7 +82,7 @@ public class MobSpawning {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL ) return true;
         while (world.getBlockState(blockPos = blockPos.up()).isOf(Blocks.POWDER_SNOW)) {}
-        return HostileEntity.canSpawnInDark(type, world, spawnReason, blockPos, random) && (world.isSkyVisible(blockPos.down()));
+        return HostileEntity.canSpawnInDark(type, world, spawnReason, blockPos, random) && (world.isSkyVisible(blockPos.down()) || (world.getBiome(blockPos).getKey().get() == CustomOverworldBiomes.FROSTED_CAVE));
     }
 
     public static boolean canSpawnCreeper(EntityType<CreeperEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {

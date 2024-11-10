@@ -53,13 +53,12 @@ public class CustomBlocks {
     public static Block WILD_WHEAT;
     public static Block CLOVERS;
 
-    public static Block CREEPER_SPORE_BLOSSOM;
+    public static CreeperSporeBlock CREEPER_SPORE_BLOSSOM;
+    public static InfestedBlock INFESTED_OAK_WOOD, INFESTED_DARK_OAK_WOOD;
 
-    public static Block INFESTED_OAK_WOOD, INFESTED_DARK_OAK_WOOD;
-
-    public static Block DEATHLY_BILE, CORRUPTED_BILE, HARMFUL_BILE, HEALTHY_BILE, REGENERATION_BILE, WITHERING_BILE, MINING_SPEED_BILE, MINING_FATIGUE_BILE, TOUGHNESS_BILE, VISION_BILE, DARKNESS_BILE, LEAPING_BILE, SLOW_FALL_BILE, SPEED_BILE, SLOWNESS_BILE, BREATH_BILE;
-    public static Block INVISIBILITY_BILE, GLOWING_BILE, WEAKNESS_BILE, STRENGTH_BILE, WIND_BILE, FIRE_BILE, OOZE_BILE, INFESTATION_BILE, POISON_BILE, WEAVING_BILE, LUCK_BILE, UNLUCK_BILE;
-    public static Block LARGENESS_BILE,SMALLNESS_BILE, VULNERABILITY_BILE, BUOYANCY_BILE;
+    public static PotionEffectBileBlock DEATHLY_BILE, CORRUPTED_BILE, HARMFUL_BILE, HEALTHY_BILE, REGENERATION_BILE, WITHERING_BILE, MINING_SPEED_BILE, MINING_FATIGUE_BILE, TOUGHNESS_BILE, VISION_BILE, DARKNESS_BILE, LEAPING_BILE, SLOW_FALL_BILE, SPEED_BILE, SLOWNESS_BILE, BREATH_BILE;
+    public static PotionEffectBileBlock INVISIBILITY_BILE, GLOWING_BILE, WEAKNESS_BILE, STRENGTH_BILE, WIND_BILE, FIRE_BILE, OOZE_BILE, INFESTATION_BILE, POISON_BILE, WEAVING_BILE, LUCK_BILE, UNLUCK_BILE;
+    public static PotionEffectBileBlock LARGENESS_BILE,SMALLNESS_BILE, VULNERABILITY_BILE, BUOYANCY_BILE;
 
 
     public static void onInitialize() {
@@ -121,11 +120,9 @@ public class CustomBlocks {
         WILD_WHEAT = registerBlock("wild_wheat", new WheatGrassBlock(getSettings("wild_wheat", Blocks.SHORT_GRASS)));
         CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
 
-
-        CREEPER_SPORE_BLOSSOM = registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM)));
-        INFESTED_OAK_WOOD = registerBlock("infested_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, getSettings("infested_oak_wood", Blocks.OAK_WOOD)));
-        INFESTED_DARK_OAK_WOOD = registerBlock("infested_dark_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, getSettings("infested_dark_oak_wood", Blocks.OAK_WOOD)));
-
+        CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM)));
+        INFESTED_OAK_WOOD = (InfestedBlock) registerBlock("infested_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, getSettings("infested_oak_wood", Blocks.OAK_WOOD)));
+        INFESTED_DARK_OAK_WOOD = (InfestedBlock) registerBlock("infested_dark_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, getSettings("infested_dark_oak_wood", Blocks.OAK_WOOD)));
 
         DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, StatusEffects.WITHER, 60, 2, 4, 0.4f);
         CORRUPTED_BILE = registerBileBlock("corrupted_bile", StatusEffects.HUNGER, 10, 1);
@@ -144,7 +141,7 @@ public class CustomBlocks {
         SLOWNESS_BILE = registerBileBlock("slowness_bile", StatusEffects.SLOWNESS);
         BREATH_BILE = registerBileBlock("breath_bile", StatusEffects.WATER_BREATHING);
         INVISIBILITY_BILE = registerBileBlock("invisibility_bile", StatusEffects.INVISIBILITY);
-        GLOWING_BILE = registerBileBlock("glowing_bile", StatusEffects.GLOWING, StatusEffects.GLOWING, 0, 50, 5, 1.0F);
+        GLOWING_BILE = registerBileBlock("glowing_bile", StatusEffects.GLOWING, StatusEffects.GLOWING, 0, 50, 8, 1.0F);
         WEAKNESS_BILE = registerBileBlock("weakness_bile", StatusEffects.WEAKNESS);
         STRENGTH_BILE = registerBileBlock("strength_bile", StatusEffects.STRENGTH); //-> Will be replacing Blaze Powder
         WIND_BILE = registerBileBlock("wind_bile", StatusEffects.WIND_CHARGED);
@@ -174,29 +171,29 @@ public class CustomBlocks {
         return block;
     }
 
-    private static Block registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, int duration, int amplifier) {
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, int duration, int amplifier) {
         return registerBileBlock(name, statusEffect, statusEffect, duration, amplifier);
     }
 
-    private static Block registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect) {
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect) {
         return registerBileBlock(name, statusEffect.value().getColor(), statusEffect);
     }
 
-    private static Block registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffect) {
+    private static PotionEffectBileBlock registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffect) {
         return registerBileBlock(name, ColorHelper.fullAlpha(color), statusEffect, 50, 0, 3, 0.8f);
     }
 
-    private static Block registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier) {
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier) {
         return registerBileBlock(name, statusEffect, statusEffectToGrant, duration, amplifier, 3, 0.6f);
     }
 
-    private static Block registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
         return registerBileBlock(name, ColorHelper.fullAlpha(statusEffect.value().getColor()), statusEffectToGrant, duration, amplifier, luminance, ambientOcclusion);
     }
 
-    private static Block registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
+    private static PotionEffectBileBlock registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
         AbstractBlock.Settings settings = getSettings(name).sounds(BlockSoundGroup.SLIME).luminance(state -> luminance).noCollision().strength(0.2f, 0.4f).pistonBehavior(PistonBehavior.DESTROY).allowsSpawning((state, world, pos, entityType) -> false);
-        return registerBlock(name, new PotionEffectBileBlock(settings, color, statusEffectToGrant, duration, amplifier, ambientOcclusion));
+        return (PotionEffectBileBlock) registerBlock(name, new PotionEffectBileBlock(settings, color, statusEffectToGrant, duration, amplifier, ambientOcclusion));
     }
 
 }

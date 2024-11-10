@@ -67,7 +67,7 @@ public class WitheredZombieEntity extends ZombieEntity {
     public boolean damage(ServerWorld world, DamageSource source, float amount) {
         if(source.isOf(DamageTypes.WITHER)) return false;
         if(super.damage(world, source, amount)) {
-            this.playSound(SoundEvents.ENTITY_PLAYER_BREATH, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.4F);
+            this.playSound(SoundEvents.ENTITY_PLAYER_BREATH, 0.3f, (this.random.nextFloat() - this.random.nextFloat()) * 0.4F + 0.6F);
             return true;
         }
         else return false;

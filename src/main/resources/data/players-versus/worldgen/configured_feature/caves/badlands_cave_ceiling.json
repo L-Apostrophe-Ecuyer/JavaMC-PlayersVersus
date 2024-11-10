@@ -5,12 +5,12 @@
     "depth": {
       "type": "minecraft:uniform",
       "min_inclusive": 2,
-      "max_inclusive": 5
+      "max_inclusive": 6
     },
     "vertical_range": 5,
     "extra_bottom_block_chance": 0,
     "extra_edge_column_chance": 0.3,
-    "vegetation_chance": 0.03,
+    "vegetation_chance": 0.001,
     "xz_radius": {
       "type": "minecraft:uniform",
       "min_inclusive": 4,
@@ -36,25 +36,19 @@
           "Name": "minecraft:stone"
         },
         {
-          "Name": "minecraft:stone"
+          "Name": "minecraft:light_gray_terracotta"
         },
         {
-          "Name": "minecraft:cobblestone"
+          "Name": "minecraft:terracotta"
         },
         {
-          "Name": "minecraft:mossy_cobblestone"
+          "Name": "minecraft:gray_terracotta"
         },
         {
-          "Name": "minecraft:lime_terracotta"
+          "Name": "minecraft:terracotta"
         },
         {
-          "Name": "minecraft:mossy_cobblestone"
-        },
-        {
-          "Name": "minecraft:cobblestone"
-        },
-        {
-          "Name": "minecraft:stone"
+          "Name": "minecraft:light_gray_terracotta"
         },
         {
           "Name": "minecraft:stone"
@@ -71,10 +65,7 @@
           "to_place": {
             "type": "minecraft:simple_state_provider",
             "state": {
-              "Name": "players-versus:creeper_spore_blossom",
-              "Properties": {
-                "age": "3"
-              }
+              "Name": "minecraft:cobweb"
             }
           }
         }

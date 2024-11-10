@@ -32,25 +32,16 @@
           "Name": "minecraft:stone"
         },
         {
-          "Name": "minecraft:stone"
+          "Name": "minecraft:sand"
         },
         {
-          "Name": "minecraft:cobblestone"
+          "Name": "minecraft:sand"
         },
         {
-          "Name": "minecraft:mossy_cobblestone"
+          "Name": "minecraft:light_gray_terracotta"
         },
         {
-          "Name": "minecraft:moss_block"
-        },
-        {
-          "Name": "minecraft:mossy_cobblestone"
-        },
-        {
-          "Name": "minecraft:cobblestone"
-        },
-        {
-          "Name": "minecraft:stone"
+          "Name": "minecraft:sand"
         },
         {
           "Name": "minecraft:stone"
@@ -61,7 +52,36 @@
       ]
     },
     "vegetation_feature": {
-      "feature": "moss_patch",
+      "feature": {
+        "type": "minecraft:random_patch",
+        "config": {
+          "tries": 16,
+          "xz_spread": 5,
+          "y_spread": 1,
+          "feature": {
+            "feature": {
+              "type": "minecraft:simple_block",
+              "config": {
+                "to_place": {
+                  "type": "minecraft:simple_state_provider",
+                  "state": {
+                    "Name": "minecraft:dead_bush"
+                  }
+                }
+              }
+            },
+            "placement": [
+              {
+                "type": "minecraft:block_predicate_filter",
+                "predicate": {
+                  "type": "minecraft:matching_blocks",
+                  "blocks": "minecraft:air"
+                }
+              }
+            ]
+          }
+        }
+      },
       "placement": []
     }
   }
