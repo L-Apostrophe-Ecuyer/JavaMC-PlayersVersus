@@ -91,6 +91,8 @@
     [],
     [],
     [
+      "players-versus:caves/ore_tuff_extra",
+      "players-versus:caves/ore_deepslate",
       "minecraft:ore_dirt",
       "minecraft:ore_gravel",
       "minecraft:ore_granite_upper",
@@ -118,9 +120,7 @@
       "minecraft:underwater_magma",
       "minecraft:disk_clay",
       "minecraft:disk_gravel",
-      "minecraft:ore_infested",
-      "players-versus:caves/ore_tuff_extra",
-      "players-versus:caves/ore_deepslate"
+      "minecraft:ore_infested"
     ],
     [],
     [],
