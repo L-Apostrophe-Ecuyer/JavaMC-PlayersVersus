@@ -1,28 +1,20 @@
 package frootloops.versus.mixin.client.players.attacking;
 
-import frootloops.versus.mod.players.RayTraceHandler;
-import frootloops.versus.mod.players.SmartBlockPlacement;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
@@ -46,10 +38,9 @@ public abstract class GameRendererMixin {
         Vec3d targetPosVec = cameraPos.add(rotationVec.x * entityInteractionRange, rotationVec.y * entityInteractionRange, rotationVec.z * entityInteractionRange);
         Box box = camera.getBoundingBox().stretch(rotationVec.multiply(entityInteractionRange)).expand(1.0, 1.0, 1.0);
         EntityHitResult entityHitResult = ProjectileUtil.raycast(camera, cameraPos, targetPosVec, box, EntityPredicates.CAN_HIT, (entityInteractionRange * entityInteractionRange));
-        if(!entityHitResult.getPos().isInRange(cameraPos, entityInteractionRange)) entityHitResult = null;
 
-        // If no entity targetted:
-        if(entityHitResult == null) return blockHitResult;
+        // If no entity targetted, or if out of range:
+        if(entityHitResult == null || !entityHitResult.getPos().isInRange(cameraPos, entityInteractionRange)) return blockHitResult;
 
         // If the entity is closer to targetted block, set it as the target:
         double squaredDistToEntity = entityHitResult.getPos().squaredDistanceTo(cameraPos);
