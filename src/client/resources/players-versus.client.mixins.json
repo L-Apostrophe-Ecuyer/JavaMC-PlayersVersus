@@ -28,6 +28,8 @@
 
 		"players.attacking.CrosshairTargetMixin",
 		"players.attacking.CrosshairRendererMixin",
+		"players.attacking.GameRendererMixin",
+		"players.attacking.MinecraftClientMixin",
 		"players.attacking.MinecraftClientMixin",
 		"players.death.DeathScreenMixin",
 		"players.HungerBarRendererMixin",

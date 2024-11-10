@@ -43,6 +43,11 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
+    public void playAmbientSound() {
+        // Skip! Spiders should be quieter. Also, their ambient noise is pretty grating
+    }
+
+    @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
 

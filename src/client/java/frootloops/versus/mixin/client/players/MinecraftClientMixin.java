@@ -57,11 +57,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Shadow @Nullable public final GameRenderer gameRenderer;
     @Shadow public final GameOptions options;
 
-    private static final double leniency = 1.5f;
-    private static boolean verticalOrientation = true;
-
-    private static Pair<BlockPos, Direction> currentTarget = null;
-
     @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity, DynamicRegistryManager registryManager) {
         NbtCompound nbtCompound = blockEntity.createComponentlessNbtWithIdentifyingData(registryManager);
         blockEntity.removeFromCopiedStackNbt(nbtCompound);
@@ -150,10 +145,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         ItemStack mainhandStack = player.getMainHandStack();
         if(offhandStack.isEmpty() || mainhandStack.isEmpty()) return false;
         if(offhandStack.getItem() instanceof ShieldItem){
-            if(player.isSneaking()) {
-                return true;
-            }
-            else if (crosshairTarget.getType() == HitResult.Type.ENTITY) {
+            if (crosshairTarget.getType() == HitResult.Type.ENTITY) {
                 if(player.isUsingItem()) {
                     return player.getActiveItem() == offhandStack;
                 } else {
@@ -192,62 +184,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             }
         }
         return false;
-    }
-
-    private static Pair<BlockPos, Direction> getBlockPlacingReacharoundTarget(PlayerEntity player) {
-        Pair<Vec3d, Vec3d> rayDetails = RayTraceHandler.getEntityParams(player);
-        World world = player.getWorld();
-
-        double range = player.getBlockInteractionRange();
-        Vec3d rayPos = rayDetails.getLeft();
-        Vec3d ray = rayDetails.getRight().multiply(range);
-        HitResult regularCollision = RayTraceHandler.rayTrace(player, world, rayPos, rayPos.add(ray), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE);
-
-        // If there is not a normal block for the player to hit, attempt to raycast
-        // reacharound targets.
-        if (regularCollision.getType() != HitResult.Type.ENTITY) {
-
-            Pair<BlockPos, Direction>  target = getVerticalTarget(player, world, rayPos, ray);
-            if(target != null) {
-                verticalOrientation = true;
-                return target;
-            }
-
-            target = getHorizontalTarget(player, world, rayPos, ray);
-            if(target != null) {
-                verticalOrientation = false;
-                return target;
-            }
-        }
-
-        return null;
-    }
-
-    private static Pair<BlockPos, Direction> getVerticalTarget(PlayerEntity player, World world, Vec3d rayPos, Vec3d ray) {
-        if(player.getPitch() < 0) return null;
-        Vec3d endPos = rayPos.add(new Vec3d(0, leniency, 0)).add(ray);
-        HitResult take2Res = RayTraceHandler.rayTrace(player, world, rayPos, endPos, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE);
-        if (take2Res.getType() == HitResult.Type.BLOCK && take2Res instanceof BlockHitResult) {
-            BlockPos pos = ((BlockHitResult) take2Res).getBlockPos().down();
-            BlockState state = world.getBlockState(pos);
-
-            if (player.getPos().y - pos.getY() > 1 && (world.isAir(pos) || state.isReplaceable()))
-                return new Pair<>(pos, Direction.DOWN);
-        }
-        return null;
-    }
-
-    private static Pair<BlockPos, Direction> getHorizontalTarget(PlayerEntity player, World world, Vec3d rayPos, Vec3d ray) {
-        Direction dir = Direction.fromRotation(player.headYaw);
-        Vec3d newPos = rayPos.add(new Vec3d(-(leniency * dir.getOffsetX()), 0, -(leniency * dir.getOffsetZ())));
-        HitResult take2Res = RayTraceHandler.rayTrace(player, world, newPos, newPos.add(ray), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE);
-        if (take2Res.getType() == HitResult.Type.BLOCK && take2Res instanceof BlockHitResult) {
-            BlockPos pos = ((BlockHitResult) take2Res).getBlockPos().offset(dir);
-            BlockState state = world.getBlockState(pos);
-
-            if ((world.isAir(pos) || state.isReplaceable())) return new Pair<>(pos, dir.getOpposite());
-        }
-        return null;
     }
 
     private static boolean isSupportedStack(ItemStack stack) {

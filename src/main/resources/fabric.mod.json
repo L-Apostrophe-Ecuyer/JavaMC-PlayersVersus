@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "players-versus",
-  "version": "1.21.3-v0.1",
+  "version": "${version}",
 
   "name": "Players Versus",
   "description": "Improves the challenge of Minecraft; less frustration, more fear, more fun.",

@@ -15,6 +15,7 @@ import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -159,9 +160,9 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     }
 
     private void attemptToAimAssistTarget(Entity entity, double range) {
-        if(entity == null) return;
+        if(entity == null || !(entity instanceof HostileEntity)) return;
         if(entity.squaredDistanceTo(player) > range * range) return;
-        if(!Combat.isLookingTowards(player, entity.getEyePos(),-0.85)) return;
+        if(!Combat.isLookingTowards(player, entity.getEyePos(),-0.9)) return;
         if(!player.canSee(entity)) return;
         this.crosshairTarget = new EntityHitResult(entity);
     }
