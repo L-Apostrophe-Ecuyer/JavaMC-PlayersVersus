@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.environment;
+package frootloops.versus.mixin.environment.blocks;
 
 import net.minecraft.block.*;
 import net.minecraft.entity.LivingEntity;

@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.environment;
+package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.*;

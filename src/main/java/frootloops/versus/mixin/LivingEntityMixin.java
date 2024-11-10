@@ -17,6 +17,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -32,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Collection;
 import java.util.Map;
 
+import static net.minecraft.fluid.FlowableFluid.FALLING;
+
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
     @Shadow
@@ -43,7 +46,11 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "travelInFluid", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
-        return isPlayer() && isSwimming() ? h : h + 0.3f;
+        if(this.getWorld().getFluidState(this.getBlockPos()).get(FALLING, false)) {
+            this.setVelocity(this.getVelocity().add(0.0, -0.03, 0.0));
+            return h;
+        }
+        else return isPlayer() && isSwimming() ? h : h + 0.3f;
     }
 
     @Inject(method = "applyMovementInput", at = @At("RETURN"), cancellable = true)
