@@ -61,12 +61,6 @@
         "weight": 60,
         "minCount": 2,
         "maxCount": 4
-      },
-      {
-        "type": "minecraft:zombified_piglin",
-        "weight": 10,
-        "minCount": 3,
-        "maxCount": 7
       }
     ],
     "underground_water_creature": [],
