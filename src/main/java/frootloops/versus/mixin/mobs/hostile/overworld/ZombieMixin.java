@@ -48,7 +48,7 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-        double followRange = 48.0;
+        double followRange = 32.0;
         double mvtSpeed = 0.28;
         cir.setReturnValue(HostileEntity.createHostileAttributes()
                         .add(EntityAttributes.FOLLOW_RANGE, followRange)

@@ -47,7 +47,7 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyVariable(method = "travelInFluid", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
         if(this.getWorld().getFluidState(this.getBlockPos()).get(FALLING, false)) {
-            this.setVelocity(this.getVelocity().add(0.0, -0.03, 0.0));
+            this.setVelocity(this.getVelocity().add(0.0, isPlayer() && isSwimming() ? -0.03 : -0.015, 0.0));
             return h;
         }
         else return isPlayer() && isSwimming() ? h : h + 0.3f;

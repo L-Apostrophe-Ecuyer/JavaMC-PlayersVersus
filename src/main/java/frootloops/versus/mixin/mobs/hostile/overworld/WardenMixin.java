@@ -12,11 +12,9 @@ import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.TridentEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.*;
-import org.apache.logging.log4j.core.jmx.Server;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,6 +26,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WardenEntity.class)
 public class WardenMixin extends HostileEntity {
+    private static final double NEW_RANGE_HORIZONTAL = 8.0d, BOOM_RANGE_VERTICAL = 10.0d,
+            BOOM_RANGE_HORIZONTAL_SQUARED = NEW_RANGE_HORIZONTAL * NEW_RANGE_HORIZONTAL;
+
+    protected WardenMixin(EntityType<? extends HostileEntity> entityType, World world) {
+        super(entityType, world);
+    }
 
 
     @Shadow @VisibleForTesting
@@ -97,20 +101,14 @@ public class WardenMixin extends HostileEntity {
     }
 
 
+
     /***
-     *  - SONIC BOOM NERFED
+     *  - SONIC BOOM NERFED & SNIFFING NERFED
      * Ranged sonic boom attacks have a shorter range. This allows for closer encounters,
      * fewer frustrating deaths, and things like arrow invulnerability.You want to know
      * why you're being attacked, and have a way to avoiding it. In vanilla, these sonic
      * booms are simply too punishing.
      */
-    private static final double NEW_RANGE_HORIZONTAL = 8.0d, NEW_RANGE_VERTICAL = 10.0d,
-            NEW_RANGE_HORIZONTAL_SQUARED = NEW_RANGE_HORIZONTAL * NEW_RANGE_HORIZONTAL;
-
-    protected WardenMixin(EntityType<? extends HostileEntity> entityType, World world) {
-        super(entityType, world);
-    }
-
     @Override
     public boolean isInRange(Entity entity, double horizontalRadius, double verticalRadius) {
         double deltaX = entity.getX() - this.getX();
@@ -118,7 +116,7 @@ public class WardenMixin extends HostileEntity {
         double deltaZ = entity.getZ() - this.getZ();
 
         // Sniffing:
-        if(horizontalRadius == 6.0d)
+        if(horizontalRadius == 6.0d && verticalRadius == 20.0d)
             return MathHelper.squaredHypot(deltaX, deltaZ) < (6.0d * 6.0d) && deltaY < 6.0d;
 
         // Immediate retaliation:
@@ -127,7 +125,7 @@ public class WardenMixin extends HostileEntity {
 
         // Sonic booms:
         if(this.getMoveControl().isMoving() && entity.getPos().y < this.getY() + 4.0) return false;
-        else if(entity instanceof PlayerEntity) return MathHelper.squaredHypot(deltaX, deltaZ) < NEW_RANGE_HORIZONTAL_SQUARED && deltaY < NEW_RANGE_VERTICAL;
+        else if(entity instanceof PlayerEntity) return MathHelper.squaredHypot(deltaX, deltaZ) < BOOM_RANGE_HORIZONTAL_SQUARED && deltaY < BOOM_RANGE_VERTICAL;
         else return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
     }
 

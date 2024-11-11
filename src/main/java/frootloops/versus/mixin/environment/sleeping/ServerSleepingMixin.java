@@ -89,7 +89,7 @@ public abstract class ServerSleepingMixin extends World {
             // If everyone is asleep, make time go by quick
             // And make nearby hostiles target players, to test their shelters
             if(tickManager.getTickRate() == 20.0f) {
-                tickManager.setTickRate(800.0f);
+                tickManager.setTickRate(1010.0f);
 
                 for (PlayerEntity player : players) {
                     Vec3d pos = player.getPos();
@@ -104,7 +104,7 @@ public abstract class ServerSleepingMixin extends World {
                 }
             }
         }
-        else if(tickManager.getTickRate() == 800.0f) {
+        else if(tickManager.getTickRate() == 1010.0f) {
             // Otherwise, wake everyone up and reset tick rate
             tickManager.setTickRate(20.0f);
             if(cachedSleepManager != null) cachedSleepManager.clearSleeping();
