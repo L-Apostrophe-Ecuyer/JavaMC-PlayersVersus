@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:birch_taiga_forest",
+    "players-versus:dark_taiga_forest",
+    "players-versus:dark_birch_forest",
+    "players-versus:cold_taiga",
+    "players-versus:mountainside_jungle",
+    "players-versus:mountainside_forest",
+    "players-versus:mountainside_forest_warm"
+  ]
+}

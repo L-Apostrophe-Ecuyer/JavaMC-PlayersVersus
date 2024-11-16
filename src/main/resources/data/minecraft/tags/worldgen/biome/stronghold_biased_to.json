@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:caves/frosted_caves",
+    "players-versus:caves/regular_cave"
+  ]
+}

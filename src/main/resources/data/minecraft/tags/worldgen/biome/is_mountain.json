@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:mountainside_jungle",
+    "players-versus:mountainside_forest",
+    "players-versus:mountainside_forest_warm"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:caves/creeper_caves_desert",
+    "players-versus:caves/creeper_caves",
+    "players-versus:caves/deep_caves"
+  ]
+}
