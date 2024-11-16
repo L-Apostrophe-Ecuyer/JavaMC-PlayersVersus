@@ -18,70 +18,167 @@
     },
     "replaceable": "#minecraft:base_stone_overworld",
     "ground_state": {
-      "type": "minecraft:weighted_state_provider",
-      "entries": [
+      "type": "minecraft:noise_provider",
+      "seed": 4234,
+      "noise": {
+        "firstOctave": -3,
+        "amplitudes": [
+          1
+        ]
+      },
+      "scale": 1,
+      "states": [
         {
-          "weight": 1,
-          "data": {
-            "Name": "players-versus:mudstone"
+          "Name": "minecraft:stone"
+        },
+        {
+          "Name": "minecraft:dirt"
+        },
+        {
+          "Name": "players-versus:brown_mud"
+        },
+        {
+          "Name": "minecraft:water",
+          "Properties": {
+            "level": "15"
           }
         },
         {
-          "weight": 1,
-          "data": {
-            "Name": "players-versus:brown_mud"
-          }
+          "Name": "players-versus:brown_mud"
         },
         {
-          "weight": 3,
-          "data": {
-            "Name": "minecraft:dirt"
-          }
+          "Name": "players-versus:brown_mud"
         },
         {
-          "weight": 10,
-          "data": {
-            "Name": "minecraft:stone"
-          }
+          "Name": "players-versus:mudstone"
+        },
+        {
+          "Name": "minecraft:stone"
         }
       ]
     },
     "vegetation_feature": {
       "feature": {
-        "type": "minecraft:ore",
+        "type": "minecraft:simple_random_selector",
         "config": {
-          "size": 32,
-          "discard_chance_on_air_exposure": 0,
-          "targets": [
+          "features": [
             {
-              "target": {
-                "predicate_type": "minecraft:random_block_match",
-                "block": "minecraft:water",
-                "probability": 0.5
+              "feature": {
+                "type": "minecraft:simple_block",
+                "config": {
+                  "to_place": {
+                    "type": "minecraft:weighted_state_provider",
+                    "entries": [
+                      {
+                        "weight": 3,
+                        "data": {
+                          "Name": "minecraft:air"
+                        }
+                      },
+                      {
+                        "weight": 1,
+                        "data": {
+                          "Name": "players-versus:sugar_cane_top",
+                          "Properties": {
+                            "ground_type": "6",
+                            "age": "0"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
               },
-              "state": {
-                "Name": "players-versus:brown_mud"
-              }
+              "placement": [
+                {
+                  "type": "minecraft:block_predicate_filter",
+                  "predicate": {
+                    "type": "minecraft:all_of",
+                    "predicates": [
+                      {
+                        "type": "minecraft:matching_blocks",
+                        "offset": [
+                          0,
+                          0,
+                          0
+                        ],
+                        "blocks": "#minecraft:air"
+                      },
+                      {
+                        "type": "minecraft:matching_blocks",
+                        "offset": [
+                          0,
+                          -1,
+                          0
+                        ],
+                        "blocks": "players-versus:brown_mud"
+                      }
+                    ]
+                  }
+                }
+              ]
             },
             {
-              "target": {
-                "predicate_type": "minecraft:random_block_match",
-                "block": "minecraft:water",
-                "probability": 0.2
+              "feature": {
+                "type": "minecraft:ore",
+                "config": {
+                  "size": 32,
+                  "discard_chance_on_air_exposure": 0,
+                  "targets": [
+                    {
+                      "target": {
+                        "predicate_type": "minecraft:random_block_match",
+                        "block": "minecraft:water",
+                        "probability": 0.5
+                      },
+                      "state": {
+                        "Name": "players-versus:brown_mud"
+                      }
+                    },
+                    {
+                      "target": {
+                        "predicate_type": "minecraft:random_block_match",
+                        "block": "minecraft:water",
+                        "probability": 0.2
+                      },
+                      "state": {
+                        "Name": "players-versus:mudstone"
+                      }
+                    },
+                    {
+                      "target": {
+                        "predicate_type": "minecraft:random_block_match",
+                        "block": "minecraft:water",
+                        "probability": 0.2
+                      },
+                      "state": {
+                        "Name": "minecraft:stone"
+                      }
+                    }
+                  ]
+                }
               },
-              "state": {
-                "Name": "players-versus:mudstone"
-              }
+              "placement": []
             },
             {
-              "target": {
-                "predicate_type": "minecraft:random_block_match",
-                "block": "minecraft:water",
-                "probability": 0.2
+              "feature": {
+                "type": "minecraft:spring_feature",
+                "config": {
+                  "state": {
+                    "Name": "minecraft:water",
+                    "Properties": {
+                      "falling": "true"
+                    }
+                  },
+                  "rock_count": 3,
+                  "hole_count": 1,
+                  "requires_block_below": true,
+                  "valid_blocks": [
+                    "players-versus:brown_mud"
+                  ]
+                }
               },
-              "state": {
-                "Name": "minecraft:stone"
-              }
+              "placement": []
             }
           ]
         }

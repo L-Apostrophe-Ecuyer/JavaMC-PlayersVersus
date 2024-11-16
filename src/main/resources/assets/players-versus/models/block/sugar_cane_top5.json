@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/tinted_cross",
+  "textures": {
+    "cross": "players-versus:block/sugar_cane_top_grey_mud"
+  }
+}

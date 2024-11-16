@@ -18,25 +18,39 @@
     },
     "replaceable": "#minecraft:base_stone_overworld",
     "ground_state": {
-      "type": "minecraft:weighted_state_provider",
-      "entries": [
+      "type": "minecraft:noise_provider",
+      "seed": 4234,
+      "noise": {
+        "firstOctave": -3,
+        "amplitudes": [
+          1
+        ]
+      },
+      "scale": 1,
+      "states": [
         {
-          "weight": 1,
-          "data": {
-            "Name": "minecraft:stone"
+          "Name": "players-versus:mudstone"
+        },
+        {
+          "Name": "minecraft:dirt"
+        },
+        {
+          "Name": "players-versus:brown_mud"
+        },
+        {
+          "Name": "minecraft:water",
+          "Properties": {
+            "level": "15"
           }
         },
         {
-          "weight": 2,
-          "data": {
-            "Name": "players-versus:mudstone"
-          }
+          "Name": "players-versus:brown_mud"
         },
         {
-          "weight": 6,
-          "data": {
-            "Name": "players-versus:brown_mud"
-          }
+          "Name": "players-versus:brown_mud"
+        },
+        {
+          "Name": "players-versus:mudstone"
         }
       ]
     },
@@ -53,7 +67,7 @@
                     "type": "minecraft:weighted_state_provider",
                     "entries": [
                       {
-                        "weight": 16,
+                        "weight": 32,
                         "data": {
                           "Name": "players-versus:wheat_grass",
                           "Properties": {
@@ -62,7 +76,7 @@
                         }
                       },
                       {
-                        "weight": 10,
+                        "weight": 20,
                         "data": {
                           "Name": "players-versus:wild_wheat",
                           "Properties": {
@@ -71,13 +85,13 @@
                         }
                       },
                       {
-                        "weight": 6,
+                        "weight": 12,
                         "data": {
                           "Name": "minecraft:short_grass"
                         }
                       },
                       {
-                        "weight": 2,
+                        "weight": 4,
                         "data": {
                           "Name": "minecraft:wheat",
                           "Properties": {
@@ -86,11 +100,21 @@
                         }
                       },
                       {
-                        "weight": 1,
+                        "weight": 2,
                         "data": {
                           "Name": "minecraft:wheat",
                           "Properties": {
                             "age": "4"
+                          }
+                        }
+                      },
+                      {
+                        "weight": 7,
+                        "data": {
+                          "Name": "players-versus:sugar_cane_top",
+                          "Properties": {
+                            "ground_type": "3",
+                            "age": "0"
                           }
                         }
                       }

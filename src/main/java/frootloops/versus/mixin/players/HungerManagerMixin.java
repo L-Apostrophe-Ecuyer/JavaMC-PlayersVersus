@@ -29,7 +29,7 @@ public class HungerManagerMixin {
     @Shadow
     private float saturationLevel;
 
-    private static final int REGEN_TIME_SLOW = 160, REGEN_TIME_FAST = 24;
+    private static final int REGEN_TIME_SLOW = 100, REGEN_TIME_FAST = 24;
     private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 1;
     private static final int FOOD_REQUIRED_FOR_SLOW_REGEN = -1;
     private static boolean IS_SLOW_REGEN_ENABLED = false;
@@ -74,7 +74,7 @@ public class HungerManagerMixin {
             }
             else {
                 if(foodTickTimer < 0) saturationLevel = 0.0f;
-                else saturationLevel = 3.0f;
+                else if(saturationLevel < 0.5f) saturationLevel = 0.5f;
             }
         }
 

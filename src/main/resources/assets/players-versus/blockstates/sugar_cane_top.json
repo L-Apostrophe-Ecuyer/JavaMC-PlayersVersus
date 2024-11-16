@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "ground_type=0": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "ground_type=1": {
+      "model": "players-versus:block/sugar_cane_top1"
+    },
+    "ground_type=2": {
+      "model": "players-versus:block/sugar_cane_top2"
+    },
+    "ground_type=3": {
+      "model": "players-versus:block/sugar_cane_top3"
+    },
+    "ground_type=4": {
+      "model": "players-versus:block/sugar_cane_top4"
+    },
+    "ground_type=5": {
+      "model": "players-versus:block/sugar_cane_top5"
+    },
+    "ground_type=6": {
+      "model": "players-versus:block/sugar_cane_top6"
+    }
+  }
+}

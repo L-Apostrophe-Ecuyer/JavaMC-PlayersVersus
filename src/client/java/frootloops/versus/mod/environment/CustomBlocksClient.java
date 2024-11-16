@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.world.biome.GrassColors;
@@ -25,6 +26,7 @@ public class CustomBlocksClient {
                 CustomBlocks.CLOVERS,
                 CustomBlocks.WILD_WHEAT,
                 CustomBlocks.WHEAT_GRASS,
+                CustomBlocks.SUGAR_CANE_TOP,
                 CustomBlocks.CREEPER_SPORE_BLOSSOM,
 
                 CustomBlocks.HARMFUL_BILE,
@@ -62,7 +64,7 @@ public class CustomBlocksClient {
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> {
             if (view == null || pos == null) return GrassColors.getDefaultColor();
             else return BiomeColors.getGrassColor(view, pos);
-        }, CustomBlocks.CLOVERS);
+        }, CustomBlocks.CLOVERS, CustomBlocks.SUGAR_CANE_TOP);
     }
 
 }
