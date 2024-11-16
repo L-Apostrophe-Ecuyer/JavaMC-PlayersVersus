@@ -70,22 +70,15 @@ public abstract class SugarcaneMixin extends Block {
         } else {
             if (blockState.isIn(BlockTags.DIRT) || blockState.isIn(BlockTags.SAND)) {
                 FluidState fluidState;
-                BlockState blockStateNeighbor, blockStateDown;
+                BlockState blockStateDown;
                 for (Direction direction : Direction.Type.HORIZONTAL) {
                     BlockPos offsetedPos = blockPosDown.offset(direction);
                     blockStateDown = world.getBlockState(offsetedPos);
                     fluidState = world.getFluidState(offsetedPos);
                     if (fluidState.isIn(FluidTags.WATER) || blockStateDown.isOf(Blocks.FROSTED_ICE)) return true;
                     if (world.getFluidState(offsetedPos.offset(direction.rotateClockwise(Direction.Axis.X))).isIn(FluidTags.WATER) ) return true;
-                    if (world.getFluidState(offsetedPos.offset(direction.rotateCounterclockwise(Direction.Axis.X))).isIn(FluidTags.WATER) ) return true;
-
-                    blockStateNeighbor = world.getBlockState(pos.offset(direction));
-                    if (blockStateNeighbor.isOf(Blocks.SUGAR_CANE) || blockStateNeighbor.isOf(CustomBlocks.SUGAR_CANE_TOP)) {
-                        offsetedPos = blockPosDown.offset(direction, 1);
-                        if (world.getFluidState(offsetedPos).isIn(FluidTags.WATER) ) return true;
-                        if (world.getFluidState(offsetedPos.offset(direction.rotateClockwise(Direction.Axis.X))).isIn(FluidTags.WATER) ) return true;
-                        if (world.getFluidState(offsetedPos.offset(direction.rotateCounterclockwise(Direction.Axis.X))).isIn(FluidTags.WATER) ) return true;
-                    }
+                    if (world.getFluidState(offsetedPos.offset(direction.rotateClockwise(Direction.Axis.Z))).isIn(FluidTags.WATER) ) return true;
+                    if (world.getFluidState(blockPosDown.offset(direction, 2)).isIn(FluidTags.WATER) ) return true;
                 }
             }
             return false;
