@@ -30,6 +30,8 @@ import java.util.List;
 
 public abstract class Combat {
 
+    public static final int TICKS_TO_SPRINT_AFTER_DMG = 120;
+
     public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 0.0d;
@@ -229,13 +231,13 @@ public abstract class Combat {
     }
 
     public static boolean canPlayerSprint(PlayerEntity player) {
-        return canPlayerSprint(player.getHungerManager());
+        return canPlayerSprint(player, player.getHungerManager());
     }
 
-    public static boolean canPlayerSprint( HungerManager hungerManager) {
+    public static boolean canPlayerSprint(LivingEntity player, HungerManager hungerManager) {
         if(!VersusSettings.DO_FOOD_OVERHAUL) return hungerManager.getFoodLevel() > 6;
         if(hungerManager.getFoodLevel() != 0) return true;
-        if(hungerManager.getSaturationLevel() > 0.0f) return true;
-        return false;
+        if(player.timeUntilRegen > 0 || player.age - player.getLastAttackedTime() < TICKS_TO_SPRINT_AFTER_DMG || hungerManager.getSaturationLevel() <= 0.0f) return false;
+        return true;
     }
 }

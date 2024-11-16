@@ -3,6 +3,7 @@ package frootloops.versus.mixin.client.players;
 import com.mojang.blaze3d.systems.RenderSystem;
 import frootloops.versus.VersusModClient;
 import frootloops.versus.VersusSettings;
+import frootloops.versus.mod.Combat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
@@ -34,8 +35,8 @@ public class HungerBarRendererMixin {
         RenderSystem.enableBlend();
 
         HungerManager hungerManager = player.getHungerManager();
-        boolean hasNoSaturation = hungerManager.getSaturationLevel() == 0.0f;
         int playerFoodLevel = hungerManager.getFoodLevel();
+        boolean doBobble = (hungerManager.getSaturationLevel() == 0.0f && this.ticks % (playerFoodLevel * 3 + 1) == 0) || (VersusSettings.DO_FOOD_OVERHAUL && !Combat.canPlayerSprint(player));
         int foodPointsAvailable = !VersusSettings.DO_FOOD_OVERHAUL ? 20 : Math.max((int) (player.getMaxHealth() - player.getHealth() + 6), playerFoodLevel);
 
         Identifier iconHaunchFull, iconHaunchHalf, iconHaunchEmpty, iconHaunchHalfDisabled, iconHaunchEmptyDisabled;
@@ -55,7 +56,7 @@ public class HungerBarRendererMixin {
         int halfHaunchFoodValue;
         for (int renderedHaunch = 0; renderedHaunch < 10; ++renderedHaunch) {
             int y = top;
-            if (hasNoSaturation && this.ticks % (playerFoodLevel * 3 + 1) == 0) y += this.random.nextInt(3) - 1;
+            if (doBobble) y += this.random.nextInt(3) - 1;
             int x = left - renderedHaunch * 8 - 9;
 
             // Draw the border icon:

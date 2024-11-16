@@ -12,6 +12,7 @@ import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
+import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
@@ -28,6 +29,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     protected MeleeAttackGoalMixin(double speed, PathAwareEntity mob) {
         this.speed = speed;
         this.mob = mob;
+        this.doOldBehavior = mob.getType().isIn(EntityTypeTags.ARTHROPOD);
     }
 
     private final boolean DEBUG = false;
@@ -54,17 +56,18 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     @Shadow
     private int cooldown;
 
+    private boolean doOldBehavior = false;
+
     private int getCooldownAmount(){
         if(maxCooldown > 0) return maxCooldown;
-        else if(this.mob instanceof WardenEntity || this.mob instanceof IronGolemEntity || this.mob instanceof HoglinEntity)
-            maxCooldown = TICKS_SWING_HEAVY;
+        else if(doOldBehavior) maxCooldown = TICKS_ENDLAG + 10;
         else if(this.mob.getMainHandStack() != null) {
             Item weapon = this.mob.getMainHandStack().getItem();
             if(weapon instanceof AxeItem || weapon instanceof TridentItem) maxCooldown = TICKS_SWING_HEAVY;
             else if(weapon instanceof HoeItem) maxCooldown = TICKS_SWING_QUICK;
             else if(weapon instanceof MiningToolItem) maxCooldown = TICKS_SWING_TOOLS;
         }
-        maxCooldown = TICKS_SWING_QUICK;
+        else maxCooldown = TICKS_SWING_QUICK;
         return maxCooldown;
     }
 
