@@ -29,7 +29,7 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
     public static final MapCodec<SugarCaneTopBlock> CODEC = createCodec(SugarCaneTopBlock::new);
     protected static final VoxelShape SHAPE = Block.createCuboidShape(2.0, 0.0, 2.0, 14.0, 10.0, 14.0);
     public static final IntProperty AGE = Properties.AGE_15;
-    public static final IntProperty GROUND_TYPE = IntProperty.of("ground_type", 0, 6);
+    public static final IntProperty GROUND_TYPE = IntProperty.of("ground_type", 0, 8);
     private static final int TYPE_REGULAR = 0;
     private static final int TYPE_SAND = 1;
     private static final int TYPE_RED_SAND = 2;
@@ -37,6 +37,8 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
     private static final int TYPE_GREY_MUD = 4;
     private static final int TYPE_CLAY = 5;
     private static final int TYPE_MUD_CAVE = 6;
+    private static final int TYPE_PALE = 7;
+    private static final int TYPE_UNGROWING = 8;
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
@@ -61,6 +63,10 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
     @Override
     public ItemStack getPickStack(WorldView world, BlockPos pos, BlockState state) {
         return Blocks.SUGAR_CANE.getPickStack(world, pos, state);
+    }
+
+    public BlockState getStuntedState() {
+        return this.getDefaultState().with(GROUND_TYPE, TYPE_UNGROWING);
     }
 
 
@@ -97,9 +103,12 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        int groundState = state.get(GROUND_TYPE);
+        if(groundState == TYPE_UNGROWING) return;
+
         BlockState blockStateBelow = world.getBlockState(pos.down());
         int numSugarCaneBelow = blockStateBelow.isOf(Blocks.SUGAR_CANE) ? 1 : 0;
-        int chanceToGrow = numSugarCaneBelow > 0 ? 128 : blockStateBelow.isIn(BlockTags.SAND) ? 64 : 16;
+        int chanceToGrow = groundState == -1 ? 128 : numSugarCaneBelow > 0 ? 64 : blockStateBelow.isIn(BlockTags.SAND) ? 32 : 16;
 
         if (random.nextInt(chanceToGrow) == 1) return;
         if (world.isAir(pos.up())) {
@@ -113,7 +122,10 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
                     numSugarCaneBelow++;
                 }
             }
-            if (numSugarCaneBelow < 3) world.setBlockState(pos, Blocks.SUGAR_CANE.getDefaultState());
+            if (numSugarCaneBelow < 3) {
+                world.setBlockState(pos, Blocks.SUGAR_CANE.getDefaultState());
+                if(random.nextInt(6) > 2 * numSugarCaneBelow) world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
+            }
         }
     }
 
@@ -133,6 +145,8 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
             if(ctx.getWorld().getLightLevel(LightType.SKY, ctx.getBlockPos()) > 4) return this.getDefaultState().with(GROUND_TYPE, TYPE_BROWN_MUD);
             else return this.getDefaultState().with(GROUND_TYPE, TYPE_MUD_CAVE);
         }
+        else if(blockStateDown.isOf(Blocks.PALE_MOSS_BLOCK)) return this.getDefaultState().with(GROUND_TYPE, TYPE_PALE);
+        else if(blockStateDown.isOf(Blocks.SUGAR_CANE) && ctx.getWorld().getRandom().nextInt(4) == 0) return this.getDefaultState().with(GROUND_TYPE, TYPE_UNGROWING);
         return CustomBlocks.SUGAR_CANE_TOP.getDefaultState();
     }
 

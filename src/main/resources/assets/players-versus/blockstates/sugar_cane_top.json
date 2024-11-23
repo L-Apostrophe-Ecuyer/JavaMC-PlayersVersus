@@ -20,6 +20,12 @@
     },
     "ground_type=6": {
       "model": "players-versus:block/sugar_cane_top6"
+    },
+    "ground_type=7": {
+      "model": "players-versus:block/sugar_cane_top5"
+    },
+    "ground_type=8": {
+      "model": "players-versus:block/sugar_cane_top"
     }
   }
 }

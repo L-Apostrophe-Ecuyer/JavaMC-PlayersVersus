@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.blocks.SugarCaneTopBlock;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.HostileEntity;
@@ -49,8 +50,10 @@ public abstract class SugarcaneMixin extends Block {
 
             if (numSugarCaneBelow < 2) {
                 if (age == 15) {
-                    world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
-                    world.setBlockState(pos, state.with(Properties.AGE_15, Integer.valueOf(8)), Block.NO_REDRAW);
+                    if(numSugarCaneBelow > 0 && (world.getLightLevel(LightType.SKY, pos) < 4 || random.nextInt(4) ==  1))
+                        world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getStuntedState());
+                    else world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
+                    world.setBlockState(pos, state.with(Properties.AGE_15, Integer.valueOf(8)), Block.NO_REDRAW); // Aged down, but only half way! Incentives picking only the top
                 } else {
                     world.setBlockState(pos, state.with(Properties.AGE_15, Integer.valueOf(age + 1)), Block.NO_REDRAW);
                 }

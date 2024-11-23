@@ -12,6 +12,7 @@ import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
+import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
@@ -32,10 +33,10 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     private final boolean DEBUG = false;
 
-    private final int TICKS_ENDLAG = 8;
-    private final int TICKS_SWING_QUICK = TICKS_ENDLAG + 12;
-    private final int TICKS_SWING_TOOLS = TICKS_ENDLAG + 24;
-    private final int TICKS_SWING_HEAVY = TICKS_ENDLAG + 30;
+    private int numTicksEndlag = -1;
+    private final int TICKS_SWING_QUICK = 20;
+    private final int TICKS_SWING_TOOLS = 30;
+    private final int TICKS_SWING_HEAVY = 40;
 
     private int maxCooldown = 0;
 
@@ -56,15 +57,14 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     private int getCooldownAmount(){
         if(maxCooldown > 0) return maxCooldown;
-        else if(this.mob instanceof WardenEntity || this.mob instanceof IronGolemEntity || this.mob instanceof HoglinEntity)
-            maxCooldown = TICKS_SWING_HEAVY;
-        else if(this.mob.getMainHandStack() != null) {
+        if(numTicksEndlag == -1) numTicksEndlag = mob.getType().isIn(EntityTypeTags.ARTHROPOD) ? 4 : 8;
+        if(!this.mob.getMainHandStack().isEmpty()) {
             Item weapon = this.mob.getMainHandStack().getItem();
-            if(weapon instanceof AxeItem || weapon instanceof TridentItem) maxCooldown = TICKS_SWING_HEAVY;
-            else if(weapon instanceof HoeItem) maxCooldown = TICKS_SWING_QUICK;
-            else if(weapon instanceof MiningToolItem) maxCooldown = TICKS_SWING_TOOLS;
+            if(weapon instanceof AxeItem || weapon instanceof TridentItem) maxCooldown = TICKS_SWING_HEAVY + numTicksEndlag;
+            else if(weapon instanceof HoeItem) maxCooldown = TICKS_SWING_QUICK + numTicksEndlag;
+            else if(weapon instanceof MiningToolItem) maxCooldown = TICKS_SWING_TOOLS + numTicksEndlag;
         }
-        maxCooldown = TICKS_SWING_QUICK;
+        else maxCooldown = TICKS_SWING_QUICK + numTicksEndlag;
         return maxCooldown;
     }
 
@@ -124,7 +124,8 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     @Inject(method = "tick", at = @At("TAIL"), cancellable = false)
     public void mobsNeedToBeAimingToLandHit(CallbackInfo info) {
         // If the mob started attacking or blocking, it can't properly adjust its aim mid-swing anymore:
-        if (this.cooldown < 0 || this.cooldown > TICKS_ENDLAG) {
+        if(numTicksEndlag == -1) numTicksEndlag = mob.getType().isIn(EntityTypeTags.ARTHROPOD) ? 1 : 8;
+        if (this.cooldown < 0 || this.cooldown > numTicksEndlag) {
             LookControl lookControl = this.mob.getLookControl();
             if (lookControl.isLookingAtSpecificPosition()) lookControl.lookAt(lookControl.getLookX(), lookControl.getLookY(), lookControl.getLookZ(),10f,10f);
         }
@@ -164,13 +165,14 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     @Overwrite
     public void attack(LivingEntity target) {
+        if(numTicksEndlag == -1) numTicksEndlag = mob.getType().isIn(EntityTypeTags.ARTHROPOD) ? 1 : 8;
         int cooldownAmount = this.getCooldownAmount();
         boolean canTrySwinging = this.cooldown <= 0;
-        boolean willTryLandingAnAttack = this.mob.isAttacking() && (this.cooldown == (cooldownAmount - TICKS_ENDLAG) || this.cooldown == (cooldownAmount - TICKS_ENDLAG) - 1);
+        boolean willTryLandingAnAttack = this.mob.isAttacking() && (this.cooldown == (cooldownAmount - numTicksEndlag) || this.cooldown == (cooldownAmount - numTicksEndlag) - 1);
 
         // Attack interruption, if the player swung right after the mob did:
-        if(this.mob.hurtTime > 14 && cooldownAmount > TICKS_ENDLAG) {
-            cooldown = TICKS_ENDLAG - 2;
+        if(this.mob.hurtTime > 14 && cooldownAmount > numTicksEndlag) {
+            cooldown = numTicksEndlag - 2;
             mob.setAttacking(false);
             mob.handSwingProgress = 0f;
             if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: interrupted.");

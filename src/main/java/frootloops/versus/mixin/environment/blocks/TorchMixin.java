@@ -4,6 +4,7 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.*;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -22,7 +23,6 @@ public abstract class TorchMixin extends Block {
     }
 
     public void tickTorchDegradation(BlockState state, ServerWorld world, BlockPos pos, boolean isCompletelyExtinguished) {
-        if(world.getDimension().ultrawarm()) return;
         if(state.isOf(Blocks.TORCH)) {
             if(isCompletelyExtinguished) world.setBlockState(pos, CustomBlocks.EXTINGUISHED_TORCH.getStateWithProperties(state));
             else world.setBlockState(pos, CustomBlocks.SMOLDERING_TORCH.getStateWithProperties(state));
@@ -45,8 +45,11 @@ public abstract class TorchMixin extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        if(pos.getY() > 32 || world.getDimension().ultrawarm()) return;
         if(world instanceof ServerWorld && state.isOf(Blocks.TORCH) || state.isOf(Blocks.WALL_TORCH)) {
-            if (random.nextInt(256) > Math.min(110, pos.getY() + 64) + 144) {
+            int randomInteger = random.nextInt(512);
+            int offset = 32 + (randomInteger - pos.getY() < 64 && world.getBlockState(pos.down()).isOf(Blocks.DEEPSLATE) ? 32 : 0);
+            if (randomInteger > pos.getY() + 512 - offset) {
                 this.tickTorchDegradation(state, world, pos, false);
             }
         }
@@ -54,7 +57,7 @@ public abstract class TorchMixin extends Block {
 
     @Override
     public void precipitationTick(BlockState state, World world, BlockPos pos, Biome.Precipitation precipitation) {
-        if(world instanceof ServerWorld && state.isOf(Blocks.TORCH) || state.isOf(Blocks.WALL_TORCH)) {
+        if(world instanceof ServerWorld) {
             this.tickTorchDegradation(state, (ServerWorld)world, pos, true);
         }
     }

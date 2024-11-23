@@ -5,6 +5,10 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.LivingEntityAccessor;
 import net.minecraft.block.BlockState;
+import net.minecraft.component.ComponentType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -56,11 +60,15 @@ public abstract class Combat {
     }
 
     public static double getAttackRangeBonusOf(ItemStack itemStack) {
-        if(itemStack == null || itemStack.isEmpty() || !itemStack.isDamageable()) return 0.0d;
-        Item item = itemStack.getItem();
-        if(item instanceof TridentItem) return 1.0d;
-        if(item instanceof HoeItem) return 1.0d;
-        if(item instanceof SwordItem) return 0.5d;
+        if(itemStack == null || itemStack.isEmpty()) return 0.0d;
+        if(itemStack.contains(DataComponentTypes.ATTRIBUTE_MODIFIERS)) {
+            AttributeModifiersComponent attributeModifiersComponent = itemStack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+            for (AttributeModifiersComponent.Entry modifier : attributeModifiersComponent.modifiers()) {
+                if(modifier.attribute() == EntityAttributes.ENTITY_INTERACTION_RANGE && modifier.slot() == AttributeModifierSlot.MAINHAND) {
+                    return modifier.modifier().value();
+                }
+            }
+        }
         return 0.0d;
     }
 
@@ -232,10 +240,10 @@ public abstract class Combat {
         return canPlayerSprint(player.getHungerManager());
     }
 
-    public static boolean canPlayerSprint( HungerManager hungerManager) {
+    public static boolean canPlayerSprint(HungerManager hungerManager) {
         if(!VersusSettings.DO_FOOD_OVERHAUL) return hungerManager.getFoodLevel() > 6;
         if(hungerManager.getFoodLevel() != 0) return true;
-        if(hungerManager.getSaturationLevel() > 0.0f) return true;
-        return false;
+        if(hungerManager.getSaturationLevel() == 0.0f) return false;
+        return true;
     }
 }

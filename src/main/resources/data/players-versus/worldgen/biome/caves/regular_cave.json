@@ -9,14 +9,14 @@
     "water_fog_color": 724535,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
+      "tick_delay": 3000,
       "block_search_extent": 8,
       "offset": 2
     },
     "music": {
       "sound": "players-versus:cave_music_and_ambience",
       "min_delay": 4000,
-      "max_delay": 12000,
+      "max_delay": 6000,
       "replace_current_music": false
     }
   },
@@ -42,20 +42,20 @@
       {
         "type": "minecraft:zombie",
         "weight": 95,
-        "minCount": 4,
-        "maxCount": 4
+        "minCount": 2,
+        "maxCount": 2
       },
       {
         "type": "minecraft:skeleton",
-        "weight": 100,
-        "minCount": 4,
-        "maxCount": 4
+        "weight": 80,
+        "minCount": 2,
+        "maxCount": 2
       },
       {
         "type": "minecraft:creeper",
-        "weight": 100,
-        "minCount": 4,
-        "maxCount": 4
+        "weight": 70,
+        "minCount": 2,
+        "maxCount": 2
       },
       {
         "type": "minecraft:slime",
@@ -74,6 +74,18 @@
         "weight": 55,
         "minCount": 4,
         "maxCount": 4
+      },
+      {
+        "type": "players-versus:deeper_creeper",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "players-versus:withered_zombie",
+        "weight": 10,
+        "minCount": 2,
+        "maxCount": 4
       }
     ],
     "underground_water_creature": [
@@ -87,7 +99,12 @@
     "water_ambient": [],
     "water_creature": []
   },
-  "spawn_costs": {},
+  "spawn_costs": {
+    "minecraft:zombie": {
+      "energy_budget": 0.12,
+      "charge": 0.6
+    }
+  },
   "carvers": [
     "minecraft:cave",
     "minecraft:cave_extra_underground",

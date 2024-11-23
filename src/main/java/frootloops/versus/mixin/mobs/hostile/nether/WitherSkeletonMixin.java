@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.nether;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -9,6 +10,8 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.WitherSkeletonEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,5 +35,10 @@ public class WitherSkeletonMixin extends HostileEntity {
         if (instanceKnockbackRes != null) instanceKnockbackRes.setBaseValue(0.5D);
 
         this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_DAMAGE).setBaseValue(0.5D);
+    }
+
+    @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0F;
     }
 }

@@ -3,7 +3,7 @@
   "placement": [
     {
       "type": "minecraft:noise_based_count",
-      "noise_to_count_ratio": 8,
+      "noise_to_count_ratio": 10,
       "noise_factor": 16,
       "noise_offset": -0.1
     },
@@ -15,7 +15,7 @@
       "height": {
         "type": "minecraft:trapezoid",
         "min_inclusive": {
-          "absolute": 32
+          "absolute": 16
         },
         "max_inclusive": {
           "absolute": 56

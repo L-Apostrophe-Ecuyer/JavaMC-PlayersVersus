@@ -80,6 +80,8 @@
     "items.VanillaItemsMixin",
     "items.PotionBottleUsageMixin",
 
+    "mobs.MobSpawnGroupsMixin",
+
     "mobs.hostile.end.dragon.ChargingPlayerPhaseMixin",
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",
     "mobs.hostile.end.dragon.StrafePlayerPhaseMixin",

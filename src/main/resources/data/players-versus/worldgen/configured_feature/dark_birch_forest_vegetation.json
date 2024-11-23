@@ -5,7 +5,7 @@
       {
         "chance": 0.065,
         "feature": {
-          "feature": "minecraft:moss_patch",
+          "feature": "players-versus:dark_forest_moss_patch",
           "placement": []
         }
       },

@@ -9,21 +9,21 @@
     "water_fog_color": 329011,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
+      "tick_delay": 2000,
       "block_search_extent": 8,
       "offset": 2
     },
     "music": {
       "sound": "players-versus:deep_dark_music_and_ambience",
-      "min_delay": 12000,
-      "max_delay": 24000,
+      "min_delay": 8000,
+      "max_delay": 16000,
       "replace_current_music": false
     },
     "particle": {
       "options": {
         "type": "minecraft:ash"
       },
-      "probability": 0.001
+      "probability": 0.005
     }
   },
   "spawners": {
@@ -34,7 +34,7 @@
     "monster": [
       {
         "type": "players-versus:deeper_creeper",
-        "weight": 100,
+        "weight": 120,
         "minCount": 1,
         "maxCount": 1
       },
@@ -58,8 +58,14 @@
       },
       {
         "type": "players-versus:withered_zombie",
-        "weight": 60,
+        "weight": 100,
         "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:enderman",
+        "weight": 20,
+        "minCount": 1,
         "maxCount": 4
       }
     ],
@@ -86,16 +92,10 @@
     [],
     [
       "players-versus:caves/ore_tuff_extra",
-      "players-versus:caves/ore_deepslate",
-      "minecraft:ore_dirt",
+      "players-versus:caves/deep_withering_bile",
+      "players-versus:caves/ore_terracotta_and_copper_grey",
       "minecraft:ore_gravel",
-      "minecraft:ore_granite_upper",
-      "minecraft:ore_granite_lower",
-      "minecraft:ore_diorite_upper",
-      "minecraft:ore_diorite_lower",
-      "minecraft:ore_andesite_upper",
       "minecraft:ore_andesite_lower",
-      "minecraft:ore_coal_upper",
       "minecraft:ore_coal_lower",
       "minecraft:ore_iron_upper",
       "minecraft:ore_iron_middle",
@@ -110,10 +110,7 @@
       "minecraft:ore_diamond_buried",
       "minecraft:ore_lapis",
       "minecraft:ore_lapis_buried",
-      "minecraft:ore_copper",
       "minecraft:underwater_magma",
-      "minecraft:disk_clay",
-      "minecraft:disk_gravel",
       "minecraft:ore_infested"
     ],
     [],

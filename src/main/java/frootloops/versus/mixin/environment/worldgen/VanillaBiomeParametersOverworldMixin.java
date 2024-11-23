@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 @Mixin(VanillaBiomeParameters.class)
 public class VanillaBiomeParametersOverworldMixin {
 
-    private static final MultiNoiseUtil.ParameterRange DEPTH_ZERO = MultiNoiseUtil.ParameterRange.of(0.0F), DEPTH_ONE = MultiNoiseUtil.ParameterRange.of(0.1F), DEPTH_SURFACE_CAVE = MultiNoiseUtil.ParameterRange.of(0.1F, 0.25F), DEPTH_CAVE = MultiNoiseUtil.ParameterRange.of(0.25F, 0.6F), DEPTH_DEEP_CAVE = MultiNoiseUtil.ParameterRange.of(0.6F, 1.0F), DEPTH_DEEP_DARK = MultiNoiseUtil.ParameterRange.of(1.0F);
+    private static final MultiNoiseUtil.ParameterRange DEPTH_ZERO = MultiNoiseUtil.ParameterRange.of(0.0F), DEPTH_ONE = MultiNoiseUtil.ParameterRange.of(0.1F), DEPTH_SURFACE_CAVE = MultiNoiseUtil.ParameterRange.of(0.1F, 0.25F), DEPTH_CAVE = MultiNoiseUtil.ParameterRange.of(0.25F, 0.7F), DEPTH_DEEP_CAVE = MultiNoiseUtil.ParameterRange.of(0.7F, 1.0F), DEPTH_DEEP_DARK = MultiNoiseUtil.ParameterRange.of(0.85F, 1.1F);
 
     private static final float MIN_EROSION_FOR_MOUNTAIN_TRANSITION = -0.475f;
     private static final long MIN_EROSION_FOR_MOUNTAIN_TRANSITION_LONG = MultiNoiseUtil.toLong(MIN_EROSION_FOR_MOUNTAIN_TRANSITION);
@@ -54,7 +54,7 @@ public class VanillaBiomeParametersOverworldMixin {
         for (PlacedBiome b : CustomOverworldBiomes.caveBiomesToPlaceInOverorld){
             if(b.type() == PlacedBiomeType.SURFACE) continue;
 
-            MultiNoiseUtil.ParameterRange depth = b.type() == PlacedBiomeType.SURFACE_CAVE ? DEPTH_SURFACE_CAVE : (b.type() == PlacedBiomeType.CAVE || b.type() == PlacedBiomeType.GENERIC_CAVE) ? DEPTH_CAVE : b.biome() == BiomeKeys.DEEP_DARK ? DEPTH_DEEP_CAVE : DEPTH_DEEP_DARK;
+            MultiNoiseUtil.ParameterRange depth = b.type() == PlacedBiomeType.SURFACE_CAVE ? DEPTH_SURFACE_CAVE : (b.type() == PlacedBiomeType.CAVE || b.type() == PlacedBiomeType.GENERIC_CAVE) ? DEPTH_CAVE : (b.biome() == BiomeKeys.DEEP_DARK || b.type() == PlacedBiomeType.DEEP_DARK) ? DEPTH_DEEP_DARK : DEPTH_DEEP_CAVE;
             float rarityOffset = (b.type() == PlacedBiomeType.GENERIC_CAVE) ? 0.07F : (b.type() == PlacedBiomeType.GENERIC_DEEP_CAVE) ? 0.05F : b.isRare() ? 0.04F : 0.0F;
             parameters.accept(Pair.of(MultiNoiseUtil.createNoiseHypercube(b.temperature(), b.humidity(), b.continentalness(), b.erosion(), depth, b.weirdness(),rarityOffset), b.biome()));
         }

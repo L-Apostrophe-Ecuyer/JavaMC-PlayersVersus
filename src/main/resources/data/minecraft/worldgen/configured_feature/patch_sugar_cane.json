@@ -42,7 +42,7 @@
                 "state": {
                   "Name": "players-versus:sugar_cane_top",
                   "Properties": {
-                    "ground_type": "0",
+                    "ground_type": "-1",
                     "age": "0"
                   }
                 }
