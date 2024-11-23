@@ -32,9 +32,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static frootloops.versus.mod.environment.blocks.SugarCaneTopBlock.*;
 
 @Mixin(SugarCaneBlock.class)
-public abstract class SugarcaneMixin extends Block {
+public abstract class SugarCaneMixin extends Block {
 
-    protected SugarcaneMixin(Settings settings) {
+    public SugarCaneMixin(Settings settings) {
         super(settings);
     }
 
