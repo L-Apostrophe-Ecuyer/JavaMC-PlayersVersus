@@ -2,7 +2,6 @@ package frootloops.versus.mixin.players;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
-import frootloops.versus.mod.Combat;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
@@ -29,8 +28,6 @@ public class HungerManagerMixin {
     private int foodTickTimer;
     @Shadow
     private float saturationLevel;
-
-    private float prevSaturationLevel = 0.0f;
 
     private static final int REGEN_TIME_SLOW = 100, REGEN_TIME_FAST = 24;
     private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 1;
@@ -64,7 +61,6 @@ public class HungerManagerMixin {
     }
 
     private void doHungerExhaustion(ServerPlayerEntity player) {
-        if(foodTickTimer > -1) prevSaturationLevel = saturationLevel;
 
         // Starvation: When starving, activities deal damage.
         if(foodLevel == 0) {
@@ -77,20 +73,15 @@ public class HungerManagerMixin {
                 }
             }
             else {
-                if(foodTickTimer < -1) saturationLevel = 0.0f;
-                else if(foodTickTimer == -1 && saturationLevel == 0.0f) saturationLevel = Math.max(0.1f, prevSaturationLevel);
-                else saturationLevel = Math.max(0.1f, saturationLevel);
-                if(exhaustion > 4.0F && saturationLevel > 0.1F){
-                    exhaustion = 0.0F;
-                    saturationLevel = 0.1F;
-                }
+                if(foodTickTimer < 0) saturationLevel = 0.0f;
+                else if(saturationLevel < 0.5f) saturationLevel = 0.5f;
             }
         }
 
         // Regular food exhaustion, accelerated, to disincentive players filling their food bar unnecessarily:
         else if(exhaustion > 4.0F){
             exhaustion = 0.0F;
-            saturationLevel = Math.max(0.0f, saturationLevel - 1.0f);
+            saturationLevel = 0.0F;
             foodLevel--;
         }
     }
@@ -105,7 +96,7 @@ public class HungerManagerMixin {
         foodTickTimer++;
         if (canPlayerFoodHeal) foodTickTimer = Math.max(foodTickTimer, 0);
         else if (player.isOnFire()) foodTickTimer = -20;
-        else if (player.hurtTime > 0) foodTickTimer = -Combat.TICKS_TO_SPRINT_AFTER_DMG;
+        else if (player.hurtTime > 0) foodTickTimer = -80;
 
         if(canPlayerFoodHeal) {
             if (foodTickTimer > REGEN_TIME_FAST) {
