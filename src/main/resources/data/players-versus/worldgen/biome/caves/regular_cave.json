@@ -14,7 +14,7 @@
       "offset": 2
     },
     "music": {
-      "sound": "players-versus:cave_music_and_ambience",
+      "sound": "minecraft:music.overworld.dripstone_caves",
       "min_delay": 4000,
       "max_delay": 6000,
       "replace_current_music": false

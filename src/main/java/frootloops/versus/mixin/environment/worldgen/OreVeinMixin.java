@@ -14,13 +14,13 @@ import org.spongepowered.asm.mixin.Overwrite;
 @Mixin(OreVeinSampler.class)
 public class OreVeinMixin {
 
-    private static final double DENSITY_THRESHOLD = 0.4;
+    private static final float DENSITY_THRESHOLD = 0.4F;
     private static final int MAX_DENSITY_INTRUSION = 20;
     private static final double LIMINAL_DENSITY_REDUCTION = 0.2;
     private static final float BLOCK_GENERATION_CHANCE = 0.7F;
-    private static final double MIN_ORE_CHANCE = 0.15;
-    private static final double MAX_ORE_CHANCE = 0.3;
-    private static final double DENSITY_FOR_MAX_ORE_CHANCE = 0.6;
+    private static final float MIN_ORE_CHANCE = 0.1F;
+    private static final float MAX_ORE_CHANCE = 0.3F;
+    private static final float DENSITY_FOR_MAX_ORE_CHANCE = 0.6F;
     private static final float RAW_ORE_BLOCK_CHANCE = 0.035F;
     private static final float VEIN_GAP_THRESHOLD = -0.3F;
 
@@ -47,7 +47,7 @@ public class OreVeinMixin {
                         return blockState;
                     } else {
                         double g = MathHelper.clampedMap(veinToggleNoiseValueAbs, DENSITY_THRESHOLD, DENSITY_FOR_MAX_ORE_CHANCE, MIN_ORE_CHANCE, MAX_ORE_CHANCE);
-                        if ((double)random.nextFloat() < g && veinGap.sample(pos) > -VEIN_GAP_THRESHOLD) {
+                        if ((double)random.nextFloat() < g && veinGap.sample(pos) > VEIN_GAP_THRESHOLD) {
                             return random.nextFloat() < RAW_ORE_BLOCK_CHANCE ? veinType.rawOreBlock : veinType.ore;
                         } else {
                             return veinType.stone;

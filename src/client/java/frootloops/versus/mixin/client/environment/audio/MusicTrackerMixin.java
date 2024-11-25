@@ -57,60 +57,18 @@ public abstract class MusicTrackerMixin {
 
     @Inject(method = "play", at= @At("HEAD"), cancellable = true)
     public void play(MusicSound type, CallbackInfo info) {
-        if(type == MusicType.MENU) {
-            int randomValue = random.nextInt(10);
-            if(randomValue > 3) {
-                current = PositionedSoundInstance.music(CustomSpecialEffects.MENU_MUSIC);
-                this.timeUntilNextSong = Integer.MAX_VALUE;
-                this.client.getSoundManager().play(this.current);
-                info.cancel();
-            }
-        }
-        else if(type == MusicType.GAME) {
+        if(type == MusicType.GAME) {
             if(client.player.getY() < -24.0) {
-                int randomValue = random.nextInt( 10);
-                if(randomValue > 6) {
-                    current = PositionedSoundInstance.music(SoundEvents.MUSIC_OVERWORLD_DEEP_DARK.value());
-                    this.timeUntilNextSong = Integer.MAX_VALUE;
-                }
-                else {
-                    current = PositionedSoundInstance.music(CustomSpecialEffects.DEEP_DARK_MUSIC_AND_AMBIENCE);
-                    this.timeUntilNextSong = 4000;
-                }
+                current = PositionedSoundInstance.music(SoundEvents.MUSIC_OVERWORLD_DEEP_DARK.value());
                 this.client.getSoundManager().play(this.current);
                 info.cancel();
             }
-            if(client.player.getY() < 40.0) {
+            if(client.player.getY() < 40.0 || (client.player.getHealth() < 14f && (client.world.isNight() || client.world.isRaining()))) {
                 int randomValue = random.nextInt( 10);
                 if(randomValue > 6) current = PositionedSoundInstance.ambient(SoundEvents.AMBIENT_CAVE.value());
-                else current = PositionedSoundInstance.ambient(CustomSpecialEffects.CAVE_MUSIC_AND_AMBIENCE);
+                else current = PositionedSoundInstance.ambient(SoundEvents.MUSIC_OVERWORLD_DRIPSTONE_CAVES.value());
                 this.client.getSoundManager().play(this.current);
                 this.timeUntilNextSong = 4000;
-                info.cancel();
-            }
-            else if(client.world.isNight() || client.world.isRaining() || client.player.getHealth() < 14f) {
-                int randomValue = random.nextInt( 10);
-                if(randomValue > 6) {
-                    this.timeUntilNextSong = 1000; // Skip
-                    info.cancel();
-                }
-                else if(randomValue > 2) {
-                    current = PositionedSoundInstance.ambient(SoundEvents.MUSIC_OVERWORLD_DRIPSTONE_CAVES.value());
-                    this.client.getSoundManager().play(this.current);
-                    this.timeUntilNextSong = Integer.MAX_VALUE;
-                    info.cancel();
-                }
-            }
-            else if(client.world.isDay()){
-                this.current = PositionedSoundInstance.music((SoundEvent)type.getSound().value());
-                if (this.current.getSound() == SoundManager.MISSING_SOUND || random.nextInt(10) == 0) {
-                    current = PositionedSoundInstance.ambient(SoundEvents.MUSIC_CREATIVE.value());
-                    this.client.getSoundManager().play(this.current);
-                }
-                else {
-                    this.client.getSoundManager().play(this.current);
-                }
-                this.timeUntilNextSong = Integer.MAX_VALUE;
                 info.cancel();
             }
         }

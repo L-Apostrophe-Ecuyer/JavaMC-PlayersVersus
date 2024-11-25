@@ -13,9 +13,7 @@ public class CustomSpecialEffects {
 
     public static SoundEvent RAIL_TURNING_SOUND;
     public static SoundEvent FOG_WIND_SOUND;
-    public static SoundEvent CAVE_MUSIC_AND_AMBIENCE;
-    public static SoundEvent DEEP_DARK_MUSIC_AND_AMBIENCE;
-    public static SoundEvent MENU_MUSIC;
+    public static SoundEvent DEEP_CAVES_MUSIC;
     public static final SimpleParticleType SPARKS_PARTICLE = FabricParticleTypes.simple();
 
 
@@ -23,9 +21,7 @@ public class CustomSpecialEffects {
         Registry.register(Registries.PARTICLE_TYPE, Identifier.of(VersusMod.MOD_ID, "sparks"), SPARKS_PARTICLE);
         RAIL_TURNING_SOUND = registerSoundEvent("rail_turning_sound");
         FOG_WIND_SOUND = registerSoundEvent("fog_wind_sound");
-        CAVE_MUSIC_AND_AMBIENCE = registerSoundEvent("cave_music_and_ambience");
-        DEEP_DARK_MUSIC_AND_AMBIENCE = registerSoundEvent("deep_dark_music_and_ambience");
-        MENU_MUSIC = registerSoundEvent("menu_music");
+        DEEP_CAVES_MUSIC = registerSoundEvent("music.overworld.deep_caves");
     }
 
     private static SoundEvent registerSoundEvent(String name) {

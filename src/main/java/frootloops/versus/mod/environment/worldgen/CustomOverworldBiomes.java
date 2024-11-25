@@ -31,7 +31,7 @@ public class CustomOverworldBiomes {
     public static final RegistryKey<Biome> DEEP_CAVES = keyOf("caves/deep_caves");
 
     public enum PlacedBiomeType {
-        SKY, SURFACE, SURFACE_CAVE, CAVE, DEEP_CAVE, GENERIC_CAVE, GENERIC_DEEP_CAVE, DEEP_DARK
+        SKY, SURFACE, SURFACE_CAVE, CAVE, DEEP_CAVE, GENERIC_CAVE, GENERIC_DEEP_CAVE
     }
 
     public static PlacedBiome[] landBiomesToPlaceInOverorld = new PlacedBiome[]{
@@ -40,14 +40,14 @@ public class CustomOverworldBiomes {
 
     public static PlacedBiome[] caveBiomesToPlaceInOverorld = new PlacedBiome[]{
             // Add here new cave biomes
-            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.375f), defaultParameter, MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.65f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.2f)),
-            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.375f), defaultParameter, MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.65f), MultiNoiseUtil.ParameterRange.of(0.2f, 1.0f)),
-            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.5f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
+            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.4f), defaultParameter, MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.65f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.2f)),
+            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.4f), defaultParameter, MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.65f), MultiNoiseUtil.ParameterRange.of(0.2f, 1.0f)),
+            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.6f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DESERT_CREEPER_CAVE, PlacedBiomeType.CAVE, true, MultiNoiseUtil.ParameterRange.of(0.8f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.5f), MultiNoiseUtil.ParameterRange.of(0.0f, 0.5f), MultiNoiseUtil.ParameterRange.of(0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.3f)),
             new PlacedBiome(DESERT_CREEPER_CAVE, PlacedBiomeType.CAVE, true, MultiNoiseUtil.ParameterRange.of(0.8f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.5f), MultiNoiseUtil.ParameterRange.of(0.0f, 0.5f), MultiNoiseUtil.ParameterRange.of(0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(0.2f, 1.0f)),
             new PlacedBiome(CREEPER_CAVE, PlacedBiomeType.CAVE, true, MultiNoiseUtil.ParameterRange.of(-0.3f, 0.7f), MultiNoiseUtil.ParameterRange.of(-0.4f, 1.1f), MultiNoiseUtil.ParameterRange.of(0.35f, 0.5f), MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(-1.0f, -0.3f)),
             new PlacedBiome(CREEPER_CAVE, PlacedBiomeType.CAVE, false, MultiNoiseUtil.ParameterRange.of(-0.3f, 0.7f), MultiNoiseUtil.ParameterRange.of(-0.4f, 0.8f), MultiNoiseUtil.ParameterRange.of(0.35f, 0.5f), MultiNoiseUtil.ParameterRange.of(-0.1f, 1.0f), MultiNoiseUtil.ParameterRange.of(0.2f, 0.6f)),
-            new PlacedBiome(BiomeKeys.DEEP_DARK, PlacedBiomeType.DEEP_DARK, false, defaultParameter, defaultParameter, defaultParameter, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.8f), defaultParameter),
+            new PlacedBiome(BiomeKeys.DEEP_DARK, PlacedBiomeType.DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, MultiNoiseUtil.ParameterRange.of(-1.0f, -0.8f), defaultParameter),
             new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, MultiNoiseUtil.ParameterRange.of(-0.7f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter)
     };

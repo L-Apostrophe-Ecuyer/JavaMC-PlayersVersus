@@ -18,6 +18,12 @@
       "min_delay": 12000,
       "max_delay": 24000,
       "replace_current_music": false
+    },
+    "music": {
+      "sound": "minecraft:music.overworld.dripstone_caves",
+      "min_delay": 4000,
+      "max_delay": 6000,
+      "replace_current_music": false
     }
   },
   "spawners": {

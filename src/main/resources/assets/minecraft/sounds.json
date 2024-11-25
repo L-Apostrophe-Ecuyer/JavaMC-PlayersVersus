@@ -1,0 +1,79 @@
+{
+    "music.menu": {
+        "sounds": [
+            {
+                "name": "players-versus:music/caves/c418_ki",
+                "stream": true, "volume": 0.8,
+                "weight": 4
+            },
+            {
+                "name": "players-versus:music/menu/c418_dog",
+                "stream": true, "volume": 1.0,
+                "weight": 2
+            },
+            {
+                "name": "players-versus:music/menu/c418_chris",
+                "stream": true, "volume": 0.8,
+                "weight": 3
+            },
+            {
+                "name": "players-versus:music/menu/c418_battlemode1",
+                "stream": true, "volume": 1.2,
+                "weight": 5
+            },
+            {
+                "name": "players-versus:music/menu/c418_battlemode4",
+                "stream": true, "volume": 1.2,
+                "weight": 2
+            },
+            { "name": "records/far", "stream": true, "weight": 2 },
+            { "name": "records/cat", "stream": true, "volume": 0.8, "weight": 2},
+            { "name": "records/wait", "stream": true, "weight": 5 },
+            { "name": "music/menu/moog_city_2", "stream": true, "weight": 4 },
+            { "name": "music/menu/floating_trees", "stream": true, "weight": 3 },
+            { "name": "music/menu/beginning_2", "stream": true, "weight": 1 },
+            { "name": "music/menu/mutation", "stream": true, "weight": 2 }
+        ]
+    },
+    "music.overworld.deep_dark": {
+        "sounds": [
+            {
+                "name": "players-versus:music/caves/fizz_full_johanjohnson",
+                "stream": true, "volume": 0.8
+            },
+            {
+                "name": "players-versus:music/caves/fizz_short_johanjohnson",
+                "stream": true, "volume": 0.8
+            },
+            {
+                "name": "players-versus:music/caves/kevinpenkin_abyssofthesea",
+                "stream": true, "volume": 0.8
+            },
+            { "name": "players-versus:music/caves/deep_dark_ambience_1", "stream": true},
+            { "name": "players-versus:music/caves/deep_dark_ambience_2", "stream": true},
+            { "name": "players-versus:music/caves/deep_dark_ambience_3", "stream": true},
+            { "name": "music/game/ancestry", "stream": true, "weight": 2}
+        ]
+    },
+    "music.overworld.dripstone_caves": {
+        "sounds": [
+            { "name": "players-versus:music/caves/c418_ki", "stream": true, "volume": 0.6},
+            { "name": "players-versus:music/caves/cave_ambience_1", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_2", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_3", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_4", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_5", "stream": true},
+            { "name": "music/game/an_ordinary_day", "stream": true},
+            { "name": "music/game/danny", "stream": true},
+            { "name": "music/game/deeper", "stream": true, "volume": 0.4},
+            { "name": "music/game/eld_unknown", "stream": true, "volume": 0.4, "weight": 2},
+            { "name": "music/game/endless", "stream": true, "volume": 0.4, "weight": 2},
+            { "name": "music/game/infinite_amethyst", "stream": true, "volume": 0.4},
+            { "name": "music/game/key", "stream": true},
+            { "name": "music/game/oxygene", "stream": true},
+            { "name": "music/game/pokopoko", "stream": true, "volume": 0.8, "weight": 2},
+            { "name": "music/game/subwoofer_lullaby", "stream": true},
+            { "name": "music/game/wending", "stream": true, "volume": 0.4, "weight": 2}
+        ]
+    }
+}

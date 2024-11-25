@@ -7,51 +7,39 @@
     },
     "fog_wind_sound" : {
         "sounds" : [
-            "players-versus:fog_wind_1",
-            "players-versus:fog_wind_2",
-            "players-versus:fog_wind_3",
-            "players-versus:fog_wind_4"
+            "players-versus:ambience/fog_wind_1",
+            "players-versus:ambience/fog_wind_2",
+            "players-versus:ambience/fog_wind_3",
+            "players-versus:ambience/fog_wind_4"
         ]
     },
-    "deep_dark_music_and_ambience" : {
-        "sounds" : [
-            "players-versus:deep_dark_ambience_1",
-            "players-versus:deep_dark_ambience_2",
-            "players-versus:deep_dark_ambience_3",
-            "players-versus:deep_dark_ambience_4"
-        ]
-    },
-    "cave_music_and_ambience" : {
-        "sounds" : [
-            "players-versus:cave_ambience_1",
-            "players-versus:cave_ambience_2",
-            "players-versus:cave_ambience_3",
-            "players-versus:cave_ambience_4",
-            "players-versus:cave_ambience_5",
-            "players-versus:cave_ambience_6",
-            "players-versus:cave_music_c418_ki",
-            "players-versus:cave_music_c418_flakes",
-            "players-versus:cave_music_kevinpenkin_abyssofthesea",
-            "players-versus:cave_music_kevinpenkin_abyssofthesea",
-            "players-versus:cave_music_kevinpenkin_butterflyatmosphere"
-        ]
-    },
-    "menu_music" : {
-        "sounds" : [
-            "players-versus:menu_music_c418_dog",
-            "players-versus:menu_music_c418_chris",
-            "players-versus:menu_music_c418_chris",
-            "players-versus:menu_music_c418_floatingtrees",
-            "players-versus:menu_music_c418_moogcity",
-            "players-versus:menu_music_c418_moogcity",
-            "players-versus:menu_music_c418_wait",
-            "players-versus:music_menu_c418_battlemode1",
-            "players-versus:music_menu_c418_battlemode4"
-        ]
-    },
-    "stronghold_music_and_ambience" : {
-        "sounds" : [
-            "players-versus:music_menu_c418_battlemode4"
+    "music.overworld.deep_caves": {
+        "sounds": [
+            {
+                "name": "players-versus:music/caves/fizz_short_johanjohnson",
+                "stream": true, "volume": 0.6, "weight": 2
+            },
+            {
+                "name": "players-versus:music/caves/kevinpenkin_abyssofthesea",
+                "stream": true, "volume": 0.8, "weight": 2
+            },
+            {
+                "name": "players-versus:music/caves/c418_ki",
+                "stream": true, "volume": 0.6, "weight": 2
+            },
+            {
+                "name": "music/game/deeper",
+                "stream": true, "volume": 0.6, "weight": 3
+            },
+            { "name": "music/game/nether/dead_voxel", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_1", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_2", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_3", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_4", "stream": true},
+            { "name": "players-versus:music/caves/cave_ambience_5", "stream": true},
+            { "name": "players-versus:music/caves/deep_dark_ambience_1", "stream": true},
+            { "name": "players-versus:music/caves/deep_dark_ambience_2", "stream": true},
+            { "name": "players-versus:music/caves/deep_dark_ambience_3", "stream": true}
         ]
     }
 }
