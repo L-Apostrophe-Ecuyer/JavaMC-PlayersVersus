@@ -24,7 +24,7 @@ import net.minecraft.world.WorldView;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 
-public class SugarCaneTopBlock extends Block implements Fertilizable {
+public class SugarCaneTopBlock extends Block {
 
     public static final MapCodec<SugarCaneTopBlock> CODEC = createCodec(SugarCaneTopBlock::new);
     protected static final VoxelShape SHAPE = Block.createCuboidShape(2.0, 0.0, 2.0, 14.0, 10.0, 14.0);
@@ -81,6 +81,7 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
     protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         BlockPos blockPosDown = pos.down();
         BlockState blockState = world.getBlockState(blockPosDown);
+        if(blockState.isAir() || !blockState.isOpaqueFullCube()) return false;
         if (blockState.isOf(Blocks.SUGAR_CANE) || blockState.isOf(Blocks.MUD) || blockState.isOf(Blocks.CLAY) || blockState.isOf(CustomBlocks.BROWN_MUD)) {
             return true;
         } else {
@@ -166,26 +167,5 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
         }
 
         return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
-    }
-
-
-    @Override
-    public boolean isFertilizable(WorldView world, BlockPos pos, BlockState state) {
-        return true;
-    }
-
-    @Override
-    public boolean canGrow(World world, Random random, BlockPos pos, BlockState state) {
-        return true;
-    }
-
-    @Override
-    public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
-        if(random.nextInt(2) == 0) {
-            world.setBlockState(pos, Blocks.SUGAR_CANE.getDefaultState());
-            if(random.nextInt(8) == 0 && world.isAir(pos.up())) {
-                world.setBlockState(pos.up(), this.getDefaultState());
-            }
-        }
     }
 }
