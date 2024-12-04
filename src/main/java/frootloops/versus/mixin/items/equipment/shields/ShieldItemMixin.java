@@ -24,14 +24,13 @@ public abstract class ShieldItemMixin extends Item {
 
     @Override
     public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if(user instanceof PlayerEntity player) player.getItemCooldownManager().set(stack, 4);
         return false;
     }
 
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        ItemStack stack = user.getStackInHand(hand);
-        if(Combat.getAttackChargeProgress(user) >= 0.5d) {
+        if(user.getAttackCooldownProgress(0.0f) > 0.5f) {
+            user.resetLastAttackedTicks();
             user.setCurrentHand(hand);
             return ActionResult.CONSUME;
         }

@@ -12,7 +12,8 @@ import java.util.Set;
 @Mixin(BipedEntityModel.class)
 public class BipedalModelMixin {
 
+    // scaleHead, float babyYHeadOffset, float babyZHeadOffset, float babyHeadScale, float babyBodyScale, float bodyYOffset, Set<String> headParts
+// new BabyModelTransformer(false, 8.0F, 4.0F, 2.0F, 2.0F, 24.0F, Set.of("head"));
     @Shadow
-    public static final ModelTransformer BABY_TRANSFORMER = new BabyModelTransformer(false, 16.0F, 0.0F, 2.0F, 2.0F, 24.0F, Set.of("head"));
-
+    public static final ModelTransformer BABY_TRANSFORMER = new BabyModelTransformer(true, 8.0F, 4.0F, 2.0F, 2.0F, 24.0F, Set.of("head"));
 }

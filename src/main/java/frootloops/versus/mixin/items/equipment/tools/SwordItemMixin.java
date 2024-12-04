@@ -74,8 +74,11 @@ public abstract class SwordItemMixin extends Item {
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
         if(Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) return ActionResult.FAIL;
-        user.setCurrentHand(hand);
-        return ActionResult.CONSUME;
+        if(user.getAttackCooldownProgress(0.0f) > 0.95f) {
+            user.setCurrentHand(hand);
+            return ActionResult.CONSUME;
+        }
+        else return ActionResult.FAIL;
     }
 
     @Override

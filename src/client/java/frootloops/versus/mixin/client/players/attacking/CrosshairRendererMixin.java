@@ -68,9 +68,8 @@ public class CrosshairRendererMixin {
 
                     // Changes start here:
                     // This is the code that makes the crosshair's size depend on the attack cooldown:
-                    double attackCooldownProgress = Combat.getAttackChargeProgress(client.player);
-                    double attackCooldownProgressCapped = attackCooldownProgress > 1.0d ? 1.0d : attackCooldownProgress;
-                    int crosshairSize = 1 + 2 * (int)(7d * attackCooldownProgressCapped);
+                    float attackCooldownProgress = client.player.getAttackCooldownProgress(0.0f);
+                    int crosshairSize = 1 + 2 * (int)(7d * attackCooldownProgress);
                     context.drawGuiTexture(RenderLayer::getCrosshair, CROSSHAIR_TEXTURE, (context.getScaledWindowWidth() - crosshairSize) / 2, (context.getScaledWindowHeight() - crosshairSize) / 2, crosshairSize, crosshairSize);
 
                     // This is the code to make sure the attack indicator only shows when a target can be hit:
@@ -86,7 +85,7 @@ public class CrosshairRendererMixin {
                         if (attackCooldownProgress >= 1.0F) {
                             context.drawGuiTexture(RenderLayer::getCrosshair, CROSSHAIR_ATTACK_INDICATOR_FULL_TEXTURE, posX, posY, 16, 16);
                         } else {
-                            int swordIconWhitePixels = (int)(attackCooldownProgressCapped * 17.0D);
+                            int swordIconWhitePixels = (int)(attackCooldownProgress * 17.0D);
                             context.drawGuiTexture(RenderLayer::getCrosshair, CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_TEXTURE, posX, posY, 16, 4);
                             context.drawGuiTexture(RenderLayer::getCrosshair, CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE, 16, 4, 0, 0, posX, posY, swordIconWhitePixels, 4);
                         }

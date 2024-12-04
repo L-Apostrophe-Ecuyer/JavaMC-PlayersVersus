@@ -40,7 +40,7 @@
         {
           "Name": "minecraft:water",
           "Properties": {
-            "level": "15"
+            "falling": "true"
           }
         },
         {
@@ -80,7 +80,6 @@
                         "data": {
                           "Name": "players-versus:sugar_cane_top",
                           "Properties": {
-                            "ground_type": "6",
                             "age": "0"
                           }
                         }

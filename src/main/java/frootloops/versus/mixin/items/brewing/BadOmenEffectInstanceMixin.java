@@ -56,7 +56,7 @@ public abstract class BadOmenEffectInstanceMixin {
 
                 // RAIDS: Check if Bad Omen can be replaced by Raid Omen
                 boolean isPlayerInsideVillage = serverWorld.isNearOccupiedPointOfInterest(serverPlayer.getBlockPos());
-                boolean isPlayerInsideTheirBase = !isPlayerInsideVillage && (serverPlayer.getSpawnPointPosition().isWithinDistance(serverPlayer.getBlockPos(), 32)) && !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
+                boolean isPlayerInsideTheirBase = !isPlayerInsideVillage && serverPlayer.getSpawnPointPosition() != null && (serverPlayer.getSpawnPointPosition().isWithinDistance(serverPlayer.getBlockPos(), 32)) && !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
                 if ((isPlayerInsideVillage || isPlayerInsideTheirBase) && serverWorld.getRaidAt(serverPlayer.getBlockPos()) == null) {
                     if(isPlayerInsideVillage) serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 600, amplifier));
                     else serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 3000, 0));

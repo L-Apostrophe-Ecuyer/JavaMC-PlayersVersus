@@ -9,10 +9,4 @@ public interface LivingEntityAccessor {
 
     @Accessor("jumping")
     boolean isJumping();
-
-    @Accessor("lastAttackedTicks")
-    int getLastAttackedTicks();
-
-    @Accessor("lastAttackedTicks")
-    public void setLastAttackedTicks(int lastAttackedTicks);
 }

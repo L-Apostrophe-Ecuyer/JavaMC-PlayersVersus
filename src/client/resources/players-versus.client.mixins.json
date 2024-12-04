@@ -15,7 +15,6 @@
 		"mobs.hostile.ZombieModelMixin",
 		"mobs.hostile.PiglinModelMixin",
 		"mobs.hostile.IllagerModelMixin",
-		"mobs.passive.PigModelMixin",
 		"mobs.passive.VillagerRessemblingModelMixin",
 		"mobs.passive.VillagerTradingScreenMixin",
 

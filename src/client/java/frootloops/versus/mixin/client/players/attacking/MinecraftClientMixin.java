@@ -58,7 +58,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         if(VersusSettings.CAN_HOLD_TO_ATTACK == false) return;
 
         boolean tryAttacking = false;
-        double attackChargeProgress = Combat.getAttackChargeProgress(player);
+        float attackChargeProgress = player.getAttackCooldownProgress(0.0f);
         if(attackChargeProgress > Combat.MIN_COOLDOWN_TO_SWING) {
             if (options.attackKey.isPressed()) {
                 ticksAttackKeyPressed++;
@@ -69,7 +69,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
                 // Otherwise, if at some point we can attack something, we do:
                 else if (attackChargeProgress > 0.85d) {
-                    double attackRange = Combat.getAttackRange(player,attackChargeProgress);
+                    double attackRange = Combat.getAttackRange(player, attackChargeProgress);
                     tryAttacking = (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos());
                 }
             }
@@ -104,14 +104,15 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         }
 
         this.ticksAttackKeyPressed = 0;
-        double attackProgress =  Combat.getAttackChargeProgress(player);
+        float attackProgress =  player.getAttackCooldownProgress(0.0f);
         double attackRange = Combat.getAttackRange(player, attackProgress);
         boolean canAttackEntities = attackProgress > Combat.MIN_COOLDOWN_TO_SWING;
+        boolean canSoonAttackEntities = !canAttackEntities && attackProgress > 0.2f;
 
-        if(VersusSettings.CAN_AIM_ASSIST && canAttackEntities) {
-            if(this.crosshairTarget.getType() != ENTITY && attackProgress < 4.0) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
-            if(this.crosshairTarget.getType() != ENTITY && player.hurtTime > 0) attemptToAimAssistTarget(player.getAttacker(), attackRange);
-            if(this.crosshairTarget.getType() != ENTITY) prevTargettedEntity = null;
+        if(VersusSettings.CAN_AIM_ASSIST && (canAttackEntities || canSoonAttackEntities)) { // Enables some help & coyote time
+            if(attackProgress == 1.0f) prevTargettedEntity = null;
+            else if(this.crosshairTarget.getType() != ENTITY) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
+            else if(this.crosshairTarget.getType() != ENTITY) attemptToAimAssistTarget(player.getAttacker(), attackRange);
         }
 
         if(DEBUG_MODE && System.nanoTime() - timeStart > 200000) VersusMod.MOD_LOGGER.warn("PLAYERS - ATTACKING - Aim assist was incredibly slow: " + ((double)(System.nanoTime() - timeStart)/1000000.0) + " ms");

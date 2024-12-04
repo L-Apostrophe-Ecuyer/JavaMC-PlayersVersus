@@ -11,6 +11,7 @@ import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -19,7 +20,6 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.LightType;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
@@ -29,20 +29,11 @@ public class SugarCaneTopBlock extends Block {
     public static final MapCodec<SugarCaneTopBlock> CODEC = createCodec(SugarCaneTopBlock::new);
     protected static final VoxelShape SHAPE = Block.createCuboidShape(2.0, 0.0, 2.0, 14.0, 10.0, 14.0);
     public static final IntProperty AGE = Properties.AGE_15;
-    public static final IntProperty GROUND_TYPE = IntProperty.of("ground_type", 0, 8);
-    private static final int TYPE_REGULAR = 0;
-    private static final int TYPE_SAND = 1;
-    private static final int TYPE_RED_SAND = 2;
-    private static final int TYPE_BROWN_MUD = 3;
-    private static final int TYPE_GREY_MUD = 4;
-    private static final int TYPE_CLAY = 5;
-    private static final int TYPE_MUD_CAVE = 6;
-    private static final int TYPE_PALE = 7;
-    private static final int TYPE_UNGROWING = 8;
+    public static final BooleanProperty CAN_GROW = BooleanProperty.of("can_grow");
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(GROUND_TYPE).add(AGE);
+        builder.add(CAN_GROW).add(AGE);
     }
 
     @Override
@@ -52,7 +43,7 @@ public class SugarCaneTopBlock extends Block {
 
     public SugarCaneTopBlock(AbstractBlock.Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(GROUND_TYPE, Integer.valueOf(TYPE_REGULAR)).with(AGE, Integer.valueOf(0)));
+        this.setDefaultState(this.stateManager.getDefaultState().with(CAN_GROW, false).with(AGE, Integer.valueOf(0)));
     }
 
     @Override
@@ -66,7 +57,7 @@ public class SugarCaneTopBlock extends Block {
     }
 
     public BlockState getStuntedState() {
-        return this.getDefaultState().with(GROUND_TYPE, TYPE_UNGROWING);
+        return this.getDefaultState().with(CAN_GROW, false);
     }
 
 
@@ -104,12 +95,14 @@ public class SugarCaneTopBlock extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        int groundState = state.get(GROUND_TYPE);
-        if(groundState == TYPE_UNGROWING) return;
 
         BlockState blockStateBelow = world.getBlockState(pos.down());
         int numSugarCaneBelow = blockStateBelow.isOf(Blocks.SUGAR_CANE) ? 1 : 0;
-        int chanceToGrow = groundState == -1 ? 128 : numSugarCaneBelow > 0 ? 64 : blockStateBelow.isIn(BlockTags.SAND) ? 32 : 16;
+        int chanceToGrow = numSugarCaneBelow == 0 ? 128 : numSugarCaneBelow > 0 ? 64 : blockStateBelow.isIn(BlockTags.SAND) ? 32 : 16;
+        if(!state.get(CAN_GROW)) {
+            if(numSugarCaneBelow > 0) return;
+            else chanceToGrow /= 4;
+        }
 
         if (random.nextInt(chanceToGrow) == 1) return;
         if (world.isAir(pos.up())) {
@@ -138,17 +131,8 @@ public class SugarCaneTopBlock extends Block {
             ctx.getWorld().setBlockState(blockPosDown, Blocks.SUGAR_CANE.getDefaultState());
             return this.getDefaultState();
         }
-        else if(blockStateDown.isOf(Blocks.SAND)) return this.getDefaultState().with(GROUND_TYPE, TYPE_SAND);
-        else if(blockStateDown.isOf(Blocks.RED_SAND)) return this.getDefaultState().with(GROUND_TYPE, TYPE_RED_SAND);
-        else if(blockStateDown.isOf(Blocks.MUD)) return this.getDefaultState().with(GROUND_TYPE, TYPE_GREY_MUD);
-        else if(blockStateDown.isOf(Blocks.CLAY)) return this.getDefaultState().with(GROUND_TYPE, TYPE_CLAY);
-        else if(blockStateDown.isOf(CustomBlocks.BROWN_MUD)) {
-            if(ctx.getWorld().getLightLevel(LightType.SKY, ctx.getBlockPos()) > 4) return this.getDefaultState().with(GROUND_TYPE, TYPE_BROWN_MUD);
-            else return this.getDefaultState().with(GROUND_TYPE, TYPE_MUD_CAVE);
-        }
-        else if(blockStateDown.isOf(Blocks.PALE_MOSS_BLOCK)) return this.getDefaultState().with(GROUND_TYPE, TYPE_PALE);
-        else if(blockStateDown.isOf(Blocks.SUGAR_CANE) && ctx.getWorld().getRandom().nextInt(4) == 0) return this.getDefaultState().with(GROUND_TYPE, TYPE_UNGROWING);
-        return CustomBlocks.SUGAR_CANE_TOP.getDefaultState();
+        else if(blockStateDown.isOf(Blocks.SUGAR_CANE) && ctx.getWorld().getRandom().nextInt(4) == 0) return this.getStuntedState();
+        return this.getDefaultState();
     }
 
     @Override

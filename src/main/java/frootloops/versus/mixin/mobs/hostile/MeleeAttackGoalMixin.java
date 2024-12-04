@@ -192,18 +192,20 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     else if(DEBUG) VersusMod.MOD_LOGGER.warn("Can land attack, by means of being near the player");
                     canAttack = true;
                 }
-                else if(Combat.getMobAttackBox(mob, false).intersects(Combat.getEntityHitbox(target))) {
-                    if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("Can swing, by means of intersecting with the player");
-                    else if(DEBUG) VersusMod.MOD_LOGGER.warn("Can land attack, by means of intersecting with the player");
-                    canAttack = true;
-                }
-                else if(canTrySwinging && target.getVehicle() == null && Combat.getMobAttackBox(mob, true).intersects(Combat.getEntityHitbox(target))) {
-                    if(DEBUG) VersusMod.MOD_LOGGER.warn("Jump attack!");
-                    double jumpBlockMultiplier = mob.getWorld().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
-                    double jumpVelocity = 0.5 * jumpBlockMultiplier + mob.getJumpBoostVelocityModifier();
-                    mob.getVelocity().multiply(1.6);
-                    mob.addVelocity(0.0, jumpVelocity, 0.0);
-                    canAttack = true;
+                else {
+                    if(Combat.getMobAttackBox(mob, false).intersects(Combat.getEntityHitbox(target))) {
+                        if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("Can swing, by means of intersecting with the player");
+                        else if(DEBUG) VersusMod.MOD_LOGGER.warn("Can land attack, by means of intersecting with the player");
+                        canAttack = true;
+                    }
+                    else if(canTrySwinging && target.getVehicle() == null && mob.isOnGround() && Combat.getMobAttackBox(mob, true).intersects(Combat.getEntityHitbox(target))) {
+                        if(DEBUG) VersusMod.MOD_LOGGER.warn("Jump attack!");
+                        double jumpBlockMultiplier = mob.getWorld().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
+                        double jumpVelocity = 0.5 * jumpBlockMultiplier + mob.getJumpBoostVelocityModifier();
+                        mob.getVelocity().multiply(1.6);
+                        mob.addVelocity(0.0, jumpVelocity, 0.0);
+                        canAttack = true;
+                    }
                 }
 
                 if(canAttack) {

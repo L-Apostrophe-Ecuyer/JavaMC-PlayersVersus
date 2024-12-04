@@ -34,7 +34,7 @@ import java.util.List;
 
 public abstract class Combat {
 
-    public static final double MIN_COOLDOWN_TO_SWING = 0.8d;
+    public static final float MIN_COOLDOWN_TO_SWING = 0.6f;
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 0.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
@@ -54,9 +54,7 @@ public abstract class Combat {
     }
 
     public static double getAttackChargeProgress(PlayerEntity player) {
-        int lastAttackTicks = ((LivingEntityAccessor)player).getLastAttackedTicks();
-        double attackSpeed = Combat.getCappedAttackSpeedOf(player);
-        return (attackSpeed * (double)lastAttackTicks) / 20.0d;
+        return player.getAttackCooldownProgress(0.0f);
     }
 
     public static double getAttackRangeBonusOf(ItemStack itemStack) {
@@ -72,19 +70,19 @@ public abstract class Combat {
         return 0.0d;
     }
 
-    public static double getAttackRange(PlayerEntity player, double attackChargeProgress) {
+    public static double getAttackRange(PlayerEntity player, float attackChargeProgress) {
         double reachAttributeValue = player.getAttributeValue(EntityAttributes.ENTITY_INTERACTION_RANGE);
-        attackChargeProgress = Math.min(1.0d, attackChargeProgress - 0.5d);
+        attackChargeProgress = Math.min(1.0f, attackChargeProgress - 0.5f);
         double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
         return reachAttributeValue + chargeTimeBonus + ridingBonus;
     }
 
     public static double getAttackRange(PlayerEntity player) {
-        return Combat.getAttackRange(player, Combat.getAttackChargeProgress(player));
+        return Combat.getAttackRange(player, player.getAttackCooldownProgress(0.0f));
     }
 
-    public static boolean isInAttackRangeOf(PlayerEntity player, Entity entity, double attackCooldownProgress) {
+    public static boolean isInAttackRangeOf(PlayerEntity player, Entity entity, float attackCooldownProgress) {
         double range = Combat.getAttackRange(player, attackCooldownProgress);
         return (range * range) > player.getEyePos().squaredDistanceTo(entity.getEyePos());
     }
@@ -119,7 +117,7 @@ public abstract class Combat {
                         VersusMod.MOD_LOGGER.warn("       * Entity Attacked!!!");
 
                         player.setSprinting(true);
-                        ((LivingEntityAccessor) player).setLastAttackedTicks(8 + 2 * level);
+                        player.resetLastAttackedTicks();
                         player.attack(targetEntity);
                     }
                 }
