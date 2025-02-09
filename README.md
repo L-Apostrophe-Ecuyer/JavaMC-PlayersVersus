@@ -1,5 +1,6 @@
 # Players Versus (Fabric)
-Mod that aims to streamline the design and experience of the vanilla game, mostly by improving the things already in the game and only rarely by adding new mobs, entities, items, blocks.
+Mod that aims to streamline the design and experience of the vanilla game, mostly by improving the things already in the game and only rarely by adding new mobs, entities, items, blocks. 
+Takes inspiration from old school MC, and from Better Than Adventure, to take the vanilla game's disparate (and sometimes shallow) ideas (amethyst, mud, copper, archeology, potion ingredients) and either deepens their uses, or makes them tie in to the game's other systems. The result is (hopefully) a more complete experience, where nothing feels like it doesn't belong, and where everything guides you to build something new and interesting.
 
 ## Current features:
 - Added fog as a weather event.
@@ -17,12 +18,12 @@ Mod that aims to streamline the design and experience of the vanilla game, mostl
   - Mobs can use shields.
   - Melee attacks from mobs have a short animation and can now be dodged by strafing.
   - Some new creatures found deep down in caves; blind creatures, or creepers that only move when looking away...
-  - Villagers and pillagers have animated pig ears.
 - Small tweaks to existing blocks and ores:
-  - Streamlined the early game, to be beginner friendly. New challenges and opportunities; especially for copper, mud, terracotta!
+  - Streamlined the early game, to be beginner friendly. New challenges and opportunities; especially for scaffolding, copper, mud, terracotta!
   - Improvements to late game, by making challenges more renewable, yet a lot scarier; especially caves deep down.
   - Potions system completely overhauled and streamlined; now only requires nether wart. Added concentrates, biles, and made lingering potions much easier to craft.
   - Enchanting table can take in already enchanted items and improve their enchantments
   - The anvil's level cost has been flattened for enchanted tools and removed for unenchanted tools.
   - In deep caves only, or while exposed to rain, regular torches can burn out. In return, mobs can hold treasures in hand when spawning deep down.
+  - Placing some blocks (like stairs) made easier when uncrouched.
   - Archeology and the brush reworked.
