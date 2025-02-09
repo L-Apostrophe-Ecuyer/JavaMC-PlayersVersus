@@ -2,13 +2,15 @@
 Mod that aims to streamline the design and experience of the vanilla game, mostly by improving the things already in the game and only rarely by adding new mobs, entities, items, blocks.
 
 ## Current features:
-
-- Valleys, caves & aquifers reworked.
-- New structure variants.
-- New health & regeneration mechanics.
 - Added fog as a weather event.
 - New sleeping and lunar cycle mechanics. Beds now speed up time, and difficulty (and ambient darkness) increases during new moons.
 - Complete inventory solution; Item merging, client-side inventory sorting, & smart hotbar swapping.
+- Optional health & regeneration mechanics overhaul.
+- Worldgen additions:
+  - Valleys, caves & aquifers reworked.
+  - New structure variants; trial towers, new desert pyramids, cold trail ruins, ruined villages.
+  - New transition biomes; mountainside jungle, mountainside forest, dark taiga forest, more.
+  - New cave biomes; frozen caves, deep caves, creeper caves (with creeper spores!)
 - Almost all mobs and PVE combat encounters sometimes tweaked (Skeletons), sometimes redesigned (Phantoms).
   - Mobs can use shields.
   - Melee attacks from mobs have a short animation and can now be dodged by strafing.
