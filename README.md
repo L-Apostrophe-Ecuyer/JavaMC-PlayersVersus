@@ -11,8 +11,8 @@ Takes inspiration from old school MC, and from Better Than Adventure, to take th
   - Note: wishlist feature to be able to jump while in a minecart or boat.
 - Worldgen additions:
   - Valleys, caves & aquifers reworked.
-  - New structure variants; trial towers, new desert pyramids, cold trail ruins, ruined villages.
-  - New transition biomes; mountainside jungle, mountainside forest, dark taiga forest, more.
+  - New structure variants; new Trial Towers, new desert pyramids, cold trail ruins, ruined villages.
+  - New transition biomes; mountainside jungle, mountainside oak forest, dark taiga forest, cold oak forest, and lots more.
   - New cave biomes; frozen caves, deep caves, badland caves, desert caves, & creeper caves (with new spores!)
 - Almost all mobs and PVE combat encounters sometimes tweaked (Skeletons), sometimes redesigned (Phantoms).
   - Mobs can use shields.
@@ -30,5 +30,6 @@ Takes inspiration from old school MC, and from Better Than Adventure, to take th
   - Enchanting table can take in already enchanted items and improve their enchantments
   - The anvil's level cost has been flattened for enchanted tools and removed for unenchanted tools.
   - In deep caves only, or while exposed to rain, regular torches can burn out. In return, mobs can hold treasures in hand when spawning deep down.
+  - Crops and sugar cane have gotten a few quality of life improvements. Added wheat grass, too!
   - Placing some blocks (like stairs) made easier when uncrouched.
-  - Archeology and the brush reworked.
+  - Archeology and the brush made into an actual game mechanic, rather than just point and click. Bonus: lots more structures have suspicious blocks.
