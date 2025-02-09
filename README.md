@@ -1,22 +1,20 @@
-# Mobs Reworked (Fabric)
+# Players Versus (Fabric)
+Mod that aims to streamline the design and experience of the vanilla game, mostly by improving the things already in the game and only rarely by adding new mobs, entities, items, blocks.
 
-## Improves melee PVE
-- Melee swing animations for mobs play slower and start before the attack can connect. This allows players to better block or dodge attacks, adding a bit more strategy.
-- Sprint attacks deal more knockback than before, and players performing critical jump attacks can now perform them while sprinting. 
-- Mob attack speed varies based off of the tool they're holding.
-- Getting attacked interrupts players eating.
-
-## Reworked Mobs
-- Creepers only spawn underground, to allow for them to be harder without griefing player builds. They have a bigger explosion radius, and can blow up even when they don't see the player, making for dangerous encounters and a much scarier caving experience.
-- Skeletons have less health, better drops, and can sometimes spawn with different equipment; including axes, swords, pickaxes, shovels. They're less punishing this way, while still being pretty threatning.
-- Zombies have more health, more movement speed, but don't see as well. If you're sneaky, you can avoid them without them detecting you.
-- Drowned swim much faster.
-- Warden's sonic boom is nerfed; it can be blocked, has a range of only 8 blocks, and is on a longer timer.
-
-## Reworked Dragon
-- A lot more aggressive. Fires more often, and will sweep towards players.
-- Dragon's fireballs explode in a sphere rather than a circle.
-
-## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+##Current features:
+- Valleys, caves & aquifers reworked.
+- New structure variants.
+- New health & regeneration mechanics.
+- New sleeping and lunar cycle mechanics. Beds now speed up time, and the light 
+- Complete inventory solution; Item merging, client-side inventory sorting, & smart hotbar swapping.
+- Almost all mobs and PVE combat encounters sometimes tweaked (Skeletons), sometimes redesigned (Phantoms).
+  - Mobs can use shields.
+  - Melee attacks from mobs have a short animation and can now be dodged by strafing.
+  - Some new creatures found deep down in caves; blind creatures, or creepers that only move when looking away...
+- Small tweaks to existing blocks and ores:
+  - Streamlined the early game, to be beginner friendly. New challenges and opportunities; especially for copper, mud, terracotta!
+  - Improvements to late game, by making challenges more renewable, yet a lot scarier; especially caves deep down.
+  - Potions system completely overhauled and streamlined; now only requires nether wart. Added concentrates, biles, and made lingering potions much easier to craft.
+  - Enchanting table can take in already enchanted items and improve their enchantments
+  - The anvil's level cost has been flattened for enchanted tools and removed for unenchanted tools.
+  - Archeology and the brush reworked.
