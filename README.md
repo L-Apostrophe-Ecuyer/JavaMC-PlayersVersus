@@ -1,11 +1,12 @@
 # Players Versus (Fabric)
 Mod that aims to streamline the design and experience of the vanilla game, mostly by improving the things already in the game and only rarely by adding new mobs, entities, items, blocks.
 
-##Current features:
+## Current features:
+
 - Valleys, caves & aquifers reworked.
 - New structure variants.
 - New health & regeneration mechanics.
-- New sleeping and lunar cycle mechanics. Beds now speed up time, and the light 
+- New sleeping and lunar cycle mechanics. Beds now speed up time, and difficulty (and ambient darkness) increases during new moons. 
 - Complete inventory solution; Item merging, client-side inventory sorting, & smart hotbar swapping.
 - Almost all mobs and PVE combat encounters sometimes tweaked (Skeletons), sometimes redesigned (Phantoms).
   - Mobs can use shields.
