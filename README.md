@@ -20,6 +20,7 @@ Takes inspiration from old school MC, and from Better Than Adventure, to take th
   - Some new creatures found deep down in caves; blind creatures, or creepers that only move when looking away...
 - Potions system completely overhauled and streamlined:
   - Brewing now only requires nether wart, which is a lot more common.
+  - Regular potions can be stacked (up to 8).
   - All potions can be 'corrupted' with a fermented spider eye.
   - Added placeable (and edible) potion concentrates, biles. and made lingering potions much easier to craft.
   - New effects; buoyancy, haunting, big, small, and likely some more that I'm forgetting.
