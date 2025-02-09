@@ -19,7 +19,7 @@ Takes inspiration from old school MC, and from Better Than Adventure, to take th
   - Melee attacks from mobs have a short animation and can now be dodged by strafing.
   - Some new creatures found deep down in caves; blind creatures, or creepers that only move when looking away...
 - Potions system completely overhauled and streamlined:
-  - Brewking now only requires nether wart and a given ingredient.
+  - Brewing now only requires nether wart, which is a lot more common.
   - All potions can be 'corrupted' with a fermented spider eye.
   - Added placeable (and edible) potion concentrates, biles. and made lingering potions much easier to craft.
   - New effects; buoyancy, haunting, big, small, and likely some more that I'm forgetting.
