@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.client.environment.visuals;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.VersusModServer;
 import frootloops.versus.mod.environment.CustomSpecialEffects;
 import net.fabricmc.api.EnvType;
@@ -72,6 +73,9 @@ public abstract class WeatherRendererMixin {
     @Overwrite
     public void addParticlesAndSound(ClientWorld world, Camera camera, int ticks, ParticlesMode particlesMode) {
         float amountOfFog = world.getRainGradient(1.0F);
+        float amountOfRain = world.getThunderGradient(1.0F) / 2.0F;
+        VersusMod.MOD_LOGGER.warn("[ CLIENT ]  Is Raining? " + world.isRaining() +  "  -  Thunder amount: " + amountOfRain  + "  -  Fog amount: " + amountOfFog);
+
         if(amountOfFog < 0.1f) return;
 
         BlockPos cameraPos = BlockPos.ofFloored(camera.getPos());
@@ -81,7 +85,6 @@ public abstract class WeatherRendererMixin {
             world.playSoundAtBlockCenter(cameraPos.up(3), CustomSpecialEffects.FOG_WIND_SOUND, SoundCategory.WEATHER, 0.2F, 1.0F, false);
         }
 
-        float amountOfRain = world.getThunderGradient(1.0F) / 2.0F;
         if (amountOfRain > 0.1F) {
             BlockPos blockPos2 = null;
 

@@ -39,7 +39,7 @@
 
     "environment.MinecartExperimentalMixin",
     "environment.MinecartMixin",
-    "environment.WorldMixin",
+    "environment.ServerWorldWeatherMixin",
 
     "items.brewing.BadOmenEffectInstanceMixin",
     "items.brewing.BrewingRecipeRegistryMixin",
