@@ -143,8 +143,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     private boolean shouldPrioritizeOffhand(){
         ItemStack offhandStack = player.getOffHandStack();
         ItemStack mainhandStack = player.getMainHandStack();
-        if(offhandStack.isEmpty() || mainhandStack.isEmpty()) return false;
-        if(offhandStack.getItem() instanceof ShieldItem){
+        if(offhandStack.isEmpty() || mainhandStack.isEmpty() || player.getItemCooldownManager().isCoolingDown(offhandStack)) return false;
+        if(offhandStack.getUseAction() == UseAction.BLOCK){
             if (crosshairTarget.getType() == HitResult.Type.ENTITY) {
                 if(player.isUsingItem()) {
                     return player.getActiveItem() == offhandStack;

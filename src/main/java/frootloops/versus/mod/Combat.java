@@ -38,7 +38,7 @@ public abstract class Combat {
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 0.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
-    public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
+    public static final double PLAYER_BASE_ATTACK_REACH = 3.0d;
     public static final double PLAYER_MAX_ATTACK_SPEED = 2.5d;
 
 

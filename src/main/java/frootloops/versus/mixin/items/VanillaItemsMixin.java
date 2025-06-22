@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.items;
 
-import frootloops.versus.mod.items.ItemsAndStacks;
+import frootloops.versus.mod.items.VanillaItemsAndStacks;
 import net.fabricmc.fabric.api.item.v1.FabricItemStack;
 import net.minecraft.component.ComponentHolder;
 import net.minecraft.component.MergedComponentMap;
@@ -34,27 +34,27 @@ public abstract class VanillaItemsMixin implements ComponentHolder, FabricItemSt
 
         @ModifyVariable(method = "Lnet/minecraft/item/ItemStack;<init>(Lnet/minecraft/item/ItemConvertible;I)V", at = @At("HEAD"), ordinal = 0)
         private static ItemConvertible injected(ItemConvertible item) {
-                return (ItemConvertible) ItemsAndStacks.getReplacementItem(item.asItem());
+                return (ItemConvertible) VanillaItemsAndStacks.getReplacementItem(item.asItem());
         }
 
         @Inject(method = "isItemEnabled", at = @At("HEAD"), cancellable = true)
         public void isItemEnabled(FeatureSet enabledFeatures, CallbackInfoReturnable<Boolean> cir) {
-                if(ItemsAndStacks.hasModdedReplacementItem(item)) cir.setReturnValue(false);
+                if(VanillaItemsAndStacks.hasModdedReplacementItem(item)) cir.setReturnValue(false);
         }
 
         @Inject(method = "onClicked", at = @At("HEAD"), cancellable = false)
         public void onClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference, CallbackInfoReturnable<Boolean> cir) {
-                if(ItemsAndStacks.hasVanillaReplacementItem(item)) {
-                        ItemStack newStack = new ItemStack(ItemsAndStacks.getVanillaReplacementItem(item).getRegistryEntry(), count, components.getChanges());
+                if(VanillaItemsAndStacks.hasVanillaReplacementItem(item)) {
+                        ItemStack newStack = new ItemStack(VanillaItemsAndStacks.getVanillaReplacementItem(item).getRegistryEntry(), count, components.getChanges());
                         slot.setStack(newStack);
                 }
         }
 
         @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
         public void getMaxCount(CallbackInfoReturnable<Integer> cir) {
-                int customMaxCount = ItemsAndStacks.getOverhauledMaxStackSize(item);
+                int customMaxCount = VanillaItemsAndStacks.getOverhauledMaxStackSize(item);
                 if(customMaxCount > 0) {
-                        cir.setReturnValue(ItemsAndStacks.getOverhauledMaxStackSize(item));
+                        cir.setReturnValue(VanillaItemsAndStacks.getOverhauledMaxStackSize(item));
                         cir.cancel();
                 }
         }

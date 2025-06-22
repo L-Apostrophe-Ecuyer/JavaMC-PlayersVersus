@@ -11,7 +11,7 @@ import net.minecraft.registry.Registries;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ItemsAndStacks {
+public abstract class VanillaItemsAndStacks {
 
     private static Map<Item, Integer> DEFAULT_MAX_STACK_SIZE = new HashMap<>();
 

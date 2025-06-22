@@ -10,7 +10,6 @@
 		"environment.visuals.LightmapMixin",
 		"environment.audio.MusicTrackerMixin",
 
-		"mobs.BipedalModelMixin",
 		"mobs.hostile.SkeletonModelMixin",
 		"mobs.hostile.ZombieModelMixin",
 		"mobs.hostile.PiglinModelMixin",

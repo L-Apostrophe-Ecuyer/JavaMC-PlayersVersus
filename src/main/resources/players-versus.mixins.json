@@ -102,6 +102,7 @@
     "mobs.hostile.overworld.SkeletonMixin",
     "mobs.hostile.overworld.SpiderMixin",
     "mobs.hostile.overworld.SilverfishMixin",
+    "mobs.hostile.overworld.SlimeMixin",
     "mobs.hostile.overworld.WardenMixin",
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",

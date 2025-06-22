@@ -16,7 +16,9 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -134,20 +136,23 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if(source.getAttacker() instanceof LivingEntity attacker) {
+        if(source.getAttacker() instanceof HostileEntity || source.getAttacker() instanceof PlayerEntity) {
 
             // Modify Invincibility Frames:
             if (timeUntilRegen > 10) {
                 if (source.isOf(DamageTypes.ARROW)) {
-                    if(attacker.getMainHandStack().isOf(Items.CROSSBOW)) timeUntilRegen = 9;
+                    // Crossbow arrows don't trigger invincibility frames, allowing for multishot shotguns:
+                    if(((LivingEntity)source.getAttacker()).getMainHandStack().isOf(Items.CROSSBOW)) timeUntilRegen = 9;
+                    // Regular bow shots give only 4 ticks of invincibility
                     else timeUntilRegen = 14;
                 }
+                // Anything else gives 8 ticks of invincibility
                 else if (timeUntilRegen > 18 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 18;
             }
 
             // Curse of Ender Enchantment:
             if(Enchants.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
-                CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), attacker);
+                CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), source.getAttacker());
             }
         }
         else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 12;

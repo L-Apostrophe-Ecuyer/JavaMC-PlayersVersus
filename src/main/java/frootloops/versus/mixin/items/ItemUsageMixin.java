@@ -1,19 +1,19 @@
 package frootloops.versus.mixin.items;
 
-import frootloops.versus.mod.items.ItemsAndStacks;
+import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.items.VanillaItemsAndStacks;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 @Mixin(Item.class)
@@ -27,18 +27,18 @@ public class ItemUsageMixin {
     @Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable = true)
     public void getMaxUseTime(ItemStack stack, LivingEntity user, CallbackInfoReturnable<Integer> cir) {
         Item item = stack.getItem();
-        int maxUseTime = ItemsAndStacks.getOverhauledMaxUseTime(item);
+        int maxUseTime = VanillaItemsAndStacks.getOverhauledMaxUseTime(item);
         if(maxUseTime > 0) {
             cir.setReturnValue(maxUseTime);
         }
-        else if(item instanceof SwordItem || item instanceof HoeItem) {
-            UseAction useAction = item.getUseAction(stack);
-            if(useAction == UseAction.BLOCK) cir.setReturnValue(72000);
-            else if(useAction == UseAction.BRUSH) cir.setReturnValue(6);
-            else cir.setReturnValue(0);
-        }
         else if (stack.contains(DataComponentTypes.FOOD)) {
             cir.setReturnValue(28);
+        }
+        else if(stack.isIn(ItemTags.DURABILITY_ENCHANTABLE)) {
+            UseAction useAction = item.getUseAction(stack);
+            if(useAction == UseAction.BLOCK) cir.setReturnValue(72000);
+            else if(useAction == UseAction.BRUSH && (Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE))) cir.setReturnValue(6);
+            else cir.setReturnValue(0);
         }
     }
 

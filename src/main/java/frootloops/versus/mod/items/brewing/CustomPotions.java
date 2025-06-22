@@ -1,27 +1,22 @@
 package frootloops.versus.mod.items.brewing;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.items.RegisteringCustomItems;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.Item;
 import net.minecraft.item.LingeringPotionItem;
 import net.minecraft.item.PotionItem;
 import net.minecraft.item.SplashPotionItem;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.Potions;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
-import java.util.List;
-
 import static frootloops.versus.VersusMod.MOD_ID;
-import static frootloops.versus.mod.items.ItemsAndStacks.MAX_POTION_STACK_SIZE;
+import static frootloops.versus.mod.items.VanillaItemsAndStacks.MAX_POTION_STACK_SIZE;
 import static frootloops.versus.mod.items.RegisteringCustomItems.getSettings;
 
 public abstract class CustomPotions {
