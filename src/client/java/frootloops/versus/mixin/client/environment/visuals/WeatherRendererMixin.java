@@ -74,8 +74,6 @@ public abstract class WeatherRendererMixin {
     public void addParticlesAndSound(ClientWorld world, Camera camera, int ticks, ParticlesMode particlesMode) {
         float amountOfFog = world.getRainGradient(1.0F);
         float amountOfRain = world.getThunderGradient(1.0F) / 2.0F;
-        VersusMod.MOD_LOGGER.warn("[ CLIENT ]  Is Raining? " + world.isRaining() +  "  -  Thunder amount: " + amountOfRain  + "  -  Fog amount: " + amountOfFog);
-
         if(amountOfFog < 0.1f) return;
 
         BlockPos cameraPos = BlockPos.ofFloored(camera.getPos());
