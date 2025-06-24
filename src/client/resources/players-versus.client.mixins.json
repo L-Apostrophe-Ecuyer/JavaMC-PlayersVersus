@@ -3,7 +3,7 @@
 	"package": "frootloops.versus.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"environment.visuals.ClientWorldMixin",
+		"environment.visuals.ClientWorldSkyMixin",
 		"environment.visuals.FogRendererMixin",
 		"environment.visuals.WorldRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
