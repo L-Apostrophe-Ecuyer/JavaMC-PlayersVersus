@@ -2,11 +2,29 @@
   "fallback": "minecraft:empty",
   "elements": [
     {
-      "weight": 4,
+      "weight": 2,
       "element": {
         "element_type": "minecraft:single_pool_element",
         "projection": "rigid",
         "location": "players-versus:trial_tower/tower_desert_1",
+        "processors":  "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/tower_desert_2",
+        "processors":  "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/tower_desert_3",
         "processors":  "players-versus:trial_tower"
       }
     }

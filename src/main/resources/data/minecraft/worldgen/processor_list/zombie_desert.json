@@ -4,6 +4,21 @@
       "processor_type": "minecraft:rule",
       "rules": [
         {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:farmland"
+          },
+          "output_state": {
+            "Name": "minecraft:farmland",
+            "Properties": {
+              "moisture": "0"
+            }
+          }
+        },
+        {
           "input_predicate": {
             "predicate_type": "minecraft:tag_match",
             "tag": "minecraft:beds"
@@ -179,7 +194,7 @@
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "Name": "minecraft:mud"
           }
         },
         {

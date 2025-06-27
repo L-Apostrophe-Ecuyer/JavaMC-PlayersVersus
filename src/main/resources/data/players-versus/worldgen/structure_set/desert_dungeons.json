@@ -1,0 +1,24 @@
+{
+  "structures": [
+    {
+      "structure": "players-versus:desert_pyramid",
+      "weight": 4
+    },
+    {
+      "structure": "players-versus:trial_tower",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 39480234,
+    "frequency_reduction_method": "default",
+    "frequency": 0.4,
+    "exclusion_zone": {
+      "other_set": "minecraft:desert_pyramids",
+      "chunk_count": 5
+    },
+    "spacing": 16,
+    "separation": 4
+  }
+}
