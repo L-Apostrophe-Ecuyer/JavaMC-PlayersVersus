@@ -2,7 +2,8 @@ package frootloops.versus;
 
 public abstract class VersusSettings {
 
-    public static int MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS = 1;
+    public static final int MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS = 1;
+    public static final int BRUSHING_TICKS_PER_STAGE = 1;
     public static boolean CAN_AIM_ASSIST = true;
     public static boolean CAN_HOLD_TO_ATTACK = true;
     public static boolean DO_HOTBAR_SWAPPING_ON_PICK_KEY = true;
