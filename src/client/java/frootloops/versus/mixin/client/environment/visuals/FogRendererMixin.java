@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+
 @Environment(EnvType.CLIENT)
 @Mixin(BackgroundRenderer.class)
 public abstract class FogRendererMixin {
@@ -48,4 +49,5 @@ public abstract class FogRendererMixin {
     private static float lessDenseNetherFog(float maxRenderDistance) {
         return 384.0f;
     }
+
 }

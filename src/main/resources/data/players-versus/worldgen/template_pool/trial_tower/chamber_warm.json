@@ -2,11 +2,20 @@
   "fallback": "minecraft:empty",
   "elements": [
     {
-      "weight": 7,
+      "weight": 3,
       "element": {
         "element_type": "minecraft:single_pool_element",
         "projection": "rigid",
         "location": "players-versus:trial_tower/chamber_ring_of_fire_1",
+        "processors": "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 4,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/chamber_ring_of_fire_2",
         "processors": "players-versus:trial_tower"
       }
     },
@@ -60,7 +69,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "projection": "rigid",
-        "location": "players-versus:trial_tower/minotaur_1",
+        "location": "players-versus:trial_tower/chamber_minotaur_1",
         "processors": "players-versus:trial_tower"
       }
     },
