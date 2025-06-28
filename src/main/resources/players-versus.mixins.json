@@ -104,6 +104,7 @@
     "mobs.hostile.overworld.SilverfishMixin",
     "mobs.hostile.overworld.SlimeMixin",
     "mobs.hostile.overworld.WardenMixin",
+    "mobs.hostile.overworld.WardenVibrationListenerMixin",
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
     "mobs.hostile.overworld.ZombieVillagerMixin",

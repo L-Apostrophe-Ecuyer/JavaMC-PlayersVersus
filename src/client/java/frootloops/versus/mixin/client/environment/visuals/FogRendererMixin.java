@@ -37,14 +37,6 @@ public abstract class FogRendererMixin {
         return viewDistance * 0.95f;
     }
 
-    @Inject(method = "getFogModifier", at = @At("HEAD"), cancellable = true)
-    private static void noMoreDarknessFog(Entity entity, float tickDelta, CallbackInfoReturnable cir) {
-        if (entity instanceof PlayerEntity player) {
-            if(player.hasStatusEffect(StatusEffects.DARKNESS) && !player.hasStatusEffect(StatusEffects.BLINDNESS)) cir.cancel();
-            else cachedPlayer = player;
-        }
-    }
-
     @ModifyConstant(method = "applyFog", constant = @Constant(floatValue = 192.0f))
     private static float lessDenseNetherFog(float maxRenderDistance) {
         return 384.0f;

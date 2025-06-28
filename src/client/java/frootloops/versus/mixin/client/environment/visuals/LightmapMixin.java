@@ -57,7 +57,7 @@ public abstract class LightmapMixin {
 
     @Overwrite
     private float getDarkness(LivingEntity entity, float factor, float delta) {
-        if(factor > 0f) return Math.max(0.0f, MathHelper.cos(((float)entity.age - delta) * (float)Math.PI * 0.025f) * 0.45f * factor);
+        if(factor > 0f) return Math.max(0.0f, MathHelper.cos(((float)entity.age - delta) * (float)Math.PI * 0.025f) * factor);
         else if(this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) return 0f;
         else if(entity.getY() < -32d) return 32f/384f;
         else if(entity.getY() < 0d) return -((float)entity.getY())/384f;

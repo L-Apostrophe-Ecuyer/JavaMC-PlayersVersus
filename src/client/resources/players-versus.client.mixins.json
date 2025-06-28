@@ -5,6 +5,7 @@
 	"client": [
 		"environment.visuals.ClientWorldSkyMixin",
 		"environment.visuals.FogRendererMixin",
+		"environment.visuals.DarknessFogRendererMixin",
 		"environment.visuals.WorldRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",
