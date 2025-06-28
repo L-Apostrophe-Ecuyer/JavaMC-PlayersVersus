@@ -6,10 +6,11 @@ import frootloops.versus.mod.items.brewing.ConcentrateItem;
 import net.minecraft.block.*;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Rarity;
 
 import java.util.HashMap;
@@ -46,6 +47,9 @@ public class ItemSortingGroups {
         }
 
         protected void insertWithinBounds(InventorySlot slot, int startIndex, int maxIndex) {
+            if(maxIndex > inventorySlots.size()) maxIndex = inventorySlots.size();
+            if(startIndex > maxIndex) startIndex = maxIndex;
+
             if(slot.stack.getMaxDamage() > 0) {
                 this.insertToolWithinBounds(slot, startIndex, maxIndex);
                 return;
@@ -64,6 +68,9 @@ public class ItemSortingGroups {
         }
 
         protected void insertToolWithinBounds(InventorySlot slot, int startIndex, int maxIndex) {
+            if(maxIndex > inventorySlots.size()) maxIndex = inventorySlots.size();
+            if(startIndex > maxIndex) startIndex = maxIndex;
+
             ItemStack otherStack = null, stack = slot.stack;
             int otherDurability = 0, durability = stack.getMaxDamage() - stack.getDamage();
 
@@ -116,7 +123,7 @@ public class ItemSortingGroups {
             else inventorySlots.add(maxIndex, slot);
         }
 
-        private void forceInsert(InventorySlot slot) {
+        protected void forceInsert(InventorySlot slot) {
             if(!this.tryInsert(slot)) inventorySlots.add(slot);
         }
 
@@ -133,8 +140,9 @@ public class ItemSortingGroups {
         }
 
         protected void merge(SortedItemGroup other) {
-            inventorySlots.addAll(other.inventorySlots);
-            other.clear();
+            while(this.size() < 9 && this.size() > 0 && other.size() > 0) {
+                this.forceInsert(other.popFirst());
+            }
         }
 
         protected void clear() {
@@ -144,6 +152,139 @@ public class ItemSortingGroups {
         protected void giveExtrasTo(SortedItemGroup other) {
             while(this.size() > 9) {
                 other.forceInsert(this.popLast());
+            }
+        }
+    }
+
+    protected static abstract class SortedToolGroup extends SortedItemGroup {
+        protected int indexToolsEnd = 0, indexSortedEnd = 0, indexExtraSortedEnd = 0, indexPrimaryBlocksEnd = 0, indexSecondaryBlocksEnd = 0;
+        protected final TagKey<Item> toolTag;
+        protected final TagKey<Block> primaryBlockTag, secondaryBlockTag;
+        protected final Map<Item, Integer> mainSortedItemsMap, extraSortedItemsMap;
+
+        protected SortedToolGroup(TagKey<Item> toolTag, Map<Item, Integer> sortedItemsMap, Map<Item, Integer> secondarySortedItemsMap, TagKey<Block> primaryBlockTag, TagKey<Block> secondaryBlockTag) {
+            this.toolTag = toolTag;
+            this.primaryBlockTag = primaryBlockTag;
+            this.secondaryBlockTag = secondaryBlockTag;
+            this.mainSortedItemsMap = sortedItemsMap;
+            this.extraSortedItemsMap = secondarySortedItemsMap;
+        }
+
+        @Override
+        protected InventorySlot popFirst() {
+            indexToolsEnd--;
+            indexSortedEnd--;
+            indexExtraSortedEnd--;
+            indexPrimaryBlocksEnd--;
+            indexSecondaryBlocksEnd--;
+            return inventorySlots.removeFirst();
+        }
+
+        @Override
+        protected InventorySlot popLast() {
+            if(inventorySlots.size() == indexToolsEnd) indexToolsEnd--;
+            if(inventorySlots.size() == indexSortedEnd) indexSortedEnd--;
+            if(inventorySlots.size() == indexExtraSortedEnd) indexExtraSortedEnd--;
+            if(inventorySlots.size() == indexPrimaryBlocksEnd) indexPrimaryBlocksEnd--;
+            if(inventorySlots.size() == indexSecondaryBlocksEnd) indexSecondaryBlocksEnd--;
+            return inventorySlots.removeLast();
+        }
+
+        @Override
+        protected boolean tryInsert(InventorySlot slot) {
+            Item item = slot.stack.getItem();
+            if(toolTag != null && slot.stack.isIn(toolTag)) {
+                this.insertToolWithinBounds(slot, 0, indexToolsEnd);
+                indexToolsEnd++;
+                indexSortedEnd++;
+                indexExtraSortedEnd++;
+                indexPrimaryBlocksEnd++;
+                indexSecondaryBlocksEnd++;
+                return true;
+            }
+            else if(mainSortedItemsMap != null && mainSortedItemsMap.containsKey(item)) {
+                this.insertMappedItemWithinBounds(slot, indexToolsEnd + 1, indexSortedEnd, mainSortedItemsMap);
+                indexSortedEnd++;
+                indexExtraSortedEnd++;
+                indexPrimaryBlocksEnd++;
+                indexSecondaryBlocksEnd++;
+                return true;
+            }
+            else if(extraSortedItemsMap != null && extraSortedItemsMap.containsKey(item)) {
+                this.insertMappedItemWithinBounds(slot, indexSortedEnd + 1, indexExtraSortedEnd, extraSortedItemsMap);
+                indexExtraSortedEnd++;
+                indexPrimaryBlocksEnd++;
+                indexSecondaryBlocksEnd++;
+                return true;
+            }
+            else if(item instanceof BlockItem blockItem) {
+                if(secondaryBlockTag != null && blockItem.getBlock().getDefaultState().isIn(secondaryBlockTag)) {
+                    this.insertWithinBounds(slot, indexSecondaryBlocksEnd + 1, this.inventorySlots.size());
+                    indexSecondaryBlocksEnd++;
+                    return true;
+                }
+                else if(primaryBlockTag != null && blockItem.getBlock().getDefaultState().isIn(primaryBlockTag)) {
+                    this.insertWithinBounds(slot, indexExtraSortedEnd + 1, indexPrimaryBlocksEnd);
+                    indexPrimaryBlocksEnd++;
+                    indexSecondaryBlocksEnd++;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        protected void clear() {
+            indexToolsEnd = 0;
+            indexSortedEnd = 0;
+            indexExtraSortedEnd = 0;
+            indexPrimaryBlocksEnd = 0;
+            indexSecondaryBlocksEnd = 0;
+            inventorySlots.clear();
+        }
+
+        @Override
+        protected void merge(SortedItemGroup other) {
+            if(other instanceof SortedToolGroup toolGroup) {
+                int currentEndIndex = indexToolsEnd;
+                for (int i = 0; i < Math.min(9 - this.size(), toolGroup.indexToolsEnd); i++){
+                    this.insertToolWithinBounds(toolGroup.popFirst(), currentEndIndex, indexToolsEnd);
+                    indexToolsEnd++;
+                    indexSortedEnd++;
+                    indexExtraSortedEnd++;
+                    indexPrimaryBlocksEnd++;
+                    indexSecondaryBlocksEnd++;
+                }
+
+                if(this.size() + toolGroup.indexSortedEnd <= 9 && toolGroup.indexToolsEnd < toolGroup.indexSortedEnd && toolGroup.size() > 0) {
+                    for (int i = 0; i < Math.min(9 - this.size(), toolGroup.indexSortedEnd); i++) {
+                        this.inventorySlots.add(toolGroup.inventorySlots.remove(toolGroup.indexToolsEnd));
+                        toolGroup.indexSortedEnd--;
+                        toolGroup.indexExtraSortedEnd--;
+                        toolGroup.indexPrimaryBlocksEnd--;
+                        toolGroup.indexSecondaryBlocksEnd--;
+                    }
+                }
+
+                if(this.size() + toolGroup.indexExtraSortedEnd <= 9 && toolGroup.indexSortedEnd < toolGroup.indexExtraSortedEnd && toolGroup.size() > 0) {
+                    for (int i = 0; i < Math.min(9 - this.size(), toolGroup.indexExtraSortedEnd); i++) {
+                        this.inventorySlots.add(toolGroup.inventorySlots.remove(toolGroup.indexSortedEnd));
+                        toolGroup.indexExtraSortedEnd--;
+                        toolGroup.indexPrimaryBlocksEnd--;
+                        toolGroup.indexSecondaryBlocksEnd--;
+                    }
+                }
+
+                if(this.size() + toolGroup.size() <= 9 && toolGroup.size() > 0) {
+                    this.inventorySlots.addAll(toolGroup.inventorySlots);
+                    toolGroup.clear();
+                }
+            }
+            else if(other instanceof CombatItems) {
+                other.merge(this);
+            }
+            else {
+                super.merge(other);
             }
         }
     }
@@ -171,49 +312,10 @@ public class ItemSortingGroups {
     /**
      * PICKAXES
      */
-    protected static class PickaxeMineableItems extends SortedItemGroup {
-        int indexPickaxesEnd = 0;
-        int indexSortedStonesEnd = 0;
-        int indexSortedCopperEnd = 0;
+    protected static class PickaxeMineableItems extends SortedToolGroup {
 
-        @Override
-        protected boolean tryInsert(InventorySlot slot) {
-            Item item = slot.stack.getItem();
-            if(item instanceof PickaxeItem) {
-                this.insertToolWithinBounds(slot, 0, indexPickaxesEnd);
-                indexPickaxesEnd++;
-                indexSortedStonesEnd++;
-                indexSortedCopperEnd++;
-                return true;
-            }
-            else if(item instanceof BlockItem blockItem && blockItem != Items.GRAVEL) {
-                if(blockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
-                    if(ItemSortingGroups.ITEMS_PICKAXE_MINEABLE.containsKey(item)) {
-                        this.insertMappedItemWithinBounds(slot, indexPickaxesEnd + 1, indexSortedStonesEnd, ITEMS_PICKAXE_MINEABLE);
-                        indexSortedStonesEnd++;
-                        indexSortedCopperEnd++;
-                        return true;
-                    }
-                    else if(ItemSortingGroups.ITEMS_COPPER_BLOCKS.containsKey(item)) {
-                        this.insertMappedItemWithinBounds(slot, indexSortedStonesEnd + 1, indexSortedCopperEnd, ITEMS_COPPER_BLOCKS);
-                        indexSortedCopperEnd++;
-                        return true;
-                    }
-                    else {
-                        this.insertWithinBounds(slot, indexSortedCopperEnd + 1, this.inventorySlots.size());
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        protected void clear() {
-            indexPickaxesEnd = 0;
-            indexSortedStonesEnd = 0;
-            indexSortedCopperEnd = 0;
-            inventorySlots.clear();
+        protected PickaxeMineableItems() {
+            super(ItemTags.PICKAXES,  ItemSortingGroups.ITEMS_PICKAXE_MINEABLE, ItemSortingGroups.ITEMS_COPPER_BLOCKS, BlockTags.PICKAXE_MINEABLE, null);
         }
     }
 
@@ -221,30 +323,10 @@ public class ItemSortingGroups {
     /**
      * HOES
      */
-    protected static class HoeMineableItems extends SortedItemGroup {
-        int indexHoesEnd = 0;
+    protected static class HoeMineableItems extends SortedToolGroup {
 
-        @Override
-        protected boolean tryInsert(InventorySlot slot) {
-            Item item = slot.stack.getItem();
-            if(item instanceof HoeItem) {
-                this.insertToolWithinBounds(slot, 0, indexHoesEnd);
-                indexHoesEnd++;
-                return true;
-            }
-            else if(item instanceof BlockItem blockItem) {
-                if(blockItem.getBlock().getDefaultState().isIn(BlockTags.HOE_MINEABLE)) {
-                    this.insertWithinBounds(slot, indexHoesEnd + 1, this.inventorySlots.size());
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        protected void clear() {
-            indexHoesEnd = 0;
-            inventorySlots.clear();
+        protected HoeMineableItems() {
+            super(ItemTags.HOES, null, null, BlockTags.HOE_MINEABLE, null);
         }
     }
 
@@ -298,6 +380,24 @@ public class ItemSortingGroups {
         }
 
         @Override
+        protected InventorySlot popFirst() {
+            indexShearsEnd--;
+            indexCobwebEnd--;
+            indexWoolEnd--;
+            indexLeavesEnd--;
+            return inventorySlots.removeFirst();
+        }
+
+        @Override
+        protected InventorySlot popLast() {
+            if(indexShearsEnd == inventorySlots.size()) indexShearsEnd--;
+            if(indexCobwebEnd == inventorySlots.size()) indexCobwebEnd--;
+            if(indexWoolEnd == inventorySlots.size()) indexWoolEnd--;
+            if(indexLeavesEnd == inventorySlots.size()) indexLeavesEnd--;
+            return inventorySlots.removeFirst();
+        }
+
+        @Override
         protected void clear() {
             indexShearsEnd = 0;
             indexWoolEnd = 0;
@@ -310,36 +410,9 @@ public class ItemSortingGroups {
     /**
      * SHOVELS
      */
-    protected static class ShovelMineableItems extends SortedItemGroup {
-        int indexShovelsEnd = 0;
-        int indexMappedBlocksEnd = 0;
-
-        @Override
-        protected boolean tryInsert(InventorySlot slot) {
-            Item item = slot.stack.getItem();
-            if(item instanceof ShovelItem) {
-                this.insertToolWithinBounds(slot, 0, indexShovelsEnd);
-                indexShovelsEnd++;
-                indexMappedBlocksEnd++;
-                return true;
-            }
-            else if(item instanceof BlockItem blockItem) {
-                if(ItemSortingGroups.ITEMS_SHOVEL_MINEABLE.containsKey(blockItem)) {
-                    this.insertMappedItemWithinBounds(slot, indexShovelsEnd + 1, indexMappedBlocksEnd, ITEMS_SHOVEL_MINEABLE);
-                    return true;
-                }
-                else if(blockItem.getBlock().getDefaultState().isIn(BlockTags.SHOVEL_MINEABLE)) {
-                    inventorySlots.add(indexMappedBlocksEnd + 1, slot);
-                }
-            }
-            return false;
-        }
-
-        @Override
-        protected void clear() {
-            indexShovelsEnd = 0;
-            indexMappedBlocksEnd = 0;
-            inventorySlots.clear();
+    protected static class ShovelMineableItems extends SortedToolGroup {
+        protected ShovelMineableItems() {
+            super(ItemTags.SHOVELS, ItemSortingGroups.ITEMS_SHOVEL_MINEABLE, null, BlockTags.SHOVEL_MINEABLE, null);
         }
     }
 
@@ -347,45 +420,34 @@ public class ItemSortingGroups {
     /**
      * AXES
      */
-    protected static class AxeMineableItems extends SortedItemGroup {
-        int indexAxesEnd = 0;
-        int indexPlanksEnd = 0;
-        int indexLogsEnd = 0;
-        int indexSlabsAndStairsEnd = 0;
+    protected static class AxeMineableItems extends SortedToolGroup {
+
+        int indexSlabsEnd = 0, indexStairsEnd = 0;
+        protected AxeMineableItems() {
+            super(ItemTags.AXES, null, null, BlockTags.LOGS, BlockTags.PLANKS);
+        }
 
         @Override
         protected boolean tryInsert(InventorySlot slot) {
-            Item item = slot.stack.getItem();
-            if(item instanceof AxeItem) {
-                this.insertToolWithinBounds(slot, 0, indexAxesEnd);
-                indexAxesEnd++;
-                indexPlanksEnd++;
-                indexLogsEnd++;
-                indexSlabsAndStairsEnd++;
+            if(super.tryInsert(slot)) {
+                indexSlabsEnd++;
+                indexStairsEnd++;
                 return true;
             }
-            else if(item instanceof BlockItem blockItem) {
-                if(blockItem.getBlock().getDefaultState().isIn(BlockTags.AXE_MINEABLE)) {
-                    if(item.getTranslationKey().endsWith("planks")) {
-                        this.insertWithinBounds(slot, indexAxesEnd + 1, indexPlanksEnd);
-                        indexPlanksEnd++;
-                        indexLogsEnd++;
-                        indexSlabsAndStairsEnd++;
-                        return true;
+            else if(slot.stack.getItem() instanceof BlockItem blockItem) {
+                BlockState state = blockItem.getBlock().getDefaultState();
+                if(state.isIn(BlockTags.AXE_MINEABLE)) {
+                    if(state.isIn(BlockTags.WOODEN_SLABS)) {
+                        this.insertWithinBounds(slot, indexSecondaryBlocksEnd + 1, indexSlabsEnd);
+                        indexSlabsEnd++;
+                        indexStairsEnd++;
                     }
-                    else if(item.getTranslationKey().endsWith("log") || item.getTranslationKey().endsWith("wood")) {
-                        this.insertWithinBounds(slot, indexPlanksEnd + 1, indexLogsEnd);
-                        indexLogsEnd++;
-                        indexSlabsAndStairsEnd++;
-                        return true;
-                    }
-                    else if(blockItem.getBlock() instanceof StairsBlock || blockItem.getBlock() instanceof SlabBlock) {
-                        this.insertWithinBounds(slot, indexLogsEnd + 1, indexSlabsAndStairsEnd);
-                        indexSlabsAndStairsEnd++;
-                        return true;
+                    else if(state.isIn(BlockTags.WOODEN_STAIRS)) {
+                        this.insertWithinBounds(slot, indexSlabsEnd + 1, indexStairsEnd);
+                        indexStairsEnd++;
                     }
                     else {
-                        this.insertWithinBounds(slot, indexSlabsAndStairsEnd + 1, this.size());
+                        this.insertWithinBounds(slot, indexStairsEnd + 1, this.size());
                         return true;
                     }
                 }
@@ -395,11 +457,9 @@ public class ItemSortingGroups {
 
         @Override
         protected void clear() {
-            indexAxesEnd = 0;
-            indexPlanksEnd = 0;
-            indexLogsEnd = 0;
-            indexSlabsAndStairsEnd = 0;
-            inventorySlots.clear();
+            super.clear();
+            indexSlabsEnd = 0;
+            indexStairsEnd = 0;
         }
     }
 
@@ -417,7 +477,7 @@ public class ItemSortingGroups {
         @Override
         protected void merge(SortedItemGroup other) {
             if(other instanceof AxeMineableItems axeGroup) {
-                for(int i = 0; i < axeGroup.indexAxesEnd; i++) {
+                for(int i = 0; i < axeGroup.indexToolsEnd; i++) {
                     inventorySlots.add(indexWeaponsEnd, axeGroup.popFirst());
                     indexWeaponsEnd++;
                     indexShieldsAndRangedEnd++;
@@ -427,7 +487,7 @@ public class ItemSortingGroups {
                 }
             }
             else if(other instanceof PickaxeMineableItems pickaxeGroup) {
-                for(int i = 0; i < pickaxeGroup.indexPickaxesEnd; i++) {
+                for(int i = 0; i < pickaxeGroup.indexToolsEnd; i++) {
                     inventorySlots.add(indexWeaponsEnd, pickaxeGroup.popFirst());
                     indexWeaponsEnd++;
                     indexShieldsAndRangedEnd++;
@@ -437,7 +497,7 @@ public class ItemSortingGroups {
                 }
             }
             else if(other instanceof HoeMineableItems hoeGroup) {
-                for(int i = 0; i < hoeGroup.indexHoesEnd; i++) {
+                for(int i = 0; i < hoeGroup.indexToolsEnd; i++) {
                     inventorySlots.add(indexWeaponsEnd, hoeGroup.popFirst());
                     indexWeaponsEnd++;
                     indexShieldsAndRangedEnd++;
@@ -447,7 +507,7 @@ public class ItemSortingGroups {
                 }
             }
             else if(other instanceof ShovelMineableItems shovelGroup) {
-                for(int i = 0; i < shovelGroup.indexShovelsEnd; i++) {
+                for(int i = 0; i < shovelGroup.indexToolsEnd; i++) {
                     inventorySlots.add(indexWeaponsEnd, shovelGroup.popFirst());
                     indexWeaponsEnd++;
                     indexShieldsAndRangedEnd++;

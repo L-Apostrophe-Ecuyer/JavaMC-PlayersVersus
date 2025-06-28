@@ -73,7 +73,7 @@ public class InventorySorting {
         }
 
 
-        if(DEBUG_MODE || true) {
+        if(DEBUG_MODE) {
             VersusMod.MOD_LOGGER.warn("Groups before merging:");
             for (SortedItemGroup group : sortedGroups) {
                 if(group.size() == 0) continue;
@@ -267,6 +267,75 @@ public class InventorySorting {
 
     private static void tryCombiningSortedGroups(int numEmptySlots) {
 
+        // Merge similar groups together when possible:
+        int maxSizeToCombine = 9;
+        if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            Max Size to Combine: " + maxSizeToCombine + " (" + numEmptySlots + " empty slots)");
+
+        if(sortedCombatGroup.size() > 0 && sortedAxeGroup.size() > 0 && sortedCombatGroup.size() + sortedAxeGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Combat with Axes!");
+            sortedCombatGroup.merge(sortedAxeGroup);
+        }
+        if(sortedCombatGroup.size() > 0 && sortedPickaxeGroup.size() > 0 && sortedCombatGroup.size() + sortedPickaxeGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Combat with Pickaxes!");
+            sortedCombatGroup.merge(sortedPickaxeGroup);
+        }
+        if(sortedHoesGroup.size() > 0 && sortedAxeGroup.size() > 0 && sortedHoesGroup.size() + sortedAxeGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Combat with Hoes!");
+            sortedHoesGroup.merge(sortedAxeGroup);
+        }
+        if(sortedPickaxeGroup.size() > 0 && sortedRedstoneGroup.size() > 0 && sortedPickaxeGroup.size() + sortedRedstoneGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Pickaxes with Redstone!");
+            sortedPickaxeGroup.merge(sortedRedstoneGroup);
+        }
+        if(sortedHoesGroup.size() > 0 && sortedShearsGroup.size() > 0 && sortedHoesGroup.size() + sortedShearsGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Hoes with Shears!");
+            sortedHoesGroup.merge(sortedShearsGroup);
+        }
+        if(sortedHoesGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedHoesGroup.size() + sortedShovelGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Hoes with Shovels!");
+            sortedHoesGroup.merge(sortedShovelGroup);
+        }
+        if(sortedPickaxeGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedPickaxeGroup.size() + sortedShovelGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Pickaxes with Shovels!");
+            sortedPickaxeGroup.merge(sortedShovelGroup);
+        }
+        if(sortedCombatGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedCombatGroup.size() + sortedShovelGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Combat with Shovels!");
+            sortedCombatGroup.merge(sortedShovelGroup);
+        }
+        if(sortedRedstoneGroup.size() > 0 && sortedRareGroup.size() > 0 && sortedRedstoneGroup.size() + sortedRareGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Redstones with Rares!");
+            sortedRedstoneGroup.merge(sortedRareGroup);
+        }
+        if(sortedRedstoneGroup.size() > 0 && sortedMiscGroup.size() > 0 && sortedRedstoneGroup.size() + sortedMiscGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Redstones with Miscs!");
+            sortedRedstoneGroup.merge(sortedMiscGroup);
+        }
+        if(sortedPickaxeGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedPickaxeGroup.size() + sortedShovelGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Pickaxes with Miscs!");
+            sortedPickaxeGroup.merge(sortedMiscGroup);
+        }
+        if(sortedMiscGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedMiscGroup.size() + sortedShovelGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Shovels with Miscs!");
+            sortedShovelGroup.merge(sortedMiscGroup);
+        }
+        if(sortedMiscGroup.size() > 0 && sortedHoesGroup.size() > 0 && sortedMiscGroup.size() + sortedHoesGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Hoes with Miscs!");
+            sortedHoesGroup.merge(sortedMiscGroup);
+        }
+        if(sortedMiscGroup.size() > 0 && sortedShearsGroup.size() > 0 && sortedMiscGroup.size() + sortedShearsGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Shears with Miscs!");
+            sortedShearsGroup.merge(sortedMiscGroup);
+        }
+        if(sortedMiscGroup.size() > 0 && sortedRareGroup.size() > 0 && sortedMiscGroup.size() + sortedRareGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Rares with Miscs!");
+            sortedRareGroup.merge(sortedMiscGroup);
+        }
+        if(sortedCombatGroup.size() > 0 && sortedMiscGroup.size() > 0 && sortedCombatGroup.size() + sortedMiscGroup.size() <= maxSizeToCombine) {
+            if(DEBUG_MODE) VersusMod.MOD_LOGGER.warn("            -> Merging Combat with Miscs!");
+            sortedCombatGroup.merge(sortedMiscGroup);
+        }
+
         // Give items to similar groups when possible, when one is overflowing:
         if(sortedPickaxeGroup.size() > 9 && sortedPickaxeGroup.size() - 9 + sortedRedstoneGroup.size() <= 9) {
             sortedPickaxeGroup.giveExtrasTo(sortedRedstoneGroup);
@@ -279,51 +348,6 @@ public class InventorySorting {
         }
         if(sortedMiscGroup.size() > 9 && sortedMiscGroup.size() - 9 + sortedCombatGroup.size() <= 9) {
             sortedMiscGroup.giveExtrasTo(sortedCombatGroup);
-        }
-
-        // Merge similar groups together when possible:
-        int maxSizeToCombine = 9 - numEmptySlots/10;
-        if(sortedPickaxeGroup.size() > 0 && sortedRedstoneGroup.size() > 0 && sortedPickaxeGroup.size() + sortedRedstoneGroup.size() <= maxSizeToCombine) {
-            sortedPickaxeGroup.merge(sortedRedstoneGroup);
-        }
-        if(sortedHoesGroup.size() > 0 && sortedShearsGroup.size() > 0 && sortedHoesGroup.size() + sortedShearsGroup.size() <= maxSizeToCombine) {
-            sortedHoesGroup.merge(sortedShearsGroup);
-        }
-        if(sortedHoesGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedHoesGroup.size() + sortedShovelGroup.size() <= maxSizeToCombine) {
-            sortedHoesGroup.merge(sortedShovelGroup);
-        }
-        if(sortedCombatGroup.size() > 0 && sortedAxeGroup.size() > 0 && sortedCombatGroup.size() + sortedAxeGroup.size() <= maxSizeToCombine) {
-            sortedCombatGroup.merge(sortedAxeGroup);
-        }
-        if(sortedCombatGroup.size() > 0 && sortedAxeGroup.size() > 0 && sortedCombatGroup.size() + sortedAxeGroup.size() <= maxSizeToCombine) {
-            sortedCombatGroup.merge(sortedAxeGroup);
-        }
-        if(sortedCombatGroup.size() > 0 && sortedMiscGroup.size() > 0 && sortedCombatGroup.size() + sortedMiscGroup.size() <= maxSizeToCombine) {
-            sortedCombatGroup.merge(sortedMiscGroup);
-        }
-        if(sortedHoesGroup.size() > 0 && sortedAxeGroup.size() > 0 && sortedHoesGroup.size() + sortedAxeGroup.size() <= maxSizeToCombine) {
-            sortedHoesGroup.merge(sortedAxeGroup);
-        }
-        if(sortedRedstoneGroup.size() > 0 && sortedRareGroup.size() > 0 && sortedRedstoneGroup.size() + sortedRareGroup.size() <= maxSizeToCombine) {
-            sortedRedstoneGroup.merge(sortedRareGroup);
-        }
-        if(sortedRedstoneGroup.size() > 0 && sortedMiscGroup.size() > 0 && sortedRedstoneGroup.size() + sortedMiscGroup.size() <= maxSizeToCombine) {
-            sortedRedstoneGroup.merge(sortedMiscGroup);
-        }
-        if(sortedCombatGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedCombatGroup.size() + sortedShovelGroup.size() <= maxSizeToCombine) {
-            sortedCombatGroup.merge(sortedShovelGroup);
-        }
-        if(sortedMiscGroup.size() > 0 && sortedShovelGroup.size() > 0 && sortedMiscGroup.size() + sortedShovelGroup.size() <= maxSizeToCombine) {
-            sortedShovelGroup.merge(sortedMiscGroup);
-        }
-        if(sortedMiscGroup.size() > 0 && sortedHoesGroup.size() > 0 && sortedMiscGroup.size() + sortedHoesGroup.size() <= maxSizeToCombine) {
-            sortedShovelGroup.merge(sortedMiscGroup);
-        }
-        if(sortedMiscGroup.size() > 0 && sortedShearsGroup.size() > 0 && sortedMiscGroup.size() + sortedShearsGroup.size() <= maxSizeToCombine) {
-            sortedShovelGroup.merge(sortedMiscGroup);
-        }
-        if(sortedMiscGroup.size() > 0 && sortedRareGroup.size() > 0 && sortedMiscGroup.size() + sortedRareGroup.size() <= maxSizeToCombine) {
-            sortedRareGroup.merge(sortedMiscGroup);
         }
     }
 }
