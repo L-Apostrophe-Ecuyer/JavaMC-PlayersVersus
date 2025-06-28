@@ -48,7 +48,7 @@ public class ItemSortingGroups {
 
         protected void insertWithinBounds(InventorySlot slot, int startIndex, int maxIndex) {
             if(maxIndex > inventorySlots.size()) maxIndex = inventorySlots.size();
-            if(startIndex > maxIndex) startIndex = maxIndex;
+            if(startIndex > maxIndex || startIndex < 0) startIndex = maxIndex;
 
             if(slot.stack.getMaxDamage() > 0) {
                 this.insertToolWithinBounds(slot, startIndex, maxIndex);
@@ -69,7 +69,7 @@ public class ItemSortingGroups {
 
         protected void insertToolWithinBounds(InventorySlot slot, int startIndex, int maxIndex) {
             if(maxIndex > inventorySlots.size()) maxIndex = inventorySlots.size();
-            if(startIndex > maxIndex) startIndex = maxIndex;
+            if(startIndex > maxIndex || startIndex < 0) startIndex = maxIndex;
 
             ItemStack otherStack = null, stack = slot.stack;
             int otherDurability = 0, durability = stack.getMaxDamage() - stack.getDamage();
@@ -453,6 +453,20 @@ public class ItemSortingGroups {
                 }
             }
             return false;
+        }
+
+        @Override
+        protected InventorySlot popFirst() {
+            indexSlabsEnd--;
+            indexStairsEnd--;
+            return super.popFirst();
+        }
+
+        @Override
+        protected InventorySlot popLast() {
+            if(indexStairsEnd == inventorySlots.size()) indexStairsEnd--;
+            if(indexSlabsEnd == inventorySlots.size()) indexSlabsEnd--;
+            return super.popLast();
         }
 
         @Override
