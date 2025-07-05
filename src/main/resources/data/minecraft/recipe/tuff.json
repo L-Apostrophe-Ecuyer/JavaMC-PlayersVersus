@@ -3,11 +3,11 @@
   "category": "building",
   "group": "stone_variants",
   "ingredients": [
-    "minecraft:quartz",
+    "minecraft:flint",
     "minecraft:cobblestone"
   ],
   "result": {
     "count": 1,
-    "id": "minecraft:diorite"
+    "id": "minecraft:tuff"
   }
 }

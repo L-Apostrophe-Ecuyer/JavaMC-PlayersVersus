@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.NetworkRecipeId;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeDisplayEntry;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.display.SlotDisplayContexts;
 import net.minecraft.text.Text;
@@ -54,7 +55,7 @@ public abstract class AnimatedResultButtonMixin extends ClickableWidget {
         // FIRST STEP -----------------
         // Draw background:
         Identifier identifier;
-        boolean isGroupOfRecipes = !this.resultCollection.hasSingleOutput() || this.resultCollection.getAllRecipes().size() > 0;
+        boolean isGroupOfRecipes = !this.resultCollection.hasSingleOutput() || this.resultCollection.getAllRecipes().size() > 1;
         boolean isCraftable = this.resultCollection.hasCraftableRecipes();
         if (isCraftable) {
             identifier = isGroupOfRecipes ? SLOT_MANY_CRAFTABLE_TEXTURE : SLOT_CRAFTABLE_TEXTURE;
@@ -80,23 +81,15 @@ public abstract class AnimatedResultButtonMixin extends ClickableWidget {
         //Recipe currentRecipe = this.currentRecipe().value();
         if(isGroupOfRecipes) {
             int offset = 4;
-            if(!this.resultCollection.hasSingleOutput()){
-                /*
-                offset = 2;
-                String recipeGroup = currentRecipe.getGroup();
-                if(recipeGroup.endsWith("copper_waxing"))  context.drawItem(Items.HONEYCOMB.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else if(recipeGroup.contains("iron"))  context.drawItem(Items.IRON_INGOT.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else if(recipeGroup.contains("copper"))  context.drawItem(Items.COPPER_INGOT.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else if(recipeGroup.contains("wood"))  context.drawItem(Items.OAK_PLANKS.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else if(recipeGroup.contains("gold"))  context.drawItem(Items.GOLD_INGOT.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else if(recipeGroup.contains("diamond"))  context.drawItem(Items.DIAMOND.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else if(recipeGroup.contains("netheri"))  context.drawItem(Items.NETHERITE_SCRAP.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else if(recipeGroup.contains("brick"))  context.drawItem(Items.BRICK.getDefaultStack(), this.getX() + 5, this.getY() + 5, 0, 10);
-                else offset = 4;
-                */
-            }
+            /*
+            if(!this.resultCollection.hasSingleOutput() && resultCollection.getAllRecipes().size() > 1){
+                context.drawItem(resultCollection.getAllRecipes().get(0).display().result().getFirst(null), this.getX() + 2, this.getY() + 2, 0, 10);
+                Identifier firstOverlayTextureID = isCraftable ? RECIPE_BOOK_CRAFTABLE_GROUP_OVERLAY : RECIPE_BOOK_UNCRAFTABLE_GROUP_OVERLAY;
+                context.drawGuiTexture(RenderLayer::getGuiTexturedOverlay,firstOverlayTextureID, this.getX(), this.getY(), this.width, this.height);
+                offset = 6;
+            }*/
             ItemStack itemStack = ((AnimatedResultButton)((Object)this)).getDisplayStack();
-            context.drawItem(itemStack, this.getX() + offset, this.getY() + offset, 0, 10);
+            context.drawItem(itemStack, this.getX() + offset, this.getY() + offset, 0, 20);
             Identifier overlayTextureID = isCraftable ? RECIPE_BOOK_CRAFTABLE_GROUP_OVERLAY : RECIPE_BOOK_UNCRAFTABLE_GROUP_OVERLAY;
             context.drawGuiTexture(RenderLayer::getGuiTexturedOverlay, overlayTextureID, this.getX(), this.getY(), this.width, this.height);
 

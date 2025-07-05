@@ -75,18 +75,19 @@ public abstract class VanillaItemsAndStacks {
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_STAIRS, CustomBlockItems.MUDSTONE_BRICK_STAIRS);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_WALL, CustomBlockItems.DRIPSTONE_BRICK_WALL);
 
+        /*
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GRANITE_SLAB, CustomBlockItems.DRIPSTONE_SLAB);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GRANITE_STAIRS, CustomBlockItems.DRIPSTONE_STAIRS);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GRANITE_WALL, CustomBlockItems.DRIPSTONE_WALL);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.POLISHED_GRANITE, CustomBlockItems.POLISHED_DRIPSTONE);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.POLISHED_GRANITE_SLAB, CustomBlockItems.POLISHED_DRIPSTONE_SLAB);
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.POLISHED_GRANITE_STAIRS, CustomBlockItems.POLISHED_DRIPSTONE_STAIRS);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.POLISHED_GRANITE_STAIRS, CustomBlockItems.POLISHED_DRIPSTONE_STAIRS);*/
     }
 
     private static void setUpTransformVanillaItemsToVanilla() {
-        TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.DIORITE, Items.CALCITE);
+        //TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.DIORITE, Items.CALCITE);
+        //TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.GRANITE, Items.DRIPSTONE_BLOCK);
         TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.CHARCOAL, Items.COAL);
-        TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.GRANITE, Items.DRIPSTONE_BLOCK);
     }
 
     private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {

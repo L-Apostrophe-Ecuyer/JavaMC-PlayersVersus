@@ -1,7 +1,6 @@
 {
   "type": "minecraft:smelting",
   "category": "misc",
-
   "ingredient":"minecraft:clay_ball",
   "result": {
     "count": 1,

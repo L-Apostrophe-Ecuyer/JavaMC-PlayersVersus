@@ -1,47 +1,66 @@
 {
-  "feature": "minecraft:ore_infested",
+  "feature": {
+    "type": "minecraft:ore",
+    "config": {
+      "size": 32,
+      "discard_chance_on_air_exposure": 0,
+      "targets": [
+        {
+          "target": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:stone",
+            "probability": 0.3
+          },
+          "state": {
+            "Name": "minecraft:stone"
+          }
+        },
+        {
+          "target": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "minecraft:stone",
+            "probability": 0.15
+          },
+          "state": {
+            "Name": "minecraft:terracotta"
+          }
+        },
+        {
+          "target": {
+            "predicate_type": "minecraft:tag_match",
+            "tag": "minecraft:base_stone_overworld"
+          },
+          "state": {
+            "Name": "minecraft:granite"
+          }
+        }
+      ]
+    }
+  },
   "placement": [
     {
-      "type": "minecraft:count",
-      "count": {
-        "type": "minecraft:weighted_list",
-        "distribution": [
-          {
-            "weight": 4,
-            "data": 0
-          },
-          {
-            "weight": 1,
-            "data": 2
-          }
-        ]
-      }
-    },
-    {
-      "type": "minecraft:height_range",
-      "height": {
-        "type": "minecraft:uniform",
-        "min_inclusive": {
-          "absolute": 18
-        },
-        "max_inclusive": {
-          "absolute": 32
-        }
-      }
+      "type": "minecraft:noise_based_count",
+      "noise_to_count_ratio": 80,
+      "noise_factor": 14,
+      "noise_offset": -0.425
     },
     {
       "type": "minecraft:in_square"
     },
     {
-      "type": "minecraft:environment_scan",
-      "direction_of_search": "up",
-      "max_steps": 4,
-      "target_condition": {
-        "type": "minecraft:not",
-        "predicate": {
-          "type": "minecraft:solid"
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "max_inclusive": {
+          "absolute": 78
+        },
+        "min_inclusive": {
+          "absolute": 74
         }
       }
+    },
+    {
+      "type": "minecraft:biome"
     }
   ]
 }

@@ -8,7 +8,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:andesite",
+          "name": "minecraft:dripstone_block",
           "conditions": [
             {
               "condition": "minecraft:inverted",
@@ -189,7 +189,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:clay_ball",
+          "name": "minecraft:pointed_dripstone",
           "functions": [
             {
               "enchantment": "minecraft:fortune",
@@ -201,5 +201,5 @@
       ]
     }
   ],
-  "random_sequence": "minecraft:blocks/andesite"
+  "random_sequence": "minecraft:blocks/dripstone_block"
 }

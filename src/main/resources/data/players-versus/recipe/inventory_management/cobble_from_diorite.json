@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "group": "stones_to_cobble",
+  "group": "stone_variants",
   "ingredients": [
     "minecraft:diorite"
   ],

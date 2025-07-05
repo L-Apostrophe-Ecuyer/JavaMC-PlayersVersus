@@ -1,11 +1,12 @@
 {
   "type": "minecraft:crafting_shapeless",
   "category": "building",
+  "group": "brick_blocks",
   "ingredients": [
     "minecraft:terracotta"
   ],
   "result": {
-    "count": 9,
+    "count": 4,
     "id": "minecraft:brick"
   }
 }

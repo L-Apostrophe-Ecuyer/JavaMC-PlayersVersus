@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "category": "building",
+  "group": "dirt_blocks",
   "ingredients": [
     "minecraft:gravel",
    "#minecraft:dirt"
