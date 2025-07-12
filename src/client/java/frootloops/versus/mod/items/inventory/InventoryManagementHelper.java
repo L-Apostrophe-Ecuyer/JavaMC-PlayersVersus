@@ -1,15 +1,10 @@
 package frootloops.versus.mod.items.inventory;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.Identifier;
-
-import static frootloops.versus.mod.items.inventory.ItemSortingGroups.*;
 
 public class InventoryManagementHelper {
 

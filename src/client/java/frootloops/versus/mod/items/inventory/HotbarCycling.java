@@ -15,6 +15,14 @@ public class HotbarCycling {
         }
     }
 
+    public static void doInverseHotbarSwap(MinecraftClient client, PlayerInventory inventory) {
+        for (int i = 0; i < 9; i++) {
+            swapItemsFromSlots(client, inventory, i + 9, i);
+            swapItemsFromSlots(client, inventory,i + 18, i);
+            swapItemsFromSlots(client, inventory, i + 27, i);
+        }
+    }
+
     private static void swapItemsFromSlots(MinecraftClient client, PlayerInventory inventory, int slotOne, int slotTwo) {
         if(slotOne == slotTwo) return;
         ItemStack stackOne = inventory.getStack(slotOne);
