@@ -17,5 +17,5 @@ public abstract class ClientWorldSkyMixin {
     }
 
     @ModifyVariable(method = "getSkyColor", at = @At("STORE"), ordinal = 3)
-    private float moreColorfulSkyDuringRain(float rainGradient) {return rainGradient/2f;}
+    private float moreColorfulSkyDuringRain(float rainGradient) {return rainGradient/1.5f;}
 }

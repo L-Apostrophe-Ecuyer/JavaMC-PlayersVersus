@@ -14,6 +14,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.HungerManager;
@@ -235,11 +236,12 @@ public abstract class Combat {
     }
 
     public static boolean canPlayerSprint(PlayerEntity player) {
-        return canPlayerSprint(player.getHungerManager());
+        return canPlayerSprint(player.getHungerManager(), player.hasStatusEffect(StatusEffects.HUNGER));
     }
 
-    public static boolean canPlayerSprint(HungerManager hungerManager) {
+    public static boolean canPlayerSprint(HungerManager hungerManager, boolean hasHungerEffect) {
         if(!VersusSettings.DO_FOOD_OVERHAUL) return hungerManager.getFoodLevel() > 6;
+        if(hasHungerEffect) return false;
         if(hungerManager.getFoodLevel() != 0) return true;
         if(hungerManager.getSaturationLevel() == 0.0f) return false;
         return true;

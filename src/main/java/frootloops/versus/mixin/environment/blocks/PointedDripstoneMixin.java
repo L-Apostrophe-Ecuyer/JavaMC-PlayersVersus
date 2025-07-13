@@ -13,6 +13,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,12 +43,11 @@ public abstract class PointedDripstoneMixin extends Block {
         super(settings);
     }
 
-    @Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)
-    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo info) {
+    @Overwrite
+    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if (random.nextBoolean()) return;
         if (state.get(VERTICAL_DIRECTION) != Direction.DOWN) return;
         dripTickOverhauled(state, world, pos, random);
-        info.cancel();
     }
 
 
@@ -85,9 +85,12 @@ public abstract class PointedDripstoneMixin extends Block {
         }
 
 
+        // Try to grow the stalagmite:
         if (fluid == Fluids.WATER) {
             if (random.nextBoolean()) PointedDripstoneBlock.tryGrow(state, world, pos, random);
         }
+
+        // Possible skip if lava:
         else if (fluid == Fluids.LAVA) {
             if (random.nextBoolean()) return;
         }

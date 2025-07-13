@@ -1,9 +1,11 @@
 package frootloops.versus.mixin.players;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.block.*;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -12,6 +14,7 @@ import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -47,7 +50,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
 
-    @Shadow public int totalExperience;
+    @Shadow public int totalExperience, experienceLevel;
 
     @Overwrite
     public double getEntityInteractionRange() {
@@ -72,12 +75,21 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         );
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
-    private boolean switchHeldItemsWithoutResettingCooldown(ItemStack selectedItem, ItemStack itemStack) {
-        if (!ItemStack.areEqual(selectedItem, itemStack)) {
-            this.selectedItem = itemStack.copy();
+    @Override
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+        if(amount > 0f && this.isSleeping()) {
+            ((PlayerEntity)((Object)this)).wakeUp(false, true);
+            if(source.getAttacker() instanceof LivingEntity attackingEntity) {
+                this.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, attackingEntity.getEyePos());
+            }
         }
-        return false; // Always return false, to avoid resetting cooldown
+        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
+            int maxUseTime = activeItemStack.getMaxUseTime(this);
+            if (maxUseTime < 64) {
+                itemUseTimeLeft = maxUseTime;
+            }
+        }
+        return super.damage(world, source, amount);
     }
 
     @Inject(method = "getXpToDrop", at = @At("HEAD"), cancellable = true)
@@ -90,6 +102,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
     }
 
+    @Overwrite
+    public int getNextLevelExperience() {
+        if(this.experienceLevel > 30) return 48 + (this.experienceLevel - 30); // No more exponential curve!
+        return this.experienceLevel * 2 + 16; // A bit more of a regular scaling amount
+    }
+
+
+    /*
     @Inject(method = "travel", at = @At("HEAD"), cancellable = false)
     public void jumpInVehicles(Vec3d movementInput, CallbackInfo info) {
         if(this.jumping && this.hasVehicle() && this.getVehicle() instanceof BoatEntity boatEntity && !boatEntity.isSubmergedInWater()) {
@@ -100,8 +120,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 boatEntity.velocityDirty = true;
             }
         }
-    }
-
+    } */
 
     @Inject(method = "canHarvest", at = @At("RETURN"), cancellable = true)
     public void canMineCopperWithWood(BlockState state, CallbackInfoReturnable<Boolean> cir) {
@@ -149,17 +168,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             if (protectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, protectionAmount);
         }
         return super.modifyAppliedDamage(source, amount);
-    }
-
-    @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
-    private void onDamageInterruptEating(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
-            Item item = this.activeItemStack.getItem();
-            if (item.getComponents().contains(DataComponentTypes.FOOD) || item instanceof PotionItem) {
-                this.clearActiveItem();
-                itemCooldownManager.set(this.activeItemStack, 32);
-            }
-        }
     }
 
     @Inject(method = "attack", at = @At("HEAD"))
@@ -217,7 +225,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Override
     public void setSprinting(boolean sprinting) {
         //if(sprinting && this.hungerManager.getFoodLevel() == 0 && this.getHealth() < 20.0f && (this.age - this.lastDamageTime > 160)) return;  // No sprinting when damaged and no food points
-        if(sprinting && !Combat.canPlayerSprint(this.hungerManager)) return;
+        if(sprinting && !Combat.canPlayerSprint(this.hungerManager, this.hasStatusEffect(StatusEffects.HUNGER))) return;
         super.setSprinting(sprinting);
     }
 }

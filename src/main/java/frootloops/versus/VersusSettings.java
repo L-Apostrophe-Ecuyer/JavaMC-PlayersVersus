@@ -6,10 +6,17 @@ public abstract class VersusSettings {
     public static final int BRUSHING_TICKS_PER_STAGE = 1;
     public static boolean CAN_AIM_ASSIST = true;
     public static boolean CAN_HOLD_TO_ATTACK = true;
+
+    // Client:
     public static boolean DO_HOTBAR_SWAPPING_ON_PICK_KEY = true;
     public static boolean DO_BEDROCK_BRIDGING = true;
     public static boolean DO_SMARTER_BLOCK_PLACING = true;
+
+    // Sleep:
+    public static boolean isFastForwardingTime = false;
     public static boolean DO_SLEEP_OVERHAUL = true;
+    public static final float SLEEP_TICK_SPEED = 1020f;
+
 
     public static boolean DO_FOOD_OVERHAUL = true;
     public static boolean DO_FOOD_EATING_INTERRUPTION = true;

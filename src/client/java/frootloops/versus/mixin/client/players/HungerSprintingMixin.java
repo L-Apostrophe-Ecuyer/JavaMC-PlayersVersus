@@ -1,8 +1,10 @@
 package frootloops.versus.mixin.client.players;
 
 import com.mojang.authlib.GameProfile;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -19,7 +21,7 @@ public abstract class HungerSprintingMixin extends PlayerEntity {
 
     @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))
     private float foodRequiedToSprint(float foodLevel) {
-        if(Combat.canPlayerSprint(this.hungerManager)) return -1.0f;  // Sprinting allowed
-        return 128.0f; // No sprinting when damaged and no food points
+        if(!VersusSettings.DO_FOOD_OVERHAUL) return 6.0f;
+        return Combat.canPlayerSprint(this.hungerManager, this.hasStatusEffect(StatusEffects.HUNGER)) ? -1.0f : 128.0f;
     }
 }

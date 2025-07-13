@@ -61,9 +61,9 @@ public abstract class WeatherRendererMixin {
 
         BlockPos cameraPos = BlockPos.ofFloored(camera.getPos());
         Random random = Random.create((long)ticks * 312987231L);
-        if(world.getLightLevel(LightType.SKY, cameraPos) > 1 && random.nextInt(384) < this.field_53154++) {
+        if(world.getLightLevel(LightType.SKY, cameraPos) > 1 && random.nextInt(600) < this.field_53154++) {
             this.field_53154 = 0;
-            world.playSoundAtBlockCenter(cameraPos.up(3), CustomSpecialEffects.FOG_WIND_SOUND, SoundCategory.WEATHER, 0.2F, 1.0F, false);
+            world.playSoundAtBlockCenter(cameraPos.up(3), CustomSpecialEffects.FOG_WIND_SOUND, SoundCategory.WEATHER, 0.15F, 1.0F, false);
         }
 
         if (amountOfRain > 0.1F) {

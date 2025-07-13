@@ -7,6 +7,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -14,6 +15,11 @@ import net.minecraft.entity.conversion.EntityConversionContext;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.*;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.MerchantEntity;
+import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.TurtleEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.BlockTags;
@@ -45,10 +51,22 @@ public abstract class ZombieMixin extends HostileEntity {
         return 500;
     }
 
+    @Overwrite
+    public void initCustomGoals() {
+        ZombieEntity self = ((ZombieEntity) ((Object)this));
+        this.goalSelector.add(2, new ZombieAttackGoal(self, 1.0, false));
+        this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, self::canBreakDoors));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
+        this.targetSelector.add(1, new RevengeGoal(self).setGroupRevenge(PigEntity.class));
+        this.targetSelector.add(2, new ActiveTargetGoal(self, PlayerEntity.class, true));
+        this.targetSelector.add(3, new ActiveTargetGoal(self, MerchantEntity.class, false));
+        this.targetSelector.add(3, new ActiveTargetGoal(self, IronGolemEntity.class, true));
+        this.targetSelector.add(5, new ActiveTargetGoal(self, TurtleEntity.class, 10, true, false, TurtleEntity.BABY_TURTLE_ON_LAND_FILTER));
+    }
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-        double followRange = 32.0;
+        double followRange = 24.0;
         double mvtSpeed = 0.28;
         cir.setReturnValue(HostileEntity.createHostileAttributes()
                         .add(EntityAttributes.FOLLOW_RANGE, followRange)
