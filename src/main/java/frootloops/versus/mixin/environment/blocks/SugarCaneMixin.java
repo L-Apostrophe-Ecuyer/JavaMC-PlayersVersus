@@ -41,16 +41,14 @@ public abstract class SugarCaneMixin extends Block {
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         int age = (Integer)state.get(Properties.AGE_15);
-        if (random.nextBoolean()) return;
         if (world.isAir(pos.up())) {
             int numSugarCaneBelow = 0;
             while (numSugarCaneBelow < 3 && world.getBlockState(pos.down(numSugarCaneBelow)).isOf(this)) {
                 numSugarCaneBelow++;
             }
-
-            if (numSugarCaneBelow < 2) {
-                if (age == 15) {
-                    if(numSugarCaneBelow > 0 && (world.getLightLevel(LightType.SKY, pos) < 4 || random.nextInt(4) ==  1))
+            if (numSugarCaneBelow > 0) {
+                if (age >= 14) {
+                    if(numSugarCaneBelow > 2 || world.getLightLevel(LightType.SKY, pos) < 13 || random.nextInt(4) ==  1)
                         world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getStuntedState());
                     else world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
                     world.setBlockState(pos, state.with(Properties.AGE_15, Integer.valueOf(8)), Block.NO_REDRAW); // Aged down, but only half way! Incentives picking only the top

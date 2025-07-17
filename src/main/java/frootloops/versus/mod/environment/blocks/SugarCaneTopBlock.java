@@ -20,11 +20,12 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.LightType;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 
-public class SugarCaneTopBlock extends Block {
+public class SugarCaneTopBlock extends Block implements Fertilizable {
 
     public static final MapCodec<SugarCaneTopBlock> CODEC = createCodec(SugarCaneTopBlock::new);
     protected static final VoxelShape SHAPE = Block.createCuboidShape(2.0, 0.0, 2.0, 14.0, 10.0, 14.0);
@@ -43,7 +44,7 @@ public class SugarCaneTopBlock extends Block {
 
     public SugarCaneTopBlock(AbstractBlock.Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(CAN_GROW, false).with(AGE, Integer.valueOf(0)));
+        this.setDefaultState(this.stateManager.getDefaultState().with(CAN_GROW, true).with(AGE, Integer.valueOf(0)));
     }
 
     @Override
@@ -71,19 +72,20 @@ public class SugarCaneTopBlock extends Block {
     @Override
     protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         BlockPos blockPosDown = pos.down();
-        BlockState blockState = world.getBlockState(blockPosDown);
-        if(blockState.isAir() || !blockState.isOpaqueFullCube()) return false;
-        if (blockState.isOf(Blocks.SUGAR_CANE) || blockState.isOf(Blocks.MUD) || blockState.isOf(Blocks.CLAY) || blockState.isOf(CustomBlocks.BROWN_MUD)) {
+        BlockState groundState = world.getBlockState(blockPosDown);
+        if (groundState.isOf(Blocks.SUGAR_CANE)) return true;
+        if (world.getLightLevel(LightType.SKY, pos) < 13) return false;
+        if (groundState.isOf(Blocks.MUD) || groundState.isOf(CustomBlocks.GRAY_MUD) || groundState.isOf(CustomBlocks.BROWN_MUD)) {
             return true;
         } else {
-            if (blockState.isIn(BlockTags.DIRT) || blockState.isIn(BlockTags.SAND)) {
+            if (groundState.isIn(BlockTags.DIRT) || groundState.isIn(BlockTags.SAND) || groundState.isOf(Blocks.CLAY) || groundState.isOf(CustomBlocks.GRAY_CLAY)) {
                 FluidState fluidState;
-                BlockState blockStateDown;
+                BlockState neighborState;
                 for (Direction direction : Direction.Type.HORIZONTAL) {
                     BlockPos offsetedPos = blockPosDown.offset(direction);
-                    blockStateDown = world.getBlockState(offsetedPos);
+                    neighborState = world.getBlockState(offsetedPos);
                     fluidState = world.getFluidState(offsetedPos);
-                    if (fluidState.isIn(FluidTags.WATER) || blockStateDown.isOf(Blocks.FROSTED_ICE)) return true;
+                    if (fluidState.isIn(FluidTags.WATER) || neighborState.isOf(Blocks.FROSTED_ICE)) return true;
                     if (world.getFluidState(offsetedPos.offset(direction.rotateClockwise(Direction.Axis.X))).isIn(FluidTags.WATER) ) return true;
                     if (world.getFluidState(offsetedPos.offset(direction.rotateClockwise(Direction.Axis.Z))).isIn(FluidTags.WATER) ) return true;
                     if (world.getFluidState(blockPosDown.offset(direction, 2)).isIn(FluidTags.WATER) ) return true;
@@ -95,32 +97,11 @@ public class SugarCaneTopBlock extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-
-        BlockState blockStateBelow = world.getBlockState(pos.down());
-        int numSugarCaneBelow = blockStateBelow.isOf(Blocks.SUGAR_CANE) ? 1 : 0;
-        int chanceToGrow = numSugarCaneBelow == 0 ? 128 : numSugarCaneBelow > 0 ? 64 : blockStateBelow.isIn(BlockTags.SAND) ? 32 : 16;
-        if(!state.get(CAN_GROW)) {
-            if(numSugarCaneBelow > 0) return;
-            else chanceToGrow /= 4;
+        if (world.getLightLevel(LightType.SKY, pos) < 13) {
+            world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getStuntedState());
+            return;
         }
-
-        if (random.nextInt(chanceToGrow) == 1) return;
-        if (world.isAir(pos.up())) {
-            int age = state.get(AGE);
-            if(age < 15) {
-                world.setBlockState(pos, state.with(AGE, Integer.valueOf(age + 1)), Block.NO_REDRAW);
-                return;
-            }
-            if(numSugarCaneBelow == 1) {
-                while (numSugarCaneBelow < 4 && world.getBlockState(pos.down(numSugarCaneBelow)).isOf(Blocks.SUGAR_CANE)) {
-                    numSugarCaneBelow++;
-                }
-            }
-            if (numSugarCaneBelow < 3) {
-                world.setBlockState(pos, Blocks.SUGAR_CANE.getDefaultState());
-                if(random.nextInt(6) > 2 * numSugarCaneBelow) world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
-            }
-        }
+        if(state.get(CAN_GROW) && this.canGrow(world, random, pos, state)) this.grow(world, random, pos, state);
     }
 
     @Override @Nullable
@@ -151,5 +132,42 @@ public class SugarCaneTopBlock extends Block {
         }
 
         return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+    }
+
+    @Override
+    public boolean isFertilizable(WorldView world, BlockPos pos, BlockState state) {
+        return state.get(CAN_GROW) && world.getLightLevel(LightType.SKY, pos) > 13;
+    }
+
+    @Override
+    public boolean canGrow(World world, Random random, BlockPos pos, BlockState state) {
+        int chanceToGrow = world.getBlockState(pos.down()).isOf(Blocks.SUGAR_CANE) ? 8 : 16;
+        if(!state.get(CAN_GROW)) chanceToGrow /= 4;
+        if (random.nextInt(chanceToGrow) == 1) return false;
+        return true;
+    }
+
+    @Override
+    public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
+        BlockState blockStateBelow = world.getBlockState(pos.down());
+        int numSugarCaneBelow = 0;
+        while (blockStateBelow.isOf(Blocks.SUGAR_CANE) && numSugarCaneBelow < 3) numSugarCaneBelow++;
+        if (world.isAir(pos.up())) {
+            int age = state.get(AGE);
+            if(age < 15) {
+                world.setBlockState(pos, state.with(AGE, Integer.valueOf(age + 1)).with(CAN_GROW, true));
+                return;
+            }
+            if(numSugarCaneBelow == 1) {
+                while (numSugarCaneBelow < 4 && world.getBlockState(pos.down(numSugarCaneBelow)).isOf(Blocks.SUGAR_CANE)) {
+                    numSugarCaneBelow++;
+                }
+            }
+            if (numSugarCaneBelow < 3) {
+                world.setBlockState(pos, Blocks.SUGAR_CANE.getDefaultState());
+                if(random.nextInt(6) > 2 * numSugarCaneBelow) world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
+                else world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getStuntedState());
+            }
+        }
     }
 }
