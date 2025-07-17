@@ -3,7 +3,7 @@
   "category": "building",
   "group": "copper",
   "key": {
-    "#": "minecraft:cut_copper"
+    "#": "minecraft:oxidized_cut_copper"
   },
   "pattern": [
     "##"

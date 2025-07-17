@@ -3,13 +3,13 @@
   "category": "building",
   "group": "copper",
   "key": {
-    "#": "minecraft:exposed_cut_copper"
+    "#": "minecraft:waxed_exposed_cut_copper"
   },
   "pattern": [
-    "# ", "##"
+    "##"
   ],
   "result": {
-    "count":  3,
-    "id": "minecraft:exposed_cut_copper_stairs"
+    "count":  4,
+    "id": "minecraft:waxed_exposed_cut_copper_slab"
   }
 }
