@@ -1,18 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
+  "category": "building",
+  "group": "diorite",
+  "key": {
+    "#": "minecraft:diorite"
+  },
   "pattern": [
     "###",
     "###"
   ],
-  "key": {
-    "#": [
-      "minecraft:calcite",
-      "minecraft:diorite"
-    ]
-  },
   "result": {
-    "id": "minecraft:diorite_wall",
-    "count": 6
+    "count": 6,
+    "id": "minecraft:diorite_wall"
   }
 }

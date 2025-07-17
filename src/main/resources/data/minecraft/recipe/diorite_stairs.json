@@ -1,19 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "building",
-  "pattern": [
-    "#  ",
-    "## ",
-    "###"
-  ],
+  "group": "diorite",
   "key": {
-    "#": [
-      "minecraft:calcite",
-      "minecraft:diorite"
-    ]
+    "#": "minecraft:diorite"
   },
+  "pattern": [
+    "# ", "##"
+  ],
   "result": {
-    "id": "minecraft:diorite_stairs",
-    "count": 4
+    "count":  3,
+    "id": "minecraft:diorite_stairs"
   }
 }

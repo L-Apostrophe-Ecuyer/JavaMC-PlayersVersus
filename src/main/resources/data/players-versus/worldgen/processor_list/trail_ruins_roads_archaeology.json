@@ -35,11 +35,11 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
-            "block": "players-versus:mudstone_bricks",
+            "block": "players-versus:brown_clay_bricks",
             "probability": 0.1
           },
           "output_state": {
-            "Name": "players-versus:mudstone"
+            "Name": "players-versus:brown_clay"
           }
         }
       ]

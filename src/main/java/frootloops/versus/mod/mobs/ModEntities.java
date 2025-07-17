@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.registry.Registries;
@@ -20,7 +19,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 
-import static frootloops.versus.mod.items.RegisteringCustomItems.getSettings;
+import static frootloops.versus.mod.items.RegisteringCustomItems.getItemSettings;
 
 public class ModEntities {
 
@@ -44,9 +43,9 @@ public class ModEntities {
             EntityType.Builder.create(WitheredZombieEntity::new, SpawnGroup.MONSTER).dimensions(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.0125f).vehicleAttachment(-0.7f).maxTrackingRange(8)
     );
 
-    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(DEEPER_CREEPER, 0x4d4b4a, 0, getSettings("deeper_creeper_spawn_egg"));
-    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(FROSTED_ZOMBIE, 0x46b3b3 , 0x2e3e7d, getSettings("frosted_zombie_spawn_egg"));
-    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(WITHERED_ZOMBIE, 0x334545, 0x101017, getSettings("withered_zombie_spawn_egg"));
+    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(DEEPER_CREEPER, 0x4d4b4a, 0, getItemSettings("deeper_creeper_spawn_egg"));
+    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(FROSTED_ZOMBIE, 0x46b3b3 , 0x2e3e7d, getItemSettings("frosted_zombie_spawn_egg"));
+    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(WITHERED_ZOMBIE, 0x334545, 0x101017, getItemSettings("withered_zombie_spawn_egg"));
 
 
     public static void onInitialize() {

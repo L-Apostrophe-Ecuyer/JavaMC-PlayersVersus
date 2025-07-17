@@ -139,10 +139,7 @@
       "minecraft:ore_lapis",
       "minecraft:ore_lapis_buried",
       "minecraft:ore_copper",
-      "minecraft:underwater_magma",
-      "minecraft:disk_sand",
-      "minecraft:disk_clay",
-      "minecraft:disk_gravel"
+      "minecraft:underwater_magma"
     ],
     [],
     [
@@ -154,7 +151,6 @@
       "players-versus:caves/badlands_cave_ceiling",
       "players-versus:caves/badlands_cave_floor",
       "minecraft:glow_lichen",
-      "minecraft:brown_mushroom_normal",
       "minecraft:red_mushroom_normal"
     ],
     [

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:gray_clay",
+    "players-versus:brown_clay",
+    "players-versus:brown_mud",
+    "players-versus:gray_mud"
+  ]
+}

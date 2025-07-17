@@ -50,4 +50,19 @@ public class MoistSlabBlock extends SlabBlock implements MoistureConvertableBloc
         MoistureConvertableBlock.onLandedUpon(world, state, pos, entity, fallDistance, dryVersion);
         super.onLandedUpon(world, state, pos, entity, fallDistance * 0.5F);
     }
+
+    @Override
+    public Block getDryVersion() {
+        return dryVersion;
+    }
+
+    @Override
+    public Block getCookedVersion() {
+        return cookedVersion;
+    }
+
+    @Override
+    public boolean hasWetVersion() {
+        return wetterVersion != null;
+    }
 }

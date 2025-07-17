@@ -2,7 +2,7 @@
   "type": "minecraft:smelting",
   "group": "dripstone",
   "category": "blocks",
-  "ingredient": "players-versus:mudstone_brick_wall",
+  "ingredient": "players-versus:brown_clay_brick_wall",
   "result": {
     "id": "players-versus:dripstone_stairs"
   },

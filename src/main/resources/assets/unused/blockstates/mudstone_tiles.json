@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "players-versus:block/mudstone_tiles"
+      "model": "players-versus:block/packed_mud_tiles"
     }
   }
 }

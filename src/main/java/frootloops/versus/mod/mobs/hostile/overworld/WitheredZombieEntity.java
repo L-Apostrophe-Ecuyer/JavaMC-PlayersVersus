@@ -1,5 +1,6 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -15,9 +16,11 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 
@@ -34,9 +37,9 @@ public class WitheredZombieEntity extends ZombieEntity {
                 .add(EntityAttributes.MOVEMENT_SPEED, 0.33f)
                 .add(EntityAttributes.ATTACK_DAMAGE, 3.0)
                 .add(EntityAttributes.ATTACK_KNOCKBACK, 1.1)
-                .add(EntityAttributes.ARMOR, 4.0)
+                .add(EntityAttributes.ARMOR, 3.0)
                 .add(EntityAttributes.ARMOR_TOUGHNESS, 3.0)
-                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.5)
+                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.25)
                 .add(EntityAttributes.SPAWN_REINFORCEMENTS);
     }
 
@@ -114,6 +117,11 @@ public class WitheredZombieEntity extends ZombieEntity {
             EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
             entityAttributeInstance.setBaseValue(1.0);
         }
+    }
+
+    @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0F;
     }
 
     @Override

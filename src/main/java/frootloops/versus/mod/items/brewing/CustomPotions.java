@@ -17,7 +17,7 @@ import net.minecraft.util.Identifier;
 
 import static frootloops.versus.VersusMod.MOD_ID;
 import static frootloops.versus.mod.items.VanillaItemsAndStacks.MAX_POTION_STACK_SIZE;
-import static frootloops.versus.mod.items.RegisteringCustomItems.getSettings;
+import static frootloops.versus.mod.items.RegisteringCustomItems.getItemSettings;
 
 public abstract class CustomPotions {
 
@@ -82,9 +82,9 @@ public abstract class CustomPotions {
         UNLUCK = registerCustomPotion("unluck", StatusEffects.UNLUCK, 0, 3000);
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
-        CustomBrewingItems.BOTTLE_OF_ENDER = new PotionItem(getSettings("bottle_of_ender").maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
-        CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(getSettings("splash_bottle_of_ender").maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
-        CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(getSettings("lingering_bottle_of_ender").maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+        CustomBrewingItems.BOTTLE_OF_ENDER = new PotionItem(getItemSettings("bottle_of_ender").maxCount(MAX_POTION_STACK_SIZE).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+        CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(getItemSettings("splash_bottle_of_ender").maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
+        CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(getItemSettings("lingering_bottle_of_ender").maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
     }
 
     private static RegistryEntry<Potion> registerCustomPotion(String name, RegistryEntry<StatusEffect> effect, int amplifier, int duration) {

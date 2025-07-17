@@ -9,11 +9,9 @@ import frootloops.versus.mod.items.brewing.effects.LargenessStatusEffect;
 import frootloops.versus.mod.items.brewing.effects.SmallnessStatusEffect;
 import frootloops.versus.mod.items.brewing.effects.VulnerabilityStatusEffect;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -41,13 +39,18 @@ public class CustomBlocks {
 
     public static Block POLISHED_STONE, POLISHED_STONE_SLAB, POLISHED_STONE_STAIRS;
 
+
+    // New Terracotta
     public static Block TERRACOTTA_BRICKS, TERRACOTTA_BRICK_SLAB, TERRACOTTA_BRICK_STAIRS, TERRACOTTA_BRICK_WALL;
     public static Block TERRACOTTA_TILES, TERRACOTTA_TILE_SLAB, TERRACOTTA_TILE_STAIRS, TERRACOTTA_TILE_WALL, CHISELED_TERRACOTTA;
-    public static Block CLAY;
-    public static Block MUDSTONE;
-    public static Block MUDSTONE_BRICKS, MUDSTONE_BRICK_SLAB, MUDSTONE_BRICK_STAIRS, MUDSTONE_BRICK_WALL;
 
-    public static Block BROWN_MUD, BROWN_MUD_BRICKS, BROWN_MUD_BRICK_SLAB, BROWN_MUD_BRICK_STAIRS, BROWN_MUD_BRICK_WALL;
+
+    // Mud blocks and variants:
+    public static MoistBlock GRAY_CLAY, GRAY_MUD, BROWN_CLAY, BROWN_MUD;
+    public static MoistBlock BROWN_CLAY_BRICKS, BROWN_MUD_BRICKS;
+    public static MoistSlabBlock BROWN_CLAY_BRICK_SLAB, BROWN_MUD_BRICK_SLAB;
+    public static MoistStairsBlock BROWN_CLAY_BRICK_STAIRS, BROWN_MUD_BRICK_STAIRS;
+    public static MoistWallBlock BROWN_CLAY_BRICK_WALL, BROWN_MUD_BRICK_WALL;
 
     public static Block WHEAT_GRASS;
     public static Block WILD_WHEAT;
@@ -72,19 +75,6 @@ public class CustomBlocks {
         CORRUPTED_WART_PLANT = registerBlock("corrupted_wart", new NetherWartBlock(getSettings("corrupted_wart", Blocks.NETHER_WART)));
         WITHERED_WART_PLANT = registerBlock("withered_wart", new NetherWartBlock(getSettings("withered_wart", Blocks.NETHER_WART)));
 
-        DRIPSTONE_SLAB = registerBlock("dripstone_slab", new SlabBlock(getSettings("dripstone_slab", Blocks.DRIPSTONE_BLOCK)));
-        DRIPSTONE_STAIRS = registerBlock("dripstone_stairs", new StairsBlock(Blocks.DRIPSTONE_BLOCK.getDefaultState(), getSettings("dripstone_stairs", Blocks.DRIPSTONE_BLOCK)));
-        DRIPSTONE_WALL = registerBlock("dripstone_wall", new WallBlock(getSettings("dripstone_wall", Blocks.DRIPSTONE_BLOCK)));
-        POLISHED_DRIPSTONE = registerBlock("polished_dripstone", new Block(getSettings("polished_dripstone", Blocks.DRIPSTONE_BLOCK)));
-        POLISHED_DRIPSTONE_SLAB = registerBlock("polished_dripstone_slab", new SlabBlock(getSettings("polished_dripstone_slab", POLISHED_DRIPSTONE)));
-        POLISHED_DRIPSTONE_STAIRS = registerBlock("polished_dripstone_stairs", new StairsBlock(POLISHED_DRIPSTONE.getDefaultState(), getSettings("polished_dripstone_stairs", POLISHED_DRIPSTONE)));
-        POLISHED_DRIPSTONE_WALL = registerBlock("polished_dripstone_wall", new WallBlock(getSettings("polished_dripstone_wall", POLISHED_DRIPSTONE)));
-        DRIPSTONE_PILLAR = registerBlock("dripstone_pillar", new PillarBlock(getSettings("dripstone_pillar", POLISHED_DRIPSTONE)));
-        DRIPSTONE_BRICKS = registerBlock("dripstone_bricks", new Block(getSettings("dripstone_bricks", POLISHED_DRIPSTONE)));
-        DRIPSTONE_BRICK_SLAB = registerBlock("dripstone_brick_slab", new SlabBlock(getSettings("dripstone_brick_slab", DRIPSTONE_BRICKS)));
-        DRIPSTONE_BRICK_STAIRS = registerBlock("dripstone_brick_stairs", new StairsBlock(DRIPSTONE_BRICKS.getDefaultState(), getSettings("dripstone_brick_stairs", DRIPSTONE_BRICKS)));
-        DRIPSTONE_BRICK_WALL = registerBlock("dripstone_brick_wall", new WallBlock(getSettings("dripstone_brick_wall", DRIPSTONE_BRICKS)));
-
         POLISHED_STONE = registerBlock("polished_stone", new Block(getSettings("polished_stone", Blocks.STONE)));
         POLISHED_STONE_SLAB = registerBlock("polished_stone_slab", new SlabBlock(getSettings("polished_stone_slab", POLISHED_STONE)));
         POLISHED_STONE_STAIRS = registerBlock("polished_stone_stairs", new StairsBlock(POLISHED_STONE.getDefaultState(), getSettings("polished_stone_stairs", POLISHED_STONE)));
@@ -98,24 +88,42 @@ public class CustomBlocks {
         TERRACOTTA_TILE_STAIRS = registerBlock("terracotta_tile_stairs", new StairsBlock(TERRACOTTA_TILES.getDefaultState(), getSettings("terracotta_tile_stairs", TERRACOTTA_TILES)));
         TERRACOTTA_TILE_WALL = registerBlock("terracotta_tile_wall", new WallBlock(getSettings("terracotta_tile_wall", TERRACOTTA_TILES)));
         CHISELED_TERRACOTTA = registerBlock("chiseled_terracotta", new Block(getSettings("chiseled_terracotta", Blocks.TERRACOTTA)));
-        CLAY = registerBlock("clay", new MoistBlock(getSettings("clay", Blocks.CLAY).strength(1.1f, 2.5f).slipperiness(0.92f).velocityMultiplier(0.94f).sounds(BlockSoundGroup.MUD), Blocks.TERRACOTTA));
 
-        MUDSTONE = registerBlock("mudstone", new MoistBlock(getSettings("mudstone", Blocks.PACKED_MUD), Blocks.DRIPSTONE_BLOCK, Blocks.DRIPSTONE_BLOCK));
-        MUDSTONE_BRICKS = registerBlock("mudstone_bricks", new MoistBlock(getSettings("mudstone_bricks", MUDSTONE), DRIPSTONE_BRICKS, DRIPSTONE_BRICKS));
-        MUDSTONE_BRICK_SLAB = registerBlock("mudstone_brick_slab", new MoistSlabBlock(getSettings("mudstone_brick_slab", MUDSTONE), DRIPSTONE_BRICK_SLAB, DRIPSTONE_BRICK_STAIRS));
-        MUDSTONE_BRICK_STAIRS = registerBlock("mudstone_brick_stairs", new MoistStairsBlock(getSettings("mudstone_brick_stairs", MUDSTONE), MUDSTONE.getDefaultState(), TERRACOTTA_BRICK_STAIRS, TERRACOTTA_BRICK_STAIRS));
-        MUDSTONE_BRICK_WALL = registerBlock("mudstone_brick_wall", new MoistWallBlock(getSettings("mudstone_brick_wall", MUDSTONE), TERRACOTTA_BRICK_SLAB, TERRACOTTA_BRICK_SLAB));
-        BROWN_MUD = registerBlock("brown_mud", new BrownMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.BROWN).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).suffocates(Blocks::never).sounds(BlockSoundGroup.MUD)));
-        BROWN_MUD_BRICKS = registerBlock("brown_mud_bricks", new MoistBlock(getSettings("brown_mud_bricks", BROWN_MUD).strength(1.1f, 2.5f).slipperiness(0.92f).velocityMultiplier(0.94f).sounds(BlockSoundGroup.MUD), MUDSTONE_BRICKS));
-        BROWN_MUD_BRICK_SLAB = registerBlock("brown_mud_brick_slab", new MoistSlabBlock(getSettings("brown_mud_brick_slab", BROWN_MUD_BRICKS), MUDSTONE_BRICK_SLAB));
-        BROWN_MUD_BRICK_STAIRS = registerBlock("brown_mud_brick_stairs", new MoistStairsBlock(getSettings("brown_mud_brick_stairs", BROWN_MUD_BRICKS), BROWN_MUD_BRICKS.getDefaultState(), MUDSTONE_BRICK_SLAB));
-        BROWN_MUD_BRICK_WALL = registerBlock("brown_mud_brick_wall", new MoistWallBlock(getSettings("brown_mud_brick_wall", BROWN_MUD_BRICKS), MUDSTONE_BRICK_WALL));
-        ((MoistBlock)MUDSTONE).wetterVersion = BROWN_MUD;
-        ((MoistBlock)MUDSTONE_BRICKS).wetterVersion = BROWN_MUD_BRICKS;
-        ((MoistSlabBlock)MUDSTONE_BRICK_SLAB).wetterVersion = BROWN_MUD_BRICK_SLAB;
-        ((MoistStairsBlock)MUDSTONE_BRICK_STAIRS).wetterVersion = BROWN_MUD_BRICK_STAIRS;
+        DRIPSTONE_SLAB = registerBlock("dripstone_slab", new SlabBlock(getSettings("dripstone_slab", Blocks.DRIPSTONE_BLOCK)));
+        DRIPSTONE_STAIRS = registerBlock("dripstone_stairs", new StairsBlock(Blocks.DRIPSTONE_BLOCK.getDefaultState(), getSettings("dripstone_stairs", Blocks.DRIPSTONE_BLOCK)));
+        DRIPSTONE_WALL = registerBlock("dripstone_wall", new WallBlock(getSettings("dripstone_wall", Blocks.DRIPSTONE_BLOCK)));
+        POLISHED_DRIPSTONE = registerBlock("polished_dripstone", new Block(getSettings("polished_dripstone", Blocks.DRIPSTONE_BLOCK)));
+        POLISHED_DRIPSTONE_SLAB = registerBlock("polished_dripstone_slab", new SlabBlock(getSettings("polished_dripstone_slab", POLISHED_DRIPSTONE)));
+        POLISHED_DRIPSTONE_STAIRS = registerBlock("polished_dripstone_stairs", new StairsBlock(POLISHED_DRIPSTONE.getDefaultState(), getSettings("polished_dripstone_stairs", POLISHED_DRIPSTONE)));
+        POLISHED_DRIPSTONE_WALL = registerBlock("polished_dripstone_wall", new WallBlock(getSettings("polished_dripstone_wall", POLISHED_DRIPSTONE)));
+        DRIPSTONE_PILLAR = registerBlock("dripstone_pillar", new PillarBlock(getSettings("dripstone_pillar", POLISHED_DRIPSTONE)));
+        DRIPSTONE_BRICKS = registerBlock("dripstone_bricks", new Block(getSettings("dripstone_bricks", POLISHED_DRIPSTONE)));
+        DRIPSTONE_BRICK_SLAB = registerBlock("dripstone_brick_slab", new SlabBlock(getSettings("dripstone_brick_slab", DRIPSTONE_BRICKS)));
+        DRIPSTONE_BRICK_STAIRS = registerBlock("dripstone_brick_stairs", new StairsBlock(DRIPSTONE_BRICKS.getDefaultState(), getSettings("dripstone_brick_stairs", DRIPSTONE_BRICKS)));
+        DRIPSTONE_BRICK_WALL = registerBlock("dripstone_brick_wall", new WallBlock(getSettings("dripstone_brick_wall", DRIPSTONE_BRICKS)));
+
+        // Clay & Grey Mud
+        GRAY_CLAY = (MoistBlock) registerBlock("gray_clay", new MoistBlock(getSettings("gray_clay", Blocks.CLAY).strength(1.1f, 2.5f).slipperiness(0.92f).velocityMultiplier(0.98f).sounds(BlockSoundGroup.PACKED_MUD), null, Blocks.CYAN_TERRACOTTA));
+        GRAY_MUD = (MoistBlock)registerBlock("gray_mud", new CustomMudBlock(getSettings("gray_mud", Blocks.MUD).mapColor(MapColor.GRAY).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.GRAY_CLAY, Blocks.CYAN_TERRACOTTA));
+        ((MoistBlock)GRAY_CLAY).wetterVersion = GRAY_MUD;
+
+        // Brown Mud & Clay
+        BROWN_CLAY = (MoistBlock)registerBlock("brown_clay", new MoistBlock(getSettings("brown_clay", Blocks.PACKED_MUD).strength(1.1f, 2.5f).slipperiness(0.92f).sounds(BlockSoundGroup.PACKED_MUD), null, Blocks.LIGHT_GRAY_TERRACOTTA));
+        BROWN_MUD = (MoistBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.BROWN).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.BROWN_CLAY, Blocks.LIGHT_GRAY_TERRACOTTA));
+        ((MoistBlock)BROWN_CLAY).wetterVersion = BROWN_MUD;
+
+        BROWN_CLAY_BRICKS = (MoistBlock)registerBlock("brown_clay_bricks", new MoistBlock(getSettings("brown_clay_bricks", BROWN_CLAY), null, TERRACOTTA_BRICKS));
+        BROWN_CLAY_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_clay_brick_slab", new MoistSlabBlock(getSettings("brown_clay_brick_slab", BROWN_CLAY), null, TERRACOTTA_BRICK_SLAB));
+        BROWN_CLAY_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_clay_brick_stairs", new MoistStairsBlock(getSettings("brown_clay_brick_stairs", BROWN_CLAY), BROWN_CLAY.getDefaultState(), null, TERRACOTTA_BRICK_STAIRS));
+        BROWN_CLAY_BRICK_WALL = (MoistWallBlock)registerBlock("brown_clay_brick_wall", new MoistWallBlock(getSettings("brown_clay_brick_wall", BROWN_CLAY), null, TERRACOTTA_BRICK_WALL));
+        BROWN_MUD_BRICKS = (MoistBlock)registerBlock("brown_mud_bricks", new MoistBlock(getSettings("brown_mud_bricks", BROWN_MUD).strength(1.1f, 2.5f).slipperiness(0.92f).velocityMultiplier(0.94f).sounds(BlockSoundGroup.MUD), BROWN_CLAY_BRICKS));
+        BROWN_MUD_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_mud_brick_slab", new MoistSlabBlock(getSettings("brown_mud_brick_slab", BROWN_MUD_BRICKS), BROWN_CLAY_BRICK_SLAB));
+        BROWN_MUD_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_mud_brick_stairs", new MoistStairsBlock(getSettings("brown_mud_brick_stairs", BROWN_MUD_BRICKS), BROWN_MUD_BRICKS.getDefaultState(), BROWN_CLAY_BRICK_SLAB));
+        BROWN_MUD_BRICK_WALL =(MoistWallBlock)registerBlock("brown_mud_brick_wall", new MoistWallBlock(getSettings("brown_mud_brick_wall", BROWN_MUD_BRICKS), BROWN_CLAY_BRICK_WALL));
+        ((MoistBlock)BROWN_CLAY_BRICKS).wetterVersion = BROWN_MUD_BRICKS;
+        ((MoistSlabBlock)BROWN_CLAY_BRICK_SLAB).wetterVersion = BROWN_MUD_BRICK_SLAB;
+        ((MoistStairsBlock)BROWN_CLAY_BRICK_STAIRS).wetterVersion = BROWN_MUD_BRICK_STAIRS;
         ((MoistWallBlock)BROWN_MUD_BRICK_WALL).wetterVersion = BROWN_MUD_BRICK_WALL;
-
 
         WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrassBlock(getSettings("wheat_grass", Blocks.SHORT_GRASS)));
         WILD_WHEAT = registerBlock("wild_wheat", new WheatGrassBlock(getSettings("wild_wheat", Blocks.SHORT_GRASS)));

@@ -194,7 +194,7 @@
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:mud"
+            "Name": "players-versus:gray_mud"
           }
         },
         {

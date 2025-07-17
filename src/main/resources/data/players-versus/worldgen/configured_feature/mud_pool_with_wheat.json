@@ -29,7 +29,7 @@
       "scale": 1,
       "states": [
         {
-          "Name": "players-versus:mudstone"
+          "Name": "players-versus:brown_clay"
         },
         {
           "Name": "minecraft:dirt"
@@ -59,7 +59,7 @@
           "Name": "minecraft:dirt"
         },
         {
-          "Name": "players-versus:mudstone"
+          "Name": "players-versus:brown_clay"
         }
       ]
     },

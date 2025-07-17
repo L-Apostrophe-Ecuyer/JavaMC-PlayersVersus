@@ -19,37 +19,6 @@ public abstract class VanillaItemsAndStacks {
     private static Map<Item, Item> TRANSFORM_VANILLA_ITEMS_TO_VANILLA = new HashMap<>();
 
     private static final Map<Item,Integer> MAX_USE_TIME_MAP = new HashMap<>();
-    static {
-        MAX_USE_TIME_MAP.put(Items.ROTTEN_FLESH, 50);
-        MAX_USE_TIME_MAP.put(Items.SPIDER_EYE, 40);
-        MAX_USE_TIME_MAP.put(Items.COOKED_BEEF, 36);
-        MAX_USE_TIME_MAP.put(Items.COOKED_PORKCHOP, 36);
-        MAX_USE_TIME_MAP.put(Items.COOKED_CHICKEN, 32);
-        MAX_USE_TIME_MAP.put(Items.COOKED_MUTTON, 32);
-        MAX_USE_TIME_MAP.put(Items.COOKED_RABBIT, 32);
-        MAX_USE_TIME_MAP.put(Items.COOKED_SALMON, 28);
-        MAX_USE_TIME_MAP.put(Items.COOKED_COD, 28);
-        MAX_USE_TIME_MAP.put(Items.BEETROOT, 12);
-        MAX_USE_TIME_MAP.put(Items.POTATO, 32);
-        MAX_USE_TIME_MAP.put(Items.BAKED_POTATO, 24);
-        MAX_USE_TIME_MAP.put(Items.POISONOUS_POTATO, 32);
-        MAX_USE_TIME_MAP.put(Items.BREAD, 24);
-        MAX_USE_TIME_MAP.put(Items.COOKIE, 12);
-        MAX_USE_TIME_MAP.put(Items.DRIED_KELP, 12);
-        MAX_USE_TIME_MAP.put(Items.PUMPKIN_PIE, 16);
-        MAX_USE_TIME_MAP.put(Items.APPLE, 24);
-        MAX_USE_TIME_MAP.put(Items.CARROT, 24);
-        MAX_USE_TIME_MAP.put(Items.GOLDEN_CARROT, 28);
-        MAX_USE_TIME_MAP.put(Items.GOLDEN_APPLE, 28);
-        MAX_USE_TIME_MAP.put(Items.ENCHANTED_GOLDEN_APPLE, 28);
-        MAX_USE_TIME_MAP.put(Items.SUSPICIOUS_STEW, 16);
-        MAX_USE_TIME_MAP.put(Items.BEETROOT_SOUP, 12);
-        MAX_USE_TIME_MAP.put(Items.MUSHROOM_STEW, 16);
-        MAX_USE_TIME_MAP.put(Items.RABBIT_STEW, 16);
-        MAX_USE_TIME_MAP.put(Items.HONEY_BOTTLE, 16);
-        MAX_USE_TIME_MAP.put(Items.POTION, 36);
-        MAX_USE_TIME_MAP.put(Items.MILK_BUCKET, 12);
-    }
 
     public static int MAX_POTION_STACK_SIZE = 8;
 
@@ -58,7 +27,8 @@ public abstract class VanillaItemsAndStacks {
         RegisteringCustomItems.registerAllCustomItems();
         setUpTransformVanillaItemsToModded();
         setUpTransformVanillaItemsToVanilla();
-        setStackSizes(16, 8, MAX_POTION_STACK_SIZE, 8, 64, 16, 64);
+        setUpMaxUseTimeOverwrite();
+        setStackSizes(64, 16, MAX_POTION_STACK_SIZE, 8, 64, 16, 64);
     }
 
     private static void setUpTransformVanillaItemsToModded() {
@@ -68,12 +38,14 @@ public abstract class VanillaItemsAndStacks {
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.RECOVERY_COMPASS, CustomEquipment.RECOVERY_COMPASS);
 
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.CLAY, CustomBlockItems.CLAY_BLOCK);
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.PACKED_MUD, CustomBlockItems.MUDSTONE);
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICKS, CustomBlockItems.MUDSTONE_BRICKS);
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_SLAB, CustomBlockItems.MUDSTONE_BRICK_SLAB);
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_STAIRS, CustomBlockItems.MUDSTONE_BRICK_STAIRS);
-        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_WALL, CustomBlockItems.DRIPSTONE_BRICK_WALL);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.CLAY, CustomBlockItems.GRAY_CLAY);
+        TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.MUD, CustomBlockItems.GRAY_MUD);
+
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.PACKED_MUD, CustomBlockItems.BROWN_CLAY);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICKS, CustomBlockItems.BROWN_CLAY_BRICKS);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_SLAB, CustomBlockItems.BROWN_CLAY_BRICK_SLAB);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_STAIRS, CustomBlockItems.BROWN_CLAY_BRICK_STAIRS);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_WALL, CustomBlockItems.BROWN_MUD_BRICK_WALL);
 
         /*
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GRANITE_SLAB, CustomBlockItems.DRIPSTONE_SLAB);
@@ -85,9 +57,25 @@ public abstract class VanillaItemsAndStacks {
     }
 
     private static void setUpTransformVanillaItemsToVanilla() {
-        //TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.DIORITE, Items.CALCITE);
         //TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.GRANITE, Items.DRIPSTONE_BLOCK);
         TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.CHARCOAL, Items.COAL);
+    }
+
+    private static void setUpMaxUseTimeOverwrite() {
+        MAX_USE_TIME_MAP.put(Items.BEETROOT, 12);
+        MAX_USE_TIME_MAP.put(Items.BAKED_POTATO, 24);
+        MAX_USE_TIME_MAP.put(Items.BREAD, 24);
+        MAX_USE_TIME_MAP.put(Items.COOKIE, 12);
+        MAX_USE_TIME_MAP.put(Items.DRIED_KELP, 12);
+        MAX_USE_TIME_MAP.put(Items.PUMPKIN_PIE, 16);
+        MAX_USE_TIME_MAP.put(Items.APPLE, 24);
+        MAX_USE_TIME_MAP.put(Items.CARROT, 24);
+        MAX_USE_TIME_MAP.put(Items.SUSPICIOUS_STEW, 16);
+        MAX_USE_TIME_MAP.put(Items.BEETROOT_SOUP, 12);
+        MAX_USE_TIME_MAP.put(Items.MUSHROOM_STEW, 16);
+        MAX_USE_TIME_MAP.put(Items.RABBIT_STEW, 16);
+        MAX_USE_TIME_MAP.put(Items.HONEY_BOTTLE, 16);
+        MAX_USE_TIME_MAP.put(Items.MILK_BUCKET, 12);
     }
 
     private static void setStackSizes(final int maxFoods, final int maxMeals, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {

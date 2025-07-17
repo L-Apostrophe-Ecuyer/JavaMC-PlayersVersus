@@ -66,7 +66,7 @@
         "random_skew_chance": 0.2,
         "can_grow_through": "#minecraft:mangrove_roots_can_grow_through",
         "muddy_roots_in": [
-          "minecraft:mud",
+          "players-versus:gray_mud",
           "minecraft:muddy_mangrove_roots"
         ],
         "muddy_roots_provider": {
@@ -123,7 +123,7 @@
             {
               "weight": 2,
               "data": {
-                "Name": "minecraft:mud"
+                "Name": "players-versus:gray_mud"
               }
             },
             {

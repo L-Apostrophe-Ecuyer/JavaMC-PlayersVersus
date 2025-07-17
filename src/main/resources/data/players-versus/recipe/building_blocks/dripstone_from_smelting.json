@@ -3,8 +3,8 @@
   "category": "blocks",
   "group": "dripstone",
   "ingredient": [
-    "players-versus:mudstone",
-    "players-versus:mudstone_bricks"
+    "players-versus:brown_clay",
+    "players-versus:brown_clay_bricks"
   ],
   "result": {
     "id": "minecraft:dripstone_block"

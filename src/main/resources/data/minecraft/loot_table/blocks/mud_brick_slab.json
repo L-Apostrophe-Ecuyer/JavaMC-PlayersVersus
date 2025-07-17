@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "players-versus:mudstone_brick_slab",
+          "name": "players-versus:brown_clay_brick_slab",
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -16,7 +16,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:block_state_property",
-                  "block": "players-versus:mudstone_brick_slab",
+                  "block": "players-versus:brown_clay_brick_slab",
                   "properties": {
                     "type": "double"
                   }
@@ -31,5 +31,5 @@
       ]
     }
   ],
-  "random_sequence": "minecraft:blocks/granite_slab"
+  "random_sequence": "minecraft:blocks/mud_brick_slab"
 }

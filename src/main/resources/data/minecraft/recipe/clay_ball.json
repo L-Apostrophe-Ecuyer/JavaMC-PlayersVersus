@@ -1,9 +1,11 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "building",
+  "category": "misc",
   "group": "clay",
   "ingredients": [
-    "minecraft:clay"
+    {
+      "item": "players-versus:gray_clay"
+    }
   ],
   "result": {
     "count": 9,

@@ -16,7 +16,7 @@
     "ground_state": {
       "type": "minecraft:simple_state_provider",
       "state": {
-        "Name": "minecraft:clay"
+        "Name": "players-versus:gray_clay"
       }
     },
     "vegetation_feature": {

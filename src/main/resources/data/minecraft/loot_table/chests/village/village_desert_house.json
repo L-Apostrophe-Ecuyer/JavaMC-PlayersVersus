@@ -45,7 +45,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "players-versus:mudstone",
+          "name": "players-versus:brown_clay",
           "functions": [
             {
               "function": "minecraft:set_count",

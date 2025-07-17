@@ -56,9 +56,7 @@ public class InventorySorting {
         ItemSlot[] newSlots = InventorySortingHelper.getOptimalInventoryRows(slots, numRows, isPlayerInventory);
         for (int i = 0; i < totalNumSlots; i++) {
             if (newSlots[i] != null) {
-                if (isPlayerInventory)
-                    remappedSlotIndices[(i + 27) % 36] = newSlots[i].slodId() + 9; // Move first 9 slots down by 3 rows to populate the hotbar
-                else remappedSlotIndices[i] = newSlots[i].slodId() + 9;
+                remappedSlotIndices[i] = newSlots[i].slodId() + 9;
             }
         }
         return remappedSlotIndices;
@@ -199,9 +197,6 @@ public class InventorySorting {
         }
         if (inventoryToSort == InventoryToSort.CREATIVE_INVENTORY)
             client.player.playerScreenHandler.sendContentUpdates();
-        if (inventoryToSort == InventoryToSort.SURVIVAL_INVENTORY) {
-            HotbarCycling.doInverseHotbarSwap(client, (PlayerInventory) inventory);
-        }
         ;
     }
 }

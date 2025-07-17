@@ -1,5 +1,7 @@
 package frootloops.versus.mixin.client.items.inventory;
 
+import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.items.RegisteringCustomItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.player.PlayerEntity;
@@ -41,7 +43,8 @@ public class ItemMergingMixin {
         CONVERSION_MAP.put(Items.DIAMOND, new Object[]{Items.DIAMOND_BLOCK, 9});
         CONVERSION_MAP.put(Items.LAPIS_LAZULI, new Object[]{Items.LAPIS_BLOCK, 9});
         CONVERSION_MAP.put(Items.WHEAT, new Object[]{Items.HAY_BLOCK, 9});
-        CONVERSION_MAP.put(Items.CLAY_BALL, new Object[]{Items.CLAY, 9});
+        CONVERSION_MAP.put(Items.CLAY_BALL, new Object[]{CustomBlockItems.GRAY_CLAY, 9});
+        CONVERSION_MAP.put(CustomBlockItems.BROWN_CLAY_BALL, new Object[]{CustomBlockItems.BROWN_CLAY, 9});
         CONVERSION_MAP.put(Items.SNOWBALL, new Object[]{Items.SNOW_BLOCK, 4});
         CONVERSION_MAP.put(Items.SLIME_BALL, new Object[]{Items.SLIME_BLOCK, 4});
     }

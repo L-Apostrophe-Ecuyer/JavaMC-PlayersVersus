@@ -758,7 +758,7 @@ public class RevampedTradeOffers {
                 1, new Factory[]{
                         new BuyForOneEmeraldFactory(Blocks.STONE, 48, 16, 1),
                         new BuyForOneEmeraldFactory(Blocks.ANDESITE, 32, 16, 2),
-                        new SellItemFactory(CustomBlocks.MUDSTONE_BRICKS, 1, 8, 12, 1),
+                        new SellItemFactory(CustomBlocks.BROWN_CLAY_BRICKS, 1, 8, 12, 1),
                         new SellItemFactory(Blocks.BRICKS, 1, 24, 12, 1),
                         //new SellItemFactory(CustomBlocks.GRANITE_BRICKS, 1, 24, 12, 1),
                         new SellItemFactory(Blocks.TERRACOTTA, 1, 24, 12, 1),

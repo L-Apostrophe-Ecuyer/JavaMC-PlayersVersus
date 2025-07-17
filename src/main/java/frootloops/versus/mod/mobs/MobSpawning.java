@@ -1,6 +1,5 @@
 package frootloops.versus.mod.mobs;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
@@ -61,13 +60,14 @@ public class MobSpawning {
     public static boolean canSpawnDeeperCreeper(EntityType<DeeperCreeperEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
-        return blockPos.getY() < -16 && (world.getLightLevel(blockPos) == 0 || world.getBlockState(blockPos.down()).isOf(Blocks.DEEPSLATE));
+        if(world.getLightLevel(blockPos) > 1 || !world.getBlockState(blockPos).isOf(Blocks.DEEPSLATE)) return false;
+        return blockPos.getY() < -16;
     }
 
     public static boolean canSpawnWitheredZombie(EntityType<WitheredZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
-        if(world.getLightLevel(blockPos) > 0) return false;
+        if(world.getLightLevel(blockPos) > 0 || !world.getBlockState(blockPos).isIn(BlockTags.SCULK_REPLACEABLE)) return false;
         if(world.getBiome(blockPos).getKey().get() == CustomOverworldBiomes.DEEP_CAVES) return true;
 
         int y = blockPos.getY();

@@ -1,12 +1,22 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_mud": {
+    "has_packed_mud": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "players-versus:mudstone"
+            "items": "players-versus:brown_clay"
+          }
+        ]
+      }
+    },
+    "has_brown_mud": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "players-versus:brown_mud"
           }
         ]
       }
@@ -14,22 +24,23 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "players-versus:mudstone"
+        "recipe": "players-versus:brown_clay"
       }
     }
   },
   "requirements": [
     [
       "has_the_recipe",
-      "has_mud"
+      "has_packed_mud",
+      "has_brown_mud"
     ]
   ],
   "rewards": {
     "recipes": [
-      "players-versus:mudstone",
-      "players-versus:mudstone_bricks",
-      "players-versus:mudstone_brick_stairs",
-      "players-versus:mudstone_brick_slab",
+      "players-versus:brown_clay",
+      "players-versus:brown_clay_bricks",
+      "players-versus:brown_clay_brick_stairs",
+      "players-versus:brown_clay_brick_slab",
       "players-versus:building_blocks/packed_mud_tiles",
       "players-versus:building_blocks/packed_mud_tile_stairs",
       "players-versus:building_blocks/packed_mud_tile_slab",

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "group": "crimson_misc",
+  "key": {
+    "#": "minecraft:stick",
+    "W": "minecraft:crimson_planks"
+  },
+  "pattern": [
+    "#W#",
+    "#W#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:crimson_fence_gate"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "oak",
+  "key": {
+    "#": "minecraft:oak_planks"
+  },
+  "pattern": [
+    "# ", "##"
+  ],
+  "result": {
+    "count":  3,
+    "id": "minecraft:oak_stairs"
+  }
+}

@@ -4,7 +4,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "players-versus:building_blocks/mudstone_bricks"
+        "recipe": "players-versus:building_blocks/packed_mud_bricks"
       }
     },
     "has_ingredient": {
@@ -12,7 +12,7 @@
       "conditions": {
         "items": [
           {
-            "items": "players-versus:mudstone"
+            "items": "players-versus:brown_clay"
           }
         ]
       }
@@ -26,10 +26,10 @@
   ],
   "rewards": {
     "recipes": [
-      "players-versus:building_blocks/mudstone_bricks",
-      "players-versus:building_blocks/mudstone_brick_stairs",
-      "players-versus:building_blocks/mudstone_brick_slab",
-      "players-versus:building_blocks/mudstone_brick_wall",
+      "players-versus:building_blocks/packed_mud_bricks",
+      "players-versus:building_blocks/packed_mud_brick_stairs",
+      "players-versus:building_blocks/packed_mud_brick_slab",
+      "players-versus:building_blocks/packed_mud_brick_wall",
       "players-versus:building_blocks/dripstone_from_smelting",
       "players-versus:building_blocks/dripstone_slab_from_smelting",
       "players-versus:building_blocks/dripstone_stairs_from_smelting",

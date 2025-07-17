@@ -64,13 +64,13 @@ public class SortedItemLists {
     /** PICKAXES -------------------------------------------------------------   */
     public static final SortedTaggedItemList PICKAXES = new SortedTaggedItemList(ItemTags.PICKAXES);
     public static final SortedMappedItemList PICKAXE_MINEABLE_NETHER = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_NETHER_BLOCKS);
-    public static final SortedMappedItemList PICKAXE_MINEABLE_GREY = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GREY_STONES);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_GRAY = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAY_STONES);
     public static final SortedMappedItemList PICKAXE_MINEABLE_PALE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES);
     public static final SortedMappedItemList PICKAXE_MINEABLE_WARM = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS);
     public static final SortedMappedItemList PICKAXE_MINEABLE_TERRACOTTA = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS);
     public static final SortedMappedItemList PICKAXE_MINEABLE_COPPER = new SortedMappedItemList(ItemSortingMaps.ITEMS_COPPER_BLOCKS);
     public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.PICKAXE_MINEABLE, 0.25f, 32.0f);
-    public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_GREY, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_COPPER, PICKAXE_MINEABLE_GENERIC};
+    public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_GRAY, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_COPPER, PICKAXE_MINEABLE_GENERIC};
 
 
     /** AXES -------------------------------------------------------------   */

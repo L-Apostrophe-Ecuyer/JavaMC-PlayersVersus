@@ -20,7 +20,7 @@
     "ground_state": {
       "type": "minecraft:simple_state_provider",
       "state": {
-        "Name": "minecraft:packed_mud"
+        "Name": "players-versus:brown_clay"
       }
     },
     "vegetation_feature": {

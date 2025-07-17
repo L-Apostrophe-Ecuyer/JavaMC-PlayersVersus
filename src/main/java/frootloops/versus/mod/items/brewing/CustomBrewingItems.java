@@ -1,42 +1,36 @@
 package frootloops.versus.mod.items.brewing;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.items.RegisteringCustomItems;
-import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 
-import static frootloops.versus.mod.items.RegisteringCustomItems.getSettings;
+import static frootloops.versus.mod.items.RegisteringCustomItems.getItemSettings;
 import static net.minecraft.item.Item.BASE_ATTACK_DAMAGE_MODIFIER_ID;
 
 public abstract class CustomBrewingItems {
 
     public static Item.Settings getBileSettings(String name) {
-        return RegisteringCustomItems.getSettings(name).rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, ConcentrateItem.CONCENTRATE_COMPONENT).useItemPrefixedTranslationKey();
+        return RegisteringCustomItems.getItemSettings(name).rarity(Rarity.UNCOMMON).component(DataComponentTypes.CONSUMABLE, ConcentrateItem.CONCENTRATE_COMPONENT).useItemPrefixedTranslationKey();
     }
 
-    public static final Item FOUR_LEAF_CLOVER = new Item(getSettings("four_leaf_clover").attributeModifiers(AttributeModifiersComponent.builder().add(EntityAttributes.LUCK, new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, 1.0, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.OFFHAND).build()));
+    public static final Item FOUR_LEAF_CLOVER = new Item(getItemSettings("four_leaf_clover").attributeModifiers(AttributeModifiersComponent.builder().add(EntityAttributes.LUCK, new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, 1.0, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.OFFHAND).build()));
     //public static final Item THREE_LEAF_CLOVER = new Item(new Item.Settings());
 
     public static PotionItem BOTTLE_OF_ENDER;
     public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
     public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
 
-    public static final Item LIVING_FLAME = new Item(getSettings("living_flame"));
-    public static final Item GLISTERING_BEETROOT = new Item(getSettings("glistering_beetroot").food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).build()));
-    public static final Item GLISTERING_MELON_SLICE = new Item(getSettings("glistering_melon_slice").food(new FoodComponent.Builder().nutrition(3).saturationModifier(0.8f).build()));
+    public static final Item LIVING_FLAME = new Item(getItemSettings("living_flame"));
+    public static final Item GLISTERING_BEETROOT = new Item(getItemSettings("glistering_beetroot").food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).build()));
+    public static final Item GLISTERING_MELON_SLICE = new Item(getItemSettings("glistering_melon_slice").food(new FoodComponent.Builder().nutrition(3).saturationModifier(0.8f).build()));
 
     public static final ConcentrateItem CONCENTRATE_OF_DEATH = new ConcentrateItem(getBileSettings("concentrate_of_death"),StatusEffects.WITHER, 2, 80, CustomBlocks.DEATHLY_BILE);
     public static final ConcentrateItem CORRUPTED_WART_POWDER = new ConcentrateItem(getBileSettings("corrupted_wart_powder"),StatusEffects.HUNGER, 4, 120, CustomBlocks.CORRUPTED_BILE); //-> Will be replacing Fermented Spider Eye

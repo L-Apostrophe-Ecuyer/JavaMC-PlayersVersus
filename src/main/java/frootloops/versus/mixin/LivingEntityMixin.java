@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.Enchants;
 import frootloops.versus.mod.environment.CustomBlocks;
-import frootloops.versus.mod.environment.blocks.clays.BrownMudBlock;
+import frootloops.versus.mod.environment.blocks.clays.CustomMudBlock;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items.brewing.effects.HauntingStatusEffect;
 import net.minecraft.enchantment.Enchantments;
@@ -19,7 +19,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -35,8 +34,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Collection;
 import java.util.Map;
 
-import static net.minecraft.fluid.FlowableFluid.FALLING;
-
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
     @Shadow
@@ -48,16 +45,12 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "travelInFluid", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
-        if(this.getWorld().getFluidState(this.getBlockPos()).get(FALLING, false)) {
-            this.setVelocity(this.getVelocity().add(0.0, isPlayer() && isSwimming() ? -0.02 : -0.01, 0.0));
-            return h;
-        }
-        else return isPlayer() && isSwimming() ? h : h + 0.3f;
+        return isPlayer() && isSwimming() ? h : h + 0.3f;
     }
 
     @Inject(method = "applyMovementInput", at = @At("RETURN"), cancellable = true)
     private void applyMovementInput(Vec3d movementInput, float slipperiness, CallbackInfoReturnable<Vec3d> cir) {
-        if (this.getBlockStateAtPos().isOf(CustomBlocks.BROWN_MUD) && BrownMudBlock.canWalkOnWetMud(this)) {
+        if (this.getBlockStateAtPos().isOf(CustomBlocks.BROWN_MUD) && CustomMudBlock.canWalkOnWetMud(this)) {
             Vec3d vec3d = this.getVelocity();
             cir.setReturnValue(new Vec3d(vec3d.x, 0.2, vec3d.z));
         }

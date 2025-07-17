@@ -1,11 +1,13 @@
 {
   "type": "minecraft:smelting",
   "category": "misc",
-  "ingredient":"minecraft:clay_ball",
+  "ingredient": [
+    "minecraft:clay_ball",
+    "players-versus:brown_clay_ball"
+  ],
   "result": {
-    "count": 1,
     "id": "minecraft:brick"
   },
   "experience": 0.3,
-  "cookingtime": 100
+  "cookingtime": 32
 }

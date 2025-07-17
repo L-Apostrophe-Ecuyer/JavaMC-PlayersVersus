@@ -15,6 +15,7 @@ import net.minecraft.util.Identifier;
 import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class RegisteringCustomItems {
+
     public static void registerAllCustomItems() {
 
         registerCustomItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS);
@@ -101,16 +102,20 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("dripstone_brick_stairs", CustomBlockItems.DRIPSTONE_BRICK_STAIRS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("dripstone_brick_wall", CustomBlockItems.DRIPSTONE_BRICK_WALL, ItemGroups.BUILDING_BLOCKS);
 
+        registerCustomItem("gray_clay", CustomBlockItems.GRAY_CLAY, ItemGroups.NATURAL);
+        registerCustomItem("gray_mud", CustomBlockItems.GRAY_MUD, ItemGroups.NATURAL);
+
+        registerCustomItem("brown_clay_ball", CustomBlockItems.BROWN_CLAY_BALL, ItemGroups.NATURAL);
+        registerCustomItem("brown_clay", CustomBlockItems.BROWN_CLAY);
         registerCustomItem("brown_mud", CustomBlockItems.BROWN_MUD, ItemGroups.NATURAL);
         registerCustomItem("brown_mud_bricks", CustomBlockItems.BROWN_MUD_BRICKS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("brown_mud_brick_slab", CustomBlockItems.BROWN_MUD_BRICK_SLAB, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("brown_mud_brick_stairs", CustomBlockItems.BROWN_MUD_BRICK_STAIRS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("brown_mud_brick_wall", CustomBlockItems.BROWN_MUD_BRICK_WALL, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("mudstone", CustomBlockItems.MUDSTONE);
-        registerCustomItem("mudstone_bricks", CustomBlockItems.MUDSTONE_BRICKS);
-        registerCustomItem("mudstone_brick_slab", CustomBlockItems.MUDSTONE_BRICK_SLAB);
-        registerCustomItem("mudstone_brick_stairs", CustomBlockItems.MUDSTONE_BRICK_STAIRS);
-        registerCustomItem("mudstone_brick_wall", CustomBlockItems.MUDSTONE_BRICK_WALL);
+        registerCustomItem("brown_clay_bricks", CustomBlockItems.BROWN_CLAY_BRICKS);
+        registerCustomItem("brown_clay_brick_slab", CustomBlockItems.BROWN_CLAY_BRICK_SLAB);
+        registerCustomItem("brown_clay_brick_stairs", CustomBlockItems.BROWN_CLAY_BRICK_STAIRS);
+        registerCustomItem("brown_clay_brick_wall", CustomBlockItems.BROWN_CLAY_BRICK_WALL);
 
         registerCustomItem("terracotta_bricks", CustomBlockItems.TERRACOTTA_BRICKS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("terracotta_brick_slab", CustomBlockItems.TERRACOTTA_BRICK_SLAB, ItemGroups.BUILDING_BLOCKS);
@@ -120,7 +125,6 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("terracotta_tile_slab", CustomBlockItems.TERRACOTTA_TILE_SLAB, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("terracotta_tile_stairs", CustomBlockItems.TERRACOTTA_TILE_STAIRS, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("chiseled_terracotta", CustomBlockItems.CHISELED_TERRACOTTA, ItemGroups.BUILDING_BLOCKS);
-        registerCustomItem("clay_block", CustomBlockItems.CLAY_BLOCK);
 
         registerCustomItem("wheat_grass", CustomBlockItems.WHEAT_GRASS, ItemGroups.NATURAL);
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT, ItemGroups.NATURAL);
@@ -131,7 +135,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("infested_oak_wood", CustomBlockItems.INFESTED_OAK_WOOD);
     }
 
-    public static Item.Settings getSettings(String name) {
+    public static Item.Settings getItemSettings(String name) {
         return new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(VersusMod.MOD_ID, name)));
     }
 

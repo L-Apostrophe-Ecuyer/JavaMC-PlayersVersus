@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "birch_misc",
+  "ingredients": [
+    "minecraft:chest",
+    "minecraft:birch_boat"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:birch_chest_boat"
+  }
+}

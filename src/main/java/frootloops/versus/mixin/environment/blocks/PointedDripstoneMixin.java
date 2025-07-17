@@ -15,9 +15,6 @@ import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +26,10 @@ public abstract class PointedDripstoneMixin extends Block {
 
     private static final Map<Block,Block> BLOCKS_THAT_DRIP_WATER = new HashMap<>();
     static {
-        BLOCKS_THAT_DRIP_WATER.put(Blocks.MUD, CustomBlocks.CLAY);
-        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD, CustomBlocks.MUDSTONE);
-        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD_BRICKS, CustomBlocks.MUDSTONE_BRICKS);
-        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.MUDSTONE, Blocks.DRIPSTONE_BLOCK);
+        BLOCKS_THAT_DRIP_WATER.put(Blocks.MUD, CustomBlocks.GRAY_CLAY);
+        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD, CustomBlocks.BROWN_CLAY);
+        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_MUD_BRICKS, CustomBlocks.BROWN_CLAY_BRICKS);
+        BLOCKS_THAT_DRIP_WATER.put(CustomBlocks.BROWN_CLAY, Blocks.DRIPSTONE_BLOCK);
         BLOCKS_THAT_DRIP_WATER.put(Blocks.ANDESITE, Blocks.DRIPSTONE_BLOCK);
         BLOCKS_THAT_DRIP_WATER.put(Blocks.PACKED_MUD, Blocks.DRIPSTONE_BLOCK);
         BLOCKS_THAT_DRIP_WATER.put(Blocks.FARMLAND, Blocks.DIRT);

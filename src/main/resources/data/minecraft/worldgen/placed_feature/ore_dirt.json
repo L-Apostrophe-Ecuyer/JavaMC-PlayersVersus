@@ -1,22 +1,13 @@
 {
   "feature": {
-    "type": "minecraft:random_selector",
+    "type": "players-versus:mud_patch",
     "config": {
-      "features": [
-        {
-          "chance": 0.00015,
-          "feature": "players-versus:lake_mud_underground"
-        },
-        {
-          "chance": 0.0005,
-          "feature": "players-versus:lake_mud_surface"
-        },
-        {
-          "chance": 0.5,
-          "feature": "players-versus:mud_pool_with_wheat"
-        }
-      ],
-      "default": "players-versus:mud_pool"
+      "is_brown_mud": true,
+      "size": {
+        "type": "minecraft:uniform",
+        "min_inclusive": 3,
+        "max_inclusive": 12
+      }
     }
   },
   "placement": [
@@ -24,8 +15,12 @@
       "type": "minecraft:in_square"
     },
     {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
       "type": "minecraft:rarity_filter",
-      "chance": 16
+      "chance": 24
     }
   ]
 }

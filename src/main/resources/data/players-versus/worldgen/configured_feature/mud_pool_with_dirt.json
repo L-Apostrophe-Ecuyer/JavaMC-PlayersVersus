@@ -50,7 +50,7 @@
           "Name": "players-versus:brown_mud"
         },
         {
-          "Name": "players-versus:mudstone"
+          "Name": "players-versus:brown_clay"
         },
         {
           "Name": "minecraft:stone"
@@ -141,7 +141,7 @@
                         "probability": 0.2
                       },
                       "state": {
-                        "Name": "players-versus:mudstone"
+                        "Name": "players-versus:brown_clay"
                       }
                     },
                     {

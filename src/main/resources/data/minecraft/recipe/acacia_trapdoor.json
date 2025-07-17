@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "group": "acacia_misc",
+  "key": {
+    "#": "minecraft:acacia_planks"
+  },
+  "pattern": [
+    "###", "###"
+  ],
+  "result": {
+    "count":  6,
+    "id": "minecraft:acacia_trapdoor"
+  }
+}

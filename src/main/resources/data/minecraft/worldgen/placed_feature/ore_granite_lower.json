@@ -2,7 +2,7 @@
   "feature": {
     "type": "minecraft:ore",
     "config": {
-      "size": 32,
+      "size": 64,
       "discard_chance_on_air_exposure": 0,
       "targets": [
         {
@@ -39,10 +39,20 @@
   },
   "placement": [
     {
-      "type": "minecraft:noise_based_count",
-      "noise_to_count_ratio": 80,
-      "noise_factor": 14,
-      "noise_offset": -0.425
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:weighted_list",
+        "distribution": [
+          {
+            "weight": 48,
+            "data": 0
+          },
+          {
+            "weight": 1,
+            "data": 24
+          }
+        ]
+      }
     },
     {
       "type": "minecraft:in_square"
@@ -50,12 +60,9 @@
     {
       "type": "minecraft:height_range",
       "height": {
-        "type": "minecraft:uniform",
-        "max_inclusive": {
+        "type": "minecraft:constant",
+        "value": {
           "absolute": 78
-        },
-        "min_inclusive": {
-          "absolute": 74
         }
       }
     },

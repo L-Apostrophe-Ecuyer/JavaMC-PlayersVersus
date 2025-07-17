@@ -59,7 +59,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:clay",
+          "name": "players-versus:gray_clay",
           "weight": 2
         },
         {

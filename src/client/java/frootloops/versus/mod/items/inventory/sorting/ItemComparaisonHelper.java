@@ -89,7 +89,7 @@ public abstract class ItemComparaisonHelper {
             if(blockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
                 if(otherBlockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
                     if(ItemSortingMaps.ITEMS_HOE_NETHER_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_HOE_NETHER_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
-                    if(ItemSortingMaps.ITEMS_PICKAXE_GREY_STONES.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_GREY_STONES.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
+                    if(ItemSortingMaps.ITEMS_PICKAXE_GRAY_STONES.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_GRAY_STONES.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;

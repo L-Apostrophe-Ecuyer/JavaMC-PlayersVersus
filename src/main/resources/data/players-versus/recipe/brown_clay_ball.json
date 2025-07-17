@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "clay",
+  "ingredients": [
+    {
+      "item": "players-versus:brown_clay"
+    }
+  ],
+  "result": {
+    "count": 9,
+    "id": "players-versus:brown_clay_ball"
+  }
+}
