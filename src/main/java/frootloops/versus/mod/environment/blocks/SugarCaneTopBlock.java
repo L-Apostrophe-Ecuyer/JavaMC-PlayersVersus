@@ -29,6 +29,7 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
 
     public static final MapCodec<SugarCaneTopBlock> CODEC = createCodec(SugarCaneTopBlock::new);
     protected static final VoxelShape SHAPE = Block.createCuboidShape(2.0, 0.0, 2.0, 14.0, 10.0, 14.0);
+    protected static final VoxelShape SHAPE_BIG = Block.createCuboidShape(2.0, 0.0, 2.0, 14.0, 14.0, 14.0);
     public static final IntProperty AGE = Properties.AGE_15;
     public static final BooleanProperty CAN_GROW = BooleanProperty.of("can_grow");
 
@@ -49,7 +50,7 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
 
     @Override
     protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return SHAPE;
+        return state.get(AGE) < 10 ? SHAPE : SHAPE_BIG;
     }
 
     @Override
@@ -101,7 +102,7 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
             world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getStuntedState());
             return;
         }
-        if(state.get(CAN_GROW) && this.canGrow(world, random, pos, state)) this.grow(world, random, pos, state);
+        if(this.canGrow(world, random, pos, state)) this.grow(world, random, pos, state);
     }
 
     @Override @Nullable
@@ -136,36 +137,28 @@ public class SugarCaneTopBlock extends Block implements Fertilizable {
 
     @Override
     public boolean isFertilizable(WorldView world, BlockPos pos, BlockState state) {
-        return state.get(CAN_GROW) && world.getLightLevel(LightType.SKY, pos) > 13;
+        return state.get(CAN_GROW) && world.getLightLevel(LightType.SKY, pos) > 13 && (state.get(AGE) < 15 || world.getBlockState(pos.up()).isAir());
     }
 
     @Override
     public boolean canGrow(World world, Random random, BlockPos pos, BlockState state) {
-        int chanceToGrow = world.getBlockState(pos.down()).isOf(Blocks.SUGAR_CANE) ? 8 : 16;
-        if(!state.get(CAN_GROW)) chanceToGrow /= 4;
-        if (random.nextInt(chanceToGrow) == 1) return false;
-        return true;
+        return state.get(CAN_GROW) && world.getLightLevel(LightType.SKY, pos) > 13 && (state.get(AGE) < 15 || world.getBlockState(pos.up()).isAir());
     }
 
     @Override
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
         BlockState blockStateBelow = world.getBlockState(pos.down());
         int numSugarCaneBelow = 0;
-        while (blockStateBelow.isOf(Blocks.SUGAR_CANE) && numSugarCaneBelow < 3) numSugarCaneBelow++;
+        while (blockStateBelow.isOf(Blocks.SUGAR_CANE) && numSugarCaneBelow < 5) numSugarCaneBelow++;
         if (world.isAir(pos.up())) {
             int age = state.get(AGE);
             if(age < 15) {
-                world.setBlockState(pos, state.with(AGE, Integer.valueOf(age + 1)).with(CAN_GROW, true));
+                world.setBlockState(pos, state.with(AGE, Integer.valueOf(age + 1)));
                 return;
             }
-            if(numSugarCaneBelow == 1) {
-                while (numSugarCaneBelow < 4 && world.getBlockState(pos.down(numSugarCaneBelow)).isOf(Blocks.SUGAR_CANE)) {
-                    numSugarCaneBelow++;
-                }
-            }
-            if (numSugarCaneBelow < 3) {
+            if (numSugarCaneBelow < 4) {
                 world.setBlockState(pos, Blocks.SUGAR_CANE.getDefaultState());
-                if(random.nextInt(6) > 2 * numSugarCaneBelow) world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
+                if(random.nextInt(5 + numSugarCaneBelow) > 1 + numSugarCaneBelow) world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
                 else world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getStuntedState());
             }
         }

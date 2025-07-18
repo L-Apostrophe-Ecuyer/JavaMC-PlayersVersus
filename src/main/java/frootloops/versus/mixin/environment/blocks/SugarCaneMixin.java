@@ -53,7 +53,7 @@ public abstract class SugarCaneMixin extends Block {
                     else world.setBlockState(pos.up(), CustomBlocks.SUGAR_CANE_TOP.getDefaultState());
                     world.setBlockState(pos, state.with(Properties.AGE_15, Integer.valueOf(8)), Block.NO_REDRAW); // Aged down, but only half way! Incentives picking only the top
                 } else {
-                    world.setBlockState(pos, state.with(Properties.AGE_15, Integer.valueOf(age + 1)), Block.NO_REDRAW);
+                    world.setBlockState(pos, state.with(Properties.AGE_15, Integer.valueOf(Math.min(15, age + 4))), Block.NO_REDRAW);
                 }
             }
             else {

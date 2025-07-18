@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cross",
   "textures": {
-    "cross": "players-versus:block/sugar_cane_top_grown"
+    "cross": "minecraft:block/sugar_cane"
   }
 }

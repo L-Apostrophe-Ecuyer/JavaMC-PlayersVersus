@@ -104,12 +104,12 @@ public class CustomBlocks {
 
         // Clay & Grey Mud
         GRAY_CLAY = (MoistBlock) registerBlock("gray_clay", new MoistBlock(getSettings("gray_clay", Blocks.CLAY).strength(1.1f, 2.5f).slipperiness(0.92f).velocityMultiplier(0.98f).sounds(BlockSoundGroup.PACKED_MUD), null, Blocks.CYAN_TERRACOTTA));
-        GRAY_MUD = (MoistBlock)registerBlock("gray_mud", new CustomMudBlock(getSettings("gray_mud", Blocks.MUD).mapColor(MapColor.GRAY).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.GRAY_CLAY, Blocks.CYAN_TERRACOTTA));
+        GRAY_MUD = (CustomMudBlock)registerBlock("gray_mud", new CustomMudBlock(getSettings("gray_mud", Blocks.DIRT).mapColor(MapColor.GRAY).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.GRAY_CLAY, Blocks.CYAN_TERRACOTTA));
         ((MoistBlock)GRAY_CLAY).wetterVersion = GRAY_MUD;
 
         // Brown Mud & Clay
         BROWN_CLAY = (MoistBlock)registerBlock("brown_clay", new MoistBlock(getSettings("brown_clay", Blocks.PACKED_MUD).strength(1.1f, 2.5f).slipperiness(0.92f).sounds(BlockSoundGroup.PACKED_MUD), null, Blocks.LIGHT_GRAY_TERRACOTTA));
-        BROWN_MUD = (MoistBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.BROWN).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.BROWN_CLAY, Blocks.LIGHT_GRAY_TERRACOTTA));
+        BROWN_MUD = (CustomMudBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.BROWN).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.BROWN_CLAY, Blocks.LIGHT_GRAY_TERRACOTTA));
         ((MoistBlock)BROWN_CLAY).wetterVersion = BROWN_MUD;
 
         BROWN_CLAY_BRICKS = (MoistBlock)registerBlock("brown_clay_bricks", new MoistBlock(getSettings("brown_clay_bricks", BROWN_CLAY), null, TERRACOTTA_BRICKS));

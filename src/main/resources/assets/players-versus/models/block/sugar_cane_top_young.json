@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:block/tinted_cross",
+  "parent": "minecraft:block/cross",
   "textures": {
     "cross": "players-versus:block/sugar_cane_top_young"
   }
