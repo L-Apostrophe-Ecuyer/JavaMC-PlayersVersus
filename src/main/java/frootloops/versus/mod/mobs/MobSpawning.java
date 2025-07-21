@@ -1,5 +1,6 @@
 package frootloops.versus.mod.mobs;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
@@ -33,9 +34,8 @@ public class MobSpawning {
 
         //BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.WITHERED_ZOMBIE, 100, 4, 4);
         SpawnRestriction.register(ModEntities.WITHERED_ZOMBIE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitheredZombie);
-
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), SpawnGroup.MONSTER, EntityType.WITHER_SKELETON, 60, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), SpawnGroup.MONSTER, EntityType.ZOMBIFIED_PIGLIN, 1, 1, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), SpawnGroup.MONSTER, EntityType.ZOMBIFIED_PIGLIN, 3, 1, 4);
 
         // SpawnRestriction.register(VanillaEntities.CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnCreeper);
         // SpawnRestriction.register(VanillaEntities.WITHER_SKELETON, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitherSkelly);
@@ -60,30 +60,27 @@ public class MobSpawning {
     public static boolean canSpawnDeeperCreeper(EntityType<DeeperCreeperEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
-        if(world.getLightLevel(blockPos) > 1 || !world.getBlockState(blockPos).isOf(Blocks.DEEPSLATE)) return false;
+        if(world.getLightLevel(blockPos) > 1 || !world.getBlockState(blockPos.down()).isOf(Blocks.DEEPSLATE)) return false;
         return blockPos.getY() < -16;
     }
 
     public static boolean canSpawnWitheredZombie(EntityType<WitheredZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
-        if(world.getLightLevel(blockPos) > 0 || !world.getBlockState(blockPos).isIn(BlockTags.SCULK_REPLACEABLE)) return false;
+        if(world.getLightLevel(blockPos) > 0 || !world.getBlockState(blockPos.down()).isIn(BlockTags.SCULK_REPLACEABLE)) return false;
         if(world.getBiome(blockPos).getKey().get() == CustomOverworldBiomes.DEEP_CAVES) return true;
 
         int y = blockPos.getY();
         if(y > 96) return false;
-        if(y > 16) {
-            if(y > 32) {
-                long dayTime = world.getLunarTime() % 24000l;
-                if (dayTime < 18000l || dayTime > 20000l) return false;
+        if(y > 24) {
+            long dayTime = world.getLunarTime() % 24000l;
+            if (dayTime < 18000l || dayTime > 20000l) return false;
 
-                int moonPhase = world.getMoonPhase();
-                if ((moonPhase + 2) % 8 < 6) return false;
-                if (moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
-            }
-            return world.getBlockState(blockPos.down()).isIn(BlockTags.MOSS_REPLACEABLE);
+            int moonPhase = world.getMoonPhase();
+            if ((moonPhase + 2) % 8 < 6) return false;
+            if (moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
         }
-        else return world.getBlockState(blockPos.down()).isIn(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
+        return true;
     }
 
     public static boolean canSpawnFrostedZombie(EntityType<FrostedZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {

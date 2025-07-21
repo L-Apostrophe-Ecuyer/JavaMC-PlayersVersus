@@ -3,7 +3,7 @@
   "category": "building",
   "group": "copper",
   "key": {
-    "#": "minecraft:waxed_weathered_copper_block"
+    "#": "minecraft:waxed_weathered_copper"
   },
   "pattern": [
     "##",

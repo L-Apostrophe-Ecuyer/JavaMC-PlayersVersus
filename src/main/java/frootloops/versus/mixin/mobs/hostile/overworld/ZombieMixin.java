@@ -100,7 +100,7 @@ public abstract class ZombieMixin extends HostileEntity {
         BlockPos pos = this.getBlockPos();
         if(pos.getY() < -16) return false;
         if(pos.getY() < 32 && !world.getBlockState(pos.down()).isOf(Blocks.STONE)) return false;
-        if(world.getBlockState(pos.down()).isIn(BlockTags.AXE_MINEABLE)) return false;
+        if(!world.getBlockState(pos.down()).isIn(BlockTags.MOSS_REPLACEABLE)) return false;
         return super.canSpawn(world, spawnReason);
     }
 
