@@ -3,6 +3,9 @@
 	"package": "frootloops.versus.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+
+		"enchantments.AnvilScreenMixin",
+
 		"environment.visuals.ClientWorldSkyMixin",
 		"environment.visuals.FogRendererMixin",
 		"environment.visuals.DarknessFogRendererMixin",

@@ -2,6 +2,12 @@
 
   "subtitles.players-versus.rail_turning_sound": "Minecart makes a sharp turn",
 
+  "container.repair.book_combine_message": "Spend XP To Combine Books",
+  "container.repair.book_invalid": "No Valid Enchantments",
+  "container.repair.book_cost": "Cost: %1$s",
+  "container.repair.cost": "Level Required: %1$s",
+  "key.pickItem": "Pick Block / Switch Hotbar",
+
   "death.attack.mud_suffocation": "%1$s suffocated while taking a mud bath",
   "death.attack.mud_suffocation.item": "%1$s suffocated while taking a mud bath",
 

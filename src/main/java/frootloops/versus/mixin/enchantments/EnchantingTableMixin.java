@@ -1,12 +1,17 @@
 package frootloops.versus.mixin.enchantments;
 
 import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.screen.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -23,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(EnchantmentScreenHandler.class)
 public abstract class EnchantingTableMixin extends ScreenHandler {
@@ -46,8 +52,6 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
     @Shadow private final ScreenHandlerContext context;
     @Shadow private final Property seed;
 
-    @Shadow private List<EnchantmentLevelEntry> generateEnchantments(DynamicRegistryManager registryManager, ItemStack stack, int slot, int level) { return null;}
-
     @Overwrite
     public boolean onButtonClick(PlayerEntity player, int id) {
         if (id < 0 || id >= this.enchantmentPower.length) return false;
@@ -63,6 +67,8 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
             this.context.run((world, pos) -> {
                 ItemStack stack = inputStack;
                 List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id, this.enchantmentPower[id]);
+                if(listCandidateEnchantments.isEmpty()) listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id + 1, this.enchantmentPower[id]);
+                if(listCandidateEnchantments.isEmpty()) listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id + 2, this.enchantmentPower[id]);
                 if (!listCandidateEnchantments.isEmpty()) {
 
                     // Apply costs:
@@ -108,14 +114,31 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
         this.context.run((world, pos) -> {
             List<EnchantmentLevelEntry> list;
             ItemStack itemStack = inventory.getStack(0);
-            for (int j = 0; j < 3; ++j) {
-                if (this.enchantmentPower[j] <= 0 || (list = this.generateEnchantments(world.getRegistryManager(), itemStack, j, this.enchantmentPower[j])) == null || list.isEmpty()) {
-                    this.enchantmentPower[j] = 0;
-                    this.enchantmentLevel[j] = -1;
-                    this.enchantmentId[j] = -1;
+            for (int slotID = 0; slotID < 3; ++slotID) {
+                list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID, this.enchantmentPower[slotID]);
+                if(list.isEmpty()) list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID + 1, this.enchantmentPower[slotID]);
+                if(list.isEmpty()) list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID + 2, this.enchantmentPower[slotID]);
+                if (this.enchantmentPower[slotID] <= 0 || list.isEmpty()) {
+                    this.enchantmentPower[slotID] = 0;
+                    this.enchantmentLevel[slotID] = -1;
+                    this.enchantmentId[slotID] = -1;
                 }
             }
             this.sendContentUpdates();
         });
+    }
+
+    private List<EnchantmentLevelEntry> generateEnchantments(DynamicRegistryManager registryManager, ItemStack stack, int seedOffset, int level) {
+        this.random.setSeed((long)(this.seed.get() + seedOffset));
+        Optional<RegistryEntryList.Named<Enchantment>> optional = registryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOptional(EnchantmentTags.IN_ENCHANTING_TABLE);
+        if (optional.isEmpty()) {
+            return List.of();
+        } else {
+            List<EnchantmentLevelEntry> list = EnchantmentHelper.generateEnchantments(this.random, stack, level, ((RegistryEntryList.Named)optional.get()).stream());
+            if (stack.isOf(Items.BOOK) && list.size() > 1) {
+                list.remove(this.random.nextInt(list.size()));
+            }
+            return list;
+        }
     }
 }
