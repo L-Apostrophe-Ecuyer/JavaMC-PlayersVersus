@@ -5,7 +5,7 @@
         "minecraft:light_gray_dye"
     ],
     "result": {
-        "id": "minecraft:blue_dye",
+        "id": "minecraft:light_blue_dye",
         "count": 2
     },
     "group": "dye_util"
