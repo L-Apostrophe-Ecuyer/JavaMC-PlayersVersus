@@ -13,6 +13,7 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.tag.EntityTypeTags;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
@@ -59,10 +60,8 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         if(maxCooldown > 0) return maxCooldown;
         if(numTicksEndlag == -1) numTicksEndlag = mob.getType().isIn(EntityTypeTags.ARTHROPOD) ? 4 : 8;
         if(!this.mob.getMainHandStack().isEmpty()) {
-            Item weapon = this.mob.getMainHandStack().getItem();
-            if(weapon instanceof AxeItem || weapon instanceof TridentItem) maxCooldown = TICKS_SWING_HEAVY + numTicksEndlag;
-            else if(weapon instanceof HoeItem) maxCooldown = TICKS_SWING_QUICK + numTicksEndlag;
-            else if(weapon instanceof MiningToolItem) maxCooldown = TICKS_SWING_TOOLS + numTicksEndlag;
+            if(this.mob.getMainHandStack().isIn(ItemTags.AXES) || this.mob.getMainHandStack().isOf(Items.TRIDENT))
+                maxCooldown = TICKS_SWING_HEAVY + numTicksEndlag;
         }
         else maxCooldown = TICKS_SWING_QUICK + numTicksEndlag;
         return maxCooldown;
