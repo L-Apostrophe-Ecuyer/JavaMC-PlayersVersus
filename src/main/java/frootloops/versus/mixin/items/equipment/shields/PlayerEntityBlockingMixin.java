@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.items.equipment.shields;
 
 import frootloops.versus.mod.enchantments.CustomEnchants;
-import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
@@ -65,7 +65,7 @@ public abstract class PlayerEntityBlockingMixin extends LivingEntity {
         if(this.getAttacker() != null) {
             ItemStack mainhandStack = this.getAttacker().getMainHandStack();
             if(!mainhandStack.isEmpty() && mainhandStack.hasEnchantments()) {
-                int cleaveLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.CLEAVING);
+                int cleaveLevel = EnchantRegistryHelper.getLevel(getWorld(), mainhandStack, CustomEnchants.CLEAVING);
                 if (cleaveLevel > 0)  disableForTicks += 40 * cleaveLevel;
             }
         }

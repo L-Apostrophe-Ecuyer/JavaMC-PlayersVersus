@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.enchantments;
 
-import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -19,6 +20,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
+import net.minecraft.util.Util;
 import net.minecraft.util.collection.IndexedIterable;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
@@ -57,68 +59,75 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
 
     @Overwrite
     public boolean onButtonClick(PlayerEntity player, int id) {
-        if (id < 0 || id >= this.enchantmentPower.length) return false;
-        this.seed.set(player.getEnchantingTableSeed());
+        if (id >= 0 && id < this.enchantmentPower.length) {
+            ItemStack inputStack = this.inventory.getStack(0);
+            ItemStack lapisStack = this.inventory.getStack(1);
+            int lapisCost = id + 1;
+            if ((lapisStack.isEmpty() || lapisStack.getCount() < lapisCost) && !player.getAbilities().creativeMode) {
+                return false;
+            }
 
-        ItemStack inputStack = this.inventory.getStack(0);
-        ItemStack lapisStack = this.inventory.getStack(1);
-        int lapisCost = id + 1;
-        if ((lapisStack.isEmpty() || lapisStack.getCount() < lapisCost) && !player.getAbilities().creativeMode) {
+            if (this.enchantmentPower[id] > 0 && !inputStack.isEmpty() && (player.experienceLevel >= lapisCost && player.experienceLevel >= this.enchantmentPower[id] || player.getAbilities().creativeMode)) {
+                this.context.run((world, pos) -> {
+                    ItemStack stack = inputStack;
+                    List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id, this.enchantmentPower[id]);
+                    if (listCandidateEnchantments.isEmpty())
+                        listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id + 1, this.enchantmentPower[id]);
+                    if (listCandidateEnchantments.isEmpty())
+                        listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id + 2, this.enchantmentPower[id]);
+                    if (!listCandidateEnchantments.isEmpty()) {
+
+                        // Apply costs:
+                        player.applyEnchantmentCosts(stack, lapisCost);
+
+                        // Switching to a book:
+                        if (stack.isOf(Items.BOOK)) {
+                            stack = stack.copyComponentsToNewStack(Items.ENCHANTED_BOOK, 1);
+                            this.inventory.setStack(0, stack);
+                        }
+
+                        // Add new enchantments, or improve old ones:
+                        Iterator enchantmentLevelEntryIterator = listCandidateEnchantments.iterator();
+                        while (enchantmentLevelEntryIterator.hasNext()) {
+                            EnchantmentLevelEntry entry = (EnchantmentLevelEntry) enchantmentLevelEntryIterator.next();
+                            stack.addEnchantment(entry.enchantment, entry.level);
+                        }
+
+                        // Update the item:
+                        if (!player.getAbilities().creativeMode) {
+                            lapisStack.decrement(lapisCost);
+                            if (lapisStack.isEmpty()) {
+                                this.inventory.setStack(1, ItemStack.EMPTY);
+                            }
+                        }
+
+                        // Update player and client effects:
+                        player.incrementStat(Stats.ENCHANT_ITEM);
+                        if (player instanceof ServerPlayerEntity)
+                            Criteria.ENCHANTED_ITEM.trigger((ServerPlayerEntity) player, stack, lapisCost);
+                        this.inventory.markDirty();
+                        this.seed.set(player.getEnchantingTableSeed());
+                        this.onContentChanged(this.inventory);
+                        world.playSound(null, pos, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0f, world.random.nextFloat() * 0.1f + 0.9f);
+                    }
+                });
+            }
+            return true;
+        } else {
+            Util.logErrorOrPause(player.getName() + " pressed invalid button id: " + id);
             return false;
         }
-
-        if (this.enchantmentPower[id] > 0 && !inputStack.isEmpty() && (player.experienceLevel >= lapisCost && player.experienceLevel >= this.enchantmentPower[id] || player.getAbilities().creativeMode)) {
-            this.context.run((world, pos) -> {
-                ItemStack stack = inputStack;
-                List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id, this.enchantmentPower[id]);
-                if(listCandidateEnchantments.isEmpty()) listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id + 1, this.enchantmentPower[id]);
-                if(listCandidateEnchantments.isEmpty()) listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id + 2, this.enchantmentPower[id]);
-                if (!listCandidateEnchantments.isEmpty()) {
-
-                    // Apply costs:
-                    player.applyEnchantmentCosts(stack, lapisCost);
-
-                    // Switching to a book:
-                    if (stack.isOf(Items.BOOK)) {
-                        stack = stack.copyComponentsToNewStack(Items.ENCHANTED_BOOK, 1);
-                        this.inventory.setStack(0, stack);
-                    }
-
-                    // Add new enchantments, or improve old ones:
-                    Iterator enchantmentLevelEntryIterator = listCandidateEnchantments.iterator();
-                    while(enchantmentLevelEntryIterator.hasNext()) {
-                        EnchantmentLevelEntry entry = (EnchantmentLevelEntry)enchantmentLevelEntryIterator.next();
-                        stack.addEnchantment(entry.enchantment, entry.level);
-                    }
-
-                    // Update the item:
-                    if (!player.getAbilities().creativeMode) {
-                        lapisStack.decrement(lapisCost);
-                        if (lapisStack.isEmpty()) {
-                            this.inventory.setStack(1, ItemStack.EMPTY);
-                        }
-                    }
-
-                    // Update player and client effects:
-                    player.incrementStat(Stats.ENCHANT_ITEM);
-                    if (player instanceof ServerPlayerEntity)  Criteria.ENCHANTED_ITEM.trigger((ServerPlayerEntity)player, stack, lapisCost);
-                    this.inventory.markDirty();
-                    this.seed.set(player.getEnchantingTableSeed());
-                    this.onContentChanged(this.inventory);
-                    world.playSound(null, pos, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0f, world.random.nextFloat() * 0.1f + 0.9f);
-                }
-            });
-            return true;
-        }
-        return false;
     }
 
     @Inject(method = "onContentChanged", at = @At(value = "TAIL"))
     private void updateUnavailableEnchantments(Inventory inventory, CallbackInfo ci) {
+        if(inventory != this.inventory) return;
+        VersusMod.MOD_LOGGER.warn("[ ENCHANTING SCREEN HANDLER ] Content changed!");
+
         this.context.run((world, pos) -> {
             List<EnchantmentLevelEntry> list;
             ItemStack itemStack = inventory.getStack(0);
-            if(itemStack.isEnchantable()) {
+            if(!itemStack.isEmpty() && itemStack.isEnchantable()) {
                 IndexedIterable<RegistryEntry<Enchantment>> indexedIterable = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT).getIndexedEntries();
                 for (int slotID = 0; slotID < 3; ++slotID) {
                     list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID, this.enchantmentPower[slotID]);
@@ -132,7 +141,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
                         this.enchantmentId[slotID] = -1;
                     }
                     else {
-                        EnchantmentLevelEntry enchantmentLevelEntry = list.getFirst();
+                        EnchantmentLevelEntry enchantmentLevelEntry = EnchantRegistryHelper.getMostImportantEnchant(list);
                         this.enchantmentId[slotID] = indexedIterable.getRawId(enchantmentLevelEntry.enchantment);
                         this.enchantmentLevel[slotID] = enchantmentLevelEntry.level;
                     }
@@ -150,23 +159,9 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
         } else {
             List<EnchantmentLevelEntry> list = EnchantmentHelper.generateEnchantments(this.random, stack, level, ((RegistryEntryList.Named)optional.get()).stream());
             if (stack.isOf(Items.BOOK) && list.size() > 1) {
-                EnchantmentLevelEntry maxEnchant = null;
-                int maxPower = Integer.MIN_VALUE;
-                for(EnchantmentLevelEntry e : list) {
-                    int power = getAvgPowerOfEnchantment(e);
-                    if(power > maxPower) {
-                        maxEnchant = e;
-                        maxPower = power;
-                    }
-                }
-                return List.of(maxEnchant);
+                return List.of(EnchantRegistryHelper.getMostImportantEnchant(list));
             }
             return list;
         }
-    }
-
-
-    private static int getAvgPowerOfEnchantment(EnchantmentLevelEntry e) {
-        return (e.enchantment.value().getMinPower(e.level) + e.enchantment.value().getMaxPower(e.level))/2;
     }
 }

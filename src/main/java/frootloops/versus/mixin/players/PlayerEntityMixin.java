@@ -3,7 +3,7 @@ package frootloops.versus.mixin.players;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.block.*;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.component.DataComponentTypes;
@@ -206,7 +206,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 3)
     private boolean doSweepingAttacksOnRegularSwings(boolean isSweep) {
-        return isSweep && (Enchants.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= VersusSettings.MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS);
+        return isSweep && (EnchantRegistryHelper.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= VersusSettings.MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS);
     }
 
     @Inject(method = "attack", at = @At("TAIL"))
@@ -234,7 +234,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     public void setSprinting(boolean sprinting) {
-        //if(sprinting && this.hungerManager.getFoodLevel() == 0 && this.getHealth() < 20.0f && (this.age - this.lastDamageTime > 160)) return;  // No sprinting when damaged and no food points
         if(sprinting && !Combat.canPlayerSprint(this.hungerManager, this.hasStatusEffect(StatusEffects.HUNGER))) return;
         super.setSprinting(sprinting);
     }

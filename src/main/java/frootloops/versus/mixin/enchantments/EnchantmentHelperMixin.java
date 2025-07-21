@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.enchantments;
 
 import com.google.common.collect.Lists;
-import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
@@ -37,7 +37,7 @@ public class EnchantmentHelperMixin {
                         break;
                     }
                 }
-                currentLevel = Enchants.getLevel(stack, enchantmentRegistryEntry);
+                currentLevel = EnchantRegistryHelper.getLevel(stack, enchantmentRegistryEntry);
             }
             if(canApplyEnchanment) {
                 Enchantment enchantmentToAdd = (Enchantment) enchantmentRegistryEntry.value();

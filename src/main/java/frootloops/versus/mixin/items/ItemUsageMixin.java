@@ -1,17 +1,14 @@
 package frootloops.versus.mixin.items;
 
-import frootloops.versus.VersusMod;
-import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import frootloops.versus.mod.items.VanillaItemsAndStacks;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ConsumableComponent;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +33,7 @@ public class ItemUsageMixin {
         else if(stack.isIn(ItemTags.DURABILITY_ENCHANTABLE)) {
             UseAction useAction = stack.getUseAction();
             if(useAction == UseAction.BLOCK) cir.setReturnValue(72000);
-            else if(useAction == UseAction.BRUSH && Enchants.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) cir.setReturnValue(6);
+            else if(useAction == UseAction.BRUSH && EnchantRegistryHelper.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) cir.setReturnValue(6);
         }
     }
 

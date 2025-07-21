@@ -4,6 +4,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryEntryLookup;
@@ -13,10 +14,11 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.World;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 
-public abstract class Enchants {
+public abstract class EnchantRegistryHelper {
 
     private static RegistryEntryLookup enchRegistryLookup = null;
 
@@ -54,5 +56,27 @@ public abstract class Enchants {
 
     public static int getEquipmentLevel(World world, LivingEntity user, RegistryKey<Enchantment> enchantment) {
         return EnchantmentHelper.getEquipmentLevel(getRegistryEntry(world, enchantment), user);
+    }
+
+    public static EnchantmentLevelEntry getMostImportantEnchant(List<EnchantmentLevelEntry> list) {
+        if(list == null || list.size() < 1) return null;
+        if(list.size() == 1) return list.getFirst();
+        EnchantmentLevelEntry maxEnchant = null;
+        int maxPower = Integer.MIN_VALUE;
+        for(EnchantmentLevelEntry e : list) {
+            int power = getValueOfEnchantment(e);
+            if(power > maxPower) {
+                maxEnchant = e;
+                maxPower = power;
+            }
+        }
+        return maxEnchant;
+    }
+    public static int getValueOfEnchantment(EnchantmentLevelEntry e) {
+        Enchantment enchant = e.enchantment.value();
+        int exclusiveEnchantBonus = enchant.exclusiveSet().size() * 8;
+        int avgPower = (enchant.getMinPower(e.level) + enchant.getMaxPower(e.level))/2;
+        int anvilCost = enchant.getAnvilCost();
+        return avgPower + anvilCost + exclusiveEnchantBonus;
     }
 }

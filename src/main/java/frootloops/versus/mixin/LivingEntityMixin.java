@@ -2,7 +2,7 @@ package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
 import frootloops.versus.mod.enchantments.CustomEnchants;
-import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.clays.CustomMudBlock;
 import frootloops.versus.mod.items.brewing.CustomStatusEffects;
@@ -89,17 +89,17 @@ public abstract class LivingEntityMixin extends Entity {
 
             // Shovel attack and Tossing Enchantment:
             if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
-                int tossLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.TOSSING);
+                int tossLevel = EnchantRegistryHelper.getLevel(getWorld(), mainhandStack, CustomEnchants.TOSSING);
                 CustomEnchants.performTossAttack(world, self, target, 0.2 + 0.1 * (double)tossLevel);
             }
 
             // Other enchantments: Frost Aspect, Impaling
             if (!mainhandStack.hasEnchantments()) return;
-            int frostLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.FROST_ASPECT);
+            int frostLevel = EnchantRegistryHelper.getLevel(getWorld(), mainhandStack, CustomEnchants.FROST_ASPECT);
             if (frostLevel > 0) CustomEnchants.performFrostAttack(world, self, target, frostLevel);
 
             if (!mainhandStack.hasEnchantments()) return;
-            int impaleLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchantments.IMPALING);
+            int impaleLevel = EnchantRegistryHelper.getLevel(getWorld(), mainhandStack, Enchantments.IMPALING);
             if (impaleLevel > 0) CustomEnchants.performImpalingAttack(world, self, target, frostLevel);
         }
     }
@@ -144,7 +144,7 @@ public abstract class LivingEntityMixin extends Entity {
             }
 
             // Curse of Ender Enchantment:
-            if(Enchants.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
+            if(EnchantRegistryHelper.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
                 CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), source.getAttacker());
             }
         }
