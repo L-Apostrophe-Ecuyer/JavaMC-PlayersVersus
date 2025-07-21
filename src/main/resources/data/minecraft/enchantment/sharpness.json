@@ -1,24 +1,8 @@
 {
-  "description": {
-    "translate": "enchantment.minecraft.sharpness"
-  },
-  "exclusive_set": "#minecraft:exclusive_set/damage",
-  "supported_items": "#minecraft:enchantable/weapon",
-  "primary_items": "#minecraft:enchantable/sharp_weapon",
-  "weight": 10,
-  "max_level": 5,
-  "min_cost": {
-    "base": 1,
-    "per_level_above_first": 11
-  },
-  "max_cost": {
-    "base": 21,
-    "per_level_above_first": 11
-  },
   "anvil_cost": 1,
-  "slots": [
-    "mainhand"
-  ],
+  "description": {
+    "translate": "enchantment.players-versus.sprint_attack"
+  },
   "effects": {
     "minecraft:damage": [
       {
@@ -26,11 +10,39 @@
           "type": "minecraft:add",
           "value": {
             "type": "minecraft:linear",
-            "base": 0.5,
+            "base": 1,
             "per_level_above_first": 0.5
           }
         }
       }
+    ],
+    "minecraft:attributes": [
+      {
+        "amount": {
+          "type": "minecraft:linear",
+          "base": 1,
+          "per_level_above_first": 0.5
+        },
+        "attribute": "players-versus:sprint_attack_damage",
+        "id": "enchantment.players-versus.sprint_attack",
+        "operation": "add_value"
+      }
     ]
-  }
+  },
+  "exclusive_set": "#minecraft:exclusive_set/damage",
+  "max_cost": {
+    "base": 21,
+    "per_level_above_first": 11
+  },
+  "max_level": 5,
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 11
+  },
+  "primary_items": "#minecraft:enchantable/sharp_weapon",
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#minecraft:enchantable/sharp_weapon",
+  "weight": 10
 }

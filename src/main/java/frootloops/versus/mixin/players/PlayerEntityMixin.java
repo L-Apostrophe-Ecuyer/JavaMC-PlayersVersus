@@ -22,6 +22,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
@@ -60,7 +61,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "createPlayerAttributes", at = @At(value = "HEAD"), cancellable = true)
     private static void createPlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         cir.setReturnValue(
-            LivingEntity.createLivingAttributes()
+                DefaultAttributeContainer.builder()
+                    .add(Registries.ATTRIBUTE.getEntry(Combat.CRITICAL_ATTACK_DAMAGE_ATTRIBUTE))
+                    .add(Registries.ATTRIBUTE.getEntry(Combat.SPRINT_ATTACK_DAMAGE_ATTRIBUTE))
                     .add(EntityAttributes.ATTACK_DAMAGE, Combat.PLAYER_BASE_ATTACK_DAMAGE)
                     .add(EntityAttributes.MOVEMENT_SPEED, 0.1f)
                     .add(EntityAttributes.ATTACK_SPEED,  Combat.PLAYER_BASE_ATTACK_SPEED)
@@ -72,6 +75,23 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                     .add(EntityAttributes.SNEAKING_SPEED)
                     .add(EntityAttributes.MINING_EFFICIENCY)
                     .add(EntityAttributes.SWEEPING_DAMAGE_RATIO)
+                    .add(EntityAttributes.MAX_HEALTH)
+                    .add(EntityAttributes.KNOCKBACK_RESISTANCE)
+                    .add(EntityAttributes.ARMOR)
+                    .add(EntityAttributes.ARMOR_TOUGHNESS)
+                    .add(EntityAttributes.MAX_ABSORPTION)
+                    .add(EntityAttributes.STEP_HEIGHT)
+                    .add(EntityAttributes.SCALE)
+                    .add(EntityAttributes.GRAVITY)
+                    .add(EntityAttributes.SAFE_FALL_DISTANCE)
+                    .add(EntityAttributes.FALL_DAMAGE_MULTIPLIER)
+                    .add(EntityAttributes.JUMP_STRENGTH)
+                    .add(EntityAttributes.OXYGEN_BONUS)
+                    .add(EntityAttributes.BURNING_TIME)
+                    .add(EntityAttributes.EXPLOSION_KNOCKBACK_RESISTANCE)
+                    .add(EntityAttributes.WATER_MOVEMENT_EFFICIENCY)
+                    .add(EntityAttributes.MOVEMENT_EFFICIENCY)
+                    .add(EntityAttributes.ATTACK_KNOCKBACK)
         );
     }
 
@@ -91,36 +111,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
         return super.damage(world, source, amount);
     }
-
-    @Inject(method = "getXpToDrop", at = @At("HEAD"), cancellable = true)
-    public void getXpToDrop(ServerWorld world, CallbackInfoReturnable<Integer> cir) {
-        PlayerEntity player = (PlayerEntity)((Object)this);
-        if(this.totalExperience == 0 || this.isExperienceDroppingDisabled() || world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || this.isSpectator()) {
-            cir.setReturnValue(0);
-        } else {
-            cir.setReturnValue(((64 + this.totalExperience) >> 3) + (this.totalExperience >> 1) - 8);
-        }
-    }
-
-    @Overwrite
-    public int getNextLevelExperience() {
-        if(this.experienceLevel > 30) return 48 + (this.experienceLevel - 30); // No more exponential curve!
-        return this.experienceLevel * 2 + 16; // A bit more of a regular scaling amount
-    }
-
-
-    /*
-    @Inject(method = "travel", at = @At("HEAD"), cancellable = false)
-    public void jumpInVehicles(Vec3d movementInput, CallbackInfo info) {
-        if(this.jumping && this.hasVehicle() && this.getVehicle() instanceof BoatEntity boatEntity && !boatEntity.isSubmergedInWater()) {
-            if(boatEntity.isOnGround() || (boatEntity.fallDistance == 0f && boatEntity.getY() == boatEntity.prevY)) {
-                double jumpStrength = boatEntity.isOnGround() ? 0.225 : 0.425;
-                Vec3d velocity = boatEntity.getVelocity();
-                boatEntity.setVelocity(velocity.x, Math.max(jumpStrength, velocity.y), velocity.z);
-                boatEntity.velocityDirty = true;
-            }
-        }
-    } */
 
     @Inject(method = "canHarvest", at = @At("RETURN"), cancellable = true)
     public void canMineCopperWithWood(BlockState state, CallbackInfoReturnable<Boolean> cir) {
@@ -170,7 +160,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         return super.modifyAppliedDamage(source, amount);
     }
 
-    @Inject(method = "attack", at = @At("HEAD"))
+    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 1)
+    private float modifyAttackDamage(float amount) {
+        boolean isSprinting = this.isSprinting() && this.isOnGround();
+        boolean isCriticalHit = !isSprinting && !this.isOnGround() && !this.isInFluid();
+        if(isSprinting) amount = Math.max(1.0f, amount + (float)this.getAttributeValue(Combat.SPRINT_ATTACK_DAMAGE));
+        else if(isCriticalHit) amount = Math.max(1.0f, amount + (float)this.getAttributeValue(Combat.CRITICAL_ATTACK_DAMAGE));
+        return amount;
+    }
+
+    @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
     public void attackTypes(Entity target, CallbackInfo ci) {
         if(this.getWorld().isClient) return;
 
@@ -181,15 +180,20 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         double amount = this.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
-        if(amount < (this.isOnGround() ? 0.5f : 0.75f)) {
+        boolean isSprinting = this.isSprinting();
+        boolean isCriticalHit = !isSprinting && !this.isOnGround();
+        if(isCriticalHit) return;
+
+        if(amount < 1.0) {
             if (target instanceof LivingEntity livingEntity) {
-                double strength = this.isSprinting() ? 0.8 : 0.5;
+                double strength = isSprinting ? 0.8 : 0.6;
                 this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
                 livingEntity.takeKnockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
             }
             else if (target instanceof VehicleEntity || target instanceof ArmorStandEntity) {
                 target.damage((ServerWorld) this.getWorld(), this.getDamageSources().playerAttack((PlayerEntity)((Object)this)), 2.0f);
             }
+            ci.cancel(); // Cancel attack
         }
     }
 

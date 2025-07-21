@@ -4,6 +4,7 @@ package frootloops.versus.mod;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.LivingEntityAccessor;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
@@ -12,6 +13,8 @@ import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.ClampedEntityAttribute;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import net.minecraft.entity.effect.StatusEffects;
@@ -22,6 +25,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
@@ -35,6 +41,26 @@ import java.util.List;
 
 public abstract class Combat {
 
+    public static EntityAttribute CRITICAL_ATTACK_DAMAGE_ATTRIBUTE, SPRINT_ATTACK_DAMAGE_ATTRIBUTE;
+    public static RegistryEntry<EntityAttribute> CRITICAL_ATTACK_DAMAGE, SPRINT_ATTACK_DAMAGE;
+
+    static {
+        // Register critical attack damage
+        CRITICAL_ATTACK_DAMAGE_ATTRIBUTE = Registry.register(
+                Registries.ATTRIBUTE,
+                Identifier.of(VersusMod.MOD_ID, "critical_attack_damage"),
+                new ClampedEntityAttribute("attribute.name.critical_attack_damage", 2.0, 0.0, 2048.0).setTracked(true)
+        );
+
+        // Register sprint attack damage
+        SPRINT_ATTACK_DAMAGE_ATTRIBUTE = Registry.register(
+                Registries.ATTRIBUTE,
+                Identifier.of(VersusMod.MOD_ID, "sprint_attack_damage"),
+                new ClampedEntityAttribute("attribute.name.sprint_attack_damage", 2.0, 0.0, 2048.0).setTracked(true)
+        );
+    }
+
+
     public static final float MIN_COOLDOWN_TO_SWING = 0.6f;
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 0.0d;
@@ -44,6 +70,8 @@ public abstract class Combat {
 
 
     public static void onInitialize() {
+        CRITICAL_ATTACK_DAMAGE = Registries.ATTRIBUTE.getEntry(CRITICAL_ATTACK_DAMAGE_ATTRIBUTE);
+        SPRINT_ATTACK_DAMAGE = Registries.ATTRIBUTE.getEntry(SPRINT_ATTACK_DAMAGE_ATTRIBUTE);
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {
