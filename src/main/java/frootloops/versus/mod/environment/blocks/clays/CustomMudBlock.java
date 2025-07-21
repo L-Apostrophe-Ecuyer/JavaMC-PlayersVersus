@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.CustomDamageSources;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.mob.WaterCreatureEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.EntityTypeTags;
@@ -58,7 +59,7 @@ public class CustomMudBlock extends MoistBlock {
                 entity.slowMovement(state, new Vec3d(0.98, 0.95, 0.98));
             }
             else {
-                entity.slowMovement(state, new Vec3d(0.95, 0.6, 0.95));
+                entity.slowMovement(state, new Vec3d(0.98, 0.6, 0.98));
             }
 
         }
@@ -98,7 +99,7 @@ public class CustomMudBlock extends MoistBlock {
 
 
     public boolean shouldDamage(World world, LivingEntity entity) {
-        if(entity instanceof PigEntity) return false;
+        if(entity instanceof AnimalEntity) return false;
         return world.getBlockState(new BlockPos(entity.getBlockX(), (int) (entity.getEyeY() - 0.04), entity.getBlockZ())).isOf(this);
     }
 
