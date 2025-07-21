@@ -588,6 +588,9 @@ public abstract class ItemSortingMaps {
         ITEMS_MINERAL_RESSOURCES.put(Items.DIAMOND_ORE, index++);
         ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_DIAMOND_ORE, index++);
         ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_BLOCK, index++);
+        ITEMS_MINERAL_RESSOURCES.put(CustomBlockItems.CUT_LAPIS, index++);
+        ITEMS_MINERAL_RESSOURCES.put(CustomBlockItems.CUT_LAPIS_SLAB, index++);
+        ITEMS_MINERAL_RESSOURCES.put(CustomBlockItems.CUT_LAPIS_STAIRS, index++);
         ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_LAZULI, index++);
         ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_ORE, index++);
         ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_LAPIS_ORE, index++);

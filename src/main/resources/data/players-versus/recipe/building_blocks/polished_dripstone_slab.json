@@ -3,14 +3,14 @@
   "group": "dripstone",
   "category": "building",
   "pattern": [
-    "###"
+    "##"
   ],
   "key": {
     "#" : "players-versus:polished_dripstone"
   },
   "result": {
     "id": "players-versus:polished_dripstone_slab",
-    "count": 6
+    "count": 4
   }
 }
 

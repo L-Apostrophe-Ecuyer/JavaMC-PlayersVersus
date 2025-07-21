@@ -33,6 +33,8 @@ public class CustomBlocks {
     public static Block CORRUPTED_WART_PLANT;
     public static Block WITHERED_WART_PLANT;
 
+    public static Block CUT_LAPIS, CUT_LAPIS_SLAB, CUT_LAPIS_STAIRS;
+
     public static Block DRIPSTONE_SLAB, DRIPSTONE_STAIRS, DRIPSTONE_WALL;
     public static Block POLISHED_DRIPSTONE, POLISHED_DRIPSTONE_SLAB, POLISHED_DRIPSTONE_STAIRS, POLISHED_DRIPSTONE_WALL, DRIPSTONE_PILLAR;
     public static Block DRIPSTONE_BRICKS, DRIPSTONE_BRICK_SLAB, DRIPSTONE_BRICK_STAIRS, DRIPSTONE_BRICK_WALL;
@@ -74,6 +76,10 @@ public class CustomBlocks {
 
         CORRUPTED_WART_PLANT = registerBlock("corrupted_wart", new NetherWartBlock(getSettings("corrupted_wart", Blocks.NETHER_WART)));
         WITHERED_WART_PLANT = registerBlock("withered_wart", new NetherWartBlock(getSettings("withered_wart", Blocks.NETHER_WART)));
+
+        CUT_LAPIS = registerBlock("cut_lapis", new Block(getSettings("cut_lapis", Blocks.LAPIS_BLOCK)));
+        CUT_LAPIS_SLAB = registerBlock("cut_lapis_slab", new SlabBlock(getSettings("cut_lapis_slab", CUT_LAPIS)));
+        CUT_LAPIS_STAIRS = registerBlock("cut_lapis_stairs", new StairsBlock(CUT_LAPIS.getDefaultState(), getSettings("cut_lapis_stairs", CUT_LAPIS)));
 
         POLISHED_STONE = registerBlock("polished_stone", new Block(getSettings("polished_stone", Blocks.STONE)));
         POLISHED_STONE_SLAB = registerBlock("polished_stone_slab", new SlabBlock(getSettings("polished_stone_slab", POLISHED_STONE)));

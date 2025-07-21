@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "players-versus:block/cut_lapis",
+    "side": "players-versus:block/cut_lapis",
+    "top": "players-versus:block/cut_lapis"
+  }
+}
+

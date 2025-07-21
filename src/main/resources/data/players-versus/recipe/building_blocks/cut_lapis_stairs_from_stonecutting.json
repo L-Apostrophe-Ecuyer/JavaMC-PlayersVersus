@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "lapis",
+  "ingredient": [
+    "players-versus:cut_lapis"
+  ],
+  "result": {
+    "count": 1,
+    "id": "players-versus:cut_lapis_stairs"
+  }
+}
+
+
+

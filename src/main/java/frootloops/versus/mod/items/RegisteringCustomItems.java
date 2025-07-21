@@ -86,6 +86,10 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH, ItemGroups.FUNCTIONAL);
         registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH, ItemGroups.FUNCTIONAL);
 
+        registerCustomItem("cut_lapis", CustomBlockItems.CUT_LAPIS, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("cut_lapis_slab", CustomBlockItems.CUT_LAPIS_SLAB, ItemGroups.BUILDING_BLOCKS);
+        registerCustomItem("cut_lapis_stairs", CustomBlockItems.CUT_LAPIS_STAIRS, ItemGroups.BUILDING_BLOCKS);
+
         registerCustomItem("polished_stone", CustomBlockItems.POLISHED_STONE, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("polished_stone_slab", CustomBlockItems.POLISHED_STONE_SLAB, ItemGroups.BUILDING_BLOCKS);
         registerCustomItem("polished_stone_stairs", CustomBlockItems.POLISHED_STONE_STAIRS, ItemGroups.BUILDING_BLOCKS);

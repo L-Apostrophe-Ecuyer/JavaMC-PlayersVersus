@@ -2,16 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "pattern": [
-    "#  ",
-    "## ",
-    "###"
+    "# ",
+    "##"
   ],
   "key": {
     "#" : "players-versus:polished_stone"
   },
   "result": {
     "id": "players-versus:polished_stone_stairs",
-    "count": 4
+    "count": 3
   }
 }
 

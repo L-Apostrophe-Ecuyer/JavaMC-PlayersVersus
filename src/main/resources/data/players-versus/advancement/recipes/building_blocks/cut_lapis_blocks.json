@@ -1,0 +1,39 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "players-versus:building_blocks/cut_lapis"
+      }
+    },
+    "has_ingredient": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:lapis_lazuli"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_ingredient"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "players-versus:building_blocks/cut_lapis",
+      "players-versus:building_blocks/cut_lapis_from_stonecutting",
+      "players-versus:building_blocks/cut_lapis_slab",
+      "players-versus:building_blocks/cut_lapis_slab_from_block_stonecutting",
+      "players-versus:building_blocks/cut_lapis_slab_from_stonecutting",
+      "players-versus:building_blocks/cut_lapis_stairs",
+      "players-versus:building_blocks/cut_lapis_stairs_from_block_stonecutting",
+      "players-versus:building_blocks/cut_lapis_stairs_from_stonecutting"
+    ]
+  }
+}

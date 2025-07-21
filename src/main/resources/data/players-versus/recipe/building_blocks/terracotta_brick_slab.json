@@ -3,14 +3,14 @@
   "group": "terracotta",
   "category": "building",
   "pattern": [
-    "###"
+    "##"
   ],
   "key": {
     "#" : "players-versus:terracotta_bricks"
   },
   "result": {
     "id": "players-versus:terracotta_brick_slab",
-    "count": 6
+    "count": 4
   }
 }
 

@@ -21,6 +21,11 @@ public abstract class CustomBlockItems {
     public static final BlockItem CORRUPTED_WART = new BlockItem(CustomBlocks.CORRUPTED_WART_PLANT, getBlockSettings("corrupted_wart"));
     public static final BlockItem WITHERED_WART = new BlockItem(CustomBlocks.WITHERED_WART_PLANT, getBlockSettings("withered_wart"));
 
+
+    public static final BlockItem CUT_LAPIS = new BlockItem(CustomBlocks.CUT_LAPIS, getBlockSettings("cut_lapis"));
+    public static final BlockItem CUT_LAPIS_SLAB = new BlockItem(CustomBlocks.CUT_LAPIS_SLAB, getBlockSettings("cut_lapis_slab"));
+    public static final BlockItem CUT_LAPIS_STAIRS = new BlockItem(CustomBlocks.CUT_LAPIS_STAIRS, getBlockSettings("cut_lapis_stairs"));
+
     public static final BlockItem POLISHED_STONE = new BlockItem(CustomBlocks.POLISHED_STONE, getBlockSettings("polished_stone"));
     public static final BlockItem POLISHED_STONE_SLAB = new BlockItem(CustomBlocks.POLISHED_STONE_SLAB, getBlockSettings("polished_stone_slab"));
     public static final BlockItem POLISHED_STONE_STAIRS = new BlockItem(CustomBlocks.POLISHED_STONE_STAIRS, getBlockSettings("polished_stone_stairs"));
