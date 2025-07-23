@@ -7,7 +7,7 @@
         "#": "minecraft:leather_chestplate"
     },
     "result": {
-        "id": "minecraft:leather",
+        "id": "minecraft:rabbit_hide",
         "count": 1
     },
     "group": "leather_from_armor"

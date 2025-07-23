@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:leather",
+          "name": "minecraft:rabbit_hide",
           "functions": [
             {
               "function": "minecraft:set_count",

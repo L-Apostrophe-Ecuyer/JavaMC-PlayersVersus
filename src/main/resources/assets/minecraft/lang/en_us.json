@@ -55,6 +55,9 @@
   "players-versus.tradeScreen.experienceBarHover" : "Will restock and learn new trades by talking to other villagers.\nEspecially if they're in a similar line of work!",
   "merchant.deprecated" : "Needs to talk to other villagers to restock.",
 
+  "item.minecraft.leather": "Leather Hide",
+  "item.minecraft.rabbit_hide": "Piece of Leather",
+
   "block.players-versus.cut_lapis": "Cut Lapis",
   "block.players-versus.cut_lapis_slab": "Cut Lapis Slab",
   "block.players-versus.cut_lapis_stairs": "Cut Lapis Stairs",
