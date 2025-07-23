@@ -1,0 +1,9 @@
+{
+  "values": [
+    "#minecraft:foxes_spawnable_on",
+    "minecraft:sand",
+    "minecraft:stone",
+    "minecraft:deepslate",
+    "#minecraft:base_stone_nether"
+  ]
+}

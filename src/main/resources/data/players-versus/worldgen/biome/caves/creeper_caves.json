@@ -27,14 +27,7 @@
     }
   },
   "spawners": {
-    "ambient": [
-      {
-        "type": "minecraft:bat",
-        "weight": 10,
-        "minCount": 8,
-        "maxCount": 8
-      }
-    ],
+    "ambient": [],
     "axolotls": [],
     "creature": [],
     "misc": [],
@@ -135,7 +128,6 @@
       "minecraft:ore_lapis_buried",
       "players-versus:caves/ore_copper_green",
       "minecraft:underwater_magma",
-      "minecraft:disk_gravel",
       "minecraft:ore_emerald",
       "players-versus:caves/ore_emerald"
     ],
@@ -146,7 +138,6 @@
     ],
     [
       "minecraft:glow_lichen",
-      "minecraft:red_mushroom_normal",
       "minecraft:classic_vines_cave_feature",
       "players-versus:caves/creeper_caves_floor_vegetation",
       "players-versus:caves/creeper_caves_ceiling_vegetation"

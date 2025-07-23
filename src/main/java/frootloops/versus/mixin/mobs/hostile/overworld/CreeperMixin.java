@@ -37,6 +37,7 @@ public class CreeperMixin extends HostileEntity {
         else return false;
     }
 
+    /*
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason != SpawnReason.NATURAL) return true;
@@ -49,5 +50,5 @@ public class CreeperMixin extends HostileEntity {
 
         BlockState state = world.getBlockState(pos.down());
         return state.isIn(BlockTags.OVERWORLD_CARVER_REPLACEABLES) || state.isOf(Blocks.MOSS_BLOCK) || state.isOf(Blocks.MOSSY_COBBLESTONE) || state.isOf(Blocks.MOSSY_STONE_BRICKS);
-    }
+    } */
 }

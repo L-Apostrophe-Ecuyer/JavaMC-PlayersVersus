@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
+import frootloops.versus.mod.mobs.MobSpawning;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import net.minecraft.block.Blocks;
@@ -94,15 +95,16 @@ public abstract class ZombieMixin extends HostileEntity {
         }
     }
 
+    /*
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
         BlockPos pos = this.getBlockPos();
         if(pos.getY() < -16) return false;
-        if(pos.getY() < 32 && !world.getBlockState(pos.down()).isOf(Blocks.STONE)) return false;
-        if(!world.getBlockState(pos.down()).isIn(BlockTags.MOSS_REPLACEABLE)) return false;
+        if(world.getLightLevel(LightType.SKY, pos) > 4) return false;
+        if(!world.getBlockState(pos.down()).isIn(MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE)) return false;
         return super.canSpawn(world, spawnReason);
-    }
+    }*/
 
     @Override
     protected void loot(ServerWorld world, ItemEntity itemEntity) {
@@ -134,7 +136,7 @@ public abstract class ZombieMixin extends HostileEntity {
                 this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
                 this.getEquippedStack(EquipmentSlot.LEGS).setDamage(rand + 80);
             }
-            if(rand % 4 == 0 || rand % 9 == 0) {
+            if((rand % 4 == 0 || rand % 9 == 0) && this.getY() < 56) {
                 this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
                 this.getEquippedStack(EquipmentSlot.HEAD).setDamage(rand + 80);
             }
@@ -182,7 +184,7 @@ public abstract class ZombieMixin extends HostileEntity {
             this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.9F;
         }
         else {
-            this.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(16.0f);
+            //this.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(16.0f);
             this.setHealth(16.0f);
         }
 

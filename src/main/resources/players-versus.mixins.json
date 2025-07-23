@@ -81,6 +81,7 @@
     "items.PotionBottleUsageMixin",
 
     "mobs.MobSpawnGroupsMixin",
+    "mobs.hostile.HostileEntityMixin",
 
     "mobs.hostile.end.dragon.ChargingPlayerPhaseMixin",
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",
