@@ -20,5 +20,4 @@ public abstract class MobSpawnGroupsMixin {
         return Math.min(this.capacity, 48);
     }
 
-
 }

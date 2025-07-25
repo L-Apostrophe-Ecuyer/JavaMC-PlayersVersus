@@ -20,6 +20,7 @@ import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
@@ -45,6 +46,11 @@ public class SpiderMixin extends HostileEntity {
     @Override
     public void playAmbientSound() {
         // Skip! Spiders should be quieter. Also, their ambient noise is pretty grating
+    }
+
+    @Override
+    public float getSoundPitch() {
+        return this.isBaby() ? (this.random.nextFloat() - this.random.nextFloat()) * 0.3F + 1.5F : (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F;
     }
 
     @Override
@@ -86,7 +92,7 @@ public class SpiderMixin extends HostileEntity {
         entityData = super.initialize(world, difficulty, spawnReason, entityData);
         if (entityData == null) {
             entityData = new SpiderEntity.SpiderData();
-            if (world.getDifficulty() == Difficulty.HARD && random.nextFloat() < 0.2f * difficulty.getClampedLocalDifficulty()) {
+            if ((world.getDifficulty() == Difficulty.HARD || world.getMoonPhase() == 7 || this.getY() < 32.0) && random.nextFloat() < 0.3f * difficulty.getClampedLocalDifficulty()) {
                 ((SpiderEntity.SpiderData)entityData).setEffect(random);
             }
         }
@@ -100,11 +106,13 @@ public class SpiderMixin extends HostileEntity {
         EntityAttributeInstance instanceMvt = this.getAttributes().getCustomInstance(EntityAttributes.MOVEMENT_SPEED);
         EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_DAMAGE);
         EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
+        EntityAttributeInstance instanceScale = this.getAttributes().getCustomInstance(EntityAttributes.SCALE);
 
         if(random.nextFloat() < 0.85F) {
             this.setBaby(true);
             if (instanceMvt != null) instanceMvt.setBaseValue(0.36D);
             if (instanceDmg != null) instanceDmg.setBaseValue(3.0D);
+            if (instanceScale != null) instanceMvt.setBaseValue(0.7D);
             if (instanceHP != null) {
                 instanceHP.setBaseValue(12.0f);
                 this.setHealth(12.0f);
@@ -113,6 +121,7 @@ public class SpiderMixin extends HostileEntity {
         else {
             if (instanceMvt != null) instanceMvt.setBaseValue(0.3D);
             if (instanceDmg != null) instanceDmg.setBaseValue(7.0D);
+            if (instanceScale != null) instanceMvt.setBaseValue(1.1D);
             if (instanceHP != null) {
                 instanceHP.setBaseValue(50.0f);
                 this.setHealth(50.0f);
