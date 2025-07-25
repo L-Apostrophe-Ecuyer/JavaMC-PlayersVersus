@@ -32,17 +32,17 @@
               "from_y": 66,
               "to_y": 56,
               "from_value": -0.1,
-              "to_value": 0.05
+              "to_value": 0.025
             }
           },
           "argument2": {
             "type": "minecraft:add",
             "argument1": {
               "type": "minecraft:y_clamped_gradient",
-              "from_y": 52,
+              "from_y": 48,
               "to_y": 36,
               "from_value": 0,
-              "to_value": -0.2
+              "to_value": -0.175
             },
             "argument2": {
               "type": "minecraft:add",
