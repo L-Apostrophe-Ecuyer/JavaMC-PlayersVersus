@@ -1,6 +1,9 @@
 package frootloops.versus.mod.environment;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.blocks.LadderBlockItem;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.LadderBlock;
 import net.minecraft.item.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -14,6 +17,8 @@ public abstract class CustomBlockItems {
     private static Item.Settings getBlockSettings(String name) {
         return new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(VersusMod.MOD_ID, name))).useBlockPrefixedTranslationKey();
     }
+
+    public static final LadderBlockItem LADDER = new LadderBlockItem((LadderBlock)Blocks.LADDER, getBlockSettings("ladder"));
 
     public static final VerticallyAttachableBlockItem SMOLDERING_TORCH = new VerticallyAttachableBlockItem(CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH,  Direction.DOWN, getBlockSettings("smoldering_torch"));
     public static final VerticallyAttachableBlockItem EXTINGUISHED_TORCH = new VerticallyAttachableBlockItem(CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, Direction.DOWN, getBlockSettings("extinguished_torch"));

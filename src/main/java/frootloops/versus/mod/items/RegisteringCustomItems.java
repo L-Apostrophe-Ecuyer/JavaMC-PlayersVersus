@@ -83,6 +83,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_luck", CustomBrewingItems.CONCENTRATE_OF_LUCK, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_unluck", CustomBrewingItems.CONCENTRATE_OF_UNLUCK, ItemGroups.INGREDIENTS);
 
+        registerCustomItem("ladder", CustomBlockItems.LADDER, ItemGroups.FUNCTIONAL);
         registerCustomItem("smoldering_torch", CustomBlockItems.SMOLDERING_TORCH, ItemGroups.FUNCTIONAL);
         registerCustomItem("extinguished_torch", CustomBlockItems.EXTINGUISHED_TORCH, ItemGroups.FUNCTIONAL);
 

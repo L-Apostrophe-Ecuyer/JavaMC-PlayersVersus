@@ -42,11 +42,17 @@ public abstract class VanillaItemsMixin implements ComponentHolder, FabricItemSt
                 if(VanillaItemsAndStacks.hasModdedReplacementItem(item)) cir.setReturnValue(false);
         }
 
-        @Inject(method = "onClicked", at = @At("HEAD"), cancellable = false)
+        @Inject(method = "onClicked", at = @At("TAIL"), cancellable = false)
         public void onClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference, CallbackInfoReturnable<Boolean> cir) {
                 if(VanillaItemsAndStacks.hasVanillaReplacementItem(item)) {
-                        ItemStack newStack = new ItemStack(VanillaItemsAndStacks.getVanillaReplacementItem(item).getRegistryEntry(), count, components.getChanges());
-                        slot.setStack(newStack);
+                        slot.setStack(((ItemStack)((Object)this)).withItem(VanillaItemsAndStacks.getVanillaReplacementItem(item)));
+                }
+        }
+
+        @Inject(method = "onStackClicked", at = @At("TAIL"), cancellable = false)
+        public void onStackClicked(Slot slot, ClickType clickType, PlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
+                if(VanillaItemsAndStacks.hasVanillaReplacementItem(item)) {
+                        slot.setStack(((ItemStack)((Object)this)).withItem(VanillaItemsAndStacks.getVanillaReplacementItem(item)));
                 }
         }
 
