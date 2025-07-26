@@ -82,6 +82,7 @@
 
     "mobs.MobSpawnGroupsMixin",
     "mobs.hostile.HostileEntityMixin",
+    "mobs.LandPathfindingMixin",
 
     "mobs.hostile.end.dragon.ChargingPlayerPhaseMixin",
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",

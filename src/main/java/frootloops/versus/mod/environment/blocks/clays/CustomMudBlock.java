@@ -1,12 +1,16 @@
 package frootloops.versus.mod.environment.blocks.clays;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
 import frootloops.versus.mod.environment.CustomDamageSources;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
-import net.minecraft.entity.mob.WaterCreatureEntity;
+import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.WolfEntity;
+import net.minecraft.fluid.WaterFluid;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.server.world.ServerWorld;
@@ -20,6 +24,8 @@ import net.minecraft.world.event.GameEvent;
 
 public class CustomMudBlock extends MoistBlock {
 
+    protected static final VoxelShape ITEM_COLLISION_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 14.0, 16.0);
+
     public CustomMudBlock(Settings settings, Block dryVersion, Block cookedVersion) {
         super(settings, dryVersion, cookedVersion);
     }
@@ -30,38 +36,52 @@ public class CustomMudBlock extends MoistBlock {
 
             // When a player goes inside mud, break a fragile block that was on top:
             double entityRelativeY = entity.getY() - Math.floor(entity.getY());
+            Block blockOnTop = world.getBlockState(pos.up()).getBlock();
             if(entityRelativeY < 0.6) {
-                Block blockOnTop = world.getBlockState(pos.up()).getBlock();
                 if(blockOnTop.getHardness() < 0.2f || blockOnTop instanceof PlantBlock) world.breakBlock(pos.up(), true);
             }
 
-            // When an entity has their head inside of mud, make them drown:
+            // When an entity has their head inside of mud, they might take some damage
             boolean canEntityBeDamaged = shouldDamage(world, livingEntity);
-            if(canEntityBeDamaged && !world.isClient && world.getTime() % 30L == 0) {
-                entity.damage((ServerWorld) world, CustomDamageSources.getMudSuffocation(world), 1);
-            }
 
             // When an entity is jumping, they should be able to get out of the block, or at least stop falling:
             if(((LivingEntityAccessor)livingEntity).isJumping())  {
+                Vec3d velocity = entity.getVelocity();
                 if(entity.isInFluid()) {
-                    Vec3d velocity = entity.getVelocity();
                     entity.slowMovement(state, new Vec3d(1.1, 1.0, 1.1));
-                    entity.setVelocity(velocity.add(0.0, 0.03, 0.0));
+                    if(world.getTime() % 20L == 0) entity.playSound(this.soundGroup.getStepSound(), this.soundGroup.getVolume() * 0.5F, this.soundGroup.getPitch() * 0.75F);
                 }
-                else {
-                    entity.slowMovement(state, new Vec3d(1.1, entityRelativeY < 0.9 ? 0.15 : 0.0, 1.1));
+                else if(entityRelativeY < 0.95 || blockOnTop.getHardness() > 0.0) {
+                    entity.setVelocity(velocity.x, 0.03, velocity.z);
+                    if(world.getTime() % 20L == 0) entity.playSound(this.soundGroup.getStepSound(), this.soundGroup.getVolume() * 0.5F, this.soundGroup.getPitch() * 0.75F);
                 }
+                else if(velocity.y < 0.12){
+                    entity.setVelocity(velocity.x, 0.3, velocity.z);
+                    entity.playSound(this.soundGroup.getFallSound(), this.soundGroup.getVolume() * 0.5F, this.soundGroup.getPitch() * 0.75F);
+                }
+            }
+            else if(entityRelativeY > 0.95 && entity.getVelocity().y >= 0.0) {
+                // When still jumping dont interrupt
             }
 
             // Otherwise, when the entity moves, they'll get hurt:
-            else if(hasEntityMoved(entity)) {
-                if(canEntityBeDamaged && world.getTime() % 5L == 0 && !world.isClient) entity.damage((ServerWorld) world, CustomDamageSources.getMudSuffocation(world), 1);
-                entity.slowMovement(state, new Vec3d(0.98, 0.95, 0.98));
+            else if(hasEntityMoved(entity) || entity.isSneaky()) {
+                if(canEntityBeDamaged && world.getTime() % 20L == 0 && !world.isClient) {
+                    entity.damage((ServerWorld) world, CustomDamageSources.getMudSuffocation(world), 1); // Damage every second while moving
+                    entity.playSound(this.soundGroup.getHitSound(), this.soundGroup.getVolume() * 0.5F, this.soundGroup.getPitch() * 0.75F);
+                }
+                else if(world.getTime() % 10L == 0) entity.playSound(this.soundGroup.getHitSound(), this.soundGroup.getVolume() * 0.5F, this.soundGroup.getPitch() * 0.75F);
+                entity.slowMovement(state, new Vec3d(0.995, 0.45, 0.995));
+                return; // To avoid dealing damage twice
             }
-            else {
-                entity.slowMovement(state, new Vec3d(0.98, 0.6, 0.98));
+            else if(entityRelativeY < 0.95) {
+                entity.slowMovement(state, new Vec3d(0.98, 0.04, 0.98));
             }
 
+            // Suffocation damage from waiting, every 4 seconds
+            if(canEntityBeDamaged && !world.isClient && world.getTime() % 80L == 0) {
+                entity.damage((ServerWorld) world, CustomDamageSources.getMudSuffocation(world), 1);
+            }
         }
     }
 
@@ -87,10 +107,11 @@ public class CustomMudBlock extends MoistBlock {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         Entity entity;
-        if (context instanceof EntityShapeContext && (entity = ((EntityShapeContext)context).getEntity()) != null && entity instanceof LivingEntity livingEntity) {
-            return livingEntity.fallDistance > 5f || CustomMudBlock.canWalkOnWetMud(livingEntity) ? VoxelShapes.fullCube() : VoxelShapes.empty();
+        if (context instanceof EntityShapeContext && (entity = ((EntityShapeContext) context).getEntity()) != null) {
+            if(!context.isAbove(VoxelShapes.fullCube(), pos, true)) VoxelShapes.empty();
+            if(entity instanceof LivingEntity livingEntity) return (livingEntity.fallDistance > MIN_FALL_DISTANCE_TO_DRY || CustomMudBlock.canWalkOnWetMud(livingEntity)) ? VoxelShapes.fullCube() : VoxelShapes.empty();
         }
-        return VoxelShapes.fullCube();
+        return ITEM_COLLISION_SHAPE;
     }
 
     protected VoxelShape getCameraCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
@@ -98,18 +119,29 @@ public class CustomMudBlock extends MoistBlock {
     }
 
 
-    public boolean shouldDamage(World world, LivingEntity entity) {
+    private boolean shouldDamage(World world, LivingEntity entity) {
         if(entity instanceof AnimalEntity) return false;
         return world.getBlockState(new BlockPos(entity.getBlockX(), (int) (entity.getEyeY() - 0.04), entity.getBlockZ())).isOf(this);
     }
 
-    public boolean hasEntityMoved(Entity entity) {
-        return entity.lastRenderX != entity.getX() || entity.lastRenderZ != entity.getZ() || entity.prevYaw != entity.getYaw() || entity.prevPitch != entity.getPitch();
+    private boolean hasEntityMoved(Entity entity) {
+        return entity.lastRenderX != entity.getX() || entity.lastRenderZ != entity.getZ(); // || entity.prevYaw != entity.getYaw() || entity.prevPitch != entity.getPitch();
     }
 
     public static boolean canWalkOnWetMud(Entity entity) {
-        if (entity instanceof ItemEntity || entity instanceof WaterCreatureEntity || entity instanceof PigEntity || entity.getType().isIn(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) return true;
+        if (entity.isInFluid()) return true; // Unrealistic but fairly useful!
+        if (entity instanceof PigEntity || entity instanceof WolfEntity || entity instanceof CatEntity || entity.getType().isIn(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) return true;
         if (entity instanceof LivingEntity) return ((LivingEntity)entity).getEquippedStack(EquipmentSlot.FEET).isOf(Items.LEATHER_BOOTS);
+        return false;
+    }
+
+    @Override
+    protected VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos) {
+        return VoxelShapes.fullCube();
+    }
+
+    @Override
+    protected boolean canPathfindThrough(BlockState state, NavigationType type) {
         return false;
     }
 
