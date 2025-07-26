@@ -97,7 +97,7 @@ public class CreepingAndExplodingGoal extends Goal {
             if (targetEntity.handSwinging && isPlayerLooking && canPlayerSeeCreeper) this.wasCoverBlown = true;
             if(this.wasCoverBlown && !canPlayerSeeCreeper) this.wasCoverBlown = false;
             if(this.wasCoverBlown || !(isPlayerLooking && canPlayerSeeCreeper) || this.creeper.getNavigation().isIdle()) {
-                this.creeper.getNavigation().startMovingTo(targetEntity, this.speed);
+                this.creeper.getNavigation().startMovingTo(targetEntity, this.speed * (this.creeper.getFuseSpeed() > 0 ? 0.5 : 1.0));
                 this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
             }
         }
@@ -105,7 +105,9 @@ public class CreepingAndExplodingGoal extends Goal {
         // Explode when within 2.5 blocks:
         boolean shouldStartExploding = (squaredDistance < 6.25 && isPlayerLooking && this.creeper.getVisibilityCache().canSee(targetEntity));
         boolean shouldKeepExploding = (this.creeper.getFuseSpeed() > 0);
-        if(shouldStartExploding || shouldKeepExploding) this.creeper.setFuseSpeed(1);
+        if(shouldStartExploding || shouldKeepExploding) {
+            this.creeper.setFuseSpeed(1);
+        }
         else this.creeper.setFuseSpeed(-1);
     }
 }
