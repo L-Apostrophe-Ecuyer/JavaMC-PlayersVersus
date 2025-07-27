@@ -112,22 +112,22 @@ public class SpiderMixin extends HostileEntity {
             this.setBaby(true);
             if (instanceMvt != null) instanceMvt.setBaseValue(0.36D);
             if (instanceDmg != null) instanceDmg.setBaseValue(3.0D);
-            if (instanceScale != null) instanceMvt.setBaseValue(0.7D);
+            if (instanceScale != null) instanceScale.setBaseValue(0.7D);
             if (instanceHP != null) {
                 instanceHP.setBaseValue(12.0f);
                 this.setHealth(12.0f);
             }
         }
         else {
-            if (instanceMvt != null) instanceMvt.setBaseValue(0.3D);
-            if (instanceDmg != null) instanceDmg.setBaseValue(7.0D);
-            if (instanceScale != null) instanceMvt.setBaseValue(1.1D);
+            if (instanceMvt != null) instanceMvt.setBaseValue(0.32D);
+            if (instanceDmg != null) instanceDmg.setBaseValue(6.0D);
+            if (instanceScale != null) instanceScale.setBaseValue(1.1D);
             if (instanceHP != null) {
-                instanceHP.setBaseValue(50.0f);
-                this.setHealth(50.0f);
+                instanceHP.setBaseValue(24.0f);
+                this.setHealth(24.0f);
             }
             SkeletonEntity skeletonEntity;
-            if (random.nextInt(80) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getWorld(), SpawnReason.JOCKEY)) != null) {
+            if (random.nextInt(60) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getWorld(), SpawnReason.JOCKEY)) != null) {
                 skeletonEntity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.getYaw(), 0.0f);
                 skeletonEntity.initialize(world, difficulty, spawnReason, null);
                 skeletonEntity.startRiding(this);
