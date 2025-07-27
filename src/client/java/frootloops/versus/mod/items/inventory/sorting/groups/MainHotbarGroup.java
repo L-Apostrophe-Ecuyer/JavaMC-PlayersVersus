@@ -3,6 +3,7 @@ package frootloops.versus.mod.items.inventory.sorting.groups;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
+import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Potion;
@@ -18,7 +19,7 @@ import static frootloops.versus.mod.items.inventory.sorting.InventorySortingHelp
 
 public class MainHotbarGroup extends SortingGroup {
 
-    ItemSlot swordSlot = null, pickaxeSlot = null, axeSlot = null, extraWeaponSlot = null, foodSlot = null, potionSlot = null, totemSlot = null, lightSlot = null, blockSlot = null;
+    ItemSlot swordSlot = null, pickaxeSlot = null, axeSlot = null, extraWeaponSlot = null, foodSlot = null, potionSlot = null, clutchItem = null, lightSlot = null, blockSlot = null;
     private boolean hasGoodPotion = false;
     private boolean hasExcellentPotion = false;
 
@@ -27,7 +28,7 @@ public class MainHotbarGroup extends SortingGroup {
     }
 
     public boolean hasAtLeastOneConsumable(){
-        return (this.foodSlot != null || this.potionSlot != null || this.totemSlot != null);
+        return (this.foodSlot != null || this.potionSlot != null || (this.clutchItem != null && this.clutchItem.itemType() == ItemType.TOTEM));
     }
 
     public boolean hasCombatItems(){
@@ -106,9 +107,9 @@ public class MainHotbarGroup extends SortingGroup {
                 return itemSlotToReturn;
             }
         }
-        else if(this.totemSlot == null && slot.stack().getComponents().contains(DataComponentTypes.DEATH_PROTECTION)) {
-            ItemSlot itemSlotToReturn = this.totemSlot;
-            this.totemSlot = slot;
+        else if(this.clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, this.clutchItem)) {
+            ItemSlot itemSlotToReturn = this.clutchItem;
+            this.clutchItem = slot;
             return itemSlotToReturn;
         }
         else if(slot.stack().isOf(Items.TORCH) || slot.stack().isOf(Items.SOUL_TORCH) || slot.stack().isOf(Items.LANTERN) || slot.stack().isOf(Items.SOUL_LANTERN)) {
@@ -155,9 +156,9 @@ public class MainHotbarGroup extends SortingGroup {
             foodSlot = null;
             numSlotsToTake--;
         }
-        if(this.totemSlot != null && numSlotsToTake > 0) {
-            slotsTaken.add(totemSlot);
-            totemSlot = null;
+        if(this.clutchItem != null && numSlotsToTake > 0) {
+            slotsTaken.add(clutchItem);
+            clutchItem = null;
             numSlotsToTake--;
         }
         if(this.lightSlot != null && numSlotsToTake > 0) {
@@ -217,11 +218,11 @@ public class MainHotbarGroup extends SortingGroup {
             if(this.swordSlot != null) itemsToRemove.add(this.swordSlot);
             if(this.extraWeaponSlot != null) itemsToRemove.add(this.extraWeaponSlot);
             if(this.potionSlot != null) itemsToRemove.add(this.potionSlot);
-            if(this.totemSlot != null) itemsToRemove.add(this.totemSlot);
+            if(this.clutchItem != null) itemsToRemove.add(this.clutchItem);
             this.swordSlot = null;
             this.extraWeaponSlot = null;
             this.potionSlot = null;
-            this.totemSlot = null;
+            this.clutchItem = null;
         }
         boolean hasEnoughBuildingItems = this.hasBuildingItems();
         if(!hasEnoughBuildingItems) {
@@ -255,7 +256,7 @@ public class MainHotbarGroup extends SortingGroup {
         if(this.extraWeaponSlot != null) currentSize++;
         if(this.foodSlot != null) currentSize++;
         if(this.potionSlot != null) currentSize++;
-        if(this.totemSlot != null) currentSize++;
+        if(this.clutchItem != null) currentSize++;
         if(this.lightSlot != null) currentSize++;
         if(this.blockSlot != null) currentSize++;
         return currentSize + this.miscItems.size();
@@ -271,7 +272,7 @@ public class MainHotbarGroup extends SortingGroup {
         this.extraWeaponSlot = null;
         this.foodSlot = null;
         this.potionSlot = null;
-        this.totemSlot = null;
+        this.clutchItem = null;
         this.lightSlot = null;
         this.blockSlot = null;
     }
@@ -306,8 +307,8 @@ public class MainHotbarGroup extends SortingGroup {
             String name = this.potionSlot.stack().getName().getString();
             hotBarOutput += name + ", ";
         }
-        if(this.totemSlot != null) {
-            String name = this.totemSlot.stack().getName().getString();
+        if(this.clutchItem != null) {
+            String name = this.clutchItem.stack().getName().getString();
             hotBarOutput += name + ", ";
         }
         if(this.lightSlot != null) {

@@ -1,6 +1,5 @@
 package frootloops.versus.mod.items.inventory.sorting;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.DataComponentTypes;
@@ -102,6 +101,13 @@ public abstract class ItemComparaisonHelper {
             return (blockItem.getBlock().getHardness() <= otherBlockItem.getBlock().getHardness());
         }
 
+        // Clutch items:
+        if(slot.itemType() == ItemType.CLUTCH_TOOL) {
+            if(slot.stack().isOf(Items.ENDER_PEARL)) return true;
+            if(slot.stack().isOf(Items.WIND_CHARGE)) return true;
+            if(slot.stack().isOf(Items.WATER_BUCKET)) return true;
+        }
+
         // Everything else: alphabetical
         return slot.toString().compareTo(slotToCompareTo.toString()) < 1;
     }
@@ -153,6 +159,7 @@ public abstract class ItemComparaisonHelper {
         }
         else if(stack.getComponents().contains(DataComponentTypes.DEATH_PROTECTION)) return ItemType.TOTEM;
         else if(stack.isIn(ItemTags.ARROWS)) return ItemType.ARROWS;
+        else if(stack.isOf(Items.WATER_BUCKET) || stack.isOf(Items.ENDER_PEARL) || stack.isOf(Items.WIND_CHARGE)) return ItemType.CLUTCH_TOOL;
         else if(stack.isOf(Items.END_CRYSTAL) || stack.isOf(Items.ENDER_PEARL) || stack.isOf(Items.COBWEB) || stack.isOf(Items.SNOWBALL) || stack.isOf(Items.FIRE_CHARGE)) return ItemType.COMBAT_ITEMS;
         else if(stack.getComponents().contains(DataComponentTypes.POTION_CONTENTS)) return ItemType.POTIONS;
         else if(stack.isOf(Items.SPYGLASS)) return ItemType.SPYGLASS;

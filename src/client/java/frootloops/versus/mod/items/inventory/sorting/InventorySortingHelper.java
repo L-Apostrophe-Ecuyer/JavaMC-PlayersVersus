@@ -175,29 +175,33 @@ public class InventorySortingHelper {
         // Step 1: Get the list of non-empty groups in order of size (of leftovers)
         List<SortingGroup> nonEmptyGroups = Arrays.stream(SORTING_GROUPS).filter(g -> g.size() > 0).sorted().collect(Collectors.toList());
         numRows -=  nonEmptyGroups.stream().mapToInt(g -> g.size()/9).sum(); // Minus groups with two or more rows
-
         if(MAIN_HOTBAR.size() > 0) nonEmptyGroups.addLast(MAIN_HOTBAR);
-        if(nonEmptyGroups.size() <= numRows) return nonEmptyGroups;
+
+        // Step 2: Get the number of rows to aim for, i.e. trying to fit everything together
+        int numRowsIdeal = Math.min(numRows, 1 + ((numRows * 9) - numEmptySlots)/9);
+
+        // Check trivial case:
+        if(nonEmptyGroups.size() <= numRowsIdeal) return nonEmptyGroups.reversed();
         if(DEBUG_SORTING_MERGE) {
             String output = nonEmptyGroups.stream().map(g -> g.GROUP_NAME + " (Size: " + g.size() + ")").collect(Collectors.joining(", "));
             VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] Ordered list of groups: " + output);
         }
 
-        // Step 2: Loop over each group. Try to find combinations of group sizes such that they both fit together
+        // Step 3: Loop over each group. Try to find combinations of group sizes such that they both fit together
         LinkedList<SortingGroup> orderedGroups = new LinkedList<>();
-        while(nonEmptyGroups.size() > 0 && nonEmptyGroups.size() > numRows) {
+        while(nonEmptyGroups.size() > 0 && (nonEmptyGroups.size() >= numRows || nonEmptyGroups.size() > numRowsIdeal)) {
 
             // Pop the next group:
-            SortingGroup groupToPlace = nonEmptyGroups.remove(0);
+            SortingGroup groupToPlace = nonEmptyGroups.removeFirst();
             orderedGroups.add(0, groupToPlace);
             if(groupToPlace.size() > 9) numRows--;
             if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                   -> Next group to place: " + groupToPlace.GROUP_NAME + " of size " + groupToPlace.size() + " - (" + numRows + " rows and " + numEmptySlots + " left)");
 
             // Look for complimentary group. If the next one fits, combine!  (Note: nonEmptyGroups is sorted in asc order)
             while(nonEmptyGroups.size() > 0 && groupToPlace.size() < 9) {
-                SortingGroup otherGroup = nonEmptyGroups.get(0);
+                SortingGroup otherGroup = nonEmptyGroups.getFirst();
                 if(groupToPlace.size() % 9 + otherGroup.size() <= 9) {
-                    nonEmptyGroups.remove(0);
+                    nonEmptyGroups.removeFirst();
                     groupToPlace.addSlots(otherGroup.takeAllItems());
                 }
                 else {
@@ -282,12 +286,14 @@ public class InventorySortingHelper {
 
         // If still space, try smartly adding tools and blocks to hotbar:
         if(!MAIN_HOTBAR.hasBuildingItems()) {
-            if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools()) {
+            if(MAIN_HOTBAR.size() + AXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(AXE_GROUP.takeAllItems());
+            else if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools()) {
                 giveExtraToolsFromAndTo(AXE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
                 if(MAIN_HOTBAR.size() >= 9) return;
             }
-            if(!MAIN_HOTBAR.hasAxe() && PICKAXE_GROUP.canGiveawayTools()) {
+            if(MAIN_HOTBAR.size() + PICKAXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(PICKAXE_GROUP.takeAllItems());
+            else if(!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.canGiveawayTools()) {
                 giveExtraToolsFromAndTo(PICKAXE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
                 if(MAIN_HOTBAR.size() >= 9) return;
