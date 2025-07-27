@@ -2,7 +2,16 @@
   "fallback": "minecraft:empty",
   "elements": [
     {
-      "weight": 1,
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "players-versus:trial_tower/chamber_dripstone_1",
+        "processors": "players-versus:trial_tower"
+      }
+    },
+    {
+      "weight": 2,
       "element": {
         "element_type": "minecraft:single_pool_element",
         "projection": "rigid",
