@@ -30,6 +30,34 @@
           }
         },
         {
+          "processor_type": "minecraft:capped",
+          "limit": 8,
+          "delegate": {
+            "processor_type": "minecraft:rule",
+            "rules": [
+              {
+                "location_predicate": {
+                  "predicate_type": "minecraft:always_true"
+                },
+                "input_predicate": {
+                  "predicate_type": "minecraft:tag_match",
+                  "tag": "minecraft:trail_ruins_replaceable"
+                },
+                "output_state": {
+                  "Name": "minecraft:suspicious_gravel",
+                  "Properties": {
+                    "dusted": "0"
+                  }
+                },
+                "block_entity_modifier": {
+                  "type": "minecraft:append_loot",
+                  "loot_table": "players-versus:archaeology/trial_tower"
+                }
+              }
+            ]
+          }
+        },
+        {
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
