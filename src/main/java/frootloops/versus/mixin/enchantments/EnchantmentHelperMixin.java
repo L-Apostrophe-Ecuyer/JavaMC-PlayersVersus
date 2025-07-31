@@ -26,7 +26,6 @@ public class EnchantmentHelperMixin {
         ItemEnchantmentsComponent itemEnchantmentsComponent = stack.get(DataComponentTypes.ENCHANTMENTS);
         boolean bl = stack.isOf(Items.BOOK);
         possibleEnchantments.filter(enchantment -> (((Enchantment)enchantment.value()).isPrimaryItem(stack) || bl)).forEach(enchantmentRegistryEntry -> {
-
             boolean canApplyEnchanment = true;
             int currentLevel = 0;
             if(!itemEnchantmentsComponent.isEmpty()) {
@@ -43,8 +42,8 @@ public class EnchantmentHelperMixin {
             if(canApplyEnchanment) {
                 Enchantment enchantmentToAdd = (Enchantment) enchantmentRegistryEntry.value();
                 for (int j = enchantmentToAdd.getMaxLevel(); j >= Math.max(currentLevel + 1, enchantmentToAdd.getMinLevel()); --j) {
-                    int minPower = enchantmentToAdd.getMinPower(j - currentLevel) + currentLevel;
-                    int maxPower = enchantmentToAdd.getMaxPower(j - currentLevel) + currentLevel;
+                    int minPower = enchantmentToAdd.getMinPower(j) - enchantmentToAdd.getMinPower(currentLevel)/4;
+                    int maxPower = enchantmentToAdd.getMaxPower(j) + enchantmentToAdd.getMinPower(currentLevel)/4;
                     if (level < minPower || level > maxPower) continue;
                     list.add(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) enchantmentRegistryEntry, j));
                     break;
