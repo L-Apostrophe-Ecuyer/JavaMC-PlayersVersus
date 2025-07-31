@@ -121,7 +121,6 @@ public class SpiderMixin extends HostileEntity {
         else {
             if (instanceMvt != null) instanceMvt.setBaseValue(0.32D);
             if (instanceDmg != null) instanceDmg.setBaseValue(6.0D);
-            if (instanceScale != null) instanceScale.setBaseValue(1.1D);
             if (instanceHP != null) {
                 instanceHP.setBaseValue(24.0f);
                 this.setHealth(24.0f);
