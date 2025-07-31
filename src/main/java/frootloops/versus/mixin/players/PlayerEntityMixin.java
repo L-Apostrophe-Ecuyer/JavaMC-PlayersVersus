@@ -7,6 +7,7 @@ import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.block.*;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ToolComponent;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -19,15 +20,12 @@ import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -121,7 +119,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void getBlockBreakingSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
         if(abilities.creativeMode) cir.setReturnValue(Float.MAX_VALUE);
         float breakingSpeed = cir.getReturnValue();
-        if (!this.isOnGround()) breakingSpeed *= 3f;
+        if (!this.isOnGround()) breakingSpeed *= this.getVelocity().y >= 0.0 ? 4f : 3f;
 
         Block block = blockState.getBlock();
         if(block == Blocks.COBWEB) {
@@ -129,13 +127,21 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             return;
         }
 
-        if(blockState.isBurnable() && blockState.getSoundGroup() == BlockSoundGroup.WOOD) {
-            cir.setReturnValue(breakingSpeed + 2f);
+        if(blockState.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
+            ToolComponent toolComponent = this.getMainHandStack().getOrDefault(DataComponentTypes.TOOL, null);
+            if(toolComponent == null) return;
+            else if(!toolComponent.isCorrectForDrops(Blocks.DIAMOND_ORE.getDefaultState())) {
+                cir.setReturnValue(breakingSpeed/3f);
+            }
+            else if(toolComponent.isCorrectForDrops(Blocks.OBSIDIAN.getDefaultState())) {
+                VersusMod.MOD_LOGGER.warn("Mining speed: from " + breakingSpeed + " to " + (breakingSpeed + (toolComponent.defaultMiningSpeed() >= 9.0F ? 2.0f : 0.5f)));
+                cir.setReturnValue(breakingSpeed + (toolComponent.defaultMiningSpeed() >= 9.0F ? 2.0f : 0.5f));
+            }
             return;
         }
 
-        if(block.getHardness() == 6.0F && block.getDefaultMapColor() == MapColor.OFF_WHITE) {
-            cir.setReturnValue(breakingSpeed * 2.4f);
+        if(blockState.isBurnable() && blockState.getSoundGroup() == BlockSoundGroup.WOOD) {
+            cir.setReturnValue(breakingSpeed + 2f);
             return;
         }
 
@@ -145,7 +151,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         if(block instanceof BrushableBlock) {
-            cir.setReturnValue(breakingSpeed - 0.5f);
+            cir.setReturnValue(breakingSpeed - 0.4f);
             return;
         }
         cir.setReturnValue(breakingSpeed);
