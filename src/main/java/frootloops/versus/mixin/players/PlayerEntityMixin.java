@@ -151,7 +151,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         if(block instanceof BrushableBlock) {
-            cir.setReturnValue(breakingSpeed - 0.4f);
+            cir.setReturnValue(breakingSpeed - 0.6f);
             return;
         }
         cir.setReturnValue(breakingSpeed);
