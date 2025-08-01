@@ -1,7 +1,7 @@
 {
   "anvil_cost": 1,
   "description": {
-    "translate": "enchantment.players-versus.critical_attack"
+    "translate": "enchantment.players-versus.sprint_attack"
   },
   "effects": {
     "minecraft:damage": [
@@ -21,10 +21,10 @@
         "amount": {
           "type": "minecraft:linear",
           "base": 1,
-          "per_level_above_first": 0.5
+          "per_level_above_first": 1.0
         },
-        "attribute": "players-versus:critical_attack_damage",
-        "id": "enchantment.players-versus.critical_attack",
+        "attribute": "players-versus:sprint_attack_damage",
+        "id": "enchantment.players-versus.sprint_attack",
         "operation": "add_value"
       }
     ]
@@ -36,13 +36,13 @@
   },
   "max_level": 5,
   "min_cost": {
-    "base": 3,
+    "base": 1,
     "per_level_above_first": 11
   },
-  "primary_items": "#players-versus:critical_weapons",
+  "primary_items": "#players-versus:sprint_weapons",
   "slots": [
     "mainhand"
   ],
-  "supported_items": "#players-versus:critical_weapons",
-  "weight": 8
+  "supported_items": "#players-versus:sprint_weapons",
+  "weight": 10
 }

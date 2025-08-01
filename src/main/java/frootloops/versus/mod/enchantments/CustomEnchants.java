@@ -25,6 +25,8 @@ import java.util.Optional;
 
 
 public abstract class CustomEnchants {
+
+    public static final RegistryKey<Enchantment> CRITICAL_STRIKE = of("critical_strike");
     public static final RegistryKey<Enchantment> TOSSING = of("tossing");
     public static final RegistryKey<Enchantment> RIPOSTE = of("riposte");
     public static final RegistryKey<Enchantment> CLEAVING = of("cleaving");
@@ -51,7 +53,7 @@ public abstract class CustomEnchants {
             targetEntity.extinguish();
 
             // Minimum ticks to get damaged is 140, for most. ModEntities get rid of 2 FrozenTicks per tick.
-            target.setFrozenTicks(target.getFrozenTicks() + 180 + 40 * level);
+            target.setFrozenTicks(target.getFrozenTicks() + 180 + 60 * level);
             if(user.getWorld() instanceof ServerWorld serverWorld) {
                 target.getWorld().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, target.getSoundCategory(), 1.0f, 1.0f);
                 serverWorld.spawnParticles(ParticleTypes.WAX_OFF, target.getX(), target.getY() + 1, target.getZ(), 4, 0.2, 0.2, 0.2, 6.0f);

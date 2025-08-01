@@ -1,7 +1,7 @@
 {
-  "anvil_cost": 1,
+  "anvil_cost": 12,
   "description": {
-    "translate": "enchantment.players-versus.sprint_attack"
+    "translate": "enchantment.minecraft.sharpness"
   },
   "effects": {
     "minecraft:damage": [
@@ -10,22 +10,10 @@
           "type": "minecraft:add",
           "value": {
             "type": "minecraft:linear",
-            "base": 1,
+            "base": 0.5,
             "per_level_above_first": 0.5
           }
         }
-      }
-    ],
-    "minecraft:attributes": [
-      {
-        "amount": {
-          "type": "minecraft:linear",
-          "base": 1,
-          "per_level_above_first": 0.5
-        },
-        "attribute": "players-versus:sprint_attack_damage",
-        "id": "enchantment.players-versus.sprint_attack",
-        "operation": "add_value"
       }
     ]
   },
@@ -39,10 +27,10 @@
     "base": 1,
     "per_level_above_first": 11
   },
-  "primary_items": "#minecraft:enchantable/sharp_weapon",
+  "primary_items": "#minecraft:enchantable/sword",
   "slots": [
     "mainhand"
   ],
   "supported_items": "#minecraft:enchantable/sharp_weapon",
-  "weight": 10
+  "weight": 1
 }

@@ -49,7 +49,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
 
-    @Shadow public int totalExperience, experienceLevel;
+    @Shadow public int totalExperience, experienceLevel, enchantingTableSeed;
 
     @Overwrite
     public double getEntityInteractionRange() {

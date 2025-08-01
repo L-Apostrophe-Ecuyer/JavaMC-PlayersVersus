@@ -5,6 +5,7 @@
 	"client": [
 
 		"enchantments.AnvilScreenMixin",
+		"enchantments.EnchantingScreenMixin",
 
 		"environment.visuals.ClientWorldSkyMixin",
 		"environment.visuals.FogRendererMixin",

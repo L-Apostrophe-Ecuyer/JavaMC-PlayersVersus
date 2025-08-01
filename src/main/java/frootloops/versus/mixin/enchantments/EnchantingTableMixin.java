@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.enchantments;
 
+import frootloops.versus.mod.enchantments.Enchants;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -10,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.screen.*;
@@ -17,6 +19,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
+import net.minecraft.util.collection.IndexedIterable;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,6 +58,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
     @Overwrite
     public boolean onButtonClick(PlayerEntity player, int id) {
         if (id < 0 || id >= this.enchantmentPower.length) return false;
+        this.seed.set(player.getEnchantingTableSeed());
 
         ItemStack inputStack = this.inventory.getStack(0);
         ItemStack lapisStack = this.inventory.getStack(1);
@@ -99,7 +103,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
                     player.incrementStat(Stats.ENCHANT_ITEM);
                     if (player instanceof ServerPlayerEntity)  Criteria.ENCHANTED_ITEM.trigger((ServerPlayerEntity)player, stack, lapisCost);
                     this.inventory.markDirty();
-                    this.random.setSeed((long)this.seed.get());
+                    this.seed.set(player.getEnchantingTableSeed());
                     this.onContentChanged(this.inventory);
                     world.playSound(null, pos, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0f, world.random.nextFloat() * 0.1f + 0.9f);
                 }
@@ -114,14 +118,24 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
         this.context.run((world, pos) -> {
             List<EnchantmentLevelEntry> list;
             ItemStack itemStack = inventory.getStack(0);
-            for (int slotID = 0; slotID < 3; ++slotID) {
-                list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID, this.enchantmentPower[slotID]);
-                if(list.isEmpty()) list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID + 1, this.enchantmentPower[slotID]);
-                if(list.isEmpty()) list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID + 2, this.enchantmentPower[slotID]);
-                if (this.enchantmentPower[slotID] <= 0 || list.isEmpty()) {
-                    this.enchantmentPower[slotID] = 0;
-                    this.enchantmentLevel[slotID] = -1;
-                    this.enchantmentId[slotID] = -1;
+            if(itemStack.isEnchantable()) {
+                IndexedIterable<RegistryEntry<Enchantment>> indexedIterable = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT).getIndexedEntries();
+                for (int slotID = 0; slotID < 3; ++slotID) {
+                    list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID, this.enchantmentPower[slotID]);
+                    if (list.isEmpty())
+                        list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID + 1, this.enchantmentPower[slotID]);
+                    if (list.isEmpty())
+                        list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID + 2, this.enchantmentPower[slotID]);
+                    if (this.enchantmentPower[slotID] <= 0 || list.isEmpty()) {
+                        this.enchantmentPower[slotID] = 0;
+                        this.enchantmentLevel[slotID] = -1;
+                        this.enchantmentId[slotID] = -1;
+                    }
+                    else {
+                        EnchantmentLevelEntry enchantmentLevelEntry = list.getFirst();
+                        this.enchantmentId[slotID] = indexedIterable.getRawId(enchantmentLevelEntry.enchantment);
+                        this.enchantmentLevel[slotID] = enchantmentLevelEntry.level;
+                    }
                 }
             }
             this.sendContentUpdates();
@@ -136,9 +150,23 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
         } else {
             List<EnchantmentLevelEntry> list = EnchantmentHelper.generateEnchantments(this.random, stack, level, ((RegistryEntryList.Named)optional.get()).stream());
             if (stack.isOf(Items.BOOK) && list.size() > 1) {
-                list.remove(this.random.nextInt(list.size()));
+                EnchantmentLevelEntry maxEnchant = null;
+                int maxPower = Integer.MIN_VALUE;
+                for(EnchantmentLevelEntry e : list) {
+                    int power = getAvgPowerOfEnchantment(e);
+                    if(power > maxPower) {
+                        maxEnchant = e;
+                        maxPower = power;
+                    }
+                }
+                return List.of(maxEnchant);
             }
             return list;
         }
+    }
+
+
+    private static int getAvgPowerOfEnchantment(EnchantmentLevelEntry e) {
+        return (e.enchantment.value().getMinPower(e.level) + e.enchantment.value().getMaxPower(e.level))/2;
     }
 }

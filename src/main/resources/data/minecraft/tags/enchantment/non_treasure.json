@@ -1,6 +1,9 @@
 {
   "replace": true,
   "values": [
+
+    "players-versus:critical_strike",
+    "players-versus:sprinting_strike",
     "players-versus:tossing",
     "players-versus:riposte",
     "players-versus:cleaving",
@@ -15,7 +18,6 @@
     "minecraft:aqua_affinity",
     "minecraft:thorns",
     "minecraft:depth_strider",
-    "minecraft:sharpness",
     "minecraft:smite",
     "minecraft:knockback",
     "minecraft:fire_aspect",
