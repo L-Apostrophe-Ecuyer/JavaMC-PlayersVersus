@@ -122,8 +122,6 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
     @Inject(method = "onContentChanged", at = @At(value = "TAIL"))
     private void updateUnavailableEnchantments(Inventory inventory, CallbackInfo ci) {
         if(inventory != this.inventory) return;
-        VersusMod.MOD_LOGGER.warn("[ ENCHANTING SCREEN HANDLER ] Content changed!");
-
         this.context.run((world, pos) -> {
             List<EnchantmentLevelEntry> list;
             ItemStack itemStack = inventory.getStack(0);
