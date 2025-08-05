@@ -1,5 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.nether;
 
+import frootloops.versus.mod.mobs.ModEntities;
+import frootloops.versus.mod.mobs.hostile.nether.WildfireEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
@@ -13,6 +15,7 @@ import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
+import net.minecraft.world.biome.BiomeKeys;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,7 +30,6 @@ public class WitherSkeletonMixin extends HostileEntity {
 
     @Inject(method = "initialize", at = @At("TAIL"))
     private void decreaseHealth(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
-
         this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH).setBaseValue(32.0D);
         this.setHealth(this.getMaxHealth());
 
@@ -39,6 +41,16 @@ public class WitherSkeletonMixin extends HostileEntity {
 
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0F;
+        boolean result = this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0F;
+        if(result && spawnReason == SpawnReason.NATURAL) {
+
+            // Rarely spawn a Wildfire:
+            if(this.getRandom().nextInt(8) == 0 && this.getWorld().getBiome(this.getBlockPos()) == BiomeKeys.SOUL_SAND_VALLEY) {
+                WildfireEntity wildfireEntity = new WildfireEntity(ModEntities.WILDFIRE, this.getWorld());
+                wildfireEntity.setPosition(this.getPos());
+                world.spawnEntity(wildfireEntity);
+            }
+        }
+        return result;
     }
 }

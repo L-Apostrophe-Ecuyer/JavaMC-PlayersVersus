@@ -61,6 +61,9 @@ public class MobSpawning {
         // Air:
         BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, EntityType.PHANTOM, 80, 1, 2);
 
+        // Nether:
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.NETHER_WASTES), SpawnGroup.MONSTER, EntityType.BLAZE, 5, 1, 1);
+
     }
 
     public static boolean isMidnightDuringNewMoon(WorldAccess world) {
