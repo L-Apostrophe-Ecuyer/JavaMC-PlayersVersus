@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.ai;
+package frootloops.versus.mod.mobs.hostile.overworld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.goal.Goal;

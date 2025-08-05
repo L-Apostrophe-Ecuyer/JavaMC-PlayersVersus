@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.ai;
+package frootloops.versus.mod.mobs.hostile.overworld;
 
 import frootloops.versus.mod.Combat;
 import net.minecraft.entity.LivingEntity;

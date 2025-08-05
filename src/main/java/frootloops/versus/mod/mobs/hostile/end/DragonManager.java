@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.end.dragon;
+package frootloops.versus.mod.mobs.hostile.end;
 
 import java.util.ArrayList;
 import java.util.List;

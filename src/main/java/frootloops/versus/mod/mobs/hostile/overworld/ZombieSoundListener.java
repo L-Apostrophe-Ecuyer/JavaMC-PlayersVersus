@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.ai;
+package frootloops.versus.mod.mobs.hostile.overworld;
 
 import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieEntity;
 import net.minecraft.entity.ai.pathing.Path;

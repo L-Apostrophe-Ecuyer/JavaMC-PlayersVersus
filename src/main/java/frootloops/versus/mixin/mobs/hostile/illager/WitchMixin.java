@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
-import frootloops.versus.mod.mobs.hostile.ai.FleeAttackerAndHealGoal;
+import frootloops.versus.mod.mobs.hostile.overworld.FleeAttackerAndHealGoal;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.WitchEntity;

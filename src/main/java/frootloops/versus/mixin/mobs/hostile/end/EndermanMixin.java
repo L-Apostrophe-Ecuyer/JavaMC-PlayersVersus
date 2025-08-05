@@ -1,19 +1,15 @@
 package frootloops.versus.mixin.mobs.hostile.end;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.mobs.hostile.ai.EndermanHideAndWaitGoal;
+import frootloops.versus.mod.mobs.hostile.end.EndermanHideAndWaitGoal;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
-import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.Angerable;
 import net.minecraft.entity.mob.EndermanEntity;
-import net.minecraft.entity.mob.EndermiteEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.sound.SoundEvent;

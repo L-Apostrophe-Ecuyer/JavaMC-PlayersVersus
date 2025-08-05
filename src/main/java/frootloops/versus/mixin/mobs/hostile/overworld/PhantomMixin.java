@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.mobs.hostile.ai.PhantomMoveControlRevamp;
+import frootloops.versus.mod.mobs.hostile.overworld.PhantomMoveControlRevamp;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
@@ -12,7 +12,6 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.FlyingEntity;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.function.BooleanBiFunction;

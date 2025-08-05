@@ -1,5 +1,7 @@
 package frootloops.versus.mod.mobs;
 
+import frootloops.versus.mod.mobs.hostile.nether.WildfireEntity;
+import frootloops.versus.mod.mobs.hostile.nether.WildfireEntityRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieRenderer;
@@ -20,5 +22,6 @@ public class ModEntitiesRenderers {
         EntityRendererRegistry.register(DEEPER_CREEPER, context -> new DeeperCreeperRenderer(context));
         EntityRendererRegistry.register(FROSTED_ZOMBIE, context -> new FrostedZombieRenderer(context));
         EntityRendererRegistry.register(WITHERED_ZOMBIE, context -> new WitheredZombieRenderer(context));
+        EntityRendererRegistry.register(WILDFIRE, context -> new WildfireEntityRenderer(context));
     }
 }

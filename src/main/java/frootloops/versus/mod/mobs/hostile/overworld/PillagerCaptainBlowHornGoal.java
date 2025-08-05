@@ -1,5 +1,5 @@
 
-package frootloops.versus.mod.mobs.hostile.ai;
+package frootloops.versus.mod.mobs.hostile.overworld;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EntityPose;

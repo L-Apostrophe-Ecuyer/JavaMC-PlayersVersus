@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.ai;
+package frootloops.versus.mod.mobs.hostile.overworld;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.mobs.hostile.overworld.PhantomAccessor;
