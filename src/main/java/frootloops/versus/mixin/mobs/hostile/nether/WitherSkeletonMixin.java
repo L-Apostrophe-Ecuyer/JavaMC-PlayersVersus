@@ -14,6 +14,7 @@ import net.minecraft.entity.mob.WitherSkeletonEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.BiomeKeys;
@@ -49,11 +50,11 @@ public class WitherSkeletonMixin extends HostileEntity {
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         boolean result = this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0F;
-        if(result && spawnReason == SpawnReason.NATURAL && this.getWorld().getDimension().ultrawarm()) {
+        if(result && spawnReason == SpawnReason.NATURAL && world.getDimension().ultrawarm() && world.getBlockState(this.getBlockPos().down()).getSoundGroup() == BlockSoundGroup.NETHER_BRICKS) {
 
             // Rarely spawn a Wildfire:
             boolean isInSoulSandValley = this.getWorld().getBiome(this.getBlockPos()) == BiomeKeys.SOUL_SAND_VALLEY;
-            if(this.getRandom().nextInt(isInSoulSandValley ? 12 : 24) == 0) {
+            if(this.getRandom().nextInt(isInSoulSandValley ? 6 : 12) == 0) {
                 WildfireEntity wildfireEntity = new WildfireEntity(ModEntities.WILDFIRE, this.getWorld());
                 wildfireEntity.setPosition(this.getPos());
                 world.spawnEntity(wildfireEntity);

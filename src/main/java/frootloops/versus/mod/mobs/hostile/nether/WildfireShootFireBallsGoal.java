@@ -53,6 +53,10 @@ public class WildfireShootFireBallsGoal extends Goal {
     @Override
     public void tick() {
         this.fireballCooldown--;
+        if(fireballCooldown == 40) {
+            this.wildfireEntity.setFireActive(true);
+        }
+
         LivingEntity livingEntity = this.wildfireEntity.getTarget();
         if (livingEntity != null) {
             boolean isPlayerVisible = this.wildfireEntity.getVisibilityCache().canSee(livingEntity);
@@ -97,15 +101,12 @@ public class WildfireShootFireBallsGoal extends Goal {
                         int weightGroundPound = (squaredDistanceTo < 25.0 || (dy < 0 && dx * dx + dz * dz < 16.0))  ? 8 : 0;
                         int random = wildfireEntity.getRandom().nextInt(weightGroundPound + weightSmallFireballs + weightBigFireball);
                         if (random <= weightBigFireball) {
-                            VersusMod.MOD_LOGGER.warn("Chose BIG Fireball attack, of weight " + weightBigFireball);
                             this.shootBigFireballAtPlayer(squaredDistanceTo, dx, dy, dz);
                         }
                         else if (random - weightBigFireball <= weightSmallFireballs) {
-                            VersusMod.MOD_LOGGER.warn("Chose Small Fireball attack, of weight " + weightSmallFireballs);
                             this.shootSmallFireballsInSpray(dy);
                         }
                         else {
-                            VersusMod.MOD_LOGGER.warn("Chose Ground Pound, of weight " + weightGroundPound);
                             this.doGroundPound();
                         }
                     }
@@ -184,7 +185,7 @@ public class WildfireShootFireBallsGoal extends Goal {
         }
 
         // Cooldown:
-        this.fireballCooldown = 60;
+        this.fireballCooldown = 80;
         wildfireEntity.setFireActive(false);
     }
 
@@ -209,9 +210,9 @@ public class WildfireShootFireBallsGoal extends Goal {
             this.wildfireEntity.getWorld().createExplosion(wildfireEntity, wildfireEntity.getX(), wildfireEntity.getY(), wildfireEntity.getZ(), 2, true, World.ExplosionSourceType.MOB);
             this.wildfireEntity.setInvulnerable(false);
 
-            // Long Cooldown (8-11s)
+            // Long Cooldown (5-8s)
             this.ticksGroundPound = 0;
-            this.fireballCooldown = 160 + wildfireEntity.getRandom().nextInt(60);
+            this.fireballCooldown = 100 + wildfireEntity.getRandom().nextInt(60);
             wildfireEntity.setFireActive(false);
         }
     }
