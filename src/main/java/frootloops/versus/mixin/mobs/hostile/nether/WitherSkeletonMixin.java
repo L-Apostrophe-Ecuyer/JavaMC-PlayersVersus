@@ -5,6 +5,7 @@ import frootloops.versus.mod.mobs.hostile.nether.WildfireEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -26,6 +27,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class WitherSkeletonMixin extends HostileEntity {
     protected WitherSkeletonMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        if(target instanceof HostileEntity) return;
+        else super.setTarget(target);
     }
 
     @Inject(method = "initialize", at = @At("TAIL"))
