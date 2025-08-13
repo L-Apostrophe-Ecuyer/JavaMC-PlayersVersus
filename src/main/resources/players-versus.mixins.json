@@ -31,6 +31,7 @@
     "environment.blocks.CropMixin",
     "environment.blocks.SugarCaneMixin",
     "environment.blocks.LadderMixin",
+    "environment.blocks.LeavesMixin",
     "environment.blocks.MossMixin",
     "environment.blocks.NetherWartMixin",
     "environment.blocks.PointedDripstoneMixin",

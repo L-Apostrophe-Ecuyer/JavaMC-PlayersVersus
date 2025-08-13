@@ -6,12 +6,15 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.intprovider.IntProvider;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.level.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,6 +39,13 @@ public abstract class ServerWorldWeatherMixin extends World {
         super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
         this.server = server;
         this.worldProperties = worldProperties;
+    }
+
+    @Override
+    public boolean hasRain(BlockPos pos) {
+        if (!this.isThundering()) {
+            return false;
+        } else return super.hasRain(pos);
     }
 
     @Overwrite

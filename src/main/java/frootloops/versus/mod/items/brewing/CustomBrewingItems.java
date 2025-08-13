@@ -28,7 +28,7 @@ public abstract class CustomBrewingItems {
     public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
     public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
 
-    public static final Item LIVING_FLAME = new Item(getItemSettings("living_flame"));
+    public static final Item LIVING_FLAME = new Item(getItemSettings("living_flame").rarity(Rarity.UNCOMMON));
     public static final Item GLISTERING_BEETROOT = new Item(getItemSettings("glistering_beetroot").food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).build()));
     public static final Item GLISTERING_MELON_SLICE = new Item(getItemSettings("glistering_melon_slice").food(new FoodComponent.Builder().nutrition(3).saturationModifier(0.8f).build()));
 
