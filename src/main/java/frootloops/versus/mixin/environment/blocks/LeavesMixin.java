@@ -56,8 +56,8 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         if (context instanceof EntityShapeContext && ((EntityShapeContext) context).getEntity() instanceof LivingEntity livingEntity) {
-            if(livingEntity instanceof SpiderEntity || livingEntity instanceof FlyingEntity || livingEntity instanceof TameableShoulderEntity) return VoxelShapes.fullCube();
-            if(!context.isAbove(VoxelShapes.fullCube(), pos, true) || livingEntity.isSneaking()) return VoxelShapes.empty();
+            if(livingEntity.hasVehicle() || livingEntity.isSneaking() || livingEntity instanceof SpiderEntity || livingEntity instanceof FlyingEntity || livingEntity instanceof TameableShoulderEntity) return VoxelShapes.fullCube();
+            if(!context.isAbove(VoxelShapes.fullCube(), pos, true)) return VoxelShapes.empty();
         }
         return VoxelShapes.fullCube();
     }
