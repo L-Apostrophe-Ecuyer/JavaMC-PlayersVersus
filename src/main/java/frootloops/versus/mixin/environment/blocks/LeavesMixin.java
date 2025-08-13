@@ -2,6 +2,7 @@ package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
+import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import frootloops.versus.mod.environment.blocks.clays.CustomMudBlock;
 import net.minecraft.block.*;
@@ -49,13 +50,14 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
 
     private static final float FALL_DISTANCE_TO_FALL_THROUGH = 6.0F;
     private static final float FALL_DISTANCE_REDUCTION = 4.0F;
-    private static Vec3d MOVE_MULT = new Vec3d(0.5, 1.1, 0.5);
+    private static Vec3d MOVE_TOWARDS_CENTER_MULT = new Vec3d(0.5, 1.1, 0.5);
+    private static Vec3d SNEAKING_MULT = new Vec3d(0.8, 0.5, 0.8);
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         if (context instanceof EntityShapeContext && ((EntityShapeContext) context).getEntity() instanceof LivingEntity livingEntity) {
             if(livingEntity instanceof SpiderEntity || livingEntity instanceof FlyingEntity || livingEntity instanceof TameableShoulderEntity) return VoxelShapes.fullCube();
-            if(!context.isAbove(VoxelShapes.fullCube(), pos, true)) return VoxelShapes.empty();
+            if(!context.isAbove(VoxelShapes.fullCube(), pos, true) || livingEntity.isSneaking()) return VoxelShapes.empty();
         }
         return VoxelShapes.fullCube();
     }
@@ -83,8 +85,10 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
 
     @Override
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+        if (!entity.getBlockPos().equals(pos) && !entity.getBlockPos().up().equals(pos)) return;
         if (!entity.isSpectator() && entity instanceof LivingEntity livingEntity && entity.getBlockPos().equals(pos) && !((LivingEntityAccessor)livingEntity).isJumping()) {
-            entity.slowMovement(state, MOVE_MULT);
+            if(livingEntity.isSneaking()) entity.slowMovement(state, SNEAKING_MULT);
+            else if(Combat.isLookingTowards(livingEntity, pos.toCenterPos(), -0.25)) entity.slowMovement(state, MOVE_TOWARDS_CENTER_MULT);
         }
     }
 
