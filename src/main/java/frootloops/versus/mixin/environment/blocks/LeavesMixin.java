@@ -85,6 +85,7 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
 
     @Override
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+        if (entity.hasVehicle()) return;
         if (!entity.getBlockPos().equals(pos) && !entity.getBlockPos().up().equals(pos)) return;
         if (!entity.isSpectator() && entity instanceof LivingEntity livingEntity && entity.getBlockPos().equals(pos) && !((LivingEntityAccessor)livingEntity).isJumping()) {
             if(livingEntity.isSneaking()) entity.slowMovement(state, SNEAKING_MULT);
