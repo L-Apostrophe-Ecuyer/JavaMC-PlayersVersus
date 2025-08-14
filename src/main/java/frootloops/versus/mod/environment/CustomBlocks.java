@@ -118,10 +118,10 @@ public class CustomBlocks {
         BROWN_MUD = (CustomMudBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.BROWN).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).solid().suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.BROWN_CLAY, Blocks.LIGHT_GRAY_TERRACOTTA));
         ((MoistBlock)BROWN_CLAY).wetterVersion = BROWN_MUD;
 
-        BROWN_CLAY_BRICKS = (MoistBlock)registerBlock("brown_clay_bricks", new MoistBlock(getSettings("brown_clay_bricks", BROWN_CLAY), null, TERRACOTTA_BRICKS));
-        BROWN_CLAY_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_clay_brick_slab", new MoistSlabBlock(getSettings("brown_clay_brick_slab", BROWN_CLAY), null, TERRACOTTA_BRICK_SLAB));
-        BROWN_CLAY_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_clay_brick_stairs", new MoistStairsBlock(getSettings("brown_clay_brick_stairs", BROWN_CLAY), BROWN_CLAY.getDefaultState(), null, TERRACOTTA_BRICK_STAIRS));
-        BROWN_CLAY_BRICK_WALL = (MoistWallBlock)registerBlock("brown_clay_brick_wall", new MoistWallBlock(getSettings("brown_clay_brick_wall", BROWN_CLAY), null, TERRACOTTA_BRICK_WALL));
+        BROWN_CLAY_BRICKS = (MoistBlock)registerBlock("brown_clay_bricks", new MoistBlock(getSettings("brown_clay_bricks", Blocks.MUD_BRICKS).slipperiness(0.98f), null, TERRACOTTA_BRICKS));
+        BROWN_CLAY_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_clay_brick_slab", new MoistSlabBlock(getSettings("brown_clay_brick_slab", BROWN_CLAY_BRICKS), null, TERRACOTTA_BRICK_SLAB));
+        BROWN_CLAY_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_clay_brick_stairs", new MoistStairsBlock(getSettings("brown_clay_brick_stairs", BROWN_CLAY_BRICKS), BROWN_CLAY_BRICKS.getDefaultState(), null, TERRACOTTA_BRICK_STAIRS));
+        BROWN_CLAY_BRICK_WALL = (MoistWallBlock)registerBlock("brown_clay_brick_wall", new MoistWallBlock(getSettings("brown_clay_brick_wall", BROWN_CLAY_BRICKS), null, TERRACOTTA_BRICK_WALL));
         BROWN_MUD_BRICKS = (MoistBlock)registerBlock("brown_mud_bricks", new MoistBlock(getSettings("brown_mud_bricks", BROWN_MUD).strength(1.1f, 2.5f).slipperiness(0.92f).velocityMultiplier(0.94f).sounds(BlockSoundGroup.MUD), BROWN_CLAY_BRICKS));
         BROWN_MUD_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_mud_brick_slab", new MoistSlabBlock(getSettings("brown_mud_brick_slab", BROWN_MUD_BRICKS), BROWN_CLAY_BRICK_SLAB));
         BROWN_MUD_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_mud_brick_stairs", new MoistStairsBlock(getSettings("brown_mud_brick_stairs", BROWN_MUD_BRICKS), BROWN_MUD_BRICKS.getDefaultState(), BROWN_CLAY_BRICK_SLAB));

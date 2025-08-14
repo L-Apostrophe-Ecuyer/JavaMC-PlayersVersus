@@ -17,7 +17,8 @@ public abstract class MossMixin extends Block implements Fertilizable {
 
     @Override
     public boolean isFertilizable(WorldView world, BlockPos pos, BlockState state) {
-        return !world.getBlockState(pos.up()).isOpaque();
+        BlockState stateUp = world.getBlockState(pos.up());
+        return (!stateUp.isOpaque() && stateUp.getBlock().getHardness() == 0.0f) || stateUp.isOf(Blocks.MOSS_BLOCK);
     }
 
     @Override
