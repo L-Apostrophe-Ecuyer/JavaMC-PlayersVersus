@@ -52,6 +52,7 @@ public class SortedInventoryOutput {
             }
 
             ItemSlot slotToInsert =  this.slotsToAdd.removeFirst();
+            if(slotToInsert == null) continue;
             if(!this.set(this.currentRow, this.currentCol, slotToInsert)) {
                 if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.error("                  Returning. Failed to set slot. (" + this.currentRow + ", " + this.currentCol + ")");
                 return false;

@@ -35,7 +35,7 @@ public class SmolderingTorchBlock extends TorchBlock {
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         int y = pos.getY();
-        if(y > 32) return;
+        if(y > 8) return;
         if(!world.isClient) {
             if (random.nextInt(200) > y + 165) {
                 this.tickSmolderingTorchDegradation(state, world, pos);
