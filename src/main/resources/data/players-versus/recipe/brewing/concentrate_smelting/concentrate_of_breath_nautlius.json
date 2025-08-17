@@ -2,10 +2,7 @@
   "type": "minecraft:smelting",
   "category": "food",
   "group": "concentrate_of_breath",
-  "ingredient": [
-    "minecraft:prismarine_crystals",
-    "minecraft:prismarine_shard"
-  ],
+  "ingredient":"minecraft:nautilus_shell",
   "result": {
     "id": "players-versus:concentrate_of_breath"
   },
