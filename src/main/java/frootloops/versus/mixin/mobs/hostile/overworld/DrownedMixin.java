@@ -73,6 +73,8 @@ public abstract class DrownedMixin extends ZombieEntity {
                 this.equipStack(EquipmentSlot.MAINHAND, PotionContentsComponent.createStack(Items.POTION, CustomPotions.HASTE));
             else if (rand < 38)
                 this.equipStack(EquipmentSlot.MAINHAND, PotionContentsComponent.createStack(Items.POTION, CustomPotions.MINING_FATIGUE));
+            if (rand % 5 == 0)
+                this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
             this.handDropChances[0] = 1f;
             this.handDropChances[1] = 1f;
         }
@@ -88,15 +90,9 @@ public abstract class DrownedMixin extends ZombieEntity {
     @Nullable
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
-
-        entityData = super.initialize(world, difficulty, spawnReason, entityData);
-        if (this.getEquippedStack(EquipmentSlot.OFFHAND).isEmpty() && world.getRandom().nextFloat() < 0.03F)
-            this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
-
         EntityAttributeInstance followRange = this.getAttributes().getCustomInstance(EntityAttributes.FOLLOW_RANGE);
         if (followRange != null) followRange.setBaseValue(32.0d);
-
-        return entityData;
+        return super.initialize(world, difficulty, spawnReason, entityData);
     }
 
     @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/mob/DrownedEntity;updateVelocity(FLnet/minecraft/util/math/Vec3d;)V"))
