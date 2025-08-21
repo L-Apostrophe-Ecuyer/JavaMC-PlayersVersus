@@ -44,7 +44,7 @@ public abstract class DrownedMixin extends ZombieEntity {
     }
 
     @ModifyConstant(method = "canSpawn", constant = @Constant(intValue = 15))
-    protected static int lessSpawning(int spawnChance) {return 30;}
+    private static int lessSpawning(int spawnChance) {return 30;}
 
     @Inject(method = "initEquipment", at = @At("HEAD"), cancellable = true)
     public void changeProbability(Random random, LocalDifficulty localDifficulty, CallbackInfo ci) {
@@ -53,9 +53,9 @@ public abstract class DrownedMixin extends ZombieEntity {
             int level = rand + random.nextInt(15);
             DynamicRegistryManager dynamicRegistryManager = this.getWorld().getRegistryManager();
             Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOptional(EnchantmentTags.ON_MOB_SPAWN_EQUIPMENT);
-            if(rand % 2 == 1) this.equipStack(EquipmentSlot.HEAD, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_HELMET), level, dynamicRegistryManager, optional));
-            if(rand % 3 == 1) this.equipStack(EquipmentSlot.LEGS,EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_LEGGINGS), level, dynamicRegistryManager, optional));
-            if(rand % 4 == 1) this.equipStack(EquipmentSlot.CHEST, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_CHESTPLATE), level, dynamicRegistryManager, optional));
+            if(rand % 2 == 1) this.equipStack(EquipmentSlot.CHEST, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_CHESTPLATE), level, dynamicRegistryManager, optional));
+            if(rand % 3 == 1) this.equipStack(EquipmentSlot.LEGS, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_LEGGINGS), level, dynamicRegistryManager, optional));
+            if(rand % 4 == 1) this.equipStack(EquipmentSlot.HEAD, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_HELMET), level, dynamicRegistryManager, optional));
             if(rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_BOOTS), level, dynamicRegistryManager, optional));
             if(rand % 6 == 1 || rand % 7 == 1) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.GOLDEN_APPLE));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.TRIDENT));
