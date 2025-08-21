@@ -44,7 +44,7 @@ public abstract class DrownedMixin extends ZombieEntity {
     }
 
     @ModifyConstant(method = "canSpawn", constant = @Constant(intValue = 15))
-    private int lessSpawning(int spawnChance) {return 30;}
+    protected static int lessSpawning(int spawnChance) {return 30;}
 
     @Inject(method = "initEquipment", at = @At("HEAD"), cancellable = true)
     public void changeProbability(Random random, LocalDifficulty localDifficulty, CallbackInfo ci) {
