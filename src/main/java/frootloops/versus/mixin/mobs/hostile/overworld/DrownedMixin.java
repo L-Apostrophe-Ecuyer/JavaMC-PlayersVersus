@@ -67,12 +67,16 @@ public abstract class DrownedMixin extends ZombieEntity {
         else if(rand < 36) {
             if (rand < 25)
                 this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.SPYGLASS));
-            else if (rand < 30)
+            else if (rand < 29)
                 this.equipStack(EquipmentSlot.MAINHAND, PotionContentsComponent.createStack(Items.POTION, CustomPotions.HASTE_STRONG));
-            else if (rand < 34)
+            else if (rand < 32)
                 this.equipStack(EquipmentSlot.MAINHAND, PotionContentsComponent.createStack(Items.POTION, CustomPotions.HASTE));
-            else if (rand < 38)
+            else if (rand < 35)
                 this.equipStack(EquipmentSlot.MAINHAND, PotionContentsComponent.createStack(Items.POTION, CustomPotions.MINING_FATIGUE));
+            else if (rand < 38)
+                this.equipStack(EquipmentSlot.MAINHAND, PotionContentsComponent.createStack(Items.POTION, CustomPotions.BUOYANCY));
+            else if (rand < 42)
+                this.equipStack(EquipmentSlot.MAINHAND, Items.GLASS_BOTTLE.getDefaultStack());
             if (rand % 5 == 0)
                 this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
             this.handDropChances[0] = 1f;
