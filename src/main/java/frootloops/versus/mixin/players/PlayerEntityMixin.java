@@ -130,13 +130,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(blockState.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
             ToolComponent toolComponent = this.getMainHandStack().getOrDefault(DataComponentTypes.TOOL, null);
             if(toolComponent == null) return;
-            else if(!toolComponent.isCorrectForDrops(Blocks.DIAMOND_ORE.getDefaultState())) {
+            else if(this.getMainHandStack().isOf(Items.GOLDEN_PICKAXE)) cir.setReturnValue(breakingSpeed + 0.5F);
+            else if(!toolComponent.isCorrectForDrops(Blocks.DEEPSLATE_DIAMOND_ORE.getDefaultState())) {
                 cir.setReturnValue(breakingSpeed/3f);
             }
-            else if(toolComponent.isCorrectForDrops(Blocks.OBSIDIAN.getDefaultState())) {
-                VersusMod.MOD_LOGGER.warn("Mining speed: from " + breakingSpeed + " to " + (breakingSpeed + (toolComponent.defaultMiningSpeed() >= 9.0F ? 2.0f : 0.5f)));
-                cir.setReturnValue(breakingSpeed + (toolComponent.defaultMiningSpeed() >= 9.0F ? 2.0f : 0.5f));
-            }
+            else cir.setReturnValue(breakingSpeed + (toolComponent.defaultMiningSpeed() >= 9.0F ? 2.0f : 0.5f));
             return;
         }
 
