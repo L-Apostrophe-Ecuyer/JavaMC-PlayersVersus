@@ -1,19 +1,24 @@
 {
   "variants": {
-    "facing=east": {
-      "model": "players-versus:block/smoldering_wall_torch"
-    },
-    "facing=north": {
-      "model": "players-versus:block/smoldering_wall_torch",
-      "y": 270
-    },
-    "facing=south": {
-      "model": "players-versus:block/smoldering_wall_torch",
-      "y": 90
-    },
-    "facing=west": {
-      "model": "players-versus:block/smoldering_wall_torch",
-      "y": 180
-    }
+    "facing=east": [
+      { "model": "players-versus:block/smoldering_wall_torch_0", "weight": 1 },
+      { "model": "players-versus:block/smoldering_wall_torch_1", "weight": 1 },
+      { "model": "players-versus:block/smoldering_wall_torch_2", "weight": 1 }
+    ],
+    "facing=north": [
+      { "model": "players-versus:block/smoldering_wall_torch_0", "y": 270, "weight": 1 },
+      { "model": "players-versus:block/smoldering_wall_torch_1", "y": 270, "weight": 1 },
+      { "model": "players-versus:block/smoldering_wall_torch_2", "y": 270, "weight": 1 }
+    ],
+    "facing=south": [
+      { "model": "players-versus:block/smoldering_wall_torch_0", "y": 90, "weight": 1 },
+      { "model": "players-versus:block/smoldering_wall_torch_1", "y": 90, "weight": 1 },
+      { "model": "players-versus:block/smoldering_wall_torch_2", "y": 90, "weight": 1 }
+    ],
+    "facing=west": [
+      { "model": "players-versus:block/smoldering_wall_torch_0", "y": 180, "weight": 1 },
+      { "model": "players-versus:block/smoldering_wall_torch_1", "y": 180, "weight": 1 },
+      { "model": "players-versus:block/smoldering_wall_torch_2", "y": 180, "weight": 1 }
+    ]
   }
 }

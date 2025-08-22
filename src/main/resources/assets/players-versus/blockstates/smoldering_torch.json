@@ -1,7 +1,9 @@
 {
-  "variants": {
-    "": {
-      "model": "players-versus:block/smoldering_torch"
+    "variants": {
+        "": [
+            { "model": "players-versus:block/smoldering_torch_0", "weight": 1 },
+            { "model": "players-versus:block/smoldering_torch_1", "weight": 1 },
+            { "model": "players-versus:block/smoldering_torch_2", "weight": 1 }
+        ]
     }
-  }
 }

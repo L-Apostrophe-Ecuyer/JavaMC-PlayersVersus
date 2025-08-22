@@ -48,8 +48,8 @@ public abstract class TorchMixin extends Block {
         if(world.getDimension().ultrawarm()) return;
         if(world instanceof ServerWorld && state.isOf(Blocks.TORCH) || state.isOf(Blocks.WALL_TORCH)) {
             int randomInteger = random.nextInt(512);
-            int offset = 24 + (randomInteger - pos.getY() < 64 || world.getBlockState(pos.down()).isOf(Blocks.DEEPSLATE) || world.hasRain(pos) ? 48 : 0);
-            if (randomInteger > pos.getY() + 512 - offset) {
+            int offset = 8 + (world.getBlockState(pos.down()).isOf(Blocks.DEEPSLATE) || world.hasRain(pos) ? 48 : 0);
+            if (randomInteger > 512 + Math.min(pos.getY() + 16, 0) - offset) {
                 this.tickTorchDegradation(state, world, pos, false);
             }
         }
