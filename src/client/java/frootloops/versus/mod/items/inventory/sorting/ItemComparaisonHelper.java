@@ -31,6 +31,7 @@ public abstract class ItemComparaisonHelper {
     public static boolean shouldGoBefore(ItemSlot slot, ItemSlot slotToCompareTo, boolean skipNonTools, boolean skipBlocks) {
         if(slotToCompareTo == null) return true;
         if(slot == null) return false;
+        if(ItemStack.areItemsAndComponentsEqual(slot.stack(), slotToCompareTo.stack())) return slot.stack().getCount() > slotToCompareTo.stack().getCount();
         if(skipNonTools) {
             if(slot.isToolOrWeapon() && !slotToCompareTo.isToolOrWeapon()) return true;
             if(!slot.isToolOrWeapon() && slotToCompareTo.isToolOrWeapon()) return false;
@@ -39,8 +40,9 @@ public abstract class ItemComparaisonHelper {
         if(skipBlocks && slot.isBlock() && slotToCompareTo.isBlock()) itemComparaison = 0;
         if(itemComparaison != 0) return itemComparaison < 0 ? true : false;
 
+
+        // Everything below is for stacks having the same type:
         if(slot.stack().getRarity().ordinal() > slotToCompareTo.stack().getRarity().ordinal()) return true;
-        if(slot.stack().isOf(slotToCompareTo.stack().getItem()) && slot.stack().getCount() > slotToCompareTo.stack().getCount()) return true;
 
         // Armor and weapon comparaison:
         if(slot.isToolOrWeapon() || (!skipNonTools && slot.isArmor())) {

@@ -52,13 +52,13 @@ public class SortedItemLists {
 
 
     /** MISC - WORLD AND ARCHEOLOGY ---------------------------------------------------------   */
-    public static final SortedTypedItemList MISC_TOOLS = new SortedTypedItemList(new ItemType[]{ItemType.MISC_TOOL});
+    public static final SortedMappedItemList FISHING = new SortedMappedItemList(ItemSortingMaps.ITEMS_FISHING);
+    public static final SortedTypedItemList MISC_TOOLS = new SortedTypedItemList(new ItemType[]{ItemType.SPYGLASS, ItemType.MISC_TOOL});
     public static final SortedBlockItemList BEDS = new SortedBlockItemList(ItemSortingMaps.ITEMS_BEDS);
     public static final SortedBlockItemList CANDLES = new SortedBlockItemList(ItemSortingMaps.ITEMS_CANDLES);
     public static final SortedBlockItemList BANNERS = new SortedBlockItemList(ItemSortingMaps.ITEMS_BANNERS);
     public static final SortedTypedItemList POTTERY_AND_BANNERS = new SortedTypedItemList(new ItemType[]{ItemType.POTTERY, ItemType.BANNER_PATTERNS});
     public static final SortedTypedItemList DISCS = new SortedTypedItemList(new ItemType[]{ItemType.DISCS});
-
     public static final SortedItemList[] MISC_EXPLORATION = {MISC_TOOLS, BEDS, CANDLES, BANNERS, POTTERY_AND_BANNERS, DISCS};
 
 
@@ -69,7 +69,7 @@ public class SortedItemLists {
 
 
     /** SHEARS ------------------------------------------------------------   */
-    public static final SortedMappedItemList SHEARS = new SortedMappedItemList(ItemSortingMaps.ITEMS_SHEAR_AND_FISHING);
+    public static final SortedTypedItemList SHEARS = new SortedTypedItemList(new ItemType[]{ItemType.SHEARS});
     public static final SortedBlockItemList WOOL_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_SHEARS_WOOL_BLOCKS);
     public static final SortedMappedItemList DYES = new SortedMappedItemList(ItemSortingMaps.ITEMS_DYES);
     public static final SortedBlockItemList FLOWERS = new SortedBlockItemList(BlockTags.FLOWERS, ItemSortingMaps.ITEMS_FLOWERS);
@@ -97,13 +97,15 @@ public class SortedItemLists {
 
     /** PICKAXES -------------------------------------------------------------   */
     public static final SortedTaggedItemList PICKAXES = new SortedTaggedItemList(ItemTags.PICKAXES);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_ICE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_ICE);
     public static final SortedMappedItemList PICKAXE_MINEABLE_NETHER = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_NETHER_BLOCKS);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_DARK = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_DARK_STONES);
     public static final SortedMappedItemList PICKAXE_MINEABLE_GRAY = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAY_STONES);
     public static final SortedMappedItemList PICKAXE_MINEABLE_PALE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES);
     public static final SortedMappedItemList PICKAXE_MINEABLE_WARM = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS);
     public static final SortedMappedItemList PICKAXE_MINEABLE_TERRACOTTA = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS);
     public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.PICKAXE_MINEABLE, 0.25f, 32.0f);
-    public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_GRAY, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_GENERIC};
+    public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_ICE, PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_DARK, PICKAXE_MINEABLE_GRAY, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_GENERIC};
 
 
     /** AXES -------------------------------------------------------------   */

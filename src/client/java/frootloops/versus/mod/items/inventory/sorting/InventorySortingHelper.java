@@ -70,7 +70,7 @@ public class InventorySortingHelper {
 
         // If each group can have their own row, then best case scenario:
         if(orderedGroups.size() <= numRows) {
-            int actualNumRowsInGroups = orderedGroups.size() + orderedGroups.stream().mapToInt(g -> g.size()/9).sum();
+            int actualNumRowsInGroups = orderedGroups.size() + orderedGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum();
             if(actualNumRowsInGroups <= numRows) {
                 for (SortingGroup group : orderedGroups) {
                     inventoryOutput.goToNextAvailableRow();
@@ -190,7 +190,7 @@ public class InventorySortingHelper {
 
         // Step 1: Get the list of non-empty groups in order of size (of leftovers)
         List<SortingGroup> nonEmptyGroups = Arrays.stream(SORTING_GROUPS).filter(g -> g.size() > 0).sorted().collect(Collectors.toList());
-        numRows -=  nonEmptyGroups.stream().mapToInt(g -> g.size()/9).sum(); // Minus groups with two or more rows
+        numRows -=  nonEmptyGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum(); // Minus groups with two or more rows
         if(MAIN_HOTBAR.size() > 0) nonEmptyGroups.addLast(MAIN_HOTBAR);
 
         // Step 2: Get the number of rows to aim for, i.e. trying to fit everything together
@@ -265,6 +265,7 @@ public class InventorySortingHelper {
         if (isPlayerInventory) {
             if (MAIN_HOTBAR.size() > 0) cleanUpHotbar();
             cleanUpToolGroup(SHEARS_GROUP, HOE_GROUP);
+            cleanUpToolGroup(SHEARS_GROUP, WORLD_GROUP);
             cleanUpToolGroup(HOE_GROUP, SHEARS_GROUP, SHOVEL_GROUP);
             cleanUpToolGroup(SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP);
             cleanUpToolGroup(PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, CONSUMABLES_GROUP);
@@ -364,13 +365,21 @@ public class InventorySortingHelper {
 
 
     public static void cleanUpMisc() {
+        tryCombiningTwoGroups(WORLD_GROUP, SHEARS_GROUP);
+        tryCombiningTwoGroups(WORLD_GROUP, BREWING_GROUP);
         int size = RANDOM_GROUP.size();
         if(size % 9 != 0) {
+            if(tryCombiningTwoGroups(WORLD_GROUP, RANDOM_GROUP)) return;
+            if(tryCombiningTwoGroups(HOE_GROUP, RANDOM_GROUP)) return;
+            if(tryCombiningTwoGroups(HOE_GROUP, RANDOM_GROUP)) return;
             if(tryCombiningTwoGroups(SHEARS_GROUP, RANDOM_GROUP)) return;
             if(tryCombiningTwoGroups(HOE_GROUP, RANDOM_GROUP)) return;
             if(tryCombiningTwoGroups(GOODIES_GROUP, RANDOM_GROUP)) return;
             if(tryCombiningTwoGroups(REDSTONE_GROUP, RANDOM_GROUP)) return;
             if(tryCombiningTwoGroups(SHOVEL_GROUP, RANDOM_GROUP)) return;
+
+            if(WORLD_GROUP.size() + size <= 9)
+                WORLD_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
 
             if(SHEARS_GROUP.size() + size <= 9)
                 SHEARS_GROUP.addSlots(RANDOM_GROUP.takeAllItems());

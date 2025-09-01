@@ -79,24 +79,28 @@ public abstract class ItemSortingMaps {
     public static final Map<Item, Integer> ITEMS_BREWING_MISC = new HashMap<>();
     static {
         int index = 1;
+        ITEMS_BREWING_MISC.put(Items.ECHO_SHARD, index++);
         ITEMS_BREWING_MISC.put(CustomBrewingItems.BOTTLE_OF_ENDER, index++);
         ITEMS_BREWING_MISC.put(Items.DRAGON_BREATH, index++);
         ITEMS_BREWING_MISC.put(Items.POPPED_CHORUS_FRUIT, index++);
         ITEMS_BREWING_MISC.put(Items.SHULKER_SHELL, index++);
+        ITEMS_BREWING_MISC.put(Items.PHANTOM_MEMBRANE, index++);
         ITEMS_BREWING_MISC.put(CustomBrewingItems.LIVING_FLAME, index++);
-        ITEMS_BREWING_MISC.put(Items.BREEZE_ROD, index++);
         ITEMS_BREWING_MISC.put(Items.BLAZE_ROD, index++);
         ITEMS_BREWING_MISC.put(Items.BLAZE_POWDER, index++);
+        ITEMS_BREWING_MISC.put(Items.BREEZE_ROD, index++);
         ITEMS_BREWING_MISC.put(Items.GHAST_TEAR, index++);
-        ITEMS_BREWING_MISC.put(Items.PHANTOM_MEMBRANE, index++);
         ITEMS_BREWING_MISC.put(Items.PRISMARINE_CRYSTALS, index++);
         ITEMS_BREWING_MISC.put(Items.PRISMARINE_SHARD, index++);
+        ITEMS_BREWING_MISC.put(Items.NAUTILUS_SHELL, index++);
         ITEMS_BREWING_MISC.put(Items.TURTLE_SCUTE, index++);
         ITEMS_BREWING_MISC.put(Items.PUFFERFISH, index++);
         ITEMS_BREWING_MISC.put(Items.RABBIT_FOOT, index++);
         ITEMS_BREWING_MISC.put(Items.ARMADILLO_SCUTE, index++);
         ITEMS_BREWING_MISC.put(CustomBrewingItems.FOUR_LEAF_CLOVER, index++);
         ITEMS_BREWING_MISC.put(Items.SUGAR, index++);
+        ITEMS_BREWING_MISC.put(Items.GLOWSTONE_DUST, index++);
+        ITEMS_BREWING_MISC.put(Items.GLOWSTONE, index++);
         ITEMS_BREWING_MISC.put(CustomBrewingItems.CORRUPTED_WART_POWDER, index++);
     }
 
@@ -110,13 +114,13 @@ public abstract class ItemSortingMaps {
         ITEMS_BREWING_MISC.put(Items.ROTTEN_FLESH, index++);
     }
 
-    public static final Map<Item, Integer> ITEMS_SHEAR_AND_FISHING = new HashMap<>();
+    public static final Map<Item, Integer> ITEMS_FISHING = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_SHEAR_AND_FISHING.put(Items.SHEARS, index++);
-        ITEMS_SHEAR_AND_FISHING.put(Items.FISHING_ROD, index++);
-        ITEMS_SHEAR_AND_FISHING.put(Items.CARROT_ON_A_STICK, index++);
-        ITEMS_SHEAR_AND_FISHING.put(Items.WARPED_FUNGUS_ON_A_STICK, index++);
+        ITEMS_FISHING.put(Items.SHEARS, index++);
+        ITEMS_FISHING.put(Items.FISHING_ROD, index++);
+        ITEMS_FISHING.put(Items.CARROT_ON_A_STICK, index++);
+        ITEMS_FISHING.put(Items.WARPED_FUNGUS_ON_A_STICK, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_SHEARS_WOOL_BLOCKS = new HashMap<>();
@@ -230,11 +234,12 @@ public abstract class ItemSortingMaps {
         ITEMS_SHEARS_SHRUBBERY.put(CustomBlockItems.CLOVERS, index++);
         ITEMS_SHEARS_SHRUBBERY.put(CustomBlockItems.WHEAT_GRASS, index++);
         ITEMS_SHEARS_SHRUBBERY.put(CustomBlockItems.WILD_WHEAT, index++);
-        ITEMS_SHEARS_SHRUBBERY.put(Items.DEAD_BUSH, index++);        ITEMS_SHEARS_SHRUBBERY.put(Items.DEAD_BUSH, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.DEAD_BUSH, index++);
         ITEMS_SHEARS_SHRUBBERY.put(Items.HANGING_ROOTS, index++);
         ITEMS_SHEARS_SHRUBBERY.put(Items.VINE, index++);
         ITEMS_SHEARS_SHRUBBERY.put(Items.CACTUS, index++);
         ITEMS_SHEARS_SHRUBBERY.put(Items.HANGING_ROOTS, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.GLOW_LICHEN, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_SHEARS_AQUATIC = new HashMap<>();
@@ -350,6 +355,8 @@ public abstract class ItemSortingMaps {
     static {
         int index = 1;
         ITEMS_HOE_FARMING.put(Items.BONE_MEAL, index++);
+        ITEMS_HOE_FARMING.put(Items.BONE, index++);
+        ITEMS_HOE_FARMING.put(Items.BONE_BLOCK, index++);
         ITEMS_HOE_FARMING.put(Items.WHEAT_SEEDS, index++);
         ITEMS_HOE_FARMING.put(Items.WHEAT, index++);
         ITEMS_HOE_FARMING.put(Items.HAY_BLOCK, index++);
@@ -389,7 +396,6 @@ public abstract class ItemSortingMaps {
         ITEMS_HOE_SCULK.put(Items.SCULK_SHRIEKER, index++);
         ITEMS_HOE_SCULK.put(Items.SCULK_SENSOR, index++);
         ITEMS_HOE_SCULK.put(Items.SCULK_VEIN, index++);
-        ITEMS_HOE_SCULK.put(Items.ECHO_SHARD, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_HOE_NETHER_BLOCKS = new HashMap<>();
@@ -422,13 +428,10 @@ public abstract class ItemSortingMaps {
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.NETHER_BRICK_SLAB, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.NETHER_BRICK_STAIRS, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.NETHER_BRICK_FENCE, index++);
-
-        ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.GILDED_BLACKSTONE, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.BLACKSTONE, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.BLACKSTONE_SLAB, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.BLACKSTONE_STAIRS, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.BLACKSTONE_WALL, index++);
-
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.POLISHED_BLACKSTONE, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.POLISHED_BLACKSTONE_BRICKS, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.CRACKED_POLISHED_BLACKSTONE_BRICKS, index++);
@@ -439,50 +442,53 @@ public abstract class ItemSortingMaps {
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.POLISHED_BLACKSTONE_BRICK_STAIRS, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.POLISHED_BLACKSTONE_WALL, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.POLISHED_BLACKSTONE_BRICK_WALL, index++);
-
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.SMOOTH_BASALT, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.BASALT, index++);
         ITEMS_PICKAXE_NETHER_BLOCKS.put(Items.POLISHED_BASALT, index++);
     }
 
+    public static final Map<Item, Integer> ITEMS_PICKAXE_DARK_STONES = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_PICKAXE_DARK_STONES.put(Items.COBBLED_DEEPSLATE, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.CRACKED_DEEPSLATE_TILES, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE_TILES, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.POLISHED_DEEPSLATE, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.CRACKED_DEEPSLATE_BRICKS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE_BRICKS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.COBBLED_DEEPSLATE_SLAB, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.POLISHED_DEEPSLATE_SLAB, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE_BRICK_SLAB, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE_TILE_SLAB, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.COBBLED_DEEPSLATE_STAIRS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.POLISHED_DEEPSLATE_STAIRS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE_BRICK_STAIRS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE_TILE_STAIRS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.COBBLED_DEEPSLATE_WALL, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.POLISHED_DEEPSLATE_WALL, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE_BRICK_WALL, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.DEEPSLATE_TILE_WALL, index++);
+
+        ITEMS_PICKAXE_DARK_STONES.put(Items.TUFF, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.POLISHED_TUFF, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.TUFF_BRICKS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.CHISELED_TUFF, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.CHISELED_TUFF_BRICKS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.TUFF_SLAB, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.POLISHED_TUFF_SLAB, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.TUFF_BRICK_SLAB, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.TUFF_STAIRS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.POLISHED_TUFF_STAIRS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.TUFF_BRICK_STAIRS, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.TUFF_WALL, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.POLISHED_TUFF_WALL, index++);
+        ITEMS_PICKAXE_DARK_STONES.put(Items.TUFF_BRICK_WALL, index++);
+    }
+
     public static final Map<Item, Integer> ITEMS_PICKAXE_GRAY_STONES = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.COBBLED_DEEPSLATE, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.CRACKED_DEEPSLATE_TILES, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE_TILES, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_DEEPSLATE, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.CRACKED_DEEPSLATE_BRICKS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE_BRICKS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.COBBLED_DEEPSLATE_SLAB, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_DEEPSLATE_SLAB, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE_BRICK_SLAB, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE_TILE_SLAB, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.COBBLED_DEEPSLATE_STAIRS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_DEEPSLATE_STAIRS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE_BRICK_STAIRS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE_TILE_STAIRS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.COBBLED_DEEPSLATE_WALL, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_DEEPSLATE_WALL, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE_BRICK_WALL, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.DEEPSLATE_TILE_WALL, index++);
-
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.TUFF, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_TUFF, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.TUFF_BRICKS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.CHISELED_TUFF, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.CHISELED_TUFF_BRICKS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.TUFF_SLAB, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_TUFF_SLAB, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.TUFF_BRICK_SLAB, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.TUFF_STAIRS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_TUFF_STAIRS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.TUFF_BRICK_STAIRS, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.TUFF_WALL, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_TUFF_WALL, index++);
-        ITEMS_PICKAXE_GRAY_STONES.put(Items.TUFF_BRICK_WALL, index++);
-
         ITEMS_PICKAXE_GRAY_STONES.put(Items.MOSSY_STONE_BRICKS, index++);
         ITEMS_PICKAXE_GRAY_STONES.put(Items.CRACKED_STONE_BRICKS, index++);
         ITEMS_PICKAXE_GRAY_STONES.put(Items.STONE_BRICKS, index++);
@@ -519,6 +525,14 @@ public abstract class ItemSortingMaps {
         ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_ANDESITE_SLAB, index++);
         ITEMS_PICKAXE_GRAY_STONES.put(CustomBlockItems.POLISHED_STONE_STAIRS, index++);
         ITEMS_PICKAXE_GRAY_STONES.put(Items.POLISHED_ANDESITE_STAIRS, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_PICKAXE_ICE = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_PICKAXE_ICE.put(Items.BLUE_ICE, index++);
+        ITEMS_PICKAXE_ICE.put(Items.PACKED_ICE, index++);
+        ITEMS_PICKAXE_ICE.put(Items.ICE, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_PICKAXE_PALE_STONES = new HashMap<>();
@@ -689,29 +703,21 @@ public abstract class ItemSortingMaps {
         int index = 1;
         ITEMS_ORE_BLOCKS.put(Items.DIAMOND_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_DIAMOND_ORE, index++);
-
         ITEMS_ORE_BLOCKS.put(Items.EMERALD_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_EMERALD_ORE, index++);
-
         ITEMS_ORE_BLOCKS.put(Items.LAPIS_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_LAPIS_ORE, index++);
-
         ITEMS_ORE_BLOCKS.put(Items.GOLD_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_GOLD_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.NETHER_GOLD_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.GILDED_BLACKSTONE, index++);
-
         ITEMS_ORE_BLOCKS.put(Items.NETHER_QUARTZ_ORE, index++);
-
         ITEMS_ORE_BLOCKS.put(Items.IRON_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_IRON_ORE, index++);
-
         ITEMS_ORE_BLOCKS.put(Items.COPPER_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_COPPER_ORE, index++);
-
         ITEMS_ORE_BLOCKS.put(Items.COAL_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_COAL_ORE, index++);
-
         ITEMS_ORE_BLOCKS.put(Items.REDSTONE_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_REDSTONE_ORE, index++);
     }
@@ -721,28 +727,19 @@ public abstract class ItemSortingMaps {
         int index = 1;
         ITEMS_REFINED_MINERALS.put(Items.DIAMOND, index++);
         ITEMS_REFINED_MINERALS.put(Items.DIAMOND_BLOCK, index++);
-
         ITEMS_REFINED_MINERALS.put(Items.EMERALD, index++);
         ITEMS_REFINED_MINERALS.put(Items.EMERALD_BLOCK, index++);
-
         ITEMS_REFINED_MINERALS.put(Items.LAPIS_LAZULI, index++);
         ITEMS_REFINED_MINERALS.put(Items.LAPIS_BLOCK, index++);
         ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS, index++);
         ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS_SLAB, index++);
         ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS_STAIRS, index++);
-
         ITEMS_REFINED_MINERALS.put(Items.COAL, index++);
         ITEMS_REFINED_MINERALS.put(Items.CHARCOAL, index++);
         ITEMS_REFINED_MINERALS.put(Items.COAL_BLOCK, index++);
-
         ITEMS_REFINED_MINERALS.put(Items.AMETHYST_BLOCK, index++);
         ITEMS_REFINED_MINERALS.put(Items.AMETHYST_SHARD, index++);
         ITEMS_REFINED_MINERALS.put(Items.AMETHYST_CLUSTER, index++);
-
-        ITEMS_REFINED_MINERALS.put(Items.QUARTZ, index++);
-
-        ITEMS_REFINED_MINERALS.put(Items.GLOWSTONE_DUST, index++);
-        ITEMS_REFINED_MINERALS.put(Items.GLOWSTONE, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_AND_BLOCKS_OF_REDSTONE = new HashMap<>();
@@ -774,11 +771,9 @@ public abstract class ItemSortingMaps {
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.DEEPSLATE_IRON_ORE, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.RAW_IRON, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.RAW_IRON_BLOCK, index++);
-
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_NUGGET, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_INGOT, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_BLOCK, index++);
-
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_TRAPDOOR, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_BARS, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.CHAIN, index++);

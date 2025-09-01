@@ -53,13 +53,13 @@ public abstract class SortedItemList {
     public void giveLastSlotsTo(int count, SortedItemList other) {
         count = Math.min(count, this.size());
         for(int i = 0; i < count; i++)
-            other.addBetween(this.removeLast(), 0, this.size(), false);
+            other.addBetween(this.removeLast(), 0, other.size(), false);
     }
 
     public void giveFirstSlotsTo(int count, SortedItemList other) {
         count = Math.min(count, this.size());
         for(int i = 0; i < count; i++)
-            other.addBetween(this.removeFirst(), 0, this.size(), false);
+            other.addBetween(this.removeFirst(), 0, other.size(), false);
     }
 
 
