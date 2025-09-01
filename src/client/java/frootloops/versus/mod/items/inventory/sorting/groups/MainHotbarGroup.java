@@ -1,14 +1,17 @@
 package frootloops.versus.mod.items.inventory.sorting.groups;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 
 import java.util.LinkedList;
@@ -19,23 +22,21 @@ import static frootloops.versus.mod.items.inventory.sorting.InventorySortingHelp
 
 public class MainHotbarGroup extends SortingGroup {
 
-    ItemSlot swordSlot = null, pickaxeSlot = null, axeSlot = null, extraWeaponSlot = null, foodSlot = null, potionSlot = null, clutchItem = null, lightSlot = null, blockSlot = null;
+    ItemSlot mainWeaponSlot = null, pickaxeSlot = null, axeSlot = null, extraWeaponSlot = null, foodSlot = null, potionSlot = null, clutchItem = null, lightSlot = null, blockSlot = null;
     private boolean hasGoodPotion = false;
     private boolean hasExcellentPotion = false;
 
-    public MainHotbarGroup() {
-        super("GROUP: MAIN_HOTBAR");
-    }
+    public MainHotbarGroup() {super("GROUP: MAIN_HOTBAR");}
 
     public boolean hasAtLeastOneConsumable(){
         return (this.foodSlot != null || this.potionSlot != null || (this.clutchItem != null && this.clutchItem.itemType() == ItemType.TOTEM));
     }
 
     public boolean hasCombatItems(){
-        boolean hasAtLeastOneWeapon = (this.swordSlot != null || this.extraWeaponSlot != null || this.axeSlot != null);
+        boolean hasAtLeastOneWeapon = (this.mainWeaponSlot != null || this.extraWeaponSlot != null || this.axeSlot != null);
         if(!hasAtLeastOneWeapon) return false;
 
-        boolean hasAtLeastTwoWeapons = (this.swordSlot != null && this.extraWeaponSlot != null) || (this.axeSlot != null && this.extraWeaponSlot != null) || (this.swordSlot != null && this.axeSlot != null);
+        boolean hasAtLeastTwoWeapons = (this.mainWeaponSlot != null && this.extraWeaponSlot != null) || (this.axeSlot != null && this.extraWeaponSlot != null) || (this.mainWeaponSlot != null && this.axeSlot != null);
         return this.hasAtLeastOneConsumable() || hasAtLeastTwoWeapons;
     }
 
@@ -48,7 +49,7 @@ public class MainHotbarGroup extends SortingGroup {
     }
 
     public boolean hasAxe(){
-        return (this.pickaxeSlot != null);
+        return (this.axeSlot != null);
     }
 
     @Override
@@ -67,13 +68,22 @@ public class MainHotbarGroup extends SortingGroup {
         }
     }
 
-    @Override
     public ItemSlot tryInsertingSlot(ItemSlot slot) {
-        if(slot.stack().isIn(ItemTags.SWORDS)) {
-            if(this.swordSlot == null || ItemComparaisonHelper.shouldGoBefore(slot, swordSlot, true)) {
-                ItemSlot itemSlotToReturn = this.swordSlot;
-                this.swordSlot = slot;
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as sword" : ", replacing " + itemSlotToReturn.stack().getName().getString()));
+        return this.tryInsertingSlot(slot, false, false, false);
+    }
+
+    public ItemSlot tryInsertingSlot(ItemSlot slot, boolean isInDeepDark, boolean isInNether, boolean isInWater) {
+        if(slot.stack().isIn(ItemTags.SWORDS) || (isInDeepDark && slot.stack().isIn(ItemTags.HOES))) {
+            boolean isBetterWeapon = this.mainWeaponSlot == null || ItemComparaisonHelper.shouldGoBefore(slot, mainWeaponSlot, true);
+            if(isInDeepDark && this.mainWeaponSlot != null) {
+                boolean isInsertingHoe = slot.stack().isIn(ItemTags.HOES);
+                if(isInsertingHoe && !mainWeaponSlot.stack().isIn(ItemTags.HOES)) isBetterWeapon = true;
+                if(!isInsertingHoe && mainWeaponSlot.stack().isIn(ItemTags.HOES)) isBetterWeapon = false;
+            }
+            if(isBetterWeapon) {
+                ItemSlot itemSlotToReturn = this.mainWeaponSlot;
+                this.mainWeaponSlot = slot;
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as main weapon" : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
         }
@@ -97,7 +107,12 @@ public class MainHotbarGroup extends SortingGroup {
             Optional<RegistryEntry<Potion>> potionID = slot.stack().getComponents().get(DataComponentTypes.POTION_CONTENTS).potion();
             if(potionID.isEmpty()) return slot;
             boolean isExcellentPotion = (potionID.get() == Potions.LONG_FIRE_RESISTANCE || potionID.get() == Potions.STRONG_STRENGTH || potionID.get() == Potions.STRONG_SWIFTNESS);
-            boolean isGoodPotion = !isExcellentPotion && (potionID.get() == Potions.FIRE_RESISTANCE || potionID.get() == Potions.STRENGTH || potionID.get() == Potions.LONG_STRENGTH || potionID.get() == Potions.SWIFTNESS || potionID.get() == Potions.LONG_SWIFTNESS || potionID.get() == Potions.HEALING || potionID.get() == Potions.STRONG_HEALING || potionID.get() == Potions.REGENERATION || potionID.get() == Potions.STRONG_REGENERATION || potionID.get() == Potions.LONG_REGENERATION);
+            boolean isGoodPotion = isExcellentPotion || potionID.get() == Potions.FIRE_RESISTANCE || potionID.get() == Potions.STRENGTH || potionID.get() == Potions.LONG_STRENGTH || potionID.get() == Potions.SWIFTNESS || potionID.get() == Potions.LONG_SWIFTNESS || potionID.get() == Potions.HEALING || potionID.get() == Potions.STRONG_HEALING || potionID.get() == Potions.REGENERATION || potionID.get() == Potions.STRONG_REGENERATION || potionID.get() == Potions.LONG_REGENERATION || potionID.get() == Potions.STRONG_TURTLE_MASTER || potionID.get() == Potions.LONG_TURTLE_MASTER || potionID.get() == CustomPotions.HASTE_STRONG;
+
+            // Situational potions:
+            if(isInNether) isExcellentPotion = (potionID.get() == Potions.FIRE_RESISTANCE || potionID.get() == CustomPotions.FIRE_RESISTANCE_STRONG);
+            if(isInWater) isExcellentPotion = (potionID.get() == Potions.WATER_BREATHING || potionID.get() == Potions.LONG_WATER_BREATHING);
+
             if(this.potionSlot == null || (isExcellentPotion && !this.hasExcellentPotion) || (isGoodPotion && !this.hasGoodPotion)) {
                 ItemSlot itemSlotToReturn = this.potionSlot;
                 this.potionSlot = slot;
@@ -107,11 +122,6 @@ public class MainHotbarGroup extends SortingGroup {
                 return itemSlotToReturn;
             }
         }
-        else if(this.clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, this.clutchItem)) {
-            ItemSlot itemSlotToReturn = this.clutchItem;
-            this.clutchItem = slot;
-            return itemSlotToReturn;
-        }
         else if(slot.stack().isOf(Items.TORCH) || slot.stack().isOf(Items.SOUL_TORCH) || slot.stack().isOf(Items.LANTERN) || slot.stack().isOf(Items.SOUL_LANTERN)) {
             if(this.lightSlot == null || this.lightSlot.stack().getCount() < slot.stack().getCount()) {
                 ItemSlot itemSlotToReturn = this.lightSlot;
@@ -120,15 +130,63 @@ public class MainHotbarGroup extends SortingGroup {
                 return itemSlotToReturn;
             }
         }
+        else if(isInDeepDark) {
+            if(slot.itemType() == ItemType.SHEARS) {
+                ItemSlot itemSlotToReturn = this.clutchItem;
+                this.clutchItem = slot;
+                return itemSlotToReturn;
+            }
+            else if(slot.stack().getItem() instanceof BlockItem blockItem && blockItem.getBlock().getDefaultState().isIn(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
+                if(blockSlot == null || blockSlot.stack().getCount() <= slot.stack().getCount()) {
+                    ItemSlot itemSlotToReturn = this.blockSlot;
+                    this.blockSlot = slot;
+                    return itemSlotToReturn;
+                }
+            }
+            else if(clutchItem == null || (clutchItem.itemType() != ItemType.SHEARS && ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+                ItemSlot itemSlotToReturn = this.clutchItem;
+                this.clutchItem = slot;
+                return itemSlotToReturn;
+            }
+        }
+        else if(isInNether) {
+            if(slot.stack().isOf(Items.POWDER_SNOW_BUCKET) || slot.stack().isOf(Items.WARPED_FUNGUS_ON_A_STICK)) {
+                ItemSlot itemSlotToReturn = this.clutchItem;
+                this.clutchItem = slot;
+                return itemSlotToReturn;
+            }
+            else if(clutchItem == null || (!clutchItem.stack().isOf(Items.POWDER_SNOW_BUCKET) && !clutchItem.stack().isOf(Items.WARPED_FUNGUS_ON_A_STICK) &&  ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+                ItemSlot itemSlotToReturn = this.clutchItem;
+                this.clutchItem = slot;
+                return itemSlotToReturn;
+            }
+        }
+        else if(isInWater) {
+            if(slot.stack().isOf(Items.FILLED_MAP) || slot.stack().isOf(Items.MAGMA_BLOCK)) {
+                ItemSlot itemSlotToReturn = this.clutchItem;
+                this.clutchItem = slot;
+                return itemSlotToReturn;
+            }
+            else if(clutchItem == null || (!clutchItem.stack().isOf(Items.FILLED_MAP) && !clutchItem.stack().isOf(Items.MAGMA_BLOCK) && ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+                ItemSlot itemSlotToReturn = this.clutchItem;
+                this.clutchItem = slot;
+                return itemSlotToReturn;
+            }
+        }
+        else if(this.clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, this.clutchItem)) {
+            ItemSlot itemSlotToReturn = this.clutchItem;
+            this.clutchItem = slot;
+            return itemSlotToReturn;
+        }
         return slot;
     }
 
 
     private LinkedList<ItemSlot> takeImportantItems(int numSlotsToTake) {
         LinkedList<ItemSlot> slotsTaken = new LinkedList<>();
-        if(this.swordSlot != null && numSlotsToTake > 0) {
-            slotsTaken.add(swordSlot);
-            swordSlot = null;
+        if(this.mainWeaponSlot != null && numSlotsToTake > 0) {
+            slotsTaken.add(mainWeaponSlot);
+            mainWeaponSlot = null;
             numSlotsToTake--;
         }
         if(this.pickaxeSlot != null && numSlotsToTake > 0) {
@@ -215,11 +273,11 @@ public class MainHotbarGroup extends SortingGroup {
         boolean hasEnoughCombatItems = this.hasCombatItems();
         if(!hasEnoughCombatItems) {
             if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Hotbar: Not enough combat items!");
-            if(this.swordSlot != null) itemsToRemove.add(this.swordSlot);
+            if(this.mainWeaponSlot != null) itemsToRemove.add(this.mainWeaponSlot);
             if(this.extraWeaponSlot != null) itemsToRemove.add(this.extraWeaponSlot);
             if(this.potionSlot != null) itemsToRemove.add(this.potionSlot);
             if(this.clutchItem != null) itemsToRemove.add(this.clutchItem);
-            this.swordSlot = null;
+            this.mainWeaponSlot = null;
             this.extraWeaponSlot = null;
             this.potionSlot = null;
             this.clutchItem = null;
@@ -250,7 +308,7 @@ public class MainHotbarGroup extends SortingGroup {
     @Override
     public int size() {
         int currentSize = 0;
-        if(this.swordSlot != null) currentSize++;
+        if(this.mainWeaponSlot != null) currentSize++;
         if(this.pickaxeSlot != null) currentSize++;
         if(this.axeSlot != null) currentSize++;
         if(this.extraWeaponSlot != null) currentSize++;
@@ -266,7 +324,7 @@ public class MainHotbarGroup extends SortingGroup {
     public void clear() {
         if(this.miscItems.size() != 0) VersusMod.MOD_LOGGER.error("[ ITEM SORTING ] Hotbar " + this.GROUP_NAME + " - Still had " + this.miscItems.size() + " items left in its list when clear() was run.");
         this.miscItems.clear();
-        this.swordSlot = null;
+        this.mainWeaponSlot = null;
         this.pickaxeSlot = null;
         this.axeSlot = null;
         this.extraWeaponSlot = null;
@@ -283,8 +341,8 @@ public class MainHotbarGroup extends SortingGroup {
         String output = "\n              [ SORTED " + this.GROUP_NAME + " ] (Size: " + this.size() + ")\n";
         String hotBarOutput = "";
 
-        if(this.swordSlot != null) {
-            String name = this.swordSlot.stack().getName().getString();
+        if(this.mainWeaponSlot != null) {
+            String name = this.mainWeaponSlot.stack().getName().getString();
             hotBarOutput += name + ", ";
         }
         if(this.pickaxeSlot != null) {

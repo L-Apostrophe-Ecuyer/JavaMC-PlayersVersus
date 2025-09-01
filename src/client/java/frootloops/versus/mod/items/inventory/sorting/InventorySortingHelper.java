@@ -33,7 +33,7 @@ public class InventorySortingHelper {
     /**
      * Makes a list of rows.
      */
-    public static ItemSlot[] getOptimalInventoryRows(LinkedList<ItemSlot> inventorySlots, int numRows, boolean isPlayerInventory) {
+    public static ItemSlot[] getOptimalInventoryRows(LinkedList<ItemSlot> inventorySlots, int numRows, boolean isPlayerInventory, boolean isInDeepDark, boolean isInNether, boolean isInWater) {
 
         int numItems = inventorySlots.size();
         int numEmptySlots = numRows * 9 - numItems;
@@ -46,11 +46,11 @@ public class InventorySortingHelper {
         }
 
         // Step 1: Populate ItemSortingGroups
-        for(ItemSlot slot: inventorySlots) InventorySortingHelper.insertItemIntoGroup(slot, isPlayerInventory);
+        for(ItemSlot slot: inventorySlots) InventorySortingHelper.insertItemIntoGroup(slot, isPlayerInventory, isInDeepDark, isInNether, isInWater);
         if(isPlayerInventory) {
             InventorySortingHelper.cleanUpHotbar();
             LinkedList<ItemSlot> slotsRemovedFromHotbar = MAIN_HOTBAR.keepOnlyEssentials();
-            for (ItemSlot slot:slotsRemovedFromHotbar) insertItemIntoGroup(slot, false);
+            for (ItemSlot slot:slotsRemovedFromHotbar) insertItemIntoGroup(slot);
         }
         if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER INSERTING -----\n");
 
@@ -150,9 +150,9 @@ public class InventorySortingHelper {
      * Inserts and sorts the ItemSlot into the most appropriate group.
      * @param includeHotbar Whether or not to include the main hotbar
      */
-    public static void insertItemIntoGroup(ItemSlot newSlot, boolean includeHotbar) {
+    public static void insertItemIntoGroup(ItemSlot newSlot, boolean includeHotbar, boolean isInDeepDark, boolean isInNether, boolean isInWater) {
         if(includeHotbar) {
-            newSlot = MAIN_HOTBAR.tryInsertingSlot(newSlot);
+            newSlot = MAIN_HOTBAR.tryInsertingSlot(newSlot, isInDeepDark, isInNether, isInWater);
             if(newSlot == null) return;
         }
 
@@ -165,6 +165,18 @@ public class InventorySortingHelper {
         // Fallback: Item didn't belong to any group.
         if(newSlot != null) RANDOM_GROUP.addSlot(newSlot);
     }
+    public static void insertItemIntoGroup(ItemSlot newSlot) {
+
+        // Insert in the regular groups:
+        for (SortingGroup group : SORTING_GROUPS) {
+            newSlot = group.tryInsertingSlot(newSlot);
+            if(newSlot == null) return;
+        }
+
+        // Fallback: Item didn't belong to any group.
+        if(newSlot != null) RANDOM_GROUP.addSlot(newSlot);
+    }
+
 
 
     /** PRIVATE FUNCTIONS - INVENTORY PLACEMENT ------------------------------------------------ */

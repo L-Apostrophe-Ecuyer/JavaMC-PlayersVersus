@@ -7,9 +7,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
 
 
 import java.util.Arrays;
@@ -51,7 +55,16 @@ public class InventorySorting {
             if (!stack.isEmpty()) slots.add(new ItemSlot(i, stack, ItemComparaisonHelper.getItemTypeOf(stack)));
         }
 
-        ItemSlot[] newSlots = InventorySortingHelper.getOptimalInventoryRows(slots, numRows, isPlayerInventory);
+        // For situational hotbar item priority:
+        boolean isInDeepDark = false, isInNether = false, isInWater = false;
+        if(isPlayerInventory) {
+            RegistryEntry<Biome> playerBiome = MinecraftClient.getInstance().world.getBiome(MinecraftClient.getInstance().player.getBlockPos()); 
+            isInDeepDark = playerBiome.matchesKey(BiomeKeys.DEEP_DARK);
+            isInNether = !isInDeepDark && playerBiome.isIn(BiomeTags.IS_NETHER);
+            isInWater = !isInDeepDark && (playerBiome.isIn(BiomeTags.IS_OCEAN) || MinecraftClient.getInstance().player.isSubmergedInWater());
+        }
+
+        ItemSlot[] newSlots = InventorySortingHelper.getOptimalInventoryRows(slots, numRows, isPlayerInventory, isInDeepDark, isInNether, isInWater);
         for (int i = 0; i < totalNumSlots; i++) {
             if (newSlots[i] != null) {
                 remappedSlotIndices[i] = newSlots[i].slodId() + 9;
