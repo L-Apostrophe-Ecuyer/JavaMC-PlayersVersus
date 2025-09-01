@@ -25,6 +25,12 @@ public abstract class SortedItemList {
         return this.addBetween(slot, 0, this.size(), true);
     }
 
+    public int append(ItemSlot slot) {
+        this.slots.add(slot);
+        return slots.size();
+    }
+
+
     protected int addBetween(ItemSlot slot, int startIndex, int endIndex) {
         return this.addBetween(slot, startIndex, endIndex, true);
     }
@@ -58,8 +64,7 @@ public abstract class SortedItemList {
 
     public void giveFirstSlotsTo(int count, SortedItemList other) {
         count = Math.min(count, this.size());
-        for(int i = 0; i < count; i++)
-            other.addBetween(this.removeFirst(), 0, other.size(), false);
+        for(int i = 0; i < count; i++) other.append(this.removeFirst());
     }
 
 

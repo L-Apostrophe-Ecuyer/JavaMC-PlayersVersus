@@ -93,12 +93,14 @@ public abstract class ItemSortingMaps {
         ITEMS_BREWING_MISC.put(Items.PRISMARINE_CRYSTALS, index++);
         ITEMS_BREWING_MISC.put(Items.PRISMARINE_SHARD, index++);
         ITEMS_BREWING_MISC.put(Items.NAUTILUS_SHELL, index++);
-        ITEMS_BREWING_MISC.put(Items.TURTLE_SCUTE, index++);
         ITEMS_BREWING_MISC.put(Items.PUFFERFISH, index++);
+        ITEMS_BREWING_MISC.put(Items.TURTLE_SCUTE, index++);
+        ITEMS_BREWING_MISC.put(CustomBrewingItems.FOUR_LEAF_CLOVER, index++);
         ITEMS_BREWING_MISC.put(Items.RABBIT_FOOT, index++);
         ITEMS_BREWING_MISC.put(Items.ARMADILLO_SCUTE, index++);
-        ITEMS_BREWING_MISC.put(CustomBrewingItems.FOUR_LEAF_CLOVER, index++);
         ITEMS_BREWING_MISC.put(Items.SUGAR, index++);
+        ITEMS_BREWING_MISC.put(Items.SUGAR, index++);
+        ITEMS_BREWING_MISC.put(Items.GUNPOWDER, index++);
         ITEMS_BREWING_MISC.put(Items.GLOWSTONE_DUST, index++);
         ITEMS_BREWING_MISC.put(Items.GLOWSTONE, index++);
         ITEMS_BREWING_MISC.put(CustomBrewingItems.CORRUPTED_WART_POWDER, index++);

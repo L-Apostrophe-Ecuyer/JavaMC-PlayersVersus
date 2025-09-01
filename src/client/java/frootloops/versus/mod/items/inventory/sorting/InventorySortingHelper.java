@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 import static frootloops.versus.mod.items.inventory.sorting.groups.SortingGroups.*;
 
 public class InventorySortingHelper {
-    public static final boolean DEBUG_SORTING_GROUPS = true;
-    public static final boolean DEBUG_SORTING_MERGE = true;
-    public static final boolean DEBUG_SORTING_OUTPUT = true;
+    public static final boolean DEBUG_SORTING_GROUPS = false;
+    public static final boolean DEBUG_SORTING_MERGE = false;
+    public static final boolean DEBUG_SORTING_OUTPUT = false;
 
     private static void printGroups(String debugMsg) {
         if(MAIN_HOTBAR.size() > 0) debugMsg += MAIN_HOTBAR.toString();
