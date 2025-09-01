@@ -33,15 +33,16 @@ public class HungerManagerMixin {
 
     private static final int REGEN_TIME_SLOW = 80, REGEN_TIME_FAST = 32;
     private static final int SPRINT_RECOVERY_TIME_SLOW = 80, SPRINT_RECOVERY_TIME_FAST = 20;
-    private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 1;
-    private static final int FOOD_REQUIRED_FOR_SLOW_REGEN = -1;
+    private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 2;
+    private static final int FOOD_REQUIRED_FOR_SLOW_REGEN = 1;
     private static boolean IS_SLOW_REGEN_ENABLED = false;
 
     @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
     public void eat(FoodComponent foodComponent, CallbackInfo info) {
+        exhaustion = 0.0F;
         foodLevel = Math.max(foodLevel, 0);
         saturationLevel = Math.max(0.1F, saturationLevel);
-        foodTickTimer = Math.max(8, foodTickTimer);
+        foodTickTimer = Math.max(16, foodTickTimer);
     }
 
 
