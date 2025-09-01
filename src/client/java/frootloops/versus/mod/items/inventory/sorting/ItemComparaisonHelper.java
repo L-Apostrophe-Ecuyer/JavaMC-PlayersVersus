@@ -187,6 +187,8 @@ public abstract class ItemComparaisonHelper {
         else if(stack.getItem().getTranslationKey().endsWith("pottery_sherd")) return ItemType.POTTERY;
         else if(stack.isOf(Items.BRICK)) return ItemType.POTTERY;
         else if(stack.isOf(Items.FLOWER_POT)) return ItemType.POTTERY;
+        else if(stack.isOf(Items.DISC_FRAGMENT_5)) return ItemType.DISCS;
+        else if(stack.getOrDefault(DataComponentTypes.JUKEBOX_PLAYABLE, null) != null) return ItemType.DISCS;
         else return ItemType.MISC;
     }
 

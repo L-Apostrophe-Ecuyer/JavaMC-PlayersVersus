@@ -52,13 +52,14 @@ public class SortedItemLists {
 
 
     /** MISC - WORLD AND ARCHEOLOGY ---------------------------------------------------------   */
-    public static final SortedTypedItemList POTTERY_AND_BANNERS = new SortedTypedItemList(new ItemType[]{ItemType.POTTERY, ItemType.BANNER_PATTERNS});
     public static final SortedTypedItemList MISC_TOOLS = new SortedTypedItemList(new ItemType[]{ItemType.MISC_TOOL});
     public static final SortedBlockItemList BEDS = new SortedBlockItemList(ItemSortingMaps.ITEMS_BEDS);
-    public static final SortedBlockItemList BANNERS = new SortedBlockItemList(ItemSortingMaps.ITEMS_BANNERS);
     public static final SortedBlockItemList CANDLES = new SortedBlockItemList(ItemSortingMaps.ITEMS_CANDLES);
+    public static final SortedBlockItemList BANNERS = new SortedBlockItemList(ItemSortingMaps.ITEMS_BANNERS);
+    public static final SortedTypedItemList POTTERY_AND_BANNERS = new SortedTypedItemList(new ItemType[]{ItemType.POTTERY, ItemType.BANNER_PATTERNS});
+    public static final SortedTypedItemList DISCS = new SortedTypedItemList(new ItemType[]{ItemType.DISCS});
 
-    public static final SortedItemList[] MISC_EXPLORATION = {MISC_TOOLS, POTTERY_AND_BANNERS, BANNERS, BEDS, CANDLES};
+    public static final SortedItemList[] MISC_EXPLORATION = {MISC_TOOLS, BEDS, CANDLES, BANNERS, POTTERY_AND_BANNERS, DISCS};
 
 
     /** MISC - ANYTHING ELSE ---------------------------------------------------------   */
