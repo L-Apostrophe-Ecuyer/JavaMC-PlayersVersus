@@ -2,11 +2,9 @@ package frootloops.versus.mod.items.inventory;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
-import frootloops.versus.mod.items.inventory.sorting.SortedInventoryOutput;
 import frootloops.versus.mod.items.inventory.sorting.InventorySortingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
 import net.minecraft.screen.ScreenHandler;
@@ -19,7 +17,7 @@ import java.util.LinkedList;
 
 public class InventorySorting {
 
-    private static final boolean DEBUG_MODE = false;
+    private static final boolean DEBUG_ITEM_SWITICHING = true;
 
     public static final ButtonTextures TEXTURE_HOTBAR_SWAP_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/hotbar_swap_down"), Identifier.of("players-versus", "container/hotbar_swap_down_highlighted"));
     public static final ButtonTextures TEXTURE_INVENTORY_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory"), Identifier.of("players-versus", "container/sort_inventory_highlighted"));
@@ -64,13 +62,13 @@ public class InventorySorting {
 
     private static void sortInventory(ScreenHandler handler, MinecraftClient client, Inventory inventory, int startingSlotIndex, int totalNumSlots, InventoryToSort inventoryToSort) {
 
-        if (DEBUG_MODE)
+        if (DEBUG_ITEM_SWITICHING)
             VersusMod.MOD_LOGGER.warn("Started sorting! 8==============================================================================================D");
         int numRows = totalNumSlots / 9;
         if (totalNumSlots < 2) return;
         int[] remappedSlots = getRemappedSlotIndices(inventory, numRows, totalNumSlots, inventoryToSort != InventoryToSort.CONTAINER_INVENTORY);
 
-        if (DEBUG_MODE) {
+        if (DEBUG_ITEM_SWITICHING) {
             VersusMod.MOD_LOGGER.warn("");
             VersusMod.MOD_LOGGER.warn("     Planned: ");
 
@@ -101,8 +99,8 @@ public class InventorySorting {
         }
 
         // Sort the player's inventory accordingly!
-        if (DEBUG_MODE) VersusMod.MOD_LOGGER.warn("");
-        if (DEBUG_MODE) VersusMod.MOD_LOGGER.warn("Now actually modifying the player's inventory:");
+        if (DEBUG_ITEM_SWITICHING) VersusMod.MOD_LOGGER.warn("");
+        if (DEBUG_ITEM_SWITICHING) VersusMod.MOD_LOGGER.warn("Now actually modifying the player's inventory:");
         int[] displacedSlots = new int[totalNumSlots];
         int slotOrigin = -1, prevOrigin = -1, slotDestination = -1;
         for (int i = 0; i < totalNumSlots; i++) {
@@ -142,7 +140,7 @@ public class InventorySorting {
             if (slotDestination != slotOrigin && isMovingItemsAround) {
                 displacedSlots[slotDestination] = slotOrigin + 9;
 
-                if (DEBUG_MODE) {
+                if (DEBUG_ITEM_SWITICHING) {
                     if (prevOrigin == -1)
                         VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with empty slot " + slotOrigin + ((prevOrigin != slotOrigin) ? " (in array, slot was " + (remappedSlots[slotDestination] - 9) + ")" : "") + (!inventory.getStack(slotDestination).isEmpty() ? " -  (displacedSlots[" + slotDestination + "] = " + (slotOrigin) + " + 9)" : ""));
                     else if (prevOrigin != slotOrigin)

@@ -25,10 +25,7 @@ public class SimpleSortingGroup extends SortingGroup {
             if (sortedList.trySortedInsert(slot) != -1) {
                 this.numItems++;
                 if(DEBUG_SORTING_GROUPS) {
-                    VersusMod.MOD_LOGGER.warn("                   -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "");
-                    if(this.debugCalculateActualSize() != this.size()) {
-                        VersusMod.MOD_LOGGER.error("                                     List: " + sortedList);
-                    }
+                    VersusMod.MOD_LOGGER.warn("                   -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s list: " + sortedList);
                 }
                 return null; // Inserted!
             }

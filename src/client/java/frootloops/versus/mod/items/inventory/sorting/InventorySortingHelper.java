@@ -1,8 +1,10 @@
 package frootloops.versus.mod.items.inventory.sorting;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.items.inventory.InventorySorting;
 import frootloops.versus.mod.items.inventory.sorting.groups.SortingGroup;
 import frootloops.versus.mod.items.inventory.sorting.groups.ToolSortingGroup;
+import frootloops.versus.mod.items.inventory.sorting.lists.SortedItemLists;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -12,9 +14,9 @@ import java.util.stream.Collectors;
 import static frootloops.versus.mod.items.inventory.sorting.groups.SortingGroups.*;
 
 public class InventorySortingHelper {
-    public static final boolean DEBUG_SORTING_GROUPS = false;
-    public static final boolean DEBUG_SORTING_MERGE = false;
-    public static final boolean DEBUG_SORTING_OUTPUT = false;
+    public static final boolean DEBUG_SORTING_GROUPS = true;
+    public static final boolean DEBUG_SORTING_MERGE = true;
+    public static final boolean DEBUG_SORTING_OUTPUT = true;
 
     private static void printGroups(String debugMsg) {
         if(MAIN_HOTBAR.size() > 0) debugMsg += MAIN_HOTBAR.toString();
@@ -230,12 +232,15 @@ public class InventorySortingHelper {
         // Step 1: Clean up groups and merge them:
         if (isPlayerInventory) {
             if (MAIN_HOTBAR.size() > 0) cleanUpHotbar();
+            if (REDSTONE_GROUP.size() > 0 && SortedItemLists.REDSTONE_RAW.size() > 0) REDSTONE_GROUP.addSlots(SortedItemLists.REDSTONE_RAW.takeAll());
+            if (GOODIES_GROUP.size() > 0 && MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(GOODIES_GROUP, MINERALS_GROUP);
             cleanUpToolGroup(SHEARS_GROUP, HOE_GROUP);
             cleanUpToolGroup(HOE_GROUP, SHEARS_GROUP, SHOVEL_GROUP);
             cleanUpToolGroup(SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP);
             cleanUpToolGroup(PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, CONSUMABLES_GROUP);
             cleanUpToolGroup(AXE_GROUP, PICKAXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(PICKAXE_GROUP, REDSTONE_GROUP);
+            giveExtraToolsFromAndTo(PICKAXE_GROUP, MINERALS_GROUP);
             giveExtraToolsFromAndTo(COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(AXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(SHOVEL_GROUP, PICKAXE_GROUP);
@@ -271,7 +276,7 @@ public class InventorySortingHelper {
 
     public static void cleanUpHotbar() {
         int size = MAIN_HOTBAR.size();
-        if(size == 9 || size == 0) return;
+        if(size == 9) return;
         if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] ---- CLEANING HOTBAR -----");
 
         // Try adding combat items to hotbar:

@@ -72,6 +72,11 @@ public abstract class ItemSortingMaps {
         ITEMS_TREASURE.put(Items.OMINOUS_TRIAL_KEY, index++);
         ITEMS_TREASURE.put(Items.TRIAL_KEY, index++);
         ITEMS_TREASURE.put(Items.NETHER_STAR, index++);
+        ITEMS_TREASURE.put(Items.BEACON, index++);
+        ITEMS_TREASURE.put(Items.ANCIENT_DEBRIS, index++);
+        ITEMS_TREASURE.put(Items.NETHERITE_SCRAP, index++);
+        ITEMS_TREASURE.put(Items.NETHERITE_INGOT, index++);
+        ITEMS_TREASURE.put(Items.NETHERITE_BLOCK, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_MONSTER_DROPS = new HashMap<>();
@@ -495,118 +500,171 @@ public abstract class ItemSortingMaps {
         ITEMS_SHOVEL_MINEABLE.put(Items.SNOW, index++);
     }
 
-    public static final Map<Item, Integer> ITEMS_COPPER_BLOCKS = new HashMap<>();
+
+    public static final Map<Item, Integer> ITEMS_ORE_BLOCKS = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_CUT_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_CUT_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_CUT_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_CUT_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_COPPER_BLOCK, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_CUT_COPPER_SLAB, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_CUT_COPPER_SLAB, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_CUT_COPPER_SLAB, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_CUT_COPPER_SLAB, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_CUT_COPPER_STAIRS, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_CUT_COPPER_STAIRS, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_CUT_COPPER_STAIRS, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_CUT_COPPER_STAIRS, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_COPPER_TRAPDOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_COPPER_TRAPDOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_COPPER_TRAPDOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_COPPER_TRAPDOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_COPPER_DOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_COPPER_DOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_COPPER_DOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_COPPER_DOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_COPPER_GRATE, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_EXPOSED_COPPER_GRATE, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_WEATHERED_COPPER_GRATE, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WAXED_OXIDIZED_COPPER_GRATE, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.CUT_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_CUT_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_CUT_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_CUT_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.COPPER_BLOCK, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_COPPER, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.CUT_COPPER_SLAB, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_CUT_COPPER_SLAB, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_CUT_COPPER_SLAB, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_CUT_COPPER_SLAB, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.CUT_COPPER_STAIRS, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_CUT_COPPER_STAIRS, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_CUT_COPPER_STAIRS, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_CUT_COPPER_STAIRS, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.COPPER_TRAPDOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_COPPER_TRAPDOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_COPPER_TRAPDOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_COPPER_TRAPDOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.COPPER_DOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_COPPER_DOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_COPPER_DOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_COPPER_DOOR, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.COPPER_GRATE, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.EXPOSED_COPPER_GRATE, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.WEATHERED_COPPER_GRATE, index++);
-        ITEMS_COPPER_BLOCKS.put(Items.OXIDIZED_COPPER_GRATE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DIAMOND_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_DIAMOND_ORE, index++);
+
+        ITEMS_ORE_BLOCKS.put(Items.EMERALD_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_EMERALD_ORE, index++);
+
+        ITEMS_ORE_BLOCKS.put(Items.LAPIS_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_LAPIS_ORE, index++);
+
+        ITEMS_ORE_BLOCKS.put(Items.GOLD_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_GOLD_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.NETHER_GOLD_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.GILDED_BLACKSTONE, index++);
+
+        ITEMS_ORE_BLOCKS.put(Items.IRON_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_IRON_ORE, index++);
+
+        ITEMS_ORE_BLOCKS.put(Items.COPPER_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_COPPER_ORE, index++);
+
+        ITEMS_ORE_BLOCKS.put(Items.COAL_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_COAL_ORE, index++);
+
+        ITEMS_ORE_BLOCKS.put(Items.REDSTONE_ORE, index++);
+        ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_REDSTONE_ORE, index++);
     }
 
-    public static final Map<Item, Integer> ITEMS_MINERAL_RESSOURCES = new HashMap<>();
+    public static final Map<Item, Integer> ITEMS_REFINED_MINERALS = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_MINERAL_RESSOURCES.put(Items.BEACON, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.ANCIENT_DEBRIS, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.NETHERITE_SCRAP, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.NETHERITE_INGOT, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.NETHERITE_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.GOLD_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.GOLD_INGOT, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.GOLD_NUGGET, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_GOLD_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_GOLD, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.GOLD_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_GOLD_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.NETHER_GOLD_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.IRON_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.IRON_INGOT, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.IRON_NUGGET, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_IRON_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_IRON, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.IRON_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_IRON_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.EMERALD_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.EMERALD, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.EMERALD_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_EMERALD_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DIAMOND_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DIAMOND, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DIAMOND_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_DIAMOND_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(CustomBlockItems.CUT_LAPIS, index++);
-        ITEMS_MINERAL_RESSOURCES.put(CustomBlockItems.CUT_LAPIS_SLAB, index++);
-        ITEMS_MINERAL_RESSOURCES.put(CustomBlockItems.CUT_LAPIS_STAIRS, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_LAZULI, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.LAPIS_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_LAPIS_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.COPPER_INGOT, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_COPPER_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.RAW_COPPER, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.COPPER_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_COPPER_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.CHARCOAL, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.COAL, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.COAL_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.DEEPSLATE_COAL_ORE, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.AMETHYST_BLOCK, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.AMETHYST_SHARD, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.AMETHYST_CLUSTER, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.GLOWSTONE_DUST, index++);
-        ITEMS_MINERAL_RESSOURCES.put(Items.GLOWSTONE, index++);
+        ITEMS_REFINED_MINERALS.put(Items.DIAMOND, index++);
+        ITEMS_REFINED_MINERALS.put(Items.DIAMOND_BLOCK, index++);
+
+        ITEMS_REFINED_MINERALS.put(Items.EMERALD, index++);
+        ITEMS_REFINED_MINERALS.put(Items.EMERALD_BLOCK, index++);
+
+        ITEMS_REFINED_MINERALS.put(Items.LAPIS_LAZULI, index++);
+        ITEMS_REFINED_MINERALS.put(Items.LAPIS_BLOCK, index++);
+        ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS, index++);
+        ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS_SLAB, index++);
+        ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS_STAIRS, index++);
+
+        ITEMS_REFINED_MINERALS.put(Items.COAL, index++);
+        ITEMS_REFINED_MINERALS.put(Items.CHARCOAL, index++);
+        ITEMS_REFINED_MINERALS.put(Items.COAL_BLOCK, index++);
+
+        ITEMS_REFINED_MINERALS.put(Items.AMETHYST_BLOCK, index++);
+        ITEMS_REFINED_MINERALS.put(Items.AMETHYST_SHARD, index++);
+        ITEMS_REFINED_MINERALS.put(Items.AMETHYST_CLUSTER, index++);
+
+        ITEMS_REFINED_MINERALS.put(Items.GLOWSTONE_DUST, index++);
+        ITEMS_REFINED_MINERALS.put(Items.GLOWSTONE, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_AND_BLOCKS_OF_REDSTONE = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_AND_BLOCKS_OF_REDSTONE.put(Items.REDSTONE, index++);
+        ITEMS_AND_BLOCKS_OF_REDSTONE.put(Items.REDSTONE_BLOCK, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_AND_BLOCKS_OF_GOLD = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GOLD_ORE, index++);
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.DEEPSLATE_GOLD_ORE, index++);
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.NETHER_GOLD_ORE, index++);
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GILDED_BLACKSTONE, index++);
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.RAW_GOLD, index++);
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.RAW_GOLD_BLOCK, index++);
+
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GOLD_NUGGET, index++);
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GOLD_INGOT, index++);
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GOLD_BLOCK, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_AND_BLOCKS_OF_IRON = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_ORE, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.DEEPSLATE_IRON_ORE, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.RAW_IRON, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.RAW_IRON_BLOCK, index++);
+
+        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.IRON_NUGGET, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_INGOT, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_BLOCK, index++);
+
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_BARS, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.CHAIN, index++);
+    }
+
+
+    public static final Map<Item, Integer> ITEMS_AND_BLOCKS_OF_COPPER = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_ORE, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.DEEPSLATE_COPPER_ORE, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.RAW_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.RAW_COPPER_BLOCK, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_INGOT, index++);
+
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BLOCK, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WEATHERED_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.OXIDIZED_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_COPPER_BLOCK, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_COPPER, index++);
+
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.CUT_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_CUT_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WEATHERED_CUT_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.OXIDIZED_CUT_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_CUT_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_CUT_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_CUT_COPPER, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_CUT_COPPER, index++);
+
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.CUT_COPPER_SLAB, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_CUT_COPPER_SLAB, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WEATHERED_CUT_COPPER_SLAB, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.OXIDIZED_CUT_COPPER_SLAB, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.CUT_COPPER_STAIRS, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_CUT_COPPER_STAIRS, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WEATHERED_CUT_COPPER_STAIRS, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.OXIDIZED_CUT_COPPER_STAIRS, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_COPPER_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WEATHERED_COPPER_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.OXIDIZED_COPPER_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_DOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_COPPER_DOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WEATHERED_COPPER_DOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.OXIDIZED_COPPER_DOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_GRATE, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_COPPER_GRATE, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WEATHERED_COPPER_GRATE, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.OXIDIZED_COPPER_GRATE, index++);
+
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_CUT_COPPER_SLAB, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_CUT_COPPER_SLAB, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_CUT_COPPER_SLAB, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_CUT_COPPER_SLAB, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_CUT_COPPER_STAIRS, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_CUT_COPPER_STAIRS, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_CUT_COPPER_STAIRS, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_CUT_COPPER_STAIRS, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_COPPER_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_COPPER_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_COPPER_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_COPPER_TRAPDOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_COPPER_DOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_COPPER_DOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_COPPER_DOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_COPPER_DOOR, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_COPPER_GRATE, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_COPPER_GRATE, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_COPPER_GRATE, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_COPPER_GRATE, index++);
     }
 }

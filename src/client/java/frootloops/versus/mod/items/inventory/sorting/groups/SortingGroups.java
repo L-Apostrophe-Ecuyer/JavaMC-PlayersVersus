@@ -19,7 +19,8 @@ public abstract class SortingGroups {
     public static final ToolSortingGroup COMBAT_GROUP = new ToolSortingGroup(SortedItemLists.WEAPONS, SortedItemLists.COMBAT_ITEMS, "GROUP: COMBAT");
     public static final SimpleSortingGroup REDSTONE_GROUP = new SimpleSortingGroup(SortedItemLists.REDSTONE_ITEMS, "GROUP: REDSTONE");
     public static final SimpleSortingGroup GOODIES_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_GOODIES, "GROUP: GOODIES");
+    public static final SimpleSortingGroup MINERALS_GROUP = new SimpleSortingGroup(SortedItemLists.MINERAL_RESSOURCE_ITEMS, "GROUP: MINERALS");
     public static final SimpleSortingGroup RANDOM_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_OTHER, "GROUP: MISC OTHER");
 
-    public static final SortingGroup[] SORTING_GROUPS = {COMBAT_GROUP, CONSUMABLES_GROUP, PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, REDSTONE_GROUP, GOODIES_GROUP, HOE_GROUP, SHEARS_GROUP, RANDOM_GROUP};
+    public static final SortingGroup[] SORTING_GROUPS = {COMBAT_GROUP, CONSUMABLES_GROUP, GOODIES_GROUP, MINERALS_GROUP, REDSTONE_GROUP, PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP, RANDOM_GROUP};
 }
