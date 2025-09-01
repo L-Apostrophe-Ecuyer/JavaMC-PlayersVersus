@@ -78,6 +78,7 @@ public abstract class ItemComparaisonHelper {
 
         // Blocks comparaison:
         else if(slot.isBlock() && slot.stack().getItem() instanceof BlockItem blockItem && slot.stack().getItem() instanceof BlockItem otherBlockItem) {
+            if(skipBlocks) return false;
             if(blockItem.getBlock().getDefaultState().isIn(BlockTags.AXE_MINEABLE) && blockItem.getBlock().getHardness() >= 1.0f) {
                 if(otherBlockItem.getBlock().getDefaultState().isIn(BlockTags.AXE_MINEABLE) && otherBlockItem.getBlock().getHardness() >= 1.0f) {
                     return slot.toString().compareTo(slotToCompareTo.toString()) < 1;
@@ -97,7 +98,6 @@ public abstract class ItemComparaisonHelper {
                 else return true;
             }
             if(otherBlockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) return false;
-            if(skipBlocks) return false;
             return (blockItem.getBlock().getHardness() <= otherBlockItem.getBlock().getHardness());
         }
 

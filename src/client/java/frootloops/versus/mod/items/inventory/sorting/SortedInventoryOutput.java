@@ -12,7 +12,7 @@ public class SortedInventoryOutput {
     private LinkedList<ItemSlot> slotsToAdd;
     private final int numRows, numEmptySlots;
     private final boolean isPlayerInventory;
-    private int numSlotsSkipped = 0, currentCol = 0, currentRow = 0;
+    private int numSlotsSkipped = 0, currentCol = 0, currentRow = 0, currentGroupColStart;
 
     public SortedInventoryOutput(int numRows, int numEmptySlots, boolean isPlayerInventory) {
         this.numRows = numRows;
@@ -44,6 +44,7 @@ public class SortedInventoryOutput {
         else if(isNewGroup) this.tryMovingToNextRow(isNewGroup);
 
         // Insert items:
+        currentGroupColStart = currentCol;
         int numItemsToAdd = slotsToAdd.size();
         for(int i = 0; i < numItemsToAdd; i++) {
             if(!this.moveToNextAvailableSlot()) {
@@ -113,6 +114,7 @@ public class SortedInventoryOutput {
         this.numSlotsSkipped += 9 - (this.currentCol + 1);
         this.currentRow++;
         this.currentCol = 0;
+        this.currentGroupColStart = 0;
         return true;
     }
 
@@ -147,7 +149,8 @@ public class SortedInventoryOutput {
             if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this tool: " + slot);
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
-                boolean shouldSwapPositions = slot != null && (other == null || (isPlayerInventory || !slot.hasSameType(other, false)) && ItemComparaisonHelper.shouldGoBefore(slot, other));
+                boolean isOtherItemInSameGroup = i <= this.currentGroupColStart;
+                boolean shouldSwapPositions = slot != null && (other == null || (isPlayerInventory || !slot.hasSameType(other, false)) && ItemComparaisonHelper.shouldGoBefore(slot, other, !isOtherItemInSameGroup));
                 if(shouldSwapPositions) {
                     invSlots[row * 9 + i] = slot;
                     slot = other;
