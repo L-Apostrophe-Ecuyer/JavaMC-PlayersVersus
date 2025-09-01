@@ -90,15 +90,19 @@ public class ToolSortingGroup extends SimpleSortingGroup {
 
     private LinkedList<ItemSlot> mergeAndTakeAllItems(boolean includeTools) {
         LinkedList<ItemSlot> items = new LinkedList<>();
-        if(includeTools) items.addAll(this.takeAllTools());
+        if(this.size() == 0) {
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Returned nothing, thought it had size zero.");
+            if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
+            return items;
+        }
 
-        if(this.size() == 0 && DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Returned nothing, thought it had size zero.");
-        if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
-        if(this.size() == 0) return items;
+        if(includeTools && numTools > 0) {
+            items.addAll(this.takeAllTools());
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + items.size() + " tools: " + items);
+        }
 
         for(int i = 1; i < sortedItemLists.length; i++) sortedItemLists[i].giveFirstSlotsTo(Integer.MAX_VALUE, sortedItemLists[0]);
         if(this.miscItems.size() > 0) miscItems.giveFirstSlotsTo(Integer.MAX_VALUE, sortedItemLists[0]);
-
         if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + sortedItemLists[0].size() + " items: " + sortedItemLists[0]);
         this.numItems = 0;
         items.addAll(sortedItemLists[0].takeAll());

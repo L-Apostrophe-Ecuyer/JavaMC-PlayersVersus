@@ -49,22 +49,57 @@ public class MainHotbarGroup extends SortingGroup {
     }
 
     public boolean hasAxe(){
-        return (this.axeSlot != null);
+        return (this.axeSlot != null && axeSlot.itemType() == ItemType.AXE);
     }
 
     @Override
     public void addSlot(ItemSlot slot) {
         slot = tryInsertingSlot(slot);
         if(slot != null) {
-            if(slot.stack().isIn(ItemTags.PICKAXES)) {
-                if(this.pickaxeSlot == null) this.pickaxeSlot = slot;
-                else this.miscItems.add(slot);
+            if(slot.itemType() == ItemType.PICKAXE) {
+                if(this.pickaxeSlot == null) {
+                    this.pickaxeSlot = slot;
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as pickaxe");
+                }
+                else {
+                    this.miscItems.add(slot);
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting pickaxe " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items");
+                }
             }
-            else if(slot.stack().isIn(ItemTags.AXES)) {
-                if(this.axeSlot == null) this.axeSlot = slot;
-                else this.miscItems.add(slot);
+            else if(slot.itemType() == ItemType.AXE) {
+                if(this.axeSlot == null) {
+                    this.axeSlot = slot;
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as axe");
+                }
+                else if(this.extraWeaponSlot == null) {
+                    this.extraWeaponSlot = slot;
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as special weapon");
+                }
+                else {
+                    this.miscItems.add(slot);
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting axe " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items");
+                }
             }
-            else  this.miscItems.add(slot);
+            else if(slot.isBlock()) {
+                if(this.blockSlot == null) {
+                    this.blockSlot = slot;
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as block");
+                }
+                else if(blockSlot.stack().isIn(ItemTags.WOOL) || ItemComparaisonHelper.shouldGoBefore(blockSlot, slot)) {
+                    this.miscItems.add(slot);
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting block " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items (current block is " + blockSlot.stack().getName().getString() + ")");
+                }
+                else {
+                    ItemSlot oldBlockSlot = blockSlot;
+                    this.blockSlot = slot;
+                    this.miscItems.add(oldBlockSlot);
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting block " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as block (replacing " + oldBlockSlot.stack().getName().getString() + ")");
+                }
+            }
+            else {
+                this.miscItems.add(slot);
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items");
+            }
         }
     }
 
@@ -343,39 +378,39 @@ public class MainHotbarGroup extends SortingGroup {
 
         if(this.mainWeaponSlot != null) {
             String name = this.mainWeaponSlot.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Weapon), ";
         }
         if(this.pickaxeSlot != null) {
             String name = this.pickaxeSlot.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Pick), ";
         }
         if(this.axeSlot != null) {
             String name = this.axeSlot.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Axe), ";
         }
         if(this.extraWeaponSlot != null) {
             String name = this.extraWeaponSlot.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Special), ";
         }
         if(this.foodSlot != null) {
             String name = this.foodSlot.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Food), ";
         }
         if(this.potionSlot != null) {
             String name = this.potionSlot.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Potion), ";
         }
         if(this.clutchItem != null) {
             String name = this.clutchItem.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Clutch), ";
         }
         if(this.lightSlot != null) {
             String name = this.lightSlot.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Light), ";
         }
         if(this.blockSlot != null) {
             String name = this.blockSlot.stack().getName().getString();
-            hotBarOutput += name + ", ";
+            hotBarOutput += name + " (Block), ";
         }
         if(hotBarOutput.length() > 0) output += "              Hotbar List : " + hotBarOutput + "\n";
         if(this.miscItems.size() > 0) output += "              Other Items List: " + this.miscItems.toString() + "\n";

@@ -149,8 +149,9 @@ public class SortedInventoryOutput {
             if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this tool: " + slot);
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
-                boolean isOtherItemInSameGroup = i <= this.currentGroupColStart;
-                boolean shouldSwapPositions = slot != null && (other == null || (isPlayerInventory || !slot.hasSameType(other, false)) && ItemComparaisonHelper.shouldGoBefore(slot, other, !isOtherItemInSameGroup));
+                boolean isOtherItemInSameGroup = i >= this.currentGroupColStart;
+                boolean shouldSwapPositions = slot != null && (other == null || (!slot.hasSameType(other, false) && ItemComparaisonHelper.shouldGoBefore(slot, other, !isOtherItemInSameGroup)));
+
                 if(shouldSwapPositions) {
                     invSlots[row * 9 + i] = slot;
                     slot = other;

@@ -1,6 +1,10 @@
 package frootloops.versus.mod.items.inventory.sorting;
 
+import frootloops.versus.VersusMod;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+
+import static frootloops.versus.mod.items.inventory.sorting.InventorySortingHelper.DEBUG_SORTING_GROUPS;
 
 public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
@@ -25,7 +29,7 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
         return this.itemType == ItemType.CHESTPLATE || this.itemType == ItemType.LEGGINGS || this.itemType == ItemType.BOOTS || this.itemType == ItemType.HELMET;
     }
     public boolean isBlock() {
-        return this.itemType.compareTo(ItemType.BLOCK_FULL) < 1 && this.itemType.compareTo(ItemType.BLOCK_OTHER) >= 0;
+        return this.itemType.compareTo(ItemType.BLOCK_FULL) >= 0 && this.itemType.compareTo(ItemType.BLOCK_OTHER) <= 0;
     }
 
     public boolean isFood() {

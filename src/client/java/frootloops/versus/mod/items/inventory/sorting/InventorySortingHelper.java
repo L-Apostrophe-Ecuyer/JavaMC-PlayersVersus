@@ -47,12 +47,14 @@ public class InventorySortingHelper {
 
         // Step 1: Populate ItemSortingGroups
         for(ItemSlot slot: inventorySlots) InventorySortingHelper.insertItemIntoGroup(slot, isPlayerInventory, isInDeepDark, isInNether, isInWater);
+        if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER INSERTING -----\n");
+
         if(isPlayerInventory) {
             InventorySortingHelper.cleanUpHotbar();
             LinkedList<ItemSlot> slotsRemovedFromHotbar = MAIN_HOTBAR.keepOnlyEssentials();
             for (ItemSlot slot:slotsRemovedFromHotbar) insertItemIntoGroup(slot);
+            if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER HOTBAR CLEAN UP -----\n");
         }
-        if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER INSERTING -----\n");
 
         // Step 2: Try forming rows withing a group, and combining similar groups
         InventorySortingHelper.cleanUpGroups(isPlayerInventory);
@@ -195,10 +197,13 @@ public class InventorySortingHelper {
         int numRowsIdeal = Math.min(numRows, 1 + ((numRows * 9) - numEmptySlots)/9);
 
         // Check trivial case:
-        if(nonEmptyGroups.size() <= numRowsIdeal) return nonEmptyGroups.reversed();
         if(DEBUG_SORTING_MERGE) {
             String output = nonEmptyGroups.stream().map(g -> g.GROUP_NAME + " (Size: " + g.size() + ")").collect(Collectors.joining(", "));
-            VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] Ordered list of groups: " + output);
+            VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] Ideal number of rows is: " + numRowsIdeal + ". Mon-empty groups: " + output);
+        }
+        if(nonEmptyGroups.size() <= numRowsIdeal) {
+            if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                      Returning!");
+            return nonEmptyGroups.reversed();
         }
 
         // Step 3: Loop over each group. Try to find combinations of group sizes such that they both fit together
@@ -207,14 +212,14 @@ public class InventorySortingHelper {
 
             // Pop the next group:
             SortingGroup groupToPlace = nonEmptyGroups.removeFirst();
-            orderedGroups.add(0, groupToPlace);
+            orderedGroups.add(groupToPlace);
             if(groupToPlace.size() > 9) numRows--;
             if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                   -> Next group to place: " + groupToPlace.GROUP_NAME + " of size " + groupToPlace.size() + " - (" + numRows + " rows and " + numEmptySlots + " left)");
 
             // Look for complimentary group. If the next one fits, combine!  (Note: nonEmptyGroups is sorted in asc order)
             while(nonEmptyGroups.size() > 0 && groupToPlace.size() < 9) {
                 SortingGroup otherGroup = nonEmptyGroups.getFirst();
-                if(groupToPlace.size() % 9 + otherGroup.size() <= 9) {
+                if((groupToPlace.size() % 9) + otherGroup.size() <= 9) {
                     nonEmptyGroups.removeFirst();
                     groupToPlace.addSlots(otherGroup.takeAllItems());
                 }
@@ -228,7 +233,15 @@ public class InventorySortingHelper {
             numEmptySlots -= 9 - groupToPlace.size();
             numRows--;
         }
-        orderedGroups.addAll(0, nonEmptyGroups);
+        orderedGroups.addAll(0, nonEmptyGroups.reversed());
+        if (MAIN_HOTBAR.size() > 0 && orderedGroups.getFirst() != MAIN_HOTBAR) {
+            orderedGroups.remove(MAIN_HOTBAR);
+            orderedGroups.addFirst(MAIN_HOTBAR);
+        }
+        if(DEBUG_SORTING_MERGE) {
+            String output = orderedGroups.stream().map(g -> g.GROUP_NAME + " (Size: " + g.size() + ")").collect(Collectors.joining(", "));
+            VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] Final ordered list of non-empty groups: " + output);
+        }
         return orderedGroups;
     }
 
@@ -264,14 +277,14 @@ public class InventorySortingHelper {
         }
         cleanUpMisc();
 
-        // Step 2: Try merging groups' lists into rows, if possible"
+        // Step 2: Try merging groups' lists into rows, if possible
         for (SortingGroup group : SORTING_GROUPS) group.tryFormingRows();
     }
 
     private static boolean tryCombiningTwoGroups(SortingGroup groupThatReceives, SortingGroup groupThatGives) {
         int sizeBottom = groupThatReceives.size() % 9;
         int sizeTop = groupThatGives.size();
-        if(sizeTop + sizeBottom <= 9 && sizeTop < 9) {
+        if(sizeTop + sizeBottom == 9) {
             groupThatReceives.addSlots(groupThatGives.takeAllItems());
             return true;
         }
@@ -301,30 +314,32 @@ public class InventorySortingHelper {
         if(tryCombiningTwoGroups(MAIN_HOTBAR, CONSUMABLES_GROUP)) if(MAIN_HOTBAR.size() >= 9) return;
         if(tryCombiningTwoGroups(MAIN_HOTBAR, COMBAT_GROUP)) if(MAIN_HOTBAR.size() >= 9) return;
         if(MAIN_HOTBAR.size() < 9 && MAIN_HOTBAR.hasCombatItems()) {
-            if(MAIN_HOTBAR.size() + COMBAT_GROUP.getNumTools() <= 9) MAIN_HOTBAR.addSlots(COMBAT_GROUP.takeAllTools());
-            if(MAIN_HOTBAR.size() + CONSUMABLES_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(CONSUMABLES_GROUP.takeAllItems());
+            if(COMBAT_GROUP.getNumTools() > 0 && MAIN_HOTBAR.size() + COMBAT_GROUP.getNumTools() <= 9) MAIN_HOTBAR.addSlots(COMBAT_GROUP.takeAllTools());
+            if(CONSUMABLES_GROUP.size() > 0 && MAIN_HOTBAR.size() + CONSUMABLES_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(CONSUMABLES_GROUP.takeAllItems());
         }
         if(MAIN_HOTBAR.size() >= 9) return;
 
         // If still space, try smartly adding tools and blocks to hotbar:
         if(!MAIN_HOTBAR.hasBuildingItems()) {
-            if(MAIN_HOTBAR.size() + AXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(AXE_GROUP.takeAllItems());
+            if(AXE_GROUP.size() > 0 && MAIN_HOTBAR.size() + AXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(AXE_GROUP.takeAllItems());
             else if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools()) {
                 giveExtraToolsFromAndTo(AXE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
-                if(MAIN_HOTBAR.size() >= 9) return;
             }
+            if(MAIN_HOTBAR.size() >= 9) return;
+
             if(MAIN_HOTBAR.size() + PICKAXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(PICKAXE_GROUP.takeAllItems());
             else if(!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.canGiveawayTools()) {
                 giveExtraToolsFromAndTo(PICKAXE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
-                if(MAIN_HOTBAR.size() >= 9) return;
             }
-            if(!MAIN_HOTBAR.hasBuildingItems() && SHOVEL_GROUP.getNumTools() > 0) {
+            if(MAIN_HOTBAR.size() >= 9) return;
+
+            if(MAIN_HOTBAR.size() < 9 && !MAIN_HOTBAR.hasBuildingItems() && SHOVEL_GROUP.getNumTools() > 0) {
                 giveExtraToolsFromAndTo(SHOVEL_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, SHOVEL_GROUP)) return;
-                if(MAIN_HOTBAR.size() >= 9) return;
             }
+            if(MAIN_HOTBAR.size() >= 9) return;
         }
         else {
             if(MAIN_HOTBAR.hasPickaxe() && tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
