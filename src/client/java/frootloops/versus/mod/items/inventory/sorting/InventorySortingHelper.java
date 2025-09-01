@@ -229,11 +229,16 @@ public class InventorySortingHelper {
      */
     public static void cleanUpGroups(boolean isPlayerInventory) {
 
-        // Step 1: Clean up groups and merge them:
+        // Step 1: Merge similar groups depending on inventory composition:
+        if (REDSTONE_GROUP.size() > 0 && SortedItemLists.REDSTONE_RAW.size() > 0) {
+            REDSTONE_GROUP.addSlots(SortedItemLists.REDSTONE_RAW.takeAll());
+            MINERALS_GROUP.recalculateActualSize();
+        }
+        if (GOODIES_GROUP.size() > 0 && MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(GOODIES_GROUP, MINERALS_GROUP);
+
+        // Step 2: Clean up tool groups and merge them:
         if (isPlayerInventory) {
             if (MAIN_HOTBAR.size() > 0) cleanUpHotbar();
-            if (REDSTONE_GROUP.size() > 0 && SortedItemLists.REDSTONE_RAW.size() > 0) REDSTONE_GROUP.addSlots(SortedItemLists.REDSTONE_RAW.takeAll());
-            if (GOODIES_GROUP.size() > 0 && MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(GOODIES_GROUP, MINERALS_GROUP);
             cleanUpToolGroup(SHEARS_GROUP, HOE_GROUP);
             cleanUpToolGroup(HOE_GROUP, SHEARS_GROUP, SHOVEL_GROUP);
             cleanUpToolGroup(SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP);
@@ -320,6 +325,7 @@ public class InventorySortingHelper {
         size = MAIN_HOTBAR.size();
         if(size < 9 && SHOVEL_GROUP.getNumTools() > 0 && tryCombiningTwoGroups(MAIN_HOTBAR, SHOVEL_GROUP)) return;
         if(size < 9 && HOE_GROUP.getNumTools() > 0 && tryCombiningTwoGroups(MAIN_HOTBAR, HOE_GROUP)) return;
+        if(size < 9 && SHEARS_GROUP.getNumTools() > 0 && tryCombiningTwoGroups(MAIN_HOTBAR, SHEARS_GROUP)) return;
 
         // If hotbar has items, but no food, try to add some:
         if(size > 2 && size < 8 && (CONSUMABLES_GROUP.size() == 1 || CONSUMABLES_GROUP.size() > 3) && !MAIN_HOTBAR.hasAtLeastOneConsumable()) {

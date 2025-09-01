@@ -193,6 +193,12 @@ public class SimpleSortingGroup extends SortingGroup {
         return this.numItems;
     }
 
+    public int recalculateActualSize() {
+        int realNumItems = miscItems.size();
+        for(SortedItemList list: sortedItemLists) realNumItems += list.size();
+        return this.numItems = realNumItems;
+    }
+
     protected int debugCalculateActualSize() {
         int realNumItems = miscItems.size();
         for(SortedItemList list: sortedItemLists) realNumItems += list.size();
@@ -207,7 +213,7 @@ public class SimpleSortingGroup extends SortingGroup {
         for(int i = 0; i < this.sortedItemLists.length; i++) {
             if(sortedItemLists[i].size() > 0) output += "                List " + i + ": " + this.sortedItemLists[i].toString() + "\n";
         }
-        if(this.miscItems.size() > 0) output += "              Other Items List: " + this.miscItems.toString() + "\n";
+        if(this.miscItems.size() > 0) output += "                Other Items List: " + this.miscItems.toString() + "\n";
         return output;
     }
 }

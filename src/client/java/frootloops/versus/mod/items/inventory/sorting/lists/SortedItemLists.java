@@ -19,16 +19,16 @@ public class SortedItemLists {
     /** MINEABLE GOODIES ------------------------------------------------------------ */
     public static final SortedMappedItemList ORE_BLOCKS = new SortedMappedItemList(ItemSortingMaps.ITEMS_ORE_BLOCKS);
     public static final SortedMappedItemList REFINED_MINERALS = new SortedMappedItemList(ItemSortingMaps.ITEMS_REFINED_MINERALS);
-    public static final SortedMappedItemList REDSTONE_RAW = new SortedMappedItemList(ItemSortingMaps.ITEMS_REDSTONE);
+    public static final SortedMappedItemList REDSTONE_RAW = new SortedMappedItemList(ItemSortingMaps.ITEMS_REDSTONE_COMPONENTS);
     public static final SortedBlockItemList GOLD_ITEMS_AND_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_GOLD);
     public static final SortedBlockItemList IRON_ITEMS_AND_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_IRON);
     public static final SortedBlockItemList COPPER_ITEMS_AND_BLOCKS = new SortedBlockItemList(BlockSoundGroup.COPPER, ItemSortingMaps.ITEMS_AND_BLOCKS_OF_COPPER);
-    public static final SortedItemList[] MINERAL_RESSOURCE_ITEMS = {ORE_BLOCKS, REFINED_MINERALS, GOLD_ITEMS_AND_BLOCKS, IRON_ITEMS_AND_BLOCKS, COPPER_ITEMS_AND_BLOCKS};
+    public static final SortedItemList[] MINERAL_RESSOURCE_ITEMS = {ORE_BLOCKS, REFINED_MINERALS, REDSTONE_RAW, GOLD_ITEMS_AND_BLOCKS, IRON_ITEMS_AND_BLOCKS, COPPER_ITEMS_AND_BLOCKS};
 
 
     /** REDSTONE -------------------------------------------------------------------- */
-    public static final SortedMappedItemList REDSTONE_COMPONENTS = new SortedMappedItemList(ItemSortingMaps.ITEMS_REDSTONE);
-    public static final SortedMappedItemList MINECART_ITEMS = new SortedMappedItemList(ItemSortingMaps.ITEMS_MINECARTS);
+    public static final SortedMappedItemList REDSTONE_COMPONENTS = new SortedMappedItemList(ItemSortingMaps.ITEMS_REDSTONE_COMPONENTS);
+    public static final SortedBlockItemList MINECART_ITEMS = new SortedBlockItemList(BlockTags.RAILS, ItemSortingMaps.ITEMS_MINECARTS);
     public static final SortedItemList[] REDSTONE_ITEMS = {REDSTONE_COMPONENTS, MINECART_ITEMS};
 
 

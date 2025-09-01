@@ -9,52 +9,48 @@ import java.util.Map;
 
 public abstract class ItemSortingMaps {
 
-    public static final Map<Item, Integer> ITEMS_REDSTONE = new HashMap<>();
+    public static final Map<Item, Integer> ITEMS_REDSTONE_COMPONENTS = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_REDSTONE.put(Items.TNT, index++);
-        ITEMS_REDSTONE.put(Items.REDSTONE, index++);
-        ITEMS_REDSTONE.put(Items.REDSTONE_BLOCK, index++);
-        ITEMS_REDSTONE.put(Items.REDSTONE_TORCH, index++);
-        ITEMS_REDSTONE.put(Items.TARGET, index++);
-        ITEMS_REDSTONE.put(Items.REPEATER, index++);
-        ITEMS_REDSTONE.put(Items.COMPARATOR, index++);
-        ITEMS_REDSTONE.put(Items.OBSERVER, index++);
-        ITEMS_REDSTONE.put(Items.PISTON, index++);
-        ITEMS_REDSTONE.put(Items.STICKY_PISTON, index++);
-        ITEMS_REDSTONE.put(Items.SLIME_BLOCK, index++);
-        ITEMS_REDSTONE.put(Items.HONEY_BLOCK, index++);
-        ITEMS_REDSTONE.put(Items.DISPENSER, index++);
-        ITEMS_REDSTONE.put(Items.DROPPER, index++);
-        ITEMS_REDSTONE.put(Items.HOPPER, index++);
-        ITEMS_REDSTONE.put(Items.CRAFTER, index++);
-        ITEMS_REDSTONE.put(Items.CHEST, index++);
-        ITEMS_REDSTONE.put(Items.TRAPPED_CHEST, index++);
-        ITEMS_REDSTONE.put(Items.BARREL, index++);
-        ITEMS_REDSTONE.put(Items.NOTE_BLOCK, index++);
-        ITEMS_REDSTONE.put(Items.COMPOSTER, index++);
-        ITEMS_REDSTONE.put(Items.WAXED_COPPER_BULB, index++);
-        ITEMS_REDSTONE.put(Items.WAXED_EXPOSED_COPPER_BULB, index++);
-        ITEMS_REDSTONE.put(Items.WAXED_WEATHERED_COPPER_BULB, index++);
-        ITEMS_REDSTONE.put(Items.WAXED_OXIDIZED_COPPER_BULB, index++);
-        ITEMS_REDSTONE.put(Items.LEVER, index++);
-        ITEMS_REDSTONE.put(Items.TRIPWIRE_HOOK, index++);
-        ITEMS_REDSTONE.put(Items.STONE_PRESSURE_PLATE, index++);
-        ITEMS_REDSTONE.put(Items.CALIBRATED_SCULK_SENSOR, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.TNT, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.REDSTONE, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.REDSTONE_BLOCK, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.REDSTONE_TORCH, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.TARGET, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.REPEATER, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.COMPARATOR, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.OBSERVER, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.PISTON, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.STICKY_PISTON, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.SLIME_BLOCK, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.HONEY_BLOCK, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.DISPENSER, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.DROPPER, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.HOPPER, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.CRAFTER, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.CHEST, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.TRAPPED_CHEST, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.BARREL, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.NOTE_BLOCK, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.COMPOSTER, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.WAXED_COPPER_BULB, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.WAXED_EXPOSED_COPPER_BULB, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.WAXED_WEATHERED_COPPER_BULB, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.WAXED_OXIDIZED_COPPER_BULB, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.LEVER, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.TRIPWIRE_HOOK, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.STONE_PRESSURE_PLATE, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.CALIBRATED_SCULK_SENSOR, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_MINECARTS = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_REDSTONE.put(Items.RAIL, index++);
-        ITEMS_REDSTONE.put(Items.POWERED_RAIL, index++);
-        ITEMS_REDSTONE.put(Items.DETECTOR_RAIL, index++);
-        ITEMS_REDSTONE.put(Items.ACTIVATOR_RAIL, index++);
-        ITEMS_REDSTONE.put(Items.MINECART, index++);
-        ITEMS_REDSTONE.put(Items.HOPPER_MINECART, index++);
-        ITEMS_REDSTONE.put(Items.CHEST_MINECART, index++);
-        ITEMS_REDSTONE.put(Items.FURNACE_MINECART, index++);
-        ITEMS_REDSTONE.put(Items.TNT_MINECART, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.MINECART, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.HOPPER_MINECART, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.CHEST_MINECART, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.FURNACE_MINECART, index++);
+        ITEMS_REDSTONE_COMPONENTS.put(Items.TNT_MINECART, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_TREASURE = new HashMap<>();
@@ -518,6 +514,8 @@ public abstract class ItemSortingMaps {
         ITEMS_ORE_BLOCKS.put(Items.NETHER_GOLD_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.GILDED_BLACKSTONE, index++);
 
+        ITEMS_ORE_BLOCKS.put(Items.NETHER_QUARTZ_ORE, index++);
+
         ITEMS_ORE_BLOCKS.put(Items.IRON_ORE, index++);
         ITEMS_ORE_BLOCKS.put(Items.DEEPSLATE_IRON_ORE, index++);
 
@@ -554,6 +552,8 @@ public abstract class ItemSortingMaps {
         ITEMS_REFINED_MINERALS.put(Items.AMETHYST_SHARD, index++);
         ITEMS_REFINED_MINERALS.put(Items.AMETHYST_CLUSTER, index++);
 
+        ITEMS_REFINED_MINERALS.put(Items.QUARTZ, index++);
+
         ITEMS_REFINED_MINERALS.put(Items.GLOWSTONE_DUST, index++);
         ITEMS_REFINED_MINERALS.put(Items.GLOWSTONE, index++);
     }
@@ -588,7 +588,7 @@ public abstract class ItemSortingMaps {
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.RAW_IRON, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.RAW_IRON_BLOCK, index++);
 
-        ITEMS_AND_BLOCKS_OF_GOLD.put(Items.IRON_NUGGET, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_NUGGET, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_INGOT, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_BLOCK, index++);
 
