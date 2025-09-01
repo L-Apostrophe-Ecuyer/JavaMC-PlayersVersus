@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items.inventory.sorting;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
@@ -75,20 +76,38 @@ public abstract class ItemSortingMaps {
         ITEMS_TREASURE.put(Items.NETHERITE_BLOCK, index++);
     }
 
-    public static final Map<Item, Integer> ITEMS_MONSTER_DROPS = new HashMap<>();
+    public static final Map<Item, Integer> ITEMS_BREWING_MISC = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_MONSTER_DROPS.put(Items.BREEZE_ROD, index++);
-        ITEMS_MONSTER_DROPS.put(Items.BLAZE_ROD, index++);
-        ITEMS_MONSTER_DROPS.put(Items.BLAZE_POWDER, index++);
-        ITEMS_MONSTER_DROPS.put(Items.GHAST_TEAR, index++);
-        ITEMS_MONSTER_DROPS.put(Items.PHANTOM_MEMBRANE, index++);
-        ITEMS_MONSTER_DROPS.put(Items.LEATHER, index++);
-        ITEMS_MONSTER_DROPS.put(Items.STRING, index++);
-        ITEMS_MONSTER_DROPS.put(Items.BONE, index++);
-        ITEMS_MONSTER_DROPS.put(Items.BONE_BLOCK, index++);
-        ITEMS_MONSTER_DROPS.put(Items.SPIDER_EYE, index++);
-        ITEMS_MONSTER_DROPS.put(Items.ROTTEN_FLESH, index++);
+        ITEMS_BREWING_MISC.put(CustomBrewingItems.BOTTLE_OF_ENDER, index++);
+        ITEMS_BREWING_MISC.put(Items.DRAGON_BREATH, index++);
+        ITEMS_BREWING_MISC.put(Items.POPPED_CHORUS_FRUIT, index++);
+        ITEMS_BREWING_MISC.put(Items.SHULKER_SHELL, index++);
+        ITEMS_BREWING_MISC.put(CustomBrewingItems.LIVING_FLAME, index++);
+        ITEMS_BREWING_MISC.put(Items.BREEZE_ROD, index++);
+        ITEMS_BREWING_MISC.put(Items.BLAZE_ROD, index++);
+        ITEMS_BREWING_MISC.put(Items.BLAZE_POWDER, index++);
+        ITEMS_BREWING_MISC.put(Items.GHAST_TEAR, index++);
+        ITEMS_BREWING_MISC.put(Items.PHANTOM_MEMBRANE, index++);
+        ITEMS_BREWING_MISC.put(Items.PRISMARINE_CRYSTALS, index++);
+        ITEMS_BREWING_MISC.put(Items.PRISMARINE_SHARD, index++);
+        ITEMS_BREWING_MISC.put(Items.TURTLE_SCUTE, index++);
+        ITEMS_BREWING_MISC.put(Items.PUFFERFISH, index++);
+        ITEMS_BREWING_MISC.put(Items.RABBIT_FOOT, index++);
+        ITEMS_BREWING_MISC.put(Items.ARMADILLO_SCUTE, index++);
+        ITEMS_BREWING_MISC.put(CustomBrewingItems.FOUR_LEAF_CLOVER, index++);
+        ITEMS_BREWING_MISC.put(Items.SUGAR, index++);
+        ITEMS_BREWING_MISC.put(CustomBrewingItems.CORRUPTED_WART_POWDER, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_TRUE_TRASH = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_BREWING_MISC.put(Items.LEATHER, index++);
+        ITEMS_BREWING_MISC.put(Items.RABBIT_HIDE, index++);
+        ITEMS_BREWING_MISC.put(Items.INK_SAC, index++);
+        ITEMS_BREWING_MISC.put(Items.GLOW_INK_SAC, index++);
+        ITEMS_BREWING_MISC.put(Items.ROTTEN_FLESH, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_SHEAR_AND_FISHING = new HashMap<>();
@@ -136,23 +155,124 @@ public abstract class ItemSortingMaps {
         ITEMS_SHEARS_WOOL_BLOCKS.put(Items.PURPLE_CARPET, index++);
         ITEMS_SHEARS_WOOL_BLOCKS.put(Items.MAGENTA_CARPET, index++);
         ITEMS_SHEARS_WOOL_BLOCKS.put(Items.PINK_CARPET, index++);
+    }
 
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.WHITE_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.LIGHT_GRAY_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.GRAY_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.BLACK_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.BROWN_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.RED_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.ORANGE_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.YELLOW_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.LIME_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.GREEN_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.CYAN_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.LIGHT_BLUE_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.BLUE_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.PURPLE_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.MAGENTA_BANNER, index++);
-        ITEMS_SHEARS_WOOL_BLOCKS.put(Items.PINK_BANNER, index++);
+    public static final Map<Item, Integer> ITEMS_BANNERS = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_BANNERS.put(Items.WHITE_BANNER, index++);
+        ITEMS_BANNERS.put(Items.LIGHT_GRAY_BANNER, index++);
+        ITEMS_BANNERS.put(Items.GRAY_BANNER, index++);
+        ITEMS_BANNERS.put(Items.BLACK_BANNER, index++);
+        ITEMS_BANNERS.put(Items.BROWN_BANNER, index++);
+        ITEMS_BANNERS.put(Items.RED_BANNER, index++);
+        ITEMS_BANNERS.put(Items.ORANGE_BANNER, index++);
+        ITEMS_BANNERS.put(Items.YELLOW_BANNER, index++);
+        ITEMS_BANNERS.put(Items.LIME_BANNER, index++);
+        ITEMS_BANNERS.put(Items.GREEN_BANNER, index++);
+        ITEMS_BANNERS.put(Items.CYAN_BANNER, index++);
+        ITEMS_BANNERS.put(Items.LIGHT_BLUE_BANNER, index++);
+        ITEMS_BANNERS.put(Items.BLUE_BANNER, index++);
+        ITEMS_BANNERS.put(Items.PURPLE_BANNER, index++);
+        ITEMS_BANNERS.put(Items.MAGENTA_BANNER, index++);
+        ITEMS_BANNERS.put(Items.PINK_BANNER, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_CANDLES = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_CANDLES.put(Items.WHITE_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.LIGHT_GRAY_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.GRAY_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.BLACK_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.BROWN_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.RED_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.ORANGE_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.YELLOW_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.LIME_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.GREEN_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.CYAN_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.LIGHT_BLUE_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.BLUE_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.PURPLE_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.MAGENTA_CANDLE, index++);
+        ITEMS_CANDLES.put(Items.PINK_CANDLE, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_BEDS = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_BEDS.put(Items.WHITE_BED, index++);
+        ITEMS_BEDS.put(Items.LIGHT_GRAY_BED, index++);
+        ITEMS_BEDS.put(Items.GRAY_BED, index++);
+        ITEMS_BEDS.put(Items.BLACK_BED, index++);
+        ITEMS_BEDS.put(Items.BROWN_BED, index++);
+        ITEMS_BEDS.put(Items.RED_BED, index++);
+        ITEMS_BEDS.put(Items.ORANGE_BED, index++);
+        ITEMS_BEDS.put(Items.YELLOW_BED, index++);
+        ITEMS_BEDS.put(Items.LIME_BED, index++);
+        ITEMS_BEDS.put(Items.GREEN_BED, index++);
+        ITEMS_BEDS.put(Items.CYAN_BED, index++);
+        ITEMS_BEDS.put(Items.LIGHT_BLUE_BED, index++);
+        ITEMS_BEDS.put(Items.BLUE_BED, index++);
+        ITEMS_BEDS.put(Items.PURPLE_BED, index++);
+        ITEMS_BEDS.put(Items.MAGENTA_BED, index++);
+        ITEMS_BEDS.put(Items.PINK_BED, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_SHEARS_SHRUBBERY = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_SHEARS_SHRUBBERY.put(Items.SHORT_GRASS, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.TALL_GRASS, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.FERN, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.LARGE_FERN, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(CustomBlockItems.CLOVERS, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(CustomBlockItems.WHEAT_GRASS, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(CustomBlockItems.WILD_WHEAT, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.DEAD_BUSH, index++);        ITEMS_SHEARS_SHRUBBERY.put(Items.DEAD_BUSH, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.HANGING_ROOTS, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.VINE, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.CACTUS, index++);
+        ITEMS_SHEARS_SHRUBBERY.put(Items.HANGING_ROOTS, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_SHEARS_AQUATIC = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_SHEARS_AQUATIC.put(Items.LILY_PAD, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.SEA_PICKLE, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.SEAGRASS, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.KELP, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DRIED_KELP_BLOCK, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.TUBE_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.TUBE_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.BRAIN_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.BRAIN_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.BUBBLE_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.BUBBLE_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.FIRE_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.FIRE_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.HORN_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.HORN_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_TUBE_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_TUBE_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_BRAIN_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_BRAIN_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_BUBBLE_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_BUBBLE_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_FIRE_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_FIRE_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_HORN_CORAL, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_HORN_CORAL_FAN, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.TUBE_CORAL_BLOCK, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.BRAIN_CORAL_BLOCK, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.FIRE_CORAL_BLOCK, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.HORN_CORAL_BLOCK, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_TUBE_CORAL_BLOCK, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_BRAIN_CORAL_BLOCK, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_FIRE_CORAL_BLOCK, index++);
+        ITEMS_SHEARS_AQUATIC.put(Items.DEAD_HORN_CORAL_BLOCK, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_ANIMALS = new HashMap<>();
@@ -171,27 +291,94 @@ public abstract class ItemSortingMaps {
         ITEMS_ANIMALS.put(Items.TURTLE_EGG, index++);
     }
 
-    public static final Map<Item, Integer> ITEMS_HOE_NATURE_BLOCKS = new HashMap<>();
+    public static final Map<Item, Integer> ITEMS_DYES = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.BONE_MEAL, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.MOSS_BLOCK, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.MOSS_CARPET, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.AZALEA, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.FLOWERING_AZALEA, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.GLOW_BERRIES, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.PALE_MOSS_BLOCK, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.PALE_MOSS_CARPET, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.PALE_HANGING_MOSS, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.WHEAT, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.HAY_BLOCK, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.PUMPKIN, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.MELON, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.WHEAT_SEEDS, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.PUMPKIN_SEEDS, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.MELON_SEEDS, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.BEETROOT_SEEDS, index++);
-        ITEMS_HOE_NATURE_BLOCKS.put(Items.TORCHFLOWER_SEEDS, index++);
+        ITEMS_DYES.put(Items.WHITE_DYE, index++);
+        ITEMS_DYES.put(Items.LIGHT_GRAY_DYE, index++);
+        ITEMS_DYES.put(Items.GRAY_DYE, index++);
+        ITEMS_DYES.put(Items.BLACK_DYE, index++);
+        ITEMS_DYES.put(Items.BROWN_DYE, index++);
+        ITEMS_DYES.put(Items.RED_DYE, index++);
+        ITEMS_DYES.put(Items.ORANGE_DYE, index++);
+        ITEMS_DYES.put(Items.YELLOW_DYE, index++);
+        ITEMS_DYES.put(Items.LIME_DYE, index++);
+        ITEMS_DYES.put(Items.GREEN_DYE, index++);
+        ITEMS_DYES.put(Items.CYAN_DYE, index++);
+        ITEMS_DYES.put(Items.LIGHT_BLUE_DYE, index++);
+        ITEMS_DYES.put(Items.BLUE_DYE, index++);
+        ITEMS_DYES.put(Items.PURPLE_DYE, index++);
+        ITEMS_DYES.put(Items.MAGENTA_DYE, index++);
+        ITEMS_DYES.put(Items.PINK_DYE, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_FLOWERS = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_FLOWERS.put(Items.OXEYE_DAISY, index++);
+        ITEMS_FLOWERS.put(Items.AZURE_BLUET, index++);
+        ITEMS_FLOWERS.put(Items.LILY_OF_THE_VALLEY, index++);
+        ITEMS_FLOWERS.put(Items.WHITE_TULIP, index++);
+        ITEMS_FLOWERS.put(Items.PINK_TULIP, index++);
+        ITEMS_FLOWERS.put(Items.ORANGE_TULIP, index++);
+        ITEMS_FLOWERS.put(Items.RED_TULIP, index++);
+        ITEMS_FLOWERS.put(Items.POPPY, index++);
+        ITEMS_FLOWERS.put(Items.ROSE_BUSH, index++);
+        ITEMS_FLOWERS.put(Items.LILAC, index++);
+        ITEMS_FLOWERS.put(Items.PEONY, index++);
+        ITEMS_FLOWERS.put(Items.ALLIUM, index++);
+        ITEMS_FLOWERS.put(Items.PINK_PETALS, index++);
+        ITEMS_FLOWERS.put(Items.SPORE_BLOSSOM, index++);
+        ITEMS_FLOWERS.put(Items.BLUE_ORCHID, index++);
+        ITEMS_FLOWERS.put(Items.CORNFLOWER, index++);
+        ITEMS_FLOWERS.put(Items.SUNFLOWER, index++);
+        ITEMS_FLOWERS.put(Items.DANDELION, index++);
+        ITEMS_FLOWERS.put(Items.WITHER_ROSE, index++);
+        ITEMS_FLOWERS.put(Items.TORCHFLOWER, index++);
+        ITEMS_FLOWERS.put(Items.PITCHER_PLANT, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_HOE_SPECIAL = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_HOE_SPECIAL.put(Items.SPONGE, index++);
+        ITEMS_HOE_SPECIAL.put(Items.WET_SPONGE, index++);
+    }
+
+
+    public static final Map<Item, Integer> ITEMS_HOE_FARMING = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_HOE_FARMING.put(Items.BONE_MEAL, index++);
+        ITEMS_HOE_FARMING.put(Items.WHEAT_SEEDS, index++);
+        ITEMS_HOE_FARMING.put(Items.WHEAT, index++);
+        ITEMS_HOE_FARMING.put(Items.HAY_BLOCK, index++);
+        ITEMS_HOE_FARMING.put(Items.COCOA_BEANS, index++);
+        ITEMS_HOE_FARMING.put(Items.SUGAR_CANE, index++);
+        ITEMS_HOE_FARMING.put(Items.PUMPKIN_SEEDS, index++);
+        ITEMS_HOE_FARMING.put(Items.PUMPKIN, index++);
+        ITEMS_HOE_FARMING.put(Items.CARVED_PUMPKIN, index++);
+        ITEMS_HOE_FARMING.put(Items.JACK_O_LANTERN, index++);
+        ITEMS_HOE_FARMING.put(Items.BEE_NEST, index++);
+        ITEMS_HOE_FARMING.put(Items.HONEYCOMB_BLOCK, index++);
+        ITEMS_HOE_FARMING.put(Items.MELON_SEEDS, index++);
+        ITEMS_HOE_FARMING.put(Items.MELON, index++);
+        ITEMS_HOE_FARMING.put(Items.BEETROOT_SEEDS, index++);
+        ITEMS_HOE_FARMING.put(Items.TORCHFLOWER_SEEDS, index++);
+        ITEMS_HOE_FARMING.put(Items.PITCHER_POD, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_HOE_MOSS = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_HOE_MOSS.put(Items.MOSS_BLOCK, index++);
+        ITEMS_HOE_MOSS.put(Items.MOSS_CARPET, index++);
+        ITEMS_HOE_MOSS.put(Items.AZALEA, index++);
+        ITEMS_HOE_MOSS.put(Items.FLOWERING_AZALEA, index++);
+        ITEMS_HOE_MOSS.put(Items.GLOW_BERRIES, index++);
+        ITEMS_HOE_MOSS.put(Items.PALE_MOSS_BLOCK, index++);
+        ITEMS_HOE_MOSS.put(Items.PALE_MOSS_CARPET, index++);
+        ITEMS_HOE_MOSS.put(Items.PALE_HANGING_MOSS, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_HOE_SCULK = new HashMap<>();
@@ -208,18 +395,18 @@ public abstract class ItemSortingMaps {
     public static final Map<Item, Integer> ITEMS_HOE_NETHER_BLOCKS = new HashMap<>();
     static {
         int index = 1;
+        ITEMS_HOE_NETHER_BLOCKS.put(Items.SHROOMLIGHT, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(Items.NETHER_WART, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(CustomBlockItems.CORRUPTED_WART, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(CustomBlockItems.WITHERED_WART, index++);
-
         ITEMS_HOE_NETHER_BLOCKS.put(Items.NETHER_WART_BLOCK, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(Items.CRIMSON_FUNGUS, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(Items.CRIMSON_ROOTS, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(Items.WEEPING_VINES, index++);
-
         ITEMS_HOE_NETHER_BLOCKS.put(Items.WARPED_WART_BLOCK, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(Items.WARPED_FUNGUS, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(Items.WARPED_ROOTS, index++);
+        ITEMS_HOE_NETHER_BLOCKS.put(Items.NETHER_SPROUTS, index++);
         ITEMS_HOE_NETHER_BLOCKS.put(Items.TWISTING_VINES, index++);
     }
 

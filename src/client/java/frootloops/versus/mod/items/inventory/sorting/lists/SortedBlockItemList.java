@@ -35,6 +35,10 @@ public class SortedBlockItemList extends SortedItemList {
         this(blockTagKey, null, blockIndexMap, -1.0f, 128.0f);
     }
 
+    public SortedBlockItemList(TagKey<Block> blockTagKey, BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap) {
+        this(blockTagKey, blockSoundGroup, blockIndexMap, -1.0f, 128.0f);
+    }
+
     public SortedBlockItemList(BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap) {
         this(null, blockSoundGroup, blockIndexMap, -1.0f, 128.0f);
     }

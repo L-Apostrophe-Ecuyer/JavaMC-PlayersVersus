@@ -183,6 +183,10 @@ public abstract class ItemComparaisonHelper {
             else if(block instanceof PlantBlock) return ItemType.MISC;
             else return ItemType.BLOCK_OTHER;
         }
+        else if(stack.getOrDefault(DataComponentTypes.BANNER_PATTERNS, null) != null) return ItemType.BANNER_PATTERNS;
+        else if(stack.getItem().getTranslationKey().endsWith("pottery_sherd")) return ItemType.POTTERY;
+        else if(stack.isOf(Items.BRICK)) return ItemType.POTTERY;
+        else if(stack.isOf(Items.FLOWER_POT)) return ItemType.POTTERY;
         else return ItemType.MISC;
     }
 

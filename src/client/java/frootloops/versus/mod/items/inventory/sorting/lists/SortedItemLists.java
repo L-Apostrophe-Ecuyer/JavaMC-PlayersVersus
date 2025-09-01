@@ -43,18 +43,40 @@ public class SortedItemLists {
     public static final SortedItemList[] COMBAT_ITEMS = {ARMOR, OTHER_COMBAT_ITEMS};
 
 
+    /** MISC - MYSTICISM & MOBS ---------------------------------------------------------   */
+
+    public static final SortedMappedItemList SHEARS_ANIMAL_HANDLING = new SortedMappedItemList(ItemSortingMaps.ITEMS_ANIMALS);
+    public static final SortedMappedItemList MISC_BREWING_ITEMS = new SortedMappedItemList(ItemSortingMaps.ITEMS_BREWING_MISC);
+    public static final SortedTypedItemList CONCENTRATES = new SortedTypedItemList(new ItemType[]{ItemType.BREWING_INGREDIENT});
+    public static final SortedItemList[] MISC_BREWING = {SHEARS_ANIMAL_HANDLING, MISC_BREWING_ITEMS, CONCENTRATES};
+
+
+    /** MISC - WORLD AND ARCHEOLOGY ---------------------------------------------------------   */
+    public static final SortedTypedItemList POTTERY_AND_BANNERS = new SortedTypedItemList(new ItemType[]{ItemType.POTTERY, ItemType.BANNER_PATTERNS});
+    public static final SortedTypedItemList MISC_TOOLS = new SortedTypedItemList(new ItemType[]{ItemType.MISC_TOOL});
+    public static final SortedBlockItemList BEDS = new SortedBlockItemList(ItemSortingMaps.ITEMS_BEDS);
+    public static final SortedBlockItemList BANNERS = new SortedBlockItemList(ItemSortingMaps.ITEMS_BANNERS);
+    public static final SortedBlockItemList CANDLES = new SortedBlockItemList(ItemSortingMaps.ITEMS_CANDLES);
+
+    public static final SortedItemList[] MISC_EXPLORATION = {MISC_TOOLS, POTTERY_AND_BANNERS, BANNERS, BEDS, CANDLES};
+
+
     /** MISC - ANYTHING ELSE ---------------------------------------------------------   */
-    public static final SortedTypedItemList MISC_BREWING = new SortedTypedItemList(new ItemType[]{ItemType.BREWING_INGREDIENT});
-    public static final SortedMappedItemList MISC_MONSTER = new SortedMappedItemList(ItemSortingMaps.ITEMS_MONSTER_DROPS);
-    public static final SortedMiscItemList MISC_EVERYTHING_BUT_MONSTER = new SortedMiscItemList(ItemSortingMaps.ITEMS_MONSTER_DROPS);
-    public static final SortedItemList[] MISC_OTHER = {MISC_BREWING, MISC_EVERYTHING_BUT_MONSTER, MISC_MONSTER};
+    public static final SortedMappedItemList MISC_TRASH = new SortedMappedItemList(ItemSortingMaps.ITEMS_TRUE_TRASH);
+    public static final SortedMiscItemList MISC_EVERYTHING_BUT_MONSTER = new SortedMiscItemList(ItemSortingMaps.ITEMS_TRUE_TRASH);
+    public static final SortedItemList[] MISC_OTHER = {MISC_EVERYTHING_BUT_MONSTER, MISC_TRASH};
 
 
     /** SHEARS ------------------------------------------------------------   */
     public static final SortedMappedItemList SHEARS = new SortedMappedItemList(ItemSortingMaps.ITEMS_SHEAR_AND_FISHING);
-    public static final SortedBlockItemList SHEARS_BLOCKS = new SortedBlockItemList(BlockTags.LEAVES, ItemSortingMaps.ITEMS_SHEARS_WOOL_BLOCKS);
-    public static final SortedBlockItemList SHEARS_ANIMAL_HANDLING = new SortedBlockItemList(BlockTags.FLOWERS, ItemSortingMaps.ITEMS_ANIMALS);
-    public static final SortedItemList[] SHEAR_MINEABLES = {SHEARS_BLOCKS, SHEARS_ANIMAL_HANDLING};
+    public static final SortedBlockItemList WOOL_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_SHEARS_WOOL_BLOCKS);
+    public static final SortedMappedItemList DYES = new SortedMappedItemList(ItemSortingMaps.ITEMS_DYES);
+    public static final SortedBlockItemList FLOWERS = new SortedBlockItemList(BlockTags.FLOWERS, ItemSortingMaps.ITEMS_FLOWERS);
+    public static final SortedBlockItemList SAPLINGS = new SortedBlockItemList(BlockTags.SAPLINGS);
+    public static final SortedBlockItemList LEAVES = new SortedBlockItemList(BlockTags.LEAVES);
+    public static final SortedBlockItemList SHEARS_SHRUBBERY = new SortedBlockItemList(null, BlockSoundGroup.GRASS, ItemSortingMaps.ITEMS_SHEARS_SHRUBBERY, 0.0F, 0.1F);
+    public static final SortedMappedItemList SHEARS_AQUATIC = new SortedMappedItemList(ItemSortingMaps.ITEMS_FLOWERS);
+    public static final SortedItemList[] SHEAR_MINEABLES = {WOOL_BLOCKS, DYES, FLOWERS, SAPLINGS, LEAVES, SHEARS_SHRUBBERY, SHEARS_AQUATIC};
 
 
     /** SHOVELS ------------------------------------------------------------   */
@@ -64,11 +86,12 @@ public class SortedItemLists {
 
     /** HOES -------------------------------------------------------------   */
     public static final SortedTaggedItemList HOES = new SortedTaggedItemList(ItemTags.HOES);
-    public static final SortedBlockItemList HOE_MINEABLE_NATURE = new SortedBlockItemList(BlockTags.REPLACEABLE, ItemSortingMaps.ITEMS_HOE_NATURE_BLOCKS);
+    public static final SortedMappedItemList HOE_SPECIAL = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_FARMING);
+    public static final SortedMappedItemList HOE_MINEABLE_FARMING = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_FARMING);
+    public static final SortedBlockItemList ITEMS_HOE_MOSS = new SortedBlockItemList(BlockSoundGroup.MOSS_BLOCK, ItemSortingMaps.ITEMS_HOE_MOSS);
     public static final SortedMappedItemList HOE_MINEABLE_SCULK = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_SCULK);
     public static final SortedMappedItemList HOE_MINEABLE_NETHER = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_NETHER_BLOCKS);
-    public static final SortedBlockItemList HOE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.HOE_MINEABLE, -1.0f, 3.0f);
-    public static final SortedItemList[] HOES_MINEABLE = {HOE_MINEABLE_NATURE, HOE_MINEABLE_SCULK, HOE_MINEABLE_NETHER, HOE_MINEABLE_GENERIC};
+    public static final SortedItemList[] HOES_MINEABLE = {HOE_MINEABLE_FARMING, HOE_SPECIAL, ITEMS_HOE_MOSS, HOE_MINEABLE_SCULK, HOE_MINEABLE_NETHER};
 
 
     /** PICKAXES -------------------------------------------------------------   */
