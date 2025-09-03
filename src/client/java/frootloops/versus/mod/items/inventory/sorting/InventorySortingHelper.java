@@ -73,10 +73,13 @@ public class InventorySortingHelper {
         // If each group can have their own row, then best case scenario:
         if(orderedGroups.size() <= numRows) {
             int actualNumRowsInGroups = orderedGroups.size() + orderedGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum();
+            VersusMod.MOD_LOGGER.warn("              -> Actual number of rows in groups is: " + actualNumRowsInGroups);
+            VersusMod.MOD_LOGGER.warn("              -> Number of rows in inventory is: " + numRows);
             if(actualNumRowsInGroups <= numRows) {
+                VersusMod.MOD_LOGGER.warn("              -> TRIVIAL PLACEMENT!! Yay");
                 for (SortingGroup group : orderedGroups) {
                     inventoryOutput.goToNextAvailableRow();
-                    inventoryOutput.addAll(group.takeAllItems(), true);
+                    inventoryOutput.addAll(group.takeAllItems(), true, false);
                 }
                 return inventoryOutput.getInvSlots();
             }
@@ -127,7 +130,7 @@ public class InventorySortingHelper {
                         else if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                 " + group.GROUP_NAME + " - Didn't take any slots, its size is zero.");
                     }
                 }
-                wasSuccessful = inventoryOutput.addAll(slotsToAdd, !hasAddedItems);
+                wasSuccessful = inventoryOutput.addAll(slotsToAdd, !hasAddedItems, true);
                 slotsToAdd.clear();
                 hasAddedItems = true;
                 if(!wasSuccessful) return null;

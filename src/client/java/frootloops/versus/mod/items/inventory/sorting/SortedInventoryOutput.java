@@ -32,8 +32,8 @@ public class SortedInventoryOutput {
         this.numGroupsToPlace--;
     }
 
-    public boolean addAll(LinkedList<ItemSlot> slots) { return this.addAll(slots, false);}
-    public boolean addAll(LinkedList<ItemSlot> slots, boolean isNewGroup) {
+    public boolean addAll(LinkedList<ItemSlot> slots) { return this.addAll(slots, false, true);}
+    public boolean addAll(LinkedList<ItemSlot> slots, boolean isNewGroup, boolean allowBacktracking) {
         slotsToAdd = slots;
         if(slotsToAdd == null || slotsToAdd.size() == 0) return true;
 
@@ -44,7 +44,7 @@ public class SortedInventoryOutput {
         }
 
         // Try backtracking, if that improves the fit:
-        if((this.slotsToAdd.size() + this.currentCol) > 9 && this.currentCol == 0)
+        if(allowBacktracking && (this.slotsToAdd.size() + this.currentCol) > 9 && this.currentCol == 0)
             this.tryBacktracking((this.slotsToAdd.size() + this.currentCol) % 9);
 
         // Try changing rows, if that improves the fit:
@@ -103,7 +103,6 @@ public class SortedInventoryOutput {
         if(this.tryMovingToNextRow(false)) return true;
         else if(currentCol < 0 || this.get(currentRow, currentCol) == null) return true;
         else if(this.currentCol < 8){
-            //if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                 - Moving to next spot -> Moving to next column, to (" + this.currentRow + ", " + this.currentCol + ")");
             this.currentCol++;
             return true;
         }
@@ -126,7 +125,7 @@ public class SortedInventoryOutput {
     }
 
     private boolean tryMovingToNextRow(boolean isNewGroup) {
-        if(isNewGroup && this.numRows - this.currentRow > numGroupsToPlace) return this.goToNextAvailableRow();
+        if(isNewGroup && this.numRows - this.currentRow > numGroupsToPlace + 1) return this.goToNextAvailableRow();
         if(this.shouldGoToNextRow(this.slotsToAdd.size(), isNewGroup)) return this.goToNextAvailableRow();
         return false;
     }
