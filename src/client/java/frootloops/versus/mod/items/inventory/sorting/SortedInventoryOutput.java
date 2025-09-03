@@ -11,18 +11,25 @@ public class SortedInventoryOutput {
     private final ItemSlot[] invSlots;
     private LinkedList<ItemSlot> slotsToAdd;
     private final int numRows, numEmptySlots;
+    private int numGroupsToPlace;
     private final boolean isPlayerInventory;
     private int numSlotsSkipped = 0, currentCol = 0, currentRow = 0, currentGroupColStart;
 
-    public SortedInventoryOutput(int numRows, int numEmptySlots, boolean isPlayerInventory) {
+    public SortedInventoryOutput(int numRows, int numEmptySlots, int numGroups, boolean isPlayerInventory) {
         this.numRows = numRows;
         this.numEmptySlots = numEmptySlots;
+        this.numGroupsToPlace = numGroups;
         this.invSlots = new ItemSlot[numRows * 9];
         this.isPlayerInventory = isPlayerInventory;
     }
 
     public ItemSlot[] getInvSlots(){
         return this.invSlots;
+    }
+
+    public void markGroupAsDone() {
+        this.currentGroupColStart = 0;
+        this.numGroupsToPlace--;
     }
 
     public boolean addAll(LinkedList<ItemSlot> slots) { return this.addAll(slots, false);}
@@ -41,7 +48,7 @@ public class SortedInventoryOutput {
             this.tryBacktracking((this.slotsToAdd.size() + this.currentCol) % 9);
 
         // Try changing rows, if that improves the fit:
-        else if(isNewGroup) this.tryMovingToNextRow(isNewGroup);
+        else if(isNewGroup) this.tryMovingToNextRow(true);
 
         // Insert items:
         currentGroupColStart = currentCol;
@@ -119,6 +126,7 @@ public class SortedInventoryOutput {
     }
 
     private boolean tryMovingToNextRow(boolean isNewGroup) {
+        if(isNewGroup && this.numRows - this.currentRow > numGroupsToPlace) return this.goToNextAvailableRow();
         if(this.shouldGoToNextRow(this.slotsToAdd.size(), isNewGroup)) return this.goToNextAvailableRow();
         return false;
     }
@@ -150,22 +158,34 @@ public class SortedInventoryOutput {
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
                 boolean isSameGroup = i >= this.currentGroupColStart;
-
-                boolean currentMatchesTypeOfAbove = row > 0 && slot != null && slot.hasSameType(this.get(row - 1, i), true);
-                boolean currentMatchesItemOfAbove = currentMatchesTypeOfAbove && slot.isSameItem(this.get(row - 1, i));
-                boolean currentMatchesItemOfNext = row > 0 && i < 8 && slot != null && slot.isSameItem(this.get(row - 1, i + 1));
-
-                boolean otherMatchesTypeOfAbove = row > 0 && other != null && other.hasSameType(this.get(row - 1, i), true);
-                boolean otherMatchesItemOfAbove = otherMatchesTypeOfAbove && other.isSameItem(this.get(row - 1, i));
-                boolean otherMatchesItemOfNext = row > 0 && i < 8 && other != null && other.isSameItem(this.get(row - 1, i + 1));
-
                 boolean isHotbar = this.isPlayerInventory && row == 0;
-                boolean mustGoBefore = slot != null && (slot.shouldAlwaysGoBefore(other, !isHotbar) || ((currentMatchesItemOfAbove || otherMatchesItemOfNext) && other != null && !other.shouldAlwaysGoBefore(slot, !isHotbar)));
-                boolean shouldGoBefore = !currentMatchesItemOfNext && (other == null || !(other.shouldAlwaysGoBefore(slot, !isHotbar) || otherMatchesItemOfAbove) && (mustGoBefore || (isSameGroup && slot != null && (!slot.hasSameType(other, false) && ItemComparaisonHelper.shouldGoBefore(slot, other, isSameGroup)))));
-                if(mustGoBefore || (!currentMatchesItemOfAbove && shouldGoBefore)) {
-                    if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                               - Setting slot (" + i + ", " + this.currentCol + ") as " + slot + ", replacing " + other + " (Must: " + mustGoBefore + ", Should: " + shouldGoBefore + ")");
+                boolean mustGoBefore = slot != null && ((isSameGroup && other == null) || slot.shouldAlwaysGoBefore(other, !isHotbar)) && (other != null && !other.shouldAlwaysGoBefore(slot, !isHotbar));
+                if(mustGoBefore) {
+
+                    // Move back to not separate similar items:
+                    if(i > 0 && this.get(row, i - 1).isVerySimilarTo(other, isSameGroup)) {
+                        int j;
+                        for(j = i - 1; j >= 0; j--) if (!this.get(row, j).isVerySimilarTo(other, isSameGroup)) break;
+                        i = Math.max(0, j);
+                        other = this.get(row, i);
+                    }
+
+                    // Place item:
+                    if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                               - Setting slot (" + this.currentRow + ", " + i + ") as " + slot + ", replacing " + other + " (Must: " + mustGoBefore + ")");
                     invSlots[row * 9 + i] = slot;
                     slot = other;
+
+                    // Update group index start, if moved item to index before current group start:
+                    if(!isSameGroup) this.currentGroupColStart++;
+
+                    // Move items to the right:
+                    for(int k = i + 1; k < column + 1; k++) {
+                        other = invSlots[row * 9 + k];
+                        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                               - Moving down slot (" + this.currentRow + ", " + k + ") as " + slot + ", replacing " + other);
+                        invSlots[row * 9 + k] = slot;
+                        slot = other;
+                    }
+                    return true; // Exit: we successfully placed the item
                 }
             }
         }

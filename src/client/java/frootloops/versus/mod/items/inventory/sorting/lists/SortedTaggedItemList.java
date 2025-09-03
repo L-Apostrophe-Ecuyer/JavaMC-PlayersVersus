@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items.inventory.sorting.lists;
 
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
+import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import net.minecraft.item.Item;
 import net.minecraft.registry.tag.TagKey;
 
@@ -8,8 +9,9 @@ public class SortedTaggedItemList extends SortedItemList {
 
     protected final TagKey<Item> itemTagKey;
 
-    public SortedTaggedItemList(TagKey<Item> itemTagKey) {
+    public SortedTaggedItemList(TagKey<Item> itemTagKey, ItemType itemType) {
         this.itemTagKey = itemTagKey;
+        this.itemType = itemType;
     }
 
     @Override

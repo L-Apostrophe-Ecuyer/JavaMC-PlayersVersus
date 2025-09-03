@@ -7,6 +7,7 @@ import frootloops.versus.mod.items.inventory.sorting.groups.ToolSortingGroup;
 import frootloops.versus.mod.items.inventory.sorting.lists.SortedItemLists;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,12 +36,13 @@ public class InventorySortingHelper {
      */
     public static ItemSlot[] getOptimalInventoryRows(LinkedList<ItemSlot> inventorySlots, int numRows, boolean isPlayerInventory, boolean isInDeepDark, boolean isInNether, boolean isInWater) {
 
+        if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] Started sorting! Is Player Inventory? " + isPlayerInventory);
         int numItems = inventorySlots.size();
         int numEmptySlots = numRows * 9 - numItems;
 
         // Step 0: If less than 9 items, trivial, just add everything and sort the single row
         if(inventorySlots.size() <= 9) {
-            SortedInventoryOutput inventoryOutput = new SortedInventoryOutput(numRows, numEmptySlots, true);
+            SortedInventoryOutput inventoryOutput = new SortedInventoryOutput(numRows, numEmptySlots, 1, true);
             inventoryOutput.addAll(inventorySlots);
             return inventoryOutput.getInvSlots();
         }
@@ -49,23 +51,23 @@ public class InventorySortingHelper {
         for(ItemSlot slot: inventorySlots) InventorySortingHelper.insertItemIntoGroup(slot, isPlayerInventory, isInDeepDark, isInNether, isInWater);
         if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER INSERTING -----\n");
 
+        // Step 2: Try forming rows withing a group, and combining similar groups
         if(isPlayerInventory) {
-            InventorySortingHelper.cleanUpHotbar();
+            InventorySortingHelper.cleanUpHotbar(isInDeepDark);
             LinkedList<ItemSlot> slotsRemovedFromHotbar = MAIN_HOTBAR.keepOnlyEssentials();
             for (ItemSlot slot:slotsRemovedFromHotbar) insertItemIntoGroup(slot);
             if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER HOTBAR CLEAN UP -----\n");
         }
-
-        // Step 2: Try forming rows withing a group, and combining similar groups
         InventorySortingHelper.cleanUpGroups(isPlayerInventory);
+        if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER GROUPS CLEAN UP & MERGE -----\n");
 
         // Step 3: Order the resulting non-empty groups such that they combine into rows
         List<SortingGroup> orderedGroups = InventorySortingHelper.getOrderedListOfGroups(numEmptySlots, numRows);
-        if(DEBUG_SORTING_MERGE) printGroups("[ INVENTORY SORTING ] ---- AFTER CLEAN UP & MERGING -----\n", orderedGroups);
+        if(DEBUG_SORTING_MERGE) printGroups("[ INVENTORY SORTING ] ---- AFTER ORDERING -----\n", orderedGroups);
 
         // Step 4: Finally, place sorted item groups into an inventory output
         if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] ---- STARTING TO INPUT INTO INVENTORY -----");
-        SortedInventoryOutput inventoryOutput = new SortedInventoryOutput(numRows, numEmptySlots, isPlayerInventory);
+        SortedInventoryOutput inventoryOutput = new SortedInventoryOutput(numRows, numEmptySlots, orderedGroups.size(), isPlayerInventory);
         LinkedList<ItemSlot> slotsTaken, slotsToAdd = new LinkedList<>();
 
         // If each group can have their own row, then best case scenario:
@@ -136,6 +138,7 @@ public class InventorySortingHelper {
                     return null;
                 }
             }
+            inventoryOutput.markGroupAsDone();
         }
 
         // Finally, clear all and return
@@ -234,6 +237,11 @@ public class InventorySortingHelper {
             numRows--;
         }
         orderedGroups.addAll(0, nonEmptyGroups.reversed());
+
+        // Sort by order of item type:
+        orderedGroups = new LinkedList<>(orderedGroups.stream().sorted(Comparator.comparing(SortingGroup::getItemType)).toList());
+
+        // Make sure Hotbar is first:
         if (MAIN_HOTBAR.size() > 0 && orderedGroups.getFirst() != MAIN_HOTBAR) {
             orderedGroups.remove(MAIN_HOTBAR);
             orderedGroups.addFirst(MAIN_HOTBAR);
@@ -260,10 +268,11 @@ public class InventorySortingHelper {
             MINERALS_GROUP.recalculateActualSize();
         }
         if (GOODIES_GROUP.size() > 0 && MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(GOODIES_GROUP, MINERALS_GROUP);
+        if (BREWING_GROUP.size() > 0 && CONSUMABLES_GROUP.size() > 0) tryCombiningTwoGroups(CONSUMABLES_GROUP, BREWING_GROUP);
+        if (BREWING_GROUP.size() > 0 && WORLD_GROUP.size() > 0) tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP);
 
         // Step 2: Clean up tool groups and merge them:
         if (isPlayerInventory) {
-            if (MAIN_HOTBAR.size() > 0) cleanUpHotbar();
             cleanUpToolGroup(SHEARS_GROUP, HOE_GROUP);
             cleanUpToolGroup(SHEARS_GROUP, WORLD_GROUP);
             cleanUpToolGroup(HOE_GROUP, SHEARS_GROUP, SHOVEL_GROUP);
@@ -275,6 +284,16 @@ public class InventorySortingHelper {
             giveExtraToolsFromAndTo(COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(AXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(SHOVEL_GROUP, PICKAXE_GROUP);
+        }
+        else {
+            cleanUpToolGroup(SHEARS_GROUP, HOE_GROUP, WORLD_GROUP, SHOVEL_GROUP);
+            cleanUpToolGroup(HOE_GROUP, SHEARS_GROUP, SHOVEL_GROUP, WORLD_GROUP);
+            cleanUpToolGroup(SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP);
+            cleanUpToolGroup(PICKAXE_GROUP, SHOVEL_GROUP, AXE_GROUP);
+            cleanUpToolGroup(AXE_GROUP, COMBAT_GROUP, PICKAXE_GROUP);
+            if(SHOVEL_GROUP.hasOnlyTools()) cleanUpToolGroup(SHOVEL_GROUP, PICKAXE_GROUP, AXE_GROUP);
+            if(HOE_GROUP.hasOnlyTools()) cleanUpToolGroup(HOE_GROUP, PICKAXE_GROUP, AXE_GROUP);
+            if(AXE_GROUP.hasOnlyTools()) cleanUpToolGroup(AXE_GROUP, PICKAXE_GROUP);
         }
         cleanUpMisc();
 
@@ -305,7 +324,7 @@ public class InventorySortingHelper {
         return false;
     }
 
-    public static void cleanUpHotbar() {
+    public static void cleanUpHotbar(boolean isInDeepDark) {
         int size = MAIN_HOTBAR.size();
         if(size == 9) return;
         if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] ---- CLEANING HOTBAR -----");
@@ -322,23 +341,44 @@ public class InventorySortingHelper {
 
         // If still space, try smartly adding tools and blocks to hotbar:
         if(!MAIN_HOTBAR.hasBuildingItems()) {
+            if(isInDeepDark) {
+                if(HOE_GROUP.size() > 0 && HOE_GROUP.size() + HOE_GROUP.size() <= 9) HOE_GROUP.addSlots(HOE_GROUP.takeAllItems());
+                else if(HOE_GROUP.hasOnlyTools() || HOE_GROUP.canGiveawayTools()) {
+                    giveExtraToolsFromAndTo(HOE_GROUP, MAIN_HOTBAR);
+                    if(tryCombiningTwoGroups(MAIN_HOTBAR, HOE_GROUP)) return;
+                }
+                if(MAIN_HOTBAR.size() >= 9) return;
+            }
+
             if(AXE_GROUP.size() > 0 && MAIN_HOTBAR.size() + AXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(AXE_GROUP.takeAllItems());
-            else if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools()) {
+            else if(AXE_GROUP.hasOnlyTools() || (!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools())) {
                 giveExtraToolsFromAndTo(AXE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
             }
             if(MAIN_HOTBAR.size() >= 9) return;
 
             if(MAIN_HOTBAR.size() + PICKAXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(PICKAXE_GROUP.takeAllItems());
-            else if(!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.canGiveawayTools()) {
+            else if(PICKAXE_GROUP.hasOnlyTools() || (!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.canGiveawayTools())) {
                 giveExtraToolsFromAndTo(PICKAXE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
             }
             if(MAIN_HOTBAR.size() >= 9) return;
 
-            if(MAIN_HOTBAR.size() < 9 && !MAIN_HOTBAR.hasBuildingItems() && SHOVEL_GROUP.getNumTools() > 0) {
+            if(MAIN_HOTBAR.size() < 9 && (SHOVEL_GROUP.hasOnlyTools() || (!MAIN_HOTBAR.hasBuildingItems() && SHOVEL_GROUP.getNumTools() > 0))) {
                 giveExtraToolsFromAndTo(SHOVEL_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, SHOVEL_GROUP)) return;
+            }
+            if(MAIN_HOTBAR.size() >= 9) return;
+
+            if(MAIN_HOTBAR.size() < 9 && SHEARS_GROUP.hasOnlyTools()) {
+                giveExtraToolsFromAndTo(SHOVEL_GROUP, MAIN_HOTBAR);
+                if(tryCombiningTwoGroups(MAIN_HOTBAR, SHOVEL_GROUP)) return;
+            }
+            if(MAIN_HOTBAR.size() >= 9) return;
+
+            if(MAIN_HOTBAR.size() < 9 && HOE_GROUP.hasOnlyTools()) {
+                giveExtraToolsFromAndTo(HOE_GROUP, MAIN_HOTBAR);
+                if(tryCombiningTwoGroups(MAIN_HOTBAR, HOE_GROUP)) return;
             }
             if(MAIN_HOTBAR.size() >= 9) return;
         }
@@ -402,21 +442,37 @@ public class InventorySortingHelper {
         cleanUpToolGroup(groupToCleanUp, firstChoice, secondChoice, null);
     }
     public static void cleanUpToolGroup(ToolSortingGroup groupToCleanUp, ToolSortingGroup firstChoice, SortingGroup secondChoice, SortingGroup lastChoice) {
-        if(groupToCleanUp.getNumTools() == 0 && (groupToCleanUp.size() < 9 || groupToCleanUp.size() % 9 <= 2)) {
+        boolean hasOnlyBlocks = groupToCleanUp.getNumTools() == 0 && groupToCleanUp.size() > 0 && groupToCleanUp.size() % 9 != 0 && (groupToCleanUp.size() < 9 || groupToCleanUp.size() % 9 <= 2);
+        boolean hasOnlyTools = groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() % 9 != 0 && (groupToCleanUp.size() < 6 || groupToCleanUp.size() % 9 <= 2);
+        if(hasOnlyBlocks || hasOnlyTools) {
             VersusMod.MOD_LOGGER.warn("                   -> " + groupToCleanUp.GROUP_NAME + " - Cleaning up tool group!");
 
-            if(firstChoice != null && firstChoice.size() > 0 && firstChoice.getNumTools() > 0)
-                if(groupToCleanUp != null && tryCombiningTwoGroups(firstChoice, groupToCleanUp)) return;
+            if(firstChoice != null && firstChoice.size() > 0 && firstChoice.getNumTools() > 0) {
+                if (groupToCleanUp != null && tryCombiningTwoGroups(firstChoice, groupToCleanUp)) return;
+                else if (groupToCleanUp.hasOnlyTools() && tryCombiningTwoGroups(groupToCleanUp, firstChoice)) return;
+                else if (groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() + firstChoice.size() <= 9) {
+                    firstChoice.addSlots(groupToCleanUp.takeAllItems());
+                    return;
+                }
+            }
 
-            if(secondChoice != null && groupToCleanUp.size() > 0 && secondChoice.size() > 0 && (!(secondChoice instanceof ToolSortingGroup) || ((ToolSortingGroup)secondChoice).getNumTools() > 0))
-                if(secondChoice != null && tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
+            if(secondChoice != null && groupToCleanUp.size() > 0 && secondChoice.size() > 0 && (!(secondChoice instanceof ToolSortingGroup) || ((ToolSortingGroup)secondChoice).getNumTools() > 0)){
+                if (groupToCleanUp != null && tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
+                else if (groupToCleanUp.hasOnlyTools() && tryCombiningTwoGroups(groupToCleanUp, secondChoice)) return;
+                else if (groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() + secondChoice.size() <= 9) {
+                    secondChoice.addSlots(groupToCleanUp.takeAllItems());
+                    return;
+                }
+            }
 
             if(lastChoice != null && groupToCleanUp.size() > 0 && lastChoice.size() > 0)
                 if(lastChoice != null && tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
 
-            VersusMod.MOD_LOGGER.warn("                      Adding the items of " + groupToCleanUp.GROUP_NAME + " to lastchoice");
-            if(lastChoice != null && groupToCleanUp.size() > 0 && lastChoice.size() > 0) lastChoice.addSlots(groupToCleanUp.takeAllItems());
-            else RANDOM_GROUP.addSlots(groupToCleanUp.takeAllItems());
+            if(hasOnlyBlocks) {
+                VersusMod.MOD_LOGGER.warn("                      Found no good match, but the building and random items of " + groupToCleanUp.GROUP_NAME + " will be given to last choice (or random)");
+                if (lastChoice != null && groupToCleanUp.size() > 0 && lastChoice.size() > 0) lastChoice.addSlots(groupToCleanUp.takeAllItems());
+                else RANDOM_GROUP.addSlots(groupToCleanUp.takeAllItems());
+            }
         }
     }
 

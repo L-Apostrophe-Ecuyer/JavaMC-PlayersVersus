@@ -13,6 +13,7 @@ import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.util.math.BlockPos;
 
 public abstract class ItemComparaisonHelper {
 
@@ -95,12 +96,12 @@ public abstract class ItemComparaisonHelper {
                     if(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
-                    return slot.toString().compareTo(slotToCompareTo.toString()) < 1;
+                    return blockItem.getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color < otherBlockItem.getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color;
                 }
                 else return true;
             }
             if(otherBlockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) return false;
-            return (blockItem.getBlock().getHardness() <= otherBlockItem.getBlock().getHardness());
+            return blockItem.getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color < otherBlockItem.getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color;
         }
 
         // Clutch items:
@@ -172,6 +173,9 @@ public abstract class ItemComparaisonHelper {
         else if(MinecraftClient.getInstance().world.getBrewingRecipeRegistry().isPotionRecipeIngredient(stack)) return ItemType.BREWING_INGREDIENT;
         else if(stack.isOf(Items.PUFFERFISH) || stack.isOf(Items.ROTTEN_FLESH) || stack.isOf(Items.SPIDER_EYE) || stack.isOf(Items.POISONOUS_POTATO) || stack.isOf(Items.INK_SAC) || stack.isOf(Items.GLOW_INK_SAC)) return ItemType.TRASH;
         else if(stack.getComponents().contains(DataComponentTypes.FOOD)) return ItemType.FOOD;
+        else if(stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS)) return ItemType.ITEM_CONTAINER;
+        else if(stack.getComponents().contains(DataComponentTypes.CONTAINER)) return ItemType.ITEM_CONTAINER;
+        else if(stack.getComponents().contains(DataComponentTypes.CONTAINER_LOOT)) return ItemType.ITEM_CONTAINER;
         else if(stack.getUseAction() != UseAction.NONE || stack.isOf(Items.TORCH) || stack.isOf(Items.SOUL_TORCH) || stack.isOf(Items.LANTERN) || stack.isOf(Items.SOUL_LANTERN)) return ItemType.TORCHES_AND_LANTERNS;
         else if(stack.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();

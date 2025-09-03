@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items.inventory.sorting.lists;
 
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
+import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -24,35 +25,40 @@ public class SortedBlockItemList extends SortedItemList {
     private final float minHardness, maxHardness;
 
     public SortedBlockItemList(TagKey<Block> blockTagKey) {
-        this(blockTagKey, null, null, -1.0f, 128.0f);
+        this(blockTagKey, null, null, -1.0f, 128.0f, ItemType.BLOCK_FULL);
+    }
+
+    public SortedBlockItemList(Map<Item, Integer> blockIndexMap, ItemType type) {
+        this(null, null, blockIndexMap, -1.0f, 128.0f, type);
     }
 
     public SortedBlockItemList(Map<Item, Integer> blockIndexMap) {
-        this(null, null, blockIndexMap, -1.0f, 128.0f);
+        this(null, null, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
     public SortedBlockItemList(TagKey<Block> blockTagKey, Map<Item, Integer> blockIndexMap) {
-        this(blockTagKey, null, blockIndexMap, -1.0f, 128.0f);
+        this(blockTagKey, null, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
     public SortedBlockItemList(TagKey<Block> blockTagKey, BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap) {
-        this(blockTagKey, blockSoundGroup, blockIndexMap, -1.0f, 128.0f);
+        this(blockTagKey, blockSoundGroup, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
     public SortedBlockItemList(BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap) {
-        this(null, blockSoundGroup, blockIndexMap, -1.0f, 128.0f);
+        this(null, blockSoundGroup, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
     public SortedBlockItemList(TagKey<Block> blockTagKey, float minHardness, float maxHardness) {
-        this(blockTagKey, null, null, minHardness, maxHardness);
+        this(blockTagKey, null, null, minHardness, maxHardness, ItemType.BLOCK_FULL);
     }
 
-    public SortedBlockItemList(TagKey<Block> blockTagKey, BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap, float minHardness, float maxHardness) {
+    public SortedBlockItemList(TagKey<Block> blockTagKey, BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap, float minHardness, float maxHardness, ItemType type) {
         this.blockTagKey = blockTagKey;
         this.blockSoundGroup = blockSoundGroup;
         this.blockIndexMap = blockIndexMap;
         this.minHardness = minHardness;
         this.maxHardness = maxHardness;
+        this.itemType = type;
     }
 
     @Override

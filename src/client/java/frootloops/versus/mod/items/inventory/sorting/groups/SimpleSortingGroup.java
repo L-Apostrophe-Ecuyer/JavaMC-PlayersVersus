@@ -2,6 +2,7 @@ package frootloops.versus.mod.items.inventory.sorting.groups;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
+import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import frootloops.versus.mod.items.inventory.sorting.lists.SortedItemList;
 
 import java.util.LinkedList;
@@ -18,6 +19,14 @@ public class SimpleSortingGroup extends SortingGroup {
     }
 
     protected int numItems = 0;
+
+    @Override
+    public ItemType getItemType() {
+        for(SortedItemList sortedList: sortedItemLists) {
+            if(sortedList.size() > 0) return sortedList.getMainItemTypeOfList();
+        }
+        return ItemType.MISC;
+    }
 
     @Override
     public ItemSlot tryInsertingSlot(ItemSlot slot) {

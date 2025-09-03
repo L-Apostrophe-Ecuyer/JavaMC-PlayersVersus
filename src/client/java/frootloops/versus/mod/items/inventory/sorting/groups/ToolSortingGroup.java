@@ -2,6 +2,7 @@ package frootloops.versus.mod.items.inventory.sorting.groups;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
+import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import frootloops.versus.mod.items.inventory.sorting.lists.SortedItemList;
 
 import java.util.Arrays;
@@ -20,6 +21,12 @@ public class ToolSortingGroup extends SimpleSortingGroup {
     }
 
     protected int numTools = 0;
+
+    @Override
+    public ItemType getItemType() {
+        if(sortedToolList.size() > 0) return sortedToolList.getMainItemTypeOfList();
+        return super.getItemType();
+    }
 
     public ItemSlot tryInsertingSlot(ItemSlot slot) {
         if(sortedToolList.trySortedInsert(slot) != -1) {
@@ -64,6 +71,10 @@ public class ToolSortingGroup extends SimpleSortingGroup {
 
     public int getNumTools() {
         return numTools;
+    }
+
+    public boolean hasOnlyTools() {
+        return numTools > 0 && this.size() == numTools;
     }
 
     public ItemSlot takeWorstTool() {

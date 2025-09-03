@@ -103,6 +103,11 @@ public class MainHotbarGroup extends SortingGroup {
         }
     }
 
+    @Override
+    public ItemType getItemType() {
+        return ItemType.SWORD;
+    }
+
     public ItemSlot tryInsertingSlot(ItemSlot slot) {
         return this.tryInsertingSlot(slot, false, false, false);
     }

@@ -1,6 +1,8 @@
 package frootloops.versus.mod.items.inventory.sorting.lists;
 
+import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
+import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import net.minecraft.item.Item;
 
 import java.util.Map;
@@ -8,8 +10,9 @@ import java.util.Map;
 public class SortedMappedItemList extends SortedItemList {
     protected final Map<Item, Integer> itemIndexMap;
 
-    public SortedMappedItemList(Map<Item, Integer> itemIndexMap) {
+    public SortedMappedItemList(Map<Item, Integer> itemIndexMap, ItemType type) {
         this.itemIndexMap = itemIndexMap;
+        this.itemType = type;
     }
 
     @Override

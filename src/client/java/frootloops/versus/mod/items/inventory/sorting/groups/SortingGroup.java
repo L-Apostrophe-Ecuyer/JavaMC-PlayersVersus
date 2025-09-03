@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items.inventory.sorting.groups;
 
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
+import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import frootloops.versus.mod.items.inventory.sorting.lists.SortedItemList;
 import frootloops.versus.mod.items.inventory.sorting.lists.SortedMiscItemList;
 
@@ -15,6 +16,8 @@ public abstract class SortingGroup implements Comparable<SortingGroup>{
     protected SortingGroup(String group_name) {
         GROUP_NAME = group_name;
     }
+
+    public abstract ItemType getItemType();
 
     /**
      * Either accepts and inserts slot into itself, or returns it back. Also has the opportunity to take the slot and return another.

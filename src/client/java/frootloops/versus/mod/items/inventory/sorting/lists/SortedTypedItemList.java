@@ -10,6 +10,7 @@ public class SortedTypedItemList extends SortedItemList {
 
     public SortedTypedItemList(final ItemType[] acceptableTypes) {
         this.acceptableTypes = acceptableTypes;
+        this.itemType = acceptableTypes[0];
     }
 
     @Override

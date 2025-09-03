@@ -2,6 +2,7 @@ package frootloops.versus.mod.items.inventory.sorting.lists;
 
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
+import frootloops.versus.mod.items.inventory.sorting.ItemType;
 
 import java.util.LinkedList;
 
@@ -9,9 +10,14 @@ import java.util.LinkedList;
 
 public abstract class SortedItemList {
     protected LinkedList<ItemSlot> slots = new LinkedList<>();
+    protected ItemType itemType;
 
     public int trySortedInsert(ItemSlot newSlot) {
         return -1;
+    }
+
+    public ItemType getMainItemTypeOfList() {
+        return this.itemType;
     }
 
     public void clear() {slots.clear();}
