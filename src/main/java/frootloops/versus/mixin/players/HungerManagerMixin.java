@@ -31,11 +31,11 @@ public class HungerManagerMixin {
 
     private float prevSaturationLevel = 0.0f;
 
-    private static final int REGEN_TIME_SLOW = 80, REGEN_TIME_FAST = 32;
+    private static final int REGEN_TIME_SLOW = 48, REGEN_TIME_FAST = 32;
     private static final int SPRINT_RECOVERY_TIME_SLOW = 80, SPRINT_RECOVERY_TIME_FAST = 20;
     private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 2;
     private static final int FOOD_REQUIRED_FOR_SLOW_REGEN = 1;
-    private static boolean IS_SLOW_REGEN_ENABLED = false;
+    private static boolean IS_SLOW_REGEN_ENABLED = true;
 
     @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
     public void eat(FoodComponent foodComponent, CallbackInfo info) {
@@ -72,7 +72,7 @@ public class HungerManagerMixin {
         if(foodLevel == 0) {
             if(IS_STARVATION_ENABLED || hasHungerEffect) {
                 //if(FOOD_REQUIRED_FOR_SLOW_REGEN > 0) saturationLevel = 0.0f;
-                if (exhaustion > 0.5F) {
+                if (exhaustion > 0.75F) {
                     exhaustion = 0.0F;
                     if(saturationLevel == 0.0f) player.damage(player.getServerWorld(), player.getDamageSources().starve(), 1.0f);
                     else saturationLevel = Math.max(0.0F, saturationLevel - 0.5F);
@@ -128,6 +128,8 @@ public class HungerManagerMixin {
                 player.setHealth((float) Math.ceil(playerHealth) + 1f);
                 foodTickTimer = 0;
                 exhaustion += 0.25F;
+                if(saturationLevel > 1.0F) saturationLevel = Math.max(1.0F, saturationLevel - 1.0F);
+                else if(foodLevel > 0) foodLevel--;
             }
         }
         else foodTickTimer = Math.min(foodTickTimer, 0);
