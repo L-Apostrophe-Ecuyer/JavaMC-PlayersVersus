@@ -36,10 +36,33 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
         return this.itemType == ItemType.FOOD;
     }
 
+    public boolean isSameItem(ItemSlot slot) {
+        if(slot == null) return false;
+        return ItemStack.areItemsAndComponentsEqual(this.stack, slot.stack);
+    }
+
     public boolean hasSameType(ItemSlot slot, boolean compareBlockTypes) {
         if(slot == null) return false;
         if(!compareBlockTypes && this.isBlock()) return slot.isBlock();
         return this.itemType == slot.itemType;
+    }
+
+    public boolean shouldAlwaysGoBefore(ItemSlot other, boolean proritizeArmor) {
+        if(other == null) return false;
+        if(this.isSameItem(other)) return this.stack.getCount() > other.stack.getCount();
+        if(this.isToolOrWeapon()) {
+            if(!other.isToolOrWeapon()) return true;
+            else return ItemComparaisonHelper.shouldGoBefore(this, other);
+        }
+        if(other.isToolOrWeapon()) return false;
+        if(proritizeArmor) {
+            if(this.isArmor()) {
+                if(!other.isArmor()) return true;
+                else return ItemComparaisonHelper.shouldGoBefore(this, other);
+            }
+            if(other.isArmor()) return false;
+        }
+        return false;
     }
 
     @Override

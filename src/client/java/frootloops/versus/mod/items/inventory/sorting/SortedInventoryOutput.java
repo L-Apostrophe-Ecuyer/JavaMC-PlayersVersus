@@ -145,13 +145,22 @@ public class SortedInventoryOutput {
         }
 
         // Try sorting each individual row as well:
-        if(isPlayerInventory && column > 0 && slot.itemType() != ItemType.MISC && slot.itemType() != ItemType.TRASH) {
+        if(column > 0 && slot.itemType() != ItemType.MISC && slot.itemType() != ItemType.TRASH) {
             if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this tool: " + slot);
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
                 boolean isSameGroup = i >= this.currentGroupColStart;
-                boolean shouldSwapPositions = slot != null && (other == null || (!slot.hasSameType(other, false) && ItemComparaisonHelper.shouldGoBefore(slot, other, isSameGroup)));
-                if(shouldSwapPositions) {
+
+                boolean currentMatchesTypeOfAbove = row > 0 && slot != null && slot.hasSameType(this.get(row - 1, i), true);
+                boolean currentMatchesItemOfAbove = currentMatchesTypeOfAbove && slot.isSameItem(this.get(row - 1, i));
+
+                boolean otherMatchesTypeOfAbove = row > 0 && other != null && other.hasSameType(this.get(row - 1, i), true);
+                boolean otherMatchesItemOfAbove = otherMatchesTypeOfAbove && other.isSameItem(this.get(row - 1, i));
+
+                boolean isHotbar = this.isPlayerInventory && row == 0;
+                boolean mustGoBefore = slot != null && (slot.shouldAlwaysGoBefore(other, !isHotbar) || (currentMatchesItemOfAbove && other != null && !other.shouldAlwaysGoBefore(slot, !isHotbar)));
+                boolean shouldGoBefore = other == null || !(other.shouldAlwaysGoBefore(slot, !isHotbar) || otherMatchesItemOfAbove) && (mustGoBefore || (slot != null && (!slot.hasSameType(other, false) && ItemComparaisonHelper.shouldGoBefore(slot, other, isSameGroup))));
+                if(mustGoBefore || (!currentMatchesTypeOfAbove && shouldGoBefore)) {
                     invSlots[row * 9 + i] = slot;
                     slot = other;
                 }
