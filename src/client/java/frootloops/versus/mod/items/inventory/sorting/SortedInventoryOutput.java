@@ -153,14 +153,17 @@ public class SortedInventoryOutput {
 
                 boolean currentMatchesTypeOfAbove = row > 0 && slot != null && slot.hasSameType(this.get(row - 1, i), true);
                 boolean currentMatchesItemOfAbove = currentMatchesTypeOfAbove && slot.isSameItem(this.get(row - 1, i));
+                boolean currentMatchesItemOfNext = row > 0 && i < 8 && slot != null && slot.isSameItem(this.get(row - 1, i + 1));
 
                 boolean otherMatchesTypeOfAbove = row > 0 && other != null && other.hasSameType(this.get(row - 1, i), true);
                 boolean otherMatchesItemOfAbove = otherMatchesTypeOfAbove && other.isSameItem(this.get(row - 1, i));
+                boolean otherMatchesItemOfNext = row > 0 && i < 8 && other != null && other.isSameItem(this.get(row - 1, i + 1));
 
                 boolean isHotbar = this.isPlayerInventory && row == 0;
-                boolean mustGoBefore = slot != null && (slot.shouldAlwaysGoBefore(other, !isHotbar) || (currentMatchesItemOfAbove && other != null && !other.shouldAlwaysGoBefore(slot, !isHotbar)));
-                boolean shouldGoBefore = other == null || !(other.shouldAlwaysGoBefore(slot, !isHotbar) || otherMatchesItemOfAbove) && (mustGoBefore || (slot != null && (!slot.hasSameType(other, false) && ItemComparaisonHelper.shouldGoBefore(slot, other, isSameGroup))));
-                if(mustGoBefore || (!currentMatchesTypeOfAbove && shouldGoBefore)) {
+                boolean mustGoBefore = slot != null && (slot.shouldAlwaysGoBefore(other, !isHotbar) || ((currentMatchesItemOfAbove || otherMatchesItemOfNext) && other != null && !other.shouldAlwaysGoBefore(slot, !isHotbar)));
+                boolean shouldGoBefore = !currentMatchesItemOfNext && (other == null || !(other.shouldAlwaysGoBefore(slot, !isHotbar) || otherMatchesItemOfAbove) && (mustGoBefore || (isSameGroup && slot != null && (!slot.hasSameType(other, false) && ItemComparaisonHelper.shouldGoBefore(slot, other, isSameGroup)))));
+                if(mustGoBefore || (!currentMatchesItemOfAbove && shouldGoBefore)) {
+                    if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                               - Setting slot (" + i + ", " + this.currentCol + ") as " + slot + ", replacing " + other + " (Must: " + mustGoBefore + ", Should: " + shouldGoBefore + ")");
                     invSlots[row * 9 + i] = slot;
                     slot = other;
                 }
