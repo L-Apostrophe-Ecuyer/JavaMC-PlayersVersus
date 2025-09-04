@@ -13,7 +13,7 @@ public class SortedInventoryOutput {
     private final int numRows, numEmptySlots;
     private int numGroupsToPlace;
     private final boolean isPlayerInventory;
-    private int numSlotsSkipped = 0, currentCol = 0, currentRow = 0, currentGroupColStart;
+    private int numSlotsSkipped = 0, currentCol = 0, currentRow = 0, currentGroupColStart = 0, currentSlotsColStart;
 
     public SortedInventoryOutput(int numRows, int numEmptySlots, int numGroups, boolean isPlayerInventory) {
         this.numRows = numRows;
@@ -28,7 +28,30 @@ public class SortedInventoryOutput {
     }
 
     public void markGroupAsDone() {
-        this.currentGroupColStart = 0;
+        boolean wasGroupMultirow = this.currentCol <= this.currentGroupColStart && this.currentCol % 8 != 0;
+        boolean shouldMoveLastRowToRight = wasGroupMultirow && (this.numGroupsToPlace > 1 || this.currentGroupColStart > 0);
+        if(shouldMoveLastRowToRight) {
+            int indexEnd, indexStart = 0;
+            for(indexEnd = 8; indexEnd > this.currentCol; indexEnd--) if(this.get(this.currentRow, indexEnd) == null) break;
+            if(indexEnd >= currentCol) { // If enough empty columns at end of row to fit the item slots. This should always be true... but better safe than sorry
+                if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("================= MOVING ITEMS OF GROUP TO END OF ROW");
+                for (int i = 0; i <= this.currentCol; i++) {
+                    ItemSlot slotToMove = this.get(this.currentRow, i);
+                    if (!slotToMove.isToolOrWeapon()) {
+                        this.invSlots[this.currentRow * 9 + i] = this.get(this.currentRow, indexEnd);
+                        this.invSlots[this.currentRow * 9 + indexEnd] = slotToMove;
+                        indexEnd--;
+                    }
+                    else {
+                        this.invSlots[this.currentRow * 9 + i] = this.get(this.currentRow, indexStart);
+                        this.invSlots[this.currentRow * 9 + indexStart] = slotToMove;
+                        indexStart++;
+                    }
+                }
+                this.currentCol = 0;
+            } else if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("----------------- End of group. Unable to move last items to the right, IndexEnd is " + indexEnd);
+        } else if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("----------------- End of group. Group's col value started at " + currentGroupColStart + " and ended at " + currentCol);
+        this.currentSlotsColStart = 0;
         this.numGroupsToPlace--;
     }
 
@@ -50,8 +73,11 @@ public class SortedInventoryOutput {
         // Try changing rows, if that improves the fit:
         else if(isNewGroup) this.tryMovingToNextRow(true);
 
+        // Update counters. These help keep groups and lists together:
+        if(isNewGroup) this.currentGroupColStart = this.currentCol;
+        currentSlotsColStart = currentCol;
+
         // Insert items:
-        currentGroupColStart = currentCol;
         int numItemsToAdd = slotsToAdd.size();
         for(int i = 0; i < numItemsToAdd; i++) {
             if(!this.moveToNextAvailableSlot()) {
@@ -120,7 +146,7 @@ public class SortedInventoryOutput {
         this.numSlotsSkipped += 9 - (this.currentCol + 1);
         this.currentRow++;
         this.currentCol = 0;
-        this.currentGroupColStart = 0;
+        this.currentSlotsColStart = 0;
         return true;
     }
 
@@ -133,12 +159,23 @@ public class SortedInventoryOutput {
     private boolean shouldGoToNextRow(int numItemsNewBatch, boolean lenientCheck) {
         if(this.currentRow >= this.numRows - 1 || this.currentCol == 0) return false;
         if(this.currentCol >= 8) return true;
+
+        // Check how many empty slots in row are actually left:
+        int numEmptySlotsInRow = 9 - currentCol;
+        if(this.get(this.currentRow,8) != null) {
+            numEmptySlotsInRow = 0;
+            for(int i = 7; i > this.currentCol; i--) if(this.get(this.currentRow,i) == null) numEmptySlotsInRow++;
+            if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                                 Checking if needing to go to next row: There are " + numEmptySlotsInRow + " empty slots left in row " + this.currentRow);
+            if(numEmptySlotsInRow == 0) return true;
+        }
+
+        // Check if we can fit the items of the current batch into the same row:
         if(numItemsNewBatch + this.currentCol < (lenientCheck ? 9 : 6)) return false;
         if(numItemsNewBatch > 0) return false;
 
         // Skip to next row logic:
         int numEmptySlotsLeftPerRow = (this.numEmptySlots - this.numSlotsSkipped)/Math.min(1, this.numRows - this.currentRow);
-        return numEmptySlotsLeftPerRow >= (9 - this.currentCol);
+        return numEmptySlotsLeftPerRow >= (9 - numEmptySlotsInRow);
     }
 
     private boolean set(int row, int column, ItemSlot slot){
@@ -156,7 +193,7 @@ public class SortedInventoryOutput {
             if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this tool: " + slot);
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
-                boolean isSameGroup = i >= this.currentGroupColStart;
+                boolean isSameGroup = i >= this.currentSlotsColStart;
                 boolean isHotbar = this.isPlayerInventory && row == 0;
                 boolean mustGoBefore = slot != null && ((isSameGroup && other == null) || slot.shouldAlwaysGoBefore(other, !isHotbar)) && (other != null && !other.shouldAlwaysGoBefore(slot, !isHotbar));
                 if(mustGoBefore) {
@@ -175,7 +212,7 @@ public class SortedInventoryOutput {
                     slot = other;
 
                     // Update group index start, if moved item to index before current group start:
-                    if(!isSameGroup) this.currentGroupColStart++;
+                    if(!isSameGroup) this.currentSlotsColStart++;
 
                     // Move items to the right:
                     for(int k = i + 1; k < column + 1; k++) {
