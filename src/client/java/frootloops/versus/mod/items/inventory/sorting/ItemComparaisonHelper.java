@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items.inventory.sorting;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.DataComponentTypes;
@@ -46,11 +47,16 @@ public abstract class ItemComparaisonHelper {
         if(slot.stack().getRarity().ordinal() > slotToCompareTo.stack().getRarity().ordinal()) return true;
 
         // Armor and weapon comparaison:
-        if(slot.isToolOrWeapon() || (!skipNonTools && slot.isArmor())) {
+        if(slot.isToolOrWeapon()) {
+            double modifiersOfStack = getToolPreferenceValue(slot.stack());
+            double modifiersOfOther = getToolPreferenceValue(slotToCompareTo.stack());
+            return modifiersOfStack > modifiersOfOther;
+        }
+        if(slot.isArmor()) {
             EquipmentSlot equipmentSlot = getPreferredEquipmentSlotOf(slot.itemType());
-            double modifiersOfStack = getAttributeValueWithStack(slot.stack(), equipmentSlot);
-            double modifiersOfOther = getAttributeValueWithStack(slotToCompareTo.stack(), equipmentSlot);
-            if (modifiersOfStack > modifiersOfOther) return true;
+            double modifiersOfStack = getArmorPreferenceValue(slot.stack(), equipmentSlot);
+            double modifiersOfOther = getArmorPreferenceValue(slotToCompareTo.stack(), equipmentSlot);
+            return modifiersOfStack > modifiersOfOther;
         }
         else if(skipNonTools) {
             return false;
@@ -198,8 +204,20 @@ public abstract class ItemComparaisonHelper {
         else return ItemType.MISC;
     }
 
-    public static double getAttributeValueWithStack(ItemStack stack, EquipmentSlot slot) {
+    private static double getAttributeValueWithStack(ItemStack stack, EquipmentSlot slot) {
         AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
         return attributeModifiersComponent.applyOperations(0.0, slot);
+    }
+
+    private static double getArmorPreferenceValue(ItemStack stack, EquipmentSlot slot) {
+        double attributeValue = getAttributeValueWithStack(stack, slot);
+        double durabilityPoints = (double)(stack.getMaxDamage() * 2 - stack.getDamage())/64.0;
+        return attributeValue + durabilityPoints;
+    }
+
+    private static double getToolPreferenceValue(ItemStack stack) {
+        double attributeValue = getAttributeValueWithStack(stack, EquipmentSlot.MAINHAND);
+        double durabilityPoints = (double)(stack.getMaxDamage() * 2 - stack.getDamage())/32.0;
+        return attributeValue + durabilityPoints;
     }
 }
