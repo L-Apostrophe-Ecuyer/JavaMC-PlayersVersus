@@ -46,7 +46,7 @@ public class HauntingStatusEffect extends StatusEffect  {
                     player.setExperiencePoints(0);
                     player.setExperienceLevel(0);
                     player.totalExperience = 0;
-                    ExperienceOrbEntity.spawn(player.getServerWorld(), player.getPos(), xpToDrop);
+                    ExperienceOrbEntity.spawn(player.getWorld(), player.getPos(), xpToDrop);
                 }
                 entity.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, -1, 5));
                 entity.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 300, 0));
@@ -56,7 +56,7 @@ public class HauntingStatusEffect extends StatusEffect  {
             entity.setInvisible(true);
             entity.setNoGravity(true);
             if(entity.getWorld() instanceof ServerWorld serverWorld) {
-                int xpToDrop = (entity.getXpToDrop(serverWorld, null) * 3) / 5;
+                int xpToDrop = (entity.getExperienceToDrop(serverWorld, null) * 3) / 5;
                 if (xpToDrop > 0 && !entity.isExperienceDroppingDisabled()) {
                     ExperienceOrbEntity.spawn(serverWorld, entity.getPos(), xpToDrop);
                 }

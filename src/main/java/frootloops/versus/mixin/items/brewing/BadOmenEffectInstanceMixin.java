@@ -19,6 +19,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,14 +51,19 @@ public abstract class BadOmenEffectInstanceMixin {
     @Inject(method = "update", at = @At(value = "HEAD"), cancellable = true)
     public void update(LivingEntity entity, Runnable overwriteCallback, CallbackInfoReturnable<Boolean> cir) {
         if(duration > 0 && entity instanceof ServerPlayerEntity serverPlayer) {
-            ServerWorld serverWorld = serverPlayer.getServerWorld();
+            ServerWorld serverWorld = serverPlayer.getWorld();
 
             if (type == StatusEffects.BAD_OMEN) {
                 if(serverWorld.getTime() % 57L != 0) return;
 
                 // RAIDS: Check if Bad Omen can be replaced by Raid Omen
                 boolean isPlayerInsideVillage = serverWorld.isNearOccupiedPointOfInterest(serverPlayer.getBlockPos());
-                boolean isPlayerInsideTheirBase = !isPlayerInsideVillage && VersusSettings.DO_RAIDS_OUTSIDE_VILLAGES && serverPlayer.getSpawnPointPosition() != null && (serverPlayer.getSpawnPointPosition().isWithinDistance(serverPlayer.getBlockPos(), 32)) && !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
+                boolean isPlayerInsideTheirBase = false;
+                if(!isPlayerInsideVillage && VersusSettings.DO_RAIDS_OUTSIDE_VILLAGES && serverPlayer.getRespawn() != null && serverPlayer.getScore() > 999) {
+                    boolean isNearRespawn = serverPlayer.getRespawn().dimension() == serverPlayer.getWorld().getRegistryKey() && (serverPlayer.getRespawn().pos().isWithinDistance(serverPlayer.getBlockPos(), 32));
+                    if(isNearRespawn) isPlayerInsideTheirBase = !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
+                }
+
                 if ((isPlayerInsideVillage || isPlayerInsideTheirBase) && serverWorld.getRaidAt(serverPlayer.getBlockPos()) == null) {
                     if(isPlayerInsideVillage) serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 600, amplifier));
                     else serverPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.RAID_OMEN, 3000, 0));

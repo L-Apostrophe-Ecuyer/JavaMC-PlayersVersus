@@ -2,8 +2,12 @@ package frootloops.versus.mixin.items.throwing;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.thrown.LingeringPotionEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
+import net.minecraft.entity.projectile.thrown.SplashPotionEntity;
 import net.minecraft.item.*;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
@@ -49,7 +53,11 @@ public abstract class ThrowablePotionItemMixin extends PotionItem implements Pro
 
     private static void throwPotion(World world, LivingEntity user, ItemStack stack, float velocity) {
         if (!world.isClient) {
-            PotionEntity potionEntity = new PotionEntity(world, user, stack);
+            PotionEntity potionEntity;
+            if(stack.isOf(Items.SPLASH_POTION)) potionEntity = new SplashPotionEntity(world, user, stack);
+            else if(stack.isOf(Items.LINGERING_POTION)) potionEntity = new LingeringPotionEntity(world, user, stack);
+            else return;
+
             potionEntity.setItem(stack);
             potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), -20.0f, velocity, 1.0f);
             world.spawnEntity(potionEntity);

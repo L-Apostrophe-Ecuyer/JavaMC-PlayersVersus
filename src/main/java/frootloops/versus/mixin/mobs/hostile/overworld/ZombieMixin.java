@@ -147,7 +147,7 @@ public abstract class ZombieMixin extends HostileEntity {
             if(rand % 13 == 0 && depth > 64) {
                 this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
                 this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 384);
-                this.armorDropChances[EquipmentSlot.CHEST.getEntitySlotId()] = 0.08f;
+                this.setEquipmentDropChance(EquipmentSlot.CHEST, 0.08F);
             }
 
             boolean isDeepInCave = this.canConvertInWater() && this.getBlockPos().getY() < 28;
@@ -158,11 +158,11 @@ public abstract class ZombieMixin extends HostileEntity {
 
             if (isDeepInCave && rand % 23 == 0) {
                 this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + random.nextInt(5)));
-                this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
+                this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 1F);
             }
 
             if(isDeepInCave && rand < 60) {
-                this.armorDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15f;
+                this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.15F);
                 if (rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
                 else if (rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
                 else if (rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
@@ -175,7 +175,7 @@ public abstract class ZombieMixin extends HostileEntity {
             if(rand < 90) {
                 int damageAmount = (isDeepInCave && rand < 60) ? rand + 900 : rand/2 + 150;
                 this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
-                this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15F;
+                this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.15F);
             }
         }
         else if(rand <= 55) {
@@ -185,11 +185,9 @@ public abstract class ZombieMixin extends HostileEntity {
             else if(rand % 7 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICK,  random.nextInt(8) + rand));
             else if(rand % 11 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICK,  random.nextInt(6) + rand));
             else this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.COPPER_INGOT,  random.nextInt(4)));
-
-            this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.9F;
+            this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 0.8F);
         }
         else {
-            //this.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(16.0f);
             this.setHealth(16.0f);
         }
 

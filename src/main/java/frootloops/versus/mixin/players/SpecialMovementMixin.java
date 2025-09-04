@@ -85,7 +85,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                     double d = this.random.nextGaussian() * 0.02 - velocityX;
                     double e = this.random.nextGaussian() * 0.02 + 0.01;
                     double f = this.random.nextGaussian() * 0.02 - velocityZ;
-                    this.getWorld().addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
+                    this.getWorld().addParticleClient(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
                 }
                 this.spawnSprintingParticles();
                 this.playBlockFallSound();

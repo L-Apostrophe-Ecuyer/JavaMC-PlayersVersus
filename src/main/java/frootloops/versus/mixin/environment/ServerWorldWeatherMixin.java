@@ -93,24 +93,24 @@ public abstract class ServerWorldWeatherMixin extends World {
                 this.worldProperties.setRaining(isRaining);
             }
 
-            this.thunderGradientPrev = this.thunderGradient;
+            this.lastThunderGradient = this.thunderGradient;
             if (this.properties.isThundering()) this.thunderGradient += 0.0025F;
             else this.thunderGradient -= 0.0025F;
             this.thunderGradient = MathHelper.clamp(this.thunderGradient, 0.0F, 1.0F);
 
-            this.rainGradientPrev = this.rainGradient;
+            this.lastRainGradient = this.rainGradient;
             if (this.properties.isRaining()) this.rainGradient += 0.0025F;
             else this.rainGradient -= 0.0025F;
             this.rainGradient = MathHelper.clamp(this.rainGradient, 0.0F, 1.0F);
         }
 
-        if (this.rainGradientPrev != this.rainGradient) {
+        if (this.lastRainGradient != this.rainGradient) {
             this.server.getPlayerManager().sendToDimension(
                     new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, this.rainGradient), this.getRegistryKey()
             );
         }
 
-        if (this.thunderGradientPrev != this.thunderGradient) {
+        if (this.lastThunderGradient != this.thunderGradient) {
             this.server.getPlayerManager().sendToDimension(
                     new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, this.thunderGradient), this.getRegistryKey()
             );

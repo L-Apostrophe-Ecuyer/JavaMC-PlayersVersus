@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(SplashPotionItem.class)
-public class SplashPotionMixin extends ThrowablePotionItem {
+public abstract class SplashPotionMixin extends ThrowablePotionItem {
 
     public SplashPotionMixin(Item.Settings settings) {
         super(settings);

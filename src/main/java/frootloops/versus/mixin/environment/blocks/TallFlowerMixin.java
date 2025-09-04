@@ -2,6 +2,7 @@ package frootloops.versus.mixin.environment.blocks;
 
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCollisionHandler;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -22,10 +23,9 @@ public abstract class TallFlowerMixin extends PlantBlock implements Fertilizable
 
 
     @Override
-    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
         if(state.isOf(Blocks.ROSE_BUSH)) {
             if (!(entity instanceof PlayerEntity) && !(entity instanceof HostileEntity)) return;
-
             entity.slowMovement(state, new Vec3d(0.9f, 0.75, 0.9f));
             if (!(world.isClient || (entity.lastRenderX == entity.getX() && entity.lastRenderZ == entity.getZ()))) {
                 double d = Math.abs(entity.getX() - entity.lastRenderX);

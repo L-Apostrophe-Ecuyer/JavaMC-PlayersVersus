@@ -65,8 +65,8 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
     }
 
     @Override
-    protected int computeFallDamage(float fallDistance, float damageMultiplier) {
-        return super.computeFallDamage(fallDistance - 4.0f, damageMultiplier) - 5;
+    protected int computeFallDamage(double fallDistance, float damagePerDistance) {
+        return super.computeFallDamage(fallDistance - 4.0f, damagePerDistance) - 5;
     }
 
 
@@ -85,7 +85,7 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
         }
         // Untargeted players, Endermen will teleport up to them until they're in range for aggro:
         else {
-            if (player.prevHeadYaw != player.headYaw) return false;
+            if (player.lastHeadYaw != player.headYaw) return false;
             else if(squaredDistance > 8192.0) return false;
 
             Vec3d playerRotationVect = player.getRotationVec(1.0f).normalize();

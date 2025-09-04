@@ -72,12 +72,11 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
     @Override
     @Nullable
     protected void initEquipment(Random random, LocalDifficulty localDifficulty) {
-        this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.3F;
-
+        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.3F);
         int rand = random.nextInt(100);
         if(rand > 52){
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-            this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.1F;
+            this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.1F);
             this.setHealth(16);
         }
         else {

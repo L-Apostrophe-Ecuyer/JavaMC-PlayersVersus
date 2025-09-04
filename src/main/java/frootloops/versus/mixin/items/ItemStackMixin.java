@@ -61,13 +61,12 @@ public abstract class ItemStackMixin implements ComponentHolder {
     @Inject(method = "getMiningSpeedMultiplier", at = @At("RETURN"), cancellable = true)
     public void getMiningSpeedMultiplier(BlockState state, CallbackInfoReturnable<Float> cir) {
         float miningSpeed = cir.getReturnValue();
-        if(miningSpeed != 1.0f && this.item instanceof MiningToolItem miningToolItem) {
-            if(state.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
-                if(miningToolItem == Items.NETHERITE_PICKAXE) miningSpeed *= 1.3f;
-                else if(miningToolItem == Items.DIAMOND_PICKAXE) miningSpeed *= 1.1f;
-                else miningSpeed *= 0.6f;
-                cir.setReturnValue(miningSpeed);
-            }
+        if(state.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
+            if(this.item == Items.NETHERITE_PICKAXE) miningSpeed *= 1.3f;
+            else if(this.item == Items.DIAMOND_PICKAXE) miningSpeed *= 1.1f;
+            else if(this.item == Items.IRON_PICKAXE) return;
+            else miningSpeed *= 0.6f;
+            cir.setReturnValue(miningSpeed);
         }
     }
 }

@@ -72,7 +72,7 @@ public class HungerManagerMixin {
                 //if(FOOD_REQUIRED_FOR_SLOW_REGEN > 0) saturationLevel = 0.0f;
                 if (exhaustion > 0.5F) {
                     exhaustion = 0.0F;
-                    if(saturationLevel == 0.0f) player.damage(player.getServerWorld(), player.getDamageSources().starve(), 1.0f);
+                    if(saturationLevel == 0.0f) player.damage(player.getWorld(), player.getDamageSources().starve(), 1.0f);
                     else saturationLevel = Math.max(0.0F, saturationLevel - 0.5F);
                 }
             }
@@ -101,7 +101,7 @@ public class HungerManagerMixin {
 
     private void doHealthRegeneration(ServerPlayerEntity player, boolean hasHungerEffect) {
         float playerHealth = player.getHealth();
-        boolean canPlayerRegenHealth = player.canFoodHeal() && player.getServerWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
+        boolean canPlayerRegenHealth = player.canFoodHeal() && player.getWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         boolean canPlayerFoodHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect;
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFoodHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
 

@@ -59,8 +59,8 @@ public abstract class DrownedMixin extends ZombieEntity {
             if(rand % 5 == 1) this.equipStack(EquipmentSlot.FEET, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_BOOTS), level, dynamicRegistryManager, optional));
             if(rand % 6 == 1 || rand % 7 == 1) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.GOLDEN_APPLE));
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.TRIDENT));
-            this.handDropChances[0] = 1f;
-            this.handDropChances[1] = 1f;
+            this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 1.0F);
+            this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 1.0F);
         }
         else if (rand < 20)
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.FISHING_ROD));
@@ -79,8 +79,8 @@ public abstract class DrownedMixin extends ZombieEntity {
                 this.equipStack(EquipmentSlot.MAINHAND, Items.GLASS_BOTTLE.getDefaultStack());
             if (rand % 5 == 0)
                 this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
-            this.handDropChances[0] = 1f;
-            this.handDropChances[1] = 1f;
+            this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.7F);
+            this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 1.0F);
         }
         ci.cancel();
     }

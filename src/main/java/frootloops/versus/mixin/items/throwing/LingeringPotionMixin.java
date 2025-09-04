@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(LingeringPotionItem.class)
-public class LingeringPotionMixin extends ThrowablePotionItem {
+public abstract class LingeringPotionMixin extends ThrowablePotionItem {
 
     public LingeringPotionMixin(Item.Settings settings) {
         super(settings);

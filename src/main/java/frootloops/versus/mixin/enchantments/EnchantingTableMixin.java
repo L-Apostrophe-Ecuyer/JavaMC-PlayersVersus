@@ -90,7 +90,7 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
                         Iterator enchantmentLevelEntryIterator = listCandidateEnchantments.iterator();
                         while (enchantmentLevelEntryIterator.hasNext()) {
                             EnchantmentLevelEntry entry = (EnchantmentLevelEntry) enchantmentLevelEntryIterator.next();
-                            stack.addEnchantment(entry.enchantment, entry.level);
+                            stack.addEnchantment(entry.enchantment(), entry.level());
                         }
 
                         // Update the item:
@@ -140,8 +140,8 @@ public abstract class EnchantingTableMixin extends ScreenHandler {
                     }
                     else {
                         EnchantmentLevelEntry enchantmentLevelEntry = EnchantRegistryHelper.getMostImportantEnchant(list);
-                        this.enchantmentId[slotID] = indexedIterable.getRawId(enchantmentLevelEntry.enchantment);
-                        this.enchantmentLevel[slotID] = enchantmentLevelEntry.level;
+                        this.enchantmentId[slotID] = indexedIterable.getRawId(enchantmentLevelEntry.enchantment());
+                        this.enchantmentLevel[slotID] = enchantmentLevelEntry.level();
                     }
                 }
             }

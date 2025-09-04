@@ -22,11 +22,6 @@ public class CreeperMixin extends HostileEntity {
     }
 
     @Override
-    public boolean disablesShield(){
-        return true;
-    }
-
-    @Override
     public boolean damage(ServerWorld world, DamageSource source, float amount) {
         if(super.damage(world, source, amount)) {
             if (source.isOf(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
@@ -36,19 +31,4 @@ public class CreeperMixin extends HostileEntity {
         }
         else return false;
     }
-
-    /*
-    @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason != SpawnReason.NATURAL) return true;
-        if(!this.getClass().equals(CreeperEntity.class)) return true;
-
-        BlockPos pos = this.getBlockPos();
-        int y = pos.getY();
-        if (y > 96 || y < 8) return false;
-        if (y > 60 && world.getLightLevel(LightType.SKY, pos) > 4) return false;
-
-        BlockState state = world.getBlockState(pos.down());
-        return state.isIn(BlockTags.OVERWORLD_CARVER_REPLACEABLES) || state.isOf(Blocks.MOSS_BLOCK) || state.isOf(Blocks.MOSSY_COBBLESTONE) || state.isOf(Blocks.MOSSY_STONE_BRICKS);
-    } */
 }

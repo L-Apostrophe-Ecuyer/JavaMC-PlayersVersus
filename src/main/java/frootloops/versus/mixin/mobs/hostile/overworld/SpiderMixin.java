@@ -21,6 +21,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
@@ -67,7 +69,7 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    protected int computeFallDamage(float fallDistance, float damageMultiplier) {
+    protected int computeFallDamage(double fallDistance, float damageMultiplier) {
         return super.computeFallDamage(fallDistance, damageMultiplier) - 10;
     }
 
@@ -81,9 +83,9 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    public int getXpToDrop(ServerWorld world) {
+    public int getExperienceToDrop(ServerWorld world) {
         if (!this.isBaby()) this.experiencePoints = 17;
-        return super.getXpToDrop(world);
+        return super.getExperienceToDrop(world);
     }
 
     @Override
@@ -184,15 +186,15 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound tag) {
-        super.readCustomDataFromNbt(tag);
-        this.setBaby(tag.getBoolean("IsBaby"));
+    protected void writeCustomData(WriteView view) {
+        super.writeCustomData(view);
+        view.putBoolean("IsBaby", this.isBaby());
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound tag) {
-        super.writeCustomDataToNbt(tag);
-        tag.putBoolean("IsBaby", this.isBaby());
+    protected void readCustomData(ReadView view) {
+        super.readCustomData(view);
+        this.setBaby(view.getBoolean("IsBaby", false));
     }
 
     @Override

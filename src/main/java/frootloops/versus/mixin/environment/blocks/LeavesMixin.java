@@ -1,24 +1,16 @@
 package frootloops.versus.mixin.environment.blocks;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
-import frootloops.versus.mod.environment.blocks.clays.CustomMudBlock;
 import net.minecraft.block.*;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.FallingBlockEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.FlyingEntity;
-import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.mob.SpiderEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.TameableShoulderEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.BlockPos;
@@ -30,9 +22,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
 import net.minecraft.world.event.GameEvent;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,8 +37,6 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     public LeavesMixin(Settings settings) {
         super(settings);
     }
-
-    private static final float FALL_DISTANCE_TO_FALL_THROUGH = 6.0F;
     private static final float FALL_DISTANCE_REDUCTION = 4.0F;
     private static Vec3d MOVE_TOWARDS_CENTER_MULT = new Vec3d(0.5, 1.1, 0.5);
     private static Vec3d SNEAKING_MULT = new Vec3d(0.8, 0.5, 0.8);
@@ -56,14 +44,14 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         if (context instanceof EntityShapeContext && ((EntityShapeContext) context).getEntity() instanceof LivingEntity livingEntity) {
-            if(livingEntity.hasVehicle() || livingEntity.isSneaking() || livingEntity instanceof SpiderEntity || livingEntity instanceof FlyingEntity || livingEntity instanceof TameableShoulderEntity) return VoxelShapes.fullCube();
+            if(livingEntity.hasVehicle() || livingEntity.isSneaking() || livingEntity instanceof SpiderEntity || livingEntity instanceof Flutterer || livingEntity instanceof TameableEntity) return VoxelShapes.fullCube();
             if(!context.isAbove(VoxelShapes.fullCube(), pos, true)) return VoxelShapes.empty();
         }
         return VoxelShapes.fullCube();
     }
 
     @Override
-    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
+    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
         if(entity instanceof FallingBlockEntity fallingBlock) {
             if(fallingBlock.getBlockState().getSoundGroup() != BlockSoundGroup.ANVIL) return;
             Block.dropStacks(state, world, pos);
@@ -84,7 +72,7 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     }
 
     @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
         if (entity.hasVehicle()) return;
         if (!entity.getBlockPos().equals(pos) && !entity.getBlockPos().up().equals(pos)) return;
         if (!entity.isSpectator() && entity instanceof LivingEntity livingEntity && entity.getBlockPos().equals(pos) && !((LivingEntityAccessor)livingEntity).isJumping()) {
