@@ -98,6 +98,6 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
     @Override
     public String toString() {
-        return this.stack.getName().getString();
+        return this.stack.getName().getString() + (this.stack.getCount() != stack.getMaxCount() ? "(" + stack.getCount() + ")" : "");
     }
 }

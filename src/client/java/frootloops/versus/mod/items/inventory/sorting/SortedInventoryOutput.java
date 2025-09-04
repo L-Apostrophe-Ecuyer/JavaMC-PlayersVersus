@@ -201,14 +201,18 @@ public class SortedInventoryOutput {
                 boolean isSameGroup = i >= this.currentSlotsColStart;
                 boolean isHotbar = this.isPlayerInventory && row == 0;
                 boolean mustGoBefore = slot != null && ((isSameGroup && other == null) || slot.shouldAlwaysGoBefore(other, !isHotbar)) && (other != null && !other.shouldAlwaysGoBefore(slot, !isHotbar));
+                if(mustGoBefore && DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                               - Will swap at column " + i + "! Should " + slot + " always go before " + other + "? " + slot.shouldAlwaysGoBefore(other, !isHotbar));
                 if(mustGoBefore) {
 
                     // Move back to not separate similar items:
-                    if(i > 0 && this.get(row, i - 1).isVerySimilarTo(other, isSameGroup)) {
-                        int j;
-                        for(j = i - 1; j >= 0; j--) if (!this.get(row, j).isVerySimilarTo(other, isSameGroup)) break;
-                        i = Math.max(0, j);
-                        other = this.get(row, i);
+                    if(!slot.isVerySimilarTo(other, isSameGroup)) {
+                        if (i > 0 && this.get(row, i - 1).isVerySimilarTo(other, isSameGroup)) {
+                            int j;
+                            for (j = i - 1; j >= 0; j--)
+                                if (!this.get(row, j).isVerySimilarTo(other, isSameGroup)) break;
+                            i = Math.max(0, j);
+                            other = this.get(row, i);
+                        }
                     }
 
                     // Place item:
