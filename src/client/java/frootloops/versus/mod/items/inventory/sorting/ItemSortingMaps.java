@@ -520,18 +520,18 @@ public abstract class ItemSortingMaps {
     public static final Map<Item, Integer> ITEMS_PICKAXE_GRAYS_COBBLE = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.COBBLED_DEEPSLATE, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.COBBLED_DEEPSLATE_SLAB, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.COBBLED_DEEPSLATE_STAIRS, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.COBBLED_DEEPSLATE_WALL, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.MOSSY_COBBLESTONE, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.MOSSY_COBBLESTONE_SLAB, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.MOSSY_COBBLESTONE_STAIRS, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.MOSSY_COBBLESTONE_WALL, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.COBBLESTONE, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.COBBLESTONE_SLAB, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.COBBLESTONE_STAIRS, index++);
-        ITEMS_PICKAXE_BLACKSTONE.put(Items.COBBLESTONE_WALL, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.COBBLED_DEEPSLATE, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.COBBLED_DEEPSLATE_SLAB, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.COBBLED_DEEPSLATE_STAIRS, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.COBBLED_DEEPSLATE_WALL, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.MOSSY_COBBLESTONE, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.MOSSY_COBBLESTONE_SLAB, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.MOSSY_COBBLESTONE_STAIRS, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.MOSSY_COBBLESTONE_WALL, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.COBBLESTONE, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.COBBLESTONE_SLAB, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.COBBLESTONE_STAIRS, index++);
+        ITEMS_PICKAXE_GRAYS_COBBLE.put(Items.COBBLESTONE_WALL, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_PICKAXE_CORAL = new HashMap<>();

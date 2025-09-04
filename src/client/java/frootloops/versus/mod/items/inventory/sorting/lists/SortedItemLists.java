@@ -102,7 +102,7 @@ public class SortedItemLists {
     public static final SortedMappedItemList PICKAXE_MINEABLE_BLACKSTONE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_BLACKSTONE, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_GRAYS_BRICKS = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAYS_POLISHED_AND_BRICK, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_GRAYS_NATURAL = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAYS_NATURAL, ItemType.BLOCK_FULL);
-    public static final SortedMappedItemList PICKAXE_MINEABLE_GRAYS_COBBLED = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_CORAL, ItemType.BLOCK_FULL);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_GRAYS_COBBLED = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAYS_COBBLE, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_CORAL = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_CORAL, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_PALE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_WARM = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS, ItemType.BLOCK_FULL);
