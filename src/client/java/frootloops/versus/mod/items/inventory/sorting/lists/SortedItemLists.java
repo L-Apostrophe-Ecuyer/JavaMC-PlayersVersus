@@ -1,9 +1,7 @@
 package frootloops.versus.mod.items.inventory.sorting.lists;
 
-import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSortingMaps;
 import frootloops.versus.mod.items.inventory.sorting.ItemType;
-import net.minecraft.item.Items;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.sound.BlockSoundGroup;
@@ -101,13 +99,16 @@ public class SortedItemLists {
     public static final SortedTypedItemList PICKAXES = new SortedTypedItemList(new ItemType[]{ItemType.PICKAXE});
     public static final SortedMappedItemList PICKAXE_MINEABLE_ICE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_ICE, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_NETHER = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_NETHER_BLOCKS, ItemType.BLOCK_FULL);
-    public static final SortedMappedItemList PICKAXE_MINEABLE_DARK = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_DARK_STONES, ItemType.BLOCK_FULL);
-    public static final SortedMappedItemList PICKAXE_MINEABLE_GRAY = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAY_STONES, ItemType.BLOCK_FULL);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_BLACKSTONE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_BLACKSTONE, ItemType.BLOCK_FULL);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_GRAYS_BRICKS = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAYS_POLISHED_AND_BRICK, ItemType.BLOCK_FULL);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_GRAYS_NATURAL = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAYS_NATURAL, ItemType.BLOCK_FULL);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_GRAYS_COBBLED = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_CORAL, ItemType.BLOCK_FULL);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_CORAL = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_CORAL, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_PALE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_WARM = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_TERRACOTTA = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS, ItemType.BLOCK_FULL);
     public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.PICKAXE_MINEABLE, 0.25f, 32.0f);
-    public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_ICE, PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_DARK, PICKAXE_MINEABLE_GRAY, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_GENERIC};
+    public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_ICE, PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_BLACKSTONE, PICKAXE_MINEABLE_GRAYS_BRICKS, PICKAXE_MINEABLE_GRAYS_NATURAL, PICKAXE_MINEABLE_GRAYS_COBBLED, PICKAXE_MINEABLE_CORAL, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_GENERIC};
 
 
     /** AXES -------------------------------------------------------------   */
