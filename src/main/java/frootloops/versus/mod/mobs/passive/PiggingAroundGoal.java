@@ -115,7 +115,7 @@ public class PiggingAroundGoal extends Goal {
         float pitch = 100f * (0.62831855F + 0.21991149F * MathHelper.sin(f * 28.7F));
         this.mob.getLookControl().lookAt(this.mob.getX(), this.mob.getY() - 1D, this.mob.getZ());
         this.mob.setPitch(pitch);
-        this.mob.prevPitch = pitch;
+        this.mob.lastPitch = pitch;
     }
 
     private void spawnDiggingParticles() {
@@ -123,11 +123,11 @@ public class PiggingAroundGoal extends Goal {
         BlockPos blockPos = this.mob.getBlockPos();
         for(int i = 0; i < 30; ++i) {
             Vec3d vec3d = Vec3d.ofCenter(blockPos);
-            this.mob.getWorld().addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState), vec3d.x, vec3d.y, vec3d.z, 0.0, 0.0, 0.0);
+            this.mob.getWorld().addParticleClient(new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState), vec3d.x, vec3d.y, vec3d.z, 0.0, 0.0, 0.0);
         }
 
         if (this.timer % 4 == 0) {
-            this.mob.getWorld().playSound(this.mob.getX(), this.mob.getY(), this.mob.getZ(), blockState.getSoundGroup().getHitSound(), this.mob.getSoundCategory(), 0.5F, 0.5F, false);
+            this.mob.playSound(blockState.getSoundGroup().getHitSound(), 0.5F, 0.5F);
         }
     }
 }

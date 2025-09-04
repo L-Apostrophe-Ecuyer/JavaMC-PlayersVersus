@@ -115,7 +115,7 @@ public class PiggingAroundGoal extends Goal {
         float pitch = 100f * (0.62831855F + 0.21991149F * MathHelper.sin(f * 28.7F));
         this.mob.getLookControl().lookAt(this.mob.getX(), this.mob.getY() - 1D, this.mob.getZ());
         this.mob.setPitch(pitch);
-        this.mob.prevPitch = pitch;
+        this.mob.lastPitch = pitch;
     }
 
     private void spawnDiggingParticles() {

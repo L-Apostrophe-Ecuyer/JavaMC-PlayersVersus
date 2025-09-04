@@ -55,7 +55,7 @@ public class RecoveryCompassItem extends Item {
 
         // Otherwise: Add effects
         else if(remainingUseTicks % 10 == 0 && user instanceof ServerPlayerEntity serverPlayer) {
-            serverPlayer.getServerWorld().spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, user.getX(), user.getEyeY(), user.getZ(), 16, 0.0, 1.0, 0.0, 0.3);
+            serverPlayer.getWorld().spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, user.getX(), user.getEyeY(), user.getZ(), 16, 0.0, 1.0, 0.0, 0.3);
             if(remainingUseTicks % 40 == 0) {
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 120, 0));
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 120, 3, true, false));
@@ -96,14 +96,14 @@ public class RecoveryCompassItem extends Item {
 
                 // Anger nerby Endermen:
                 Box boundingBox = new Box(user.getX() - ENDERMAN_AGGRO_RANGE, user.getY() - ENDERMAN_AGGRO_RANGE, user.getZ() - ENDERMAN_AGGRO_RANGE, user.getX() + ENDERMAN_AGGRO_RANGE, user.getY() + ENDERMAN_AGGRO_RANGE, user.getZ() + ENDERMAN_AGGRO_RANGE);
-                List<EndermanEntity> nearbyEndermen = serverPlayer.getServerWorld().getEntitiesByClass(EndermanEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
+                List<EndermanEntity> nearbyEndermen = serverPlayer.getWorld().getEntitiesByClass(EndermanEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
                 for (EndermanEntity enderman : nearbyEndermen) {
                     enderman.setTarget(user);
                 }
                 return new ItemStack(Items.COMPASS, 1);
             }
             else {
-                world.playSound(user, user.getBlockPos(), SoundEvents.ENTITY_ITEM_BREAK, user.getSoundCategory(), 1f, 0.8f);
+                world.playSound(user, user.getBlockPos(), SoundEvents.ENTITY_ITEM_BREAK.value(), user.getSoundCategory(), 1f, 0.8f);
             }
         }
 

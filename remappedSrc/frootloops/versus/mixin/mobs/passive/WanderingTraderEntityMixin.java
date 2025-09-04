@@ -60,7 +60,7 @@ public abstract class WanderingTraderEntityMixin extends MerchantEntity implemen
             experience += 1 + this.random.nextInt(2);
             if(experience > 0 && this.getCustomer() instanceof ServerPlayerEntity serverPlayer) {
                 experience = 0;
-                ServerWorld serverWorld = serverPlayer.getServerWorld();
+                ServerWorld serverWorld = serverPlayer.getWorld();
                 if(!serverWorld.getDimension().hasRaids() || !serverWorld.getDimension().hasSkyLight() || serverWorld.getTimeOfDay() > 12000L) return;
 
                 boolean doesTraderWantToSettleDown = serverWorld.isNearOccupiedPointOfInterest(this.getBlockPos());

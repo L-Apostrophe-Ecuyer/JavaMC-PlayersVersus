@@ -47,7 +47,7 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
         super(entityType, world);
     }
 
-    private static HashMap<VillagerProfession, VillagerProfession[]> PROFESSION_AFFINITY_MAP = new HashMap<>();
+    private static HashMap<RegistryKey<VillagerProfession>, VillagerProfession[]> PROFESSION_AFFINITY_MAP = new HashMap<>();
     static {
         PROFESSION_AFFINITY_MAP.put(VillagerProfession.ARMORER, new VillagerProfession[]{VillagerProfession.WEAPONSMITH, VillagerProfession.LEATHERWORKER, VillagerProfession.LIBRARIAN});
         PROFESSION_AFFINITY_MAP.put(VillagerProfession.WEAPONSMITH, new VillagerProfession[]{VillagerProfession.ARMORER, VillagerProfession.TOOLSMITH, VillagerProfession.LIBRARIAN});

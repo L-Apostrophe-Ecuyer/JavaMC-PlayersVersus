@@ -49,7 +49,7 @@ public abstract class BadOmenEffectInstanceMixin {
     @Inject(method = "update", at = @At(value = "HEAD"), cancellable = true)
     public void update(LivingEntity entity, Runnable overwriteCallback, CallbackInfoReturnable<Boolean> cir) {
         if(duration > 0 && entity instanceof ServerPlayerEntity serverPlayer) {
-            ServerWorld serverWorld = serverPlayer.getServerWorld();
+            ServerWorld serverWorld = serverPlayer.getWorld();
 
             if (type == StatusEffects.BAD_OMEN) {
                 if(serverWorld.getTime() % 57L != 0) return;

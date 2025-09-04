@@ -2,6 +2,7 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.InstrumentComponent;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ai.goal.Goal;
@@ -86,8 +87,9 @@ public class PillagerCaptainBlowHornGoal extends Goal {
             if(timeSpentTootingHorn == 0) {
                 illager.setAttacking(true);
                 this.illager.setPose(EntityPose.CROAKING);
-                RegistryEntry<Instrument> instrumentRegistryEntry = this.illager.getOffHandStack().get(DataComponentTypes.INSTRUMENT);
-                if (instrumentRegistryEntry != null) {
+                InstrumentComponent instrumentComponent = this.illager.getOffHandStack().get(DataComponentTypes.INSTRUMENT);
+                if (instrumentComponent != null) {
+                    RegistryEntry<Instrument> instrumentRegistryEntry = instrumentComponent.getInstrument(this.illager.getRegistryManager()).get();
                     float volume = instrumentRegistryEntry.value().range() / 16.0f;
                     illager.getWorld().playSoundFromEntity(null, illager, instrumentRegistryEntry.value().soundEvent().value(), SoundCategory.HOSTILE, volume, 1.0f);
                     illager.getWorld().emitGameEvent(GameEvent.INSTRUMENT_PLAY, illager.getPos(), GameEvent.Emitter.of(illager));

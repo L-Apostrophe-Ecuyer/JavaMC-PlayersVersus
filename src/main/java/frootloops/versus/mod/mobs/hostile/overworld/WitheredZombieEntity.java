@@ -56,8 +56,8 @@ public class WitheredZombieEntity extends ZombieEntity {
     public void initCustomGoals() {
         this.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, -1, 127));
         this.ambientSoundChance = -1000;
-        this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.4F;
-        this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.5F;
+        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.4F);
+        this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 0.5F);
         this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.9F)); // Only 10% chance of actually wandering
         this.targetSelector.add(1, new RevengeGoal(this, PigEntity.class));
@@ -92,11 +92,11 @@ public class WitheredZombieEntity extends ZombieEntity {
         boolean isAtDiamondDepth = this.getBlockPos().getY() < -32;
         if (isAtDiamondDepth && rand % 23 == 0) {
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + random.nextInt(5)));
-            this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
+            this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 1.0F);
         }
 
         if(isAtDiamondDepth && rand < 60) {
-            this.armorDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15f;
+            this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.1F);
             if (rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
             else if (rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
             else if (rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
@@ -109,7 +109,6 @@ public class WitheredZombieEntity extends ZombieEntity {
         if(rand < 90) {
             int damageAmount = (isAtDiamondDepth && rand < 60) ? rand + 900 : rand/2 + 150;
             this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
-            this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15F;
         }
 
         // Bit less attack damage when wielding weapons:

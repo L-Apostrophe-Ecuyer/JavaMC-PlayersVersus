@@ -154,7 +154,7 @@ public class RevampedTradeOffers {
 
 
 
-    public static final Map<VillagerProfession, Int2ObjectMap<Factory[]>> REVAMPED_PROFESSION_TO_LEVELED_TRADE = Util.make(Maps.newHashMap(), map -> {
+    public static final Map<RegistryKey<VillagerProfession>, Int2ObjectMap<Factory[]>> REVAMPED_PROFESSION_TO_LEVELED_TRADE = Util.make(Maps.newHashMap(), map -> {
         map.put(VillagerProfession.FARMER, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{

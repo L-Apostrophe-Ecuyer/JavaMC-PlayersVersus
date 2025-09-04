@@ -39,7 +39,7 @@ public class CreepingAndExplodingGoal extends Goal {
     public boolean shouldContinue() {
         LivingEntity livingEntity = this.creeper.getTarget();
         if (livingEntity == null || !livingEntity.isAlive()) return false;
-        if (!this.creeper.isInWalkTargetRange(livingEntity.getBlockPos())) return false;
+        if (!this.creeper.isInPositionTargetRange(livingEntity.getBlockPos())) return false;
         return !(livingEntity instanceof PlayerEntity) || !livingEntity.isSpectator() && !((PlayerEntity)livingEntity).isCreative();
     }
 

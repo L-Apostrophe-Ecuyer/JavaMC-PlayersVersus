@@ -38,7 +38,7 @@ public class RayTraceHandler {
      * @return Pair | Left = Starting position, Right = Direction
      */
     public static Pair<Vec3d, Vec3d> getEntityParams(Entity player) {
-        float pitch = player.prevPitch + (player.getPitch() - player.prevPitch);
+        float pitch = player.lastPitch + (player.getPitch() - player.lastPitch);
         float yaw = player.prevYaw + (player.getYaw() - player.prevYaw);
         Vec3d pos = player.getPos();
         double posX = player.prevX + (pos.x - player.prevX);

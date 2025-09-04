@@ -88,7 +88,7 @@ public class FrostedZombieEntity extends ZombieEntity implements RangedAttackMob
         int rand = random.nextInt(32);
         if(rand - 8 > 0) {
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.SNOWBALL, rand - 8));
-            this.handDropChances[1] = 0.8f;
+            this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 0.8F);
             this.goalSelector.add(1, new SnowballAttackGoal(this, 1.25, 12, 12.0f));
         }
         if (rand < 4) {

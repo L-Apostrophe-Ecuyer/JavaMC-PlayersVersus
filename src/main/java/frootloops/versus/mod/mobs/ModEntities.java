@@ -49,10 +49,10 @@ public class ModEntities {
             "wildfire", EntityType.Builder.create(WildfireEntity::new, SpawnGroup.MONSTER).makeFireImmune().dimensions(0.6F, 1.8F).maxTrackingRange(8)
     );
 
-    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(DEEPER_CREEPER, 0x4d4b4a, 0, getItemSettings("deeper_creeper_spawn_egg"));
-    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(FROSTED_ZOMBIE, 0x46b3b3 , 0x2e3e7d, getItemSettings("frosted_zombie_spawn_egg"));
-    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(WITHERED_ZOMBIE, 0x334545, 0x101017, getItemSettings("withered_zombie_spawn_egg"));
-    public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(WILDFIRE, 0xbf9e26, 0x66c2de, getItemSettings("wildfire_spawn_egg"));
+    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(DEEPER_CREEPER, getItemSettings("deeper_creeper_spawn_egg"));
+    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(FROSTED_ZOMBIE, getItemSettings("frosted_zombie_spawn_egg"));
+    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(WITHERED_ZOMBIE, getItemSettings("withered_zombie_spawn_egg"));
+    public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(WILDFIRE, getItemSettings("wildfire_spawn_egg"));
 
 
     public static void onInitialize() {

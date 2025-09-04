@@ -125,7 +125,7 @@ public class CustomMudBlock extends MoistBlock {
     }
 
     private boolean hasEntityMoved(Entity entity) {
-        return entity.lastRenderX != entity.getX() || entity.lastRenderZ != entity.getZ(); // || entity.prevYaw != entity.getYaw() || entity.prevPitch != entity.getPitch();
+        return entity.lastRenderX != entity.getX() || entity.lastRenderZ != entity.getZ(); // || entity.prevYaw != entity.getYaw() || entity.lastPitch != entity.getPitch();
     }
 
     public static boolean canWalkOnWetMud(Entity entity) {

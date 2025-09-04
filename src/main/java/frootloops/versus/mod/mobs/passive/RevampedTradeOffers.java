@@ -155,7 +155,7 @@ public class RevampedTradeOffers {
 
 
 
-    public static final Map<VillagerProfession, Int2ObjectMap<Factory[]>> REVAMPED_PROFESSION_TO_LEVELED_TRADE = Util.make(Maps.newHashMap(), map -> {
+    public static final Map<RegistryKey<VillagerProfession>, Int2ObjectMap<Factory[]>> REVAMPED_PROFESSION_TO_LEVELED_TRADE = Util.make(Maps.newHashMap(), map -> {
         map.put(VillagerProfession.FARMER, copyToFastUtilMap(
                 ImmutableMap.of(
                         1, new Factory[]{
@@ -1122,9 +1122,9 @@ public class RevampedTradeOffers {
         }
     }
 
-    public record TypedWrapperFactory(Map<VillagerType, Factory> typeToFactory) implements Factory
+    public record TypedWrapperFactory(Map<RegistryKey<VillagerType>, Factory> typeToFactory) implements Factory
     {
-        public static TypedWrapperFactory of(Factory factory, VillagerType ... types) {
+        public static TypedWrapperFactory of(Factory factory, RegistryKey<VillagerType> ... types) {
             return new TypedWrapperFactory(Arrays.stream(types).collect(Collectors.toMap(type -> type, type -> factory)));
         }
 
@@ -1133,7 +1133,7 @@ public class RevampedTradeOffers {
         public TradeOffer create(Entity entity, Random random) {
             if (entity instanceof VillagerDataContainer) {
                 VillagerDataContainer villagerDataContainer = (VillagerDataContainer)((Object)entity);
-                VillagerType villagerType = villagerDataContainer.getVillagerData().getType();
+                RegistryKey<VillagerType> villagerType = villagerDataContainer.getVillagerData().type().getKey().get();
                 Factory factory = this.typeToFactory.get(villagerType);
                 if (factory == null) {
                     return null;

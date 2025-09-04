@@ -26,6 +26,8 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
@@ -71,20 +73,23 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        nbt.putShort("Fuse", (short)this.fuseTime);
-        nbt.putByte("ExplosionRadius", (byte)this.explosionRadius);
-        nbt.putBoolean("ignited", this.isIgnited());
+    protected void writeCustomData(WriteView view) {
+        super.writeCustomData(view);
+        view.putShort("Fuse", (short)this.fuseTime);
+        view.putByte("ExplosionRadius", (byte)this.explosionRadius);
+        view.putBoolean("ignited", this.isIgnited());
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        if (nbt.contains("Fuse", NbtElement.NUMBER_TYPE)) this.fuseTime = nbt.getShort("Fuse");
-        if (nbt.contains("ExplosionRadius", NbtElement.NUMBER_TYPE)) this.explosionRadius = nbt.getByte("ExplosionRadius");
-        if (nbt.getBoolean("ignited")) this.ignite();
+    protected void readCustomData(ReadView view) {
+        super.readCustomData(view);
+        this.fuseTime = view.getShort("Fuse", (short)30);
+        this.explosionRadius = view.getByte("ExplosionRadius", (byte)3);
+        if (view.getBoolean("ignited", false)) {
+            this.ignite();
+        }
     }
+
 
     @Override
     public void onStruckByLightning(ServerWorld world, LightningEntity lightning) {
