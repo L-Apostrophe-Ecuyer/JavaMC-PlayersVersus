@@ -18,6 +18,7 @@ public abstract class SortingGroup implements Comparable<SortingGroup>{
     }
 
     public abstract ItemType getItemType();
+    public abstract int getMaxNumRows();
 
     /**
      * Either accepts and inserts slot into itself, or returns it back. Also has the opportunity to take the slot and return another.
@@ -47,9 +48,14 @@ public abstract class SortingGroup implements Comparable<SortingGroup>{
     public abstract void tryFormingRows();
 
     /**
-     * Take all items from the biggest list currently in the group.
+     * Return size of next non-empty list to return.
      */
     public abstract int getNextListSize();
+
+    /**
+     * Take all items from the next non-empty list currently in the group.
+     */
+    public abstract LinkedList<ItemSlot> takeNextList();
 
     /**
      * Take all items from the biggest list currently in the group.

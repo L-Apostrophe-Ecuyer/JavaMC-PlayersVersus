@@ -109,6 +109,16 @@ public class InventorySortingHelper {
                     if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("              -> " + group.GROUP_NAME + " - Took exactly " + slotsTaken.size() + " slots, with splitUpGroups = false");
                     slotsToAdd.addAll(slotsTaken);
                 }
+                else if(!isPlayerInventory && inventoryOutput.numGroupsToPlace == 1 && group.getMaxNumRows() < inventoryOutput.getNumEmptyRowsLeft()) {
+                    if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("              -> " + group.GROUP_NAME + " - Taking each sublist of group to split into rows");
+                    while(group.size() > 0) {
+                        slotsToAdd.addAll(group.takeNextList());
+                        wasSuccessful = inventoryOutput.addAll(slotsToAdd, !hasAddedItems, true);
+                        slotsToAdd.clear();
+                        hasAddedItems = true;
+                        if(!wasSuccessful) return null;
+                    }
+                }
                 else {
                     slotsTaken = group.tryTakingExactNumSlots(numSlotsInRow, !hasAddedItems, false);
                     if(slotsTaken != null && slotsTaken.size() > 0) {

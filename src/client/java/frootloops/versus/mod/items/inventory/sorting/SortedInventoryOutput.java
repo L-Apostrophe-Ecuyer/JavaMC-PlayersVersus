@@ -11,7 +11,7 @@ public class SortedInventoryOutput {
     private final ItemSlot[] invSlots;
     private LinkedList<ItemSlot> slotsToAdd;
     private final int numRows, numEmptySlots;
-    private int numGroupsToPlace;
+    public int numGroupsToPlace;
     private final boolean isPlayerInventory;
     private int numSlotsSkipped = 0, currentCol = 0, currentRow = 0, currentGroupColStart = 0, currentSlotsColStart;
 
@@ -104,6 +104,11 @@ public class SortedInventoryOutput {
     }
     public int getCurrentCol() {
         return this.currentCol;
+    }
+
+    public int getNumEmptyRowsLeft() {
+        int numFilledRows = this.currentRow + (currentCol > 0 ? -1 : 0);
+        return this.numRows - numFilledRows;
     }
 
     public int getNumSlotsForNextBatch(int minNumItems, boolean isNewGroup) {;

@@ -108,6 +108,12 @@ public class MainHotbarGroup extends SortingGroup {
         return ItemType.SWORD;
     }
 
+    @Override
+    public int getMaxNumRows() {
+        int size = this.size();
+        return size > 0 ? 1 + size/9 : 0;
+    }
+
     public ItemSlot tryInsertingSlot(ItemSlot slot) {
         return this.tryInsertingSlot(slot, false, false, false);
     }
@@ -280,6 +286,11 @@ public class MainHotbarGroup extends SortingGroup {
     @Override
     public int getNextListSize() {
         return this.size();
+    }
+
+    @Override
+    public LinkedList<ItemSlot> takeNextList() {
+        return this.takeAllItems();
     }
 
     @Override

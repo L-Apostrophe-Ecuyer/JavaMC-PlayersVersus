@@ -29,6 +29,14 @@ public class SimpleSortingGroup extends SortingGroup {
     }
 
     @Override
+    public int getMaxNumRows() {
+        int numRows = this.miscItems.size() > 0 ? 1 + this.miscItems.size()/9 : 0;
+        for(SortedItemList sortedList: sortedItemLists)
+            if(sortedList.size() > 0) numRows = 1 + sortedList.size()/9;
+        return numRows;
+    }
+
+    @Override
     public ItemSlot tryInsertingSlot(ItemSlot slot) {
         for(SortedItemList sortedList: sortedItemLists) {
             if (sortedList.trySortedInsert(slot) != -1) {
@@ -50,6 +58,22 @@ public class SimpleSortingGroup extends SortingGroup {
         if(this.size() == 0) return 0;
         for(SortedItemList list : this.sortedItemLists) if(list.size() > 0) return list.size();
         return 0;
+    }
+
+    @Override
+    public LinkedList<ItemSlot> takeNextList() {
+        if(this.size() == 0) return new LinkedList<>();
+        for(SortedItemList list : this.sortedItemLists) {
+            if(list.size() > 0) {
+                this.numItems -= list.size();
+                return list.takeAll();
+            }
+        }
+        if(this.miscItems.size() > 0) {
+            this.numItems -= this.miscItems.size();
+            return miscItems.takeAll();
+        }
+        return new LinkedList<>();
     }
 
     @Override

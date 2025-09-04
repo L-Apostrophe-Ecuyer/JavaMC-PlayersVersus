@@ -324,4 +324,21 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         if(this.miscItems.size() > 0) output += "              Other Items List: " + this.miscItems + "\n";
         return output;
     }
+
+    @Override
+    public int getMaxNumRows() {
+        int numRows = super.getMaxNumRows();
+        return (numTools > 0) ? numRows + 1 + numTools/9 : numRows;
+    }
+
+    @Override
+    public LinkedList<ItemSlot> takeNextList() {
+        if(this.size() == 0) return new LinkedList<>();
+        if(this.numTools > 0) {
+            LinkedList<ItemSlot> slotsTaken = this.takeAllTools();
+            if(slotsTaken.size() + super.getNextListSize() <= 9) slotsTaken.addAll(super.takeNextList());
+            return slotsTaken;
+        }
+        return super.takeNextList();
+    }
 }
