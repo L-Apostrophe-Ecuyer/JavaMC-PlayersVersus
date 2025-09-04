@@ -70,13 +70,29 @@ public class InventorySortingHelper {
         SortedInventoryOutput inventoryOutput = new SortedInventoryOutput(numRows, numEmptySlots, orderedGroups.size(), isPlayerInventory);
         LinkedList<ItemSlot> slotsTaken, slotsToAdd = new LinkedList<>();
 
+        // If each individual sublist can have their own row, then do the work to split them:
+        if(!isPlayerInventory) {
+            int numRowsForEachList = 0;
+            for(SortingGroup group : orderedGroups) numRowsForEachList += group.getMaxNumRows();
+            if(numRowsForEachList <= numRows) {
+                VersusMod.MOD_LOGGER.warn("              -> TRIVIAL PLACEMENT!! Placing each list into a row");
+                for (SortingGroup group : orderedGroups) {
+                    while(group.size() > 0) {
+                        inventoryOutput.goToNextAvailableRow();
+                        inventoryOutput.addAll(group.takeNextList(), true, true);
+                    }
+                }
+                return inventoryOutput.getInvSlots();
+            }
+        }
+
         // If each group can have their own row, then best case scenario:
         if(orderedGroups.size() <= numRows) {
             int actualNumRowsInGroups = orderedGroups.size() + orderedGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum();
             VersusMod.MOD_LOGGER.warn("              -> Actual number of rows in groups is: " + actualNumRowsInGroups);
             VersusMod.MOD_LOGGER.warn("              -> Number of rows in inventory is: " + numRows);
             if(actualNumRowsInGroups <= numRows) {
-                VersusMod.MOD_LOGGER.warn("              -> TRIVIAL PLACEMENT!! Yay");
+                VersusMod.MOD_LOGGER.warn("              -> TRIVIAL PLACEMENT!! Placing each group into a row :D");
                 for (SortingGroup group : orderedGroups) {
                     inventoryOutput.goToNextAvailableRow();
                     inventoryOutput.addAll(group.takeAllItems(), true, false);
