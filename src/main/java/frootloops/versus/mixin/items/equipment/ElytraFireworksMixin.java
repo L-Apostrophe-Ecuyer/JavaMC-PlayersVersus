@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items.equipment.elytra;
+package frootloops.versus.mixin.items.equipment;
 
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;

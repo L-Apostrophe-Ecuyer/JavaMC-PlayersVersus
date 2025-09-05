@@ -9,6 +9,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,24 +19,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
 @Mixin(Item.class)
-public class ItemUsageMixin {
+public abstract class ItemUsageMixin {
 
     @Inject(method = "getUseAction", at = @At("HEAD"), cancellable = true)
     public void getUseAction(ItemStack stack, CallbackInfoReturnable<UseAction> cir) {
         if(cir.getReturnValue() == UseAction.NONE && stack.isOf(Items.RECOVERY_COMPASS)) cir.setReturnValue(UseAction.BOW);
     }
 
-    @Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable = true)
-    public void getMaxUseTime(ItemStack stack, LivingEntity user, CallbackInfoReturnable<Integer> cir) {
-        int maxUseTime = VanillaItemsAndStacks.getOverhauledMaxUseTime((Item)((Object)this));
-        if(maxUseTime != -1) {
-            cir.setReturnValue(maxUseTime);
-        }
-        else if(stack.isIn(ItemTags.DURABILITY_ENCHANTABLE)) {
-            UseAction useAction = stack.getUseAction();
-            if(useAction == UseAction.BLOCK) cir.setReturnValue(72000);
-            else if(useAction == UseAction.BRUSH && EnchantRegistryHelper.hasEnchantment(stack, Enchantments.SWEEPING_EDGE)) cir.setReturnValue(6);
-        }
+    @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setCurrentHand(Lnet/minecraft/util/Hand;)V"), cancellable = true)
+    public void canOnlyBlockIfAttackIsCharged(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+        if(user.getAttackCooldownProgress(0.0f) < 0.5f) cir.setReturnValue(ActionResult.PASS);
     }
 
     @Inject(method = "finishUsing", at = @At("RETURN"), cancellable = false)
@@ -48,7 +42,6 @@ public class ItemUsageMixin {
             }
 
             if(!canPlayerStillUseItem) {
-
                 ItemStack stackToPutOnCooldown = player.getOffHandStack();
                 if (stack == user.getOffHandStack()) stackToPutOnCooldown = player.getMainHandStack();
                 if (stackToPutOnCooldown.getMaxUseTime(user) > 4) return;

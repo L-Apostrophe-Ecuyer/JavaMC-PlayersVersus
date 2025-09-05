@@ -32,7 +32,6 @@ public abstract class VanillaItemsAndStacks {
     }
 
     private static void setUpTransformVanillaItemsToModded() {
-
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.FERMENTED_SPIDER_EYE, CustomBrewingItems.CORRUPTED_WART_POWDER);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.GLISTERING_MELON_SLICE, CustomBrewingItems.GLISTERING_MELON_SLICE);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.BLAZE_POWDER, CustomBrewingItems.CONCENTRATE_OF_STRENGTH);
@@ -41,7 +40,7 @@ public abstract class VanillaItemsAndStacks {
 
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.LADDER, CustomBlockItems.LADDER);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.CLAY, CustomBlockItems.GRAY_CLAY);
-        TRANSFORM_VANILLA_ITEMS_TO_VANILLA.put(Items.MUD, CustomBlockItems.GRAY_MUD);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD, CustomBlockItems.GRAY_MUD);
 
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.PACKED_MUD, CustomBlockItems.BROWN_CLAY);
         TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICKS, CustomBlockItems.BROWN_CLAY_BRICKS);
