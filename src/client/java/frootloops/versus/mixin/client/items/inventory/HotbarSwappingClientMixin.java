@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.client.items.inventory;
 
 
+import frootloops.versus.mod.items.inventory.HotbarCycling;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
@@ -13,12 +14,8 @@ import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -45,12 +42,7 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
         super(string);
     }
 
-    @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity, DynamicRegistryManager registryManager) {
-        NbtCompound nbtCompound = blockEntity.createComponentlessNbtWithIdentifyingData(registryManager);
-        blockEntity.removeFromCopiedStackNbt(nbtCompound);
-        BlockItem.setBlockEntityData(stack, blockEntity.getType(), nbtCompound);
-        stack.applyComponentsFrom(blockEntity.createComponentMap());
-    }
+
 
     /**
      * Pick block improved; will instead swap hotbar with a row of the inventory containing the match (or, if
@@ -59,18 +51,26 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
     @Inject(method = "doItemPick",at = @At("HEAD"), cancellable = true)
     private void doItemPick(CallbackInfo info) {
         if(!DO_HOTBAR_SWAPPING_ON_PICK_KEY) return;
+
         boolean isCreativeMode = this.player.getAbilities().creativeMode;
-        ItemStack stackToSwapTo = getPickedBlock(isCreativeMode);
+        boolean isCrouching = this.player.isSneaking() || Screen.hasControlDown();
+
+        ItemStack stackToSwapTo = getPickItemStack(isCreativeMode, isCrouching);
         boolean isStackEmpty = (stackToSwapTo == null || stackToSwapTo.isEmpty());
 
         PlayerInventory playerInventory = this.player.getInventory();
         int slotToSwapTo = isStackEmpty ? -1: playerInventory.getSlotWithStack(stackToSwapTo);
-        if (slotToSwapTo == -1 && isCreativeMode && !isStackEmpty && (Screen.hasControlDown() || playerInventory.getStack(playerInventory.selectedSlot).isEmpty() || !isRowFull(playerInventory, 0))) {
-            playerInventory.addPickBlock(stackToSwapTo);
-            this.interactionManager.clickCreativeStack(this.player.getStackInHand(Hand.MAIN_HAND), 36 + playerInventory.selectedSlot);
+
+        boolean doesPlayerAlreadyHaveStack = slotToSwapTo != -1;
+        if (isCreativeMode && !doesPlayerAlreadyHaveStack && !isStackEmpty) {
+            boolean hasEmptySlot = goToNextEmptySlot(playerInventory);
+            if(hasEmptySlot || isCrouching) this.interactionManager.pickItemFromBlock(((BlockHitResult)this.crosshairTarget).getBlockPos(), isCrouching);
+        }
+        else if (playerInventory.getSelectedSlot() == slotToSwapTo) {
+            HotbarCycling.doHotbarSwap(playerInventory);
         }
         else if (PlayerInventory.isValidHotbarIndex(slotToSwapTo)) {
-            playerInventory.selectedSlot = slotToSwapTo;
+            playerInventory.setSelectedSlot(slotToSwapTo);
         }
         else {
             int numRowsToSwitch = slotToSwapTo == -1 ? 1 : 1 + (35 - slotToSwapTo) / 9;
@@ -80,26 +80,27 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
                     else break;
                 }
             }
-            if (numRowsToSwitch < 1 || numRowsToSwitch > 3) return;
-            for (int i = 0; i < 9; i++) {
-                if (numRowsToSwitch == 1) {
-                    swapItemsFromSlots(playerInventory, i, i + 9);
-                    swapItemsFromSlots(playerInventory, i, i + 18);
-                    swapItemsFromSlots(playerInventory, i, i + 27);
-                } else if (numRowsToSwitch == 2) {
-                    swapItemsFromSlots(playerInventory, i, i + 9);
-                    swapItemsFromSlots(playerInventory, i, i + 27);
-                    swapItemsFromSlots(playerInventory, i, i + 9);
-                    swapItemsFromSlots(playerInventory, i, i + 18);
-                } else if (numRowsToSwitch == 3) {
-                    swapItemsFromSlots(playerInventory, i, i + 27);
-                    swapItemsFromSlots(playerInventory, i, i + 18);
-                    swapItemsFromSlots(playerInventory, i, i + 9);
-                }
-            }
-            if(slotToSwapTo != -1) playerInventory.selectedSlot = slotToSwapTo % 9;
+            HotbarCycling.doHotbarSwap(playerInventory, numRowsToSwitch);
+            if(slotToSwapTo != -1) playerInventory.setSelectedSlot(slotToSwapTo % 9);
         }
         info.cancel();
+    }
+
+
+
+    private static boolean goToNextEmptySlot(PlayerInventory inventory) {
+        if(inventory.getStack(inventory.getSelectedSlot()).isEmpty()) return true;
+        for(int row = 0; row < 4; row++) {
+            for (int col = 0; col < 9; col++) {
+                if (inventory.getStack(row * 9 + col).isEmpty()) {
+                    int numRowsToSwitch = row == 0 ? 0 : 4 - row;
+                    HotbarCycling.doHotbarSwap(inventory, numRowsToSwitch);
+                    inventory.setSelectedSlot(col);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -117,18 +118,10 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
         return true;
     }
 
-    private void swapItemsFromSlots(PlayerInventory inventory, int hotbarSlot, int slotTwo) {
-        ItemStack stackOne = inventory.getStack(hotbarSlot);
-        ItemStack stackTwo = inventory.getStack(slotTwo);
-        if(stackOne.isEmpty() && stackTwo.isEmpty()) return;
-        this.interactionManager.clickSlot(0, slotTwo, hotbarSlot, SlotActionType.SWAP, player);
-    }
-
-    private ItemStack getPickedBlock(boolean isCreativeMode){
+    private ItemStack getPickItemStack(boolean isCreativeMode, boolean includeData){
         HitResult.Type crosshairTargetType = this.crosshairTarget.getType();
         if (this.crosshairTarget == null || crosshairTargetType == HitResult.Type.MISS) return null;
 
-        BlockEntity blockEntity;
         ItemStack itemStack;
         if (crosshairTargetType == HitResult.Type.BLOCK) {
 
@@ -136,13 +129,8 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
             BlockState blockState = this.world.getBlockState(blockPos);
             if (blockState.isAir()) return null;
 
-            itemStack = blockState.getBlock().getPickStack(this.world, blockPos, blockState);
+            itemStack = blockState.getPickStack(this.world, blockPos, includeData);
             if (itemStack.isEmpty()) return null;
-
-            if (isCreativeMode && Screen.hasControlDown() && blockState.hasBlockEntity()) {
-                blockEntity = this.world.getBlockEntity(blockPos);
-                if (blockEntity != null) addBlockEntityNbt(itemStack, blockEntity, this.world.getRegistryManager());
-            }
             return itemStack;
 
         } else if (crosshairTargetType == HitResult.Type.ENTITY && isCreativeMode) {

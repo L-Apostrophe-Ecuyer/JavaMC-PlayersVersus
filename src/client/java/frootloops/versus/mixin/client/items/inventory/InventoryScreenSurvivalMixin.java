@@ -39,7 +39,7 @@ public abstract class InventoryScreenSurvivalMixin<T extends AbstractRecipeScree
     private void addInventoryButtons(CallbackInfo info) {
 
         this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 22, this.height / 2 - 22, 20, 18, InventorySorting.TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
-            HotbarCycling.doHotbarSwap(client, client.player.getInventory());
+            HotbarCycling.doHotbarSwap(client.player.getInventory());
             if (buttonHotbarSwap != null) buttonHotbarSwap.setFocused(false);
         });
 
@@ -56,7 +56,7 @@ public abstract class InventoryScreenSurvivalMixin<T extends AbstractRecipeScree
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if(button == 2) {
-            HotbarCycling.doHotbarSwap(client, client.player.getInventory());
+            HotbarCycling.doHotbarSwap(client.player.getInventory());
         }
         else {
             ScreenPos recipeBookButtonPos = this.getRecipeBookButtonPos();

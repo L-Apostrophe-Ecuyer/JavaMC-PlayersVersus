@@ -1,23 +1,21 @@
 package frootloops.versus.mod.items.inventory;
 
-import frootloops.versus.VersusMod;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-
-public class ContainerDumping {
+@Environment(EnvType.CLIENT)
+public abstract class ContainerDumping {
 
     private static final boolean DEBUG_MODE = false;
 

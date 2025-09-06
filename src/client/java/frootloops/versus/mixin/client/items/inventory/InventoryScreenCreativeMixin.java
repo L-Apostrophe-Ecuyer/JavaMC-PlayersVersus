@@ -41,10 +41,10 @@ public abstract class InventoryScreenCreativeMixin  extends HandledScreen<Creati
 
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
-        if (this.client.interactionManager.hasCreativeInventory()) {
+        if (this.client.currentScreen instanceof CreativeInventoryScreen) {
 
             this.buttonHotbarSwap = new TexturedButtonWidget(this.x + 104 + 24, this.height / 2 - 36, 20, 18, InventorySorting.TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
-                HotbarCycling.doHotbarSwap(client, client.player.getInventory());
+                HotbarCycling.doHotbarSwap(client.player.getInventory());
                 if(buttonHotbarSwap != null) buttonHotbarSwap.setFocused(false);
             });
 
@@ -70,7 +70,7 @@ public abstract class InventoryScreenCreativeMixin  extends HandledScreen<Creati
     @Inject(method = "mouseReleased",at = @At("RETURN"), cancellable = false)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable info) {
         if (selectedTab.getType() == ItemGroup.Type.INVENTORY && button == 2 && this.handler.getCursorStack().isEmpty()) {
-            HotbarCycling.doHotbarSwap(client, client.player.getInventory());
+            HotbarCycling.doHotbarSwap(client.player.getInventory());
         }
     }
 

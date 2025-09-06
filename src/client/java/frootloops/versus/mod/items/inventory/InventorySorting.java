@@ -3,6 +3,8 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items.inventory.sorting.InventorySortingHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.inventory.Inventory;
@@ -19,6 +21,7 @@ import net.minecraft.world.biome.BiomeKeys;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+@Environment(EnvType.CLIENT)
 public class InventorySorting {
 
     private static final boolean DEBUG_ITEM_SWITICHING = false;

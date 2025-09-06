@@ -1,33 +1,57 @@
 package frootloops.versus.mod.items.inventory;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class HotbarCycling {
+@Environment(EnvType.CLIENT)
+public abstract class HotbarCycling {
 
-    public static void doHotbarSwap(MinecraftClient client, PlayerInventory inventory) {
-        for (int i = 0; i < 9; i++) {
-            swapItemsFromSlots(client, inventory, i, i + 9);
-            swapItemsFromSlots(client, inventory, i, i + 18);
-            swapItemsFromSlots(client, inventory, i, i + 27);
+    public static void doHotbarSwap(PlayerInventory inventory, int numTypesToSwap) {
+        if(numTypesToSwap % 4 == 0 || numTypesToSwap < 0) return;
+        if(numTypesToSwap % 4 == 1) doHotbarSwap(inventory);
+        if(numTypesToSwap % 4 == 3) doInverseHotbarSwap(inventory);
+        else {
+            for (int i = 0; i < 9; i++) {
+                swapItemsFromSlots(inventory, i, i + 9);
+                swapItemsFromSlots(inventory, i, i + 18);
+                swapItemsFromSlots(inventory, i, i + 27);
+            }
         }
     }
 
-    public static void doInverseHotbarSwap(MinecraftClient client, PlayerInventory inventory) {
+    public static void doHotbarSwap(PlayerInventory inventory, boolean skipEmptyRows) {
         for (int i = 0; i < 9; i++) {
-            swapItemsFromSlots(client, inventory, i + 9, i);
-            swapItemsFromSlots(client, inventory,i + 18, i);
-            swapItemsFromSlots(client, inventory, i + 27, i);
+            swapItemsFromSlots(inventory, i, i + 9);
+            swapItemsFromSlots(inventory, i, i + 18);
+            swapItemsFromSlots(inventory, i, i + 27);
         }
     }
 
-    private static void swapItemsFromSlots(MinecraftClient client, PlayerInventory inventory, int slotOne, int slotTwo) {
+    public static void doHotbarSwap(PlayerInventory inventory) {
+        for (int i = 0; i < 9; i++) {
+            swapItemsFromSlots(inventory, i, i + 9);
+            swapItemsFromSlots(inventory, i, i + 18);
+            swapItemsFromSlots(inventory, i, i + 27);
+        }
+    }
+
+    public static void doInverseHotbarSwap(PlayerInventory inventory) {
+        for (int i = 0; i < 9; i++) {
+            swapItemsFromSlots(inventory, i + 9, i);
+            swapItemsFromSlots(inventory,i + 18, i);
+            swapItemsFromSlots(inventory, i + 27, i);
+        }
+    }
+
+    private static void swapItemsFromSlots(PlayerInventory inventory, int slotOne, int slotTwo) {
         if(slotOne == slotTwo) return;
         ItemStack stackOne = inventory.getStack(slotOne);
         ItemStack stackTwo = inventory.getStack(slotTwo);
         if(stackOne.isEmpty() && stackTwo.isEmpty()) return;
-        client.interactionManager.clickSlot(0, slotTwo, slotOne, SlotActionType.SWAP, client.player);
+        MinecraftClient.getInstance().interactionManager.clickSlot(0, slotTwo, slotOne, SlotActionType.SWAP, MinecraftClient.getInstance().player);
     }
 }

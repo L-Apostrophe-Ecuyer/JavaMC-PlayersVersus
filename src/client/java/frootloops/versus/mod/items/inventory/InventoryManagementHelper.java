@@ -1,11 +1,14 @@
 package frootloops.versus.mod.items.inventory;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 
+@Environment(EnvType.CLIENT)
 public class InventoryManagementHelper {
 
     protected static void placeOrDropCursorStack(ScreenHandler handler, MinecraftClient client, Inventory inventory) {
