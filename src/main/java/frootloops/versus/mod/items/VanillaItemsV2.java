@@ -23,15 +23,9 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Optional;
 
-public class VanillaItemsV2 implements ModInitializer {
+import static frootloops.versus.mod.items.equipment.CustomEquipment.*;
 
-    public static final Identifier ATTACK_REACH_MODIFIER_ID = Identifier.of(VersusMod.MOD_ID,"attack_reach_modifier");
-    private static final double TRIDENT_SPEED = 1.0, TRIDENT_DAMAGE = 9.0, TRIDENT_REACH = 1.0;
-    private static final double PICKAXE_SPEED = 1.2, PICKAXE_DAMAGE = 2.0, PICKAXE_REACH = 0.0;
-    private static final double SHOVEL_SPEED = 1.4, SHOVEL_DAMAGE = 3.0, SHOVEL_REACH = 0.0;
-    private static final double SWORD_SPEED = 1.6, SWORD_DAMAGE = 3.0, SWORD_REACH = 0.5;
-    private static final double HOE_SPEED = 2.0, HOE_DAMAGE = 1.0, HOE_REACH = 1.0;
-    private static final double AXE_SPEED = 1.0, AXE_DAMAGE = 6.0, AXE_REACH = 0.0;
+public class VanillaItemsV2 implements ModInitializer {
 
     @Override
     public void onInitialize() {
@@ -106,7 +100,7 @@ public class VanillaItemsV2 implements ModInitializer {
     private static void modifySwordComponents(DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount) {
         context.modify(item, builder -> {builder
                 .add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange))
-                .add(DataComponentTypes.BLOCKS_ATTACKS, createDamageBlockingComponent(0.0625F, 0.5F, baseBlockingAmount, 0.5F, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK));
+                .add(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(baseBlockingAmount, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK));
         });
     }
 
@@ -116,46 +110,9 @@ public class VanillaItemsV2 implements ModInitializer {
         });
     }
 
-    private static BlocksAttacksComponent createDamageBlockingComponent(
-            float blockDelaySeconds,    // The amount of time (in seconds) that use must be held before successfully blocking attacks
-            float disableCooldownScale, // The multiplier applied to the cooldown time for the item when attacked by a disabling attack
-            float amountBlockedBase,    // The constant amount of damage to be blocked
-            float amountBlockedFactor,  // The fraction of the dealt damage to be blocked
-            RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking
-    ) {
-        float horizontalBlockingAngle = 90F;
-        float itemDamageThreshold = 3.0F;
-        float itemDamageBase = 1.0F;
-        float itemDamageFactor = 1.0F;
-        return new BlocksAttacksComponent(
-                blockDelaySeconds,
-                disableCooldownScale,
-                List.of(new BlocksAttacksComponent.DamageReduction(horizontalBlockingAngle, Optional.empty(), amountBlockedBase, amountBlockedFactor)),
-                new BlocksAttacksComponent.ItemDamage(itemDamageThreshold, itemDamageBase, itemDamageFactor),
-                Optional.of(DamageTypeTags.BYPASSES_SHIELD),
-                Optional.of(SoundEvents.ITEM_SHIELD_BLOCK),
-                Optional.of(SoundEvents.ITEM_SHIELD_BREAK)
-        );
-    }
 
-    private static AttributeModifiersComponent createToolAttributeModifiers(double attackDamage, double attackSpeed, double extraAttackRange) {
-        AttributeModifiersComponent.Builder attributeBuilder = AttributeModifiersComponent.builder()
-                .add(
-                        EntityAttributes.ATTACK_DAMAGE,
-                        new EntityAttributeModifier(Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, attackDamage - Combat.PLAYER_BASE_ATTACK_DAMAGE, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-                )
-                .add(
-                        EntityAttributes.ATTACK_SPEED,
-                        new EntityAttributeModifier(Item.BASE_ATTACK_SPEED_MODIFIER_ID, attackSpeed - Combat.PLAYER_BASE_ATTACK_SPEED, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-                );
-        if(extraAttackRange != 0.0) {
-            attributeBuilder.add(
-                    EntityAttributes.ENTITY_INTERACTION_RANGE,
-                    new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, extraAttackRange, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-            );
-        }
-        return attributeBuilder.build();
-    }
+
+
 
 
 }
