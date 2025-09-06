@@ -13,7 +13,6 @@
 		"environment.visuals.WorldRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",
-		"environment.audio.MusicTrackerMixin",
 
 		"mobs.hostile.SkeletonModelMixin",
 		"mobs.hostile.ZombieModelMixin",
