@@ -25,9 +25,8 @@ import java.util.Optional;
 
 import static frootloops.versus.mod.items.equipment.CustomEquipment.*;
 
-public class VanillaItemsV2 implements ModInitializer {
+public class VanillaItemsV2 {
 
-    @Override
     public void onInitialize() {
         Identifier latePhase = Identifier.of(VersusMod.MOD_ID, "late");
         DefaultItemComponentEvents.MODIFY.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase);

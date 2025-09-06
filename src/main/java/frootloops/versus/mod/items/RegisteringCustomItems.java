@@ -33,11 +33,11 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("copper_leggings_damaged", CustomEquipment.COPPER_LEGGINGS_DAMAGED, ItemGroups.COMBAT);
         registerCustomItem("copper_helmet_damaged", CustomEquipment.COPPER_HELMET_DAMAGED, ItemGroups.COMBAT);
         registerCustomItem("copper_boots_damaged", CustomEquipment.COPPER_BOOTS_DAMAGED, ItemGroups.COMBAT);
-        /*registerCustomItem("copper_hoe", CustomEquipment.COPPER_HOE, ItemGroups.TOOLS);
+        registerCustomItem("copper_hoe", CustomEquipment.COPPER_HOE, ItemGroups.TOOLS);
         registerCustomItem("copper_axe", CustomEquipment.COPPER_AXE, ItemGroups.TOOLS, ItemGroups.COMBAT);
         registerCustomItem("copper_sword", CustomEquipment.COPPER_SWORD, ItemGroups.COMBAT);
         registerCustomItem("copper_shovel", CustomEquipment.COPPER_SHOVEL, ItemGroups.TOOLS);
-        registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);*/
+        registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);
 
         registerCustomItem("bottle_of_ender", CustomBrewingItems.BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
         registerCustomItem("splash_bottle_of_ender", CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);

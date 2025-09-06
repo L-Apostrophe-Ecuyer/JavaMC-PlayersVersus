@@ -3,8 +3,6 @@ package frootloops.versus.mod.items.equipment;
 import com.google.common.collect.Maps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.items.VanillaItemsV2;
-import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
@@ -14,9 +12,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.*;
 import net.minecraft.item.equipment.ArmorMaterial;
 import net.minecraft.item.equipment.EquipmentAsset;
-import net.minecraft.item.equipment.EquipmentAssetKeys;
 import net.minecraft.item.equipment.EquipmentType;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -27,9 +23,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,10 +73,10 @@ public abstract class CustomEquipment {
     public static final Item COPPER_LEGGINGS = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.LEGGINGS, getItemSettings("copper_leggings"), COPPER_LEGGINGS_DAMAGED, 32);
     public static final Item COPPER_BOOTS = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.BOOTS, getItemSettings("copper_boots"), COPPER_BOOTS_DAMAGED, 24);
 
-    public final static HoeItem COPPER_HOE = registerHoe("copper_hoe", COPPER_TOOL_MATERIAL);
-    public final static AxeItem COPPER_AXE = registerAxe("copper_axe", COPPER_TOOL_MATERIAL);
-    public final static Item COPPER_PICKAXE = registerPickaxe("copper_pickaxe", COPPER_TOOL_MATERIAL);
-    public final static Item COPPER_SWORD = registerSword("copper_sword", COPPER_TOOL_MATERIAL, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK);
+    public final static HoeItem COPPER_HOE = customHoe("copper_hoe", COPPER_TOOL_MATERIAL);
+    public final static AxeItem COPPER_AXE = customAxe("copper_axe", COPPER_TOOL_MATERIAL);
+    public final static Item COPPER_PICKAXE = customPickaxe("copper_pickaxe", COPPER_TOOL_MATERIAL);
+    public final static Item COPPER_SWORD = customSword("copper_sword", COPPER_TOOL_MATERIAL, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK);
     public final static ShovelItem COPPER_SHOVEL = new ShovelItem(COPPER_TOOL_MATERIAL, RebalancedTools.getShovelSpeedModifier(), RebalancedTools.getShovelSpeedModifier(), getItemSettings("copper_shovel"));
 
     private static RegistryKey<EquipmentAsset> getArmorAsset(String id) {
@@ -101,28 +95,22 @@ public abstract class CustomEquipment {
         );
     }
 
-    private static HoeItem registerHoe(String name, ToolMaterial material) {
-        HoeItem hoeItem = new HoeItem(material, (float) (HOE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (HOE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED),
+    private static HoeItem customHoe(String name, ToolMaterial material) {
+        return new HoeItem(material, (float) (HOE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (HOE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED),
                 getItemSettings(name).component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + HOE_DAMAGE, HOE_SPEED, HOE_REACH)));
-        registerCustomItem(name, hoeItem, ItemGroups.TOOLS);
-        return hoeItem;
     }
-    private static AxeItem registerAxe(String name, ToolMaterial material) {
-        AxeItem axeItem = new AxeItem(material, (float) (AXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (AXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED), getItemSettings(name));
-        registerCustomItem(name, axeItem, ItemGroups.TOOLS, ItemGroups.COMBAT);
-        return axeItem;
+    private static AxeItem customAxe(String name, ToolMaterial material) {
+        return new AxeItem(material, (float) (AXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (AXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED), getItemSettings(name));
     }
-    private static Item registerPickaxe(String name, ToolMaterial material) {
-        Item pickItem = new Item(getItemSettings(name).pickaxe(material, (float) (PICKAXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (PICKAXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED)));
-        return registerCustomItem(name, pickItem, ItemGroups.TOOLS);
+    private static Item customPickaxe(String name, ToolMaterial material) {
+        return new Item(getItemSettings(name).pickaxe(material, (float) (PICKAXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (PICKAXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED)));
     }
 
-    private static Item registerSword(String name, ToolMaterial material, RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking) {
-        Item swordItem = new Item(getItemSettings(name)
+    private static Item customSword(String name, ToolMaterial material, RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking) {
+        return new Item(getItemSettings(name)
                 .sword(material, (float) (SWORD_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (SWORD_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED))
                 .component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SWORD_DAMAGE, SWORD_SPEED, SWORD_REACH))
                 .component(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(material.attackDamageBonus(), soundBlocking, soundBreaking)));
-        return registerCustomItem(name, swordItem, ItemGroups.COMBAT);
     }
 
     public static BlocksAttacksComponent getSwordBlockingComponent(float baseBlockingAmount, RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking) {
