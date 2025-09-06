@@ -63,7 +63,7 @@ public abstract class WeatherRendererMixin {
         Random random = Random.create((long)ticks * 312987231L);
         if(world.getLightLevel(LightType.SKY, cameraPos) > 1 && random.nextInt(600) < this.field_53154++) {
             this.field_53154 = 0;
-            world.playSoundAtBlockCenter(cameraPos.up(3), CustomSpecialEffects.FOG_WIND_SOUND, SoundCategory.WEATHER, 0.15F, 1.0F, false);
+            world.playSoundAtBlockCenterClient(cameraPos.up(3), CustomSpecialEffects.FOG_WIND_SOUND, SoundCategory.WEATHER, 0.15F, 1.0F, false);
         }
 
         if (amountOfRain > 0.1F) {
@@ -89,16 +89,16 @@ public abstract class WeatherRendererMixin {
                     double h = (double)fluidState.getHeight(world, blockPos2);
                     double m = Math.max(g, h);
                     ParticleEffect particleEffect = !fluidState.isIn(FluidTags.LAVA) && !blockState.isOf(Blocks.MAGMA_BLOCK) && !CampfireBlock.isLitCampfire(blockState) ? ParticleTypes.RAIN : ParticleTypes.SMOKE;
-                    world.addParticle(particleEffect, (double)blockPos2.getX() + d, (double)blockPos2.getY() + m, (double)blockPos2.getZ() + e, 0.0, 0.0, 0.0);
+                    world.addParticleClient(particleEffect, (double)blockPos2.getX() + d, (double)blockPos2.getY() + m, (double)blockPos2.getZ() + e, 0.0, 0.0, 0.0);
                 }
             }
 
             if (blockPos2 != null && random.nextInt(6) < this.field_53154++) {
                 this.field_53154 = 0;
                 if (blockPos2.getY() > cameraPos.getY() + 1 && world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, cameraPos).getY() > MathHelper.floor((float)cameraPos.getY())) {
-                    world.playSoundAtBlockCenter(blockPos2, SoundEvents.WEATHER_RAIN_ABOVE, SoundCategory.WEATHER, 0.075F, 0.5F, false);
+                    world.playSoundAtBlockCenterClient(blockPos2, SoundEvents.WEATHER_RAIN_ABOVE, SoundCategory.WEATHER, 0.075F, 0.5F, false);
                 } else {
-                    world.playSoundAtBlockCenter(blockPos2, SoundEvents.WEATHER_RAIN, SoundCategory.WEATHER, 0.1F, 1.0F, false);
+                    world.playSoundAtBlockCenterClient(blockPos2, SoundEvents.WEATHER_RAIN, SoundCategory.WEATHER, 0.1F, 1.0F, false);
                 }
             }
         }

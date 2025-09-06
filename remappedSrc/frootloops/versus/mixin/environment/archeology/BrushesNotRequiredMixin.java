@@ -74,7 +74,7 @@ public class BrushesNotRequiredMixin {
         DustParticlesOffset dustParticlesOffset = DustParticlesOffset.fromSide(playerEntity.getRotationVector(), direction);
 
         for(int k = 0; k < j; ++k) {
-            world.addParticle(blockStateParticleEffect, blockPos.getX() - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), blockPos.getY(), blockPos.getZ() - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * 3.0 * world.getRandom().nextDouble(), 0.0, dustParticlesOffset.zd() * (double)i * 3.0 * world.getRandom().nextDouble());
+            world.addParticleClient(blockStateParticleEffect, blockPos.getX() - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), blockPos.getY(), blockPos.getZ() - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * 3.0 * world.getRandom().nextDouble(), 0.0, dustParticlesOffset.zd() * (double)i * 3.0 * world.getRandom().nextDouble());
         }
 
     }

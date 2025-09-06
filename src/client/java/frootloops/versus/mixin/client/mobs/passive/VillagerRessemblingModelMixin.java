@@ -46,12 +46,13 @@ public abstract class VillagerRessemblingModelMixin extends EntityModel<Villager
 
     @Inject(method = "setAngles", at = @At("HEAD"))
     public void setAngles(VillagerEntityRenderState renderState, CallbackInfo info) {
-        float f = renderState.limbFrequency;
-        float g = renderState.limbAmplitudeMultiplier;
+        float f = renderState.limbSwingAnimationProgress;
+        float g = renderState.limbSwingAmplitude;
+        float h = (float) (Math.PI / 6);
         float i = renderState.age * 0.1F + f * 0.5F;
         float j = 0.08F + g * 0.4F;
-        this.rightEar.roll = (float) (-Math.PI / 6) - MathHelper.cos(i * 1.2F) * j;
-        this.leftEar.roll = (float) (Math.PI / 6) + MathHelper.cos(i) * j;
+        this.leftEar.roll = (float) (-h) - MathHelper.cos(i * 1.2F) * j;
+        this.rightEar.roll = (float) (h) + MathHelper.cos(i) * j;
     }
 
 }

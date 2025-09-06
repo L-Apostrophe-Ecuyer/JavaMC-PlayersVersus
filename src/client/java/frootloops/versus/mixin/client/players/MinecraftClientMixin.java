@@ -57,12 +57,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Shadow @Nullable public final GameRenderer gameRenderer;
     @Shadow public final GameOptions options;
 
-    @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity, DynamicRegistryManager registryManager) {
-        NbtCompound nbtCompound = blockEntity.createComponentlessNbtWithIdentifyingData(registryManager);
-        blockEntity.removeFromCopiedStackNbt(nbtCompound);
-        BlockItem.setBlockEntityData(stack, blockEntity.getType(), nbtCompound);
-        stack.applyComponentsFrom(blockEntity.createComponentMap());
-    }
+    @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity, DynamicRegistryManager registryManager) {}
 
     public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, GameOptions options) { super(string);
         this.gameRenderer = gameRenderer;
@@ -111,7 +106,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                             if (actionResult instanceof ActionResult.Success success) {
                                 if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
                                     this.player.swingHand(hand);
-                                    if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.interactionManager.hasCreativeInventory())) {
+                                    if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.isInCreativeMode())) {
                                         this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
                                     }
                                 }

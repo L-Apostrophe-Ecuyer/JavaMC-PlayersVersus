@@ -14,9 +14,8 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class HungerSprintingMixin extends PlayerEntity {
-
-    public HungerSprintingMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
-        super(world, pos, yaw, gameProfile);
+    public HungerSprintingMixin(World world, GameProfile profile) {
+        super(world, profile);
     }
 
     @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))

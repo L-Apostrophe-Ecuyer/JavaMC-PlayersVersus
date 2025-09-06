@@ -52,14 +52,14 @@ public abstract class MusicTrackerMixin {
     @Inject(method = "isPlayingType", at= @At("HEAD"), cancellable = true)
     public void isPlayingType(MusicSound type, CallbackInfoReturnable<Boolean> cir) {
         if(this.current == null) cir.setReturnValue(false);
-        else cir.setReturnValue(((SoundEvent)type.getSound().value()).id().equals(this.current.getId()));
+        else cir.setReturnValue(((SoundEvent)type.sound().value()).id().equals(this.current.getId()));
     }
 
     @Inject(method = "play", at= @At("HEAD"), cancellable = true)
     public void play(MusicSound type, CallbackInfo info) {
         if(type == MusicType.GAME) {
             if(client.player.getY() < -24.0) {
-                current = PositionedSoundInstance.music(SoundEvents.MUSIC_OVERWORLD_DEEP_DARK.value());
+                current = PositionedSoundInstance.music(SoundEvents.MUSIC_OVERWORLD_DEEP_DARK.value(), 1.0f);
                 this.client.getSoundManager().play(this.current);
                 info.cancel();
             }

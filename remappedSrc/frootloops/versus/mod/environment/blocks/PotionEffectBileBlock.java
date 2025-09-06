@@ -84,7 +84,7 @@ public class PotionEffectBileBlock extends Block {
             double d = (double) pos.getX() + 0.25 + randomDouble * 0.5;
             double e = (double) pos.getY() + 0.5;
             double f = (double) pos.getZ() + 0.25 + random.nextDouble() * 0.5;
-            world.addParticle(PARTICLE, true, d, e, f, 0.0, 0.05, 0.0);
+            world.addParticleClient(PARTICLE, true, d, e, f, 0.0, 0.05, 0.0);
         }
     }
 

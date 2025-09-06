@@ -5,6 +5,7 @@ import frootloops.versus.VersusModClient;
 import frootloops.versus.VersusSettings;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderLayer;
@@ -31,8 +32,6 @@ public class HungerBarRendererMixin {
 
     @Overwrite
     private void renderFood(DrawContext context, PlayerEntity player, int top, int left) {
-        RenderSystem.enableBlend();
-
         HungerManager hungerManager = player.getHungerManager();
         int playerFoodLevel = hungerManager.getFoodLevel();
         int foodPointsAvailable = !VersusSettings.DO_FOOD_OVERHAUL ? 20 : Math.max((int) (player.getMaxHealth() - player.getHealth() + 6), playerFoodLevel);
@@ -60,40 +59,13 @@ public class HungerBarRendererMixin {
 
             // Draw the border icon:
             halfHaunchFoodValue = renderedHaunch * 2 + 1;
-            if(halfHaunchFoodValue < foodPointsAvailable) context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchEmpty, x, y, 9, 9);
-            else if(halfHaunchFoodValue == foodPointsAvailable) context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchHalfDisabled, x, y, 9, 9);
-            else context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchEmptyDisabled, x, y, 9, 9);
+            if(halfHaunchFoodValue < foodPointsAvailable) context.drawGuiTexture(RenderPipelines.GUI_TEXTURED,iconHaunchEmpty, x, y, 9, 9);
+            else if(halfHaunchFoodValue == foodPointsAvailable) context.drawGuiTexture(RenderPipelines.GUI_TEXTURED,iconHaunchHalfDisabled, x, y, 9, 9);
+            else context.drawGuiTexture(RenderPipelines.GUI_TEXTURED,iconHaunchEmptyDisabled, x, y, 9, 9);
 
             // Draw the food points icon:
-            if (halfHaunchFoodValue < playerFoodLevel) context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchFull, x, y, 9, 9);
-            else if (halfHaunchFoodValue == playerFoodLevel) context.drawGuiTexture(RenderLayer::getGuiTextured,iconHaunchHalf, x, y, 9, 9);
+            if (halfHaunchFoodValue < playerFoodLevel) context.drawGuiTexture(RenderPipelines.GUI_TEXTURED,iconHaunchFull, x, y, 9, 9);
+            else if (halfHaunchFoodValue == playerFoodLevel) context.drawGuiTexture(RenderPipelines.GUI_TEXTURED,iconHaunchHalf, x, y, 9, 9);
         }
-        RenderSystem.disableBlend();
     }
-
-    /*
-    Works, but I opted to optimize performance. The above code is a lot better, and avoids unnecessary ops
-
-    @Redirect(method = "renderFood", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
-    public void foodGUI(DrawContext context, Identifier texture, int x, int y, int width, int height) {
-        if(VersusSettings.DO_FOOD_OVERHAUL && (texture == FOOD_EMPTY_HUNGER_TEXTURE || texture == FOOD_EMPTY_TEXTURE)) {
-            int n = context.getScaledWindowWidth() / 2 + 91;
-            int hungerLevelMin = (n - x - 9)/4; // Reverse mathing the original 0-9 value of the x position, then multiplying by 2
-            if(hungerLevelMin > 5) {
-                PlayerEntity playerEntity = this.getCameraPlayer();
-                int maxHungerLevel = Math.max((int) (playerEntity.getMaxHealth() - playerEntity.getHealth()), playerEntity.getHungerManager().getFoodLevel());
-                if(hungerLevelMin + 1 >= maxHungerLevel) {
-                    if(hungerLevelMin >= maxHungerLevel) {
-                        if(texture == FOOD_EMPTY_TEXTURE) texture = VersusMod.HUD_TEXTURE_DISABLED_FOOD;
-                        else texture = VersusMod.HUD_TEXTURE_DISABLED_FOOD_HUNGER;
-                    }
-                    else {
-                        if(texture == FOOD_EMPTY_TEXTURE) texture = VersusMod.HUD_TEXTURE_DISABLED_FOOD_HALF;
-                        else texture = VersusMod.HUD_TEXTURE_DISABLED_FOOD_HALF_HUNGER;
-                    }
-                }
-            }
-        }
-        context.drawGuiTexture(texture, x, y, 0, width, height);
-    }*/
 }
