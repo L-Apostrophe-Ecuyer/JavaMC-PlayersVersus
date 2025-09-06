@@ -48,7 +48,7 @@ public interface MoistureConvertableBlock {
         }
     }
 
-    static void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance, Block dryBlock) {
+    static void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, double fallDistance, Block dryBlock) {
         if(dryBlock == null) return;
         if(entity instanceof FallingBlockEntity) {
             BlockState result = dryBlock.getStateWithProperties(state);

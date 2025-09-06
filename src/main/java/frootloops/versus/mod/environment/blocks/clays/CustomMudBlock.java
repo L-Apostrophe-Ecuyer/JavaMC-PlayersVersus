@@ -31,7 +31,7 @@ public class CustomMudBlock extends MoistBlock {
     }
 
     @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
         if (!entity.isSpectator() && entity instanceof LivingEntity livingEntity && entity.getBlockStateAtPos().isOf(this) && !canWalkOnWetMud(entity)) {
 
             // When a player goes inside mud, break a fragile block that was on top:
@@ -86,7 +86,7 @@ public class CustomMudBlock extends MoistBlock {
     }
 
     @Override
-    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
+    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
         if(entity instanceof FallingBlockEntity fallingBlock) {
             if(fallDistance < MIN_FALL_DISTANCE_TO_DRY && fallingBlock.getBlockState().getSoundGroup() != BlockSoundGroup.ANVIL) return;
             world.setBlockState(pos, this.getDryVersion().getDefaultState());

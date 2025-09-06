@@ -3,7 +3,6 @@ package frootloops.versus.mod.environment.blocks;
 import frootloops.versus.VersusMod;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -11,15 +10,12 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
+import net.minecraft.particle.TintedParticleEffect;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
@@ -34,7 +30,7 @@ public class PotionEffectBileBlock extends Block {
 
     private static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
 
-    private final EntityEffectParticleEffect PARTICLE;
+    private final TintedParticleEffect PARTICLE;
     private final int DURATION, AMPLIFIER;
     private final float AMBIENT_OCCLUSION_AMOUNT;
     private RegistryEntry<StatusEffect> effect;
@@ -42,7 +38,7 @@ public class PotionEffectBileBlock extends Block {
     public PotionEffectBileBlock(Settings settings, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, float ambientOcclusion) {
         super(settings);
         this.effect = statusEffectToGrant;
-        this.PARTICLE = EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, color);
+        this.PARTICLE = TintedParticleEffect.create(ParticleTypes.ENTITY_EFFECT, color);
         this.DURATION = duration;
         this.AMPLIFIER = amplifier;
         this.AMBIENT_OCCLUSION_AMOUNT = ambientOcclusion;
@@ -53,7 +49,7 @@ public class PotionEffectBileBlock extends Block {
     }
 
     @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
         if (!world.isClient && !entity.isSpectator() && entity.getBlockStateAtPos().isOf(this) && entity instanceof LivingEntity livingEntity) {
             if(entity.fallDistance > 0.65 && (entity instanceof PlayerEntity || (!world.isClient && ((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && entity.getWidth() * entity.getWidth() * entity.getHeight() > 0.512F)) {
                 this.grantStatusEffect(livingEntity, true);
@@ -63,7 +59,17 @@ public class PotionEffectBileBlock extends Block {
                 this.grantStatusEffect(livingEntity, false);
             }
         }
-        super.onEntityCollision(state, world, pos, entity);
+    }
+
+    @Override
+    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
+        if (!world.isClient && !entity.isSpectator() && entity.getBlockStateAtPos().isOf(this) && entity instanceof LivingEntity livingEntity) {
+            if(entity.fallDistance > 0.65 && (entity instanceof PlayerEntity || (!world.isClient && ((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && entity.getWidth() * entity.getWidth() * entity.getHeight() > 0.512F)) {
+                this.grantStatusEffect(livingEntity, true);
+                super.onLandedUpon(world, state, pos, entity, fallDistance);
+                world.breakBlock(pos, false);
+            }
+        }
     }
 
     private void grantStatusEffect(LivingEntity entity, boolean extraStrongEffect) {
@@ -84,7 +90,7 @@ public class PotionEffectBileBlock extends Block {
             double d = (double) pos.getX() + 0.25 + randomDouble * 0.5;
             double e = (double) pos.getY() + 0.5;
             double f = (double) pos.getZ() + 0.25 + random.nextDouble() * 0.5;
-            world.addParticle(PARTICLE, true, d, e, f, 0.0, 0.05, 0.0);
+            world.addParticleClient(PARTICLE, d, e, f, 0.0, 0.05, 0.0);
         }
     }
 
