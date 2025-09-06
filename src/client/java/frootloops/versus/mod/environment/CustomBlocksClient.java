@@ -3,11 +3,10 @@ package frootloops.versus.mod.environment;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.color.world.BiomeColors;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.world.biome.GrassColors;
 
 @Environment(EnvType.CLIENT)
@@ -16,7 +15,7 @@ public class CustomBlocksClient {
     public static void onInitialize() {
 
 
-        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(),
+        BlockRenderLayerMap.putBlocks(BlockRenderLayer.CUTOUT,
                 CustomBlocks.SMOLDERING_TORCH,
                 CustomBlocks.SMOLDERING_WALL_TORCH,
                 CustomBlocks.EXTINGUISHED_TORCH,
@@ -26,7 +25,6 @@ public class CustomBlocksClient {
                 CustomBlocks.CLOVERS,
                 CustomBlocks.WILD_WHEAT,
                 CustomBlocks.WHEAT_GRASS,
-                CustomBlocks.SUGAR_CANE_TOP,
                 CustomBlocks.CREEPER_SPORE_BLOSSOM,
 
                 CustomBlocks.HARMFUL_BILE,
@@ -64,7 +62,7 @@ public class CustomBlocksClient {
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> {
             if (view == null || pos == null) return GrassColors.getDefaultColor();
             else return BiomeColors.getGrassColor(view, pos);
-        }, CustomBlocks.CLOVERS, CustomBlocks.SUGAR_CANE_TOP);
+        }, CustomBlocks.CLOVERS);
     }
 
 }
