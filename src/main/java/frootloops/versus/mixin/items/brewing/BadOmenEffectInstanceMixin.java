@@ -49,7 +49,7 @@ public abstract class BadOmenEffectInstanceMixin {
     }
 
     @Inject(method = "update", at = @At(value = "HEAD"), cancellable = true)
-    public void update(LivingEntity entity, Runnable overwriteCallback, CallbackInfoReturnable<Boolean> cir) {
+    public void update(ServerWorld world, LivingEntity entity, Runnable hiddenEffectCallback, CallbackInfoReturnable<Boolean> cir) {
         if(duration > 0 && entity instanceof ServerPlayerEntity serverPlayer) {
             ServerWorld serverWorld = serverPlayer.getWorld();
 

@@ -57,8 +57,6 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Shadow @Nullable public final GameRenderer gameRenderer;
     @Shadow public final GameOptions options;
 
-    @Shadow private void addBlockEntityNbt(ItemStack stack, BlockEntity blockEntity, DynamicRegistryManager registryManager) {}
-
     public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, GameOptions options) { super(string);
         this.gameRenderer = gameRenderer;
         this.options = options;
@@ -179,10 +177,5 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             }
         }
         return false;
-    }
-
-    private static boolean isSupportedStack(ItemStack stack) {
-        Item item = stack.getItem();
-        return item instanceof BlockItem;
     }
 }

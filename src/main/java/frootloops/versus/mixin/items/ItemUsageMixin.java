@@ -26,10 +26,11 @@ public abstract class ItemUsageMixin {
         if(cir.getReturnValue() == UseAction.NONE && stack.isOf(Items.RECOVERY_COMPASS)) cir.setReturnValue(UseAction.BOW);
     }
 
+    /*
     @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setCurrentHand(Lnet/minecraft/util/Hand;)V"), cancellable = true)
-    public void canOnlyBlockIfAttackIsCharged(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+    public void canOnlyBlockIfAttackIsCharged(PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         if(user.getAttackCooldownProgress(0.0f) < 0.5f) cir.setReturnValue(ActionResult.PASS);
-    }
+    }*/
 
     @Inject(method = "finishUsing", at = @At("RETURN"), cancellable = false)
     public void dontUseOffhandItemAfterExhausted(ItemStack stack, World world, LivingEntity user, CallbackInfoReturnable cir) {
