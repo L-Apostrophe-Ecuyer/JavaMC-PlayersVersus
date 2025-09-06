@@ -57,7 +57,6 @@ public class CustomBlocks {
     public static Block WHEAT_GRASS;
     public static Block WILD_WHEAT;
     public static Block CLOVERS;
-    public static SugarCaneTopBlock SUGAR_CANE_TOP;
 
     public static CreeperSporeBlock CREEPER_SPORE_BLOSSOM;
     public static InfestedBlock INFESTED_OAK_WOOD, INFESTED_DARK_OAK_WOOD;
@@ -134,7 +133,6 @@ public class CustomBlocks {
         WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrassBlock(getSettings("wheat_grass", Blocks.SHORT_GRASS)));
         WILD_WHEAT = registerBlock("wild_wheat", new WheatGrassBlock(getSettings("wild_wheat", Blocks.SHORT_GRASS)));
         CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
-        SUGAR_CANE_TOP = (SugarCaneTopBlock)registerBlock("sugar_cane_top", new SugarCaneTopBlock(getSettings("sugar_cane_top", Blocks.SUGAR_CANE)));
 
         CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM)));
         INFESTED_OAK_WOOD = (InfestedBlock) registerBlock("infested_oak_wood", new InfestedBlock(Blocks.OAK_WOOD, getSettings("infested_oak_wood", Blocks.OAK_WOOD)));

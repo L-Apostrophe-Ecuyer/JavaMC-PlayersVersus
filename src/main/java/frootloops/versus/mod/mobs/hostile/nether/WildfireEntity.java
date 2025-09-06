@@ -89,21 +89,11 @@ public class WildfireEntity extends HostileEntity {
 
         if (this.getWorld().isClient) {
             if (this.random.nextInt(24) == 0 && !this.isSilent()) {
-                this.getWorld()
-                        .playSound(
-                                this.getX() + 0.5,
-                                this.getY() + 0.5,
-                                this.getZ() + 0.5,
-                                SoundEvents.ENTITY_BLAZE_BURN,
-                                this.getSoundCategory(),
-                                1.0F + this.random.nextFloat(),
-                                this.random.nextFloat() * 0.7F + 0.3F,
-                                false
-                        );
+                this.playSound(SoundEvents.ENTITY_BLAZE_BURN, 1.0F + this.random.nextFloat(), this.random.nextFloat() * 0.7F + 0.3F);
             }
 
             for (int i = 0; i < (this.isFireActive() ? 4 : 2); i++) {
-                this.getWorld().addParticle(ParticleTypes.SOUL_FIRE_FLAME, this.getParticleX(0.5), this.getRandomBodyY(), this.getParticleZ(0.5), 0.0, 0.0, 0.0);
+                this.getWorld().addParticleClient(ParticleTypes.SOUL_FIRE_FLAME, this.getParticleX(0.5), this.getRandomBodyY(), this.getParticleZ(0.5), 0.0, 0.0, 0.0);
             }
         }
 
@@ -116,7 +106,7 @@ public class WildfireEntity extends HostileEntity {
                 double d = this.random.nextGaussian() * 0.02;
                 double e = this.random.nextGaussian() * 0.02;
                 double f = this.random.nextGaussian() * 0.02;
-                serverWorld.addParticle(ParticleTypes.SOUL_FIRE_FLAME, this.getParticleX(1.0) - d * 10.0, this.getRandomBodyY() - e * 10.0, this.getParticleZ(1.0) - f * 10.0, d, e, f);
+                serverWorld.addParticleClient(ParticleTypes.SOUL_FIRE_FLAME, this.getParticleX(1.0) - d * 10.0, this.getRandomBodyY() - e * 10.0, this.getParticleZ(1.0) - f * 10.0, d, e, f);
             }
         }
     }

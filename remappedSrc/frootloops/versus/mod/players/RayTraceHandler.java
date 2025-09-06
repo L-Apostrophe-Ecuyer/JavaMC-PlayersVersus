@@ -39,12 +39,12 @@ public class RayTraceHandler {
      */
     public static Pair<Vec3d, Vec3d> getEntityParams(Entity player) {
         float pitch = player.lastPitch + (player.getPitch() - player.lastPitch);
-        float yaw = player.prevYaw + (player.getYaw() - player.prevYaw);
+        float yaw = player.lastYaw + (player.getYaw() - player.lastYaw);
         Vec3d pos = player.getPos();
-        double posX = player.prevX + (pos.x - player.prevX);
-        double posY = player.prevY + (pos.y - player.prevY);
+        double posX = player.lastX + (pos.x - player.lastX);
+        double posY = player.lastY + (pos.y - player.lastY);
         if (player instanceof PlayerEntity) posY += player.getEyeHeight(player.getPose());
-        double posZ = player.prevZ + (pos.z - player.prevZ);
+        double posZ = player.lastZ + (pos.z - player.lastZ);
         Vec3d rayPos = new Vec3d(posX, posY, posZ);
 
         float zYaw = -MathHelper.cos(yaw * (float) Math.PI / 180);

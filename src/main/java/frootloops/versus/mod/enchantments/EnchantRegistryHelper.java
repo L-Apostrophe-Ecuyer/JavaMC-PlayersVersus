@@ -73,9 +73,9 @@ public abstract class EnchantRegistryHelper {
         return maxEnchant;
     }
     public static int getValueOfEnchantment(EnchantmentLevelEntry e) {
-        Enchantment enchant = e.enchantment.value();
+        Enchantment enchant = e.enchantment().value();
         int exclusiveEnchantBonus = enchant.exclusiveSet().size() * 8;
-        int avgPower = (enchant.getMinPower(e.level) + enchant.getMaxPower(e.level))/2;
+        int avgPower = (enchant.getMinPower(e.level()) + enchant.getMaxPower(e.level()))/2;
         int anvilCost = enchant.getAnvilCost();
         return avgPower + anvilCost + exclusiveEnchantBonus;
     }

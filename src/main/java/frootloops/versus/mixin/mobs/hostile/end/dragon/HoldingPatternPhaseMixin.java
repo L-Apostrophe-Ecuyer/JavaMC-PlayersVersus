@@ -5,6 +5,7 @@ import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.phase.AbstractPhase;
 import net.minecraft.entity.boss.dragon.phase.HoldingPatternPhase;
+import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,8 +21,8 @@ public abstract class HoldingPatternPhaseMixin extends AbstractPhase {
 		super(dragon);
 	}
 
-	@Inject(at = @At("HEAD"), method = "tickInRange()V", cancellable = true)
-	private void findNewTarget(CallbackInfo callback) {
+	@Inject(at = @At("HEAD"), method = "tickInRange", cancellable = true)
+	private void findNewTarget(ServerWorld world, CallbackInfo callback) {
 		if (this.path == null || !this.path.isFinished())
 			return;
 

@@ -1111,10 +1111,10 @@ public class RevampedTradeOffers {
         @Nullable
         public TradeOffer create(Entity entity, Random random) {
             if (entity instanceof VillagerDataContainer) {
-                if(this.map.get(((VillagerDataContainer)(entity)).getVillagerData().getType()) instanceof Item item) {
+                if(this.map.get(((VillagerDataContainer)(entity)).getVillagerData().type()) instanceof Item item) {
                     return new TradeOffer(new TradedItem(Items.EMERALD, this.price), new ItemStack(item), this.maxUses, this.experience, 0.05f);
                 }
-                else if(this.map.get(((VillagerDataContainer)(entity)).getVillagerData().getType()) instanceof ItemStack itemStack) {
+                else if(this.map.get(((VillagerDataContainer)(entity)).getVillagerData().type()) instanceof ItemStack itemStack) {
                     return new TradeOffer(new TradedItem(Items.EMERALD, this.price), itemStack, this.maxUses, this.experience, 0.05f);
                 }
             }

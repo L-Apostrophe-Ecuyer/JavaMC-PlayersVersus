@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "players-versus:block/sugar_cane_top_young"
+    },
+    "age=1": {
+      "model": "players-versus:block/sugar_cane_top_young"
+    },
+    "age=2": {
+      "model": "players-versus:block/sugar_cane_top_young"
+    },
+    "age=3": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "age=4": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "age=5": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "age=6": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "age=7": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "age=8": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "age=9": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "age=10": {
+      "model": "players-versus:block/sugar_cane_top"
+    },
+    "age=11": {
+      "model": "players-versus:block/sugar_cane_top_grown"
+    },
+    "age=12": {
+      "model": "players-versus:block/sugar_cane_top_grown"
+    },
+    "age=13": {
+      "model": "players-versus:block/sugar_cane_top_grown"
+    },
+    "age=14": {
+      "model": "players-versus:block/sugar_cane_top_grown"
+    },
+    "age=15": {
+      "model": "minecraft:block/sugar_cane"
+    }
+  }
+}

@@ -106,7 +106,7 @@ public class BrownMudBlock extends MoistBlock {
     }
 
     public boolean hasEntityMoved(Entity entity) {
-        return entity.lastRenderX != entity.getX() || entity.lastRenderZ != entity.getZ() || entity.prevYaw != entity.getYaw() || entity.lastPitch != entity.getPitch();
+        return entity.lastRenderX != entity.getX() || entity.lastRenderZ != entity.getZ() || entity.lastYaw != entity.getYaw() || entity.lastPitch != entity.getPitch();
     }
 
     public static boolean canWalkOnWetMud(Entity entity) {

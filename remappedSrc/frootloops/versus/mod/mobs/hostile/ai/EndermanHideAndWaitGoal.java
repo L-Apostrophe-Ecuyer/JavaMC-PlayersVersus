@@ -138,7 +138,7 @@ public class EndermanHideAndWaitGoal<T extends LivingEntity> extends Goal {
             if (mob.teleport(x, y, z, true)) {
                 mob.getWorld().emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(mob));
                 if (!mob.isSilent()) {
-                    mob.getWorld().playSound(null, mob.prevX, mob.prevY, mob.prevZ, SoundEvents.ENTITY_ENDERMAN_TELEPORT, mob.getSoundCategory(), 1.0F, 1.0F);
+                    mob.getWorld().playSound(null, mob.lastX, mob.lastY, mob.lastZ, SoundEvents.ENTITY_ENDERMAN_TELEPORT, mob.getSoundCategory(), 1.0F, 1.0F);
                     mob.playSound(SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0F, 1.0F);
                 }
                 return true;
