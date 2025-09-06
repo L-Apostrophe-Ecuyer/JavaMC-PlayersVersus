@@ -13,8 +13,6 @@ import net.minecraft.world.biome.GrassColors;
 public class CustomBlocksClient {
 
     public static void onInitialize() {
-
-
         BlockRenderLayerMap.putBlocks(BlockRenderLayer.CUTOUT,
                 CustomBlocks.SMOLDERING_TORCH,
                 CustomBlocks.SMOLDERING_WALL_TORCH,
