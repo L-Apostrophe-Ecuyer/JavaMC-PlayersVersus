@@ -1,8 +1,8 @@
 {
   "type": "minecraft:flower",
   "config": {
-    "tries": 64,
-    "xz_spread": 6,
+    "tries": 72,
+    "xz_spread": 8,
     "y_spread": 2,
     "feature": {
       "feature": {
@@ -23,7 +23,7 @@
               "max_inclusive": 1
             },
             "slow_noise": {
-              "firstOctave": -11,
+              "firstOctave": -12,
               "amplitudes": [
                 1
               ]
@@ -31,40 +31,28 @@
             "slow_scale": 1,
             "states": [
               {
-                "Name": "minecraft:tall_grass",
-                "Properties": {
-                  "half": "lower"
-                }
-              },
-              {
-                "Name": "minecraft:short_grass"
-              },
-              {
                 "Name": "minecraft:dandelion"
               },
               {
                 "Name": "minecraft:cornflower"
               },
               {
-                "Name": "minecraft:short_grass"
-              },
-              {
                 "Name": "minecraft:oxeye_daisy"
               },
               {
+                "Name": "minecraft:short_grass"
+              },
+              {
                 "Name": "players-versus:wheat_grass"
+              },
+              {
+                "Name": "players-versus:wild_wheat"
               },
               {
                 "Name": "minecraft:short_dry_grass"
               },
               {
                 "Name": "minecraft:tall_dry_grass"
-              },
-              {
-                "Name": "players-versus:wheat_grass"
-              },
-              {
-                "Name": "minecraft:short_grass"
               }
             ]
           }

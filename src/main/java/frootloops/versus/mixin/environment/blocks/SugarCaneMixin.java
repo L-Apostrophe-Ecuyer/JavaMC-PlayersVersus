@@ -41,11 +41,12 @@ public abstract class SugarCaneMixin extends Block {
             while (numSugarCaneBelow < 3 && world.getBlockState(pos.down(numSugarCaneBelow)).isOf(this)) {
                 numSugarCaneBelow++;
             }
-            if (age == 15 && (world.getLightLevel(LightType.SKY, pos) > (1 + numSugarCaneBelow) * (4 + random.nextInt(4)))) {
+            if(numSugarCaneBelow == 2 && age == 14) return;
+            if (age == 15 && (world.getLightLevel(LightType.SKY, pos) > (1 + numSugarCaneBelow) * (5 + random.nextInt(4)))) {
                 world.setBlockState(pos.up(), state.with(Properties.AGE_15, 0));
             }
             else if(age < 15){
-                world.setBlockState(pos, state.with(Properties.AGE_15, age + 1), Block.NO_REDRAW);
+                world.setBlockState(pos, state.with(Properties.AGE_15, age + 1));
             }
         }
     }
@@ -54,7 +55,10 @@ public abstract class SugarCaneMixin extends Block {
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         BlockPos blockPosDown = pos.down();
         BlockState blockState = world.getBlockState(blockPosDown);
-        if (blockState.isOf(Blocks.SUGAR_CANE) || blockState.isOf(Blocks.MUD) || blockState.isOf(Blocks.CLAY) || blockState.isOf(CustomBlocks.BROWN_MUD)) {
+        if(blockState.isOf(Blocks.SUGAR_CANE)) {
+            return blockState.get(Properties.AGE_15) == 15;
+        }
+        if (blockState.isOf(Blocks.MUD) || blockState.isOf(Blocks.CLAY) || blockState.isOf(CustomBlocks.BROWN_MUD)) {
             return true;
         } else {
             if (blockState.isIn(BlockTags.DIRT) || blockState.isIn(BlockTags.SAND)) {

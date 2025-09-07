@@ -4,12 +4,20 @@
     "config": {
       "features": [
         {
-          "chance": 0.1,
+          "chance": 0.2,
           "feature": "minecraft:spruce"
+        },
+        {
+          "chance": 0.0125,
+          "feature": "minecraft:fallen_spruce_tree"
         },
         {
           "chance": 0.35,
           "feature": "minecraft:birch_bees_002"
+        },
+        {
+          "chance": 0.0125,
+          "feature": "minecraft:fallen_birch_tree"
         }
       ],
       "default": "minecraft:oak_bees_002"
