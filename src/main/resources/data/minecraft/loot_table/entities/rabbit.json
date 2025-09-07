@@ -86,18 +86,14 @@
             {
               "function": "minecraft:set_components",
               "components": {
-                "minecraft:attribute_modifiers": {
-                  "modifiers": [
-                    {
-                      "id": "lucky_rabbit_foot",
-                      "type": "minecraft:luck",
-                      "amount": 1,
-                      "operation": "add_value",
-                      "slot": "offhand"
-                    }
-                  ],
-                  "show_in_tooltip": true
-                }
+                "minecraft:attribute_modifiers": [
+                  {
+                    "type": "minecraft:luck",
+                    "id": "minecraft:",
+                    "amount": 1,
+                    "operation": "add_value"
+                  }
+                ]
               }
             }
           ]
