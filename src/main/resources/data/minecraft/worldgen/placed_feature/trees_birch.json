@@ -9,10 +9,10 @@
         },
         {
           "chance": 0.35,
-          "feature": "minecraft:birch_bees_0002"
+          "feature": "minecraft:birch_bees_002"
         }
       ],
-      "default": "minecraft:oak_bees_0002"
+      "default": "minecraft:oak_bees_002"
     }
   },
   "placement": [

@@ -13,12 +13,17 @@
       "block_search_extent": 8,
       "offset": 2
     },
-    "music": {
-      "sound": "players-versus:music.overworld.deep_caves",
-      "min_delay": 8000,
-      "max_delay": 16000,
-      "replace_current_music": false
-    }
+    "music": [
+      {
+        "data": {
+          "max_delay": 18000,
+          "min_delay": 10000,
+          "replace_current_music": true,
+          "sound": "players-versus:music.overworld.deep_caves"
+        },
+        "weight": 5
+      }
+    ]
   },
   "spawners": {
     "ambient": [],

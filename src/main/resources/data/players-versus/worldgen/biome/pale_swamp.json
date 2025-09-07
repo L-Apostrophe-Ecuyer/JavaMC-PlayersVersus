@@ -3,7 +3,7 @@
   "downfall": 0.9,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 7907327,
+    "sky_color": 7906265,
     "fog_color": 12638463,
     "water_color": 3969166,
     "water_fog_color": 1650209,
@@ -15,12 +15,18 @@
       "block_search_extent": 8,
       "offset": 2
     },
-    "music": {
-      "sound": "minecraft:music.overworld.swamp",
-      "min_delay": 12000,
-      "max_delay": 24000,
-      "replace_current_music": false
-    }
+    "music": [
+      {
+        "data": {
+          "max_delay": 24000,
+          "min_delay": 12000,
+          "replace_current_music": true,
+          "sound": "minecraft:music.overworld.swamp"
+        },
+        "weight": 1
+      }
+    ],
+    "music_volume": 0.5
   },
   "spawners": {
     "ambient": [

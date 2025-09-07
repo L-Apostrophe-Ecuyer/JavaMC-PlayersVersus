@@ -118,11 +118,10 @@
                         }
                       },
                       {
-                        "weight": 7,
+                        "weight": 2,
                         "data": {
-                          "Name": "players-versus:sugar_cane_top",
+                          "Name": "minecraft:sugar_cane",
                           "Properties": {
-                            "ground_type": "3",
                             "age": "0"
                           }
                         }
