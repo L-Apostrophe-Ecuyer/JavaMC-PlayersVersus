@@ -83,6 +83,12 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         return sortedToolList.removeLast();
     }
 
+    public ItemSlot takeBestTool() {
+        if(numTools < 1) return null;
+        this.numTools--;
+        return sortedToolList.removeFirst();
+    }
+
     private LinkedList<ItemSlot> takeTools(int count) {
         if(numTools < 1 || count == 0) return new LinkedList<>();
         if(numTools <= count) return this.takeAllTools();

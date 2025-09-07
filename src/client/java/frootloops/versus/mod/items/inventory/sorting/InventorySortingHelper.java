@@ -368,6 +368,24 @@ public class InventorySortingHelper {
         }
         if(MAIN_HOTBAR.size() >= 9) return;
 
+        // If some space, and still no weapon, try adding an axe:
+        if(!MAIN_HOTBAR.hasCombatItems() && !MAIN_HOTBAR.hasAxe() && AXE_GROUP.getNumTools() > 0) {
+            if(AXE_GROUP.hasOnlyTools()) {
+                MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
+                if(tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
+            }
+            else if(AXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
+        }
+
+        // If still some space, and still no pickaxe, try adding one:
+        if(!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.getNumTools() > 0) {
+            if(PICKAXE_GROUP.hasOnlyTools()) {
+                MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
+                if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
+            }
+            else if(PICKAXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
+        }
+
         // If still space, try smartly adding tools and blocks to hotbar:
         if(!MAIN_HOTBAR.hasBuildingItems()) {
             if(isInDeepDark) {

@@ -36,7 +36,7 @@ public class MainHotbarGroup extends SortingGroup {
         boolean hasAtLeastOneWeapon = (this.mainWeaponSlot != null || this.extraWeaponSlot != null || this.axeSlot != null);
         if(!hasAtLeastOneWeapon) return false;
 
-        boolean hasAtLeastTwoWeapons = (this.mainWeaponSlot != null && this.extraWeaponSlot != null) || (this.axeSlot != null && this.extraWeaponSlot != null) || (this.mainWeaponSlot != null && this.axeSlot != null);
+        boolean hasAtLeastTwoWeapons = (this.mainWeaponSlot != null && this.extraWeaponSlot != null) || (this.axeSlot != null && this.extraWeaponSlot != null) || (this.mainWeaponSlot != null && this.axeSlot != null) || (this.pickaxeSlot != null && this.axeSlot != null);
         return this.hasAtLeastOneConsumable() || hasAtLeastTwoWeapons;
     }
 
@@ -219,7 +219,7 @@ public class MainHotbarGroup extends SortingGroup {
                 return itemSlotToReturn;
             }
         }
-        else if(this.clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, this.clutchItem)) {
+        else if(this.clutchItem == null || (!slot.isToolOrWeapon() && ItemComparaisonHelper.shouldGoBefore(slot, this.clutchItem))) {
             ItemSlot itemSlotToReturn = this.clutchItem;
             this.clutchItem = slot;
             return itemSlotToReturn;
