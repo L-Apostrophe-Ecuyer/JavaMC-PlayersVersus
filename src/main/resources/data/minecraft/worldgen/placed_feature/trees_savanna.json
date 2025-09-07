@@ -4,16 +4,16 @@
     "config": {
       "features": [
         {
-          "chance": 0.05,
-          "feature": "minecraft:patch_dead_bush"
-        },
-        {
-          "chance": 0.15,
+          "chance": 0.2,
           "feature": "minecraft:jungle_bush"
         },
         {
-          "chance": 0.75,
+          "chance": 0.55,
           "feature": "minecraft:oak_checked"
+        },
+        {
+          "chance": 0.0125,
+          "feature": "minecraft:fallen_oak_tree"
         }
       ],
       "default": "minecraft:acacia_checked"
@@ -22,9 +22,9 @@
   "placement": [
     {
       "type": "minecraft:noise_based_count",
-      "noise_to_count_ratio": 32,
+      "noise_to_count_ratio": 20,
       "noise_factor": 8,
-      "noise_offset": -0.1
+      "noise_offset": 0.05
     },
     {
       "type": "minecraft:in_square"

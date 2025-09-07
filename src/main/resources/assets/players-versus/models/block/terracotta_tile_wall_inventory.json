@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/wall_inventory",
   "textures": {
-    "wall": "players-versus:block/terracotta_tile"
+    "wall": "players-versus:block/terracotta_tiles"
   }
 }
 

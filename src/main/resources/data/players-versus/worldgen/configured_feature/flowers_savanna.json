@@ -34,6 +34,9 @@
                 "Name": "minecraft:dandelion"
               },
               {
+                "Name": "minecraft:dandelion"
+              },
+              {
                 "Name": "minecraft:cornflower"
               },
               {
@@ -49,7 +52,16 @@
                 "Name": "players-versus:wild_wheat"
               },
               {
+                "Name": "minecraft:tall_grass"
+              },
+              {
                 "Name": "minecraft:short_dry_grass"
+              },
+              {
+                "Name": "minecraft:tall_dry_grass"
+              },
+              {
+                "Name": "minecraft:tall_dry_grass"
               },
               {
                 "Name": "minecraft:tall_dry_grass"

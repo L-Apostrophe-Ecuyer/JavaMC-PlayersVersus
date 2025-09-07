@@ -40,7 +40,7 @@
         {
           "Name": "minecraft:water",
           "Properties": {
-            "falling": "true"
+            "level": "0"
           }
         },
         {
@@ -67,24 +67,10 @@
                 "type": "minecraft:simple_block",
                 "config": {
                   "to_place": {
-                    "type": "minecraft:weighted_state_provider",
-                    "entries": [
-                      {
-                        "weight": 3,
-                        "data": {
-                          "Name": "minecraft:air"
-                        }
-                      },
-                      {
-                        "weight": 2,
-                        "data": {
-                          "Name": "minecraft:sugar_cane",
-                          "Properties": {
-                            "age": "0"
-                          }
-                        }
-                      }
-                    ]
+                    "type": "minecraft:simple_state_provider",
+                    "state": {
+                      "Name": "minecraft:sugar_cane"
+                    }
                   }
                 }
               },
