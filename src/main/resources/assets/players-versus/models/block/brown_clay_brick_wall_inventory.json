@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "players-versus:block/brown_clay_bricks"
+  }
+}
+
+
+

@@ -77,7 +77,5 @@ public abstract class CustomBlockItems {
     public static final BlockItem CLOVERS = new BlockItem(CustomBlocks.CLOVERS, getBlockSettings("clovers"));
 
     public static final BlockItem CREEPER_SPORE_BLOSSOM = new BlockItem(CustomBlocks.CREEPER_SPORE_BLOSSOM, getBlockSettings("creeper_spore_blossom"));
-    public static final BlockItem INFESTED_DARK_OAK_WOOD = new BlockItem(CustomBlocks.INFESTED_DARK_OAK_WOOD, getBlockSettings("infested_dark_oak_wood"));
-    public static final BlockItem INFESTED_OAK_WOOD = new BlockItem(CustomBlocks.INFESTED_OAK_WOOD, getBlockSettings("infested_oak_wood"));
 
 }
