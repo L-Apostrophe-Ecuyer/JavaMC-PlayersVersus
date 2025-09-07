@@ -222,8 +222,8 @@ public class InventorySortingHelper {
 
         // Step 1: Get the list of non-empty groups in order of size (of leftovers)
         List<SortingGroup> nonEmptyGroups = Arrays.stream(SORTING_GROUPS).filter(g -> g.size() > 0).sorted().collect(Collectors.toList());
-        numRows -=  nonEmptyGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum(); // Minus groups with two or more rows
-        if(MAIN_HOTBAR.size() > 0) nonEmptyGroups.addLast(MAIN_HOTBAR);
+        numRows -= nonEmptyGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum(); // Minus groups with two or more rows
+        numRows -= MAIN_HOTBAR.getMaxNumRows();
 
         // Step 2: Get the number of rows to aim for, i.e. trying to fit everything together
         int numRowsIdeal = Math.min(numRows, 1 + ((numRows * 9) - numEmptySlots)/9);
@@ -271,10 +271,7 @@ public class InventorySortingHelper {
         orderedGroups = new LinkedList<>(orderedGroups.stream().sorted(Comparator.comparing(SortingGroup::getItemType)).toList());
 
         // Make sure Hotbar is first:
-        if (MAIN_HOTBAR.size() > 0 && orderedGroups.getFirst() != MAIN_HOTBAR) {
-            orderedGroups.remove(MAIN_HOTBAR);
-            orderedGroups.addFirst(MAIN_HOTBAR);
-        }
+        if (MAIN_HOTBAR.size() > 0) orderedGroups.addFirst(MAIN_HOTBAR);
         if(DEBUG_SORTING_MERGE) {
             String output = orderedGroups.stream().map(g -> g.GROUP_NAME + " (Size: " + g.size() + ")").collect(Collectors.joining(", "));
             VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] Final ordered list of non-empty groups: " + output);
