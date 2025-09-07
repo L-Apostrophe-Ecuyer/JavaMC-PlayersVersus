@@ -137,8 +137,6 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("clovers", CustomBlockItems.CLOVERS, ItemGroups.NATURAL);
 
         registerCustomItem("creeper_spore_blossom", CustomBlockItems.CREEPER_SPORE_BLOSSOM, ItemGroups.FUNCTIONAL);
-        registerCustomItem("infested_dark_oak_wood", CustomBlockItems.INFESTED_DARK_OAK_WOOD);
-        registerCustomItem("infested_oak_wood", CustomBlockItems.INFESTED_OAK_WOOD);
     }
 
     public static Item.Settings getItemSettings(String name) {
