@@ -9,6 +9,7 @@
     "water_fog_color": 1650209,
     "grass_color": 7770682,
     "foliage_color": 6401867,
+    "dry_foliage_color": 8082228,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 5000,
@@ -205,6 +206,8 @@
       "minecraft:red_mushroom_normal",
       "minecraft:patch_sugar_cane_swamp",
       "minecraft:patch_pumpkin",
+      "minecraft:patch_firefly_bush_swamp",
+      "minecraft:patch_firefly_bush_near_water_swamp",
       "minecraft:seagrass_swamp"
     ],
     [
