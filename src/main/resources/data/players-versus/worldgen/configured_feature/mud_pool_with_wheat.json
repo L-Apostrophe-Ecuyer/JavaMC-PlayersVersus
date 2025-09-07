@@ -118,7 +118,7 @@
                         }
                       },
                       {
-                        "weight": 2,
+                        "weight": 32,
                         "data": {
                           "Name": "minecraft:sugar_cane",
                           "Properties": {

@@ -165,12 +165,9 @@
     [
       "minecraft:glow_lichen",
       "minecraft:trees_sparse_jungle",
-      "players-versus:flower_mountainside_warm",
-      "minecraft:patch_grass_jungle",
-      "minecraft:brown_mushroom_normal",
-      "minecraft:red_mushroom_normal",
+      "players-versus:flowers_mountainside_warm",
+      "players-versus:patch_grass_mountainside",
       "minecraft:patch_sugar_cane",
-      "minecraft:patch_pumpkin",
       "minecraft:vines",
       "minecraft:patch_melon_sparse"
     ],
