@@ -28,7 +28,7 @@
           "max_delay": 24000,
           "min_delay": 12000,
           "replace_current_music": true,
-          "sound": "minecraft:music.overworld.deep_caves"
+          "sound": "players-versus:music.overworld.deep_caves"
         },
         "weight": 1
       }
