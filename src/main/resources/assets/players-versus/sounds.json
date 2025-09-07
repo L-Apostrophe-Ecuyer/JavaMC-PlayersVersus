@@ -15,32 +15,32 @@
     },
     "sword_blocking_diamond" : {
         "sounds" : [
-            "players-versus:ambience/sword_blocking_diamond1",
-            "players-versus:ambience/sword_blocking_diamond2",
-            "players-versus:ambience/sword_blocking_diamond3",
-            "players-versus:ambience/sword_blocking_diamond4"
+            "players-versus:sword_blocking_diamond1",
+            "players-versus:sword_blocking_diamond2",
+            "players-versus:sword_blocking_diamond3",
+            "players-versus:sword_blocking_diamond4"
         ]
     },
     "sword_blocking_metal" : {
         "sounds" : [
-            "players-versus:ambience/sword_blocking_metal1",
-            "players-versus:ambience/sword_blocking_metal2",
-            "players-versus:ambience/sword_blocking_metal3",
-            "players-versus:ambience/sword_blocking_metal4"
+            "players-versus:sword_blocking_metal1",
+            "players-versus:sword_blocking_metal2",
+            "players-versus:sword_blocking_metal3",
+            "players-versus:sword_blocking_metal4"
         ]
     },
     "sword_blocking_stone" : {
         "sounds" : [
-            "players-versus:ambience/sword_blocking_stone1",
-            "players-versus:ambience/sword_blocking_stone2",
-            "players-versus:ambience/sword_blocking_stone3"
+            "players-versus:sword_blocking_stone1",
+            "players-versus:sword_blocking_stone2",
+            "players-versus:sword_blocking_stone3"
         ]
     },
     "sword_blocking_wood" : {
         "sounds" : [
-            "players-versus:ambience/sword_blocking_wood1",
-            "players-versus:ambience/sword_blocking_wood2",
-            "players-versus:ambience/sword_blocking_wood3"
+            "players-versus:sword_blocking_wood1",
+            "players-versus:sword_blocking_wood2",
+            "players-versus:sword_blocking_wood3"
         ]
     },
     "music.overworld.deep_caves": {
