@@ -134,7 +134,7 @@ public class CustomBlocks {
         WILD_WHEAT = registerBlock("wild_wheat", new WheatGrassBlock(getSettings("wild_wheat", Blocks.SHORT_GRASS)));
         CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
 
-        CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM).luminance((state) -> (3 - state.get(Properties.AGE_2)) * 3)));
+        CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM).luminance((state) -> 3 + state.get(Properties.AGE_2) * 3)));
 
         DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, StatusEffects.WITHER, 60, 2, 4, 0.4f);
         CORRUPTED_BILE = registerBileBlock("corrupted_bile", StatusEffects.HUNGER, 10, 1);
