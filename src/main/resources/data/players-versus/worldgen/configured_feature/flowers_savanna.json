@@ -12,7 +12,7 @@
             "type": "minecraft:dual_noise_provider",
             "seed": 2345,
             "noise": {
-              "firstOctave": -3,
+              "firstOctave": -4,
               "amplitudes": [
                 1
               ]
@@ -43,16 +43,10 @@
                 "Name": "minecraft:oxeye_daisy"
               },
               {
-                "Name": "minecraft:short_grass"
-              },
-              {
-                "Name": "players-versus:wheat_grass"
+                "Name": "minecraft:tall_grass"
               },
               {
                 "Name": "players-versus:wild_wheat"
-              },
-              {
-                "Name": "minecraft:tall_grass"
               },
               {
                 "Name": "minecraft:short_dry_grass"

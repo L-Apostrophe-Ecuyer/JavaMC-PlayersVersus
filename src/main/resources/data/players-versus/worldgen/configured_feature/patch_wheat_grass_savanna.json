@@ -6,33 +6,102 @@
     "y_spread": 3,
     "feature": {
       "feature": {
-        "type": "minecraft:simple_block",
+        "type": "minecraft:random_selector",
         "config": {
-          "to_place": {
-            "type": "minecraft:weighted_state_provider",
-            "entries": [
+          "features": [
+            {
+              "chance": 0.8,
+              "feature": {
+                "feature": {
+                  "type": "minecraft:simple_block",
+                  "config": {
+                    "to_place": {
+                      "type": "minecraft:weighted_state_provider",
+                      "entries": [
+                        {
+                          "weight": 16,
+                          "data": {
+                            "Name": "minecraft:short_grass"
+                          }
+                        },
+                        {
+                          "weight": 14,
+                          "data": {
+                            "Name": "players-versus:wheat_grass"
+                          }
+                        },
+                        {
+                          "weight": 3,
+                          "data": {
+                            "Name": "players-versus:wild_wheat"
+                          }
+                        },
+                        {
+                          "weight": 4,
+                          "data": {
+                            "Name": "minecraft:dandelion"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "placement": [
+                  {
+                    "type": "minecraft:block_predicate_filter",
+                    "predicate": {
+                      "type": "minecraft:matching_blocks",
+                      "blocks": "minecraft:air"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "default": {
+            "feature": {
+              "type": "minecraft:simple_block",
+              "config": {
+                "to_place": {
+                  "type": "minecraft:weighted_state_provider",
+                  "entries": [
+                    {
+                      "weight": 3,
+                      "data": {
+                        "Name": "minecraft:short_dry_grass"
+                      }
+                    },
+                    {
+                      "weight": 2,
+                      "data": {
+                        "Name": "minecraft:tall_dry_grass"
+                      }
+                    }
+                  ]
+                },
+                "schedule_tick": false
+              }
+            },
+            "placement": [
               {
-                "weight": 16,
-                "data": {
-                  "Name": "minecraft:short_grass"
-                }
-              },
-              {
-                "weight": 18,
-                "data": {
-                  "Name": "players-versus:wheat_grass"
-                }
-              },
-              {
-                "weight": 6,
-                "data": {
-                  "Name": "players-versus:wild_wheat"
-                }
-              },
-              {
-                "weight": 2,
-                "data": {
-                  "Name": "minecraft:dead_bush"
+                "type": "minecraft:block_predicate_filter",
+                "predicate": {
+                  "type": "minecraft:all_of",
+                  "predicates": [
+                    {
+                      "type": "minecraft:matching_blocks",
+                      "blocks": "minecraft:air"
+                    },
+                    {
+                      "type": "minecraft:matching_block_tag",
+                      "offset": [
+                        0,
+                        -1,
+                        0
+                      ],
+                      "tag": "minecraft:dry_vegetation_may_place_on"
+                    }
+                  ]
                 }
               }
             ]

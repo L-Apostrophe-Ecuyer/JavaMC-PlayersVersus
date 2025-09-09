@@ -25,12 +25,20 @@ public abstract class SugarCaneMixin extends Block {
 
     @Override @Nullable
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockPos blockPosUp = ctx.getBlockPos().up();
-        BlockState blockStateUp = ctx.getWorld().getBlockState(blockPosUp);
-        if(blockStateUp.isOf(Blocks.SUGAR_CANE)) {
-            return Blocks.SUGAR_CANE.getDefaultState().with(Properties.AGE_15, 15);
+        if(ctx.getPlayer() == null) {
+            BlockPos blockPosDown = ctx.getBlockPos().down();
+            BlockState blockStateDown = ctx.getWorld().getBlockState(blockPosDown);
+            if (blockStateDown.isOf(Blocks.SUGAR_CANE) && blockStateDown.get(Properties.AGE_15) != 15) {
+                ctx.getWorld().setBlockState(blockPosDown, Blocks.SUGAR_CANE.getDefaultState().with(Properties.AGE_15, 15));
+            }
+
+            BlockPos blockPosUp = ctx.getBlockPos().up();
+            BlockState blockStateUp = ctx.getWorld().getBlockState(blockPosUp);
+            if (blockStateUp.isOf(Blocks.SUGAR_CANE)) {
+                return Blocks.SUGAR_CANE.getDefaultState().with(Properties.AGE_15, 15);
+            }
         }
-        else return Blocks.SUGAR_CANE.getDefaultState();
+        return Blocks.SUGAR_CANE.getDefaultState();
     }
 
     @Override
