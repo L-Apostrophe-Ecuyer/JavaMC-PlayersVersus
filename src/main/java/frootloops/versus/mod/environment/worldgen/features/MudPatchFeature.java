@@ -10,6 +10,7 @@ import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.LightType;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.gen.feature.Feature;
@@ -78,9 +79,15 @@ public class MudPatchFeature extends Feature<MudPatchFeatureConfig> {
             if(toPlace.isOf(Blocks.WATER)) world.scheduleFluidTick(blockPos, toPlace.getFluidState().getFluid(), 0);
             wasAbleToGenerate = true;
 
-            // Next, if were in the middle of the pool, try placing a block below as well:
+            // Next, if were in the middle of the pool:
             if(isNearCenter && (toPlace == wetBlock || toPlace.isOf(Blocks.WATER))) {
 
+                // Random chance of placing sugar cane, if sunlit:
+                if(toPlace == BROWN_MUD && world.getBlockState(blockPos.up()).isAir() && world.getLightLevel(LightType.SKY, blockPos.up()) > 14 && random.nextInt(4) == 0) {
+                    world.setBlockState(blockPos.up(), Blocks.SUGAR_CANE.getDefaultState(), Block.NOTIFY_LISTENERS);
+                }
+
+                // Try placing a block below as well:
                 blockPos = blockPos.down();
                 blockState = world.getBlockState(blockPos);
                 if(!world.getBlockState(blockPos.up()).isReplaceable() || !CAN_REPLACE_BLOCKS.contains(blockState.getBlock())) continue;
