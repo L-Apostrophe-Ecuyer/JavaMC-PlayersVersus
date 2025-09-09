@@ -30,6 +30,7 @@ public class MobSpawning {
 
     public static final TagKey<Block> UNDEAD_OVERWORLD_SPAWNABLE = blockTagOf("undead_overworld_spawnable_on");
     public static final TagKey<Block> CREEPER_SPAWNABLE = blockTagOf("creeper_spawnable_on");
+    public static final TagKey<Block> DEEPER_CREEPER_SPAWNABLE = blockTagOf("stalker_spawnable_on");
     private static TagKey<Block> blockTagOf(String id) {
         return TagKey.of(RegistryKeys.BLOCK, Identifier.of(VersusMod.MOD_ID, id));
     }
@@ -76,8 +77,8 @@ public class MobSpawning {
     public static boolean canSpawnDeeperCreeper(EntityType<DeeperCreeperEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != SpawnReason.NATURAL) return true;
-        if(world.getLightLevel(blockPos) > 1 || !world.getBlockState(blockPos.down()).isOf(Blocks.DEEPSLATE)) return false;
-        return blockPos.getY() < -16;
+        if(world.getLightLevel(blockPos) > 1 || !world.getBlockState(blockPos.down()).isIn(DEEPER_CREEPER_SPAWNABLE)) return false;
+        return blockPos.getY() < 32;
     }
 
     public static boolean canSpawnWitheredZombie(EntityType<WitheredZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {

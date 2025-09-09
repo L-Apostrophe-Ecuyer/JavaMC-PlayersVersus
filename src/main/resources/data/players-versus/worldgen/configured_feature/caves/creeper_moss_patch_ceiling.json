@@ -10,7 +10,7 @@
     "vertical_range": 5,
     "extra_bottom_block_chance": 0,
     "extra_edge_column_chance": 0.3,
-    "vegetation_chance": 0.03,
+    "vegetation_chance": 0.1,
     "xz_radius": {
       "type": "minecraft:uniform",
       "min_inclusive": 4,
@@ -33,25 +33,34 @@
           "Name": "minecraft:stone"
         },
         {
-          "Name": "minecraft:stone"
+          "Name": "minecraft:andesite"
         },
         {
           "Name": "minecraft:stone"
         },
         {
-          "Name": "minecraft:cobblestone"
+          "Name": "minecraft:stone"
         },
         {
-          "Name": "minecraft:mossy_cobblestone"
+          "Name": "minecraft:pale_moss_block"
+        },
+        {
+          "Name": "minecraft:moss_block"
         },
         {
           "Name": "minecraft:lime_terracotta"
         },
         {
-          "Name": "minecraft:mossy_cobblestone"
+          "Name": "minecraft:moss_block"
         },
         {
-          "Name": "minecraft:cobblestone"
+          "Name": "minecraft:moss_block"
+        },
+        {
+          "Name": "minecraft:pale_moss_block"
+        },
+        {
+          "Name": "minecraft:pale_moss_block"
         },
         {
           "Name": "minecraft:stone"
@@ -64,35 +73,6 @@
         }
       ]
     },
-    "vegetation_feature": {
-      "feature": {
-        "type": "minecraft:simple_block",
-        "config": {
-          "to_place": {
-            "type": "minecraft:simple_state_provider",
-            "state": {
-              "Name": "players-versus:creeper_spore_blossom",
-              "Properties": {
-                "age": "3"
-              }
-            }
-          }
-        }
-      },
-      "placement": [
-        {
-          "type": "minecraft:block_predicate_filter",
-          "predicate": {
-            "type": "minecraft:matching_blocks",
-            "offset": [
-              0,
-              0,
-              0
-            ],
-            "blocks": "#minecraft:air"
-          }
-        }
-      ]
-    }
+    "vegetation_feature": "players-versus:caves/creeper_caves_ceiling_vegetation"
   }
 }

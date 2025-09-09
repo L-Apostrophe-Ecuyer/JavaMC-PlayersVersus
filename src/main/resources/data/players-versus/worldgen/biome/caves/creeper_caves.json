@@ -3,8 +3,8 @@
   "downfall": 0.75,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 4492657,
-    "fog_color": 8426363,
+    "sky_color": 7117781,
+    "fog_color": 9022141,
     "water_color": 4043458,
     "water_fog_color": 538175,
     "mood_sound": {
@@ -41,6 +41,12 @@
     "misc": [],
     "monster": [
       {
+        "type": "players-versus:deeper_creeper",
+        "weight": 70,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
         "type": "minecraft:spider",
         "weight": 100,
         "minCount": 4,
@@ -60,7 +66,7 @@
       },
       {
         "type": "minecraft:creeper",
-        "weight": 140,
+        "weight": 100,
         "minCount": 4,
         "maxCount": 4
       },
@@ -145,10 +151,9 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:glow_lichen",
       "minecraft:classic_vines_cave_feature",
-      "players-versus:caves/creeper_caves_floor_vegetation",
-      "players-versus:caves/creeper_caves_ceiling_vegetation"
+      "players-versus:caves/creeper_caves_ceiling",
+      "players-versus:caves/creeper_caves_floor_vegetation"
     ],
     [
       "minecraft:freeze_top_layer"
