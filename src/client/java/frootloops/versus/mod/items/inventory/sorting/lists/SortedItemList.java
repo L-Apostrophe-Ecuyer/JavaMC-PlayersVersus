@@ -37,12 +37,11 @@ public abstract class SortedItemList {
         return slots.size();
     }
 
-
-    protected int addBetween(ItemSlot slot, int startIndex, int endIndex) {
+    public int addBetween(ItemSlot slot, int startIndex, int endIndex) {
         return this.addBetween(slot, startIndex, endIndex, true);
     }
 
-    protected int addBetween(ItemSlot slot, int startIndex, int endIndex, boolean doSortedInsert) {
+    public int addBetween(ItemSlot slot, int startIndex, int endIndex, boolean doSortedInsert) {
         if(this.size() > 0) {
             endIndex = Math.min(endIndex, this.size() - 1);
             startIndex = Math.max(0, Math.min(startIndex, endIndex));
@@ -51,6 +50,10 @@ public abstract class SortedItemList {
             if(startIndex > 0 && slot.isToolOrWeapon()) {
                 skipNonToolTypes = true;
                 startIndex = 0;
+            }
+            if(startIndex == endIndex) {
+                slots.add(startIndex, slot);
+                return startIndex;
             }
             for (int i = endIndex - 1; i >= startIndex; i--) {
                 if (ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, !doSortedInsert)) {
@@ -72,6 +75,10 @@ public abstract class SortedItemList {
     public void giveFirstSlotsTo(int count, SortedItemList other) {
         count = Math.min(count, this.size());
         for(int i = 0; i < count; i++) other.append(this.removeFirst());
+    }
+
+    public ItemSlot getSlot(int index) {
+        return this.slots.get(index);
     }
 
 

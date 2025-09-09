@@ -82,13 +82,17 @@ public class SimpleSortingGroup extends SortingGroup {
         slot = this.tryInsertingSlot(slot);
         if(slot != null) {
             if(slot.isToolOrWeapon()) sortedItemLists[0].add(slot);
-            else {
-                int insertPos = this.miscItems.add(slot);
-            }
+            else this.miscItems.add(slot);
             this.numItems++;
             if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "");
             if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
         }
+    }
+
+    @Override
+    protected void addSlotsToMisc(LinkedList<ItemSlot> newSlots) {
+        this.numItems += newSlots.size();
+        super.addSlotsToMisc(newSlots);
     }
 
     @Override

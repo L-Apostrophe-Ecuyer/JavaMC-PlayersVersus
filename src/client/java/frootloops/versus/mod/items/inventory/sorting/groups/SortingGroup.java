@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items.inventory.sorting.groups;
 
+import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import frootloops.versus.mod.items.inventory.sorting.lists.SortedItemList;
@@ -34,7 +35,25 @@ public abstract class SortingGroup implements Comparable<SortingGroup>{
     }
 
     public void addSlots(LinkedList<ItemSlot> newSlots) {
-        for (ItemSlot newSlot:newSlots) this.addSlot(newSlot);
+        for(int i = 0; i < newSlots.size(); i++) {
+            ItemSlot slot = newSlots.pop();
+            slot = tryInsertingSlot(slot);
+            if(slot != null) newSlots.add(slot);
+        }
+        this.addSlotsToMisc(newSlots);
+    }
+
+    protected void addSlotsToMisc(LinkedList<ItemSlot> newSlots) {
+        if(newSlots.size() < 1) return;
+        int indexMiscEnd;
+        for(indexMiscEnd = miscItems.size() - 1; indexMiscEnd >= 0; indexMiscEnd--) {
+            if(ItemComparaisonHelper.shouldGoBefore(miscItems.getSlot(indexMiscEnd), newSlots.getFirst())) break;
+        }
+        int indexMiscStart = indexMiscEnd;
+        for (ItemSlot slot : newSlots) {
+            miscItems.addBetween(slot, indexMiscStart, indexMiscEnd, false);
+            indexMiscEnd++;
+        }
     }
 
     /**
