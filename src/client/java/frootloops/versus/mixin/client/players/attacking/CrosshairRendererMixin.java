@@ -56,10 +56,6 @@ public class CrosshairRendererMixin {
             if (this.client.interactionManager.getCurrentGameMode() != GameMode.SPECTATOR || this.shouldRenderSpectatorCrosshair(this.client.crosshairTarget)) {
                 if (!this.shouldRenderCrosshair()) {
                     context.createNewRootLayer();
-                    int i = 15;
-                    context.drawGuiTexture(
-                            RenderPipelines.CROSSHAIR, CROSSHAIR_TEXTURE, (context.getScaledWindowWidth() - 15) / 2, (context.getScaledWindowHeight() - 15) / 2, 15, 15
-                    );
 
                     // Changes start here:
                     // This is the code that makes the crosshair's size depend on the attack cooldown:
