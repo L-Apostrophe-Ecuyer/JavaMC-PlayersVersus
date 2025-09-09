@@ -190,6 +190,12 @@ public class InventorySortingHelper {
             if(newSlot == null) return;
         }
 
+        // Special case for trash, which should go in the back:
+        if(newSlot.itemType() == ItemType.TRASH) {
+            RANDOM_GROUP.addSlot(newSlot);
+            return;
+        }
+
         // Insert in the regular groups:
         for (SortingGroup group : SORTING_GROUPS) {
             newSlot = group.tryInsertingSlot(newSlot);
@@ -297,10 +303,11 @@ public class InventorySortingHelper {
         if (BREWING_GROUP.size() > 0 && CONSUMABLES_GROUP.size() > 0) tryCombiningTwoGroups(CONSUMABLES_GROUP, BREWING_GROUP);
         if (BREWING_GROUP.size() > 0 && WORLD_GROUP.size() > 0) tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP);
 
+        if (BREWING_GROUP.size() > 0 && WORLD_GROUP.size() > 0) tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP);
+
         // Step 2: Clean up tool groups and merge them:
         if (isPlayerInventory) {
-            cleanUpToolGroup(SHEARS_GROUP, HOE_GROUP);
-            cleanUpToolGroup(SHEARS_GROUP, WORLD_GROUP);
+            cleanUpToolGroup(SHEARS_GROUP, HOE_GROUP, WORLD_GROUP);
             cleanUpToolGroup(HOE_GROUP, SHEARS_GROUP, SHOVEL_GROUP);
             cleanUpToolGroup(SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP);
             cleanUpToolGroup(PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, CONSUMABLES_GROUP);
@@ -488,7 +495,7 @@ public class InventorySortingHelper {
     public static void cleanUpToolGroup(ToolSortingGroup groupToCleanUp, ToolSortingGroup firstChoice, SortingGroup secondChoice, SortingGroup lastChoice) {
         boolean hasOnlyBlocks = groupToCleanUp.getNumTools() == 0 && groupToCleanUp.size() > 0 && groupToCleanUp.size() % 9 != 0 && (groupToCleanUp.size() < 9 || groupToCleanUp.size() % 9 <= 2);
         boolean hasOnlyTools = groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() % 9 != 0 && (groupToCleanUp.size() < 6 || groupToCleanUp.size() % 9 <= 2);
-        if(hasOnlyBlocks || hasOnlyTools) {
+        if(groupToCleanUp.size() < ((hasOnlyBlocks || hasOnlyTools) ? 6 : 4)) {
             VersusMod.MOD_LOGGER.warn("                   -> " + groupToCleanUp.GROUP_NAME + " - Cleaning up tool group!");
 
             if(firstChoice != null && firstChoice.size() > 0 && firstChoice.getNumTools() > 0) {
@@ -509,8 +516,15 @@ public class InventorySortingHelper {
                 }
             }
 
-            if(lastChoice != null && groupToCleanUp.size() > 0 && lastChoice.size() > 0)
-                if(lastChoice != null && tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
+            if(firstChoice != null && firstChoice.size() > 0 && firstChoice.size() + groupToCleanUp.size() <= 9) {
+                if (tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
+                else if(groupToCleanUp.getNumTools() > 0) groupToCleanUp.addSlots(firstChoice.takeAllItems());
+                else firstChoice.addSlots(groupToCleanUp.takeAllItems());
+                return;
+            }
+
+            if(lastChoice != null && lastChoice.size() > 0)
+                if(tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
 
             if(hasOnlyBlocks) {
                 VersusMod.MOD_LOGGER.warn("                      Found no good match, but the building and random items of " + groupToCleanUp.GROUP_NAME + " will be given to last choice (or random)");

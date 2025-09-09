@@ -44,11 +44,9 @@ public class SortedItemLists {
 
 
     /** MISC - MYSTICISM & MOBS ---------------------------------------------------------   */
-
-    public static final SortedMappedItemList SHEARS_ANIMAL_HANDLING = new SortedMappedItemList(ItemSortingMaps.ITEMS_ANIMALS, ItemType.MISC);
-    public static final SortedMappedItemList MISC_BREWING_ITEMS = new SortedMappedItemList(ItemSortingMaps.ITEMS_BREWING_MISC, ItemType.MISC);
+    public static final SortedMappedItemList MISC_BREWING_ITEMS = new SortedMappedItemList(ItemSortingMaps.ITEMS_BREWING_MISC, ItemType.BREWING_INGREDIENT);
     public static final SortedTypedItemList CONCENTRATES = new SortedTypedItemList(new ItemType[]{ItemType.BREWING_INGREDIENT});
-    public static final SortedItemList[] MISC_BREWING = {SHEARS_ANIMAL_HANDLING, MISC_BREWING_ITEMS, CONCENTRATES};
+    public static final SortedItemList[] MISC_BREWING = {MISC_BREWING_ITEMS, CONCENTRATES};
 
 
     /** MISC - WORLD AND ARCHEOLOGY ---------------------------------------------------------   */
@@ -70,6 +68,7 @@ public class SortedItemLists {
 
     /** SHEARS ------------------------------------------------------------   */
     public static final SortedTypedItemList SHEARS = new SortedTypedItemList(new ItemType[]{ItemType.SHEARS});
+    public static final SortedMappedItemList SHEARS_ANIMAL_HANDLING = new SortedMappedItemList(ItemSortingMaps.ITEMS_ANIMALS, ItemType.MISC);
     public static final SortedBlockItemList WOOL_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_SHEARS_WOOL_BLOCKS);
     public static final SortedMappedItemList DYES = new SortedMappedItemList(ItemSortingMaps.ITEMS_DYES, ItemType.MISC);
     public static final SortedBlockItemList FLOWERS = new SortedBlockItemList(BlockTags.FLOWERS, ItemSortingMaps.ITEMS_FLOWERS);
@@ -77,7 +76,7 @@ public class SortedItemLists {
     public static final SortedBlockItemList LEAVES = new SortedBlockItemList(BlockTags.LEAVES);
     public static final SortedBlockItemList SHEARS_SHRUBBERY = new SortedBlockItemList(null, BlockSoundGroup.GRASS, ItemSortingMaps.ITEMS_SHEARS_SHRUBBERY, 0.0F, 0.1F, ItemType.BLOCK_OTHER);
     public static final SortedMappedItemList SHEARS_AQUATIC = new SortedMappedItemList(ItemSortingMaps.ITEMS_FLOWERS, ItemType.BLOCK_OTHER);
-    public static final SortedItemList[] SHEAR_MINEABLES = {WOOL_BLOCKS, DYES, FLOWERS, SAPLINGS, LEAVES, SHEARS_SHRUBBERY, SHEARS_AQUATIC};
+    public static final SortedItemList[] SHEAR_MINEABLES = {SHEARS_ANIMAL_HANDLING, WOOL_BLOCKS, DYES, FLOWERS, SAPLINGS, LEAVES, SHEARS_SHRUBBERY, SHEARS_AQUATIC};
 
 
     /** SHOVELS ------------------------------------------------------------   */
@@ -107,7 +106,7 @@ public class SortedItemLists {
     public static final SortedMappedItemList PICKAXE_MINEABLE_PALE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_WARM = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_TERRACOTTA = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS, ItemType.BLOCK_FULL);
-    public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.PICKAXE_MINEABLE, 0.25f, 32.0f);
+    public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.PICKAXE_MINEABLE, 0.25f, 51.0f);
     public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_ICE, PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_BLACKSTONE, PICKAXE_MINEABLE_GRAYS_BRICKS, PICKAXE_MINEABLE_GRAYS_NATURAL, PICKAXE_MINEABLE_GRAYS_COBBLED, PICKAXE_MINEABLE_CORAL, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_GENERIC};
 
 

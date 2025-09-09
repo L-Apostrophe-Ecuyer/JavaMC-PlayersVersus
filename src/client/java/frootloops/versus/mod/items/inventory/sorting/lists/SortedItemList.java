@@ -3,6 +3,7 @@ package frootloops.versus.mod.items.inventory.sorting.lists;
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items.inventory.sorting.ItemType;
+import net.minecraft.item.Item;
 
 import java.util.LinkedList;
 
@@ -95,5 +96,10 @@ public abstract class SortedItemList {
         String output = "";
         for(int i = 0; i < this.size(); i++) output += this.slots.get(i) + ", ";
         return output.substring(0, Math.max(0, output.length() - 2));
+    }
+
+    public boolean containsItem(Item item) {
+        for(ItemSlot slot : slots) if(slot.stack().getItem() == item) return true;
+        return false;
     }
 }

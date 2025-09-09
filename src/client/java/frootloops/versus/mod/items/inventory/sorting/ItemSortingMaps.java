@@ -99,7 +99,6 @@ public abstract class ItemSortingMaps {
         ITEMS_BREWING_MISC.put(Items.RABBIT_FOOT, index++);
         ITEMS_BREWING_MISC.put(Items.ARMADILLO_SCUTE, index++);
         ITEMS_BREWING_MISC.put(Items.SUGAR, index++);
-        ITEMS_BREWING_MISC.put(Items.SUGAR, index++);
         ITEMS_BREWING_MISC.put(Items.GUNPOWDER, index++);
         ITEMS_BREWING_MISC.put(Items.GLOWSTONE_DUST, index++);
         ITEMS_BREWING_MISC.put(Items.GLOWSTONE, index++);
@@ -292,10 +291,27 @@ public abstract class ItemSortingMaps {
         ITEMS_ANIMALS.put(Items.GOLDEN_HORSE_ARMOR, index++);
         ITEMS_ANIMALS.put(Items.IRON_HORSE_ARMOR, index++);
         ITEMS_ANIMALS.put(Items.LEATHER_HORSE_ARMOR, index++);
+        ITEMS_ANIMALS.put(Items.WHITE_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.LIGHT_GRAY_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.GRAY_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.BLACK_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.BROWN_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.RED_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.ORANGE_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.YELLOW_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.LIME_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.GREEN_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.CYAN_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.LIGHT_BLUE_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.BLUE_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.PURPLE_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.MAGENTA_HARNESS, index++);
+        ITEMS_ANIMALS.put(Items.PINK_HARNESS, index++);
         ITEMS_ANIMALS.put(Items.WOLF_ARMOR, index++);
         ITEMS_ANIMALS.put(Items.ARMADILLO_SCUTE, index++);
         ITEMS_ANIMALS.put(Items.TURTLE_SCUTE, index++);
         ITEMS_ANIMALS.put(Items.TURTLE_EGG, index++);
+        ITEMS_ANIMALS.put(Items.DRIED_GHAST, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_DYES = new HashMap<>();

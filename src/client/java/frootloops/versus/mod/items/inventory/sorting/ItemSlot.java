@@ -29,6 +29,10 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
     public boolean isToolOrWeapon() { return this.itemType.compareTo(ItemType.CROSSBOW) < 1;}
 
+    public boolean isUsedToClutch() {
+        return this.itemType == ItemType.CLUTCH_TOOL || this.itemType == ItemType.TOTEM;
+    }
+
     public boolean isArmor() {
         return this.itemType == ItemType.CHESTPLATE || this.itemType == ItemType.LEGGINGS || this.itemType == ItemType.BOOTS || this.itemType == ItemType.HELMET;
     }

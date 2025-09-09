@@ -5,7 +5,10 @@ import frootloops.versus.mod.items.brewing.CustomPotions;
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items.inventory.sorting.ItemType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ToolComponent;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Potion;
@@ -13,6 +16,7 @@ import net.minecraft.potion.Potions;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.sound.BlockSoundGroup;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -22,9 +26,11 @@ import static frootloops.versus.mod.items.inventory.sorting.InventorySortingHelp
 
 public class MainHotbarGroup extends SortingGroup {
 
+    private static final float MAX_BLOCK_HARDNESS = 6.0F;
     ItemSlot mainWeaponSlot = null, pickaxeSlot = null, axeSlot = null, extraWeaponSlot = null, foodSlot = null, potionSlot = null, clutchItem = null, lightSlot = null, blockSlot = null;
     private boolean hasGoodPotion = false;
     private boolean hasExcellentPotion = false;
+    private boolean isBlockSlotLocked = false;
 
     public MainHotbarGroup() {super("GROUP: MAIN_HOTBAR");}
 
@@ -41,7 +47,26 @@ public class MainHotbarGroup extends SortingGroup {
     }
 
     public boolean hasBuildingItems(){
-        return (this.pickaxeSlot != null && this.blockSlot != null) || (this.axeSlot != null && this.blockSlot != null);
+        if(isBlockSlotLocked) return true;
+        if(this.blockSlot == null) return false;
+        BlockState blockState = ((BlockItem)blockSlot.stack().getItem()).getBlock().getDefaultState();
+        if(blockState.getBlock().getHardness() > MAX_BLOCK_HARDNESS && !(blockState.getBlock().getBlastResistance() == Blocks.OBSIDIAN.getBlastResistance() && this.canHaveObsidianAsBlock())) {
+            return false;
+        }
+        if(this.pickaxeSlot != null) {
+            ToolComponent pickaxeComponent = pickaxeSlot.stack().get(DataComponentTypes.TOOL);
+            if(pickaxeComponent.isCorrectForDrops(blockState)) return true;
+        }
+        if(this.axeSlot != null) {
+            ToolComponent axeComponent = axeSlot.stack().get(DataComponentTypes.TOOL);
+            if(axeComponent.isCorrectForDrops(blockState)) return true;
+        }
+        return false;
+    }
+    private boolean canHaveObsidianAsBlock() {
+        if(this.pickaxeSlot == null || pickaxeSlot.stack().getMaxDamage() < 256) return false;
+        if(miscItems.size() > 0 && miscItems.containsItem(Items.END_CRYSTAL)) return true;
+        return false;
     }
 
     public boolean hasPickaxe(){
@@ -80,12 +105,12 @@ public class MainHotbarGroup extends SortingGroup {
                     if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting axe " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items");
                 }
             }
-            else if(slot.isBlock()) {
+            else if(slot.itemType() == ItemType.BLOCK_FULL || slot.itemType() == ItemType.BLOCK_WORKSTATION) {
                 if(this.blockSlot == null) {
                     this.blockSlot = slot;
                     if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as block");
                 }
-                else if(blockSlot.stack().isIn(ItemTags.WOOL) || ItemComparaisonHelper.shouldGoBefore(blockSlot, slot)) {
+                else if(blockSlot.stack().isIn(ItemTags.WOOL) || isBlockSlotLocked || ItemComparaisonHelper.shouldGoBefore(blockSlot, slot)) {
                     this.miscItems.add(slot);
                     if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting block " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items (current block is " + blockSlot.stack().getName().getString() + ")");
                 }
@@ -176,22 +201,32 @@ public class MainHotbarGroup extends SortingGroup {
                 return itemSlotToReturn;
             }
         }
+        else if(slot.itemType() == ItemType.TOTEM && (this.clutchItem == null || this.clutchItem.itemType() != ItemType.TOTEM)) {
+            ItemSlot itemSlotToReturn = this.clutchItem;
+            this.clutchItem = slot;
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as totem, for clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
+            return itemSlotToReturn;
+        }
         else if(isInDeepDark) {
             if(slot.itemType() == ItemType.SHEARS) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as deep dark clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
             else if(slot.stack().getItem() instanceof BlockItem blockItem && blockItem.getBlock().getDefaultState().isIn(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
                 if(blockSlot == null || blockSlot.stack().getCount() <= slot.stack().getCount()) {
                     ItemSlot itemSlotToReturn = this.blockSlot;
                     this.blockSlot = slot;
+                    this.isBlockSlotLocked = true;
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as deep dark block." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                     return itemSlotToReturn;
                 }
             }
-            else if(clutchItem == null || (clutchItem.itemType() != ItemType.SHEARS && ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+            else if(slot.isUsedToClutch() && clutchItem.itemType() != ItemType.SHEARS && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as deep dark clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
         }
@@ -199,11 +234,13 @@ public class MainHotbarGroup extends SortingGroup {
             if(slot.stack().isOf(Items.POWDER_SNOW_BUCKET) || slot.stack().isOf(Items.WARPED_FUNGUS_ON_A_STICK)) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as nether clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
-            else if(clutchItem == null || (!clutchItem.stack().isOf(Items.POWDER_SNOW_BUCKET) && !clutchItem.stack().isOf(Items.WARPED_FUNGUS_ON_A_STICK) &&  ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+            else if(slot.isUsedToClutch() && !clutchItem.stack().isOf(Items.POWDER_SNOW_BUCKET) && !clutchItem.stack().isOf(Items.WARPED_FUNGUS_ON_A_STICK) && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as nether clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
         }
@@ -211,17 +248,20 @@ public class MainHotbarGroup extends SortingGroup {
             if(slot.stack().isOf(Items.FILLED_MAP) || slot.stack().isOf(Items.MAGMA_BLOCK)) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as ocean clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
-            else if(clutchItem == null || (!clutchItem.stack().isOf(Items.FILLED_MAP) && !clutchItem.stack().isOf(Items.MAGMA_BLOCK) && ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+            else if(slot.isUsedToClutch() && !clutchItem.stack().isOf(Items.FILLED_MAP) && !clutchItem.stack().isOf(Items.MAGMA_BLOCK) && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as ocean clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
         }
-        else if(this.clutchItem == null || (!slot.isToolOrWeapon() && ItemComparaisonHelper.shouldGoBefore(slot, this.clutchItem))) {
+        else if(slot.isUsedToClutch() && (this.clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, this.clutchItem))) {
             ItemSlot itemSlotToReturn = this.clutchItem;
             this.clutchItem = slot;
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as ocean clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
             return itemSlotToReturn;
         }
         return slot;
@@ -334,25 +374,22 @@ public class MainHotbarGroup extends SortingGroup {
             this.clutchItem = null;
         }
         boolean hasEnoughBuildingItems = this.hasBuildingItems();
-        if(!hasEnoughBuildingItems) {
+        if(!hasEnoughBuildingItems && !isBlockSlotLocked) {
             if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Hotbar: Not enough building items!");
-            if(this.pickaxeSlot != null) itemsToRemove.add(this.pickaxeSlot);
-            if(this.axeSlot != null) itemsToRemove.add(this.axeSlot);
             if(this.blockSlot != null) itemsToRemove.add(this.blockSlot);
-            this.pickaxeSlot = null;
-            this.axeSlot = null;
             this.blockSlot = null;
         }
         if(!hasEnoughCombatItems && !hasEnoughBuildingItems) { // No valid hotbar goup
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Hotbar: Not enough items tto make a good hotbar, sorting everything back into groups");
-            if(this.foodSlot != null) itemsToRemove.add(this.foodSlot);
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Hotbar: Not enough items tto make a good hotbar, sorting extras back into groups");
+            if(this.clutchItem != null) itemsToRemove.add(this.clutchItem);
             if(this.lightSlot != null) itemsToRemove.add(this.lightSlot);
-            this.foodSlot = null;
+            this.clutchItem = null;
             this.lightSlot = null;
             if(this.miscItems.size() > 0) {
                 itemsToRemove.addAll(miscItems.takeAll());
             }
         }
+        if(this.miscItems.size() < 3 && this.size() != 9) itemsToRemove.addAll(miscItems.takeAll());
         return itemsToRemove;
     }
 

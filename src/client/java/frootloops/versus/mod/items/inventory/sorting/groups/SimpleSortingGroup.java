@@ -39,10 +39,11 @@ public class SimpleSortingGroup extends SortingGroup {
     @Override
     public ItemSlot tryInsertingSlot(ItemSlot slot) {
         for(SortedItemList sortedList: sortedItemLists) {
-            if (sortedList.trySortedInsert(slot) != -1) {
+            int insertPos = sortedList.trySortedInsert(slot);
+            if (insertPos != -1) {
                 this.numItems++;
                 if(DEBUG_SORTING_GROUPS) {
-                    VersusMod.MOD_LOGGER.warn("                   -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s list: " + sortedList);
+                    VersusMod.MOD_LOGGER.warn("                   -> " + this.GROUP_NAME + ": Inserting " + slot.stack().getName().getString() + " of type " + slot.itemType() + " into list: " + sortedList);
                 }
                 return null; // Inserted!
             }
@@ -81,7 +82,9 @@ public class SimpleSortingGroup extends SortingGroup {
         slot = this.tryInsertingSlot(slot);
         if(slot != null) {
             if(slot.isToolOrWeapon()) sortedItemLists[0].add(slot);
-            else this.miscItems.add(slot);
+            else {
+                int insertPos = this.miscItems.add(slot);
+            }
             this.numItems++;
             if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "");
             if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();

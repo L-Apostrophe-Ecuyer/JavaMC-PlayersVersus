@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items.inventory.sorting;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.DataComponentTypes;
@@ -13,6 +14,7 @@ import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.BlockPos;
 
 public abstract class ItemComparaisonHelper {
@@ -140,6 +142,7 @@ public abstract class ItemComparaisonHelper {
     }
 
     public static ItemType getItemTypeOf(ItemStack stack) {
+        if(stack.isOf(Items.PUFFERFISH) || stack.isOf(Items.ROTTEN_FLESH) || stack.isOf(Items.SPIDER_EYE) || stack.isOf(Items.POISONOUS_POTATO) || stack.isOf(Items.INK_SAC) || stack.isOf(Items.GLOW_INK_SAC)) return ItemType.TRASH;
         if((stack.getComponents().contains(DataComponentTypes.TOOL) || stack.getMaxDamage() > 0) && !stack.getComponents().contains(DataComponentTypes.EQUIPPABLE)) {
             if(stack.isIn(ItemTags.SWORDS)) return ItemType.SWORD;
             else if(stack.isIn(ItemTags.PICKAXES)) return ItemType.PICKAXE;
@@ -156,6 +159,9 @@ public abstract class ItemComparaisonHelper {
             else return ItemType.MISC_TOOL;
         }
         else if(stack.getComponents().contains(DataComponentTypes.EQUIPPABLE)) {
+
+            VersusMod.MOD_LOGGER.warn("Item type of " + stack.getName().getString() + " is misc tool or equippable");
+
             EquippableComponent equipComponent = stack.getComponents().get(DataComponentTypes.EQUIPPABLE);
             if(!equipComponent.allows(EntityType.PLAYER)) return ItemType.MISC_TOOL;
             else if(stack.isOf(Items.ELYTRA)) return ItemType.ELYTRA;
@@ -169,29 +175,29 @@ public abstract class ItemComparaisonHelper {
         else if(stack.isIn(ItemTags.ARROWS)) return ItemType.ARROWS;
         else if(stack.isOf(Items.WATER_BUCKET) || stack.isOf(Items.ENDER_PEARL) || stack.isOf(Items.WIND_CHARGE)) return ItemType.CLUTCH_TOOL;
         else if(stack.isOf(Items.END_CRYSTAL) || stack.isOf(Items.ENDER_PEARL) || stack.isOf(Items.COBWEB) || stack.isOf(Items.SNOWBALL) || stack.isOf(Items.FIRE_CHARGE)) return ItemType.COMBAT_ITEMS;
-        else if(stack.getComponents().contains(DataComponentTypes.POTION_CONTENTS)) return ItemType.POTIONS;
         else if(stack.isOf(Items.SPYGLASS)) return ItemType.SPYGLASS;
         else if(stack.getItem() instanceof SmithingTemplateItem) return ItemType.SMITHING_TEMPLATE;
         else if(stack.getComponents().contains(DataComponentTypes.INSTRUMENT)) return ItemType.MISC_TOOL;
         else if(stack.isOf(Items.MAP) || stack.isOf(Items.FILLED_MAP)) return ItemType.MISC_TOOL;
         else if(stack.isOf(Items.BUCKET) || stack.getRecipeRemainder() == Items.BUCKET.getDefaultStack()) return ItemType.MISC_TOOL;
         else if(MinecraftClient.getInstance().world.getBrewingRecipeRegistry().isPotionRecipeIngredient(stack)) return ItemType.BREWING_INGREDIENT;
-        else if(stack.isOf(Items.PUFFERFISH) || stack.isOf(Items.ROTTEN_FLESH) || stack.isOf(Items.SPIDER_EYE) || stack.isOf(Items.POISONOUS_POTATO) || stack.isOf(Items.INK_SAC) || stack.isOf(Items.GLOW_INK_SAC)) return ItemType.TRASH;
         else if(stack.getComponents().contains(DataComponentTypes.FOOD)) return ItemType.FOOD;
         else if(stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS)) return ItemType.ITEM_CONTAINER;
         else if(stack.getComponents().contains(DataComponentTypes.CONTAINER)) return ItemType.ITEM_CONTAINER;
         else if(stack.getComponents().contains(DataComponentTypes.CONTAINER_LOOT)) return ItemType.ITEM_CONTAINER;
+        else if(stack.getComponents().contains(DataComponentTypes.POTION_CONTENTS)) return ItemType.POTIONS;
         else if(stack.getUseAction() != UseAction.NONE || stack.isOf(Items.TORCH) || stack.isOf(Items.SOUL_TORCH) || stack.isOf(Items.LANTERN) || stack.isOf(Items.SOUL_LANTERN)) return ItemType.TORCHES_AND_LANTERNS;
         else if(stack.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
             if(block instanceof CraftingTableBlock || block instanceof BlockWithEntity || block.getDefaultState().isIn(BlockTags.ANVIL)) return ItemType.BLOCK_WORKSTATION;
+            if(block.getHardness() > 32F && block.getBlastResistance() > 128F) return ItemType.BLOCK_OTHER;
             if(block.getDefaultState().isOpaqueFullCube()) return ItemType.BLOCK_FULL;
             else if(block.getDefaultState().getLuminance() > 4) return ItemType.MISC_TOOL;
             else if(block instanceof SlabBlock) return ItemType.BLOCK_SLAB;
             else if(block instanceof StairsBlock) return ItemType.BLOCK_STAIRS;
             else if(block instanceof WallBlock) return ItemType.BLOCK_WALL;
             else if(block instanceof FenceBlock) return ItemType.BLOCK_FENCE;
-            else if(block instanceof PlantBlock) return ItemType.MISC;
+            else if(block instanceof PlantBlock || (block.getHardness() < 1F && block.getDefaultState().getSoundGroup() == BlockSoundGroup.GRASS)) return ItemType.PLANTS_AND_FLOWERS;
             else return ItemType.BLOCK_OTHER;
         }
         else if(stack.getOrDefault(DataComponentTypes.BANNER_PATTERNS, null) != null) return ItemType.BANNER_PATTERNS;
