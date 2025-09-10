@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "players-versus:item/withered_zombie_spawn_egg"
+    "layer0": "players-versus:item/deeper_creeper_spawn_egg"
   }
 }
