@@ -19,10 +19,11 @@ public abstract class SortingGroups {
     public static final ToolSortingGroup COMBAT_GROUP = new ToolSortingGroup(SortedItemLists.WEAPONS, SortedItemLists.COMBAT_ITEMS, "GROUP: COMBAT");
     public static final SimpleSortingGroup REDSTONE_GROUP = new SimpleSortingGroup(SortedItemLists.REDSTONE_ITEMS, "GROUP: REDSTONE");
     public static final SimpleSortingGroup GOODIES_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_GOODIES, "GROUP: GOODIES");
-    public static final SimpleSortingGroup MINERALS_GROUP = new SimpleSortingGroup(SortedItemLists.MINERAL_RESSOURCE_ITEMS, "GROUP: MINERALS");
+    public static final SimpleSortingGroup RARE_MINERALS_GROUP = new SimpleSortingGroup(SortedItemLists.MINERAL_RESSOURCE_ITEMS, "GROUP: RARE MINERALS");
+    public static final SimpleSortingGroup COMMON_MINERALS_GROUP = new SimpleSortingGroup(SortedItemLists.MINERAL_RESSOURCE_COMMON_ITEMS, "GROUP: COMMON MINERALS");
     public static final SimpleSortingGroup BREWING_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_BREWING, "GROUP: BREWING");
     public static final ToolSortingGroup WORLD_GROUP = new ToolSortingGroup(SortedItemLists.FISHING, SortedItemLists.MISC_EXPLORATION, "GROUP: WORLD");
     public static final SimpleSortingGroup RANDOM_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_OTHER, "GROUP: MISC OTHER");
 
-    public static final SortingGroup[] SORTING_GROUPS = {COMBAT_GROUP, CONSUMABLES_GROUP, GOODIES_GROUP, MINERALS_GROUP, REDSTONE_GROUP, PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP, BREWING_GROUP, WORLD_GROUP, RANDOM_GROUP};
+    public static final SortingGroup[] SORTING_GROUPS = {COMBAT_GROUP, CONSUMABLES_GROUP, GOODIES_GROUP, RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP, REDSTONE_GROUP, PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP, BREWING_GROUP, WORLD_GROUP, RANDOM_GROUP};
 }

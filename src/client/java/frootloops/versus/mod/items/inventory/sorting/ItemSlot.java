@@ -1,16 +1,10 @@
 package frootloops.versus.mod.items.inventory.sorting;
 
-import frootloops.versus.VersusMod;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.RepairableComponent;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-
-import static frootloops.versus.mod.items.inventory.sorting.InventorySortingHelper.DEBUG_SORTING_GROUPS;
 
 public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
@@ -27,7 +21,7 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
         return this.itemType.compareTo(ItemType.HOE) < 1;
     }
 
-    public boolean isToolOrWeapon() { return this.itemType.compareTo(ItemType.CROSSBOW) < 1;}
+    public boolean isToolOrWeapon() { return this.itemType != ItemType.SHIELD && this.itemType.compareTo(ItemType.FISHING_ROD) < 1;}
 
     public boolean isUsedToClutch() {
         return this.itemType == ItemType.CLUTCH_TOOL || this.itemType == ItemType.TOTEM;

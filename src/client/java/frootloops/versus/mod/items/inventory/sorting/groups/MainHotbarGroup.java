@@ -16,12 +16,11 @@ import net.minecraft.potion.Potions;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.sound.BlockSoundGroup;
 
 import java.util.LinkedList;
 import java.util.Optional;
 
-import static frootloops.versus.mod.items.inventory.sorting.InventorySortingHelper.DEBUG_SORTING_GROUPS;
+import static frootloops.versus.mod.items.inventory.sorting.SortingHelper.DEBUG_SORTING_GROUPS;
 
 
 public class MainHotbarGroup extends SortingGroup {

@@ -2,7 +2,7 @@ package frootloops.versus.mod.items.inventory;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
-import frootloops.versus.mod.items.inventory.sorting.InventorySortingHelper;
+import frootloops.versus.mod.items.inventory.sorting.SortingHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -67,7 +67,7 @@ public class InventorySorting {
             isInWater = !isInDeepDark && (playerBiome.isIn(BiomeTags.IS_OCEAN) || MinecraftClient.getInstance().player.isSubmergedInWater());
         }
 
-        ItemSlot[] newSlots = InventorySortingHelper.getOptimalInventoryRows(slots, numRows, isPlayerInventory, isInDeepDark, isInNether, isInWater);
+        ItemSlot[] newSlots = SortingHelper.getOptimalInventoryRows(slots, numRows, isPlayerInventory, isInDeepDark, isInNether, isInWater);
         for (int i = 0; i < totalNumSlots; i++) {
             if (newSlots[i] != null) {
                 remappedSlotIndices[i] = newSlots[i].slodId() + 9;

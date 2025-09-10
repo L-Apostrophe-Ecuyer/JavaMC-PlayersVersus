@@ -769,12 +769,18 @@ public abstract class ItemSortingMaps {
         ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS, index++);
         ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS_SLAB, index++);
         ITEMS_REFINED_MINERALS.put(CustomBlockItems.CUT_LAPIS_STAIRS, index++);
-        ITEMS_REFINED_MINERALS.put(Items.COAL, index++);
-        ITEMS_REFINED_MINERALS.put(Items.CHARCOAL, index++);
-        ITEMS_REFINED_MINERALS.put(Items.COAL_BLOCK, index++);
         ITEMS_REFINED_MINERALS.put(Items.AMETHYST_BLOCK, index++);
         ITEMS_REFINED_MINERALS.put(Items.AMETHYST_SHARD, index++);
         ITEMS_REFINED_MINERALS.put(Items.AMETHYST_CLUSTER, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_COMMON_MINERALS = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_COMMON_MINERALS.put(Items.COAL, index++);
+        ITEMS_COMMON_MINERALS.put(Items.CHARCOAL, index++);
+        ITEMS_COMMON_MINERALS.put(Items.COAL_BLOCK, index++);
+        ITEMS_COMMON_MINERALS.put(Items.FLINT, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_AND_BLOCKS_OF_REDSTONE = new HashMap<>();
@@ -793,7 +799,6 @@ public abstract class ItemSortingMaps {
         ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GILDED_BLACKSTONE, index++);
         ITEMS_AND_BLOCKS_OF_GOLD.put(Items.RAW_GOLD, index++);
         ITEMS_AND_BLOCKS_OF_GOLD.put(Items.RAW_GOLD_BLOCK, index++);
-
         ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GOLD_NUGGET, index++);
         ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GOLD_INGOT, index++);
         ITEMS_AND_BLOCKS_OF_GOLD.put(Items.GOLD_BLOCK, index++);

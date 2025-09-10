@@ -4,7 +4,7 @@ import frootloops.versus.VersusMod;
 
 import java.util.LinkedList;
 
-import static frootloops.versus.mod.items.inventory.sorting.InventorySortingHelper.DEBUG_SORTING_OUTPUT;
+import static frootloops.versus.mod.items.inventory.sorting.SortingHelper.DEBUG_SORTING_OUTPUT;
 
 public class SortedInventoryOutput {
 

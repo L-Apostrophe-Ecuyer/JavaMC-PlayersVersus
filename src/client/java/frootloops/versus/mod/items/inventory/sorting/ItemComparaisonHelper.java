@@ -43,7 +43,6 @@ public abstract class ItemComparaisonHelper {
         if(skipBlocks && slot.isBlock() && slotToCompareTo.isBlock()) itemComparaison = 0;
         if(itemComparaison != 0) return itemComparaison < 0 ? true : false;
 
-
         // Everything below is for stacks having the same type:
         if(slot.stack().getRarity().ordinal() > slotToCompareTo.stack().getRarity().ordinal()) return true;
 
@@ -70,8 +69,10 @@ public abstract class ItemComparaisonHelper {
 
             FoodComponent food = slot.stack().getComponents().getOrDefault(DataComponentTypes.FOOD, null);
             FoodComponent otherFood = slotToCompareTo.stack().getComponents().getOrDefault(DataComponentTypes.FOOD, null);
-            boolean isNewerFoodBetter = (food.nutrition() + food.saturation()) >= (otherFood.nutrition() + otherFood.saturation());
-            return isNewerFoodBetter;
+            boolean isNewerFoodBetter = (food.nutrition() + 3F * food.saturation()) >= (otherFood.nutrition() + 3F * otherFood.saturation());
+            if(isNewerFoodBetter) return true;
+            else if(food.saturation() == otherFood.saturation() && food.nutrition() == otherFood.nutrition() && slot.stack().getCount() > slotToCompareTo.stack().getCount()) return true;
+            else return false;
         }
 
         // Potion comparaison:
@@ -153,6 +154,7 @@ public abstract class ItemComparaisonHelper {
             else if(stack.isIn(ItemTags.CROSSBOW_ENCHANTABLE) || stack.isOf(Items.CROSSBOW)) return ItemType.CROSSBOW;
             else if(stack.getUseAction() == UseAction.BLOCK || stack.isOf(Items.SHIELD)) return ItemType.SHIELD;
             else if(stack.isOf(Items.SHEARS)) return ItemType.SHEARS;
+            else if(stack.isOf(Items.FISHING_ROD)) return ItemType.FISHING_ROD;
             else if(stack.isOf(Items.BRUSH)) return ItemType.MISC_TOOL;
             else if(getAttributeValueWithStack(stack, EquipmentSlot.MAINHAND) > 1.0 || stack.isIn(ItemTags.WEAPON_ENCHANTABLE))
                 return ItemType.SPECIAL_WEAPON;

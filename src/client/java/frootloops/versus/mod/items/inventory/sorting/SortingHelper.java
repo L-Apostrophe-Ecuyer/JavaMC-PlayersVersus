@@ -1,7 +1,6 @@
 package frootloops.versus.mod.items.inventory.sorting;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.items.inventory.InventorySorting;
 import frootloops.versus.mod.items.inventory.sorting.groups.SortingGroup;
 import frootloops.versus.mod.items.inventory.sorting.groups.ToolSortingGroup;
 import frootloops.versus.mod.items.inventory.sorting.lists.SortedItemLists;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 
 import static frootloops.versus.mod.items.inventory.sorting.groups.SortingGroups.*;
 
-public class InventorySortingHelper {
+public class SortingHelper {
     public static final boolean DEBUG_SORTING_GROUPS = true;
     public static final boolean DEBUG_SORTING_MERGE = true;
     public static final boolean DEBUG_SORTING_OUTPUT = true;
@@ -48,21 +47,21 @@ public class InventorySortingHelper {
         }
 
         // Step 1: Populate ItemSortingGroups
-        for(ItemSlot slot: inventorySlots) InventorySortingHelper.insertItemIntoGroup(slot, isPlayerInventory, isInDeepDark, isInNether, isInWater);
+        for(ItemSlot slot: inventorySlots) SortingHelper.insertItemIntoGroup(slot, isPlayerInventory, isInDeepDark, isInNether, isInWater);
         if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER INSERTING -----\n");
 
         // Step 2: Try forming rows withing a group, and combining similar groups
         if(isPlayerInventory) {
-            InventorySortingHelper.cleanUpHotbar(isInDeepDark);
+            SortingHelper.cleanUpHotbar(isInDeepDark);
             LinkedList<ItemSlot> slotsRemovedFromHotbar = MAIN_HOTBAR.keepOnlyEssentials();
             for (ItemSlot slot:slotsRemovedFromHotbar) insertItemIntoGroup(slot);
             if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER HOTBAR CLEAN UP -----\n");
         }
-        InventorySortingHelper.cleanUpGroups(isPlayerInventory);
+        SortingHelper.cleanUpGroups(isPlayerInventory);
         if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER GROUPS CLEAN UP & MERGE -----\n");
 
         // Step 3: Order the resulting non-empty groups such that they combine into rows
-        List<SortingGroup> orderedGroups = InventorySortingHelper.getOrderedListOfGroups(numEmptySlots, numRows);
+        List<SortingGroup> orderedGroups = SortingHelper.getOrderedListOfGroups(numEmptySlots, numRows);
         if(DEBUG_SORTING_MERGE) printGroups("[ INVENTORY SORTING ] ---- AFTER ORDERING -----\n", orderedGroups);
 
         // Step 4: Finally, place sorted item groups into an inventory output
@@ -297,12 +296,15 @@ public class InventorySortingHelper {
         // Step 1: Merge similar groups depending on inventory composition:
         if (REDSTONE_GROUP.size() > 0 && SortedItemLists.REDSTONE_RAW.size() > 0) {
             REDSTONE_GROUP.addSlots(SortedItemLists.REDSTONE_RAW.takeAll());
-            MINERALS_GROUP.recalculateActualSize();
+            RARE_MINERALS_GROUP.recalculateActualSize();
         }
-        if (GOODIES_GROUP.size() > 0 && MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(GOODIES_GROUP, MINERALS_GROUP);
+        else if(RARE_MINERALS_GROUP.size() > 0 && RARE_MINERALS_GROUP.size() == SortedItemLists.REDSTONE_RAW.size() && BREWING_GROUP.size() > 0) {
+            BREWING_GROUP.addSlots(SortedItemLists.REDSTONE_RAW.takeAll());
+            RARE_MINERALS_GROUP.recalculateActualSize();
+        }
+        if (GOODIES_GROUP.size() > 0 && RARE_MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(GOODIES_GROUP, RARE_MINERALS_GROUP);
+        if (RARE_MINERALS_GROUP.size() > 0 && COMMON_MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP);
         if (BREWING_GROUP.size() > 0 && CONSUMABLES_GROUP.size() > 0) tryCombiningTwoGroups(CONSUMABLES_GROUP, BREWING_GROUP);
-        if (BREWING_GROUP.size() > 0 && WORLD_GROUP.size() > 0) tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP);
-
         if (BREWING_GROUP.size() > 0 && WORLD_GROUP.size() > 0) tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP);
 
         // Step 2: Clean up tool groups and merge them:
@@ -313,7 +315,7 @@ public class InventorySortingHelper {
             cleanUpToolGroup(PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, CONSUMABLES_GROUP);
             cleanUpToolGroup(AXE_GROUP, PICKAXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(PICKAXE_GROUP, REDSTONE_GROUP);
-            giveExtraToolsFromAndTo(PICKAXE_GROUP, MINERALS_GROUP);
+            giveExtraToolsFromAndTo(PICKAXE_GROUP, RARE_MINERALS_GROUP);
             giveExtraToolsFromAndTo(COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(AXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(SHOVEL_GROUP, PICKAXE_GROUP);
@@ -390,17 +392,16 @@ public class InventorySortingHelper {
             else if(PICKAXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
         }
 
+        // If in deep dark:
+        if(isInDeepDark) {
+            giveExtraToolsFromAndTo(HOE_GROUP, MAIN_HOTBAR);
+            if(MAIN_HOTBAR.size() >= 9) return;
+            giveExtraToolsFromAndTo(SHEARS_GROUP, MAIN_HOTBAR);
+            if(MAIN_HOTBAR.size() >= 9) return;
+        }
+
         // If still space, try smartly adding tools and blocks to hotbar:
         if(!MAIN_HOTBAR.hasBuildingItems()) {
-            if(isInDeepDark) {
-                if(HOE_GROUP.size() > 0 && HOE_GROUP.size() + HOE_GROUP.size() <= 9) HOE_GROUP.addSlots(HOE_GROUP.takeAllItems());
-                else if(HOE_GROUP.hasOnlyTools() || HOE_GROUP.canGiveawayTools()) {
-                    giveExtraToolsFromAndTo(HOE_GROUP, MAIN_HOTBAR);
-                    if(tryCombiningTwoGroups(MAIN_HOTBAR, HOE_GROUP)) return;
-                }
-                if(MAIN_HOTBAR.size() >= 9) return;
-            }
-
             if(AXE_GROUP.size() > 0 && MAIN_HOTBAR.size() + AXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(AXE_GROUP.takeAllItems());
             else if(AXE_GROUP.hasOnlyTools() || (!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools())) {
                 giveExtraToolsFromAndTo(AXE_GROUP, MAIN_HOTBAR);
@@ -415,19 +416,20 @@ public class InventorySortingHelper {
             }
             if(MAIN_HOTBAR.size() >= 9) return;
 
-            if(MAIN_HOTBAR.size() < 9 && (SHOVEL_GROUP.hasOnlyTools() || (!MAIN_HOTBAR.hasBuildingItems() && SHOVEL_GROUP.getNumTools() > 0))) {
+            if(MAIN_HOTBAR.size() + SHOVEL_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(SHOVEL_GROUP.takeAllItems());
+            else if(SHOVEL_GROUP.getNumTools() > 0) {
                 giveExtraToolsFromAndTo(SHOVEL_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, SHOVEL_GROUP)) return;
             }
             if(MAIN_HOTBAR.size() >= 9) return;
 
-            if(MAIN_HOTBAR.size() < 9 && SHEARS_GROUP.hasOnlyTools()) {
+            if(SHEARS_GROUP.getNumTools() > 0) {
                 giveExtraToolsFromAndTo(SHOVEL_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, SHOVEL_GROUP)) return;
             }
             if(MAIN_HOTBAR.size() >= 9) return;
 
-            if(MAIN_HOTBAR.size() < 9 && HOE_GROUP.hasOnlyTools()) {
+            if(HOE_GROUP.getNumTools() > 0) {
                 giveExtraToolsFromAndTo(HOE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, HOE_GROUP)) return;
             }
@@ -456,6 +458,16 @@ public class InventorySortingHelper {
 
 
     public static void cleanUpMisc() {
+        tryCombiningTwoGroups(RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP);
+        tryCombiningTwoGroups(WORLD_GROUP, COMMON_MINERALS_GROUP);
+        tryCombiningTwoGroups(COMMON_MINERALS_GROUP, RANDOM_GROUP);
+        if(COMMON_MINERALS_GROUP.size() > 0) {
+            if(RARE_MINERALS_GROUP.size() > 0 && COMMON_MINERALS_GROUP.size() + RARE_MINERALS_GROUP.size() < 9)
+                RARE_MINERALS_GROUP.addSlots(COMMON_MINERALS_GROUP.takeAllItems());
+            else if(WORLD_GROUP.size() > 0 && COMMON_MINERALS_GROUP.size() + WORLD_GROUP.size() < 9)
+                WORLD_GROUP.addSlots(COMMON_MINERALS_GROUP.takeAllItems());
+        }
+
         tryCombiningTwoGroups(WORLD_GROUP, SHEARS_GROUP);
         tryCombiningTwoGroups(WORLD_GROUP, BREWING_GROUP);
         int size = RANDOM_GROUP.size();
@@ -544,6 +556,13 @@ public class InventorySortingHelper {
 
             if(secondChoice != null && groupToCleanUp.getNumTools() > 1 && secondChoice.size() > 0)
                 secondChoice.addSlot(groupToCleanUp.takeWorstTool());
+        }
+        else if(groupToCleanUp.hasOnlyTools()) {
+            if(firstChoice != null && firstChoice.size() > 0 && firstChoice.size() + groupToCleanUp.size() < 9)
+                firstChoice.addSlots(groupToCleanUp.takeAllTools());
+
+            else if(secondChoice != null && groupToCleanUp.getNumTools() > 1 && secondChoice.size() > 0)
+                secondChoice.addSlots(groupToCleanUp.takeAllTools());
         }
     }
 }
