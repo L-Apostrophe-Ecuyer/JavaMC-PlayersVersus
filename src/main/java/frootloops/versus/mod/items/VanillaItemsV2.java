@@ -1,58 +1,129 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.Combat;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.*;
+import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
+import net.minecraft.item.consume.ConsumeEffect;
+import net.minecraft.item.consume.UseAction;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
-import java.util.Optional;
 
 import static frootloops.versus.mod.items.equipment.CustomEquipment.*;
 
 public class VanillaItemsV2 {
 
-    public void onInitialize() {
-        Identifier latePhase = Identifier.of(VersusMod.MOD_ID, "late");
-        DefaultItemComponentEvents.MODIFY.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase);
-
+    public static void onInitialize() {
         // Modify default components:
+        DefaultItemComponentEvents.MODIFY.addPhaseOrdering(Event.DEFAULT_PHASE, Identifier.of(VersusMod.MOD_ID, "late"));
         DefaultItemComponentEvents.MODIFY.register(context -> {
 
             // Modify tools:
             modifyVanillaToolsAndWeapons(context);
 
             // Modify stack sizes:
-
+            modifyVanillaStackSizesAndFoods(context, 64, 8, 16, 64, 16, 64);
 
             // Add food component to glistering melon slices:
-            context.modify(Items.GLISTERING_MELON_SLICE, builder -> {builder.add(
-                    DataComponentTypes.FOOD, null
-            );});
-
+            context.modify(Items.GLISTERING_MELON_SLICE, builder -> {builder
+                    .add(DataComponentTypes.FOOD, new FoodComponent.Builder().nutrition(4).saturationModifier(1.0F).build())
+                    .add(DataComponentTypes.CONSUMABLE, createFoodConsumptionComponent(1.4F, true, new ApplyEffectsConsumeEffect(
+                            List.of(new StatusEffectInstance(StatusEffects.REGENERATION, 10, 2))
+                    )));
+            });
         });
     }
 
 
+    private static void modifyVanillaStackSizesAndFoods(final DefaultItemComponentEvents.ModifyContext context, final int maxFoods, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
+        VersusMod.MOD_LOGGER.info("Modifying vanilla stack sizes and food components...");
+        for (Item item : Registries.ITEM) {
+            if (item.getComponents().contains(DataComponentTypes.FOOD)) {
+                modifyVanillaFoodItem(context, item, maxFoods, maxBottled, maxStews);
+            }
+            else {
+                if(item.getMaxCount() == 1) {
+                    if(item.getComponents().contains(DataComponentTypes.MAX_DAMAGE)) return;
+
+                    EquippableComponent equipComponent = item.getComponents().getOrDefault(DataComponentTypes.EQUIPPABLE, null);
+                    if (equipComponent != null && (equipComponent.slot() == EquipmentSlot.SADDLE || equipComponent.slot() == EquipmentSlot.BODY)) modifyVanillaStackSizeOf(context, item, maxPlaceableEntities);
+                    else if (item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem) modifyVanillaStackSizeOf(context, item, maxPlaceableEntities);
+                }
+                else if (item instanceof BlockItem) modifyVanillaStackSizeOf(context, item, maxPlaceableBlocks);
+            }
+        }
+
+        // Throwables:
+        modifyVanillaStackSizeOf(context, Items.EGG, maxThrowables);
+        modifyVanillaStackSizeOf(context, Items.SNOWBALL, maxThrowables);
+        modifyVanillaStackSizeOf(context, Items.ENDER_PEARL, maxThrowables);
+        modifyVanillaStackSizeOf(context, Items.FIRE_CHARGE, maxThrowables);
+
+        // Others:
+        modifyVanillaStackSizeOf(context, Items.POTION, maxBottled);
+        modifyVanillaStackSizeOf(context, Items.POWDER_SNOW_BUCKET, maxPlaceableEntities);
+        modifyVanillaStackSizeOf(context, Items.CAKE, maxFoods);
+        modifyVanillaStackSizeOf(context, Items.RECOVERY_COMPASS, 1);
+    }
+
+    private static void modifyVanillaStackSizeOf(final DefaultItemComponentEvents.ModifyContext context, Item item, int newStackSize) {
+        if(item.getMaxCount() == newStackSize) return;
+        context.modify(item, builder -> {builder.add(DataComponentTypes.MAX_STACK_SIZE, newStackSize);});
+    }
+
+    private static void modifyVanillaFoodItem(final DefaultItemComponentEvents.ModifyContext context, final Item item, final int maxFoods, final int maxBottled, final int maxStews) {
+        FoodComponent foodComponent = item.getComponents().get(DataComponentTypes.FOOD);
+        ConsumableComponent consumeComponent = item.getComponents().get(DataComponentTypes.CONSUMABLE);
+        boolean isDrink = consumeComponent.sound() == SoundEvents.ENTITY_GENERIC_DRINK;
+        boolean hasParticles = !isDrink;
+        float useTimeSeconds = 1.6F;
+        int maxCount = maxFoods;
+        if(item == Items.RABBIT_STEW) {
+            isDrink = false;
+            hasParticles = false;
+            useTimeSeconds = 0.8F;
+            maxCount = maxStews;
+        }
+        else if(item.getComponents().contains(DataComponentTypes.USE_REMAINDER)) {
+            Item useRemainder = item.getComponents().get(DataComponentTypes.USE_REMAINDER).convertInto().getItem();
+            isDrink = true;
+            hasParticles = false;
+            useTimeSeconds = 0.8F;
+            if(useRemainder == Items.GLASS_BOTTLE) maxCount = maxBottled;
+            else if(useRemainder == Items.BOWL) maxCount = maxStews;
+            else maxCount = Math.max(maxBottled, maxStews);
+        }
+        else {
+            if(item == Items.ROTTEN_FLESH || item == Items.SPIDER_EYE || item == Items.PUFFERFISH || item == Items.POTATO || item == Items.POISONOUS_POTATO) useTimeSeconds = 2.0F;
+            else if(item == Items.PUMPKIN_PIE || item == Items.COOKIE) useTimeSeconds = 1.0F;
+            else if(item == Items.BREAD || (item instanceof BlockItem blockItem && blockItem.getBlock().getHardness() < 1.0F)) useTimeSeconds = 1.2F;
+            else if(item.getTranslationKey().contains("cooked")) useTimeSeconds = 1.8F;
+            else if(item.getTranslationKey().contains("raw")) useTimeSeconds = 2.0F;
+            else if(foodComponent.nutrition() <= 3 && foodComponent.saturation() <= 0.8F) useTimeSeconds = 1.2F;
+        }
+        ConsumableComponent consumableComponent = isDrink ?
+                createDrinkConsumptionComponent(useTimeSeconds, consumeComponent.onConsumeEffects()) :
+                createFoodConsumptionComponent(useTimeSeconds, hasParticles, consumeComponent.onConsumeEffects());
+        if(maxCount != item.getMaxCount()) modifyVanillaStackSizeOf(context, item, maxCount);
+        context.modify(item, builder -> {builder.add(DataComponentTypes.CONSUMABLE, consumableComponent);});
+    }
 
 
-
-    private static void modifyVanillaToolsAndWeapons(DefaultItemComponentEvents.ModifyContext context) {
+    private static void modifyVanillaToolsAndWeapons(final DefaultItemComponentEvents.ModifyContext context) {
+        VersusMod.MOD_LOGGER.info("Modifying vanilla tools and armor...");
         modifyToolComponents(context, Items.TRIDENT, TRIDENT_DAMAGE, TRIDENT_SPEED, TRIDENT_REACH);
 
         // Shields are instant:
@@ -96,22 +167,38 @@ public class VanillaItemsV2 {
         modifyToolComponents(context, Items.NETHERITE_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
     }
 
-    private static void modifySwordComponents(DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount) {
+    private static void modifySwordComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount) {
         context.modify(item, builder -> {builder
                 .add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange))
                 .add(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(baseBlockingAmount, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK));
         });
     }
 
-    private static void modifyToolComponents(DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange) {
+    private static void modifyToolComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange) {
         context.modify(item, builder -> {
             builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange));
         });
     }
 
+    public static ConsumableComponent createDrinkConsumptionComponent(float consumeSeconds, List<ConsumeEffect> consumeEffects) {
+        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().consumeSeconds(consumeSeconds).useAction(UseAction.DRINK).sound(SoundEvents.ENTITY_GENERIC_DRINK).consumeParticles(false);
+        for(ConsumeEffect effect : consumeEffects) consumeComponent.consumeEffect(effect);
+        return consumeComponent.build();
+    }
 
+    public static ConsumableComponent createFoodConsumptionComponent(float consumeSeconds, boolean doParticles, ApplyEffectsConsumeEffect applyEffectsConsumeEffect) {
+        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().consumeSeconds(1.6F).useAction(UseAction.EAT).sound(SoundEvents.ENTITY_GENERIC_EAT).consumeParticles(true);
+        if(applyEffectsConsumeEffect != null) consumeComponent.consumeEffect(applyEffectsConsumeEffect);
+        return consumeComponent.build();
+    }
+    public static ConsumableComponent createFoodConsumptionComponent(float consumeSeconds, boolean doParticles, List<ConsumeEffect> consumeEffects) {
+        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().consumeSeconds(1.6F).useAction(UseAction.EAT).sound(SoundEvents.ENTITY_GENERIC_EAT).consumeParticles(true);
+        for(ConsumeEffect effect : consumeEffects) consumeComponent.consumeEffect(effect);
+        return consumeComponent.build();
+    }
 
-
-
-
+    public static ConsumableComponent createUseActionComponent(UseAction useAction, float consumeSeconds, RegistryEntry<SoundEvent> sound, RegistryEntry<SoundEvent> finishSound, boolean consumeParticles, ConsumeEffect consumeEffect) {
+        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().useAction(useAction).consumeSeconds(consumeSeconds).sound(sound).finishSound(finishSound).consumeParticles(consumeParticles).consumeEffect(consumeEffect);
+        return consumeComponent.build();
+    }
 }

@@ -97,5 +97,4 @@ public abstract class CustomPotions {
         if(entry == null) VersusMod.MOD_LOGGER.error("ERROR: Potion Entry for '" + name + "' was returned as null by the registry upon launching the game.");
         return entry;
     }
-
 }
