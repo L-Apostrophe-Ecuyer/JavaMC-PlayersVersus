@@ -1,12 +1,13 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.VersusMod;
-import net.fabricmc.api.ModInitializer;
+import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.items.brewing.CustomBrewingItems;
+import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -20,11 +21,15 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static frootloops.versus.mod.items.equipment.CustomEquipment.*;
 
 public class VanillaItemsV2 {
+
+    private static Map<Item, Item> TRANSFORM_VANILLA_ITEMS_TO_MODDED = new HashMap<>();
 
     public static void onInitialize() {
         // Modify default components:
@@ -47,6 +52,32 @@ public class VanillaItemsV2 {
         });
     }
 
+    private static void setUpTransformVanillaItemsToModded() {
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.CHARCOAL, Items.COAL);
+
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.FERMENTED_SPIDER_EYE, CustomBrewingItems.CORRUPTED_WART_POWDER);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.BLAZE_POWDER, CustomBrewingItems.CONCENTRATE_OF_STRENGTH);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.RECOVERY_COMPASS, CustomEquipment.RECOVERY_COMPASS);
+
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.LADDER, CustomBlockItems.LADDER);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.CLAY, CustomBlockItems.GRAY_CLAY);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD, CustomBlockItems.GRAY_MUD);
+
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.PACKED_MUD, CustomBlockItems.BROWN_CLAY);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICKS, CustomBlockItems.BROWN_CLAY_BRICKS);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_SLAB, CustomBlockItems.BROWN_CLAY_BRICK_SLAB);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_STAIRS, CustomBlockItems.BROWN_CLAY_BRICK_STAIRS);
+        TRANSFORM_VANILLA_ITEMS_TO_MODDED.put(Items.MUD_BRICK_WALL, CustomBlockItems.BROWN_MUD_BRICK_WALL);
+    }
+
+    public static Item getReplacementItem(Item item) {
+        return TRANSFORM_VANILLA_ITEMS_TO_MODDED.getOrDefault(item, item);
+    }
+
+    public static boolean hasReplacementItem(Item item) {
+        return TRANSFORM_VANILLA_ITEMS_TO_MODDED.containsKey(item);
+    }
 
     private static void modifyVanillaStackSizesAndFoods(final DefaultItemComponentEvents.ModifyContext context, final int maxFoods, final int maxBottled, final int maxStews, final int maxThrowables, final int maxPlaceableEntities, final int maxPlaceableBlocks) {
         VersusMod.MOD_LOGGER.info("Modifying vanilla stack sizes and food components...");

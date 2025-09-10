@@ -45,7 +45,6 @@ public abstract class RegisteringCustomItems {
 
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
-        registerCustomItem("glistering_melon_slice", CustomBrewingItems.GLISTERING_MELON_SLICE);
 
         registerCustomItem("four_leaf_clover", CustomBrewingItems.FOUR_LEAF_CLOVER, ItemGroups.INGREDIENTS);
         registerCustomItem("corrupted_wart", CustomBlockItems.CORRUPTED_WART, ItemGroups.INGREDIENTS);

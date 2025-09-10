@@ -71,6 +71,7 @@
     "items.ItemEntityMixin",
     "items.ItemStackMixin",
     "items.ItemUsageMixin",
+    "items.VanillaItemsMixin",
     "items.PotionBottleUsageMixin",
 
     "mobs.MobSpawnGroupsMixin",

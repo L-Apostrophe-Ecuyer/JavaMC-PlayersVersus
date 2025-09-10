@@ -30,7 +30,6 @@ public abstract class CustomBrewingItems {
 
     public static final Item LIVING_FLAME = new Item(getItemSettings("living_flame").rarity(Rarity.UNCOMMON));
     public static final Item GLISTERING_BEETROOT = new Item(getItemSettings("glistering_beetroot").food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).build()));
-    public static final Item GLISTERING_MELON_SLICE = new Item(getItemSettings("glistering_melon_slice").food(new FoodComponent.Builder().nutrition(3).saturationModifier(0.8f).build()));
 
     public static final ConcentrateItem CONCENTRATE_OF_DEATH = new ConcentrateItem(getBileSettings("concentrate_of_death"),StatusEffects.WITHER, 2, 80, CustomBlocks.DEATHLY_BILE);
     public static final ConcentrateItem CORRUPTED_WART_POWDER = new ConcentrateItem(getBileSettings("corrupted_wart_powder"),StatusEffects.HUNGER, 4, 120, CustomBlocks.CORRUPTED_BILE); //-> Will be replacing Fermented Spider Eye
