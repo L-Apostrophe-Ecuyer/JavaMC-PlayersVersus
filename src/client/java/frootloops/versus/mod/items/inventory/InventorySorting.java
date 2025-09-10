@@ -46,7 +46,7 @@ public class InventorySorting {
 
     public static void sortInventory(ScreenHandler handler, MinecraftClient client, Inventory inventory, InventoryToSort inventoryType, int startingSlotIndex, int numSlots) {
         InventoryManagementHelper.placeOrDropCursorStack(handler, client, inventory);
-        InventoryManagementHelper.mergeStacksTogether(handler, client, inventory, startingSlotIndex, numSlots);
+        InventoryManagementHelper.mergeStacksTogether(handler, client, inventory, (inventoryType == InventoryToSort.SURVIVAL_INVENTORY || inventoryType == InventoryToSort.CREATIVE_INVENTORY) ? 9 : 0, numSlots);
         sortInventory(handler, client, inventory, startingSlotIndex, numSlots, inventoryType);
     }
 

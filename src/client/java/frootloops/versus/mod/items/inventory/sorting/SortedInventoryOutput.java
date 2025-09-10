@@ -28,13 +28,13 @@ public class SortedInventoryOutput {
     }
 
     public void markGroupAsDone() {
-        boolean wasGroupMultirow = this.currentCol <= this.currentGroupColStart && this.currentCol % 8 != 0;
+        boolean wasGroupMultirow = this.currentCol <= this.currentGroupColStart && this.currentCol % 8 != 0 && !(currentGroupColStart == currentCol && currentCol == 7);
         boolean shouldMoveLastRowToRight = wasGroupMultirow && (this.numGroupsToPlace > 1 || this.currentGroupColStart > 0);
         if(shouldMoveLastRowToRight) {
             int indexEnd, indexStart = 0;
             for(indexEnd = 8; indexEnd > this.currentCol; indexEnd--) if(this.get(this.currentRow, indexEnd) == null) break;
             if(indexEnd >= currentCol) { // If enough empty columns at end of row to fit the item slots. This should always be true... but better safe than sorry
-                if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("================= MOVING ITEMS OF GROUP TO END OF ROW");
+                if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("================= MOVING ITEMS OF GROUP TO END OF ROW! Current group's col start was " + currentGroupColStart + " and current col is " + currentCol);
                 for (int i = 0; i <= this.currentCol; i++) {
                     ItemSlot slotToMove = this.get(this.currentRow, i);
                     if (!slotToMove.isToolOrWeapon()) {
@@ -53,6 +53,8 @@ public class SortedInventoryOutput {
         } else if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("----------------- End of group. Group's col value started at " + currentGroupColStart + " and ended at " + currentCol);
         this.currentSlotsColStart = 0;
         this.numGroupsToPlace--;
+
+        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn(this.toString());
     }
 
     public boolean addAll(LinkedList<ItemSlot> slots) { return this.addAll(slots, false, true);}
@@ -246,7 +248,7 @@ public class SortedInventoryOutput {
 
     @Override
     public String toString() {
-        String output = "\n              [ SORTED INVENTORY ]\n";
+        String output = "\n              [ SORTED INVENTORY ] Current position is row " + currentRow + " and col " + currentCol + "\n";
         for(int i = 0; i < this.numRows; i++) {
             output += "              Row " + i + ": [";
             for(int j = 0; j < 9; j++) {

@@ -287,6 +287,11 @@ public class MainHotbarGroup extends SortingGroup {
         return slot;
     }
 
+    @Override
+    protected void addSlotsToMisc(LinkedList<ItemSlot> newSlots) {
+        for (ItemSlot slot : newSlots) miscItems.add(slot);
+    }
+
 
     private LinkedList<ItemSlot> takeImportantItems(int numSlotsToTake) {
         LinkedList<ItemSlot> slotsTaken = new LinkedList<>();

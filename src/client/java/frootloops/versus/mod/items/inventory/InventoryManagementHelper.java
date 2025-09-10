@@ -1,8 +1,10 @@
 package frootloops.versus.mod.items.inventory;
 
+import frootloops.versus.VersusMod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -40,17 +42,17 @@ public class InventoryManagementHelper {
 
     protected static void mergeStacksTogether(ScreenHandler handler, MinecraftClient client, Inventory inventory, int startingSlotIndex, int totalNumSlots) {
         ItemStack stackOne, stackTwo;
-        int maxSlotIndex = startingSlotIndex + totalNumSlots + 9 + 1;
-        for (int i = startingSlotIndex + 9; i < maxSlotIndex; i++) {
+        int maxSlotIndex = startingSlotIndex + totalNumSlots; // + 9 + 1;
+        for (int i = startingSlotIndex; i < maxSlotIndex; i++) {
             stackOne = inventory.getStack(i);
             if(stackOne.isEmpty() || !stackOne.isStackable() || stackOne.getCount() == stackOne.getMaxCount()) continue;
-
             for (int j = i + 1; j < maxSlotIndex; j++) {
                 stackTwo = inventory.getStack(j);
-                if(stackTwo.isEmpty() || !stackTwo.isStackable() || stackTwo.getCount() == stackTwo.getMaxCount() || !ItemStack.areItemsAndComponentsEqual(stackOne, stackTwo)) continue;
-                client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP, client.player); // Grab the stack
-                client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP_ALL, client.player); // Grab all matching items
-                if(!handler.getCursorStack().isEmpty()) client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP, client.player); // Place them back down
+                if(stackTwo.isEmpty() || !stackTwo.isOf(stackOne.getItem()) || stackTwo.getCount() == stackTwo.getMaxCount() || !ItemStack.areItemsAndComponentsEqual(stackOne, stackTwo)) continue;
+                client.interactionManager.clickSlot(handler.syncId, j, 0, SlotActionType.PICKUP, client.player); // Grab the stack
+                client.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.PICKUP, client.player); // Combine with other
+                if(!handler.getCursorStack().isEmpty()) client.interactionManager.clickSlot(handler.syncId, j, 0, SlotActionType.PICKUP, client.player); // Place leftovers back down
+                if(inventory.getStack(i).getCount() == stackOne.getMaxCount()) break;
             }
         }
     }
