@@ -11,23 +11,12 @@ import net.minecraft.screen.slot.SlotActionType;
 public abstract class HotbarCycling {
 
     public static void doHotbarSwap(PlayerInventory inventory, int numTypesToSwap) {
-        if(numTypesToSwap % 4 == 0 || numTypesToSwap < 0) return;
-        if(numTypesToSwap % 4 == 1) doHotbarSwap(inventory);
-        if(numTypesToSwap % 4 == 3) doInverseHotbarSwap(inventory);
-        else {
+        if(numTypesToSwap > 0) {
             for (int i = 0; i < 9; i++) {
-                swapItemsFromSlots(inventory, i, i + 9);
-                swapItemsFromSlots(inventory, i, i + 18);
-                swapItemsFromSlots(inventory, i, i + 27);
+                swapItemsFromSlots(inventory, i, i + numTypesToSwap * 9);
+                swapItemsFromSlots(inventory, i, i + (numTypesToSwap == 2 ? 27 : 18));
+                swapItemsFromSlots(inventory, i, i + (numTypesToSwap == 1 ? 27 : 9));
             }
-        }
-    }
-
-    public static void doHotbarSwap(PlayerInventory inventory, boolean skipEmptyRows) {
-        for (int i = 0; i < 9; i++) {
-            swapItemsFromSlots(inventory, i, i + 9);
-            swapItemsFromSlots(inventory, i, i + 18);
-            swapItemsFromSlots(inventory, i, i + 27);
         }
     }
 

@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.client.items.inventory;
 
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items.inventory.HotbarCycling;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -64,9 +65,12 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
         boolean doesPlayerAlreadyHaveStack = slotToSwapTo != -1;
         if (isCreativeMode && !doesPlayerAlreadyHaveStack && !isStackEmpty) {
             boolean hasEmptySlot = goToNextEmptySlot(playerInventory);
-            if(hasEmptySlot || isCrouching) this.interactionManager.pickItemFromBlock(((BlockHitResult)this.crosshairTarget).getBlockPos(), isCrouching);
+            if(hasEmptySlot || isCrouching) {
+                if(this.crosshairTarget.getType() == HitResult.Type.BLOCK) this.interactionManager.pickItemFromBlock(((BlockHitResult)this.crosshairTarget).getBlockPos(), isCrouching);
+                else if(this.crosshairTarget.getType() == HitResult.Type.ENTITY) this.interactionManager.pickItemFromEntity(((EntityHitResult)this.crosshairTarget).getEntity(), isCrouching);
+            }
         }
-        else if (playerInventory.getSelectedSlot() == slotToSwapTo) {
+        else if (playerInventory.getSelectedSlot() == slotToSwapTo && !isCrouching) {
             HotbarCycling.doHotbarSwap(playerInventory);
         }
         else if (PlayerInventory.isValidHotbarIndex(slotToSwapTo)) {
