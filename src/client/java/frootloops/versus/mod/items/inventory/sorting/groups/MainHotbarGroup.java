@@ -343,7 +343,7 @@ public class MainHotbarGroup extends SortingGroup {
     @Override
     public LinkedList<ItemSlot> takeAllItems() {
         if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems()");
-        for (ItemSlot slot:this.takeImportantItems(9)) this.miscItems.add(slot);
+        for (ItemSlot slot:this.takeImportantItems(Integer.MAX_VALUE)) this.miscItems.addBetween(slot, 0, miscItems.size(), true);
         return miscItems.takeAll();
     }
 
