@@ -1088,9 +1088,6 @@ public class RevampedTradeOffers {
         private final int experience;
 
         public TypeAwareSellItemFactory(int price, int count, int maxUses, int experience, ImmutableMap<Object, Object> map) {
-            Registries.VILLAGER_TYPE.stream().filter(villagerType -> !map.containsKey(villagerType)).findAny().ifPresent(villagerType -> {
-                throw new IllegalStateException("Missing trade for villager type: " + Registries.VILLAGER_TYPE.getId(villagerType));
-            });
             this.map = map;
             this.price = price;
             this.count = count;
