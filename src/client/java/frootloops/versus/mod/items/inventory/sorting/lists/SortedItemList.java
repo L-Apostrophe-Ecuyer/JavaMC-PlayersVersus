@@ -1,8 +1,11 @@
 package frootloops.versus.mod.items.inventory.sorting.lists;
 
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.items.inventory.InventorySorting;
 import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items.inventory.sorting.ItemType;
+import frootloops.versus.mod.items.inventory.sorting.SortingHelper;
 import net.minecraft.item.Item;
 
 import java.util.LinkedList;
@@ -59,8 +62,9 @@ public abstract class SortedItemList {
                 slots.add(startIndex, slot);
                 return startIndex;
             }
-            for (int i = startIndex; i <= endIndex; i++) {
+            for (int i = startIndex; i < endIndex + 1; i++) {
                 if (ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, !doSortedInsert, doSortedInsert)) {
+                    if(SortingHelper.DEBUG_SORTING_GROUPS && startIndex == 0 && doSortedInsert) VersusMod.MOD_LOGGER.warn("                            - Found a better spot for " + slot + " -> Inserting it at pos " + i + " -> List: " + this);
                     slots.add(i, slot);
                     return i;
                 }

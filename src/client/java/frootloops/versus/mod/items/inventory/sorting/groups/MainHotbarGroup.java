@@ -78,73 +78,13 @@ public class MainHotbarGroup extends SortingGroup {
 
     @Override
     public void addSlot(ItemSlot slot) {
-        slot = tryInsertingSlot(slot);
-        if(slot != null) {
-            if(slot.itemType() == ItemType.PICKAXE) {
-                if(this.pickaxeSlot == null || ItemComparaisonHelper.shouldGoBefore(slot, pickaxeSlot)) {
-                    ItemSlot slotToReplace = this.pickaxeSlot;
-                    this.pickaxeSlot = slot;
-                    if(slotToReplace != null) this.miscItems.add(slotToReplace);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as pickaxe");
-                }
-                else {
-                    this.miscItems.add(slot);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting pickaxe " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items");
-                }
-            }
-            else if(slot.itemType() == ItemType.AXE) {
-                if(this.axeSlot == null || ItemComparaisonHelper.shouldGoBefore(slot, axeSlot)) {
-                    ItemSlot slotToReplace = this.axeSlot;
-                    this.axeSlot = slot;
-                    if(slotToReplace != null) this.miscItems.add(slotToReplace);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as axe");
-                }
-                else if(this.extraWeaponSlot == null || (extraWeaponSlot.itemType() == ItemType.AXE && ItemComparaisonHelper.shouldGoBefore(slot, extraWeaponSlot))) {
-                    ItemSlot slotToReplace = this.extraWeaponSlot;
-                    this.extraWeaponSlot = slot;
-                    if(slotToReplace != null) this.miscItems.add(slotToReplace);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as special weapon");
-                }
-                else {
-                    this.miscItems.add(slot);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting axe " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items");
-                }
-            }
-            else if(slot.isToolOrWeapon()) {
-                boolean mustBeWeapon = this.extraWeaponSlot == null || (slot.isWeapon() && !extraWeaponSlot.isWeapon());
-                boolean cannotBeWeapon = !mustBeWeapon && extraWeaponSlot != null && extraWeaponSlot.isWeapon() && !slot.isWeapon();
-                if(!cannotBeWeapon && (mustBeWeapon || ItemComparaisonHelper.shouldGoBefore(slot, extraWeaponSlot))) {
-                    ItemSlot slotToReplace = this.extraWeaponSlot;
-                    this.extraWeaponSlot = slot;
-                    if(slotToReplace != null) this.miscItems.add(slotToReplace);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as extra weapon");
-                }
-                else {
-                    this.miscItems.add(slot);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items");
-                }
-            }
-            else if(slot.itemType() == ItemType.BLOCK_FULL || slot.itemType() == ItemType.BLOCK_WORKSTATION) {
-                if(this.blockSlot == null) {
-                    this.blockSlot = slot;
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as block");
-                }
-                else if(blockSlot.stack().isIn(ItemTags.WOOL) || isBlockSlotLocked || ItemComparaisonHelper.shouldGoBefore(blockSlot, slot)) {
-                    this.miscItems.add(slot);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting block " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items (current block is " + blockSlot.stack().getName().getString() + ")");
-                }
-                else {
-                    ItemSlot oldBlockSlot = blockSlot;
-                    this.blockSlot = slot;
-                    this.miscItems.add(oldBlockSlot);
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting block " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as block (replacing " + oldBlockSlot.stack().getName().getString() + ")");
-                }
-            }
-            else {
-                int pos = this.miscItems.add(slot);
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items at pos " + pos + ": " + miscItems);
-            }
-        }
+        slot = tryAddingSlot(slot);
+        if(slot != null) this.miscItems.add(slot);
+    }
+
+    @Override
+    public void addSlots(LinkedList<ItemSlot> newSlots) {
+        for (ItemSlot slot : newSlots) this.addSlot(slot);
     }
 
     @Override
@@ -286,6 +226,59 @@ public class MainHotbarGroup extends SortingGroup {
         return slot;
     }
 
+    private ItemSlot tryAddingSlot(ItemSlot slot) {
+        slot = this.tryInsertingSlot(slot);
+        if(slot != null) {
+            if(slot.itemType() == ItemType.PICKAXE) {
+                if(this.pickaxeSlot == null || ItemComparaisonHelper.shouldGoBefore(slot, pickaxeSlot)) {
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as pickaxe");
+                    ItemSlot slotToReplace = this.pickaxeSlot;
+                    this.pickaxeSlot = slot;
+                    return slotToReplace;
+                }
+            }
+            else if(slot.itemType() == ItemType.AXE) {
+                if(this.axeSlot == null || ItemComparaisonHelper.shouldGoBefore(slot, axeSlot)) {
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as axe");
+                    ItemSlot slotToReplace = this.axeSlot;
+                    this.axeSlot = slot;
+                    return slotToReplace;
+                }
+                else if(this.extraWeaponSlot == null || (extraWeaponSlot.itemType() == ItemType.AXE && ItemComparaisonHelper.shouldGoBefore(slot, extraWeaponSlot))) {
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as special weapon");
+                    ItemSlot slotToReplace = this.extraWeaponSlot;
+                    this.extraWeaponSlot = slot;
+                    return slotToReplace;
+                }
+            }
+            else if(slot.isToolOrWeapon()) {
+                boolean mustBeWeapon = this.extraWeaponSlot == null || (slot.isWeapon() && !extraWeaponSlot.isWeapon());
+                boolean cannotBeWeapon = !mustBeWeapon && extraWeaponSlot != null && extraWeaponSlot.isWeapon() && !slot.isWeapon();
+                if(!cannotBeWeapon && (mustBeWeapon || ItemComparaisonHelper.shouldGoBefore(slot, extraWeaponSlot))) {
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as extra weapon");
+                    ItemSlot slotToReplace = this.extraWeaponSlot;
+                    this.extraWeaponSlot = slot;
+                    return slotToReplace;
+                }
+            }
+            else if(slot.itemType() == ItemType.BLOCK_FULL || slot.itemType() == ItemType.BLOCK_WORKSTATION) {
+                if(this.blockSlot == null) {
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as block");
+                    this.blockSlot = slot;
+                    return null;
+                }
+                else if(!isBlockSlotLocked && !blockSlot.stack().isIn(ItemTags.WOOL) && !ItemComparaisonHelper.shouldGoBefore(blockSlot, slot)) {
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting block " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + " as block (replacing " + blockSlot.stack().getName().getString() + ")");
+                    ItemSlot oldBlockSlot = blockSlot;
+                    this.blockSlot = slot;
+                    return oldBlockSlot;
+                }
+            }
+        }
+        return slot;
+    }
+
+
     @Override
     protected void addSlotsToMisc(LinkedList<ItemSlot> newSlots) {
         for (ItemSlot slot : newSlots) {
@@ -347,7 +340,7 @@ public class MainHotbarGroup extends SortingGroup {
     @Override
     public LinkedList<ItemSlot> takeAllItems() {
         if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems()");
-        for (ItemSlot slot:this.takeImportantItems(Integer.MAX_VALUE)) this.miscItems.addBetween(slot, 0, miscItems.size(), true);
+        for (ItemSlot slot:this.takeImportantItems(Integer.MAX_VALUE)) this.miscItems.addBetween(slot, 0, miscItems.size());
         return miscItems.takeAll();
     }
 

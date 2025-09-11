@@ -49,9 +49,13 @@ public class SortedInventoryOutput {
                     }
                 }
                 this.currentCol = 0;
+                for (int i = 0; i < 9; i++) {
+                    if(this.invSlots[this.currentRow * 9 + i] == null) break;
+                    else this.currentCol += 1;
+                }
             } else if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("----------------- End of group. Unable to move last items to the right, IndexEnd is " + indexEnd);
         } else if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("----------------- End of group. Group's col value started at " + currentGroupColStart + " and ended at " + currentCol);
-        this.currentSlotsColStart = 0;
+        this.currentSlotsColStart = currentCol;
         this.numGroupsToPlace--;
 
         if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn(this.toString());
@@ -196,7 +200,7 @@ public class SortedInventoryOutput {
         }
 
         // Try sorting each individual row as well:
-        if(column > 0 && (this.get (currentRow,  column - 1).isVerySimilarTo(slot, false) || (slot.itemType() != ItemType.MISC && slot.itemType() != ItemType.TRASH))) {
+        if(column > 0) {
             if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this tool: " + slot);
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
@@ -218,7 +222,7 @@ public class SortedInventoryOutput {
                     }
 
                     // Place item:
-                    if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                               - Setting slot (" + this.currentRow + ", " + i + ") as " + slot + ", replacing " + other + " (Must: " + mustGoBefore + ")");
+                    if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                                 Setting slot (" + this.currentRow + ", " + i + ") as " + slot + ", replacing " + other + " (Must: " + mustGoBefore + ")");
                     invSlots[row * 9 + i] = slot;
                     slot = other;
 
@@ -228,7 +232,7 @@ public class SortedInventoryOutput {
                     // Move items to the right:
                     for(int k = i + 1; k < column + 1; k++) {
                         other = invSlots[row * 9 + k];
-                        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                               - Moving down slot (" + this.currentRow + ", " + k + ") as " + slot + ", replacing " + other);
+                        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                                 Moving down slot (" + this.currentRow + ", " + k + ") as " + slot + (slot == null ? "" : " of type " + slot.itemType()) + ", replacing " + other + (other == null ? "" : " of type " + other.itemType()));
                         invSlots[row * 9 + k] = slot;
                         slot = other;
                     }

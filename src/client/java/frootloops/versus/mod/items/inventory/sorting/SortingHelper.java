@@ -329,8 +329,9 @@ public class SortingHelper {
             cleanUpToolGroup(SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP);
             cleanUpToolGroup(PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, CONSUMABLES_GROUP);
             cleanUpToolGroup(AXE_GROUP, PICKAXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
-            giveExtraToolsFromAndTo(PICKAXE_GROUP, REDSTONE_GROUP);
-            giveExtraToolsFromAndTo(PICKAXE_GROUP, RARE_MINERALS_GROUP);
+            if(SortedItemLists.ORE_BLOCKS.size() > 2) giveExtraToolsFromAndTo(PICKAXE_GROUP, RARE_MINERALS_GROUP);
+            if(SortedItemLists.REDSTONE_COMPONENTS.size() > 2) giveExtraToolsFromAndTo(PICKAXE_GROUP, REDSTONE_GROUP);
+            else if(SortedItemLists.REDSTONE_COMPONENTS.size() > 0) tryCombiningTwoGroups(PICKAXE_GROUP, REDSTONE_GROUP);
             giveExtraToolsFromAndTo(COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(AXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(SHOVEL_GROUP, PICKAXE_GROUP);
@@ -380,7 +381,7 @@ public class SortingHelper {
         if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] ---- CLEANING HOTBAR -----");
 
         // If no weapon, try adding an axe:
-        if(!MAIN_HOTBAR.hasCombatItems() && !MAIN_HOTBAR.hasAxe() && AXE_GROUP.getNumTools() > 0) {
+        if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.getNumTools() > 0) {
             if(AXE_GROUP.hasOnlyTools()) {
                 MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
@@ -401,8 +402,10 @@ public class SortingHelper {
         }
         if(MAIN_HOTBAR.size() >= 9) return;
 
-        // If still some space, and still no axe, try adding one, and try combining groups:
-        if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.getNumTools() > 0 && tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
+        // If still some space, and still no axe, try adding one:
+        if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
+        if(MAIN_HOTBAR.size() >= 9) return;
+        if(MAIN_HOTBAR.hasAxe() && tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
 
         // If in deep dark:
         if(isInDeepDark) {
