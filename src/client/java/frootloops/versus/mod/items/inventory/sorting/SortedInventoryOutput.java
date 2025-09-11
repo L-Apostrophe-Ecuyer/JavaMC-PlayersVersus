@@ -35,7 +35,7 @@ public class SortedInventoryOutput {
             for(indexEnd = 8; indexEnd > this.currentCol; indexEnd--) if(this.get(this.currentRow, indexEnd) == null) break;
             if(indexEnd >= currentCol) { // If enough empty columns at end of row to fit the item slots. This should always be true... but better safe than sorry
                 if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("================= MOVING ITEMS OF GROUP TO END OF ROW! Current group's col start was " + currentGroupColStart + " and current col is " + currentCol);
-                for (int i = 0; i <= this.currentCol; i++) {
+                for (int i = this.currentCol; i >= 0; i--) {
                     ItemSlot slotToMove = this.get(this.currentRow, i);
                     if (!slotToMove.isToolOrWeapon()) {
                         this.invSlots[this.currentRow * 9 + i] = this.get(this.currentRow, indexEnd);

@@ -78,11 +78,17 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
     public boolean shouldAlwaysGoBefore(ItemSlot other, boolean proritizeArmor) {
         if(other == null) return false;
-        if(this.itemType != other.itemType) {
-            if(this.itemType == ItemType.TRASH) return false;
-            if(other.itemType == ItemType.TRASH) return true;
+
+        // Rubbish always in the back!
+        if(!this.hasSameType(other, true)) {
+            if(this.itemType.compareTo(ItemType.MISC) > 0) return this.itemType.compareTo(other.itemType) < 0;
+            if(other.itemType.compareTo(ItemType.MISC) > 0) return this.itemType.compareTo(other.itemType) < 0;
         }
+
+        // Highest count first:
         if(this.isSameItem(other)) return this.stack.getCount() > other.stack.getCount();
+
+        // Otherwise, tools and potentially armor first:
         if(this.isToolOrWeapon()) {
             if(!other.isToolOrWeapon()) return true;
             else return ItemComparaisonHelper.shouldGoBefore(this, other);
