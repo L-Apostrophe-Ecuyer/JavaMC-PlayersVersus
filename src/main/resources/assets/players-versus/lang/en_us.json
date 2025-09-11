@@ -1,6 +1,7 @@
 {
 
   "subtitles.players-versus.rail_turning_sound": "Minecart makes a sharp turn",
+  "subtitles.players-versus.sword_blocking": "Sword blocks attack",
 
   "attribute.name.critical_attack_damage": "Critical Attack Damage",
   "attribute.name.sprint_attack_damage": "Sprint Attack Damage",
@@ -337,7 +338,7 @@
   "block.players-versus.smallness_bile" : "Bitter Bile",
   "block.players-versus.invisibility_bile" : "Ethereal Bile",
   "block.players-versus.glowing_bile" : "Shiny Bile",
-  "block.players-versus.strength_bile"  : "Fiery bILE",
+  "block.players-versus.strength_bile"  : "Fiery Bile",
   "block.players-versus.weakness_bile" : "Feeble Bile",
   "block.players-versus.fire_bile" : "Blistering Bile",
   "block.players-versus.wind_bile" : "Airy Bile",

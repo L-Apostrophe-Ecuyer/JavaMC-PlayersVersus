@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.items.equipment;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.component.DataComponentTypes;
@@ -8,14 +9,13 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityBlockingMixin extends Entity {
     public LivingEntityBlockingMixin(EntityType<?> type, World world) {super(type, world);}
-    private static final float MIN_ANGLE_TO_BLOCK = (float) (Math.PI / 180.0) * 90F;
+    private static final float MAX_ANGLE_TO_BLOCK = (float) (Math.PI / 180.0) * 90F;
     private static final int PARRY_TIME_TICKS = 6;
 
     @Shadow protected int itemUseTimeLeft;
@@ -62,18 +62,19 @@ public abstract class LivingEntityBlockingMixin extends Entity {
             } else {
                 BlocksAttacksComponent blocksAttacksComponent = blockingItem.get(DataComponentTypes.BLOCKS_ATTACKS);
                 if (blocksAttacksComponent != null) {
-
                     int levelRiposte = EnchantRegistryHelper.getLevel(getWorld(), blockingItem, CustomEnchants.RIPOSTE);
                     int ticksToParry = PARRY_TIME_TICKS + levelRiposte;
                     int useTime =  activeItemStack.getMaxUseTime((LivingEntity) ((Object)this)) - itemUseTimeLeft;
                     boolean wasAttackParried = useTime <= ticksToParry;
+                    boolean doesAttackBypassShield = blocksAttacksComponent.bypassedBy().map(source::isIn).orElse(false) && !(wasAttackParried && source.isOf(DamageTypes.SONIC_BOOM));
+                    if (doesAttackBypassShield) return 0.0F;
 
-                    // Check if attack bypasses shields:
-                    boolean isAttackBlockedByShields = blocksAttacksComponent.bypassedBy().map(source::isIn).orElse(false) || (source.isOf(DamageTypes.SONIC_BOOM) && wasAttackParried);
-                    if(!isAttackBlockedByShields) return 0.0F;
-                    if (source.getSource() instanceof PersistentProjectileEntity persistentProjectileEntity && persistentProjectileEntity.getPierceLevel() > 0) return 0.0F;
+                    // Check if we can repel arrow:
+                    if ((!blockingItem.isIn(ItemTags.SWORDS) || wasAttackParried) && source.getSource() instanceof PersistentProjectileEntity persistentProjectileEntity && persistentProjectileEntity.getPierceLevel() > 0) {
+                        return 0.0F;
+                    }
+
                     else {
-
                         // Get the angle of attack vs blocking:
                         double angle = 3.1416F;
                         if (source.getPosition() != null) {
@@ -94,10 +95,10 @@ public abstract class LivingEntityBlockingMixin extends Entity {
 
                         // Do parrying logic:
                         // If you blocked within 6-9 ticks of an attack, you reflect the attack back (partially)
-                        if(wasAttackParried && angle > MIN_ANGLE_TO_BLOCK) {
+                        if(wasAttackParried && angle < MAX_ANGLE_TO_BLOCK) {
                             if ((LivingEntity) (Object) this instanceof PlayerEntity player) {
                                 player.getItemCooldownManager().set(blockingItem, PARRY_TIME_TICKS << 1);
-                                player.playSoundToPlayer(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1F, 1F);
+                                player.playSoundToPlayer(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 0.2F, 1F);
                             }
                             if(levelRiposte > 0f) reflectedDamage += 0.2F * damageAmount * levelRiposte;
                             ((LivingEntity) ((Object) this)).clearActiveItem();

@@ -220,25 +220,26 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     } else if (willTryLandingAnAttack) {
                         if(this.mob.canSee(target)) {
                             if(DEBUG) VersusMod.MOD_LOGGER.warn("Landing attack!");
-                            this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.4F);
-                            this.mob.tryAttack(getServerWorld(this.mob), target);
+                            if(this.mob.tryAttack(getServerWorld(this.mob), target)) {
+                                this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, 0.6F, 1.4F);
+                            }
                             this.cooldown -= 2;
                         }
                         else {
                             if(DEBUG) VersusMod.MOD_LOGGER.warn("Missed: couldn't see target.");
-                            this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
+                            this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.2F, 0.9F);
                             this.cooldown -= 1;
                         }
                     }
                 }
                 else if (willTryLandingAnAttack) {
                     if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack.");
-                    this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
+                    this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, 0.8F, 0.8F);
                 }
             }
             else if (willTryLandingAnAttack) {
                 if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: neither in close quarters, nor looking towards target");
-                this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
+                this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, 0.8F, 0.8F);
             }
         }
     }

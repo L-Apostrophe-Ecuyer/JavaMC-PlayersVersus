@@ -41,6 +41,14 @@ import java.util.List;
 
 public abstract class Combat {
 
+    public static final double TRIDENT_SPEED = 1.0, TRIDENT_DAMAGE = 9.0, TRIDENT_REACH = 1.0;
+    public static final double PICKAXE_SPEED = 1.2, PICKAXE_DAMAGE = 2.0, PICKAXE_REACH = 0.0;
+    public static final double SHOVEL_SPEED = 1.4, SHOVEL_DAMAGE = 3.0, SHOVEL_REACH = 0.0;
+    public static final double SWORD_SPEED = 1.6, SWORD_DAMAGE = 3.0, SWORD_REACH = 0.5;
+    public static final double HOE_SPEED = 2.0, HOE_DAMAGE = 1.0, HOE_REACH = 1.0;
+    public static final double AXE_SPEED = 1.0, AXE_DAMAGE = 6.0, AXE_REACH = 0.0;
+    public static final Identifier ATTACK_REACH_MODIFIER_ID = Identifier.of(VersusMod.MOD_ID,"attack_reach_modifier");
+
     public static EntityAttribute CRITICAL_ATTACK_DAMAGE_ATTRIBUTE, SPRINT_ATTACK_DAMAGE_ATTRIBUTE;
     public static RegistryEntry<EntityAttribute> CRITICAL_ATTACK_DAMAGE, SPRINT_ATTACK_DAMAGE;
 

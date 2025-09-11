@@ -1,7 +1,9 @@
 package frootloops.versus.mod.items;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.environment.CustomSpecialEffects;
 import frootloops.versus.mod.items.brewing.CustomBrewingItems;
 import frootloops.versus.mod.items.equipment.CustomEquipment;
 import net.fabricmc.fabric.api.event.Event;
@@ -9,6 +11,8 @@ import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
@@ -17,6 +21,7 @@ import net.minecraft.item.consume.ConsumeEffect;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
@@ -24,11 +29,12 @@ import net.minecraft.util.Identifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import static frootloops.versus.mod.Combat.*;
 import static frootloops.versus.mod.items.equipment.CustomEquipment.*;
 
 public class VanillaItemsV2 {
-
     private static Map<Item, Item> TRANSFORM_VANILLA_ITEMS_TO_MODDED = new HashMap<>();
 
     public static void onInitialize() {
@@ -163,45 +169,51 @@ public class VanillaItemsV2 {
         });
 
         double extra = 0.0;
-        modifySwordComponents(context, Items.WOODEN_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra);
+        modifySwordComponents(context, Items.WOODEN_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra, CustomSpecialEffects.SWORD_BLOCKING_WOOD);
         modifyToolComponents(context, Items.WOODEN_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
         modifyToolComponents(context, Items.WOODEN_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
         modifyToolComponents(context, Items.WOODEN_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
         modifyToolComponents(context, Items.WOODEN_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
 
         extra = 1.0;
-        modifySwordComponents(context, Items.STONE_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra);
+        modifySwordComponents(context, Items.STONE_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra, CustomSpecialEffects.SWORD_BLOCKING_STONE);
         modifyToolComponents(context, Items.STONE_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
         modifyToolComponents(context, Items.STONE_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
         modifyToolComponents(context, Items.STONE_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
         modifyToolComponents(context, Items.STONE_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
 
         extra = 2.0;
-        modifySwordComponents(context, Items.IRON_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra);
+        modifySwordComponents(context, Items.IRON_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra, CustomSpecialEffects.SWORD_BLOCKING_METAL);
         modifyToolComponents(context, Items.IRON_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
         modifyToolComponents(context, Items.IRON_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
         modifyToolComponents(context, Items.IRON_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
         modifyToolComponents(context, Items.IRON_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
 
+        modifySwordComponents(context, Items.GOLDEN_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra, CustomSpecialEffects.SWORD_BLOCKING_METAL);
+        modifyToolComponents(context, Items.GOLDEN_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
+        modifyToolComponents(context, Items.GOLDEN_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
+        modifyToolComponents(context, Items.GOLDEN_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
+        modifyToolComponents(context, Items.GOLDEN_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
+
         extra = 3.0;
-        modifySwordComponents(context, Items.DIAMOND_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra);
+        modifySwordComponents(context, Items.DIAMOND_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra, CustomSpecialEffects.SWORD_BLOCKING_DIAMOND);
         modifyToolComponents(context, Items.DIAMOND_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
         modifyToolComponents(context, Items.DIAMOND_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
         modifyToolComponents(context, Items.DIAMOND_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
         modifyToolComponents(context, Items.DIAMOND_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
 
         extra = 4.0;
-        modifySwordComponents(context, Items.NETHERITE_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra);
+        modifySwordComponents(context, Items.NETHERITE_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, (float)extra, CustomSpecialEffects.SWORD_BLOCKING_METAL);
         modifyToolComponents(context, Items.NETHERITE_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
         modifyToolComponents(context, Items.NETHERITE_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
         modifyToolComponents(context, Items.NETHERITE_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
         modifyToolComponents(context, Items.NETHERITE_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
     }
 
-    private static void modifySwordComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount) {
+    private static void modifySwordComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount, RegistryEntry.Reference<SoundEvent> blockingSound) {
         context.modify(item, builder -> {builder
                 .add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange))
-                .add(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(baseBlockingAmount, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK));
+                .add(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(baseBlockingAmount, blockingSound, blockingSound));
         });
     }
 
@@ -231,5 +243,51 @@ public class VanillaItemsV2 {
     public static ConsumableComponent createUseActionComponent(UseAction useAction, float consumeSeconds, RegistryEntry<SoundEvent> sound, RegistryEntry<SoundEvent> finishSound, boolean consumeParticles, ConsumeEffect consumeEffect) {
         ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().useAction(useAction).consumeSeconds(consumeSeconds).sound(sound).finishSound(finishSound).consumeParticles(consumeParticles).consumeEffect(consumeEffect);
         return consumeComponent.build();
+    }
+
+    public static BlocksAttacksComponent getSwordBlockingComponent(float baseBlockingAmount, RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking) {
+        return createDamageBlockingComponent(0.0625F, 0.5F, baseBlockingAmount, 0.5F, soundBlocking, soundBreaking);
+    }
+
+
+    public static BlocksAttacksComponent createDamageBlockingComponent(
+            float blockDelaySeconds,    // The amount of time (in seconds) that use must be held before successfully blocking attacks
+            float disableCooldownScale, // The multiplier applied to the cooldown time for the item when attacked by a disabling attack
+            float amountBlockedBase,    // The constant amount of damage to be blocked
+            float amountBlockedFactor,  // The fraction of the dealt damage to be blocked
+            RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking
+    ) {
+        float horizontalBlockingAngle = 90F;
+        float itemDamageThreshold = 3.0F;
+        float itemDamageBase = 1.0F;
+        float itemDamageFactor = 1.0F;
+        return new BlocksAttacksComponent(
+                blockDelaySeconds,
+                disableCooldownScale,
+                List.of(new BlocksAttacksComponent.DamageReduction(horizontalBlockingAngle, Optional.empty(), amountBlockedBase, amountBlockedFactor)),
+                new BlocksAttacksComponent.ItemDamage(itemDamageThreshold, itemDamageBase, itemDamageFactor),
+                Optional.of(DamageTypeTags.BYPASSES_SHIELD),
+                Optional.of(soundBlocking),
+                Optional.of(soundBreaking)
+        );
+    }
+
+    public static AttributeModifiersComponent createToolAttributeModifiers(double attackDamage, double attackSpeed, double extraAttackRange) {
+        AttributeModifiersComponent.Builder attributeBuilder = AttributeModifiersComponent.builder()
+                .add(
+                        EntityAttributes.ATTACK_DAMAGE,
+                        new EntityAttributeModifier(Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, attackDamage - Combat.PLAYER_BASE_ATTACK_DAMAGE, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
+                )
+                .add(
+                        EntityAttributes.ATTACK_SPEED,
+                        new EntityAttributeModifier(Item.BASE_ATTACK_SPEED_MODIFIER_ID, attackSpeed - Combat.PLAYER_BASE_ATTACK_SPEED, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
+                );
+        if(extraAttackRange != 0.0) {
+            attributeBuilder.add(
+                    EntityAttributes.ENTITY_INTERACTION_RANGE,
+                    new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, extraAttackRange, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
+            );
+        }
+        return attributeBuilder.build();
     }
 }

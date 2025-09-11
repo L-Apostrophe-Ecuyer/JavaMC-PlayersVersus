@@ -3,12 +3,8 @@ package frootloops.versus.mod.items.equipment;
 import com.google.common.collect.Maps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.environment.CustomSpecialEffects;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.component.type.BlocksAttacksComponent;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.*;
 import net.minecraft.item.equipment.ArmorMaterial;
 import net.minecraft.item.equipment.EquipmentAsset;
@@ -18,36 +14,22 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
+import static frootloops.versus.mod.Combat.*;
 
 import static frootloops.versus.mod.items.RegisteringCustomItems.getItemSettings;
-import static frootloops.versus.mod.items.RegisteringCustomItems.registerCustomItem;
+import static frootloops.versus.mod.items.VanillaItemsV2.createToolAttributeModifiers;
+import static frootloops.versus.mod.items.VanillaItemsV2.getSwordBlockingComponent;
 
 public abstract class CustomEquipment {
 
     public static final Item RECOVERY_COMPASS =  new RecoveryCompassItem(getItemSettings("recovery_compass").maxCount(1));
-
-    
-    public static final double TRIDENT_SPEED = 1.0, TRIDENT_DAMAGE = 9.0, TRIDENT_REACH = 1.0;
-    public static final double PICKAXE_SPEED = 1.2, PICKAXE_DAMAGE = 2.0, PICKAXE_REACH = 0.0;
-    public static final double SHOVEL_SPEED = 1.4, SHOVEL_DAMAGE = 3.0, SHOVEL_REACH = 0.0;
-    public static final double SWORD_SPEED = 1.6, SWORD_DAMAGE = 3.0, SWORD_REACH = 0.5;
-    public static final double HOE_SPEED = 2.0, HOE_DAMAGE = 1.0, HOE_REACH = 1.0;
-    public static final double AXE_SPEED = 1.0, AXE_DAMAGE = 6.0, AXE_REACH = 0.0;
-    public static final Identifier ATTACK_REACH_MODIFIER_ID = Identifier.of(VersusMod.MOD_ID,"attack_reach_modifier");
-
-
-
-
-
 
     static RegistryKey<? extends Registry<EquipmentAsset>> ARMOR_ASSET_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.of(VersusMod.MOD_ID, "equipment_asset"));
     public static final int COPPER_ENCHANTABILITY = 3, COPPER_ARMOR_DURABILITY = 4;
@@ -76,8 +58,8 @@ public abstract class CustomEquipment {
     public final static HoeItem COPPER_HOE = customHoe("copper_hoe", COPPER_TOOL_MATERIAL);
     public final static AxeItem COPPER_AXE = customAxe("copper_axe", COPPER_TOOL_MATERIAL);
     public final static Item COPPER_PICKAXE = customPickaxe("copper_pickaxe", COPPER_TOOL_MATERIAL);
-    public final static Item COPPER_SWORD = customSword("copper_sword", COPPER_TOOL_MATERIAL, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK);
-    public final static ShovelItem COPPER_SHOVEL = new ShovelItem(COPPER_TOOL_MATERIAL, RebalancedTools.getShovelSpeedModifier(), RebalancedTools.getShovelSpeedModifier(), getItemSettings("copper_shovel"));
+    public final static Item COPPER_SWORD = customSword("copper_sword", COPPER_TOOL_MATERIAL, CustomSpecialEffects.SWORD_BLOCKING_METAL);
+    public final static ShovelItem COPPER_SHOVEL = customShovel("copper_shovel", COPPER_TOOL_MATERIAL);
 
     private static RegistryKey<EquipmentAsset> getArmorAsset(String id) {
         return RegistryKey.of(ARMOR_ASSET_REGISTRY_KEY, Identifier.of(VersusMod.MOD_ID, id));
@@ -95,6 +77,10 @@ public abstract class CustomEquipment {
         );
     }
 
+    private static ShovelItem customShovel(String name, ToolMaterial material) {
+        return new ShovelItem(material, (float) (SHOVEL_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (SHOVEL_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED),
+                getItemSettings(name).component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SHOVEL_DAMAGE, SHOVEL_SPEED, SHOVEL_REACH)));
+    }
     private static HoeItem customHoe(String name, ToolMaterial material) {
         return new HoeItem(material, (float) (HOE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (HOE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED),
                 getItemSettings(name).component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + HOE_DAMAGE, HOE_SPEED, HOE_REACH)));
@@ -106,56 +92,10 @@ public abstract class CustomEquipment {
         return new Item(getItemSettings(name).pickaxe(material, (float) (PICKAXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (PICKAXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED)));
     }
 
-    private static Item customSword(String name, ToolMaterial material, RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking) {
+    private static Item customSword(String name, ToolMaterial material, RegistryEntry.Reference<SoundEvent> soundBlocking) {
         return new Item(getItemSettings(name)
                 .sword(material, (float) (SWORD_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (SWORD_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED))
                 .component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SWORD_DAMAGE, SWORD_SPEED, SWORD_REACH))
-                .component(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(material.attackDamageBonus(), soundBlocking, soundBreaking)));
-    }
-
-    public static BlocksAttacksComponent getSwordBlockingComponent(float baseBlockingAmount, RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking) {
-        return createDamageBlockingComponent(0.0625F, 0.5F, baseBlockingAmount, 0.5F, soundBlocking, soundBreaking);
-    }
-
-
-    public static BlocksAttacksComponent createDamageBlockingComponent(
-            float blockDelaySeconds,    // The amount of time (in seconds) that use must be held before successfully blocking attacks
-            float disableCooldownScale, // The multiplier applied to the cooldown time for the item when attacked by a disabling attack
-            float amountBlockedBase,    // The constant amount of damage to be blocked
-            float amountBlockedFactor,  // The fraction of the dealt damage to be blocked
-            RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking
-    ) {
-        float horizontalBlockingAngle = 90F;
-        float itemDamageThreshold = 3.0F;
-        float itemDamageBase = 1.0F;
-        float itemDamageFactor = 1.0F;
-        return new BlocksAttacksComponent(
-                blockDelaySeconds,
-                disableCooldownScale,
-                List.of(new BlocksAttacksComponent.DamageReduction(horizontalBlockingAngle, Optional.empty(), amountBlockedBase, amountBlockedFactor)),
-                new BlocksAttacksComponent.ItemDamage(itemDamageThreshold, itemDamageBase, itemDamageFactor),
-                Optional.of(DamageTypeTags.BYPASSES_SHIELD),
-                Optional.of(SoundEvents.ITEM_SHIELD_BLOCK),
-                Optional.of(SoundEvents.ITEM_SHIELD_BREAK)
-        );
-    }
-
-    public static AttributeModifiersComponent createToolAttributeModifiers(double attackDamage, double attackSpeed, double extraAttackRange) {
-        AttributeModifiersComponent.Builder attributeBuilder = AttributeModifiersComponent.builder()
-                .add(
-                        EntityAttributes.ATTACK_DAMAGE,
-                        new EntityAttributeModifier(Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, attackDamage - Combat.PLAYER_BASE_ATTACK_DAMAGE, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-                )
-                .add(
-                        EntityAttributes.ATTACK_SPEED,
-                        new EntityAttributeModifier(Item.BASE_ATTACK_SPEED_MODIFIER_ID, attackSpeed - Combat.PLAYER_BASE_ATTACK_SPEED, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-                );
-        if(extraAttackRange != 0.0) {
-            attributeBuilder.add(
-                    EntityAttributes.ENTITY_INTERACTION_RANGE,
-                    new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, extraAttackRange, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-            );
-        }
-        return attributeBuilder.build();
+                .component(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(material.attackDamageBonus(), soundBlocking, SoundEvents.ITEM_SHIELD_BREAK)));
     }
 }
