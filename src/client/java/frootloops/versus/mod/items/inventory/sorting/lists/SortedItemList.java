@@ -59,7 +59,7 @@ public abstract class SortedItemList {
                 slots.add(startIndex, slot);
                 return startIndex;
             }
-            for (int i = endIndex - 1; i >= startIndex; i--) {
+            for (int i = startIndex; i <= endIndex; i++) {
                 if (ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, !doSortedInsert, doSortedInsert)) {
                     slots.add(i, slot);
                     return i;
