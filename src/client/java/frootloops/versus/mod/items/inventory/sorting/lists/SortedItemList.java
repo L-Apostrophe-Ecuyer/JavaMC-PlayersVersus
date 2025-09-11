@@ -81,6 +81,14 @@ public abstract class SortedItemList {
         for(int i = 0; i < count; i++) other.append(this.removeFirst());
     }
 
+    public void appendListToEnd(SortedItemList other) {
+        this.slots.addAll(other.takeAll());
+    }
+
+    public void addListToStart(SortedItemList other) {
+        this.slots.addAll(0, other.takeAll());
+    }
+
     public ItemSlot getSlot(int index) {
         return this.slots.get(index);
     }

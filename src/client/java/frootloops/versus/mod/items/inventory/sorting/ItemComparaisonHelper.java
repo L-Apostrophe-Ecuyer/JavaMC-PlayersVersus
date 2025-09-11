@@ -30,6 +30,8 @@ public abstract class ItemComparaisonHelper {
     public static boolean shouldGoBefore(ItemSlot slot, ItemSlot slotToCompareTo, boolean skipNonTools, boolean skipBlocks, boolean compareNames) {
         if(slotToCompareTo == null) return true;
         if(slot == null) return false;
+        if(slot.itemType() != slotToCompareTo.itemType() && slot.itemType() == ItemType.TRASH) return false;
+        if(slot.itemType() != slotToCompareTo.itemType() && slotToCompareTo.itemType() == ItemType.TRASH) return true;
         if(ItemStack.areItemsAndComponentsEqual(slot.stack(), slotToCompareTo.stack())) return slot.stack().getCount() > slotToCompareTo.stack().getCount();
         if(skipNonTools) {
             if(slot.isToolOrWeapon() && !slotToCompareTo.isToolOrWeapon()) return true;

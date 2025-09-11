@@ -78,6 +78,10 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
     public boolean shouldAlwaysGoBefore(ItemSlot other, boolean proritizeArmor) {
         if(other == null) return false;
+        if(this.itemType != other.itemType) {
+            if(this.itemType == ItemType.TRASH) return false;
+            if(other.itemType == ItemType.TRASH) return true;
+        }
         if(this.isSameItem(other)) return this.stack.getCount() > other.stack.getCount();
         if(this.isToolOrWeapon()) {
             if(!other.isToolOrWeapon()) return true;

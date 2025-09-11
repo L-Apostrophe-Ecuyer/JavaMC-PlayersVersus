@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items.inventory.sorting.groups;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.items.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items.inventory.sorting.ItemType;
 import frootloops.versus.mod.items.inventory.sorting.lists.SortedItemList;
@@ -100,10 +101,13 @@ public class SimpleSortingGroup extends SortingGroup {
         if(this.size() == 0 && DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Returned nothing, thought it had size zero.");
         if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
         if(this.size() == 0) return new LinkedList<>();
-        for(int i = 1; i < sortedItemLists.length; i++) {
-            sortedItemLists[i].giveFirstSlotsTo(Integer.MAX_VALUE, sortedItemLists[0]);
+        for(int i = 1; i < sortedItemLists.length; i++) sortedItemLists[0].appendListToEnd(sortedItemLists[i]);
+        if(this.miscItems.size() > 0) {
+            if(sortedItemLists[0].size() > 0 && ItemComparaisonHelper.shouldGoBefore(miscItems.getSlot(0), sortedItemLists[0].getSlot(0), false, true, false)) {
+                sortedItemLists[0].addListToStart(miscItems);
+            }
+            else sortedItemLists[0].appendListToEnd(miscItems);
         }
-        if(this.miscItems.size() > 0) miscItems.giveFirstSlotsTo(Integer.MAX_VALUE, sortedItemLists[0]);
         if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + sortedItemLists[0].size() + " items: " + sortedItemLists[0]);
         this.numItems = 0;
         return sortedItemLists[0].takeAll();
