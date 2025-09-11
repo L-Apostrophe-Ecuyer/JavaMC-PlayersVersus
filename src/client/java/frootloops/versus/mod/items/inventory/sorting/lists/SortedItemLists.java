@@ -19,7 +19,7 @@ public class SortedItemLists {
     /** MINEABLE GOODIES ------------------------------------------------------------ */
     public static final SortedMappedItemList ORE_BLOCKS = new SortedMappedItemList(ItemSortingMaps.ITEMS_ORE_BLOCKS, ItemType.MISC);
     public static final SortedMappedItemList REFINED_MINERALS = new SortedMappedItemList(ItemSortingMaps.ITEMS_REFINED_MINERALS, ItemType.MISC);
-    public static final SortedMappedItemList REDSTONE_RAW = new SortedMappedItemList(ItemSortingMaps.ITEMS_REDSTONE_COMPONENTS, ItemType.MISC);
+    public static final SortedMappedItemList REDSTONE_RAW = new SortedMappedItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_REDSTONE, ItemType.MISC);
     public static final SortedBlockItemList GOLD_ITEMS_AND_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_GOLD, ItemType.MISC);
     public static final SortedBlockItemList IRON_ITEMS_AND_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_IRON, ItemType.MISC);
     public static final SortedBlockItemList COPPER_ITEMS_AND_BLOCKS = new SortedBlockItemList(BlockSoundGroup.COPPER, ItemSortingMaps.ITEMS_AND_BLOCKS_OF_COPPER);

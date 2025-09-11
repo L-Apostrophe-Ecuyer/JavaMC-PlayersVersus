@@ -196,7 +196,7 @@ public class SortedInventoryOutput {
         }
 
         // Try sorting each individual row as well:
-        if(column > 0 && slot.itemType() != ItemType.MISC && slot.itemType() != ItemType.TRASH) {
+        if(column > 0 && (this.get (currentRow,  column - 1).isVerySimilarTo(slot, false) || (slot.itemType() != ItemType.MISC && slot.itemType() != ItemType.TRASH))) {
             if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this tool: " + slot);
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
