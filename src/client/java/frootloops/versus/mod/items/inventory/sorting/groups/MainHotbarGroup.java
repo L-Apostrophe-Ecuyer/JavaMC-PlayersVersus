@@ -141,8 +141,8 @@ public class MainHotbarGroup extends SortingGroup {
                 }
             }
             else {
-                this.miscItems.add(slot);
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items");
+                int pos = this.miscItems.add(slot);
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items at pos " + pos + ": " + miscItems);
             }
         }
     }
@@ -288,7 +288,10 @@ public class MainHotbarGroup extends SortingGroup {
 
     @Override
     protected void addSlotsToMisc(LinkedList<ItemSlot> newSlots) {
-        for (ItemSlot slot : newSlots) miscItems.add(slot);
+        for (ItemSlot slot : newSlots) {
+            int pos = miscItems.add(slot);
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s misc items at pos " + pos + ": " + miscItems);
+        }
     }
 
 
@@ -340,6 +343,7 @@ public class MainHotbarGroup extends SortingGroup {
         }
         return slotsTaken;
     }
+
     @Override
     public LinkedList<ItemSlot> takeAllItems() {
         if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems()");
