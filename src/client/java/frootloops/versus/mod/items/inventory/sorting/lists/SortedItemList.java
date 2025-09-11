@@ -37,6 +37,10 @@ public abstract class SortedItemList {
         return slots.size();
     }
 
+    public void addAt(ItemSlot slot, int index) {
+        slots.add(index, slot);
+    }
+
     public int addBetween(ItemSlot slot, int startIndex, int endIndex) {
         return this.addBetween(slot, startIndex, endIndex, true);
     }
@@ -56,7 +60,7 @@ public abstract class SortedItemList {
                 return startIndex;
             }
             for (int i = endIndex - 1; i >= startIndex; i--) {
-                if (ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, !doSortedInsert)) {
+                if (ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, !doSortedInsert, doSortedInsert)) {
                     slots.add(i, slot);
                     return i;
                 }

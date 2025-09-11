@@ -45,14 +45,21 @@ public abstract class SortingGroup implements Comparable<SortingGroup>{
 
     protected void addSlotsToMisc(LinkedList<ItemSlot> newSlots) {
         if(newSlots.size() < 1) return;
-        int indexMiscEnd;
-        for(indexMiscEnd = miscItems.size() - 1; indexMiscEnd >= 0; indexMiscEnd--) {
-            if(ItemComparaisonHelper.shouldGoBefore(miscItems.getSlot(indexMiscEnd), newSlots.getFirst())) break;
-        }
-        int indexMiscStart = indexMiscEnd;
         for (ItemSlot slot : newSlots) {
-            miscItems.addBetween(slot, indexMiscStart, indexMiscEnd, false);
-            indexMiscEnd++;
+            if(slot.isToolOrWeapon()) {
+                miscItems.add(slot);
+                newSlots.remove(slot);
+            }
+        }
+        if(newSlots.size() < 1) return;
+        int indexMisc = 0;
+        for(int i = miscItems.size() - 1; i >= 0; i--) {
+            indexMisc = i;
+            if(ItemComparaisonHelper.shouldGoBefore(miscItems.getSlot(i), newSlots.getFirst(), false, false, false)) break;
+        }
+        for (ItemSlot slot : newSlots) {
+            miscItems.addAt(slot, indexMisc);
+            indexMisc++;
         }
     }
 

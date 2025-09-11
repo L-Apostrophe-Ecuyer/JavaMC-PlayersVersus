@@ -303,9 +303,24 @@ public class SortingHelper {
             RARE_MINERALS_GROUP.recalculateActualSize();
         }
         if (GOODIES_GROUP.size() > 0 && RARE_MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(GOODIES_GROUP, RARE_MINERALS_GROUP);
-        if (RARE_MINERALS_GROUP.size() > 0 && COMMON_MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP);
-        if (BREWING_GROUP.size() > 0 && CONSUMABLES_GROUP.size() > 0) tryCombiningTwoGroups(CONSUMABLES_GROUP, BREWING_GROUP);
-        if (BREWING_GROUP.size() > 0 && WORLD_GROUP.size() > 0) tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP);
+        if (RARE_MINERALS_GROUP.size() > 0 && COMMON_MINERALS_GROUP.size() > 0) {
+            if(!tryCombiningTwoGroups(RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP) && RARE_MINERALS_GROUP.size() + COMMON_MINERALS_GROUP.size() <= 9) RARE_MINERALS_GROUP.addSlots(COMMON_MINERALS_GROUP.takeAllItems());
+        }
+        if (BREWING_GROUP.size() > 0 && CONSUMABLES_GROUP.size() > 0) {
+            if(!tryCombiningTwoGroups(CONSUMABLES_GROUP, BREWING_GROUP)) {
+                int numPotions = SortedItemLists.POTION_ITEMS.size();
+                int numConcentrates = SortedItemLists.CONCENTRATES.size();
+                if(numPotions > 0 && numConcentrates > 0 && numPotions + numConcentrates > 4) {
+                    for (ItemSlot slot : SortedItemLists.CONCENTRATES.takeAll()) SortedItemLists.POTION_ITEMS.append(slot);
+                    CONSUMABLES_GROUP.recalculateActualSize();
+                    BREWING_GROUP.recalculateActualSize();
+                    CONSUMABLES_GROUP.addSlots(BREWING_GROUP.takeAllItems());
+                }
+            }
+        }
+        if (BREWING_GROUP.size() > 0 && WORLD_GROUP.size() > 0) {
+            if(!tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP) && BREWING_GROUP.size() <= 2 && WORLD_GROUP.size() <= 7) WORLD_GROUP.addSlots(BREWING_GROUP.takeAllItems());
+        }
 
         // Step 2: Clean up tool groups and merge them:
         if (isPlayerInventory) {
@@ -364,6 +379,39 @@ public class SortingHelper {
         if(size == 9) return;
         if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] ---- CLEANING HOTBAR -----");
 
+        // If no weapon, try adding an axe:
+        if(!MAIN_HOTBAR.hasCombatItems() && !MAIN_HOTBAR.hasAxe() && AXE_GROUP.getNumTools() > 0) {
+            if(AXE_GROUP.hasOnlyTools()) {
+                MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
+                if(tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
+            }
+            else if(AXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
+        }
+        if(MAIN_HOTBAR.size() >= 9) return;
+
+        // If still some space, and still no pickaxe, try adding one, and try combining groups:
+        if(!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.getNumTools() > 0) {
+            if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
+            else if(PICKAXE_GROUP.hasOnlyTools()) {
+                MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
+                if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
+            }
+            else if(PICKAXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
+            else if(PICKAXE_GROUP.size() + MAIN_HOTBAR.size() < 9 && (MAIN_HOTBAR.hasCombatItems() || COMBAT_GROUP.size() == 0)) MAIN_HOTBAR.addSlots(PICKAXE_GROUP.takeAllItems());
+        }
+        if(MAIN_HOTBAR.size() >= 9) return;
+
+        // If still some space, and still no axe, try adding one, and try combining groups:
+        if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.getNumTools() > 0 && tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
+
+        // If in deep dark:
+        if(isInDeepDark) {
+            giveExtraToolsFromAndTo(HOE_GROUP, MAIN_HOTBAR);
+            if(MAIN_HOTBAR.size() >= 9) return;
+            giveExtraToolsFromAndTo(SHEARS_GROUP, MAIN_HOTBAR);
+            if(MAIN_HOTBAR.size() >= 9) return;
+        }
+
         // Try adding combat items to hotbar:
         if(MAIN_HOTBAR.size() < 9) giveExtraToolsFromAndTo(COMBAT_GROUP, MAIN_HOTBAR);
         if(tryCombiningTwoGroups(MAIN_HOTBAR, CONSUMABLES_GROUP)) if(MAIN_HOTBAR.size() >= 9) return;
@@ -373,32 +421,6 @@ public class SortingHelper {
             if(CONSUMABLES_GROUP.size() > 0 && MAIN_HOTBAR.size() + CONSUMABLES_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(CONSUMABLES_GROUP.takeAllItems());
         }
         if(MAIN_HOTBAR.size() >= 9) return;
-
-        // If some space, and still no weapon, try adding an axe:
-        if(!MAIN_HOTBAR.hasCombatItems() && !MAIN_HOTBAR.hasAxe() && AXE_GROUP.getNumTools() > 0) {
-            if(AXE_GROUP.hasOnlyTools()) {
-                MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
-                if(tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
-            }
-            else if(AXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
-        }
-
-        // If still some space, and still no pickaxe, try adding one:
-        if(!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.getNumTools() > 0) {
-            if(PICKAXE_GROUP.hasOnlyTools()) {
-                MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
-                if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
-            }
-            else if(PICKAXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
-        }
-
-        // If in deep dark:
-        if(isInDeepDark) {
-            giveExtraToolsFromAndTo(HOE_GROUP, MAIN_HOTBAR);
-            if(MAIN_HOTBAR.size() >= 9) return;
-            giveExtraToolsFromAndTo(SHEARS_GROUP, MAIN_HOTBAR);
-            if(MAIN_HOTBAR.size() >= 9) return;
-        }
 
         // If still space, try smartly adding tools and blocks to hotbar:
         if(!MAIN_HOTBAR.hasBuildingItems()) {
@@ -552,7 +574,7 @@ public class SortingHelper {
     public static void giveExtraToolsFromAndTo(ToolSortingGroup groupToCleanUp, SortingGroup firstChoice, SortingGroup secondChoice) {
         if(groupToCleanUp.canGiveawayTools()) {
             if(firstChoice != null && firstChoice.size() > 0)
-                firstChoice.addSlot(groupToCleanUp.takeWorstTool());
+                firstChoice.addSlot(firstChoice == MAIN_HOTBAR ? groupToCleanUp.takeBestTool() : groupToCleanUp.takeWorstTool());
 
             if(secondChoice != null && groupToCleanUp.getNumTools() > 1 && secondChoice.size() > 0)
                 secondChoice.addSlot(groupToCleanUp.takeWorstTool());

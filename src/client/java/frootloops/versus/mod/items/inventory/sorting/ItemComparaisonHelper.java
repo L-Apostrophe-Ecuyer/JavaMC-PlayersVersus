@@ -19,19 +19,15 @@ import net.minecraft.util.math.BlockPos;
 
 public abstract class ItemComparaisonHelper {
 
-    public static boolean shouldGoBefore(ItemStack stack, ItemStack stackToCompareTo) {
-        return shouldGoBefore(new ItemSlot(0, stack, getItemTypeOf(stack)), new ItemSlot(0, stackToCompareTo, getItemTypeOf(stackToCompareTo)), false, false);
-    }
-
     public static boolean shouldGoBefore(ItemSlot slot, ItemSlot slotToCompareTo) {
-        return shouldGoBefore(slot, slotToCompareTo, false, false);
+        return shouldGoBefore(slot, slotToCompareTo, false, false, false);
     }
 
     public static boolean shouldGoBefore(ItemSlot slot, ItemSlot slotToCompareTo, boolean skipNonTools) {
-        return shouldGoBefore(slot, slotToCompareTo, skipNonTools, skipNonTools);
+        return shouldGoBefore(slot, slotToCompareTo, skipNonTools, skipNonTools, false);
     }
 
-    public static boolean shouldGoBefore(ItemSlot slot, ItemSlot slotToCompareTo, boolean skipNonTools, boolean skipBlocks) {
+    public static boolean shouldGoBefore(ItemSlot slot, ItemSlot slotToCompareTo, boolean skipNonTools, boolean skipBlocks, boolean compareNames) {
         if(slotToCompareTo == null) return true;
         if(slot == null) return false;
         if(ItemStack.areItemsAndComponentsEqual(slot.stack(), slotToCompareTo.stack())) return slot.stack().getCount() > slotToCompareTo.stack().getCount();
@@ -119,7 +115,7 @@ public abstract class ItemComparaisonHelper {
             if(slot.stack().isOf(Items.WATER_BUCKET)) return true;
         }
 
-        // Everything else: alphabetical
+        if(!compareNames) return false;
         return slot.toString().compareTo(slotToCompareTo.toString()) < 1;
     }
 

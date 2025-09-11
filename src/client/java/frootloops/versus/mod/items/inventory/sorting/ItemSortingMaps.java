@@ -108,11 +108,15 @@ public abstract class ItemSortingMaps {
     public static final Map<Item, Integer> ITEMS_TRUE_TRASH = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_BREWING_MISC.put(Items.LEATHER, index++);
-        ITEMS_BREWING_MISC.put(Items.RABBIT_HIDE, index++);
-        ITEMS_BREWING_MISC.put(Items.INK_SAC, index++);
-        ITEMS_BREWING_MISC.put(Items.GLOW_INK_SAC, index++);
-        ITEMS_BREWING_MISC.put(Items.ROTTEN_FLESH, index++);
+        ITEMS_TRUE_TRASH.put(Items.GLASS_BOTTLE, index++);
+        ITEMS_TRUE_TRASH.put(Items.LEATHER, index++);
+        ITEMS_TRUE_TRASH.put(Items.RABBIT_HIDE, index++);
+        ITEMS_TRUE_TRASH.put(Items.BOWL, index++);
+        ITEMS_TRUE_TRASH.put(Items.STICK, index++);
+        ITEMS_TRUE_TRASH.put(Items.LEAF_LITTER, index++);
+        ITEMS_TRUE_TRASH.put(Items.INK_SAC, index++);
+        ITEMS_TRUE_TRASH.put(Items.GLOW_INK_SAC, index++);
+        ITEMS_TRUE_TRASH.put(Items.ROTTEN_FLESH, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_FISHING = new HashMap<>();
