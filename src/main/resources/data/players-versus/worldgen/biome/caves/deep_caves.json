@@ -16,8 +16,8 @@
     "music": [
       {
         "data": {
-          "max_delay": 18000,
-          "min_delay": 10000,
+          "max_delay": 16000,
+          "min_delay": 8000,
           "replace_current_music": true,
           "sound": "players-versus:music.overworld.deep_caves"
         },
