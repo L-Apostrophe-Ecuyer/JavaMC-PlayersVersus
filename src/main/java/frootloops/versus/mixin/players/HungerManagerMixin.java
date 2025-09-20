@@ -49,7 +49,7 @@ public class HungerManagerMixin {
 
         // Hunger effect is more punishing:
         boolean hasHungerEffect = player.hasStatusEffect(StatusEffects.HUNGER);
-        if (hasHungerEffect) this.exhaustion += foodLevel > 0 ? 0.025f : 0.005f;
+        if (hasHungerEffect) this.exhaustion += foodLevel > 0 ? 0.03125f : 0.00390625f;
 
         // Food exhaustion:
         this.doHungerExhaustion(player, hasHungerEffect);
