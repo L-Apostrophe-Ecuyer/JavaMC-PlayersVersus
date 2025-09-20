@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 import static frootloops.versus.mod.items_and_effects.inventory.sorting.groups.SortingGroups.*;
 
 public class SortingHelper {
-    public static final boolean DEBUG_SORTING_GROUPS = false;
-    public static final boolean DEBUG_SORTING_MERGE = false;
-    public static final boolean DEBUG_SORTING_OUTPUT = false;
+    public static final boolean DEBUG_SORTING_GROUPS = true;
+    public static final boolean DEBUG_SORTING_MERGE = true;
+    public static final boolean DEBUG_SORTING_OUTPUT = true;
 
     private static void printGroups(String debugMsg) {
         if(MAIN_HOTBAR.size() > 0) debugMsg += MAIN_HOTBAR.toString();
@@ -88,10 +88,10 @@ public class SortingHelper {
         // If each group can have their own row, then best case scenario:
         if(orderedGroups.size() <= numRows) {
             int actualNumRowsInGroups = orderedGroups.size() + orderedGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum();
-            VersusMod.MOD_LOGGER.warn("              -> Actual number of rows in groups is: " + actualNumRowsInGroups);
-            VersusMod.MOD_LOGGER.warn("              -> Number of rows in inventory is: " + numRows);
+            if(DEBUG_SORTING_MERGE || DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("              -> Actual number of rows in groups is: " + actualNumRowsInGroups);
+            if(DEBUG_SORTING_MERGE || DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("              -> Number of rows in inventory is: " + numRows);
             if(actualNumRowsInGroups <= numRows) {
-                VersusMod.MOD_LOGGER.warn("              -> TRIVIAL PLACEMENT!! Placing each group into a row :D");
+                if(DEBUG_SORTING_MERGE || DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("              -> TRIVIAL PLACEMENT!! Placing each group into a row :D");
                 for (SortingGroup group : orderedGroups) {
                     inventoryOutput.goToNextAvailableRow();
                     inventoryOutput.addAll(group.takeAllItems(), true, false);
@@ -238,37 +238,36 @@ public class SortingHelper {
             String output = nonEmptyGroups.stream().map(g -> g.GROUP_NAME + " (Size: " + g.size() + ")").collect(Collectors.joining(", "));
             VersusMod.MOD_LOGGER.warn("[ INVENTORY SORTING ] Ideal number of rows is: " + numRowsIdeal + ". Mon-empty groups: " + output);
         }
-        if(nonEmptyGroups.size() <= numRowsIdeal) {
-            if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                      Returning!");
-            return nonEmptyGroups.reversed();
-        }
 
-        // Step 3: Loop over each group. Try to find combinations of group sizes such that they both fit together
+        // Step 3: Optional. If no simple fit, Loop over each group. Try to find combinations of group sizes such that they both fit together
         LinkedList<SortingGroup> orderedGroups = new LinkedList<>();
-        while(nonEmptyGroups.size() > 0 && (nonEmptyGroups.size() >= numRows || nonEmptyGroups.size() > numRowsIdeal)) {
+        if(nonEmptyGroups.size() <= numRowsIdeal) {
+            while (nonEmptyGroups.size() > 0 && (nonEmptyGroups.size() >= numRows || nonEmptyGroups.size() > numRowsIdeal)) {
 
-            // Pop the next group:
-            SortingGroup groupToPlace = nonEmptyGroups.removeFirst();
-            orderedGroups.add(groupToPlace);
-            if(groupToPlace.size() > 9) numRows--;
-            if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                   -> Next group to place: " + groupToPlace.GROUP_NAME + " of size " + groupToPlace.size() + " - (" + numRows + " rows and " + numEmptySlots + " left)");
+                // Pop the next group:
+                SortingGroup groupToPlace = nonEmptyGroups.removeFirst();
+                orderedGroups.add(groupToPlace);
+                if (groupToPlace.size() > 9) numRows--;
+                if (DEBUG_SORTING_MERGE)
+                    VersusMod.MOD_LOGGER.warn("                   -> Next group to place: " + groupToPlace.GROUP_NAME + " of size " + groupToPlace.size() + " - (" + numRows + " rows and " + numEmptySlots + " left)");
 
-            // Look for complimentary group. If the next one fits, combine!  (Note: nonEmptyGroups is sorted in asc order)
-            while(nonEmptyGroups.size() > 0 && groupToPlace.size() < 9) {
-                SortingGroup otherGroup = nonEmptyGroups.getFirst();
-                if((groupToPlace.size() % 9) + otherGroup.size() <= 9) {
-                    nonEmptyGroups.removeFirst();
-                    groupToPlace.addSlots(otherGroup.takeAllItems());
+                // Look for complimentary group. If the next one fits, combine!  (Note: nonEmptyGroups is sorted in asc order)
+                while (nonEmptyGroups.size() > 0 && groupToPlace.size() < 9) {
+                    SortingGroup otherGroup = nonEmptyGroups.getFirst();
+                    if ((groupToPlace.size() % 9) + otherGroup.size() <= 9) {
+                        nonEmptyGroups.removeFirst();
+                        groupToPlace.addSlots(otherGroup.takeAllItems());
+                    } else {
+                        break;
+                    }
                 }
-                else {
-                    break;
-                }
+
+                // Consider this being a full row:
+                if (DEBUG_SORTING_MERGE)
+                    VersusMod.MOD_LOGGER.warn("                      Skipping next row for " + groupToPlace.GROUP_NAME + " of size " + groupToPlace.size() + " - (" + numRows + " rows and " + numEmptySlots + " left)");
+                numEmptySlots -= 9 - groupToPlace.size();
+                numRows--;
             }
-
-            // Consider this being a full row:
-            if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                      Skipping next row for " + groupToPlace.GROUP_NAME + " of size " + groupToPlace.size() + " - (" + numRows + " rows and " + numEmptySlots + " left)");
-            numEmptySlots -= 9 - groupToPlace.size();
-            numRows--;
         }
         orderedGroups.addAll(0, nonEmptyGroups.reversed());
 
@@ -533,7 +532,7 @@ public class SortingHelper {
         boolean hasOnlyBlocks = groupToCleanUp.getNumTools() == 0 && groupToCleanUp.size() > 0 && groupToCleanUp.size() % 9 != 0 && (groupToCleanUp.size() < 9 || groupToCleanUp.size() % 9 <= 2);
         boolean hasOnlyTools = groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() % 9 != 0 && (groupToCleanUp.size() < 6 || groupToCleanUp.size() % 9 <= 2);
         if(groupToCleanUp.size() < ((hasOnlyBlocks || hasOnlyTools) ? 6 : 4)) {
-            VersusMod.MOD_LOGGER.warn("                   -> " + groupToCleanUp.GROUP_NAME + " - Cleaning up tool group!");
+            if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                   -> " + groupToCleanUp.GROUP_NAME + " - Cleaning up tool group!");
 
             if(firstChoice != null && firstChoice.size() > 0 && firstChoice.getNumTools() > 0) {
                 if (groupToCleanUp != null && tryCombiningTwoGroups(firstChoice, groupToCleanUp)) return;
@@ -564,7 +563,7 @@ public class SortingHelper {
                 if(tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
 
             if(hasOnlyBlocks) {
-                VersusMod.MOD_LOGGER.warn("                      Found no good match, but the building and random items of " + groupToCleanUp.GROUP_NAME + " will be given to last choice (or random)");
+                if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                      Found no good match, but the building and random items of " + groupToCleanUp.GROUP_NAME + " will be given to last choice (or random)");
                 if (lastChoice != null && groupToCleanUp.size() > 0 && lastChoice.size() > 0) lastChoice.addSlots(groupToCleanUp.takeAllItems());
                 else RANDOM_GROUP.addSlots(groupToCleanUp.takeAllItems());
             }

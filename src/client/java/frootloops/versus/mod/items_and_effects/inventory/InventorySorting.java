@@ -24,7 +24,7 @@ import java.util.LinkedList;
 @Environment(EnvType.CLIENT)
 public class InventorySorting {
 
-    private static final boolean DEBUG_ITEM_SWITICHING = false;
+    private static final boolean DEBUG_ITEM_SWITICHING = true;
 
     public static final ButtonTextures TEXTURE_HOTBAR_SWAP_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/hotbar_swap_down"), Identifier.of("players-versus", "container/hotbar_swap_down_highlighted"));
     public static final ButtonTextures TEXTURE_INVENTORY_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory"), Identifier.of("players-versus", "container/sort_inventory_highlighted"));
@@ -32,7 +32,7 @@ public class InventorySorting {
     public static final ButtonTextures TEXTURE_CHEST_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_chest"), Identifier.of("players-versus", "container/sort_chest_highlighted"));
     public static final ButtonTextures TEXTURE_SHULKER_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_shulker"), Identifier.of("players-versus", "container/sort_shulker_highlighted"));
 
-    public static enum InventoryToSort {
+    public enum InventoryToSort {
         SURVIVAL_INVENTORY,
         CREATIVE_INVENTORY,
         INVENTORY_WHILE_CHEST_OPEN,
