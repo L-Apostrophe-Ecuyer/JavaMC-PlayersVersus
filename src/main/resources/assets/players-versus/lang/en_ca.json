@@ -3,6 +3,22 @@
   "subtitles.players-versus.rail_turning_sound": "Minecart makes a sharp turn",
   "subtitles.players-versus.sword_blocking": "Sword blocks attack",
 
+  "players-versus:music/menu/c418_battlemode1": "C418 - Battlemode 1",
+  "players-versus:music/menu/c418_battlemode4": "C418 - Battlemode 4",
+  "players-versus:music/menu/c418_chris": "C418 - Chris",
+  "players-versus:music/menu/c418_dog": "C418 - Dog",
+  "players-versus:music/caves/soulyoutube_empty_rooms": "Soul (YT) - Empty Rooms",
+  "players-versus:music/caves/fizz_short_johanjohnson": "Johan Johnson - Fizz",
+  "players-versus:music/caves/kevinpenkin_abyssofthesea": "Kevin Penkin - Abyss of the Sea",
+  "players-versus:music/caves/c418_ki": "C418 - Ki",
+  "players-versus:music/caves/cave_ambience_1": "Cave Ambience",
+  "players-versus:music/caves/cave_ambience_2": "Cave Ambience",
+  "players-versus:music/caves/cave_ambience_3": "Cave Ambience",
+  "players-versus:music/caves/cave_ambience_4": "Cave Ambience",
+  "players-versus:music/caves/deep_dark_ambience_1": "Deep Dark Ambience",
+  "players-versus:music/caves/deep_dark_ambience_2": "Deep Dark Ambience",
+  "players-versus:music/caves/deep_dark_ambience_3": "Deep Dark Ambience",
+
   "attribute.name.critical_attack_damage": "Critical Attack Damage",
   "attribute.name.sprint_attack_damage": "Sprint Attack Damage",
 
