@@ -1,6 +1,7 @@
 {
 
   "subtitles.players-versus.rail_turning_sound": "Minecart makes a sharp turn",
+  "subtitles.players-versus.sword_blocking": "Sword blocks attack",
 
   "attribute.name.critical_attack_damage": "Critical Attack Damage",
   "attribute.name.sprint_attack_damage": "Sprint Attack Damage",
@@ -70,7 +71,7 @@
   "block.players-versus.brown_mud_brick_slab": "Mud Brick Slab",
   "block.players-versus.brown_mud_brick_stairs": "Mud Brick Stairs",
   "block.players-versus.brown_mud_brick_wall": "Mud Brick Wall",
-  "item.players-versus.brown_clay_ball" : "Brown Clay Ball",
+  "block.players-versus.brown_clay_ball" : "Brown Clay Ball",
   "block.minecraft.packed_mud": "Brown Clay",
   "block.minecraft.mud_bricks": "Brown Clay Bricks",
   "block.minecraft.mud_brick_slab": "Brown Clay Brick Slab",
@@ -182,6 +183,7 @@
   "item.minecraft.potion.effect.decay_strong": "Potion of Decay",
   "item.minecraft.potion.effect.fire_resistance_strong": "Potion of Fire Resistance",
 
+  "item.minecraft.tipped_arrow.effect.haunting": "Arrow of Untimely Death",
   "item.minecraft.tipped_arrow.effect.largeness": "Arrow of Big",
   "item.minecraft.tipped_arrow.effect.largeness_long": "Arrow of Big",
   "item.minecraft.tipped_arrow.effect.largeness_strong": "Arrow of Big",
@@ -211,6 +213,7 @@
   "item.minecraft.tipped_arrow.effect.decay_strong": "Arrow of Decay",
   "item.minecraft.tipped_arrow.effect.fire_resistance_strong": "Arrow of Fire Resistance",
 
+  "item.minecraft.splash_potion.effect.haunting": "Splash Potion of Untimely Death",
   "item.minecraft.splash_potion.effect.largeness": "Splash Potion of Big",
   "item.minecraft.splash_potion.effect.largeness_long": "Splash Potion of Big",
   "item.minecraft.splash_potion.effect.largeness_strong": "Splash Potion of Big",
@@ -240,6 +243,7 @@
   "item.minecraft.splash_potion.effect.decay_strong": "Splash Potion of Decay",
   "item.minecraft.splash_potion.effect.fire_resistance_strong": "Splash Potion of Fire Resistance",
 
+  "item.minecraft.lingering_potion.effect.haunting": "Lingering Potion of Untimely Death",
   "item.minecraft.lingering_potion.effect.largeness": "Lingering Potion of Big",
   "item.minecraft.lingering_potion.effect.largeness_long": "Lingering Potion of Big",
   "item.minecraft.lingering_potion.effect.largeness_strong": "Lingering Potion of Big",
@@ -337,7 +341,7 @@
   "block.players-versus.smallness_bile" : "Bitter Bile",
   "block.players-versus.invisibility_bile" : "Ethereal Bile",
   "block.players-versus.glowing_bile" : "Shiny Bile",
-  "block.players-versus.strength_bile"  : "Fiery bILE",
+  "block.players-versus.strength_bile"  : "Fiery Bile",
   "block.players-versus.weakness_bile" : "Feeble Bile",
   "block.players-versus.fire_bile" : "Blistering Bile",
   "block.players-versus.wind_bile" : "Airy Bile",

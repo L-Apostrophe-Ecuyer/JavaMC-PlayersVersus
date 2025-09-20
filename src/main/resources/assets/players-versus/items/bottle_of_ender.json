@@ -1,6 +1,6 @@
 {
 "model": {
     "type": "minecraft:model",
-    "model": "players-versus:item/ender_bottle"
+    "model": "players-versus:item/bottle_of_ender"
   }
 }

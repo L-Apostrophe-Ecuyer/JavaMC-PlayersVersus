@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items_and_effects;
+package frootloops.versus.mod.items_and_effects.brewing;
 
 
 import frootloops.versus.mod.items_and_effects.brewing.effects.*;
@@ -19,9 +19,9 @@ public abstract class CustomStatusEffects {
     public static RegistryEntry<StatusEffect> BUOYANCY;
 
     public static void registerCustomStatusEffects() {
+        VULNERABILITY = registerCustomEffect("vulnerability", new VulnerabilityStatusEffect("vulnerability"));
         LARGENESS = registerCustomEffect("largeness", new LargenessStatusEffect("largeness"));
         SMALLNESS = registerCustomEffect("smallness", new SmallnessStatusEffect("smallness"));
-        VULNERABILITY = registerCustomEffect("vulnerability", new VulnerabilityStatusEffect("vulnerability"));
         BUOYANCY = registerCustomEffect("buoyancy", new BuoyancyStatusEffect("buoyancy"));
         HAUNTING = registerCustomEffect("haunting", new HauntingStatusEffect());
     }

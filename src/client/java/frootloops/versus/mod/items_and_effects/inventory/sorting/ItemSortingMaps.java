@@ -80,7 +80,6 @@ public abstract class ItemSortingMaps {
     static {
         int index = 1;
         ITEMS_BREWING_MISC.put(Items.ECHO_SHARD, index++);
-        ITEMS_BREWING_MISC.put(CustomBrewingItems.BOTTLE_OF_ENDER, index++);
         ITEMS_BREWING_MISC.put(Items.DRAGON_BREATH, index++);
         ITEMS_BREWING_MISC.put(Items.POPPED_CHORUS_FRUIT, index++);
         ITEMS_BREWING_MISC.put(Items.SHULKER_SHELL, index++);

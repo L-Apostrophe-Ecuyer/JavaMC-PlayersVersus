@@ -2,7 +2,6 @@ package frootloops.versus.mod.items_and_effects.brewing;
 
 
 import frootloops.versus.mod.items_and_effects.CustomBrewingItems;
-import frootloops.versus.mod.items_and_effects.CustomPotions;
 import net.minecraft.item.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
@@ -15,8 +14,11 @@ public abstract class BrewingSystem {
 
     private record RelatedPotions(RegistryEntry<Potion> strongPotion, RegistryEntry<Potion> longPotion,  RegistryEntry<Potion> invertedPotion) {}
     public static void setBrewingRecipeRegistry(BrewingRecipeRegistry.Builder builder) {
+
+        // Register potions:
         CustomPotions.registerCustomPotions();
 
+        // Generate recipes:
         HashMap<RegistryEntry<Potion>, RelatedPotions> brewablePotionTypes = new HashMap<>() {{
 
             put(Potions.HEALING, new RelatedPotions(Potions.STRONG_HEALING, Potions.REGENERATION, Potions.HARMING));
@@ -77,11 +79,7 @@ public abstract class BrewingSystem {
         builder.registerItemRecipe(Items.LINGERING_POTION, Items.GUNPOWDER, Items.SPLASH_POTION);
         builder.registerItemRecipe(Items.SPLASH_POTION, Items.REDSTONE, Items.LINGERING_POTION);
 
-        builder.registerItemRecipe(Items.POTION, CustomBrewingItems.CONCENTRATE_OF_DEATH, CustomBrewingItems.BOTTLE_OF_ENDER);
-        builder.registerItemRecipe(CustomBrewingItems.BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER);
-        builder.registerItemRecipe(CustomBrewingItems.BOTTLE_OF_ENDER, Items.REDSTONE, CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER);
-        builder.registerItemRecipe(CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER, Items.GUNPOWDER, CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER);
-        builder.registerItemRecipe(CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER, Items.REDSTONE, CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER);
+        registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_DEATH, CustomPotions.HAUNTING);
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_HEALTH, Potions.HEALING);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_HARM, Potions.HARMING);

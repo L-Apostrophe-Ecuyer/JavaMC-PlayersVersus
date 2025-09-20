@@ -1,0 +1,22 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "predicate": "minecraft:potion_contents",
+    "value": "players-versus:haunting",
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/lingering_potion",
+      "tints": [
+        {
+          "type": "minecraft:potion",
+          "default": -13083194
+        }
+      ]
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "players-versus:item/lingering_bottle_of_ender"
+    },
+    "property": "minecraft:component"
+  }
+}

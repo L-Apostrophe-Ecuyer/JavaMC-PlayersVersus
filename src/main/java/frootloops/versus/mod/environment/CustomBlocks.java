@@ -3,7 +3,7 @@ package frootloops.versus.mod.environment;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.*;
 import frootloops.versus.mod.environment.blocks.clays.*;
-import frootloops.versus.mod.items_and_effects.CustomStatusEffects;
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.brewing.effects.BuoyancyStatusEffect;
 import frootloops.versus.mod.items_and_effects.brewing.effects.LargenessStatusEffect;
 import frootloops.versus.mod.items_and_effects.brewing.effects.SmallnessStatusEffect;

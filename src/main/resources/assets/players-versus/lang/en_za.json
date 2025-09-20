@@ -183,6 +183,7 @@
   "item.minecraft.potion.effect.decay_strong": "Potion of Decay",
   "item.minecraft.potion.effect.fire_resistance_strong": "Potion of Fire Resistance",
 
+  "item.minecraft.tipped_arrow.effect.haunting": "Arrow of Untimely Death",
   "item.minecraft.tipped_arrow.effect.largeness": "Arrow of Big",
   "item.minecraft.tipped_arrow.effect.largeness_long": "Arrow of Big",
   "item.minecraft.tipped_arrow.effect.largeness_strong": "Arrow of Big",
@@ -212,6 +213,7 @@
   "item.minecraft.tipped_arrow.effect.decay_strong": "Arrow of Decay",
   "item.minecraft.tipped_arrow.effect.fire_resistance_strong": "Arrow of Fire Resistance",
 
+  "item.minecraft.splash_potion.effect.haunting": "Splash Potion of Untimely Death",
   "item.minecraft.splash_potion.effect.largeness": "Splash Potion of Big",
   "item.minecraft.splash_potion.effect.largeness_long": "Splash Potion of Big",
   "item.minecraft.splash_potion.effect.largeness_strong": "Splash Potion of Big",
@@ -241,6 +243,7 @@
   "item.minecraft.splash_potion.effect.decay_strong": "Splash Potion of Decay",
   "item.minecraft.splash_potion.effect.fire_resistance_strong": "Splash Potion of Fire Resistance",
 
+  "item.minecraft.lingering_potion.effect.haunting": "Lingering Potion of Untimely Death",
   "item.minecraft.lingering_potion.effect.largeness": "Lingering Potion of Big",
   "item.minecraft.lingering_potion.effect.largeness_long": "Lingering Potion of Big",
   "item.minecraft.lingering_potion.effect.largeness_strong": "Lingering Potion of Big",

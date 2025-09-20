@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 
-import frootloops.versus.mod.items_and_effects.CustomPotions;
+import frootloops.versus.mod.items_and_effects.brewing.CustomPotions;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;

@@ -37,10 +37,6 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("copper_shovel", CustomEquipment.COPPER_SHOVEL, ItemGroups.TOOLS);
         registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);
 
-        registerCustomItem("bottle_of_ender", CustomBrewingItems.BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
-        registerCustomItem("splash_bottle_of_ender", CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
-        registerCustomItem("lingering_bottle_of_ender", CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER, ItemGroups.FOOD_AND_DRINK);
-
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
 

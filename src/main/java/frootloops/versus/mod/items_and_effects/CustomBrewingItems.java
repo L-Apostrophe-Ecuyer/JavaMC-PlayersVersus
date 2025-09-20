@@ -2,6 +2,7 @@ package frootloops.versus.mod.items_and_effects;
 
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.items_and_effects.brewing.ConcentrateItem;
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
@@ -22,11 +23,6 @@ public abstract class CustomBrewingItems {
     }
 
     public static final Item FOUR_LEAF_CLOVER = new Item(getItemSettings("four_leaf_clover").attributeModifiers(AttributeModifiersComponent.builder().add(EntityAttributes.LUCK, new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, 1.0, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.OFFHAND).build()));
-    //public static final Item THREE_LEAF_CLOVER = new Item(new Item.Settings());
-
-    public static PotionItem BOTTLE_OF_ENDER;
-    public static SplashPotionItem SPLASH_BOTTLE_OF_ENDER;
-    public static LingeringPotionItem LINGERING_BOTTLE_OF_ENDER;
 
     public static final Item LIVING_FLAME = new Item(getItemSettings("living_flame").rarity(Rarity.UNCOMMON));
     public static final Item GLISTERING_BEETROOT = new Item(getItemSettings("glistering_beetroot").food(new FoodComponent.Builder().nutrition(4).saturationModifier(0.8f).build()));
@@ -44,7 +40,7 @@ public abstract class CustomBrewingItems {
     public static final ConcentrateItem CONCENTRATE_OF_MINING_FATIGUE = new ConcentrateItem(getBileSettings("concentrate_of_mining_fatigue"),StatusEffects.MINING_FATIGUE, CustomBlocks.MINING_FATIGUE_BILE); // New potion!
 
     public static final ConcentrateItem CONCENTRATE_OF_TOUGHNESS = new ConcentrateItem(getBileSettings("concentrate_of_toughness"),StatusEffects.RESISTANCE, CustomBlocks.TOUGHNESS_BILE);
-    public static final ConcentrateItem CONCENTRATE_OF_VULNERABILITY = new ConcentrateItem(getBileSettings("concentrate_of_vulnerability"),CustomStatusEffects.VULNERABILITY, CustomBlocks.VULNERABILITY_BILE); // New potion!
+    public static final ConcentrateItem CONCENTRATE_OF_VULNERABILITY = new ConcentrateItem(getBileSettings("concentrate_of_vulnerability"), CustomStatusEffects.VULNERABILITY, CustomBlocks.VULNERABILITY_BILE); // New potion!
 
     public static final ConcentrateItem CONCENTRATE_OF_VISION = new ConcentrateItem(getBileSettings("concentrate_of_vision"),StatusEffects.NIGHT_VISION, CustomBlocks.VISION_BILE);
     public static final ConcentrateItem CONCENTRATE_OF_DARKNESS = new ConcentrateItem(getBileSettings("concentrate_of_darkness"),StatusEffects.DARKNESS, CustomBlocks.DARKNESS_BILE);         // New potion!

@@ -1,14 +1,10 @@
-package frootloops.versus.mod.items_and_effects;
+package frootloops.versus.mod.items_and_effects.brewing;
 
 import frootloops.versus.VersusMod;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.PotionContentsComponent;
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.LingeringPotionItem;
-import net.minecraft.item.PotionItem;
-import net.minecraft.item.SplashPotionItem;
 import net.minecraft.potion.Potion;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -16,7 +12,6 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
 import static frootloops.versus.VersusMod.MOD_ID;
-import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getItemSettings;
 
 public abstract class CustomPotions {
 
@@ -31,8 +26,8 @@ public abstract class CustomPotions {
     public static RegistryEntry<Potion> DARKNESS, DARKNESS_LONG, DARKNESS_STRONG;
     public static RegistryEntry<Potion> GLOWING, GLOWING_LONG, GLOWING_STRONG;
     public static RegistryEntry<Potion> DECAY, DECAY_LONG, DECAY_STRONG;
-    public static RegistryEntry<Potion> HAUNTING;
     public static RegistryEntry<Potion> UNLUCK;
+    public static RegistryEntry<Potion> HAUNTING;
     public static RegistryEntry<Potion> FIRE_RESISTANCE_STRONG;
 
     public static void registerCustomPotions() {
@@ -81,9 +76,6 @@ public abstract class CustomPotions {
         UNLUCK = registerCustomPotion("unluck", StatusEffects.UNLUCK, 0, 3000);
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
-        CustomBrewingItems.BOTTLE_OF_ENDER = new PotionItem(getItemSettings("bottle_of_ender").maxCount(8).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
-        CustomBrewingItems.SPLASH_BOTTLE_OF_ENDER = new SplashPotionItem(getItemSettings("splash_bottle_of_ender").maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
-        CustomBrewingItems.LINGERING_BOTTLE_OF_ENDER = new LingeringPotionItem(getItemSettings("lingering_bottle_of_ender").maxCount(1).component(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(CustomPotions.HAUNTING)));
     }
 
     private static RegistryEntry<Potion> registerCustomPotion(String name, RegistryEntry<StatusEffect> effect, int amplifier, int duration) {

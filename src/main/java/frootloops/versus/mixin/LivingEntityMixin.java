@@ -5,7 +5,7 @@ import frootloops.versus.mod.enchantments.CustomEnchants;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.clays.CustomMudBlock;
-import frootloops.versus.mod.items_and_effects.CustomStatusEffects;
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.brewing.effects.HauntingStatusEffect;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;

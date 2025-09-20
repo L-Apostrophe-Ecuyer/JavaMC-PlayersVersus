@@ -1,7 +1,7 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting.groups;
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.items_and_effects.CustomPotions;
+import frootloops.versus.mod.items_and_effects.brewing.CustomPotions;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
