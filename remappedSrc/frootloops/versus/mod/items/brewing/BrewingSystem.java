@@ -1,9 +1,9 @@
-package frootloops.versus.mod.items.brewing;
+package frootloops.versus.mod.items_and_effects.brewing;
 
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.items.brewing.CustomBrewingItems;
-import frootloops.versus.mod.items.brewing.CustomPotions;
+import frootloops.versus.mod.items_and_effects.brewing.CustomBrewingItems;
+import frootloops.versus.mod.items_and_effects.brewing.CustomPotions;
 import net.minecraft.item.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;

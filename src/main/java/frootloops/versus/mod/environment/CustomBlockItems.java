@@ -10,7 +10,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
-import static frootloops.versus.mod.items.RegisteringCustomItems.getItemSettings;
+import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getItemSettings;
 
 public abstract class CustomBlockItems {
 

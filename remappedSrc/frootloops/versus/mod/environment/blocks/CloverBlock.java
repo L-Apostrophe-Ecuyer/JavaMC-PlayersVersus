@@ -3,7 +3,7 @@ package frootloops.versus.mod.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.environment.CustomBlocks;
-import frootloops.versus.mod.items.brewing.CustomBrewingItems;
+import frootloops.versus.mod.items_and_effects.brewing.CustomBrewingItems;
 import net.minecraft.block.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;

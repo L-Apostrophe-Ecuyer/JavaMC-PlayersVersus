@@ -1,8 +1,8 @@
-package frootloops.versus.mod.items.brewing;
+package frootloops.versus.mod.items_and_effects.brewing;
 
 
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.items.brewing.effects.*;
+import frootloops.versus.mod.items_and_effects.brewing.effects.*;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;

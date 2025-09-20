@@ -20,7 +20,7 @@ public abstract class HungerSprintingMixin extends PlayerEntity {
 
     @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))
     private float foodRequiedToSprint(float foodLevel) {
-        if(!VersusSettings.DO_FOOD_OVERHAUL) return 6.0f;
+        if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return 6.0f;
         return Combat.canPlayerSprint(this.hungerManager, this.hasStatusEffect(StatusEffects.HUNGER)) ? -1.0f : 128.0f;
     }
 }

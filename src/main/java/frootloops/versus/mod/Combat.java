@@ -186,7 +186,7 @@ public abstract class Combat {
     }
 
     public static boolean canPlayerSprint(HungerManager hungerManager, boolean hasHungerEffect) {
-        if(!VersusSettings.DO_FOOD_OVERHAUL) return hungerManager.getFoodLevel() > 6;
+        if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return hungerManager.getFoodLevel() > 6;
         if(hasHungerEffect) return false;
         if(hungerManager.getFoodLevel() != 0) return true;
         if(hungerManager.getSaturationLevel() == 0.0f) return false;

@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items.brewing;
+package frootloops.versus.mixin.items_and_effects.brewing;
 
 import frootloops.versus.VersusMod;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;

@@ -1,7 +1,7 @@
-package frootloops.versus.mod.items;
+package frootloops.versus.mod.items_and_effects;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
-import frootloops.versus.mod.items.equipment.CustomEquipment;
+import frootloops.versus.mod.items_and_effects.equipment.CustomEquipment;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 

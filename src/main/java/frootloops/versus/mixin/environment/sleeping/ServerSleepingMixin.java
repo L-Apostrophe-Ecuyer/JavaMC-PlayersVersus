@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.environment.sleeping;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HostileEntity;
@@ -20,7 +19,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.tick.TickManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -28,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static frootloops.versus.VersusSettings.isFastForwardingTime;
+import static frootloops.versus.VersusSettings.Gameplay.isFastForwardingTime;
 
 
 @Mixin(ServerWorld.class)
@@ -45,9 +43,9 @@ public abstract class ServerSleepingMixin extends World {
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/SleepManager;canSkipNight(I)Z"))
     public boolean checkOnEepyPlayers(SleepManager sleepManager, int percentage) {
-        if(VersusSettings.DO_SLEEP_OVERHAUL) percentage = 100;
+        if(VersusSettings.Gameplay.DO_SLEEP_OVERHAUL) percentage = 100;
         boolean canSkipNight = sleepManager.canSkipNight(percentage);
-        if(VersusSettings.DO_SLEEP_OVERHAUL) {
+        if(VersusSettings.Gameplay.DO_SLEEP_OVERHAUL) {
 
             // If everyone is asleep, make time go by quick
             // And make nearby hostiles target players, to test their shelters
@@ -71,14 +69,14 @@ public abstract class ServerSleepingMixin extends World {
         this.sleepManager.clearSleeping();
 
         TickManager tickManager = this.server.getTickManager();
-        if(tickManager.getTickRate() == VersusSettings.SLEEP_TICK_SPEED) tickManager.setTickRate(20.0f);
+        if(tickManager.getTickRate() == VersusSettings.Gameplay.SLEEP_TICK_SPEED) tickManager.setTickRate(20.0f);
     }
 
     private void startFastForwardingTime(List<ServerPlayerEntity> players) {
         isFastForwardingTime = true;
         TickManager tickManager = this.server.getTickManager();
         if(tickManager.getTickRate() == 20.0f) {
-            tickManager.setTickRate(VersusSettings.SLEEP_TICK_SPEED);
+            tickManager.setTickRate(VersusSettings.Gameplay.SLEEP_TICK_SPEED);
 
             for (PlayerEntity player : players) {
                 Vec3d pos = player.getPos();

@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.brewing.effects;
+package frootloops.versus.mod.items_and_effects.brewing.effects;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;

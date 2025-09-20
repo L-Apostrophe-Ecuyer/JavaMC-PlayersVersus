@@ -1,9 +1,9 @@
-package frootloops.versus.mod.items;
+package frootloops.versus.mod.items_and_effects;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlockItems;
-import frootloops.versus.mod.items.brewing.CustomBrewingItems;
-import frootloops.versus.mod.items.equipment.CustomEquipment;
+import frootloops.versus.mod.items_and_effects.brewing.CustomBrewingItems;
+import frootloops.versus.mod.items_and_effects.equipment.CustomEquipment;
 import frootloops.versus.mod.mobs.ModEntities;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.*;

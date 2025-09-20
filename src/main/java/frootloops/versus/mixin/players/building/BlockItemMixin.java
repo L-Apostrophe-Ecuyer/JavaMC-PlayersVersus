@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.players.building;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -39,7 +38,7 @@ public abstract class BlockItemMixin extends Item {
 
     @Inject(method = "getPlacementState", at = @At(value = "RETURN"), cancellable = true)
     public void getPlacementState(ItemPlacementContext context, CallbackInfoReturnable<BlockState> cir) {
-        if(!VersusSettings.DO_SMARTER_BLOCK_PLACING) return;
+        if(!VersusSettings.QOL.DO_SMARTER_BLOCK_PLACING) return;
 
         BlockState blockState = this.block.getPlacementState(context);
         if(blockState == null || !canPlace(context, blockState)) return;

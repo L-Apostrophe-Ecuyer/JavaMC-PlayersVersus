@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items.equipment;
+package frootloops.versus.mixin.items_and_effects.equipment;
 
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.Block;

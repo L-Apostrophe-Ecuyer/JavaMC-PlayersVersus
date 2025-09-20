@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items;
+package frootloops.versus.mixin.items_and_effects;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.component.ComponentHolder;

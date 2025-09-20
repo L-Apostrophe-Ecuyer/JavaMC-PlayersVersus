@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.equipment;
+package frootloops.versus.mod.items_and_effects.equipment;
 
 import frootloops.versus.VersusMod;
 import net.minecraft.item.*;
@@ -13,7 +13,7 @@ import net.minecraft.util.Util;
 
 import java.util.EnumMap;
 
-import static frootloops.versus.mod.items.RegisteringCustomItems.getSettings;
+import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getSettings;
 
 public abstract class CustomEquipment {
 

@@ -1,8 +1,8 @@
-package frootloops.versus.mod.items.brewing;
+package frootloops.versus.mod.items_and_effects.brewing;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlocks;
-import frootloops.versus.mod.items.RegisteringCustomItems;
+import frootloops.versus.mod.items_and_effects.RegisteringCustomItems;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
@@ -18,7 +18,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 
-import static frootloops.versus.mod.items.RegisteringCustomItems.getSettings;
+import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getSettings;
 import static net.minecraft.item.Item.BASE_ATTACK_DAMAGE_MODIFIER_ID;
 
 public abstract class CustomBrewingItems {

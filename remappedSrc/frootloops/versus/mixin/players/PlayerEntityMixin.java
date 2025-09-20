@@ -153,7 +153,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;dropShoulderEntities()V"))
     private void onDamageInterruptEating(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
+        if (VersusSettings.Combat.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
             Item item = this.activeItemStack.getItem();
             if (item.getComponents().contains(DataComponentTypes.FOOD) || item instanceof PotionItem) {
                 this.clearActiveItem();
@@ -203,13 +203,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     public void setUuid(UUID uuid) {
-        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+        if(VersusSettings.Combat.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
         super.setUuid(uuid);
     }
 
     @Inject(method = "canConsume", at = @At("HEAD"), cancellable = true)
     public void canConsume(boolean ignoreHunger, CallbackInfoReturnable<Boolean> cir) {
-        if(VersusSettings.DO_FOOD_OVERHAUL) {
+        if(VersusSettings.Combat.DO_FOOD_OVERHAUL) {
             cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 + this.getMaxHealth() - this.getHealth())));
         }
     }

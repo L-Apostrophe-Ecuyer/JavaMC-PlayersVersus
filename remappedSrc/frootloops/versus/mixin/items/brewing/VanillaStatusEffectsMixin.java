@@ -1,9 +1,9 @@
 
-package frootloops.versus.mixin.items.brewing;
+package frootloops.versus.mixin.items_and_effects.brewing;
 
 
-import frootloops.versus.mod.items.brewing.CustomStatusEffects;
-import frootloops.versus.mod.items.brewing.effects.FireResistanceEffect;
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
+import frootloops.versus.mod.items_and_effects.brewing.effects.FireResistanceEffect;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.registry.Registries;

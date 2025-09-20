@@ -3,7 +3,7 @@ package frootloops.versus.mod.mobs;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
-import frootloops.versus.mod.items.throwing.SlimeballEntity;
+import frootloops.versus.mod.items_and_effects.throwing.SlimeballEntity;
 
 
 import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieEntity;
@@ -20,7 +20,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 
-import static frootloops.versus.mod.items.RegisteringCustomItems.getSettings;
+import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getSettings;
 
 public class ModEntities {
 

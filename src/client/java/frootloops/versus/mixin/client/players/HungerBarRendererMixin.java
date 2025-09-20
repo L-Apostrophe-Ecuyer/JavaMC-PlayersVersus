@@ -34,8 +34,8 @@ public class HungerBarRendererMixin {
     private void renderFood(DrawContext context, PlayerEntity player, int top, int left) {
         HungerManager hungerManager = player.getHungerManager();
         int playerFoodLevel = hungerManager.getFoodLevel();
-        int foodPointsAvailable = !VersusSettings.DO_FOOD_OVERHAUL ? 20 : Math.max((int) (player.getMaxHealth() - player.getHealth() + 6), playerFoodLevel);
-        boolean makeIconsJiggle = (hungerManager.getSaturationLevel() == 0.0f && this.ticks % (playerFoodLevel * 3 + 1) == 0) || (VersusSettings.DO_FOOD_OVERHAUL && player.hasStatusEffect(StatusEffects.HUNGER));
+        int foodPointsAvailable = !VersusSettings.Combat.DO_FOOD_OVERHAUL ? 20 : Math.max((int) (player.getMaxHealth() - player.getHealth() + 6), playerFoodLevel);
+        boolean makeIconsJiggle = (hungerManager.getSaturationLevel() == 0.0f && this.ticks % (playerFoodLevel * 3 + 1) == 0) || (VersusSettings.Combat.DO_FOOD_OVERHAUL && player.hasStatusEffect(StatusEffects.HUNGER));
 
         Identifier iconHaunchFull, iconHaunchHalf, iconHaunchEmpty, iconHaunchHalfDisabled, iconHaunchEmptyDisabled;
         if (player.hasStatusEffect(StatusEffects.HUNGER)) {

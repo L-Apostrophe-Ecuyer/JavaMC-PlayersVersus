@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.equipment;
+package frootloops.versus.mod.items_and_effects.equipment;
 
 import frootloops.versus.VersusMod;
 import net.minecraft.entity.Entity;

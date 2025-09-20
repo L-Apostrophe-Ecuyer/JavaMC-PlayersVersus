@@ -1,13 +1,10 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.HungerManager;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static frootloops.versus.VersusSettings.IS_STARVATION_ENABLED;
 
 @Mixin(HungerManager.class)
 public class HungerManagerMixin {
@@ -49,7 +45,7 @@ public class HungerManagerMixin {
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     public void update(ServerPlayerEntity player, CallbackInfo ci) {
 
-        if(!VersusSettings.DO_FOOD_OVERHAUL) return;
+        if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return;
 
         // Hunger effect is more punishing:
         boolean hasHungerEffect = player.hasStatusEffect(StatusEffects.HUNGER);
@@ -70,7 +66,7 @@ public class HungerManagerMixin {
 
         // Starvation: When starving, activities deal damage.
         if(foodLevel == 0) {
-            if(IS_STARVATION_ENABLED || hasHungerEffect) {
+            if(VersusSettings.Combat.IS_STARVATION_ENABLED || hasHungerEffect) {
                 //if(FOOD_REQUIRED_FOR_SLOW_REGEN > 0) saturationLevel = 0.0f;
                 if (exhaustion > 0.75F) {
                     exhaustion = 0.0F;

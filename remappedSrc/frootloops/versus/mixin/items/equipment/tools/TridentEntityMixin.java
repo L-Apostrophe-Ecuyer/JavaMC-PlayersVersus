@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items.equipment.tools;
+package frootloops.versus.mixin.items_and_effects.equipment.tools;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;

@@ -86,7 +86,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                 this.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, attackingEntity.getEyePos());
             }
         }
-        if (VersusSettings.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
+        if (VersusSettings.Combat.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
             int maxUseTime = activeItemStack.getMaxUseTime(this);
             if (maxUseTime < 64) {
                 itemUseTimeLeft = maxUseTime;
@@ -189,7 +189,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 3)
     private boolean doSweepingAttacksOnRegularSwings(boolean isSweep) {
-        return isSweep && (EnchantRegistryHelper.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= VersusSettings.MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS);
+        return isSweep && (EnchantRegistryHelper.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= VersusSettings.Combat.MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS);
     }
 
     @Inject(method = "attack", at = @At("TAIL"))
@@ -204,13 +204,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     public void setUuid(UUID uuid) {
-        if(VersusSettings.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
+        if(VersusSettings.Combat.DO_FOOD_REDUCED_ON_SPAWN) this.hungerManager.setFoodLevel(6);
         super.setUuid(uuid);
     }
 
     @Inject(method = "canConsume", at = @At("HEAD"), cancellable = true)
     public void canConsume(boolean ignoreHunger, CallbackInfoReturnable<Boolean> cir) {
-        if(VersusSettings.DO_FOOD_OVERHAUL) {
+        if(VersusSettings.Combat.DO_FOOD_OVERHAUL) {
             cir.setReturnValue(ignoreHunger || (this.hungerManager.isNotFull() && (this.hungerManager.getFoodLevel() < 6 + this.getMaxHealth() - this.getHealth())));
         }
     }

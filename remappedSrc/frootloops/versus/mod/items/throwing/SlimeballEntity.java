@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.throwing;
+package frootloops.versus.mod.items_and_effects.throwing;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.ModEntities;

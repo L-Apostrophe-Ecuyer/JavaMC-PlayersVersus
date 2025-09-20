@@ -57,7 +57,7 @@ public class ZombieHordeMixin implements SpecialSpawner {
             BlockPos blockPos;
             if (playerEntity.isSpectator() || world.getBiome(blockPos = playerEntity.getBlockPos()).isIn(BiomeTags.WITHOUT_ZOMBIE_SIEGES)) continue;
 
-            boolean canSpawnZombieHorde = VersusSettings.DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES || world.isNearOccupiedPointOfInterest(blockPos);
+            boolean canSpawnZombieHorde = VersusSettings.Gameplay.DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES || world.isNearOccupiedPointOfInterest(blockPos);
             if(!canSpawnZombieHorde) continue;
             for (int i = 0; i < 10; ++i) {
                 float f = world.random.nextFloat() * ((float)Math.PI * 2);

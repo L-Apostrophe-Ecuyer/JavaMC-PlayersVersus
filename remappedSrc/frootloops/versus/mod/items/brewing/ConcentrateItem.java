@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items.brewing;
+package frootloops.versus.mod.items_and_effects.brewing;
 
 import net.minecraft.block.Block;
 import net.minecraft.component.DataComponentTypes;

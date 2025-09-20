@@ -1,6 +1,6 @@
-package frootloops.versus.mixin.items;
+package frootloops.versus.mixin.items_and_effects;
 
-import frootloops.versus.mod.items.ItemsAndStacks;
+import frootloops.versus.mod.items_and_effects.ItemsAndStacks;
 import net.fabricmc.fabric.api.item.v1.FabricItemStack;
 import net.minecraft.component.ComponentHolder;
 import net.minecraft.component.MergedComponentMap;

@@ -47,7 +47,7 @@ public class HungerManagerMixin {
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     public void update(ServerPlayerEntity player, CallbackInfo ci) {
 
-        if(!VersusSettings.DO_FOOD_OVERHAUL) return;
+        if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return;
 
         // Hunger effect is more punishing:
         boolean hasHungerEffect = player.hasStatusEffect(StatusEffects.HUNGER);

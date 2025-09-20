@@ -39,5 +39,5 @@ public abstract class SuspiciousBlocksMixin extends BlockEntity {
     }
 
     @ModifyConstant(method = "brush", constant = @Constant(longValue = 10L))
-    private long fasterBrushing(long tickDelayUntilNextBrushStage) {return (long) VersusSettings.BRUSHING_TICKS_PER_STAGE;}
+    private long fasterBrushing(long tickDelayUntilNextBrushStage) {return VersusSettings.Gameplay.BRUSHING_TICKS_PER_STAGE * 2L;}
 }

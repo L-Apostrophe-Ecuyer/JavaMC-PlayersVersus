@@ -1,7 +1,7 @@
-package frootloops.versus.mixin.items.equipment.tools;
+package frootloops.versus.mixin.items_and_effects.equipment.tools;
 
 
-import frootloops.versus.mod.items.equipment.RebalancedTools;
+import frootloops.versus.mod.items_and_effects.equipment.RebalancedTools;
 import net.minecraft.item.ShovelItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;

@@ -1,8 +1,8 @@
-package frootloops.versus.mixin.items.equipment.tools;
+package frootloops.versus.mixin.items_and_effects.equipment.tools;
 
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.Enchants;
-import frootloops.versus.mod.items.equipment.RebalancedTools;
+import frootloops.versus.mod.items_and_effects.equipment.RebalancedTools;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.enchantment.Enchantments;
@@ -13,7 +13,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ActionResult;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;

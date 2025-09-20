@@ -1,9 +1,9 @@
-package frootloops.versus.mod.items;
+package frootloops.versus.mod.items_and_effects;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
-import frootloops.versus.mod.items.brewing.ConcentrateItem;
-import frootloops.versus.mod.items.brewing.CustomBrewingItems;
-import frootloops.versus.mod.items.equipment.CustomEquipment;
+import frootloops.versus.mod.items_and_effects.brewing.ConcentrateItem;
+import frootloops.versus.mod.items_and_effects.brewing.CustomBrewingItems;
+import frootloops.versus.mod.items_and_effects.equipment.CustomEquipment;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;

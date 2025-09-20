@@ -1,4 +1,4 @@
-package frootloops.versus.mixin.items.equipment.elytra;
+package frootloops.versus.mixin.items_and_effects.equipment.elytra;
 
 import frootloops.versus.mod.Combat;
 import net.minecraft.entity.Entity;

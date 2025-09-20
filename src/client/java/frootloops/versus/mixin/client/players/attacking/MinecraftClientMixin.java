@@ -1,7 +1,5 @@
 package frootloops.versus.mixin.client.players.attacking;
 
-//import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
-
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
@@ -55,7 +53,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
     @Inject(method = "handleBlockBreaking",at = @At("HEAD"), cancellable = true)
     private void holdToAttack(boolean bl, CallbackInfo ci) {
-        if(VersusSettings.CAN_HOLD_TO_ATTACK == false) return;
+        if(VersusSettings.Combat.CAN_HOLD_TO_ATTACK == false) return;
 
         boolean tryAttacking = false;
         float attackChargeProgress = player.getAttackCooldownProgress(0.0f);
@@ -109,7 +107,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean canAttackEntities = attackProgress > Combat.MIN_COOLDOWN_TO_SWING;
         boolean canSoonAttackEntities = !canAttackEntities && attackProgress > 0.2f;
 
-        if(VersusSettings.CAN_AIM_ASSIST && (canAttackEntities || canSoonAttackEntities)) { // Enables some help & coyote time
+        if(VersusSettings.Combat.CAN_AIM_ASSIST && (canAttackEntities || canSoonAttackEntities)) { // Enables some help & coyote time
             if(attackProgress == 1.0f) prevTargettedEntity = null;
             else if(this.crosshairTarget.getType() != ENTITY) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
             else if(this.crosshairTarget.getType() != ENTITY) attemptToAimAssistTarget(player.getAttacker(), attackRange);
