@@ -11,17 +11,31 @@
       ]
     },
     {
-      "rolls": 4,
+      "rolls": 5,
       "entries": [
         {
           "type": "minecraft:item",
           "name": "players-versus:concentrate_of_death",
+          "weight": 2,
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "min": 2,
                 "max": 8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_decay",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 4,
+                "max": 12
               }
             }
           ]

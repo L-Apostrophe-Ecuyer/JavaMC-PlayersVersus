@@ -14,6 +14,16 @@
               "chance": 0.1
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:brewing_stand",
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.4
+            }
+          ]
         }
       ],
       "conditions": [
@@ -23,7 +33,11 @@
       ]
     },
     {
-      "rolls": 1,
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 2
+      },
       "entries": [
         {
           "type": "minecraft:item",

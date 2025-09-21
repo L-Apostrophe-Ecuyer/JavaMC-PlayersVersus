@@ -6,6 +6,37 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "minecraft:cobweb",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 2
+              },
+              "add": false
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "flags": {
+              "is_baby": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
           "name": "minecraft:spider_eye",
           "conditions": [
             {
@@ -81,5 +112,5 @@
       ]
     }
   ],
-  "random_sequence": "minecraft:entities/magma_cube"
+  "random_sequence": "minecraft:entities/spider"
 }

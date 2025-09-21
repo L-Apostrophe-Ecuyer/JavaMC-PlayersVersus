@@ -71,7 +71,7 @@
         {
           "type": "minecraft:item",
           "name": "players-versus:concentrate_of_mining_fatigue",
-          "weight": 3
+          "weight": 1
         },
         {
           "type": "minecraft:item",
