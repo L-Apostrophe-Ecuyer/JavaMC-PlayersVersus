@@ -182,7 +182,7 @@ public class MainHotbarGroup extends SortingGroup {
                     return itemSlotToReturn;
                 }
             }
-            else if(slot.isUsedToClutch() && clutchItem.itemType() != ItemType.SHEARS && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+            else if(slot.isUsedToClutch() && (clutchItem == null || (clutchItem.itemType() != ItemType.SHEARS && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))))) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
                 if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as deep dark clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
@@ -196,7 +196,7 @@ public class MainHotbarGroup extends SortingGroup {
                 if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as nether clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
-            else if(slot.isUsedToClutch() && !clutchItem.stack().isOf(Items.POWDER_SNOW_BUCKET) && !clutchItem.stack().isOf(Items.WARPED_FUNGUS_ON_A_STICK) && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+            else if(slot.isUsedToClutch() && (clutchItem == null || (!clutchItem.stack().isOf(Items.POWDER_SNOW_BUCKET) && !clutchItem.stack().isOf(Items.WARPED_FUNGUS_ON_A_STICK) && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))))) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
                 if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as nether clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
@@ -210,7 +210,7 @@ public class MainHotbarGroup extends SortingGroup {
                 if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as ocean clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
                 return itemSlotToReturn;
             }
-            else if(slot.isUsedToClutch() && !clutchItem.stack().isOf(Items.FILLED_MAP) && !clutchItem.stack().isOf(Items.MAGMA_BLOCK) && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+            else if(slot.isUsedToClutch() && !clutchItem.stack().isOf(Items.FILLED_MAP) && (clutchItem == null || !clutchItem.stack().isOf(Items.MAGMA_BLOCK)) && (clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
                 ItemSlot itemSlotToReturn = this.clutchItem;
                 this.clutchItem = slot;
                 if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as ocean clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
