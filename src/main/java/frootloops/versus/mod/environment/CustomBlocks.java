@@ -136,10 +136,10 @@ public class CustomBlocks {
 
         CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM).luminance((state) -> 3 + state.get(Properties.AGE_2) * 3)));
 
-        DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, StatusEffects.WITHER, 60, 2, 4, 0.4f);
-        CORRUPTED_BILE = registerBileBlock("corrupted_bile", StatusEffects.HUNGER, 10, 1);
+        DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, StatusEffects.WITHER, 210, 0, 4, 0.4f);
+        CORRUPTED_BILE = registerBileBlock("corrupted_bile", StatusEffects.HUNGER, 210, 1);
         HARMFUL_BILE = registerBileBlock("harmful_bile", StatusEffects.INSTANT_DAMAGE);
-        HEALTHY_BILE = registerBileBlock("healthy_bile", StatusEffects.INSTANT_HEALTH, StatusEffects.REGENERATION, 10, 1);
+        HEALTHY_BILE = registerBileBlock("healthy_bile", StatusEffects.INSTANT_HEALTH);
         REGENERATION_BILE = registerBileBlock("regeneration_bile", StatusEffects.REGENERATION);
         WITHERING_BILE = registerBileBlock("withering_bile", StatusEffects.WITHER);
         MINING_SPEED_BILE = registerBileBlock("mining_speed_bile", StatusEffects.HASTE);            // New potion!
@@ -149,11 +149,11 @@ public class CustomBlocks {
         DARKNESS_BILE = registerBileBlock("darkness_bile", StatusEffects.DARKNESS);         // New potion!
         LEAPING_BILE = registerBileBlock("leaping_bile", StatusEffects.JUMP_BOOST);
         SLOW_FALL_BILE = registerBileBlock("slow_fall_bile", StatusEffects.SLOW_FALLING);
-        SPEED_BILE = registerBileBlock("speed_bile", StatusEffects.SPEED);
+        SPEED_BILE = registerBileBlock("speed_bile", StatusEffects.SPEED, 300, 0);
         SLOWNESS_BILE = registerBileBlock("slowness_bile", StatusEffects.SLOWNESS);
         BREATH_BILE = registerBileBlock("breath_bile", StatusEffects.WATER_BREATHING);
         INVISIBILITY_BILE = registerBileBlock("invisibility_bile", StatusEffects.INVISIBILITY);
-        GLOWING_BILE = registerBileBlock("glowing_bile", StatusEffects.GLOWING, StatusEffects.GLOWING, 0, 50, 8, 1.0F);
+        GLOWING_BILE = registerBileBlock("glowing_bile", StatusEffects.GLOWING, StatusEffects.GLOWING, 300, 0, 9, 1.0F);
         WEAKNESS_BILE = registerBileBlock("weakness_bile", StatusEffects.WEAKNESS);
         STRENGTH_BILE = registerBileBlock("strength_bile", StatusEffects.STRENGTH); //-> Will be replacing Blaze Powder
         WIND_BILE = registerBileBlock("wind_bile", StatusEffects.WIND_CHARGED);
@@ -183,8 +183,8 @@ public class CustomBlocks {
         return block;
     }
 
-    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, int duration, int amplifier) {
-        return registerBileBlock(name, statusEffect, statusEffect, duration, amplifier);
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, int maxDuration, int amplifier) {
+        return registerBileBlock(name, statusEffect, statusEffect, maxDuration, amplifier);
     }
 
     private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect) {
@@ -192,20 +192,20 @@ public class CustomBlocks {
     }
 
     private static PotionEffectBileBlock registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffect) {
-        return registerBileBlock(name, ColorHelper.fullAlpha(color), statusEffect, 50, 0, 3, 0.8f);
+        return registerBileBlock(name, ColorHelper.fullAlpha(color), statusEffect, 140, 0, 3, 0.8f);
     }
 
-    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier) {
-        return registerBileBlock(name, statusEffect, statusEffectToGrant, duration, amplifier, 3, 0.6f);
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int maxDuration, int amplifier) {
+        return registerBileBlock(name, statusEffect, statusEffectToGrant, maxDuration, amplifier, 3, 0.6f);
     }
 
-    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
-        return registerBileBlock(name, ColorHelper.fullAlpha(statusEffect.value().getColor()), statusEffectToGrant, duration, amplifier, luminance, ambientOcclusion);
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int maxDuration, int amplifier, int luminance, float ambientOcclusion) {
+        return registerBileBlock(name, ColorHelper.fullAlpha(statusEffect.value().getColor()), statusEffectToGrant, maxDuration, amplifier, luminance, ambientOcclusion);
     }
 
-    private static PotionEffectBileBlock registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int duration, int amplifier, int luminance, float ambientOcclusion) {
+    private static PotionEffectBileBlock registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int maxDuration, int amplifier, int luminance, float ambientOcclusion) {
         AbstractBlock.Settings settings = getSettings(name).sounds(BlockSoundGroup.SLIME).luminance(state -> luminance).noCollision().strength(0.2f, 0.4f).pistonBehavior(PistonBehavior.DESTROY).allowsSpawning((state, world, pos, entityType) -> false);
-        return (PotionEffectBileBlock) registerBlock(name, new PotionEffectBileBlock(settings, color, statusEffectToGrant, duration, amplifier, ambientOcclusion));
+        return (PotionEffectBileBlock) registerBlock(name, new PotionEffectBileBlock(settings, color, statusEffectToGrant, maxDuration, amplifier, ambientOcclusion));
     }
 
 }
