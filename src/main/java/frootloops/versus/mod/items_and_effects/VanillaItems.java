@@ -217,8 +217,6 @@ public class VanillaItems {
         else if(isStew) maxCount = VersusSettings.Items.MAX_COUNT_STEWS;
         else if(isBucket) maxCount = VersusSettings.Items.MAX_COUNT_BUCKETS;
         else maxCount = VersusSettings.Items.MAX_COUNT_FOOD;
-
-        VersusMod.MOD_LOGGER.warn(" Modifying food " + item.getName().getString());
         DefaultItemComponentEvents.MODIFY.register(context -> {
             if(maxCount != item.getDefaultStack().getMaxCount()) modifyVanillaStackSizeOf(context, item, maxCount);
             context.modify(item, builder -> {builder.add(DataComponentTypes.CONSUMABLE, newConsumeComponent);});
@@ -228,8 +226,6 @@ public class VanillaItems {
 
     private static void modifyVanillaToolsAndWeapons() {
         DefaultItemComponentEvents.MODIFY.register(context -> {
-
-            VersusMod.MOD_LOGGER.info("Modifying vanilla tools and armor...");
             modifyToolComponents(context, Items.TRIDENT, TRIDENT_DAMAGE, TRIDENT_SPEED, TRIDENT_REACH);
 
             // Shields are instant:
