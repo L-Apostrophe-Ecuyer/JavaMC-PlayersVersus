@@ -4,14 +4,30 @@
     "predicate": "minecraft:potion_contents",
     "value": "players-versus:haunting",
     "on_false": {
-      "type": "minecraft:model",
-      "model": "minecraft:item/potion",
-      "tints": [
-        {
-          "type": "minecraft:potion",
-          "default": -13083194
-        }
-      ]
+      "type": "minecraft:condition",
+      "property": "minecraft:component",
+      "predicate": "minecraft:potion_contents",
+      "value": "minecraft:water",
+      "on_true": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/water_bottle",
+        "tints": [
+          {
+            "type": "minecraft:potion",
+            "default": -13083194
+          }
+        ]
+      },
+      "on_false": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/potion",
+        "tints": [
+          {
+            "type": "minecraft:potion",
+            "default": -13083194
+          }
+        ]
+      }
     },
     "on_true": {
       "type": "minecraft:model",

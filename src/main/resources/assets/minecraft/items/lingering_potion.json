@@ -4,18 +4,34 @@
     "predicate": "minecraft:potion_contents",
     "value": "players-versus:haunting",
     "on_false": {
-      "type": "minecraft:model",
-      "model": "minecraft:item/lingering_potion",
-      "tints": [
-        {
-          "type": "minecraft:potion",
-          "default": -13083194
-        }
-      ]
+      "type": "minecraft:condition",
+      "property": "minecraft:component",
+      "predicate": "minecraft:potion_contents",
+      "value": "minecraft:water",
+      "on_true": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/water_bottle_lingering",
+        "tints": [
+          {
+            "type": "minecraft:potion",
+            "default": -13083194
+          }
+        ]
+      },
+      "on_false": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/lingering_potion",
+        "tints": [
+          {
+            "type": "minecraft:potion",
+            "default": -13083194
+          }
+        ]
+      }
     },
     "on_true": {
       "type": "minecraft:model",
-      "model": "players-versus:item/lingering_bottle_of_ender"
+      "model": "players-versus:item/bottle_of_ender_lingering"
     },
     "property": "minecraft:component"
   }

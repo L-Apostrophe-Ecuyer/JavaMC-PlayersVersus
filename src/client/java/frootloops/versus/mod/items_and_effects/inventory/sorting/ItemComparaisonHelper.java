@@ -159,9 +159,6 @@ public abstract class ItemComparaisonHelper {
             else return ItemType.MISC_TOOL;
         }
         else if(stack.getComponents().contains(DataComponentTypes.EQUIPPABLE)) {
-
-            VersusMod.MOD_LOGGER.warn("Item type of " + stack.getName().getString() + " is misc tool or equippable");
-
             EquippableComponent equipComponent = stack.getComponents().get(DataComponentTypes.EQUIPPABLE);
             if(!equipComponent.allows(EntityType.PLAYER)) return ItemType.MISC_TOOL;
             else if(stack.isOf(Items.ELYTRA)) return ItemType.ELYTRA;
