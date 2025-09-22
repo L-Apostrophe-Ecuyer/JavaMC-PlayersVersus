@@ -85,24 +85,18 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     public boolean damage(ServerWorld world, DamageSource source, float amount) {
-        if (this.isInvulnerableTo(world, source)) {
-            return false;
-        } else if (this.abilities.invulnerable && !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-            return false;
-        } else {
+        if (this.isInvulnerableTo(world, source)) return false;
+        else if (this.abilities.invulnerable && !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
+        else {
             this.despawnCounter = 0;
             if (this.isDead()) {
                 return false;
             } else {
                 this.dropShoulderEntities();
                 if (source.isScaledWithDifficulty()) {
-                    if (world.getDifficulty() == Difficulty.EASY || world.getDifficulty() == Difficulty.PEACEFUL)
-                        amount = Math.min(amount / 2.0F + 1.0F, amount);
-
-                    else if (world.getDifficulty() == Difficulty.HARD)
-                        amount = amount * 3.0F / 2.0F;
+                    if (world.getDifficulty() == Difficulty.EASY || world.getDifficulty() == Difficulty.PEACEFUL) amount = Math.min(amount / 2.0F + 1.0F, amount);
+                    else if (world.getDifficulty() == Difficulty.HARD) amount = amount * 3.0F / 2.0F;
                 }
-
                 if(amount > 0f && this.isSleeping()) {
                     ((PlayerEntity)((Object)this)).wakeUp(false, true);
                     if(source.getAttacker() instanceof LivingEntity attackingEntity) {
