@@ -37,9 +37,10 @@
     },
     "music.overworld.deep_dark": {
         "sounds": [
+            { "name": "music/game/ancestry", "stream": true, "weight": 6},
             {
                 "name": "players-versus:music/caves/fizz_full_johanjohnson",
-                "stream": true, "volume": 0.8
+                "stream": true, "volume": 0.8, "weight": 3
             },
             {
                 "name": "players-versus:music/caves/fizz_short_johanjohnson",
@@ -47,12 +48,11 @@
             },
             {
                 "name": "players-versus:music/caves/kevinpenkin_abyssofthesea",
-                "stream": true, "volume": 0.8
+                "stream": true, "volume": 0.8, "weight": 2
             },
-            { "name": "players-versus:music/caves/deep_dark_ambience_1", "stream": false},
-            { "name": "players-versus:music/caves/deep_dark_ambience_2", "stream": false},
-            { "name": "players-versus:music/caves/deep_dark_ambience_3", "stream": false},
-            { "name": "music/game/ancestry", "stream": true, "weight": 2}
+            { "name": "players-versus:music/caves/deep_dark_ambience_1", "stream": false, "weight": 3},
+            { "name": "players-versus:music/caves/deep_dark_ambience_2", "stream": false, "weight": 3},
+            { "name": "players-versus:music/caves/deep_dark_ambience_3", "stream": false, "weight": 3}
         ]
     },
     "music.overworld.dripstone_caves": {
