@@ -1,7 +1,9 @@
 package frootloops.versus.mixin.mobs.passive;
 
 import com.google.common.collect.Lists;
-import frootloops.versus.mod.mobs.passive.RevampedTradeOffers;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories;
+import frootloops.versus.mod.mobs.passive.RevampedVillagerOffers;
+import frootloops.versus.mod.mobs.passive.RevampedWandererOffers;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.conversion.EntityConversionContext;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -33,16 +35,14 @@ public abstract class WanderingTraderEntityMixin extends MerchantEntity implemen
         super(entityType, world);
     }
 
-    //VillagerType SETTLING_VILLAGER_TYPE = Registry.register(Registries.VILLAGER_TYPE, Identifier.ofVanilla("settler"), new VillagerType("settler"));
-
     private int experience = 0;
 
     @Override
     public void fillRecipes() {
         TradeOfferList tradeOfferList = this.getOffers();
-        for (Pair<RevampedTradeOffers.Factory[], Integer> pair : RevampedTradeOffers.REBALANCED_WANDERING_TRADER_TRADES) {
+        for (Pair<RevampedTradeFactories.Factory[], Integer> pair : RevampedWandererOffers.WANDERING_TRADER_TRADES) {
 
-            ArrayList<RevampedTradeOffers.Factory> offersList = Lists.newArrayList(pair.getLeft());
+            ArrayList<RevampedTradeFactories.Factory> offersList = Lists.newArrayList(pair.getLeft());
             int count = pair.getRight() - 1 + this.random.nextBetweenExclusive(0, 3);
 
             int i = 0;

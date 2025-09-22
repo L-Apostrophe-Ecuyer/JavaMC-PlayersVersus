@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.mobs.passive;
 
 import com.google.common.collect.Sets;
-import frootloops.versus.mod.mobs.passive.RevampedTradeOffers;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ExperienceOrbEntity;
@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
 
-import static frootloops.versus.mod.mobs.passive.RevampedTradeOffers.REVAMPED_PROFESSION_TO_LEVELED_TRADE;
+import static frootloops.versus.mod.mobs.passive.RevampedVillagerOffers.PROFESSION_TO_LEVELED_TRADE;
 
 @Mixin(VillagerEntity.class)
 public abstract class VillagerEntityMixin extends MerchantEntity implements VillagerDataContainer {
@@ -66,11 +66,11 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
     @Override
     public void fillRecipes() {
         VillagerData villagerData = this.getVillagerData();
-        Int2ObjectMap<RevampedTradeOffers.Factory[]> int2ObjectMap = REVAMPED_PROFESSION_TO_LEVELED_TRADE.get(villagerData.profession());
+        Int2ObjectMap<RevampedTradeFactories.Factory[]> int2ObjectMap = PROFESSION_TO_LEVELED_TRADE.get(villagerData.profession());
         if (int2ObjectMap == null || int2ObjectMap.isEmpty()) {
             return;
         }
-        RevampedTradeOffers.Factory[] newTradesAvailable = int2ObjectMap.get(villagerData.level());
+        RevampedTradeFactories.Factory[] newTradesAvailable = int2ObjectMap.get(villagerData.level());
         if (newTradesAvailable == null) {
             return;
         }
@@ -89,7 +89,7 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
             }
         }
         for (Integer integer : set) {
-            RevampedTradeOffers.Factory factory = newTradesAvailable[integer];
+            RevampedTradeFactories.Factory factory = newTradesAvailable[integer];
             TradeOffer tradeOffer = factory.create(this, this.random);
             if (tradeOffer == null) continue;
             tradeOfferList.add(tradeOffer);

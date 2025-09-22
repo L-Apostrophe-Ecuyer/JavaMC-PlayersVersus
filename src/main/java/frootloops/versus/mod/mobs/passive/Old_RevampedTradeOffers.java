@@ -56,7 +56,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RevampedTradeOffers {
+public class Old_RevampedTradeOffers {
 
     public static final TagKey<Structure> ON_RUINS_EXPLORER_MAPS = TagKey.of(RegistryKeys.STRUCTURE, Identifier.of(VersusMod.MOD_ID, "on_ruins_explorer_maps"));
     public static final TagKey<Structure> ON_DANGEROUS_LOCATIONS_MAPS = TagKey.of(RegistryKeys.STRUCTURE, Identifier.of(VersusMod.MOD_ID, "on_pillager_maps"));
