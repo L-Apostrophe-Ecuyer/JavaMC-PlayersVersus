@@ -27,7 +27,7 @@ public class HungerManagerMixin {
 
     private float prevSaturationLevel = 0.0f;
 
-    private static final int REGEN_TIME_SLOW = 48, REGEN_TIME_FAST = 32;
+    private static final int REGEN_TIME_SLOW = 48, REGEN_TIME_FAST = 24;
     private static final int SPRINT_RECOVERY_TIME_SLOW = 80, SPRINT_RECOVERY_TIME_FAST = 20;
     private static final int FOOD_REQUIRED_FOR_FAST_REGEN = 2;
     private static final int FOOD_REQUIRED_FOR_SLOW_REGEN = 1;
@@ -100,7 +100,7 @@ public class HungerManagerMixin {
     private void doHealthRegeneration(ServerPlayerEntity player, boolean hasHungerEffect) {
         float playerHealth = player.getHealth();
         boolean canPlayerRegenHealth = player.canFoodHeal() && player.getWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
-        boolean canPlayerFastHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect;
+        boolean canPlayerFastHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect && (player.hasStatusEffect(StatusEffects.WITHER) || (player.isOnFire() && !player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasStatusEffect(StatusEffects.POISON)));
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFastHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
         boolean canPlayerFoodHeal = canPlayerFastHeal || canPlayerSlowHeal;
 
