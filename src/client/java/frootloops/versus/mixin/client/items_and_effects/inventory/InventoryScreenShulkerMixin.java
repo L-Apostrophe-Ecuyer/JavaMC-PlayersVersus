@@ -36,7 +36,7 @@ public abstract class InventoryScreenShulkerMixin extends HandledScreen<ShulkerB
         });
 
         this.buttonSortInventory = new TexturedButtonWidget(this.x + 155, this.y + 20 + (17 * 3), 13, 11, InventorySorting.TEXTURE_SMALL_INVENTORY_SORT_BUTTON, button -> {
-            if(client.player != null) InventorySorting.sortInventory(this.handler, client, client.player.getInventory(), InventorySorting.InventoryToSort.INVENTORY_WHILE_CHEST_OPEN, 27, 36);
+            if(client.player != null) InventorySorting.sortInventory(this.handler, client, client.player.getInventory(), InventorySorting.InventoryToSort.INVENTORY_WHITH_SLOTS_ABOVE, 27, 36);
             if(buttonSortInventory != null) buttonSortInventory.setFocused(false);
         });
 

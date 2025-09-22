@@ -24,7 +24,7 @@ import java.util.LinkedList;
 @Environment(EnvType.CLIENT)
 public class InventorySorting {
 
-    private static final boolean DEBUG_ITEM_SWITICHING = true;
+    private static final boolean DEBUG_ITEM_SWITICHING = false;
 
     public static final ButtonTextures TEXTURE_HOTBAR_SWAP_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/hotbar_swap_down"), Identifier.of("players-versus", "container/hotbar_swap_down_highlighted"));
     public static final ButtonTextures TEXTURE_INVENTORY_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory"), Identifier.of("players-versus", "container/sort_inventory_highlighted"));
@@ -35,7 +35,7 @@ public class InventorySorting {
     public enum InventoryToSort {
         SURVIVAL_INVENTORY,
         CREATIVE_INVENTORY,
-        INVENTORY_WHILE_CHEST_OPEN,
+        INVENTORY_WHITH_SLOTS_ABOVE,
         CONTAINER_INVENTORY,
     }
 
@@ -175,9 +175,9 @@ public class InventorySorting {
                     client.interactionManager.clickSlot(handler.syncId, slotOrigin, 8, SlotActionType.SWAP, client.player);
                     client.interactionManager.clickSlot(handler.syncId, slotDestination, 8, SlotActionType.SWAP, client.player);
                     client.interactionManager.clickSlot(handler.syncId, slotOrigin, 8, SlotActionType.SWAP, client.player);
-                } else if (inventoryToSort == InventoryToSort.INVENTORY_WHILE_CHEST_OPEN) {
+                } else if (inventoryToSort == InventoryToSort.INVENTORY_WHITH_SLOTS_ABOVE) {
 
-                    // Inversed row: in containers and chests, the row slot indexes go AFTER regular inventory slots rather than before.
+                    // Inversed row: in containers and chests, the hotbar slot indices go AFTER regular inventory slots rather than before.
                     int actualSlotOrigin = (slotOrigin < 9) ? (slotOrigin + startingSlotIndex + 27) : slotOrigin + startingSlotIndex - 9;
                     int actualSlotDest = (slotDestination < 9) ? (slotDestination + startingSlotIndex + 27) : slotDestination + startingSlotIndex - 9;
                     int rowStartingIndex = startingSlotIndex + totalNumSlots - 9;

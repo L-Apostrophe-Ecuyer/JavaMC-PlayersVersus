@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.client.items_and_effects.inventory;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.inventory.HotbarCycling;
 import frootloops.versus.mod.items_and_effects.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
@@ -44,8 +45,15 @@ public abstract class InventoryScreenSurvivalMixin<T extends AbstractRecipeScree
         });
 
         this.buttonSortInventory = new TexturedButtonWidget(buttonHotbarSwap.getX() + 22, buttonHotbarSwap.getY(), 20, 18, InventorySorting.TEXTURE_INVENTORY_SORT_BUTTON, button -> {
-            if (client.player != null)
-                InventorySorting.sortInventory(this.handler, client, client.player.getInventory(), InventorySorting.InventoryToSort.SURVIVAL_INVENTORY);
+            if (client.player != null) {
+                int numSlots = 36;
+                int indexFirstRow = this.handler.getSlotIndex(client.player.getInventory(), 9).getAsInt();
+                int indexHotbar = this.handler.getSlotIndex(client.player.getInventory(), 0).getAsInt();
+                int indexStart = Math.min(indexFirstRow, indexHotbar);
+                VersusMod.MOD_LOGGER.warn("Start of player inventory is " + indexStart);
+                InventorySorting.InventoryToSort type = indexHotbar == 0 ? InventorySorting.InventoryToSort.SURVIVAL_INVENTORY : InventorySorting.InventoryToSort.INVENTORY_WHITH_SLOTS_ABOVE;
+                InventorySorting.sortInventory(this.handler, client, client.player.getInventory(), type, indexStart, numSlots);
+            }
             if (buttonSortInventory != null) buttonSortInventory.setFocused(false);
         });
 

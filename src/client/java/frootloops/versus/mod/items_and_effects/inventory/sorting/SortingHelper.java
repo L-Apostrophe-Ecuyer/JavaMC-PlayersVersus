@@ -328,9 +328,10 @@ public class SortingHelper {
             cleanUpToolGroup(SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP);
             cleanUpToolGroup(PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, CONSUMABLES_GROUP);
             cleanUpToolGroup(AXE_GROUP, PICKAXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
-            if(SortedItemLists.ORE_BLOCKS.size() > 2) giveExtraToolsFromAndTo(PICKAXE_GROUP, RARE_MINERALS_GROUP);
             if(SortedItemLists.REDSTONE_COMPONENTS.size() > 2) giveExtraToolsFromAndTo(PICKAXE_GROUP, REDSTONE_GROUP);
             else if(SortedItemLists.REDSTONE_COMPONENTS.size() > 0) tryCombiningTwoGroups(PICKAXE_GROUP, REDSTONE_GROUP);
+            if(SortedItemLists.SHULKER_BOXES.size() > 1 && !tryCombiningTwoGroups(PICKAXE_GROUP, CONTAINERS_GROUP)) giveExtraToolsFromAndTo(PICKAXE_GROUP, CONTAINERS_GROUP);
+            if(SortedItemLists.ORE_BLOCKS.size() > 2  && !tryCombiningTwoGroups(PICKAXE_GROUP, RARE_MINERALS_GROUP)) giveExtraToolsFromAndTo(PICKAXE_GROUP, RARE_MINERALS_GROUP);
             giveExtraToolsFromAndTo(COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(AXE_GROUP, COMBAT_GROUP, CONSUMABLES_GROUP);
             giveExtraToolsFromAndTo(SHOVEL_GROUP, PICKAXE_GROUP);
@@ -482,6 +483,7 @@ public class SortingHelper {
 
 
     public static void cleanUpMisc() {
+        tryCombiningTwoGroups(GOODIES_GROUP, CONTAINERS_GROUP);
         tryCombiningTwoGroups(RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP);
         tryCombiningTwoGroups(WORLD_GROUP, COMMON_MINERALS_GROUP);
         tryCombiningTwoGroups(COMMON_MINERALS_GROUP, RANDOM_GROUP);
@@ -508,16 +510,16 @@ public class SortingHelper {
             if(WORLD_GROUP.size() + size <= 9)
                 WORLD_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
 
-            if(SHEARS_GROUP.size() + size <= 9)
+            else if(SHEARS_GROUP.size() + size <= 9)
                 SHEARS_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
 
-            if(GOODIES_GROUP.size() + RANDOM_GROUP.size() <= 9)
+            else if(GOODIES_GROUP.size() + RANDOM_GROUP.size() <= 9)
                 GOODIES_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
 
-            if(GOODIES_GROUP.size() + RANDOM_GROUP.size() <= 9)
-                GOODIES_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
+            else if(CONTAINERS_GROUP.size() + RANDOM_GROUP.size() <= 9)
+                CONTAINERS_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
 
-            if(SHEARS_GROUP.size() + size <= 9)
+            else if(SHEARS_GROUP.size() + size <= 9)
                 SHEARS_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
         }
     }

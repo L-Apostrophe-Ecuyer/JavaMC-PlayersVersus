@@ -182,7 +182,8 @@ public abstract class ItemComparaisonHelper {
         else if(stack.isOf(Items.BUCKET) || stack.getRecipeRemainder() == Items.BUCKET.getDefaultStack()) return ItemType.MISC_TOOL;
         else if(MinecraftClient.getInstance().world.getBrewingRecipeRegistry().isPotionRecipeIngredient(stack)) return ItemType.BREWING_INGREDIENT;
         else if(stack.getComponents().contains(DataComponentTypes.FOOD)) return ItemType.FOOD;
-        else if(stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS)) return ItemType.ITEM_CONTAINER;
+        else if(stack.isIn(ItemTags.SHULKER_BOXES)) return ItemType.SHULKER_BOX;
+        else if(stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS)) return ItemType.BUNDLE;
         else if(stack.getComponents().contains(DataComponentTypes.CONTAINER)) return ItemType.ITEM_CONTAINER;
         else if(stack.getComponents().contains(DataComponentTypes.CONTAINER_LOOT)) return ItemType.ITEM_CONTAINER;
         else if(stack.getComponents().contains(DataComponentTypes.POTION_CONTENTS)) return ItemType.POTIONS;

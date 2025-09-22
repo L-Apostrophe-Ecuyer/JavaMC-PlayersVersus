@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ClientPlayerInteractionManager.class)
-public abstract class InteractionManagerMixin  {
+public abstract class DebugInteractionManagerMixin {
 
     @Inject(method = "clickSlot",at = @At("HEAD"), cancellable = false)
     public void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo info) {

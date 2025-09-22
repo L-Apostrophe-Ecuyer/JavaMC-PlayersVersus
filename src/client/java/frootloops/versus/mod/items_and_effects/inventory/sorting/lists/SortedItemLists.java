@@ -9,11 +9,15 @@ import net.minecraft.sound.BlockSoundGroup;
 public class SortedItemLists {
 
     /** MISC - GOODIES ------------------------------------------------------------   */
-    public static final SortedTaggedItemList SHULKER_BOXES = new SortedTaggedItemList(ItemTags.SHULKER_BOXES, ItemType.ITEM_CONTAINER);
-    public static final SortedTaggedItemList BUNDLES = new SortedTaggedItemList(ItemTags.BUNDLES, ItemType.ITEM_CONTAINER);
     public static final SortedMappedItemList TREASURE_ITEMS = new SortedMappedItemList(ItemSortingMaps.ITEMS_TREASURE, ItemType.MISC);
     public static final SortedTypedItemList SMITHING_ITEMS = new SortedTypedItemList(new ItemType[]{ItemType.SMITHING_TEMPLATE});
-    public static final SortedItemList[] MISC_GOODIES = {SHULKER_BOXES, BUNDLES, TREASURE_ITEMS, SMITHING_ITEMS};
+    public static final SortedItemList[] MISC_GOODIES = {TREASURE_ITEMS, SMITHING_ITEMS};
+
+
+    /** MISC - CONTAINERS ------------------------------------------------------------   */
+    public static final SortedTypedItemList SHULKER_BOXES = new SortedTypedItemList(new ItemType[]{ItemType.SHULKER_BOX});
+    public static final SortedTypedItemList BUNDLES = new SortedTypedItemList(new ItemType[]{ItemType.BUNDLE, ItemType.ITEM_CONTAINER});
+    public static final SortedItemList[] MISC_GONTAINERS = {BUNDLES, SHULKER_BOXES};
 
 
     /** MINEABLE GOODIES ------------------------------------------------------------ */
