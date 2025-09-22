@@ -3,9 +3,10 @@
   "subtitles.players-versus.rail_turning_sound": "Minecart makes a sharp turn",
   "subtitles.players-versus.sword_blocking": "Sword blocks attack",
 
-  "record.wait": "C418 - Wait",
-  "record.cat": "C418 - Cat",
-  "record.far": "C418 - Far",
+  "records.wait": "C418 - Wait",
+  "records.cat": "C418 - Cat",
+  "records.far": "C418 - Far",
+  "players-versus.music.menu.c418_battlemode1": "C418 - Battlemode 1",
   "players-versus.music.menu.c418_battlemode4": "C418 - Battlemode 4",
   "players-versus.music.menu.c418_chris": "C418 - Chris",
   "players-versus.music.menu.c418_dog": "C418 - Dog",
@@ -74,7 +75,8 @@
   "players-versus.deathScreen.spectateHome": "Spectate home",
   "players-versus.deathScreen.respawnNearby": "Respawn nearby",
   "players-versus.deathScreen.respawnHome": "Respawn home",
-  "players-versus.tradeScreen.experienceBarHover" : "Will restock and learn new trades by talking to other villagers.\nEspecially if they're in a similar line of work!",
+  "players-versus.tradeScreen.experienceBarHover" : "Will restock and learn new trades by talking to other villagers.
+Especially if they're in a similar line of work!",
   "merchant.deprecated" : "Needs to talk to other villagers to restock.",
 
   "item.minecraft.leather": "Leather Hide",
