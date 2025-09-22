@@ -22,10 +22,13 @@ import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -50,6 +53,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
 
     @Shadow public int totalExperience, experienceLevel, enchantingTableSeed;
+
+    @Shadow protected void dropShoulderEntities() {}
 
     @Overwrite
     public double getEntityInteractionRange() {
@@ -80,19 +85,39 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     public boolean damage(ServerWorld world, DamageSource source, float amount) {
-        if(amount > 0f && this.isSleeping()) {
-            ((PlayerEntity)((Object)this)).wakeUp(false, true);
-            if(source.getAttacker() instanceof LivingEntity attackingEntity) {
-                this.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, attackingEntity.getEyePos());
+        if (this.isInvulnerableTo(world, source)) {
+            return false;
+        } else if (this.abilities.invulnerable && !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return false;
+        } else {
+            this.despawnCounter = 0;
+            if (this.isDead()) {
+                return false;
+            } else {
+                this.dropShoulderEntities();
+                if (source.isScaledWithDifficulty()) {
+                    if (world.getDifficulty() == Difficulty.EASY || world.getDifficulty() == Difficulty.PEACEFUL)
+                        amount = Math.min(amount / 2.0F + 1.0F, amount);
+
+                    else if (world.getDifficulty() == Difficulty.HARD)
+                        amount = amount * 3.0F / 2.0F;
+                }
+
+                if(amount > 0f && this.isSleeping()) {
+                    ((PlayerEntity)((Object)this)).wakeUp(false, true);
+                    if(source.getAttacker() instanceof LivingEntity attackingEntity) {
+                        this.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, attackingEntity.getEyePos());
+                    }
+                }
+                if (VersusSettings.Combat.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
+                    int maxUseTime = activeItemStack.getMaxUseTime(this);
+                    if (maxUseTime < 64) {
+                        itemUseTimeLeft = maxUseTime;
+                    }
+                }
+                return amount == 0.0F ? false : super.damage(world, source, amount);
             }
         }
-        if (VersusSettings.Combat.DO_FOOD_EATING_INTERRUPTION && source.getAttacker() != null && amount > 1.0F) {
-            int maxUseTime = activeItemStack.getMaxUseTime(this);
-            if (maxUseTime < 64) {
-                itemUseTimeLeft = maxUseTime;
-            }
-        }
-        return super.damage(world, source, amount);
     }
 
     @Inject(method = "canHarvest", at = @At("RETURN"), cancellable = true)
