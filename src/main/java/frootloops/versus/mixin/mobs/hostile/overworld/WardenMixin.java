@@ -1,9 +1,13 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
+import frootloops.versus.VersusMod;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.WardenAngerManager;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.Angriness;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.WardenBrain;
@@ -15,6 +19,7 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Unit;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -22,9 +27,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Optional;
 
 
 @Mixin(WardenEntity.class)
@@ -86,6 +95,18 @@ public class WardenMixin extends HostileEntity {
         return this.angerManager.getAngerFor(this.getTarget());
     }
 
+    /**
+     * Darkness' fog amount depends on how close the player is
+     */
+    @Overwrite
+    public static void addDarknessToClosePlayers(ServerWorld world, Vec3d pos, @Nullable Entity entity, int range) {
+        if(entity instanceof WardenEntity warden && warden.getTarget() instanceof PlayerEntity player && player.squaredDistanceTo(warden) < 256.0) {
+            StatusEffectInstance intenseDarkness = new StatusEffectInstance(StatusEffects.DARKNESS, 120, 2, false, false);
+            StatusEffectUtil.addEffectToPlayersWithinDistance(world, entity, pos, 16.0, intenseDarkness, 200);
+        }
+        StatusEffectInstance mildDarkness = new StatusEffectInstance(StatusEffects.DARKNESS, 260, 0, false, false);
+        StatusEffectUtil.addEffectToPlayersWithinDistance(world, entity, pos, 32.0, mildDarkness, 200);
+    }
 
     /**
     This allows players to sneak away from Wardens, and Wardens to lose their scent, making for tense encounters.
@@ -128,6 +149,7 @@ public class WardenMixin extends HostileEntity {
      */
     @Overwrite
     public void increaseAngerAt(@Nullable Entity entity, int amount, boolean listening) {
+        if(amount < 1) return;
         if (!this.isAiDisabled() && this.isValidTarget(entity)) {
             boolean isPlayer = entity instanceof PlayerEntity;
 
@@ -137,23 +159,35 @@ public class WardenMixin extends HostileEntity {
             }
 
             // If Player:
-            if(isPlayer && amount > 0) {
+            if(isPlayer) {
 
                 // If current target isnt a player, but new one is, forget them and prioritize player:
-                if( this.getTarget() != null && !(this.getTarget() instanceof PlayerEntity)) {
-                    if(this.getAngriness().isAngry()) this.getBrain().forget(MemoryModuleType.ATTACK_TARGET);
-                    this.angerManager.increaseAngerAt(this.getTarget(), -4 * amount);
+                if(this.getTarget() != null && this.getTarget().isAlive() && !(this.getTarget() instanceof PlayerEntity)) {
+                    this.getBrain().forget(MemoryModuleType.ATTACK_TARGET);
+                    Optional<LivingEntity> suspect = this.angerManager.getPrimeSuspect();
+                    while(suspect.isPresent()) {
+                        if(suspect.get() instanceof PlayerEntity) break;
+                        else angerManager.removeSuspect(suspect.get());
+                        suspect = this.angerManager.getPrimeSuspect();
+                    }
                 }
 
                 // Get rebalanced anger amount, for regular sniffing or hearing:
                 else if(amount == 10 || amount == 35) {
                     if(entity.isSprinting()) amount = 40;
+                    else if(!listening) amount = 5;
                     else {
                         double squaredDistance = this.squaredDistanceTo(entity);
                         if(squaredDistance > 24.0) amount /= 5;
                         else if (squaredDistance > 16.0) amount /= 2;
                         else if (squaredDistance < 4.0) amount = 3 + amount/2;
                     }
+                }
+            }
+            else {
+                // If current target IS a player, but new one isn't, ignore them:
+                if(this.getTarget() != null && this.getTarget().isAlive() && (this.getTarget() instanceof PlayerEntity player) && player.squaredDistanceTo(this) < 1024.0) {
+                    return;
                 }
             }
 

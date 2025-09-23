@@ -18,7 +18,7 @@ public abstract class DarknessFogRendererMixin {
     @ModifyConstant(method = "applyStartEndModifier", constant = @Constant(floatValue = 15.0F))
     private float darknessEffectNoLongerCompletelyBlindsPlayers(float fogEnd) {
         StatusEffectInstance darkness = MinecraftClient.getInstance().player.getStatusEffect(StatusEffects.DARKNESS);
-        float blindnessAmount = darkness == null ? 0.0f : 8f + darkness.getAmplifier() * 16.0f;
+        float blindnessAmount = darkness == null ? 0.0f : 8f + darkness.getAmplifier() * 12.0f;
         return 48.0f - blindnessAmount;
     }
 
