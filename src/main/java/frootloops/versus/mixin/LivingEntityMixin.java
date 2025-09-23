@@ -118,7 +118,7 @@ public abstract class LivingEntityMixin extends Entity {
             if(fireResistanceEffect != null) return (fireResistanceEffect.getAmplifier() > 0) ? 0.0f : 0.6f;
         }
 
-        // Drowning & Suffocation should no longer kill pets:
+        // Random Drowning & Suffocation should no longer slowly kill pets:
         else if(amount > 0f && (source.isOf(DamageTypes.DROWN) || source.isOf(DamageTypes.IN_WALL)) && !this.isPlayer() && !(((LivingEntity)((Object)this)) instanceof HostileEntity)) {
             this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 110, 0, true, false));
             return amount;
