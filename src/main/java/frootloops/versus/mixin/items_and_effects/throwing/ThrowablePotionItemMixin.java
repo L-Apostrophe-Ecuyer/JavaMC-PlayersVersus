@@ -27,7 +27,7 @@ public abstract class ThrowablePotionItemMixin extends PotionItem implements Pro
             throwPotion(world, user, itemStack, 0.4f + pullProgress);
             playerEntity.incrementStat(Stats.USED.getOrCreateStat(this));
             playerEntity.getItemCooldownManager().set(itemStack, 20);
-
+            itemStack.decrementUnlessCreative(1, user);
         }
         else throwPotion(world, user, itemStack, 0.5f);
         return false;
