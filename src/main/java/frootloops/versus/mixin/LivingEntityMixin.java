@@ -12,11 +12,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -38,6 +40,8 @@ import java.util.Map;
 public abstract class LivingEntityMixin extends Entity {
     @Shadow
     private final Map<StatusEffect, StatusEffectInstance> activeStatusEffects = Maps.newHashMap();
+
+    @Shadow public final boolean addStatusEffect(StatusEffectInstance effect) {return false;}
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -107,13 +111,22 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
     private float rebalancedDamage(float amount2, ServerWorld world, DamageSource source, float amount) {
-        // Explosions don't hurt as much, or at least, the damage is more consistent:
-        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
-            return (amount + amount + 16.0f) / 4.0f;
-        }
+
+        // Fire resistance is only partial at level one!
         if (source.isIn(DamageTypeTags.IS_FIRE)) {
             StatusEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getStatusEffect(StatusEffects.FIRE_RESISTANCE);
             if(fireResistanceEffect != null) return (fireResistanceEffect.getAmplifier() > 0) ? 0.0f : 0.6f;
+        }
+
+        // Drowning & Suffocation should no longer kill pets:
+        else if(amount > 0f && (source.isOf(DamageTypes.DROWN) || source.isOf(DamageTypes.IN_WALL)) && !this.isPlayer() && !(((LivingEntity)((Object)this)) instanceof HostileEntity)) {
+            this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 110, 0, true, false));
+            return amount;
+        }
+
+        // Explosions don't hurt as much, or at least, the damage is more consistent:
+        else if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
+            return (amount + amount + 16.0f) / 4.0f;
         }
         return amount;
     }
