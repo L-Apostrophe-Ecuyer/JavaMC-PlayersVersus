@@ -164,6 +164,7 @@ public class WardenMixin extends HostileEntity {
                 // If current target isnt a player, but new one is, forget them and prioritize player:
                 if(this.getTarget() != null && this.getTarget().isAlive() && !(this.getTarget() instanceof PlayerEntity)) {
                     this.getBrain().forget(MemoryModuleType.ATTACK_TARGET);
+                    this.getBrain().forget(MemoryModuleType.ANGRY_AT);
                     Optional<LivingEntity> suspect = this.angerManager.getPrimeSuspect();
                     while(suspect.isPresent()) {
                         if(suspect.get() instanceof PlayerEntity) break;
