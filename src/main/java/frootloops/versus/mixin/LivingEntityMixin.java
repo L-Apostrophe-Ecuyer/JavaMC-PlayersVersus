@@ -20,6 +20,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -119,8 +120,8 @@ public abstract class LivingEntityMixin extends Entity {
         }
 
         // Random Drowning & Suffocation should no longer slowly kill pets:
-        else if(amount > 0f && (source.isOf(DamageTypes.DROWN) || source.isOf(DamageTypes.IN_WALL)) && !this.isPlayer() && !(((LivingEntity)((Object)this)) instanceof HostileEntity)) {
-            this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 110, 0, true, false));
+        else if(amount > 0f && !this.isPlayer() && (source.isOf(DamageTypes.DROWN) || source.isOf(DamageTypes.IN_WALL)) && (((LivingEntity)((Object)this)) instanceof PassiveEntity)) {
+            this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 160, 0, true, false));
             return amount;
         }
 
