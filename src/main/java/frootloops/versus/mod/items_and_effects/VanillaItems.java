@@ -64,7 +64,6 @@ public class VanillaItems {
     }
 
     private static void setUpTransformVanillaItemsToModded() {
-        ITEM_REPLACEMENT_MAP.put(Items.CHARCOAL, Items.COAL);
 
         ITEM_REPLACEMENT_MAP.put(Items.FERMENTED_SPIDER_EYE, CustomBrewingItems.CORRUPTED_WART_POWDER);
         ITEM_REPLACEMENT_MAP.put(Items.BLAZE_POWDER, CustomBrewingItems.CONCENTRATE_OF_STRENGTH);
@@ -87,6 +86,7 @@ public class VanillaItems {
     }
 
     public static boolean hasReplacementItem(Item item) {
+        if(item == Items.PACKED_MUD) VersusMod.MOD_LOGGER.warn(" -> Is Packed Mud in map? " + ITEM_REPLACEMENT_MAP.containsKey(item));
         return ITEM_REPLACEMENT_MAP.containsKey(item);
     }
 

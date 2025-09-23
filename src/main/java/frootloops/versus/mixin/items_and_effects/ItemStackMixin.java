@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.items_and_effects;
 
+import frootloops.versus.mod.items_and_effects.VanillaItems;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.ComponentHolder;
 import net.minecraft.component.DataComponentTypes;
@@ -7,14 +8,20 @@ import net.minecraft.component.MergedComponentMap;
 import net.minecraft.component.type.EnchantableComponent;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.resource.featuretoggle.FeatureSet;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.text.Text;
+import net.minecraft.util.ClickType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ItemStack.class)
@@ -36,6 +43,16 @@ public abstract class ItemStackMixin implements ComponentHolder {
     @Shadow
     public boolean hasEnchantments() {return false;}
 
+    @ModifyVariable(method = "<init>(Lnet/minecraft/registry/entry/RegistryEntry;I)V", at = @At("HEAD"), argsOnly = true)
+    private static RegistryEntry<Item> modifyItemRegistry(RegistryEntry<Item> item) {
+        if(VanillaItems.hasReplacementItem(item.value())) return Registries.ITEM.getEntry(VanillaItems.getReplacementItem(item.value()));
+        return item;
+    }
+
+    @ModifyVariable(method = "<init>(Lnet/minecraft/item/ItemConvertible;I)V", at = @At("HEAD"), argsOnly = true)
+    private static ItemConvertible modifyItemConvertible(ItemConvertible item) {
+        return VanillaItems.getReplacementItem(item.asItem());
+    }
 
     @Inject(method = "isEnchantable", at = @At("RETURN"), cancellable = true)
     public void isEnchantable(CallbackInfoReturnable<Boolean> cir) {
