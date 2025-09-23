@@ -30,12 +30,13 @@ public abstract class EnchantingScreenMixin extends HandledScreen<EnchantmentScr
 
     @Redirect(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/EnchantingPhrases;generatePhrase(Lnet/minecraft/client/font/TextRenderer;I)Lnet/minecraft/text/StringVisitable;"))
     private StringVisitable replaceGlyphPhrases(EnchantingPhrases enchantingPhrases, TextRenderer textRenderer, int width) {
+        int originalIndex = index;
         for(int i = 0; i < 3; i++) {
             index = (index + 1) % 3;
-            if(this.handler.enchantmentPower[i] != 0) break;
+            if(this.handler.enchantmentPower[index] != 0) break;
         }
         if(this.handler.enchantmentPower[index] == 0) {
-            VersusMod.MOD_LOGGER.error("[ ENCHANTING SCREEN ] Error when trying to display the enchanting name of index " + index + " -> No Enchanting Power! Index is invalid.");
+            VersusMod.MOD_LOGGER.error("[ ENCHANTING SCREEN ] Error when trying to display the enchanting name of index " + index + " -> No Enchanting Power! Index is invalid. Original was " + originalIndex + ", and enchantmentPower = [" + this.handler.enchantmentPower[0] + ", " + this.handler.enchantmentPower[1] + ", " + this.handler.enchantmentPower[2] + "]");
             return StringVisitable.EMPTY;
         }
 
