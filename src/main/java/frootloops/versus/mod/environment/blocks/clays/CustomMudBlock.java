@@ -6,10 +6,7 @@ import frootloops.versus.mod.environment.CustomDamageSources;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.pathing.NavigationType;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.CatEntity;
-import net.minecraft.entity.passive.PigEntity;
-import net.minecraft.entity.passive.WolfEntity;
+import net.minecraft.entity.passive.*;
 import net.minecraft.fluid.WaterFluid;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.EntityTypeTags;
@@ -129,8 +126,8 @@ public class CustomMudBlock extends MoistBlock {
     }
 
     public static boolean canWalkOnWetMud(Entity entity) {
-        if (entity.isInFluid()) return true; // Unrealistic but fairly useful!
-        if (entity instanceof PigEntity || entity instanceof WolfEntity || entity instanceof CatEntity || entity.getType().isIn(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) return true;
+        if (entity.isInFluid() && !entity.isPlayer()) return true; // Unrealistic but fairly useful!
+        if (entity instanceof PigEntity || entity instanceof TameableEntity || entity.getType().isIn(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) return true;
         if (entity instanceof LivingEntity) return ((LivingEntity)entity).getEquippedStack(EquipmentSlot.FEET).isOf(Items.LEATHER_BOOTS);
         return false;
     }
