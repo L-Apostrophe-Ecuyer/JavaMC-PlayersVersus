@@ -39,6 +39,7 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     private static final double MIN_VELOCITY_TO_BE_SOLID = -0.5;
     private static Vec3d NORMAL_MULT = new Vec3d(0.6, 0.8, 0.6);
     private static Vec3d SNEAKING_MULT = new Vec3d(0.8, 0.8, 0.8);
+    private static Vec3d JUMPING_MULT = new Vec3d(0.9, 1.0, 0.9);
 
     private static final VoxelShape COLLISION_SHAPE_INSIDE = Block.createCuboidShape(4.0, 4.0, 4.0, 12.0, 12.0, 12.0);
 
@@ -93,9 +94,9 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
         if (!entity.getBlockPos().equals(pos) && !entity.getBlockPos().up().equals(pos)) return;
         if (entity instanceof LivingEntity livingEntity) {
             if(((LivingEntityAccessor)livingEntity).isJumping()) {
-                if(livingEntity.isOnGround() || (livingEntity.getVelocity().y < -0.07 && livingEntity.getVelocity().y > -0.08)) {
-                    livingEntity.addVelocity(0.0, 0.33 - livingEntity.getVelocity().y, 0.0);
-                }
+                Vec3d v = livingEntity.getVelocity();
+                if(livingEntity.isOnGround() || (v.y < -0.07 && v.y > -0.08))
+                    livingEntity.setVelocity(v.x * 0.9, 0.33, v.z * 0.9);
             }
             else {
                 if (livingEntity.isSneaking()) entity.slowMovement(state, SNEAKING_MULT);
