@@ -43,9 +43,8 @@ public abstract class ServerWorldWeatherMixin extends World {
 
     @Override
     public boolean hasRain(BlockPos pos) {
-        if (!this.isThundering()) {
-            return false;
-        } else return super.hasRain(pos);
+        if (!this.isThundering()) return false;
+        else return super.hasRain(pos);
     }
 
     @Overwrite

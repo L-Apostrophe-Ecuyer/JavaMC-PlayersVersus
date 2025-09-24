@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.environment.blocks;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
-import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.block.*;
 import net.minecraft.enchantment.Enchantments;
@@ -9,7 +9,6 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.passive.TameableShoulderEntity;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
@@ -29,7 +28,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.HashMap;
-import java.util.OptionalInt;
 
 @Mixin(LeavesBlock.class)
 public abstract class LeavesMixin extends Block implements Waterloggable {
@@ -37,14 +35,27 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     public LeavesMixin(Settings settings) {
         super(settings);
     }
-    private static final float FALL_DISTANCE_REDUCTION = 4.0F;
-    private static Vec3d MOVE_TOWARDS_CENTER_MULT = new Vec3d(0.5, 1.1, 0.5);
-    private static Vec3d SNEAKING_MULT = new Vec3d(0.8, 0.5, 0.8);
+    private static final double FALL_DISTANCE_REDUCTION = 3.0;
+    private static final double MIN_VELOCITY_TO_BE_SOLID = -0.5;
+    private static Vec3d NORMAL_MULT = new Vec3d(0.6, 0.8, 0.6);
+    private static Vec3d SNEAKING_MULT = new Vec3d(0.8, 0.8, 0.8);
+
+    private static final VoxelShape COLLISION_SHAPE_INSIDE = Block.createCuboidShape(4.0, 4.0, 4.0, 12.0, 12.0, 12.0);
+
+    protected VoxelShape getInsideCollisionShape(BlockState state, BlockView world, BlockPos pos, Entity entity) {
+        if(entity instanceof LivingEntity && entity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) return VoxelShapes.empty();
+        return COLLISION_SHAPE_INSIDE;
+    }
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         if (context instanceof EntityShapeContext && ((EntityShapeContext) context).getEntity() instanceof LivingEntity livingEntity) {
-            if(livingEntity.hasVehicle() || livingEntity.isSneaking() || livingEntity instanceof SpiderEntity || livingEntity instanceof Flutterer || livingEntity instanceof TameableEntity) return VoxelShapes.fullCube();
+            if(livingEntity.hasPassengers() || livingEntity.hasVehicle() || livingEntity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) {
+                livingEntity.fallDistance = -(livingEntity.getVelocity().getY() + 0.07) * 8.0;
+                livingEntity.setVelocity(livingEntity.getVelocity().multiply(1.0, 0.9, 1.0));
+                return VoxelShapes.empty();
+            }
+            if(livingEntity instanceof SpiderEntity || livingEntity instanceof Flutterer || livingEntity instanceof AnimalEntity) return VoxelShapes.fullCube();
             if(!context.isAbove(VoxelShapes.fullCube(), pos, true)) return VoxelShapes.empty();
         }
         return VoxelShapes.fullCube();
@@ -58,26 +69,38 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
             world.removeBlock(pos, false);
         }
         else if(entity instanceof LivingEntity livingEntity) {
-            if(!state.getFluidState().isEmpty() && EnchantRegistryHelper.hasEnchantment(livingEntity.getEquippedStack(EquipmentSlot.FEET), Enchantments.FROST_WALKER)) {
-                Block.dropStacks(state, world, pos);
+            fallDistance = Math.max(fallDistance, -(livingEntity.getVelocity().getY() + 0.07) * 8.0);
+            if(livingEntity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) {
+                livingEntity.fallDistance = fallDistance;
+                livingEntity.setVelocity(livingEntity.getVelocity().x, -0.15, livingEntity.getVelocity().z);
+            }
+            else if(!state.getFluidState().isEmpty() && EnchantRegistryHelper.hasEnchantment(livingEntity.getEquippedStack(EquipmentSlot.FEET), Enchantments.FROST_WALKER)) {
+                world.breakBlock(pos, true);
                 world.setBlockState(pos, Blocks.FROSTED_ICE.getDefaultState());
                 world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(entity, Blocks.FROSTED_ICE.getDefaultState()));
-                super.onLandedUpon(world, state, pos, livingEntity, livingEntity.fallDistance);
+                super.onLandedUpon(world, state, pos, livingEntity, fallDistance);
             }
-            else if(fallDistance > 4) {
-                livingEntity.fallDistance = livingEntity.fallDistance / FALL_DISTANCE_REDUCTION;
-                super.onLandedUpon(world, state, pos, livingEntity, livingEntity.fallDistance);
+            else {
+                fallDistance = fallDistance / FALL_DISTANCE_REDUCTION;
+                super.onLandedUpon(world, state, pos, livingEntity, fallDistance);
             }
         }
     }
 
     @Override
     protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
-        if (entity.hasVehicle()) return;
+        if (entity.hasVehicle() || entity.isSpectator()) return;
         if (!entity.getBlockPos().equals(pos) && !entity.getBlockPos().up().equals(pos)) return;
-        if (!entity.isSpectator() && entity instanceof LivingEntity livingEntity && entity.getBlockPos().equals(pos) && !((LivingEntityAccessor)livingEntity).isJumping()) {
-            if(livingEntity.isSneaking()) entity.slowMovement(state, SNEAKING_MULT);
-            else if(Combat.isLookingTowards(livingEntity, pos.toCenterPos(), -0.25)) entity.slowMovement(state, MOVE_TOWARDS_CENTER_MULT);
+        if (entity instanceof LivingEntity livingEntity) {
+            if(((LivingEntityAccessor)livingEntity).isJumping()) {
+                if(livingEntity.isOnGround() || (livingEntity.getVelocity().y < -0.07 && livingEntity.getVelocity().y > -0.08)) {
+                    livingEntity.addVelocity(0.0, 0.33 - livingEntity.getVelocity().y, 0.0);
+                }
+            }
+            else {
+                if (livingEntity.isSneaking()) entity.slowMovement(state, SNEAKING_MULT);
+                else entity.slowMovement(state, NORMAL_MULT);
+            }
         }
     }
 
