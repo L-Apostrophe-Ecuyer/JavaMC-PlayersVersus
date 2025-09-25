@@ -125,11 +125,18 @@ public class BurningConversion {
         ITEM_BURNING_CONVERSION_MAP.put(Items.RAW_COPPER, new ItemBurningConversionRecord(180, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(Items.COPPER_ORE, new ItemBurningConversionRecord(180, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(Items.DEEPSLATE_COPPER_ORE, new ItemBurningConversionRecord(180, null, Items.COPPER_INGOT, false));
+
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_AXE, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_PICKAXE, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_SHOVEL, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_SWORD, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_HOE, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_AXE_WAXED, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_PICKAXE_WAXED, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_SHOVEL_WAXED, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_SWORD_WAXED, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_HOE_WAXED, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
+
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_HELMET, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_CHESTPLATE, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_LEGGINGS, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
@@ -138,6 +145,10 @@ public class BurningConversion {
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_CHESTPLATE_EXPOSED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_LEGGINGS_EXPOSED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_BOOTS_EXPOSED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_HELMET_WAXED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_CHESTPLATE_WAXED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_LEGGINGS_WAXED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_BOOTS_WAXED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
 
         ITEM_BURNING_CONVERSION_MAP.put(Items.COPPER_BLOCK, new ItemBurningConversionRecord(240, Items.COPPER_INGOT, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(Items.WAXED_COPPER_BLOCK, new ItemBurningConversionRecord(-10, Items.COPPER_BLOCK, Items.COPPER_BLOCK, false));

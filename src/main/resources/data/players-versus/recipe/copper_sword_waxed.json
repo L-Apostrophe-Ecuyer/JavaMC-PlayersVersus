@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_transmute",
+  "category": "equipment",
+  "group": "copper_equipment_waxing",
+  "input": "players-versus:copper_sword",
+  "material": "minecraft:honeycomb",
+  "result": {
+    "id": "players-versus:copper_sword_waxed"
+  }
+}

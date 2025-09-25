@@ -27,6 +27,10 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("copper_leggings", CustomEquipment.COPPER_LEGGINGS, ItemGroups.COMBAT);
         registerCustomItem("copper_helmet", CustomEquipment.COPPER_HELMET, ItemGroups.COMBAT);
         registerCustomItem("copper_boots", CustomEquipment.COPPER_BOOTS, ItemGroups.COMBAT);
+        registerCustomItem("copper_chestplate_waxed", CustomEquipment.COPPER_CHESTPLATE_WAXED, ItemGroups.COMBAT);
+        registerCustomItem("copper_leggings_waxed", CustomEquipment.COPPER_LEGGINGS_WAXED, ItemGroups.COMBAT);
+        registerCustomItem("copper_helmet_waxed", CustomEquipment.COPPER_HELMET_WAXED, ItemGroups.COMBAT);
+        registerCustomItem("copper_boots_waxed", CustomEquipment.COPPER_BOOTS_WAXED, ItemGroups.COMBAT);
         registerCustomItem("copper_chestplate_exposed", CustomEquipment.COPPER_CHESTPLATE_EXPOSED, ItemGroups.COMBAT);
         registerCustomItem("copper_leggings_exposed", CustomEquipment.COPPER_LEGGINGS_EXPOSED, ItemGroups.COMBAT);
         registerCustomItem("copper_helmet_exposed", CustomEquipment.COPPER_HELMET_EXPOSED, ItemGroups.COMBAT);
@@ -36,6 +40,11 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("copper_sword", CustomEquipment.COPPER_SWORD, ItemGroups.COMBAT);
         registerCustomItem("copper_shovel", CustomEquipment.COPPER_SHOVEL, ItemGroups.TOOLS);
         registerCustomItem("copper_pickaxe", CustomEquipment.COPPER_PICKAXE, ItemGroups.TOOLS);
+        registerCustomItem("copper_hoe_waxed", CustomEquipment.COPPER_HOE_WAXED, ItemGroups.TOOLS);
+        registerCustomItem("copper_axe_waxed", CustomEquipment.COPPER_AXE_WAXED, ItemGroups.TOOLS, ItemGroups.COMBAT);
+        registerCustomItem("copper_sword_waxed", CustomEquipment.COPPER_SWORD_WAXED, ItemGroups.COMBAT);
+        registerCustomItem("copper_shovel_waxed", CustomEquipment.COPPER_SHOVEL_WAXED, ItemGroups.TOOLS);
+        registerCustomItem("copper_pickaxe_waxed", CustomEquipment.COPPER_PICKAXE_WAXED, ItemGroups.TOOLS);
 
         registerCustomItem("living_flame", CustomBrewingItems.LIVING_FLAME, ItemGroups.INGREDIENTS);
         registerCustomItem("glistering_beetroot", CustomBrewingItems.GLISTERING_BEETROOT, ItemGroups.INGREDIENTS, ItemGroups.FOOD_AND_DRINK);
