@@ -1,13 +1,10 @@
 package frootloops.versus.mixin.environment.blocks;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.*;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
