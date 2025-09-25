@@ -1,18 +1,22 @@
 {
   "model": {
-    "type": "minecraft:condition",
-    "property": "minecraft:component",
-    "predicate": "minecraft:damage",
-    "value": {
-      "damage": 64
-    },
-    "on_true": {
-      "type": "minecraft:model",
-      "model": "players-versus:item/copper_equipment_exposed/copper_axe"
-    },
-    "on_false": {
-      "type": "minecraft:model",
-      "model": "players-versus:item/copper_equipment/copper_axe"
-    }
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:damage",
+    "entries": [
+      {
+        "threshold": 0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "players-versus:item/copper_equipment/copper_axe"
+        }
+      },
+      {
+        "threshold": 0.85,
+        "model": {
+          "type": "minecraft:model",
+          "model": "players-versus:item/copper_equipment_exposed/copper_axe"
+        }
+      }
+    ]
   }
 }

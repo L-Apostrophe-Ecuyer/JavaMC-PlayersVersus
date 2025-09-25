@@ -1,18 +1,22 @@
 {
   "model": {
-    "type": "minecraft:condition",
-    "property": "minecraft:component",
-    "predicate": "minecraft:damage",
-    "value": {
-      "damage": 64
-    },
-    "on_true": {
-      "type": "minecraft:model",
-      "model": "players-versus:item/copper_equipment_exposed/copper_pickaxe"
-    },
-    "on_false": {
-      "type": "minecraft:model",
-      "model": "players-versus:item/copper_equipment/copper_pickaxe"
-    }
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:damage",
+    "entries": [
+      {
+        "threshold": 0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "players-versus:item/copper_equipment/copper_pickaxe"
+        }
+      },
+      {
+        "threshold": 0.85,
+        "model": {
+          "type": "minecraft:model",
+          "model": "players-versus:item/copper_equipment_exposed/copper_pickaxe"
+        }
+      }
+    ]
   }
 }
