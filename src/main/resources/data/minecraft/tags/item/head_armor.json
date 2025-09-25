@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "players-versus:copper_helmet"
+    "players-versus:copper_helmet",
+    "players-versus:copper_helmet_exposed"
   ]
 }

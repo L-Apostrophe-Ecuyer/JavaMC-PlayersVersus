@@ -2,12 +2,12 @@
   "layers": {
     "humanoid": [
       {
-        "texture": "players-versus:copper_damaged"
+        "texture": "players-versus:copper_exposed"
       }
     ],
     "humanoid_leggings": [
       {
-        "texture": "players-versus:copper_damaged"
+        "texture": "players-versus:copper_exposed"
       }
     ]
   }

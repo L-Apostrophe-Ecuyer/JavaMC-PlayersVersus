@@ -10,6 +10,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.*;
 import net.minecraft.item.equipment.ArmorMaterial;
 import net.minecraft.item.equipment.EquipmentAsset;
+import net.minecraft.item.equipment.EquipmentAssetKeys;
 import net.minecraft.item.equipment.EquipmentType;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -32,19 +33,20 @@ import static frootloops.versus.mod.items_and_effects.VanillaItems.getSwordBlock
 public abstract class CustomEquipment {
 
     public static final Item RECOVERY_COMPASS =  new RecoveryCompassItem(getItemSettings("recovery_compass").maxCount(1));
+    static final RegistryKey<EquipmentAsset> COPPER_ARMOR_MATERIAL_KEY = RegistryKey.of(EquipmentAssetKeys.REGISTRY_KEY, Identifier.of(VersusMod.MOD_ID, "copper"));
+    static final RegistryKey<EquipmentAsset> COPPER_EXPOSED_ARMOR_MATERIAL_KEY = RegistryKey.of(EquipmentAssetKeys.REGISTRY_KEY, Identifier.of(VersusMod.MOD_ID, "copper_exposed"));
 
-    static RegistryKey<? extends Registry<EquipmentAsset>> ARMOR_ASSET_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.of(VersusMod.MOD_ID, "equipment_asset"));
-    public static final int COPPER_ENCHANTABILITY = 3, COPPER_ARMOR_DURABILITY = 4;
+    static final int COPPER_ENCHANTABILITY = 3, COPPER_ARMOR_DURABILITY = 4;
     public static final TagKey<Item> COPPER_TOOL_MATERIALS_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(VersusMod.MOD_ID, "copper_tool_materials"));
     public static final ToolMaterial COPPER_TOOL_MATERIAL = new ToolMaterial(BlockTags.INCORRECT_FOR_STONE_TOOL, 128, 13.0F, 1.0F, COPPER_ENCHANTABILITY, COPPER_TOOL_MATERIALS_TAG);
     static final ArmorMaterial COPPER_ARMOR_MATERIAL = new ArmorMaterial(
             COPPER_ARMOR_DURABILITY, createDefenseMap(2, 3, 5, 2, 7), COPPER_ENCHANTABILITY, SoundEvents.ITEM_ARMOR_EQUIP_GOLD, 0.0F, 0.0F, COPPER_TOOL_MATERIALS_TAG,
-            getArmorAsset("copper")
+            COPPER_ARMOR_MATERIAL_KEY
     );
 
     static final ArmorMaterial COPPER_ARMOR_EXPOSED_MATERIAL = new ArmorMaterial(
-            COPPER_ARMOR_DURABILITY, createDefenseMap(1, 2, 4, 1, 6), COPPER_ENCHANTABILITY - 1, SoundEvents.ITEM_ARMOR_EQUIP_GOLD, 0.0F, 0.0F, COPPER_TOOL_MATERIALS_TAG,
-            getArmorAsset("copper_damaged")
+            COPPER_ARMOR_DURABILITY, createDefenseMap(1, 2, 4, 1, 6), 1, SoundEvents.ITEM_ARMOR_EQUIP_GOLD, 0.0F, 0.0F, COPPER_TOOL_MATERIALS_TAG,
+            COPPER_EXPOSED_ARMOR_MATERIAL_KEY
     );
 
 
@@ -63,10 +65,6 @@ public abstract class CustomEquipment {
     public final static Item COPPER_PICKAXE = customPickaxe("copper_pickaxe", COPPER_TOOL_MATERIAL);
     public final static Item COPPER_SWORD = customSword("copper_sword", COPPER_TOOL_MATERIAL, CustomSpecialEffects.SWORD_BLOCKING_METAL);
     public final static ShovelItem COPPER_SHOVEL = customShovel("copper_shovel", COPPER_TOOL_MATERIAL);
-
-    private static RegistryKey<EquipmentAsset> getArmorAsset(String id) {
-        return RegistryKey.of(ARMOR_ASSET_REGISTRY_KEY, Identifier.of(VersusMod.MOD_ID, id));
-    }
 
     private static Map<EquipmentType, Integer> createDefenseMap(int bootsDefense, int leggingsDefense, int chestplateDefense, int helmetDefense, int bodyDefense) {
         return Maps.newEnumMap(
