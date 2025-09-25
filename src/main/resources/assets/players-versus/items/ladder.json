@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "minecraft:block/ladder"
+    "model": "minecraft:item/ladder"
   }
 }

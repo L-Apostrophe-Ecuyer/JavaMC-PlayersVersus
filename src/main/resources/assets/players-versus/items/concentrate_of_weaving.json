@@ -1,6 +1,6 @@
 {
 "model": {
     "type": "minecraft:model",
-    "model": "players-versus:item/concentrate_of_weaving"
+    "model": "players-versus:item/concentrates/concentrate_of_weaving"
   }
 }

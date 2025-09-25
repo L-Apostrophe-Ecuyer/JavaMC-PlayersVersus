@@ -1,6 +1,18 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "players-versus:item/copper_axe"
+    "type": "minecraft:condition",
+    "property": "minecraft:component",
+    "predicate": "minecraft:damage",
+    "value": {
+      "damage": 64
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "players-versus:item/copper_equipment_exposed/copper_axe"
+    },
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "players-versus:item/copper_equipment/copper_axe"
+    }
   }
 }

@@ -1,0 +1,68 @@
+{
+  "parent": "minecraft:item/generated",
+  "overrides": [
+    {
+      "model": "players-versus:item/copper_boots_quartz_trim_exposed",
+      "predicate": {
+        "trim_type": 0.1
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_iron_trim_exposed",
+      "predicate": {
+        "trim_type": 0.2
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_netherite_trim_exposed",
+      "predicate": {
+        "trim_type": 0.3
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_redstone_trim_exposed",
+      "predicate": {
+        "trim_type": 0.4
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_copper_trim_exposed",
+      "predicate": {
+        "trim_type": 0.5
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_gold_trim_exposed",
+      "predicate": {
+        "trim_type": 0.6
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_emerald_trim_exposed",
+      "predicate": {
+        "trim_type": 0.7
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_diamond_trim_exposed",
+      "predicate": {
+        "trim_type": 0.8
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_lapis_trim_exposed",
+      "predicate": {
+        "trim_type": 0.9
+      }
+    },
+    {
+      "model": "players-versus:item/copper_boots_amethyst_trim_exposed",
+      "predicate": {
+        "trim_type": 1.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "players-versus:item/copper_boots_exposed"
+  }
+}

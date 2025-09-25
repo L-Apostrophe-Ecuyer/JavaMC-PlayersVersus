@@ -135,10 +135,10 @@ public class ItemBurningConversion {
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_CHESTPLATE, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_LEGGINGS, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_BOOTS, new ItemBurningConversionRecord(60, null, Items.COPPER_INGOT, false));
-        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_HELMET_DAMAGED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
-        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_CHESTPLATE_DAMAGED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
-        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_LEGGINGS_DAMAGED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
-        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_BOOTS_DAMAGED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_HELMET_EXPOSED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_CHESTPLATE_EXPOSED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_LEGGINGS_EXPOSED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
+        ITEM_BURNING_CONVERSION_MAP.put(CustomEquipment.COPPER_BOOTS_EXPOSED, new ItemBurningConversionRecord(20, null, Items.COPPER_INGOT, false));
 
         ITEM_BURNING_CONVERSION_MAP.put(Items.COPPER_BLOCK, new ItemBurningConversionRecord(240, Items.COPPER_INGOT, Items.COPPER_INGOT, false));
         ITEM_BURNING_CONVERSION_MAP.put(Items.WAXED_COPPER_BLOCK, new ItemBurningConversionRecord(-10, Items.COPPER_BLOCK, Items.COPPER_BLOCK, false));

@@ -48,14 +48,15 @@ public abstract class CustomEquipment {
     );
 
 
-    public static final Item COPPER_HELMET_DAMAGED = new DecayableArmorItem(COPPER_ARMOR_EXPOSED_MATERIAL, EquipmentType.HELMET, getItemSettings("copper_helmet_damaged"), Items.GOLDEN_HELMET, 64);
-    public static final Item COPPER_CHESTPLATE_DAMAGED = new DecayableArmorItem(COPPER_ARMOR_EXPOSED_MATERIAL, EquipmentType.CHESTPLATE, getItemSettings("copper_chestplate_damaged"), Items.GOLDEN_CHESTPLATE, 80);
-    public static final Item COPPER_LEGGINGS_DAMAGED = new DecayableArmorItem(COPPER_ARMOR_EXPOSED_MATERIAL, EquipmentType.LEGGINGS, getItemSettings("copper_leggings_damaged"), Items.GOLDEN_LEGGINGS, 72);
-    public static final Item COPPER_BOOTS_DAMAGED = new DecayableArmorItem(COPPER_ARMOR_EXPOSED_MATERIAL, EquipmentType.BOOTS, getItemSettings("copper_boots_damaged"), Items.GOLDEN_BOOTS, 64);
-    public static final Item COPPER_HELMET = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.HELMET, getItemSettings("copper_helmet"), COPPER_HELMET_DAMAGED, 24);
-    public static final Item COPPER_CHESTPLATE = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.CHESTPLATE, getItemSettings("copper_chestplate"), COPPER_CHESTPLATE_DAMAGED, 36);
-    public static final Item COPPER_LEGGINGS = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.LEGGINGS, getItemSettings("copper_leggings"), COPPER_LEGGINGS_DAMAGED, 32);
-    public static final Item COPPER_BOOTS = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.BOOTS, getItemSettings("copper_boots"), COPPER_BOOTS_DAMAGED, 24);
+    public static final Item COPPER_HELMET_EXPOSED = new DecayableArmorItem(COPPER_ARMOR_EXPOSED_MATERIAL, EquipmentType.HELMET, getItemSettings("copper_helmet_exposed"), Items.GOLDEN_HELMET, 64);
+    public static final Item COPPER_CHESTPLATE_EXPOSED = new DecayableArmorItem(COPPER_ARMOR_EXPOSED_MATERIAL, EquipmentType.CHESTPLATE, getItemSettings("copper_chestplate_exposed"), Items.GOLDEN_CHESTPLATE, 80);
+    public static final Item COPPER_LEGGINGS_EXPOSED = new DecayableArmorItem(COPPER_ARMOR_EXPOSED_MATERIAL, EquipmentType.LEGGINGS, getItemSettings("copper_leggings_exposed"), Items.GOLDEN_LEGGINGS, 72);
+    public static final Item COPPER_BOOTS_EXPOSED = new DecayableArmorItem(COPPER_ARMOR_EXPOSED_MATERIAL, EquipmentType.BOOTS, getItemSettings("copper_boots_exposed"), Items.GOLDEN_BOOTS, 64);
+
+    public static final Item COPPER_HELMET = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.HELMET, getItemSettings("copper_helmet"), COPPER_HELMET_EXPOSED, 24);
+    public static final Item COPPER_CHESTPLATE = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.CHESTPLATE, getItemSettings("copper_chestplate"), COPPER_CHESTPLATE_EXPOSED, 36);
+    public static final Item COPPER_LEGGINGS = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.LEGGINGS, getItemSettings("copper_leggings"), COPPER_LEGGINGS_EXPOSED, 32);
+    public static final Item COPPER_BOOTS = new DecayableArmorItem(COPPER_ARMOR_MATERIAL, EquipmentType.BOOTS, getItemSettings("copper_boots"), COPPER_BOOTS_EXPOSED, 24);
 
     public final static HoeItem COPPER_HOE = customHoe("copper_hoe", COPPER_TOOL_MATERIAL);
     public final static AxeItem COPPER_AXE = customAxe("copper_axe", COPPER_TOOL_MATERIAL);
