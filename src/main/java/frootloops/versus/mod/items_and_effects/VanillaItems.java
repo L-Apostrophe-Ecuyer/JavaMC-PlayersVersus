@@ -18,6 +18,7 @@ import net.minecraft.item.*;
 import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
 import net.minecraft.item.consume.ConsumeEffect;
 import net.minecraft.item.consume.UseAction;
+import net.minecraft.item.equipment.EquipmentType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -60,6 +61,20 @@ public class VanillaItems {
                             List.of(new StatusEffectInstance(StatusEffects.REGENERATION, 10, 2))
                     )));
             });
+
+            // Give leather armor some knockback resistance:
+            context.modify(Items.LEATHER_CHESTPLATE, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.CHESTPLATE, 2.0, 0.0, 0.1));});
+            context.modify(Items.LEATHER_LEGGINGS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.LEGGINGS, 2.0, 0.0, 0.05));});
+            context.modify(Items.LEATHER_BOOTS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.BOOTS, 1.0, 0.0, 0.0, -0.1));});
+
+            // Give chainmail armor some toughness:
+            context.modify(Items.CHAINMAIL_CHESTPLATE, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.CHESTPLATE, 5.0, 3.0, 0.0));});
+            context.modify(Items.CHAINMAIL_LEGGINGS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.LEGGINGS, 4.0, 2.0, 0.0));});
+            context.modify(Items.CHAINMAIL_BOOTS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.BOOTS, 2.0, 2.0, 0.0));});
+            context.modify(Items.CHAINMAIL_HELMET, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.HELMET, 2.0, 2.0, 0.0));});
+
+            // Give turtle helmets more buffs:
+            context.modify(Items.TURTLE_HELMET, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createTurtleArmorAttributes(EquipmentType.HELMET, 2.0));});
         });
     }
 
@@ -235,7 +250,7 @@ public class VanillaItems {
 
             double extra = 0.0;
             modifySwordComponents(context, Items.WOODEN_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, 0F, CustomSpecialEffects.SWORD_BLOCKING_WOOD);
-            modifyToolComponents(context, Items.WOODEN_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
+            modifyToolComponents(context, Items.WOODEN_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH, 1.0);
             modifyToolComponents(context, Items.WOODEN_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
             modifyToolComponents(context, Items.WOODEN_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
             modifyToolComponents(context, Items.WOODEN_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
@@ -249,27 +264,27 @@ public class VanillaItems {
 
             extra = 2.0;
             modifySwordComponents(context, Items.IRON_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, 1F, CustomSpecialEffects.SWORD_BLOCKING_METAL);
-            modifyToolComponents(context, Items.IRON_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
+            modifyToolComponents(context, Items.IRON_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH, 1.0);
             modifyToolComponents(context, Items.IRON_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
             modifyToolComponents(context, Items.IRON_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
             modifyToolComponents(context, Items.IRON_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
 
             modifySwordComponents(context, Items.GOLDEN_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, 1F, CustomSpecialEffects.SWORD_BLOCKING_METAL);
-            modifyToolComponents(context, Items.GOLDEN_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
+            modifyToolComponents(context, Items.GOLDEN_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH, 1.0);
             modifyToolComponents(context, Items.GOLDEN_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
             modifyToolComponents(context, Items.GOLDEN_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
             modifyToolComponents(context, Items.GOLDEN_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
 
             extra = 3.0;
             modifySwordComponents(context, Items.DIAMOND_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, 2F, CustomSpecialEffects.SWORD_BLOCKING_DIAMOND);
-            modifyToolComponents(context, Items.DIAMOND_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
+            modifyToolComponents(context, Items.DIAMOND_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH, 1.0);
             modifyToolComponents(context, Items.DIAMOND_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
             modifyToolComponents(context, Items.DIAMOND_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
             modifyToolComponents(context, Items.DIAMOND_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
 
             extra = 4.0;
             modifySwordComponents(context, Items.NETHERITE_SWORD, SWORD_DAMAGE + extra, SWORD_SPEED, SWORD_REACH, 3F, CustomSpecialEffects.SWORD_BLOCKING_METAL);
-            modifyToolComponents(context, Items.NETHERITE_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH);
+            modifyToolComponents(context, Items.NETHERITE_SHOVEL, SHOVEL_DAMAGE + extra, SHOVEL_SPEED, SHOVEL_REACH, 1.0);
             modifyToolComponents(context, Items.NETHERITE_PICKAXE, PICKAXE_DAMAGE + extra, PICKAXE_SPEED, PICKAXE_REACH);
             modifyToolComponents(context, Items.NETHERITE_AXE, AXE_DAMAGE + extra, AXE_SPEED, AXE_REACH);
             modifyToolComponents(context, Items.NETHERITE_HOE, HOE_DAMAGE + extra, HOE_SPEED, HOE_REACH);
@@ -278,14 +293,18 @@ public class VanillaItems {
 
     private static void modifySwordComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount, RegistryEntry.Reference<SoundEvent> blockingSound) {
         context.modify(item, builder -> {builder
-                .add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange))
+                .add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange, 0.0))
                 .add(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(baseBlockingAmount, blockingSound, blockingSound));
         });
     }
 
     private static void modifyToolComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange) {
+        modifyToolComponents(context, item, attackDamage, attackSpeed, extraAttackRange, 0.0);
+    }
+
+    private static void modifyToolComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, double extraAttackKnockback) {
         context.modify(item, builder -> {
-            builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange));
+            builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange, extraAttackKnockback));
         });
     }
 
@@ -338,22 +357,46 @@ public class VanillaItems {
         );
     }
 
-    public static AttributeModifiersComponent createToolAttributeModifiers(double attackDamage, double attackSpeed, double extraAttackRange) {
+    public static AttributeModifiersComponent createToolAttributeModifiers(double attackDamage, double attackSpeed, double extraAttackRange, double extraAttackKnockback) {
         AttributeModifiersComponent.Builder attributeBuilder = AttributeModifiersComponent.builder()
-                .add(
-                        EntityAttributes.ATTACK_DAMAGE,
-                        new EntityAttributeModifier(Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, attackDamage - Combat.PLAYER_BASE_ATTACK_DAMAGE, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-                )
-                .add(
-                        EntityAttributes.ATTACK_SPEED,
-                        new EntityAttributeModifier(Item.BASE_ATTACK_SPEED_MODIFIER_ID, attackSpeed - Combat.PLAYER_BASE_ATTACK_SPEED, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-                );
-        if(extraAttackRange != 0.0) {
-            attributeBuilder.add(
-                    EntityAttributes.ENTITY_INTERACTION_RANGE,
-                    new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, extraAttackRange, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND
-            );
-        }
+                .add(EntityAttributes.ATTACK_DAMAGE, new EntityAttributeModifier(Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, attackDamage - Combat.PLAYER_BASE_ATTACK_DAMAGE, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
+                .add(EntityAttributes.ATTACK_SPEED, new EntityAttributeModifier(Item.BASE_ATTACK_SPEED_MODIFIER_ID, attackSpeed - Combat.PLAYER_BASE_ATTACK_SPEED, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND);
+
+        if(extraAttackRange != 0.0)
+            attributeBuilder.add(EntityAttributes.ENTITY_INTERACTION_RANGE, new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, extraAttackRange, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND);
+
+        if(extraAttackKnockback != 0.0)
+            attributeBuilder.add(EntityAttributes.ATTACK_KNOCKBACK, new EntityAttributeModifier(ATTACK_KNOCKBACK_MODIFIER_ID, extraAttackRange, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND);
+
         return attributeBuilder.build();
+    }
+
+
+    public static AttributeModifiersComponent createArmorAttributes(EquipmentType type, double armor, double toughness, double kbResistance) {
+        return createArmorAttributes(type, armor, toughness, kbResistance, 0.0);
+    }
+    public static AttributeModifiersComponent createArmorAttributes(EquipmentType type, double armor, double toughness, double kbResistance, double fallDmgMultiplier) {
+        AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
+        AttributeModifierSlot attributeModifierSlot = AttributeModifierSlot.forEquipmentSlot(type.getEquipmentSlot());
+        Identifier identifier = Identifier.ofVanilla("armor." + type.getName());
+
+        builder.add(EntityAttributes.ARMOR, new EntityAttributeModifier(identifier, armor, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        if (toughness != 0.0) builder.add(EntityAttributes.ARMOR_TOUGHNESS, new EntityAttributeModifier(identifier, toughness, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        if (kbResistance > 0.0) builder.add(EntityAttributes.KNOCKBACK_RESISTANCE, new EntityAttributeModifier(identifier, kbResistance, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        if (fallDmgMultiplier != 0.0) builder.add(EntityAttributes.FALL_DAMAGE_MULTIPLIER, new EntityAttributeModifier(identifier, fallDmgMultiplier, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+
+        return builder.build();
+    }
+
+    private static AttributeModifiersComponent createTurtleArmorAttributes(EquipmentType type, double armor) {
+        AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
+        AttributeModifierSlot attributeModifierSlot = AttributeModifierSlot.forEquipmentSlot(type.getEquipmentSlot());
+        Identifier identifier = Identifier.ofVanilla("armor." + type.getName());
+
+        builder.add(EntityAttributes.ARMOR, new EntityAttributeModifier(identifier, armor, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        builder.add(EntityAttributes.ARMOR_TOUGHNESS, new EntityAttributeModifier(identifier, 0.5, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        builder.add(EntityAttributes.WATER_MOVEMENT_EFFICIENCY, new EntityAttributeModifier(identifier, 0.5, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        builder.add(EntityAttributes.ATTACK_DAMAGE, new EntityAttributeModifier(identifier, 1.0, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        return builder.build();
     }
 }

@@ -85,11 +85,11 @@ public abstract class CustomEquipment {
 
     private static ShovelItem customShovel(String name, ToolMaterial material) {
         return new ShovelItem(material, (float) (SHOVEL_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (SHOVEL_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED),
-                getItemSettings(name).component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SHOVEL_DAMAGE, SHOVEL_SPEED, SHOVEL_REACH)));
+                getItemSettings(name).component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SHOVEL_DAMAGE, SHOVEL_SPEED, SHOVEL_REACH, 1.0)));
     }
     private static HoeItem customHoe(String name, ToolMaterial material) {
         return new HoeItem(material, (float) (HOE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (HOE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED),
-                getItemSettings(name).component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + HOE_DAMAGE, HOE_SPEED, HOE_REACH)));
+                getItemSettings(name).component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + HOE_DAMAGE, HOE_SPEED, HOE_REACH, 1.0)));
     }
     private static AxeItem customAxe(String name, ToolMaterial material) {
         return new AxeItem(material, (float) (AXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (AXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED), getItemSettings(name));
@@ -101,7 +101,7 @@ public abstract class CustomEquipment {
     private static Item customSword(String name, ToolMaterial material, RegistryEntry.Reference<SoundEvent> soundBlocking) {
         return new Item(getItemSettings(name)
                 .sword(material, (float) (SWORD_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (SWORD_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED))
-                .component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SWORD_DAMAGE, SWORD_SPEED, SWORD_REACH))
+                .component(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SWORD_DAMAGE, SWORD_SPEED, SWORD_REACH, 0.0))
                 .component(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(material.attackDamageBonus() - 1F, soundBlocking, SoundEvents.ITEM_SHIELD_BREAK)));
     }
 
