@@ -7,7 +7,7 @@ import net.minecraft.item.Items;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ItemBurningConversion {
+public class BurningConversion {
 
     public record ItemBurningConversionRecord(int itemExtraHealth, Item resultItem, Item veryHotResultItem, boolean canExtinguishFire){
     }

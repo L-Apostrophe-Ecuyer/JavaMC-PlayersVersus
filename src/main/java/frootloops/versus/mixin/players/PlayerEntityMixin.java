@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
@@ -16,19 +15,17 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.HungerManager;
-import net.minecraft.entity.player.ItemCooldownManager;
-import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.*;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Rarity;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -41,14 +38,17 @@ import java.util.UUID;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
-    protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world, ItemCooldownManager itemCooldownManager) {
+    protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world, ItemCooldownManager itemCooldownManager, HungerManager hungerManager, PlayerInventory inventory) {
         super(entityType, world);
         this.itemCooldownManager = itemCooldownManager;
+        this.inventory = inventory;
     }
 
     @Shadow private final ItemCooldownManager itemCooldownManager;
     @Shadow private HungerManager hungerManager;
     @Shadow private ItemStack selectedItem;
+
+    @Shadow final PlayerInventory inventory;
 
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
 
@@ -238,5 +238,35 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void setSprinting(boolean sprinting) {
         if(sprinting && !Combat.canPlayerSprint(this.hungerManager, this.hasStatusEffect(StatusEffects.HUNGER))) return;
         super.setSprinting(sprinting);
+    }
+
+
+    // Upon death, important items take much longer to despawn! And players that killed another player get dibs on the loot, as well.
+    @Override
+    public void dropInventory(ServerWorld world) {
+        super.dropInventory(world);
+        PlayerEntity murderer = null;
+        boolean wasKilledByPlayer = false;
+        if(this.getPrimeAdversary() instanceof PlayerEntity primeAdversary) {
+            murderer = primeAdversary;
+            wasKilledByPlayer = true;
+        }
+
+        if (!world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+            for (int i = 0; i < inventory.size(); i++) {
+                ItemStack itemStack = inventory.getStack(i);
+                if (EnchantRegistryHelper.hasEnchantment(itemStack, Enchantments.VANISHING_CURSE)) inventory.setStack(i, ItemStack.EMPTY);
+                else if (!itemStack.isEmpty()) {
+                    ItemEntity entity = this.dropItem(itemStack, true, false);
+                    boolean shouldNeverDespawn = (itemStack.getRarity() == Rarity.EPIC || itemStack.getComponents().contains(DataComponentTypes.CONTAINER) || itemStack.getComponents().contains(DataComponentTypes.DAMAGE_RESISTANT));
+                    boolean shouldTakeLongerToDespawn = !shouldNeverDespawn && (itemStack.getCount() > 56 || itemStack.getRarity() != Rarity.COMMON || itemStack.getComponents().contains(DataComponentTypes.CUSTOM_NAME) || itemStack.getComponents().contains(DataComponentTypes.STORED_ENCHANTMENTS));
+                    if(shouldNeverDespawn) entity.setNeverDespawn();
+                    else if(shouldTakeLongerToDespawn) entity.setCovetedItem();
+                    else entity.setPickupDelay(20);
+                    if(wasKilledByPlayer) entity.setOwner(murderer.getUuid());
+                    inventory.setStack(i, ItemStack.EMPTY);
+                }
+            }
+        }
     }
 }

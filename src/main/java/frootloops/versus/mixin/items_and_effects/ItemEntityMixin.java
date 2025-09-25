@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.items_and_effects;
 
-import frootloops.versus.mod.items_and_effects.ItemBurningConversion;
+import frootloops.versus.mod.items_and_effects.BurningConversion;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
@@ -137,8 +137,8 @@ public abstract class ItemEntityMixin extends Entity {
         // Anything else:
         int currentItemMaxHealth = isExtraHot ? 20 : itemAge > 200 ? 40 : 80;
         Item itemToConvertTo = null;
-        if(ItemBurningConversion.ITEM_BURNING_CONVERSION_MAP.containsKey(burningItem)) {
-            ItemBurningConversion.ItemBurningConversionRecord conversionRecord = ItemBurningConversion.ITEM_BURNING_CONVERSION_MAP.get(burningItem);
+        if(BurningConversion.ITEM_BURNING_CONVERSION_MAP.containsKey(burningItem)) {
+            BurningConversion.ItemBurningConversionRecord conversionRecord = BurningConversion.ITEM_BURNING_CONVERSION_MAP.get(burningItem);
             currentItemMaxHealth += isExtraHot ? conversionRecord.itemExtraHealth()/4 : conversionRecord.itemExtraHealth();
             itemToConvertTo = (isExtraHot ? conversionRecord.veryHotResultItem() : conversionRecord.resultItem());
         }
@@ -158,8 +158,8 @@ public abstract class ItemEntityMixin extends Entity {
         }
         else if(itemToConvertTo != null && currentItemMaxHealth > 0) {
             int newItemMaxHealth = isExtraHot ? 20 : itemAge > 200 ? 40 : 80;
-            if(ItemBurningConversion.ITEM_BURNING_CONVERSION_MAP.containsKey(itemToConvertTo)) {
-                newItemMaxHealth += ItemBurningConversion.ITEM_BURNING_CONVERSION_MAP.get(itemToConvertTo).itemExtraHealth() - Math.max(0, itemAge - 200)/5;
+            if(BurningConversion.ITEM_BURNING_CONVERSION_MAP.containsKey(itemToConvertTo)) {
+                newItemMaxHealth += BurningConversion.ITEM_BURNING_CONVERSION_MAP.get(itemToConvertTo).itemExtraHealth() - Math.max(0, itemAge - 200)/5;
                 if(isExtraHot) newItemMaxHealth = newItemMaxHealth/4;
             }
             ((ItemEntity)((Object)this)).setStack(new ItemStack(itemToConvertTo, currentItemStack.getCount()));
