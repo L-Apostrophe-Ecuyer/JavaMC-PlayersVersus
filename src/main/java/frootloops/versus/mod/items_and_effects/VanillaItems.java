@@ -206,6 +206,7 @@ public class VanillaItems {
         modifyVanillaFoodItem(Items.SWEET_BERRIES, VersusSettings.Items.EAT_TIME_VEGGIES);
         modifyVanillaFoodItem(Items.GLOW_BERRIES, VersusSettings.Items.EAT_TIME_VEGGIES);
         modifyVanillaFoodItem(Items.TROPICAL_FISH, VersusSettings.Items.EAT_TIME_SNACK);
+        modifyVanillaFoodItem(Items.MILK_BUCKET, VersusSettings.Items.EAT_TIME_LIQUIDS);
     }
 
     private static void modifyVanillaStackSizeOf(DefaultItemComponentEvents.ModifyContext context, Item item, int newStackSize) {
@@ -215,20 +216,21 @@ public class VanillaItems {
 
     private static void modifyVanillaFoodItem(final Item item, final float eatTime) {
         UseRemainderComponent remainderComponent = item.getDefaultStack().getOrDefault(DataComponentTypes.USE_REMAINDER, null);
-        boolean isBottled = remainderComponent != null && remainderComponent.convertInto().isOf(Items.GLASS_BOTTLE);
+        boolean isHoneyBottle = item == Items.HONEY_BOTTLE;
+        boolean isBottled = !isHoneyBottle && (remainderComponent != null && remainderComponent.convertInto().isOf(Items.GLASS_BOTTLE));
         boolean isBucket = !isBottled && remainderComponent != null && remainderComponent.convertInto().isOf(Items.BUCKET);
         boolean isStew = !isBucket && !isBottled && remainderComponent != null && remainderComponent.convertInto().isOf(Items.BOWL);
 
         ConsumableComponent consumeComponent = item.getDefaultStack().getOrDefault(DataComponentTypes.CONSUMABLE, null);
-        boolean isDrink = isStew || isBucket || isStew || consumeComponent.sound() == SoundEvents.ENTITY_GENERIC_DRINK;
+        boolean isDrink = isHoneyBottle || isStew || isBucket || isBottled || consumeComponent.sound() == SoundEvents.ENTITY_GENERIC_DRINK;
         boolean hasParticles = !isDrink && remainderComponent == null;
 
         ConsumableComponent newConsumeComponent = isDrink ?
-                createDrinkConsumptionComponent(eatTime, consumeComponent.onConsumeEffects()) :
+                createDrinkConsumptionComponent(eatTime, consumeComponent.onConsumeEffects(), isHoneyBottle) :
                 createFoodConsumptionComponent(eatTime, hasParticles, consumeComponent.onConsumeEffects());
 
         final int maxCount;
-        if(isBottled && item != Items.HONEY_BOTTLE) maxCount = VersusSettings.Items.MAX_COUNT_BOTTLED;
+        if(isBottled) maxCount = VersusSettings.Items.MAX_COUNT_BOTTLED;
         else if(isStew) maxCount = VersusSettings.Items.MAX_COUNT_STEWS;
         else if(isBucket) maxCount = VersusSettings.Items.MAX_COUNT_BUCKETS;
         else maxCount = VersusSettings.Items.MAX_COUNT_FOOD;
@@ -308,8 +310,8 @@ public class VanillaItems {
         });
     }
 
-    public static ConsumableComponent createDrinkConsumptionComponent(float consumeSeconds, List<ConsumeEffect> consumeEffects) {
-        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().consumeSeconds(consumeSeconds).useAction(UseAction.DRINK).sound(SoundEvents.ENTITY_GENERIC_DRINK).consumeParticles(false);
+    public static ConsumableComponent createDrinkConsumptionComponent(float consumeSeconds, List<ConsumeEffect> consumeEffects, boolean usHoneySound) {
+        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().consumeSeconds(consumeSeconds).useAction(UseAction.DRINK).sound(usHoneySound ? SoundEvents.ITEM_HONEY_BOTTLE_DRINK : SoundEvents.ENTITY_GENERIC_DRINK).consumeParticles(false);
         for(ConsumeEffect effect : consumeEffects) consumeComponent.consumeEffect(effect);
         return consumeComponent.build();
     }
