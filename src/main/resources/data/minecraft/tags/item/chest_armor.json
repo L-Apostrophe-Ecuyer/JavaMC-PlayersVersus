@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "players-versus:copper_chestplate",
-    "players-versus:copper_chestplate_exposed"
+    "players-versus:copper_chestplate_exposed",
+    "players-versus:waxed_copper_chestplate"
   ]
 }

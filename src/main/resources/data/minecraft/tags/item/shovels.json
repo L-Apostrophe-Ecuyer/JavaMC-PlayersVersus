@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "players-versus:copper_shovel"
+    "players-versus:copper_shovel",
+    "players-versus:waxed_copper_shovel"
   ]
 }

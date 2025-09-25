@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "players-versus:copper_helmet",
-    "players-versus:copper_helmet_exposed"
+    "players-versus:copper_helmet_exposed",
+    "players-versus:waxed_copper_helmet"
   ]
 }
