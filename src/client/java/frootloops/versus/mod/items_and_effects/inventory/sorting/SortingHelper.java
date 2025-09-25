@@ -11,12 +11,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.*;
 import static frootloops.versus.mod.items_and_effects.inventory.sorting.groups.SortingGroups.*;
 
 public class SortingHelper {
-    public static final boolean DEBUG_SORTING_GROUPS = false;
-    public static final boolean DEBUG_SORTING_MERGE = false;
-    public static final boolean DEBUG_SORTING_OUTPUT = false;
 
     private static void printGroups(String debugMsg) {
         if(MAIN_HOTBAR.size() > 0) debugMsg += MAIN_HOTBAR.toString();

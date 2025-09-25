@@ -20,7 +20,7 @@ import net.minecraft.registry.tag.ItemTags;
 import java.util.LinkedList;
 import java.util.Optional;
 
-import static frootloops.versus.mod.items_and_effects.inventory.sorting.SortingHelper.DEBUG_SORTING_GROUPS;
+import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_GROUPS;
 
 
 public class MainHotbarGroup extends SortingGroup {

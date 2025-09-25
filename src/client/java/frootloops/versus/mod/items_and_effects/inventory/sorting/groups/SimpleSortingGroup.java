@@ -8,7 +8,7 @@ import frootloops.versus.mod.items_and_effects.inventory.sorting.lists.SortedIte
 
 import java.util.LinkedList;
 
-import static frootloops.versus.mod.items_and_effects.inventory.sorting.SortingHelper.DEBUG_SORTING_GROUPS;
+import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_GROUPS;
 
 
 public class SimpleSortingGroup extends SortingGroup {

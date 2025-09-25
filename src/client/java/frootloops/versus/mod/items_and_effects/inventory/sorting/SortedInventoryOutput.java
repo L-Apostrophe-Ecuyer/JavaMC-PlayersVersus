@@ -4,7 +4,7 @@ import frootloops.versus.VersusMod;
 
 import java.util.LinkedList;
 
-import static frootloops.versus.mod.items_and_effects.inventory.sorting.SortingHelper.DEBUG_SORTING_OUTPUT;
+import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_OUTPUT;
 
 public class SortedInventoryOutput {
 
@@ -143,7 +143,22 @@ public class SortedInventoryOutput {
             this.currentCol++;
             return true;
         }
+        // This should only very rarely ever occur:
+        if(this.currentCol == 8 && this.currentRow == this.numRows - 1 && this.goToLastEmptySlot()) return true;
         if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.error("[ ITEM SORTING ] SORTED INVENTORY OUTPUT - Tried to move out of bounds!");
+        return false;
+    }
+
+    public boolean goToLastEmptySlot() {
+        for(int row = this.currentRow; row >= 0; row--) {
+            for(int col = 0; col < 8; col++) {
+                if(this.get(row, col) == null) {
+                    this.currentRow = row;
+                    this.currentCol = col;
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

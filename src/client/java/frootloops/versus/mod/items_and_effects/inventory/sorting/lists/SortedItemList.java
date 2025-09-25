@@ -9,6 +9,7 @@ import net.minecraft.item.Item;
 
 import java.util.LinkedList;
 
+import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_GROUPS;
 
 
 public abstract class SortedItemList {
@@ -63,7 +64,7 @@ public abstract class SortedItemList {
             }
             for (int i = startIndex; i < endIndex + 1; i++) {
                 if (ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, !doSortedInsert, doSortedInsert)) {
-                    if(SortingHelper.DEBUG_SORTING_GROUPS && startIndex == 0 && doSortedInsert) VersusMod.MOD_LOGGER.warn("                            - Found a better spot for " + slot + " -> Inserting it at pos " + i + " -> List: " + this);
+                    if(DEBUG_SORTING_GROUPS && startIndex == 0 && doSortedInsert) VersusMod.MOD_LOGGER.warn("                            - Found a better spot for " + slot + " -> Inserting it at pos " + i + " -> List: " + this);
                     slots.add(i, slot);
                     return i;
                 }
