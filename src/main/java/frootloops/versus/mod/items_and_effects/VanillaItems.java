@@ -65,7 +65,7 @@ public class VanillaItems {
             // Give leather armor some knockback resistance:
             context.modify(Items.LEATHER_CHESTPLATE, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.CHESTPLATE, 2.0, 0.0, 0.1));});
             context.modify(Items.LEATHER_LEGGINGS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.LEGGINGS, 2.0, 0.0, 0.05));});
-            context.modify(Items.LEATHER_BOOTS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.BOOTS, 1.0, 0.0, 0.0, -0.1));});
+            context.modify(Items.LEATHER_BOOTS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.BOOTS, 1.0, 0.0, 0.0, -0.2));});
 
             // Give chainmail armor some toughness:
             context.modify(Items.CHAINMAIL_CHESTPLATE, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.CHESTPLATE, 5.0, 3.0, 0.0));});
