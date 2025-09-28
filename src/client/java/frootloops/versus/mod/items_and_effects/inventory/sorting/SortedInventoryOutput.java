@@ -223,7 +223,7 @@ public class SortedInventoryOutput {
 
         // Try sorting each individual row as well:
         if(column > 0) {
-            if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this tool: " + slot);
+            if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this item: " + slot + " of type " + slot.itemType().name());
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
                 boolean isSameGroup = i >= this.currentSlotsColStart;
