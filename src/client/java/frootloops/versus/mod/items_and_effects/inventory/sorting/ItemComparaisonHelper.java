@@ -178,7 +178,7 @@ public abstract class ItemComparaisonHelper {
         else if(stack.getComponents().contains(DataComponentTypes.INSTRUMENT)) return ItemType.MISC_TOOL;
         else if(stack.isOf(Items.MAP) || stack.isOf(Items.FILLED_MAP)) return ItemType.MISC_TOOL;
         else if(stack.isOf(Items.BUCKET) || stack.getRecipeRemainder() == Items.BUCKET.getDefaultStack()) return ItemType.MISC_TOOL;
-        else if(MinecraftClient.getInstance().world.getBrewingRecipeRegistry().isPotionRecipeIngredient(stack)) return ItemType.BREWING_INGREDIENT;
+        else if(MinecraftClient.getInstance().world.getBrewingRecipeRegistry().isPotionRecipeIngredient(stack)  || stack.getItem() instanceof ConcentrateItem) return ItemType.BREWING_INGREDIENT;
         else if(stack.getComponents().contains(DataComponentTypes.FOOD)) return ItemType.FOOD;
         else if(stack.isIn(ItemTags.SHULKER_BOXES)) return ItemType.SHULKER_BOX;
         else if(stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS)) return ItemType.BUNDLE;
