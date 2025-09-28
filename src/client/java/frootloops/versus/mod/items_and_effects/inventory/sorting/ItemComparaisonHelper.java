@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.items_and_effects.brewing.ConcentrateItem;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.DataComponentTypes;

@@ -73,7 +73,7 @@ public class SortedInventoryOutput {
         }
 
         // Try backtracking, if that improves the fit:
-        if(allowBacktracking && (this.slotsToAdd.size() + this.currentCol) > 9 && this.currentCol == 0)
+        if(allowBacktracking && (this.slotsToAdd.size() + this.currentCol) > 9 && this.currentCol == 0 && this.get(this.currentRow, this.currentCol) == null)
             this.tryBacktracking((this.slotsToAdd.size() + this.currentCol) % 9);
 
         // Try changing rows, if that improves the fit:
@@ -140,7 +140,14 @@ public class SortedInventoryOutput {
         if(this.tryMovingToNextRow(false)) return true;
         else if(currentCol < 0 || this.get(currentRow, currentCol) == null) return true;
         else if(this.currentCol < 8){
-            this.currentCol++;
+            while(this.get(currentRow, currentCol) != null) {
+                this.currentCol++;
+                if(this.currentCol == 9) {
+                    this.currentCol = 0;
+                    this.currentRow++;
+                    if(this.currentRow >= this.numRows) return false;
+                }
+            }
             return true;
         }
         // This should only very rarely ever occur:
