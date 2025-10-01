@@ -45,26 +45,33 @@ public abstract class SortingGroup implements Comparable<SortingGroup>{
 
     protected void addSlotsToMisc(LinkedList<ItemSlot> newSlots) {
         if(newSlots.size() < 1) return;
-        int indexNew = 0;
-        for(int i = 0; i < newSlots.size(); i++) {
-            ItemSlot slot = newSlots.get(indexNew);
-            if(slot.isToolOrWeapon()) {
-                miscItems.add(slot);
-                newSlots.remove(slot);
-            }
-            else indexNew++;
-        }
-        if(newSlots.size() < 1) return;
-        int indexMisc = 0;
+
+        // Step 1: Figure out where to insert into the misc list:
+        int indexMiscStart = 0, indexMiscEnd = 0;
         for(int i = miscItems.size() - 1; i >= 0; i--) {
-            indexMisc = i;
+            indexMiscStart = i;
             if(ItemComparaisonHelper.shouldGoBefore(miscItems.getSlot(i), newSlots.getFirst(), false, false, false)) break;
         }
+
+        // Step 2: Insert there, while also
+        if(newSlots.size() < 1) return;
+        indexMiscEnd = indexMiscStart;
         for (ItemSlot slot : newSlots) {
-            miscItems.addAt(slot, indexMisc);
-            indexMisc++;
+            miscItems.addBetween(slot, indexMiscStart, indexMiscEnd);
+            indexMiscEnd++;
         }
     }
+
+
+
+    /**
+     * Merge with another group, by taking all of their slots and placing them in this group.
+     */
+    public void mergeWithOtherGroup(SortingGroup otherGroup) {
+        while(otherGroup.size() > 0)
+            this.addSlots(otherGroup.takeNextList());
+    }
+
 
     /**
      * Take all items from this group, in the form of an ordered list.

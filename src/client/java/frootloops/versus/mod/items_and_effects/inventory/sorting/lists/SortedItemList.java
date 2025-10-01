@@ -4,7 +4,6 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import frootloops.versus.mod.items_and_effects.inventory.sorting.SortingHelper;
 import net.minecraft.item.Item;
 
 import java.util.LinkedList;
@@ -32,10 +31,14 @@ public abstract class SortedItemList {
     public ItemSlot removeLast() {return slots.removeLast();}
 
     public int add(ItemSlot slot) {
-        return this.addBetween(slot, 0, this.size(), true);
+        return this.addBetween(slot, 0, this.size() - 1, true);
     }
 
-    public int append(ItemSlot slot) {
+    public int addWithMinimalSorting(ItemSlot slot) {
+        return this.addBetween(slot, 0, this.size() - 1, false);
+    }
+
+    public int addWithoutSorting(ItemSlot slot) {
         this.slots.add(slot);
         return slots.size();
     }
@@ -45,44 +48,41 @@ public abstract class SortedItemList {
     }
 
     public int addBetween(ItemSlot slot, int startIndex, int endIndex) {
+        endIndex = Math.min(endIndex, this.size() - 1);
+        startIndex = Math.max(0, Math.min(startIndex, endIndex));
         return this.addBetween(slot, startIndex, endIndex, true);
     }
 
-    public int addBetween(ItemSlot slot, int startIndex, int endIndex, boolean doSortedInsert) {
+    private int addBetween(ItemSlot slot, int startIndex, int endIndex, boolean doSortedInsert) {
         if(this.size() > 0) {
-            endIndex = Math.min(endIndex, this.size() - 1);
-            startIndex = Math.max(0, Math.min(startIndex, endIndex));
-
-            boolean skipNonToolTypes = !doSortedInsert; // doSortedInsert is usually true, unless merging two groups together, where they should stay distinct
+            boolean skipNonToolTypes = false;
             if(startIndex > 0 && slot.isToolOrWeapon()) {
                 skipNonToolTypes = true;
                 startIndex = 0;
             }
-            if(startIndex == endIndex) {
-                slots.add(startIndex, slot);
-                return startIndex;
-            }
             for (int i = startIndex; i < endIndex + 1; i++) {
-                if (ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, !doSortedInsert, doSortedInsert)) {
+                ItemSlot otherSlot = slots.get(i);
+                boolean shouldGoBefore = slot.shouldAlwaysGoBefore(otherSlot, doSortedInsert) || (doSortedInsert && ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, false, true));
+                if (shouldGoBefore) {
                     if(DEBUG_SORTING_GROUPS && startIndex == 0 && doSortedInsert) VersusMod.MOD_LOGGER.warn("                            - Found a better spot for " + slot + " -> Inserting it at pos " + i + " -> List: " + this);
                     slots.add(i, slot);
                     return i;
                 }
             }
         }
-        slots.add(slot);
-        return endIndex;
+        if(endIndex >= this.size() - 1) slots.addLast(slot);
+        else slots.add(endIndex, slot);
+        return endIndex + 1;
     }
 
     public void giveLastSlotsTo(int count, SortedItemList other) {
         count = Math.min(count, this.size());
-        for(int i = 0; i < count; i++)
-            other.addBetween(this.removeLast(), 0, other.size(), false);
+        for(int i = 0; i < count; i++) other.addWithMinimalSorting(this.removeLast());
     }
 
     public void giveFirstSlotsTo(int count, SortedItemList other) {
         count = Math.min(count, this.size());
-        for(int i = 0; i < count; i++) other.append(this.removeFirst());
+        for(int i = 0; i < count; i++) other.addWithMinimalSorting(this.removeFirst());
     }
 
     public void appendListToEnd(SortedItemList other) {

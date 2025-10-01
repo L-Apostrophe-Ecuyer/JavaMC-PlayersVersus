@@ -254,7 +254,7 @@ public class SortingHelper {
                     SortingGroup otherGroup = nonEmptyGroups.getFirst();
                     if ((groupToPlace.size() % 9) + otherGroup.size() <= 9) {
                         nonEmptyGroups.removeFirst();
-                        groupToPlace.addSlots(otherGroup.takeAllItems());
+                        groupToPlace.mergeWithOtherGroup(otherGroup);
                     } else {
                         break;
                     }
@@ -301,22 +301,22 @@ public class SortingHelper {
         }
         if (GOODIES_GROUP.size() > 0 && RARE_MINERALS_GROUP.size() > 0) tryCombiningTwoGroups(GOODIES_GROUP, RARE_MINERALS_GROUP);
         if (RARE_MINERALS_GROUP.size() > 0 && COMMON_MINERALS_GROUP.size() > 0) {
-            if(!tryCombiningTwoGroups(RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP) && RARE_MINERALS_GROUP.size() + COMMON_MINERALS_GROUP.size() <= 9) RARE_MINERALS_GROUP.addSlots(COMMON_MINERALS_GROUP.takeAllItems());
+            if(!tryCombiningTwoGroups(RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP) && RARE_MINERALS_GROUP.size() + COMMON_MINERALS_GROUP.size() <= 9) RARE_MINERALS_GROUP.mergeWithOtherGroup(COMMON_MINERALS_GROUP);
         }
         if (BREWING_GROUP.size() > 0 && CONSUMABLES_GROUP.size() > 0) {
             if(!tryCombiningTwoGroups(CONSUMABLES_GROUP, BREWING_GROUP)) {
                 int numPotions = SortedItemLists.POTION_ITEMS.size();
                 int numConcentrates = SortedItemLists.CONCENTRATES.size();
                 if(numPotions > 0 && numConcentrates > 0 && numPotions + numConcentrates > 4) {
-                    for (ItemSlot slot : SortedItemLists.CONCENTRATES.takeAll()) SortedItemLists.POTION_ITEMS.append(slot);
+                    for (ItemSlot slot : SortedItemLists.CONCENTRATES.takeAll()) SortedItemLists.POTION_ITEMS.addWithoutSorting(slot);
                     CONSUMABLES_GROUP.recalculateActualSize();
                     BREWING_GROUP.recalculateActualSize();
-                    CONSUMABLES_GROUP.addSlots(BREWING_GROUP.takeAllItems());
+                    CONSUMABLES_GROUP.mergeWithOtherGroup(BREWING_GROUP);
                 }
             }
         }
         if (BREWING_GROUP.size() > 0 && WORLD_GROUP.size() > 0) {
-            if(!tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP) && BREWING_GROUP.size() <= 2 && WORLD_GROUP.size() <= 7) WORLD_GROUP.addSlots(BREWING_GROUP.takeAllItems());
+            if(!tryCombiningTwoGroups(BREWING_GROUP, WORLD_GROUP) && BREWING_GROUP.size() <= 2 && WORLD_GROUP.size() <= 7) WORLD_GROUP.mergeWithOtherGroup(BREWING_GROUP);
         }
 
         // Step 2: Clean up tool groups and merge them:
@@ -354,7 +354,7 @@ public class SortingHelper {
         int sizeBottom = groupThatReceives.size() % 9;
         int sizeTop = groupThatGives.size();
         if(sizeTop + sizeBottom == 9) {
-            groupThatReceives.addSlots(groupThatGives.takeAllItems());
+            groupThatReceives.mergeWithOtherGroup(groupThatGives);
             return true;
         }
         else if(sizeTop > 4 && sizeBottom > 4 && sizeBottom + sizeTop > 9) return false;
@@ -367,7 +367,7 @@ public class SortingHelper {
 
             // Success!! These two groups should go one after the other.
             groupThatReceives.addSlots(itemsTaken); // Complete first group to make a full row
-            groupThatReceives.addSlots(groupThatGives.takeAllItems()); // Append second group entirely
+            groupThatReceives.mergeWithOtherGroup(groupThatGives); // Append second group entirely
             return true;
         }
         return false;
@@ -396,7 +396,7 @@ public class SortingHelper {
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
             }
             else if(PICKAXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
-            else if(PICKAXE_GROUP.size() + MAIN_HOTBAR.size() < 9 && (MAIN_HOTBAR.hasCombatItems() || COMBAT_GROUP.size() == 0)) MAIN_HOTBAR.addSlots(PICKAXE_GROUP.takeAllItems());
+            else if(PICKAXE_GROUP.size() + MAIN_HOTBAR.size() < 9 && (MAIN_HOTBAR.hasCombatItems() || COMBAT_GROUP.size() == 0)) MAIN_HOTBAR.mergeWithOtherGroup(PICKAXE_GROUP);
         }
         if(MAIN_HOTBAR.size() >= 9) return;
 
@@ -419,27 +419,27 @@ public class SortingHelper {
         if(tryCombiningTwoGroups(MAIN_HOTBAR, COMBAT_GROUP)) if(MAIN_HOTBAR.size() >= 9) return;
         if(MAIN_HOTBAR.size() < 9 && MAIN_HOTBAR.hasCombatItems()) {
             if(COMBAT_GROUP.getNumTools() > 0 && MAIN_HOTBAR.size() + COMBAT_GROUP.getNumTools() <= 9) MAIN_HOTBAR.addSlots(COMBAT_GROUP.takeAllTools());
-            if(CONSUMABLES_GROUP.size() > 0 && MAIN_HOTBAR.size() + CONSUMABLES_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(CONSUMABLES_GROUP.takeAllItems());
+            if(CONSUMABLES_GROUP.size() > 0 && MAIN_HOTBAR.size() + CONSUMABLES_GROUP.size() <= 9) MAIN_HOTBAR.mergeWithOtherGroup(CONSUMABLES_GROUP);
         }
         if(MAIN_HOTBAR.size() >= 9) return;
 
         // If still space, try smartly adding tools and blocks to hotbar:
         if(!MAIN_HOTBAR.hasBuildingItems()) {
-            if(AXE_GROUP.size() > 0 && MAIN_HOTBAR.size() + AXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(AXE_GROUP.takeAllItems());
+            if(AXE_GROUP.size() > 0 && MAIN_HOTBAR.size() + AXE_GROUP.size() <= 9) MAIN_HOTBAR.mergeWithOtherGroup(AXE_GROUP);
             else if(AXE_GROUP.hasOnlyTools() || (!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools())) {
                 giveExtraToolsFromAndTo(AXE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, AXE_GROUP)) return;
             }
             if(MAIN_HOTBAR.size() >= 9) return;
 
-            if(MAIN_HOTBAR.size() + PICKAXE_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(PICKAXE_GROUP.takeAllItems());
+            if(MAIN_HOTBAR.size() + PICKAXE_GROUP.size() <= 9) MAIN_HOTBAR.mergeWithOtherGroup(PICKAXE_GROUP);
             else if(PICKAXE_GROUP.hasOnlyTools() || (!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.canGiveawayTools())) {
                 giveExtraToolsFromAndTo(PICKAXE_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
             }
             if(MAIN_HOTBAR.size() >= 9) return;
 
-            if(MAIN_HOTBAR.size() + SHOVEL_GROUP.size() <= 9) MAIN_HOTBAR.addSlots(SHOVEL_GROUP.takeAllItems());
+            if(MAIN_HOTBAR.size() + SHOVEL_GROUP.size() <= 9) MAIN_HOTBAR.mergeWithOtherGroup(SHOVEL_GROUP);
             else if(SHOVEL_GROUP.getNumTools() > 0) {
                 giveExtraToolsFromAndTo(SHOVEL_GROUP, MAIN_HOTBAR);
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, SHOVEL_GROUP)) return;
@@ -487,9 +487,9 @@ public class SortingHelper {
         tryCombiningTwoGroups(COMMON_MINERALS_GROUP, RANDOM_GROUP);
         if(COMMON_MINERALS_GROUP.size() > 0) {
             if(RARE_MINERALS_GROUP.size() > 0 && COMMON_MINERALS_GROUP.size() + RARE_MINERALS_GROUP.size() < 9)
-                RARE_MINERALS_GROUP.addSlots(COMMON_MINERALS_GROUP.takeAllItems());
+                RARE_MINERALS_GROUP.mergeWithOtherGroup(COMMON_MINERALS_GROUP);
             else if(WORLD_GROUP.size() > 0 && COMMON_MINERALS_GROUP.size() + WORLD_GROUP.size() < 9)
-                WORLD_GROUP.addSlots(COMMON_MINERALS_GROUP.takeAllItems());
+                WORLD_GROUP.mergeWithOtherGroup(COMMON_MINERALS_GROUP);
         }
 
         tryCombiningTwoGroups(WORLD_GROUP, SHEARS_GROUP);
@@ -506,19 +506,19 @@ public class SortingHelper {
             if(tryCombiningTwoGroups(SHOVEL_GROUP, RANDOM_GROUP)) return;
 
             if(WORLD_GROUP.size() + size <= 9)
-                WORLD_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
+                WORLD_GROUP.mergeWithOtherGroup(RANDOM_GROUP);
 
             else if(SHEARS_GROUP.size() + size <= 9)
-                SHEARS_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
+                SHEARS_GROUP.mergeWithOtherGroup(RANDOM_GROUP);
 
             else if(GOODIES_GROUP.size() + RANDOM_GROUP.size() <= 9)
-                GOODIES_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
+                GOODIES_GROUP.mergeWithOtherGroup(RANDOM_GROUP);
 
             else if(CONTAINERS_GROUP.size() + RANDOM_GROUP.size() <= 9)
-                CONTAINERS_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
+                CONTAINERS_GROUP.mergeWithOtherGroup(RANDOM_GROUP);
 
             else if(SHEARS_GROUP.size() + size <= 9)
-                SHEARS_GROUP.addSlots(RANDOM_GROUP.takeAllItems());
+                SHEARS_GROUP.mergeWithOtherGroup(RANDOM_GROUP);
         }
     }
 
@@ -532,40 +532,43 @@ public class SortingHelper {
         boolean hasOnlyBlocks = groupToCleanUp.getNumTools() == 0 && groupToCleanUp.size() > 0 && groupToCleanUp.size() % 9 != 0 && (groupToCleanUp.size() < 9 || groupToCleanUp.size() % 9 <= 2);
         boolean hasOnlyTools = groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() % 9 != 0 && (groupToCleanUp.size() < 6 || groupToCleanUp.size() % 9 <= 2);
         if(groupToCleanUp.size() < ((hasOnlyBlocks || hasOnlyTools) ? 6 : 4)) {
-            if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                   -> " + groupToCleanUp.GROUP_NAME + " - Cleaning up tool group!");
+            if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("           -> " + groupToCleanUp.GROUP_NAME + " - Cleaning up tool group!");
 
             if(firstChoice != null && firstChoice.size() > 0 && firstChoice.getNumTools() > 0) {
+                if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("               - Trying to merge group " + groupToCleanUp.GROUP_NAME + " with first choice, " + firstChoice.GROUP_NAME);
                 if (groupToCleanUp != null && tryCombiningTwoGroups(firstChoice, groupToCleanUp)) return;
                 else if (groupToCleanUp.hasOnlyTools() && tryCombiningTwoGroups(groupToCleanUp, firstChoice)) return;
                 else if (groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() + firstChoice.size() <= 9) {
-                    firstChoice.addSlots(groupToCleanUp.takeAllItems());
+                    firstChoice.mergeWithOtherGroup(groupToCleanUp);
                     return;
                 }
             }
 
             if(secondChoice != null && groupToCleanUp.size() > 0 && secondChoice.size() > 0 && (!(secondChoice instanceof ToolSortingGroup) || ((ToolSortingGroup)secondChoice).getNumTools() > 0)){
+                if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("               - Trying to merge group " + groupToCleanUp.GROUP_NAME + " with second choice, " + secondChoice.GROUP_NAME);
                 if (groupToCleanUp != null && tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
                 else if (groupToCleanUp.hasOnlyTools() && tryCombiningTwoGroups(groupToCleanUp, secondChoice)) return;
                 else if (groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() + secondChoice.size() <= 9) {
-                    secondChoice.addSlots(groupToCleanUp.takeAllItems());
+                    secondChoice.mergeWithOtherGroup(groupToCleanUp);
                     return;
                 }
             }
 
-            if(firstChoice != null && firstChoice.size() > 0 && firstChoice.size() + groupToCleanUp.size() <= 9) {
+            if(firstChoice != null && firstChoice.size() > 0 && (firstChoice.size() + groupToCleanUp.size() <= 9 || hasOnlyBlocks)) {
+                if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("               - Trying again to merge group " + groupToCleanUp.GROUP_NAME + " with first choice, " + secondChoice.GROUP_NAME + ", since combined their size would be small");
                 if (tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
-                else if(groupToCleanUp.getNumTools() > 0) groupToCleanUp.addSlots(firstChoice.takeAllItems());
-                else firstChoice.addSlots(groupToCleanUp.takeAllItems());
+                else if(groupToCleanUp.getNumTools() > 0) groupToCleanUp.mergeWithOtherGroup(firstChoice);
+                else firstChoice.mergeWithOtherGroup(groupToCleanUp);
                 return;
             }
 
-            if(lastChoice != null && lastChoice.size() > 0)
-                if(tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
+            if(lastChoice != null && lastChoice.size() > 0 && (lastChoice.size() + groupToCleanUp.size() <= 9 || hasOnlyBlocks))
+                if(tryCombiningTwoGroups(lastChoice, groupToCleanUp)) return;
 
             if(hasOnlyBlocks) {
                 if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("                      Found no good match, but the building and random items of " + groupToCleanUp.GROUP_NAME + " will be given to last choice (or random)");
-                if (lastChoice != null && groupToCleanUp.size() > 0 && lastChoice.size() > 0) lastChoice.addSlots(groupToCleanUp.takeAllItems());
-                else RANDOM_GROUP.addSlots(groupToCleanUp.takeAllItems());
+                if (lastChoice != null && groupToCleanUp.size() > 0 && lastChoice.size() > 0) lastChoice.mergeWithOtherGroup(groupToCleanUp);
+                else RANDOM_GROUP.mergeWithOtherGroup(groupToCleanUp);
             }
         }
     }

@@ -110,11 +110,11 @@ public class SortedBlockItemList extends SortedItemList {
                 // If the item currently in the list somehow isn't in the block tag, then insert before:
                 Item otherItem = slots.get(i).stack().getItem();
                 if(!(otherItem instanceof BlockItem otherBlockItem) || ((this.blockTagKey == null || !otherBlockItem.getBlock().getDefaultState().isIn(this.blockTagKey)) && otherBlockItem.getBlock().getDefaultState().getSoundGroup() != this.blockSoundGroup)) {
-                    this.addBetween(newSlot, indexMapEnd, i, true);
+                    this.addBetween(newSlot, indexMapEnd, i);
                     return i;
                 }
             }
-            return this.addBetween(newSlot, indexMapEnd, this.size(), true);
+            return this.addBetween(newSlot, indexMapEnd, this.size());
         }
         return -1;
     }
