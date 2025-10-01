@@ -184,7 +184,9 @@ public abstract class ItemComparaisonHelper {
         else if(stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS)) return ItemType.BUNDLE;
         else if(stack.getComponents().contains(DataComponentTypes.CONTAINER)) return ItemType.ITEM_CONTAINER;
         else if(stack.getComponents().contains(DataComponentTypes.CONTAINER_LOOT)) return ItemType.ITEM_CONTAINER;
-        else if(stack.getComponents().contains(DataComponentTypes.POTION_CONTENTS)) return ItemType.POTIONS;
+        else if(stack.getComponents().contains(DataComponentTypes.POTION_CONTENTS)) {
+            return stack.get(DataComponentTypes.POTION_CONTENTS).hasEffects() ? ItemType.POTIONS : ItemType.MISC;
+        }
         else if(stack.getUseAction() != UseAction.NONE || stack.isOf(Items.TORCH) || stack.isOf(Items.SOUL_TORCH) || stack.isOf(Items.LANTERN) || stack.isOf(Items.SOUL_LANTERN)) return ItemType.TORCHES_AND_LANTERNS;
         else if(stack.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
