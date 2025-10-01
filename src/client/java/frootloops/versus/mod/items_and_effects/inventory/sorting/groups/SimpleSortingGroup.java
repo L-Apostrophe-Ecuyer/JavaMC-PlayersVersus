@@ -33,7 +33,7 @@ public class SimpleSortingGroup extends SortingGroup {
     public int getMaxNumRows() {
         int numRows = this.miscItems.size() > 0 ? 1 + this.miscItems.size()/9 : 0;
         for(SortedItemList sortedList: sortedItemLists)
-            if(sortedList.size() > 0) numRows = 1 + sortedList.size()/9;
+            if(sortedList.size() > 0) numRows += 1 + sortedList.size()/9;
         return numRows;
     }
 
@@ -253,7 +253,7 @@ public class SimpleSortingGroup extends SortingGroup {
     @Override
     public String toString() {
         if(this.size() == 0) return "\n              [ SORTED " + this.GROUP_NAME + " ] -> Empty!";
-        String output = "\n              [ SORTED " + this.GROUP_NAME + " ] (" +this.numItems+ " Items)\n";
+        String output = "\n              [ SORTED " + this.GROUP_NAME + " ] (" +this.numItems+ " Items) -> Max Rows:  " + this.getMaxNumRows() + "\n";
         for(int i = 0; i < this.sortedItemLists.length; i++) {
             if(sortedItemLists[i].size() > 0) output += "                List " + i + ": " + this.sortedItemLists[i].toString() + "\n";
         }

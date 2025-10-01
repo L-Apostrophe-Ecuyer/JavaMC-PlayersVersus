@@ -321,7 +321,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
     @Override
     public String toString() {
         if(this.size() == 0) return "\n              [ SORTED " + this.GROUP_NAME + " ] -> Empty!";
-        String output = "\n              [ SORTED " + this.GROUP_NAME + " ] (" +this.numTools+ " Tools, " +this.numItems+ " Items)" ;
+        String output = "\n              [ SORTED " + this.GROUP_NAME + " ] (" +this.numTools+ " Tools, " +this.numItems+ " Items) - Max Rows:" + this.getMaxNumRows() ;
         if(sortedToolList.size() > 0) output += "\n                Tool List: " + this.sortedToolList;
         output += "\n";
         for(int i = 0; i < this.sortedItemLists.length; i++) {

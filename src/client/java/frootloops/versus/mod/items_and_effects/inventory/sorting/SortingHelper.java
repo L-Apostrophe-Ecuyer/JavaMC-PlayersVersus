@@ -67,6 +67,7 @@ public class SortingHelper {
         SortedInventoryOutput inventoryOutput = new SortedInventoryOutput(numRows, numEmptySlots, orderedGroups.size(), isPlayerInventory);
         LinkedList<ItemSlot> slotsTaken, slotsToAdd = new LinkedList<>();
 
+        // Case 4.1 - One Row Per List
         // If each individual sublist can have their own row, then do the work to split them:
         if(!isPlayerInventory) {
             int numRowsForEachList = 0;
@@ -83,6 +84,7 @@ public class SortingHelper {
             }
         }
 
+        // Case 4.2 - One Row Per Group
         // If each group can have their own row, then best case scenario:
         if(orderedGroups.size() <= numRows) {
             int actualNumRowsInGroups = orderedGroups.size() + orderedGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum();
