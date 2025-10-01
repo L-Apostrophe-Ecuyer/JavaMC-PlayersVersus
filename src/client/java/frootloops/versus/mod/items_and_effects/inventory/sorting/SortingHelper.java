@@ -539,8 +539,8 @@ public class SortingHelper {
             if(firstChoice != null && firstChoice.size() > 0 && firstChoice.getNumTools() > 0) {
                 if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("               - Trying to merge group " + groupToCleanUp.GROUP_NAME + " with first choice, " + firstChoice.GROUP_NAME);
                 if (groupToCleanUp != null && tryCombiningTwoGroups(firstChoice, groupToCleanUp)) return;
-                else if (groupToCleanUp.hasOnlyTools() && tryCombiningTwoGroups(groupToCleanUp, firstChoice)) return;
-                else if (groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() + firstChoice.size() <= 9) {
+                else if (hasOnlyTools && tryCombiningTwoGroups(groupToCleanUp, firstChoice)) return;
+                else if (hasOnlyTools && groupToCleanUp.size() + firstChoice.size() <= 9) {
                     firstChoice.mergeWithOtherGroup(groupToCleanUp);
                     return;
                 }
@@ -549,8 +549,8 @@ public class SortingHelper {
             if(secondChoice != null && groupToCleanUp.size() > 0 && secondChoice.size() > 0 && (!(secondChoice instanceof ToolSortingGroup) || ((ToolSortingGroup)secondChoice).getNumTools() > 0)){
                 if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("               - Trying to merge group " + groupToCleanUp.GROUP_NAME + " with second choice, " + secondChoice.GROUP_NAME);
                 if (groupToCleanUp != null && tryCombiningTwoGroups(secondChoice, groupToCleanUp)) return;
-                else if (groupToCleanUp.hasOnlyTools() && tryCombiningTwoGroups(groupToCleanUp, secondChoice)) return;
-                else if (groupToCleanUp.hasOnlyTools() && groupToCleanUp.size() + secondChoice.size() <= 9) {
+                else if (hasOnlyTools && tryCombiningTwoGroups(groupToCleanUp, secondChoice)) return;
+                else if (hasOnlyTools && groupToCleanUp.size() + secondChoice.size() <= 9) {
                     secondChoice.mergeWithOtherGroup(groupToCleanUp);
                     return;
                 }
