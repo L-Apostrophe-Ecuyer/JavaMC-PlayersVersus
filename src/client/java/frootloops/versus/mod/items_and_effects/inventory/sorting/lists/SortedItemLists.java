@@ -2,6 +2,7 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSortingMaps;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
+import net.minecraft.block.Blocks;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.sound.BlockSoundGroup;
@@ -125,7 +126,7 @@ public class SortedItemLists {
     public static final SortedTaggedItemList AXE_MINEABLE_DOORS = new SortedTaggedItemList(ItemTags.WOODEN_DOORS, ItemType.BLOCK_OTHER);
     public static final SortedTaggedItemList AXE_MINEABLE_TRAPDOORS = new SortedTaggedItemList(ItemTags.WOODEN_TRAPDOORS, ItemType.BLOCK_OTHER);
     public static final SortedTaggedItemList AXE_MINEABLE_BUTTONS = new SortedTaggedItemList(ItemTags.WOODEN_BUTTONS, ItemType.BLOCK_OTHER);
-    public static final SortedBlockItemList AXE_MINEABLE_OTHER = new SortedBlockItemList(BlockTags.AXE_MINEABLE, 0.5f, 32.0f);
+    public static final SortedBlockItemList AXE_MINEABLE_OTHER = new SortedBlockItemList(BlockTags.AXE_MINEABLE, 1.01f, 32.0f);
     public static final SortedItemList[] AXE_MINEABLES = {AXE_MINEABLE_PLANKS, AXE_MINEABLE_LOGS, AXE_MINEABLE_SLABS, AXE_MINEABLE_STAIRS, AXE_MINEABLE_DOORS, AXE_MINEABLE_TRAPDOORS, AXE_MINEABLE_BUTTONS, AXE_MINEABLE_OTHER};
 
 }
