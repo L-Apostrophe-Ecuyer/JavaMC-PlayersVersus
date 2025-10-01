@@ -64,7 +64,7 @@ public class SimpleSortingGroup extends SortingGroup {
 
     @Override
     public LinkedList<ItemSlot> takeNextList() {
-        if(this.size() == 0) return new LinkedList<>();
+        if(this.size() == 0 && this.size() == this.debugCalculateActualSize()) return new LinkedList<>();
         for(SortedItemList list : this.sortedItemLists) {
             if(list.size() > 0) {
                 this.numItems -= list.size();
