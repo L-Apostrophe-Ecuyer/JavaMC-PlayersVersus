@@ -356,6 +356,7 @@ public class SortingHelper {
         int sizeBottom = groupThatReceives.size() % 9;
         int sizeTop = groupThatGives.size();
         if(sizeTop + sizeBottom == 9) {
+            if(DEBUG_SORTING_MERGE) VersusMod.MOD_LOGGER.warn("               -> Merging " + groupThatReceives.GROUP_NAME + " with " + groupThatGives + " -> Together they'll fit neatly in a row");
             groupThatReceives.mergeWithOtherGroup(groupThatGives);
             return true;
         }
@@ -363,15 +364,6 @@ public class SortingHelper {
 
         int numItemsToSwap = 9 - sizeBottom;
         if(sizeBottom <= 0 || sizeTop <= 0 || sizeTop < numItemsToSwap) return false;
-
-        LinkedList<ItemSlot> itemsTaken = groupThatGives.tryTakingExactNumSlots(numItemsToSwap, true, true);
-        if(itemsTaken != null && itemsTaken.size() > 0) {
-
-            // Success!! These two groups should go one after the other.
-            groupThatReceives.addSlots(itemsTaken); // Complete first group to make a full row
-            groupThatReceives.mergeWithOtherGroup(groupThatGives); // Append second group entirely
-            return true;
-        }
         return false;
     }
 
