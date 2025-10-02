@@ -36,6 +36,7 @@ public class ItemMergingMixin {
         CONVERSION_MAP.put(Items.GOLD_NUGGET, new Object[]{Items.GOLD_INGOT, 4});
         CONVERSION_MAP.put(Items.RAW_GOLD, new Object[]{Items.RAW_GOLD_BLOCK, 9});
         CONVERSION_MAP.put(Items.COPPER_INGOT, new Object[]{Items.COPPER_BLOCK, 9});
+        CONVERSION_MAP.put(Items.COPPER_NUGGET, new Object[]{Items.COPPER_INGOT, 4});
         CONVERSION_MAP.put(Items.RAW_COPPER, new Object[]{Items.RAW_COPPER_BLOCK, 9});
         CONVERSION_MAP.put(Items.EMERALD, new Object[]{Items.EMERALD_BLOCK, 9});
         CONVERSION_MAP.put(Items.COAL, new Object[]{Items.COAL_BLOCK, 9});

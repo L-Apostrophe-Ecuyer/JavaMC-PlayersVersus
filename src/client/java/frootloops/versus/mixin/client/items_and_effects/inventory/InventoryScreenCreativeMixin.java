@@ -6,6 +6,7 @@ import frootloops.versus.mod.items_and_effects.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.itemgroup.v1.FabricCreativeInventoryScreen;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
@@ -68,8 +69,8 @@ public abstract class InventoryScreenCreativeMixin  extends HandledScreen<Creati
     }
 
     @Inject(method = "mouseReleased",at = @At("RETURN"), cancellable = false)
-    public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable info) {
-        if (selectedTab.getType() == ItemGroup.Type.INVENTORY && button == 2 && this.handler.getCursorStack().isEmpty()) {
+    public void mouseClicked(Click click, CallbackInfoReturnable info) {
+        if (selectedTab.getType() == ItemGroup.Type.INVENTORY && click.button() == 2 && this.handler.getCursorStack().isEmpty()) {
             HotbarCycling.doHotbarSwap(client.player.getInventory());
         }
     }
