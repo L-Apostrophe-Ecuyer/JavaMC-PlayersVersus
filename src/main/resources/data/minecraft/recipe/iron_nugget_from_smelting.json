@@ -11,7 +11,7 @@
     "minecraft:chainmail_leggings",
     "minecraft:chainmail_boots",
     "minecraft:shears",
-    "minecraft:chain"
+    "minecraft:iron_chain"
   ],
   "result": {
     "id": "minecraft:iron_nugget"
