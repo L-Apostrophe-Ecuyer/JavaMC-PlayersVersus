@@ -18,7 +18,7 @@ public abstract class HungerSprintingMixin extends PlayerEntity {
         super(world, profile);
     }
 
-    @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))
+    @ModifyConstant(method = "Lnet/minecraft/client/network/ClientPlayerEntity;canSprint()Z", constant = @Constant(floatValue = 6.0f))
     private float foodRequiedToSprint(float foodLevel) {
         if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return 6.0f;
         return Combat.canPlayerSprint(this.hungerManager, this.hasStatusEffect(StatusEffects.HUNGER)) ? -1.0f : 128.0f;
