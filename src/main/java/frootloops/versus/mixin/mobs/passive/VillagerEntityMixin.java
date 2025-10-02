@@ -12,6 +12,7 @@ import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.server.world.ServerWorld;
@@ -75,20 +76,25 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
         if (professionKey != null) {
             Int2ObjectMap<RevampedTradeFactories.Factory[]> offersMap = PROFESSION_TO_LEVELED_TRADE.get(professionKey);
             if (offersMap != null && !offersMap.isEmpty()) {
-                RevampedTradeFactories.Factory[] factorys = offersMap.get(villagerData.level());
+                RevampedTradeFactories.Factory[] tradeOfferFactories = offersMap.get(villagerData.level());
 
-                if (factorys != null) {
+                if (tradeOfferFactories != null) {
                     TradeOfferList tradeOfferList = this.getOffers();
-                    ArrayList<RevampedTradeFactories.Factory> arrayList = Lists.newArrayList(factorys);
-                    int i = 0;
-                    int numOffers = 2 + Math.max(0, 5 - villagerData.level());
+                    ArrayList<RevampedTradeFactories.Factory> availableOffers = Lists.newArrayList(tradeOfferFactories);
 
-                    // Add new offers:
-                    findOffersToAdd: while (i < numOffers && !arrayList.isEmpty()) {
-                        TradeOffer newOffer = (arrayList.remove(this.random.nextInt(arrayList.size()))).create(this, this.random);
+                    int n = 0;
+                    int maxNumOffers = 22 + Math.max(0, 5 - villagerData.level());
+
+                    // Get index of where "buy" offers end:
+                    int buyIndex = 0;
+                    while(buyIndex < tradeOfferList.size() && tradeOfferList.get(buyIndex).getSellItem().isOf(Items.EMERALD)) buyIndex++;
+
+                    // Find offers to chose:
+                    findOffersToAdd: while (n < maxNumOffers && !availableOffers.isEmpty()) {
+                        TradeOffer newOffer = (availableOffers.remove(this.random.nextInt(availableOffers.size()))).create(this, this.random);
                         if (newOffer != null) {
 
-                            // Make sure the offer isn't already being sold
+                            // Make sure the offer isn't already being sold:
                             for (TradeOffer currentOffer:tradeOfferList) {
                                 if (ItemStack.areItemsAndComponentsEqual(currentOffer.getSellItem(), newOffer.getSellItem())
                                         && ItemStack.areItemsAndComponentsEqual(currentOffer.getFirstBuyItem().itemStack(), newOffer.getFirstBuyItem().itemStack()) ) {
@@ -97,8 +103,9 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
                             }
 
                             // Add!
-                            tradeOfferList.add(newOffer);
-                            i++;
+                            if(newOffer.getSellItem().isOf(Items.EMERALD)) tradeOfferList.add(buyIndex, newOffer);
+                            else tradeOfferList.addLast(newOffer);
+                            n++;
                         }
                     }
                 }
