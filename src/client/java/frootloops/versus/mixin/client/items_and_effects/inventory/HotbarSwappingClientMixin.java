@@ -91,7 +91,7 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
         }
 
         prevItemPickTime = this.player.age;
-        prevItemPick = stackToSwapTo.getItem();
+        prevItemPick = isStackEmpty ? null : stackToSwapTo.getItem();
         info.cancel();
     }
 
