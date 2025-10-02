@@ -2,12 +2,12 @@
   "layers": {
     "humanoid": [
       {
-        "texture": "players-versus:copper"
+        "texture": "minecraft:copper"
       }
     ],
     "humanoid_leggings": [
       {
-        "texture": "players-versus:copper"
+        "texture": "minecraft:copper"
       }
     ]
   }

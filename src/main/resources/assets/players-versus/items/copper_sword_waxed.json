@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "players-versus:item/copper_equipment/copper_sword"
+    "model": "minecraft:item/copper_sword"
   }
 }

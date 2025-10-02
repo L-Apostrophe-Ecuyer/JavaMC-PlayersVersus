@@ -7,6 +7,13 @@
         "threshold": 0,
         "model": {
           "type": "minecraft:model",
+          "model": "minecraft:item/copper_sword"
+        }
+      },
+      {
+        "threshold": 0.6,
+        "model": {
+          "type": "minecraft:model",
           "model": "players-versus:item/copper_equipment/copper_sword"
         }
       },
