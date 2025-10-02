@@ -68,9 +68,16 @@ public class MobSpawning {
     }
 
     public static boolean isMidnightDuringNewMoon(WorldAccess world) {
-        long dayTime = world.getLunarTime() % 24000l;
-        if (dayTime < 18000l || dayTime > 20000l) return false;
+        return isNewMoon(world) && isMidnight(world);
+    }
+
+    public static boolean isNewMoon(WorldAccess world) {
         return world.getMoonPhase() == 7;
+    }
+
+    public static boolean isMidnight(WorldAccess world) {
+        long dayTime = world.getLunarTime() % 24000l;
+        return !(dayTime < 18000l || dayTime > 20000l);
     }
 
 
