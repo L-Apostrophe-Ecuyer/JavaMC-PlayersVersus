@@ -67,7 +67,7 @@ public abstract class WanderingTraderEntityMixin extends MerchantEntity implemen
 
                 boolean doesTraderWantToSettleDown = serverWorld.isNearOccupiedPointOfInterest(this.getBlockPos());
                 if(!doesTraderWantToSettleDown) {
-                    BlockPos spawnPos = serverPlayer.getRespawn().pos();
+                    BlockPos spawnPos = serverPlayer.getRespawn().respawnData().getPos();
                     if(spawnPos != null) doesTraderWantToSettleDown = (spawnPos.isWithinDistance(this.getBlockPos(), 32)) && !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
                     else doesTraderWantToSettleDown = serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 16, PointOfInterestStorage.OccupationStatus.ANY).toList().size() > 1;
                 }

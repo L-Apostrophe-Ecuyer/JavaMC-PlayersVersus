@@ -42,9 +42,9 @@ public class DragonManager {
 
 		double chance = chargePlayerMaxChance;
 
-		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.getEntityWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
 		Box boundingBox = new Box(centerPodium).expand(64d);
-		List<PlayerEntity> players = dragon.getWorld().getEntitiesByClass(PlayerEntity.class, boundingBox, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
+		List<PlayerEntity> players = dragon.getEntityWorld().getEntitiesByClass(PlayerEntity.class, boundingBox, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
 
 		for (PlayerEntity player : players) {
 			List<EndCrystalEntity> endCrystals = player.getEntityWorld().getNonSpectatingEntities(EndCrystalEntity.class, player.getBoundingBox().expand(10d));
@@ -58,9 +58,9 @@ public class DragonManager {
 	}
 
 	private static void chargePlayer(EnderDragonEntity dragon) {
-		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.getEntityWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
 		Box bb = new Box(centerPodium).expand(64d);
-		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayerNearCrystal(dragon.getWorld(), bb);
+		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayerNearCrystal(dragon.getEntityWorld(), bb);
 
 		if (player == null)
 			return;
@@ -79,10 +79,10 @@ public class DragonManager {
 	}
 
 	private static void fireballPlayer(EnderDragonEntity dragon) {
-		BlockPos centerPodium = dragon.getWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.getEntityWorld().getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, EndPortalFeature.offsetOrigin(new BlockPos(0,0,0)));
 		Box bb = new Box(centerPodium).expand(64d);
 
-		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayer(dragon.getWorld(), bb);
+		ServerPlayerEntity player = (ServerPlayerEntity) getRandomPlayer(dragon.getEntityWorld(), bb);
 		if (player == null) return;
 
 		dragon.getPhaseManager().setPhase(PhaseType.STRAFE_PLAYER);
@@ -99,12 +99,12 @@ public class DragonManager {
 		double yPower = attackTarget.getBodyY(0.5D) - y;
 		double zPower = attackTarget.getZ() - z;
 		if (!dragon.isSilent()) {
-			dragon.getWorld().syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
+			dragon.getEntityWorld().syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
 		}
 
-		DragonFireballEntity dragonfireballentity = new DragonFireballEntity(dragon.getWorld(), dragon, new Vec3d(xPower, yPower, zPower));
+		DragonFireballEntity dragonfireballentity = new DragonFireballEntity(dragon.getEntityWorld(), dragon, new Vec3d(xPower, yPower, zPower));
 		dragonfireballentity.refreshPositionAndAngles(x, y, z, 0.0F, 0.0F);
-		dragon.getWorld().spawnEntity(dragonfireballentity);
+		dragon.getEntityWorld().spawnEntity(dragonfireballentity);
 
 		double numFireballs = 3.0D;
 
@@ -118,12 +118,12 @@ public class DragonManager {
 			yPower = attackTarget.getBodyY(0.5D) - y + randomOffset;
 			zPower = attackTarget.getZ() - z + randomOffset;
 			if (!dragon.isSilent()) {
-				dragon.getWorld().syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
+				dragon.getEntityWorld().syncWorldEvent(null, 1017, dragon.getBlockPos(), 0);
 			}
 
-			dragonfireballentity = new DragonFireballEntity(dragon.getWorld(), dragon, new Vec3d(xPower, yPower, zPower));
+			dragonfireballentity = new DragonFireballEntity(dragon.getEntityWorld(), dragon, new Vec3d(xPower, yPower, zPower));
 			dragonfireballentity.refreshPositionAndAngles(x, y, z, 0.0F, 0.0F);
-			dragon.getWorld().spawnEntity(dragonfireballentity);
+			dragon.getEntityWorld().spawnEntity(dragonfireballentity);
 		}
 	}
 

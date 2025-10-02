@@ -65,7 +65,7 @@ public class PillagerCaptainBlowHornGoal extends Goal {
         this.prevOffhandStack = this.illager.getOffHandStack();
         this.prevMainhandStack = this.illager.getMainHandStack();
 
-        RegistryEntry.Reference<Instrument> entry = illager.getWorld().getRegistryManager().getOrThrow(RegistryKeys.INSTRUMENT).getEntry(Identifier.ofVanilla("seek_goat_horn")).get();
+        RegistryEntry.Reference<Instrument> entry = illager.getEntityWorld().getRegistryManager().getOrThrow(RegistryKeys.INSTRUMENT).getEntry(Identifier.ofVanilla("seek_goat_horn")).get();
         ItemStack goatHornStack = GoatHornItem.getStackForInstrument(Items.GOAT_HORN, entry);
         this.illager.equipStack(EquipmentSlot.OFFHAND, goatHornStack);
         this.illager.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
@@ -91,8 +91,8 @@ public class PillagerCaptainBlowHornGoal extends Goal {
                 if (instrumentComponent != null) {
                     RegistryEntry<Instrument> instrumentRegistryEntry = instrumentComponent.getInstrument(this.illager.getRegistryManager()).get();
                     float volume = instrumentRegistryEntry.value().range() / 16.0f;
-                    illager.getWorld().playSoundFromEntity(null, illager, instrumentRegistryEntry.value().soundEvent().value(), SoundCategory.HOSTILE, volume, 1.0f);
-                    illager.getWorld().emitGameEvent(GameEvent.INSTRUMENT_PLAY, illager.getEntityPos(), GameEvent.Emitter.of(illager));
+                    illager.getEntityWorld().playSoundFromEntity(null, illager, instrumentRegistryEntry.value().soundEvent().value(), SoundCategory.HOSTILE, volume, 1.0f);
+                    illager.getEntityWorld().emitGameEvent(GameEvent.INSTRUMENT_PLAY, illager.getEntityPos(), GameEvent.Emitter.of(illager));
                 }
             }
             timeSpentTootingHorn++;

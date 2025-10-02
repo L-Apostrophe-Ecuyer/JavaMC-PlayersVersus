@@ -43,19 +43,19 @@ public abstract class CustomEnchants {
 
     public final static void performTossAttack(ServerWorld world,LivingEntity user, Entity target, double magnitude){
         target.addVelocity(0.0, magnitude, 0.0);
-        target.getWorld().playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, user.getSoundCategory(), 1.2f, 1.2f);
-        target.getWorld().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, user.getSoundCategory(), 1.0f, 1.0f);
+        target.getEntityWorld().playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, user.getSoundCategory(), 1.2f, 1.2f);
+        target.getEntityWorld().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, user.getSoundCategory(), 1.0f, 1.0f);
     }
 
     public final static void performFrostAttack(ServerWorld world,LivingEntity user, Entity target, int level){
         if (target instanceof LivingEntity targetEntity && targetEntity.canFreeze()) {
-            user.getWorld().playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, user.getSoundCategory(), 1.0f, 1.0f);
+            user.getEntityWorld().playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, user.getSoundCategory(), 1.0f, 1.0f);
             targetEntity.extinguish();
 
             // Minimum ticks to get damaged is 140, for most. ModEntities get rid of 2 FrozenTicks per tick.
             target.setFrozenTicks(target.getFrozenTicks() + 180 + 60 * level);
-            if(user.getWorld() instanceof ServerWorld serverWorld) {
-                target.getWorld().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, target.getSoundCategory(), 1.0f, 1.0f);
+            if(user.getEntityWorld() instanceof ServerWorld serverWorld) {
+                target.getEntityWorld().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, target.getSoundCategory(), 1.0f, 1.0f);
                 serverWorld.spawnParticles(ParticleTypes.WAX_OFF, target.getX(), target.getY() + 1, target.getZ(), 4, 0.2, 0.2, 0.2, 6.0f);
             }
         }
@@ -70,7 +70,7 @@ public abstract class CustomEnchants {
 
     public static void onCurseOfEnderUserDamaged(ServerWorld world,LivingEntity user, Entity attacker) {
         if(attacker instanceof LivingEntity && user != null & user.isAlive()) {
-            if (!user.getWorld().isClient()) {
+            if (!user.getEntityWorld().isClient()) {
                 user.damage(world, user.getDamageSources().magic(), 2.0f);
                 if(!user.isAlive())
                     return;
@@ -81,7 +81,7 @@ public abstract class CustomEnchants {
                 double f = user.getZ();
                 for (int i = 0; i < 16; ++i) {
                     double g = user.getX() + (user.getRandom().nextDouble() - 0.5) * 16.0;
-                    double h = MathHelper.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), user.getWorld().getBottomY(), user.getWorld().getBottomY() + ((ServerWorld)user.getWorld()).getLogicalHeight() - 1);
+                    double h = MathHelper.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), user.getEntityWorld().getBottomY(), user.getEntityWorld().getBottomY() + ((ServerWorld)user.getEntityWorld()).getLogicalHeight() - 1);
                     double j = user.getZ() + (user.getRandom().nextDouble() - 0.5) * 16.0;
                     if (user.hasVehicle()) {
                         user.stopRiding();
@@ -89,8 +89,8 @@ public abstract class CustomEnchants {
                     Vec3d vec3d = user.getEntityPos();
                     if (!user.teleport(g, h, j, true)) continue;
 
-                    user.getWorld().emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(user));
-                    user.getWorld().playSound(null, d, e, f, SoundEvents.ENTITY_ENDERMAN_TELEPORT, user.getSoundCategory(), 1.0f, 1.0f);
+                    user.getEntityWorld().emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(user));
+                    user.getEntityWorld().playSound(null, d, e, f, SoundEvents.ENTITY_ENDERMAN_TELEPORT, user.getSoundCategory(), 1.0f, 1.0f);
                     user.playSound(SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
                     user.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, attacker.getEyePos());
                     break;

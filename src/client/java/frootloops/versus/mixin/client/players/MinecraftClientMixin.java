@@ -136,7 +136,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 return true;
             }
             else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
-                return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
+                return (Combat.isLookingTowards(player,player.getAttacker().getEntityPos()));
             }
         }
         else if(mainhandStack.getUseAction() == UseAction.BLOCK){
@@ -152,7 +152,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 }
             }
             else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
-                return (Combat.isLookingTowards(player,player.getAttacker().getPos()));
+                return (Combat.isLookingTowards(player,player.getAttacker().getEntityPos()));
             }
             else if(offhandStack.getUseAction() == UseAction.EAT || offhandStack.getUseAction() == UseAction.DRINK) {
                 if(offhandStack.getComponents().contains(DataComponentTypes.FOOD)) {

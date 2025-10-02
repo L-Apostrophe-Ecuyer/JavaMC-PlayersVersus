@@ -38,7 +38,7 @@ public abstract class PhantomMixin extends MobEntity {
     @Override
     public boolean damage(ServerWorld world, DamageSource source, float amount) {
         boolean wasDamaged = super.damage(world, source, amount);
-        if(!source.isOf(DamageTypes.MOB_PROJECTILE) && source.getAttacker() != null && this.getTarget() != null && !Combat.isLookingTowards(this, this.getTarget().getPos(), true)) {
+        if(!source.isOf(DamageTypes.MOB_PROJECTILE) && source.getAttacker() != null && this.getTarget() != null && !Combat.isLookingTowards(this, this.getTarget().getEntityPos(), true)) {
             // Keep attacking, instead of flying back up, to give a chance to melee attackers:
             this.hurtTime = 0;
             for(PrioritizedGoal goal : this.goalSelector.getGoals()) {

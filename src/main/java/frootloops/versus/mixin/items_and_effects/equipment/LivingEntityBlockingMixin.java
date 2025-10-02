@@ -61,7 +61,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
             } else {
                 BlocksAttacksComponent blocksAttacksComponent = blockingItem.get(DataComponentTypes.BLOCKS_ATTACKS);
                 if (blocksAttacksComponent != null) {
-                    int levelRiposte = EnchantRegistryHelper.getLevel(getWorld(), blockingItem, CustomEnchants.RIPOSTE);
+                    int levelRiposte = EnchantRegistryHelper.getLevel(this.getEntityWorld(), blockingItem, CustomEnchants.RIPOSTE);
                     int ticksToParry = PARRY_TIME_TICKS + levelRiposte;
                     int useTime =  activeItemStack.getMaxUseTime((LivingEntity) ((Object)this)) - itemUseTimeLeft;
                     boolean wasAttackParried = useTime <= ticksToParry;
@@ -89,7 +89,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                         if (damageReductionAmount <= 0.0F) return damageReductionAmount;
 
                         // Thorns will deal damage to the attacker
-                        int levelThorns = EnchantRegistryHelper.getLevel(getWorld(), blockingItem, Enchantments.THORNS);
+                        int levelThorns = EnchantRegistryHelper.getLevel(this.getEntityWorld(), blockingItem, Enchantments.THORNS);
                         float reflectedDamage = 0.1F * damageAmount * levelThorns;
 
                         // Do parrying logic:

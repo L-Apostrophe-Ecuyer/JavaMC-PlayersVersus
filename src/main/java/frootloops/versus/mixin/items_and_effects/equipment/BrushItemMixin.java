@@ -38,7 +38,7 @@ public abstract class BrushItemMixin extends Item {
         if(!stack.isOf(Items.BRUSH) || stack.getUseAction() != UseAction.BRUSH) return ActionResult.PASS;
 
         if (entity instanceof ChickenEntity chicken && chicken.isAlive() && !chicken.isBaby()) {
-            if(user.getWorld() instanceof ServerWorld serverWorld) {
+            if(user.getEntityWorld() instanceof ServerWorld serverWorld) {
                 chicken.emitGameEvent(GameEvent.ENTITY_INTERACT);
                 chicken.playSoundIfNotSilent(SoundEvents.ITEM_BRUSH_BRUSHING_GENERIC);
                 int random = user.getRandom().nextInt(5);
@@ -48,13 +48,13 @@ public abstract class BrushItemMixin extends Item {
                     chicken.dropStack(serverWorld, new ItemStack(Items.FEATHER));
                     chicken.emitGameEvent(GameEvent.ENTITY_INTERACT);
                     chicken.playSound(SoundEvents.ENTITY_ARMADILLO_BRUSH);
-                    ParticleUtil.spawnParticlesAround(user.getWorld(), chicken.getBlockPos(), random, ParticleTypes.HAPPY_VILLAGER);
+                    ParticleUtil.spawnParticlesAround(user.getEntityWorld(), chicken.getBlockPos(), random, ParticleTypes.HAPPY_VILLAGER);
                     chicken.eggLayTime -= random * 250;
                 } else {
                     stack.damage(8, user, hand == Hand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
                     chicken.takeKnockback(0.4, user.getX() - chicken.getX(), user.getZ() - chicken.getZ());
                     chicken.playSoundIfNotSilent(SoundEvents.ENTITY_CHICKEN_HURT);
-                    ParticleUtil.spawnParticlesAround(user.getWorld(), chicken.getBlockPos(), 3, ParticleTypes.SMOKE);
+                    ParticleUtil.spawnParticlesAround(user.getEntityWorld(), chicken.getBlockPos(), 3, ParticleTypes.SMOKE);
                 }
             }
             return ActionResult.SUCCESS;

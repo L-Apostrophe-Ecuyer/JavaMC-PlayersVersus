@@ -26,7 +26,7 @@ public class RespawnNearLastDeath {
 
     public static void respawnPlayerNearTheirDeath(ServerPlayerEntity player) {
         if(player == null) return;
-        respawnPlayerNearTheirDeath(player,player.getServer(),player.getUuid());
+        respawnPlayerNearTheirDeath(player,player.getEntityWorld().getServer(),player.getUuid());
     }
 
     public static void respawnPlayerNearTheirDeath(ServerPlayerEntity player, MinecraftServer server, UUID playerUUID) {

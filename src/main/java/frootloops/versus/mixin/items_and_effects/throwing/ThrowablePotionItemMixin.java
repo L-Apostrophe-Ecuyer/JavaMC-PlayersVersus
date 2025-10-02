@@ -50,7 +50,7 @@ public abstract class ThrowablePotionItemMixin extends PotionItem implements Pro
     }
 
     private static void throwPotion(World world, LivingEntity user, ItemStack stack, float velocity) {
-        if (!world.isClient) {
+        if (!world.isClient()) {
             PotionEntity potionEntity;
             if(stack.isOf(Items.SPLASH_POTION)) potionEntity = new SplashPotionEntity(world, user, stack);
             else if(stack.isOf(Items.LINGERING_POTION)) potionEntity = new LingeringPotionEntity(world, user, stack);

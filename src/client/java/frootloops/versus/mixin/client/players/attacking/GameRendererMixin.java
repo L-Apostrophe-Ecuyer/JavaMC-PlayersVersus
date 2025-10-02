@@ -24,14 +24,14 @@ public abstract class GameRendererMixin {
         Vec3d cameraPos = camera.getCameraPosVec(tickDelta);
         Vec3d cameraRotation = camera.getRotationVec(tickDelta);
         Vec3d pointingVect = cameraPos.add(cameraRotation.x * blockInteractionRange, cameraRotation.y * blockInteractionRange, cameraRotation.z * blockInteractionRange);
-        BlockHitResult blockHitResult = camera.getWorld().raycast(new RaycastContext(cameraPos, pointingVect, RaycastContext.ShapeType.OUTLINE,RaycastContext.FluidHandling.NONE, camera));
+        BlockHitResult blockHitResult = camera.getEntityWorld().raycast(new RaycastContext(cameraPos, pointingVect, RaycastContext.ShapeType.OUTLINE,RaycastContext.FluidHandling.NONE, camera));
 
         // Ensure block pos is in range (it should be, but oh well)
-        Vec3d distVect = cameraPos.relativize(blockHitResult.getEntityPos());
+        Vec3d distVect = cameraPos.relativize(blockHitResult.getPos());
         double squareDistToBlock = distVect.lengthSquared();
         if(squareDistToBlock > blockInteractionRange * blockInteractionRange) {
             Direction direction = Direction.getFacing(distVect);
-            blockHitResult = BlockHitResult.createMissed(blockHitResult.getEntityPos(), direction, blockHitResult.getBlockPos());
+            blockHitResult = BlockHitResult.createMissed(blockHitResult.getPos(), direction, blockHitResult.getBlockPos());
         }
 
         Vec3d rotationVec = camera.getRotationVec(tickDelta);
@@ -40,14 +40,14 @@ public abstract class GameRendererMixin {
         EntityHitResult entityHitResult = ProjectileUtil.raycast(camera, cameraPos, targetPosVec, box, EntityPredicates.CAN_HIT, (entityInteractionRange * entityInteractionRange));
 
         // If no entity targetted, or if out of range:
-        if(entityHitResult == null || !entityHitResult.getEntityPos().isInRange(cameraPos, entityInteractionRange)) return blockHitResult;
+        if(entityHitResult == null || !entityHitResult.getPos().isInRange(cameraPos, entityInteractionRange)) return blockHitResult;
 
         // If the entity is closer to targetted block, set it as the target:
-        double squaredDistToEntity = entityHitResult.getEntityPos().squaredDistanceTo(cameraPos);
+        double squaredDistToEntity = entityHitResult.getPos().squaredDistanceTo(cameraPos);
         if(squaredDistToEntity < squareDistToBlock || squareDistToBlock - squaredDistToEntity > 4.0) return entityHitResult;
 
         // Otherwise, try to check if we can target the entity through grass:
-        Block targettedBlock = camera.getWorld().getBlockState(blockHitResult.getBlockPos()).getBlock();
+        Block targettedBlock = camera.getEntityWorld().getBlockState(blockHitResult.getBlockPos()).getBlock();
         return (targettedBlock instanceof PlantBlock || targettedBlock.getHardness() == 0.0f) ? entityHitResult : blockHitResult;
     }
 }

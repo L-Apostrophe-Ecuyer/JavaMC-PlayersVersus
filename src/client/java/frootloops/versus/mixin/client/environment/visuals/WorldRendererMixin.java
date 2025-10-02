@@ -35,10 +35,10 @@ public abstract class WorldRendererMixin {
     @Inject(method = "addParticle", at = @At("HEAD"), cancellable = true)
     public void tickRainSplashing(ParticleEffect parameters, boolean shouldAlwaysSpawn, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfo info) {
         ParticleType type = parameters.getType();
-        if((type == ParticleTypes.ENTITY_EFFECT) && this.client.cameraEntity.getEyePos().squaredDistanceTo(x,y + 0.1,z) < 2.5) {
+        if((type == ParticleTypes.ENTITY_EFFECT) && this.client.getCameraEntity().getEyePos().squaredDistanceTo(x,y + 0.1,z) < 2.5) {
             info.cancel();
         }
-        else if((type == ParticleTypes.RAIN) && this.client.cameraEntity.getEyePos().squaredDistanceTo(x,y,z) < 80.0) {
+        else if((type == ParticleTypes.RAIN) && this.client.getCameraEntity().getEyePos().squaredDistanceTo(x,y,z) < 80.0) {
             info.cancel();
         }
     }

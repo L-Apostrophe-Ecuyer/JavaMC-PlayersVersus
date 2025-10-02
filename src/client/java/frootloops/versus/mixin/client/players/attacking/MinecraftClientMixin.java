@@ -68,7 +68,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 // Otherwise, if at some point we can attack something, we do:
                 else if (attackChargeProgress > 0.85d) {
                     double attackRange = Combat.getAttackRange(player, attackChargeProgress);
-                    tryAttacking = (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getEntityPos());
+                    tryAttacking = (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos());
                 }
             }
             else ticksAttackKeyPressed = 0;
@@ -119,7 +119,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         boolean missedSwing = true;
         switch (this.crosshairTarget.getType()) {
             case ENTITY: {
-                if(canAttackEntities && (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getEntityPos())) {
+                if(canAttackEntities && (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos())) {
                     missedSwing = false;
                     prevTargettedEntity = ((EntityHitResult) this.crosshairTarget).getEntity();
                     interactionManager.attackEntity(this.player, prevTargettedEntity);

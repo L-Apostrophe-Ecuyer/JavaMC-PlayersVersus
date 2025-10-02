@@ -36,7 +36,7 @@ public class SmolderingTorchBlock extends TorchBlock {
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         int y = pos.getY();
         if(y > 8) return;
-        if(!world.isClient) {
+        if(!world.isClient()) {
             if (random.nextInt(200) > y + 165) {
                 this.tickSmolderingTorchDegradation(state, world, pos);
             }
@@ -45,7 +45,7 @@ public class SmolderingTorchBlock extends TorchBlock {
 
     @Override
     public void precipitationTick(BlockState state, World world, BlockPos pos, Biome.Precipitation precipitation) {
-        if(!world.isClient) this.tickSmolderingTorchDegradation(state, (ServerWorld)world, pos);
+        if(!world.isClient()) this.tickSmolderingTorchDegradation(state, (ServerWorld)world, pos);
         world.playSoundAtBlockCenterClient(pos, SoundEvents.BLOCK_CANDLE_EXTINGUISH, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
     }
 }

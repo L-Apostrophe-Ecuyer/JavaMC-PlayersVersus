@@ -45,8 +45,8 @@ public class PotionEffectBileBlock extends Block {
 
     @Override
     protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
-        if (!world.isClient && !entity.isSpectator() && entity instanceof LivingEntity livingEntity) {
-            if(entity.fallDistance > 1.0 && (entity instanceof PlayerEntity || (!world.isClient && ((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && entity.getWidth() * entity.getWidth() * entity.getHeight() > 0.512F)) {
+        if (!world.isClient() && !entity.isSpectator() && entity instanceof LivingEntity livingEntity) {
+            if(entity.fallDistance > 1.0 && (entity instanceof PlayerEntity || (!world.isClient() && ((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && entity.getWidth() * entity.getWidth() * entity.getHeight() > 0.512F)) {
                 this.grantStatusEffect(livingEntity, true);
                 super.onEntityCollision(state, world, pos, entity, handler);
                 world.breakBlock(pos, false);

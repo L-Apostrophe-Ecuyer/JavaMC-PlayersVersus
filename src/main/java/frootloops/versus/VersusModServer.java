@@ -29,8 +29,8 @@ public class VersusModServer implements DedicatedServerModInitializer {
 
     public static void addPacketRecievers(){
         ServerPlayNetworking.registerGlobalReceiver(RespawnNearbyPayload.ID, (payload, context) -> {
-            context.player().getServer().execute(() -> {
-                RespawnNearLastDeath.respawnPlayerNearTheirDeath(context.player(), context.player().getServer(), payload.playerUUID());
+            context.player().getEntityWorld().getServer().execute(() -> {
+                RespawnNearLastDeath.respawnPlayerNearTheirDeath(context.player(), context.player().getEntityWorld().getServer(), payload.playerUUID());
             });
         });
     }

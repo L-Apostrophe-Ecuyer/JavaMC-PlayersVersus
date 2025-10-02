@@ -45,7 +45,7 @@ public abstract class PotionBottleUsageMixin extends Item {
             world.playSound((PlayerEntity)null, blockPos, SoundEvents.ENTITY_GENERIC_SPLASH, SoundCategory.BLOCKS, 1.0F, 1.0F);
             playerEntity.setStackInHand(context.getHand(), ItemUsage.exchangeStack(itemStack, playerEntity, new ItemStack(Items.GLASS_BOTTLE)));
             playerEntity.incrementStat(Stats.USED.getOrCreateStat(itemStack.getItem()));
-            if (!world.isClient) {
+            if (!world.isClient()) {
                 ServerWorld serverWorld = (ServerWorld)world;
 
                 for(int i = 0; i < 5; ++i) {

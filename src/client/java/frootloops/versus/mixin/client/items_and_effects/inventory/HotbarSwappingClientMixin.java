@@ -9,11 +9,15 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.WindowEventHandler;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.SystemKeycodes;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -39,6 +43,11 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
         super(string);
     }
 
+    @Shadow
+    public boolean isCtrlPressed() {return false;}
+
+    private static int prevItemPickTime = 0;
+    private static Item prevItemPick = null;
 
 
     /**
@@ -50,10 +59,11 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
         if(!VersusSettings.QOL.DO_HOTBAR_SWAPPING_ON_PICK_KEY) return;
 
         boolean isCreativeMode = this.player.getAbilities().creativeMode;
-        boolean isCrouching = this.player.isSneaking() || Screen.hasControlDown();
+        boolean isCrouching = this.player.isSneaking() || this.isCtrlPressed();
 
         ItemStack stackToSwapTo = getPickItemStack(isCreativeMode, isCrouching);
         boolean isStackEmpty = (stackToSwapTo == null || stackToSwapTo.isEmpty());
+        int currentPickTime = player.age;
 
         PlayerInventory playerInventory = this.player.getInventory();
         int slotToSwapTo = isStackEmpty ? -1: playerInventory.getSlotWithStack(stackToSwapTo);
@@ -66,7 +76,7 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
                 else if(this.crosshairTarget.getType() == HitResult.Type.ENTITY) this.interactionManager.pickItemFromEntity(((EntityHitResult)this.crosshairTarget).getEntity(), isCrouching);
             }
         }
-        else if (playerInventory.getSelectedSlot() == slotToSwapTo && !isCrouching) {
+        else if (playerInventory.getSelectedSlot() == slotToSwapTo || currentPickTime - prevItemPickTime < 6 || (currentPickTime - prevItemPickTime < 12 && stackToSwapTo.getItem() == prevItemPick)) {
             HotbarCycling.doHotbarSwap(playerInventory);
         }
         else if (PlayerInventory.isValidHotbarIndex(slotToSwapTo)) {
@@ -83,6 +93,9 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
             HotbarCycling.doHotbarSwap(playerInventory, numRowsToSwitch);
             if(slotToSwapTo != -1) playerInventory.setSelectedSlot(slotToSwapTo % 9);
         }
+
+        prevItemPickTime = this.player.age;
+        prevItemPick = stackToSwapTo.getItem();
         info.cancel();
     }
 

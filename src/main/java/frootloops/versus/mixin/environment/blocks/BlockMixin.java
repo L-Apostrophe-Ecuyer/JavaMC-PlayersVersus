@@ -49,7 +49,7 @@ public abstract class BlockMixin extends AbstractBlock {
     }
 
     private static void dropStackTowardsPlayer(World world, BlockPos pos, ItemStack stack, @Nullable Entity entity) {
-        if (world.isClient || stack.isEmpty() || !((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) return;
+        if (world.isClient() || stack.isEmpty() || !((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) return;
 
         double itemHeight = 0.125;
         double posX = (double)pos.getX() + 0.5 + MathHelper.nextDouble(world.random, -0.25, 0.25);

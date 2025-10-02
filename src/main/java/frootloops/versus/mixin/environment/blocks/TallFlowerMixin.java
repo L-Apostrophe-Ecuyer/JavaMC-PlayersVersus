@@ -27,7 +27,7 @@ public abstract class TallFlowerMixin extends PlantBlock implements Fertilizable
         if(state.isOf(Blocks.ROSE_BUSH)) {
             if (!(entity instanceof PlayerEntity) && !(entity instanceof HostileEntity)) return;
             entity.slowMovement(state, new Vec3d(0.9f, 0.75, 0.9f));
-            if (!(world.isClient || (entity.lastRenderX == entity.getX() && entity.lastRenderZ == entity.getZ()))) {
+            if (!(world.isClient() || (entity.lastRenderX == entity.getX() && entity.lastRenderZ == entity.getZ()))) {
                 double d = Math.abs(entity.getX() - entity.lastRenderX);
                 double e = Math.abs(entity.getZ() - entity.lastRenderZ);
                 if (d >= (double) 0.03f || e >= (double) 0.03f) {

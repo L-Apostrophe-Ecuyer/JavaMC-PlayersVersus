@@ -22,7 +22,7 @@ public abstract class MoveToRaidCenterGoalMixin<T extends RaiderEntity> extends 
     public boolean canStart() {
         RaiderEntity raider = (RaiderEntity)this.actor;
         if(raider.getTarget() == null && !raider.hasControllingPassenger() && raider.hasActiveRaid() && !raider.getRaid().isFinished()){
-            if(((ServerWorld)raider.getWorld()).isNearOccupiedPointOfInterest(raider.getBlockPos())) return false;
+            if(((ServerWorld)raider.getEntityWorld()).isNearOccupiedPointOfInterest(raider.getBlockPos())) return false;
             return !raider.getBlockPos().isWithinDistance(raider.getRaid().getCenter(), 16.0);
         }
         return false;
@@ -32,7 +32,7 @@ public abstract class MoveToRaidCenterGoalMixin<T extends RaiderEntity> extends 
     public boolean shouldContinue() {
         RaiderEntity raider = (RaiderEntity)this.actor;
         if(raider.getTarget() == null && !raider.hasControllingPassenger() && raider.hasActiveRaid() && !raider.getRaid().isFinished()){
-            if(((ServerWorld)raider.getWorld()).isNearOccupiedPointOfInterest(raider.getBlockPos())) return false;
+            if(((ServerWorld)raider.getEntityWorld()).isNearOccupiedPointOfInterest(raider.getBlockPos())) return false;
             return !raider.getBlockPos().isWithinDistance(raider.getRaid().getCenter(), 16.0);
         }
         return false;

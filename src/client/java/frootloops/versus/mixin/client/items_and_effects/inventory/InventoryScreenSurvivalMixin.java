@@ -5,10 +5,12 @@ import frootloops.versus.mod.items_and_effects.inventory.HotbarCycling;
 import frootloops.versus.mod.items_and_effects.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.ScreenPos;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.AbstractRecipeScreenHandler;
@@ -28,11 +30,15 @@ public abstract class InventoryScreenSurvivalMixin<T extends AbstractRecipeScree
     private TexturedButtonWidget buttonHotbarSwap = null;
     private TexturedButtonWidget buttonSortInventory = null;
 
+    @Shadow private final RecipeBookWidget<?> recipeBook;
+    @Shadow private boolean narrow;
+
     @Shadow
     protected abstract ScreenPos getRecipeBookButtonPos();
 
-    public InventoryScreenSurvivalMixin(T handler, PlayerInventory inventory, Text title) {
+    public InventoryScreenSurvivalMixin(T handler, PlayerInventory inventory, Text title, RecipeBookWidget<?> recipeBook) {
         super(handler, inventory, title);
+        this.recipeBook = recipeBook;
     }
 
 
@@ -61,30 +67,31 @@ public abstract class InventoryScreenSurvivalMixin<T extends AbstractRecipeScree
         this.addDrawableChild(buttonSortInventory);
     }
 
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if(button == 2) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if(click.button() == 2) {
             HotbarCycling.doHotbarSwap(client.player.getInventory());
+            return false;
         }
         else {
-            ScreenPos recipeBookButtonPos = this.getRecipeBookButtonPos();
-            boolean clickedOnRecipeBook = (mouseY >= recipeBookButtonPos.y() && mouseY <= recipeBookButtonPos.y() + 18) && (mouseX >= recipeBookButtonPos.x() && mouseX <= recipeBookButtonPos.x() + 20);
-            if (clickedOnRecipeBook) {
-                if(buttonHotbarSwap != null) {
-                    buttonHotbarSwap.setPosition(this.x + 104 + 22, this.height / 2 - 22);
-                    buttonHotbarSwap.setFocused(false);
-                }
-                if(buttonSortInventory != null) {
-                    buttonSortInventory.setPosition(buttonSortInventory == null ? this.x + 104 + 22 : buttonHotbarSwap.getX() + 22, this.height / 2 - 22);
-                    buttonSortInventory.setFocused(false);
-                }
+            boolean returnValue;
+            if (this.recipeBook.mouseClicked(click, doubled)) {
+                this.setFocused(this.recipeBook);
+                returnValue = true;
+            } else {
+                boolean outsideClickValue = super.mouseClicked(click, doubled);
+                returnValue = this.narrow && this.recipeBook.isOpen() ? true : outsideClickValue;
             }
+
+            if(buttonHotbarSwap != null) {
+                buttonHotbarSwap.setPosition(this.x + 104 + 22, this.height / 2 - 22);
+                buttonHotbarSwap.setFocused(false);
+            }
+            if(buttonSortInventory != null) {
+                buttonSortInventory.setPosition(buttonSortInventory == null ? this.x + 104 + 22 : buttonHotbarSwap.getX() + 22, this.height / 2 - 22);
+                buttonSortInventory.setFocused(false);
+            }
+
+            return returnValue;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
-    }
-
-    @Inject(method = "mouseClicked",at = @At("RETURN"), cancellable = false)
-    public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable info) {
-
     }
 }

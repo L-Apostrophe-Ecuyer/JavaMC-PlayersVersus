@@ -63,7 +63,7 @@ public class CustomMudBlock extends MoistBlock {
 
             // Otherwise, when the entity moves, they'll get hurt:
             else if(hasEntityMoved(entity) || entity.isSneaky()) {
-                if(canEntityBeDamaged && world.getTime() % 20L == 0 && !world.isClient) {
+                if(canEntityBeDamaged && world.getTime() % 20L == 0 && !world.isClient()) {
                     entity.damage((ServerWorld) world, CustomDamageSources.getMudSuffocation(world), 1); // Damage every second while moving
                     entity.playSound(this.soundGroup.getHitSound(), this.soundGroup.getVolume() * 0.5F, this.soundGroup.getPitch() * 0.75F);
                 }
@@ -76,7 +76,7 @@ public class CustomMudBlock extends MoistBlock {
             }
 
             // Suffocation damage from waiting, every 4 seconds
-            if(canEntityBeDamaged && !world.isClient && world.getTime() % 80L == 0) {
+            if(canEntityBeDamaged && !world.isClient() && world.getTime() % 80L == 0) {
                 entity.damage((ServerWorld) world, CustomDamageSources.getMudSuffocation(world), 1);
             }
         }

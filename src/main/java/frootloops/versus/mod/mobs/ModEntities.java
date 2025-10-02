@@ -9,6 +9,7 @@ import frootloops.versus.mod.items_and_effects.throwing.SlimeballEntity;
 
 import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
@@ -48,10 +49,10 @@ public class ModEntities {
             "wildfire", EntityType.Builder.create(WildfireEntity::new, SpawnGroup.MONSTER).makeFireImmune().dimensions(0.6F, 1.8F).maxTrackingRange(8)
     );
 
-    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(DEEPER_CREEPER, getItemSettings("deeper_creeper_spawn_egg"));
-    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(FROSTED_ZOMBIE, getItemSettings("frosted_zombie_spawn_egg"));
-    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(WITHERED_ZOMBIE, getItemSettings("withered_zombie_spawn_egg"));
-    public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(WILDFIRE, getItemSettings("wildfire_spawn_egg"));
+    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("deeper_creeper_spawn_egg").spawnEgg(DEEPER_CREEPER));
+    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("frosted_zombie_spawn_egg").spawnEgg(FROSTED_ZOMBIE));
+    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("withered_zombie_spawn_egg").spawnEgg(WITHERED_ZOMBIE));
+    public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("wildfire_spawn_egg").spawnEgg(WILDFIRE));
 
 
     public static void onInitialize() {

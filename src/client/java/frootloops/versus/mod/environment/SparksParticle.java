@@ -10,6 +10,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 
 public class SparksParticle extends AnimatedParticle {
@@ -22,7 +23,7 @@ public class SparksParticle extends AnimatedParticle {
         this.velocityY = Math.abs(vy)/2.0;
         this.scale *= 0.75F;
         this.maxAge = 12 + this.random.nextInt(18);
-        this.setSpriteForAge(spriteProvider);
+        this.updateSprite(spriteProvider);
     }
 
     protected SparksParticle(ClientWorld world, double x, double y, double z, SpriteProvider spriteProvider, float upwardsAcceleration) {
@@ -30,7 +31,7 @@ public class SparksParticle extends AnimatedParticle {
         this.gravityStrength = 0.75F;
         this.scale *= 0.75F;
         this.maxAge = 12 + this.random.nextInt(18);
-        this.setSpriteForAge(spriteProvider);
+        this.updateSprite(spriteProvider);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class SparksParticle extends AnimatedParticle {
 
         @Nullable
         @Override
-        public Particle createParticle(SimpleParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
+        public Particle createParticle(SimpleParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, Random random) {
             return new SparksParticle(world, x, y, z, velocityX, velocityY, velocityZ, this.spriteProvider);
         }
     }

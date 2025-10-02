@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ZombieSiegeManager.class)
-public class ZombieHordeMixin implements SpecialSpawner {
+public abstract class ZombieHordeMixin implements SpecialSpawner {
 
     @Shadow
     private int remaining, countdown, startX, startY, startZ;
@@ -30,7 +30,7 @@ public class ZombieHordeMixin implements SpecialSpawner {
 
 
     @Override
-    public void spawn(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals) {
+    public void spawn(ServerWorld world, boolean spawnMonsters) {
 
         if (world.isDay() || !spawnMonsters) {
             this.remaining = 15;

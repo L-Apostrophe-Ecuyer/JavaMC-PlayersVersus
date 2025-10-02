@@ -95,10 +95,6 @@ public class DeeperCreeperEntity extends CreeperEntity {
     public void onStruckByLightning(ServerWorld world, LightningEntity lightning) {
         super.onStruckByLightning(world, lightning);
     }
-    @Override
-    public boolean shouldDropHead() {
-        return false;
-    }
 
     @Override
     public void tick() {

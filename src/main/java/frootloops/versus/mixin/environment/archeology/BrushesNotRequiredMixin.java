@@ -53,7 +53,7 @@ public class BrushesNotRequiredMixin {
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = false)
     private void update(CallbackInfo info) {
-        if(world.isClient) return;
+        if(world.isClient()) return;
 
         int ticksTillBrushing = player.getMainHandStack().isIn(ItemTags.SHOVELS) ? 2 : 6;
         if(this.tickCounter - startMiningTime > ticksTillBrushing && this.tickCounter - startMiningTime < 36 && player.handSwinging) {

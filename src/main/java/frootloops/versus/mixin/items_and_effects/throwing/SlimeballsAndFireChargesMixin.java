@@ -37,7 +37,7 @@ public class SlimeballsAndFireChargesMixin {
 
     private static void throwSnowball(World world, PlayerEntity user, ItemStack itemStack) {
         world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_EGG_THROW, SoundCategory.NEUTRAL, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
-        if (!world.isClient) {
+        if (!world.isClient()) {
             SlimeballEntity slimeballEntity = new SlimeballEntity(world, user, itemStack);
             slimeballEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0f, 1.5f, 1.0f);
             world.spawnEntity(slimeballEntity);
@@ -52,7 +52,7 @@ public class SlimeballsAndFireChargesMixin {
 
     private static void throwFireCharge(World world, PlayerEntity user, ItemStack itemStack) {
         world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.NEUTRAL, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
-        if (!world.isClient) {
+        if (!world.isClient()) {
             double vx = -MathHelper.sin(user.getYaw() * ((float)Math.PI / 180)) * MathHelper.cos(user.getPitch() * ((float)Math.PI / 180));
             double vy = -MathHelper.sin((user.getPitch()) * ((float)Math.PI / 180));
             double vz = MathHelper.cos(user.getYaw() * ((float)Math.PI / 180)) * MathHelper.cos(user.getPitch() * ((float)Math.PI / 180));
