@@ -80,6 +80,17 @@ public class VanillaItems {
 
     private static void setUpTransformVanillaItemsToModded() {
 
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_AXE, CustomEquipment.COPPER_AXE);
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_HOE, CustomEquipment.COPPER_HOE);
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_SHOVEL, CustomEquipment.COPPER_SHOVEL);
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_SWORD, CustomEquipment.COPPER_SWORD);
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_PICKAXE, CustomEquipment.COPPER_PICKAXE);
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_HELMET, CustomEquipment.COPPER_HELMET);
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_BOOTS, CustomEquipment.COPPER_BOOTS);
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_LEGGINGS, CustomEquipment.COPPER_LEGGINGS);
+        ITEM_REPLACEMENT_MAP.put(Items.COPPER_CHESTPLATE, CustomEquipment.COPPER_CHESTPLATE);
+
+
         ITEM_REPLACEMENT_MAP.put(Items.FERMENTED_SPIDER_EYE, CustomBrewingItems.CORRUPTED_WART_POWDER);
         ITEM_REPLACEMENT_MAP.put(Items.BLAZE_POWDER, CustomBrewingItems.CONCENTRATE_OF_STRENGTH);
         ITEM_REPLACEMENT_MAP.put(Items.MAGMA_CREAM, CustomBrewingItems.CONCENTRATE_OF_FIRE);
