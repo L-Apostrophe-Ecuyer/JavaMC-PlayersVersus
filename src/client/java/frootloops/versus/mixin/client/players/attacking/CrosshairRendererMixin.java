@@ -8,6 +8,8 @@ import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.gui.hud.debug.DebugHudEntries;
+import net.minecraft.client.gui.hud.debug.DebugHudProfile;
 import net.minecraft.client.option.AttackIndicator;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.Perspective;
@@ -34,13 +36,6 @@ public class CrosshairRendererMixin {
     @Shadow private static final Identifier CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_TEXTURE = Identifier.of("hud/crosshair_attack_indicator_background");
     @Shadow private static final Identifier CROSSHAIR_ATTACK_INDICATOR_PROGRESS_TEXTURE = Identifier.of("hud/crosshair_attack_indicator_progress");
 
-    @Shadow public boolean shouldRenderCrosshair() {
-        return this.debugHud.shouldShowDebugHud()
-                && this.client.options.getPerspective() == Perspective.FIRST_PERSON
-                && !this.client.player.hasReducedDebugInfo()
-                && !this.client.options.getReducedDebugInfo().getValue();
-    }
-
 
     @Shadow
     private boolean shouldRenderSpectatorCrosshair(HitResult hitResult) {return false;}
@@ -54,7 +49,7 @@ public class CrosshairRendererMixin {
         GameOptions gameOptions = this.client.options;
         if (gameOptions.getPerspective().isFirstPerson()) {
             if (this.client.interactionManager.getCurrentGameMode() != GameMode.SPECTATOR || this.shouldRenderSpectatorCrosshair(this.client.crosshairTarget)) {
-                if (!this.shouldRenderCrosshair()) {
+                if (!this.client.debugHudEntryList.isEntryVisible(DebugHudEntries.THREE_DIMENSIONAL_CROSSHAIR)) {
                     context.createNewRootLayer();
 
                     // Changes start here:
