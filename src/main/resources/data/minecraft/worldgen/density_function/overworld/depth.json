@@ -1,16 +1,4 @@
 {
-  "type": "minecraft:add",
-  "argument1": {
-    "type": "minecraft:mul",
-    "argument1": 0.0,
-    "argument2": {
-      "type": "minecraft:noise",
-      "noise": "minecraft:surface",
-      "xz_scale": 2,
-      "y_scale": 0
-    }
-  },
-  "argument2":{
     "type": "minecraft:add",
     "argument1": {
       "type": "minecraft:add",
@@ -24,5 +12,4 @@
       "argument2": "minecraft:overworld/offset"
     },
     "argument2": "players-versus:overworld/river_carver_depth"
-  }
 }
