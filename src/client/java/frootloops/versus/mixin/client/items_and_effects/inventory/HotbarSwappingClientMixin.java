@@ -72,24 +72,24 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
                 else if(this.crosshairTarget.getType() == HitResult.Type.ENTITY) this.interactionManager.pickItemFromEntity(((EntityHitResult)this.crosshairTarget).getEntity(), isCrouching);
             }
         }
-        else if (!doesPlayerAlreadyHaveStack || playerInventory.getSelectedSlot() == slotToSwapTo || currentPickTime - prevItemPickTime < 6 || (currentPickTime - prevItemPickTime < 12 && stackToSwapTo.getItem() == prevItemPick)) {
-            HotbarCycling.doHotbarSwap(playerInventory);
-        }
-        else if (PlayerInventory.isValidHotbarIndex(slotToSwapTo)) {
-            playerInventory.setSelectedSlot(slotToSwapTo);
-        }
         else {
-            int numRowsToSwitch = slotToSwapTo == -1 ? 1 : 1 + (35 - slotToSwapTo) / 9;
-            if(slotToSwapTo == -1) {
-                while (numRowsToSwitch < 4) {
-                    if(isRowEmpty(playerInventory, 36 - numRowsToSwitch * 9)) numRowsToSwitch += 1;
-                    else break;
-                }
+            if (!doesPlayerAlreadyHaveStack || playerInventory.getSelectedSlot() == slotToSwapTo || currentPickTime - prevItemPickTime < 6 || (currentPickTime - prevItemPickTime < 12 && stackToSwapTo.getItem() == prevItemPick)) {
+                slotToSwapTo = -1; // Force a hotbar swap!
             }
-            HotbarCycling.doHotbarSwap(playerInventory, numRowsToSwitch);
-            if(slotToSwapTo != -1) playerInventory.setSelectedSlot(slotToSwapTo % 9);
+            if (PlayerInventory.isValidHotbarIndex(slotToSwapTo)) {
+                playerInventory.setSelectedSlot(slotToSwapTo);
+            } else {
+                int numRowsToSwitch = slotToSwapTo == -1 ? 1 : 1 + (35 - slotToSwapTo) / 9;
+                if (slotToSwapTo == -1) {
+                    while (numRowsToSwitch < 4) {
+                        if (isRowEmpty(playerInventory, 36 - numRowsToSwitch * 9)) numRowsToSwitch += 1;
+                        else break;
+                    }
+                }
+                HotbarCycling.doHotbarSwap(playerInventory, numRowsToSwitch);
+                if (slotToSwapTo != -1) playerInventory.setSelectedSlot(slotToSwapTo % 9);
+            }
         }
-
         prevItemPickTime = this.player.age;
         prevItemPick = isStackEmpty ? null : stackToSwapTo.getItem();
         info.cancel();
