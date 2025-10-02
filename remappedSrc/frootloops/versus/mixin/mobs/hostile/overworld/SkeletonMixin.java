@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
+import frootloops.versus.mod.mobs.MobSpawning;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -20,6 +21,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.LightType;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
@@ -57,25 +59,24 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
     }
 
 
+    /*
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
         BlockPos pos = this.getBlockPos();
-        if(pos.getY() < -16) return false;
-        if(pos.getY() < 32 && !world.getBlockState(pos.down()).isOf(Blocks.STONE)) return false;
-        if(world.getBlockState(pos.down()).isIn(BlockTags.AXE_MINEABLE)) return false;
+        if(world.getLightLevel(LightType.SKY, pos) > 4) return false;
+        if(!world.getBlockState(pos.down()).isIn(MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE)) return false;
         return super.canSpawn(world, spawnReason);
-    }
+    }*/
 
     @Override
     @Nullable
     protected void initEquipment(Random random, LocalDifficulty localDifficulty) {
-        this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.3F;
-
+        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.3F);
         int rand = random.nextInt(100);
         if(rand > 52){
             this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-            this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.1F;
+            this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.1F);
             this.setHealth(16);
         }
         else {

@@ -1,7 +1,6 @@
 package frootloops.versus.mixin.players;
 
-import frootloops.versus.mod.enchantments.CustomEnchants;
-import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -14,13 +13,9 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static frootloops.versus.mod.enchantments.CustomEnchants.BOUNDING_STRIDES;
 
@@ -46,7 +41,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             return;
         }
 
-        double boundingStridesLevel = Enchants.getLevel(getWorld(), leggings, BOUNDING_STRIDES);
+        double boundingStridesLevel = EnchantRegistryHelper.getLevel(getWorld(), leggings, BOUNDING_STRIDES);
         if(boundingStridesLevel <= 0) {
             super.jump();
         }
@@ -90,7 +85,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                     double d = this.random.nextGaussian() * 0.02 - velocityX;
                     double e = this.random.nextGaussian() * 0.02 + 0.01;
                     double f = this.random.nextGaussian() * 0.02 - velocityZ;
-                    this.getWorld().addParticle(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
+                    this.getWorld().addParticleClient(ParticleTypes.POOF, this.getParticleX(1.0), this.getRandomBodyY(), this.getParticleZ(1.0), d, e, f);
                 }
                 this.spawnSprintingParticles();
                 this.playBlockFallSound();

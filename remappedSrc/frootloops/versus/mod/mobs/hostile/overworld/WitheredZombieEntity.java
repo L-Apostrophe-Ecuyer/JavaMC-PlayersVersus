@@ -1,5 +1,6 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -15,9 +16,11 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 
@@ -34,9 +37,9 @@ public class WitheredZombieEntity extends ZombieEntity {
                 .add(EntityAttributes.MOVEMENT_SPEED, 0.33f)
                 .add(EntityAttributes.ATTACK_DAMAGE, 3.0)
                 .add(EntityAttributes.ATTACK_KNOCKBACK, 1.1)
-                .add(EntityAttributes.ARMOR, 4.0)
+                .add(EntityAttributes.ARMOR, 3.0)
                 .add(EntityAttributes.ARMOR_TOUGHNESS, 3.0)
-                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.5)
+                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.25)
                 .add(EntityAttributes.SPAWN_REINFORCEMENTS);
     }
 
@@ -53,8 +56,8 @@ public class WitheredZombieEntity extends ZombieEntity {
     public void initCustomGoals() {
         this.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, -1, 127));
         this.ambientSoundChance = -1000;
-        this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.4F;
-        this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.5F;
+        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.4F);
+        this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 0.5F);
         this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.9F)); // Only 10% chance of actually wandering
         this.targetSelector.add(1, new RevengeGoal(this, PigEntity.class));
@@ -89,11 +92,11 @@ public class WitheredZombieEntity extends ZombieEntity {
         boolean isAtDiamondDepth = this.getBlockPos().getY() < -32;
         if (isAtDiamondDepth && rand % 23 == 0) {
             this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + random.nextInt(5)));
-            this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
+            this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 1.0F);
         }
 
         if(isAtDiamondDepth && rand < 60) {
-            this.armorDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15f;
+            this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.1F);
             if (rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
             else if (rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
             else if (rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
@@ -106,7 +109,6 @@ public class WitheredZombieEntity extends ZombieEntity {
         if(rand < 90) {
             int damageAmount = (isAtDiamondDepth && rand < 60) ? rand + 900 : rand/2 + 150;
             this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
-            this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15F;
         }
 
         // Bit less attack damage when wielding weapons:
@@ -114,6 +116,11 @@ public class WitheredZombieEntity extends ZombieEntity {
             EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
             entityAttributeInstance.setBaseValue(1.0);
         }
+    }
+
+    @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0F;
     }
 
     @Override

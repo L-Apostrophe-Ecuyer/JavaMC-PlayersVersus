@@ -1,13 +1,10 @@
 package frootloops.versus.mixin.environment.blocks;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.block.*;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -34,7 +31,7 @@ public abstract class TorchMixin extends Block {
         else return;
 
         world.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 4, 0.1, 0.2, 0.1, 0.05);
-        world.playSoundAtBlockCenterClient(pos, SoundEvents.BLOCK_CANDLE_EXTINGUISH, SoundCategory.BLOCKS, 0.3f, 0.6f, true);
+        world.playSound(null, pos, SoundEvents.BLOCK_CANDLE_EXTINGUISH, SoundCategory.BLOCKS, 0.3f, 0.6f);
     }
 
 
@@ -45,11 +42,11 @@ public abstract class TorchMixin extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        if(pos.getY() > 32 || world.getDimension().ultrawarm()) return;
+        if(world.getDimension().ultrawarm()) return;
         if(world instanceof ServerWorld && state.isOf(Blocks.TORCH) || state.isOf(Blocks.WALL_TORCH)) {
             int randomInteger = random.nextInt(512);
-            int offset = 32 + (randomInteger - pos.getY() < 64 && world.getBlockState(pos.down()).isOf(Blocks.DEEPSLATE) ? 32 : 0);
-            if (randomInteger > pos.getY() + 512 - offset) {
+            int offset = 8 + (world.getBlockState(pos.down()).isOf(Blocks.DEEPSLATE) || world.hasRain(pos) ? 48 : 0);
+            if (randomInteger > 512 + Math.min(pos.getY() + 16, 0) - offset) {
                 this.tickTorchDegradation(state, world, pos, false);
             }
         }

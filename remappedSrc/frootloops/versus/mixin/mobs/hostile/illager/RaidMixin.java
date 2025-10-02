@@ -20,32 +20,35 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Optional;
+
 @Mixin(Raid.class)
 public abstract class RaidMixin {
 
     @Shadow private final ServerBossBar bar;
     @Shadow private int wavesSpawned;
-    @Shadow private BlockPos center;
-    @Shadow private final ServerWorld world;
+    @Shadow private Optional<BlockPos> preCalculatedRaidersSpawnLocation;
     private int numPlayerDeaths = 0;
     private boolean isRaidingVillage = false;
     private boolean isRaidingBase = false;
+    private ServerWorld serverWorld = null;
 
-    protected RaidMixin(ServerBossBar bar, int wavesSpawned, BlockPos center, ServerWorld world) {
+    protected RaidMixin(ServerBossBar bar, Optional<BlockPos> preCalculatedRaidersSpawnLocation) {
         this.bar = bar;
-        this.wavesSpawned = wavesSpawned;
-        this.center = center;
-        this.world = world;
+        this.preCalculatedRaidersSpawnLocation = preCalculatedRaidersSpawnLocation;
     }
 
 
     @Inject(method = "getMaxWaves", at = @At("HEAD"), cancellable = true)
-    public void start(Difficulty difficulty, CallbackInfoReturnable<Integer> cir) {
+    public void getMaxWaves(Difficulty difficulty, CallbackInfoReturnable<Integer> cir) {
         numPlayerDeaths = 0;
+        if(this.serverWorld == null) return;
         if(this.wavesSpawned > 0) return;
+        if(preCalculatedRaidersSpawnLocation.isEmpty()) return;
 
+        BlockPos center = preCalculatedRaidersSpawnLocation.get();
         Box boundingBox = new Box(center.getX() - 48.0, center.getY() - 24.0, center.getZ() - 48.0, center.getX() + 48.0, center.getY() + 24.0, center.getZ() + 48.0);
-        int numVillagers = world.getEntitiesByClass(VillagerEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY).size();
+        int numVillagers = serverWorld.getEntitiesByClass(VillagerEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY).size();
         int difficultyBonus = difficulty == Difficulty.EASY ? 1 : difficulty == Difficulty.NORMAL ? 2 : 3;
 
         if(numVillagers == 0) {
@@ -61,6 +64,7 @@ public abstract class RaidMixin {
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;isNearOccupiedPointOfInterest(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean shouldContinueRaid(ServerWorld world, BlockPos pos) {
+        if(this.serverWorld == null) this.serverWorld = world;
         if (this.wavesSpawned == 0) return true;
         boolean hasSomeoneDied = false;
 

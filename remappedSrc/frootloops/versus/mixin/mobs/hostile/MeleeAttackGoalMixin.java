@@ -13,6 +13,7 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.tag.EntityTypeTags;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
@@ -59,10 +60,8 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         if(maxCooldown > 0) return maxCooldown;
         if(numTicksEndlag == -1) numTicksEndlag = mob.getType().isIn(EntityTypeTags.ARTHROPOD) ? 4 : 8;
         if(!this.mob.getMainHandStack().isEmpty()) {
-            Item weapon = this.mob.getMainHandStack().getItem();
-            if(weapon instanceof AxeItem || weapon instanceof TridentItem) maxCooldown = TICKS_SWING_HEAVY + numTicksEndlag;
-            else if(weapon instanceof HoeItem) maxCooldown = TICKS_SWING_QUICK + numTicksEndlag;
-            else if(weapon instanceof MiningToolItem) maxCooldown = TICKS_SWING_TOOLS + numTicksEndlag;
+            if(this.mob.getMainHandStack().isIn(ItemTags.AXES) || this.mob.getMainHandStack().isOf(Items.TRIDENT))
+                maxCooldown = TICKS_SWING_HEAVY + numTicksEndlag;
         }
         else maxCooldown = TICKS_SWING_QUICK + numTicksEndlag;
         return maxCooldown;
@@ -221,25 +220,26 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     } else if (willTryLandingAnAttack) {
                         if(this.mob.canSee(target)) {
                             if(DEBUG) VersusMod.MOD_LOGGER.warn("Landing attack!");
-                            this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.6F, 1.4F);
-                            this.mob.tryAttack(getServerWorld(this.mob), target);
+                            if(this.mob.tryAttack(getServerWorld(this.mob), target)) {
+                                this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, 0.6F, 1.4F);
+                            }
                             this.cooldown -= 2;
                         }
                         else {
                             if(DEBUG) VersusMod.MOD_LOGGER.warn("Missed: couldn't see target.");
-                            this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.2F, 0.9F);
+                            this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.2F, 0.9F);
                             this.cooldown -= 1;
                         }
                     }
                 }
                 else if (willTryLandingAnAttack) {
                     if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack.");
-                    this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
+                    this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, 0.8F, 0.8F);
                 }
             }
             else if (willTryLandingAnAttack) {
                 if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: neither in close quarters, nor looking towards target");
-                this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8F, 0.8F);
+                this.mob.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, 0.8F, 0.8F);
             }
         }
     }

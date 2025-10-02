@@ -10,11 +10,18 @@ import net.minecraft.entity.mob.SilverfishEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(SilverfishEntity.class)
 public class SilverfishMixin extends HostileEntity {
     protected SilverfishMixin(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    @ModifyConstant(method = "createSilverfishAttributes", constant = @Constant(doubleValue = 8.0))
+    private static double lessHealth(double hp) {
+        return 5.0f;
     }
 
     @Override

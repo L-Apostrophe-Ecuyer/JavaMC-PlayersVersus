@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.end.dragon;
 
-import frootloops.versus.mod.mobs.hostile.end.dragon.DragonManager;
+import frootloops.versus.mod.mobs.hostile.end.DragonManager;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.phase.AbstractPhase;
 import net.minecraft.entity.boss.dragon.phase.ChargingPlayerPhase;

@@ -30,19 +30,19 @@ public class ZombieHordeMixin implements SpecialSpawner {
 
 
     @Override
-    public int spawn(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals) {
+    public void spawn(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals) {
 
         if (world.isDay() || !spawnMonsters) {
             this.remaining = 15;
             this.countdown = 1 + world.random.nextInt(2);
             this.spawned = false;
-            return 0;
+            return;
         }
 
         float skyAngle = world.getSkyAngle(0.0f);
-        if (skyAngle < 0.4f || skyAngle > 0.5f || world.random.nextInt(20) != 0) return 0;
-        if (!this.tryGettingSpawnLocation(world)) return 0;
-        if (--this.countdown > 0) return 0;
+        if (skyAngle < 0.4f || skyAngle > 0.5f || world.random.nextInt(20) != 0) return;
+        if (!this.tryGettingSpawnLocation(world)) return;
+        if (--this.countdown > 0) return;
 
         int i;
         for(i = 0; i < Math.min(this.remaining, 10); i++) {
@@ -50,7 +50,6 @@ public class ZombieHordeMixin implements SpecialSpawner {
         }
         this.spawned = true;
         this.remaining -= i;
-        return i;
     }
 
     private boolean tryGettingSpawnLocation(ServerWorld world) {
@@ -58,7 +57,7 @@ public class ZombieHordeMixin implements SpecialSpawner {
             BlockPos blockPos;
             if (playerEntity.isSpectator() || world.getBiome(blockPos = playerEntity.getBlockPos()).isIn(BiomeTags.WITHOUT_ZOMBIE_SIEGES)) continue;
 
-            boolean canSpawnZombieHorde = VersusSettings.DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES || world.isNearOccupiedPointOfInterest(blockPos);
+            boolean canSpawnZombieHorde = VersusSettings.Gameplay.DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES || world.isNearOccupiedPointOfInterest(blockPos);
             if(!canSpawnZombieHorde) continue;
             for (int i = 0; i < 10; ++i) {
                 float f = world.random.nextFloat() * ((float)Math.PI * 2);

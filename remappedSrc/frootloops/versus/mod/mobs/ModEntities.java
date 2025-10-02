@@ -1,6 +1,7 @@
 package frootloops.versus.mod.mobs;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.mobs.hostile.nether.WildfireEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import frootloops.versus.mod.items_and_effects.throwing.SlimeballEntity;
@@ -11,7 +12,6 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.registry.Registries;
@@ -20,7 +20,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 
-import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getSettings;
+import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getItemSettings;
 
 public class ModEntities {
 
@@ -44,9 +44,14 @@ public class ModEntities {
             EntityType.Builder.create(WitheredZombieEntity::new, SpawnGroup.MONSTER).dimensions(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.0125f).vehicleAttachment(-0.7f).maxTrackingRange(8)
     );
 
-    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(DEEPER_CREEPER, 0x4d4b4a, 0, getSettings("deeper_creeper_spawn_egg"));
-    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(FROSTED_ZOMBIE, 0x46b3b3 , 0x2e3e7d, getSettings("frosted_zombie_spawn_egg"));
-    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(WITHERED_ZOMBIE, 0x334545, 0x101017, getSettings("withered_zombie_spawn_egg"));
+    public static final EntityType<WildfireEntity> WILDFIRE = register(
+            "wildfire", EntityType.Builder.create(WildfireEntity::new, SpawnGroup.MONSTER).makeFireImmune().dimensions(0.6F, 1.8F).maxTrackingRange(8)
+    );
+
+    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(DEEPER_CREEPER, getItemSettings("deeper_creeper_spawn_egg"));
+    public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(FROSTED_ZOMBIE, getItemSettings("frosted_zombie_spawn_egg"));
+    public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(WITHERED_ZOMBIE, getItemSettings("withered_zombie_spawn_egg"));
+    public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(WILDFIRE, getItemSettings("wildfire_spawn_egg"));
 
 
     public static void onInitialize() {
@@ -55,6 +60,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(DEEPER_CREEPER, DeeperCreeperEntity.createDeeperCreeperAttributes());
         FabricDefaultAttributeRegistry.register(FROSTED_ZOMBIE, FrostedZombieEntity.createFrostedAttributes());
         FabricDefaultAttributeRegistry.register(WITHERED_ZOMBIE, WitheredZombieEntity.createWitheredAttributes());
+        FabricDefaultAttributeRegistry.register(WILDFIRE, WildfireEntity.createWildfireAttributes());
 
         // Make them spawn in the world:
         MobSpawning.addCustomSpawns();

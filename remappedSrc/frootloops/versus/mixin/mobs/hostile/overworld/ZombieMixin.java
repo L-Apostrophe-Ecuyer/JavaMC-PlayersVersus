@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
+import frootloops.versus.mod.mobs.MobSpawning;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import net.minecraft.block.Blocks;
@@ -7,6 +8,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -14,6 +16,11 @@ import net.minecraft.entity.conversion.EntityConversionContext;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.*;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.MerchantEntity;
+import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.TurtleEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.BlockTags;
@@ -45,10 +52,22 @@ public abstract class ZombieMixin extends HostileEntity {
         return 500;
     }
 
+    @Overwrite
+    public void initCustomGoals() {
+        ZombieEntity self = ((ZombieEntity) ((Object)this));
+        this.goalSelector.add(2, new ZombieAttackGoal(self, 1.0, false));
+        this.goalSelector.add(6, new MoveThroughVillageGoal(this, 1.0, true, 4, self::canBreakDoors));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
+        this.targetSelector.add(1, new RevengeGoal(self).setGroupRevenge(PigEntity.class));
+        this.targetSelector.add(2, new ActiveTargetGoal(self, PlayerEntity.class, true));
+        this.targetSelector.add(3, new ActiveTargetGoal(self, MerchantEntity.class, false));
+        this.targetSelector.add(3, new ActiveTargetGoal(self, IronGolemEntity.class, true));
+        this.targetSelector.add(5, new ActiveTargetGoal(self, TurtleEntity.class, 10, true, false, TurtleEntity.BABY_TURTLE_ON_LAND_FILTER));
+    }
 
     @Inject(method = "createZombieAttributes", at = @At("HEAD"), cancellable = true)
     private static void createZombieAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-        double followRange = 32.0;
+        double followRange = 24.0;
         double mvtSpeed = 0.28;
         cir.setReturnValue(HostileEntity.createHostileAttributes()
                         .add(EntityAttributes.FOLLOW_RANGE, followRange)
@@ -76,15 +95,16 @@ public abstract class ZombieMixin extends HostileEntity {
         }
     }
 
+    /*
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
         BlockPos pos = this.getBlockPos();
         if(pos.getY() < -16) return false;
-        if(pos.getY() < 32 && !world.getBlockState(pos.down()).isOf(Blocks.STONE)) return false;
-        if(world.getBlockState(pos.down()).isIn(BlockTags.AXE_MINEABLE)) return false;
+        if(world.getLightLevel(LightType.SKY, pos) > 4) return false;
+        if(!world.getBlockState(pos.down()).isIn(MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE)) return false;
         return super.canSpawn(world, spawnReason);
-    }
+    }*/
 
     @Override
     protected void loot(ServerWorld world, ItemEntity itemEntity) {
@@ -116,7 +136,7 @@ public abstract class ZombieMixin extends HostileEntity {
                 this.equipStack(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
                 this.getEquippedStack(EquipmentSlot.LEGS).setDamage(rand + 80);
             }
-            if(rand % 4 == 0 || rand % 9 == 0) {
+            if((rand % 4 == 0 || rand % 9 == 0) && this.getY() < 56) {
                 this.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
                 this.getEquippedStack(EquipmentSlot.HEAD).setDamage(rand + 80);
             }
@@ -127,17 +147,22 @@ public abstract class ZombieMixin extends HostileEntity {
             if(rand % 13 == 0 && depth > 64) {
                 this.equipStack(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
                 this.getEquippedStack(EquipmentSlot.CHEST).setDamage(rand + 384);
-                this.armorDropChances[EquipmentSlot.CHEST.getEntitySlotId()] = 0.08f;
+                this.setEquipmentDropChance(EquipmentSlot.CHEST, 0.08F);
             }
 
-            boolean isAtDiamondDepth = this.canConvertInWater() && this.getBlockPos().getY() < 8;
-            if (isAtDiamondDepth && rand % 23 == 0) {
+            boolean isDeepInCave = this.canConvertInWater() && this.getBlockPos().getY() < 28;
+            if(isDeepInCave) {
+                this.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(24.0f);
+                this.setHealth(24.0f);
+            }
+
+            if (isDeepInCave && rand % 23 == 0) {
                 this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + random.nextInt(5)));
-                this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 1F;
+                this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 1F);
             }
 
-            if(isAtDiamondDepth && rand < 60) {
-                this.armorDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15f;
+            if(isDeepInCave && rand < 60) {
+                this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.15F);
                 if (rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
                 else if (rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
                 else if (rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
@@ -148,9 +173,9 @@ public abstract class ZombieMixin extends HostileEntity {
             else if(rand < 80) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
             else if(rand < 90)this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
             if(rand < 90) {
-                int damageAmount = (isAtDiamondDepth && rand < 60) ? rand + 900 : rand/2 + 150;
+                int damageAmount = (isDeepInCave && rand < 60) ? rand + 900 : rand/2 + 150;
                 this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
-                this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 0.15F;
+                this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.15F);
             }
         }
         else if(rand <= 55) {
@@ -160,11 +185,9 @@ public abstract class ZombieMixin extends HostileEntity {
             else if(rand % 7 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICK,  random.nextInt(8) + rand));
             else if(rand % 11 == 0) this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.BRICK,  random.nextInt(6) + rand));
             else this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.COPPER_INGOT,  random.nextInt(4)));
-
-            this.handDropChances[EquipmentSlot.OFFHAND.getEntitySlotId()] = 0.9F;
+            this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 0.8F);
         }
         else {
-            this.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(16.0f);
             this.setHealth(16.0f);
         }
 

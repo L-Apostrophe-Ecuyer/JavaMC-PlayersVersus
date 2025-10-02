@@ -10,6 +10,7 @@ import net.minecraft.item.ShovelItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
@@ -54,7 +55,7 @@ public class BrushesNotRequiredMixin {
     private void update(CallbackInfo info) {
         if(world.isClient) return;
 
-        int ticksTillBrushing = player.getMainHandStack().getItem() instanceof ShovelItem ? 2 : 6;
+        int ticksTillBrushing = player.getMainHandStack().isIn(ItemTags.SHOVELS) ? 2 : 6;
         if(this.tickCounter - startMiningTime > ticksTillBrushing && this.tickCounter - startMiningTime < 36 && player.handSwinging) {
             BlockState blockState = world.getBlockState(miningPos);
             if (blockState.getBlock() instanceof BrushableBlock) {
@@ -76,7 +77,6 @@ public class BrushesNotRequiredMixin {
         for(int k = 0; k < j; ++k) {
             world.addParticleClient(blockStateParticleEffect, blockPos.getX() - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), blockPos.getY(), blockPos.getZ() - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * 3.0 * world.getRandom().nextDouble(), 0.0, dustParticlesOffset.zd() * (double)i * 3.0 * world.getRandom().nextDouble());
         }
-
     }
 
     private static record DustParticlesOffset(double xd, double yd, double zd) {

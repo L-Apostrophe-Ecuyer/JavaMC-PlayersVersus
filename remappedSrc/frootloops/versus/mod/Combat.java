@@ -4,6 +4,7 @@ package frootloops.versus.mod;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.LivingEntityAccessor;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
@@ -12,8 +13,11 @@ import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.ClampedEntityAttribute;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
 //import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.HungerManager;
@@ -21,6 +25,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
@@ -34,15 +41,46 @@ import java.util.List;
 
 public abstract class Combat {
 
+    public static final double TRIDENT_SPEED = 1.0, TRIDENT_DAMAGE = 9.0, TRIDENT_REACH = 0.5;
+    public static final double PICKAXE_SPEED = 1.2, PICKAXE_DAMAGE = 2.0, PICKAXE_REACH = 0.0;
+    public static final double SHOVEL_SPEED = 1.4, SHOVEL_DAMAGE = 3.0, SHOVEL_REACH = 0.0;
+    public static final double SWORD_SPEED = 1.6, SWORD_DAMAGE = 3.0, SWORD_REACH = 0.0;
+    public static final double HOE_SPEED = 2.0, HOE_DAMAGE = 1.0, HOE_REACH = 0.5;
+    public static final double AXE_SPEED = 1.0, AXE_DAMAGE = 6.0, AXE_REACH = 0.0;
+    public static final Identifier ATTACK_REACH_MODIFIER_ID = Identifier.of(VersusMod.MOD_ID,"attack_reach_modifier");
+    public static final Identifier ATTACK_KNOCKBACK_MODIFIER_ID = Identifier.of(VersusMod.MOD_ID,"attack_knockback_modifier");
+
+    public static EntityAttribute CRITICAL_ATTACK_DAMAGE_ATTRIBUTE, SPRINT_ATTACK_DAMAGE_ATTRIBUTE;
+    public static RegistryEntry<EntityAttribute> CRITICAL_ATTACK_DAMAGE, SPRINT_ATTACK_DAMAGE;
+
+    static {
+        // Register critical attack damage
+        CRITICAL_ATTACK_DAMAGE_ATTRIBUTE = Registry.register(
+                Registries.ATTRIBUTE,
+                Identifier.of(VersusMod.MOD_ID, "critical_attack_damage"),
+                new ClampedEntityAttribute("attribute.name.critical_attack_damage", 2.0, 0.0, 2048.0).setTracked(true)
+        );
+
+        // Register sprint attack damage
+        SPRINT_ATTACK_DAMAGE_ATTRIBUTE = Registry.register(
+                Registries.ATTRIBUTE,
+                Identifier.of(VersusMod.MOD_ID, "sprint_attack_damage"),
+                new ClampedEntityAttribute("attribute.name.sprint_attack_damage", 2.0, 0.0, 2048.0).setTracked(true)
+        );
+    }
+
+
     public static final float MIN_COOLDOWN_TO_SWING = 0.6f;
 
     public static final double PLAYER_BASE_ATTACK_DAMAGE = 0.0d;
     public static final double PLAYER_BASE_ATTACK_SPEED = 4.0d;
-    public static final double PLAYER_BASE_ATTACK_REACH = 2.5d;
+    public static final double PLAYER_BASE_ATTACK_REACH = 3.0d;
     public static final double PLAYER_MAX_ATTACK_SPEED = 2.5d;
 
 
     public static void onInitialize() {
+        CRITICAL_ATTACK_DAMAGE = Registries.ATTRIBUTE.getEntry(CRITICAL_ATTACK_DAMAGE_ATTRIBUTE);
+        SPRINT_ATTACK_DAMAGE = Registries.ATTRIBUTE.getEntry(SPRINT_ATTACK_DAMAGE_ATTRIBUTE);
     }
 
     private static double getCappedAttackSpeedOf(PlayerEntity player) {
@@ -87,67 +125,6 @@ public abstract class Combat {
         return (range * range) > player.getEyePos().squaredDistanceTo(entity.getEyePos());
     }
 
-    public static void doSpecialSweepAttack(PlayerEntity player, double attackRange, int level) {
-        if(level < 1) return;
-
-        World world = player.getWorld();
-        player.spawnSweepAttackParticles();
-        player.swingHand(player.getActiveHand());
-        //player.getItemCooldownManager().set(player.getActiveItem().getItem(), 19 - level * 2);
-        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
-
-        VersusMod.MOD_LOGGER.warn("SWEEP ATTACK: With range " + attackRange);
-
-        attackRange = attackRange - (0.5d * (double)(3 - level));
-        double attackRangeSquared = attackRange * attackRange;
-
-        // Attack entities:
-        Vec3d playerPos = player.getEyePos();
-        Box boundingBox = new Box(playerPos.x - attackRange, playerPos.y - attackRange, playerPos.z - attackRange, playerPos.x + attackRange, playerPos.y + attackRange, playerPos.z + attackRange);
-        List<LivingEntity> entitiesInRange = world.getEntitiesByClass(LivingEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
-        for (LivingEntity targetEntity : entitiesInRange) {
-            if(!targetEntity.isTeammate(player) && targetEntity != player) {
-
-                VersusMod.MOD_LOGGER.warn("    -> Entity " + targetEntity.getName().getString() + " is in range? " + targetEntity.getEyePos().squaredDistanceTo(playerPos) + " < " + attackRangeSquared + "? " + (targetEntity.getEyePos().squaredDistanceTo(playerPos) < attackRangeSquared));
-                if(targetEntity.squaredDistanceTo(playerPos) < attackRangeSquared) VersusMod.MOD_LOGGER.warn("       Entity " + targetEntity.getName().getString() + " is in sight? " + Combat.isLookingTowards(player, targetEntity.getPos()));
-
-                if (targetEntity.getEyePos().squaredDistanceTo(playerPos) - 2.0 < attackRangeSquared && Combat.isLookingTowards(player, targetEntity.getPos())) {
-                    if(player.canSee(targetEntity)) {
-
-                        VersusMod.MOD_LOGGER.warn("       * Entity Attacked!!!");
-
-                        player.setSprinting(true);
-                        player.resetLastAttackedTicks();
-                        player.attack(targetEntity);
-                    }
-                }
-            }
-        }
-
-        // Break foliage:
-        if(player.getActiveItem().getItem() instanceof HoeItem) {
-            Vec3d hitPos = Combat.getHitResultOf(player, attackRange - 1d).getPos();
-            BlockPos blockPosOfHit = new BlockPos((int) hitPos.x, (int) hitPos.y, (int) hitPos.z);
-            BlockPos blockPos, above;
-            BlockState blockState;
-            for (int x = -2; x <= 2; x++) {
-                for (int z = -2; z <= 2; z++) {
-                    for (int y = -1; y <= 1; y++) {
-                        blockPos = blockPosOfHit.add(x, y, z);
-                        blockState = world.getBlockState(blockPos);
-                        if (blockState.getHardness(world, blockPos) == 0.0) {
-                            world.breakBlock(blockPos, true, player);
-                            above = blockPos.add(0, 1, 0);
-                            if (world.getBlockState(above).getHardness(world, above) == 0.0F) {
-                                world.breakBlock(above, true, player);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     public static final boolean isLookingTowardsEntity(LivingEntity looker, LivingEntity target, boolean strict){
         return Combat.isLookingTowards(looker,new Vec3d(target.getX(), target.getEyeY(), target.getZ()),strict);
     }
@@ -171,35 +148,6 @@ public abstract class Combat {
         Vec3d positionVector = targetPos.relativize(looker.getEyePos());
         if(rotationVector.dotProduct(positionVector) >= 0.0F) return false;
         else return (rotationVector.dotProduct(positionVector.normalize()) < dotProductThreshold);
-    }
-
-    public static HitResult getHitResultOf(LivingEntity entity, double range) {
-        return getHitResultOf(entity.getYaw(1F), entity.getPitch(1f), range, entity);
-    }
-
-    public static HitResult getHitResultOf(float yaw, float pitch, double range, Entity entity) {
-
-        // Convert degrees to radians manually
-        double yawRadians = yaw * Math.PI / 180.0;
-        double pitchRadians = pitch * Math.PI / 180.0;
-
-        // Calculate the components of the direction vector
-        double dx = range * -Math.sin(yawRadians) * Math.cos(pitchRadians);
-        double dy = range * -Math.sin(pitchRadians);
-        double dz = range * Math.cos(yawRadians) * Math.cos(pitchRadians);
-        Vec3d direction = new Vec3d(dx, dy, dz);
-
-        World world = entity.getWorld();
-        Vec3d posStart = entity.getEyePos();
-        Vec3d posStop = posStart.add(direction);
-
-        HitResult hitResult = world.raycast(new RaycastContext(posStart, posStop, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity));
-        if (((HitResult)hitResult).getType() != HitResult.Type.MISS) posStop = ((HitResult)hitResult).getPos();
-
-        HitResult entityHitResult = ProjectileUtil.getEntityCollision(world, entity, posStart, posStop, entity.getBoundingBox().stretch(direction).expand(1.0), EntityPredicates.CAN_COLLIDE.and(e -> e != null));
-        if (entityHitResult != null) hitResult = entityHitResult;
-
-        return (HitResult)hitResult;
     }
 
     public static Box getMobAttackBox(MobEntity mob, boolean jump) {
@@ -235,11 +183,12 @@ public abstract class Combat {
     }
 
     public static boolean canPlayerSprint(PlayerEntity player) {
-        return canPlayerSprint(player.getHungerManager());
+        return canPlayerSprint(player.getHungerManager(), player.hasStatusEffect(StatusEffects.HUNGER));
     }
 
-    public static boolean canPlayerSprint(HungerManager hungerManager) {
+    public static boolean canPlayerSprint(HungerManager hungerManager, boolean hasHungerEffect) {
         if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return hungerManager.getFoodLevel() > 6;
+        if(hasHungerEffect) return false;
         if(hungerManager.getFoodLevel() != 0) return true;
         if(hungerManager.getSaturationLevel() == 0.0f) return false;
         return true;

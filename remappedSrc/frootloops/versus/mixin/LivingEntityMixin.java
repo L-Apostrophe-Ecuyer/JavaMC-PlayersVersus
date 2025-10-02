@@ -2,9 +2,9 @@ package frootloops.versus.mixin;
 
 import com.google.common.collect.Maps;
 import frootloops.versus.mod.enchantments.CustomEnchants;
-import frootloops.versus.mod.enchantments.Enchants;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import frootloops.versus.mod.environment.CustomBlocks;
-import frootloops.versus.mod.environment.blocks.clays.BrownMudBlock;
+import frootloops.versus.mod.environment.blocks.clays.CustomMudBlock;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.brewing.effects.HauntingStatusEffect;
 import net.minecraft.enchantment.Enchantments;
@@ -12,12 +12,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.fluid.FluidState;
+import net.minecraft.entity.passive.PassiveEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -33,12 +37,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Collection;
 import java.util.Map;
 
-import static net.minecraft.fluid.FlowableFluid.FALLING;
-
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
     @Shadow
     private final Map<StatusEffect, StatusEffectInstance> activeStatusEffects = Maps.newHashMap();
+
+    @Shadow public final boolean addStatusEffect(StatusEffectInstance effect) {return false;}
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -46,16 +50,12 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "travelInFluid", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
-        if(this.getWorld().getFluidState(this.getBlockPos()).get(FALLING, false)) {
-            this.setVelocity(this.getVelocity().add(0.0, isPlayer() && isSwimming() ? -0.02 : -0.01, 0.0));
-            return h;
-        }
-        else return isPlayer() && isSwimming() ? h : h + 0.3f;
+        return isPlayer() && isSwimming() ? h : h + 0.3f;
     }
 
     @Inject(method = "applyMovementInput", at = @At("RETURN"), cancellable = true)
     private void applyMovementInput(Vec3d movementInput, float slipperiness, CallbackInfoReturnable<Vec3d> cir) {
-        if (this.getBlockStateAtPos().isOf(CustomBlocks.BROWN_MUD) && BrownMudBlock.canWalkOnWetMud(this)) {
+        if (this.getBlockStateAtPos().isOf(CustomBlocks.BROWN_MUD) && CustomMudBlock.canWalkOnWetMud(this)) {
             Vec3d vec3d = this.getVelocity();
             cir.setReturnValue(new Vec3d(vec3d.x, 0.2, vec3d.z));
         }
@@ -94,17 +94,17 @@ public abstract class LivingEntityMixin extends Entity {
 
             // Shovel attack and Tossing Enchantment:
             if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
-                int tossLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.TOSSING);
+                int tossLevel = EnchantRegistryHelper.getLevel(getWorld(), mainhandStack, CustomEnchants.TOSSING);
                 CustomEnchants.performTossAttack(world, self, target, 0.2 + 0.1 * (double)tossLevel);
             }
 
             // Other enchantments: Frost Aspect, Impaling
             if (!mainhandStack.hasEnchantments()) return;
-            int frostLevel = Enchants.getLevel(getWorld(), mainhandStack, CustomEnchants.FROST_ASPECT);
+            int frostLevel = EnchantRegistryHelper.getLevel(getWorld(), mainhandStack, CustomEnchants.FROST_ASPECT);
             if (frostLevel > 0) CustomEnchants.performFrostAttack(world, self, target, frostLevel);
 
             if (!mainhandStack.hasEnchantments()) return;
-            int impaleLevel = Enchants.getLevel(getWorld(), mainhandStack, Enchantments.IMPALING);
+            int impaleLevel = EnchantRegistryHelper.getLevel(getWorld(), mainhandStack, Enchantments.IMPALING);
             if (impaleLevel > 0) CustomEnchants.performImpalingAttack(world, self, target, frostLevel);
         }
     }
@@ -112,13 +112,22 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
     private float rebalancedDamage(float amount2, ServerWorld world, DamageSource source, float amount) {
-        // Explosions don't hurt as much, or at least, the damage is more consistent:
-        if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
-            return (amount + amount + 16.0f) / 4.0f;
-        }
+
+        // Fire resistance is only partial at level one!
         if (source.isIn(DamageTypeTags.IS_FIRE)) {
             StatusEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getStatusEffect(StatusEffects.FIRE_RESISTANCE);
             if(fireResistanceEffect != null) return (fireResistanceEffect.getAmplifier() > 0) ? 0.0f : 0.6f;
+        }
+
+        // Random Drowning & Suffocation should no longer slowly kill pets:
+        else if(amount > 0f && !this.isPlayer() && (source.isOf(DamageTypes.DROWN) || source.isOf(DamageTypes.IN_WALL)) && (((LivingEntity)((Object)this)) instanceof PassiveEntity)) {
+            this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 160, 0, true, false));
+            return amount;
+        }
+
+        // Explosions don't hurt as much, or at least, the damage is more consistent:
+        else if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
+            return (amount + amount + 16.0f) / 4.0f;
         }
         return amount;
     }
@@ -134,20 +143,23 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("TAIL"))
     private void modifyInvincibilityFrames(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if(source.getAttacker() instanceof LivingEntity attacker) {
+        if(source.getAttacker() instanceof HostileEntity || source.getAttacker() instanceof PlayerEntity) {
 
             // Modify Invincibility Frames:
             if (timeUntilRegen > 10) {
                 if (source.isOf(DamageTypes.ARROW)) {
-                    if(attacker.getMainHandStack().isOf(Items.CROSSBOW)) timeUntilRegen = 9;
+                    // Crossbow arrows don't trigger invincibility frames, allowing for multishot shotguns:
+                    if(((LivingEntity)source.getAttacker()).getMainHandStack().isOf(Items.CROSSBOW)) timeUntilRegen = 9;
+                    // Regular bow shots give only 4 ticks of invincibility
                     else timeUntilRegen = 14;
                 }
+                // Anything else gives 8 ticks of invincibility
                 else if (timeUntilRegen > 18 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 18;
             }
 
             // Curse of Ender Enchantment:
-            if(Enchants.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
-                CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), attacker);
+            if(EnchantRegistryHelper.getEquipmentLevel(getWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
+                CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), source.getAttacker());
             }
         }
         else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 12;

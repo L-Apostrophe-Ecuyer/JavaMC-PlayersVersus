@@ -17,11 +17,11 @@ public class OreVeinMixin {
     private static final float DENSITY_THRESHOLD = 0.4F;
     private static final int MAX_DENSITY_INTRUSION = 20;
     private static final double LIMINAL_DENSITY_REDUCTION = 0.2;
-    private static final float BLOCK_GENERATION_CHANCE = 0.7F;
+    private static final float BLOCK_GENERATION_CHANCE = 0.8F;
     private static final float MIN_ORE_CHANCE = 0.1F;
-    private static final float MAX_ORE_CHANCE = 0.3F;
+    private static final float MAX_ORE_CHANCE = 0.45F;
     private static final float DENSITY_FOR_MAX_ORE_CHANCE = 0.6F;
-    private static final float RAW_ORE_BLOCK_CHANCE = 0.035F;
+    private static final float RAW_ORE_BLOCK_CHANCE = 0.05F;
     private static final float VEIN_GAP_THRESHOLD = -0.3F;
 
     @Overwrite
@@ -48,7 +48,7 @@ public class OreVeinMixin {
                     } else {
                         double g = MathHelper.clampedMap(veinToggleNoiseValueAbs, DENSITY_THRESHOLD, DENSITY_FOR_MAX_ORE_CHANCE, MIN_ORE_CHANCE, MAX_ORE_CHANCE);
                         if ((double)random.nextFloat() < g && veinGap.sample(pos) > VEIN_GAP_THRESHOLD) {
-                            return random.nextFloat() < RAW_ORE_BLOCK_CHANCE ? veinType.rawOreBlock : veinType.ore;
+                            return random.nextFloat() < RAW_ORE_BLOCK_CHANCE + (veinType == CustomWorldgen.VeinType.COPPER ? 0.05 : 0.00) ? veinType.rawOreBlock : veinType.ore;
                         } else {
                             return veinType.stone;
                         }

@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.mobs.hostile.ai.PhantomMoveControlRevamp;
+import frootloops.versus.mod.mobs.hostile.overworld.PhantomMoveControlRevamp;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
@@ -9,10 +9,9 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.mob.FlyingEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.function.BooleanBiFunction;
@@ -26,14 +25,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(PhantomEntity.class)
-public abstract class PhantomMixin extends FlyingEntity {
+public abstract class PhantomMixin extends MobEntity {
 
     @Shadow
     BlockPos circlingCenter = BlockPos.ORIGIN;
 
-    protected PhantomMixin(EntityType<? extends FlyingEntity> entityType, World world) {
+    protected PhantomMixin(EntityType<? extends MobEntity> entityType, World world) {
         super(entityType, world);
     }
+
 
     @Override
     public boolean damage(ServerWorld world, DamageSource source, float amount) {

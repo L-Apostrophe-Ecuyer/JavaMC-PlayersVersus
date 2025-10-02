@@ -18,11 +18,11 @@ public abstract class ShortPlantMixin extends PlantBlock implements Fertilizable
 
     @Override
     protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) {
-        return floor.isIn(BlockTags.DIRT) || floor.isOf(Blocks.FARMLAND) || floor.isIn(BlockTags.DEAD_BUSH_MAY_PLACE_ON);
+        return floor.isIn(BlockTags.DIRT) || floor.isOf(Blocks.FARMLAND) || floor.isIn(BlockTags.DRY_VEGETATION_MAY_PLACE_ON);
     }
 
     @Override
     public boolean canGrow(World world, Random random, BlockPos pos, BlockState state) {
-        return !world.getBlockState(pos.down()).isIn(BlockTags.DEAD_BUSH_MAY_PLACE_ON);
+        return !world.getBlockState(pos.down()).isIn(BlockTags.DRY_VEGETATION_MAY_PLACE_ON);
     }
 }

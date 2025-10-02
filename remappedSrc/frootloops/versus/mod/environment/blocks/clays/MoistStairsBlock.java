@@ -47,8 +47,23 @@ public class MoistStairsBlock extends StairsBlock implements MoistureConvertable
     }
 
     @Override
-    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
+    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
         MoistureConvertableBlock.onLandedUpon(world, state, pos, entity, fallDistance, dryVersion);
         super.onLandedUpon(world, state, pos, entity, fallDistance * 0.5F);
+    }
+
+    @Override
+    public Block getDryVersion() {
+        return dryVersion;
+    }
+
+    @Override
+    public Block getCookedVersion() {
+        return cookedVersion;
+    }
+
+    @Override
+    public boolean hasWetVersion() {
+        return wetterVersion != null;
     }
 }

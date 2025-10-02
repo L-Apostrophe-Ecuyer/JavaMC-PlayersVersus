@@ -20,6 +20,9 @@ import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
@@ -48,6 +51,11 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
+    public float getSoundPitch() {
+        return this.isBaby() ? (this.random.nextFloat() - this.random.nextFloat()) * 0.3F + 1.5F : (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F;
+    }
+
+    @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
 
@@ -61,7 +69,7 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    protected int computeFallDamage(float fallDistance, float damageMultiplier) {
+    protected int computeFallDamage(double fallDistance, float damageMultiplier) {
         return super.computeFallDamage(fallDistance, damageMultiplier) - 10;
     }
 
@@ -75,9 +83,9 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    public int getXpToDrop(ServerWorld world) {
+    public int getExperienceToDrop(ServerWorld world) {
         if (!this.isBaby()) this.experiencePoints = 17;
-        return super.getXpToDrop(world);
+        return super.getExperienceToDrop(world);
     }
 
     @Override
@@ -86,7 +94,7 @@ public class SpiderMixin extends HostileEntity {
         entityData = super.initialize(world, difficulty, spawnReason, entityData);
         if (entityData == null) {
             entityData = new SpiderEntity.SpiderData();
-            if (world.getDifficulty() == Difficulty.HARD && random.nextFloat() < 0.2f * difficulty.getClampedLocalDifficulty()) {
+            if ((world.getDifficulty() == Difficulty.HARD || world.getMoonPhase() == 7 || this.getY() < 32.0) && random.nextFloat() < 0.3f * difficulty.getClampedLocalDifficulty()) {
                 ((SpiderEntity.SpiderData)entityData).setEffect(random);
             }
         }
@@ -100,25 +108,27 @@ public class SpiderMixin extends HostileEntity {
         EntityAttributeInstance instanceMvt = this.getAttributes().getCustomInstance(EntityAttributes.MOVEMENT_SPEED);
         EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_DAMAGE);
         EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
+        EntityAttributeInstance instanceScale = this.getAttributes().getCustomInstance(EntityAttributes.SCALE);
 
         if(random.nextFloat() < 0.85F) {
             this.setBaby(true);
             if (instanceMvt != null) instanceMvt.setBaseValue(0.36D);
             if (instanceDmg != null) instanceDmg.setBaseValue(3.0D);
+            if (instanceScale != null) instanceScale.setBaseValue(0.7D);
             if (instanceHP != null) {
                 instanceHP.setBaseValue(12.0f);
                 this.setHealth(12.0f);
             }
         }
         else {
-            if (instanceMvt != null) instanceMvt.setBaseValue(0.3D);
-            if (instanceDmg != null) instanceDmg.setBaseValue(7.0D);
+            if (instanceMvt != null) instanceMvt.setBaseValue(0.32D);
+            if (instanceDmg != null) instanceDmg.setBaseValue(6.0D);
             if (instanceHP != null) {
-                instanceHP.setBaseValue(50.0f);
-                this.setHealth(50.0f);
+                instanceHP.setBaseValue(24.0f);
+                this.setHealth(24.0f);
             }
             SkeletonEntity skeletonEntity;
-            if (random.nextInt(80) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getWorld(), SpawnReason.JOCKEY)) != null) {
+            if (random.nextInt(60) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getWorld(), SpawnReason.JOCKEY)) != null) {
                 skeletonEntity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.getYaw(), 0.0f);
                 skeletonEntity.initialize(world, difficulty, spawnReason, null);
                 skeletonEntity.startRiding(this);
@@ -176,15 +186,15 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound tag) {
-        super.readCustomDataFromNbt(tag);
-        this.setBaby(tag.getBoolean("IsBaby"));
+    protected void writeCustomData(WriteView view) {
+        super.writeCustomData(view);
+        view.putBoolean("IsBaby", this.isBaby());
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound tag) {
-        super.writeCustomDataToNbt(tag);
-        tag.putBoolean("IsBaby", this.isBaby());
+    protected void readCustomData(ReadView view) {
+        super.readCustomData(view);
+        this.setBaby(view.getBoolean("IsBaby", false));
     }
 
     @Override
