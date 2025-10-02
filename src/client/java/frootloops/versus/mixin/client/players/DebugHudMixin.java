@@ -22,6 +22,8 @@ public abstract class DebugHudMixin {
 
     @Shadow private final MinecraftClient client;
 
+    @Shadow private boolean renderingChartVisible, renderingAndTickChartsVisible, packetSizeAndPingChartsVisible;
+
     protected DebugHudMixin(MinecraftClient client) {
         this.client = client;
     }
@@ -35,6 +37,10 @@ public abstract class DebugHudMixin {
             boolean shouldRestrictDebug = this.client.player.getGameMode().isSurvivalLike();
             if (shouldRestrictDebug) {
 
+                renderingChartVisible = false;
+                renderingAndTickChartsVisible = false;
+                packetSizeAndPingChartsVisible = false;
+
                 context.createNewRootLayer();
                 Profiler profiler = Profilers.get();
                 profiler.push("debug");
@@ -46,7 +52,7 @@ public abstract class DebugHudMixin {
                 // Show player position if enabled:
                 if(!isDebugReduced && (isF3Enabled || client.debugHudEntryList.isEntryVisible(DebugHudEntries.PLAYER_POSITION))) {
                     BlockPos blockPos = client.player.getBlockPos();
-                    list.add(String.format(Locale.ROOT, " %d %d %d", blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                    list.add(String.format(Locale.ROOT, " %d %d %d ", blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                 }
 
                 // Show player FPS if enabled:
