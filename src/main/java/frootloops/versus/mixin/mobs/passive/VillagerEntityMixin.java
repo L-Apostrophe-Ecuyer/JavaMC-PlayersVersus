@@ -1,14 +1,19 @@
 package frootloops.versus.mixin.mobs.passive;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import frootloops.versus.mod.mobs.passive.RevampedTradeFactories;
+import frootloops.versus.mod.mobs.passive.RevampedVillagerOffers;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.SharedConstants;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.village.*;
 import net.minecraft.world.World;
@@ -66,33 +71,38 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
     @Override
     public void fillRecipes() {
         VillagerData villagerData = this.getVillagerData();
-        Int2ObjectMap<RevampedTradeFactories.Factory[]> int2ObjectMap = PROFESSION_TO_LEVELED_TRADE.get(villagerData.profession());
-        if (int2ObjectMap == null || int2ObjectMap.isEmpty()) {
-            return;
-        }
-        RevampedTradeFactories.Factory[] newTradesAvailable = int2ObjectMap.get(villagerData.level());
-        if (newTradesAvailable == null) {
-            return;
-        }
-        TradeOfferList tradeOfferList = getOffers();
+        RegistryKey<VillagerProfession> professionKey = villagerData.profession().getKey().orElse(null);
+        if (professionKey != null) {
+            Int2ObjectMap<RevampedTradeFactories.Factory[]> offersMap = PROFESSION_TO_LEVELED_TRADE.get(professionKey);
+            if (offersMap != null && !offersMap.isEmpty()) {
+                RevampedTradeFactories.Factory[] factorys = offersMap.get(villagerData.level());
 
-        HashSet<Integer> set = Sets.newHashSet();
-        int numTradesAdded = (villagerData.level() > 1 ? 3 : 4) + random.nextBetween(0, 1);
+                if (factorys != null) {
+                    TradeOfferList tradeOfferList = this.getOffers();
+                    ArrayList<RevampedTradeFactories.Factory> arrayList = Lists.newArrayList(factorys);
+                    int i = 0;
+                    int numOffers = 2 + Math.max(0, 5 - villagerData.level());
 
-        if (newTradesAvailable.length > numTradesAdded) {
-            while (set.size() < numTradesAdded) {
-                set.add(this.random.nextInt(newTradesAvailable.length));
+                    // Add new offers:
+                    findOffersToAdd: while (i < numOffers && !arrayList.isEmpty()) {
+                        TradeOffer newOffer = (arrayList.remove(this.random.nextInt(arrayList.size()))).create(this, this.random);
+                        if (newOffer != null) {
+
+                            // Make sure the offer isn't already being sold
+                            for (TradeOffer currentOffer:tradeOfferList) {
+                                if (ItemStack.areItemsAndComponentsEqual(currentOffer.getSellItem(), newOffer.getSellItem())
+                                        && ItemStack.areItemsAndComponentsEqual(currentOffer.getFirstBuyItem().itemStack(), newOffer.getFirstBuyItem().itemStack()) ) {
+                                    continue findOffersToAdd;
+                                }
+                            }
+
+                            // Add!
+                            tradeOfferList.add(newOffer);
+                            i++;
+                        }
+                    }
+                }
             }
-        } else {
-            for (int i = 0; i < newTradesAvailable.length; ++i) {
-                set.add(i);
-            }
-        }
-        for (Integer integer : set) {
-            RevampedTradeFactories.Factory factory = newTradesAvailable[integer];
-            TradeOffer tradeOffer = factory.create(this, this.random);
-            if (tradeOffer == null) continue;
-            tradeOfferList.add(tradeOffer);
         }
     }
 
