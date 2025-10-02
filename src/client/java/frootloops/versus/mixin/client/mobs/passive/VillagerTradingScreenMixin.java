@@ -19,8 +19,8 @@ public abstract class VillagerTradingScreenMixin extends HandledScreen<MerchantS
         super(handler, inventory, title);
     }
 
-    @Inject(method = "render", at = @At("TAIL"), cancellable = false)
-    public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
+    @Inject(method = "drawForeground", at = @At("TAIL"), cancellable = false)
+    public void renderMain(DrawContext context, int mouseX, int mouseY, CallbackInfo info) {
         if(handler.getExperience() > 0) {
             if(mouseX > x + 136 && mouseX < x + 234 && mouseY > y + 14 && mouseY < y + 23) {
                 Text text = Text.translatable("players-versus.tradeScreen.experienceBarHover");
