@@ -100,7 +100,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                 this.mob.setPose(EntityPose.CROUCHING);
                 this.mob.setVelocity(0, velocity.y, 0);
                 this.mob.setAttacking(mob instanceof IllagerEntity);
-                this.mob.getOffHandStack().usageTick(this.mob.getWorld(), this.mob, 8);
+                this.mob.getOffHandStack().usageTick(this.mob.getEntityWorld(), this.mob, 8);
                 this.mob.setCurrentHand(Hand.OFF_HAND);
                 info.cancel();
 
@@ -142,18 +142,18 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         if(this.mob.timeUntilRegen > 4) return false;
 
         LivingEntity opponent = mob.getLastAttacker();
-        if(opponent == null) opponent = mob.getWorld().getClosestPlayer(mob, 8d);
+        if(opponent == null) opponent = mob.getEntityWorld().getClosestPlayer(mob, 8d);
         if(opponent != null) {
 
             // If the enemy already attacked, and mob wasn't hurt, exit (attack of opportunity);
             if(opponent.handSwinging && this.mob.timeUntilRegen < 6) return false;
 
             // If enemy isn't in the "danger zone" for an incoming attack, and mob isn't hurt, exit to attack;
-            double d = this.mob.getPos().squaredDistanceTo(opponent.getPos());
+            double d = this.mob.getEntityPos().squaredDistanceTo(opponent.getEntityPos());
             if((d > 16.0d || d < 4.0d) && this.mob.timeUntilRegen != 0) return false;
 
             // If opponent is about to crit or sprint attack, sometimes try blocking:
-            if((!opponent.isOnGround() || opponent.isSprinting()) && this.cooldown % 3 == 0) return Combat.isLookingTowards(mob,opponent.getPos());
+            if((!opponent.isOnGround() || opponent.isSprinting()) && this.cooldown % 3 == 0) return Combat.isLookingTowards(mob,opponent.getEntityPos());
 
             // if enemy is walking slowly, easy target, exit to attack;
             if(opponent.getVelocity().x == 0.0d || opponent.getVelocity().z == 0.0d) return false;
@@ -179,7 +179,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
         // Otherwise, see if we can attack (cooldown is reduced in tick()):
         else if (canTrySwinging || willTryLandingAnAttack) {
-            boolean isInCloseQuarters = (target.getEyePos().squaredDistanceTo(mob.getEyePos()) < 1.5d) || (target.getPos().squaredDistanceTo(mob.getPos()) < 1.5d);
+            boolean isInCloseQuarters = (target.getEyePos().squaredDistanceTo(mob.getEyePos()) < 1.5d) || (target.getEntityPos().squaredDistanceTo(mob.getEntityPos()) < 1.5d);
             if(isInCloseQuarters || Combat.isLookingTowards(this.mob, target.getEyePos(), true)) {
 
                 if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("-------------------- SWING ATTEMPT");
@@ -199,7 +199,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     }
                     else if(canTrySwinging && target.getVehicle() == null && mob.isOnGround() && Combat.getMobAttackBox(mob, true).intersects(Combat.getEntityHitbox(target))) {
                         if(DEBUG) VersusMod.MOD_LOGGER.warn("Jump attack!");
-                        double jumpBlockMultiplier = mob.getWorld().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
+                        double jumpBlockMultiplier = mob.getEntityWorld().getBlockState(mob.getBlockPos()).getBlock().getJumpVelocityMultiplier();
                         double jumpVelocity = 0.5 * jumpBlockMultiplier + mob.getJumpBoostVelocityModifier();
                         mob.getVelocity().multiply(1.6);
                         mob.addVelocity(0.0, jumpVelocity, 0.0);

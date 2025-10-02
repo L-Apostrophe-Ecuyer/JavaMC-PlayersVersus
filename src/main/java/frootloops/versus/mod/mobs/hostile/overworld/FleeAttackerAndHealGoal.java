@@ -46,7 +46,7 @@ public class FleeAttackerAndHealGoal<T extends LivingEntity> extends Goal {
         targetEntity = (LivingEntity) mob.getRecentDamageSource().getAttacker();
         if (targetEntity == null || !(targetEntity instanceof LivingEntity)) return false;
 
-        Vec3d vec3d = NoPenaltyTargeting.findFrom(mob, 16, 7, targetEntity.getPos());
+        Vec3d vec3d = NoPenaltyTargeting.findFrom(mob, 16, 7, targetEntity.getEntityPos());
         if (vec3d == null) return false;
         if (targetEntity.squaredDistanceTo(vec3d.x, vec3d.y, vec3d.z) < targetEntity.squaredDistanceTo(this.mob)) {
             return false;
@@ -68,7 +68,7 @@ public class FleeAttackerAndHealGoal<T extends LivingEntity> extends Goal {
             if (!isDrinkingPotion && canDrinkPotion) {
                 isDrinkingPotion = true;
                 drinkTimeLeft = 32;
-                if (!mob.isSilent()) mob.getWorld().playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENTITY_WITCH_DRINK, mob.getSoundCategory(), 1.0f, 1.0f);
+                if (!mob.isSilent()) mob.getEntityWorld().playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENTITY_WITCH_DRINK, mob.getSoundCategory(), 1.0f, 1.0f);
             }
             else if (isDrinkingPotion && --this.drinkTimeLeft <= 0) {
                 isDrinkingPotion = false;

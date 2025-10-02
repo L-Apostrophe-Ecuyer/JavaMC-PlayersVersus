@@ -24,7 +24,7 @@ public class PhantomMoveControlRevamp extends MoveControl {
         if (this.entity.horizontalCollision || this.entity.verticalCollision) {
             this.entity.setYaw(this.entity.getYaw() + 180.0f);
             this.targetSpeed = 0.1f;
-            this.targetPos = this.entity.getPos().add(0, 8, 0);
+            this.targetPos = this.entity.getEntityPos().add(0, 8, 0);
         }
         else {
             this.targetPos = ((PhantomAccessor)this.entity).getTargetPosition();

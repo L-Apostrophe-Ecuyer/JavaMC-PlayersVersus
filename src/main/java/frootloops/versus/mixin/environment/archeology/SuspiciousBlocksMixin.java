@@ -32,8 +32,8 @@ public abstract class SuspiciousBlocksMixin extends BlockEntity {
     @Inject(method = "finishBrushing", at = @At("RETURN"), cancellable = false)
     private void finishBrushing(ServerWorld world, LivingEntity brusher, ItemStack itemStack, CallbackInfo info) {
         if(itemStack.getUseAction() != UseAction.BRUSH || !itemStack.isOf(Items.BRUSH)) {
-            if(!(world.getBlockState(this.getPos()).getBlock() instanceof BrushableBlock)) {
-                world.breakBlock(this.getPos(), true, brusher);
+            if(!(world.getBlockState(this.getEntityPos()).getBlock() instanceof BrushableBlock)) {
+                world.breakBlock(this.getEntityPos(), true, brusher);
             }
         }
     }

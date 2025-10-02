@@ -143,10 +143,10 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
         if (this.canLevelUp()) {
             this.levelUpTimer = 40;
             this.levelingUp = true;
-            this.getWorld().spawnEntity(new ExperienceOrbEntity(this.getWorld(), this.getX(), this.getY() + 0.5, this.getZ(), this.getVillagerData().level() * 8));
+            this.getEntityWorld().spawnEntity(new ExperienceOrbEntity(this.getEntityWorld(), this.getX(), this.getY() + 0.5, this.getZ(), this.getVillagerData().level() * 8));
         }
         else {
-            this.getWorld().spawnEntity(new ExperienceOrbEntity(this.getWorld(), this.getX(), this.getY() + 0.5, this.getZ(), experienceFromOffer));
+            this.getEntityWorld().spawnEntity(new ExperienceOrbEntity(this.getEntityWorld(), this.getX(), this.getY() + 0.5, this.getZ(), experienceFromOffer));
         }
     }
 }

@@ -50,7 +50,7 @@ public class ItemMergingMixin {
 
     @Overwrite
     private boolean handleSlotClick(PlayerEntity player, ClickType clickType, Slot slot, ItemStack stack, ItemStack cursorStack) {
-        FeatureSet featureSet = player.getWorld().getEnabledFeatures();
+        FeatureSet featureSet = player.getEntityWorld().getEnabledFeatures();
         if (cursorStack.isItemEnabled(featureSet) && (cursorStack.onStackClicked(slot, clickType, player) || ItemMergingMixin.tryFuseWithStack(cursorStack, slot, clickType))) {
             return true;
         }

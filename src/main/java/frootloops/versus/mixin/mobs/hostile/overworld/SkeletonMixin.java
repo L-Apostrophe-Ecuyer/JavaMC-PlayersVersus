@@ -44,7 +44,7 @@ public abstract class SkeletonMixin extends AbstractSkeletonEntity {
         ItemStack itemStack = this.getStackInHand(ProjectileUtil.getHandPossiblyHolding(this, Items.BOW));
         ItemStack itemStack2 = this.getProjectileType(itemStack);
         PersistentProjectileEntity persistentProjectileEntity = this.createArrowProjectile(itemStack2, pullProgress, itemStack);
-        if (this.getWorld() instanceof ServerWorld serverWorld) {
+        if (this.getEntityWorld() instanceof ServerWorld serverWorld) {
             double vx = (target.getX() - 2.0 * target.getVelocity().x) - this.getX();
             double vy = target.getBodyY(0.3333333333333333) - persistentProjectileEntity.getY();
             double vz = target.getZ() - 2.0 * target.getVelocity().x - this.getZ();

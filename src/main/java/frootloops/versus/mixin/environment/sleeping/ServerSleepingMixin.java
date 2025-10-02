@@ -79,7 +79,7 @@ public abstract class ServerSleepingMixin extends World {
             tickManager.setTickRate(VersusSettings.Gameplay.SLEEP_TICK_SPEED);
 
             for (PlayerEntity player : players) {
-                Vec3d pos = player.getPos();
+                Vec3d pos = player.getEntityPos();
                 Box boundingBox = new Box(pos.x - 24.0, pos.y - 12.0, pos.z - 24.0, pos.x + 24.0, pos.y + 12.0, pos.z + 24.0);
                 List<HostileEntity> hostilesNearby = this.getEntitiesByClass(HostileEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
                 for (HostileEntity hostile : hostilesNearby) {

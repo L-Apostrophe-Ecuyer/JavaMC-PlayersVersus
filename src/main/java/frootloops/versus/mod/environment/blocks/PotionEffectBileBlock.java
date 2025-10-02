@@ -68,7 +68,7 @@ public class PotionEffectBileBlock extends Block {
             return;
         }
         if (entity.bypassesSteppingEffects()) return;
-        if(effect == StatusEffects.INSTANT_DAMAGE && !entity.getWorld().isClient) entity.damage((ServerWorld) entity.getWorld(), entity.getDamageSources().magic(), extraStrongEffect ? 2 : 1);
+        if(effect == StatusEffects.INSTANT_DAMAGE && !entity.getEntityWorld().isClient()) entity.damage((ServerWorld) entity.getEntityWorld(), entity.getDamageSources().magic(), extraStrongEffect ? 2 : 1);
         else if(effect == StatusEffects.INSTANT_HEALTH) entity.heal(extraStrongEffect ? 2 : 1);
         else {
             int duration = 20 + (extraStrongEffect ? 40 : 0);

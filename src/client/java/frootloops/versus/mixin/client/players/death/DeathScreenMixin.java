@@ -34,13 +34,13 @@ public class DeathScreenMixin extends Screen {
 
     @ModifyConstant(method = "init", constant = @Constant(intValue = 72))
     private int lowerRespawnButton(int height) {
-        if(!client.player.getWorld().getRegistryKey().equals(World.OVERWORLD)) return 72;
+        if(!client.player.getEntityWorld().getRegistryKey().equals(World.OVERWORLD)) return 72;
         else return 84;
     }
 
     @ModifyConstant(method = "init", constant = @Constant(intValue = 96))
     private int lowerTitleButton(int height) {
-        if(!client.player.getWorld().getRegistryKey().equals(World.OVERWORLD)) return 96;
+        if(!client.player.getEntityWorld().getRegistryKey().equals(World.OVERWORLD)) return 96;
         else return 108;
     }
 
@@ -56,7 +56,7 @@ public class DeathScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"), cancellable = false)
     public void addRespawnNearbyButton(CallbackInfo info) {
-        if(client.player.getWorld().getRegistryKey().equals(World.OVERWORLD)) {
+        if(client.player.getEntityWorld().getRegistryKey().equals(World.OVERWORLD)) {
             MutableText text = this.isHardcore ? Text.translatable("players-versus.deathScreen.spectateNearby") : Text.translatable("players-versus.deathScreen.respawnNearby");
             this.buttons.add(this.addDrawableChild(ButtonWidget.builder(text, button -> {
                 this.client.player.requestRespawn();

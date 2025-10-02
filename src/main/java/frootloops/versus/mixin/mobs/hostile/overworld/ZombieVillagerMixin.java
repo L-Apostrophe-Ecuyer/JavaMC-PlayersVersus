@@ -59,7 +59,7 @@ public abstract class ZombieVillagerMixin extends ZombieEntity {
             if(conversionTimer < 1200 && !((ZombieVillagerEntity)((Object)this)).isConverting()) return ActionResult.FAIL;
 
             itemStack.decrementUnlessCreative(1, player);
-            if (!this.getWorld().isClient) {
+            if (!this.getEntityWorld().isClient()) {
                 int conversionTime = (conversionTimer > 0) ? (conversionTimer - 600 - this.random.nextInt(200)) : this.random.nextInt(2400) + 1200;
                 this.setConverting(player.getUuid(), conversionTime);
             }

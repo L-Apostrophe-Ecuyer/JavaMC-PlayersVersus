@@ -147,7 +147,7 @@ public class RevampedTradeFactories {
 
         @Override
         public TradeOffer create(Entity entity, Random random) {
-            Optional<RegistryEntry<Enchantment>> optional = entity.getWorld()
+            Optional<RegistryEntry<Enchantment>> optional = entity.getEntityWorld()
                     .getRegistryManager()
                     .getOrThrow(RegistryKeys.ENCHANTMENT)
                     .getRandomEntry(this.possibleEnchantments, random);
@@ -243,7 +243,7 @@ public class RevampedTradeFactories {
         @Override
         public TradeOffer create(Entity entity, Random random) {
             ItemStack itemStack = this.processed.copy();
-            World world = entity.getWorld();
+            World world = entity.getEntityWorld();
             this.enchantmentProviderKey
                     .ifPresent(
                             key -> EnchantmentHelper.applyEnchantmentProvider(itemStack, world.getRegistryManager(), key, world.getLocalDifficulty(entity.getBlockPos()), random)
@@ -319,7 +319,7 @@ public class RevampedTradeFactories {
         @Override
         public TradeOffer create(Entity entity, Random random) {
             int i = 5 + random.nextInt(15);
-            DynamicRegistryManager dynamicRegistryManager = entity.getWorld().getRegistryManager();
+            DynamicRegistryManager dynamicRegistryManager = entity.getEntityWorld().getRegistryManager();
             Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.getOrThrow(RegistryKeys.ENCHANTMENT)
                     .getOptional(EnchantmentTags.ON_TRADED_EQUIPMENT);
             ItemStack itemStack = EnchantmentHelper.enchant(random, new ItemStack(this.tool.getItem()), i, dynamicRegistryManager, optional);
@@ -382,7 +382,7 @@ public class RevampedTradeFactories {
         @Override
         public TradeOffer create(Entity entity, Random random) {
             ItemStack itemStack = this.sell.copy();
-            World world = entity.getWorld();
+            World world = entity.getEntityWorld();
             this.enchantmentProviderKey
                     .ifPresent(
                             key -> EnchantmentHelper.applyEnchantmentProvider(itemStack, world.getRegistryManager(), key, world.getLocalDifficulty(entity.getBlockPos()), random)
@@ -411,7 +411,7 @@ public class RevampedTradeFactories {
         @Nullable
         @Override
         public TradeOffer create(Entity entity, Random random) {
-            if (entity.getWorld() instanceof ServerWorld serverWorld) {
+            if (entity.getEntityWorld() instanceof ServerWorld serverWorld) {
                 BlockPos blockPos = serverWorld.locateStructure(this.structure, entity.getBlockPos(), 100, true);
                 if (blockPos != null) {
                     ItemStack itemStack = FilledMapItem.createMap(serverWorld, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
@@ -455,7 +455,7 @@ public class RevampedTradeFactories {
         public TradeOffer create(Entity entity, Random random) {
             TradedItem tradedItem = new TradedItem(Items.EMERALD, this.price);
             List<RegistryEntry<Potion>> list = Registries.POTION.streamEntries()
-                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && entity.getWorld().getBrewingRecipeRegistry().isBrewable(entry) && entry.value() != CustomPotions.HAUNTING.value())
+                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && entity.getEntityWorld().getBrewingRecipeRegistry().isBrewable(entry) && entry.value() != CustomPotions.HAUNTING.value())
                     .collect(Collectors.toList());
             RegistryEntry<Potion> registryEntry = Util.getRandom(list, random);
             ItemStack itemStack = new ItemStack(this.sell.getItem(), this.sellCount);

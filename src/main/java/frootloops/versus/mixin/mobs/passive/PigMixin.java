@@ -15,6 +15,7 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.server.world.ServerWorld;
@@ -74,7 +75,7 @@ public abstract class PigMixin extends AnimalEntity {
         super.onEatingGrass();
         this.setPitch(60f);
         int count = 1 + this.random.nextBetween(0,1);
-        if(this.getWorld().isClient) return;
+        if(this.getEntityWorld().isClient()) return;
 
         Item dugUpItem = Items.BROWN_MUSHROOM;
         int rand = this.random.nextInt(100);
@@ -89,7 +90,7 @@ public abstract class PigMixin extends AnimalEntity {
         }
 
         for(int j = 0; j < count; ++j) {
-            ItemEntity itemEntity = this.dropItem((ServerWorld) this.getWorld(), dugUpItem, 1);
+            ItemEntity itemEntity = this.dropItem(dugUpItem.getDefaultStack(), true, false);
             if (itemEntity != null) itemEntity.setVelocity(itemEntity.getVelocity().add((double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(this.random.nextFloat() * 0.05F), (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)));
         }
     }

@@ -92,7 +92,7 @@ public class PillagerCaptainBlowHornGoal extends Goal {
                     RegistryEntry<Instrument> instrumentRegistryEntry = instrumentComponent.getInstrument(this.illager.getRegistryManager()).get();
                     float volume = instrumentRegistryEntry.value().range() / 16.0f;
                     illager.getWorld().playSoundFromEntity(null, illager, instrumentRegistryEntry.value().soundEvent().value(), SoundCategory.HOSTILE, volume, 1.0f);
-                    illager.getWorld().emitGameEvent(GameEvent.INSTRUMENT_PLAY, illager.getPos(), GameEvent.Emitter.of(illager));
+                    illager.getWorld().emitGameEvent(GameEvent.INSTRUMENT_PLAY, illager.getEntityPos(), GameEvent.Emitter.of(illager));
                 }
             }
             timeSpentTootingHorn++;

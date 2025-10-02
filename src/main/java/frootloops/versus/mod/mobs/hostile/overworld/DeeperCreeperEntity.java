@@ -125,18 +125,18 @@ public class DeeperCreeperEntity extends CreeperEntity {
     }
 
     private void explode() {
-        if (!this.getWorld().isClient) {
+        if (!this.getEntityWorld().isClient()) {
             float explosionMultiplier = this.isCharged() ? 2.0f : this.hurtTime > 0 ? 0.5f : 1.0f;
             this.dead = true;
-            this.getWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * explosionMultiplier, World.ExplosionSourceType.MOB);
+            this.getEntityWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * explosionMultiplier, World.ExplosionSourceType.MOB);
             this.spawnEffectsCloud();
-            this.onRemoval((ServerWorld) this.getWorld(), Entity.RemovalReason.KILLED);
+            this.onRemoval((ServerWorld) this.getEntityWorld(), Entity.RemovalReason.KILLED);
             this.discard();
         }
     }
 
     private void spawnEffectsCloud() {
-        AreaEffectCloudEntity areaEffectCloudEntity = new AreaEffectCloudEntity(this.getWorld(), this.getX(), this.getY(), this.getZ());
+        AreaEffectCloudEntity areaEffectCloudEntity = new AreaEffectCloudEntity(this.getEntityWorld(), this.getX(), this.getY(), this.getZ());
         areaEffectCloudEntity.setRadius(5f);
         areaEffectCloudEntity.setRadiusOnUse(-0.5f);
         areaEffectCloudEntity.setWaitTime(10);
@@ -144,7 +144,7 @@ public class DeeperCreeperEntity extends CreeperEntity {
         areaEffectCloudEntity.setRadiusGrowth(-areaEffectCloudEntity.getRadius() / 300.0f);
         areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 600, 0, false, false));
         areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 600, 0, false, true));
-        this.getWorld().spawnEntity(areaEffectCloudEntity);
+        this.getEntityWorld().spawnEntity(areaEffectCloudEntity);
     }
 
     @Override

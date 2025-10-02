@@ -161,7 +161,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     protected float modifyAppliedDamage(DamageSource source, float amount) {
-        if(source.isOf(DamageTypes.SONIC_BOOM) && this.getWorld() instanceof ServerWorld serverWorld) {
+        if(source.isOf(DamageTypes.SONIC_BOOM) && this.getEntityWorld() instanceof ServerWorld serverWorld) {
             float protectionAmount = EnchantmentHelper.getProtectionAmount(serverWorld, this, source);
             if (protectionAmount > 0) amount = DamageUtil.getInflictedDamage(amount, protectionAmount);
         }
@@ -179,7 +179,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
     public void attackTypes(Entity target, CallbackInfo ci) {
-        if(this.getWorld().isClient) return;
+        if(this.getEntityWorld().isClient()) return;
 
         // After attacking, the shield is interrupted:
         if(this.getOffHandStack().getItem() instanceof ShieldItem) {
@@ -195,11 +195,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(amount < 1.0) {
             if (target instanceof LivingEntity livingEntity) {
                 double strength = isSprinting ? 0.8 : 0.6;
-                this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
+                this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
                 livingEntity.takeKnockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
             }
             else if (target instanceof VehicleEntity || target instanceof ArmorStandEntity) {
-                target.damage((ServerWorld) this.getWorld(), this.getDamageSources().playerAttack((PlayerEntity)((Object)this)), 2.0f);
+                target.damage((ServerWorld) this.getEntityWorld(), this.getDamageSources().playerAttack((PlayerEntity)((Object)this)), 2.0f);
             }
             ci.cancel(); // Cancel attack
         }
@@ -208,7 +208,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 3)
     private boolean doSweepingAttacksOnRegularSwings(boolean isSweep) {
-        return isSweep && (EnchantRegistryHelper.getLevel(this.getWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= VersusSettings.Combat.MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS);
+        return isSweep && (EnchantRegistryHelper.getLevel(this.getEntityWorld(), this.getMainHandStack(), Enchantments.SWEEPING_EDGE) >= VersusSettings.Combat.MIN_SWEEPING_LEVEL_FOR_SWEEPING_ATTACKS);
     }
 
     @Inject(method = "attack", at = @At("TAIL"))

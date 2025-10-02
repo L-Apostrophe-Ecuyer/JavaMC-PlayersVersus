@@ -77,7 +77,7 @@ public abstract class ItemEntityMixin extends Entity {
             ItemStack currentItemStack = ((ItemEntity)((Object)this)).getStack();
             if(source.isOf(DamageTypes.LAVA)) doFireDamageTransformation(currentItemStack, true, false);
             else if(source.isIn(DamageTypeTags.IS_FIRE)) {
-                BlockState blockState = this.getWorld().getBlockState(this.getBlockPos());
+                BlockState blockState = this.getEntityWorld().getBlockState(this.getBlockPos());
                 boolean isExtraHot = (blockState.isOf(Blocks.SOUL_FIRE) || blockState.isOf(Blocks.SOUL_CAMPFIRE));
                 doFireDamageTransformation(currentItemStack, isExtraHot, false);
             }
@@ -103,18 +103,18 @@ public abstract class ItemEntityMixin extends Entity {
             if (burningItem == Items.BUCKET) {
                 if(isExtraHot) {
                     ((ItemEntity) ((Object) this)).setStack(new ItemStack(Items.LAVA_BUCKET, currentItemStack.getCount()));
-                    this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+                    this.getEntityWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
                     health = 300;
                     return;
                 }
             }
             else {
-                if(this.getWorld() instanceof ServerWorld) {
-                    ((BucketItem)burningItem).placeFluid(null, this.getWorld(), this.getBlockPos(), null);
-                    ((BucketItem)burningItem).onEmptied(null, this.getWorld(), currentItemStack, this.getBlockPos());
+                if(this.getEntityWorld() instanceof ServerWorld) {
+                    ((BucketItem)burningItem).placeFluid(null, this.getEntityWorld(), this.getBlockPos(), null);
+                    ((BucketItem)burningItem).onEmptied(null, this.getEntityWorld(), currentItemStack, this.getBlockPos());
                 }
                 ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.BUCKET, currentItemStack.getCount()));
-                this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+                this.getEntityWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
                 health = 300;
                 return;
             }
@@ -122,10 +122,10 @@ public abstract class ItemEntityMixin extends Entity {
 
         // Special effects: Totems!
         if(burningItem == Items.TOTEM_OF_UNDYING) {
-            this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
-            this.getWorld().sendEntityStatus(this, (byte)35);
+            this.getEntityWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+            this.getEntityWorld().sendEntityStatus(this, (byte)35);
             Box boundingBox = new Box(this.getX() - 4d, this.getY() - 4d, this.getZ() - 4d, this.getX() + 4d, this.getY() + 4d, this.getZ() + 4d);
-            List<ItemEntity> entitiesNearby = this.getWorld().getEntitiesByClass(ItemEntity.class, boundingBox, EntityPredicates.VALID_ENTITY);
+            List<ItemEntity> entitiesNearby = this.getEntityWorld().getEntitiesByClass(ItemEntity.class, boundingBox, EntityPredicates.VALID_ENTITY);
             for (ItemEntity entity: entitiesNearby) {
                 entity.setNeverDespawn();
                 entity.setGlowing(true);
@@ -151,7 +151,7 @@ public abstract class ItemEntityMixin extends Entity {
         if(health > 0) return; // Item is spared for now
 
         // Otherwise, the item has burnt and should be transformed.
-        this.getWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
+        this.getEntityWorld().playSound(this, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1f, 1f);
         if(!isExtraHot && currentItemStack.isIn(ItemTags.LOGS_THAT_BURN)) {
             ((ItemEntity)((Object)this)).setStack(new ItemStack(Items.COAL, currentItemStack.getCount()));
             health = 20;

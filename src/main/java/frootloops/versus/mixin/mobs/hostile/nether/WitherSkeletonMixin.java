@@ -53,10 +53,10 @@ public class WitherSkeletonMixin extends HostileEntity {
         if(result && spawnReason == SpawnReason.NATURAL && world.getDimension().ultrawarm() && world.getBlockState(this.getBlockPos().down()).getSoundGroup() == BlockSoundGroup.NETHER_BRICKS) {
 
             // Rarely spawn a Wildfire:
-            boolean isInSoulSandValley = this.getWorld().getBiome(this.getBlockPos()) == BiomeKeys.SOUL_SAND_VALLEY;
+            boolean isInSoulSandValley = this.getEntityWorld().getBiome(this.getBlockPos()) == BiomeKeys.SOUL_SAND_VALLEY;
             if(this.getRandom().nextInt(isInSoulSandValley ? 6 : 12) == 0) {
-                WildfireEntity wildfireEntity = new WildfireEntity(ModEntities.WILDFIRE, this.getWorld());
-                wildfireEntity.setPosition(this.getPos());
+                WildfireEntity wildfireEntity = new WildfireEntity(ModEntities.WILDFIRE, this.getEntityWorld());
+                wildfireEntity.setPosition(this.getEntityPos());
                 world.spawnEntity(wildfireEntity);
             }
         }

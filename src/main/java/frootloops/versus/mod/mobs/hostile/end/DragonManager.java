@@ -47,7 +47,7 @@ public class DragonManager {
 		List<PlayerEntity> players = dragon.getWorld().getEntitiesByClass(PlayerEntity.class, boundingBox, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
 
 		for (PlayerEntity player : players) {
-			List<EndCrystalEntity> endCrystals = player.getWorld().getNonSpectatingEntities(EndCrystalEntity.class, player.getBoundingBox().expand(10d));
+			List<EndCrystalEntity> endCrystals = player.getEntityWorld().getNonSpectatingEntities(EndCrystalEntity.class, player.getBoundingBox().expand(10d));
 			if (endCrystals.size() > 0) {
 				chance *= 2d;
 				break;
@@ -66,7 +66,7 @@ public class DragonManager {
 			return;
 
 		dragon.getPhaseManager().setPhase(PhaseType.CHARGING_PLAYER);
-		Vec3d targetPos = player.getPos();
+		Vec3d targetPos = player.getEntityPos();
 		if (targetPos.y < dragon.getY())
 			targetPos = targetPos.add(0d, -5d, 0d);
 		else
@@ -147,7 +147,7 @@ public class DragonManager {
 		List<PlayerEntity> playersNearCrystals = new ArrayList<>();
 
  		for (PlayerEntity player : players) {
-			List<EndCrystalEntity> endCrystals = player.getWorld().getEntitiesByClass(EndCrystalEntity.class, player.getBoundingBox().expand(10d), EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
+			List<EndCrystalEntity> endCrystals = player.getEntityWorld().getEntitiesByClass(EndCrystalEntity.class, player.getBoundingBox().expand(10d), EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
 			if (endCrystals.size() > 0)
 				playersNearCrystals.add(player);
 		}

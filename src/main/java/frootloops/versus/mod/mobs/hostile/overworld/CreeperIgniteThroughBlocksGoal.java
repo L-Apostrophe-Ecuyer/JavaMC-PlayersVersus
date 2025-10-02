@@ -77,9 +77,9 @@ public class CreeperIgniteThroughBlocksGoal extends Goal {
     }
 
     public static boolean canSee(LivingEntity seer, CreeperEntity peeper) {
-        Vec3d peeperPos = peeper.getPos();
+        Vec3d peeperPos = peeper.getEntityPos();
         Vec3d vecLook = seer.getRotationVector();
-        Vec3d subtractedReverse = peeperPos.relativize(seer.getPos()).normalize();
+        Vec3d subtractedReverse = peeperPos.relativize(seer.getEntityPos()).normalize();
         subtractedReverse = new Vec3d(subtractedReverse.x, 0, subtractedReverse.z);
         double dot = subtractedReverse.dotProduct(vecLook);
         return dot < 0.0;

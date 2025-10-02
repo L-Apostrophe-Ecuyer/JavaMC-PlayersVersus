@@ -82,14 +82,14 @@ public abstract class ZombieMixin extends HostileEntity {
         if(source.isOf(DamageTypes.FREEZE)) {
             this.convertTo(ModEntities.FROSTED_ZOMBIE, EntityConversionContext.create(this, true, true), zombie -> {
                 if (!this.isSilent()) {
-                    this.getWorld().syncWorldEvent(null, WorldEvents.ZOMBIE_CONVERTS_TO_DROWNED, this.getBlockPos(), 0);
+                    this.getEntityWorld().syncWorldEvent(null, WorldEvents.ZOMBIE_CONVERTS_TO_DROWNED, this.getBlockPos(), 0);
                 }
             });
         }
         else if(source.isOf(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
             this.convertTo(ModEntities.WITHERED_ZOMBIE, EntityConversionContext.create(this, true, true), zombie -> {
                 if (!this.isSilent()) {
-                    this.getWorld().syncWorldEvent(null, WorldEvents.ZOMBIE_CONVERTS_TO_DROWNED, this.getBlockPos(), 0);
+                    this.getEntityWorld().syncWorldEvent(null, WorldEvents.ZOMBIE_CONVERTS_TO_DROWNED, this.getBlockPos(), 0);
                 }
             });
         }
@@ -117,7 +117,7 @@ public abstract class ZombieMixin extends HostileEntity {
         super.initEquipment(random, localDifficulty);
         if(this.isBaby()) return;
 
-        float difficulty = this.getWorld().getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
+        float difficulty = this.getEntityWorld().getDifficulty() == Difficulty.HARD ? 0.25f : 0.15f;
         ((ZombieEntity)((Object)this)).setCanBreakDoors(true);
         if(!this.getClass().equals(ZombieEntity.class)) return;
         if(random.nextBoolean()) return;
@@ -206,7 +206,7 @@ public abstract class ZombieMixin extends HostileEntity {
 
     @Inject(method = "setBaby", at = @At(value = "TAIL"), cancellable = false)
     public void babiesArentNinjas(boolean baby, CallbackInfo info) {
-        if (this.getWorld() != null && !this.getWorld().isClient) {
+        if (this.getEntityWorld() != null && !this.getEntityWorld().isClient()) {
             this.setHealth(12.0f);
         }
     }

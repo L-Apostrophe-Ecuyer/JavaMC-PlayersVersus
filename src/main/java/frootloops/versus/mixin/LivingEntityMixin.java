@@ -167,7 +167,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "onStatusEffectsRemoved", at = @At("HEAD"))
     private void onStatusEffectsRemoved(Collection<StatusEffectInstance> effects, CallbackInfo info) {
-        if(this.getWorld().isClient) return;
+        if(this.getEntityWorld().isClient()) return;
         for(StatusEffectInstance statusEffectInstance : effects) {
             if (statusEffectInstance.getEffectType() == CustomStatusEffects.HAUNTING) {
                 HauntingStatusEffect.removeEffect(((LivingEntity) (Object) this));

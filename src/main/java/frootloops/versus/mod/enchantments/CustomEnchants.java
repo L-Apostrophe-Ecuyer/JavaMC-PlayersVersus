@@ -70,7 +70,7 @@ public abstract class CustomEnchants {
 
     public static void onCurseOfEnderUserDamaged(ServerWorld world,LivingEntity user, Entity attacker) {
         if(attacker instanceof LivingEntity && user != null & user.isAlive()) {
-            if (!user.getWorld().isClient) {
+            if (!user.getWorld().isClient()) {
                 user.damage(world, user.getDamageSources().magic(), 2.0f);
                 if(!user.isAlive())
                     return;
@@ -86,7 +86,7 @@ public abstract class CustomEnchants {
                     if (user.hasVehicle()) {
                         user.stopRiding();
                     }
-                    Vec3d vec3d = user.getPos();
+                    Vec3d vec3d = user.getEntityPos();
                     if (!user.teleport(g, h, j, true)) continue;
 
                     user.getWorld().emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(user));

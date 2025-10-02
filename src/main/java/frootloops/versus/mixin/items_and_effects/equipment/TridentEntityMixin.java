@@ -32,7 +32,7 @@ public abstract class TridentEntityMixin extends PersistentProjectileEntity {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = false)
     private void returnFromTheVoid(CallbackInfo ci) {
-        if(this.getY() < this.getWorld().getBottomY()) dealtDamage = true;
+        if(this.getY() < this.getEntityWorld().getBottomY()) dealtDamage = true;
     }
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = false)

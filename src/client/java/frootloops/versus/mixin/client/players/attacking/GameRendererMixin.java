@@ -27,11 +27,11 @@ public abstract class GameRendererMixin {
         BlockHitResult blockHitResult = camera.getWorld().raycast(new RaycastContext(cameraPos, pointingVect, RaycastContext.ShapeType.OUTLINE,RaycastContext.FluidHandling.NONE, camera));
 
         // Ensure block pos is in range (it should be, but oh well)
-        Vec3d distVect = cameraPos.relativize(blockHitResult.getPos());
+        Vec3d distVect = cameraPos.relativize(blockHitResult.getEntityPos());
         double squareDistToBlock = distVect.lengthSquared();
         if(squareDistToBlock > blockInteractionRange * blockInteractionRange) {
             Direction direction = Direction.getFacing(distVect);
-            blockHitResult = BlockHitResult.createMissed(blockHitResult.getPos(), direction, blockHitResult.getBlockPos());
+            blockHitResult = BlockHitResult.createMissed(blockHitResult.getEntityPos(), direction, blockHitResult.getBlockPos());
         }
 
         Vec3d rotationVec = camera.getRotationVec(tickDelta);
@@ -40,10 +40,10 @@ public abstract class GameRendererMixin {
         EntityHitResult entityHitResult = ProjectileUtil.raycast(camera, cameraPos, targetPosVec, box, EntityPredicates.CAN_HIT, (entityInteractionRange * entityInteractionRange));
 
         // If no entity targetted, or if out of range:
-        if(entityHitResult == null || !entityHitResult.getPos().isInRange(cameraPos, entityInteractionRange)) return blockHitResult;
+        if(entityHitResult == null || !entityHitResult.getEntityPos().isInRange(cameraPos, entityInteractionRange)) return blockHitResult;
 
         // If the entity is closer to targetted block, set it as the target:
-        double squaredDistToEntity = entityHitResult.getPos().squaredDistanceTo(cameraPos);
+        double squaredDistToEntity = entityHitResult.getEntityPos().squaredDistanceTo(cameraPos);
         if(squaredDistToEntity < squareDistToBlock || squareDistToBlock - squaredDistToEntity > 4.0) return entityHitResult;
 
         // Otherwise, try to check if we can target the entity through grass:

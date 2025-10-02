@@ -131,14 +131,14 @@ public class WildfireShootFireBallsGoal extends Goal {
      */
     private void shootBigFireballAtPlayer(double squaredDistanceTo, double dx, double dy, double dz) {
         // Play sound:
-        if (!this.wildfireEntity.isSilent()) this.wildfireEntity.getWorld().syncWorldEvent(null, WorldEvents.BLAZE_SHOOTS, this.wildfireEntity.getBlockPos(), 0);
+        if (!this.wildfireEntity.isSilent()) this.wildfireEntity.getEntityWorld().syncWorldEvent(null, WorldEvents.BLAZE_SHOOTS, this.wildfireEntity.getBlockPos(), 0);
 
         // Shoot fireball:
         double deviation = 0.5 + squaredDistanceTo/128 - 1/Math.max(2, 256 - squaredDistanceTo);
         Vec3d velocity = new Vec3d(this.wildfireEntity.getRandom().nextTriangular(dx, deviation), dy, this.wildfireEntity.getRandom().nextTriangular(dz, deviation));
-        FireballEntity fireball = new FireballEntity(this.wildfireEntity.getWorld(), this.wildfireEntity, velocity.normalize(), 1);
+        FireballEntity fireball = new FireballEntity(this.wildfireEntity.getEntityWorld(), this.wildfireEntity, velocity.normalize(), 1);
         fireball.setPosition(fireball.getX(), this.wildfireEntity.getBodyY(0.5) + 0.5, fireball.getZ());
-        this.wildfireEntity.getWorld().spawnEntity(fireball);
+        this.wildfireEntity.getEntityWorld().spawnEntity(fireball);
 
         // Cooldown:
         this.fireballsFired++;
@@ -166,7 +166,7 @@ public class WildfireShootFireBallsGoal extends Goal {
         }
 
         // Play sound:
-        if (!this.wildfireEntity.isSilent()) this.wildfireEntity.getWorld().syncWorldEvent(null, WorldEvents.BLAZE_SHOOTS, this.wildfireEntity.getBlockPos(), 0);
+        if (!this.wildfireEntity.isSilent()) this.wildfireEntity.getEntityWorld().syncWorldEvent(null, WorldEvents.BLAZE_SHOOTS, this.wildfireEntity.getBlockPos(), 0);
 
         // Shoot fireballs:
         for(int i = 0; i < 4; i++) {
@@ -178,9 +178,9 @@ public class WildfireShootFireBallsGoal extends Goal {
                 if(i >= 2) vz = -vz;
 
                 double vy = 0.0 - 0.2 * (wildfireEntity.getRandom().nextDouble() - wildfireEntity.getRandom().nextDouble());
-                SmallFireballEntity fireball = new SmallFireballEntity(this.wildfireEntity.getWorld(), this.wildfireEntity, new Vec3d(vx/2.0, vy, vz/2.0));
+                SmallFireballEntity fireball = new SmallFireballEntity(this.wildfireEntity.getEntityWorld(), this.wildfireEntity, new Vec3d(vx/2.0, vy, vz/2.0));
                 fireball.setPosition(fireball.getX(), this.wildfireEntity.getBodyY(0.5) + 0.5, fireball.getZ());
-                this.wildfireEntity.getWorld().spawnEntity(fireball);
+                this.wildfireEntity.getEntityWorld().spawnEntity(fireball);
             }
         }
 
@@ -207,7 +207,7 @@ public class WildfireShootFireBallsGoal extends Goal {
         }
         else {
             this.wildfireEntity.setInvulnerable(true);
-            this.wildfireEntity.getWorld().createExplosion(wildfireEntity, wildfireEntity.getX(), wildfireEntity.getY(), wildfireEntity.getZ(), 2, true, World.ExplosionSourceType.MOB);
+            this.wildfireEntity.getEntityWorld().createExplosion(wildfireEntity, wildfireEntity.getX(), wildfireEntity.getY(), wildfireEntity.getZ(), 2, true, World.ExplosionSourceType.MOB);
             this.wildfireEntity.setInvulnerable(false);
 
             // Long Cooldown (5-8s)

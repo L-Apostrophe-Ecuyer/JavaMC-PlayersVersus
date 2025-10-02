@@ -24,7 +24,7 @@ public class CreepingAndExplodingGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        long l = this.creeper.getWorld().getTime();
+        long l = this.creeper.getEntityWorld().getTime();
         if (l - this.lastUpdateTime < 40L) {
             return false;
         }
@@ -73,7 +73,7 @@ public class CreepingAndExplodingGoal extends Goal {
         if (this.creeper.getFuseSpeed() > 0 || this.creeper.isInFluid()) this.wasCoverBlown = true;
 
         double squaredDistance = this.creeper.squaredDistanceTo(targetEntity);
-        boolean isPlayerLooking = Combat.isLookingTowards(targetEntity, this.creeper.getPos());
+        boolean isPlayerLooking = Combat.isLookingTowards(targetEntity, this.creeper.getEntityPos());
         boolean canPlayerSeeCreeper = targetEntity.canSee(this.creeper);
 
         // When far enough away from target, only move when not looking (unless cover was blown):

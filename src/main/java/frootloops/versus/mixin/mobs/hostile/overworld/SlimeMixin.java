@@ -34,7 +34,7 @@ public abstract class SlimeMixin extends MobEntity {
 
     @Overwrite
     public void damage(LivingEntity target) {
-        if (this.getWorld() instanceof ServerWorld serverWorld && this.isAlive() && this.isInAttackRange(target) && this.canSee(target)) {
+        if (this.getEntityWorld() instanceof ServerWorld serverWorld && this.isAlive() && this.isInAttackRange(target) && this.canSee(target)) {
             DamageSource damageSource = this.getDamageSources().mobAttack(this);
             if (target.damage(serverWorld, damageSource, this.getDamageAmount())) {
                 this.playSound(SoundEvents.ENTITY_SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
@@ -57,7 +57,7 @@ public abstract class SlimeMixin extends MobEntity {
     public void onDeath(DamageSource damageSource) {
         if(damageSource.isOf(DamageTypes.LAVA) && this.getClass().equals(SlimeEntity.class) && ((SlimeEntity)((LivingEntity)(this))).getSize() == 1) {
             this.convertTo(EntityType.MAGMA_CUBE, EntityConversionContext.create(this, true, true), magmaCube -> {
-                this.getWorld().syncWorldEvent(null, WorldEvents.FIRE_EXTINGUISHED, this.getBlockPos(), 0);
+                this.getEntityWorld().syncWorldEvent(null, WorldEvents.FIRE_EXTINGUISHED, this.getBlockPos(), 0);
             });
         }
         else super.onDeath(damageSource);

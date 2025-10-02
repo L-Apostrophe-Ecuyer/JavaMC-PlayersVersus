@@ -43,7 +43,7 @@ public class EndermanHideAndWaitGoal<T extends LivingEntity> extends Goal {
 
     @Override
     public boolean canStart() {
-        if(mob.getWorld().isClient) return false;
+        if(mob.getEntityWorld().isClient()) return false;
 
         targetEntity = mob.getAttacker();
         if (targetEntity == null) return false;
@@ -96,17 +96,17 @@ public class EndermanHideAndWaitGoal<T extends LivingEntity> extends Goal {
 
 
     private boolean teleportAway() {
-        if (!mob.getWorld().isClient() && mob.isAlive()) {
+        if (!mob.getEntityWorld().isClient() && mob.isAlive()) {
             double x = mob.getX() + (mob.getRandom().nextDouble() - 0.5) * 64.0;
             double z = mob.getZ() + (mob.getRandom().nextDouble() - 0.5) * 64.0;
-            double y = mob.getY() + (double)Math.min(mob.getWorld().getTopY(Heightmap.Type.MOTION_BLOCKING, (int)x, (int)z) + 16, (mob.getRandom().nextInt(64) - 16));
+            double y = mob.getY() + (double)Math.min(mob.getEntityWorld().getTopY(Heightmap.Type.MOTION_BLOCKING, (int)x, (int)z) + 16, (mob.getRandom().nextInt(64) - 16));
             return teleportTo(x, y, z);
         }
         return false;
     }
 
     private boolean teleportBackToPlayer() {
-        if (!mob.getWorld().isClient() && mob.isAlive()) {
+        if (!mob.getEntityWorld().isClient() && mob.isAlive()) {
             //Vec3d vec3d = new Vec3d(mob.getX() - targetEntity.getX(), mob.getBodyY(0.5) - targetEntity.getEyeY(), mob.getZ() - targetEntity.getZ());
             //vec3d = vec3d.normalize();
             //double range = 16.0;
@@ -120,25 +120,25 @@ public class EndermanHideAndWaitGoal<T extends LivingEntity> extends Goal {
 
     private boolean teleportTo(double x, double y, double z) {
         BlockPos.Mutable mutable = new BlockPos.Mutable(x, y, z);
-        BlockState blockState = mob.getWorld().getBlockState(mutable);
+        BlockState blockState = mob.getEntityWorld().getBlockState(mutable);
         if(!blockState.getFluidState().isEmpty()) return false;
 
-        while(mutable.getY() > mob.getWorld().getBottomY() && !blockState.isOpaqueFullCube()) {
+        while(mutable.getY() > mob.getEntityWorld().getBottomY() && !blockState.isOpaqueFullCube()) {
             mutable.move(Direction.DOWN);
-            blockState = mob.getWorld().getBlockState(mutable);
+            blockState = mob.getEntityWorld().getBlockState(mutable);
             if(!blockState.getFluidState().isEmpty()) return false;
         }
 
-        blockState = mob.getWorld().getBlockState(mutable);
+        blockState = mob.getEntityWorld().getBlockState(mutable);
         boolean isBlockPermitted = blockState.isOpaqueFullCube();
         boolean isBlockWet = blockState.getFluidState().isIn(FluidTags.WATER);
         if (isBlockPermitted && !isBlockWet) {
-            Vec3d vec3d = mob.getPos();
-            //VersusMod.MOD_LOGGER.warn("    > " + mob.getWorld().getTime() + ": Teleport attempt to " + mutable);
+            Vec3d vec3d = mob.getEntityPos();
+            //VersusMod.MOD_LOGGER.warn("    > " + mob.getEntityWorld().getTime() + ": Teleport attempt to " + mutable);
             if (mob.teleport(x, y, z, true)) {
-                mob.getWorld().emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(mob));
+                mob.getEntityWorld().emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(mob));
                 if (!mob.isSilent()) {
-                    mob.getWorld().playSound(null, mob.lastX, mob.lastY, mob.lastZ, SoundEvents.ENTITY_ENDERMAN_TELEPORT, mob.getSoundCategory(), 1.0F, 1.0F);
+                    mob.getEntityWorld().playSound(null, mob.lastX, mob.lastY, mob.lastZ, SoundEvents.ENTITY_ENDERMAN_TELEPORT, mob.getSoundCategory(), 1.0F, 1.0F);
                     mob.playSound(SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0F, 1.0F);
                 }
                 return true;

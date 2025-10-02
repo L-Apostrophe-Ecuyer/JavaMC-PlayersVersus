@@ -96,7 +96,7 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
             if (dotProduct > dotProductThreshold) {
                 if (squaredDistance > 256.0 && player.canSee(this)) {
                     angerTime = 0;
-                    Vec3d target = this.getPos().add(directionVect.multiply(0.5));
+                    Vec3d target = this.getEntityPos().add(directionVect.multiply(0.5));
                     teleportTo(target.x + (this.random.nextDouble() - 0.5) * 4.0, target.y + (double) this.random.nextInt(16) - 8.0, target.z + (this.random.nextDouble() - 0.5) * 4.0);
                     this.lookAtEntity(player, 100f, 100f);
                     this.playAmbientSound();
@@ -132,7 +132,7 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
         if (!this.isSilent()) {
             volume *= 0.8f;
             pitch *= 0.75f;
-            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundCategory(), volume, pitch);
+            this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundCategory(), volume, pitch);
         }
     }
 

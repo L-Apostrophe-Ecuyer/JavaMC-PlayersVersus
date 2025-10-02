@@ -59,7 +59,7 @@ public abstract class BlockMixin extends AbstractBlock {
         itemEntity.setToDefaultPickupDelay();
 
         if(entity != null) {
-            Vec3d distanceVect = itemEntity.getPos().relativize(entity.getPos()).multiply(0.1);
+            Vec3d distanceVect = itemEntity.getEntityPos().relativize(entity.getEntityPos()).multiply(0.1);
             itemEntity.setVelocity(itemEntity.getVelocity().add(distanceVect.multiply(0.6)));
             if(distanceVect.lengthSquared() < 1.0) itemEntity.resetPickupDelay();
         }

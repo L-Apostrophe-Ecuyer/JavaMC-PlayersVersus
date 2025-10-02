@@ -77,14 +77,14 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                         // Get the angle of attack vs blocking:
                         double angle = 3.1416F;
                         if (source.getPosition() != null) {
-                            Vec3d distanceVector = source.getPosition().subtract(this.getPos());
+                            Vec3d distanceVector = source.getPosition().subtract(this.getEntityPos());
                             distanceVector = new Vec3d(distanceVector.x, 0.0, distanceVector.z).normalize();
                             angle = Math.acos(distanceVector.dotProduct(this.getRotationVector(0.0F, this.getHeadYaw())));
                         }
 
                         // Calculate the actual damage reduction amount:
                         float damageReductionAmount = blocksAttacksComponent.getDamageReductionAmount(source, damageAmount, angle);
-                        blocksAttacksComponent.onShieldHit(this.getWorld(), blockingItem, (LivingEntity) ((Object)this), this.getActiveHand(), damageReductionAmount);
+                        blocksAttacksComponent.onShieldHit(this.getEntityWorld(), blockingItem, (LivingEntity) ((Object)this), this.getActiveHand(), damageReductionAmount);
                         if (!source.isIn(DamageTypeTags.IS_PROJECTILE) && source.getSource() instanceof LivingEntity livingEntity) this.takeShieldHit(world, livingEntity);
                         if (damageReductionAmount <= 0.0F) return damageReductionAmount;
 
@@ -108,20 +108,20 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                         if((wasAttackParried || reflectedDamage > 0.0f) && damageReductionAmount > 0.0F && source.getSource() instanceof LivingEntity attacker && !attacker.equals(this)) {
                             double extraKnockbackStrength = wasAttackParried ? 0.8 : 0.4;
                             if(reflectedDamage > 0 && source.getName() != "thorns") {
-                                if ((LivingEntity) (Object) this instanceof PlayerEntity player) attacker.damage((ServerWorld) this.getWorld(), this.getDamageSources().playerAttack(player), reflectedDamage);
-                                else attacker.damage((ServerWorld) this.getWorld(), this.getDamageSources().mobAttack((LivingEntity) ((Object)this)), reflectedDamage);
+                                if ((LivingEntity) (Object) this instanceof PlayerEntity player) attacker.damage((ServerWorld) this.getEntityWorld(), this.getDamageSources().playerAttack(player), reflectedDamage);
+                                else attacker.damage((ServerWorld) this.getEntityWorld(), this.getDamageSources().mobAttack((LivingEntity) ((Object)this)), reflectedDamage);
                             }
                             attacker.takeKnockback(extraKnockbackStrength, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
                         }
 
                         // Check if mob was blocking shield and the shield is now disabled:
-                        else if(this.getWorld() instanceof ServerWorld serverWorld && (LivingEntity) (Object) this instanceof MobEntity mob && source.getSource() instanceof LivingEntity attacker) {
+                        else if(this.getEntityWorld() instanceof ServerWorld serverWorld && (LivingEntity) (Object) this instanceof MobEntity mob && source.getSource() instanceof LivingEntity attacker) {
                             if (attacker.getWeaponDisableBlockingForSeconds() > 0.0F) {
 
                                 // Drop the shield:
                                 ItemStack shieldItemStack = mob.getOffHandStack();
                                 if(mob.isPersistent() || serverWorld.getRandom().nextDouble() < 0.1) {
-                                    ItemEntity itemEntity = new ItemEntity(this.getWorld(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
+                                    ItemEntity itemEntity = new ItemEntity(this.getEntityWorld(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
                                     itemEntity.setPickupDelay(40);
                                     serverWorld.spawnEntity(itemEntity);
                                 }

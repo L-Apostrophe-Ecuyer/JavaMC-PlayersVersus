@@ -64,7 +64,7 @@ public class SlimeballEntity extends ThrownItemEntity {
         if (status == EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES) {
             ParticleEffect particleEffect = this.getParticleParameters();
             for (int i = 0; i < 8; ++i) {
-                this.getWorld().addParticleClient(particleEffect, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
+                this.getEntityWorld().addParticleClient(particleEffect, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
             }
         }
     }
@@ -84,10 +84,10 @@ public class SlimeballEntity extends ThrownItemEntity {
     @Override
     protected void onCollision(HitResult hitResult) {
         super.onCollision(hitResult);
-        if (!this.getWorld().isClient) {
+        if (!this.getEntityWorld().isClient()) {
             this.playSound(SoundEvents.ENTITY_SLIME_JUMP_SMALL, 1f, 0.9f + 0.3f * random.nextFloat());
             if(hitResult.getType() == HitResult.Type.ENTITY || this.numBouncesLeft < 1) {
-                this.getWorld().sendEntityStatus(this, EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES);
+                this.getEntityWorld().sendEntityStatus(this, EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES);
                 this.discard();
             }
             else {
@@ -96,8 +96,8 @@ public class SlimeballEntity extends ThrownItemEntity {
                     BlockHitResult blockHitResult = (BlockHitResult)hitResult;
                     this.onBlockHit(blockHitResult);
                     BlockPos blockPos = blockHitResult.getBlockPos();
-                    BlockState blockState = this.getWorld().getBlockState(blockPos);
-                    this.getWorld().emitGameEvent(GameEvent.PROJECTILE_LAND, blockPos, GameEvent.Emitter.of(this, blockState));
+                    BlockState blockState = this.getEntityWorld().getBlockState(blockPos);
+                    this.getEntityWorld().emitGameEvent(GameEvent.PROJECTILE_LAND, blockPos, GameEvent.Emitter.of(this, blockState));
 
                     // Bounce!
                     Direction direction = blockHitResult.getSide();

@@ -53,7 +53,7 @@ public class WardenMixin extends HostileEntity {
     @Contract("null->false")
     public boolean isValidTarget(@Nullable Entity entity) {
         if (entity instanceof LivingEntity livingEntity
-                && this.getWorld() == entity.getWorld()
+                && this.getEntityWorld() == entity.getEntityWorld()
                 && EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(entity)
                 && !this.isTeammate(entity)
                 && livingEntity.getType() != EntityType.ARMOR_STAND
@@ -115,7 +115,7 @@ public class WardenMixin extends HostileEntity {
     private void reduceAngerTowardsSneakyPlayers(CallbackInfo ci){
         if(this.getAngriness() == Angriness.ANGRY && this.age > 200 && this.age % 3 == 0) {
             Entity target = this.getTarget();
-            if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getPos()) > 400)) {
+            if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getEntityPos()) > 400)) {
                 this.angerManager.increaseAngerAt(target, -1);
             }
         }
@@ -128,7 +128,7 @@ public class WardenMixin extends HostileEntity {
             this.setPersistent();
         }
         else if(spawnReason == SpawnReason.TRIGGERED) {
-            PlayerEntity closestPlayer = this.getWorld().getClosestPlayer(this, 64.0d);
+            PlayerEntity closestPlayer = this.getEntityWorld().getClosestPlayer(this, 64.0d);
             if(closestPlayer != null && !this.isInRange(closestPlayer, 16.0)) {
                 WardenBrain.lookAtDisturbance((WardenEntity) ((Object)this), closestPlayer.getBlockPos());
                 this.angerManager.increaseAngerAt(closestPlayer, closestPlayer.isSprinting() ? 70 : 50);
@@ -228,7 +228,7 @@ public class WardenMixin extends HostileEntity {
         // Sonic booms:
         if(horizontalRadius == 15.0d && verticalRadius == 20.0d && entity instanceof PlayerEntity) {
             if(this.getLastAttackTime() < this.age - BOOM_COOLDOWN_AFTER_ATTACK) return false;
-            if(this.getMoveControl().isMoving() && entity.getPos().y < this.getY() + 4.0) return false;
+            if(this.getMoveControl().isMoving() && entity.getEntityPos().y < this.getY() + 4.0) return false;
             return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
         }
 
@@ -250,15 +250,15 @@ public class WardenMixin extends HostileEntity {
                 mightReceiveDamage = false;
             }
             else {
-                double distanceSquared = attacker.getPos().squaredDistanceTo(this.getPos());
+                double distanceSquared = attacker.getEntityPos().squaredDistanceTo(this.getEntityPos());
                 if(distanceSquared > 256.0d) mightReceiveDamage = false;
-                else amount = (amount * (256.0f - (float)attacker.getPos().squaredDistanceTo(this.getPos())))/256.0f;
+                else amount = (amount * (256.0f - (float)attacker.getEntityPos().squaredDistanceTo(this.getEntityPos())))/256.0f;
             }
             if(amount < 3.0f) mightReceiveDamage = false;
         }
         if(mightReceiveDamage) hasReceivedDamage = super.damage(world, source, amount);
 
-        if (!(this.getWorld().isClient || this.isAiDisabled() || this.isDiggingOrEmerging())) {
+        if (!(this.getEntityWorld().isClient() || this.isAiDisabled() || this.isDiggingOrEmerging())) {
             this.increaseAngerAt(attacker, Angriness.ANGRY.getThreshold() + 20, false);
             if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity livingEntity) {
                 if (source.isDirect() || this.isInRange(livingEntity, 5.0)) {

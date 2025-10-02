@@ -44,7 +44,7 @@ public abstract class BadOmenEffectInstanceMixin {
     @Inject(method = "update", at = @At(value = "HEAD"), cancellable = true)
     public void update(ServerWorld world, LivingEntity entity, Runnable hiddenEffectCallback, CallbackInfoReturnable<Boolean> cir) {
         if(duration > 0 && entity instanceof ServerPlayerEntity serverPlayer) {
-            ServerWorld serverWorld = serverPlayer.getWorld();
+            ServerWorld serverWorld = serverPlayer.getEntityWorld();
 
             if (type == StatusEffects.BAD_OMEN) {
                 if(serverWorld.getTime() % 57L != 0) return;
@@ -53,7 +53,7 @@ public abstract class BadOmenEffectInstanceMixin {
                 boolean isPlayerInsideVillage = serverWorld.isNearOccupiedPointOfInterest(serverPlayer.getBlockPos());
                 boolean isPlayerInsideTheirBase = false;
                 if(!isPlayerInsideVillage && VersusSettings.Gameplay.DO_RAIDS_OUTSIDE_VILLAGES && serverPlayer.getRespawn() != null && serverPlayer.getScore() > 999) {
-                    boolean isNearRespawn = serverPlayer.getRespawn().dimension() == serverPlayer.getWorld().getRegistryKey() && (serverPlayer.getRespawn().pos().isWithinDistance(serverPlayer.getBlockPos(), 32));
+                    boolean isNearRespawn = serverPlayer.getRespawn().respawnData().getDimension() == serverPlayer.getEntityWorld().getRegistryKey() && (serverPlayer.getRespawn().respawnData().getPos().isWithinDistance(serverPlayer.getBlockPos(), 32));
                     if(isNearRespawn) isPlayerInsideTheirBase = !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
                 }
 

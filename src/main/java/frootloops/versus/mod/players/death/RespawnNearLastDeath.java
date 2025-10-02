@@ -35,7 +35,7 @@ public class RespawnNearLastDeath {
         RegistryKey<World> deathDimension = lastDeathPos.get().dimension();
         BlockPos deathPosition = lastDeathPos.get().pos();
 
-        if(deathDimension != World.OVERWORLD || deathDimension != player.getWorld().getRegistryKey()) return;
+        if(deathDimension != World.OVERWORLD || deathDimension != player.getEntityWorld().getRegistryKey()) return;
         RespawnNearLastDeath.moveToOverworldDeathLocation(player, deathPosition, server.getOverworld(), 128, 17);
     }
 

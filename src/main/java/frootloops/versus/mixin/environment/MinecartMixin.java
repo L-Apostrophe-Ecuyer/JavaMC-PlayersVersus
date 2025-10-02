@@ -45,7 +45,7 @@ public abstract class MinecartMixin extends VehicleEntity {
     @Overwrite
     public double getMaxSpeed(ServerWorld world) {
         if(world.getEnabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
-            double gameruleMaxSpeed = this.controller.getMaxSpeed((ServerWorld) this.getWorld());
+            double gameruleMaxSpeed = this.controller.getMaxSpeed((ServerWorld) this.getEntityWorld());
             return gameruleMaxSpeed == 8.0 ? gameruleMaxSpeed * 8.0 : gameruleMaxSpeed;
         }
         return 64.0 / (this.isTouchingWater() ? 40.0 : 20.0);
@@ -77,9 +77,9 @@ public abstract class MinecartMixin extends VehicleEntity {
                     this.setDamageWobbleSide(-this.getDamageWobbleSide());
                     this.setDamageWobbleTicks(10);
                     this.setDamageWobbleStrength(20.0F);
-                    if (this.getWorld() instanceof ServerWorld serverWorld) {
+                    if (this.getEntityWorld() instanceof ServerWorld serverWorld) {
                         if(velocitySlowdownAmount > 0.45f) serverWorld.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), CustomSpecialEffects.RAIL_TURNING_SOUND, this.getSoundCategory(), velocitySlowdownAmount - 0.4f, 0.4f + random.nextFloat() * 0.4f);
-                        serverWorld.spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getPos().getX(), this.getPos().getY() + 0.1, this.getPos().getZ(), 2, 0.1, 0.05, 0.1, 0.1);
+                        serverWorld.spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getEntityPos().getX(), this.getEntityPos().getY() + 0.1, this.getEntityPos().getZ(), 2, 0.1, 0.05, 0.1, 0.1);
                     }
                 }
             }
@@ -90,9 +90,9 @@ public abstract class MinecartMixin extends VehicleEntity {
                 this.setDamageWobbleSide(-this.getDamageWobbleSide());
                 this.setDamageWobbleTicks(10);
                 this.setDamageWobbleStrength(30.0F);
-                if (this.getWorld() instanceof ServerWorld serverWorld) {
+                if (this.getEntityWorld() instanceof ServerWorld serverWorld) {
                     serverWorld.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), CustomSpecialEffects.RAIL_TURNING_SOUND, this.getSoundCategory(), 0.6f, 0.8f + random.nextFloat() * 0.2f);
-                    serverWorld.spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getPos().getX(), this.getPos().getY() + 0.1, this.getPos().getZ(), 16, 0.1, 0.05, 0.1, 0.2);
+                    serverWorld.spawnParticles(CustomSpecialEffects.SPARKS_PARTICLE, this.getEntityPos().getX(), this.getEntityPos().getY() + 0.1, this.getEntityPos().getZ(), 16, 0.1, 0.05, 0.1, 0.2);
                 }
             }
         }

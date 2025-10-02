@@ -54,7 +54,7 @@ public abstract class AnvilCostMixin extends ForgingScreenHandler {
     public void levelsOnlyUsedWhenUsingBooks(PlayerEntity player, int lvlCost) {
         if(repairStack.isOf(Items.ENCHANTED_BOOK)) {
             player.addExperienceLevels(lvlCost);
-            player.getWorld().playSound(player, player.getBlockPos(), SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.5f, 1f);
+            player.getEntityWorld().playSound(player, player.getBlockPos(), SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.5f, 1f);
         }
     }
 

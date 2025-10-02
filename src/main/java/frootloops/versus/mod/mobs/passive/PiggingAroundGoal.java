@@ -46,7 +46,7 @@ public class PiggingAroundGoal extends Goal {
 
         // If the pig is in a crop, eat it:
         BlockPos blockPos = this.mob.getBlockPos();
-        if (YUMMY_CROPS_PREDICATE.test(this.mob.getWorld().getBlockState(blockPos))) {
+        if (YUMMY_CROPS_PREDICATE.test(this.mob.getEntityWorld().getBlockState(blockPos))) {
             return true;
 
         // Pig has to be on grass and feel free to move around, or they won't dig:
@@ -57,10 +57,10 @@ public class PiggingAroundGoal extends Goal {
             Path pathToWander = this.mob.getNavigation().findPathTo(wanderTarget.x, wanderTarget.y, wanderTarget.z, 0);
             if(pathToWander == null) return false;
 
-            if(this.mob.getWorld().getBlockState(blockPos.down()).isOf(Blocks.GRASS_BLOCK)) {
+            if(this.mob.getEntityWorld().getBlockState(blockPos.down()).isOf(Blocks.GRASS_BLOCK)) {
                 this.timer++;
                 if(timer >= 0) {
-                    this.mob.getWorld().playSoundFromEntity(null, this.mob, SoundEvents.ENTITY_SNIFFER_SCENTING, SoundCategory.AMBIENT, 1.0F, 1.3F);
+                    this.mob.getEntityWorld().playSoundFromEntity(null, this.mob, SoundEvents.ENTITY_SNIFFER_SCENTING, SoundCategory.AMBIENT, 1.0F, 1.3F);
                     timer = MAX_TIMER;
                     return true;
                 }
@@ -71,7 +71,7 @@ public class PiggingAroundGoal extends Goal {
 
     public void start() {
         this.timer = this.getTickCount(MAX_TIMER);
-        this.mob.getWorld().sendEntityStatus(this.mob, (byte)10);
+        this.mob.getEntityWorld().sendEntityStatus(this.mob, (byte)10);
         this.mob.getNavigation().stop();
     }
 
@@ -89,16 +89,16 @@ public class PiggingAroundGoal extends Goal {
         this.spawnDiggingParticles();
         if (this.timer == EATING_TICKS) {
             BlockPos blockPos = this.mob.getBlockPos();
-            BlockState blockState = this.mob.getWorld().getBlockState(blockPos);
+            BlockState blockState = this.mob.getEntityWorld().getBlockState(blockPos);
             if (blockState.getBlock() == Blocks.CARROTS) {
-                this.mob.getWorld().setBlockState(blockPos, Blocks.CARROTS.getDefaultState());
+                this.mob.getEntityWorld().setBlockState(blockPos, Blocks.CARROTS.getDefaultState());
                 this.mob.lovePlayer(null);
 
             } else {
                 blockPos = blockPos.down();
-                if (this.mob.getWorld().getBlockState(blockPos).isOf(Blocks.GRASS_BLOCK)) {
-                    this.mob.getWorld().syncWorldEvent(2001, blockPos, Block.getRawIdFromState(Blocks.GRASS_BLOCK.getDefaultState()));
-                    this.mob.getWorld().setBlockState(blockPos, Blocks.DIRT.getDefaultState(), 2);
+                if (this.mob.getEntityWorld().getBlockState(blockPos).isOf(Blocks.GRASS_BLOCK)) {
+                    this.mob.getEntityWorld().syncWorldEvent(2001, blockPos, Block.getRawIdFromState(Blocks.GRASS_BLOCK.getDefaultState()));
+                    this.mob.getEntityWorld().setBlockState(blockPos, Blocks.DIRT.getDefaultState(), 2);
                     this.mob.playAmbientSound();
                     this.mob.onEatingGrass();
                 }
@@ -123,7 +123,7 @@ public class PiggingAroundGoal extends Goal {
         BlockPos blockPos = this.mob.getBlockPos();
         for(int i = 0; i < 30; ++i) {
             Vec3d vec3d = Vec3d.ofCenter(blockPos);
-            this.mob.getWorld().addParticleClient(new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState), vec3d.x, vec3d.y, vec3d.z, 0.0, 0.0, 0.0);
+            this.mob.getEntityWorld().addParticleClient(new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState), vec3d.x, vec3d.y, vec3d.z, 0.0, 0.0, 0.0);
         }
 
         if (this.timer % 4 == 0) {

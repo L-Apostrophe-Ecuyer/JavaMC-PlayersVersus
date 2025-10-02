@@ -59,7 +59,7 @@ public abstract class WeatherRendererMixin {
         float amountOfRain = world.getThunderGradient(1.0F) / 2.0F;
         if(amountOfFog < 0.1f) return;
 
-        BlockPos cameraPos = BlockPos.ofFloored(camera.getPos());
+        BlockPos cameraPos = BlockPos.ofFloored(camera.getEntityPos());
         Random random = Random.create((long)ticks * 312987231L);
         if(world.getLightLevel(LightType.SKY, cameraPos) > 1 && random.nextInt(600) < this.field_53154++) {
             this.field_53154 = 0;

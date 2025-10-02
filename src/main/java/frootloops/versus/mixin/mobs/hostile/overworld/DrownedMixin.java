@@ -42,9 +42,9 @@ public abstract class DrownedMixin extends ZombieEntity {
     @Inject(method = "initEquipment", at = @At("HEAD"), cancellable = true)
     public void changeProbability(Random random, LocalDifficulty localDifficulty, CallbackInfo ci) {
         int rand = random.nextInt(100);
-        if (rand < 16 && this.getWorld().getBiome(this.getBlockPos()).isIn(BiomeTags.IS_OCEAN)) {
+        if (rand < 16 && this.getEntityWorld().getBiome(this.getBlockPos()).isIn(BiomeTags.IS_OCEAN)) {
             int level = rand + random.nextInt(15);
-            DynamicRegistryManager dynamicRegistryManager = this.getWorld().getRegistryManager();
+            DynamicRegistryManager dynamicRegistryManager = this.getEntityWorld().getRegistryManager();
             Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOptional(EnchantmentTags.ON_MOB_SPAWN_EQUIPMENT);
             if(rand % 2 == 1) this.equipStack(EquipmentSlot.CHEST, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_CHESTPLATE), level, dynamicRegistryManager, optional));
             if(rand % 3 == 1) this.equipStack(EquipmentSlot.LEGS, EnchantmentHelper.enchant(random, new ItemStack(Items.GOLDEN_LEGGINGS), level, dynamicRegistryManager, optional));
