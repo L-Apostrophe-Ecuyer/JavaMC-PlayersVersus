@@ -817,9 +817,10 @@ public abstract class ItemSortingMaps {
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_NUGGET, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_INGOT, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_BLOCK, index++);
+
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_TRAPDOOR, index++);
         ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_BARS, index++);
-        ITEMS_AND_BLOCKS_OF_IRON.put(Items.CHAIN, index++);
+        ITEMS_AND_BLOCKS_OF_IRON.put(Items.IRON_CHAIN, index++);
     }
 
 
@@ -891,5 +892,32 @@ public abstract class ItemSortingMaps {
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_COPPER_GRATE, index++);
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_COPPER_GRATE, index++);
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_COPPER_GRATE, index++);
+
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.unaffected(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.exposed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.oxidized(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.weathered(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.waxed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.waxedExposed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.waxedOxidized(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.waxedWeathered(), index++);
+
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.unaffected(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.exposed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.oxidized(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.weathered(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.waxed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.waxedExposed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.waxedOxidized(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.waxedWeathered(), index++);
+
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_LIGHTNING_ROD, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WEATHERED_LIGHTNING_ROD, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.OXIDIZED_LIGHTNING_ROD, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_LIGHTNING_ROD, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_EXPOSED_LIGHTNING_ROD, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_WEATHERED_LIGHTNING_ROD, index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.WAXED_OXIDIZED_LIGHTNING_ROD, index++);
     }
 }
