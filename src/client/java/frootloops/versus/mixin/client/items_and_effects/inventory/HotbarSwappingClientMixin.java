@@ -72,7 +72,7 @@ public abstract class HotbarSwappingClientMixin extends ReentrantThreadExecutor<
                 else if(this.crosshairTarget.getType() == HitResult.Type.ENTITY) this.interactionManager.pickItemFromEntity(((EntityHitResult)this.crosshairTarget).getEntity(), isCrouching);
             }
         }
-        else if (playerInventory.getSelectedSlot() == slotToSwapTo || currentPickTime - prevItemPickTime < 6 || (currentPickTime - prevItemPickTime < 12 && stackToSwapTo.getItem() == prevItemPick)) {
+        else if (!doesPlayerAlreadyHaveStack || playerInventory.getSelectedSlot() == slotToSwapTo || currentPickTime - prevItemPickTime < 6 || (currentPickTime - prevItemPickTime < 12 && stackToSwapTo.getItem() == prevItemPick)) {
             HotbarCycling.doHotbarSwap(playerInventory);
         }
         else if (PlayerInventory.isValidHotbarIndex(slotToSwapTo)) {
