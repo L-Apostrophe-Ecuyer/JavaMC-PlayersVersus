@@ -102,13 +102,16 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
                     findOffersToAdd: while (n < maxNumOffers && !availableOffers.isEmpty()) {
                         TradeOffer newOffer = (availableOffers.remove(this.random.nextInt(availableOffers.size()))).create(this, this.random);
                         if (newOffer != null) {
-                            boolean isEnchantedBook = newOffer.getSellItem().isOf(Items.ENCHANTED_BOOK);
-                            RegistryEntry<Enchantment> enchant = !isEnchantedBook ? null : newOffer.getSellItem().getEnchantments().getEnchantments().iterator().next();
+                            boolean isEnchantedBook = newOffer.getSellItem().isOf(Items.ENCHANTED_BOOK) && newOffer.getSellItem().hasEnchantments();
+                            RegistryEntry<Enchantment> enchant = null;
+                            if(isEnchantedBook) {
+                                enchant = (RegistryEntry<Enchantment>) newOffer.getSellItem().getEnchantments().getEnchantments().toArray()[0];
+                            }
 
                             // Make sure the offer isn't already being sold:
                             for (TradeOffer currentOffer:tradeOfferList) {
                                 if(isEnchantedBook && enchant != null) {
-                                    if(newOffer.getSellItem().isOf(Items.ENCHANTED_BOOK) && newOffer.getSellItem().getEnchantments().getLevel(enchant) > 0)
+                                    if(newOffer.getSellItem().isOf(Items.ENCHANTED_BOOK) && newOffer.getSellItem().hasEnchantments() && newOffer.getSellItem().getEnchantments().getLevel(enchant) > 0)
                                         continue findOffersToAdd;
                                 }
                                 else if (ItemStack.areItemsAndComponentsEqual(currentOffer.getSellItem(), newOffer.getSellItem())

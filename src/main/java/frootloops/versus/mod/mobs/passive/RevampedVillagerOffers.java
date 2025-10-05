@@ -523,12 +523,12 @@ public class RevampedVillagerOffers {
                 ImmutableMap.<Integer, Factory[]>builder()
                         .put(1,
                                 new Factory[]{
-                                        new BuyItemFactory(Items.WRITABLE_BOOK, 1, 15),
+                                        new BuyItemFactory(Items.WRITABLE_BOOK, 1, 6),
                                         new BuyItemFactory(Items.PAPER, 24, 3),
                                         new BuyItemFactory(Items.PAPER, 22, 3),
                                         new BuyItemFactory(Items.BOOK, 16, 4),
                                         new BuyItemFactory(Items.BOOK, 14, 4),
-                                        new SellItemFactory(Items.NAME_TAG, 6, 1, 12),
+                                        new SellItemFactory(Items.NAME_TAG, 6, 1, 6),
                                         new SellItemFactory(Blocks.CHISELED_BOOKSHELF, 12, 2),
                                         new SellItemFactory(Blocks.CHISELED_BOOKSHELF, 14, 2),
                                         new EnchantBookFactory(1, EnchantmentTags.IN_ENCHANTING_TABLE),
@@ -544,6 +544,7 @@ public class RevampedVillagerOffers {
                                         new SellItemFactory(Items.LANTERN, 1, 8, 5),
                                         new SellItemFactory(Items.SOUL_LANTERN, 1, 6, 5),
                                         new SellItemFactory(Items.COPPER_LANTERNS.weathered(), 1, 6, 5),
+                                        new SellItemFactory(Items.COPPER_LANTERNS.waxed(), 1, 6, 5),
                                         new SellItemFactory(Items.NAME_TAG, 6, 1, 12)
                                 }
                         )

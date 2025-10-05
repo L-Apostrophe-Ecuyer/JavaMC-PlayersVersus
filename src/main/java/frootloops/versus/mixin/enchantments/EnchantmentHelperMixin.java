@@ -43,22 +43,24 @@ public class EnchantmentHelperMixin {
             if(!itemEnchantmentsComponent.isEmpty()) {
                 for (RegistryEntry<Enchantment> itemEnchantment : itemEnchantmentsComponent.getEnchantments()) {
                     if(itemEnchantment.equals(enchantmentRegistryEntry)) {
+                        currentLevel = EnchantRegistryHelper.getLevel(stack, enchantmentRegistryEntry);
                         break;
                     }else if(!Enchantment.canBeCombined(enchantmentRegistryEntry, itemEnchantment)) {
                         canApplyEnchanment = false;
                         break;
                     }
                 }
-                currentLevel = EnchantRegistryHelper.getLevel(stack, enchantmentRegistryEntry);
             }
             if(canApplyEnchanment) {
                 Enchantment enchantmentToAdd = enchantmentRegistryEntry.value();
-                for (int lvl = enchantmentToAdd.getMaxLevel(); lvl >= Math.max(currentLevel + 1, enchantmentToAdd.getMinLevel()); --lvl) {
-                    int minPower = enchantmentToAdd.getMinPower(lvl) - currentLevel == 0 ? 0 : enchantmentToAdd.getMinPower(currentLevel)/4;
-                    int maxPower = enchantmentToAdd.getMaxPower(lvl);
-                    if (itemEnchPower < minPower || itemEnchPower > maxPower) continue;
-                    list.add(new EnchantmentLevelEntry(enchantmentRegistryEntry, lvl));
-                    break;
+                if(currentLevel < enchantmentToAdd.getMaxLevel()) {
+                    for (int lvl = enchantmentToAdd.getMaxLevel(); lvl >= Math.max(currentLevel + 1, enchantmentToAdd.getMinLevel()); --lvl) {
+                        int minPower = enchantmentToAdd.getMinPower(lvl) - currentLevel == 0 ? 0 : enchantmentToAdd.getMinPower(currentLevel) / 4;
+                        int maxPower = enchantmentToAdd.getMaxPower(lvl);
+                        if (itemEnchPower < minPower || itemEnchPower > maxPower) continue;
+                        list.add(new EnchantmentLevelEntry(enchantmentRegistryEntry, lvl));
+                        break;
+                    }
                 }
             }
         });;
