@@ -528,8 +528,9 @@ public class RevampedVillagerOffers {
                                         new BuyItemFactory(Items.PAPER, 22, 3),
                                         new BuyItemFactory(Items.BOOK, 16, 4),
                                         new BuyItemFactory(Items.BOOK, 14, 4),
-                                        new SellItemFactory(Blocks.BOOKSHELF, 3, 1, 12, 12),
-                                        new SellItemFactory(Blocks.CHISELED_BOOKSHELF, 3, 5),
+                                        new SellItemFactory(Items.NAME_TAG, 6, 1, 12),
+                                        new SellItemFactory(Blocks.CHISELED_BOOKSHELF, 12, 2),
+                                        new SellItemFactory(Blocks.CHISELED_BOOKSHELF, 14, 2),
                                         new EnchantBookFactory(1, EnchantmentTags.IN_ENCHANTING_TABLE),
                                         new EnchantBookFactory(5, EnchantmentTags.MINING_EXCLUSIVE_SET),
                                         createLibrarianTradeFactory(5)

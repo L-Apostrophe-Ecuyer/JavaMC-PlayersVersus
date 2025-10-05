@@ -6,6 +6,9 @@ import frootloops.versus.mod.mobs.passive.RevampedTradeFactories;
 import frootloops.versus.mod.mobs.passive.RevampedVillagerOffers;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.SharedConstants;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.passive.MerchantEntity;
@@ -14,6 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.village.*;
@@ -98,10 +102,16 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
                     findOffersToAdd: while (n < maxNumOffers && !availableOffers.isEmpty()) {
                         TradeOffer newOffer = (availableOffers.remove(this.random.nextInt(availableOffers.size()))).create(this, this.random);
                         if (newOffer != null) {
+                            boolean isEnchantedBook = newOffer.getSellItem().isOf(Items.ENCHANTED_BOOK);
+                            RegistryEntry<Enchantment> enchant = !isEnchantedBook ? null : newOffer.getSellItem().getEnchantments().getEnchantments().iterator().next();
 
                             // Make sure the offer isn't already being sold:
                             for (TradeOffer currentOffer:tradeOfferList) {
-                                if (ItemStack.areItemsAndComponentsEqual(currentOffer.getSellItem(), newOffer.getSellItem())
+                                if(isEnchantedBook && enchant != null) {
+                                    if(newOffer.getSellItem().isOf(Items.ENCHANTED_BOOK) && newOffer.getSellItem().getEnchantments().getLevel(enchant) > 0)
+                                        continue findOffersToAdd;
+                                }
+                                else if (ItemStack.areItemsAndComponentsEqual(currentOffer.getSellItem(), newOffer.getSellItem())
                                         && ItemStack.areItemsAndComponentsEqual(currentOffer.getFirstBuyItem().itemStack(), newOffer.getFirstBuyItem().itemStack()) ) {
                                     continue findOffersToAdd;
                                 }
