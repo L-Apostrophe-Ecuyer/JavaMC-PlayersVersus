@@ -30,7 +30,7 @@ public class EnchantmentHelperMixin {
         final int itemEnchPower;
         EnchantableComponent enchantableComponent = stack.get(DataComponentTypes.ENCHANTABLE);
         if(enchantableComponent != null && !(isBook || stack.isOf(Items.FISHING_ROD) || stack.isOf(Items.TRIDENT))) {
-            if(enchantableComponent.value() <= 0) itemEnchPower = Math.max(1, enchPower/3);
+            if(enchantableComponent.value() == 1) itemEnchPower = Math.max(1, enchPower/3);
             else if(enchantableComponent.value() <= 4) itemEnchPower = Math.max(1, enchPower - 4 + enchantableComponent.value());
             else itemEnchPower = enchPower + enchantableComponent.value()/3;
         }
