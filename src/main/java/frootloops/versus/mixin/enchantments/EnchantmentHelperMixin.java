@@ -31,7 +31,7 @@ public class EnchantmentHelperMixin {
         final int itemEnchPower;
         EnchantableComponent enchantableComponent = stack.get(DataComponentTypes.ENCHANTABLE);
         if(enchantableComponent != null && !(isBook || stack.isOf(Items.FISHING_ROD) || stack.isOf(Items.TRIDENT))) {
-            if(enchantableComponent.value() == 1) itemEnchPower = Math.max(1, enchPower/3);
+            if(enchantableComponent.value() == 1) itemEnchPower = Math.clamp(enchPower/3, 1, 10);
             else if(enchantableComponent.value() <= 4) itemEnchPower = Math.max(1, enchPower - 4 + enchantableComponent.value());
             else itemEnchPower = enchPower + enchantableComponent.value()/3;
         }
@@ -53,9 +53,10 @@ public class EnchantmentHelperMixin {
             }
             if(canApplyEnchanment) {
                 Enchantment enchantmentToAdd = enchantmentRegistryEntry.value();
+                int currentPow = currentLevel <= 0 ? 0 : enchantmentToAdd.getMinPower(currentLevel) / 6;
                 if(currentLevel < enchantmentToAdd.getMaxLevel()) {
                     for (int lvl = enchantmentToAdd.getMaxLevel(); lvl >= Math.max(currentLevel + 1, enchantmentToAdd.getMinLevel()); --lvl) {
-                        int minPower = enchantmentToAdd.getMinPower(lvl) - currentLevel == 0 ? 0 : enchantmentToAdd.getMinPower(currentLevel) / 4;
+                        int minPower = enchantmentToAdd.getMinPower(lvl) - currentPow;
                         int maxPower = enchantmentToAdd.getMaxPower(lvl);
                         if (itemEnchPower < minPower || itemEnchPower > maxPower) continue;
                         list.add(new EnchantmentLevelEntry(enchantmentRegistryEntry, lvl));
