@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.enchantments;
 
 import com.google.common.collect.Lists;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.EnchantableComponent;
@@ -54,13 +55,14 @@ public class EnchantmentHelperMixin {
                 Enchantment enchantmentToAdd = enchantmentRegistryEntry.value();
                 for (int lvl = enchantmentToAdd.getMaxLevel(); lvl >= Math.max(currentLevel + 1, enchantmentToAdd.getMinLevel()); --lvl) {
                     int minPower = enchantmentToAdd.getMinPower(lvl) - currentLevel == 0 ? 0 : enchantmentToAdd.getMinPower(currentLevel)/4;
-                    int maxPower = enchantmentToAdd.getMaxPower(lvl) + currentLevel == 0 ? 0 : enchantmentToAdd.getMinPower(currentLevel)/4;
+                    int maxPower = enchantmentToAdd.getMaxPower(lvl);
                     if (itemEnchPower < minPower || itemEnchPower > maxPower) continue;
                     list.add(new EnchantmentLevelEntry(enchantmentRegistryEntry, lvl));
                     break;
                 }
             }
-        });
+        });;
+
         return list;
     }
 }
