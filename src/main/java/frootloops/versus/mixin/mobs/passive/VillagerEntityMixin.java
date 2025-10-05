@@ -83,9 +83,9 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
                     ArrayList<RevampedTradeFactories.Factory> availableOffers = Lists.newArrayList(tradeOfferFactories);
 
                     int n = 0;
-                    int maxNumOffers = 22 + Math.max(0, 5 - villagerData.level());
+                    int maxNumOffers = 2 + Math.max(0, 4 - villagerData.level());
 
-                    // Get index of where "buy" offers end:
+                    // Get index of where "buy" offers end:z
                     int buyIndex = 0;
                     while(buyIndex < tradeOfferList.size() && tradeOfferList.get(buyIndex).getSellItem().isOf(Items.EMERALD)) buyIndex++;
 

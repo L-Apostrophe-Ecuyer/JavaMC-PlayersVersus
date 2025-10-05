@@ -89,12 +89,21 @@ public class RevampedTradeFactories {
         return PotionContentsComponent.createStack(Items.POTION, potion);
     }
 
+    public static ItemStack createSplashPotionStack(RegistryEntry<Potion> potion) {
+        return PotionContentsComponent.createStack(Items.SPLASH_POTION, potion);
+    }
+
     public static class BuyItemFactory implements Factory {
         private final TradedItem stack;
         private final int maxUses;
         private final int experience;
         private final int price;
         private final float multiplier;
+
+        public BuyItemFactory(ItemConvertible item, int count, int experience) {
+            this(item, count, 12, experience, 1);
+        }
+
 
         public BuyItemFactory(ItemConvertible item, int count, int maxUses, int experience) {
             this(item, count, maxUses, experience, 1);
@@ -135,7 +144,7 @@ public class RevampedTradeFactories {
         private final int maxLevel;
 
         public EnchantBookFactory(int experience, TagKey<Enchantment> possibleEnchantments) {
-            this(experience, 0, Integer.MAX_VALUE, possibleEnchantments);
+            this(experience, 0, 4 + 2 * experience, possibleEnchantments);
         }
 
         public EnchantBookFactory(int experience, int minLevel, int maxLevel, TagKey<Enchantment> possibleEnchantments) {
@@ -318,7 +327,7 @@ public class RevampedTradeFactories {
 
         @Override
         public TradeOffer create(Entity entity, Random random) {
-            int i = 5 + random.nextInt(15);
+            int i = 5 + random.nextInt(this.experience);
             DynamicRegistryManager dynamicRegistryManager = entity.getEntityWorld().getRegistryManager();
             Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.getOrThrow(RegistryKeys.ENCHANTMENT)
                     .getOptional(EnchantmentTags.ON_TRADED_EQUIPMENT);
@@ -339,6 +348,14 @@ public class RevampedTradeFactories {
 
         public SellItemFactory(Block block, int price, int count, int maxUses, int experience) {
             this(new ItemStack(block), price, count, maxUses, experience);
+        }
+
+        public SellItemFactory(Block block, int count, int experience) {
+            this(new ItemStack(block), 1, count, 16, experience);
+        }
+
+        public SellItemFactory(Item item, int count, int experience) {
+            this(new ItemStack(item), 1, count, 12, experience);
         }
 
         public SellItemFactory(Item item, int price, int count, int experience) {
@@ -466,16 +483,16 @@ public class RevampedTradeFactories {
         }
     }
 
-    public static class SellSuspiciousStewFactory implements Factory {
+    public static class SellSusStewFactory implements Factory {
         private final SuspiciousStewEffectsComponent stewEffects;
         private final int experience;
         private final float multiplier;
 
-        public SellSuspiciousStewFactory(RegistryEntry<StatusEffect> effect, int duration, int experience) {
+        public SellSusStewFactory(RegistryEntry<StatusEffect> effect, int duration, int experience) {
             this(new SuspiciousStewEffectsComponent(List.of(new SuspiciousStewEffectsComponent.StewEffect(effect, duration))), experience, 0.05F);
         }
 
-        public SellSuspiciousStewFactory(SuspiciousStewEffectsComponent stewEffects, int experience, float multiplier) {
+        public SellSusStewFactory(SuspiciousStewEffectsComponent stewEffects, int experience, float multiplier) {
             this.stewEffects = stewEffects;
             this.experience = experience;
             this.multiplier = multiplier;
