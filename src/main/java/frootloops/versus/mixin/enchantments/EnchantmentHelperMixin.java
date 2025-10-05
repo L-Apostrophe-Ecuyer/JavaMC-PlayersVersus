@@ -21,11 +21,11 @@ import java.util.stream.Stream;
 public class EnchantmentHelperMixin {
 
     @Overwrite
-    public static List<EnchantmentLevelEntry> getPossibleEntries(int level, ItemStack stack, Stream<RegistryEntry<Enchantment>> possibleEnchantments) {
+    public static List<EnchantmentLevelEntry> getPossibleEntries(int enchLevel, ItemStack stack, Stream<RegistryEntry<Enchantment>> possibleEnchantments) {
         ArrayList<EnchantmentLevelEntry> list = Lists.newArrayList();
         ItemEnchantmentsComponent itemEnchantmentsComponent = stack.get(DataComponentTypes.ENCHANTMENTS);
-        boolean bl = stack.isOf(Items.BOOK);
-        possibleEnchantments.filter(enchantment -> (((Enchantment)enchantment.value()).isPrimaryItem(stack) || bl)).forEach(enchantmentRegistryEntry -> {
+        boolean isBook = stack.isOf(Items.BOOK);
+        possibleEnchantments.filter(enchantment -> ((enchantment.value()).isPrimaryItem(stack) || isBook)).forEach(enchantmentRegistryEntry -> {
             boolean canApplyEnchanment = true;
             int currentLevel = 0;
             if(!itemEnchantmentsComponent.isEmpty()) {
@@ -40,12 +40,12 @@ public class EnchantmentHelperMixin {
                 currentLevel = EnchantRegistryHelper.getLevel(stack, enchantmentRegistryEntry);
             }
             if(canApplyEnchanment) {
-                Enchantment enchantmentToAdd = (Enchantment) enchantmentRegistryEntry.value();
-                for (int j = enchantmentToAdd.getMaxLevel(); j >= Math.max(currentLevel + 1, enchantmentToAdd.getMinLevel()); --j) {
-                    int minPower = enchantmentToAdd.getMinPower(j) - enchantmentToAdd.getMinPower(currentLevel)/4;
-                    int maxPower = enchantmentToAdd.getMaxPower(j) + enchantmentToAdd.getMinPower(currentLevel)/4;
-                    if (level < minPower || level > maxPower) continue;
-                    list.add(new EnchantmentLevelEntry((RegistryEntry<Enchantment>) enchantmentRegistryEntry, j));
+                Enchantment enchantmentToAdd = enchantmentRegistryEntry.value();
+                for (int lvl = enchantmentToAdd.getMaxLevel(); lvl >= Math.max(currentLevel + 1, enchantmentToAdd.getMinLevel()); --lvl) {
+                    int minPower = enchantmentToAdd.getMinPower(lvl) - currentLevel == 0 ? 0 : enchantmentToAdd.getMinPower(currentLevel)/4;
+                    int maxPower = enchantmentToAdd.getMaxPower(lvl) + currentLevel == 0 ? 0 : enchantmentToAdd.getMinPower(currentLevel)/4;
+                    if (enchLevel < minPower || enchLevel > maxPower) continue;
+                    list.add(new EnchantmentLevelEntry(enchantmentRegistryEntry, lvl));
                     break;
                 }
             }

@@ -327,12 +327,11 @@ public class RevampedTradeFactories {
 
         @Override
         public TradeOffer create(Entity entity, Random random) {
-            int i = 5 + random.nextInt(this.experience);
+            int enchantLevels = 2 + random.nextInt(this.experience);
             DynamicRegistryManager dynamicRegistryManager = entity.getEntityWorld().getRegistryManager();
-            Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.getOrThrow(RegistryKeys.ENCHANTMENT)
-                    .getOptional(EnchantmentTags.ON_TRADED_EQUIPMENT);
-            ItemStack itemStack = EnchantmentHelper.enchant(random, new ItemStack(this.tool.getItem()), i, dynamicRegistryManager, optional);
-            int j = Math.min(this.basePrice + i, 64);
+            Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOptional(EnchantmentTags.ON_TRADED_EQUIPMENT);
+            ItemStack itemStack = EnchantmentHelper.enchant(random, new ItemStack(this.tool.getItem()), enchantLevels, dynamicRegistryManager, optional);
+            int j = Math.min(this.basePrice + enchantLevels, 64);
             TradedItem tradedItem = new TradedItem(Items.EMERALD, j);
             return new TradeOffer(tradedItem, itemStack, this.maxUses, this.experience, this.multiplier);
         }
