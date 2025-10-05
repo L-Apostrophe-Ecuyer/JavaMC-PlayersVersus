@@ -91,7 +91,7 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
 
                     // Get index of where "conversion" offers end:
                     int convertIndex = buyIndex;
-                    while(convertIndex < tradeOfferList.size() && tradeOfferList.get(convertIndex).getSecondBuyItem().isPresent()) convertIndex++;
+                    while(convertIndex < tradeOfferList.size() && (tradeOfferList.get(convertIndex).getSellItem().isOf(Items.EMERALD) || tradeOfferList.get(convertIndex).getSecondBuyItem().isPresent())) convertIndex++;
 
                     // Find offers to chose:
                     findOffersToAdd: while (n < maxNumOffers && !availableOffers.isEmpty()) {
