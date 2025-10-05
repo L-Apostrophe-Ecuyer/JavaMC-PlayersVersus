@@ -193,4 +193,25 @@ public abstract class Combat {
         if(hungerManager.getSaturationLevel() == 0.0f) return false;
         return true;
     }
+
+    public enum AttackType {
+        NORMAL, SPRINT, CRITICAL
+    }
+
+    public static AttackType getAttackType(LivingEntity entity) {
+        if(entity instanceof PlayerEntity player) return getAttackType(player, getAttackChargeProgress(player));
+        return AttackType.NORMAL;
+    }
+
+    public static AttackType getAttackType(PlayerEntity player, double attackCharge) {
+        if(attackCharge < 0.9) return AttackType.NORMAL;
+        if(player.isSprinting() && player.isOnGround()) return AttackType.SPRINT;
+        if(player.fallDistance > 0.0
+                && !player.isOnGround()
+                && !player.isClimbing()
+                && !player.isTouchingWater()
+                && !player.hasBlindnessEffect()
+                && !player.hasVehicle()) return AttackType.CRITICAL;
+        return AttackType.NORMAL;
+    }
 }

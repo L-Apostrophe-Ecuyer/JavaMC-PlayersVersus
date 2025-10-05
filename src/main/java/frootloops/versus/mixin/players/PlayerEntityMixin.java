@@ -16,10 +16,12 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.*;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
@@ -170,10 +172,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 0)
     private float modifyAttackDamage(float amount) {
-        boolean isSprinting = this.isSprinting() && this.isOnGround();
-        boolean isCriticalHit = !isSprinting && !this.isOnGround() && !this.isInFluid();
-        if(isSprinting) amount = Math.max(1.0f, amount + (float)this.getAttributeValue(Combat.SPRINT_ATTACK_DAMAGE));
-        else if(isCriticalHit) amount = Math.max(1.0f, amount + (float)this.getAttributeValue(Combat.CRITICAL_ATTACK_DAMAGE));
+        Combat.AttackType type = Combat.getAttackType(this);
+        if(type == Combat.AttackType.SPRINT) amount = Math.max(1.0f, amount + (float)this.getAttributeValue(Combat.SPRINT_ATTACK_DAMAGE));
+        else if(type == Combat.AttackType.CRITICAL) {
+            float critExtraDamage = (float)this.getAttributeValue(Combat.CRITICAL_ATTACK_DAMAGE);
+            if(critExtraDamage == 0.0f) return Math.max(amount, 1.0f);
+            else {
+                float critAmountExpected = Math.max(amount, 1.0f) * 1.5F + critExtraDamage;
+                amount = critAmountExpected/1.5F;
+            }
+        }
         return amount;
     }
 
@@ -188,18 +196,22 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         double amount = this.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
-        boolean isSprinting = this.isSprinting();
-        boolean isCriticalHit = !isSprinting && !this.isOnGround();
-        if(isCriticalHit) return;
+        Combat.AttackType type = Combat.getAttackType(this);
+        if(type == Combat.AttackType.CRITICAL) return;
 
         if(amount < 1.0) {
-            if (target instanceof LivingEntity livingEntity) {
-                double strength = isSprinting ? 0.8 : 0.6;
+            if (target instanceof VehicleEntity || target instanceof ArmorStandEntity) {
+                target.damage((ServerWorld) this.getEntityWorld(), this.getDamageSources().playerAttack((PlayerEntity)((Object)this)), 2.0f);
+            }
+            else if (target instanceof LivingEntity livingEntity) {
+                double strength = type == Combat.AttackType.SPRINT ? 0.8 : 0.6;
                 this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0f, 1.0f);
                 livingEntity.takeKnockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
             }
-            else if (target instanceof VehicleEntity || target instanceof ArmorStandEntity) {
-                target.damage((ServerWorld) this.getEntityWorld(), this.getDamageSources().playerAttack((PlayerEntity)((Object)this)), 2.0f);
+            else if (target.getType().isIn(EntityTypeTags.REDIRECTABLE_PROJECTILE)
+                    && target instanceof ProjectileEntity projectileEntity
+                    && projectileEntity.deflect(ProjectileDeflection.REDIRECTED, this, LazyEntityReference.of(this), true)) {
+                this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory());
             }
             ci.cancel(); // Cancel attack
         }
@@ -217,7 +229,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         boolean isStillOrWalkingBackwards = (this.isOnGround() && !this.isSprinting()) && (this.getVelocity().x == 0d) && (this.getVelocity().z == 0d);
 
         // Attacking while walking backwards deals less knockback:
-        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.4d, 0.8d, 0.4d));
+        if(isStillOrWalkingBackwards) target.setVelocity(target.getVelocity().multiply(0.3d, 0.8d, 0.3d));
         else if(target.getVelocity().lengthSquared() < 1.0 && target instanceof LivingEntity livingEntity) livingEntity.takeKnockback(0.4, this.getX() - target.getX(), this.getZ() - target.getZ());
     }
 
