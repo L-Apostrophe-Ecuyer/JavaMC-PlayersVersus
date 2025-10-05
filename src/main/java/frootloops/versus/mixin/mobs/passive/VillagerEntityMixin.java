@@ -85,13 +85,14 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
                     int n = 0;
                     int maxNumOffers = 2 + Math.max(0, 4 - villagerData.level());
 
-                    // Get index of where "buy" offers end:
-                    int buyIndex = 0;
-                    while(buyIndex < tradeOfferList.size() && tradeOfferList.get(buyIndex).getSellItem().isOf(Items.EMERALD)) buyIndex++;
 
                     // Get index of where "conversion" offers end:
-                    int convertIndex = buyIndex;
-                    while(convertIndex < tradeOfferList.size() && (tradeOfferList.get(convertIndex).getSellItem().isOf(Items.EMERALD) || tradeOfferList.get(convertIndex).getSecondBuyItem().isPresent())) convertIndex++;
+                    int convertIndex = 0;
+                    while(convertIndex < tradeOfferList.size() && tradeOfferList.get(convertIndex).getSecondBuyItem().isPresent()) convertIndex++;
+
+                    // Get index of where "buy" offers end:
+                    int buyIndex = convertIndex;
+                    while(buyIndex < tradeOfferList.size() && tradeOfferList.get(buyIndex).getSellItem().isOf(Items.EMERALD)) buyIndex++;
 
                     // Find offers to chose:
                     findOffersToAdd: while (n < maxNumOffers && !availableOffers.isEmpty()) {
@@ -107,8 +108,11 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
                             }
 
                             // Add!
-                            if(newOffer.getSellItem().isOf(Items.EMERALD)) tradeOfferList.add(buyIndex, newOffer);
-                            else if(newOffer.getSecondBuyItem().isPresent()) tradeOfferList.add(convertIndex, newOffer);
+                            if(newOffer.getSecondBuyItem().isPresent()) {
+                                tradeOfferList.add(convertIndex, newOffer);
+                                buyIndex++;
+                            }
+                            else if(newOffer.getSellItem().isOf(Items.EMERALD)) tradeOfferList.add(buyIndex, newOffer);
                             else tradeOfferList.addLast(newOffer);
                             n++;
                         }
