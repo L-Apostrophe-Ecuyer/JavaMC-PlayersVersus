@@ -168,7 +168,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         return super.modifyAppliedDamage(source, amount);
     }
 
-    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 1)
+    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 0)
     private float modifyAttackDamage(float amount) {
         boolean isSprinting = this.isSprinting() && this.isOnGround();
         boolean isCriticalHit = !isSprinting && !this.isOnGround() && !this.isInFluid();
