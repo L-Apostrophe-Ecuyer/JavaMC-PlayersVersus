@@ -35,7 +35,7 @@ public abstract class CustomEquipment {
     static final RegistryKey<EquipmentAsset> COPPER_ARMOR_MATERIAL_KEY = RegistryKey.of(EquipmentAssetKeys.REGISTRY_KEY, Identifier.of(VersusMod.MOD_ID, "copper"));
     static final RegistryKey<EquipmentAsset> COPPER_EXPOSED_ARMOR_MATERIAL_KEY = RegistryKey.of(EquipmentAssetKeys.REGISTRY_KEY, Identifier.of(VersusMod.MOD_ID, "copper_exposed"));
 
-    static final int COPPER_ENCHANTABILITY = 3, COPPER_ARMOR_DURABILITY = 4;
+    static final int COPPER_ENCHANTABILITY = 0, COPPER_ARMOR_DURABILITY = 4;
     public static final TagKey<Item> COPPER_TOOL_MATERIALS_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(VersusMod.MOD_ID, "copper_tool_materials"));
     public static final ToolMaterial COPPER_TOOL_MATERIAL = new ToolMaterial(BlockTags.INCORRECT_FOR_STONE_TOOL, 128, 13.0F, 1.0F, COPPER_ENCHANTABILITY, COPPER_TOOL_MATERIALS_TAG);
     public static final ToolMaterial COPPER_WAXED_TOOL_MATERIAL = new ToolMaterial(BlockTags.INCORRECT_FOR_STONE_TOOL, 196, 13.0F, 1.5F, COPPER_ENCHANTABILITY, COPPER_TOOL_MATERIALS_TAG);
