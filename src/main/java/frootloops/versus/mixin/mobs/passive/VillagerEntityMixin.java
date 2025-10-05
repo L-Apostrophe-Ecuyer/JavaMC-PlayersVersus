@@ -85,9 +85,13 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
                     int n = 0;
                     int maxNumOffers = 2 + Math.max(0, 4 - villagerData.level());
 
-                    // Get index of where "buy" offers end:z
+                    // Get index of where "buy" offers end:
                     int buyIndex = 0;
                     while(buyIndex < tradeOfferList.size() && tradeOfferList.get(buyIndex).getSellItem().isOf(Items.EMERALD)) buyIndex++;
+
+                    // Get index of where "conversion" offers end:
+                    int convertIndex = buyIndex;
+                    while(convertIndex < tradeOfferList.size() && tradeOfferList.get(convertIndex).getSecondBuyItem().isPresent()) convertIndex++;
 
                     // Find offers to chose:
                     findOffersToAdd: while (n < maxNumOffers && !availableOffers.isEmpty()) {
@@ -104,6 +108,7 @@ public abstract class VillagerEntityMixin extends MerchantEntity implements Vill
 
                             // Add!
                             if(newOffer.getSellItem().isOf(Items.EMERALD)) tradeOfferList.add(buyIndex, newOffer);
+                            else if(newOffer.getSecondBuyItem().isPresent()) tradeOfferList.add(convertIndex, newOffer);
                             else tradeOfferList.addLast(newOffer);
                             n++;
                         }
