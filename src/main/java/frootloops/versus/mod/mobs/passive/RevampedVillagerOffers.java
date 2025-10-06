@@ -32,8 +32,11 @@ public class RevampedVillagerOffers {
     public static final Map<RegistryKey<VillagerProfession>, Int2ObjectMap<Factory[]>> PROFESSION_TO_LEVELED_TRADE = Util.make(
             Maps.<RegistryKey<VillagerProfession>, Int2ObjectMap<Factory[]>>newHashMap(),
             map -> {
+
+                map.put(VillagerProfession.BUTCHER, getButcherOffers());
                 map.put(VillagerProfession.FARMER, getFarmerOffers());
                 map.put(VillagerProfession.FISHERMAN, getFishermanOffers());
+                map.put(VillagerProfession.FLETCHER, getFletcherOffers());
                 map.put(VillagerProfession.MASON, getMasonOffers());
                 map.put(VillagerProfession.CLERIC, getClericOffers());
                 map.put(VillagerProfession.LIBRARIAN, getLibrarianOffers());
@@ -89,68 +92,6 @@ public class RevampedVillagerOffers {
                                         },
                                         5, new Factory[]{
                                                 new SellItemFactory(Items.PAINTING, 1, 3, 30)
-                                        }
-                                )
-                        )
-                );
-
-
-                // Fletcher is done!
-                map.put(
-                        VillagerProfession.FLETCHER,
-                        copyToFastUtilMap(
-                                ImmutableMap.of(
-                                        1, new Factory[]{
-                                                new BuyItemFactory(Items.FLINT, 16, 2),
-                                                new BuyItemFactory(Items.FEATHER, 24, 2),
-                                                new SellItemFactory(Items.ARROW, 16, 1),
-                                                new SellItemFactory(Items.TARGET, 4, 1),
-                                                new SellItemFactory(Items.BOW, 1, 3),
-                                                new ProcessItemFactory(Blocks.GRAVEL, 8, 1, Items.ARROW, 32, 12, 1, 0.05F)
-                                        },
-                                        2, new Factory[]{
-                                                new BuyItemFactory(CustomEquipment.COPPER_AXE_WAXED, 1, 3),
-                                                new SellItemFactory(Items.CARVED_PUMPKIN, 6, 5),
-                                                new SellItemFactory(Items.OAK_WOOD, 8, 4),
-                                                TypedWrapperFactory.of(
-                                                        new SellItemFactory(Items.DARK_OAK_WOOD, 8, 5),
-                                                        VillagerType.SWAMP,
-                                                        VillagerType.PLAINS
-                                                ),
-                                                TypedWrapperFactory.of(
-                                                        new SellItemFactory(Items.JUNGLE_WOOD, 8, 5),
-                                                        VillagerType.JUNGLE,
-                                                        VillagerType.DESERT,
-                                                        VillagerType.SAVANNA
-                                                ),
-                                                TypedWrapperFactory.of(
-                                                        new SellItemFactory(Items.ACACIA_WOOD, 8, 5),
-                                                        VillagerType.SAVANNA
-                                                ),
-                                                TypedWrapperFactory.of(
-                                                        new SellItemFactory(Items.MANGROVE_WOOD, 8, 5),
-                                                        VillagerType.SWAMP,
-                                                        VillagerType.SAVANNA
-                                                ),
-                                                TypedWrapperFactory.of(
-                                                        new SellItemFactory(Items.SPRUCE_WOOD, 8, 5),
-                                                        VillagerType.SNOW,
-                                                        VillagerType.TAIGA,
-                                                        VillagerType.PLAINS
-                                                ),
-                                                TypedWrapperFactory.of(
-                                                        new SellItemFactory(Items.BIRCH_WOOD, 8, 5),
-                                                        VillagerType.PLAINS
-                                                ),
-                                        },
-                                        3, new Factory[]{
-                                                new BuyItemFactory(Items.GUNPOWDER, 6, 5),
-                                                new SellItemFactory(Items.CROSSBOW, 3, 1, 12)},
-                                        4, new Factory[]{
-                                                new SellEnchantedToolFactory(Items.CROSSBOW, 3, 3, 18),
-                                                new SellEnchantedToolFactory(Items.BOW, 2, 3, 18)},
-                                        5, new Factory[]{
-                                                new SellPotionHoldingItemFactory(Items.ARROW, 5, Items.TIPPED_ARROW, 5, 2, 12, 30)
                                         }
                                 )
                         )
@@ -288,27 +229,7 @@ public class RevampedVillagerOffers {
                                 )
                         )
                 );
-                map.put(
-                        VillagerProfession.BUTCHER,
-                        copyToFastUtilMap(
-                                ImmutableMap.of(
-                                        1, new Factory[]{
-                                                new BuyItemFactory(Items.CHICKEN, 14, 2),
-                                                new BuyItemFactory(Items.PORKCHOP, 7, 2),
-                                                new BuyItemFactory(Items.RABBIT, 4, 2),
-                                                new SellItemFactory(Items.RABBIT_STEW, 1, 1, 1)
-                                        },
-                                        2, new Factory[]{
-                                                new BuyItemFactory(Items.COAL, 15, 2),
-                                                new SellItemFactory(Items.COOKED_PORKCHOP, 5, 5),
-                                                new SellItemFactory(Items.COOKED_CHICKEN, 8, 5)
-                                        },
-                                        3, new Factory[]{new BuyItemFactory(Items.MUTTON, 7, 20), new BuyItemFactory(Items.BEEF, 10, 20)},
-                                        4, new Factory[]{new BuyItemFactory(Items.DRIED_KELP_BLOCK, 10, 30)},
-                                        5, new Factory[]{new BuyItemFactory(Items.SWEET_BERRIES, 10, 30)}
-                                )
-                        )
-                );
+
                 map.put(
                         VillagerProfession.LEATHERWORKER,
                         copyToFastUtilMap(
@@ -338,6 +259,50 @@ public class RevampedVillagerOffers {
             }
     );
 
+
+    private static final Int2ObjectMap<Factory[]> getButcherOffers() {
+        return copyToFastUtilMap(
+                ImmutableMap.of(
+                        1, new Factory[]{
+                                new ProcessItemFactory(Items.PORKCHOP, 32, 1, Items.COOKED_PORKCHOP, 32, 8, 1, 0.05F),
+                                new ProcessItemFactory(Items.CHICKEN, 32, 1, Items.COOKED_CHICKEN, 32, 8, 1, 0.05F),
+                                new ProcessItemFactory(Items.BEEF, 32, 1, Items.COOKED_BEEF, 32, 8, 1, 0.05F),
+                                new BuyItemFactory(Items.WHEAT_SEEDS, 48, 1, 1, 1),
+                                new BuyItemFactory(Items.WHEAT, 27, 2),
+                                new BuyItemFactory(Items.WHEAT, 28, 2),
+                                TypedWrapperFactory.of(new BuyItemFactory(Items.EGG, 16, 2), VillagerType.SWAMP, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new BuyItemFactory(Items.BLUE_EGG, 16, 2), VillagerType.TAIGA, VillagerType.SNOW),
+                                TypedWrapperFactory.of(new BuyItemFactory(Items.BROWN_EGG, 16, 2), VillagerType.SAVANNA, VillagerType.JUNGLE, VillagerType.DESERT),
+                                new SellItemFactory(Items.OAK_FENCE, 9, 2),
+                        },
+                        2, new Factory[]{
+                                new BuyItemFactory(Items.DRIED_KELP_BLOCK, 8, 10),
+                                new BuyItemFactory(Items.DRIED_KELP_BLOCK, 8, 8),
+                                new SellItemFactory(Items.COOKED_CHICKEN, 6, 3),
+                                new SellItemFactory(Items.COOKED_PORKCHOP, 4, 3),
+                                new SellItemFactory(Items.COOKED_BEEF, 3, 3),
+                                new SellItemFactory(Items.COOKED_MUTTON, 5, 3),
+                                new SellItemFactory(Items.COOKED_RABBIT, 6, 4)
+                        },
+                        3, new Factory[]{
+                                new SellItemFactory(Items.OAK_FENCE_GATE, 5, 10),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.DARK_OAK_FENCE_GATE, 5, 10), VillagerType.SWAMP, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.JUNGLE_FENCE_GATE, 5, 10), VillagerType.JUNGLE, VillagerType.DESERT, VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.ACACIA_FENCE_GATE, 5, 10), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.MANGROVE_FENCE_GATE, 5, 10), VillagerType.SWAMP, VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.SPRUCE_FENCE_GATE, 5, 10), VillagerType.SNOW, VillagerType.TAIGA, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.BIRCH_FENCE_GATE, 5, 10), VillagerType.PLAINS),
+                        },
+                        4, new Factory[]{
+                                new SellItemFactory(Items.FEATHER, 16, 8),
+                                new ProcessItemFactory(Items.RABBIT, 8, 1, Items.RABBIT_STEW, 8, 16, 12, 0.05F),
+                        },
+                        5, new Factory[]{
+                                new SellItemFactory(Items.HONEY_BOTTLE, 16, 8)
+                        }
+                )
+        );
+    }
 
     private static final Int2ObjectMap<Factory[]> getFarmerOffers() {
         return copyToFastUtilMap(
@@ -413,6 +378,42 @@ public class RevampedVillagerOffers {
                         },
                         5, new Factory[]{
                                 new SellEnchantedToolFactory(Items.FISHING_ROD, 12, 3, 20, 0.2F)
+                        }
+                )
+        );
+    }
+
+    private static final Int2ObjectMap<Factory[]> getFletcherOffers() {
+        return copyToFastUtilMap(
+                ImmutableMap.of(
+                        1, new Factory[]{
+                                new BuyItemFactory(Items.FLINT, 16, 2),
+                                new BuyItemFactory(Items.FEATHER, 24, 2),
+                                new SellItemFactory(Items.ARROW, 16, 1),
+                                new SellItemFactory(Items.BOW, 1, 3),
+                                new SellItemFactory(Items.OAK_WOOD, 8, 3),
+                                new ProcessItemFactory(Blocks.GRAVEL, 8, 1, Items.ARROW, 32, 12, 1, 0.05F),
+                        },
+                        2, new Factory[]{
+                                new BuyItemFactory(CustomEquipment.COPPER_AXE_WAXED, 1, 3),
+                                new SellItemFactory(Items.CARVED_PUMPKIN, 6, 5),
+                                new SellItemFactory(Items.OAK_WOOD, 8, 4),
+                                new SellItemFactory(Items.TARGET, 4, 6),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.DARK_OAK_WOOD, 8, 5), VillagerType.SWAMP, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.JUNGLE_WOOD, 8, 5), VillagerType.JUNGLE, VillagerType.DESERT, VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.ACACIA_WOOD, 8, 5), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.MANGROVE_WOOD, 8, 5), VillagerType.SWAMP, VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.SPRUCE_WOOD, 8, 5), VillagerType.SNOW, VillagerType.TAIGA, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.BIRCH_WOOD, 8, 5), VillagerType.PLAINS),
+                        },
+                        3, new Factory[]{
+                                new BuyItemFactory(Items.GUNPOWDER, 6, 5),
+                                new SellItemFactory(Items.CROSSBOW, 3, 1, 12)},
+                        4, new Factory[]{
+                                new SellEnchantedToolFactory(Items.CROSSBOW, 3, 3, 18),
+                                new SellEnchantedToolFactory(Items.BOW, 2, 3, 18)},
+                        5, new Factory[]{
+                                new SellPotionHoldingItemFactory(Items.ARROW, 5, Items.TIPPED_ARROW, 5, 2, 12, 30)
                         }
                 )
         );
@@ -551,8 +552,11 @@ public class RevampedVillagerOffers {
                         .put(3,
                                 new Factory[]{
                                         new BuyItemFactory(Items.LAPIS_LAZULI, 5, 5),
+                                        new BuyItemFactory(Items.LAPIS_LAZULI, 6, 5),
+                                        new BuyItemFactory(Items.AMETHYST_SHARD, 12, 6),
                                         new BuyItemFactory(Items.AMETHYST_SHARD, 12, 6),
                                         new BuyItemFactory(Items.EXPERIENCE_BOTTLE, 1, 6),
+                                        new SellItemFactory(Items.GLASS, 24, 6),
                                         new SellItemFactory(Items.GLASS, 16, 6),
                                         new SellItemFactory(Items.TINTED_GLASS, 12, 8),
                                         new EnchantBookFactory(10, EnchantmentTags.TRADEABLE)
@@ -567,8 +571,8 @@ public class RevampedVillagerOffers {
                         )
                         .put(5,
                                 new Factory[]{
-                                        new EnchantBookFactory(18, EnchantmentTags.TRADEABLE),
-                                        new EnchantBookFactory(16, EnchantmentTags.BOOTS_EXCLUSIVE_SET), // Mending or infinity
+                                        new EnchantBookFactory(20, EnchantmentTags.TRADEABLE),
+                                        new EnchantBookFactory(16, EnchantmentTags.BOW_EXCLUSIVE_SET), // Mending or infinity
                                 }
                         )
                         .build()
