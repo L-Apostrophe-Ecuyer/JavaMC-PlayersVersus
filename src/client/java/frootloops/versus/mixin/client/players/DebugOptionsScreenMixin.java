@@ -12,7 +12,7 @@ public class DebugOptionsScreenMixin {
     @Redirect(method = "fillEntries", at = @At(value = "INVOKE", target = "Ljava/lang/String;contains(Ljava/lang/CharSequence;)Z"))
     private boolean redirectContains(String pathString, CharSequence searchString) {
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean shouldRestrictDebug = !client.canSwitchGameMode() || (client.player.getGameMode() != null && client.player.getGameMode().isSurvivalLike()) || !client.player.hasPermissionLevel(2);
+        boolean shouldRestrictDebug = !client.canSwitchGameMode() || (client.player.getGameMode() != null && client.player.getGameMode().isSurvivalLike() && !client.player.hasPermissionLevel(2));
         if(shouldRestrictDebug) {
             switch (pathString) {
                 case "biome":
