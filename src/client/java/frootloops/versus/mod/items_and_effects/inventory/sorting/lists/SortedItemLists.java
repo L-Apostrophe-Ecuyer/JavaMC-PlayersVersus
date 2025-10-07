@@ -53,7 +53,7 @@ public class SortedItemLists {
     /** MISC - MYSTICISM & MOBS ---------------------------------------------------------   */
     public static final SortedMappedItemList MISC_BREWING_ITEMS = new SortedMappedItemList(ItemSortingMaps.ITEMS_BREWING_MISC, ItemType.BREWING_INGREDIENT);
     public static final SortedTypedItemList CONCENTRATES = new SortedTypedItemList(new ItemType[]{ItemType.BREWING_INGREDIENT});
-    public static final SortedItemList[] MISC_BREWING = {MISC_BREWING_ITEMS, CONCENTRATES};
+    public static final SortedItemList[] MISC_BREWING = {CONCENTRATES, MISC_BREWING_ITEMS};
 
 
     /** MISC - WORLD AND ARCHEOLOGY ---------------------------------------------------------   */
@@ -111,10 +111,11 @@ public class SortedItemLists {
     public static final SortedMappedItemList PICKAXE_MINEABLE_GRAYS_COBBLED = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_GRAYS_COBBLE, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_CORAL = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_CORAL, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_PALE = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES, ItemType.BLOCK_FULL);
+    public static final SortedMappedItemList PICKAXE_MINEABLE_BLUES = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_BLUE_BLOCKS, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_WARM = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_TERRACOTTA = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS, ItemType.BLOCK_FULL);
-    public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.PICKAXE_MINEABLE, 0.25f, 51.0f);
-    public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_ICE, PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_BLACKSTONE, PICKAXE_MINEABLE_GRAYS_BRICKS, PICKAXE_MINEABLE_GRAYS_NATURAL, PICKAXE_MINEABLE_GRAYS_COBBLED, PICKAXE_MINEABLE_CORAL, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_GENERIC};
+    public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.PICKAXE_MINEABLE, 0.5f, 51.0f);
+    public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_ICE, PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_BLACKSTONE, PICKAXE_MINEABLE_GRAYS_BRICKS, PICKAXE_MINEABLE_GRAYS_NATURAL, PICKAXE_MINEABLE_GRAYS_COBBLED, PICKAXE_MINEABLE_CORAL, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_BLUES, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_GENERIC};
 
 
     /** AXES -------------------------------------------------------------   */

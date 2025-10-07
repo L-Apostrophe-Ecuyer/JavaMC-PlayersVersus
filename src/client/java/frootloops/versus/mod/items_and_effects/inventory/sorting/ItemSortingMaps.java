@@ -79,6 +79,11 @@ public abstract class ItemSortingMaps {
     public static final Map<Item, Integer> ITEMS_BREWING_MISC = new HashMap<>();
     static {
         int index = 1;
+        ITEMS_BREWING_MISC.put(CustomBrewingItems.CORRUPTED_WART_POWDER, index++);
+        ITEMS_BREWING_MISC.put(Items.GUNPOWDER, index++);
+        ITEMS_BREWING_MISC.put(Items.SUGAR, index++);
+        ITEMS_BREWING_MISC.put(Items.GLOWSTONE_DUST, index++);
+        ITEMS_BREWING_MISC.put(Items.GLOWSTONE, index++);;
         ITEMS_BREWING_MISC.put(Items.ECHO_SHARD, index++);
         ITEMS_BREWING_MISC.put(Items.DRAGON_BREATH, index++);
         ITEMS_BREWING_MISC.put(Items.POPPED_CHORUS_FRUIT, index++);
@@ -97,11 +102,6 @@ public abstract class ItemSortingMaps {
         ITEMS_BREWING_MISC.put(CustomBrewingItems.FOUR_LEAF_CLOVER, index++);
         ITEMS_BREWING_MISC.put(Items.RABBIT_FOOT, index++);
         ITEMS_BREWING_MISC.put(Items.ARMADILLO_SCUTE, index++);
-        ITEMS_BREWING_MISC.put(Items.SUGAR, index++);
-        ITEMS_BREWING_MISC.put(Items.GUNPOWDER, index++);
-        ITEMS_BREWING_MISC.put(Items.GLOWSTONE_DUST, index++);
-        ITEMS_BREWING_MISC.put(Items.GLOWSTONE, index++);
-        ITEMS_BREWING_MISC.put(CustomBrewingItems.CORRUPTED_WART_POWDER, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_TRUE_TRASH = new HashMap<>();
@@ -566,6 +566,25 @@ public abstract class ItemSortingMaps {
         ITEMS_PICKAXE_CORAL.put(Items.BUBBLE_CORAL_BLOCK, index++);
         ITEMS_PICKAXE_CORAL.put(Items.FIRE_CORAL_BLOCK, index++);
         ITEMS_PICKAXE_CORAL.put(Items.HORN_CORAL_BLOCK, index++);
+    }
+
+    public static final Map<Item, Integer> ITEMS_PICKAXE_BLUE_BLOCKS = new HashMap<>();
+    static {
+        int index = 1;
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.PRISMARINE, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.PRISMARINE_SLAB, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.PRISMARINE_STAIRS, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.PRISMARINE_WALL, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.PRISMARINE_BRICKS, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.PRISMARINE_BRICK_SLAB, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.PRISMARINE_BRICK_STAIRS, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.DARK_PRISMARINE, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.DARK_PRISMARINE_SLAB, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.DARK_PRISMARINE_STAIRS, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(Items.LAPIS_BLOCK, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(CustomBlockItems.CUT_LAPIS, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(CustomBlockItems.CUT_LAPIS_SLAB, index++);
+        ITEMS_PICKAXE_BLUE_BLOCKS.put(CustomBlockItems.CUT_LAPIS_STAIRS, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_PICKAXE_ICE = new HashMap<>();
