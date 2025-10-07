@@ -77,6 +77,12 @@ public abstract class DebugHudMixin {
                     list.add(" Biome: " + getBiomeAsString(client.world.getBiome(blockPos)) + " ");
                 }
 
+                // If F3 is currently enabled, then show how to configure the screen;
+                if(isF3Enabled) {
+                    list.add("");
+                    list.add(" Use F3 + F6 to configure the debug screen ");
+                }
+
                 // And that's it!
                 this.drawText(context, list, true);
                 info.cancel();
@@ -86,6 +92,6 @@ public abstract class DebugHudMixin {
 
     private static String getBiomeAsString(RegistryEntry<Biome> biome) {
         String biomeName = biome.getKeyOrValue().map(key -> key.getValue().toString(), value -> "[unregistered " + value + "]");
-        return biomeName.substring(biomeName.indexOf(':'), -1);
+        return biomeName.substring(biomeName.indexOf(':') + 1);
     }
 }
