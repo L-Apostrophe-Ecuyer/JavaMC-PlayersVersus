@@ -51,22 +51,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
 
     public boolean canGiveawayTools() {
         if(numTools > 0 && numItems < 1) return true;
-        if(numTools < 2) return false;
-
-        // Check if giving away tools would ruin a perfect row of 9. If so, cancel:
-        int sizeFirst, sizeSecond;
-        for(int i = 0; i < sortedItemLists.length; i++) {
-            sizeFirst = sortedItemLists[i].size() % 9;
-            if(sizeFirst == 0) continue;
-
-            for(int j = i; i < sortedItemLists.length; i++) {
-                sizeSecond = sortedItemLists[j].size() % 9;
-                if(sizeSecond != 0 && sizeFirst + sizeSecond == 8) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return numTools > 1;
     }
 
     public int getNumTools() {
@@ -194,7 +179,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         int numToolsTaken = 0, numItemsTaken = 0;
 
         // If has tools, try to include at least one, especially if not enough other blocks:
-        int maxToolsToTake = prioritizeNonTools ?numSlotsToTake - this.numItems : Math.clamp(numSlotsToTake - numItems, 1, sortedToolList.size());
+        int maxToolsToTake = prioritizeNonTools ? numSlotsToTake - this.numItems : Math.max(Math.min(numSlotsToTake - numItems, numTools), 1);
         if(maxToolsToTake > 0 && sortedToolList.size() > 1) {
             slotList.addAll(sortedToolList.take(maxToolsToTake));
             numToolsTaken = slotList.size();
