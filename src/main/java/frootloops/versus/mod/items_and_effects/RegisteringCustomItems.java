@@ -67,6 +67,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_darkness", CustomBrewingItems.CONCENTRATE_OF_DARKNESS, ItemGroups.INGREDIENTS);      // New potion!
         registerCustomItem("concentrate_of_leaping", CustomBrewingItems.CONCENTRATE_OF_LEAPING, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_slow_fall", CustomBrewingItems.CONCENTRATE_OF_SLOW_FALL, ItemGroups.INGREDIENTS);
+        registerCustomItem("concentrate_of_levitation", CustomBrewingItems.CONCENTRATE_OF_LEVITATION, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_speed", CustomBrewingItems.CONCENTRATE_OF_SPEED, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_slowness", CustomBrewingItems.CONCENTRATE_OF_SLOWNESS, ItemGroups.INGREDIENTS);
         registerCustomItem("concentrate_of_breath", CustomBrewingItems.CONCENTRATE_OF_BREATH, ItemGroups.INGREDIENTS);

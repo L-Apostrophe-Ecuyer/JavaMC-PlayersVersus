@@ -47,6 +47,7 @@ public abstract class CustomBrewingItems {
 
     public static final ConcentrateItem CONCENTRATE_OF_LEAPING = new ConcentrateItem(getBileSettings("concentrate_of_leaping"),StatusEffects.JUMP_BOOST, CustomBlocks.LEAPING_BILE);
     public static final ConcentrateItem CONCENTRATE_OF_SLOW_FALL = new ConcentrateItem(getBileSettings("concentrate_of_slow_fall"),StatusEffects.SLOW_FALLING, CustomBlocks.SLOW_FALL_BILE);
+    public static final ConcentrateItem CONCENTRATE_OF_LEVITATION = new ConcentrateItem(getBileSettings("concentrate_of_levitation"),StatusEffects.SLOW_FALLING, CustomBlocks.LEVITATION_BILE);
 
     public static final ConcentrateItem CONCENTRATE_OF_SPEED = new ConcentrateItem(getBileSettings("concentrate_of_speed"),StatusEffects.SPEED, CustomBlocks.SPEED_BILE);
     public static final ConcentrateItem CONCENTRATE_OF_SLOWNESS = new ConcentrateItem(getBileSettings("concentrate_of_slowness"),StatusEffects.SLOWNESS, CustomBlocks.SLOWNESS_BILE);

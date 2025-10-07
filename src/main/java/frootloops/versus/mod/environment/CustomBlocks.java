@@ -61,7 +61,7 @@ public class CustomBlocks {
 
     public static CreeperSporeBlock CREEPER_SPORE_BLOSSOM;
 
-    public static PotionEffectBileBlock DEATHLY_BILE, CORRUPTED_BILE, HARMFUL_BILE, HEALTHY_BILE, REGENERATION_BILE, WITHERING_BILE, MINING_SPEED_BILE, MINING_FATIGUE_BILE, TOUGHNESS_BILE, VISION_BILE, DARKNESS_BILE, LEAPING_BILE, SLOW_FALL_BILE, SPEED_BILE, SLOWNESS_BILE, BREATH_BILE;
+    public static PotionEffectBileBlock DEATHLY_BILE, CORRUPTED_BILE, HARMFUL_BILE, HEALTHY_BILE, REGENERATION_BILE, WITHERING_BILE, MINING_SPEED_BILE, MINING_FATIGUE_BILE, TOUGHNESS_BILE, VISION_BILE, DARKNESS_BILE, LEAPING_BILE, SLOW_FALL_BILE, LEVITATION_BILE, SPEED_BILE, SLOWNESS_BILE, BREATH_BILE;
     public static PotionEffectBileBlock INVISIBILITY_BILE, GLOWING_BILE, WEAKNESS_BILE, STRENGTH_BILE, WIND_BILE, FIRE_BILE, OOZE_BILE, INFESTATION_BILE, POISON_BILE, WEAVING_BILE, LUCK_BILE, UNLUCK_BILE;
     public static PotionEffectBileBlock LARGENESS_BILE,SMALLNESS_BILE, VULNERABILITY_BILE, BUOYANCY_BILE;
 
@@ -146,9 +146,10 @@ public class CustomBlocks {
         MINING_FATIGUE_BILE = registerBileBlock("mining_fatigue_bile", StatusEffects.MINING_FATIGUE); // New potion!
         TOUGHNESS_BILE = registerBileBlock("toughness_bile", StatusEffects.RESISTANCE);
         VISION_BILE = registerBileBlock("vision_bile", StatusEffects.NIGHT_VISION);
-        DARKNESS_BILE = registerBileBlock("darkness_bile", StatusEffects.DARKNESS);         // New potion!
+        DARKNESS_BILE = registerBileBlock("darkness_bile", StatusEffects.DARKNESS);              // New potion!
         LEAPING_BILE = registerBileBlock("leaping_bile", StatusEffects.JUMP_BOOST);
         SLOW_FALL_BILE = registerBileBlock("slow_fall_bile", StatusEffects.SLOW_FALLING);
+        LEVITATION_BILE = registerBileBlock("levitation_bile", StatusEffects.LEVITATION, 200, 1);       // New potion!
         SPEED_BILE = registerBileBlock("speed_bile", StatusEffects.SPEED, 300, 0);
         SLOWNESS_BILE = registerBileBlock("slowness_bile", StatusEffects.SLOWNESS);
         BREATH_BILE = registerBileBlock("breath_bile", StatusEffects.WATER_BREATHING);

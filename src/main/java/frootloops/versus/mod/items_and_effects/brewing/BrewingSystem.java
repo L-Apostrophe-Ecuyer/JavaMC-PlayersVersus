@@ -38,6 +38,7 @@ public abstract class BrewingSystem {
 
             put(Potions.LEAPING, new RelatedPotions(Potions.STRONG_LEAPING, Potions.LONG_LEAPING, Potions.SLOW_FALLING));
             put(Potions.SLOW_FALLING, new RelatedPotions(Potions.LONG_SLOW_FALLING, Potions.LONG_SLOW_FALLING, Potions.LEAPING));
+            put(CustomPotions.LEVITATION, new RelatedPotions(CustomPotions.LEVITATION_STRONG, CustomPotions.LEVITATION_LONG, Potions.SLOW_FALLING));
 
             put(Potions.SWIFTNESS, new RelatedPotions(Potions.STRONG_SWIFTNESS, Potions.LONG_SWIFTNESS, Potions.SLOWNESS));
             put(Potions.SLOWNESS,  new RelatedPotions(Potions.LONG_SLOWNESS, Potions.LONG_SLOWNESS, Potions.SWIFTNESS));
@@ -98,6 +99,7 @@ public abstract class BrewingSystem {
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_LEAPING, Potions.LEAPING);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_SLOW_FALL, Potions.SLOW_FALLING);
+        registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_LEVITATION, CustomPotions.LEVITATION);
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_SPEED, Potions.SWIFTNESS);
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_SLOWNESS, Potions.SLOWNESS);
@@ -141,12 +143,12 @@ public abstract class BrewingSystem {
             if (hasLongPotion) {
                 builder.registerPotionRecipe(potion, Items.SUGAR, current.longPotion);
                 builder.registerPotionRecipe(Potions.THICK, ingredient, current.longPotion);
-                builder.registerPotionRecipe(potion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_LONG);
+                builder.registerPotionRecipe(current.longPotion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_LONG);
             }
             if (hasStrongPotion) {
                 builder.registerPotionRecipe(potion, Items.GLOWSTONE_DUST, current.strongPotion);
                 builder.registerPotionRecipe(Potions.AWKWARD, ingredient, current.strongPotion);
-                builder.registerPotionRecipe(potion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_STRONG);
+                builder.registerPotionRecipe(current.strongPotion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_STRONG);
             }
 
             if (current.invertedPotion != null && current.invertedPotion != potion) {

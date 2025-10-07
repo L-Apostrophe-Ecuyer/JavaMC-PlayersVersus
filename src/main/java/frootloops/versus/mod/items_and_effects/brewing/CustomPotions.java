@@ -14,7 +14,6 @@ import net.minecraft.util.Identifier;
 import static frootloops.versus.VersusMod.MOD_ID;
 
 public abstract class CustomPotions {
-
     private static boolean werePotionsRegistered = false;
 
     public static RegistryEntry<Potion> LARGENESS, LARGENESS_LONG, LARGENESS_STRONG;
@@ -27,6 +26,7 @@ public abstract class CustomPotions {
     public static RegistryEntry<Potion> GLOWING, GLOWING_LONG, GLOWING_STRONG;
     public static RegistryEntry<Potion> DECAY, DECAY_LONG, DECAY_STRONG;
     public static RegistryEntry<Potion> UNLUCK;
+    public static RegistryEntry<Potion> LEVITATION, LEVITATION_STRONG, LEVITATION_LONG;
     public static RegistryEntry<Potion> HAUNTING;
     public static RegistryEntry<Potion> FIRE_RESISTANCE_STRONG;
 
@@ -74,6 +74,10 @@ public abstract class CustomPotions {
         FIRE_RESISTANCE_STRONG = registerCustomPotion("fire_resistance_strong", StatusEffects.FIRE_RESISTANCE, 1, 2400);
 
         UNLUCK = registerCustomPotion("unluck", StatusEffects.UNLUCK, 0, 3000);
+
+        LEVITATION = registerCustomPotion("levitation", StatusEffects.LEVITATION, 0, 200);
+        LEVITATION_LONG = registerCustomPotion("levitation_long", StatusEffects.LEVITATION, 0, 280);
+        LEVITATION_STRONG = registerCustomPotion("levitation_strong", StatusEffects.LEVITATION, 1, 120);
 
         HAUNTING = registerCustomPotion("haunting", CustomStatusEffects.HAUNTING, 0, 320);
     }
