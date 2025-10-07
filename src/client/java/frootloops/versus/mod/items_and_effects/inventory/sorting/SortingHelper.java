@@ -148,7 +148,7 @@ public class SortingHelper {
                         }
                         else if(group.size() > 0){
                             slotsTaken = group.takeFirstSlots(numSlotsInRow, true);
-                            if(slotsTaken == null || slotsTaken.size() == 0) VersusMod.MOD_LOGGER.error("[ ITEM SORTING ERROR ] " + group.GROUP_NAME + " - Tried to take " + numSlotsInRow + " slots, with splitUpGroups = true, but received nothing");
+                            if(slotsTaken == null || slotsTaken.size() == 0) VersusMod.MOD_LOGGER.error("[ ITEM SORTING ERROR ] " + group.GROUP_NAME + " - Tried to take " + numSlotsInRow + " slots, with splitUpGroups = true, but received nothing. Group: " + group);
                             else if (DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                 " + group.GROUP_NAME + " - Took " + slotsTaken.size() + " slots, with splitUpGroups = true");
                             slotsToAdd.addAll(slotsTaken);
                         }
@@ -161,7 +161,7 @@ public class SortingHelper {
                 if(!wasSuccessful) return null;
 
                 numIterations++;
-                if(numIterations > 100) {
+                if(numIterations > 30) {
                     VersusMod.MOD_LOGGER.error("[ ITEM SORTING ERROR ] " + group.GROUP_NAME + " - Unable to extract all items, still has " + group.size() + ":\n" + group.toString() + "\n           SlotsTaken size: " + slotsTaken.size() + "\n           SlotsToAdd size: " + slotsToAdd + "\n           Row/Column Inventory: (" + inventoryOutput.getCurrentRow() + ", " + inventoryOutput.getCurrentCol() + ")");
                     return null;
                 }

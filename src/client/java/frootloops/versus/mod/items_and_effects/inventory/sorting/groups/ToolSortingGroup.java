@@ -154,7 +154,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         return this.takeFirstSlots(numSlotsToTake, splitUpSubGroups, false);
     }
 
-    public LinkedList<ItemSlot> takeFirstSlots(int numSlotsToTake, boolean splitUpSubGroups, boolean prioritizeNonTools) {
+    public LinkedList<ItemSlot> takeFirstSlots(int numSlotsToTake, final boolean splitUpSubGroups, final boolean prioritizeNonTools) {
         if(numSlotsToTake < 1 || this.size() < 1) {
             if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("[ ITEM SORTING ] " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake + ", " + splitUpSubGroups + ") - Group was empty!! Has " + this.sortedToolList.size() + " tools and " + Arrays.stream(this.sortedItemLists).mapToInt(SortedItemList::size) + " items");
             return new LinkedList<>();
@@ -209,7 +209,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
             numItemsTaken = slotList.size() - numToolsTaken;
         }
 
-        if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numItemsTaken + " items (misc included) and " + numToolsTaken + " tools");
+        if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - At the end of the fct, returning " + numItemsTaken + " items (misc included) and " + numToolsTaken + " tools");
         this.numItems -= numItemsTaken;
         return slotList;
     }
@@ -244,9 +244,12 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         for(int i = startIndex; i != endIndex; i += increment) {
             if(sortedItemLists[i].size() == 0) continue;
             int sizeOfList = sortedItemLists[i].size();
-            if (withTool && sizeOfList % 9 < numSlotsToTake && (sizeOfList % 9) + this.numTools >= numSlotsToTake) {
+            if(sizeOfList == 0) continue;
+            else if (withTool && (sizeOfList + this.numTools )== numSlotsToTake) {
                 LinkedList<ItemSlot> slotList = sortedItemLists[i].takeAll();
                 slotList.addAll(this.takeTools(numSlotsToTake - sizeOfList));
+                this.numItems -= sizeOfList;
+                this.numTools = this.sortedToolList.size();
                 if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + withTool + ", " + startFromEnd + ") - Quick return of " + (sizeOfList) + " items and " + (numSlotsToTake - sizeOfList) + " tools");
                 return slotList;
             }
