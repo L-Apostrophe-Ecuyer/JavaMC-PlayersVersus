@@ -384,9 +384,6 @@ public class SortingHelper {
 
         // If still some space, and still no pickaxe, try adding one, and try combining groups:
         if(!MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.getNumTools() > 0) {
-
-            VersusMod.MOD_LOGGER.error(" Hotbar has no pickaxe, but pickaxe group does!");
-
             if(tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
             else if(PICKAXE_GROUP.hasOnlyTools()) {
                 MAIN_HOTBAR.addSlot(PICKAXE_GROUP.takeBestTool());
@@ -396,7 +393,6 @@ public class SortingHelper {
             else if(PICKAXE_GROUP.size() + MAIN_HOTBAR.size() < 9 && (MAIN_HOTBAR.hasCombatItems() || COMBAT_GROUP.size() == 0)) MAIN_HOTBAR.mergeWithOtherGroup(PICKAXE_GROUP);
         }
         if(MAIN_HOTBAR.size() >= 9) return;
-        VersusMod.MOD_LOGGER.error(" Hotbar cleaning still going. Has pickaxe? " + MAIN_HOTBAR.hasPickaxe());
 
         // If still some space, and still no axe, try adding one:
         if(!MAIN_HOTBAR.hasAxe() && AXE_GROUP.canGiveawayTools()) MAIN_HOTBAR.addSlot(AXE_GROUP.takeBestTool());
@@ -446,9 +442,6 @@ public class SortingHelper {
             }
             if(MAIN_HOTBAR.size() >= 9) return;
             if(!MAIN_HOTBAR.hasBuildingItems()) {
-
-                VersusMod.MOD_LOGGER.error(" Hotbar still doesnt have building items!");
-
                 if(MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.size() - PICKAXE_GROUP.getNumTools() > 0) VersusMod.MOD_LOGGER.error("  Will add pickaxe blocks to hotbar!");
                 if(MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.size() - PICKAXE_GROUP.getNumTools() > 0)
                     if(!MAIN_HOTBAR.addSlots(PICKAXE_GROUP.tryTakingExactNumSlots(9 - MAIN_HOTBAR.size(), PICKAXE_GROUP.size() > 9, false)))
