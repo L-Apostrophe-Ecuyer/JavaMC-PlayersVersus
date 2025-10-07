@@ -1,6 +1,7 @@
 package frootloops.versus.mod.items_and_effects.brewing.effects;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.CustomSpecialEffects;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffect;
@@ -13,7 +14,7 @@ public class BuoyancyStatusEffect extends StatusEffect  {
     public static final int COLOR = 15985696;
 
     public BuoyancyStatusEffect(String id) {
-        super(category, COLOR, ParticleTypes.BUBBLE_COLUMN_UP);
+        super(category, COLOR, CustomSpecialEffects.BUYANCY_EFFECT_PARTICLE);
 
         this.addAttributeModifier(
                 EntityAttributes.WATER_MOVEMENT_EFFICIENCY, Identifier.of(VersusMod.MOD_ID, "effect." + id),

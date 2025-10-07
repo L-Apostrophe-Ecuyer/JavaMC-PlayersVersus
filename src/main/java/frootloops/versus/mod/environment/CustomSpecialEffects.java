@@ -18,10 +18,11 @@ public class CustomSpecialEffects {
     public static SoundEvent DEEP_CAVES_MUSIC;
     public static RegistryEntry.Reference<SoundEvent> SWORD_BLOCKING_WOOD, SWORD_BLOCKING_STONE, SWORD_BLOCKING_METAL, SWORD_BLOCKING_DIAMOND;
     public static final SimpleParticleType SPARKS_PARTICLE = FabricParticleTypes.simple();
-
+    public static final SimpleParticleType BUYANCY_EFFECT_PARTICLE = FabricParticleTypes.simple();
 
     public static void onInitialize() {
         Registry.register(Registries.PARTICLE_TYPE, Identifier.of(VersusMod.MOD_ID, "sparks"), SPARKS_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE, Identifier.of(VersusMod.MOD_ID, "buyancy_effect"), BUYANCY_EFFECT_PARTICLE);
         RAIL_TURNING_SOUND = registerSoundEvent("rail_turning_sound");
         FOG_WIND_SOUND = registerSoundEvent("fog_wind_sound");
         DEEP_CAVES_MUSIC = registerSoundEvent("music.overworld.deep_caves");

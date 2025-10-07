@@ -6,6 +6,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.TintedParticleEffect;
 import net.minecraft.util.Identifier;
 
 public class SmallnessStatusEffect extends StatusEffect  {
@@ -13,7 +14,7 @@ public class SmallnessStatusEffect extends StatusEffect  {
     public static final int COLOR = 22790024;
 
     public SmallnessStatusEffect(String id) {
-        super(category, COLOR, ParticleTypes.SMOKE);
+        super(category, COLOR);
 
         this.addAttributeModifier(
                 EntityAttributes.SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
