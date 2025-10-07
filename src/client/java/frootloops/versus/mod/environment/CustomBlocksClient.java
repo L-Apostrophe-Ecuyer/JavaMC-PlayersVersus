@@ -54,7 +54,8 @@ public class CustomBlocksClient {
                 CustomBlocks.POISON_BILE,
                 CustomBlocks.WEAVING_BILE,
                 CustomBlocks.LUCK_BILE,
-                CustomBlocks.UNLUCK_BILE
+                CustomBlocks.UNLUCK_BILE,
+                CustomBlocks.LEVITATION_BILE
         );
 
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> {
