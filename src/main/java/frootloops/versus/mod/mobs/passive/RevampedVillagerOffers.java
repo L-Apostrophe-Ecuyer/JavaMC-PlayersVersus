@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.environment.CustomBlocks;
-import frootloops.versus.mod.items_and_effects.CustomBrewingItems;
 import frootloops.versus.mod.items_and_effects.CustomEquipment;
 import frootloops.versus.mod.items_and_effects.brewing.CustomPotions;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
@@ -36,66 +35,12 @@ public class RevampedVillagerOffers {
                 map.put(VillagerProfession.BUTCHER, getButcherOffers());
                 map.put(VillagerProfession.FARMER, getFarmerOffers());
                 map.put(VillagerProfession.FISHERMAN, getFishermanOffers());
+                map.put(VillagerProfession.SHEPHERD, getSheperdOffers());
                 map.put(VillagerProfession.FLETCHER, getFletcherOffers());
                 map.put(VillagerProfession.MASON, getMasonOffers());
                 map.put(VillagerProfession.CLERIC, getClericOffers());
                 map.put(VillagerProfession.LIBRARIAN, getLibrarianOffers());
                 map.put(VillagerProfession.ARMORER, getArmorerOffers());
-
-
-                // Sheperd is done!
-                map.put(
-                        VillagerProfession.SHEPHERD,
-                        copyToFastUtilMap(
-                                ImmutableMap.of(
-                                        1, new Factory[]{
-                                                new BuyItemFactory(Items.BROWN_DYE, 8, 6),
-                                                new BuyItemFactory(Items.BLACK_DYE, 14, 4),
-                                                new BuyItemFactory(Items.WHEAT, 32, 4),
-                                                new SellItemFactory(Blocks.WHITE_WOOL, 16, 2),
-                                                new SellItemFactory(Blocks.BROWN_WOOL, 8, 2),
-                                                new SellItemFactory(Blocks.BLACK_WOOL, 12, 2),
-                                                new SellItemFactory(Blocks.GRAY_WOOL, 16, 2),
-                                                new SellItemFactory(Blocks.LIGHT_GRAY_WOOL, 16, 2),
-                                                new SellItemFactory(Items.SHEARS, 1, 1, 4),
-                                                new SellItemFactory(Items.LEAD, 1, 16, 4)
-                                        },
-                                        2, new Factory[]{
-                                                new BuyItemFactory(Items.BLUE_DYE, 10, 12),
-                                                new BuyItemFactory(Items.CYAN_DYE, 10, 10),
-                                                new BuyItemFactory(Items.GREEN_DYE, 8, 12),
-                                                new BuyItemFactory(Items.PURPLE_DYE, 12, 10),
-                                                new SellItemFactory(Blocks.ORANGE_WOOL, 8, 4),
-                                                new SellItemFactory(Blocks.MAGENTA_WOOL, 8, 4),
-                                                new SellItemFactory(Blocks.LIGHT_BLUE_WOOL, 8, 4),
-                                                new SellItemFactory(Blocks.YELLOW_WOOL, 8, 4),
-                                                new SellItemFactory(Blocks.LIME_WOOL, 8, 4),
-                                                new SellItemFactory(Blocks.PINK_WOOL, 8, 4),
-                                                new SellItemFactory(Blocks.BROWN_WOOL, 8, 4),
-                                                new SellItemFactory(Blocks.RED_WOOL, 8, 4)
-                                        },
-                                        3, new Factory[]{
-                                                new SellItemFactory(Blocks.MAGENTA_WOOL, 8, 8),
-                                                new SellItemFactory(Blocks.LIGHT_BLUE_WOOL, 8, 8),
-                                                new SellItemFactory(Blocks.LIME_WOOL, 8, 8),
-                                                new SellItemFactory(Blocks.CYAN_WOOL, 8, 8),
-                                                new SellItemFactory(Blocks.PURPLE_WOOL, 8, 8),
-                                                new SellItemFactory(Blocks.BLUE_WOOL, 8, 8),
-                                                new SellItemFactory(Blocks.GREEN_WOOL, 8, 8)
-                                        },
-                                        4, new Factory[]{
-                                                new SellItemFactory(Items.MAGENTA_DYE, 6, 12),
-                                                new SellItemFactory(Items.PINK_DYE, 8, 12),
-                                                new SellItemFactory(Items.RED_DYE, 8, 12),
-                                                new SellItemFactory(Items.ORANGE_DYE, 8, 12),
-                                                new SellItemFactory(Items.YELLOW_DYE, 8, 12)
-                                        },
-                                        5, new Factory[]{
-                                                new SellItemFactory(Items.PAINTING, 1, 3, 30)
-                                        }
-                                )
-                        )
-                );
 
                 // TODO
                 map.put(
@@ -106,46 +51,46 @@ public class RevampedVillagerOffers {
                                         2, new Factory[]{
                                                 new BuyItemFactory(Items.GLASS_PANE, 11, 10),
                                                 TypedWrapperFactory.of(
-                                                        new SellMapFactory(8, StructureTags.ON_TAIGA_VILLAGE_MAPS, "filled_map.village_taiga", MapDecorationTypes.VILLAGE_TAIGA, 12, 5),
-                                                        VillagerType.SWAMP,
-                                                        VillagerType.SNOW,
-                                                        VillagerType.PLAINS
-                                                ),
+                                                                new SellMapFactory(8, StructureTags.ON_TAIGA_VILLAGE_MAPS, "filled_map.village_taiga", MapDecorationTypes.VILLAGE_TAIGA, 12, 5),
+                                                                VillagerType.SWAMP,
+                                                                VillagerType.SNOW,
+                                                                VillagerType.PLAINS
+                                                        ),
                                                 TypedWrapperFactory.of(
-                                                        new SellMapFactory(8, StructureTags.ON_SWAMP_EXPLORER_MAPS, "filled_map.explorer_swamp", MapDecorationTypes.SWAMP_HUT, 12, 5),
-                                                        VillagerType.TAIGA,
-                                                        VillagerType.SNOW,
-                                                        VillagerType.JUNGLE
-                                                ),
+                                                                new SellMapFactory(8, StructureTags.ON_SWAMP_EXPLORER_MAPS, "filled_map.explorer_swamp", MapDecorationTypes.SWAMP_HUT, 12, 5),
+                                                                VillagerType.TAIGA,
+                                                                VillagerType.SNOW,
+                                                                VillagerType.JUNGLE
+                                                        ),
                                                 TypedWrapperFactory.of(
-                                                        new SellMapFactory(8, StructureTags.ON_SNOWY_VILLAGE_MAPS, "filled_map.village_snowy", MapDecorationTypes.VILLAGE_SNOWY, 12, 5),
-                                                        VillagerType.TAIGA,
-                                                        VillagerType.SWAMP
-                                                ),
+                                                                new SellMapFactory(8, StructureTags.ON_SNOWY_VILLAGE_MAPS, "filled_map.village_snowy", MapDecorationTypes.VILLAGE_SNOWY, 12, 5),
+                                                                VillagerType.TAIGA,
+                                                                VillagerType.SWAMP
+                                                        ),
                                                 TypedWrapperFactory.of(
-                                                        new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapDecorationTypes.VILLAGE_SAVANNA, 12, 5),
-                                                        VillagerType.PLAINS,
-                                                        VillagerType.JUNGLE,
-                                                        VillagerType.DESERT
-                                                ),
+                                                                new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapDecorationTypes.VILLAGE_SAVANNA, 12, 5),
+                                                                VillagerType.PLAINS,
+                                                                VillagerType.JUNGLE,
+                                                                VillagerType.DESERT
+                                                        ),
                                                 TypedWrapperFactory.of(
-                                                        new SellMapFactory(8, StructureTags.ON_PLAINS_VILLAGE_MAPS, "filled_map.village_plains", MapDecorationTypes.VILLAGE_PLAINS, 12, 5),
-                                                        VillagerType.TAIGA,
-                                                        VillagerType.SNOW,
-                                                        VillagerType.SAVANNA,
-                                                        VillagerType.DESERT
-                                                ),
+                                                                new SellMapFactory(8, StructureTags.ON_PLAINS_VILLAGE_MAPS, "filled_map.village_plains", MapDecorationTypes.VILLAGE_PLAINS, 12, 5),
+                                                                VillagerType.TAIGA,
+                                                                VillagerType.SNOW,
+                                                                VillagerType.SAVANNA,
+                                                                VillagerType.DESERT
+                                                        ),
                                                 TypedWrapperFactory.of(
-                                                        new SellMapFactory(8, StructureTags.ON_JUNGLE_EXPLORER_MAPS, "filled_map.explorer_jungle", MapDecorationTypes.JUNGLE_TEMPLE, 12, 5),
-                                                        VillagerType.SWAMP,
-                                                        VillagerType.SAVANNA,
-                                                        VillagerType.DESERT
-                                                ),
+                                                                new SellMapFactory(8, StructureTags.ON_JUNGLE_EXPLORER_MAPS, "filled_map.explorer_jungle", MapDecorationTypes.JUNGLE_TEMPLE, 12, 5),
+                                                                VillagerType.SWAMP,
+                                                                VillagerType.SAVANNA,
+                                                                VillagerType.DESERT
+                                                        ),
                                                 TypedWrapperFactory.of(
-                                                        new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapDecorationTypes.VILLAGE_DESERT, 12, 5),
-                                                        VillagerType.SAVANNA,
-                                                        VillagerType.JUNGLE
-                                                )
+                                                                new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapDecorationTypes.VILLAGE_DESERT, 12, 5),
+                                                                VillagerType.SAVANNA,
+                                                                VillagerType.JUNGLE
+                                                        )
                                         },
                                         3, new Factory[]{
                                                 new BuyItemFactory(Items.COMPASS, 1, 20),
@@ -165,8 +110,8 @@ public class RevampedVillagerOffers {
                                                 TypedWrapperFactory.of(new SellItemFactory(Items.ORANGE_TERRACOTTA, 16, 1), VillagerType.SAVANNA, VillagerType.DESERT),
                                                 TypedWrapperFactory.of(new SellItemFactory(Items.BROWN_TERRACOTTA, 16, 1), VillagerType.PLAINS, VillagerType.JUNGLE),
                                                 TypedWrapperFactory.of(new SellItemFactory(Items.MAGENTA_TERRACOTTA, 16, 1), VillagerType.SAVANNA),
-                                                TypedWrapperFactory.of(new SellItemFactory(Items.LIGHT_BLUE_TERRACOTTA, 16, 1), VillagerType.SNOW, VillagerType.SWAMP),
-                                                TypedWrapperFactory.of(new SellItemFactory(Items.PINK_TERRACOTTA, 16, 1), VillagerType.TAIGA, VillagerType.PLAINS),
+                                                TypedWrapperFactory.of(new SellItemFactory(Items.LIGHT_BLUE_TERRACOTTA, 16, 1), VillagerType.SNOW, VillagerType.TAIGA, VillagerType.SWAMP),
+                                                TypedWrapperFactory.of(new SellItemFactory(Items.PINK_TERRACOTTA, 16, 1), VillagerType.PLAINS),
                                                 TypedWrapperFactory.of(new SellItemFactory(Items.GRAY_TERRACOTTA, 16, 1), VillagerType.DESERT),
                                                 TypedWrapperFactory.of(new SellItemFactory(Items.BLACK_TERRACOTTA, 16, 1), VillagerType.SWAMP)
                                         },
@@ -383,6 +328,67 @@ public class RevampedVillagerOffers {
         );
     }
 
+    private static final Int2ObjectMap<Factory[]> getSheperdOffers() {
+        return copyToFastUtilMap(
+                ImmutableMap.of(
+                        1, new Factory[]{
+                                new BuyItemFactory(Items.BROWN_DYE, 8, 6),
+                                new BuyItemFactory(Items.BLACK_DYE, 14, 4),
+                                new BuyItemFactory(Items.BLUE_DYE, 10, 9),
+                                new BuyItemFactory(Items.GREEN_DYE, 8, 8),
+                                new BuyItemFactory(Items.WHEAT, 32, 4),
+                                new SellItemFactory(Blocks.WHITE_WOOL, 16, 2),
+                                new SellItemFactory(Blocks.BROWN_WOOL, 8, 2),
+                                new SellItemFactory(Blocks.BLACK_WOOL, 12, 2),
+                                new SellItemFactory(Blocks.GRAY_WOOL, 16, 2),
+                                new SellItemFactory(Blocks.LIGHT_GRAY_WOOL, 16, 2),
+                                new SellItemFactory(Items.SHEARS, 1, 1, 4),
+                                new SellItemFactory(Items.LEAD, 1, 16, 4)
+                        },
+                        2, new Factory[]{
+                                new SellItemFactory(Blocks.ORANGE_WOOL, 8, 4),
+                                new SellItemFactory(Blocks.YELLOW_WOOL, 8, 4),
+                                new SellItemFactory(Blocks.BROWN_WOOL, 8, 4),
+                                new SellItemFactory(Blocks.RED_WOOL, 8, 4),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.BLUE_WOOL, 8, 4), VillagerType.SNOW, VillagerType.TAIGA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.WHITE_WOOL, 8, 4), VillagerType.SNOW, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.RED_WOOL, 8, 4), VillagerType.PLAINS, VillagerType.SAVANNA, VillagerType.TAIGA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.GREEN_WOOL, 8, 4), VillagerType.DESERT, VillagerType.SAVANNA, VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.LIME_WOOL, 8, 4), VillagerType.DESERT, VillagerType.TAIGA, VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.PURPLE_WOOL, 8, 4), VillagerType.TAIGA, VillagerType.SWAMP),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CYAN_WOOL, 8, 4), VillagerType.DESERT, VillagerType.SNOW),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.YELLOW_WOOL, 8, 4), VillagerType.PLAINS, VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.ORANGE_WOOL, 8, 4), VillagerType.SAVANNA, VillagerType.DESERT),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.BROWN_WOOL, 8, 4), VillagerType.PLAINS, VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.MAGENTA_WOOL, 8, 4), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.PINK_WOOL, 8, 4), VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.GRAY_WOOL, 8, 4), VillagerType.DESERT),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.BLACK_WOOL, 8, 4), VillagerType.SWAMP),
+                        },
+                        3, new Factory[]{
+                                TypedWrapperFactory.of(new SellItemFactory(Items.LIME_WOOL, 8, 8), VillagerType.DESERT, VillagerType.TAIGA, VillagerType.JUNGLE, VillagerType.SWAMP, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.GREEN_WOOL, 8, 8), VillagerType.DESERT, VillagerType.TAIGA, VillagerType.JUNGLE, VillagerType.SWAMP, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.LIGHT_BLUE_WOOL, 8, 4), VillagerType.SNOW, VillagerType.TAIGA, VillagerType.SWAMP, VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.MAGENTA_WOOL, 8, 4), VillagerType.TAIGA, VillagerType.JUNGLE, VillagerType.DESERT),
+                                new SellItemFactory(Blocks.CYAN_WOOL, 8, 8),
+                                new SellItemFactory(Blocks.PURPLE_WOOL, 8, 8),
+                                new SellItemFactory(Blocks.BLUE_WOOL, 8, 8)
+                        },
+                        4, new Factory[]{
+                                new SellItemFactory(Items.PURPLE_DYE, 4, 12),
+                                new SellItemFactory(Items.MAGENTA_DYE, 6, 12),
+                                new SellItemFactory(Items.PINK_DYE, 8, 12),
+                                new SellItemFactory(Items.RED_DYE, 8, 12),
+                                new SellItemFactory(Items.ORANGE_DYE, 8, 12),
+                                new SellItemFactory(Items.YELLOW_DYE, 8, 12)
+                        },
+                        5, new Factory[]{
+                                new SellItemFactory(Items.PAINTING, 1, 3, 30)
+                        }
+                )
+        );
+    }
+
     private static final Int2ObjectMap<Factory[]> getFletcherOffers() {
         return copyToFastUtilMap(
                 ImmutableMap.of(
@@ -444,21 +450,21 @@ public class RevampedVillagerOffers {
                         new SellItemFactory(Blocks.TERRACOTTA, 26, 3),
                         new SellItemFactory(CustomBlocks.TERRACOTTA_BRICKS, 16, 3),
                         new SellItemFactory(CustomBlocks.TERRACOTTA_TILES, 18, 3),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.BLUE_TERRACOTTA, 16, 3), VillagerType.SNOW, VillagerType.TAIGA),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.WHITE_TERRACOTTA, 16, 3), VillagerType.SNOW, VillagerType.PLAINS),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.RED_TERRACOTTA, 16, 3), VillagerType.SNOW, VillagerType.SAVANNA),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.GREEN_TERRACOTTA, 16, 3), VillagerType.DESERT, VillagerType.SAVANNA, VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.LIME_TERRACOTTA, 16, 3), VillagerType.DESERT, VillagerType.TAIGA),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.PURPLE_TERRACOTTA, 16, 3), VillagerType.TAIGA, VillagerType.SWAMP),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CYAN_TERRACOTTA, 16, 3), VillagerType.DESERT, VillagerType.SNOW),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.YELLOW_TERRACOTTA, 16, 3), VillagerType.PLAINS, VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.ORANGE_TERRACOTTA, 16, 3), VillagerType.SAVANNA, VillagerType.DESERT),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.BROWN_TERRACOTTA, 16, 3), VillagerType.PLAINS, VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.MAGENTA_TERRACOTTA, 16, 3), VillagerType.SAVANNA),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.LIGHT_BLUE_TERRACOTTA, 16, 3), VillagerType.SNOW, VillagerType.SWAMP),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.PINK_TERRACOTTA, 16, 3), VillagerType.TAIGA, VillagerType.PLAINS),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.GRAY_TERRACOTTA, 16, 3), VillagerType.DESERT),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.BLACK_TERRACOTTA, 16, 3), VillagerType.SWAMP)},
+                        TypedWrapperFactory.of(new SellItemFactory(Items.BLUE_TERRACOTTA, 16, 3), VillagerType.SNOW, VillagerType.TAIGA),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.WHITE_TERRACOTTA, 16, 3), VillagerType.SNOW, VillagerType.PLAINS),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.RED_TERRACOTTA, 16, 3), VillagerType.SNOW, VillagerType.SAVANNA),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.GREEN_TERRACOTTA, 16, 3), VillagerType.DESERT, VillagerType.SAVANNA, VillagerType.JUNGLE),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.LIME_TERRACOTTA, 16, 3), VillagerType.DESERT, VillagerType.TAIGA),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.PURPLE_TERRACOTTA, 16, 3), VillagerType.TAIGA, VillagerType.SWAMP),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.CYAN_TERRACOTTA, 16, 3), VillagerType.DESERT, VillagerType.SNOW),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.YELLOW_TERRACOTTA, 16, 3), VillagerType.PLAINS, VillagerType.JUNGLE),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.ORANGE_TERRACOTTA, 16, 3), VillagerType.SAVANNA, VillagerType.DESERT),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.BROWN_TERRACOTTA, 16, 3), VillagerType.PLAINS, VillagerType.JUNGLE),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.MAGENTA_TERRACOTTA, 16, 3), VillagerType.SAVANNA),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.LIGHT_BLUE_TERRACOTTA, 16, 3), VillagerType.SNOW, VillagerType.TAIGA, VillagerType.SWAMP),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.PINK_TERRACOTTA, 16, 3), VillagerType.PLAINS),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.GRAY_TERRACOTTA, 16, 3), VillagerType.DESERT),
+                        TypedWrapperFactory.of(new SellItemFactory(Items.BLACK_TERRACOTTA, 16, 3), VillagerType.SWAMP)},
                 3, new Factory[]{
                         new SellItemFactory(Blocks.TUFF, 36, 4),
                         new SellItemFactory(Blocks.POLISHED_TUFF, 32, 4),
