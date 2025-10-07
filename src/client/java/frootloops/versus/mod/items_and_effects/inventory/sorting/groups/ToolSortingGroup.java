@@ -166,6 +166,10 @@ public class ToolSortingGroup extends SimpleSortingGroup {
      */
     @Override
     public LinkedList<ItemSlot> takeFirstSlots(int numSlotsToTake, boolean splitUpSubGroups) {
+        return this.takeFirstSlots(numSlotsToTake, splitUpSubGroups, false);
+    }
+
+    public LinkedList<ItemSlot> takeFirstSlots(int numSlotsToTake, boolean splitUpSubGroups, boolean prioritizeNonTools) {
         if(numSlotsToTake < 1 || this.size() < 1) {
             if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("[ ITEM SORTING ] " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake + ", " + splitUpSubGroups + ") - Group was empty!! Has " + this.sortedToolList.size() + " tools and " + Arrays.stream(this.sortedItemLists).mapToInt(SortedItemList::size) + " items");
             return new LinkedList<>();
@@ -187,11 +191,12 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         }
 
         LinkedList<ItemSlot> slotList = new LinkedList<>();
-        int numToolsTaken = 0, numItemssTaken = 0;
+        int numToolsTaken = 0, numItemsTaken = 0;
 
         // If has tools, try to include at least one, especially if not enough other blocks:
-        if(sortedToolList.size() > 1) {
-            slotList.addAll(sortedToolList.take(Math.clamp(numSlotsToTake - numItems, 1, sortedToolList.size())));
+        int maxToolsToTake = prioritizeNonTools ?numSlotsToTake - this.numItems : Math.clamp(numSlotsToTake - numItems, 1, sortedToolList.size());
+        if(maxToolsToTake > 0 && sortedToolList.size() > 1) {
+            slotList.addAll(sortedToolList.take(maxToolsToTake));
             numToolsTaken = slotList.size();
             this.numTools -= numToolsTaken;
             if(numToolsTaken >= numSlotsToTake) {
@@ -202,12 +207,12 @@ public class ToolSortingGroup extends SimpleSortingGroup {
 
         // Fill with otherItems:
         for(int i = 0; i < sortedItemLists.length; i++) {
-            if(sortedItemLists[i].size() > 0 && (splitUpSubGroups || sortedItemLists[i].size() <= numSlotsToTake - numToolsTaken - numItemssTaken)) {
-                slotList.addAll(sortedItemLists[i].take(Math.min(sortedItemLists[i].size(), numSlotsToTake - numToolsTaken - numItemssTaken)));
-                numItemssTaken = slotList.size() - numToolsTaken;
-                if(numItemssTaken + numToolsTaken >= numSlotsToTake) {
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numItemssTaken + " items and " + numToolsTaken + " tools");
-                    this.numItems -= numItemssTaken;
+            if(sortedItemLists[i].size() > 0 && (splitUpSubGroups || sortedItemLists[i].size() <= numSlotsToTake - numToolsTaken - numItemsTaken)) {
+                slotList.addAll(sortedItemLists[i].take(Math.min(sortedItemLists[i].size(), numSlotsToTake - numToolsTaken - numItemsTaken)));
+                numItemsTaken = slotList.size() - numToolsTaken;
+                if(numItemsTaken + numToolsTaken >= numSlotsToTake) {
+                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numItemsTaken + " items and " + numToolsTaken + " tools");
+                    this.numItems -= numItemsTaken;
                     return slotList;
                 }
             }
@@ -215,12 +220,12 @@ public class ToolSortingGroup extends SimpleSortingGroup {
 
         // Finally, if still some slots left, fill with misc:
         if(miscItems.size() > 0) {
-            slotList.addAll(miscItems.take(numSlotsToTake - numToolsTaken - numItemssTaken));
-            numItemssTaken = slotList.size() - numToolsTaken;
+            slotList.addAll(miscItems.take(numSlotsToTake - numToolsTaken - numItemsTaken));
+            numItemsTaken = slotList.size() - numToolsTaken;
         }
 
-        if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numItemssTaken + " items (misc included) and " + numToolsTaken + " tools");
-        this.numItems -= numItemssTaken;
+        if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numItemsTaken + " items (misc included) and " + numToolsTaken + " tools");
+        this.numItems -= numItemsTaken;
         return slotList;
     }
 
@@ -273,6 +278,13 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         for(int i = startIndex; i != endIndex; i += increment) {
             sizeFirst = sortedItemLists[i].size() % 9;
             if(sizeFirst == 0) continue;
+            if(sizeFirst + this.numTools == numSlotsToTake) {
+                slotList = new LinkedList<>();
+                slotList.addAll(sortedToolList.takeAll());
+                slotList.addAll(sortedItemLists[i].take(sizeFirst));
+                this.numItems -= sizeFirst;
+                return slotList;
+            }
 
             for(int j = i; j != endIndex; j += increment) {
                 sizeSecond = sortedItemLists[j].size() % 9;

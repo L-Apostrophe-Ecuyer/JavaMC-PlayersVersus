@@ -34,13 +34,15 @@ public abstract class SortingGroup implements Comparable<SortingGroup>{
         if(slot != null) this.miscItems.add(slot);
     }
 
-    public void addSlots(LinkedList<ItemSlot> newSlots) {
+    public boolean addSlots(LinkedList<ItemSlot> newSlots) {
+        if(newSlots == null || newSlots.size() < 1) return false;
         for(int i = 0; i < newSlots.size(); i++) {
             ItemSlot slot = newSlots.pop();
             slot = tryInsertingSlot(slot);
             if(slot != null) newSlots.add(slot);
         }
         this.addSlotsToMisc(newSlots);
+        return true;
     }
 
     protected void addSlotsToMisc(LinkedList<ItemSlot> newSlots) {

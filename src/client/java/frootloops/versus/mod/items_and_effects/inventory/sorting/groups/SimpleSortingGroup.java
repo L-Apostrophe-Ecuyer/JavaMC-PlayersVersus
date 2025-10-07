@@ -144,8 +144,8 @@ public class SimpleSortingGroup extends SortingGroup {
         for(int i = 0; i < sortedItemLists.length; i++) {
             if(sortedItemLists[i].size() > 0 && (splitUpSubgroups || sortedItemLists[i].size() <= numSlotsToTake - numItemsTaken)) {
                 int numItemsToTakeFromList = Math.min(sortedItemLists[i].size(), numSlotsToTake - numItemsTaken);
-                if(numItemsToTakeFromList < 1) continue;
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeFirstSlots(" + numSlotsToTake + ", " + splitUpSubgroups + ") - Current Size: " + this.numItems + " - Taking " +numItemsToTakeFromList + " items from: " + sortedItemLists[i].toString());
+                if( numItemsToTakeFromList < 1) continue;
+                if( DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeFirstSlots(" + numSlotsToTake + ", " + splitUpSubgroups + ") - Current Size: " + this.numItems + " - Taking " +numItemsToTakeFromList + " items from: " + sortedItemLists[i].toString());
                 slotList.addAll(sortedItemLists[i].take(numItemsToTakeFromList));
 
                 numItemsTaken = slotList.size();

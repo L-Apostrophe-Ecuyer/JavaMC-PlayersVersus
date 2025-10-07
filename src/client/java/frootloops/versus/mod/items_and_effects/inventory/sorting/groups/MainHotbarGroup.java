@@ -83,8 +83,10 @@ public class MainHotbarGroup extends SortingGroup {
     }
 
     @Override
-    public void addSlots(LinkedList<ItemSlot> newSlots) {
+    public boolean addSlots(LinkedList<ItemSlot> newSlots) {
+        if(newSlots == null || newSlots.size() < 1) return false;
         for (ItemSlot slot : newSlots) this.addSlot(slot);
+        return true;
     }
 
     @Override

@@ -407,16 +407,6 @@ public class SortingHelper {
             if(MAIN_HOTBAR.size() >= 9) return;
         }
 
-        // Try adding combat items to hotbar:
-        if(MAIN_HOTBAR.size() < 9) giveExtraToolsFromAndTo(COMBAT_GROUP, MAIN_HOTBAR);
-        if(tryCombiningTwoGroups(MAIN_HOTBAR, CONSUMABLES_GROUP)) if(MAIN_HOTBAR.size() >= 9) return;
-        if(tryCombiningTwoGroups(MAIN_HOTBAR, COMBAT_GROUP)) if(MAIN_HOTBAR.size() >= 9) return;
-        if(MAIN_HOTBAR.size() < 9 && MAIN_HOTBAR.hasCombatItems()) {
-            if(COMBAT_GROUP.getNumTools() > 0 && MAIN_HOTBAR.size() + COMBAT_GROUP.getNumTools() <= 9) MAIN_HOTBAR.addSlots(COMBAT_GROUP.takeAllTools());
-            if(CONSUMABLES_GROUP.size() > 0 && MAIN_HOTBAR.size() + CONSUMABLES_GROUP.size() <= 9) MAIN_HOTBAR.mergeWithOtherGroup(CONSUMABLES_GROUP);
-        }
-        if(MAIN_HOTBAR.size() >= 9) return;
-
         // If still space, try smartly adding tools and blocks to hotbar:
         if(!MAIN_HOTBAR.hasBuildingItems()) {
             if(AXE_GROUP.size() > 0 && MAIN_HOTBAR.size() + AXE_GROUP.size() <= 9) MAIN_HOTBAR.mergeWithOtherGroup(AXE_GROUP);
@@ -451,6 +441,14 @@ public class SortingHelper {
                 if(tryCombiningTwoGroups(MAIN_HOTBAR, HOE_GROUP)) return;
             }
             if(MAIN_HOTBAR.size() >= 9) return;
+            if(!MAIN_HOTBAR.hasBuildingItems()) {
+                if(MAIN_HOTBAR.hasPickaxe() && PICKAXE_GROUP.size() - PICKAXE_GROUP.getNumTools() > 0)
+                    if(!MAIN_HOTBAR.addSlots(PICKAXE_GROUP.tryTakingExactNumSlots(9 - MAIN_HOTBAR.size(), PICKAXE_GROUP.size() > 9, false)))
+                        MAIN_HOTBAR.addSlots(PICKAXE_GROUP.takeFirstSlots(9 - MAIN_HOTBAR.size(), true, true));
+                if(MAIN_HOTBAR.hasAxe() && MAIN_HOTBAR.size() < 9 && AXE_GROUP.size() - AXE_GROUP.getNumTools() > 0)
+                    if(!MAIN_HOTBAR.addSlots(AXE_GROUP.tryTakingExactNumSlots(9 - MAIN_HOTBAR.size(), AXE_GROUP.size() > 9, false)))
+                        MAIN_HOTBAR.addSlots(AXE_GROUP.takeFirstSlots(9 - MAIN_HOTBAR.size(), true, true));
+            }
         }
         else {
             if(MAIN_HOTBAR.hasPickaxe() && tryCombiningTwoGroups(MAIN_HOTBAR, PICKAXE_GROUP)) return;
@@ -464,6 +462,18 @@ public class SortingHelper {
         if(size < 9 && SHOVEL_GROUP.getNumTools() > 0 && tryCombiningTwoGroups(MAIN_HOTBAR, SHOVEL_GROUP)) return;
         if(size < 9 && HOE_GROUP.getNumTools() > 0 && tryCombiningTwoGroups(MAIN_HOTBAR, HOE_GROUP)) return;
         if(size < 9 && SHEARS_GROUP.getNumTools() > 0 && tryCombiningTwoGroups(MAIN_HOTBAR, SHEARS_GROUP)) return;
+
+
+        // Try adding combat items to hotbar:
+        giveExtraToolsFromAndTo(COMBAT_GROUP, MAIN_HOTBAR);
+        if(MAIN_HOTBAR.size() >= 9) return;
+        if(tryCombiningTwoGroups(MAIN_HOTBAR, CONSUMABLES_GROUP)) if(MAIN_HOTBAR.size() >= 9) return;
+        if(tryCombiningTwoGroups(MAIN_HOTBAR, COMBAT_GROUP)) if(MAIN_HOTBAR.size() >= 9) return;
+        if(MAIN_HOTBAR.size() < 9 && MAIN_HOTBAR.hasCombatItems()) {
+            if(COMBAT_GROUP.getNumTools() > 0 && MAIN_HOTBAR.size() + COMBAT_GROUP.getNumTools() <= 9) MAIN_HOTBAR.addSlots(COMBAT_GROUP.takeAllTools());
+            if(CONSUMABLES_GROUP.size() > 0 && MAIN_HOTBAR.size() + CONSUMABLES_GROUP.size() <= 9) MAIN_HOTBAR.mergeWithOtherGroup(CONSUMABLES_GROUP);
+        }
+        if(MAIN_HOTBAR.size() >= 9) return;
 
         // If hotbar has items, but no food, try to add some:
         if(size > 2 && size < 8 && (CONSUMABLES_GROUP.size() == 1 || CONSUMABLES_GROUP.size() > 3) && !MAIN_HOTBAR.hasAtLeastOneConsumable()) {
