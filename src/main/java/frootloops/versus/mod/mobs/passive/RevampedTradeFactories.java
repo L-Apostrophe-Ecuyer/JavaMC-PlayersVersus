@@ -16,6 +16,7 @@ import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.enchantment.provider.EnchantmentProvider;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 import net.minecraft.item.map.MapDecorationType;
 import net.minecraft.item.map.MapState;
@@ -471,7 +472,7 @@ public class RevampedTradeFactories {
         public TradeOffer create(Entity entity, Random random) {
             TradedItem tradedItem = new TradedItem(Items.EMERALD, this.price);
             List<RegistryEntry<Potion>> list = Registries.POTION.streamEntries()
-                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && entity.getEntityWorld().getBrewingRecipeRegistry().isBrewable(entry) && entry.value() != CustomPotions.HAUNTING.value())
+                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && entity.getEntityWorld().getBrewingRecipeRegistry().isBrewable(entry) && !entry.value().getEffects().getFirst().getEffectType().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
                     .collect(Collectors.toList());
             RegistryEntry<Potion> registryEntry = Util.getRandom(list, random);
             ItemStack itemStack = new ItemStack(this.sell.getItem(), this.sellCount);

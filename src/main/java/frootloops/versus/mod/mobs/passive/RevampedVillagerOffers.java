@@ -397,6 +397,7 @@ public class RevampedVillagerOffers {
                                 new BuyItemFactory(Items.FEATHER, 24, 2),
                                 new SellItemFactory(Items.ARROW, 16, 1),
                                 new SellItemFactory(Items.BOW, 1, 3),
+                                new SellItemFactory(Items.CROSSBOW, 2, 1, 4),
                                 new SellItemFactory(Items.OAK_WOOD, 8, 3),
                                 new ProcessItemFactory(Blocks.GRAVEL, 8, 1, Items.ARROW, 32, 12, 1, 0.05F),
                         },
@@ -414,12 +415,13 @@ public class RevampedVillagerOffers {
                         },
                         3, new Factory[]{
                                 new BuyItemFactory(Items.GUNPOWDER, 6, 5),
-                                new SellItemFactory(Items.CROSSBOW, 3, 1, 12)},
+                                new SellEnchantedToolFactory(Items.BOW, 2, 3, 12)},
                         4, new Factory[]{
                                 new SellEnchantedToolFactory(Items.CROSSBOW, 3, 3, 18),
-                                new SellEnchantedToolFactory(Items.BOW, 2, 3, 18)},
+                                new SellPotionHoldingItemFactory(Items.ARROW, 12, Items.TIPPED_ARROW, 12, 2, 12, 15)},
                         5, new Factory[]{
-                                new SellPotionHoldingItemFactory(Items.ARROW, 5, Items.TIPPED_ARROW, 5, 2, 12, 30)
+                                new SellPotionHoldingItemFactory(Items.ARROW, 12, Items.TIPPED_ARROW, 12, 2, 12, 30),
+                                new SellPotionHoldingItemFactory(Items.ARROW, 12, Items.TIPPED_ARROW, 12, 2, 12, 30)
                         }
                 )
         );
