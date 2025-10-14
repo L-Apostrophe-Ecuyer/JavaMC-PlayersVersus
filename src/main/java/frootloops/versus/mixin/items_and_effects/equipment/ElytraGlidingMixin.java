@@ -39,6 +39,6 @@ public abstract class ElytraGlidingMixin extends Entity {
 
     @Inject(method = "canGlide", at = @At("HEAD"), cancellable = true)
     private void stopGlidingWhenAttacked(CallbackInfoReturnable<Boolean> cir) {
-        if(this.age - this.lastAttackedTime < 10) cir.setReturnValue(false);
+        if(this.age - this.lastAttackedTime < 2) cir.setReturnValue(false);
     }
 }
