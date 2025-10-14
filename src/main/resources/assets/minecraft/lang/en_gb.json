@@ -26,9 +26,11 @@
   "attribute.name.critical_attack_damage": "Critical Attack Damage",
   "attribute.name.sprint_attack_damage": "Sprint Attack Damage",
 
+  "container.repair.conflicting_enchants": "Conflicting Enchants!",
   "container.repair.book_combine_message": "Spend XP To Combine Books",
-  "container.repair.book_invalid": "No Valid Enchantments",
-  "container.repair.book_cost": "Cost: %1$s",
+  "container.repair.book_invalid_for_item": "Book Is Incompatible!",
+  "container.repair.items_are_incompatible": "Items Are Incompatible",
+  "container.repair.book_cost": "Will Cost %1$s Levels",
   "container.repair.cost": "Level Required: %1$s",
 
   "key.pickItem": "Pick Block / Switch Hotbar",

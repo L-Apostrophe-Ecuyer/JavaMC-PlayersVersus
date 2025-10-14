@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.client.enchantments;
 
 
+import frootloops.versus.VersusMod;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.client.gui.screen.ingame.CyclingSlotIcon;
@@ -14,6 +15,7 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,6 +33,15 @@ public abstract class AnvilScreenMixin extends ForgingScreen<AnvilScreenHandler>
 
     private static final Text BOOK_COMBINE_MESSAGE = Text.translatable("container.repair.book_combine_message");
     private static final Text BOOK_INVALID_MESSAGE = Text.translatable("container.repair.book_invalid");
+
+
+
+    private static final Text MSG_ERROR_CONFLICTING_ENCHANTMENTS = Text.translatable("container.repair.conflicting_enchants");
+    private static final Text MSG_ERROR_INCOMPATIBLE_ITEMS = Text.translatable("container.repair.items_are_incompatible");
+    private static final Text MSG_ERROR_INCOMPATIBLE_BOOK = Text.translatable("container.repair.book_invalid_for_item");
+    private static final Text MSG_ADD_BOOK_TO_COMBINE = Text.translatable("container.repair.book_combine_message");
+    private static final String TEXT_LVL_COST = "container.repair.book_cost";
+    private static final String TEXT_LVL_REQUIRED = "container.repair.cost";
 
     private static final Identifier EMPTY_ARMOR_SLOT_HELMET_TEXTURE = Identifier.ofVanilla("container/slot/helmet");
     private static final Identifier EMPTY_ARMOR_SLOT_CHESTPLATE_TEXTURE = Identifier.ofVanilla("container/slot/chestplate");
@@ -119,29 +130,52 @@ public abstract class AnvilScreenMixin extends ForgingScreen<AnvilScreenHandler>
 
     @Inject(method = "drawForeground", at = @At(value = "HEAD"), cancellable = true)
     protected void showBookErrorMessage(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
-        if(handler.getSlot(0).getStack().isOf(Items.ENCHANTED_BOOK) && !handler.getSlot(1).getStack().isOf(Items.ENCHANTED_BOOK)) {
-            int color = 3618615; // Dark gray
-            Text text = BOOK_COMBINE_MESSAGE;
-            int x = this.backgroundWidth - 8 - this.textRenderer.getWidth(text) - 2;
-            context.fill(x - 2, 67, this.backgroundWidth - 8, 79, 1325400064);
-            context.drawText(this.textRenderer, text, x, 69, color, false);
-            ci.cancel();
-        }
-        if(handler.getSlot(1).getStack().isOf(Items.ENCHANTED_BOOK)) {
-            super.drawForeground(context, mouseX, mouseY);
-            int levelCost = this.handler.getLevelCost();
-            int color = 16736352; // Red
-            Text text;
-            if(levelCost == 0) text = BOOK_INVALID_MESSAGE;
+        boolean isFirstSlotBook = handler.getSlot(0).getStack().isOf(Items.ENCHANTED_BOOK);
+        if(!handler.getSlot(0).hasStack() || (!isFirstSlotBook && !handler.getSlot(1).hasStack() && !handler.getSlot(2).hasStack())) return;
+
+        boolean isSecondSlotBook = handler.getSlot(1).getStack().isOf(Items.ENCHANTED_BOOK);
+        boolean hasResult = handler.getSlot(2).hasStack();
+        boolean isError = handler.getSlot(0).hasStack() && handler.getSlot(1).hasStack() && !hasResult && handler.getLevelCost() == 0;
+
+        int color;
+        Text text;
+
+        if(isError) {
+            color = Colors.LIGHT_RED;
+            if(isFirstSlotBook && isSecondSlotBook) text = MSG_ERROR_INCOMPATIBLE_BOOK;
+            else if(!isFirstSlotBook && isSecondSlotBook) text = MSG_ERROR_INCOMPATIBLE_BOOK;
             else {
-                if(this.handler.getSlot(2).canTakeItems(this.player)) color = 15466253; // Yellow instead of green
-                text = Text.translatable("container.repair.book_cost", new Object[]{this.handler.getLevelCost()});
+                if(handler.getSlot(0).getStack().isOf(handler.getSlot(1).getStack().getItem())) {
+                    if(!isFirstSlotBook && handler.getSlot(0).getStack().getDamage() == 0 && !handler.getSlot(1).getStack().hasEnchantments()) return; // Nothing to repair
+                    else text = MSG_ERROR_CONFLICTING_ENCHANTMENTS;
+                }
+                else text = MSG_ERROR_INCOMPATIBLE_ITEMS;
             }
-            int x = this.backgroundWidth - 8 - this.textRenderer.getWidth(text) - 2;
-            context.fill(x - 2, 67, this.backgroundWidth - 8, 79, 1325400064);
-            context.drawTextWithShadow(this.textRenderer, text, x, 69, color);
-            ci.cancel();
         }
+        else if(hasResult) {
+            if(handler.getSlot(0).getStack().hasEnchantments() && !handler.getSlot(2).getStack().hasEnchantments()) {
+                color = Colors.LIGHT_YELLOW;
+                text = MSG_ERROR_CONFLICTING_ENCHANTMENTS;
+            }
+            else if(handler.getLevelCost() > 0) {
+                color = isSecondSlotBook ? Colors.LIGHT_YELLOW : Colors.GREEN;
+                text = Text.translatable(isSecondSlotBook ? TEXT_LVL_COST : TEXT_LVL_REQUIRED, new Object[]{this.handler.getLevelCost()});
+            }
+            else return;
+        }
+        else if(!hasResult && isFirstSlotBook && !handler.getSlot(1).hasStack()) {
+            color = Colors.LIGHT_GRAY;
+            text = MSG_ADD_BOOK_TO_COMBINE;
+        }
+        else return;
+
+        context.drawText(this.textRenderer, this.title, this.titleX, this.titleY, Colors.DARK_GRAY, false);
+        context.drawText(this.textRenderer, this.playerInventoryTitle, this.playerInventoryTitleX, this.playerInventoryTitleY, Colors.DARK_GRAY, false);
+
+        int x = this.backgroundWidth - 8 - this.textRenderer.getWidth(text) - 2;
+        context.fill(x - 2, 67, this.backgroundWidth - 8, 79, 1325400064);
+        context.drawText(this.textRenderer, text, x, 69, color, true);
+        ci.cancel();
     }
 
     @Inject(method = "drawBackground", at = @At(value = "TAIL"))
