@@ -30,4 +30,9 @@ public abstract class VexMixin extends HostileEntity {
             this.setHealth(this.getMaxHealth());
         }
     }
+
+    @Override
+    public float getTargetingMargin() {
+        return 0.5F;
+    }
 }

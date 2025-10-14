@@ -54,7 +54,7 @@
     "items_and_effects.equipment.ArmorProtectionMixin",
     "items_and_effects.equipment.BrushItemMixin",
     "items_and_effects.equipment.ElytraFireworksMixin",
-    "items_and_effects.equipment.ElytraGlideDurabilityMixin",
+    "items_and_effects.equipment.ElytraGlidingMixin",
     "items_and_effects.equipment.ElytraFireworksSpeedMixin",
     "items_and_effects.equipment.FlintAndSteelItemMixin",
     "items_and_effects.equipment.LivingEntityBlockingMixin",

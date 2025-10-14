@@ -281,4 +281,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             }
         }
     }
+
+    // Increase hitbox size when gliding:
+    @Override
+    public float getTargetingMargin() {
+        return this.isGliding() ? 10.0f : 0.0f;
+    }
 }
