@@ -52,39 +52,27 @@ public class RevampedVillagerOffers {
                                                 new BuyItemFactory(Items.GLASS_PANE, 11, 10),
                                                 TypedWrapperFactory.of(
                                                                 new SellMapFactory(8, StructureTags.ON_TAIGA_VILLAGE_MAPS, "filled_map.village_taiga", MapDecorationTypes.VILLAGE_TAIGA, 12, 5),
-                                                                VillagerType.SWAMP,
-                                                                VillagerType.SNOW,
-                                                                VillagerType.PLAINS
+                                                                VillagerType.SWAMP, VillagerType.SNOW, VillagerType.PLAINS
                                                         ),
                                                 TypedWrapperFactory.of(
                                                                 new SellMapFactory(8, StructureTags.ON_SWAMP_EXPLORER_MAPS, "filled_map.explorer_swamp", MapDecorationTypes.SWAMP_HUT, 12, 5),
-                                                                VillagerType.TAIGA,
-                                                                VillagerType.SNOW,
-                                                                VillagerType.JUNGLE
+                                                                VillagerType.TAIGA, VillagerType.SNOW, VillagerType.JUNGLE
                                                         ),
                                                 TypedWrapperFactory.of(
                                                                 new SellMapFactory(8, StructureTags.ON_SNOWY_VILLAGE_MAPS, "filled_map.village_snowy", MapDecorationTypes.VILLAGE_SNOWY, 12, 5),
-                                                                VillagerType.TAIGA,
-                                                                VillagerType.SWAMP
+                                                                VillagerType.TAIGA, VillagerType.SWAMP
                                                         ),
                                                 TypedWrapperFactory.of(
                                                                 new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapDecorationTypes.VILLAGE_SAVANNA, 12, 5),
-                                                                VillagerType.PLAINS,
-                                                                VillagerType.JUNGLE,
-                                                                VillagerType.DESERT
+                                                                VillagerType.PLAINS, VillagerType.JUNGLE, VillagerType.DESERT
                                                         ),
                                                 TypedWrapperFactory.of(
                                                                 new SellMapFactory(8, StructureTags.ON_PLAINS_VILLAGE_MAPS, "filled_map.village_plains", MapDecorationTypes.VILLAGE_PLAINS, 12, 5),
-                                                                VillagerType.TAIGA,
-                                                                VillagerType.SNOW,
-                                                                VillagerType.SAVANNA,
-                                                                VillagerType.DESERT
+                                                                VillagerType.TAIGA, VillagerType.SNOW, VillagerType.SAVANNA, VillagerType.DESERT
                                                         ),
                                                 TypedWrapperFactory.of(
                                                                 new SellMapFactory(8, StructureTags.ON_JUNGLE_EXPLORER_MAPS, "filled_map.explorer_jungle", MapDecorationTypes.JUNGLE_TEMPLE, 12, 5),
-                                                                VillagerType.SWAMP,
-                                                                VillagerType.SAVANNA,
-                                                                VillagerType.DESERT
+                                                                VillagerType.SWAMP, VillagerType.SAVANNA, VillagerType.DESERT
                                                         ),
                                                 TypedWrapperFactory.of(
                                                                 new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapDecorationTypes.VILLAGE_DESERT, 12, 5),
@@ -436,7 +424,8 @@ public class RevampedVillagerOffers {
                         new SellItemFactory(CustomBlocks.POLISHED_STONE, 32, 2),
                         new SellItemFactory(Blocks.SMOOTH_STONE, 16, 3),
                         new SellItemFactory(Blocks.STONE_BRICKS, 32, 2),
-                        new SellItemFactory(Blocks.MOSSY_STONE_BRICKS, 32, 2)
+                        new SellItemFactory(Blocks.MOSSY_STONE_BRICKS, 32, 2),
+                        new ProcessItemFactory(Blocks.COPPER_BLOCK, 1, 1, Items.CUT_COPPER, 8, 12, 2, 0.05F)
                 },
                 2, new Factory[]{
                         new BuyItemFactory(CustomBlockItems.BROWN_CLAY_BALL, 16, 16, 3),
@@ -476,10 +465,12 @@ public class RevampedVillagerOffers {
                         new SellItemFactory(Blocks.TUFF_BRICKS, 32, 4),
                         new SellItemFactory(Blocks.TUFF_BRICKS, 32, 4)},
                 4, new Factory[]{
-                        new SellItemFactory(Blocks.CUT_COPPER, 18, 5),
-                        new SellItemFactory(Blocks.WAXED_CUT_COPPER, 12, 5),
-                        new SellItemFactory(Blocks.WEATHERED_CUT_COPPER, 8, 6),
-                        new SellItemFactory(Blocks.WEATHERED_CUT_COPPER, 8, 6)},
+                        new SellItemFactory(Blocks.DRIPSTONE_BLOCK, 36, 6),
+                        new SellItemFactory(CustomBlockItems.POLISHED_DRIPSTONE, 32, 6),
+                        new SellItemFactory(CustomBlockItems.POLISHED_DRIPSTONE, 32, 6),
+                        new SellItemFactory(CustomBlockItems.DRIPSTONE_PILLAR, 24, 6),
+                        new SellItemFactory(CustomBlockItems.DRIPSTONE_BRICKS, 32, 6),
+                        new SellItemFactory(CustomBlockItems.DRIPSTONE_BRICKS, 32, 6)},
                 5, new Factory[]{
                         new SellItemFactory(Blocks.CALCITE, 10, 7),
                         new SellItemFactory(Blocks.SMOOTH_QUARTZ, 16, 7),
