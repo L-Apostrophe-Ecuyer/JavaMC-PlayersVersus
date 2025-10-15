@@ -17,15 +17,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 @Mixin(OreVeinSampler.class)
 public class OreVeinMixin {
 
-    private static final float DENSITY_THRESHOLD = 0.14F;
+    private static final float DENSITY_THRESHOLD = 0.3F;
     private static final int MAX_DENSITY_INTRUSION = 20;
     private static final double LIMINAL_DENSITY_REDUCTION = 0.2;
     private static final float BLOCK_GENERATION_CHANCE = 0.85F;
-    private static final float MIN_ORE_CHANCE = 0.3F;
+    private static final float MIN_ORE_CHANCE = 0.2F;
     private static final float MAX_ORE_CHANCE = 0.5F;
     private static final float DENSITY_FOR_MAX_ORE_CHANCE = 0.6F;
-    private static final float RAW_ORE_BLOCK_CHANCE = 0.1F;
-    private static final float VEIN_GAP_THRESHOLD = -0.45F;
+    private static final float VEIN_GAP_THRESHOLD = -0.3F;
 
     @Overwrite
     public static ChunkNoiseSampler.BlockStateSampler create(DensityFunction veinToggle, DensityFunction veinRidged, DensityFunction veinGap, RandomSplitter randomDeriver) {
@@ -51,7 +50,7 @@ public class OreVeinMixin {
                     } else {
                         double oreChance = MathHelper.clampedMap(veinToggleNoiseValueAbs, DENSITY_THRESHOLD, DENSITY_FOR_MAX_ORE_CHANCE, MIN_ORE_CHANCE, MAX_ORE_CHANCE);
                         if ((double)random.nextFloat() < oreChance && veinGap.sample(pos) > VEIN_GAP_THRESHOLD) {
-                            return random.nextFloat() < RAW_ORE_BLOCK_CHANCE + (veinType == CustomWorldgen.VeinType.COPPER ? 0.2F : 0.0F) ? veinType.rawOreBlock : veinType.ore;
+                            return random.nextFloat() < veinType.oreBlockChance ? veinType.rawOreBlock : veinType.ore;
                         } else {
                             return veinType.stone;
                         }

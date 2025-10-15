@@ -29,21 +29,23 @@ public class CustomWorldgen {
     }
 
     public static enum VeinType {
-        COPPER(Blocks.COPPER_ORE.getDefaultState(), Blocks.RAW_COPPER_BLOCK.getDefaultState(), Blocks.TERRACOTTA.getDefaultState(), 32, 88),
-        IRON(Blocks.DEEPSLATE_IRON_ORE.getDefaultState(), Blocks.RAW_IRON_BLOCK.getDefaultState(), Blocks.TUFF.getDefaultState(), -8, 36);
+        COPPER(Blocks.COPPER_ORE.getDefaultState(), Blocks.RAW_COPPER_BLOCK.getDefaultState(), Blocks.TERRACOTTA.getDefaultState(), 32, 88, 0.25F),
+        IRON(Blocks.DEEPSLATE_IRON_ORE.getDefaultState(), Blocks.RAW_IRON_BLOCK.getDefaultState(), Blocks.TUFF.getDefaultState(), -8, 36, 0.1F);
 
         public final BlockState ore;
         public final BlockState rawOreBlock;
         public final BlockState stone;
         public final int minY;
         public final int maxY;
+        public final float oreBlockChance;
 
-        private VeinType(final BlockState ore, final BlockState rawOreBlock, final BlockState stone, final int minY, final int maxY) {
+        private VeinType(final BlockState ore, final BlockState rawOreBlock, final BlockState stone, final int minY, final int maxY, final float oreBlockChance) {
             this.ore = ore;
             this.rawOreBlock = rawOreBlock;
             this.stone = stone;
             this.minY = minY;
             this.maxY = maxY;
+            this.oreBlockChance = oreBlockChance;
         }
     }
 
