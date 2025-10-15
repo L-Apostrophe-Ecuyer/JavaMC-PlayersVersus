@@ -29,6 +29,7 @@ public abstract class CustomPotions {
     public static RegistryEntry<Potion> LEVITATION, LEVITATION_STRONG, LEVITATION_LONG;
     public static RegistryEntry<Potion> HAUNTING;
     public static RegistryEntry<Potion> FIRE_RESISTANCE_STRONG;
+    public static RegistryEntry<Potion> NIGHT_VISION_STRONG;
 
     public static void registerCustomPotions() {
         if(werePotionsRegistered) return;
@@ -72,6 +73,7 @@ public abstract class CustomPotions {
         DECAY_STRONG = registerCustomPotion("decay_strong", StatusEffects.WITHER, 1, 160);
 
         FIRE_RESISTANCE_STRONG = registerCustomPotion("fire_resistance_strong", StatusEffects.FIRE_RESISTANCE, 1, 2400);
+        NIGHT_VISION_STRONG = registerCustomPotion("night_vision_strong", StatusEffects.NIGHT_VISION, 1, 2400);
 
         UNLUCK = registerCustomPotion("unluck", StatusEffects.UNLUCK, 0, 3000);
 

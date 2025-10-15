@@ -8,6 +8,7 @@ import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.dimension.DimensionType;
@@ -38,7 +39,10 @@ public abstract class LightmapMixin {
 
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 9)
     private float reducedAmbientLight(float n) {
-        if(this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) return n + 0.3f;
+        if(this.client.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) {
+            StatusEffectInstance nightVisionEffect = this.client.player.getStatusEffect(StatusEffects.NIGHT_VISION);
+            return n + 0.4f * nightVisionEffect.getAmplifier();
+        }
         return n * 0.5f - 0.065f;
     }
 

@@ -34,7 +34,7 @@ public abstract class BrewingSystem {
             put(CustomPotions.VULNERABILITY, new RelatedPotions(CustomPotions.MINING_FATIGUE_STRONG, CustomPotions.VULNERABILITY_LONG, Potions.TURTLE_MASTER));
 
             put(CustomPotions.DARKNESS, new RelatedPotions(CustomPotions.DARKNESS_STRONG, CustomPotions.DARKNESS_LONG, CustomPotions.GLOWING));
-            put(Potions.NIGHT_VISION,   new RelatedPotions(Potions.LONG_NIGHT_VISION, Potions.LONG_NIGHT_VISION, CustomPotions.DARKNESS));
+            put(Potions.NIGHT_VISION,   new RelatedPotions(CustomPotions.NIGHT_VISION_STRONG, Potions.LONG_NIGHT_VISION, CustomPotions.DARKNESS));
 
             put(Potions.LEAPING, new RelatedPotions(Potions.STRONG_LEAPING, Potions.LONG_LEAPING, Potions.SLOW_FALLING));
             put(Potions.SLOW_FALLING, new RelatedPotions(Potions.LONG_SLOW_FALLING, Potions.LONG_SLOW_FALLING, Potions.LEAPING));
