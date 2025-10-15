@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "minecraft:block/firefly_bush"
+      },
+      {
+        "model": "minecraft:block/firefly_bush"
+      },
+      {
+        "model": "minecraft:block/firefly_bush_emissive"
+      },
+      {
+        "model": "minecraft:block/firefly_bush_emissive1"
+      },
+      {
+        "model": "minecraft:block/firefly_bush_emissive2"
+      }
+    ]
+  }
+}
