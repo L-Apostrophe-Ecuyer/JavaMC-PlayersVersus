@@ -29,8 +29,8 @@ public class CustomWorldgen {
     }
 
     public static enum VeinType {
-        COPPER(Blocks.COPPER_ORE.getDefaultState(), Blocks.RAW_COPPER_BLOCK.getDefaultState(), Blocks.TERRACOTTA.getDefaultState(), 48, 64),
-        IRON(Blocks.DEEPSLATE_IRON_ORE.getDefaultState(), Blocks.RAW_IRON_BLOCK.getDefaultState(), Blocks.TUFF.getDefaultState(), 24, 48);
+        COPPER(Blocks.COPPER_ORE.getDefaultState(), Blocks.RAW_COPPER_BLOCK.getDefaultState(), Blocks.TERRACOTTA.getDefaultState(), 32, 88),
+        IRON(Blocks.DEEPSLATE_IRON_ORE.getDefaultState(), Blocks.RAW_IRON_BLOCK.getDefaultState(), Blocks.TUFF.getDefaultState(), -8, 36);
 
         public final BlockState ore;
         public final BlockState rawOreBlock;
