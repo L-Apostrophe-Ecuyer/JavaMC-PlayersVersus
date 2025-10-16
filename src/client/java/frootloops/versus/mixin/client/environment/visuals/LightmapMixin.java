@@ -58,7 +58,7 @@ public abstract class LightmapMixin {
 
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 8)
     private float reducedAmbientLight(float n) {
-        if(nightVisionAmplifier > -1) return n - 0.05f;
+        if(nightVisionAmplifier > -1) return n - 0.05f + 0.02f * nightVisionAmplifier;
         return n - 0.03f;
     }
 
