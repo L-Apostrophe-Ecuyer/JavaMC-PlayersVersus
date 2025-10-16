@@ -17,25 +17,25 @@
       "type": "minecraft:weighted_state_provider",
       "entries": [
         {
-          "weight": 80,
+          "weight": 40,
           "data": {
             "Name": "minecraft:dirt"
           }
         },
         {
-          "weight": 40,
+          "weight": 20,
           "data": {
             "Name": "minecraft:rooted_dirt"
           }
         },
         {
-          "weight": 20,
+          "weight": 10,
           "data": {
             "Name": "players-versus:brown_clay"
           }
         },
         {
-          "weight": 160,
+          "weight": 80,
           "data": {
             "Name": "minecraft:sand"
           }

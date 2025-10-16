@@ -24,7 +24,7 @@
             }
           },
           {
-            "weight": 60,
+            "weight": 120,
             "data": {
               "Name": "minecraft:sand"
             }
