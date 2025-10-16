@@ -9,10 +9,11 @@ import org.spongepowered.asm.mixin.injection.*;
 
 @Environment(EnvType.CLIENT)
 @Mixin(DimensionOrBossFogModifier.class)
-public abstract class FogRendererMixin {
+public abstract class NetherFogRendererMixin {
+
     @ModifyConstant(method = "applyStartEndModifier", constant = @Constant(floatValue = 192.0f))
     private static float lessDenseNetherFog(float maxRenderDistance) {
-        return 384.0f;
+        return 512.0f;
     }
 
 }
