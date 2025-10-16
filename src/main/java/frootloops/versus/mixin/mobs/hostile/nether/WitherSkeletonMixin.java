@@ -50,7 +50,7 @@ public class WitherSkeletonMixin extends HostileEntity {
     @Override
     public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
         boolean result = this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0F;
-        if(result && spawnReason == SpawnReason.NATURAL && world.getDimension().ultrawarm() && world.getBlockState(this.getBlockPos().down()).getSoundGroup() == BlockSoundGroup.NETHER_BRICKS) {
+        if(result && spawnReason != SpawnReason.MOB_SUMMONED && world.getDimension().ultrawarm() && world.getBlockState(this.getBlockPos().down()).getSoundGroup() == BlockSoundGroup.NETHER_BRICKS) {
 
             // Rarely spawn a Wildfire:
             boolean isInSoulSandValley = this.getEntityWorld().getBiome(this.getBlockPos()) == BiomeKeys.SOUL_SAND_VALLEY;

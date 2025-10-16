@@ -29,13 +29,17 @@ public abstract class LightmapMixin {
     protected LightmapMixin(MinecraftClient client, GameRenderer renderer) {
         this.client = client;
     }
-    private static final Vector3f NIGHT_VISION_SKY_COLOR = new Vector3f(1.0F, 0.1F, 0.0F);
+    private static final Vector3f NIGHT_VISION_SKY_COLOR_OVERWORLD = new Vector3f(1.0F, 0.1F, 0.0F);
+    private static final Vector3f NIGHT_VISION_SKY_COLOR_NETHER = new Vector3f(0.25F, 1.0F, 0.15F);
     private static int nightVisionAmplifier = -1;
 
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 0)
     private Vector3f modifySky(Vector3f skyColor) {
-        if(MinecraftClient.getInstance().world.getDimensionEffects().hasAlternateSkyColor()) return skyColor; // End flashes
-        if(nightVisionAmplifier > -1) return NIGHT_VISION_SKY_COLOR;
+        if(nightVisionAmplifier > -1) {
+            if(client.world.getDimension().ultrawarm()) return NIGHT_VISION_SKY_COLOR_NETHER;
+            if(client.world.getDimension().hasRaids()) return NIGHT_VISION_SKY_COLOR_OVERWORLD;
+            return skyColor.add(-0.2f, -0.2f, -0.4f);
+        }
         return skyColor;
     }
 
