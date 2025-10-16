@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "resin_bricks",
+  "ingredient": "minecraft:resin_bricks",
+  "result": {
+    "count": 1,
+    "id": "minecraft:resin_brick_wall"
+  }
+}

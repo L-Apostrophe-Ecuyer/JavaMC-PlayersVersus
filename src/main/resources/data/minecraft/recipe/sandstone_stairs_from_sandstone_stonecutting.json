@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "sandstone",
+  "ingredient": "minecraft:sandstone",
+  "result": {
+    "count": 1,
+    "id": "minecraft:sandstone_stairs"
+  }
+}

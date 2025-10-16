@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "dark_prismarine",
+  "ingredient": "minecraft:dark_prismarine",
+  "result": {
+    "count": 2,
+    "id": "minecraft:dark_prismarine_slab"
+  }
+}

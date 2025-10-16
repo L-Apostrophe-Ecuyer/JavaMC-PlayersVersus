@@ -1,12 +1,9 @@
 {
   "type": "minecraft:stonecutting",
-  "ingredient": [
-    "minecraft:stone",
-    "minecraft:stone_bricks",
-    "players-versus:polished_stone"
-  ],
+  "group": "chiseled_stone_bricks",
+  "ingredient": "minecraft:stone",
   "result": {
-    "id": "minecraft:chiseled_stone_bricks",
-    "count": 1
+    "count": 1,
+    "id": "minecraft:chiseled_stone_bricks"
   }
 }

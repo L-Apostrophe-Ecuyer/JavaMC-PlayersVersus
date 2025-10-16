@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "chiseled_stone_bricks",
+  "ingredient": "minecraft:stone_bricks",
+  "result": {
+    "count": 1,
+    "id": "minecraft:chiseled_stone_bricks"
+  }
+}

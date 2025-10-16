@@ -6,11 +6,6 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:flint",
-          "weight": 250
-        },
-        {
-          "type": "minecraft:item",
           "name": "minecraft:feather",
           "weight": 6
         },
