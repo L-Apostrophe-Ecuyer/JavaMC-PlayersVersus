@@ -1,0 +1,639 @@
+{
+  "type": "minecraft:archaeology",
+  "pools": [
+    {
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:string",
+          "weight": 50
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:feather",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:raw_gold",
+          "weight": 30,
+          "functions": [],
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#minecraft:is_badlands"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arms_up_pottery_sherd",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:explorer_pottery_sherd",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:brewer_pottery_sherd",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:brick",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:oak_log",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:brown_mushroom",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bone",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:rotten_flesh",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gunpowder",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:string",
+          "weight": 20
+        },
+                {
+          "type": "minecraft:item",
+          "name": "players-versus:brown_clay_ball",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:brown_clay_ball",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:clay_ball",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:clay_ball",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 5
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:raw_copper",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_nugget",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:raw_iron",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:coal",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:crossbow",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.1,
+                "max": 0.3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:copper_pickaxe_waxed",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.9
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:copper_pickaxe_waxed",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.9
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_pickaxe",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.9
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_pickaxe",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:enchant_randomly",
+              "options": "#minecraft:on_random_loot",
+              "only_compatible": true
+            },
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_shovel",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:enchant_randomly",
+              "options": "#minecraft:on_random_loot",
+              "only_compatible": true
+            },
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.5,
+                "max": 0.8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_shovel",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.05,
+                "max": 0.35
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:brown_bundle",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_contents",
+              "component": "minecraft:bundle_contents",
+              "entries": [
+                {
+                  "type": "minecraft:loot_table",
+                  "value": {
+                    "type": "minecraft:generic",
+                    "pools": [
+                      {
+                        "rolls": {
+                          "type": "minecraft:uniform",
+                          "min": 3,
+                          "max": 8
+                        },
+                        "entries": [
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:wheat_seeds",
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 3
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:leaf_litter",
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 3
+                                },
+                                "conditions": [
+                                  {
+                                    "condition": "minecraft:location_check",
+                                    "predicate": {
+                                      "biomes": "#minecraft:is_forest"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:wheat",
+                            "weight": 4
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:honeycomb",
+                            "weight": 5,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 2,
+                                  "max": 4
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:oak_planks",
+                            "weight": 6,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 3,
+                                  "max": 4
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:copper_nugget",
+                            "weight": 4,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 4
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:copper_ingot"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:stick"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:candle"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bundle",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_contents",
+              "component": "minecraft:bundle_contents",
+              "entries": [
+                {
+                  "type": "minecraft:loot_table",
+                  "value": {
+                    "type": "minecraft:generic",
+                    "pools": [
+                      {
+                        "rolls": {
+                          "type": "minecraft:uniform",
+                          "min": 4,
+                          "max": 6
+                        },
+                        "entries": [
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:snowball",
+                            "weight": 4,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 2,
+                                  "max": 5
+                                }
+                              }
+                            ],
+                            "conditions": [
+                              {
+                                "condition": "minecraft:location_check",
+                                "predicate": {
+                                  "biomes": "#minecraft:spawns_snow_foxes"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:pink_petals",
+                            "weight": 4,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 2,
+                                  "max": 6
+                                }
+                              }
+                            ],
+                            "conditions": [
+                              {
+                                "condition": "minecraft:location_check",
+                                "predicate": {
+                                  "biomes": "#minecraft:is_mountain"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:leaf_litter",
+                            "weight": 3,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 3
+                                },
+                                "conditions": [
+                                  {
+                                    "condition": "minecraft:location_check",
+                                    "predicate": {
+                                      "biomes": "#minecraft:is_forest"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:wheat",
+                            "weight": 1
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:honeycomb",
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 3
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:oak_planks",
+                            "weight": 6,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 3,
+                                  "max": 4
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:oak_log",
+                            "weight": 3,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 3
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:stick",
+                            "weight": 2
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:apple",
+                            "weight": 2
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:coal",
+                            "weight": 2
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:carrot",
+                            "weight": 2
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:beetroot"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:beetroot_seeds",
+                            "weight": 2
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:enchant_randomly",
+              "options": "#minecraft:on_random_loot",
+              "only_compatible": true
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar_cane",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:wheat_seeds",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:beetroot_seeds",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:paper",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_slow_fall",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_slowness",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_speed",
+          "weight": 5
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "minecraft:archaeology/gravel"
+}

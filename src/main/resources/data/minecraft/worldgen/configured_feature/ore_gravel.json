@@ -1,0 +1,48 @@
+{
+  "type": "minecraft:ore",
+  "config": {
+    "discard_chance_on_air_exposure": 0,
+    "size": 33,
+    "targets": [
+      {
+        "target": {
+          "predicate_type": "minecraft:random_block_match",
+          "block": "minecraft:stone",
+          "probability": 0.015
+        },
+        "state": {
+          "Name": "minecraft:suspicious_gravel"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:random_block_match",
+          "block": "minecraft:deepslate",
+          "probability": 0.01
+        },
+        "state": {
+          "Name": "minecraft:suspicious_gravel"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:random_block_match",
+          "block": "minecraft:gravel",
+          "probability": 0.015
+        },
+        "state": {
+          "Name": "minecraft:suspicious_gravel"
+        }
+      },
+      {
+        "state": {
+          "Name": "minecraft:gravel"
+        },
+        "target": {
+          "predicate_type": "minecraft:tag_match",
+          "tag": "minecraft:base_stone_overworld"
+        }
+      }
+    ]
+  }
+}

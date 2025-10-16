@@ -1,9 +1,11 @@
 package frootloops.versus.mixin.environment.archeology;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.BrushableBlock;
 import net.minecraft.block.entity.BrushableBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.loot.LootTables;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -51,11 +53,20 @@ public class BrushesNotRequiredMixin {
     @Inject(method = "update", at = @At("HEAD"), cancellable = false)
     private void update(CallbackInfo info) {
         if(world.isClient()) return;
-        int ticksTillBrushing = player.getMainHandStack().isIn(ItemTags.SHOVELS) ? 2 : 6;
+        int ticksTillBrushing = 6;
         if(this.tickCounter - startMiningTime > ticksTillBrushing && this.tickCounter - startMiningTime < 36 && player.handSwinging) {
             BlockState blockState = world.getBlockState(miningPos);
             if (blockState.getBlock() instanceof BrushableBlock brushableBlock) {
                 if (world.getBlockEntity(miningPos) instanceof BrushableBlockEntity brushableBlockEntity) {
+                    addDustParticles(world, prevDirection, miningPos, blockState, player);
+                    brushableBlockEntity.brush(world.getTime(), (ServerWorld)world, player, prevDirection, player.getMainHandStack());
+                    brushableBlockEntity.scheduledTick((ServerWorld)world);
+                }
+                else {
+                    BrushableBlockEntity brushableBlockEntity = (BrushableBlockEntity)brushableBlock.createBlockEntity(miningPos, blockState);
+                    if(brushableBlock == Blocks.SUSPICIOUS_SAND) brushableBlockEntity.setLootTable(LootTables.DESERT_WELL_ARCHAEOLOGY, world.getSeed());
+                    else brushableBlockEntity.setLootTable(LootTables.DESERT_WELL_ARCHAEOLOGY, world.getSeed());
+
                     addDustParticles(world, prevDirection, miningPos, blockState, player);
                     brushableBlockEntity.brush(world.getTime(), (ServerWorld)world, player, prevDirection, player.getMainHandStack());
                     brushableBlockEntity.scheduledTick((ServerWorld)world);

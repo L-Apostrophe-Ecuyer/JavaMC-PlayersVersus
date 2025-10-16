@@ -1,0 +1,514 @@
+{
+  "type": "minecraft:archaeology",
+  "pools": [
+    {
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:flint",
+          "weight": 250
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:feather",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:tall_dry_grass",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:tall_dry_grass",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:dead_bush",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:raw_gold",
+          "weight": 40,
+          "functions": [],
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#minecraft:is_badlands"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arms_up_pottery_sherd",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:explorer_pottery_sherd",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:brewer_pottery_sherd",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:brick",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:jungle_log",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:cactus",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bone",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:rotten_flesh",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gunpowder",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:string",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:clay_ball",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 5
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:raw_gold",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:lapis_lazuli",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:coal",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:copper_sword_waxed",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.9
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:copper_shovel_waxed",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.9
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_shovel",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.9
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_pickaxe",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:enchant_randomly",
+              "options": "#minecraft:on_random_loot",
+              "only_compatible": true
+            },
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_sword",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:enchant_randomly",
+              "options": "#minecraft:on_random_loot",
+              "only_compatible": true
+            },
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.5,
+                "max": 0.8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_shovel",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.05,
+                "max": 0.35
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:brown_bundle",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_contents",
+              "component": "minecraft:bundle_contents",
+              "entries": [
+                {
+                  "type": "minecraft:loot_table",
+                  "value": {
+                    "type": "minecraft:generic",
+                    "pools": [
+                      {
+                        "rolls": {
+                          "type": "minecraft:uniform",
+                          "min": 3,
+                          "max": 8
+                        },
+                        "entries": [
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:terracotta",
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 3
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:sand",
+                            "weight": 2,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 4
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:wheat"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:honeycomb",
+                            "weight": 3,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 2,
+                                  "max": 4
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:gold_ingot"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:stick"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:golden_apple"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:golden_carrot"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:carrot"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:glistering_melon_slice"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bundle",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_contents",
+              "component": "minecraft:bundle_contents",
+              "entries": [
+                {
+                  "type": "minecraft:loot_table",
+                  "value": {
+                    "type": "minecraft:generic",
+                    "pools": [
+                      {
+                        "rolls": {
+                          "type": "minecraft:uniform",
+                          "min": 4,
+                          "max": 6
+                        },
+                        "entries": [
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:cactus_flower",
+                            "weight": 4
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:wheat",
+                            "weight": 1
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:honeycomb",
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 3
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:jungle_planks",
+                            "weight": 6,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 3,
+                                  "max": 4
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:jungle_log",
+                            "weight": 3,
+                            "functions": [
+                              {
+                                "function": "minecraft:set_count",
+                                "count": {
+                                  "type": "minecraft:uniform",
+                                  "min": 1,
+                                  "max": 3
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:apple",
+                            "weight": 2
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:carrot",
+                            "weight": 2
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:beetroot"
+                          },
+                          {
+                            "type": "minecraft:item",
+                            "name": "minecraft:beetroot_seeds",
+                            "weight": 2
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:enchant_randomly",
+              "options": "#minecraft:on_random_loot",
+              "only_compatible": true
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar_cane",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:wheat_seeds",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:beetroot_seeds",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:paper",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:dune_armor_trim_smithing_template",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_slow_fall",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_slowness",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_speed",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_health",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_wind",
+          "weight": 5
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "minecraft:archaeology/gravel"
+}

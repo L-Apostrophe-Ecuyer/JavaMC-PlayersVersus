@@ -25,7 +25,7 @@
     "environment.worldgen.structures.StructurePieceMixin",
 
     "environment.archeology.BrushesNotRequiredMixin",
-    "environment.archeology.SuspiciousBlocksMixin",
+    "environment.archeology.SuspiciousBlockEntityMixin",
     "environment.sleeping.ServerSleepingMixin",
     "environment.blocks.BlockMixin",
     "environment.blocks.CropMixin",
