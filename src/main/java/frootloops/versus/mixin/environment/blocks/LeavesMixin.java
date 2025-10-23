@@ -36,7 +36,7 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
         super(settings);
     }
     private static final double FALL_DISTANCE_REDUCTION = 3.0;
-    private static final double MIN_VELOCITY_TO_BE_SOLID = -0.5;
+    private static final double MIN_VELOCITY_TO_BE_SOLID = -0.4;
     private static Vec3d NORMAL_MULT = new Vec3d(0.6, 0.8, 0.6);
     private static Vec3d SNEAKING_MULT = new Vec3d(0.8, 0.8, 0.8);
     private static Vec3d JUMPING_MULT = new Vec3d(0.9, 1.0, 0.9);
