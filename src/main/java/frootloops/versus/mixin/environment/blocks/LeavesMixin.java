@@ -51,9 +51,14 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         if (context instanceof EntityShapeContext && ((EntityShapeContext) context).getEntity() instanceof LivingEntity livingEntity) {
+            if(livingEntity.isPlayer() && livingEntity.isGliding() && livingEntity.getVelocity().lengthSquared() > 0.5) {
+                livingEntity.fallDistance = -(livingEntity.getVelocity().getY() + 0.1) * 8.0;
+                livingEntity.setVelocity(livingEntity.getVelocity().multiply(0.95));
+                return VoxelShapes.empty();
+            }
             if(livingEntity.hasPassengers() || livingEntity.hasVehicle() || livingEntity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) {
                 livingEntity.fallDistance = -(livingEntity.getVelocity().getY() + 0.1) * 8.0;
-                livingEntity.setVelocity(livingEntity.getVelocity().multiply(1.0, 0.9, 1.0));
+                livingEntity.setVelocity(livingEntity.getVelocity().multiply(1.0, 0.95, 1.0));
                 return VoxelShapes.empty();
             }
             if(livingEntity instanceof SpiderEntity || livingEntity instanceof Flutterer || livingEntity instanceof AnimalEntity) return VoxelShapes.fullCube();
@@ -71,7 +76,11 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
         }
         else if(entity instanceof LivingEntity livingEntity) {
             fallDistance = Math.max(fallDistance, -(livingEntity.getVelocity().getY() + 0.1) * 8.0);
-            if(livingEntity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) {
+            if(livingEntity.isPlayer() && livingEntity.isGliding() && livingEntity.getVelocity().lengthSquared() > 0.5) {
+                livingEntity.fallDistance = fallDistance;
+                livingEntity.setVelocity(livingEntity.getVelocity().multiply(0.95));
+            }
+            else if(livingEntity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) {
                 livingEntity.fallDistance = fallDistance;
                 livingEntity.setVelocity(livingEntity.getVelocity().x, -0.15, livingEntity.getVelocity().z);
             }
@@ -93,7 +102,8 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
         if (entity.hasVehicle() || entity.isSpectator()) return;
         if (!entity.getBlockPos().equals(pos) && !entity.getBlockPos().up().equals(pos)) return;
         if (entity instanceof LivingEntity livingEntity) {
-            if(((LivingEntityAccessor)livingEntity).isJumping()) {
+            if(livingEntity.isPlayer() && livingEntity.isGliding()) return;
+            else if(((LivingEntityAccessor)livingEntity).isJumping()) {
                 Vec3d v = livingEntity.getVelocity();
                 if(livingEntity.isOnGround() || (v.y < -0.07 && v.y > -0.08))
                     livingEntity.setVelocity(v.x * 0.9, 0.33, v.z * 0.9);
