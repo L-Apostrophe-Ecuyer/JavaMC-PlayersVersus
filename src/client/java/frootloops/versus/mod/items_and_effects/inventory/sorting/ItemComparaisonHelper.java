@@ -1,6 +1,5 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
-import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.brewing.ConcentrateItem;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -132,7 +131,7 @@ public abstract class ItemComparaisonHelper {
 
     public static EquipmentSlot getPreferredEquipmentSlotOf(ItemType type) {
         return switch (type) {
-            case SHIELD, TOTEM -> EquipmentSlot.OFFHAND;
+            case SHIELD, TOTEMS -> EquipmentSlot.OFFHAND;
             case CHESTPLATE -> EquipmentSlot.CHEST;
             case LEGGINGS -> EquipmentSlot.LEGS;
             case BOOTS -> EquipmentSlot.FEET;
@@ -169,7 +168,7 @@ public abstract class ItemComparaisonHelper {
             else if(equipComponent.slot() == EquipmentSlot.HEAD) return ItemType.HELMET;
             else return ItemType.MISC_TOOL;
         }
-        else if(stack.getComponents().contains(DataComponentTypes.DEATH_PROTECTION)) return ItemType.TOTEM;
+        else if(stack.getComponents().contains(DataComponentTypes.DEATH_PROTECTION)) return ItemType.TOTEMS;
         else if(stack.isIn(ItemTags.ARROWS)) return ItemType.ARROWS;
         else if(stack.isOf(Items.WATER_BUCKET) || stack.isOf(Items.ENDER_PEARL) || stack.isOf(Items.WIND_CHARGE)) return ItemType.CLUTCH_TOOL;
         else if(stack.isOf(Items.END_CRYSTAL) || stack.isOf(Items.ENDER_PEARL) || stack.isOf(Items.COBWEB) || stack.isOf(Items.SNOWBALL) || stack.isOf(Items.FIRE_CHARGE)) return ItemType.COMBAT_ITEMS;
@@ -179,6 +178,7 @@ public abstract class ItemComparaisonHelper {
         else if(stack.isOf(Items.MAP) || stack.isOf(Items.FILLED_MAP)) return ItemType.MISC_TOOL;
         else if(stack.isOf(Items.BUCKET) || stack.getRecipeRemainder() == Items.BUCKET.getDefaultStack()) return ItemType.MISC_TOOL;
         else if(MinecraftClient.getInstance().world.getBrewingRecipeRegistry().isPotionRecipeIngredient(stack)  || stack.getItem() instanceof ConcentrateItem) return ItemType.BREWING_INGREDIENT;
+        else if(stack.isOf(Items.GOLDEN_APPLE) || stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) return ItemType.GAPPLES;
         else if(stack.getComponents().contains(DataComponentTypes.FOOD)) return ItemType.FOOD;
         else if(stack.isIn(ItemTags.SHULKER_BOXES)) return ItemType.SHULKER_BOX;
         else if(stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS)) return ItemType.BUNDLE;

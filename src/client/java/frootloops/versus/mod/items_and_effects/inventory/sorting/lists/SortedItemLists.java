@@ -2,7 +2,6 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSortingMaps;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import net.minecraft.block.Blocks;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.sound.BlockSoundGroup;
@@ -39,13 +38,13 @@ public class SortedItemLists {
 
 
     /** MISC - COMBAT ------------------------------------------------------------   */
-    public static final SortedTypedItemList FOOD_ITEMS = new SortedTypedItemList(new ItemType[]{ItemType.FOOD});
+    public static final SortedTypedItemList FOOD_ITEMS = new SortedTypedItemList(new ItemType[]{ItemType.GAPPLES, ItemType.FOOD});
     public static final SortedTypedItemList POTION_ITEMS = new SortedTypedItemList(new ItemType[]{ItemType.POTIONS});
     public static final SortedItemList[] CONSUMEABLE_ITEMS = {FOOD_ITEMS, POTION_ITEMS};
 
     public static final SortedTypedItemList WEAPONS = new SortedTypedItemList(new ItemType[]{ItemType.SWORD, ItemType.SPECIAL_WEAPON, ItemType.BOW, ItemType.CROSSBOW});
     public static final SortedTypedItemList ARMOR  = new SortedTypedItemList(new ItemType[]{ItemType.CHESTPLATE, ItemType.LEGGINGS, ItemType.HELMET, ItemType.BOOTS});
-    public static final SortedTypedItemList OTHER_COMBAT_ITEMS = new SortedTypedItemList(new ItemType[]{ItemType.TOTEM, ItemType.CLUTCH_TOOL, ItemType.COMBAT_ITEMS});
+    public static final SortedTypedItemList OTHER_COMBAT_ITEMS = new SortedTypedItemList(new ItemType[]{ItemType.TOTEMS, ItemType.CLUTCH_TOOL, ItemType.COMBAT_ITEMS});
     public static final SortedTypedItemList ARROWS = new SortedTypedItemList(new ItemType[]{ItemType.ARROWS});
     public static final SortedItemList[] COMBAT_ITEMS = {ARMOR, OTHER_COMBAT_ITEMS, ARROWS};
 

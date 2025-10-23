@@ -34,7 +34,7 @@ public class MainHotbarGroup extends SortingGroup {
     public MainHotbarGroup() {super("GROUP: MAIN_HOTBAR");}
 
     public boolean hasAtLeastOneConsumable(){
-        return (this.foodSlot != null || this.potionSlot != null || (this.clutchItem != null && this.clutchItem.itemType() == ItemType.TOTEM));
+        return (this.foodSlot != null || this.potionSlot != null || (this.clutchItem != null && (this.clutchItem.itemType() == ItemType.TOTEMS || this.clutchItem.itemType() == ItemType.GAPPLES)));
     }
 
     public boolean hasCombatItems(){
@@ -162,10 +162,16 @@ public class MainHotbarGroup extends SortingGroup {
                 return itemSlotToReturn;
             }
         }
-        else if(slot.itemType() == ItemType.TOTEM && (this.clutchItem == null || this.clutchItem.itemType() != ItemType.TOTEM)) {
+        else if(slot.itemType() == ItemType.TOTEMS && (this.clutchItem == null || this.clutchItem.itemType() != ItemType.TOTEMS)) {
             ItemSlot itemSlotToReturn = this.clutchItem;
             this.clutchItem = slot;
             if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as totem, for clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
+            return itemSlotToReturn;
+        }
+        else if(slot.itemType() == ItemType.GAPPLES && (this.clutchItem == null || ItemComparaisonHelper.shouldGoBefore(slot, clutchItem))) {
+            ItemSlot itemSlotToReturn = this.clutchItem;
+            this.clutchItem = slot;
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("              -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + (itemSlotToReturn == null ? " as gapple, for clutch item." : ", replacing " + itemSlotToReturn.stack().getName().getString()));
             return itemSlotToReturn;
         }
         else if(isInDeepDark) {
