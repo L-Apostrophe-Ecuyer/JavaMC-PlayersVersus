@@ -18,6 +18,9 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
 @Mixin(InGameHud.class)
@@ -30,11 +33,13 @@ public class HungerBarRendererMixin {
 
     @Shadow @Nullable private PlayerEntity getCameraPlayer() {return null;}
 
-    @Overwrite
-    private void renderFood(DrawContext context, PlayerEntity player, int top, int left) {
+    @Inject(method = "renderFood", at = @At("HEAD"), cancellable = true)
+    private void renderFood(DrawContext context, PlayerEntity player, int top, int left, CallbackInfo info) {
+        if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return;
+
         HungerManager hungerManager = player.getHungerManager();
         int playerFoodLevel = hungerManager.getFoodLevel();
-        int foodPointsAvailable = !VersusSettings.Combat.DO_FOOD_OVERHAUL ? 20 : Math.max((int) (player.getMaxHealth() - player.getHealth() + 6), playerFoodLevel);
+        int foodPointsAvailable = Math.max((int) (player.getMaxHealth() - player.getHealth() + 6), playerFoodLevel);
         boolean makeIconsJiggle = (hungerManager.getSaturationLevel() == 0.0f && this.ticks % (playerFoodLevel * 3 + 1) == 0) || (VersusSettings.Combat.DO_FOOD_OVERHAUL && player.hasStatusEffect(StatusEffects.HUNGER));
 
         Identifier iconHaunchFull, iconHaunchHalf, iconHaunchEmpty, iconHaunchHalfDisabled, iconHaunchEmptyDisabled;
@@ -67,5 +72,6 @@ public class HungerBarRendererMixin {
             if (halfHaunchFoodValue < playerFoodLevel) context.drawGuiTexture(RenderPipelines.GUI_TEXTURED,iconHaunchFull, x, y, 9, 9);
             else if (halfHaunchFoodValue == playerFoodLevel) context.drawGuiTexture(RenderPipelines.GUI_TEXTURED,iconHaunchHalf, x, y, 9, 9);
         }
+        info.cancel();
     }
 }
