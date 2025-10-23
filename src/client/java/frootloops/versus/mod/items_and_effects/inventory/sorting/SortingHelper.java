@@ -308,9 +308,9 @@ public class SortingHelper {
         if (BREWING_GROUP.size() > 0 && CONSUMABLES_GROUP.size() > 0) {
             if(!tryCombiningTwoGroups(CONSUMABLES_GROUP, BREWING_GROUP)) {
                 int numPotions = SortedItemLists.POTION_ITEMS.size();
-                int numConcentrates = SortedItemLists.CONCENTRATES.size();
+                int numConcentrates = SortedItemLists.BREWING_INGREDIENTS.size();
                 if(numPotions > 0 && numConcentrates > 0 && numPotions + numConcentrates > 4) {
-                    for (ItemSlot slot : SortedItemLists.CONCENTRATES.takeAll()) SortedItemLists.POTION_ITEMS.addWithoutSorting(slot);
+                    for (ItemSlot slot : SortedItemLists.BREWING_INGREDIENTS.takeAll()) SortedItemLists.POTION_ITEMS.addWithoutSorting(slot);
                     CONSUMABLES_GROUP.recalculateActualSize();
                     BREWING_GROUP.recalculateActualSize();
                     CONSUMABLES_GROUP.mergeWithOtherGroup(BREWING_GROUP);

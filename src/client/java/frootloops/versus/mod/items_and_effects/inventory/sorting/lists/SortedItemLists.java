@@ -51,8 +51,8 @@ public class SortedItemLists {
 
     /** MISC - MYSTICISM & MOBS ---------------------------------------------------------   */
     public static final SortedMappedItemList MISC_BREWING_ITEMS = new SortedMappedItemList(ItemSortingMaps.ITEMS_BREWING_MISC, ItemType.BREWING_INGREDIENT);
-    public static final SortedTypedItemList CONCENTRATES = new SortedTypedItemList(new ItemType[]{ItemType.BREWING_INGREDIENT});
-    public static final SortedItemList[] MISC_BREWING = {CONCENTRATES, MISC_BREWING_ITEMS};
+    public static final SortedTypedItemList BREWING_INGREDIENTS = new SortedTypedItemList(new ItemType[]{ItemType.BREWING_INGREDIENT});
+    public static final SortedItemList[] MISC_BREWING = {BREWING_INGREDIENTS, MISC_BREWING_ITEMS};
 
 
     /** MISC - WORLD AND ARCHEOLOGY ---------------------------------------------------------   */
