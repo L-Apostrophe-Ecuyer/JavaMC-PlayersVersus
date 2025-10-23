@@ -11,7 +11,12 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:tall_dry_grass",
+          "name": "minecraft:acacia_sapling",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:short_dry_grass",
           "weight": 30
         },
         {
