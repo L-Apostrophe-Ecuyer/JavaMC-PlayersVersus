@@ -4,6 +4,10 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.AbstractChestBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.WindowEventHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -13,16 +17,19 @@ import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.thread.ReentrantThreadExecutor;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,6 +50,8 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Shadow @Nullable public final GameRenderer gameRenderer;
     @Shadow public final GameOptions options;
 
+    private static final Hand[] OFFHAND_FIRST =  new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND}, MAINHAND_FIRST =  new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND};
+
     public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, GameOptions options) { super(string);
         this.gameRenderer = gameRenderer;
         this.options = options;
@@ -59,7 +68,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             }
 
             ActionResult actionResult = null;
-            Hand[] hands = this.shouldPrioritizeOffhand() ? new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND} :  new Hand[] {Hand.MAIN_HAND, Hand.OFF_HAND};
+            Hand[] hands = this.shouldPrioritizeOffhand() ? OFFHAND_FIRST : MAINHAND_FIRST;
             for (Hand hand : hands) {
                 ItemStack itemStack = this.player.getStackInHand(hand);
                 if (!itemStack.isItemEnabled(this.world.getEnabledFeatures())) continue;
@@ -71,6 +80,19 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                             if (!this.world.getWorldBorder().contains(entity.getBlockPos())) {
                                 info.cancel();
                                 return;
+                            }
+
+                            // Use chest if item frame clicked on accident
+                            if(entity instanceof ItemFrameEntity itemFrameEntity) {
+                                BlockPos pos = itemFrameEntity.getAttachedBlockPos();
+                                BlockState state = world.getBlockState(pos);
+                                if(state.getBlock() instanceof AbstractChestBlock) {
+                                    BlockHitResult blockHitResult = new BlockHitResult(entityHitResult.getPos(), itemFrameEntity.getHorizontalFacing(), pos, false);
+                                    actionResult = this.interactionManager.interactBlock(this.player, hand, blockHitResult);
+                                    if (actionResult instanceof ActionResult.Success success && success.swingSource() == ActionResult.SwingSource.CLIENT) this.player.swingHand(hand);
+                                    info.cancel();
+                                    return;
+                                }
                             }
 
                             actionResult = this.interactionManager.interactEntityAtLocation(this.player, entity, entityHitResult, hand);
