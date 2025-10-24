@@ -24,7 +24,7 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
     public boolean isToolOrWeapon() { return this.itemType != ItemType.SHIELD && this.itemType.compareTo(ItemType.FISHING_ROD) < 1;}
 
     public boolean isUsedToClutch() {
-        return this.itemType == ItemType.CLUTCH_TOOL || this.itemType == ItemType.TOTEMS_AND_GAPPLES;
+        return this.itemType == ItemType.CLUTCH_TOOL || this.itemType == ItemType.TOTEMS || this.itemType == ItemType.GAPPLES;
     }
 
     public boolean isArmor() {
