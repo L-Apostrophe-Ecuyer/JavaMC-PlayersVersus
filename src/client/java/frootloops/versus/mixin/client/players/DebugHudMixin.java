@@ -86,7 +86,8 @@ public abstract class DebugHudMixin {
                 // If F3 is currently enabled, then show how to configure the screen;
                 if(isF3Enabled) {
                     list.add("");
-                    list.add(" Use F3 + F6 to configure the debug screen ");
+                    list.add(" Use F3 + F6 to configure ");
+                    list.add(" the debug screen. ");
                 }
 
                 // And that's it!
