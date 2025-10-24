@@ -52,7 +52,7 @@ public abstract class LightmapMixin {
                 return l/2f;
             }
             nightVisionAmplifier = effect.getAmplifier();
-            return nightVisionAmplifier * 0.35f + l/16f;
+            return nightVisionAmplifier * 0.35f + 0.15f + l/16f;
 
         } else {
             nightVisionAmplifier = -1;
