@@ -6,7 +6,12 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.gui.hud.debug.DebugHudEntries;
 import net.minecraft.client.gui.hud.debug.DebugHudEntryVisibility;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Language;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
@@ -74,7 +79,8 @@ public abstract class DebugHudMixin {
 
                 // Show biome if enabled:
                 if(client.debugHudEntryList.isEntryVisible(DebugHudEntries.BIOME)) {
-                    list.add(" Biome: " + getBiomeAsString(client.world.getBiome(blockPos)) + " ");
+                    MutableText text = Text.literal("Biome: ").append("subtitles.players-versus.sword_blocking").append(" ");
+                    list.add(" Biome: " + getBiomeName(client.world.getBiome(blockPos)) + " ");
                 }
 
                 // If F3 is currently enabled, then show how to configure the screen;
@@ -90,8 +96,9 @@ public abstract class DebugHudMixin {
         }
     }
 
-    private static String getBiomeAsString(RegistryEntry<Biome> biome) {
-        String biomeName = biome.getKeyOrValue().map(key -> key.getValue().toString(), value -> "[unregistered " + value + "]");
-        return biomeName.substring(biomeName.indexOf(':') + 1);
+    private static String getBiomeName(RegistryEntry<Biome> biome) {
+        Optional<RegistryKey<Biome>> biomeKey = biome.getKey();
+        if(biomeKey.isEmpty()) return "[Unregistered]";
+        return Language.getInstance().get(biomeKey.get().getValue().toTranslationKey("biome"));
     }
 }
