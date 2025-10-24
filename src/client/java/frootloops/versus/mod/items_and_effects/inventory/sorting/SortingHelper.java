@@ -37,13 +37,6 @@ public class SortingHelper {
         int numItems = inventorySlots.size();
         int numEmptySlots = numRows * 9 - numItems;
 
-        // Step 0: If less than 9 items, trivial, just add everything and sort the single row
-        if(inventorySlots.size() <= 9) {
-            SortedInventoryOutput inventoryOutput = new SortedInventoryOutput(numRows, numEmptySlots, 1, true);
-            inventoryOutput.addAll(inventorySlots);
-            return inventoryOutput.getInvSlots();
-        }
-
         // Step 1: Populate ItemSortingGroups
         for(ItemSlot slot: inventorySlots) SortingHelper.insertItemIntoGroup(slot, isPlayerInventory, isInDeepDark, isInNether, isInWater);
         if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER INSERTING -----\n");

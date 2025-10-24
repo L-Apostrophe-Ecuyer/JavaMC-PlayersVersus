@@ -27,7 +27,7 @@ public class InventorySorting {
     public static final boolean DEBUG_SORTING_GROUPS = true;
     public static final boolean DEBUG_SORTING_MERGE = true;
     public static final boolean DEBUG_SORTING_OUTPUT = true;
-    private static final boolean DEBUG_ITEM_SWITICHING = false;
+    private static final boolean DEBUG_ITEM_SWITICHING = true;
 
     public static final ButtonTextures TEXTURE_HOTBAR_SWAP_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/hotbar_swap_down"), Identifier.of("players-versus", "container/hotbar_swap_down_highlighted"));
     public static final ButtonTextures TEXTURE_INVENTORY_SORT_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/sort_inventory"), Identifier.of("players-versus", "container/sort_inventory_highlighted"));
