@@ -36,7 +36,7 @@
               },
               "argument2": {
                 "type": "minecraft:interpolated",
-                "argument": "minecraft:overworld/depth"
+                "argument": "players-versus:overworld/depth"
               }
             }
           }
@@ -109,7 +109,7 @@
                 },
                 "argument2": {
                   "type": "minecraft:interpolated",
-                  "argument": "minecraft:overworld/depth"
+                  "argument": "players-versus:overworld/depth"
                 }
               }
             }
@@ -128,7 +128,7 @@
               },
               "argument2": {
                 "type": "minecraft:interpolated",
-                "argument": "minecraft:overworld/caves/entrances"
+                "argument": "players-versus:overworld/caves/entrances"
               }
             }
           }

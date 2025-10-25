@@ -9,10 +9,22 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.gen.WorldPreset;
+import net.minecraft.world.gen.WorldPresets;
+import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 
 public class CustomWorldgen {
+
+    public static final Identifier BETTER_WORLDGEN_PRESET_ID = Identifier.of(VersusMod.MOD_ID, "better_world");
+    public static final RegistryKey<WorldPreset> BETTER_WORLDGEN_PRESET = RegistryKey.of(RegistryKeys.WORLD_PRESET, BETTER_WORLDGEN_PRESET_ID);
+    public static final RegistryKey<ChunkGeneratorSettings> OVERWORLD = RegistryKey.of(RegistryKeys.CHUNK_GENERATOR_SETTINGS, BETTER_WORLDGEN_PRESET_ID);
+
+
     public static final Identifier STONE_STALAGTITE_ID = Identifier.of(VersusMod.MOD_ID, "stone_stalagtite");
     public static final StoneStalagtiteFeature STONE_STALAGTITE_FEATURE = new StoneStalagtiteFeature(StoneStalagtiteFeatureConfig.CODEC);
 

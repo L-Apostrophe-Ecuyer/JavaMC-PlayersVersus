@@ -41,16 +41,16 @@
                       "argument1": 0.078125,
                       "argument2": {
                         "type": "minecraft:range_choice",
-                        "input": "minecraft:overworld/sloped_cheese",
+                        "input": "players-versus:overworld/sloped_cheese",
                         "max_exclusive": 1.5625,
                         "min_inclusive": -1000000,
                         "when_in_range": {
                           "type": "minecraft:min",
-                          "argument1": "minecraft:overworld/sloped_cheese",
+                          "argument1": "players-versus:overworld/sloped_cheese",
                           "argument2": {
                             "type": "minecraft:mul",
                             "argument1": 5,
-                            "argument2": "minecraft:overworld/caves/entrances"
+                            "argument2": "players-versus:overworld/caves/entrances"
                           }
                         },
                         "when_out_of_range": {
@@ -99,7 +99,7 @@
                                       "argument2": {
                                         "type": "minecraft:mul",
                                         "argument1": -0.64,
-                                        "argument2": "minecraft:overworld/sloped_cheese"
+                                        "argument2": "players-versus:overworld/sloped_cheese"
                                       }
                                     },
                                     "max": 0.5,
@@ -107,7 +107,7 @@
                                   }
                                 }
                               },
-                              "argument2": "minecraft:overworld/caves/entrances"
+                              "argument2": "players-versus:overworld/caves/entrances"
                             },
                             "argument2": {
                               "type": "minecraft:add",
@@ -117,11 +117,11 @@
                           },
                           "argument2": {
                             "type": "minecraft:range_choice",
-                            "input": "minecraft:overworld/caves/pillars",
+                            "input": "players-versus:overworld/caves/pillars",
                             "max_exclusive": 0.03,
                             "min_inclusive": -1000000,
                             "when_in_range": -1000000,
-                            "when_out_of_range": "minecraft:overworld/caves/pillars"
+                            "when_out_of_range": "players-versus:overworld/caves/pillars"
                           }
                         }
                       }
@@ -135,5 +135,5 @@
       }
     }
   },
-  "argument2": "minecraft:overworld/caves/noodle"
+  "argument2": "players-versus:overworld/caves/noodle"
 }

@@ -18,7 +18,7 @@
   "noise_router": {
     "barrier": "players-versus:overworld/aquifer_barrier",
     "continents": "minecraft:overworld/continents",
-    "depth": "minecraft:overworld/depth",
+    "depth": "players-versus:overworld/depth",
     "erosion": "minecraft:overworld/erosion",
     "final_density": "players-versus:overworld/final_density",
     "fluid_level_floodedness": "players-versus:overworld/aquifer_fluid_level_floodedness",

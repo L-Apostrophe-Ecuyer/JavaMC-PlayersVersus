@@ -69,7 +69,7 @@
                   },
                   "argument2": {
                     "type": "minecraft:add",
-                    "argument1": "minecraft:overworld/caves/entrances",
+                    "argument1": "players-versus:overworld/caves/entrances",
                     "argument2": {
                       "type": "minecraft:min",
                       "argument1": 0,
@@ -78,7 +78,7 @@
                         "argument1": {
                           "type": "minecraft:add",
                           "argument1": -0.24,
-                          "argument2": "minecraft:overworld/caves/entrances"
+                          "argument2": "players-versus:overworld/caves/entrances"
                         },
                         "argument2": {
                           "type": "minecraft:mul",
@@ -88,7 +88,7 @@
                             "argument2": {
                               "type": "minecraft:add",
                               "argument1": -0.08,
-                              "argument2": "minecraft:overworld/caves/noodle"
+                              "argument2": "players-versus:overworld/caves/noodle"
                             }
                           },
                           "argument2": -4

@@ -27,7 +27,7 @@ public abstract class LightmapMixin {
     protected LightmapMixin(MinecraftClient client, GameRenderer renderer) {
         this.client = client;
     }
-    private static final Vector3f NIGHT_VISION_SKY_COLOR_OVERWORLD = new Vector3f(0.5F, 0.4F, 0.35F);
+    private static final Vector3f NIGHT_VISION_SKY_COLOR_OVERWORLD = new Vector3f(0.52F, 0.43F, 0.35F);
     private static final Vector3f NIGHT_VISION_SKY_COLOR_NETHER = new Vector3f(0.9F, 1.0F, 0.9F);
     private static int nightVisionAmplifier = -1;
 

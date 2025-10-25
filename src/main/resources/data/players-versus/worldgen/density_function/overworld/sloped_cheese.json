@@ -16,7 +16,7 @@
               "type": "minecraft:mul",
               "argument1": {
                 "type": "minecraft:add",
-                "argument1": "minecraft:overworld/depth",
+                "argument1": "players-versus:overworld/depth",
                 "argument2": {
                   "type": "minecraft:mul",
                   "argument1": "minecraft:overworld/jaggedness",

@@ -1,5 +1,8 @@
 {
 
+  "generator.minecraft.normal": "Vanilla",
+  "generator.players-versus.better_world": "Improved",
+
   "subtitles.players-versus.rail_turning_sound": "Minecart makes a sharp turn",
   "subtitles.players-versus.sword_blocking": "Sword blocks attack",
 

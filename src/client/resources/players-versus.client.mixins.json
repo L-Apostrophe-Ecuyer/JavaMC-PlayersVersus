@@ -13,6 +13,8 @@
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",
 
+		"environment.worldgen.DefaultWorldPresetMixin",
+
 		"mobs.hostile.SkeletonModelMixin",
 		"mobs.hostile.ZombieModelMixin",
 		"mobs.hostile.PiglinModelMixin",
