@@ -1,6 +1,4 @@
 {
-  "type": "minecraft:cache_once",
-  "argument": {
     "type": "minecraft:add",
     "argument1": {
       "type": "minecraft:add",
@@ -143,5 +141,4 @@
         }
       }
     }
-  }
 }

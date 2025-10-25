@@ -1,8 +1,4 @@
 {
-  "type": "minecraft:cache_once",
-  "argument": {
-    "type": "minecraft:cache_once",
-    "argument": {
       "type": "minecraft:min",
       "argument1": "players-versus:overworld/river_carver",
       "argument2": {
@@ -37,6 +33,4 @@
         },
         "argument2": "minecraft:overworld/base_3d_noise"
       }
-    }
-  }
 }

@@ -23,7 +23,7 @@ public class VanillaBiomeParametersOverworldMixin {
 
     private static final MultiNoiseUtil.ParameterRange DEPTH_ZERO = MultiNoiseUtil.ParameterRange.of(0.0F);
     private static final MultiNoiseUtil.ParameterRange DEPTH_ONE = MultiNoiseUtil.ParameterRange.of(0.1F);
-    private static final MultiNoiseUtil.ParameterRange DEPTH_SURFACE_CAVE = MultiNoiseUtil.ParameterRange.of(0.1F, 0.25F), DEPTH_CAVE = MultiNoiseUtil.ParameterRange.of(0.25F, 0.65F), DEPTH_DEEP_CAVE = MultiNoiseUtil.ParameterRange.of(0.9F);
+    private static final MultiNoiseUtil.ParameterRange DEPTH_SURFACE_CAVE = MultiNoiseUtil.ParameterRange.of(0.1F, 0.25F), DEPTH_CAVE = MultiNoiseUtil.ParameterRange.of(0.2F, 0.4F), DEPTH_GENERIC_CAVE = MultiNoiseUtil.ParameterRange.of(0.25F, 0.65F), DEPTH_DEEP_CAVE = MultiNoiseUtil.ParameterRange.of(0.9F);
 
     private static final float MIN_EROSION_FOR_MOUNTAIN_TRANSITION = -0.475f;
     private static final long MIN_EROSION_FOR_MOUNTAIN_TRANSITION_LONG = MultiNoiseUtil.toLong(MIN_EROSION_FOR_MOUNTAIN_TRANSITION);
@@ -60,7 +60,7 @@ public class VanillaBiomeParametersOverworldMixin {
         for (PlacedBiome b : CustomOverworldBiomes.caveBiomesToPlaceInOverorld){
             if(b.type() == PlacedBiomeType.SURFACE) continue;
 
-            MultiNoiseUtil.ParameterRange depth = b.type() == PlacedBiomeType.SURFACE_CAVE ? DEPTH_SURFACE_CAVE : (b.type() == PlacedBiomeType.CAVE || b.type() == PlacedBiomeType.GENERIC_CAVE) ? DEPTH_CAVE : DEPTH_DEEP_CAVE;
+            MultiNoiseUtil.ParameterRange depth = b.type() == PlacedBiomeType.SURFACE_CAVE ? DEPTH_SURFACE_CAVE : (b.type() == PlacedBiomeType.CAVE ? DEPTH_CAVE : (b.type() == PlacedBiomeType.GENERIC_CAVE ? DEPTH_GENERIC_CAVE : DEPTH_DEEP_CAVE));
             float rarityOffset = (b.type() == PlacedBiomeType.GENERIC_CAVE) ? 0.07F : (b.type() == PlacedBiomeType.GENERIC_DEEP_CAVE) ? 0.05F : b.isRare() ? 0.04F : 0.0F;
             parameters.accept(Pair.of(MultiNoiseUtil.createNoiseHypercube(b.temperature(), b.humidity(), b.continentalness(), b.erosion(), depth, b.weirdness(),rarityOffset), b.biome()));
         }

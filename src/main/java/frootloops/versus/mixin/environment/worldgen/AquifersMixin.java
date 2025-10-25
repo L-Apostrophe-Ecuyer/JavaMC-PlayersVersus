@@ -23,7 +23,6 @@ public abstract class AquifersMixin {
         )
     )
     public AquiferSampler aquifer(ChunkNoiseSampler chunkNoiseSampler, ChunkPos chunkPos, NoiseRouter noiseRouter, RandomSplitter randomSplitter, int minimumY, int height, AquiferSampler.FluidLevelSampler fluidLevelSampler) {
-        VersusMod.MOD_LOGGER.error(" HEIGHT IS " + height);
         if(height == 336) return new SimpleWaterAquifer(chunkNoiseSampler, chunkPos, noiseRouter, randomSplitter, minimumY, height, fluidLevelSampler); // Custom!
         else return AquiferSampler.aquifer(chunkNoiseSampler, chunkPos, noiseRouter, randomSplitter, minimumY, height, fluidLevelSampler);
     }
