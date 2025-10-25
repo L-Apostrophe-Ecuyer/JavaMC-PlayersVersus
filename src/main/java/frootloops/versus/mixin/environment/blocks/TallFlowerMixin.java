@@ -23,7 +23,7 @@ public abstract class TallFlowerMixin extends PlantBlock implements Fertilizable
 
 
     @Override
-    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
+    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bl) {
         if(state.isOf(Blocks.ROSE_BUSH)) {
             if (!(entity instanceof PlayerEntity) && !(entity instanceof HostileEntity)) return;
             entity.slowMovement(state, new Vec3d(0.9f, 0.75, 0.9f));

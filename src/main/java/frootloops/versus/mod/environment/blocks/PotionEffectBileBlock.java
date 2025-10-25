@@ -32,7 +32,7 @@ public class PotionEffectBileBlock extends Block {
     private final TintedParticleEffect PARTICLE;
     private final int MAX_DURATION, AMPLIFIER;
     private final float AMBIENT_OCCLUSION_AMOUNT;
-    private RegistryEntry<StatusEffect> effect;
+    private final RegistryEntry<StatusEffect> effect;
 
     public PotionEffectBileBlock(Settings settings, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int maxDuration, int amplifier, float ambientOcclusion) {
         super(settings.noCollision());
@@ -44,11 +44,11 @@ public class PotionEffectBileBlock extends Block {
     }
 
     @Override
-    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
+    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bl) {
         if (!world.isClient() && !entity.isSpectator() && entity instanceof LivingEntity livingEntity) {
             if(entity.fallDistance > 1.0 && (entity instanceof PlayerEntity || (!world.isClient() && ((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && entity.getWidth() * entity.getWidth() * entity.getHeight() > 0.512F)) {
                 this.grantStatusEffect(livingEntity, true);
-                super.onEntityCollision(state, world, pos, entity, handler);
+                super.onEntityCollision(state, world, pos, entity, handler, bl);
                 world.breakBlock(pos, false);
             }
             else if(world.getTime() % 10L == 0 || entity.fallDistance > 0.0){

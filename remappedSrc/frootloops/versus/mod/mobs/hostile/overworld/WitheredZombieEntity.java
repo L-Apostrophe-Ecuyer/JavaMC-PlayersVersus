@@ -1,0 +1,155 @@
+package frootloops.versus.mod.mobs.hostile.overworld;
+
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.*;
+import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.entity.passive.*;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.*;
+
+
+
+public class WitheredZombieEntity extends ZombieEntity {
+    public WitheredZombieEntity(EntityType<? extends ZombieEntity> entityType, World world) {
+        super(entityType, world);
+    }
+
+    public static DefaultAttributeContainer.Builder createWitheredAttributes() {
+        return HostileEntity.createHostileAttributes()
+                .add(EntityAttributes.FOLLOW_RANGE, 6.5)
+                .add(EntityAttributes.MOVEMENT_SPEED, 0.33f)
+                .add(EntityAttributes.ATTACK_DAMAGE, 3.0)
+                .add(EntityAttributes.ATTACK_KNOCKBACK, 1.1)
+                .add(EntityAttributes.ARMOR, 3.0)
+                .add(EntityAttributes.ARMOR_TOUGHNESS, 3.0)
+                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.25)
+                .add(EntityAttributes.SPAWN_REINFORCEMENTS);
+    }
+
+    @Override
+    public boolean tryAttack(ServerWorld world, Entity target) {
+        boolean hasAttacked = super.tryAttack(world, target);
+        if (hasAttacked && this.getMainHandStack().isEmpty() && target instanceof LivingEntity livingEntity) {
+            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 60), this);
+        }
+        return hasAttacked;
+    }
+
+    @Override
+    public void initCustomGoals() {
+        this.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, -1, 127));
+        this.ambientSoundChance = -1000;
+        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.4F);
+        this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 0.5F);
+        this.goalSelector.add(2, new ZombieAttackGoal((ZombieEntity) ((Object)this), 1.0, false));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.7, 0.9F)); // Only 10% chance of actually wandering
+        this.targetSelector.add(1, new RevengeGoal(this, PigEntity.class));
+        this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, false));
+        this.targetSelector.add(3, new ActiveTargetGoal(this, MerchantEntity.class, false));
+        this.targetSelector.add(3, new ActiveTargetGoal(this, IronGolemEntity.class, false));
+    }
+
+    @Override
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+        if(source.isOf(DamageTypes.WITHER)) return false;
+        if(super.damage(world, source, amount)) {
+            this.playSound(SoundEvents.ENTITY_PLAYER_BREATH, 0.3f, (this.random.nextFloat() - this.random.nextFloat()) * 0.4F + 0.6F);
+            return true;
+        }
+        else return false;
+    }
+
+    @Override
+    public void tickMovement() {
+        super.tickMovement();
+        if(this.age % 16 == 0 && this.getTarget() != null) {
+            double distanceSquared = this.getTarget().squaredDistanceTo(this);
+            if(this.getTarget().isSneaking()) distanceSquared *= 3;
+            if(distanceSquared > 256.0) this.setTarget(null);
+        }
+    }
+
+    @Override
+    public void initEquipment(Random random, LocalDifficulty localDifficulty) {
+        int rand = random.nextInt(150);
+        boolean isAtDiamondDepth = this.getBlockPos().getY() < -32;
+        if (isAtDiamondDepth && rand % 23 == 0) {
+            this.equipStack(EquipmentSlot.OFFHAND, new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + random.nextInt(5)));
+            this.setEquipmentDropChance(EquipmentSlot.OFFHAND, 1.0F);
+        }
+
+        if(isAtDiamondDepth && rand < 60) {
+            this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.1F);
+            if (rand < 30) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+            else if (rand < 50) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_AXE));
+            else if (rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SHOVEL));
+        }
+        else if(rand < 20) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+        else if(rand < 40) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+        else if(rand < 60) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+        else if(rand < 80) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
+        else if(rand < 90)this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
+        if(rand < 90) {
+            int damageAmount = (isAtDiamondDepth && rand < 60) ? rand + 900 : rand/2 + 150;
+            this.getEquippedStack(EquipmentSlot.MAINHAND).setDamage(damageAmount);
+        }
+
+        // Bit less attack damage when wielding weapons:
+        if(this.getEquippedStack(EquipmentSlot.MAINHAND).isDamageable()) {
+            EntityAttributeInstance entityAttributeInstance = this.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
+            entityAttributeInstance.setBaseValue(1.0);
+        }
+    }
+
+    @Override
+    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
+        return this.getPathfindingFavor(this.getBlockPos(), world) >= 0.0F;
+    }
+
+    @Override
+    public void setBaby(boolean baby) {
+        return;
+    }
+
+    @Override
+    protected boolean canConvertInWater() {
+        return false;
+    }
+
+    @Override
+    protected boolean burnsInDaylight() {
+        return false;
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.ENTITY_PLAYER_BREATH;
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.ENTITY_PLAYER_BREATH;
+    }
+
+    @Override
+    protected SoundEvent getStepSound() {
+        return SoundEvents.ENTITY_HUSK_STEP;
+    }
+}

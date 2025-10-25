@@ -28,7 +28,7 @@ public class CustomMudBlock extends MoistBlock {
     }
 
     @Override
-    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
+    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bl) {
         if (!entity.isSpectator() && entity instanceof LivingEntity livingEntity && entity.getBlockStateAtPos().isOf(this) && !canWalkOnWetMud(entity)) {
 
             // When a player goes inside mud, break a fragile block that was on top:

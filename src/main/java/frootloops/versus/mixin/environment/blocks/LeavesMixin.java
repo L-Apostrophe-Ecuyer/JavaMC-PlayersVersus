@@ -98,7 +98,7 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     }
 
     @Override
-    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
+    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bl) {
         if (entity.hasVehicle() || entity.isSpectator()) return;
         if (!entity.getBlockPos().equals(pos) && !entity.getBlockPos().up().equals(pos)) return;
         if (entity instanceof LivingEntity livingEntity) {

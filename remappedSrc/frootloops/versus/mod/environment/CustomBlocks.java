@@ -1,0 +1,212 @@
+package frootloops.versus.mod.environment;
+
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.blocks.*;
+import frootloops.versus.mod.environment.blocks.clays.*;
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
+import frootloops.versus.mod.items_and_effects.brewing.effects.BuoyancyStatusEffect;
+import frootloops.versus.mod.items_and_effects.brewing.effects.LargenessStatusEffect;
+import frootloops.versus.mod.items_and_effects.brewing.effects.SmallnessStatusEffect;
+import frootloops.versus.mod.items_and_effects.brewing.effects.VulnerabilityStatusEffect;
+import net.minecraft.block.*;
+import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
+
+
+public class CustomBlocks {
+
+    public static Block SMOLDERING_TORCH;
+    public static Block SMOLDERING_WALL_TORCH;
+    public static Block EXTINGUISHED_TORCH;
+    public static Block EXTINGUISHED_WALL_TORCH;
+
+    public static Block CORRUPTED_WART_PLANT;
+    public static Block WITHERED_WART_PLANT;
+
+    public static Block CUT_LAPIS, CUT_LAPIS_SLAB, CUT_LAPIS_STAIRS;
+
+    public static Block DRIPSTONE_SLAB, DRIPSTONE_STAIRS, DRIPSTONE_WALL;
+    public static Block POLISHED_DRIPSTONE, POLISHED_DRIPSTONE_SLAB, POLISHED_DRIPSTONE_STAIRS, POLISHED_DRIPSTONE_WALL, DRIPSTONE_PILLAR;
+    public static Block DRIPSTONE_BRICKS, DRIPSTONE_BRICK_SLAB, DRIPSTONE_BRICK_STAIRS, DRIPSTONE_BRICK_WALL;
+
+    public static Block POLISHED_STONE, POLISHED_STONE_SLAB, POLISHED_STONE_STAIRS;
+
+
+    // New Terracotta
+    public static Block TERRACOTTA_BRICKS, TERRACOTTA_BRICK_SLAB, TERRACOTTA_BRICK_STAIRS, TERRACOTTA_BRICK_WALL;
+    public static Block TERRACOTTA_TILES, TERRACOTTA_TILE_SLAB, TERRACOTTA_TILE_STAIRS, TERRACOTTA_TILE_WALL, CHISELED_TERRACOTTA;
+
+
+    // Mud blocks and variants:
+    public static MoistBlock GRAY_CLAY, GRAY_MUD, BROWN_CLAY, BROWN_MUD;
+    public static MoistBlock BROWN_CLAY_BRICKS, BROWN_MUD_BRICKS;
+    public static MoistSlabBlock BROWN_CLAY_BRICK_SLAB, BROWN_MUD_BRICK_SLAB;
+    public static MoistStairsBlock BROWN_CLAY_BRICK_STAIRS, BROWN_MUD_BRICK_STAIRS;
+    public static MoistWallBlock BROWN_CLAY_BRICK_WALL, BROWN_MUD_BRICK_WALL;
+
+    public static Block WHEAT_GRASS;
+    public static Block WILD_WHEAT;
+    public static Block CLOVERS;
+
+    public static CreeperSporeBlock CREEPER_SPORE_BLOSSOM;
+
+    public static PotionEffectBileBlock DEATHLY_BILE, CORRUPTED_BILE, HARMFUL_BILE, HEALTHY_BILE, REGENERATION_BILE, WITHERING_BILE, MINING_SPEED_BILE, MINING_FATIGUE_BILE, TOUGHNESS_BILE, VISION_BILE, DARKNESS_BILE, LEAPING_BILE, SLOW_FALL_BILE, LEVITATION_BILE, SPEED_BILE, SLOWNESS_BILE, BREATH_BILE;
+    public static PotionEffectBileBlock INVISIBILITY_BILE, GLOWING_BILE, WEAKNESS_BILE, STRENGTH_BILE, WIND_BILE, FIRE_BILE, OOZE_BILE, INFESTATION_BILE, POISON_BILE, WEAVING_BILE, LUCK_BILE, UNLUCK_BILE;
+    public static PotionEffectBileBlock LARGENESS_BILE,SMALLNESS_BILE, VULNERABILITY_BILE, BUOYANCY_BILE;
+
+
+    public static void onInitialize() {
+
+        SMOLDERING_TORCH = registerBlock("smoldering_torch", new SmolderingTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_torch").noCollision().breakInstantly().luminance((state) -> 12).sounds(BlockSoundGroup.WOOD).pistonBehavior(PistonBehavior.DESTROY)));
+        SMOLDERING_WALL_TORCH = registerBlock("smoldering_wall_torch", new SmolderingWallTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_wall_torch").noCollision().breakInstantly().luminance((state) -> 12).sounds(BlockSoundGroup.WOOD).pistonBehavior(PistonBehavior.DESTROY)));
+        EXTINGUISHED_TORCH = registerBlock("extinguished_torch", new TorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_torch").noCollision().breakInstantly().luminance((state) -> 6).sounds(BlockSoundGroup.WOOD).pistonBehavior(PistonBehavior.DESTROY)));
+        EXTINGUISHED_WALL_TORCH = registerBlock("extinguished_wall_torch", new WallTorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_wall_torch").noCollision().breakInstantly().luminance((state) -> 6).sounds(BlockSoundGroup.WOOD).pistonBehavior(PistonBehavior.DESTROY)));
+
+        CORRUPTED_WART_PLANT = registerBlock("corrupted_wart", new NetherWartBlock(getSettings("corrupted_wart", Blocks.NETHER_WART)));
+        WITHERED_WART_PLANT = registerBlock("withered_wart", new NetherWartBlock(getSettings("withered_wart", Blocks.NETHER_WART)));
+
+        CUT_LAPIS = registerBlock("cut_lapis", new Block(getSettings("cut_lapis", Blocks.LAPIS_BLOCK)));
+        CUT_LAPIS_SLAB = registerBlock("cut_lapis_slab", new SlabBlock(getSettings("cut_lapis_slab", CUT_LAPIS)));
+        CUT_LAPIS_STAIRS = registerBlock("cut_lapis_stairs", new StairsBlock(CUT_LAPIS.getDefaultState(), getSettings("cut_lapis_stairs", CUT_LAPIS)));
+
+        POLISHED_STONE = registerBlock("polished_stone", new Block(getSettings("polished_stone", Blocks.STONE)));
+        POLISHED_STONE_SLAB = registerBlock("polished_stone_slab", new SlabBlock(getSettings("polished_stone_slab", POLISHED_STONE)));
+        POLISHED_STONE_STAIRS = registerBlock("polished_stone_stairs", new StairsBlock(POLISHED_STONE.getDefaultState(), getSettings("polished_stone_stairs", POLISHED_STONE)));
+
+        TERRACOTTA_BRICKS = registerBlock("terracotta_bricks", new Block(getSettings("terracotta_bricks", Blocks.TERRACOTTA)));
+        TERRACOTTA_BRICK_SLAB = registerBlock("terracotta_brick_slab", new SlabBlock(getSettings("terracotta_brick_slab", TERRACOTTA_BRICKS)));
+        TERRACOTTA_BRICK_STAIRS = registerBlock("terracotta_brick_stairs", new StairsBlock(TERRACOTTA_BRICKS.getDefaultState(), getSettings("terracotta_brick_stairs", TERRACOTTA_BRICKS)));
+        TERRACOTTA_BRICK_WALL = registerBlock("terracotta_brick_wall", new WallBlock(getSettings("terracotta_brick_wall", TERRACOTTA_BRICKS)));
+        TERRACOTTA_TILES = registerBlock("terracotta_tiles", new Block(getSettings("terracotta_tiles", Blocks.TERRACOTTA)));
+        TERRACOTTA_TILE_SLAB = registerBlock("terracotta_tile_slab", new SlabBlock(getSettings("terracotta_tile_slab", TERRACOTTA_TILES)));
+        TERRACOTTA_TILE_STAIRS = registerBlock("terracotta_tile_stairs", new StairsBlock(TERRACOTTA_TILES.getDefaultState(), getSettings("terracotta_tile_stairs", TERRACOTTA_TILES)));
+        TERRACOTTA_TILE_WALL = registerBlock("terracotta_tile_wall", new WallBlock(getSettings("terracotta_tile_wall", TERRACOTTA_TILES)));
+        CHISELED_TERRACOTTA = registerBlock("chiseled_terracotta", new Block(getSettings("chiseled_terracotta", Blocks.TERRACOTTA)));
+
+        DRIPSTONE_SLAB = registerBlock("dripstone_slab", new SlabBlock(getSettings("dripstone_slab", Blocks.DRIPSTONE_BLOCK)));
+        DRIPSTONE_STAIRS = registerBlock("dripstone_stairs", new StairsBlock(Blocks.DRIPSTONE_BLOCK.getDefaultState(), getSettings("dripstone_stairs", Blocks.DRIPSTONE_BLOCK)));
+        DRIPSTONE_WALL = registerBlock("dripstone_wall", new WallBlock(getSettings("dripstone_wall", Blocks.DRIPSTONE_BLOCK)));
+        POLISHED_DRIPSTONE = registerBlock("polished_dripstone", new Block(getSettings("polished_dripstone", Blocks.DRIPSTONE_BLOCK)));
+        POLISHED_DRIPSTONE_SLAB = registerBlock("polished_dripstone_slab", new SlabBlock(getSettings("polished_dripstone_slab", POLISHED_DRIPSTONE)));
+        POLISHED_DRIPSTONE_STAIRS = registerBlock("polished_dripstone_stairs", new StairsBlock(POLISHED_DRIPSTONE.getDefaultState(), getSettings("polished_dripstone_stairs", POLISHED_DRIPSTONE)));
+        POLISHED_DRIPSTONE_WALL = registerBlock("polished_dripstone_wall", new WallBlock(getSettings("polished_dripstone_wall", POLISHED_DRIPSTONE)));
+        DRIPSTONE_PILLAR = registerBlock("dripstone_pillar", new PillarBlock(getSettings("dripstone_pillar", POLISHED_DRIPSTONE)));
+        DRIPSTONE_BRICKS = registerBlock("dripstone_bricks", new Block(getSettings("dripstone_bricks", POLISHED_DRIPSTONE)));
+        DRIPSTONE_BRICK_SLAB = registerBlock("dripstone_brick_slab", new SlabBlock(getSettings("dripstone_brick_slab", DRIPSTONE_BRICKS)));
+        DRIPSTONE_BRICK_STAIRS = registerBlock("dripstone_brick_stairs", new StairsBlock(DRIPSTONE_BRICKS.getDefaultState(), getSettings("dripstone_brick_stairs", DRIPSTONE_BRICKS)));
+        DRIPSTONE_BRICK_WALL = registerBlock("dripstone_brick_wall", new WallBlock(getSettings("dripstone_brick_wall", DRIPSTONE_BRICKS)));
+
+        // Clay & Grey Mud
+        GRAY_CLAY = (MoistBlock) registerBlock("gray_clay", new MoistBlock(getSettings("gray_clay", Blocks.CLAY).strength(1.1f, 2.5f).slipperiness(0.92f).velocityMultiplier(0.98f).sounds(BlockSoundGroup.PACKED_MUD), null, Blocks.CYAN_TERRACOTTA));
+        GRAY_MUD = (CustomMudBlock)registerBlock("gray_mud", new CustomMudBlock(getSettings("gray_mud", Blocks.DIRT).mapColor(MapColor.GRAY).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).solid().suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.GRAY_CLAY, Blocks.CYAN_TERRACOTTA));
+        ((MoistBlock)GRAY_CLAY).wetterVersion = GRAY_MUD;
+
+        // Brown Mud & Clay
+        BROWN_CLAY = (MoistBlock)registerBlock("brown_clay", new MoistBlock(getSettings("brown_clay", Blocks.PACKED_MUD).strength(1.1f, 2.5f).slipperiness(0.92f).sounds(BlockSoundGroup.PACKED_MUD), null, Blocks.LIGHT_GRAY_TERRACOTTA));
+        BROWN_MUD = (CustomMudBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.BROWN).dynamicBounds().allowsSpawning(Blocks::never).blockVision(Blocks::always).solid().suffocates(Blocks::never).sounds(BlockSoundGroup.MUD), CustomBlocks.BROWN_CLAY, Blocks.LIGHT_GRAY_TERRACOTTA));
+        ((MoistBlock)BROWN_CLAY).wetterVersion = BROWN_MUD;
+
+        BROWN_CLAY_BRICKS = (MoistBlock)registerBlock("brown_clay_bricks", new MoistBlock(getSettings("brown_clay_bricks", Blocks.MUD_BRICKS).slipperiness(0.98f), null, TERRACOTTA_BRICKS));
+        BROWN_CLAY_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_clay_brick_slab", new MoistSlabBlock(getSettings("brown_clay_brick_slab", BROWN_CLAY_BRICKS), null, TERRACOTTA_BRICK_SLAB));
+        BROWN_CLAY_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_clay_brick_stairs", new MoistStairsBlock(getSettings("brown_clay_brick_stairs", BROWN_CLAY_BRICKS), BROWN_CLAY_BRICKS.getDefaultState(), null, TERRACOTTA_BRICK_STAIRS));
+        BROWN_CLAY_BRICK_WALL = (MoistWallBlock)registerBlock("brown_clay_brick_wall", new MoistWallBlock(getSettings("brown_clay_brick_wall", BROWN_CLAY_BRICKS), null, TERRACOTTA_BRICK_WALL));
+        BROWN_MUD_BRICKS = (MoistBlock)registerBlock("brown_mud_bricks", new MoistBlock(getSettings("brown_mud_bricks", BROWN_MUD).strength(1.1f, 2.5f).slipperiness(0.92f).velocityMultiplier(0.94f).sounds(BlockSoundGroup.MUD), BROWN_CLAY_BRICKS));
+        BROWN_MUD_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_mud_brick_slab", new MoistSlabBlock(getSettings("brown_mud_brick_slab", BROWN_MUD_BRICKS), BROWN_CLAY_BRICK_SLAB));
+        BROWN_MUD_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_mud_brick_stairs", new MoistStairsBlock(getSettings("brown_mud_brick_stairs", BROWN_MUD_BRICKS), BROWN_MUD_BRICKS.getDefaultState(), BROWN_CLAY_BRICK_SLAB));
+        BROWN_MUD_BRICK_WALL =(MoistWallBlock)registerBlock("brown_mud_brick_wall", new MoistWallBlock(getSettings("brown_mud_brick_wall", BROWN_MUD_BRICKS), BROWN_CLAY_BRICK_WALL));
+        ((MoistBlock)BROWN_CLAY_BRICKS).wetterVersion = BROWN_MUD_BRICKS;
+        ((MoistSlabBlock)BROWN_CLAY_BRICK_SLAB).wetterVersion = BROWN_MUD_BRICK_SLAB;
+        ((MoistStairsBlock)BROWN_CLAY_BRICK_STAIRS).wetterVersion = BROWN_MUD_BRICK_STAIRS;
+        ((MoistWallBlock)BROWN_MUD_BRICK_WALL).wetterVersion = BROWN_MUD_BRICK_WALL;
+
+        WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrassBlock(getSettings("wheat_grass", Blocks.SHORT_GRASS)));
+        WILD_WHEAT = registerBlock("wild_wheat", new WheatGrassBlock(getSettings("wild_wheat", Blocks.SHORT_GRASS)));
+        CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
+
+        CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM).luminance((state) -> 3 + state.get(Properties.AGE_2) * 3)));
+
+        DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, StatusEffects.WITHER, 210, 0, 4, 0.4f);
+        CORRUPTED_BILE = registerBileBlock("corrupted_bile", StatusEffects.HUNGER, 210, 1);
+        HARMFUL_BILE = registerBileBlock("harmful_bile", StatusEffects.INSTANT_DAMAGE);
+        HEALTHY_BILE = registerBileBlock("healthy_bile", StatusEffects.INSTANT_HEALTH);
+        REGENERATION_BILE = registerBileBlock("regeneration_bile", StatusEffects.REGENERATION);
+        WITHERING_BILE = registerBileBlock("withering_bile", StatusEffects.WITHER);
+        MINING_SPEED_BILE = registerBileBlock("mining_speed_bile", StatusEffects.HASTE);            // New potion!
+        MINING_FATIGUE_BILE = registerBileBlock("mining_fatigue_bile", StatusEffects.MINING_FATIGUE); // New potion!
+        TOUGHNESS_BILE = registerBileBlock("toughness_bile", StatusEffects.RESISTANCE);
+        VISION_BILE = registerBileBlock("vision_bile", StatusEffects.NIGHT_VISION);
+        DARKNESS_BILE = registerBileBlock("darkness_bile", StatusEffects.DARKNESS);              // New potion!
+        LEAPING_BILE = registerBileBlock("leaping_bile", StatusEffects.JUMP_BOOST);
+        SLOW_FALL_BILE = registerBileBlock("slow_fall_bile", StatusEffects.SLOW_FALLING);
+        LEVITATION_BILE = registerBileBlock("levitation_bile", StatusEffects.LEVITATION, 200, 1);       // New potion!
+        SPEED_BILE = registerBileBlock("speed_bile", StatusEffects.SPEED, 300, 0);
+        SLOWNESS_BILE = registerBileBlock("slowness_bile", StatusEffects.SLOWNESS);
+        BREATH_BILE = registerBileBlock("breath_bile", StatusEffects.WATER_BREATHING);
+        INVISIBILITY_BILE = registerBileBlock("invisibility_bile", StatusEffects.INVISIBILITY);
+        GLOWING_BILE = registerBileBlock("glowing_bile", StatusEffects.GLOWING, StatusEffects.GLOWING, 300, 0, 9, 1.0F);
+        WEAKNESS_BILE = registerBileBlock("weakness_bile", StatusEffects.WEAKNESS);
+        STRENGTH_BILE = registerBileBlock("strength_bile", StatusEffects.STRENGTH); //-> Will be replacing Blaze Powder
+        WIND_BILE = registerBileBlock("wind_bile", StatusEffects.WIND_CHARGED);
+        FIRE_BILE = registerBileBlock("fire_bile", StatusEffects.FIRE_RESISTANCE); //-> Will be replacing Magma Cream
+        OOZE_BILE = registerBileBlock("ooze_bile", StatusEffects.OOZING);
+        INFESTATION_BILE = registerBileBlock("infestation_bile", StatusEffects.INFESTED);
+        POISON_BILE = registerBileBlock("poison_bile", StatusEffects.POISON);
+        WEAVING_BILE = registerBileBlock("weaving_bile", StatusEffects.WEAVING);
+        LUCK_BILE = registerBileBlock("luck_bile", StatusEffects.LUCK);
+        UNLUCK_BILE = registerBileBlock("unluck_bile", StatusEffects.UNLUCK);
+        VULNERABILITY_BILE = registerBileBlock("vulnerability_bile", VulnerabilityStatusEffect.COLOR, CustomStatusEffects.VULNERABILITY); // New potion!
+        BUOYANCY_BILE = registerBileBlock("buoyancy_bile", BuoyancyStatusEffect.COLOR, CustomStatusEffects.BUOYANCY);       // New potion & effect!
+        LARGENESS_BILE = registerBileBlock("largeness_bile", LargenessStatusEffect.COLOR, CustomStatusEffects.LARGENESS);     // New potion & effect!
+        SMALLNESS_BILE = registerBileBlock("smallness_bile", SmallnessStatusEffect.COLOR, CustomStatusEffects.SMALLNESS);     // New potion & effect!
+    }
+
+
+    private static AbstractBlock.Settings getSettings(String name) {
+        return AbstractBlock.Settings.create().registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(VersusMod.MOD_ID, name)));
+    }
+
+    private static AbstractBlock.Settings getSettings(String name, Block blockToCopy) {
+        return AbstractBlock.Settings.copy(blockToCopy).registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(VersusMod.MOD_ID, name)));
+    }
+    private static Block registerBlock(String name, Block block) {
+        Registry.register(Registries.BLOCK, Identifier.of(VersusMod.MOD_ID, name), block);
+        return block;
+    }
+
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, int maxDuration, int amplifier) {
+        return registerBileBlock(name, statusEffect, statusEffect, maxDuration, amplifier);
+    }
+
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect) {
+        return registerBileBlock(name, statusEffect.value().getColor(), statusEffect);
+    }
+
+    private static PotionEffectBileBlock registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffect) {
+        return registerBileBlock(name, ColorHelper.fullAlpha(color), statusEffect, 140, 0, 3, 0.8f);
+    }
+
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int maxDuration, int amplifier) {
+        return registerBileBlock(name, statusEffect, statusEffectToGrant, maxDuration, amplifier, 3, 0.6f);
+    }
+
+    private static PotionEffectBileBlock registerBileBlock(String name, RegistryEntry<StatusEffect> statusEffect, RegistryEntry<StatusEffect> statusEffectToGrant, int maxDuration, int amplifier, int luminance, float ambientOcclusion) {
+        return registerBileBlock(name, ColorHelper.fullAlpha(statusEffect.value().getColor()), statusEffectToGrant, maxDuration, amplifier, luminance, ambientOcclusion);
+    }
+
+    private static PotionEffectBileBlock registerBileBlock(String name, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int maxDuration, int amplifier, int luminance, float ambientOcclusion) {
+        AbstractBlock.Settings settings = getSettings(name).sounds(BlockSoundGroup.SLIME).luminance(state -> luminance).noCollision().strength(0.2f, 0.4f).pistonBehavior(PistonBehavior.DESTROY).allowsSpawning((state, world, pos, entityType) -> false);
+        return (PotionEffectBileBlock) registerBlock(name, new PotionEffectBileBlock(settings, color, statusEffectToGrant, maxDuration, amplifier, ambientOcclusion));
+    }
+
+}
