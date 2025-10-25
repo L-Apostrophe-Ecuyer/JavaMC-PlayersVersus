@@ -50,7 +50,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     @Shadow @Nullable public final GameRenderer gameRenderer;
     @Shadow public final GameOptions options;
 
-    private static final Hand[] OFFHAND_FIRST =  new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND}, MAINHAND_FIRST =  new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND};
+    private static final Hand[] OFFHAND_FIRST =  new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND}, MAINHAND_FIRST = new Hand[] {Hand.MAIN_HAND, Hand.OFF_HAND};
 
     public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, GameOptions options) { super(string);
         this.gameRenderer = gameRenderer;
