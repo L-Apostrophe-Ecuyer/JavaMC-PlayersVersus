@@ -83,10 +83,10 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                         }
 
                         // Calculate the actual damage reduction amount:
-                        float damageReductionAmount = blocksAttacksComponent.getDamageReductionAmount(source, damageAmount, angle);
-                        blocksAttacksComponent.onShieldHit(this.getEntityWorld(), blockingItem, (LivingEntity) ((Object)this), this.getActiveHand(), damageReductionAmount);
+                        float damageTaken = blocksAttacksComponent.getDamageReductionAmount(source, damageAmount, angle);
+                        blocksAttacksComponent.onShieldHit(this.getEntityWorld(), blockingItem, (LivingEntity) ((Object)this), this.getActiveHand(), damageTaken);
                         if (!source.isIn(DamageTypeTags.IS_PROJECTILE) && source.getSource() instanceof LivingEntity livingEntity) this.takeShieldHit(world, livingEntity);
-                        if (damageReductionAmount <= 0.0F) return damageReductionAmount;
+                        if (damageTaken <= 0.0F) return damageTaken;
 
                         // Thorns will deal damage to the attacker
                         int levelThorns = EnchantRegistryHelper.getLevel(this.getEntityWorld(), blockingItem, Enchantments.THORNS);
@@ -101,24 +101,30 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                             }
                             if(levelRiposte > 0f) reflectedDamage += 0.2F * damageAmount * levelRiposte;
                             ((LivingEntity) ((Object) this)).clearActiveItem();
-                            damageReductionAmount = damageAmount; // Block all damage
+                            damageTaken = damageAmount; // Block all damage
                         }
 
                         // Deal extra knockback and reflect damage onto attacker:
-                        if((wasAttackParried || reflectedDamage > 0.0f) && damageReductionAmount > 0.0F && source.getSource() instanceof LivingEntity attacker && !attacker.equals(this)) {
+                        if((wasAttackParried || reflectedDamage > 0.0f) && damageTaken > 0.0F && source.getSource() instanceof LivingEntity attacker && !attacker.equals(this)) {
                             double extraKnockbackStrength = wasAttackParried ? 0.8 : 0.4;
                             if(reflectedDamage > 0 && source.getName() != "thorns") {
-                                if ((LivingEntity) (Object) this instanceof PlayerEntity player) attacker.damage((ServerWorld) this.getEntityWorld(), this.getDamageSources().playerAttack(player), reflectedDamage);
+                                if (this.isPlayer() && (LivingEntity) (Object) this instanceof PlayerEntity player) attacker.damage((ServerWorld) this.getEntityWorld(), this.getDamageSources().playerAttack(player), reflectedDamage);
                                 else attacker.damage((ServerWorld) this.getEntityWorld(), this.getDamageSources().mobAttack((LivingEntity) ((Object)this)), reflectedDamage);
                             }
                             attacker.takeKnockback(extraKnockbackStrength, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
                         }
 
-                        // Check if mob was blocking shield and the shield is now disabled:
-                        else if(this.getEntityWorld() instanceof ServerWorld serverWorld && (LivingEntity) (Object) this instanceof MobEntity mob && source.getSource() instanceof LivingEntity attacker) {
-                            if (attacker.getWeaponDisableBlockingForSeconds() > 0.0F) {
+                        else if(this.getEntityWorld() instanceof ServerWorld serverWorld && source.getSource() instanceof LivingEntity attacker) {
+                            float weaponDisableForBlocking = attacker.getWeaponDisableBlockingForSeconds();
 
-                                // Drop the shield:
+                            // For player, disable shield:
+                            if(this.isPlayer() && (LivingEntity) (Object) this instanceof PlayerEntity player) {
+                                player.resetLastAttackedTicks();
+                                if(!wasAttackParried) player.getItemCooldownManager().set(blockingItem, 2 + (int)(20f * weaponDisableForBlocking));
+                            }
+
+                            // Check if mob was blocking shield and the shield is now disabled:
+                            else if(weaponDisableForBlocking > 0.0f && (LivingEntity) (Object) this instanceof MobEntity mob){
                                 ItemStack shieldItemStack = mob.getOffHandStack();
                                 if(mob.isPersistent() || serverWorld.getRandom().nextDouble() < 0.1) {
                                     ItemEntity itemEntity = new ItemEntity(this.getEntityWorld(), this.getX(), this.getY(), this.getZ(), shieldItemStack.copy());
@@ -135,7 +141,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                         }
 
                         // Return:
-                        return damageReductionAmount;
+                        return damageTaken;
                     }
                 } else {
                     return 0.0F;

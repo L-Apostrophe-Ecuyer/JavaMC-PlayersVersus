@@ -258,7 +258,7 @@ public class VanillaItems {
 
             // Shields are instant:
             context.modify(Items.SHIELD, builder -> {
-                builder.add(DataComponentTypes.BLOCKS_ATTACKS, createDamageBlockingComponent(0.0625F, 1.0F, 0.0F, 1.0F, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK));
+                builder.add(DataComponentTypes.BLOCKS_ATTACKS, createDamageBlockingComponent(0.0625F, 1.0F, 5.0F, 0.8F, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK));
             });
 
             double extra = 0.0;
