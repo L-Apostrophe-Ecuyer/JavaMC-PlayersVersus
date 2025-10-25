@@ -3,10 +3,6 @@ package frootloops.versus.mod;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
-import frootloops.versus.mixin.LivingEntityAccessor;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.minecraft.block.BlockState;
-import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
@@ -16,28 +12,18 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
-//import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
-
-import java.util.List;
 
 public abstract class Combat {
 
@@ -110,10 +96,9 @@ public abstract class Combat {
 
     public static double getAttackRange(PlayerEntity player, float attackChargeProgress) {
         double reachAttributeValue = player.getAttributeValue(EntityAttributes.ENTITY_INTERACTION_RANGE);
-        attackChargeProgress = Math.min(1.0f, attackChargeProgress - 0.5f);
-        double chargeTimeBonus = attackChargeProgress * attackChargeProgress;
+        double chargeTimeMult = Math.min(1.0f, attackChargeProgress);
         double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
-        return reachAttributeValue + chargeTimeBonus + ridingBonus;
+        return reachAttributeValue * chargeTimeMult + ridingBonus;
     }
 
     public static double getAttackRange(PlayerEntity player) {
