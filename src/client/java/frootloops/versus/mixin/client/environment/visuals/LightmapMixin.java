@@ -1,6 +1,5 @@
 package frootloops.versus.mixin.client.environment.visuals;
 
-import frootloops.versus.VersusMod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -11,7 +10,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.dimension.DimensionType;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -29,7 +27,7 @@ public abstract class LightmapMixin {
     protected LightmapMixin(MinecraftClient client, GameRenderer renderer) {
         this.client = client;
     }
-    private static final Vector3f NIGHT_VISION_SKY_COLOR_OVERWORLD = new Vector3f(0.6F, 0.5F, 0.3F);
+    private static final Vector3f NIGHT_VISION_SKY_COLOR_OVERWORLD = new Vector3f(0.5F, 0.46F, 0.38F);
     private static final Vector3f NIGHT_VISION_SKY_COLOR_NETHER = new Vector3f(0.9F, 1.0F, 0.9F);
     private static int nightVisionAmplifier = -1;
 
@@ -52,7 +50,7 @@ public abstract class LightmapMixin {
                 return l/2f;
             }
             nightVisionAmplifier = effect.getAmplifier();
-            return nightVisionAmplifier * 0.2f + 0.35f + l/16f;
+            return nightVisionAmplifier * 0.15f + 0.25f + l/16f;
 
         } else {
             nightVisionAmplifier = -1;
