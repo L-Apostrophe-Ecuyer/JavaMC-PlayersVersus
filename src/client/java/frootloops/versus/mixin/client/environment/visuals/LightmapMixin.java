@@ -50,7 +50,7 @@ public abstract class LightmapMixin {
                 return l/2f;
             }
             nightVisionAmplifier = effect.getAmplifier();
-            return nightVisionAmplifier * 0.1f + 0.15f + l/16f;
+            return nightVisionAmplifier * 0.15f + 0.125f + l/16f;
 
         } else {
             nightVisionAmplifier = -1;
@@ -60,7 +60,7 @@ public abstract class LightmapMixin {
 
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 8)
     private float reducedAmbientLight(float n) {
-        if(nightVisionAmplifier > -1) return n - 0.05f + 0.01f * nightVisionAmplifier;
+        if(nightVisionAmplifier > -1) return n - 0.05f + 0.015f * nightVisionAmplifier;
         return n - 0.03f;
     }
 
