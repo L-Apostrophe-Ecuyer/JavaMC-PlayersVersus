@@ -6,8 +6,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.AbstractChestBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.WindowEventHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -83,11 +81,11 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                             }
 
                             // Use chest if item frame clicked on accident
-                            if(entity instanceof ItemFrameEntity itemFrameEntity) {
-                                BlockPos pos = itemFrameEntity.getAttachedBlockPos();
+                            if(!this.player.isSneaking() && entity instanceof ItemFrameEntity itemFrameEntity) {
+                                BlockPos pos = itemFrameEntity.getAttachedBlockPos().offset(itemFrameEntity.getFacing(), -1);
                                 BlockState state = world.getBlockState(pos);
                                 if(state.getBlock() instanceof AbstractChestBlock) {
-                                    BlockHitResult blockHitResult = new BlockHitResult(entityHitResult.getPos(), itemFrameEntity.getHorizontalFacing(), pos, false);
+                                    BlockHitResult blockHitResult = new BlockHitResult(crosshairTarget.getPos(), itemFrameEntity.getFacing(), pos, false);
                                     actionResult = this.interactionManager.interactBlock(this.player, hand, blockHitResult);
                                     if (actionResult instanceof ActionResult.Success success && success.swingSource() == ActionResult.SwingSource.CLIENT) this.player.swingHand(hand);
                                     info.cancel();
