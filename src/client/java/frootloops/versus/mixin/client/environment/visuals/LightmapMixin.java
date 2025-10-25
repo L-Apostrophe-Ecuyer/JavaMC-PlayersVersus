@@ -27,7 +27,7 @@ public abstract class LightmapMixin {
     protected LightmapMixin(MinecraftClient client, GameRenderer renderer) {
         this.client = client;
     }
-    private static final Vector3f NIGHT_VISION_SKY_COLOR_OVERWORLD = new Vector3f(0.5F, 0.46F, 0.38F);
+    private static final Vector3f NIGHT_VISION_SKY_COLOR_OVERWORLD = new Vector3f(0.5F, 0.4F, 0.35F);
     private static final Vector3f NIGHT_VISION_SKY_COLOR_NETHER = new Vector3f(0.9F, 1.0F, 0.9F);
     private static int nightVisionAmplifier = -1;
 
@@ -50,7 +50,7 @@ public abstract class LightmapMixin {
                 return l/2f;
             }
             nightVisionAmplifier = effect.getAmplifier();
-            return nightVisionAmplifier * 0.15f + 0.25f + l/16f;
+            return nightVisionAmplifier * 0.04f + 0.2f + l/16f;
 
         } else {
             nightVisionAmplifier = -1;
@@ -60,7 +60,7 @@ public abstract class LightmapMixin {
 
     @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 8)
     private float reducedAmbientLight(float n) {
-        if(nightVisionAmplifier > -1) return n - 0.05f + 0.02f * nightVisionAmplifier;
+        if(nightVisionAmplifier > -1) return n - 0.05f + 0.01f * nightVisionAmplifier;
         return n - 0.03f;
     }
 
