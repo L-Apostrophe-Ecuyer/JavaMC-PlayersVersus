@@ -1,6 +1,7 @@
 package frootloops.versus.mod.environment.worldgen.debug;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -58,14 +59,19 @@ import java.util.function.Consumer;
  * <p>Metrics, measured right after the carvers ran:
  * <ul>
  *   <li>water at or above y 64: the Players Versus aquifer never places any there;</li>
- *   <li>stone inside carved space below y -8: stone there is an aquifer barrier written over deepslate by a carver
- *   (quirk Q6);</li>
+ *   <li>stone placed by carvers in y -8..63: carved positions that hold stone after the carvers ran but held something
+ *   else before. The aquifer's barriers are the only source: vanilla's aquifer tells carvers to leave barrier blocks
+ *   alone, while the Players Versus aquifer hands them stone (quirk Q6). Vanilla world types should report 0;</li>
  *   <li>basin seam ratio: water/non-water changes across chunk borders divided by the same count across chunk
- *   middles, for y 0..31. About 1 means no seams; much more than 1 along x is quirk Q1.</li>
+ *   middles, for y 0..31. About 1 means no seams;</li>
+ *   <li>water in y 0..31 by x (and z) offset inside the chunk, relative to the mean. Quirk Q1 predicts extra water at
+ *   x offsets 0..7 only; z is the control;</li>
  *   <li>fluid ticks queued: fluid blocks the aquifer marked for a fluid update during NOISE and CARVERS, per chunk,
  *   overall and for y 0..31 next to the water blocks there. Each one runs when its chunk becomes a full chunk. Almost as
  *   many ticks as water blocks in y 0..31 is quirk Q8.</li>
  * </ul>
+ * The report also holds text maps (one character per 8x8 blocks, north up) of the surface and its biomes, so results
+ * can be compared without the images.
  */
 public final class WorldgenBench {
 
@@ -78,7 +84,10 @@ public final class WorldgenBench {
     private static final int BASIN_SEAM_MIN_Y = 0;
     private static final int BASIN_SEAM_MAX_Y = 32;
     private static final int WATER_CEILING_Y = 64;
-    private static final int DEEPSLATE_ONLY_BELOW_Y = -8;
+    /** Covers every aquifer barrier: the lowest ones are basin barriers at y -3. */
+    private static final int CARVER_BAND_MIN_Y = -8;
+    private static final int CARVER_BAND_MAX_Y = 64;
+    private static final int MAP_CELL = 8;
 
     private WorldgenBench() {
     }
@@ -116,6 +125,9 @@ public final class WorldgenBench {
     public static Path run(ServerWorld world, ChunkPos center, int radius, Consumer<String> log) throws IOException {
         ServerChunkManager chunkManager = world.getChunkManager();
         String settings = describeGenerator(chunkManager.getChunkGenerator());
+        String gate = chunkManager.getChunkGenerator() instanceof NoiseChunkGenerator noiseGenerator
+                ? "players_versus_aquifer_and_ore_veins=" + PvWorldgen.isPvGenerator(noiseGenerator.getSettings().value())
+                : "not a noise generator";
         int minChunkX = center.x - radius;
         int minChunkZ = center.z - radius;
         int chunksPerSide = radius * 2 + 1;
@@ -137,6 +149,13 @@ public final class WorldgenBench {
             log.accept(String.format(Locale.ROOT, "[pvwg] %-9s %9.1f ms  %7.2f ms/chunk",
                     status.getId(), elapsed / 1e6, elapsed / 1e6 / chunkCount));
 
+            if (status == ChunkStatus.SURFACE) {
+                for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
+                    for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
+                        region.captureBeforeCarvers(chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.SURFACE, true));
+                    }
+                }
+            }
             if (status == ChunkStatus.CARVERS) {
                 for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
                     for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
@@ -151,7 +170,7 @@ public final class WorldgenBench {
                 .resolve("bench-" + timestamp + "-" + settings.replaceAll("[^A-Za-z0-9_.-]", "_"));
         Files.createDirectories(dir);
         region.writeImages(dir);
-        List<String> report = region.report(settings, world.getSeed(), center, radius, stageNanos, chunkCount);
+        List<String> report = region.report(settings, gate, world.getSeed(), center, radius, stageNanos, chunkCount);
         Files.write(dir.resolve("report.txt"), report);
         for (String line : report) {
             if (line.startsWith("metric")) log.accept("[pvwg] " + line);
@@ -177,13 +196,15 @@ public final class WorldgenBench {
 
         private final int minX, minZ, size, bottomY, topY;
         private final int[] surfaceY, floorY, surfaceColor;
+        private final char[] surfaceClass;
         private final int[] surfaceBiome;
         private final int[][] layerBiome = new int[BIOME_LAYER_YS.length][];
         private final byte[][] slices = new byte[SLICE_YS.length][];
         private final BitSet basinWater;
+        private final BitSet stoneBeforeCarvers;
         private final List<String> biomeIds = new ArrayList<>();
         private final Map<String, Integer> biomeIndex = new HashMap<>();
-        private long waterAtOrAboveCeiling, stoneInCarvedDeepslate, carvedDeepslateZone;
+        private long waterAtOrAboveCeiling, carverPlacedStone, carvedInBand;
         private long fluidTicksQueued, fluidTicksQueuedInBasinLayers;
         private int protoChunks;
 
@@ -197,10 +218,35 @@ public final class WorldgenBench {
             this.surfaceY = new int[columns];
             this.floorY = new int[columns];
             this.surfaceColor = new int[columns];
+            this.surfaceClass = new char[columns];
             this.surfaceBiome = new int[columns];
             for (int i = 0; i < BIOME_LAYER_YS.length; i++) this.layerBiome[i] = new int[columns];
             for (int i = 0; i < SLICE_YS.length; i++) this.slices[i] = new byte[columns];
             this.basinWater = new BitSet(columns * (BASIN_SEAM_MAX_Y - BASIN_SEAM_MIN_Y));
+            this.stoneBeforeCarvers = new BitSet(columns * (CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y));
+        }
+
+        private int column(int x, int z) {
+            return (x - this.minX) + (z - this.minZ) * this.size;
+        }
+
+        /** Remembers where stone was before the carvers ran, to tell stone the carvers placed from stone they skipped. */
+        void captureBeforeCarvers(Chunk chunk) {
+            ChunkPos chunkPos = chunk.getPos();
+            BlockPos.Mutable pos = new BlockPos.Mutable();
+            int layers = CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y;
+            for (int localX = 0; localX < 16; localX++) {
+                for (int localZ = 0; localZ < 16; localZ++) {
+                    int x = chunkPos.getStartX() + localX;
+                    int z = chunkPos.getStartZ() + localZ;
+                    int column = column(x, z);
+                    for (int y = CARVER_BAND_MIN_Y; y < CARVER_BAND_MAX_Y; y++) {
+                        if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.STONE)) {
+                            this.stoneBeforeCarvers.set(column * layers + (y - CARVER_BAND_MIN_Y));
+                        }
+                    }
+                }
+            }
         }
 
         void capture(Chunk chunk) {
@@ -213,7 +259,7 @@ public final class WorldgenBench {
                 for (int localZ = 0; localZ < 16; localZ++) {
                     int x = chunkPos.getStartX() + localX;
                     int z = chunkPos.getStartZ() + localZ;
-                    int column = (x - this.minX) + (z - this.minZ) * this.size;
+                    int column = column(x, z);
 
                     int surface = this.topY;
                     while (surface >= this.bottomY && chunk.getBlockState(pos.set(x, surface, z)).isAir()) surface--;
@@ -222,6 +268,7 @@ public final class WorldgenBench {
                     this.surfaceY[column] = surface;
                     this.floorY[column] = floor;
                     this.surfaceColor[column] = surface >= this.bottomY ? baseColor(chunk.getBlockState(pos.set(x, floor, z))) : 0;
+                    this.surfaceClass[column] = surface > floor ? '~' : surface >= this.bottomY ? mapChar(chunk.getBlockState(pos.set(x, floor, z))) : ' ';
                     this.surfaceBiome[column] = biomeIndex(chunk, x, Math.max(floor, this.bottomY), z);
                     for (int i = 0; i < BIOME_LAYER_YS.length; i++) {
                         this.layerBiome[i][column] = biomeIndex(chunk, x, BIOME_LAYER_YS[i], z);
@@ -239,10 +286,14 @@ public final class WorldgenBench {
                         if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.WATER)) this.waterAtOrAboveCeiling++;
                     }
                     if (carvingMask != null) {
-                        for (int y = this.bottomY; y < DEEPSLATE_ONLY_BELOW_Y; y++) {
+                        int layers = CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y;
+                        for (int y = CARVER_BAND_MIN_Y; y < CARVER_BAND_MAX_Y; y++) {
                             if (!carvingMask.get(localX, y, localZ)) continue;
-                            this.carvedDeepslateZone++;
-                            if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.STONE)) this.stoneInCarvedDeepslate++;
+                            this.carvedInBand++;
+                            if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.STONE)
+                                    && !this.stoneBeforeCarvers.get(column * layers + (y - CARVER_BAND_MIN_Y))) {
+                                this.carverPlacedStone++;
+                            }
                         }
                     }
                 }
@@ -375,13 +426,20 @@ public final class WorldgenBench {
             return (r << 16) | (g << 8) | b;
         }
 
-        List<String> report(String settings, long seed, ChunkPos center, int radius, Map<String, Long> stageNanos, int chunkCount) {
+        List<String> report(String settings, String gate, long seed, ChunkPos center, int radius, Map<String, Long> stageNanos, int chunkCount) {
             List<String> lines = new ArrayList<>();
             lines.add("settings " + settings);
+            lines.add("gate " + gate);
             lines.add("seed " + seed);
             lines.add(String.format(Locale.ROOT, "region center chunk %d,%d radius %d (%d chunks), heights %d..%d",
                     center.x, center.z, radius, chunkCount, this.bottomY, this.topY));
             lines.add("cpus " + Runtime.getRuntime().availableProcessors() + ", java " + System.getProperty("java.version"));
+            lines.add("mods " + FabricLoader.getInstance().getAllMods().stream()
+                    .map(mod -> mod.getMetadata().getId() + " " + mod.getMetadata().getVersion().getFriendlyString())
+                    .filter(mod -> !mod.startsWith("fabric") && !mod.startsWith("java ") && !mod.startsWith("minecraft ")
+                            && !mod.startsWith("mixinextras "))
+                    .sorted()
+                    .collect(java.util.stream.Collectors.joining(", ")));
             long total = 0;
             for (Map.Entry<String, Long> stage : stageNanos.entrySet()) {
                 total += stage.getValue();
@@ -391,10 +449,12 @@ public final class WorldgenBench {
             lines.add(String.format(Locale.ROOT, "time %-9s %10.1f ms %8.2f ms/chunk", "total", total / 1e6, total / 1e6 / chunkCount));
 
             lines.add("metric water_at_or_above_y" + WATER_CEILING_Y + " " + this.waterAtOrAboveCeiling);
-            lines.add(String.format(Locale.ROOT, "metric stone_in_carved_space_below_y%d %d of %d carved positions",
-                    DEEPSLATE_ONLY_BELOW_Y, this.stoneInCarvedDeepslate, this.carvedDeepslateZone));
+            lines.add(String.format(Locale.ROOT, "metric carver_placed_stone_y%d..%d %d of %d carved positions",
+                    CARVER_BAND_MIN_Y, CARVER_BAND_MAX_Y - 1, this.carverPlacedStone, this.carvedInBand));
             lines.add(String.format(Locale.ROOT, "metric basin_seam_ratio_x %.2f", seamRatio(true)));
             lines.add(String.format(Locale.ROOT, "metric basin_seam_ratio_z %.2f", seamRatio(false)));
+            appendWaterByChunkOffset(lines, true);
+            appendWaterByChunkOffset(lines, false);
             lines.add(String.format(Locale.ROOT, "metric fluid_ticks_queued_per_chunk %.1f, in y %d..%d %.1f (water blocks there %.1f)",
                     perChunk(this.fluidTicksQueued), BASIN_SEAM_MIN_Y, BASIN_SEAM_MAX_Y - 1, perChunk(this.fluidTicksQueuedInBasinLayers),
                     this.basinWater.cardinality() / (this.size * this.size / 256.0)));
@@ -405,7 +465,83 @@ public final class WorldgenBench {
                 lines.add("biomes at y " + BIOME_LAYER_YS[i] + ":");
                 appendHistogram(lines, this.layerBiome[i]);
             }
+
+            lines.add("map surface (" + MAP_CELL + "x" + MAP_CELL + " blocks per character, north up):"
+                    + " ~ water  : sand  , gravel  \" grass  * snow/ice  m mud  d dirt  t terracotta  c calcite  # stone  ? other");
+            appendMap(lines, column -> this.surfaceClass[column]);
+            List<String> biomeLegend = new ArrayList<>();
+            lines.add("map surface biomes (legend below):");
+            appendMap(lines, column -> biomeChar(this.surfaceBiome[column]));
+            for (int i = 0; i < this.biomeIds.size(); i++) biomeLegend.add(biomeChar(i) + " " + this.biomeIds.get(i));
+            lines.add("legend " + String.join(", ", biomeLegend));
             return lines;
+        }
+
+        /** Water blocks in y 0..31 per block offset inside the chunk along one axis, relative to the mean of the 16 offsets. */
+        private void appendWaterByChunkOffset(List<String> lines, boolean alongX) {
+            int layers = BASIN_SEAM_MAX_Y - BASIN_SEAM_MIN_Y;
+            long[] counts = new long[16];
+            for (int column = 0; column < this.size * this.size; column++) {
+                int world = alongX ? this.minX + column % this.size : this.minZ + column / this.size;
+                for (int layer = 0; layer < layers; layer++) {
+                    if (this.basinWater.get(column * layers + layer)) counts[world & 15]++;
+                }
+            }
+            double mean = 0;
+            for (long count : counts) mean += count / 16.0;
+            StringBuilder values = new StringBuilder();
+            double low = 0, high = 0;
+            for (int offset = 0; offset < 16; offset++) {
+                double relative = mean == 0 ? 0 : counts[offset] / mean;
+                values.append(String.format(Locale.ROOT, " %.2f", relative));
+                if (offset < 8) low += relative / 8;
+                else high += relative / 8;
+            }
+            String axis = alongX ? "x" : "z";
+            lines.add("metric water_y" + BASIN_SEAM_MIN_Y + ".." + (BASIN_SEAM_MAX_Y - 1) + "_by_" + axis + "_in_chunk" + values);
+            lines.add(String.format(Locale.ROOT, "metric water_y%d..%d_%s0..7_vs_%s8..15 %.3f",
+                    BASIN_SEAM_MIN_Y, BASIN_SEAM_MAX_Y - 1, axis, axis, high == 0 ? 0 : low / high));
+        }
+
+        /** One character per MAP_CELL x MAP_CELL blocks: the most common value in that square. */
+        private void appendMap(List<String> lines, java.util.function.IntFunction<Character> charOf) {
+            for (int cellZ = 0; cellZ < this.size; cellZ += MAP_CELL) {
+                StringBuilder row = new StringBuilder("  ");
+                for (int cellX = 0; cellX < this.size; cellX += MAP_CELL) {
+                    Map<Character, Integer> votes = new HashMap<>();
+                    for (int z = cellZ; z < Math.min(cellZ + MAP_CELL, this.size); z++) {
+                        for (int x = cellX; x < Math.min(cellX + MAP_CELL, this.size); x++) {
+                            votes.merge(charOf.apply(x + z * this.size), 1, Integer::sum);
+                        }
+                    }
+                    row.append(votes.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(' '));
+                }
+                lines.add(row.toString());
+            }
+        }
+
+        private static final String BIOME_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        private static char biomeChar(int index) {
+            return index < BIOME_CHARS.length() ? BIOME_CHARS.charAt(index) : '+';
+        }
+
+        private static char mapChar(BlockState state) {
+            Block block = state.getBlock();
+            if (block == Blocks.SAND || block == Blocks.SANDSTONE || block == Blocks.SUSPICIOUS_SAND
+                    || block == Blocks.RED_SAND || block == Blocks.RED_SANDSTONE) return ':';
+            if (block == Blocks.GRAVEL || block == Blocks.SUSPICIOUS_GRAVEL) return ',';
+            if (block == Blocks.GRASS_BLOCK) return '"';
+            if (block == Blocks.SNOW_BLOCK || block == Blocks.SNOW || block == Blocks.POWDER_SNOW
+                    || block == Blocks.ICE || block == Blocks.PACKED_ICE || block == Blocks.BLUE_ICE) return '*';
+            if (block == Blocks.MUD || block == Blocks.MUDDY_MANGROVE_ROOTS) return 'm';
+            if (block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.ROOTED_DIRT
+                    || block == Blocks.MYCELIUM) return 'd';
+            if (Registries.BLOCK.getId(block).getPath().contains("terracotta")) return 't';
+            if (block == Blocks.CALCITE) return 'c';
+            if (block == Blocks.STONE || block == Blocks.DEEPSLATE || block == Blocks.ANDESITE || block == Blocks.DIORITE
+                    || block == Blocks.GRANITE || block == Blocks.TUFF) return '#';
+            return '?';
         }
 
         private double perChunk(long count) {

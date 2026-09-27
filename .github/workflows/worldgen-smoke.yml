@@ -1,5 +1,5 @@
 # Worldgen benchmark: generates the same region with the vanilla Default world type and the Players Versus world type,
-# and uploads timings, metrics, map images and the server log for both.
+# each alone and next to C2ME and Lithium, and uploads timings, metrics, map images and the server log.
 # It starts a Minecraft server, which requires accepting the Minecraft EULA (https://aka.ms/MinecraftEULA).
 #
 # Two ways to start it:
@@ -40,6 +40,8 @@ jobs:
       fail-fast: false
       matrix:
         level_type: ["minecraft:normal", "players-versus:better_world"]
+        # Other mods (Modrinth projects) to run alongside, for compatibility: the newest release for 1.21.10.
+        mods: ["", "c2me-fabric lithium"]
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
@@ -56,6 +58,18 @@ jobs:
           distribution: 'microsoft'
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
+      - name: resolve compatibility mods
+        id: mods
+        run: |
+          coordinates=""
+          for slug in ${{ matrix.mods }}; do
+            version=$(curl -fsSL -A "L-Apostrophe-Ecuyer/JavaMC-PlayersVersus worldgen-smoke" \
+              "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%221.21.10%22%5D" \
+              | python3 -c 'import json, sys; print(json.load(sys.stdin)[0]["version_number"])')
+            echo "$slug $version"
+            coordinates="$coordinates${coordinates:+,}$slug:$version"
+          done
+          echo "value=$coordinates" >> "$GITHUB_OUTPUT"
       - name: run worldgen smoke test
         run: >
           ./gradlew runWorldgenSmoke
@@ -64,6 +78,7 @@ jobs:
           "-Ppv.seed=$SEED"
           "-Ppv.benchRadius=$RADIUS"
           "-Ppv.benchCenter=$CENTER"
+          "-Ppv.compatMods=${{ steps.mods.outputs.value }}"
       - name: show report
         if: always()
         run: cat run/worldgen-smoke/pvwg/*/report.txt || true
@@ -76,7 +91,8 @@ jobs:
       - name: artifact name
         id: name
         if: always()
-        run: echo "value=worldgen-smoke-$(echo '${{ matrix.level_type }}' | tr ':' '-')" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "value=worldgen-smoke-$(echo '${{ matrix.level_type }} ${{ matrix.mods }}' | xargs | tr ': ' '-_')" >> "$GITHUB_OUTPUT"
       - name: upload results
         if: always()
         uses: actions/upload-artifact@v4
