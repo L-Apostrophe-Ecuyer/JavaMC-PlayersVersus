@@ -33,6 +33,7 @@ loom {
 		// Headless worldgen benchmark: starts a dedicated server on a fresh world, generates a square of chunks
 		// stage by stage, writes timings, metrics and map images to run/worldgen-smoke/pvwg/, then stops.
 		// Options: -Ppv.levelType=<world preset> -Ppv.seed=<seed> -Ppv.benchRadius=<chunks> -Ppv.benchCenter=<x,z>
+		// -Ppv.keepWorld=true reopens the existing world instead of starting a fresh one.
 		// The server only starts with -Ppv.acceptEula=true (you accept https://aka.ms/MinecraftEULA).
 		worldgenSmoke {
 			server()
@@ -48,6 +49,7 @@ loom {
 
 def worldgenSmokeDir = file("run/worldgen-smoke")
 def worldgenSmokeAcceptEula = providers.gradleProperty("pv.acceptEula").getOrElse("false") == "true"
+def worldgenSmokeKeepWorld = providers.gradleProperty("pv.keepWorld").getOrElse("false") == "true"
 def worldgenSmokeLevelType = providers.gradleProperty("pv.levelType").getOrElse("players-versus:better_world")
 def worldgenSmokeProperties = [
 		"level-seed"         : providers.gradleProperty("pv.seed").getOrElse("8675309"),
@@ -65,7 +67,9 @@ if (worldgenSmokeLevelType != "server-default") {
 tasks.matching { it.name == "runWorldgenSmoke" }.configureEach {
 	doFirst {
 		worldgenSmokeDir.mkdirs()
-		new File(worldgenSmokeDir, "world").deleteDir()
+		if (!worldgenSmokeKeepWorld) {
+			new File(worldgenSmokeDir, "world").deleteDir()
+		}
 		new File(worldgenSmokeDir, "server.properties").text = worldgenSmokeProperties.collect { key, value -> "${key}=${value}" }.join("\n") + "\n"
 		if (worldgenSmokeAcceptEula) {
 			new File(worldgenSmokeDir, "eula.txt").text = "eula=true\n"

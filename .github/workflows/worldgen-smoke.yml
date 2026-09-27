@@ -1,5 +1,6 @@
 # Worldgen benchmark: generates the same region with the vanilla Default world type and the Players Versus world type,
-# each alone and next to C2ME and Lithium, and uploads timings, metrics, map images and the server log.
+# each alone and next to C2ME and Lithium, and uploads timings, metrics, map images and the server log. The upgrade job
+# reopens a world made by an older build with this one.
 # It starts a Minecraft server, which requires accepting the Minecraft EULA (https://aka.ms/MinecraftEULA).
 #
 # Two ways to start it:
@@ -105,5 +106,78 @@ jobs:
           path: |
             run/worldgen-smoke/pvwg/
             run/worldgen-smoke/logs/latest.log
+            run/worldgen-smoke/crash-reports/
+          if-no-files-found: warn
+
+  # Reopens a Players Versus world made by an older build (OLD_COMMIT, before Phase 1: its preset still used vanilla's
+  # multi_noise biome source) with this commit's build, and generates new chunks far from the old ones. Then generates
+  # the same new chunks in a fresh world, for comparison.
+  upgrade:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.accept_eula) ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[smoke]'))
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    env:
+      SEED: ${{ inputs.seed || '8675309' }}
+      OLD_COMMIT: 37efc29
+      # Old chunks around 100,88 and new ones around 100,108: 11 chunks apart, beyond the ring the old run generated
+      # partway (structure starts), so the new region's biomes all come from this build.
+      OLD_CENTER: "100,88"
+      NEW_CENTER: "100,108"
+      RADIUS: "4"
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: setup jdk 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'microsoft'
+      - name: make the world with the old build
+        run: |
+          git checkout --detach "$OLD_COMMIT"
+          chmod +x ./gradlew
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$OLD_CENTER"
+          mkdir -p reports
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/old-build.txt
+          rm -rf run/worldgen-smoke/pvwg
+      - name: reopen it with this build
+        run: |
+          git checkout --detach "$GITHUB_SHA"
+          chmod +x ./gradlew
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true -Ppv.keepWorld=true \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$NEW_CENTER"
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/reopened.txt
+          rm -rf run/worldgen-smoke/pvwg
+          if ls run/worldgen-smoke/crash-reports/* >/dev/null 2>&1; then echo "crash report written"; exit 1; fi
+          if grep -n "\[pvwg\] bench failed" run/worldgen-smoke/logs/latest.log; then exit 1; fi
+          cp run/worldgen-smoke/logs/latest.log reports/reopened.log
+      - name: same chunks in a fresh world with this build
+        run: |
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$NEW_CENTER"
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/fresh.txt
+      - name: show reports
+        if: always()
+        run: |
+          set +e
+          for f in reports/*.txt; do echo "===== $f"; cat "$f"; done
+          echo "===== generators"
+          grep -H "^generator " reports/*.txt
+          echo "===== biomes and maps: reopened world vs fresh world (same seed and chunks)"
+          diff <(sed -n '/^biomes at surface:/,$p' reports/reopened.txt) <(sed -n '/^biomes at surface:/,$p' reports/fresh.txt) \
+            && echo "identical" || true
+      - name: upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldgen-smoke-upgrade
+          path: |
+            reports/
+            run/worldgen-smoke/logs/
             run/worldgen-smoke/crash-reports/
           if-no-files-found: warn

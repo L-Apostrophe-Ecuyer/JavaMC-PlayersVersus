@@ -1,5 +1,7 @@
 package frootloops.versus.mod.environment.worldgen.debug;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import it.unimi.dsi.fastutil.shorts.ShortList;
@@ -9,6 +11,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
@@ -125,6 +128,7 @@ public final class WorldgenBench {
     public static Path run(ServerWorld world, ChunkPos center, int radius, Consumer<String> log) throws IOException {
         ServerChunkManager chunkManager = world.getChunkManager();
         String settings = describeGenerator(chunkManager.getChunkGenerator());
+        String generator = encodeGenerator(world, chunkManager.getChunkGenerator());
         String gate = chunkManager.getChunkGenerator() instanceof NoiseChunkGenerator noiseGenerator
                 ? "players_versus_aquifer_and_ore_veins=" + PvWorldgen.isPvGenerator(noiseGenerator.getSettings().value())
                 : "not a noise generator";
@@ -134,6 +138,7 @@ public final class WorldgenBench {
         int chunkCount = chunksPerSide * chunksPerSide;
         log.accept(String.format(Locale.ROOT, "[pvwg] bench: %d chunks around chunk %d,%d, settings %s",
                 chunkCount, center.x, center.z, settings));
+        log.accept("[pvwg] generator " + generator);
 
         Region region = new Region(world, minChunkX * 16, minChunkZ * 16, chunksPerSide * 16);
         Map<String, Long> stageNanos = new LinkedHashMap<>();
@@ -170,12 +175,18 @@ public final class WorldgenBench {
                 .resolve("bench-" + timestamp + "-" + settings.replaceAll("[^A-Za-z0-9_.-]", "_"));
         Files.createDirectories(dir);
         region.writeImages(dir);
-        List<String> report = region.report(settings, gate, world.getSeed(), center, radius, stageNanos, chunkCount);
+        List<String> report = region.report(settings, generator, gate, world.getSeed(), center, radius, stageNanos, chunkCount);
         Files.write(dir.resolve("report.txt"), report);
         for (String line : report) {
             if (line.startsWith("metric")) log.accept("[pvwg] " + line);
         }
         return dir;
+    }
+
+    /** The generator, encoded the way level.dat stores it. */
+    static String encodeGenerator(ServerWorld world, ChunkGenerator generator) {
+        return ChunkGenerator.CODEC.encodeStart(RegistryOps.of(JsonOps.INSTANCE, world.getRegistryManager()), generator)
+                .result().map(JsonElement::toString).orElse("unencodable " + generator.getClass().getName());
     }
 
     static String describeGenerator(ChunkGenerator generator) {
@@ -426,9 +437,10 @@ public final class WorldgenBench {
             return (r << 16) | (g << 8) | b;
         }
 
-        List<String> report(String settings, String gate, long seed, ChunkPos center, int radius, Map<String, Long> stageNanos, int chunkCount) {
+        List<String> report(String settings, String generator, String gate, long seed, ChunkPos center, int radius, Map<String, Long> stageNanos, int chunkCount) {
             List<String> lines = new ArrayList<>();
             lines.add("settings " + settings);
+            lines.add("generator " + generator);
             lines.add("gate " + gate);
             lines.add("seed " + seed);
             lines.add(String.format(Locale.ROOT, "region center chunk %d,%d radius %d (%d chunks), heights %d..%d",
