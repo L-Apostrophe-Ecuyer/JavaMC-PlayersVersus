@@ -1,6 +1,7 @@
 package frootloops.versus.mod.environment.worldgen;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.worldgen.biome.PvBiomeSource;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenBench;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenDebugCommands;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
@@ -20,12 +21,14 @@ import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
 public final class PvWorldgen {
 
     public static final Identifier AQUIFER_FLOODEDNESS_ID = Identifier.of(VersusMod.MOD_ID, "aquifer_floodedness");
+    public static final Identifier BIOME_SOURCE_ID = Identifier.of(VersusMod.MOD_ID, "overworld");
 
     private PvWorldgen() {
     }
 
     public static void initialize() {
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, AQUIFER_FLOODEDNESS_ID, AquiferFloodedness.CODEC);
+        Registry.register(Registries.BIOME_SOURCE, BIOME_SOURCE_ID, PvBiomeSource.CODEC);
         WorldgenDebugCommands.register();
         WorldgenBench.registerHeadlessRun();
     }

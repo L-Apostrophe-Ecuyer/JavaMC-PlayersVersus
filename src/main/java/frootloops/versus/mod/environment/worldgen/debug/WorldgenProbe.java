@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment.worldgen.debug;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferDecision;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferRules;
+import frootloops.versus.mod.environment.worldgen.biome.PvBiomeSource;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerChunkManager;
@@ -62,6 +63,9 @@ public final class WorldgenProbe {
         lines.add("biome " + sourceBiome.getIdAsString() + " (stored in chunk: " + world.getBiome(pos).getIdAsString() + ")");
 
         MultiNoiseUtil.NoiseValuePoint point = climate.sample(quartX, quartY, quartZ);
+        if (generator.getBiomeSource() instanceof PvBiomeSource pvBiomeSource) {
+            lines.add("biome rule " + pvBiomeSource.ruleAt(point));
+        }
         lines.add(String.format(Locale.ROOT, "climate T %.3f  H %.3f  C %.3f  E %.3f  D %.3f  W %.3f",
                 MultiNoiseUtil.toFloat(point.temperatureNoise()),
                 MultiNoiseUtil.toFloat(point.humidityNoise()),

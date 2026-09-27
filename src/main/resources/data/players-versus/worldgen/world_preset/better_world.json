@@ -5,8 +5,7 @@
       "generator": {
         "type": "minecraft:noise",
         "biome_source": {
-          "type": "minecraft:multi_noise",
-          "preset": "minecraft:overworld"
+          "type": "players-versus:overworld"
         },
         "settings": "players-versus:overworld"
       }

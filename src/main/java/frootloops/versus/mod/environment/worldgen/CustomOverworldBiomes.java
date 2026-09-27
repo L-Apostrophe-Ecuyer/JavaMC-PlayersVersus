@@ -8,7 +8,9 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
-import java.util.HashMap;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 public class CustomOverworldBiomes {
 
@@ -57,103 +59,69 @@ public class CustomOverworldBiomes {
     };
 
 
-    private static HashMap<RegistryKey<Biome>, RegistryKey<Biome>> MOUNTAIN_BIOME_REPLACEMENTS;
-    private static HashMap<RegistryKey<Biome>, RegistryKey<Biome>> FROZEN_BIOME_REPLACEMENTS;
-    private static HashMap<RegistryKey<Biome>, RegistryKey<Biome>> HUMID_BIOME_REPLACEMENTS;
-    private static HashMap<RegistryKey<Biome>, RegistryKey<Biome>> SURFACE_CAVE_BIOME_REPLACEMENTS;
+    private static final Map<RegistryKey<Biome>, RegistryKey<Biome>> MOUNTAIN_BIOME_REPLACEMENTS = Map.ofEntries(
+            Map.entry(BiomeKeys.OLD_GROWTH_BIRCH_FOREST, BIRCH_TAIGA_FOREST),
+            Map.entry(BiomeKeys.BIRCH_FOREST, BIRCH_TAIGA_FOREST),
+            Map.entry(BiomeKeys.DARK_FOREST, DARK_TAIGA_FOREST),
+            Map.entry(BiomeKeys.JUNGLE, MOUNTAINSIDE_JUNGLE),
+            Map.entry(BiomeKeys.SPARSE_JUNGLE, MOUNTAINSIDE_JUNGLE),
+            Map.entry(BiomeKeys.BAMBOO_JUNGLE, MOUNTAINSIDE_JUNGLE),
+            Map.entry(BiomeKeys.TAIGA, BiomeKeys.WINDSWEPT_FOREST),
+            Map.entry(BiomeKeys.FOREST, MOUNTAINSIDE_FOREST),
+            Map.entry(BiomeKeys.SNOWY_TAIGA, BiomeKeys.GROVE),
+            Map.entry(BiomeKeys.PLAINS, BiomeKeys.MEADOW),
+            Map.entry(BiomeKeys.SNOWY_PLAINS, BiomeKeys.SNOWY_SLOPES),
+            Map.entry(BiomeKeys.SAVANNA, MOUNTAINSIDE_FOREST_WARM),
+            Map.entry(BiomeKeys.SAVANNA_PLATEAU, BiomeKeys.WINDSWEPT_SAVANNA));
 
+    private static final Map<RegistryKey<Biome>, RegistryKey<Biome>> FROZEN_BIOME_REPLACEMENTS = Map.ofEntries(
+            Map.entry(BiomeKeys.SNOWY_BEACH, COLD_BEACH),
+            Map.entry(BiomeKeys.TAIGA, COLD_TAIGA),
+            Map.entry(BiomeKeys.FOREST, BiomeKeys.TAIGA),
+            Map.entry(BiomeKeys.BIRCH_FOREST, BIRCH_TAIGA_FOREST),
+            Map.entry(BiomeKeys.SNOWY_TAIGA, COLD_TAIGA),
+            Map.entry(BiomeKeys.PLAINS, BiomeKeys.MEADOW),
+            Map.entry(BiomeKeys.SNOWY_PLAINS, COLD_PLAINS),
+            Map.entry(BiomeKeys.FROZEN_OCEAN, BiomeKeys.COLD_OCEAN),
+            Map.entry(BiomeKeys.ICE_SPIKES, BiomeKeys.SNOWY_PLAINS));
 
-    private static void tryPopulateMountainBiomeReplacements() {
-        if(MOUNTAIN_BIOME_REPLACEMENTS != null) return;
-        MOUNTAIN_BIOME_REPLACEMENTS = new HashMap<>();
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.OLD_GROWTH_BIRCH_FOREST, BIRCH_TAIGA_FOREST);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.BIRCH_FOREST, BIRCH_TAIGA_FOREST);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.DARK_FOREST, DARK_TAIGA_FOREST);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.JUNGLE, MOUNTAINSIDE_JUNGLE);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.SPARSE_JUNGLE, MOUNTAINSIDE_JUNGLE);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.BAMBOO_JUNGLE, MOUNTAINSIDE_JUNGLE);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.TAIGA, BiomeKeys.WINDSWEPT_FOREST);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.FOREST, MOUNTAINSIDE_FOREST);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.SNOWY_TAIGA, BiomeKeys.GROVE);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.PLAINS, BiomeKeys.MEADOW);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.SNOWY_PLAINS, BiomeKeys.SNOWY_SLOPES);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.SAVANNA, MOUNTAINSIDE_FOREST_WARM);
-        MOUNTAIN_BIOME_REPLACEMENTS.put(BiomeKeys.SAVANNA_PLATEAU, BiomeKeys.WINDSWEPT_SAVANNA);
-    }
+    private static final Map<RegistryKey<Biome>, RegistryKey<Biome>> HUMID_BIOME_REPLACEMENTS = Map.ofEntries(
+            Map.entry(BiomeKeys.BIRCH_FOREST, DARK_BIRCH_FOREST),
+            Map.entry(BiomeKeys.DARK_FOREST, DARK_BIRCH_FOREST),
+            Map.entry(BiomeKeys.JUNGLE, BiomeKeys.SPARSE_JUNGLE),
+            Map.entry(BiomeKeys.DESERT, DESERT_OASIS),
+            Map.entry(BiomeKeys.BADLANDS, BiomeKeys.DESERT));
 
-    private static void tryPopulateSnowyToTemperateBiomeReplacements() {
-        if(FROZEN_BIOME_REPLACEMENTS != null) return;
-        FROZEN_BIOME_REPLACEMENTS = new HashMap<>();
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.SNOWY_BEACH, COLD_BEACH);
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.TAIGA, COLD_TAIGA);
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.FOREST, BiomeKeys.TAIGA);
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.BIRCH_FOREST, BIRCH_TAIGA_FOREST);
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.SNOWY_TAIGA, COLD_TAIGA);
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.PLAINS, BiomeKeys.MEADOW);
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.SNOWY_PLAINS, COLD_PLAINS);
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.FROZEN_OCEAN, BiomeKeys.COLD_OCEAN);
-        FROZEN_BIOME_REPLACEMENTS.put(BiomeKeys.ICE_SPIKES, BiomeKeys.SNOWY_PLAINS);
-    }
+    private static final Map<RegistryKey<Biome>, RegistryKey<Biome>> SURFACE_CAVE_BIOME_REPLACEMENTS = Map.ofEntries(
+            Map.entry(BiomeKeys.FROZEN_PEAKS, FROSTED_CAVE),
+            Map.entry(BiomeKeys.SNOWY_SLOPES, FROSTED_CAVE),
+            Map.entry(BiomeKeys.DESERT, DESERT_CREEPER_CAVE),
+            Map.entry(BiomeKeys.BADLANDS, BADLANDS_CAVE),
+            Map.entry(BiomeKeys.ERODED_BADLANDS, BADLANDS_CAVE),
+            Map.entry(BiomeKeys.WOODED_BADLANDS, BADLANDS_CAVE));
 
-    private static void tryPopulateHumidBiomeReplacements() {
-        if(HUMID_BIOME_REPLACEMENTS != null) return;
-        HUMID_BIOME_REPLACEMENTS = new HashMap<>();
-        HUMID_BIOME_REPLACEMENTS.put(BiomeKeys.BIRCH_FOREST, DARK_BIRCH_FOREST);
-        HUMID_BIOME_REPLACEMENTS.put(BiomeKeys.DARK_FOREST, DARK_BIRCH_FOREST);
-        HUMID_BIOME_REPLACEMENTS.put(BiomeKeys.JUNGLE, BiomeKeys.SPARSE_JUNGLE);
-        HUMID_BIOME_REPLACEMENTS.put(BiomeKeys.DESERT, DESERT_OASIS);
-        HUMID_BIOME_REPLACEMENTS.put(BiomeKeys.BADLANDS, BiomeKeys.DESERT);
-    }
-
-    private static void tryPopulateSurfaceCaveBiomeReplacements() {
-        if(SURFACE_CAVE_BIOME_REPLACEMENTS != null) return;
-        SURFACE_CAVE_BIOME_REPLACEMENTS = new HashMap<>();
-        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.FROZEN_PEAKS, FROSTED_CAVE);
-        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.SNOWY_SLOPES, FROSTED_CAVE);
-        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.DESERT, DESERT_CREEPER_CAVE);
-        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.BADLANDS, BADLANDS_CAVE);
-        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.ERODED_BADLANDS, BADLANDS_CAVE);
-        SURFACE_CAVE_BIOME_REPLACEMENTS.put(BiomeKeys.WOODED_BADLANDS, BADLANDS_CAVE);
-    }
-
-
+    @Nullable
     public static RegistryKey<Biome> getMountainTransitionBiome(RegistryKey<Biome> originalBiome) {
-        tryPopulateMountainBiomeReplacements();
-        return MOUNTAIN_BIOME_REPLACEMENTS.getOrDefault(originalBiome, null);
+        return MOUNTAIN_BIOME_REPLACEMENTS.get(originalBiome);
     }
 
+    @Nullable
     public static RegistryKey<Biome> getSnowyToTemperateTransitionBiome(RegistryKey<Biome> originalBiome) {
-        tryPopulateSnowyToTemperateBiomeReplacements();
-        return FROZEN_BIOME_REPLACEMENTS.getOrDefault(originalBiome, null);
+        return FROZEN_BIOME_REPLACEMENTS.get(originalBiome);
     }
 
+    @Nullable
     public static RegistryKey<Biome> getHumidTransitionBiome(RegistryKey<Biome> originalBiome) {
-        tryPopulateHumidBiomeReplacements();
-        return HUMID_BIOME_REPLACEMENTS.getOrDefault(originalBiome, null);
+        return HUMID_BIOME_REPLACEMENTS.get(originalBiome);
     }
 
+    @Nullable
     public static RegistryKey<Biome> getSurfaceCaveBiome(RegistryKey<Biome> originalBiome) {
-        tryPopulateSurfaceCaveBiomeReplacements();
-        return SURFACE_CAVE_BIOME_REPLACEMENTS.getOrDefault(originalBiome, null);
+        return SURFACE_CAVE_BIOME_REPLACEMENTS.get(originalBiome);
     }
 
     private static RegistryKey<Biome> keyOf(String id) {
         return RegistryKey.of(RegistryKeys.BIOME, Identifier.of(VersusMod.MOD_ID, id));
-    }
-
-    public static void freeUpMemory() {
-        if(MOUNTAIN_BIOME_REPLACEMENTS != null) {
-            MOUNTAIN_BIOME_REPLACEMENTS.clear();
-            MOUNTAIN_BIOME_REPLACEMENTS = null;
-        }
-        if(FROZEN_BIOME_REPLACEMENTS != null) {
-            FROZEN_BIOME_REPLACEMENTS.clear();
-            FROZEN_BIOME_REPLACEMENTS = null;
-        }
-        if(HUMID_BIOME_REPLACEMENTS != null) {
-            HUMID_BIOME_REPLACEMENTS.clear();
-            HUMID_BIOME_REPLACEMENTS = null;
-        }
     }
 
     public record PlacedBiome(RegistryKey<Biome> biome, PlacedBiomeType type, boolean isRare,

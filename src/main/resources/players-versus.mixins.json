@@ -20,7 +20,6 @@
     "environment.worldgen.ChunkNoiseSamplerMixin",
     "environment.worldgen.WorldPresetsMixin",
     "environment.worldgen.WorldPresetServerDefaultMixin",
-    "environment.worldgen.VanillaBiomeParametersOverworldMixin",
 
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",
