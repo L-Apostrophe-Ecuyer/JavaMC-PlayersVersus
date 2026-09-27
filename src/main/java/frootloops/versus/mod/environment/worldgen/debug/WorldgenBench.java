@@ -1,6 +1,7 @@
 package frootloops.versus.mod.environment.worldgen.debug;
 
 import frootloops.versus.VersusMod;
+import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
@@ -61,6 +62,9 @@ import java.util.function.Consumer;
  *   (quirk Q6);</li>
  *   <li>basin seam ratio: water/non-water changes across chunk borders divided by the same count across chunk
  *   middles, for y 0..31. About 1 means no seams; much more than 1 along x is quirk Q1.</li>
+ *   <li>fluid ticks queued: fluid blocks the aquifer marked for a fluid update during NOISE and CARVERS, per chunk,
+ *   overall and for y 0..31 next to the water blocks there. Each one runs when its chunk becomes a full chunk. Almost as
+ *   many ticks as water blocks in y 0..31 is quirk Q8.</li>
  * </ul>
  */
 public final class WorldgenBench {
@@ -180,6 +184,8 @@ public final class WorldgenBench {
         private final List<String> biomeIds = new ArrayList<>();
         private final Map<String, Integer> biomeIndex = new HashMap<>();
         private long waterAtOrAboveCeiling, stoneInCarvedDeepslate, carvedDeepslateZone;
+        private long fluidTicksQueued, fluidTicksQueuedInBasinLayers;
+        private int protoChunks;
 
         Region(ServerWorld world, int minX, int minZ, int size) {
             this.minX = minX;
@@ -199,8 +205,9 @@ public final class WorldgenBench {
 
         void capture(Chunk chunk) {
             ChunkPos chunkPos = chunk.getPos();
-            CarvingMask carvingMask = chunk instanceof ProtoChunk proto && !(chunk instanceof WrapperProtoChunk)
-                    ? proto.getCarvingMask() : null;
+            // A WrapperProtoChunk wraps a chunk that is already full: its carving mask and post-processing lists are gone.
+            ProtoChunk proto = chunk instanceof ProtoChunk protoChunk && !(chunk instanceof WrapperProtoChunk) ? protoChunk : null;
+            CarvingMask carvingMask = proto != null ? proto.getCarvingMask() : null;
             BlockPos.Mutable pos = new BlockPos.Mutable();
             for (int localX = 0; localX < 16; localX++) {
                 for (int localZ = 0; localZ < 16; localZ++) {
@@ -238,6 +245,23 @@ public final class WorldgenBench {
                             if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.STONE)) this.stoneInCarvedDeepslate++;
                         }
                     }
+                }
+            }
+            if (proto != null) countQueuedFluidTicks(proto);
+        }
+
+        /** Counts the fluid blocks NOISE and CARVERS marked for a fluid update (the chunk's post-processing lists). */
+        private void countQueuedFluidTicks(ProtoChunk chunk) {
+            this.protoChunks++;
+            ShortList[] lists = chunk.getPostProcessingLists();
+            for (int index = 0; index < lists.length; index++) {
+                ShortList packed = lists[index];
+                if (packed == null) continue;
+                int sectionY = chunk.sectionIndexToCoord(index);
+                for (int i = 0; i < packed.size(); i++) {
+                    int y = ProtoChunk.joinBlockPos(packed.getShort(i), sectionY, chunk.getPos()).getY();
+                    this.fluidTicksQueued++;
+                    if (y >= BASIN_SEAM_MIN_Y && y < BASIN_SEAM_MAX_Y) this.fluidTicksQueuedInBasinLayers++;
                 }
             }
         }
@@ -371,6 +395,9 @@ public final class WorldgenBench {
                     DEEPSLATE_ONLY_BELOW_Y, this.stoneInCarvedDeepslate, this.carvedDeepslateZone));
             lines.add(String.format(Locale.ROOT, "metric basin_seam_ratio_x %.2f", seamRatio(true)));
             lines.add(String.format(Locale.ROOT, "metric basin_seam_ratio_z %.2f", seamRatio(false)));
+            lines.add(String.format(Locale.ROOT, "metric fluid_ticks_queued_per_chunk %.1f, in y %d..%d %.1f (water blocks there %.1f)",
+                    perChunk(this.fluidTicksQueued), BASIN_SEAM_MIN_Y, BASIN_SEAM_MAX_Y - 1, perChunk(this.fluidTicksQueuedInBasinLayers),
+                    this.basinWater.cardinality() / (this.size * this.size / 256.0)));
 
             lines.add("biomes at surface:");
             appendHistogram(lines, this.surfaceBiome);
@@ -379,6 +406,10 @@ public final class WorldgenBench {
                 appendHistogram(lines, this.layerBiome[i]);
             }
             return lines;
+        }
+
+        private double perChunk(long count) {
+            return this.protoChunks == 0 ? 0.0 : (double) count / this.protoChunks;
         }
 
         private void appendHistogram(List<String> lines, int[] biomes) {
