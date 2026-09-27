@@ -17,11 +17,10 @@ public final class PvWorldgenConstants {
     // ------------------------------------------------------------------------------------------------------------
 
     /**
-     * The aquifer fills water strictly below this y, so the ocean surface is at y 63.
-     *
-     * <p>Note: the noise settings still declare {@code sea_level: 63} (vanilla meaning: water up to y 62). Aligning
-     * the two is quirk Q5 in {@code docs/worldgen-refactor-plan.md}; the JSON {@code range_choice} bound in
-     * {@code aquifer_floodedness_oceans_and_rivers_y64.json} also uses 64.
+     * The aquifer fills water strictly below this y, so the ocean surface is at y 63. Same meaning as the noise
+     * settings' {@code sea_level} (vanilla: water below it), which must hold the same number, since spawning,
+     * icebergs, ocean structures and the snow line read that one. Also the {@code range_choice} bound in
+     * {@code aquifer_floodedness_oceans_and_rivers_y64.json}.
      */
     public static final int SEA_LEVEL = 64;
 
@@ -76,12 +75,9 @@ public final class PvWorldgenConstants {
     // Aquifer: fluid ticks
     // ------------------------------------------------------------------------------------------------------------
 
-    /** Water within this margin above its threshold schedules a fluid tick, so it can flow into nearby openings. */
-    public static final double FLUID_TICK_MARGIN = 0.2;
-
     /**
-     * Basin water also schedules a tick when the terrain density is below this. Kept from the old aquifer, but density is
-     * always at most 0 when this test runs, so every basin-water block schedules a tick (quirk Q8, fixed in Phase 2).
+     * Water within this margin above its threshold schedules a fluid tick, so it can flow into nearby openings. Water
+     * further inside a body is surrounded by water and doesn't need one.
      */
-    public static final double BASIN_TICK_DENSITY = 0.08;
+    public static final double FLUID_TICK_MARGIN = 0.2;
 }

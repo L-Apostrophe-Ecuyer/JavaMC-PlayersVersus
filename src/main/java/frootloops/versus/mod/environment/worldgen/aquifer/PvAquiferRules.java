@@ -11,8 +11,8 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.*;
  * <ol>
  *   <li>below the lava level: lava;</li>
  *   <li>at or above {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#SEA_LEVEL}: air;</li>
- *   <li>sea band: floodedness decides water, a stone barrier, or falls through;</li>
- *   <li>basin band: spread decides basin water, a stone barrier, or falls through;</li>
+ *   <li>sea band: floodedness decides water, a barrier (solid), or falls through;</li>
+ *   <li>basin band: spread decides basin water, a barrier (solid), or falls through;</li>
  *   <li>otherwise air.</li>
  * </ol>
  * Noise is only sampled when a rule needs it.
@@ -51,7 +51,7 @@ public final class PvAquiferRules {
             double basinFloodedness = spread.sample(pos);
             double waterThreshold = basinWaterThreshold(y);
             if (basinFloodedness > waterThreshold) {
-                return basinFloodedness < waterThreshold + FLUID_TICK_MARGIN || density < BASIN_TICK_DENSITY
+                return basinFloodedness < waterThreshold + FLUID_TICK_MARGIN
                         ? PvAquiferDecision.BASIN_WATER_TICKING
                         : PvAquiferDecision.BASIN_WATER;
             }

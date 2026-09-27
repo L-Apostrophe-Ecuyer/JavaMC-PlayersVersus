@@ -2,9 +2,8 @@ package frootloops.versus.mod.environment.worldgen.biome;
 
 import com.mojang.datafixers.util.Pair;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
+import frootloops.versus.mod.environment.worldgen.TestGame;
 import frootloops.versus.mod.environment.worldgen.biome.PvBiomeLayout.Box;
-import net.minecraft.Bootstrap;
-import net.minecraft.SharedConstants;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
@@ -34,8 +33,7 @@ class PvBiomeLayoutTest {
 
     @BeforeAll
     static void bootstrap() {
-        SharedConstants.createGameVersion();
-        Bootstrap.initialize();
+        TestGame.start();
         vanilla = new ArrayList<>();
         new VanillaBiomeParameters().writeOverworldBiomeParameters(vanilla::add);
     }

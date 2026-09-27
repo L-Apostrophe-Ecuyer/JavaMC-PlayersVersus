@@ -1,0 +1,103 @@
+package frootloops.versus.mod.environment.worldgen;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
+import frootloops.versus.VersusMod;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.resource.DirectoryResourcePack;
+import net.minecraft.resource.LifecycledResourceManagerImpl;
+import net.minecraft.resource.ResourcePack;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.VanillaDataPackProvider;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
+import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.world.gen.noise.NoiseConfig;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+/**
+ * Vanilla's data pack plus this mod's data (read from {@code src/main/resources}), loaded into worldgen registries by
+ * the game's own loader, so tests can build this mod's noise router the way a world does.
+ */
+public final class WorldgenTestData {
+
+    public static final Path MOD_RESOURCES = Path.of("src/main/resources");
+    private static final List<RegistryKey<? extends Registry<?>>> LOADED = List.of(RegistryKeys.NOISE_PARAMETERS, RegistryKeys.DENSITY_FUNCTION);
+
+    private static DynamicRegistryManager.Immutable registries;
+    private static ChunkGeneratorSettings pvSettings;
+
+    private WorldgenTestData() {
+    }
+
+    /** Noise parameters and density functions: vanilla's, with this mod's pack on top. */
+    public static synchronized DynamicRegistryManager.Immutable registries() {
+        if (registries == null) {
+            TestGame.start();
+            ResourcePack vanilla = VanillaDataPackProvider.createDefaultPack();
+            ResourcePack mod = new DirectoryResourcePack(vanilla.getInfo(), MOD_RESOURCES);
+            try (LifecycledResourceManagerImpl resources = new LifecycledResourceManagerImpl(ResourceType.SERVER_DATA, List.of(vanilla, mod))) {
+                registries = RegistryLoader.loadFromResource(resources, List.of(),
+                        RegistryLoader.DYNAMIC_REGISTRIES.stream().filter(entry -> LOADED.contains(entry.key())).toList());
+            }
+        }
+        return registries;
+    }
+
+    /**
+     * This mod's noise settings, decoded from its JSON against {@link #registries()}. The surface rule is swapped for
+     * plain stone: it names this mod's blocks, which only exist after the whole mod initialized, and these tests build
+     * no surfaces.
+     */
+    public static synchronized ChunkGeneratorSettings pvSettings() {
+        if (pvSettings == null) {
+            JsonObject json = JsonParser.parseString(read("data/" + VersusMod.MOD_ID + "/worldgen/noise_settings/overworld.json")).getAsJsonObject();
+            json.add("surface_rule", JsonParser.parseString("{\"type\": \"minecraft:block\", \"result_state\": {\"Name\": \"minecraft:stone\"}}"));
+            pvSettings = ChunkGeneratorSettings.CODEC.parse(RegistryOps.of(JsonOps.INSTANCE, registries()), json).getOrThrow();
+        }
+        return pvSettings;
+    }
+
+    public static NoiseConfig noiseConfig(long seed) {
+        return NoiseConfig.create(pvSettings(), registries().getOrThrow(RegistryKeys.NOISE_PARAMETERS), seed);
+    }
+
+    /**
+     * A density function from the registry, with its noises seeded the way {@link NoiseConfig} seeds its router:
+     * each noise gets {@code config}'s sampler for that noise's key.
+     */
+    public static DensityFunction seeded(NoiseConfig config, String id) {
+        DensityFunction function = registries().getOrThrow(RegistryKeys.DENSITY_FUNCTION)
+                .getOrThrow(RegistryKey.of(RegistryKeys.DENSITY_FUNCTION, Identifier.of(id))).value();
+        return function.apply(new DensityFunction.DensityFunctionVisitor() {
+            @Override
+            public DensityFunction apply(DensityFunction densityFunction) {
+                return densityFunction;
+            }
+
+            @Override
+            public DensityFunction.Noise apply(DensityFunction.Noise noise) {
+                return new DensityFunction.Noise(noise.noiseData(), config.getOrCreateSampler(noise.noiseData().getKey().orElseThrow()));
+            }
+        });
+    }
+
+    public static String read(String resource) {
+        try {
+            return Files.readString(MOD_RESOURCES.resolve(resource));
+        } catch (IOException exception) {
+            throw new UncheckedIOException(exception);
+        }
+    }
+}
