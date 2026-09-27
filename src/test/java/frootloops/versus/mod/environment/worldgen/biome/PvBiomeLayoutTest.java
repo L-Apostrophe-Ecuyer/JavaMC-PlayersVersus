@@ -16,10 +16,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -165,33 +167,69 @@ class PvBiomeLayoutTest {
 
     /**
      * How far the new layout moves biomes compared with the old mixin, over random climate points at several depths.
-     * The surface changes by design (Q2, Q4, Q7); caves must not change.
+     * The surface changes by design (Q2, Q4, Q7); caves must not change. Where two entries are exactly as near, the
+     * search tree's layout decides, so a different pick that ties in either layout isn't counted as a change.
      */
     @Test
     void newLayoutStaysCloseToTheOldOne() {
-        MultiNoiseUtil.Entries<RegistryKey<Biome>> oldLayout = entries(OldBiomeLayout.build());
-        MultiNoiseUtil.Entries<RegistryKey<Biome>> newLayout = entries(toPairs(PvBiomeLayout.build()));
-        // Depths between the layout's depth-range edges; points exactly on an edge are ties decided by the search tree.
+        List<Pair<NoiseHypercube, RegistryKey<Biome>>> oldList = OldBiomeLayout.build();
+        List<Pair<NoiseHypercube, RegistryKey<Biome>>> newList = toPairs(PvBiomeLayout.build());
+        MultiNoiseUtil.Entries<RegistryKey<Biome>> oldLayout = entries(oldList);
+        MultiNoiseUtil.Entries<RegistryKey<Biome>> newLayout = entries(newList);
         float[] depths = {0.0F, 0.05F, 0.12F, 0.17F, 0.22F, 0.3F, 0.45F, 0.7F, 0.85F, 0.95F, 1.05F};
         Random random = new Random(8675309L);
         int samples = 40_000;
         for (float depth : depths) {
             Map<String, Integer> changes = new HashMap<>();
-            int same = 0;
+            int changed = 0, ties = 0;
             for (int i = 0; i < samples; i++) {
                 MultiNoiseUtil.NoiseValuePoint point = MultiNoiseUtil.createNoiseValuePoint(
                         uniform(random), uniform(random), uniform(random), uniform(random), depth, uniform(random));
                 RegistryKey<Biome> before = oldLayout.get(point);
                 RegistryKey<Biome> after = newLayout.get(point);
-                if (before == after) same++;
-                else changes.merge(before.getValue().getPath() + " -> " + after.getValue().getPath(), 1, Integer::sum);
+                if (before == after) continue;
+                if (nearest(oldList, point).contains(after) || nearest(newList, point).contains(before)) {
+                    ties++;
+                    continue;
+                }
+                changed++;
+                changes.merge(before.getValue().getPath() + " -> " + after.getValue().getPath(), 1, Integer::sum);
             }
-            double agreement = (double) same / samples;
-            System.out.printf(Locale.ROOT, "[layout] depth %.2f: %.2f%% unchanged; top changes %s%n", depth, 100 * agreement, top(changes, 8, samples));
-            // random points can still land on a climate-axis edge (values are whole ten-thousandths), hence the small margin
-            if (depth >= 0.3F) assertTrue(agreement > 0.9995, "caves changed at depth " + depth);
+            double agreement = 1.0 - (double) changed / samples;
+            System.out.printf(Locale.ROOT, "[layout] depth %.2f: %.2f%% unchanged (%d ties); top changes %s%n",
+                    depth, 100 * agreement, ties, top(changes, 8, samples));
+            if (depth >= 0.3F) assertEquals(0, changed, "caves changed at depth " + depth + ": " + changes);
             else assertTrue(agreement > 0.8, "surface changed too much at depth " + depth);
         }
+    }
+
+    /** Every biome whose entry is nearest to the point, by the same squared distance the search tree minimizes. */
+    private static Set<RegistryKey<Biome>> nearest(List<Pair<NoiseHypercube, RegistryKey<Biome>>> list, MultiNoiseUtil.NoiseValuePoint point) {
+        long best = Long.MAX_VALUE;
+        Set<RegistryKey<Biome>> biomes = new HashSet<>();
+        for (Pair<NoiseHypercube, RegistryKey<Biome>> entry : list) {
+            long distance = squaredDistance(entry.getFirst(), point);
+            if (distance < best) {
+                best = distance;
+                biomes.clear();
+            }
+            if (distance == best) biomes.add(entry.getSecond());
+        }
+        return biomes;
+    }
+
+    private static long squaredDistance(NoiseHypercube h, MultiNoiseUtil.NoiseValuePoint p) {
+        return square(axis(h.temperature(), p.temperatureNoise())) + square(axis(h.humidity(), p.humidityNoise()))
+                + square(axis(h.continentalness(), p.continentalnessNoise())) + square(axis(h.erosion(), p.erosionNoise()))
+                + square(axis(h.depth(), p.depth())) + square(axis(h.weirdness(), p.weirdnessNoise())) + square(h.offset());
+    }
+
+    private static long axis(MultiNoiseUtil.ParameterRange range, long value) {
+        return value < range.min() ? range.min() - value : value > range.max() ? value - range.max() : 0L;
+    }
+
+    private static long square(long value) {
+        return value * value;
     }
 
     private static float uniform(Random random) {
