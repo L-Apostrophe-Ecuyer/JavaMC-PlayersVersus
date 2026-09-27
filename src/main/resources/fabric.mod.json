@@ -25,6 +25,7 @@
 			"frootloops.versus.VersusModClient"
 		]
 	},
+	"accessWidener": "players-versus.accesswidener",
 	"mixins": [
 		"players-versus.mixins.json",
 		{
