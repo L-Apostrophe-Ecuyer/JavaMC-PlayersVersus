@@ -1,9 +1,16 @@
-# Manually triggered worldgen benchmark. Generates the same region with the vanilla Default world type and the
-# Players Versus world type, and uploads timings, metrics and map images for both.
-# Running it starts a Minecraft server, so you must accept the Minecraft EULA for the run.
+# Worldgen benchmark: generates the same region with the vanilla Default world type and the Players Versus world type,
+# and uploads timings, metrics, map images and the server log for both.
+# It starts a Minecraft server, which requires accepting the Minecraft EULA (https://aka.ms/MinecraftEULA).
+#
+# Two ways to start it:
+# - Push a commit whose message contains [smoke]. The repository owner accepted the Minecraft EULA for these runs
+#   (2026-09-27). They use the default seed, radius and center below.
+# - Actions > worldgen-smoke > Run workflow, ticking the EULA box. GitHub only offers this button once this file is
+#   on the default branch.
 
 name: worldgen-smoke
 on:
+  push:
   workflow_dispatch:
     inputs:
       accept_eula:
@@ -20,15 +27,25 @@ on:
         description: "Center chunk as x,z"
         default: "100,100"
 
+concurrency:
+  group: worldgen-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   smoke:
-    if: ${{ inputs.accept_eula }}
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.accept_eula) ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[smoke]'))
     strategy:
       fail-fast: false
       matrix:
         level_type: ["minecraft:normal", "players-versus:better_world"]
     runs-on: ubuntu-22.04
     timeout-minutes: 45
+    env:
+      SEED: ${{ inputs.seed || '8675309' }}
+      RADIUS: ${{ inputs.radius || '12' }}
+      CENTER: ${{ inputs.center || '100,100' }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -44,12 +61,18 @@ jobs:
           ./gradlew runWorldgenSmoke
           -Ppv.acceptEula=true
           "-Ppv.levelType=${{ matrix.level_type }}"
-          "-Ppv.seed=${{ inputs.seed }}"
-          "-Ppv.benchRadius=${{ inputs.radius }}"
-          "-Ppv.benchCenter=${{ inputs.center }}"
+          "-Ppv.seed=$SEED"
+          "-Ppv.benchRadius=$RADIUS"
+          "-Ppv.benchCenter=$CENTER"
       - name: show report
         if: always()
         run: cat run/worldgen-smoke/pvwg/*/report.txt || true
+      # The bench logs its own failures and still stops the server cleanly, so the run above can succeed without a report.
+      - name: check that the bench wrote a report
+        run: |
+          ls run/worldgen-smoke/pvwg/*/report.txt
+          if ls run/worldgen-smoke/crash-reports/* >/dev/null 2>&1; then echo "crash report written"; exit 1; fi
+          if grep -n "\[pvwg\] bench failed" run/worldgen-smoke/logs/latest.log; then exit 1; fi
       - name: artifact name
         id: name
         if: always()
@@ -59,5 +82,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.name.outputs.value }}
-          path: run/worldgen-smoke/pvwg/
+          path: |
+            run/worldgen-smoke/pvwg/
+            run/worldgen-smoke/logs/latest.log
+            run/worldgen-smoke/crash-reports/
           if-no-files-found: warn
