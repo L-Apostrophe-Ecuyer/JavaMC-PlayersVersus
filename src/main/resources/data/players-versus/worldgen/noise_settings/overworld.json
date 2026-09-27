@@ -21,7 +21,10 @@
     "depth": "players-versus:overworld/depth",
     "erosion": "minecraft:overworld/erosion",
     "final_density": "players-versus:overworld/final_density",
-    "fluid_level_floodedness": "players-versus:overworld/aquifer_fluid_level_floodedness",
+    "fluid_level_floodedness": {
+      "type": "players-versus:aquifer_floodedness",
+      "argument": "players-versus:overworld/aquifer_fluid_level_floodedness"
+    },
     "fluid_level_spread": "players-versus:overworld/aquifer_fluid_level_spread",
     "preliminary_surface_level": "players-versus:overworld/preliminary_surface_level",
     "lava": {

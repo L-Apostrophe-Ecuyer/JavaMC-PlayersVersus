@@ -1,0 +1,63 @@
+# Manually triggered worldgen benchmark. Generates the same region with the vanilla Default world type and the
+# Players Versus world type, and uploads timings, metrics and map images for both.
+# Running it starts a Minecraft server, so you must accept the Minecraft EULA for the run.
+
+name: worldgen-smoke
+on:
+  workflow_dispatch:
+    inputs:
+      accept_eula:
+        description: "I accept the Minecraft EULA (https://aka.ms/MinecraftEULA) for this run"
+        type: boolean
+        default: false
+      seed:
+        description: "World seed"
+        default: "8675309"
+      radius:
+        description: "Radius in chunks around the center (max 32)"
+        default: "12"
+      center:
+        description: "Center chunk as x,z"
+        default: "100,100"
+
+jobs:
+  smoke:
+    if: ${{ inputs.accept_eula }}
+    strategy:
+      fail-fast: false
+      matrix:
+        level_type: ["minecraft:normal", "players-versus:better_world"]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'microsoft'
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: run worldgen smoke test
+        run: >
+          ./gradlew runWorldgenSmoke
+          -Ppv.acceptEula=true
+          "-Ppv.levelType=${{ matrix.level_type }}"
+          "-Ppv.seed=${{ inputs.seed }}"
+          "-Ppv.benchRadius=${{ inputs.radius }}"
+          "-Ppv.benchCenter=${{ inputs.center }}"
+      - name: show report
+        if: always()
+        run: cat run/worldgen-smoke/pvwg/*/report.txt || true
+      - name: artifact name
+        id: name
+        if: always()
+        run: echo "value=worldgen-smoke-$(echo '${{ matrix.level_type }}' | tr ':' '-')" >> "$GITHUB_OUTPUT"
+      - name: upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.value }}
+          path: run/worldgen-smoke/pvwg/
+          if-no-files-found: warn

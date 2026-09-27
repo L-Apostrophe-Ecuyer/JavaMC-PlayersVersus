@@ -38,6 +38,7 @@ public class CustomWorldgen {
     public static void onInitialize() {
         Registry.register(Registries.FEATURE, STONE_STALAGTITE_ID, STONE_STALAGTITE_FEATURE);
         Registry.register(Registries.FEATURE, MUD_PATCH_ID, MUD_PATCH_FEATURE);
+        PvWorldgen.initialize();
     }
 
     public enum VeinType {

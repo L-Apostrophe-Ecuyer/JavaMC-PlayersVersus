@@ -17,8 +17,7 @@
     "enchantments.EnchantmentHelperMixin",
     "enchantments.EnchantmentBottleMixin",
 
-    "environment.worldgen.AquifersMixin",
-    "environment.worldgen.OreVeinMixin",
+    "environment.worldgen.ChunkNoiseSamplerMixin",
     "environment.worldgen.WorldPresetsMixin",
     "environment.worldgen.WorldPresetServerDefaultMixin",
     "environment.worldgen.VanillaBiomeParametersOverworldMixin",

@@ -28,6 +28,44 @@ loom {
 		}
 	}
 
+	runs {
+		// Headless worldgen benchmark: starts a dedicated server on a fresh world, generates a square of chunks
+		// stage by stage, writes timings, metrics and map images to run/worldgen-smoke/pvwg/, then stops.
+		// Options: -Ppv.levelType=<world preset> -Ppv.seed=<seed> -Ppv.benchRadius=<chunks> -Ppv.benchCenter=<x,z>
+		// The server only starts with -Ppv.acceptEula=true (you accept https://aka.ms/MinecraftEULA).
+		worldgenSmoke {
+			server()
+			configName = "Worldgen smoke test"
+			runDir = "run/worldgen-smoke"
+			programArg "--nogui"
+			vmArg "-Dpv.worldgen.bench=${providers.gradleProperty('pv.benchRadius').getOrElse('12')}"
+			vmArg "-Dpv.worldgen.bench.center=${providers.gradleProperty('pv.benchCenter').getOrElse('100,100')}"
+		}
+	}
+
+}
+
+def worldgenSmokeDir = file("run/worldgen-smoke")
+def worldgenSmokeAcceptEula = providers.gradleProperty("pv.acceptEula").getOrElse("false") == "true"
+def worldgenSmokeProperties = [
+		"level-seed"         : providers.gradleProperty("pv.seed").getOrElse("8675309"),
+		"level-type"         : providers.gradleProperty("pv.levelType").getOrElse("players-versus:better_world"),
+		"max-tick-time"      : "-1",
+		"online-mode"        : "false",
+		"spawn-protection"   : "0",
+		"sync-chunk-writes"  : "false",
+		"view-distance"      : "4",
+		"simulation-distance": "4",
+]
+tasks.matching { it.name == "runWorldgenSmoke" }.configureEach {
+	doFirst {
+		worldgenSmokeDir.mkdirs()
+		new File(worldgenSmokeDir, "world").deleteDir()
+		new File(worldgenSmokeDir, "server.properties").text = worldgenSmokeProperties.collect { key, value -> "${key}=${value}" }.join("\n") + "\n"
+		if (worldgenSmokeAcceptEula) {
+			new File(worldgenSmokeDir, "eula.txt").text = "eula=true\n"
+		}
+	}
 }
 
 dependencies {
