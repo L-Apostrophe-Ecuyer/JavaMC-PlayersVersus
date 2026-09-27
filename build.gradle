@@ -48,9 +48,9 @@ loom {
 
 def worldgenSmokeDir = file("run/worldgen-smoke")
 def worldgenSmokeAcceptEula = providers.gradleProperty("pv.acceptEula").getOrElse("false") == "true"
+def worldgenSmokeLevelType = providers.gradleProperty("pv.levelType").getOrElse("players-versus:better_world")
 def worldgenSmokeProperties = [
 		"level-seed"         : providers.gradleProperty("pv.seed").getOrElse("8675309"),
-		"level-type"         : providers.gradleProperty("pv.levelType").getOrElse("players-versus:better_world"),
 		"max-tick-time"      : "-1",
 		"online-mode"        : "false",
 		"spawn-protection"   : "0",
@@ -58,6 +58,10 @@ def worldgenSmokeProperties = [
 		"view-distance"      : "4",
 		"simulation-distance": "4",
 ]
+// "server-default" leaves level-type out, to test the preset a server picks when server.properties doesn't name one.
+if (worldgenSmokeLevelType != "server-default") {
+	worldgenSmokeProperties["level-type"] = worldgenSmokeLevelType
+}
 tasks.matching { it.name == "runWorldgenSmoke" }.configureEach {
 	doFirst {
 		worldgenSmokeDir.mkdirs()

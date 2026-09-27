@@ -42,6 +42,10 @@ jobs:
         level_type: ["minecraft:normal", "players-versus:better_world"]
         # Other mods (Modrinth projects) to run alongside, for compatibility: the newest release for 1.21.10.
         mods: ["", "c2me-fabric lithium"]
+        include:
+          # No level-type in server.properties: the mod makes Improved the server default.
+          - level_type: "server-default"
+            mods: ""
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
@@ -91,6 +95,7 @@ jobs:
           ls run/worldgen-smoke/pvwg/*/report.txt
           if ls run/worldgen-smoke/crash-reports/* >/dev/null 2>&1; then echo "crash report written"; exit 1; fi
           if grep -n "\[pvwg\] bench failed" run/worldgen-smoke/logs/latest.log; then exit 1; fi
+          if [ "${{ matrix.level_type }}" = "server-default" ]; then grep "^settings players-versus:overworld" run/worldgen-smoke/pvwg/*/report.txt; fi
       - name: artifact name
         id: name
         if: always()
