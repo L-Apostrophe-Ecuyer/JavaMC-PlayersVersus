@@ -58,18 +58,22 @@ jobs:
           distribution: 'microsoft'
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
-      - name: resolve compatibility mods
-        id: mods
+      # Fabric Loader remaps jars in the run's mods folder at startup; Loom's modLocalRuntime would refuse mods built
+      # with a newer Loom than this project's.
+      - name: download compatibility mods
+        env:
+          UA: "L-Apostrophe-Ecuyer/JavaMC-PlayersVersus worldgen-smoke"
         run: |
-          coordinates=""
+          mkdir -p run/worldgen-smoke/mods
           for slug in ${{ matrix.mods }}; do
-            version=$(curl -fsSL -A "L-Apostrophe-Ecuyer/JavaMC-PlayersVersus worldgen-smoke" \
+            read -r version url filename < <(curl -fsSL -A "$UA" \
               "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%221.21.10%22%5D" \
-              | python3 -c 'import json, sys; print(json.load(sys.stdin)[0]["version_number"])')
+              | python3 -c 'import json, sys; v = json.load(sys.stdin)[0]; f = next(f for f in v["files"] if f["primary"]); print(v["version_number"], f["url"], f["filename"])')
+            test -n "$url"
             echo "$slug $version"
-            coordinates="$coordinates${coordinates:+,}$slug:$version"
+            curl -fsSL -A "$UA" -o "run/worldgen-smoke/mods/$filename" "$url"
           done
-          echo "value=$coordinates" >> "$GITHUB_OUTPUT"
+          ls -la run/worldgen-smoke/mods
       - name: run worldgen smoke test
         run: >
           ./gradlew runWorldgenSmoke
@@ -78,7 +82,6 @@ jobs:
           "-Ppv.seed=$SEED"
           "-Ppv.benchRadius=$RADIUS"
           "-Ppv.benchCenter=$CENTER"
-          "-Ppv.compatMods=${{ steps.mods.outputs.value }}"
       - name: show report
         if: always()
         run: cat run/worldgen-smoke/pvwg/*/report.txt || true
