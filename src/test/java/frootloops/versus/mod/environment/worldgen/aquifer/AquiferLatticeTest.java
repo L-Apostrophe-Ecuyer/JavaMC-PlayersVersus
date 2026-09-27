@@ -19,16 +19,17 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The lattice aquifer against exact per-block values, on this mod's real data: for every block of a few chunks,
- * what the aquifer would place if the block were open (as for a carved block), with lattice values and with exact
- * ones, and what each costs.
+ * Interpolating floodedness and spread whole on a {@link Lattice}, against exact per-block values, on this mod's real
+ * data: for every block of a few chunks, what the aquifer would place if the block were open (as for a carved block),
+ * and what each costs. This is the measurement that ruled the approach out (19% of decisions in y 48..63 change,
+ * because both functions step inside their bands); the lattice of smooth inputs that replaces it must do far better.
  */
 class AquiferLatticeTest {
 
     private static final int[][] BANDS = {{-31, -4}, {-3, 7}, {8, 31}, {32, 47}, {48, 63}};
 
     @Test
-    void latticeDecisionsMatchExactOnes() {
+    void wholeFunctionLatticeAgainstExactValues() {
         NoiseConfig config = WorldgenTestData.noiseConfig(8675309L);
         NoiseRouter router = config.getNoiseRouter();
         DensityFunction floodedness = router.fluidLevelFloodednessNoise();

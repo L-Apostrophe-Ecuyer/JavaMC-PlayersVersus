@@ -8,10 +8,7 @@ import net.minecraft.world.gen.densityfunction.DensityFunction;
 import net.minecraft.world.gen.noise.NoiseRouter;
 import org.jetbrains.annotations.Nullable;
 
-import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MAX_Y;
-import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
-import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BAND_MIN_Y;
-import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
+import java.util.function.ToDoubleFunction;
 
 /**
  * The Players Versus aquifer: sea-level water for oceans and rivers, barriers that keep it out of caves, water basins
@@ -19,16 +16,19 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  *
  * <p>One instance exists per {@link net.minecraft.world.gen.chunk.ChunkNoiseSampler}, created by
  * {@code ChunkNoiseSamplerMixin} for Players Versus generators only. It answers the terrain pass, the carvers (which
- * pass {@code density = 0}) and heightmap probes, all from the same two {@link Lattice}s, so they agree block for
- * block, and so do neighbouring chunks.
+ * pass {@code density = 0}) and heightmap probes.
+ *
+ * <p>It samples floodedness and spread per block. Interpolating them whole on a {@link Lattice} was tried and measured
+ * (commit 373b78f, {@code AquiferLatticeTest}): both functions step inside their bands (floodedness is 0 from y 64
+ * up, the ramen term only applies below y 32 and inside the barrier band, spread's factor jumps at y 24), so
+ * interpolating across those steps changed 19% of decisions in y 48..63 and put barriers on ocean surfaces. A lattice
+ * may only hold their smooth inputs; see the plan, Section 6.2.
  */
 public final class PvAquifer implements AquiferSampler {
 
     private final FluidLevelSampler fluidLevelSampler;
-    /** Sea/river floodedness, only read strictly between {@code SEA_BAND_MIN_Y} and {@code SEA_LEVEL}. */
-    private final Lattice floodedness;
-    /** Cave-basin floodedness, only read strictly between {@code BASIN_MIN_Y} and {@code BASIN_MAX_Y}. */
-    private final Lattice spread;
+    private final ToDoubleFunction<DensityFunction.NoisePos> floodedness;
+    private final ToDoubleFunction<DensityFunction.NoisePos> spread;
 
     /**
      * Only read right after {@link #apply} returned a fluid, and every fluid decision sets it, so it never leaks a
@@ -38,8 +38,8 @@ public final class PvAquifer implements AquiferSampler {
 
     public PvAquifer(NoiseRouter noiseRouter, ChunkPos chunkPos, FluidLevelSampler fluidLevelSampler) {
         this.fluidLevelSampler = fluidLevelSampler;
-        this.floodedness = new Lattice(noiseRouter.fluidLevelFloodednessNoise(), chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL);
-        this.spread = new Lattice(noiseRouter.fluidLevelSpreadNoise(), chunkPos, BASIN_MIN_Y, BASIN_MAX_Y);
+        this.floodedness = noiseRouter.fluidLevelFloodednessNoise()::sample;
+        this.spread = noiseRouter.fluidLevelSpreadNoise()::sample;
     }
 
     @Override
@@ -59,10 +59,5 @@ public final class PvAquifer implements AquiferSampler {
     @Override
     public boolean needsFluidTick() {
         return this.needsFluidTick;
-    }
-
-    /** Lattice points sampled so far (floodedness, spread), for tests and the benchmark. */
-    public int[] latticeSamples() {
-        return new int[]{this.floodedness.samples(), this.spread.samples()};
     }
 }
