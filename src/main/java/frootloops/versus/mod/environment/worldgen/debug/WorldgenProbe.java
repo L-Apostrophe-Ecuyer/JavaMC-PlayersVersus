@@ -1,6 +1,7 @@
 package frootloops.versus.mod.environment.worldgen.debug;
 
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
+import frootloops.versus.mod.environment.worldgen.aquifer.Lattice;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferDecision;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferRules;
 import frootloops.versus.mod.environment.worldgen.biome.PvBiomeSource;
@@ -10,6 +11,7 @@ import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
@@ -24,11 +26,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MAX_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BAND_MIN_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
+
 /**
  * {@code /pvwg probe}: what the generator thinks about the block you're standing on.
  *
  * <p>Density functions are sampled raw at the block (no cell interpolation, no structure terrain adaptation), so
- * values near a boundary can differ slightly from what chunk generation produced.
+ * values near a boundary can differ slightly from what chunk generation produced. The aquifer line shows the lattice
+ * values the aquifer uses, and the exact values next to them.
  */
 public final class WorldgenProbe {
 
@@ -89,10 +97,16 @@ public final class WorldgenProbe {
             if (PvWorldgen.isPvGenerator(settings)) {
                 DensityFunction floodedness = router.fluidLevelFloodednessNoise();
                 DensityFunction spread = router.fluidLevelSpreadNoise();
+                ChunkPos chunkPos = new ChunkPos(pos);
+                Lattice floodednessLattice = new Lattice(floodedness, chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL);
+                Lattice spreadLattice = new Lattice(spread, chunkPos, BASIN_MIN_Y, BASIN_MAX_Y);
                 boolean lavaLevel = pos.getY() < Math.min(VANILLA_LAVA_LEVEL, settings.seaLevel());
-                PvAquiferDecision decision = PvAquiferRules.decide(noisePos, finalDensity, lavaLevel, floodedness, spread);
-                lines.add(String.format(Locale.ROOT, "aquifer floodedness %.4f  spread %.4f  ->  %s",
-                        floodedness.sample(noisePos), spread.sample(noisePos), decision));
+                PvAquiferDecision decision = PvAquiferRules.decide(noisePos, finalDensity, lavaLevel, floodednessLattice, spreadLattice);
+                PvAquiferDecision exact = PvAquiferRules.decide(noisePos, finalDensity, lavaLevel, floodedness::sample, spread::sample);
+                lines.add(String.format(Locale.ROOT, "aquifer floodedness %.4f (exact %.4f)  spread %.4f (exact %.4f)  ->  %s%s",
+                        floodednessLattice.applyAsDouble(noisePos), floodedness.sample(noisePos),
+                        spreadLattice.applyAsDouble(noisePos), spread.sample(noisePos),
+                        decision, decision == exact ? "" : " (exact values would give " + exact + ")"));
             } else {
                 lines.add("aquifer: vanilla (not a Players Versus generator)");
             }

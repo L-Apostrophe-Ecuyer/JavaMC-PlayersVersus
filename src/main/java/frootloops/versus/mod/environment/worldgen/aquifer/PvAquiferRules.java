@@ -2,6 +2,8 @@ package frootloops.versus.mod.environment.worldgen.aquifer;
 
 import net.minecraft.world.gen.densityfunction.DensityFunction;
 
+import java.util.function.ToDoubleFunction;
+
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.*;
 
 /**
@@ -26,11 +28,13 @@ public final class PvAquiferRules {
      * @param pos         position to decide for; also used to sample {@code floodedness} and {@code spread}
      * @param density     terrain density at {@code pos} (carvers pass 0)
      * @param lavaLevel   whether {@code pos} is below the generator's lava level
-     * @param floodedness sea/river floodedness (router slot {@code fluid_level_floodedness})
-     * @param spread      cave-basin floodedness (router slot {@code fluid_level_spread})
+     * @param floodedness sea/river floodedness (router slot {@code fluid_level_floodedness}): the aquifer's
+     *                    {@link Lattice}, or the function itself for exact values
+     * @param spread      cave-basin floodedness (router slot {@code fluid_level_spread}), likewise
      */
     public static PvAquiferDecision decide(DensityFunction.NoisePos pos, double density, boolean lavaLevel,
-                                           DensityFunction floodedness, DensityFunction spread) {
+                                           ToDoubleFunction<DensityFunction.NoisePos> floodedness,
+                                           ToDoubleFunction<DensityFunction.NoisePos> spread) {
         if (density > 0.0) return PvAquiferDecision.SOLID;
         if (lavaLevel) return PvAquiferDecision.LAVA;
 
@@ -38,7 +42,7 @@ public final class PvAquiferRules {
         if (y >= SEA_LEVEL) return PvAquiferDecision.AIR_ABOVE_SEA;
 
         if (y > SEA_BAND_MIN_Y) {
-            double seaFloodedness = floodedness.sample(pos);
+            double seaFloodedness = floodedness.applyAsDouble(pos);
             if (seaFloodedness > SEA_WATER_THRESHOLD) {
                 return seaFloodedness < SEA_WATER_THRESHOLD + FLUID_TICK_MARGIN
                         ? PvAquiferDecision.SEA_WATER_TICKING
@@ -48,7 +52,7 @@ public final class PvAquiferRules {
         }
 
         if (y > BASIN_MIN_Y && y < BASIN_MAX_Y) {
-            double basinFloodedness = spread.sample(pos);
+            double basinFloodedness = spread.applyAsDouble(pos);
             double waterThreshold = basinWaterThreshold(y);
             if (basinFloodedness > waterThreshold) {
                 return basinFloodedness < waterThreshold + FLUID_TICK_MARGIN

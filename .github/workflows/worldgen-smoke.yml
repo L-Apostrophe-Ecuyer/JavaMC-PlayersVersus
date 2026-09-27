@@ -1,6 +1,7 @@
 # Worldgen benchmark: generates the same region with the vanilla Default world type and the Players Versus world type,
 # each alone and next to C2ME and Lithium, and uploads timings, metrics, map images and the server log. The upgrade job
-# reopens a world made by an older build with this one.
+# reopens a world made by an older build with this one. The perf job times this commit against the one before it on
+# the same runner, since timings between runners differ by more than most changes.
 # It starts a Minecraft server, which requires accepting the Minecraft EULA (https://aka.ms/MinecraftEULA).
 #
 # Two ways to start it:
@@ -179,5 +180,82 @@ jobs:
           path: |
             reports/
             run/worldgen-smoke/logs/
+            run/worldgen-smoke/crash-reports/
+          if-no-files-found: warn
+
+  # Generates the Players Versus benchmark region with the previous commit, then with this one, then a vanilla world,
+  # all on one runner, and prints the time per status side by side.
+  perf:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.accept_eula) ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[smoke]'))
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    env:
+      SEED: ${{ inputs.seed || '8675309' }}
+      RADIUS: ${{ inputs.radius || '12' }}
+      CENTER: ${{ inputs.center || '100,100' }}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: setup jdk 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'microsoft'
+      - name: previous commit
+        run: |
+          git checkout --detach "$GITHUB_SHA~1"
+          git log --oneline -1
+          chmod +x ./gradlew
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+          mkdir -p reports
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/1-previous.txt
+          rm -rf run/worldgen-smoke/pvwg
+      - name: this commit
+        run: |
+          git checkout --detach "$GITHUB_SHA"
+          chmod +x ./gradlew
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/2-this.txt
+          rm -rf run/worldgen-smoke/pvwg
+      - name: vanilla
+        run: |
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=minecraft:normal" \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/3-vanilla.txt
+      - name: compare
+        if: always()
+        run: |
+          python3 - reports/1-previous.txt reports/2-this.txt reports/3-vanilla.txt <<'EOF'
+          import sys
+          def read(path):
+              times, metrics = {}, []
+              for line in open(path):
+                  parts = line.split()
+                  if parts and parts[0] == "time":
+                      times[parts[1]] = float(parts[-2])
+                  elif parts and parts[0] == "metric":
+                      metrics.append(line.rstrip())
+              return times, metrics
+          (previous, pm), (this, tm), (vanilla, vm) = (read(path) for path in sys.argv[1:])
+          print(f"{'status':20} {'previous':>9} {'this':>9} {'vanilla':>9} {'this/prev':>10} {'this/vanilla':>13}  (ms/chunk)")
+          for status in this:
+              p, t, v = previous.get(status, float('nan')), this[status], vanilla.get(status, float('nan'))
+              print(f"{status:20} {p:9.2f} {t:9.2f} {v:9.2f} {t / p:10.2f} {t / v:13.2f}")
+          print("\nmetrics, previous commit:"); print("\n".join(pm))
+          print("\nmetrics, this commit:"); print("\n".join(tm))
+          EOF
+      - name: upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldgen-smoke-perf
+          path: |
+            reports/
             run/worldgen-smoke/crash-reports/
           if-no-files-found: warn

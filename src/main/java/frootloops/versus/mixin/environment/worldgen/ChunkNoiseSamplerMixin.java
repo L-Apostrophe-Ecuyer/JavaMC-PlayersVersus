@@ -39,7 +39,7 @@ public abstract class ChunkNoiseSamplerMixin {
                                                    Operation<AquiferSampler> original,
                                                    @Local(argsOnly = true) ChunkGeneratorSettings settings) {
         if (PvWorldgen.isPvGenerator(settings)) {
-            return new PvAquifer(noiseRouter, fluidLevelSampler);
+            return new PvAquifer(noiseRouter, chunkPos, fluidLevelSampler);
         }
         return original.call(chunkNoiseSampler, chunkPos, noiseRouter, randomSplitter, minimumY, height, fluidLevelSampler);
     }

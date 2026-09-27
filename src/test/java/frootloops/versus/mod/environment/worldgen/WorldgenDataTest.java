@@ -67,7 +67,7 @@ class WorldgenDataTest {
                 for (int z = 1408; z < 1808; z += 4) {
                     for (int y = band[0]; y <= band[1]; y += 2) {
                         DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
-                        PvAquiferDecision decision = PvAquiferRules.decide(pos, 0.0, false, router.fluidLevelFloodednessNoise(), router.fluidLevelSpreadNoise());
+                        PvAquiferDecision decision = PvAquiferRules.decide(pos, 0.0, false, router.fluidLevelFloodednessNoise()::sample, router.fluidLevelSpreadNoise()::sample);
                         counts.merge(decision, 1, Integer::sum);
                         total++;
                     }
