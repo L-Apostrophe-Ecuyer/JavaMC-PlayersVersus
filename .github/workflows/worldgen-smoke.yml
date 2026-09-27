@@ -27,10 +27,6 @@ on:
         description: "Center chunk as x,z"
         default: "100,100"
 
-concurrency:
-  group: worldgen-smoke-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   smoke:
     if: >-

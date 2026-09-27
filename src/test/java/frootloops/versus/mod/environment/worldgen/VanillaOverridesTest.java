@@ -35,7 +35,7 @@ class VanillaOverridesTest {
     @Test
     void carverOverridesComparedWithVanilla() throws IOException {
         Map<String, Float> vanilla = new TreeMap<>();
-        BuiltinRegistries.createWrapperLookup().getWrapperOrThrow(RegistryKeys.CONFIGURED_CARVER).streamEntries()
+        BuiltinRegistries.createWrapperLookup().getOrThrow(RegistryKeys.CONFIGURED_CARVER).streamEntries()
                 .forEach(entry -> vanilla.put(entry.registryKey().getValue().getPath(), entry.value().config().probability));
         for (String carver : List.of("cave", "cave_extra_underground", "canyon")) {
             float override = readProbability(Path.of("src/main/resources/data/minecraft/worldgen/configured_carver/" + carver + ".json"));
