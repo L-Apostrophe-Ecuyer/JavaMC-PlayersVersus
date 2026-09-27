@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
+import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquifer;
 import frootloops.versus.mod.environment.worldgen.ore.PvOreVeins;
 import net.minecraft.util.math.ChunkPos;
@@ -12,6 +13,7 @@ import net.minecraft.world.gen.chunk.AquiferSampler;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.ChunkNoiseSampler;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.world.gen.noise.NoiseConfig;
 import net.minecraft.world.gen.noise.NoiseRouter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,9 +39,10 @@ public abstract class ChunkNoiseSamplerMixin {
                                                    RandomSplitter randomSplitter, int minimumY, int height,
                                                    AquiferSampler.FluidLevelSampler fluidLevelSampler,
                                                    Operation<AquiferSampler> original,
-                                                   @Local(argsOnly = true) ChunkGeneratorSettings settings) {
+                                                   @Local(argsOnly = true) ChunkGeneratorSettings settings,
+                                                   @Local(argsOnly = true) NoiseConfig noiseConfig) {
         if (PvWorldgen.isPvGenerator(settings)) {
-            return new PvAquifer(noiseRouter, chunkPos, fluidLevelSampler);
+            return new PvAquifer(AquiferInputs.of(noiseConfig, settings), noiseRouter.depth(), chunkPos, fluidLevelSampler);
         }
         return original.call(chunkNoiseSampler, chunkPos, noiseRouter, randomSplitter, minimumY, height, fluidLevelSampler);
     }

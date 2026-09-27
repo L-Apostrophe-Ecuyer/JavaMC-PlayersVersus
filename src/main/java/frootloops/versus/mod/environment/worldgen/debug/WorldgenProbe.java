@@ -1,8 +1,9 @@
 package frootloops.versus.mod.environment.worldgen.debug;
 
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
+import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
+import frootloops.versus.mod.environment.worldgen.aquifer.PvAquifer;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferDecision;
-import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferRules;
 import frootloops.versus.mod.environment.worldgen.biome.PvBiomeSource;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
@@ -10,6 +11,7 @@ import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
@@ -28,7 +30,8 @@ import java.util.Locale;
  * {@code /pvwg probe}: what the generator thinks about the block you're standing on.
  *
  * <p>Density functions are sampled raw at the block (no cell interpolation, no structure terrain adaptation), so
- * values near a boundary can differ slightly from what chunk generation produced.
+ * values near a boundary can differ slightly from what chunk generation produced. The aquifer line shows the values
+ * the aquifer uses (smooth inputs from its lattice) next to the exact ones.
  */
 public final class WorldgenProbe {
 
@@ -90,9 +93,12 @@ public final class WorldgenProbe {
                 DensityFunction floodedness = router.fluidLevelFloodednessNoise();
                 DensityFunction spread = router.fluidLevelSpreadNoise();
                 boolean lavaLevel = pos.getY() < Math.min(VANILLA_LAVA_LEVEL, settings.seaLevel());
-                PvAquiferDecision decision = PvAquiferRules.decide(noisePos, finalDensity, lavaLevel, floodedness::sample, spread::sample);
-                lines.add(String.format(Locale.ROOT, "aquifer floodedness %.4f  spread %.4f  ->  %s",
-                        floodedness.sample(noisePos), spread.sample(noisePos), decision));
+                PvAquifer aquifer = new PvAquifer(AquiferInputs.of(noiseConfig, settings), router.depth(), new ChunkPos(pos),
+                        (x, y, z) -> { throw new UnsupportedOperationException("the probe passes lavaLevel itself"); });
+                PvAquiferDecision decision = aquifer.decide(noisePos, finalDensity, lavaLevel);
+                lines.add(String.format(Locale.ROOT, "aquifer floodedness %.4f (exact %.4f)  spread %.4f (exact %.4f)  ->  %s",
+                        aquifer.floodedness(noisePos), floodedness.sample(noisePos),
+                        aquifer.spread(noisePos), spread.sample(noisePos), decision));
             } else {
                 lines.add("aquifer: vanilla (not a Players Versus generator)");
             }

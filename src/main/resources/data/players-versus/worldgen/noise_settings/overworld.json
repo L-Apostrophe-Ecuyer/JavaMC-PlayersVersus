@@ -23,9 +23,27 @@
     "final_density": "players-versus:overworld/final_density",
     "fluid_level_floodedness": {
       "type": "players-versus:aquifer_floodedness",
-      "argument": "players-versus:overworld/aquifer_fluid_level_floodedness"
+      "depth": "players-versus:overworld/depth",
+      "continentalness": {
+        "type": "minecraft:shifted_noise", "noise": "minecraft:continentalness",
+        "shift_x": "minecraft:shift_x", "shift_y": 0.0, "shift_z": "minecraft:shift_z",
+        "xz_scale": 0.25, "y_scale": 0.1
+      },
+      "ridge": {
+        "type": "minecraft:shifted_noise", "noise": "minecraft:ridge",
+        "shift_x": "minecraft:shift_x", "shift_y": 0.0, "shift_z": "minecraft:shift_z",
+        "xz_scale": 0.25, "y_scale": 0.0
+      },
+      "entrances": "players-versus:overworld/caves/entrances",
+      "surface": { "type": "minecraft:noise", "noise": "minecraft:surface", "xz_scale": 2.0, "y_scale": 1.0 },
+      "ramen": { "type": "minecraft:noise", "noise": "minecraft:noodle", "xz_scale": 3.0, "y_scale": 3.0 }
     },
-    "fluid_level_spread": "players-versus:overworld/aquifer_fluid_level_spread",
+    "fluid_level_spread": {
+      "type": "players-versus:aquifer_spread",
+      "entrances": "players-versus:overworld/caves/entrances",
+      "noodle": "players-versus:overworld/caves/noodle",
+      "surface": { "type": "minecraft:noise", "noise": "minecraft:surface", "xz_scale": 4.0, "y_scale": 2.0 }
+    },
     "preliminary_surface_level": "players-versus:overworld/preliminary_surface_level",
     "lava": {
       "type": "minecraft:noise", "noise": "minecraft:aquifer_lava",

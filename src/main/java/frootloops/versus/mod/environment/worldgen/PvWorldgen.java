@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.worldgen.biome.PvBiomeSource;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenBench;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenDebugCommands;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
+import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -21,6 +22,7 @@ import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
 public final class PvWorldgen {
 
     public static final Identifier AQUIFER_FLOODEDNESS_ID = Identifier.of(VersusMod.MOD_ID, "aquifer_floodedness");
+    public static final Identifier AQUIFER_SPREAD_ID = Identifier.of(VersusMod.MOD_ID, "aquifer_spread");
     public static final Identifier BIOME_SOURCE_ID = Identifier.of(VersusMod.MOD_ID, "overworld");
 
     private PvWorldgen() {
@@ -28,6 +30,7 @@ public final class PvWorldgen {
 
     public static void initialize() {
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, AQUIFER_FLOODEDNESS_ID, AquiferFloodedness.CODEC);
+        Registry.register(Registries.DENSITY_FUNCTION_TYPE, AQUIFER_SPREAD_ID, AquiferSpread.CODEC);
         Registry.register(Registries.BIOME_SOURCE, BIOME_SOURCE_ID, PvBiomeSource.CODEC);
         WorldgenDebugCommands.register();
         WorldgenBench.registerHeadlessRun();
@@ -44,7 +47,8 @@ public final class PvWorldgen {
         return unwrap(settings.noiseRouter().fluidLevelFloodednessNoise()) instanceof AquiferFloodedness;
     }
 
-    private static DensityFunction unwrap(DensityFunction function) {
+    /** The function a registry reference points to, following references to references. */
+    public static DensityFunction unwrap(DensityFunction function) {
         while (function instanceof DensityFunctionTypes.RegistryEntryHolder holder) {
             function = holder.function().value();
         }

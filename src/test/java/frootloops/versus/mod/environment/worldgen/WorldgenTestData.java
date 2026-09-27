@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -74,23 +75,13 @@ public final class WorldgenTestData {
     }
 
     /**
-     * A density function from the registry, with its noises seeded the way {@link NoiseConfig} seeds its router:
-     * each noise gets {@code config}'s sampler for that noise's key.
+     * A density function from the registry, seeded by the aquifer's own seeding ({@link AquiferInputs#seeding}), which
+     * must match how {@link NoiseConfig} seeds its router.
      */
     public static DensityFunction seeded(NoiseConfig config, String id) {
-        DensityFunction function = registries().getOrThrow(RegistryKeys.DENSITY_FUNCTION)
-                .getOrThrow(RegistryKey.of(RegistryKeys.DENSITY_FUNCTION, Identifier.of(id))).value();
-        return function.apply(new DensityFunction.DensityFunctionVisitor() {
-            @Override
-            public DensityFunction apply(DensityFunction densityFunction) {
-                return densityFunction;
-            }
-
-            @Override
-            public DensityFunction.Noise apply(DensityFunction.Noise noise) {
-                return new DensityFunction.Noise(noise.noiseData(), config.getOrCreateSampler(noise.noiseData().getKey().orElseThrow()));
-            }
-        });
+        return registries().getOrThrow(RegistryKeys.DENSITY_FUNCTION)
+                .getOrThrow(RegistryKey.of(RegistryKeys.DENSITY_FUNCTION, Identifier.of(id))).value()
+                .apply(AquiferInputs.seeding(config));
     }
 
     public static String read(String resource) {

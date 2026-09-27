@@ -1,0 +1,60 @@
+package frootloops.versus.mod.environment.worldgen.aquifer;
+
+import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
+import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
+import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
+import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.world.gen.noise.NoiseConfig;
+import org.junit.jupiter.api.Test;
+
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
+/**
+ * The Java aquifer functions ({@link AquiferFormulas}, through the router's {@link AquiferFloodedness} and
+ * {@link AquiferSpread}) against the JSON they replace, which stays in the mod's data as the reference: they must give
+ * the same doubles everywhere.
+ */
+class AquiferPortTest {
+
+    private static final long SEED = 8675309L;
+    /** Band edges of the JSON, and the blocks next to them. */
+    private static final int[] EDGE_YS = {-33, -32, -31, -5, -4, -3, -2, -1, 0, 1, 7, 8, 9, 15, 16, 17, 23, 24, 25, 31, 32, 33,
+            39, 40, 41, 47, 48, 49, 53, 54, 55, 63, 64, 65};
+
+    @Test
+    void yValueIsVanillasY() {
+        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        DensityFunction y = WorldgenTestData.seeded(config, "minecraft:y");
+        for (int blockY = -64; blockY < 320; blockY++) {
+            assertEquals(y.sample(new DensityFunction.UnblendedNoisePos(0, blockY, 0)), AquiferFormulas.yValue(blockY), 0.0, "y " + blockY);
+        }
+    }
+
+    @Test
+    void javaGivesTheJsonsValues() {
+        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        DensityFunction floodedness = config.getNoiseRouter().fluidLevelFloodednessNoise();
+        DensityFunction spread = config.getNoiseRouter().fluidLevelSpreadNoise();
+        assertInstanceOf(AquiferFloodedness.class, floodedness);
+        assertInstanceOf(AquiferSpread.class, spread);
+        DensityFunction jsonFloodedness = WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_floodedness");
+        DensityFunction jsonSpread = WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_spread");
+
+        Random random = new Random(SEED);
+        int compared = 0, nonZero = 0;
+        for (int i = 0; i < 20000; i++) {
+            int x = random.nextInt(8000) - 4000, z = random.nextInt(8000) - 4000;
+            int y = i % 2 == 0 ? EDGE_YS[random.nextInt(EDGE_YS.length)] : random.nextInt(110) - 40;
+            DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
+            double expectedFloodedness = jsonFloodedness.sample(pos), expectedSpread = jsonSpread.sample(pos);
+            assertEquals(expectedFloodedness, floodedness.sample(pos), 0.0, () -> "floodedness at " + x + "," + y + "," + z);
+            assertEquals(expectedSpread, spread.sample(pos), 0.0, () -> "spread at " + x + "," + y + "," + z);
+            compared++;
+            if (expectedFloodedness != 0.0 || expectedSpread != 0.0) nonZero++;
+        }
+        System.out.println("[port] F and S equal the JSON at " + compared + " points, " + nonZero + " of them not both zero");
+    }
+}

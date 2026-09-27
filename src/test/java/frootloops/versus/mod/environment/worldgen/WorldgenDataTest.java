@@ -32,14 +32,16 @@ class WorldgenDataTest {
         assertEquals(PvWorldgenConstants.SEA_LEVEL, settings.seaLevel(), "sea_level in the noise settings and PvWorldgenConstants.SEA_LEVEL differ");
     }
 
-    /** {@link WorldgenTestData#seeded} must give the exact values of {@link NoiseConfig}'s router. */
+    /**
+     * The aquifer seeds its input functions itself ({@code AquiferInputs.seeding}); that must give the exact values of
+     * {@link NoiseConfig}'s own router. {@code AquiferPortTest} relies on it too.
+     */
     @Test
     void seedingMatchesNoiseConfig() {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
         NoiseRouter router = config.getNoiseRouter();
         assertEqualValues("depth", WorldgenTestData.seeded(config, "players-versus:overworld/depth"), router.depth());
-        assertEqualValues("floodedness", WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_floodedness"), router.fluidLevelFloodednessNoise());
-        assertEqualValues("spread", WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_spread"), router.fluidLevelSpreadNoise());
+        assertEqualValues("continents", WorldgenTestData.seeded(config, "minecraft:overworld/continents"), router.continents());
     }
 
     private static void assertEqualValues(String name, DensityFunction ours, DensityFunction router) {
