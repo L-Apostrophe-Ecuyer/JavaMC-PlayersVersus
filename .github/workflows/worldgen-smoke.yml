@@ -40,10 +40,21 @@ jobs:
         level_type: ["minecraft:normal", "players-versus:better_world"]
         # Other mods (Modrinth projects) to run alongside, for compatibility: the newest release for 1.21.10.
         mods: ["", "c2me-fabric lithium"]
+        # "java-kernel": the Players Versus final density stays a Java kernel next to C2ME's compiler.
+        variant: [""]
         include:
           # No level-type in server.properties: the mod makes Improved the server default.
           - level_type: "server-default"
             mods: ""
+            variant: ""
+          # Since d79ad84 the run next to C2ME and Lithium differs from the plain one (14 of 2,500 surface cells, water
+          # in y 48..63). These two runs tell the compiled final density, and Lithium, apart from the rest.
+          - level_type: "players-versus:better_world"
+            mods: "c2me-fabric lithium"
+            variant: "java-kernel"
+          - level_type: "players-versus:better_world"
+            mods: "c2me-fabric"
+            variant: ""
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
@@ -84,6 +95,7 @@ jobs:
           "-Ppv.seed=$SEED"
           "-Ppv.benchRadius=$RADIUS"
           "-Ppv.benchCenter=$CENTER"
+          "-Ppv.vanillaTypes=${{ matrix.variant == 'java-kernel' && 'false' || 'true' }}"
       - name: show report
         if: always()
         run: cat run/worldgen-smoke/pvwg/*/report.txt || true
@@ -98,7 +110,7 @@ jobs:
         id: name
         if: always()
         run: |
-          echo "value=worldgen-smoke-$(echo '${{ matrix.level_type }} ${{ matrix.mods }}' | xargs | tr ': ' '-_')" >> "$GITHUB_OUTPUT"
+          echo "value=worldgen-smoke-$(echo '${{ matrix.level_type }} ${{ matrix.mods }} ${{ matrix.variant }}' | xargs | tr ': ' '-_')" >> "$GITHUB_OUTPUT"
       - name: upload results
         if: always()
         uses: actions/upload-artifact@v4

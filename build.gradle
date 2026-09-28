@@ -34,6 +34,7 @@ loom {
 		// stage by stage, writes timings, metrics and map images to run/worldgen-smoke/pvwg/, then stops.
 		// Options: -Ppv.levelType=<world preset> -Ppv.seed=<seed> -Ppv.benchRadius=<chunks> -Ppv.benchCenter=<x,z>
 		// -Ppv.keepWorld=true reopens the existing world instead of starting a fresh one.
+		// -Ppv.vanillaTypes=false keeps the Java final density next to C2ME's compiler (DensityCompilerCompat).
 		// The server only starts with -Ppv.acceptEula=true (you accept https://aka.ms/MinecraftEULA).
 		worldgenSmoke {
 			server()
@@ -42,6 +43,7 @@ loom {
 			programArg "--nogui"
 			vmArg "-Dpv.worldgen.bench=${providers.gradleProperty('pv.benchRadius').getOrElse('12')}"
 			vmArg "-Dpv.worldgen.bench.center=${providers.gradleProperty('pv.benchCenter').getOrElse('100,100')}"
+			vmArg "-Dpv.worldgen.vanillaTypes=${providers.gradleProperty('pv.vanillaTypes').getOrElse('true')}"
 		}
 	}
 

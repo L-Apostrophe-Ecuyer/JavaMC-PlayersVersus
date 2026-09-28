@@ -12,21 +12,27 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.structure.StructureStart;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.ProtoChunk;
 import net.minecraft.world.chunk.WrapperProtoChunk;
 import net.minecraft.world.gen.carver.CarvingMask;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
+import net.minecraft.world.gen.structure.Structure;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -82,7 +88,9 @@ import java.util.function.Consumer;
  *   (Section 10, question 7 of the refactor plan); y -8..-1, 0..23, 24..47 and 48..63.</li>
  * </ul>
  * The report also holds text maps (one character per 8x8 blocks, north up) of the surface and its biomes, so results
- * can be compared without the images.
+ * can be compared without the images; hashes of every block after NOISE and after CARVERS, by 16-block layer and by
+ * chunk, so two runs that should agree can be checked block for block and their differences located; and the
+ * structure starts in the region.
  */
 public final class WorldgenBench {
 
@@ -171,6 +179,13 @@ public final class WorldgenBench {
             log.accept(String.format(Locale.ROOT, "[pvwg] %-9s %9.1f ms  %7.2f ms/chunk",
                     status.getId(), elapsed / 1e6, elapsed / 1e6 / chunkCount));
 
+            if (status == ChunkStatus.NOISE) {
+                for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
+                    for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
+                        region.hashBlocks("noise", chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.NOISE, true));
+                    }
+                }
+            }
             if (status == ChunkStatus.SURFACE) {
                 for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
                     for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
@@ -181,7 +196,9 @@ public final class WorldgenBench {
             if (status == ChunkStatus.CARVERS) {
                 for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
                     for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
-                        region.capture(chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.CARVERS, true));
+                        Chunk chunk = chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.CARVERS, true);
+                        region.capture(chunk);
+                        region.hashBlocks("carvers", chunk);
                     }
                 }
             }
@@ -243,6 +260,10 @@ public final class WorldgenBench {
         /** Water blocks by {@code WATER_BAND_TOPS}, and below them. */
         private final long[] waterByBand = new long[WATER_BAND_TOPS.length];
         private long waterBelowSeaBand;
+        /** Block hashes by status: [chunk, by {@link #chunkIndex}][16-block section from the bottom]. */
+        private final Map<String, long[][]> sectionHashes = new LinkedHashMap<>();
+        private final Registry<Structure> structures;
+        private final List<String> structureStarts = new ArrayList<>();
 
         Region(ServerWorld world, int minX, int minZ, int size) {
             this.minX = minX;
@@ -260,6 +281,35 @@ public final class WorldgenBench {
             for (int i = 0; i < SLICE_YS.length; i++) this.slices[i] = new byte[columns];
             this.basinWater = new BitSet(columns * (BASIN_SEAM_MAX_Y - BASIN_SEAM_MIN_Y));
             this.stoneBeforeCarvers = new BitSet(columns * (CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y));
+            this.structures = world.getRegistryManager().getOrThrow(RegistryKeys.STRUCTURE);
+        }
+
+        private int chunksPerSide() {
+            return this.size / 16;
+        }
+
+        private int chunkIndex(ChunkPos pos) {
+            return (pos.x - (this.minX >> 4)) + (pos.z - (this.minZ >> 4)) * chunksPerSide();
+        }
+
+        /** FNV-1a over the raw ids of every block of each 16-block section, for {@link #appendHashes}. */
+        void hashBlocks(String status, Chunk chunk) {
+            long[][] byChunk = this.sectionHashes.computeIfAbsent(status, key -> new long[chunksPerSide() * chunksPerSide()][]);
+            ChunkSection[] sections = chunk.getSectionArray();
+            long[] hashes = new long[sections.length];
+            for (int i = 0; i < sections.length; i++) {
+                ChunkSection section = sections[i];
+                long hash = 0xcbf29ce484222325L;
+                for (int y = 0; y < 16; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        for (int x = 0; x < 16; x++) {
+                            hash = (hash ^ Block.getRawIdFromState(section.getBlockState(x, y, z))) * 0x100000001b3L;
+                        }
+                    }
+                }
+                hashes[i] = hash;
+            }
+            byChunk[chunkIndex(chunk.getPos())] = hashes;
         }
 
         private int column(int x, int z) {
@@ -336,6 +386,14 @@ public final class WorldgenBench {
             }
             BitSet ticking = proto != null ? countQueuedFluidTicks(proto) : new BitSet();
             countLeaks(chunk, carvingMask, ticking);
+            for (Map.Entry<Structure, StructureStart> entry : chunk.getStructureStarts().entrySet()) {
+                StructureStart start = entry.getValue();
+                if (!start.hasChildren()) continue;
+                BlockBox box = start.getBoundingBox();
+                this.structureStarts.add(String.format(Locale.ROOT, "structure %s start chunk %d,%d box %d,%d,%d..%d,%d,%d",
+                        this.structures.getId(entry.getKey()), start.getPos().x, start.getPos().z, box.getMinX(), box.getMinY(),
+                        box.getMinZ(), box.getMaxX(), box.getMaxY(), box.getMaxZ()));
+            }
         }
 
         /**
@@ -587,7 +645,46 @@ public final class WorldgenBench {
             appendMap(lines, column -> biomeChar(this.surfaceBiome[column]));
             for (int i = 0; i < this.biomeIds.size(); i++) biomeLegend.add(biomeChar(i) + " " + this.biomeIds.get(i));
             lines.add("legend " + String.join(", ", biomeLegend));
+            appendHashes(lines);
+            this.structureStarts.stream().sorted().forEach(lines::add);
             return lines;
+        }
+
+        private static final String HASH_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
+
+        /**
+         * Per status: one hash per 16-block layer over the whole region, from the bottom up, then a map with one character
+         * per chunk (north up) hashing all of the chunk's blocks.
+         */
+        private void appendHashes(List<String> lines) {
+            for (Map.Entry<String, long[][]> entry : this.sectionHashes.entrySet()) {
+                long[][] byChunk = entry.getValue();
+                int sections = 0;
+                for (long[] hashes : byChunk) if (hashes != null) sections = Math.max(sections, hashes.length);
+                StringBuilder layers = new StringBuilder("hash " + entry.getKey() + " layers from y " + this.bottomY + ", 16 blocks each:");
+                for (int section = 0; section < sections; section++) {
+                    long layer = 0;
+                    for (long[] hashes : byChunk) layer = mix(layer, hashes != null && section < hashes.length ? hashes[section] : 0L);
+                    layers.append(String.format(Locale.ROOT, " %08x", layer >>> 32));
+                }
+                lines.add(layers.toString());
+                lines.add("hash " + entry.getKey() + " chunks (one character per chunk, north up):");
+                int side = chunksPerSide();
+                for (int chunkZ = 0; chunkZ < side; chunkZ++) {
+                    StringBuilder row = new StringBuilder("  ");
+                    for (int chunkX = 0; chunkX < side; chunkX++) {
+                        long[] hashes = byChunk[chunkX + chunkZ * side];
+                        long chunk = 0;
+                        if (hashes != null) for (long hash : hashes) chunk = mix(chunk, hash);
+                        row.append(hashes == null ? ' ' : HASH_CHARS.charAt((int) (chunk >>> 58)));
+                    }
+                    lines.add(row.toString());
+                }
+            }
+        }
+
+        private static long mix(long hash, long value) {
+            return (Long.rotateLeft(hash, 23) ^ value) * 0x9e3779b97f4a7c15L;
         }
 
         /** Water blocks in y 0..31 per block offset inside the chunk along one axis, relative to the mean of the 16 offsets. */
