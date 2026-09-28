@@ -72,7 +72,12 @@ import java.util.function.Consumer;
  *   x offsets 0..7 only; z is the control;</li>
  *   <li>fluid ticks queued: fluid blocks the aquifer marked for a fluid update during NOISE and CARVERS, per chunk,
  *   overall and for y 0..31 next to the water blocks there. Each one runs when its chunk becomes a full chunk. Almost as
- *   many ticks as water blocks in y 0..31 is quirk Q8.</li>
+ *   many ticks as water blocks in y 0..31 is quirk Q8;</li>
+ *   <li>stone the carvers skipped in y -8..63: carved positions that held stone before and after the carvers ran. A
+ *   carver skips a position when the aquifer answers "barrier";</li>
+ *   <li>water beside or above air in y -31..63 (neighbours inside the chunk): where water spills, or stands as a wall of
+ *   water until something updates it. Split by what made the water and the air (the terrain pass or a carver), by
+ *   height, and by whether the water has a fluid tick queued.</li>
  * </ul>
  * The report also holds text maps (one character per 8x8 blocks, north up) of the surface and its biomes, so results
  * can be compared without the images.
@@ -91,6 +96,13 @@ public final class WorldgenBench {
     /** Covers every aquifer barrier: the lowest ones are basin barriers at y -3. */
     private static final int CARVER_BAND_MIN_Y = -8;
     private static final int CARVER_BAND_MAX_Y = 64;
+    /** The aquifer's water: the sea band, y -31..63. */
+    private static final int LEAK_MIN_Y = -31;
+    private static final int LEAK_MAX_Y = 64;
+    /** Heights the leak metric is split by: y -31..-1, 0..23, 24..47, 48..63. */
+    private static final int[] LEAK_BAND_TOPS = {0, 24, 48, 64};
+    /** Where water flows from a block: the four sides, then below. */
+    private static final int[][] SIDES_AND_BELOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
     private static final int MAP_CELL = 8;
 
     private WorldgenBench() {
@@ -216,9 +228,14 @@ public final class WorldgenBench {
         private final BitSet stoneBeforeCarvers;
         private final List<String> biomeIds = new ArrayList<>();
         private final Map<String, Integer> biomeIndex = new HashMap<>();
-        private long waterAtOrAboveCeiling, carverPlacedStone, carvedInBand;
+        private long waterAtOrAboveCeiling, carverPlacedStone, carverSkippedStone, carvedInBand;
         private long fluidTicksQueued, fluidTicksQueuedInBasinLayers;
         private int protoChunks;
+        /** Water blocks beside or above air, and those among them with a fluid tick queued. */
+        private long leakingWater, leakingWaterTicking;
+        /** Water and air side by side, by what made them: [water carved * 2 + air carved]. */
+        private final long[] leakPairsBySource = new long[4];
+        private final long[] leakingWaterByBand = new long[LEAK_BAND_TOPS.length];
 
         Region(ServerWorld world, int minX, int minZ, int size) {
             this.minX = minX;
@@ -302,31 +319,76 @@ public final class WorldgenBench {
                         for (int y = CARVER_BAND_MIN_Y; y < CARVER_BAND_MAX_Y; y++) {
                             if (!carvingMask.get(localX, y, localZ)) continue;
                             this.carvedInBand++;
-                            if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.STONE)
-                                    && !this.stoneBeforeCarvers.get(column * layers + (y - CARVER_BAND_MIN_Y))) {
-                                this.carverPlacedStone++;
+                            if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.STONE)) {
+                                if (this.stoneBeforeCarvers.get(column * layers + (y - CARVER_BAND_MIN_Y))) this.carverSkippedStone++;
+                                else this.carverPlacedStone++;
                             }
                         }
                     }
                 }
             }
-            if (proto != null) countQueuedFluidTicks(proto);
+            BitSet ticking = proto != null ? countQueuedFluidTicks(proto) : new BitSet();
+            countLeaks(chunk, carvingMask, ticking);
         }
 
-        /** Counts the fluid blocks NOISE and CARVERS marked for a fluid update (the chunk's post-processing lists). */
-        private void countQueuedFluidTicks(ProtoChunk chunk) {
+        /**
+         * Water blocks with air beside or below them, inside the chunk: the water spills there once it's updated, or
+         * right away if it has a fluid tick queued ({@code ticking}, by {@link #localIndex}).
+         */
+        private void countLeaks(Chunk chunk, CarvingMask carvingMask, BitSet ticking) {
+            ChunkPos chunkPos = chunk.getPos();
+            BlockPos.Mutable pos = new BlockPos.Mutable();
+            for (int localX = 0; localX < 16; localX++) {
+                for (int localZ = 0; localZ < 16; localZ++) {
+                    for (int y = LEAK_MIN_Y; y < LEAK_MAX_Y; y++) {
+                        BlockState state = chunk.getBlockState(pos.set(chunkPos.getStartX() + localX, y, chunkPos.getStartZ() + localZ));
+                        if (!state.isOf(Blocks.WATER) || !state.getFluidState().isStill()) continue;
+                        boolean waterCarved = carvingMask != null && carvingMask.get(localX, y, localZ), leaks = false;
+                        for (int[] offset : SIDES_AND_BELOW) {
+                            int nx = localX + offset[0], ny = y + offset[1], nz = localZ + offset[2];
+                            if (nx < 0 || nx > 15 || nz < 0 || nz > 15) continue;
+                            if (!chunk.getBlockState(pos.set(chunkPos.getStartX() + nx, ny, chunkPos.getStartZ() + nz)).isAir()) continue;
+                            leaks = true;
+                            boolean airCarved = carvingMask != null && carvingMask.get(nx, ny, nz);
+                            this.leakPairsBySource[(waterCarved ? 2 : 0) + (airCarved ? 1 : 0)]++;
+                        }
+                        if (!leaks) continue;
+                        this.leakingWater++;
+                        if (ticking.get(this.localIndex(localX, y, localZ))) this.leakingWaterTicking++;
+                        int band = 0;
+                        while (y >= LEAK_BAND_TOPS[band]) band++;
+                        this.leakingWaterByBand[band]++;
+                    }
+                }
+            }
+        }
+
+        private int localIndex(int localX, int y, int localZ) {
+            return ((y - this.bottomY) * 16 + localZ) * 16 + localX;
+        }
+
+        /**
+         * Counts the fluid blocks NOISE and CARVERS marked for a fluid update (the chunk's post-processing lists).
+         *
+         * @return the marked positions, by {@link #localIndex}
+         */
+        private BitSet countQueuedFluidTicks(ProtoChunk chunk) {
             this.protoChunks++;
+            BitSet marked = new BitSet();
             ShortList[] lists = chunk.getPostProcessingLists();
             for (int index = 0; index < lists.length; index++) {
                 ShortList packed = lists[index];
                 if (packed == null) continue;
                 int sectionY = chunk.sectionIndexToCoord(index);
                 for (int i = 0; i < packed.size(); i++) {
-                    int y = ProtoChunk.joinBlockPos(packed.getShort(i), sectionY, chunk.getPos()).getY();
+                    BlockPos pos = ProtoChunk.joinBlockPos(packed.getShort(i), sectionY, chunk.getPos());
+                    int y = pos.getY();
                     this.fluidTicksQueued++;
                     if (y >= BASIN_SEAM_MIN_Y && y < BASIN_SEAM_MAX_Y) this.fluidTicksQueuedInBasinLayers++;
+                    if (y >= this.bottomY && y <= this.topY) marked.set(this.localIndex(pos.getX() & 15, y, pos.getZ() & 15));
                 }
             }
+            return marked;
         }
 
         private int biomeIndex(Chunk chunk, int x, int y, int z) {
@@ -465,6 +527,19 @@ public final class WorldgenBench {
             lines.add("metric water_at_or_above_y" + WATER_CEILING_Y + " " + this.waterAtOrAboveCeiling);
             lines.add(String.format(Locale.ROOT, "metric carver_placed_stone_y%d..%d %d of %d carved positions",
                     CARVER_BAND_MIN_Y, CARVER_BAND_MAX_Y - 1, this.carverPlacedStone, this.carvedInBand));
+            lines.add(String.format(Locale.ROOT, "metric carver_skipped_stone_y%d..%d %d of %d carved positions",
+                    CARVER_BAND_MIN_Y, CARVER_BAND_MAX_Y - 1, this.carverSkippedStone, this.carvedInBand));
+            double chunks = this.size * this.size / 256.0;
+            lines.add(String.format(Locale.ROOT, "metric water_beside_or_above_air_y%d..%d_per_chunk %.2f (%.2f with a fluid tick);"
+                            + " pairs by what made the water and the air: noise and noise %.2f, noise and carver %.2f, carver and noise %.2f,"
+                            + " carver and carver %.2f; by height: y %d..%d %.2f, %d..%d %.2f, %d..%d %.2f, %d..%d %.2f",
+                    LEAK_MIN_Y, LEAK_MAX_Y - 1, this.leakingWater / chunks, this.leakingWaterTicking / chunks,
+                    this.leakPairsBySource[0] / chunks, this.leakPairsBySource[1] / chunks, this.leakPairsBySource[2] / chunks,
+                    this.leakPairsBySource[3] / chunks,
+                    LEAK_MIN_Y, LEAK_BAND_TOPS[0] - 1, this.leakingWaterByBand[0] / chunks,
+                    LEAK_BAND_TOPS[0], LEAK_BAND_TOPS[1] - 1, this.leakingWaterByBand[1] / chunks,
+                    LEAK_BAND_TOPS[1], LEAK_BAND_TOPS[2] - 1, this.leakingWaterByBand[2] / chunks,
+                    LEAK_BAND_TOPS[2], LEAK_BAND_TOPS[3] - 1, this.leakingWaterByBand[3] / chunks));
             lines.add(String.format(Locale.ROOT, "metric basin_seam_ratio_x %.2f", seamRatio(true)));
             lines.add(String.format(Locale.ROOT, "metric basin_seam_ratio_z %.2f", seamRatio(false)));
             appendWaterByChunkOffset(lines, true);
