@@ -1,4 +1,4 @@
-# Players Versus world type: worldgen revamp plan (revision 5)
+# Players Versus world type: worldgen revamp plan (revision 6)
 
 **Target:** Minecraft 1.21.10, Yarn `1.21.10+build.2`, Fabric Loader 0.17.3, Loom 1.11, Java 21.
 
@@ -8,7 +8,7 @@
 2. The revamp is **its own world type**. Vanilla world types behave as usual.
 3. **Fix the quirks.**
 
-**Status:** the groundwork (Section 4), Phase 1 (the biome source, Section 6.3), Phase 2 (the aquifer, Section 6.2) and Phase 3 (the terrain kernels, Section 6.5) are in, and so are the owner's answers to Section 10, among them Improved-only carvers. They have run on a real server: every commit tagged `[smoke]` generates the same region with a vanilla world and a Players Versus world, alone and next to C2ME and Lithium, reopens a world made by an older build, and compares timings on one runner (Section 8). Phases 4 and 5 are still a plan. Revision 5 adds Phase 3 and what it taught about where the time goes and about C2ME (Section 6.5). Revision 4 replaced predictions with measurements wherever a run or a test could check them (Section 2.4). Revision 3 (git history) added the verified APIs, the pseudocode and the formulas in Appendix A.
+**Status:** the groundwork (Section 4), Phase 1 (the biome source, Section 6.3), Phase 2 (the aquifer, Section 6.2) and Phase 3 (the terrain kernels, Section 6.5) are in, and so are the owner's answers to Section 10, among them Improved-only carvers. They have run on a real server: every commit tagged `[smoke]` generates the same region with a vanilla world and a Players Versus world, alone and next to C2ME and Lithium, reopens a world made by an older build, and compares timings on one runner (Section 8). Phases 4 and 5 are still a plan. Revision 6 answers the owner's notes on cheese caves and water (Section 10, question 6): the aquifer's walls now stand where water meets open space (Section 6.2, 2c), and the caves are a little less concentrated at y 24..32. Revision 5 adds Phase 3 and what it taught about where the time goes and about C2ME (Section 6.5). Revision 4 replaced predictions with measurements wherever a run or a test could check them (Section 2.4). Revision 3 (git history) added the verified APIs, the pseudocode and the formulas in Appendix A.
 
 **How vanilla facts were checked.** Names and signatures come from the Yarn 1.21.10 mappings (Appendix B). Mappings don't say what code does, and don't reliably say whether a member is public: `VanillaBiomeParameters.writeOverworldBiomeParameters` turned out to be protected, which only the compiler caught. So behavior is checked by running it: unit tests run Minecraft's code under Fabric Loader (`./gradlew test`), and the smoke workflow runs a dedicated server. Claims nothing has measured yet are still marked **[measure]**.
 
@@ -27,6 +27,7 @@
 | `PvAquifer` v2: F and S in Java per block, their smooth inputs on the terrain pass's cells; one answer for every caller | per-block evaluation of the JSON trees, which gave carvers other values than the terrain pass | **2b, done** |
 | Terrain kernels (`PvTerrain`, `PvFinalDensity`, `PvDepth`, `PvEntrances`, `PvNoodle`): the terrain density functions in Java, each shared value computed once | 18 hand-written density-function JSON trees | **3, done** |
 | `PvChunkGenerator` (`players-versus:noise`): the Improved preset's overworld, carving with the tuned carvers | three `minecraft:` carver overrides, which changed every world type | **done** (Section 10, question 1) |
+| Aquifer walls: stone where water could flow into open space, and the barrier bands only within 2 blocks of water or near the sea surface | walls from the barrier bands alone, which missed some edges and filled caves far from any water | **2c, done** (Section 10, question 6) |
 | `PvSettings` + `PvSurfaceRules`: all settings in code | `noise_settings/overworld.json` (41 KB of surface rules) | 4 |
 
 **Expected effect.** Static estimates, with measurements where a phase is done (Phase 2a against Phase 2b on one runner, ms per chunk). The measured baseline is in Section 2.4: Players Versus generation took 1.3 to 1.6 times as long as vanilla on the same region; after Phase 2 it takes 1.27 to 1.29 times as long.
@@ -73,22 +74,31 @@ flowchart TD
 | `preliminary_surface_level` | vanilla formula (no rivers) | surface rule `above_preliminary_surface`, vanilla internals |
 | `continents`, `erosion`, `ridges`, `temperature`, `vegetation`, `vein_*` | vanilla | biomes, ore veins |
 
-### 1.3 The aquifer rules (`PvAquiferRules.decide`)
+### 1.3 The aquifer rules (`PvAquiferRules`)
 
-For a block whose final density is ≤ 0, and for every carved block (carvers pass density 0, and leave the block alone when the answer is solid). The first matching rule wins:
+**A position's own floodedness** (`atPosition`), below sea level. The first matching rule wins:
 
 | # | Condition | Result (`PvAquiferDecision`) |
+|---|---|---|
+| a | −32 < y and F′ > 0.34 | `SEA_WATER`, or `SEA_WATER_TICKING` if F′ < 0.54 |
+| b | −32 < y and F′ > 0.0001 + max(0, y − 60)·0.015 | the sea's barrier band, `SEA_BARRIER` |
+| c | −4 < y < 32 and S > tW(y), where tW = 0.5 for y > 8, else 0.5 − (8 − y)·0.08 | `BASIN_WATER`, or `BASIN_WATER_TICKING` if S < tW + 0.2 |
+| d | −4 < y < 23 and S > tB(y), where tB = 0.0001 for y < 12, else (y − 12)·0.06 | the basins' barrier band, `BASIN_BARRIER` |
+| e | otherwise | `AIR` |
+
+**What the aquifer places** (`decide`), for a block whose final density is ≤ 0, and for every carved block (carvers pass density 0, and leave the block alone when the answer is solid). The first matching rule wins:
+
+| # | Condition | Result |
 |---|---|---|
 | 1 | density > 0 | `SOLID` (terrain, ore veins) |
 | 2 | y below the lava level (y < −54) | `LAVA` |
 | 3 | y ≥ `SEA_LEVEL` (64) | `AIR_ABOVE_SEA` |
-| 4a | −32 < y and F′ > 0.34 | `SEA_WATER`, or `SEA_WATER_TICKING` if F′ < 0.54 |
-| 4b | −32 < y and F′ > 0.0001 + max(0, y − 60)·0.015 | `SEA_BARRIER` (solid: the terrain pass fills it with ore veins or the default block; carvers skip it) |
-| 5a | −4 < y < 32 and S > tW(y), where tW = 0.5 for y > 8, else 0.5 − (8 − y)·0.08 | `BASIN_WATER`, or `BASIN_WATER_TICKING` if S < tW + 0.2 |
-| 5b | −4 < y < 23 and S > tB(y), where tB = 0.0001 for y < 12, else (y − 12)·0.06 | `BASIN_BARRIER` (solid) |
-| 6 | otherwise | `AIR` |
+| 4 | its own floodedness says water | that water |
+| 5 | water (by its neighbours' own floodedness) beside it or above it, where water would flow in | `SEA_BARRIER` if any of it is sea water, else `BASIN_BARRIER` (solid: the terrain pass fills it with ore veins or the default block; carvers skip it) |
+| 6 | its own floodedness is a barrier band, and water lies within 2 steps along the axes, or y ≥ 56 | the band's `SEA_BARRIER` or `BASIN_BARRIER` |
+| 7 | otherwise | `AIR` |
 
-All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans are water connected to the sea surface and walled off from caves by stone; caves above y 32 stay dry; low caves get basins with their own water; the bottom is lava. That is what the revamp keeps.
+All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans are water connected to the sea surface; low caves get basins with their own water up to y 23; caves above them stay dry; stone stands wherever water meets open space, and the barrier bands add to it within 2 blocks of the water, and near the sea surface, where the sea's band fills the dry hollows next to coasts; the bottom is lava. Until revision 6 the bands alone were the walls (rules b and d gave stone wherever they held): Section 6.2, 2c.
 
 ### 1.4 Biome placement (`PvBiomeLayout`, since Phase 1)
 
@@ -154,7 +164,8 @@ P1, P2 and P4 are gone since Phase 2b (Section 6.2). On one runner, `noise` went
 | Q7 | Transitions sit at depth 0 and 0.1, originals only at 0 | **Fixed in Phase 1.** At depth 0.12–0.17, 2.5–3% of climate points change, mostly mountainside biomes giving way to cave biomes. |
 | Q8 | Basin water's tick test `density < 0.08` is always true, because density is ≤ 0 at that point | **Fixed in Phase 2a.** It queued 243.6 fluid updates per chunk (175.1 in y 0..31, where there are 259.4 water blocks per chunk), against 47.3 in vanilla. Basin water now ticks only within the margin of its threshold: 110.8 per chunk, 44.8 in y 0..31, with the same water. |
 | Q9 | Surface biomes only exist at depth 0, so where the ground sits more than about 0.135 of depth (≈17 blocks) below the noise surface, a cave biome is nearer | **New, measured.** 2.19% of surface columns in the benchmark region are `regular_cave`, including patches of ocean floor near the coast, where ocean features (kelp, seagrass) can't generate. Vanilla avoids this with the depth-1 copies, which Players Versus drops so caves stay caves. **Accepted** (Section 10, question 4). |
-| Q10 | The terrain's cave branch (cheese caves, the cave layer, pillars) almost never runs. It needs the sloped cheese at 1.5625 or more, but the sloped cheese is `min(river_carver, …)`, and the river carver is 1 away from river valleys. Only near a valley's edge, at y 48 to about 70, can the river carver pass 1.5625. | **New, measured, kept** (the goal is to keep the world as it is, Section 10, question 3). 106 of 20,000 random positions take the branch in `TerrainPortTest`. Players Versus caves come from the entrances (spaghetti and ramen caves), noodles and carvers. Opening the branch up would change the underground a lot. |
+| Q10 | The terrain's cave branch (vanilla's cheese caves, the cave layer, pillars) almost never runs. It needs the sloped cheese at 1.5625 or more, but the sloped cheese is `min(river_carver, …)`, and the river carver is 1 away from river valleys. Only near a valley's edge, at y 48 to about 70, can the river carver pass 1.5625. | **Measured, kept by design** (Section 10, question 6). 106 of 20,000 random positions take the branch in `TerrainPortTest`. The Players Versus cheese caves are the entrance caves, whose height terms make them most common at y 24..39 (spaghetti and ramen caves, noodles and carvers add the rest). Revision 6 softens that a little (Section 10, question 6). |
+| Q11 | The barrier bands were the only walls between water and open space: a dry position was stone when its own floodedness lay between its barrier and water thresholds. Where floodedness jumps over the band, water meets open space: at the bottom of the sea band (y −32), and in the basins, whose band thins out above y 12 and ends at y 22 while their water reaches y 23. Where the band is wide, it fills caves far from any water. | **Fixed in revision 6** (Section 6.2, 2c). In the terrain pass, 0.18 water blocks per chunk had open air beside or below them, and 324 dry blocks per chunk sat next to water that a carver could open: after the carvers, 1.40 water blocks per chunk touched air (vanilla 0.10). The bands put 223 blocks of stone per chunk into open terrain, 87% of it next to no water, and carvers hit that stone at 16.4% of their positions in y −8..63 (vanilla 2.1%). |
 
 ---
 
@@ -311,6 +322,42 @@ Measured:
 - **Decisions against the old JSON in the terrain pass** (9 chunks, every block treated as open): 100% the same in y −31..7, 99.53% in y 8..31 (all from S: Q1), 99.997% in y 32..47 and 99.58% in y 48..63 (from F, mostly air becoming barrier). F's changes come from the inputs that moved: continentalness and the river's entrances (per block before, lattice now) and the ridge noise, whose shift the chunk's flat cache rounded to 4 blocks in the terrain pass. Carvers now get the terrain pass's decision at every block; before, they disagreed on 7.7% of y 8..31, 0.8% of y 48..63 and 0.1% of y −3..7.
 - **Smoke run:** water in y 0..31 258.6 blocks per chunk (2a: 259.4), 110.7 fluid updates queued per chunk (110.8), seam ratios x 0.88 and z 0.96 (0.86, 0.97), `carver_placed_stone` 0. The surface map differs from 2a's in 2 of 2,500 cells, both at a water's edge; the biome map doesn't differ. With C2ME and Lithium the numbers and maps are the same.
 - **Time, one runner:** from 2a to 2b, `noise` went from 35.5 to 25.9 ms per chunk, `carvers` from 2.34 to 1.07 and the total from 92.3 to 74.9 (vanilla: 19.7, 1.06 and 57.9). On another runner, the cell grid (`ea8dade`) timed within 1 to 3% of `bf27b69`.
+
+**2c: walls where water meets open space (done, revision 6, commits `85b94d0` and `91f014e`).** Until then the barrier bands were the only walls (Q11). `AquiferSurveyTest` measured them in vanilla's terrain pass over 40 chunks (20 anywhere, 10 on coasts, 10 along rivers, neighbours looked at inside each chunk), and two smoke metrics after the carvers:
+
+- the walls held in the terrain pass, nearly: 0.18 water blocks per chunk had open air beside or below them. But 324 dry blocks per chunk sat next to water with no band between, which is where floodedness jumps over the band. Carvers open some of them: after the carvers, 1.40 water blocks per chunk touched air (vanilla 0.10), 0.86 of them where a carver made both, and 0.71 at y −31..−1, where the sea band ends;
+- the bands put 222.7 blocks of stone per chunk into open terrain (720 per coast chunk), and 87% of it kept no water from flowing anywhere; 10% faced open air in a cave without keeping any water. Carvers skip barrier stone, and did so at 16.4% of their positions in y −8..63 (vanilla 2.1%), which left stone plugs in their tunnels.
+
+Four rules played out on the same decisions (the survey's simulation, in the git history of `AquiferSurveyTest`), per chunk:
+
+| Rule | Stone in open terrain | Floors one block thick between water and open air | Water next to open air | Dry blocks a carver could open next to water |
+|---|---|---|---|---|
+| the bands (before) | 222.7 | 0.7 | 0.18 | 323.8 |
+| exact walls: stone where water could flow in (4 sides, above), nothing else | 30.1 | 24.1 | 0 | 0 |
+| exact walls, and the bands within 2 steps of water | **60.6** | **0.7** | **0** | **0** |
+| exact walls, and the bands within 3 steps (or 2 blocks in every direction) | 89.2 (86.2) | 0.7 | 0 | 0 |
+
+Exact walls alone leave floors one block thick under water, over air the bands used to fill (sand there would fall once updated). The third rule went in first (`85b94d0`), and the smoke run's surface map showed what the survey hadn't counted: 51 of 2,500 cells changed, most of them sand turning to stone, with the cave biome at the surface, along one coast. Next to coasts, the sea's band filled dry hollows below sea level up to about the sea surface (the sand on top came from the surface rules); without it they opened into pits. Counted against the bands alone, per chunk (the survey's `WallVariants`):
+
+| Rule | Stone in open terrain (in caves / under the sky) | Columns whose highest solid block moves | Water next to open air |
+|---|---|---|---|
+| the bands (before) | 212.1 / 9.7 | none | 0.18 |
+| walls, and the bands within 2 steps of water | 60.5 / 3.3 | 6.40 down, 0.03 up (25.6 blocks in all) | 0 |
+| **walls, and the bands within 2 steps of water or from y 56 up** | **77.7 / 9.7** | **0.03 up** (0.6 blocks in all) | **0** |
+| the same from y 48 up (from y 40 up) | 78.0 / 9.7 (88.8 / 9.7) | 0.03 up | 0 |
+
+From y 56 up the bands stay where they are (`91f014e`, `BANDS_KEPT_FROM_Y`); keeping them from lower down adds stone in caves and changes nothing at the surface. In the code:
+
+- `PvAquiferRules.atPosition` says what a position's own floodedness says: sea or basin water (ticking near the threshold, as before), a barrier band, or nothing (Section 1.3). Where the water is doesn't change.
+- `PvAquiferRules.decide` places that water, else stone where water could flow in, from a side or from above, else a band's stone within 2 steps of water or from y 56 up, else air. Walls don't depend on density, so carvers get the same walls, and no carver can open water to air.
+- `PvAquifer` keeps each block's `atPosition` in a memo that reaches 2 blocks past the chunk (one byte per block of y −31..63, a column's array made when first needed), so a block's floodedness is computed once however many neighbours ask. The lattices and the ridge cache reach one lattice cell past the chunk and give there what the neighbouring chunk's own lattice gives, to the bit (`LatticeTest`), so both chunks agree on the walls along their border. `AquiferTerrainPassTest` checks it on 3 × 3 chunks inland and 3 × 3 on a coast (32,351 open water blocks, 9,749 water-neighbour pairs across chunk borders): no open water next to open air, and no water next to a dry block once carved.
+
+Measured after the change (the smoke region: `85b94d0` against `fc5b0fb`, the commit before it, and `91f014e`, which keeps the bands from y 56 up):
+
+- water next to air after the carvers: 1.29 → **0** blocks per chunk (vanilla 0.10), on both commits; carvers skipping barrier stone: 16.3% → 4.2% → **7.3%** of their positions in y −8..63 (vanilla 2.1%), the last from the stone kept from y 56 up; the water itself, fluid updates (109.4 per chunk) and seam ratios (x 0.87, z 0.93) don't change;
+- maps: with `91f014e` the surface map is the same as before revision 6 (`92d51d7`) in all 2,500 cells. The biome map differs in 4 cells, all ocean floors switching between an ocean biome and `regular_cave` (Q9). Those come from the cave change: under water the walls change no floor, since they only turn open blocks that aren't water into stone or back, and the first block below the water stays where it was; the cave change moves F through its entrance term;
+- in `AquiferSurveyTest` (40 chunks), stone in open terrain went from 222.7 to 89.1 blocks per chunk (79.4 in caves, 9.7 under the sky), and to 229 per coast chunk from 720;
+- time: in the terrain pass alone (`AquiferTerrainPassTest.aquiferCost`, 18 chunks), the walls add 0.2 to 0.4 ms per chunk (about 3%), with 511 lattice points per chunk instead of 348 and each block's own floodedness computed for 3,538 blocks instead of 2,959. The `perf` job couldn't resolve that: for `85b94d0`, `noise` read 14.98 → 17.65 ms per chunk alone and 18.10 → 17.71 next to C2ME; for `91f014e`, against `8a5e429` (the same aquifer but for the y 56 rule, which only saves work), 14.54 → 16.29 alone and 16.98 → 23.94 next to C2ME. The same code read 0.87 and 0.76 times vanilla's `noise` depending on its place in the run. Single runs of one build vary by up to 40%, so the job now times each build twice (Section 8).
 
 ### 6.3 Biome layout (Phase 1, done): rules as data, disjoint boxes
 
@@ -495,6 +542,7 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:no
 | 2a (done) | Aquifer rules: Q5, Q6, Q8 (6.2) | `carver_placed_stone` is 0 (baseline 2,027): **met**; fewer queued fluid updates (baseline 243.6 per chunk): **met**, 110.8 |
 | 2b (done) | F and S in Java, `PvAquifer` with lattices on the terrain pass's cells (6.2) | Seam ratios don't get worse (baseline x 0.86, z 0.97): **met**, 0.88 and 0.96; water and barrier maps close to 2a's: **met**, 2 of 2,500 surface cells differ; `noise` and `carvers` ms/chunk below 2a's in the `perf` job: **met**, 0.73 and 0.46 times 2a's |
 | 3 (done) | Terrain kernels (6.5); the replaced JSON moves to the test resources | `noise` ms/chunk down: **met**, 25.88 → 17.85 (vanilla 19.77), and next to C2ME 1.24 times vanilla, as before (1.23); maps and metrics: **identical** to Phase 2's, with and without C2ME |
+| 2c (done, revision 6) | Walls where water meets open space (6.2) | No water next to open air after the carvers: **met**, 0 (before 1.40 per chunk; vanilla 0.10); fewer carver positions on barrier stone: **met**, 16.3% → 7.3% (vanilla 2.1%); surface map unchanged: **met**, 0 of 2,500 cells |
 | 4 | `PvSettings`, `PvSurfaceRules` (6.6, 6.7); `PvChunkGenerator` exists already (Section 10, question 1) | No worldgen logic in hand-written JSON; full bench against Default |
 | 5 | Measure-driven tuning: cave-biome features (P5), carvers | Per-status times within 1.2× of vanilla |
 
@@ -509,6 +557,8 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:no
 | Q7 | One surface depth for all surface entries | 1, done |
 | Q8 | Queue fluid updates only within the S margin, like sea water | 2a, done |
 | Q9 | Accepted as is (Section 10, question 4) | none |
+| Q10 | Kept by design: the cheese caves are the entrance caves (Section 10, question 6) | none |
+| Q11 | Walls where water could flow into open space, and the barrier bands only where they hold water back (6.2, 2c) | 2c, done |
 
 ---
 
@@ -517,16 +567,19 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:no
 - **Every push:** `./gradlew build` runs the unit tests (`src/test`, JUnit with `fabric-loader-junit`, Fabric Loader in server mode, so the mod's mixins apply). `TestGame` starts the game the same way for every test (vanilla's bootstrap, then this mod's worldgen types; the registries refuse to exist before the bootstrap), and `WorldgenTestData` loads vanilla's data pack plus `src/main/resources` with the game's own `RegistryLoader` and decodes the real noise settings (their surface rule swapped for stone, since it names this mod's blocks). The tests cover:
   - the biome layout: vanilla's list is untouched and has the expected shape, pieces partition every slice, Q2/Q4 spot checks, old-vs-new agreement at 11 depths;
   - the data: the gate finds its marker, `sea_level` matches the code, seeding a registry function by hand matches `NoiseConfig` exactly, and a printed baseline of aquifer decisions and raw sample costs;
-  - the aquifer: the rules with constant inputs; the lattice's interpolation; the Java F and S against the old JSON (exact doubles); and, in vanilla's own terrain pass (`TerrainPass`), the lattices against `interpolated` (to the bit), carvers against the terrain pass (the same decision everywhere), and the decisions against the old JSON's, by band;
+  - the aquifer: the rules with constant inputs and made-up neighbourhoods; the lattice's interpolation, and past the chunk against the neighbouring chunk's lattice (to the bit); the Java F and S against the old JSON (exact doubles); and, in vanilla's own terrain pass (`TerrainPass`), the lattices against `interpolated` (to the bit), carvers against the terrain pass (the same decision everywhere), each position's own floodedness against the old JSON's, by band, and no water next to open air on 3 x 3 chunks inland and on a coast, across chunk borders and once carved;
+  - the water and the caves (`AquiferSurveyTest`, 40 chunks): water by height and kind, walls, no leaks, the share of each height that is cave, and wall rules played out against the bands;
   - the terrain kernels against the old JSON (`TerrainPortTest`, Section 6.5), in both of the final density's forms, and what the terrain pass costs with each;
   - the carvers: no vanilla carver is overridden and the overridden biomes keep vanilla's carver lists (`VanillaOverridesTest`, which also prints what those overrides still change), and Improved worlds carve with the lists they had before (`PvCarversTest`).
-- **Commits tagged `[smoke]`** also run two more jobs: `upgrade` reopens a world made by an older build (Section 10, question 3), and `perf` times this commit and the previous one, plus vanilla, on the same runner, alone and next to C2ME and Lithium, because timings between runners differ by more than most changes (the same code measured 63.4 and 68.9 ms per chunk, and one Phase 2a run was about 25% slower in every status, including ones the change didn't touch). "Previous" is the commit before the latest change to the mod, so a push that only touches tests or docs still times the last change. A short warm-up run comes first: without it, the first run on a runner read 14–22% slow with the same mod code on both sides; with it, 7% in the one run measured so far. Single runs still vary: in that run, the first run next to C2ME read every status 10–50% slow. Compare with vanilla on the same runner, and trust changes that repeat.
+- **Commits tagged `[smoke]`** also run two more jobs: `upgrade` reopens a world made by an older build (Section 10, question 3), and `perf` times this commit and the previous one, plus vanilla, on the same runner, alone and next to C2ME and Lithium, because timings between runners differ by more than most changes (the same code measured 63.4 and 68.9 ms per chunk, and one Phase 2a run was about 25% slower in every status, including ones the change didn't touch). "Previous" is the commit before the latest change to the mod, so a push that only touches tests or docs still times the last change. A short warm-up run comes first: without it, the first run on a runner read 14–22% slow with the same mod code on both sides; with it, 7% in the one run measured so far. Single runs still vary: in that run, the first run next to C2ME read every status 10–50% slow, and in `91f014e`'s job two builds with nearly the same code read 12% apart in `noise` alone and 41% apart next to C2ME, while one build read 0.87 and 0.76 times vanilla in two jobs, depending on its place in the run. So since revision 6 each build runs twice, in the order previous, this, vanilla, this, previous (alone, then next to C2ME and Lithium), which cancels a drift over the job; the job compares the means and prints how far each build's two runs differ. Compare with vanilla on the same runner, and trust changes larger than that spread.
 - **Commits tagged `[smoke]`:** the `worldgen-smoke` workflow starts a dedicated server and generates the benchmark region for: Default, Improved, each with C2ME + Lithium, and a server with no `level-type`. A job fails if the bench wrote no report, logged a failure, or the server wrote a crash report. The report is printed to the job log, including text maps of the surface and its biomes (the PNGs are in the uploaded artifact).
 - **Metrics** (per world):
   - `water_at_or_above_y64`: must stay 0;
   - `carver_placed_stone_y-8..63`: stone that carvers placed where something else was; vanilla is 0, and Players Versus must reach 0 after Phase 2;
   - `basin_seam_ratio_x`/`z`, and water in y 0..31 by x and z offset inside the chunk: seams show up as a ratio well above 1 or as an x profile unlike z's; run-to-run spatial noise is about ±10%;
-  - `fluid_ticks_queued_per_chunk`: after Phase 2, far below the water-block count printed next to it.
+  - `fluid_ticks_queued_per_chunk`: after Phase 2, far below the water-block count printed next to it;
+  - `carver_skipped_stone_y-8..63`: carved positions that held stone before and after the carvers, where the aquifer answered "barrier" (vanilla about 2%);
+  - `water_beside_or_above_air_y-31..63_per_chunk`: water blocks with air beside or below them after the carvers (neighbours inside the chunk), by what made the water and the air, by height, and with a fluid tick queued or not; 0 since revision 6 (vanilla about 0.1).
 - **Later (optional):** once the revamp settles, add a per-chunk hash snapshot to the bench so pure refactors can prove they changed nothing.
 
 ---
@@ -546,7 +599,7 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:no
 
 ## 10. Questions and decisions
 
-All five were answered by the repository owner (decisions of 2026-09-28, below each question).
+Questions 1 to 6 were answered by the repository owner (decisions of 2026-09-28, below each question); question 7 records the owner's design intent for the aquifer, and the work it asks for.
 
 1. **Vanilla-namespace data overrides change vanilla world types.** Files under `data/minecraft/` replace vanilla's in every world type: 124 under `worldgen/` (6 biomes, 3 carvers, 32 configured and 37 placed features, 10 processor lists, 2 structures, 2 structure sets, 32 template pools), 23 worldgen tags, and 55 structure templates (plains and zombie village pieces, two ancient city pieces). The carvers, compared with vanilla's registry by a unit test (`VanillaOverridesTest`):
 
@@ -582,6 +635,23 @@ All five were answered by the repository owner (decisions of 2026-09-28, below e
 5. **Side effects of the Q2 fix** (measured by `PvBiomeLayoutTest`). Frozen oceans come back where vanilla has them: under the old layout, 1.14% of surface climate points were cold ocean instead. And deserts at humidity 0.275–0.35 become desert oases (0.04% of surface points), which have no creeper caves beneath them (0.08% of points at depth 0.22 go from desert creeper caves to regular caves). Keep the fix as is, or add explicit rules to bring back the old look?
 
    **Decided: keep the fix as is.**
+6. **Cheese caves and water (the owner's notes on revision 5).** "Q10 is due to the gradient we apply to cheese caves, so that they are more common around y=24-32. This could be reduced a little bit though; we can add a bit more cheese above y 32, but just a bit." And: the aquifer was meant to mix ocean, cheese caves and rivers, all interconnected and waterlogged, with a water layer at 24 and another at 64; was that kept? Its walls were very approximate; can the cached values improve them?
+
+   **The water layers are kept.** The rules are the original aquifer's (its thresholds are the constants in `PvWorldgenConstants`; Phase 2a fixed Q5, Q6 and Q8, and Phases 2b and 3 moved the work into Java, to the same doubles): sea water fills oceans, rivers and the caves near them up to y 63, basin water fills low caves up to y 23, and caves in between stay dry. `AquiferSurveyTest` over 40 chunks (20 anywhere, 10 on coasts, 10 along rivers) finds, per chunk, 1,989 blocks of sea water under the sky and 284 in caves (y 8..63, most at y 32..47), and 388 of basin water in caves, all at y 0..23.
+
+   **Q10 and the cheese caves.** The Players Versus cheese caves are the entrance caves: their height terms make them most common at y 24..39 (28.35% of the blocks under the surface at y 32..39, 22.66% at y 24..31, 11.86% at y 40..47). Vanilla's cheese branch, which Q10 is about, stays off: the river carver keeps the sloped cheese at 1 away from river valleys, below the 1.5625 the branch needs. That's kept.
+
+   **Done: the caves are a little less concentrated.** The height term that makes the low, `(48 -> 36, 0 -> -0.165)`, is now `(48 -> 38, 0 -> -0.155)`, and the lift under y 28 `(28 -> 18, 0 -> 0.275)` is `(28 -> 18, 0 -> 0.265)`, so nothing changes under y 18 (commit `fc5b0fb`). Share of the blocks under the surface that is cave: y 16..23 6.93% → 6.63%, y 24..31 22.66% → 21.21%, y 32..39 28.35% → 28.47%, y 40..47 11.86% → 13.55%; the same under y 16 and from y 48 up, and the same volume overall (2,968 → 2,966 blocks per chunk). Candidates that started the low higher (y 50..52) also added caves at y 48..55, where they opened 14 to 23 surface blocks per chunk, mostly sea and river floors; this one opens 2.9.
+
+   The water follows the caves, since F and S both read the entrance term. In `AquiferSurveyTest`, basin water went from 394 to 388 blocks per chunk, all of it at y 16..23 (143 → 137), and sea water in caves from 273 to 284, at y 40..47 (90 → 102). In the smoke region, water in y 0..31 went from 258.6 to 245.1 blocks per chunk (−5%, carver tunnels included), queued fluid updates from 110.7 to 109.4, and the seam ratios from x 0.88, z 0.96 to 0.87, 0.93. The `perf` job's run of `fc5b0fb` (the cave change alone) already has the later commits' numbers, so this comes from the caves, not the walls.
+
+   **Done: walls where water meets open space** (Section 6.2, 2c; Q11).
+7. **The aquifer's design intent (the owner's notes on revision 6).**
+   - Under y 64, the river carver and the ocean noise decide what gets water, and the entrance caves around them are waterlogged up to a point (sometimes with a barrier awkwardly in the middle of a cave, which is acceptable): flooded rivers and oceans, some flooded caves connecting to them, dry caves elsewhere. The one real bug: where an ocean cuts into a big entrance cave, the wall is sometimes very thin and leaves gaps.
+   - In y 0..24 the entrance caves are big, ramen caves cut under them, and they flood like lakes: lakes in big caves, and flooded corridors under them that may connect big caves and are a gamble to swim, with everything around dry. The JSON couldn't tell where noodle caves would meet those lakes, so noodles were kept out of y 0..24; with the entrance values in Java, noodles could come back there, only around the flooded caves. Anything under y −8 should be dry.
+   - If ambitious: a second river-like carver on its own noise around y 80, based on depth, that removes a little terrain and fills it with water without a barrier, for waterfalls. A 2D river map times a height gradient (widest at y 80) times max(0, depth·10)², read as a second aquifer: above 0 and above y 80, air; above 0 but below a threshold, under y 80, stone; at or above the threshold, or at y 80, water, flowing only at y 80.
+
+   **Thin walls with gaps: fixed** in revision 6 (Section 6.2, 2c): no water block touches air after the carvers (1.29 to 1.40 per chunk before).
 
 ---
 
@@ -609,7 +679,7 @@ D   (depth)              = G(-64,320,1.5,-1.5) + offset + RCD
 SC (sloped_cheese) = min(RC, 4·qn((D + jaggedness·hn(jagged(1500, 0)))·factor) + base_3d_noise)
 RMC (ramen_cave_carver) = y∈[0,44) ? min(0, 2·(0.1 + G(-4,8,0,1)·G(8,16,1.4,1)·G(16,44,1.2,0)·(-0.2 + 0.08·noodle_ridge_a(4,2) + |noodle(3,3)|))) : 0
 EN (entrances) = RMC
-               + (-0.1·min(continents, 0.1) + G(96,72,0.15,0) + G(66,56,-0.1,0.025) + G(48,36,0,-0.165) + G(28,18,0,0.275) + G(-16,-40,0,-0.2) + G(-40,-60,0,0.215))
+               + (-0.1·min(continents, 0.1) + G(96,72,0.15,0) + G(66,56,-0.1,0.025) + G(48,38,0,-0.155) + G(28,18,0,0.265) + G(-16,-40,0,-0.2) + G(-40,-60,0,0.215))
                + min(0.37 + cave_entrance(0.8, 0.75) + G(-10,30,0.3,0),
                      roughness + clamp(max(spaghetti_3d_1, spaghetti_3d_2) - 0.0765 - 0.0115·spaghetti_3d_thickness, -1, 1))
 P  (pillars)   = min(0.3, max(-0.02, -0.2 + 0.7·max(0, pillar(20, 0.5) - 0.15)))
@@ -634,7 +704,7 @@ S  = y∈[-2,48) ? (y≥24 ? G(24,48,-0.2,0) : 1)·max(0, G(48,24,-3,-0.1)
                + interpolated(min(1, G(0,16,0,-16)·min(0, -0.12 - 0.06|surface(4,2)| + EN + min(0, (EN-0.24)·(-4·min(0, N-0.08))))))) : 0
 ```
 
-(The `interpolated(...)` wrapping `N` inside `S` is Q1. Since Phase 2b the aquifer computes that inner part from exact values at its lattice points, which sit where the terrain pass's cell corners are.)
+(The `interpolated(...)` wrapping `N` inside `S` is Q1. Since Phase 2b the aquifer computes that inner part from exact values at its lattice points, which sit where the terrain pass's cell corners are. `EN`'s two height terms `G(48,38,0,-0.155) + G(28,18,0,0.265)` were `G(48,36,0,-0.165) + G(28,18,0,0.275)` until revision 6: Section 10, question 6.)
 
 ---
 

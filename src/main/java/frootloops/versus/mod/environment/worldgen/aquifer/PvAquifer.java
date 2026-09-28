@@ -60,13 +60,18 @@ public final class PvAquifer implements AquiferSampler {
     private final AquiferFloodedness floodednessInputs;
     private final int originX, originZ;
     private final Lattice depth, continentalness, entrances, basinInner;
-    /** Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled. */
-    private final double[] ridge = new double[SIDE * SIDE];
+    /**
+     * Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled; made when first needed, since
+     * heightmap probes make an aquifer for every column they sample and often never reach the sea band.
+     */
+    @Nullable
+    private double[] ridge;
     /**
      * Each block's own decision, by column and then height from {@link #MIN_Y}: its ordinal plus one, 0 until
-     * computed. A column's array is made when first needed.
+     * computed. Made when first needed, and each column's array too.
      */
-    private final byte[][] positions = new byte[SIDE * SIDE][];
+    @Nullable
+    private byte[][] positions;
     /** Where {@link #atPosition} samples the noises; one per aquifer, which only one thread uses at a time. */
     private final Position position = new Position();
     private final ToDoubleFunction<DensityFunction.NoisePos> floodedness = this::floodedness;
@@ -99,7 +104,6 @@ public final class PvAquifer implements AquiferSampler {
             DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
             return AquiferFormulas.basinInner(y, entrances.exactAt(x, y, z), spread.noodle().sample(pos), spread.surface().sample(pos));
         }, chunkPos, BASIN_MIN_Y, BASIN_MAX_Y, CELL_HEIGHT);
-        Arrays.fill(this.ridge, Double.NaN);
     }
 
     @Override
@@ -126,6 +130,7 @@ public final class PvAquifer implements AquiferSampler {
             return PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread);
         }
         int column = localX * SIDE + localZ;
+        if (this.positions == null) this.positions = new byte[SIDE * SIDE][];
         byte[] levels = this.positions[column];
         if (levels == null) {
             levels = new byte[LEVELS];
@@ -164,6 +169,10 @@ public final class PvAquifer implements AquiferSampler {
         int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
         if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
             return this.floodednessInputs.ridge().sample(new DensityFunction.UnblendedNoisePos(x, 0, z));
+        }
+        if (this.ridge == null) {
+            this.ridge = new double[SIDE * SIDE];
+            Arrays.fill(this.ridge, Double.NaN);
         }
         int index = localX * SIDE + localZ;
         double value = this.ridge[index];

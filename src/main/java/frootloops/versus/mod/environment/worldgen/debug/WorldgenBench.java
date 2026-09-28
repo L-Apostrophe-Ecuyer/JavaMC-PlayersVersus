@@ -77,7 +77,9 @@ import java.util.function.Consumer;
  *   carver skips a position when the aquifer answers "barrier";</li>
  *   <li>water beside or above air in y -31..63 (neighbours inside the chunk): where water spills, or stands as a wall of
  *   water until something updates it. Split by what made the water and the air (the terrain pass or a carver), by
- *   height, and by whether the water has a fluid tick queued.</li>
+ *   height, and by whether the water has a fluid tick queued;</li>
+ *   <li>water by height, per chunk: below y -31, where the aquifer places none; y -31..-9, which should stay dry
+ *   (Section 10, question 7 of the refactor plan); y -8..-1, 0..23, 24..47 and 48..63.</li>
  * </ul>
  * The report also holds text maps (one character per 8x8 blocks, north up) of the surface and its biomes, so results
  * can be compared without the images.
@@ -101,6 +103,8 @@ public final class WorldgenBench {
     private static final int LEAK_MAX_Y = 64;
     /** Heights the leak metric is split by: y -31..-1, 0..23, 24..47, 48..63. */
     private static final int[] LEAK_BAND_TOPS = {0, 24, 48, 64};
+    /** Heights the water count is split by: y -31..-9, -8..-1, 0..23, 24..47, 48..63 (and all water below y -31). */
+    private static final int[] WATER_BAND_TOPS = {-8, 0, 24, 48, 64};
     /** Where water flows from a block: the four sides, then below. */
     private static final int[][] SIDES_AND_BELOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
     private static final int MAP_CELL = 8;
@@ -236,6 +240,9 @@ public final class WorldgenBench {
         /** Water and air side by side, by what made them: [water carved * 2 + air carved]. */
         private final long[] leakPairsBySource = new long[4];
         private final long[] leakingWaterByBand = new long[LEAK_BAND_TOPS.length];
+        /** Water blocks by {@code WATER_BAND_TOPS}, and below them. */
+        private final long[] waterByBand = new long[WATER_BAND_TOPS.length];
+        private long waterBelowSeaBand;
 
         Region(ServerWorld world, int minX, int minZ, int size) {
             this.minX = minX;
@@ -332,17 +339,26 @@ public final class WorldgenBench {
         }
 
         /**
-         * Water blocks with air beside or below them, inside the chunk: the water spills there once it's updated, or
-         * right away if it has a fluid tick queued ({@code ticking}, by {@link #localIndex}).
+         * Water blocks by height, and those with air beside or below them, inside the chunk: the water spills there once
+         * it's updated, or right away if it has a fluid tick queued ({@code ticking}, by {@link #localIndex}).
          */
         private void countLeaks(Chunk chunk, CarvingMask carvingMask, BitSet ticking) {
             ChunkPos chunkPos = chunk.getPos();
             BlockPos.Mutable pos = new BlockPos.Mutable();
             for (int localX = 0; localX < 16; localX++) {
                 for (int localZ = 0; localZ < 16; localZ++) {
+                    for (int y = this.bottomY; y < LEAK_MIN_Y; y++) {
+                        if (chunk.getBlockState(pos.set(chunkPos.getStartX() + localX, y, chunkPos.getStartZ() + localZ)).isOf(Blocks.WATER)) {
+                            this.waterBelowSeaBand++;
+                        }
+                    }
                     for (int y = LEAK_MIN_Y; y < LEAK_MAX_Y; y++) {
                         BlockState state = chunk.getBlockState(pos.set(chunkPos.getStartX() + localX, y, chunkPos.getStartZ() + localZ));
-                        if (!state.isOf(Blocks.WATER) || !state.getFluidState().isStill()) continue;
+                        if (!state.isOf(Blocks.WATER)) continue;
+                        int waterBand = 0;
+                        while (y >= WATER_BAND_TOPS[waterBand]) waterBand++;
+                        this.waterByBand[waterBand]++;
+                        if (!state.getFluidState().isStill()) continue;
                         boolean waterCarved = carvingMask != null && carvingMask.get(localX, y, localZ), leaks = false;
                         for (int[] offset : SIDES_AND_BELOW) {
                             int nx = localX + offset[0], ny = y + offset[1], nz = localZ + offset[2];
@@ -540,6 +556,14 @@ public final class WorldgenBench {
                     LEAK_BAND_TOPS[0], LEAK_BAND_TOPS[1] - 1, this.leakingWaterByBand[1] / chunks,
                     LEAK_BAND_TOPS[1], LEAK_BAND_TOPS[2] - 1, this.leakingWaterByBand[2] / chunks,
                     LEAK_BAND_TOPS[2], LEAK_BAND_TOPS[3] - 1, this.leakingWaterByBand[3] / chunks));
+            lines.add(String.format(Locale.ROOT, "metric water_by_height_per_chunk y %d..%d %.2f, %d..%d %.2f, %d..%d %.2f, %d..%d %.2f,"
+                            + " %d..%d %.2f, %d..%d %.2f",
+                    this.bottomY, LEAK_MIN_Y - 1, this.waterBelowSeaBand / chunks,
+                    LEAK_MIN_Y, WATER_BAND_TOPS[0] - 1, this.waterByBand[0] / chunks,
+                    WATER_BAND_TOPS[0], WATER_BAND_TOPS[1] - 1, this.waterByBand[1] / chunks,
+                    WATER_BAND_TOPS[1], WATER_BAND_TOPS[2] - 1, this.waterByBand[2] / chunks,
+                    WATER_BAND_TOPS[2], WATER_BAND_TOPS[3] - 1, this.waterByBand[3] / chunks,
+                    WATER_BAND_TOPS[3], WATER_BAND_TOPS[4] - 1, this.waterByBand[4] / chunks));
             lines.add(String.format(Locale.ROOT, "metric basin_seam_ratio_x %.2f", seamRatio(true)));
             lines.add(String.format(Locale.ROOT, "metric basin_seam_ratio_z %.2f", seamRatio(false)));
             appendWaterByChunkOffset(lines, true);

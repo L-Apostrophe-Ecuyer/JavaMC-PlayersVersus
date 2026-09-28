@@ -14,8 +14,9 @@ import static frootloops.versus.mod.environment.worldgen.density.DensityOps.grad
  * reads it at every cell corner and the aquifer on its lattice, so the JSON wraps it in {@code cache_once}.
  *
  * <p>The height terms put the most caves at y 28..38 (the low of {@code (48 -> 38, 0 -> -0.155)}, which
- * {@code (28 -> 18, 0 -> 0.265)} lifts back under y 28). Until revision 6 of the refactor plan, the low was -0.165 and
- * reached from y 36, and the lift 0.275: the same caves under y 18, a few more at y 36..47, fewer at y 16..35.
+ * {@code (28 -> 18, 0 -> 0.265)} lifts back under y 28). Until revision 6 of the refactor plan the low was -0.165,
+ * reached at y 36, and the lift 0.275; now there are as many caves under y 18, a few more at y 36..47 and fewer at
+ * y 16..35.
  *
  * <p>The tunnels (four noises and the roughness) are skipped where the entrance term is already below anything they
  * could reach, as vanilla's {@code min} does.

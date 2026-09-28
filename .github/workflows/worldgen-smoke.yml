@@ -219,32 +219,27 @@ jobs:
           changed=$(git log -1 --format=%H "$GITHUB_SHA" -- src/main build.gradle gradle.properties settings.gradle gradle)
           echo "PREVIOUS=$(git rev-parse "$changed~1")" >> "$GITHUB_ENV"
           echo "latest change to the mod: $(git log --oneline -1 "$changed")"
-      - name: previous commit
+      # Each build runs twice, in the order previous, this, vanilla, this, previous, and the compare step averages the
+      # two runs: single runs of one build differ by up to 40% on a runner (91f014e's job, where "previous" and "this"
+      # were nearly the same code), and the order cancels a drift over the job.
+      - name: previous, this, vanilla, this, previous
         run: |
-          git checkout --detach "$PREVIOUS"
-          git log --oneline -1
-          chmod +x ./gradlew
-          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
-            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
           mkdir -p reports
-          cp run/worldgen-smoke/pvwg/*/report.txt reports/1-previous.txt
-          rm -rf run/worldgen-smoke/pvwg
-      - name: this commit
-        run: |
-          git checkout --detach "$GITHUB_SHA"
-          chmod +x ./gradlew
-          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
-            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
-          cp run/worldgen-smoke/pvwg/*/report.txt reports/2-this.txt
-          rm -rf run/worldgen-smoke/pvwg
-      - name: vanilla
-        run: |
-          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=minecraft:normal" \
-            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
-          cp run/worldgen-smoke/pvwg/*/report.txt reports/3-vanilla.txt
-          rm -rf run/worldgen-smoke/pvwg
-      # The same three runs next to C2ME and Lithium: C2ME compiles density functions it knows and calls the others,
-      # so a change can speed up one setup and slow down the other.
+          bench() {  # $1 report name, $2 commit, $3 level type
+            git checkout --quiet --detach "$2"
+            echo "::group::$1: $(git log --oneline -1)"
+            chmod +x ./gradlew
+            ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=$3" \
+              "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+            cp run/worldgen-smoke/pvwg/*/report.txt "reports/$1.txt"
+            rm -rf run/worldgen-smoke/pvwg
+            echo "::endgroup::"
+          }
+          bench previous-1 "$PREVIOUS" players-versus:better_world
+          bench this-1 "$GITHUB_SHA" players-versus:better_world
+          bench vanilla "$GITHUB_SHA" minecraft:normal
+          bench this-2 "$GITHUB_SHA" players-versus:better_world
+          bench previous-2 "$PREVIOUS" players-versus:better_world
       - name: download C2ME and Lithium
         env:
           UA: "L-Apostrophe-Ecuyer/JavaMC-PlayersVersus worldgen-smoke"
@@ -258,28 +253,26 @@ jobs:
             echo "$slug $version"
             curl -fsSL -A "$UA" -o "perf-mods/$filename" "$url"
           done
-      - name: previous commit with C2ME and Lithium
+      # The same five runs next to C2ME and Lithium: C2ME compiles density functions it knows and calls the others, so
+      # a change can speed up one setup and slow down the other.
+      - name: previous, this, vanilla, this, previous, next to C2ME and Lithium
         run: |
-          git checkout --detach "$PREVIOUS"
           mkdir -p run/worldgen-smoke/mods && cp perf-mods/*.jar run/worldgen-smoke/mods/
-          chmod +x ./gradlew
-          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
-            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
-          cp run/worldgen-smoke/pvwg/*/report.txt reports/4-previous-c2me.txt
-          rm -rf run/worldgen-smoke/pvwg
-      - name: this commit with C2ME and Lithium
-        run: |
-          git checkout --detach "$GITHUB_SHA"
-          chmod +x ./gradlew
-          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
-            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
-          cp run/worldgen-smoke/pvwg/*/report.txt reports/5-this-c2me.txt
-          rm -rf run/worldgen-smoke/pvwg
-      - name: vanilla with C2ME and Lithium
-        run: |
-          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=minecraft:normal" \
-            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
-          cp run/worldgen-smoke/pvwg/*/report.txt reports/6-vanilla-c2me.txt
+          bench() {  # $1 report name, $2 commit, $3 level type
+            git checkout --quiet --detach "$2"
+            echo "::group::$1: $(git log --oneline -1)"
+            chmod +x ./gradlew
+            ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=$3" \
+              "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+            cp run/worldgen-smoke/pvwg/*/report.txt "reports/$1.txt"
+            rm -rf run/worldgen-smoke/pvwg
+            echo "::endgroup::"
+          }
+          bench c2me-previous-1 "$PREVIOUS" players-versus:better_world
+          bench c2me-this-1 "$GITHUB_SHA" players-versus:better_world
+          bench c2me-vanilla "$GITHUB_SHA" minecraft:normal
+          bench c2me-this-2 "$GITHUB_SHA" players-versus:better_world
+          bench c2me-previous-2 "$PREVIOUS" players-versus:better_world
           rm -rf run/worldgen-smoke/mods
       - name: compare
         if: always()
@@ -297,19 +290,29 @@ jobs:
                   elif parts and parts[0] == "metric":
                       metrics.append(line.rstrip())
               return times, metrics
-          def table(title, previous, this, vanilla):
-              print(f"\n{title}")
-              print(f"{'status':20} {'previous':>9} {'this':>9} {'vanilla':>9} {'this/prev':>10} {'this/vanilla':>13}  (ms/chunk)")
-              nan = float('nan')
-              for status in this:
-                  p, t, v = previous.get(status, nan), this[status], vanilla.get(status, nan)
-                  print(f"{status:20} {p:9.2f} {t:9.2f} {v:9.2f} {t / p:10.2f} {t / v:13.2f}")
-          d = sys.argv[1]
-          runs = {name: read(os.path.join(d, name + ".txt")) for name in
-                  ["1-previous", "2-this", "3-vanilla", "4-previous-c2me", "5-this-c2me", "6-vanilla-c2me"]}
-          table("Players Versus alone", runs["1-previous"][0], runs["2-this"][0], runs["3-vanilla"][0])
-          table("next to C2ME and Lithium", runs["4-previous-c2me"][0], runs["5-this-c2me"][0], runs["6-vanilla-c2me"][0])
-          for name in ["1-previous", "2-this", "5-this-c2me"]:
+          def mean(runs, status):
+              values = [run[status] for run in runs if status in run]
+              return sum(values) / len(values) if values else float('nan')
+          def spread(runs, status):
+              values = [run[status] for run in runs if status in run]
+              return (max(values) - min(values)) / (sum(values) / len(values)) if len(values) > 1 else float('nan')
+          def table(title, prefix):
+              previous = [runs[prefix + "previous-1"][0], runs[prefix + "previous-2"][0]]
+              this = [runs[prefix + "this-1"][0], runs[prefix + "this-2"][0]]
+              vanilla = runs[prefix + "vanilla"][0]
+              print(f"\n{title} (previous and this: the mean of two runs; spread: how far those two runs differ)")
+              print(f"{'status':20} {'previous':>9} {'this':>9} {'vanilla':>9} {'this/prev':>10} {'this/vanilla':>13} "
+                    f"{'spread prev':>12} {'spread this':>12}  (ms/chunk)")
+              for status in runs[prefix + "this-1"][0]:
+                  p, t, v = mean(previous, status), mean(this, status), vanilla.get(status, float('nan'))
+                  print(f"{status:20} {p:9.2f} {t:9.2f} {v:9.2f} {t / p:10.2f} {t / v:13.2f} "
+                        f"{spread(previous, status):12.0%} {spread(this, status):12.0%}")
+          names = [prefix + name for prefix in ["", "c2me-"]
+                   for name in ["previous-1", "this-1", "vanilla", "this-2", "previous-2"]]
+          runs = {name: read(os.path.join(sys.argv[1], name + ".txt")) for name in names}
+          table("Players Versus alone", "")
+          table("next to C2ME and Lithium", "c2me-")
+          for name in ["previous-1", "this-1", "c2me-this-1"]:
               print(f"\nmetrics, {name}:"); print("\n".join(runs[name][1]))
           EOF
       - name: upload results
