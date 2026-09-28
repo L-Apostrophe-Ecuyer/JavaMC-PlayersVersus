@@ -64,10 +64,10 @@ class AquiferSurveyTest {
         Map<String, double[][]> candidates = new LinkedHashMap<>();
         candidates.put("now", new double[0][]);
         candidates.put("48 to -0.155", replacing(48, -0.155));
+        candidates.put("50 to -0.155", replacing(50, -0.155));
+        candidates.put("50 to -0.16", replacing(50, -0.16));
         candidates.put("52 to -0.155", replacing(52, -0.155));
         candidates.put("52 to -0.16", replacing(52, -0.16));
-        candidates.put("54 to -0.16", replacing(54, -0.16));
-        candidates.put("56 to -0.16", replacing(56, -0.16));
         return candidates;
     }
 
@@ -376,6 +376,8 @@ class AquiferSurveyTest {
         long airInReach, solidNextToAir;
         // per candidate, by band: blocks under the highest solid block of the terrain now, and the open ones among them
         final long[][] candidateCovered, candidateCave;
+        /** Per candidate: columns whose highest solid block now is open, a new way into the caves from the surface. */
+        final long[] candidateOpenedSurface;
         // per kind of place: chunks, leaking water, wall blocks in caves, wall blocks under the sky, barrier stone
         final Map<String, long[]> byKind = new LinkedHashMap<>();
 
@@ -395,6 +397,7 @@ class AquiferSurveyTest {
             this.wallByBand = new long[this.bands];
             this.candidateCovered = new long[candidates][this.bands];
             this.candidateCave = new long[candidates][this.bands];
+            this.candidateOpenedSurface = new long[candidates];
         }
 
         long caveBlocks(int candidate) {
@@ -499,6 +502,7 @@ class AquiferSurveyTest {
                         }
                     }
                     for (int c = 0; c < this.candidateCave.length; c++) {
+                        if (surface >= this.minY && blocks.open[c][blocks.index(x, surface, z)]) this.candidateOpenedSurface[c]++;
                         for (int y = this.minY; y < surface; y++) {
                             int band = (y - this.minY) / BAND;
                             this.candidateCovered[c][band]++;
@@ -597,9 +601,9 @@ class AquiferSurveyTest {
                 }
                 System.out.println(row);
             }
-            StringBuilder totals = new StringBuilder("[survey] cave blocks per chunk, all heights:");
+            StringBuilder totals = new StringBuilder("[survey] cave blocks per chunk, all heights (columns per chunk whose surface block opens):");
             for (int c = 0; c < names.size(); c++) {
-                totals.append(String.format(Locale.ROOT, " %s %.0f;", names.get(c), this.caveBlocks(c) / n));
+                totals.append(String.format(Locale.ROOT, " %s %.0f (%.2f);", names.get(c), this.caveBlocks(c) / n, this.candidateOpenedSurface[c] / n));
             }
             System.out.println(totals);
         }
