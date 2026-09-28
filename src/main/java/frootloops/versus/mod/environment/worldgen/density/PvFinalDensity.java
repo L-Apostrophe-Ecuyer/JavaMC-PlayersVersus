@@ -10,7 +10,8 @@ import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
  * Density-function type {@code players-versus:final_density}: the router's {@code final_density}, sampled for every
  * block. The interpolated terrain ({@link PvTerrain} inside vanilla's {@code interpolated} and {@code blend_density}),
  * scaled and squeezed, then cut by noodle caves ({@link PvNoodle}), giving the old JSON's doubles
- * ({@code TerrainPortTest}).
+ * ({@code TerrainPortTest}) except in the flooded corridors ({@link PvNoodle#corridorBias}): in the basin layers, near the
+ * flooded caves, the noodle's height bias is lower, and the aquifer floods what it opens there.
  *
  * <p>The JSON asked for the noodle at nearly every block: vanilla's {@code min} only skips it below the noodle's
  * lowest possible value, about -0.55, which a squeezed value (never below -0.46) doesn't reach. Here the bound
@@ -25,12 +26,14 @@ import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
  * @param noodleThickness {@code caves/noodle_thickness}
  * @param noodleRidgeA    {@code caves/noodle_ridge_a}
  * @param noodleRidgeB    {@code caves/noodle_ridge_b}
+ * @param entrances       the entrance value for the corridors, interpolated like the aquifer's lattice of it; only read
+ *                        in the corridors' layers, so the JSON only fills it in around them
  * @param noodleFloor     the lowest the noodle can be above its height bias, less a margin for rounding
  * @param minValue        derived bounds
  * @param maxValue        derived bounds
  */
 public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleToggle, DensityFunction noodleThickness,
-                             DensityFunction noodleRidgeA, DensityFunction noodleRidgeB, double noodleFloor,
+                             DensityFunction noodleRidgeA, DensityFunction noodleRidgeB, DensityFunction entrances, double noodleFloor,
                              double minValue, double maxValue) implements DensityFunction {
 
     public static final MapCodec<PvFinalDensity> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -38,7 +41,8 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
             DensityFunction.FUNCTION_CODEC.fieldOf("noodle_toggle").forGetter(PvFinalDensity::noodleToggle),
             DensityFunction.FUNCTION_CODEC.fieldOf("noodle_thickness").forGetter(PvFinalDensity::noodleThickness),
             DensityFunction.FUNCTION_CODEC.fieldOf("noodle_ridge_a").forGetter(PvFinalDensity::noodleRidgeA),
-            DensityFunction.FUNCTION_CODEC.fieldOf("noodle_ridge_b").forGetter(PvFinalDensity::noodleRidgeB)
+            DensityFunction.FUNCTION_CODEC.fieldOf("noodle_ridge_b").forGetter(PvFinalDensity::noodleRidgeB),
+            DensityFunction.FUNCTION_CODEC.fieldOf("corridor_entrances").forGetter(PvFinalDensity::entrances)
     ).apply(instance, PvFinalDensity::new));
     private static final CodecHolder<PvFinalDensity> CODEC_HOLDER = CodecHolder.of(CODEC);
 
@@ -49,8 +53,8 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
     private static final double ROUNDING_MARGIN = 1.0e-9;
 
     public PvFinalDensity(DensityFunction terrain, DensityFunction noodleToggle, DensityFunction noodleThickness,
-                          DensityFunction noodleRidgeA, DensityFunction noodleRidgeB) {
-        this(terrain, noodleToggle, noodleThickness, noodleRidgeA, noodleRidgeB,
+                          DensityFunction noodleRidgeA, DensityFunction noodleRidgeB, DensityFunction entrances) {
+        this(terrain, noodleToggle, noodleThickness, noodleRidgeA, noodleRidgeB, entrances,
                 PvNoodle.tunnelMin(noodleThickness) - ROUNDING_MARGIN,
                 Math.min(-DensityOps.SQUEEZE_MAX, PvNoodle.BIAS_MIN + PvNoodle.tunnelMin(noodleThickness)),
                 Math.min(DensityOps.SQUEEZE_MAX, PvNoodle.BIAS_MAX + PvNoodle.tunnelMax(noodleThickness, noodleRidgeA, noodleRidgeB)));
@@ -59,7 +63,8 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
     @Override
     public double sample(NoisePos pos) {
         double terrain = DensityOps.squeeze(this.terrain.sample(pos) * 0.64);
-        double bias = PvNoodle.bias(pos.blockY());
+        int y = pos.blockY();
+        double bias = PvNoodle.inCorridorLayers(y) ? PvNoodle.corridorBias(y, this.entrances.sample(pos)) : PvNoodle.bias(y);
         if (terrain < bias + this.noodleFloor) return terrain;
         return Math.min(terrain, bias + PvNoodle.tunnel(pos, this.noodleToggle, this.noodleThickness, this.noodleRidgeA, this.noodleRidgeB));
     }
@@ -78,7 +83,7 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
      */
     public DensityFunction asVanillaTypes() {
         DensityFunction terrain = DensityFunctionTypes.mul(DensityFunctionTypes.constant(0.64), this.terrain).squeeze();
-        DensityFunction bias = PvNoodle.biasFunction();
+        DensityFunction bias = PvNoodle.corridorBiasFunction(this.entrances);
         DensityFunction tunnel = DensityFunctionTypes.rangeChoice(this.noodleToggle, -1000000.0, -0.2, DensityFunctionTypes.constant(64.0),
                 DensityFunctionTypes.add(this.noodleThickness, DensityFunctionTypes.mul(DensityFunctionTypes.constant(1.5),
                         DensityFunctionTypes.max(this.noodleRidgeA.abs(), this.noodleRidgeB.abs()))));
@@ -90,7 +95,8 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
     @Override
     public DensityFunction apply(DensityFunctionVisitor visitor) {
         PvFinalDensity applied = new PvFinalDensity(this.terrain.apply(visitor), this.noodleToggle.apply(visitor),
-                this.noodleThickness.apply(visitor), this.noodleRidgeA.apply(visitor), this.noodleRidgeB.apply(visitor));
+                this.noodleThickness.apply(visitor), this.noodleRidgeA.apply(visitor), this.noodleRidgeB.apply(visitor),
+                this.entrances.apply(visitor));
         return visitor.apply(DensityCompilerCompat.ACTIVE ? applied.asVanillaTypes() : applied);
     }
 

@@ -12,8 +12,8 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.*;
  * The Players Versus aquifer rules, shared by {@link PvAquifer} and {@code /pvwg probe}.
  *
  * <p>Each position first gets what its own floodedness says ({@link #atPosition}): sea water, basin water, a barrier
- * band (floodedness between its barrier and water thresholds), or dry. That's the water the aquifer places, and it
- * depends on nothing else. The walls come from the neighbourhood ({@link #decide}): for a non-solid position, in order:
+ * band (floodedness between its barrier and water thresholds), or dry; and in the basin layers, basin water where the
+ * flooded corridors' noodle opens the block. That's the water the aquifer places, and it depends on nothing else. The walls come from the neighbourhood ({@link #decide}): for a non-solid position, in order:
  * <ol>
  *   <li>below the lava level: lava;</li>
  *   <li>at or above {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#SEA_LEVEL}: air;</li>
@@ -39,6 +39,9 @@ public final class PvAquiferRules {
     private PvAquiferRules() {
     }
 
+    /** For {@link #atPosition} without the flooded corridors: no corridor anywhere. */
+    public static final ToDoubleFunction<DensityFunction.NoisePos> NO_CORRIDORS = pos -> Double.POSITIVE_INFINITY;
+
     /** What {@link #atPosition} says at a block, for the neighbours {@link #decide} looks at. */
     @FunctionalInterface
     public interface Positions {
@@ -57,6 +60,19 @@ public final class PvAquiferRules {
      */
     public static PvAquiferDecision atPosition(DensityFunction.NoisePos pos, ToDoubleFunction<DensityFunction.NoisePos> floodedness,
                                                ToDoubleFunction<DensityFunction.NoisePos> spread) {
+        return atPosition(pos, floodedness, spread, NO_CORRIDORS);
+    }
+
+    /**
+     * {@link #atPosition}, with the flooded corridors: in their layers, a block that isn't basin water is when the
+     * corridors' noodle opens it (the refactor plan, Section 10, question 7).
+     *
+     * @param corridors the noodle with the corridors' bias at a block ({@code density/PvNoodle.corridorBias} plus the
+     *                  noodle's tunnel), the value the final density takes there: at most 0 where it opens the block
+     */
+    public static PvAquiferDecision atPosition(DensityFunction.NoisePos pos, ToDoubleFunction<DensityFunction.NoisePos> floodedness,
+                                               ToDoubleFunction<DensityFunction.NoisePos> spread,
+                                               ToDoubleFunction<DensityFunction.NoisePos> corridors) {
         int y = pos.blockY();
         if (y >= SEA_LEVEL) return PvAquiferDecision.AIR;
 
@@ -78,6 +94,7 @@ public final class PvAquiferRules {
                         ? PvAquiferDecision.BASIN_WATER_TICKING
                         : PvAquiferDecision.BASIN_WATER;
             }
+            if (y < CORRIDOR_MAX_Y && corridors.applyAsDouble(pos) <= 0.0) return PvAquiferDecision.BASIN_WATER;
             if (basinFloodedness > basinBarrierThreshold(y) && y < BASIN_BARRIER_MAX_Y) {
                 return PvAquiferDecision.BASIN_BARRIER;
             }

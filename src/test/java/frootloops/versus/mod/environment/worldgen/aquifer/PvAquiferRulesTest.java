@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BANDS_KEPT_FROM_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_MAX_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_WATER_MIN_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,6 +108,24 @@ class PvAquiferRulesTest {
                 .decide(0, BANDS_KEPT_FROM_Y, 0));
         assertEquals(PvAquiferDecision.AIR, new Neighbourhood().put(0, BANDS_KEPT_FROM_Y - 1, 0, PvAquiferDecision.SEA_BARRIER)
                 .decide(0, BANDS_KEPT_FROM_Y - 1, 0));
+    }
+
+    @Test
+    void corridorsAreBasinWaterWhereTheirNoodleOpens() {
+        DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(0, 10, 0);
+        // S below the basin water threshold, the corridors' noodle open (at most 0): basin water, no tick
+        assertEquals(PvAquiferDecision.BASIN_WATER, PvAquiferRules.atPosition(pos, p -> 0.0, p -> 0.0, p -> -0.01));
+        assertEquals(PvAquiferDecision.BASIN_WATER, PvAquiferRules.atPosition(pos, p -> 0.0, p -> 0.0, p -> 0.0));
+        // closed: nothing (and without corridors, nothing either)
+        assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(pos, p -> 0.0, p -> 0.0, p -> 0.01));
+        assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(pos, p -> 0.0, p -> 0.0));
+        // only in the corridors' layers, y -3..23
+        assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(new DensityFunction.UnblendedNoisePos(0, CORRIDOR_MAX_Y, 0),
+                p -> 0.0, p -> 0.0, p -> -1.0));
+        assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(new DensityFunction.UnblendedNoisePos(0, BASIN_MIN_Y, 0),
+                p -> 0.0, p -> 0.0, p -> -1.0));
+        // the sea's water and band come first
+        assertEquals(PvAquiferDecision.SEA_BARRIER, PvAquiferRules.atPosition(pos, p -> 0.2, p -> 0.0, p -> -1.0));
     }
 
     @Test

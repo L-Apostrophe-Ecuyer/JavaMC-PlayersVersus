@@ -1,7 +1,9 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
+import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
+import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.ChunkPos;
@@ -15,6 +17,7 @@ import java.util.function.ToDoubleFunction;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BAND_REACH;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MAX_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_MAX_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BAND_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
 
@@ -30,7 +33,8 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * them whole moved those steps (commit 373b78f). Their smooth inputs come from per-chunk {@link Lattice}s on the
  * terrain pass's cell grid (4 x 8 x 4, aligned like vanilla's cells): depth, cave entrances and S's inner part, which
  * the JSON router interpolated on those cells in the terrain pass; and 3D continentalness, which it sampled per block
- * but is smooth. The ridge noise is kept per column; the surface and ramen noises are sampled per block. Every caller
+ * but is smooth; and the noodle's four inputs over the basin layers, for the flooded corridors ({@link #corridor}). The
+ * ridge noise is kept per column; the surface and ramen noises are sampled per block. Every caller
  * (the terrain pass, carvers, probes) gets the same answer at a block; {@code AquiferTerrainPassTest} compares it
  * with the terrain pass before.
  *
@@ -60,6 +64,8 @@ public final class PvAquifer implements AquiferSampler {
     private final AquiferFloodedness floodednessInputs;
     private final int originX, originZ;
     private final Lattice depth, continentalness, entrances, basinInner;
+    /** The noodle's four inputs over the flooded corridors' layers, for {@link #corridor}. */
+    private final Lattice noodleToggle, noodleThickness, noodleRidgeA, noodleRidgeB;
     /**
      * Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled; made when first needed, since
      * heightmap probes make an aquifer for every column they sample and often never reach the sea band.
@@ -76,6 +82,7 @@ public final class PvAquifer implements AquiferSampler {
     private final Position position = new Position();
     private final ToDoubleFunction<DensityFunction.NoisePos> floodedness = this::floodedness;
     private final ToDoubleFunction<DensityFunction.NoisePos> spread = this::spread;
+    private final ToDoubleFunction<DensityFunction.NoisePos> corridor = this::corridor;
     private final PvAquiferRules.Positions atPosition = this::atPosition;
     /** Blocks whose own decision was computed, for tests and the benchmark. */
     private int computedPositions;
@@ -104,6 +111,13 @@ public final class PvAquifer implements AquiferSampler {
             DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
             return AquiferFormulas.basinInner(y, entrances.exactAt(x, y, z), spread.noodle().sample(pos), spread.surface().sample(pos));
         }, chunkPos, BASIN_MIN_Y, BASIN_MAX_Y, CELL_HEIGHT);
+        if (!(PvWorldgen.unwrap(spread.noodle()) instanceof PvNoodle noodle)) {
+            throw new IllegalStateException("players-versus:aquifer_spread needs players-versus:noodle as its noodle, found " + spread.noodle());
+        }
+        this.noodleToggle = new Lattice(noodle.toggle(), chunkPos, BASIN_MIN_Y, CORRIDOR_MAX_Y, CELL_HEIGHT);
+        this.noodleThickness = new Lattice(noodle.thickness(), chunkPos, BASIN_MIN_Y, CORRIDOR_MAX_Y, CELL_HEIGHT);
+        this.noodleRidgeA = new Lattice(noodle.ridgeA(), chunkPos, BASIN_MIN_Y, CORRIDOR_MAX_Y, CELL_HEIGHT);
+        this.noodleRidgeB = new Lattice(noodle.ridgeB(), chunkPos, BASIN_MIN_Y, CORRIDOR_MAX_Y, CELL_HEIGHT);
     }
 
     @Override
@@ -127,7 +141,7 @@ public final class PvAquifer implements AquiferSampler {
         if (y < MIN_Y || y >= SEA_LEVEL) return PvAquiferDecision.AIR;
         int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
         if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
-            return PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread);
+            return PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread, this.corridor);
         }
         int column = localX * SIDE + localZ;
         if (this.positions == null) this.positions = new byte[SIDE * SIDE][];
@@ -139,7 +153,7 @@ public final class PvAquifer implements AquiferSampler {
         int level = y - MIN_Y;
         int stored = levels[level];
         if (stored != 0) return DECISIONS[stored - 1];
-        PvAquiferDecision decision = PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread);
+        PvAquiferDecision decision = PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread, this.corridor);
         levels[level] = (byte) (decision.ordinal() + 1);
         this.computedPositions++;
         return decision;
@@ -165,6 +179,20 @@ public final class PvAquifer implements AquiferSampler {
         return AquiferFormulas.spread(y, this.basinInner.at(pos.blockX(), y, pos.blockZ()));
     }
 
+    /**
+     * The final density's noodle at a block of the flooded corridors' layers, with the corridors' bias
+     * ({@link PvNoodle#corridorBias}): the same doubles as the terrain pass, since the entrance value and the noodle's
+     * inputs come from lattices on its cells. At most 0 where the corridor opens the block.
+     */
+    public double corridor(DensityFunction.NoisePos pos) {
+        int x = pos.blockX(), y = pos.blockY(), z = pos.blockZ();
+        double bias = PvNoodle.corridorBias(y, this.entrances.at(x, y, z));
+        double on = this.noodleToggle.at(x, y, z);
+        if (on >= -1000000.0 && on < -0.2) return bias + 64.0;
+        return bias + (this.noodleThickness.at(x, y, z)
+                + Math.max(Math.abs(this.noodleRidgeA.at(x, y, z)), Math.abs(this.noodleRidgeB.at(x, y, z))) * 1.5);
+    }
+
     private double ridge(int x, int z) {
         int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
         if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
@@ -183,9 +211,13 @@ public final class PvAquifer implements AquiferSampler {
         return value;
     }
 
-    /** Lattice points sampled so far (depth, continentalness, entrances, basin inner), for tests and the benchmark. */
+    /**
+     * Lattice points sampled so far (depth, continentalness, entrances, basin inner, then the noodle's toggle, thickness
+     * and ridges), for tests and the benchmark.
+     */
     public int[] latticeSamples() {
-        return new int[]{this.depth.samples(), this.continentalness.samples(), this.entrances.samples(), this.basinInner.samples()};
+        return new int[]{this.depth.samples(), this.continentalness.samples(), this.entrances.samples(), this.basinInner.samples(),
+                this.noodleToggle.samples(), this.noodleThickness.samples(), this.noodleRidgeA.samples(), this.noodleRidgeB.samples()};
     }
 
     /** Blocks whose own decision was computed so far (each once), for tests and the benchmark. */

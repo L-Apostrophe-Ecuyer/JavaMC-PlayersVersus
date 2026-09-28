@@ -81,6 +81,38 @@ public final class PvWorldgenConstants {
     public static final double BASIN_BARRIER_RAMP_PER_BLOCK = 0.06;
 
     // ------------------------------------------------------------------------------------------------------------
+    // Aquifer: flooded corridors (the refactor plan, Section 10, question 7)
+    // ------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Noodle caves come back to the basin layers (above {@link #BASIN_MIN_Y}, below this y) as flooded corridors near
+     * the flooded caves. Elsewhere in these layers the noodle's height bias ({@code density/PvNoodle.bias}) keeps them
+     * out, as before.
+     */
+    public static final int CORRIDOR_MAX_Y = 24;
+
+    /**
+     * The corridors' zone: where the entrance value ({@code players-versus:overworld/caves/entrances}, negative in the
+     * entrance caves) is below this, the noodle's bias moves to {@link #CORRIDOR_BIAS}, fully once it's
+     * {@link #CORRIDOR_ZONE_TAPER} lower. {@code FloodedNoodleSurveyTest} compared zones up to 0.2, 0.3 and 0.4.
+     */
+    public static final double CORRIDOR_ENTRANCES = 0.4;
+    public static final double CORRIDOR_ZONE_TAPER = 0.05;
+    public static final double CORRIDOR_ZONE_SCALE = 1.0 / CORRIDOR_ZONE_TAPER;
+
+    /** The noodle's height bias in the corridors' zone; vanilla's noodles have none (0). */
+    public static final double CORRIDOR_BIAS = 0.0;
+
+    /**
+     * Nearer the caves, from this entrance value down to 0, the bias falls on to {@link #CORRIDOR_FLARE_BIAS}, so the
+     * corridors widen into the caves they reach instead of passing a block or two by them. In the survey's lake-rich
+     * areas, 14% of the corridors' water reached a lake without it (a zone up to 0.3), 59 to 65% with it.
+     */
+    public static final double CORRIDOR_FLARE_FROM = 0.15;
+    public static final double CORRIDOR_FLARE_SCALE = 1.0 / CORRIDOR_FLARE_FROM;
+    public static final double CORRIDOR_FLARE_BIAS = -0.06;
+
+    // ------------------------------------------------------------------------------------------------------------
     // Aquifer: walls
     // ------------------------------------------------------------------------------------------------------------
 

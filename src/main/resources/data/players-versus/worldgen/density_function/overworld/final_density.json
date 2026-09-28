@@ -46,5 +46,16 @@
   "noodle_toggle": "players-versus:overworld/caves/noodle_toggle",
   "noodle_thickness": "players-versus:overworld/caves/noodle_thickness",
   "noodle_ridge_a": "players-versus:overworld/caves/noodle_ridge_a",
-  "noodle_ridge_b": "players-versus:overworld/caves/noodle_ridge_b"
+  "noodle_ridge_b": "players-versus:overworld/caves/noodle_ridge_b",
+  "corridor_entrances": {
+    "type": "minecraft:interpolated",
+    "argument": {
+      "type": "minecraft:range_choice",
+      "input": "minecraft:y",
+      "min_inclusive": -9,
+      "max_exclusive": 25,
+      "when_in_range": "players-versus:overworld/caves/entrances",
+      "when_out_of_range": 1
+    }
+  }
 }

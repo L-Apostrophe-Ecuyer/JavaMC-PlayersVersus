@@ -2,6 +2,8 @@ package frootloops.versus.mod.environment.worldgen.aquifer;
 
 import frootloops.versus.mod.environment.worldgen.TerrainPass;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
+import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
+import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.gen.chunk.AquiferSampler;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
@@ -30,7 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>what each position's own floodedness says ({@link PvAquiferRules#atPosition}) against the terrain pass's before
  *   Phase 2b, when the router's F and S were the JSON that stays in the mod's data, by band, with each change put down
  *   to F or S;</li>
- *   <li>water never touches open air, across chunk borders too, whatever the carvers open.</li>
+ *   <li>water never touches open air, across chunk borders too, whatever the carvers open;</li>
+ *   <li>the flooded corridors: the aquifer's corridor value is the final density's noodle, bit for bit, so it floods
+ *   what they open.</li>
  * </ul>
  */
 class AquiferTerrainPassTest {
@@ -221,6 +225,46 @@ class AquiferTerrainPassTest {
      * bands within 2 steps of water (the rule in the code). Each gets fresh passes over the same chunks; the differences
      * are the walls'. Also counts the lattice points and the blocks whose own floodedness each needed.
      */
+    /**
+     * The flooded corridors (the refactor plan, Section 10, question 7): at every block of their layers, the aquifer's
+     * corridor value ({@link PvAquifer#corridor}, from its lattices) is the final density's noodle with the corridors'
+     * bias, to the bit; where that opens the block, the final density is open and the aquifer's water fills it (except
+     * where the sea's band comes first).
+     */
+    @Test
+    void corridorsFloodWhatTheTerrainOpens() {
+        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        PvFinalDensity kernel = assertInstanceOf(PvFinalDensity.class, WorldgenTestData.seeded(config, "players-versus:overworld/final_density"));
+        long[] counts = new long[4];
+        // a chunk of the smoke region, and one full of flooded caves (FloodedNoodleSurveyTest's first area)
+        for (ChunkPos chunk : List.of(new ChunkPos(100, 100), new ChunkPos(96, 128), new ChunkPos(97, 128))) {
+            TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
+            PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer(), "ChunkNoiseSamplerMixin didn't make the aquifer");
+            DensityFunction router = pass.register(config.getNoiseRouter().finalDensity());
+            DensityFunction entrances = pass.register(kernel.entrances());
+            DensityFunction toggle = pass.register(kernel.noodleToggle()), thickness = pass.register(kernel.noodleThickness());
+            DensityFunction ridgeA = pass.register(kernel.noodleRidgeA()), ridgeB = pass.register(kernel.noodleRidgeB());
+            pass.run((x, y, z, pos) -> {
+                if (!PvNoodle.inCorridorLayers(y)) return;
+                double noodle = PvNoodle.corridorBias(y, entrances.sample(pos)) + PvNoodle.tunnel(pos, toggle, thickness, ridgeA, ridgeB);
+                assertEquals(noodle, aquifer.corridor(pos), 0.0, () -> "the corridors' noodle at " + x + "," + y + "," + z);
+                counts[0]++;
+                if (noodle > 0.0) return;
+                counts[1]++;
+                double density = router.sample(pos);
+                assertTrue(density <= 0.0, () -> "the corridors' noodle opens " + x + "," + y + "," + z + " but the final density is " + density);
+                PvAquiferDecision decision = aquifer.decide(pos, density, false);
+                if (PvAquiferRules.isWater(decision)) counts[2]++;
+                else if (aquifer.atPosition(x, y, z) == PvAquiferDecision.SEA_BARRIER) counts[3]++;
+            });
+        }
+        System.out.printf(Locale.ROOT, "[terrain pass] corridors: %d blocks compared, %d opened by the corridors' noodle, %d of them water,"
+                + " %d the sea's band%n", counts[0], counts[1], counts[2], counts[3]);
+        assertTrue(counts[1] > 0, "no block opened by the corridors in the chunks tried");
+        assertEquals(counts[1], counts[2] + counts[3], "blocks the corridors open that are neither water nor the sea's band");
+    }
+
     @Test
     void aquiferCost() {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);

@@ -6,7 +6,6 @@ import frootloops.versus.mod.environment.worldgen.density.DensityOps;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
 import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.gen.chunk.AquiferSampler;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
@@ -25,13 +24,17 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Noodle caves back in the basin layers, only around the flooded caves (the refactor plan, Section 10, question 7):
- * candidate rules played out in vanilla's terrain pass over areas of 5 x 5 chunks, picked for their lakes. The noodle's
- * height bias keeps it out of y -8..20 today ({@link PvNoodle#bias}); a candidate lowers that bias where the basin
- * floodedness S is above a threshold (so noodles open only where the aquifer floods them), or where the entrance value
- * is low (near the entrance caves, flooded or not). Per candidate: the blocks it opens, what the aquifer makes of them
- * (water, stone, dry air), and how the water bodies of y -3..23 join up (neighbours across the whole area); and maps of
- * the middle of the first area.
+ * The flooded corridors (the refactor plan, Section 10, question 7) in vanilla's terrain pass, over areas of 5 x 5
+ * chunks picked for their lakes: noodle caves back in the basin layers near the flooded caves, filled by the aquifer.
+ * Against the same terrain without them (the noodle's old height bias, {@link PvNoodle#bias}): the blocks they open and
+ * what they become, how much of their water reaches a lake, how the water bodies of y -3..23 join up (neighbours across
+ * the whole area), and that no water has dry air beside or below it; with maps of the middle of the first area. The
+ * router's final density must be the corridors' formula ({@link PvNoodle#corridorBias}), to the bit.
+ *
+ * <p>The rules were chosen here: noodles opened only where S would flood them added about 2 water blocks per chunk
+ * (S falls off within a few blocks of the lakes); opened by the entrance value and left to S, they came out mostly dry;
+ * filled by the aquifer, they need no walls, and widening them nearer the caves took the share of their water that
+ * joins a lake from 14% to about 60%.
  */
 class FloodedNoodleSurveyTest {
 
@@ -49,37 +52,10 @@ class FloodedNoodleSurveyTest {
     private static final byte SOLID = 0, WATER = 1, STONE = 2, AIR = 3;
     private static final String[] KINDS = {"solid", "water", "stone", "air"};
 
-    /**
-     * A rule for the noodle's height bias in y -3..23. By S: where S passes {@code from} (or the basin water threshold,
-     * if that's higher), the bias moves from today's towards {@code bias}, over {@code taper} of S (at once if 0). By
-     * the entrances: the same where the entrance value is below {@code from}, and nearer the caves (entrance value from
-     * {@code flareTo} down to 0) the bias falls further, to {@code flare}, so the noodles widen into the caves. A rule
-     * that {@code floods} also makes the aquifer fill the noodle wherever the lower bias opens it (after the sea's water
-     * and band, as the basins come), and stone where that water could flow into dry air, as the walls do.
-     */
-    private record Candidate(String name, boolean byEntrances, double from, double taper, double bias, double flare, double flareTo,
-                             boolean floods) {
-        double biasAt(int y, double spread, double entrances) {
-            double now = PvNoodle.bias(y);
-            double past = this.byEntrances ? this.from - entrances : spread - Math.max(this.from, PvAquiferRules.basinWaterThreshold(y));
-            double share = this.taper == 0.0 ? (past > 0.0 ? 1.0 : 0.0) : MathHelper.clamp(past / this.taper, 0.0, 1.0);
-            double target = this.flareTo <= 0.0 ? this.bias
-                    : this.bias + (this.flare - this.bias) * MathHelper.clamp((this.flareTo - entrances) / this.flareTo, 0.0, 1.0);
-            return now + (target - now) * share;
-        }
-    }
-
-    private static final List<Candidate> CANDIDATES = List.of(
-            new Candidate("S > 0.5 over 0.1, bias 0", false, 0.5, 0.1, 0.0, 0.0, 0.0, false),
-            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0", true, 0.3, 0.05, 0.0, 0.0, 0.0, true),
-            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0 flaring to -0.06 from 0.1", true, 0.3, 0.05, 0.0, -0.06, 0.1, true),
-            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0 flaring to -0.1 from 0.1", true, 0.3, 0.05, 0.0, -0.1, 0.1, true),
-            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0 flaring to -0.1 from 0.2", true, 0.3, 0.05, 0.0, -0.1, 0.2, true),
-            new Candidate("flooded, entrances < 0.4 over 0.05, bias 0 flaring to -0.06 from 0.15", true, 0.4, 0.05, 0.0, -0.06, 0.15, true));
-    /** The candidates whose maps are printed, and the heights. */
-    private static final int[] MAPPED = {3};
+    /** The heights the maps show. */
     private static final int[] MAP_YS = {4, 12, 20};
     private static final int MAP_SIDE = 48;
+    private static final int[][] SIDES_AND_BELOW = {{1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}, {0, -1, 0}};
 
     @Test
     void survey() {
@@ -88,13 +64,10 @@ class FloodedNoodleSurveyTest {
         PvFinalDensity finalDensity = finalDensity(config.getNoiseRouter().finalDensity());
         AquiferInputs inputs = AquiferInputs.of(config, settings);
         List<ChunkPos> centers = lakeCenters(config, inputs);
-        int variants = CANDIDATES.size() + 1;
-        Stats[] stats = new Stats[variants];
-        for (int v = 0; v < variants; v++) stats[v] = new Stats();
+        Stats without = new Stats(), with = new Stats();
         long[] routerMismatches = {0};
         for (ChunkPos center : centers) {
-            byte[][] kinds = new byte[variants][SIDE * SIDE * LAYERS];
-            boolean[][] corridor = new boolean[variants][SIDE * SIDE * LAYERS];
+            byte[] before = new byte[SIDE * SIDE * LAYERS], after = new byte[SIDE * SIDE * LAYERS];
             int originX = (center.x - AREA_CHUNKS / 2) * 16, originZ = (center.z - AREA_CHUNKS / 2) * 16;
             for (int chunkX = 0; chunkX < AREA_CHUNKS; chunkX++) {
                 for (int chunkZ = 0; chunkZ < AREA_CHUNKS; chunkZ++) {
@@ -107,54 +80,52 @@ class FloodedNoodleSurveyTest {
                     DensityFunction thickness = pass.register(finalDensity.noodleThickness());
                     DensityFunction ridgeA = pass.register(finalDensity.noodleRidgeA());
                     DensityFunction ridgeB = pass.register(finalDensity.noodleRidgeB());
-                    DensityFunction entrances = pass.register(inputs.floodedness().entrances());
+                    DensityFunction entrances = pass.register(finalDensity.entrances());
                     pass.run((x, y, z, pos) -> {
                         if (y < MIN_Y || y >= MAX_Y) return;
                         double terrainValue = DensityOps.squeeze(terrain.sample(pos) * 0.64);
                         double tunnel = PvNoodle.tunnel(pos, toggle, thickness, ridgeA, ridgeB);
-                        double now = Math.min(terrainValue, PvNoodle.bias(y) + tunnel);
-                        if (now != router.sample(pos)) routerMismatches[0]++;
+                        double old = Math.min(terrainValue, PvNoodle.bias(y) + tunnel);
+                        double now = router.sample(pos);
+                        if (now != Math.min(terrainValue, PvNoodle.corridorBias(y, entrances.sample(pos)) + tunnel)) routerMismatches[0]++;
                         int i = index(x - originX, y, z - originZ);
-                        kinds[0][i] = kind(now, aquifer.decide(pos, now, false));
-                        double spread = aquifer.spread(pos), entrance = entrances.sample(pos);
-                        PvAquiferDecision own = null;
-                        for (int c = 0; c < CANDIDATES.size(); c++) {
-                            Candidate rule = CANDIDATES.get(c);
-                            double bias = rule.biasAt(y, spread, entrance);
-                            double candidate = Math.min(terrainValue, bias + tunnel);
-                            if (rule.floods() && bias < PvNoodle.bias(y) && bias + tunnel <= 0.0) {
-                                if (own == null) own = aquifer.atPosition(x, y, z);
-                                if (!sea(own)) {
-                                    kinds[c + 1][i] = WATER;
-                                    corridor[c + 1][i] = true;
-                                    continue;
-                                }
-                            }
-                            kinds[c + 1][i] = candidate == now ? kinds[0][i] : kind(candidate, aquifer.decide(pos, candidate, false));
-                        }
+                        after[i] = kind(now, aquifer.decide(pos, now, false));
+                        before[i] = old == now ? after[i] : kind(old, aquifer.decide(pos, old, false));
                     });
                 }
             }
-            for (int v = 0; v < variants; v++) {
-                stats[v].walls += wall(kinds[v], corridor[v]);
-                stats[v].add(kinds[0], kinds[v]);
-            }
+            without.add(before, before);
+            with.add(before, after);
+            with.leaks += leaks(after);
             if (center.equals(centers.get(0))) {
-                for (int c : MAPPED) {
-                    for (int y : MAP_YS) printMap(center, CANDIDATES.get(c).name(), y, kinds[0], kinds[c + 1]);
-                }
+                for (int y : MAP_YS) printMap(center, y, before, after);
             }
         }
 
         double chunks = AREAS * AREA_CHUNKS * AREA_CHUNKS;
         System.out.printf(Locale.ROOT, "[noodles] %d areas of %d x %d chunks around %s, y %d..%d; per chunk:%n",
                 AREAS, AREA_CHUNKS, AREA_CHUNKS, centers, MIN_Y, MAX_Y - 1);
-        for (int v = 0; v < variants; v++) {
-            String name = v == 0 ? "now" : CANDIDATES.get(v - 1).name();
-            System.out.println("[noodles] " + name + ": " + stats[v].describe(chunks));
+        System.out.println("[noodles] without the corridors: " + without.describe(chunks));
+        System.out.println("[noodles] with the corridors: " + with.describe(chunks));
+        assertEquals(0, routerMismatches[0], "the router's final density isn't the corridors' formula");
+        assertTrue(without.water > 0, "the survey found no water in the basin layers");
+        assertTrue(with.water > without.water, "the corridors added no water");
+        assertEquals(0, with.leaks, "water with dry air beside or below it");
+    }
+
+    /** Water blocks with dry open air beside or below them, inside the area. */
+    private static int leaks(byte[] kinds) {
+        int leaks = 0;
+        for (int i = 0; i < kinds.length; i++) {
+            if (kinds[i] != WATER) continue;
+            int layer = i / (SIDE * SIDE), x = (i / SIDE) % SIDE, z = i % SIDE;
+            for (int[] offset : SIDES_AND_BELOW) {
+                int nx = x + offset[0], ny = layer + offset[1], nz = z + offset[2];
+                if (nx < 0 || nx >= SIDE || nz < 0 || nz >= SIDE || ny < 0) continue;
+                if (kinds[(ny * SIDE + nx) * SIDE + nz] == AIR) leaks++;
+            }
         }
-        assertEquals(0, routerMismatches[0], "the survey's noodle differs from the router's final density");
-        assertTrue(stats[0].water > 0, "the survey found no water in the basin layers");
+        return leaks;
     }
 
     /**
@@ -196,10 +167,10 @@ class FloodedNoodleSurveyTest {
 
     /**
      * The middle of an area at one height, north up: {@code #} solid, {@code .} dry, {@code ~} water, {@code +} water the
-     * candidate adds, {@code o} stone it adds, {@code -} dry air it adds.
+     * corridors add, {@code o} stone they add, {@code -} dry air they add.
      */
-    private static void printMap(ChunkPos center, String name, int y, byte[] now, byte[] candidate) {
-        System.out.println("[noodles] map, " + name + ", y " + y + ", " + MAP_SIDE + " x " + MAP_SIDE + " blocks around chunk " + center + ":");
+    private static void printMap(ChunkPos center, int y, byte[] now, byte[] candidate) {
+        System.out.println("[noodles] map with the corridors, y " + y + ", " + MAP_SIDE + " x " + MAP_SIDE + " blocks around chunk " + center + ":");
         int start = (SIDE - MAP_SIDE) / 2;
         for (int z = start; z < start + MAP_SIDE; z++) {
             StringBuilder row = new StringBuilder("[noodles]   ");
@@ -219,30 +190,6 @@ class FloodedNoodleSurveyTest {
             }
             System.out.println(row);
         }
-    }
-
-    private static boolean sea(PvAquiferDecision own) {
-        return own == PvAquiferDecision.SEA_WATER || own == PvAquiferDecision.SEA_WATER_TICKING || own == PvAquiferDecision.SEA_BARRIER;
-    }
-
-    /** Stone where a corridor's water could flow into dry air (beside it or below it), as the walls do; how many. */
-    private static int wall(byte[] kinds, boolean[] corridor) {
-        int walls = 0;
-        for (int i = 0; i < kinds.length; i++) {
-            if (!corridor[i]) continue;
-            int layer = i / (SIDE * SIDE), x = (i / SIDE) % SIDE, z = i % SIDE;
-            for (int[] offset : NEIGHBOURS) {
-                if (offset[1] > 0) continue;
-                int nx = x + offset[0], ny = layer + offset[1], nz = z + offset[2];
-                if (nx < 0 || nx >= SIDE || nz < 0 || nz >= SIDE || ny < 0) continue;
-                int n = (ny * SIDE + nx) * SIDE + nz;
-                if (kinds[n] == AIR) {
-                    kinds[n] = STONE;
-                    walls++;
-                }
-            }
-        }
-        return walls;
     }
 
     private static byte kind(double density, PvAquiferDecision decision) {
@@ -282,8 +229,8 @@ class FloodedNoodleSurveyTest {
         long newBodies, newBodyBlocks;
         /** New water (solid today) in a body that holds some of today's water: corridors reaching a lake. */
         long connected;
-        /** Dry blocks beside or below a flooded corridor, made stone. */
-        long walls;
+        /** Water blocks with dry air beside or below them. */
+        long leaks;
 
         void add(byte[] now, byte[] kinds) {
             for (int i = 0; i < kinds.length; i++) {
@@ -358,10 +305,10 @@ class FloodedNoodleSurveyTest {
             }
             text.append(String.format(Locale.ROOT, " (bands y %d..%d, %d..%d, %d..%d)", MIN_Y, BAND_TOPS[0] - 1,
                     BAND_TOPS[0], BAND_TOPS[1] - 1, BAND_TOPS[1], BAND_TOPS[2] - 1));
-            text.append(String.format(Locale.ROOT, "; new water reaching a lake %.1f; water bodies %.1f, of which %.2f join %.2f of today's,"
-                            + " %.2f meet no cave (%.1f blocks); walls for corridors %.2f",
+            text.append(String.format(Locale.ROOT, "; new water reaching a lake %.1f; water bodies %.1f, of which %.2f join %.2f of those"
+                            + " without the corridors, %.2f meet no cave (%.1f blocks); water with dry air beside or below %d",
                     this.connected / chunks, this.bodies / chunks, this.joining / chunks, this.joined / chunks, this.newBodies / chunks,
-                    this.newBodyBlocks / chunks, this.walls / chunks));
+                    this.newBodyBlocks / chunks, this.leaks));
             return text.toString();
         }
     }

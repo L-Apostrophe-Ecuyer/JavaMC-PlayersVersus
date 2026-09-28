@@ -29,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@link PvNoodle}) against the JSON they replaced ({@link WorldgenTestData#REFERENCE}): the same doubles at random
  * positions, and at every block of vanilla's terrain pass, where vanilla's caches and interpolation are in play. The
  * final density is also checked in the vanilla types it takes for C2ME's compiler ({@link PvFinalDensity#asVanillaTypes}).
+ * In the flooded corridors' zone ({@link PvNoodle#corridorBias}), which the JSON never had, the final density is
+ * checked against its vanilla types only.
  */
 class TerrainPortTest {
 
@@ -52,6 +54,7 @@ class TerrainPortTest {
             pairs.put(name, new DensityFunction[]{WorldgenTestData.seeded(config, NEW + name), WorldgenTestData.seeded(config, OLD + name)});
         }
         pairs.put(AS_VANILLA_TYPES, new DensityFunction[]{asVanillaTypes(config), WorldgenTestData.seeded(config, OLD + "final_density")});
+        DensityFunction corridorEntrances = kernel(config).entrances();
         // what each sample exercised, so the comparison can't pass without reaching every branch
         DensityFunction ridges = WorldgenTestData.seeded(config, "minecraft:overworld/ridges");
         DensityFunction jaggedness = WorldgenTestData.seeded(config, "minecraft:overworld/jaggedness");
@@ -65,10 +68,14 @@ class TerrainPortTest {
             int x = random.nextInt(12000) - 6000, z = random.nextInt(12000) - 6000;
             int y = i % 2 == 0 ? edgeYs.get(random.nextInt(edgeYs.size())) : random.nextInt(336) - 64;
             DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
+            boolean corridor = inCorridorZone(y, corridorEntrances, pos);
             for (Map.Entry<String, DensityFunction[]> pair : pairs.entrySet()) {
-                double expected = pair.getValue()[1].sample(pos), actual = pair.getValue()[0].sample(pos);
-                assertEquals(expected, actual, 0.0, () -> pair.getKey() + " at " + x + "," + y + "," + z);
+                boolean finalDensity = pair.getKey().equals("final_density") || pair.getKey().equals(AS_VANILLA_TYPES);
+                double expected = corridor && finalDensity ? pairs.get("final_density")[0].sample(pos) : pair.getValue()[1].sample(pos);
+                double actual = pair.getValue()[0].sample(pos);
+                assertEquals(expected, actual, 0.0, () -> pair.getKey() + " at " + x + "," + y + "," + z + (corridor ? " (in the corridors' zone)" : ""));
             }
+            if (corridor) reached.merge("corridors' zone", 1, Integer::sum);
             double yValue = DensityOps.yValue(y), ridge = ridges.sample(pos), cheese = slopedCheese.sample(pos);
             if (yValue >= 48.0 && yValue < 256.0 && Math.abs(ridge) < 0.22) reached.merge("river valley", 1, Integer::sum);
             if (yValue >= 54.0 && yValue < 128.0 && Math.abs(ridge) < 0.2) reached.merge("river depth", 1, Integer::sum);
@@ -78,7 +85,8 @@ class TerrainPortTest {
             if (!(toggle.sample(pos) < -0.2)) reached.merge("noodles on", 1, Integer::sum);
         }
         System.out.println("[terrain port] " + pairs.keySet() + " equal the JSON at 20000 points; reached " + reached);
-        for (String branch : List.of("river valley", "river depth", "jagged peaks", "surface branch", "cave branch", "ramen band", "noodles on")) {
+        for (String branch : List.of("river valley", "river depth", "jagged peaks", "surface branch", "cave branch", "ramen band", "noodles on",
+                "corridors' zone")) {
             assertTrue(reached.getOrDefault(branch, 0) >= 50, "too few samples reached " + branch + ": " + reached);
         }
     }
@@ -105,18 +113,27 @@ class TerrainPortTest {
             names.add(AS_VANILLA_TYPES);
             news.add(pass.register(asVanillaTypes(config)));
             olds.add(pass.register(WorldgenTestData.seeded(config, OLD + "final_density")));
+            DensityFunction corridorEntrances = pass.register(kernel(config).entrances());
+            int finalDensity = names.indexOf("final_density");
             int[] compared = new int[names.size()];
+            int[] corridors = {0};
             pass.run((x, y, z, pos) -> {
+                boolean corridor = inCorridorZone(y, corridorEntrances, pos);
+                if (corridor) corridors[0]++;
                 for (int i = 0; i < names.size(); i++) {
                     if (names.get(i).equals("depth") && (Math.floorMod(x, 4) != 0 || Math.floorMod(z, 4) != 0)) continue;
-                    double expected = olds.get(i).sample(pos), actual = news.get(i).sample(pos);
+                    boolean againstKernel = corridor && (i == finalDensity || names.get(i).equals(AS_VANILLA_TYPES));
+                    double expected = againstKernel ? news.get(finalDensity).sample(pos) : olds.get(i).sample(pos);
+                    double actual = news.get(i).sample(pos);
                     int index = i;
-                    assertEquals(expected, actual, 0.0, () -> names.get(index) + " at " + x + "," + y + "," + z + " (chunk " + chunk.x + "," + chunk.z + ")");
+                    assertEquals(expected, actual, 0.0, () -> names.get(index) + " at " + x + "," + y + "," + z + " (chunk " + chunk.x + "," + chunk.z
+                            + (againstKernel ? ", in the corridors' zone" : "") + ")");
                     compared[i]++;
                 }
             });
-            System.out.printf(Locale.ROOT, "[terrain port] chunk %d,%d: %s equal the JSON at %s blocks%n", chunk.x, chunk.z, names,
-                    Arrays.toString(compared));
+            System.out.printf(Locale.ROOT, "[terrain port] chunk %d,%d: %s equal the JSON at %s blocks (the final density: the kernel's own"
+                            + " vanilla types at the %d blocks of the corridors' zone)%n", chunk.x, chunk.z, names, Arrays.toString(compared),
+                    corridors[0]);
         }
     }
 
@@ -151,6 +168,15 @@ class TerrainPortTest {
                 + nanos.entrySet().stream().map(entry -> String.format(Locale.ROOT, "with %s %.2f ms", entry.getKey(),
                         entry.getValue() / 2e6 / chunks.size())).collect(Collectors.joining(", ")));
         assertTrue(Double.isFinite(sink[0]));
+    }
+
+    private static PvFinalDensity kernel(NoiseConfig config) {
+        return assertInstanceOf(PvFinalDensity.class, WorldgenTestData.seeded(config, NEW + "final_density"));
+    }
+
+    /** Whether the flooded corridors change the noodle's bias at a block, which the JSON never did. */
+    private static boolean inCorridorZone(int y, DensityFunction corridorEntrances, DensityFunction.NoisePos pos) {
+        return PvNoodle.inCorridorLayers(y) && PvNoodle.corridorBias(y, corridorEntrances.sample(pos)) != PvNoodle.bias(y);
     }
 
     /** The final density in the vanilla types it takes when C2ME's compiler is active. */

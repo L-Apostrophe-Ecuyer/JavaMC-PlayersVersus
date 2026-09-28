@@ -3,9 +3,18 @@ package frootloops.versus.mod.environment.worldgen.density;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.dynamic.CodecHolder;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
 import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
 
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_BIAS;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_ENTRANCES;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_FLARE_BIAS;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_FLARE_FROM;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_FLARE_SCALE;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_MAX_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_ZONE_SCALE;
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.gradient;
 
 /**
@@ -53,6 +62,47 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
                         DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(32, 20, 0.0, 0.1),
                                 DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(-8, -32, 0.0, -0.3),
                                         DensityFunctionTypes.yClampedGradient(-52, -64, 0.0, 0.35)))));
+    }
+
+    /** Whether {@code y} is in the flooded corridors' layers, the basin water's: y -3..23. */
+    public static boolean inCorridorLayers(int y) {
+        return y > BASIN_MIN_Y && y < CORRIDOR_MAX_Y;
+    }
+
+    /**
+     * The noodle's height bias with the flooded corridors (the refactor plan, Section 10, question 7): in their layers,
+     * where the entrance value says a flooded cave is near, it moves from {@link #bias} towards
+     * {@code PvWorldgenConstants.CORRIDOR_BIAS}, and on to {@code CORRIDOR_FLARE_BIAS} nearer the caves. The final
+     * density and the aquifer both use it, with the same interpolated entrance value, so the aquifer floods exactly the
+     * corridors the terrain opens. {@link #corridorBiasFunction} gives the same doubles from vanilla types.
+     */
+    public static double corridorBias(int y, double entrances) {
+        double now = bias(y);
+        if (!inCorridorLayers(y)) return now;
+        double share = MathHelper.clamp((CORRIDOR_ENTRANCES - entrances) * CORRIDOR_ZONE_SCALE, 0.0, 1.0);
+        double flare = MathHelper.clamp((CORRIDOR_FLARE_FROM - entrances) * CORRIDOR_FLARE_SCALE, 0.0, 1.0);
+        double target = CORRIDOR_BIAS + (CORRIDOR_FLARE_BIAS - CORRIDOR_BIAS) * flare;
+        return now + (target - now) * share;
+    }
+
+    /**
+     * {@link #corridorBias} from vanilla types, for C2ME's compiler: the same operations in the same order (a
+     * subtraction as the addition of a negated value, which IEEE defines as the same), and the layers as a
+     * {@code range_choice} on vanilla's {@code y}, whose value at a block is within a hair of its height.
+     */
+    static DensityFunction corridorBiasFunction(DensityFunction entrances) {
+        DensityFunction now = biasFunction();
+        DensityFunction negated = DensityFunctionTypes.mul(DensityFunctionTypes.constant(-1.0), entrances);
+        DensityFunction share = DensityFunctionTypes.mul(DensityFunctionTypes.add(DensityFunctionTypes.constant(CORRIDOR_ENTRANCES), negated),
+                DensityFunctionTypes.constant(CORRIDOR_ZONE_SCALE)).clamp(0.0, 1.0);
+        DensityFunction flare = DensityFunctionTypes.mul(DensityFunctionTypes.add(DensityFunctionTypes.constant(CORRIDOR_FLARE_FROM), negated),
+                DensityFunctionTypes.constant(CORRIDOR_FLARE_SCALE)).clamp(0.0, 1.0);
+        DensityFunction target = DensityFunctionTypes.add(DensityFunctionTypes.constant(CORRIDOR_BIAS),
+                DensityFunctionTypes.mul(DensityFunctionTypes.constant(CORRIDOR_FLARE_BIAS - CORRIDOR_BIAS), flare));
+        DensityFunction corridor = DensityFunctionTypes.add(now, DensityFunctionTypes.mul(
+                DensityFunctionTypes.add(target, DensityFunctionTypes.mul(DensityFunctionTypes.constant(-1.0), now)), share));
+        DensityFunction y = DensityFunctionTypes.yClampedGradient(-4064, 4062, -4064.0, 4062.0);
+        return DensityFunctionTypes.rangeChoice(y, BASIN_MIN_Y + 0.5, CORRIDOR_MAX_Y - 0.5, corridor, now);
     }
 
     /** The noodle without its bias: 64 (solid) where the toggle is off, else the thickness plus the larger ridge. */
