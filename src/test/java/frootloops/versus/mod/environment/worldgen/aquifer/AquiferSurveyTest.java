@@ -53,20 +53,27 @@ class AquiferSurveyTest {
 
     /**
      * Candidate height profiles for the caves: terms added to the entrances, each {from y, to y, from value, to value}
-     * of a {@code y_clamped_gradient}. Each replaces the entrances' {@code (48 -> 36, 0 -> -0.165)}, which with the
-     * rise below y 28 makes the caves' low point at y 28..36.
+     * of a {@code y_clamped_gradient}. The entrances' {@code (48 -> 36, 0 -> -0.165)} lowers everything under y 36, and
+     * {@code (28 -> 18, 0 -> 0.275)} lifts everything under y 18 again, which leaves the caves' low point at y 28..36.
+     * Each candidate replaces both: the first from a higher y or to a smaller value, the second so that the sum under
+     * y 18 stays 0.11, which keeps the caves there as they are.
      */
     private static final Map<String, double[][]> CANDIDATES = candidates();
 
     private static Map<String, double[][]> candidates() {
-        double[] old = {48, 36, 0.0, 0.165};  // subtracts the current term
         Map<String, double[][]> candidates = new LinkedHashMap<>();
         candidates.put("now", new double[0][]);
-        candidates.put("48..36 to -0.15", new double[][]{{48, 36, 0.0, -0.15}, old});
-        candidates.put("52..36 to -0.15", new double[][]{{52, 36, 0.0, -0.15}, old});
-        candidates.put("52..36 to -0.16", new double[][]{{52, 36, 0.0, -0.16}, old});
-        candidates.put("56..36 to -0.15", new double[][]{{56, 36, 0.0, -0.15}, old});
+        candidates.put("48 to -0.155", replacing(48, -0.155));
+        candidates.put("52 to -0.155", replacing(52, -0.155));
+        candidates.put("54 to -0.155", replacing(54, -0.155));
+        candidates.put("56 to -0.155", replacing(56, -0.155));
+        candidates.put("52 to -0.15", replacing(52, -0.15));
         return candidates;
+    }
+
+    /** The terms that turn {@code (48 -> 36, 0 -> -0.165)} into {@code (fromY -> 36, 0 -> low)}, and the rise under y 28 to match. */
+    private static double[][] replacing(int fromY, double low) {
+        return new double[][]{{fromY, 36, 0.0, low}, {48, 36, 0.0, 0.165}, {28, 18, 0.0, 0.11 - low}, {28, 18, 0.0, -0.275}};
     }
 
     @Test
