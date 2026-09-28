@@ -219,10 +219,10 @@ jobs:
           changed=$(git log -1 --format=%H "$GITHUB_SHA" -- src/main build.gradle gradle.properties settings.gradle gradle)
           echo "PREVIOUS=$(git rev-parse "$changed~1")" >> "$GITHUB_ENV"
           echo "latest change to the mod: $(git log --oneline -1 "$changed")"
-      # Each build runs twice, in the order previous, this, vanilla, this, previous, and the compare step averages the
-      # two runs: single runs of one build differ by up to 40% on a runner (91f014e's job, where "previous" and "this"
-      # were nearly the same code), and the order cancels a drift over the job.
-      - name: previous, this, vanilla, this, previous
+      # Each build runs twice, in the order previous, this, vanilla, vanilla, this, previous, and the compare step
+      # averages the two runs: single runs of one build differ by up to 40% on a runner (91f014e's job, where "previous"
+      # and "this" were nearly the same code), and the order cancels a drift over the job.
+      - name: previous, this, vanilla, vanilla, this, previous
         run: |
           mkdir -p reports
           bench() {  # $1 report name, $2 commit, $3 level type
@@ -237,7 +237,8 @@ jobs:
           }
           bench previous-1 "$PREVIOUS" players-versus:better_world
           bench this-1 "$GITHUB_SHA" players-versus:better_world
-          bench vanilla "$GITHUB_SHA" minecraft:normal
+          bench vanilla-1 "$GITHUB_SHA" minecraft:normal
+          bench vanilla-2 "$GITHUB_SHA" minecraft:normal
           bench this-2 "$GITHUB_SHA" players-versus:better_world
           bench previous-2 "$PREVIOUS" players-versus:better_world
       - name: download C2ME and Lithium
@@ -253,9 +254,9 @@ jobs:
             echo "$slug $version"
             curl -fsSL -A "$UA" -o "perf-mods/$filename" "$url"
           done
-      # The same five runs next to C2ME and Lithium: C2ME compiles density functions it knows and calls the others, so
-      # a change can speed up one setup and slow down the other.
-      - name: previous, this, vanilla, this, previous, next to C2ME and Lithium
+      # The same six runs next to C2ME and Lithium: C2ME compiles density functions it knows and calls the others, so a
+      # change can speed up one setup and slow down the other.
+      - name: previous, this, vanilla, vanilla, this, previous, next to C2ME and Lithium
         run: |
           mkdir -p run/worldgen-smoke/mods && cp perf-mods/*.jar run/worldgen-smoke/mods/
           bench() {  # $1 report name, $2 commit, $3 level type
@@ -270,7 +271,8 @@ jobs:
           }
           bench c2me-previous-1 "$PREVIOUS" players-versus:better_world
           bench c2me-this-1 "$GITHUB_SHA" players-versus:better_world
-          bench c2me-vanilla "$GITHUB_SHA" minecraft:normal
+          bench c2me-vanilla-1 "$GITHUB_SHA" minecraft:normal
+          bench c2me-vanilla-2 "$GITHUB_SHA" minecraft:normal
           bench c2me-this-2 "$GITHUB_SHA" players-versus:better_world
           bench c2me-previous-2 "$PREVIOUS" players-versus:better_world
           rm -rf run/worldgen-smoke/mods
@@ -299,16 +301,16 @@ jobs:
           def table(title, prefix):
               previous = [runs[prefix + "previous-1"][0], runs[prefix + "previous-2"][0]]
               this = [runs[prefix + "this-1"][0], runs[prefix + "this-2"][0]]
-              vanilla = runs[prefix + "vanilla"][0]
-              print(f"\n{title} (previous and this: the mean of two runs; spread: how far those two runs differ)")
+              vanilla = [runs[prefix + "vanilla-1"][0], runs[prefix + "vanilla-2"][0]]
+              print(f"\n{title} (each the mean of two runs; spread: how far those two runs differ)")
               print(f"{'status':20} {'previous':>9} {'this':>9} {'vanilla':>9} {'this/prev':>10} {'this/vanilla':>13} "
-                    f"{'spread prev':>12} {'spread this':>12}  (ms/chunk)")
+                    f"{'spread prev':>12} {'spread this':>12} {'spread van.':>12}  (ms/chunk)")
               for status in runs[prefix + "this-1"][0]:
-                  p, t, v = mean(previous, status), mean(this, status), vanilla.get(status, float('nan'))
+                  p, t, v = mean(previous, status), mean(this, status), mean(vanilla, status)
                   print(f"{status:20} {p:9.2f} {t:9.2f} {v:9.2f} {t / p:10.2f} {t / v:13.2f} "
-                        f"{spread(previous, status):12.0%} {spread(this, status):12.0%}")
+                        f"{spread(previous, status):12.0%} {spread(this, status):12.0%} {spread(vanilla, status):12.0%}")
           names = [prefix + name for prefix in ["", "c2me-"]
-                   for name in ["previous-1", "this-1", "vanilla", "this-2", "previous-2"]]
+                   for name in ["previous-1", "this-1", "vanilla-1", "vanilla-2", "this-2", "previous-2"]]
           runs = {name: read(os.path.join(sys.argv[1], name + ".txt")) for name in names}
           table("Players Versus alone", "")
           table("next to C2ME and Lithium", "c2me-")
