@@ -32,6 +32,11 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * but is smooth. The ridge noise is kept per column; the surface and ramen noises are sampled per block. Every caller
  * (the terrain pass, carvers, probes) gets the same answer at a block; {@code AquiferTerrainPassTest} compares it
  * with the terrain pass before.
+ *
+ * <p>Walls look at a block's neighbours ({@link PvAquiferRules#decide}), up to {@link PvAquiferRules#BAND_REACH}
+ * blocks away, so each block's own decision ({@link PvAquiferRules#atPosition}) is kept once computed, for the chunk
+ * and that far around it. The lattices and the ridge cache reach past the chunk too, and give there what the
+ * neighbouring chunk gives, so both chunks agree on the walls along their border.
  */
 public final class PvAquifer implements AquiferSampler {
 
@@ -41,14 +46,30 @@ public final class PvAquifer implements AquiferSampler {
      */
     public static final int CELL_HEIGHT = 8;
 
+    /** How far past the chunk the walls look, and so the columns kept below. */
+    private static final int REACH = PvAquiferRules.BAND_REACH;
+    private static final int SIDE = 16 + 2 * REACH;
+    /** The heights where {@link PvAquiferRules#atPosition} can say anything but air: the sea band, y -31..63. */
+    private static final int MIN_Y = SEA_BAND_MIN_Y + 1;
+    private static final int LEVELS = SEA_LEVEL - MIN_Y;
+    private static final PvAquiferDecision[] DECISIONS = PvAquiferDecision.values();
+
     private final FluidLevelSampler fluidLevelSampler;
     private final AquiferFloodedness floodednessInputs;
     private final int originX, originZ;
     private final Lattice depth, continentalness, entrances, basinInner;
     /** Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled. */
-    private final double[] ridge = new double[16 * 16];
+    private final double[] ridge = new double[SIDE * SIDE];
+    /**
+     * Each block's own decision, by column and then height from {@link #MIN_Y}: its ordinal plus one, 0 until
+     * computed. A column's array is made when first needed.
+     */
+    private final byte[][] positions = new byte[SIDE * SIDE][];
+    /** Where {@link #atPosition} samples the noises; one per aquifer, which only one thread uses at a time. */
+    private final Position position = new Position();
     private final ToDoubleFunction<DensityFunction.NoisePos> floodedness = this::floodedness;
     private final ToDoubleFunction<DensityFunction.NoisePos> spread = this::spread;
+    private final PvAquiferRules.Positions atPosition = this::atPosition;
 
     /**
      * Only read right after {@link #apply} returned a fluid, and every fluid decision sets it, so it never leaks a
@@ -90,7 +111,28 @@ public final class PvAquifer implements AquiferSampler {
 
     /** What the aquifer places at {@code pos}; {@code /pvwg probe} asks this too. */
     public PvAquiferDecision decide(DensityFunction.NoisePos pos, double density, boolean lavaLevel) {
-        return PvAquiferRules.decide(pos, density, lavaLevel, this.floodedness, this.spread);
+        return PvAquiferRules.decide(pos, density, lavaLevel, this.atPosition);
+    }
+
+    /** {@link PvAquiferRules#atPosition} at a block, computed once for the blocks the walls look at. */
+    public PvAquiferDecision atPosition(int x, int y, int z) {
+        if (y < MIN_Y || y >= SEA_LEVEL) return PvAquiferDecision.AIR;
+        int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
+        if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
+            return PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread);
+        }
+        int column = localX * SIDE + localZ;
+        byte[] levels = this.positions[column];
+        if (levels == null) {
+            levels = new byte[LEVELS];
+            this.positions[column] = levels;
+        }
+        int level = y - MIN_Y;
+        int stored = levels[level];
+        if (stored != 0) return DECISIONS[stored - 1];
+        PvAquiferDecision decision = PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread);
+        levels[level] = (byte) (decision.ordinal() + 1);
+        return decision;
     }
 
     @Override
@@ -114,11 +156,11 @@ public final class PvAquifer implements AquiferSampler {
     }
 
     private double ridge(int x, int z) {
-        int localX = x - this.originX, localZ = z - this.originZ;
-        if (localX < 0 || localX > 15 || localZ < 0 || localZ > 15) {
+        int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
+        if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
             return this.floodednessInputs.ridge().sample(new DensityFunction.UnblendedNoisePos(x, 0, z));
         }
-        int index = localX * 16 + localZ;
+        int index = localX * SIDE + localZ;
         double value = this.ridge[index];
         if (Double.isNaN(value)) {
             value = this.floodednessInputs.ridge().sample(new DensityFunction.UnblendedNoisePos(x, 0, z));
@@ -130,5 +172,32 @@ public final class PvAquifer implements AquiferSampler {
     /** Lattice points sampled so far (depth, continentalness, entrances, basin inner), for tests and the benchmark. */
     public int[] latticeSamples() {
         return new int[]{this.depth.samples(), this.continentalness.samples(), this.entrances.samples(), this.basinInner.samples()};
+    }
+
+    /** A block position to sample the noises at, set for each block {@link #atPosition} computes. */
+    private static final class Position implements DensityFunction.NoisePos {
+        private int x, y, z;
+
+        Position set(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            return this;
+        }
+
+        @Override
+        public int blockX() {
+            return this.x;
+        }
+
+        @Override
+        public int blockY() {
+            return this.y;
+        }
+
+        @Override
+        public int blockZ() {
+            return this.z;
+        }
     }
 }

@@ -86,12 +86,26 @@ class LatticeTest {
         }
     }
 
+    /** Blocks one cell past the chunk's sides get what the neighbouring chunk's own lattice gives, to the bit. */
     @Test
-    void positionsOutsideTheChunkOrBandAreExact() {
+    void blocksNextToTheChunkGetTheNeighbouringChunksValues() {
         Counting wavy = new Counting(pos -> Math.sin(pos.blockX() * 0.7) + Math.cos(pos.blockY() * 0.3 + pos.blockZ()));
         ChunkPos chunk = new ChunkPos(0, 0);
         Lattice lattice = new Lattice(wavy, chunk, -4, 32);
-        int[][] outside = {{16, 10, 5}, {-1, 10, 5}, {5, 10, 16}, {5, -5, 5}, {5, 32, 5}, {5, 100, 5}};
+        int[][] next = {{16, 10, 5}, {19, 11, 5}, {-1, 10, 5}, {-4, 13, 5}, {5, 10, 16}, {5, 10, -1}, {-1, 10, -1}, {16, 10, 16},
+                {-3, 30, 18}};
+        for (int[] p : next) {
+            Lattice own = new Lattice(wavy, new ChunkPos(Math.floorDiv(p[0], 16), Math.floorDiv(p[2], 16)), -4, 32);
+            assertEquals(own.at(p[0], p[1], p[2]), lattice.at(p[0], p[1], p[2]), 0.0, "at " + p[0] + "," + p[1] + "," + p[2]);
+        }
+    }
+
+    @Test
+    void positionsFurtherOutOrOutsideTheBandAreExact() {
+        Counting wavy = new Counting(pos -> Math.sin(pos.blockX() * 0.7) + Math.cos(pos.blockY() * 0.3 + pos.blockZ()));
+        ChunkPos chunk = new ChunkPos(0, 0);
+        Lattice lattice = new Lattice(wavy, chunk, -4, 32);
+        int[][] outside = {{20, 10, 5}, {-5, 10, 5}, {5, 10, 20}, {5, 10, -5}, {5, -5, 5}, {5, 32, 5}, {5, 100, 5}};
         for (int[] p : outside) {
             assertEquals(wavy.function.applyAsDouble(at(p[0], p[1], p[2])), lattice.applyAsDouble(at(p[0], p[1], p[2])), 0.0);
         }

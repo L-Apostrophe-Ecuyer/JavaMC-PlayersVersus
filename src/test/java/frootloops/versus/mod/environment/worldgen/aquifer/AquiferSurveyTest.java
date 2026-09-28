@@ -27,15 +27,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * A survey of the Players Versus water in vanilla's terrain pass, on this mod's real data, over chunks anywhere, on
  * coasts and along rivers:
  * <ul>
- *   <li>where water touches open air beside or below it, so it spills there, or stands as a wall of water until
- *   something updates it;</li>
- *   <li>the barrier stone: open terrain the aquifer fills to keep water from air, and how much of it touches no
- *   water;</li>
- *   <li>what a wall exactly where water meets air would take instead;</li>
+ *   <li>where water touches open air beside or below it, so it would spill there, or stand as a wall of water until
+ *   something updates it: nowhere, including once carvers open the blocks around it;</li>
+ *   <li>the barrier stone: open terrain the aquifer fills to keep water from air, and how much of it touches water;</li>
  *   <li>how much of each height is cave, now and with candidate height gradients for the cave entrances.</li>
  * </ul>
- * Neighbours are only looked at inside a chunk, so each chunk is surveyed on its own. It prints the numbers and
- * asserts only what the survey itself relies on.
+ * Neighbours are only looked at inside a chunk, so each chunk is surveyed on its own ({@code AquiferTerrainPassTest}
+ * looks across chunk borders).
  */
 class AquiferSurveyTest {
 
@@ -53,30 +51,17 @@ class AquiferSurveyTest {
 
     /**
      * Candidate height profiles for the caves: terms added to the entrances, each {from y, to y, from value, to value}
-     * of a {@code y_clamped_gradient}. The entrances' {@code (48 -> 36, 0 -> -0.165)} lowers everything under y 36, and
-     * {@code (28 -> 18, 0 -> 0.275)} lifts everything under y 18 again, which leaves the caves' low point at y 28..36.
-     * Each candidate replaces both: the first from a higher y or to a smaller value, the second so that the sum under
-     * y 18 stays 0.11, which keeps the caves there as they are.
+     * of a {@code y_clamped_gradient}. "before" is the profile until revision 6 of the refactor plan: the entrances'
+     * {@code (48 -> 38, 0 -> -0.155)} was {@code (48 -> 36, 0 -> -0.165)}, and {@code (28 -> 18, 0 -> 0.265)} was
+     * {@code (28 -> 18, 0 -> 0.275)}.
      */
     private static final Map<String, double[][]> CANDIDATES = candidates();
 
     private static Map<String, double[][]> candidates() {
         Map<String, double[][]> candidates = new LinkedHashMap<>();
         candidates.put("now", new double[0][]);
-        candidates.put("48..36 to -0.155", replacing(48, 36, -0.155));
-        candidates.put("48..38 to -0.155", replacing(48, 38, -0.155));
-        candidates.put("48..38 to -0.16", replacing(48, 38, -0.16));
-        candidates.put("48..40 to -0.15", replacing(48, 40, -0.15));
-        candidates.put("50..38 to -0.155", replacing(50, 38, -0.155));
+        candidates.put("before", new double[][]{{48, 36, 0.0, -0.165}, {48, 38, 0.0, 0.155}, {28, 18, 0.0, 0.275}, {28, 18, 0.0, -0.265}});
         return candidates;
-    }
-
-    /**
-     * The terms that turn {@code (48 -> 36, 0 -> -0.165)} into {@code (fromY -> toY, 0 -> low)}, and the rise under
-     * y 28 to match.
-     */
-    private static double[][] replacing(int fromY, int toY, double low) {
-        return new double[][]{{fromY, toY, 0.0, low}, {48, 36, 0.0, 0.165}, {28, 18, 0.0, 0.11 - low}, {28, 18, 0.0, -0.275}};
     }
 
     @Test
@@ -90,7 +75,6 @@ class AquiferSurveyTest {
                 .map(name -> withEntrancesDelta(finalDensity, delta(CANDIDATES.get(name)))).toList();
         Map<ChunkPos, String> chunks = surveyChunks(config);
         Tally tally = new Tally(names.size(), shape.minimumY(), shape.height());
-        WallRules walls = new WallRules();
         long[] unchangedMismatches = {0};
         for (Map.Entry<ChunkPos, String> entry : chunks.entrySet()) {
             ChunkPos chunk = entry.getKey();
@@ -114,12 +98,13 @@ class AquiferSurveyTest {
                 }
             });
             tally.add(blocks, entry.getValue());
-            walls.add(blocks);
         }
         tally.print(names);
-        walls.print();
         assertEquals(0, unchangedMismatches[0], "the survey's unchanged candidate differs from the router's final density");
         assertTrue(tally.openWater > 0 && tally.caveBlocks(0) > 0, "the survey found no water or no caves");
+        long leaking = tally.leaking[0][0] + tally.leaking[0][1] + tally.leaking[1][0] + tally.leaking[1][1];
+        assertEquals(0, leaking, "water blocks next to open air");
+        assertEquals(0, tally.wallAnywhere, "dry blocks water could flow into once carved");
     }
 
     /** {@code finalDensity} with {@code delta} added to the entrances its terrain reads. */
@@ -222,143 +207,6 @@ class AquiferSurveyTest {
         }
     }
 
-    /**
-     * Wall rules played out on the decisions above, which carvers get too: where each rule puts stone in open terrain,
-     * and what it leaves. A rule decides for every block that isn't water, from where the water is:
-     * <ol>
-     *   <li>now: the barrier bands, floodedness between the barrier and water thresholds;</li>
-     *   <li>exact: stone wherever water could flow in, from beside or above, and nowhere else;</li>
-     *   <li>that, and the bands within 2 blocks of water.</li>
-     * </ol>
-     */
-    private static final class WallRules {
-        private static final String[] NAMES = {"barrier bands (now)", "exact walls", "exact walls and bands within 2 blocks of water",
-                "exact walls and bands within 2 steps of water", "exact walls and bands within 3 steps of water"};
-        private static final int[][] FLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
-        private static final int[][] INFLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, 1, 0}};
-
-        int chunks;
-        /** Open terrain each rule fills with stone, by [rule][in a cave 0, under the sky 1]. */
-        final long[][] stone = new long[NAMES.length][2];
-        /** Stone with open water right above it and open dry air right below: a floor one block thick. */
-        final long[] thinFloors = new long[NAMES.length];
-        /** Open water with open dry air beside or below it. */
-        final long[] leaks = new long[NAMES.length];
-        /** Dry blocks water could flow into, from beside or above, if a carver opened them. */
-        final long[] carvableLeaks = new long[NAMES.length];
-
-        void add(ChunkBlocks blocks) {
-            this.chunks++;
-            int size = blocks.state.length, maxY = blocks.minY + blocks.height;
-            boolean[][] wall = new boolean[NAMES.length][size];
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    for (int y = blocks.minY; y < maxY; y++) {
-                        PvAquiferDecision carved = blocks.carvedAt(x, y, z);
-                        if (carved != PvAquiferDecision.AIR && !barrier(carved)) continue;
-                        int i = blocks.index(x, y, z);
-                        boolean inflow = this.near(blocks, x, y, z, INFLOW);
-                        wall[0][i] = barrier(carved);
-                        wall[1][i] = inflow;
-                        wall[2][i] = inflow || barrier(carved) && this.waterWithin(blocks, x, y, z, 2);
-                        wall[3][i] = inflow || barrier(carved) && this.waterWithinSteps(blocks, x, y, z, 2);
-                        wall[4][i] = inflow || barrier(carved) && this.waterWithinSteps(blocks, x, y, z, 3);
-                    }
-                }
-            }
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    int top = blocks.minY - 1;
-                    for (int y = maxY - 1; y >= blocks.minY; y--) {
-                        if (solid(blocks.at(x, y, z))) {
-                            top = y;
-                            break;
-                        }
-                    }
-                    for (int y = blocks.minY; y < maxY; y++) {
-                        int i = blocks.index(x, y, z);
-                        PvAquiferDecision decision = blocks.at(x, y, z);
-                        boolean open = decision != PvAquiferDecision.SOLID;
-                        for (int rule = 0; rule < NAMES.length; rule++) {
-                            if (open && wall[rule][i]) {
-                                this.stone[rule][y < top ? 0 : 1]++;
-                                if (y > blocks.minY && y + 1 < maxY && water(blocks.at(x, y + 1, z))
-                                        && this.dryAir(blocks, wall[rule], x, y - 1, z)) {
-                                    this.thinFloors[rule]++;
-                                }
-                            }
-                            if (open && water(decision)) {
-                                for (int[] offset : FLOW) {
-                                    if (this.dryAir(blocks, wall[rule], x + offset[0], y + offset[1], z + offset[2])) {
-                                        this.leaks[rule]++;
-                                        break;
-                                    }
-                                }
-                            }
-                            PvAquiferDecision carved = blocks.carvedAt(x, y, z);
-                            if ((carved == PvAquiferDecision.AIR || barrier(carved)) && !wall[rule][i] && this.near(blocks, x, y, z, INFLOW)) {
-                                this.carvableLeaks[rule]++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /** Open terrain the rule leaves dry: no water, no wall. */
-        private boolean dryAir(ChunkBlocks blocks, boolean[] wall, int x, int y, int z) {
-            if (!blocks.inside(x, y, z)) return false;
-            PvAquiferDecision decision = blocks.at(x, y, z);
-            return decision != PvAquiferDecision.SOLID && !water(decision) && decision != PvAquiferDecision.LAVA
-                    && !wall[blocks.index(x, y, z)];
-        }
-
-        /** Whether water (where the terrain is open or not) is at one of the offsets. */
-        private boolean near(ChunkBlocks blocks, int x, int y, int z, int[][] offsets) {
-            for (int[] offset : offsets) {
-                int nx = x + offset[0], ny = y + offset[1], nz = z + offset[2];
-                if (blocks.inside(nx, ny, nz) && water(blocks.carvedAt(nx, ny, nz))) return true;
-            }
-            return false;
-        }
-
-        /** Water within {@code steps} blocks along the axes, in any order (a Manhattan distance). */
-        private boolean waterWithinSteps(ChunkBlocks blocks, int x, int y, int z, int steps) {
-            for (int dx = -steps; dx <= steps; dx++) {
-                for (int dy = -steps + Math.abs(dx); dy <= steps - Math.abs(dx); dy++) {
-                    int reach = steps - Math.abs(dx) - Math.abs(dy);
-                    for (int dz = -reach; dz <= reach; dz++) {
-                        int nx = x + dx, ny = y + dy, nz = z + dz;
-                        if (blocks.inside(nx, ny, nz) && water(blocks.carvedAt(nx, ny, nz))) return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        private boolean waterWithin(ChunkBlocks blocks, int x, int y, int z, int reach) {
-            for (int dx = -reach; dx <= reach; dx++) {
-                for (int dy = -reach; dy <= reach; dy++) {
-                    for (int dz = -reach; dz <= reach; dz++) {
-                        int nx = x + dx, ny = y + dy, nz = z + dz;
-                        if (blocks.inside(nx, ny, nz) && water(blocks.carvedAt(nx, ny, nz))) return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        void print() {
-            double n = this.chunks;
-            for (int rule = 0; rule < NAMES.length; rule++) {
-                System.out.printf(Locale.ROOT, "[survey] walls, %s: stone in open terrain %.1f in caves and %.1f under the sky per chunk;"
-                                + " floors one block thick %.1f; water next to open dry air %.2f; dry blocks water could reach once carved %.1f%n",
-                        NAMES[rule], this.stone[rule][0] / n, this.stone[rule][1] / n, this.thinFloors[rule] / n, this.leaks[rule] / n,
-                        this.carvableLeaks[rule] / n);
-            }
-        }
-    }
-
     /** The survey's counts, over all chunks. */
     private static final class Tally {
         /** Where water can flow from a block: the four sides, then below. */
@@ -394,6 +242,8 @@ class AquiferSurveyTest {
                 barrierSeenUnneeded = new long[2][2];
         /** Open air in the sea band's reach (y -32..63), and solid blocks beside or above it, where a wall would read the aquifer. */
         long airInReach, solidNextToAir;
+        /** Barrier stone with open water right above it and open air right below: a floor one block thick. */
+        long thinFloors;
         // per candidate, by band: blocks under the highest solid block of the terrain now, and the open ones among them
         final long[][] candidateCovered, candidateCave;
         /** Per candidate: columns whose highest solid block now is open, a new way into the caves from the surface. */
@@ -499,6 +349,9 @@ class AquiferSurveyTest {
                         } else if (barrier(decision)) {
                             (cave ? this.barrierCave : this.barrierSky)[band]++;
                             kindCounts[4]++;
+                            if (y > this.minY && y + 1 < maxY && water(blocks.at(x, y + 1, z)) && blocks.at(x, y - 1, z) == PvAquiferDecision.AIR) {
+                                this.thinFloors++;
+                            }
                             if (interior) {
                                 int type = decision == PvAquiferDecision.SEA_BARRIER ? 0 : 1;
                                 this.barrierTotal[type][where]++;
@@ -564,8 +417,8 @@ class AquiferSurveyTest {
             System.out.println("[survey] " + this.chunks + " chunks " + this.kinds + "; per chunk:");
             System.out.printf(Locale.ROOT, "[survey] open water: sea %.0f in caves, %.0f under the sky; basin %.0f in caves, %.0f under the sky%n",
                     sum(this.caveSea) / n, sum(this.skySea) / n, sum(this.caveBasin) / n, sum(this.skyBasin) / n);
-            System.out.printf(Locale.ROOT, "[survey] barrier stone (open terrain the aquifer fills): %.0f in caves, %.0f under the sky%n",
-                    sum(this.barrierCave) / n, sum(this.barrierSky) / n);
+            System.out.printf(Locale.ROOT, "[survey] barrier stone (open terrain the aquifer fills): %.1f in caves, %.1f under the sky;"
+                    + " floors one block thick between water and open air %.1f%n", sum(this.barrierCave) / n, sum(this.barrierSky) / n, this.thinFloors / n);
             System.out.printf(Locale.ROOT, "[survey] water next to open air (beside it or above it): sea %.1f (%.1f ticking), basin %.1f (%.1f ticking);"
                             + " %.1f pairs beside, %.1f above; the air: %.1f blocks in caves, %.1f under the sky%n",
                     (this.leaking[0][0] + this.leaking[0][1]) / n, this.leaking[0][1] / n, (this.leaking[1][0] + this.leaking[1][1]) / n,

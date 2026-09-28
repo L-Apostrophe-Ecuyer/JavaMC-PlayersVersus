@@ -18,7 +18,9 @@ import java.util.function.ToDoubleFunction;
  * it. That's why the aquifer puts F's and S's smooth inputs here and evaluates F and S themselves per block.
  *
  * <p>Lattice points sit on absolute multiples of the step, so every caller that asks about a block (the terrain pass,
- * carvers, heightmap probes) gets the same value, and so does the neighbouring chunk along a shared border.
+ * carvers, heightmap probes) gets the same value, and so does the neighbouring chunk along a shared border. The lattice
+ * reaches one cell past each side of the chunk, so a block just outside it (the aquifer looks at its blocks'
+ * neighbours) gets what the neighbouring chunk's own lattice gives there.
  *
  * <p>Not thread-safe; each instance belongs to one aquifer, which belongs to one chunk noise sampler.
  */
@@ -37,7 +39,11 @@ public final class Lattice implements ToDoubleFunction<DensityFunction.NoisePos>
     }
 
     static final int STEP_XZ = 4;
-    private static final int SIDE = 16 / STEP_XZ + 1;
+    /** Cells the lattice reaches past each side of the chunk. */
+    private static final int BORDER = 1;
+    private static final int SIDE = 16 / STEP_XZ + 1 + 2 * BORDER;
+    /** The blocks the lattice interpolates, relative to the chunk's start: this one included, that one not. */
+    private static final int FIRST = -BORDER * STEP_XZ, END = 16 + BORDER * STEP_XZ;
 
     private final Source source;
     private final int originX, originZ, minY, stepY, levels;
@@ -46,7 +52,8 @@ public final class Lattice implements ToDoubleFunction<DensityFunction.NoisePos>
     private int samples;
 
     /**
-     * Covers the chunk's 16 x 16 columns and y from {@code minY} up to {@code maxY}, rounded out to the lattice.
+     * Covers the chunk's 16 x 16 columns, one cell around them, and y from {@code minY} up to {@code maxY}, rounded
+     * out to the lattice.
      *
      * @param stepY vertical distance between lattice points; the terrain pass uses the noise settings' cell height
      */
@@ -73,18 +80,21 @@ public final class Lattice implements ToDoubleFunction<DensityFunction.NoisePos>
         return this.at(pos.blockX(), pos.blockY(), pos.blockZ());
     }
 
-    /** The interpolated value at a block; exact outside the chunk or band (nothing in the game asks there). */
+    /**
+     * The interpolated value at a block; exact beyond the chunk's border cells or outside the band (nothing in the
+     * game asks there).
+     */
     public double at(int blockX, int blockY, int blockZ) {
         int x = blockX - this.originX;
         int y = blockY - this.minY;
         int z = blockZ - this.originZ;
-        if (x < 0 || x > 15 || z < 0 || z > 15 || y < 0 || y >= (this.levels - 1) * this.stepY) {
+        if (x < FIRST || x >= END || z < FIRST || z >= END || y < 0 || y >= (this.levels - 1) * this.stepY) {
             return this.source.sample(blockX, blockY, blockZ);
         }
-        int ix = x / STEP_XZ, iy = y / this.stepY, iz = z / STEP_XZ;
-        double deltaX = (x % STEP_XZ) / (double) STEP_XZ;
+        int ix = Math.floorDiv(x, STEP_XZ), iy = y / this.stepY, iz = Math.floorDiv(z, STEP_XZ);
+        double deltaX = Math.floorMod(x, STEP_XZ) / (double) STEP_XZ;
         double deltaY = (y % this.stepY) / (double) this.stepY;
-        double deltaZ = (z % STEP_XZ) / (double) STEP_XZ;
+        double deltaZ = Math.floorMod(z, STEP_XZ) / (double) STEP_XZ;
         double x0z0 = MathHelper.lerp(deltaY, this.point(ix, iy, iz), this.point(ix, iy + 1, iz));
         double x1z0 = MathHelper.lerp(deltaY, this.point(ix + 1, iy, iz), this.point(ix + 1, iy + 1, iz));
         double x0z1 = MathHelper.lerp(deltaY, this.point(ix, iy, iz + 1), this.point(ix, iy + 1, iz + 1));
@@ -97,15 +107,16 @@ public final class Lattice implements ToDoubleFunction<DensityFunction.NoisePos>
         int x = blockX - this.originX;
         int y = blockY - this.minY;
         int z = blockZ - this.originZ;
-        if (x < 0 || x > 16 || z < 0 || z > 16 || y < 0 || y > (this.levels - 1) * this.stepY
-                || x % STEP_XZ != 0 || y % this.stepY != 0 || z % STEP_XZ != 0) {
+        if (x < FIRST || x > END || z < FIRST || z > END || y < 0 || y > (this.levels - 1) * this.stepY
+                || Math.floorMod(x, STEP_XZ) != 0 || y % this.stepY != 0 || Math.floorMod(z, STEP_XZ) != 0) {
             return this.source.sample(blockX, blockY, blockZ);
         }
-        return this.point(x / STEP_XZ, y / this.stepY, z / STEP_XZ);
+        return this.point(Math.floorDiv(x, STEP_XZ), y / this.stepY, Math.floorDiv(z, STEP_XZ));
     }
 
+    /** The lattice point at column {@code ix, iz} (-1 for the border cell before the chunk) and level {@code iy}. */
     private double point(int ix, int iy, int iz) {
-        int index = ix * SIDE + iz;
+        int index = (ix + BORDER) * SIDE + (iz + BORDER);
         double[] column = this.columns[index];
         if (column == null) {
             column = new double[this.levels];

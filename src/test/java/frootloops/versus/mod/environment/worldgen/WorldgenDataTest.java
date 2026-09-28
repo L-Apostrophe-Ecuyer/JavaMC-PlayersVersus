@@ -57,8 +57,9 @@ class WorldgenDataTest {
     }
 
     /**
-     * What today's aquifer would place in open space (as for a carved block) around the smoke test's region, by y band,
-     * and what one raw sample of each input costs. A reference for the lattice aquifer of Phase 2.
+     * What each position's own floodedness says around the smoke test's region (water, a barrier band or dry, before
+     * the walls), by y band, and what one raw sample of each input costs. A reference for the lattice aquifer of
+     * Phase 2.
      */
     @Test
     void aquiferBaseline() {
@@ -72,7 +73,7 @@ class WorldgenDataTest {
                 for (int z = 1408; z < 1808; z += 4) {
                     for (int y = band[0]; y <= band[1]; y += 2) {
                         DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
-                        PvAquiferDecision decision = PvAquiferRules.decide(pos, 0.0, false, router.fluidLevelFloodednessNoise()::sample, router.fluidLevelSpreadNoise()::sample);
+                        PvAquiferDecision decision = PvAquiferRules.atPosition(pos, router.fluidLevelFloodednessNoise()::sample, router.fluidLevelSpreadNoise()::sample);
                         counts.merge(decision, 1, Integer::sum);
                         total++;
                     }

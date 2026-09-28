@@ -20,18 +20,20 @@ public enum PvAquiferDecision {
     /** Same, but close to the threshold, so the water gets a fluid tick and can spill into openings. */
     SEA_WATER_TICKING(Blocks.WATER.getDefaultState(), true),
     /**
-     * Between the barrier and water thresholds: a wall that keeps sea water out of caves. Solid, like vanilla's
-     * barriers: the terrain pass fills it with an ore vein or the default block, and carvers leave it alone.
+     * A wall that keeps sea water out of open space: where sea water could flow in, or the sea's barrier band
+     * (floodedness between the barrier and water thresholds) near water. {@link PvAquiferRules#atPosition} names the
+     * band itself with it. Solid, like vanilla's barriers: the terrain pass fills it with an ore vein or the default
+     * block, and carvers leave it alone.
      */
     SEA_BARRIER(null, false),
     /** Water pooled in a low cave basin. */
     BASIN_WATER(Blocks.WATER.getDefaultState(), false),
     BASIN_WATER_TICKING(Blocks.WATER.getDefaultState(), true),
-    /** Wall around a cave basin; solid like {@link #SEA_BARRIER}. */
+    /** The same for basin water, and the basins' barrier band; solid like {@link #SEA_BARRIER}. */
     BASIN_BARRIER(null, false),
     /** At or above sea level: open space stays air. */
     AIR_ABOVE_SEA(Blocks.AIR.getDefaultState(), false),
-    /** No rule placed a fluid or barrier. */
+    /** No rule placed a fluid or barrier; from {@link PvAquiferRules#atPosition}, no water or band there. */
     AIR(Blocks.AIR.getDefaultState(), false);
 
     /** The block to place, or {@code null} for solid: whatever the terrain pass or the existing block puts there. */
