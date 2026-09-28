@@ -38,7 +38,7 @@ class TerrainPortTest {
     private static final List<String> PORTED = List.of("final_density", "depth", "caves/entrances", "caves/noodle");
     private static final String AS_VANILLA_TYPES = "final_density as vanilla types";
     /** Every height where a band or gradient of the formulas starts or ends. */
-    private static final int[] EDGES = {-64, -60, -52, -40, -32, -16, -10, -8, -4, 0, 8, 16, 18, 20, 28, 30, 32, 36, 40, 44,
+    private static final int[] EDGES = {-64, -60, -52, -40, -32, -16, -10, -8, -4, 0, 8, 16, 18, 20, 28, 30, 32, 36, 38, 40, 44,
             48, 50, 54, 56, 66, 68, 72, 74, 90, 96, 120, 128, 240, 256};
     private static final AquiferSampler.FluidLevelSampler NO_FLUID_LEVELS = (x, y, z) -> {
         throw new UnsupportedOperationException("not needed");

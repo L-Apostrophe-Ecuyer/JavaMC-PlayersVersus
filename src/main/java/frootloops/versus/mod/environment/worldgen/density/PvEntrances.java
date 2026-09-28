@@ -13,6 +13,10 @@ import static frootloops.versus.mod.environment.worldgen.density.DensityOps.grad
  * in y 0..43 (the old {@code caves/entrances} and {@code ramen_cave_carver}), negative where they're open. The terrain
  * reads it at every cell corner and the aquifer on its lattice, so the JSON wraps it in {@code cache_once}.
  *
+ * <p>The height terms put the most caves at y 28..38 (the low of {@code (48 -> 38, 0 -> -0.155)}, which
+ * {@code (28 -> 18, 0 -> 0.265)} lifts back under y 28). Until revision 6 of the refactor plan, the low was -0.165 and
+ * reached from y 36, and the lift 0.275: the same caves under y 18, a few more at y 36..47, fewer at y 16..35.
+ *
  * <p>The tunnels (four noises and the roughness) are skipped where the entrance term is already below anything they
  * could reach, as vanilla's {@code min} does.
  *
@@ -49,8 +53,8 @@ public record PvEntrances(DensityFunction continents, DensityFunction spaghettiR
     /** The ramen shape's largest value: its three gradients peak at 1, 1.4 and 1.2. */
     private static final double RAMEN_SHAPE_MAX = 1.0 * 1.4 * 1.2;
     /** The sum of the height terms' lowest and highest values. */
-    private static final double HEIGHT_TERMS_MIN = 0.0 + -0.1 + -0.165 + 0.0 + -0.2 + 0.0;
-    private static final double HEIGHT_TERMS_MAX = 0.15 + 0.025 + 0.0 + 0.275 + 0.0 + 0.215;
+    private static final double HEIGHT_TERMS_MIN = 0.0 + -0.1 + -0.155 + 0.0 + -0.2 + 0.0;
+    private static final double HEIGHT_TERMS_MAX = 0.15 + 0.025 + 0.0 + 0.265 + 0.0 + 0.215;
 
     public PvEntrances(DensityFunction continents, DensityFunction spaghettiRoughness, DensityFunction ramenRidge,
                        DensityFunction ramenNoodle, DensityFunction caveEntrance, DensityFunction spaghetti1,
@@ -75,7 +79,7 @@ public record PvEntrances(DensityFunction continents, DensityFunction spaghettiR
         double ramen = yValue >= 0.0 && yValue < 44.0 ? this.ramen(pos, y) : 0.0;
         double base = Math.min(this.continents.sample(pos), 0.1) * -0.1
                 + ((gradient(y, 96, 72, 0.15, 0.0) + gradient(y, 66, 56, -0.1, 0.025))
-                + (gradient(y, 48, 36, 0.0, -0.165) + (gradient(y, 28, 18, 0.0, 0.275)
+                + (gradient(y, 48, 38, 0.0, -0.155) + (gradient(y, 28, 18, 0.0, 0.265)
                 + (gradient(y, -16, -40, 0.0, -0.2) + gradient(y, -40, -60, 0.0, 0.215)))));
         double entrance = (this.caveEntrance.sample(pos) + 0.37) + gradient(y, -10, 30, 0.3, 0.0);
         double caves = entrance < this.tunnelsMin ? entrance : Math.min(entrance, this.tunnels(pos));

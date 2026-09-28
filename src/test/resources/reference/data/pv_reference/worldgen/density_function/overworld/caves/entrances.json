@@ -44,9 +44,9 @@
                 "argument1": {
                   "type": "minecraft:y_clamped_gradient",
                   "from_y": 48,
-                  "to_y": 36,
+                  "to_y": 38,
                   "from_value": 0,
-                  "to_value": -0.165
+                  "to_value": -0.155
                 },
                 "argument2": {
                   "type": "minecraft:add",
@@ -55,7 +55,7 @@
                     "from_y": 28,
                     "to_y": 18,
                     "from_value": 0,
-                    "to_value": 0.275
+                    "to_value": 0.265
                   },
                   "argument2": {
                     "type": "minecraft:add",
