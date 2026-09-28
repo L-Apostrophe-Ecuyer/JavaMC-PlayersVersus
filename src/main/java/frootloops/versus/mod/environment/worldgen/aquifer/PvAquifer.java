@@ -70,6 +70,8 @@ public final class PvAquifer implements AquiferSampler {
     private final ToDoubleFunction<DensityFunction.NoisePos> floodedness = this::floodedness;
     private final ToDoubleFunction<DensityFunction.NoisePos> spread = this::spread;
     private final PvAquiferRules.Positions atPosition = this::atPosition;
+    /** Blocks whose own decision was computed, for tests and the benchmark. */
+    private int computedPositions;
 
     /**
      * Only read right after {@link #apply} returned a fluid, and every fluid decision sets it, so it never leaks a
@@ -132,6 +134,7 @@ public final class PvAquifer implements AquiferSampler {
         if (stored != 0) return DECISIONS[stored - 1];
         PvAquiferDecision decision = PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread);
         levels[level] = (byte) (decision.ordinal() + 1);
+        this.computedPositions++;
         return decision;
     }
 
@@ -172,6 +175,11 @@ public final class PvAquifer implements AquiferSampler {
     /** Lattice points sampled so far (depth, continentalness, entrances, basin inner), for tests and the benchmark. */
     public int[] latticeSamples() {
         return new int[]{this.depth.samples(), this.continentalness.samples(), this.entrances.samples(), this.basinInner.samples()};
+    }
+
+    /** Blocks whose own decision was computed so far (each once), for tests and the benchmark. */
+    public int computedPositions() {
+        return this.computedPositions;
     }
 
     /** A block position to sample the noises at, set for each block {@link #atPosition} computes. */

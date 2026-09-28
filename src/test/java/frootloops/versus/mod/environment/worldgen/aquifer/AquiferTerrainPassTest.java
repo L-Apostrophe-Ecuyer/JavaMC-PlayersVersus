@@ -215,6 +215,75 @@ class AquiferTerrainPassTest {
         return new int[]{water, borderPairs};
     }
 
+    /**
+     * What the aquifer costs in the terrain pass, for the open blocks the pass asks about, in three ways: each block's
+     * own floodedness only (the rule before walls: a band is stone), plus the walls where water could flow in, plus the
+     * bands within 2 steps of water (the rule in the code). Each gets fresh passes over the same chunks; the differences
+     * are the walls'. Also counts the lattice points and the blocks whose own floodedness each needed.
+     */
+    @Test
+    void aquiferCost() {
+        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        List<ChunkPos> chunks = new ArrayList<>();
+        for (ChunkPos center : List.of(new ChunkPos(100, 100), coastalChunk(config))) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) chunks.add(new ChunkPos(center.x + dx, center.z + dz));
+            }
+        }
+        String[] variants = {"own floodedness only", "and walls where water flows in", "and bands within 2 steps (the code)"};
+        long[] nanos = new long[variants.length];
+        long[][] counts = new long[variants.length][3];  // lattice points, blocks computed, open blocks asked about
+        double[] sink = {0};
+        for (int round = 0; round < 4; round++) {  // rounds 0 and 1 warm up the JIT
+            for (int v = 0; v < variants.length; v++) {
+                int variant = v;
+                long start = System.nanoTime();
+                for (ChunkPos chunk : chunks) {
+                    TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
+                    PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer());
+                    DensityFunction finalDensity = pass.register(config.getNoiseRouter().finalDensity());
+                    long[] asked = {0};
+                    pass.run((x, y, z, pos) -> {
+                        double density = finalDensity.sample(pos);
+                        if (density > 0.0) return;
+                        asked[0]++;
+                        PvAquiferDecision decision = switch (variant) {
+                            case 0 -> aquifer.atPosition(x, y, z);
+                            case 1 -> {
+                                PvAquiferDecision own = aquifer.atPosition(x, y, z);
+                                yield PvAquiferRules.isWater(own) || y >= 64 ? own : inflowWall(aquifer, x, y, z);
+                            }
+                            default -> aquifer.decide(pos, density, false);
+                        };
+                        sink[0] += decision.ordinal();
+                    });
+                    if (round >= 2) {
+                        for (int points : aquifer.latticeSamples()) counts[variant][0] += points;
+                        counts[variant][1] += aquifer.computedPositions();
+                        counts[variant][2] += asked[0];
+                    }
+                }
+                if (round >= 2) nanos[variant] += System.nanoTime() - start;
+            }
+        }
+        double runs = 2.0 * chunks.size();
+        for (int v = 0; v < variants.length; v++) {
+            System.out.printf(Locale.ROOT, "[terrain pass] aquifer cost, %s: %.2f ms per chunk (the pass with its reflection included);"
+                            + " %.0f lattice points, %.0f blocks' own floodedness computed, %.0f open blocks asked about%n",
+                    variants[v], nanos[v] / 1e6 / runs, counts[v][0] / runs, counts[v][1] / runs, counts[v][2] / runs);
+        }
+        assertTrue(sink[0] > 0);
+    }
+
+    private static PvAquiferDecision inflowWall(PvAquifer aquifer, int x, int y, int z) {
+        int[][] inflow = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, 1, 0}};
+        for (int[] offset : inflow) {
+            if (PvAquiferRules.isWater(aquifer.atPosition(x + offset[0], y + offset[1], z + offset[2]))) return PvAquiferDecision.SEA_BARRIER;
+        }
+        return PvAquiferDecision.AIR;
+    }
+
     /** The first chunk found on a coast (vanilla's coast is continentalness -0.19..-0.11), in a fixed search. */
     private static ChunkPos coastalChunk(NoiseConfig config) {
         DensityFunction continents = config.getNoiseRouter().continents();
