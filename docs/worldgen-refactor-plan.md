@@ -1,4 +1,4 @@
-# Players Versus world type: worldgen revamp plan (revision 3)
+# Players Versus world type: worldgen revamp plan (revision 4)
 
 **Target:** Minecraft 1.21.10, Yarn `1.21.10+build.2`, Fabric Loader 0.17.3, Loom 1.11, Java 21.
 
@@ -8,9 +8,9 @@
 2. The revamp is **its own world type**. Vanilla world types behave as usual.
 3. **Fix the quirks.**
 
-**Status:** the groundwork is in (Section 4); everything else is still a plan. Revision 2 (git history) described the goals. This revision adds verified vanilla APIs, pseudocode for every component, and the current density functions written out as formulas (Appendix A).
+**Status:** the groundwork (Section 4), Phase 1 (the biome source, Section 6.3) and Phase 2 (the aquifer, Section 6.2) are in, and have run on a real server: every commit tagged `[smoke]` generates the same region with a vanilla world and a Players Versus world, alone and next to C2ME and Lithium, reopens a world made by an older build, and compares timings on one runner (Section 8). Phases 3 to 5 are still a plan. Revision 4 replaces predictions with measurements wherever a run or a test could check them (Section 2.4); several predictions were wrong, among them what happens to existing worlds (Section 10, question 3). Revision 3 (git history) added the verified APIs, the pseudocode and the formulas in Appendix A.
 
-**How vanilla facts were checked.** Class, method and constructor signatures were checked against the Yarn 1.21.10 mappings (`FabricMC/yarn`, branch `1.21.10`). Appendix B lists them. Mappings don't contain method bodies, so behavior claims (for example the stale nested interpolator behind Q1) are still marked **[measure]**. The `/pvwg bench` metrics measure them directly.
+**How vanilla facts were checked.** Names and signatures come from the Yarn 1.21.10 mappings (Appendix B). Mappings don't say what code does, and don't reliably say whether a member is public: `VanillaBiomeParameters.writeOverworldBiomeParameters` turned out to be protected, which only the compiler caught. So behavior is checked by running it: unit tests run Minecraft's code under Fabric Loader (`./gradlew test`), and the smoke workflow runs a dedicated server. Claims nothing has measured yet are still marked **[measure]**.
 
 ---
 
@@ -22,19 +22,20 @@
 |---|---|---|
 | `ChunkNoiseSamplerMixin`: one gated `@WrapOperation` hook for aquifer and ore veins | `AquifersMixin` (`height == 336`), `OreVeinMixin` (global `@Overwrite`) | **done** |
 | `/pvwg probe`, `/pvwg bench`, `runWorldgenSmoke`, `worldgen-smoke` workflow | (nothing: debugging was guesswork) | **done** |
-| `PvBiomeSource` + `PvBiomeLayout`: layout rules as data, disjoint boxes | `VanillaBiomeParametersOverworldMixin` (global) | 1 |
-| `PvAquifer` v2: lattice-cached F and S, one answer for every caller | per-block evaluation of the JSON trees | 2 |
+| `PvBiomeSource` + `PvBiomeLayout`: layout rules as data, disjoint boxes | `VanillaBiomeParametersOverworldMixin` (global) | **done** |
+| Aquifer rules: solid barriers, fluid ticks only near edges, sea level 64 | stone barriers placed by carvers, every basin block ticking | **2a, done** |
+| `PvAquifer` v2: F and S in Java per block, their smooth inputs on the terrain pass's cells; one answer for every caller | per-block evaluation of the JSON trees, which gave carvers other values than the terrain pass | **2b, done** |
 | `PvRouter` + kernels: terrain density functions in Java | 18 hand-written density-function JSON files | 3 |
 | `PvChunkGenerator` + `PvSettings` + `PvSurfaceRules`: all settings in code | `noise_settings/overworld.json` (41 KB of surface rules) | 4 |
 
-**Expected effect.** These are static estimates; `/pvwg bench` measures the real numbers.
+**Expected effect.** Static estimates, with measurements where a phase is done (Phase 2a against Phase 2b on one runner, ms per chunk). The measured baseline is in Section 2.4: Players Versus generation took 1.3 to 1.6 times as long as vanilla on the same region; after Phase 2 it takes 1.27 to 1.29 times as long.
 
 | Work | Today | After |
 |---|---|---|
-| Aquifer, terrain pass | ~48 octave samples per open block (y −31…63): 60–400k per chunk | 5–35k per chunk, from lattice points only |
-| Aquifer, carvers | ~100–250 per carved block | ~0 extra (same lattice) |
+| Aquifer, terrain pass | ~48 octave samples per open block (y −31…63): 60–400k per chunk | at most 1,125 lattice points per chunk, plus the surface and ramen noises per block. **Measured:** `noise` 35.5 → 25.9 (vanilla 19.7) |
+| Aquifer, carvers | ~100–250 per carved block | the chunk's lattices, already filled. **Measured:** `carvers` 2.34 → 1.07 (vanilla 1.06) |
 | Terrain corner pass | ~130–180k per chunk | 25–40% less (no duplicate `sloped_cheese`, per-column river/jagged noise) |
-| Worldgen mixins | 6, two of which changed vanilla world types | 1 (plus the 3 default-preset mixins, depending on Section 10, question 2) |
+| Worldgen mixins | 6, three of which changed vanilla world types | 1 (plus the 3 default-preset mixins, depending on Section 10, question 2). Today: `ChunkNoiseSamplerMixin` and the default-preset mixins, which now chain with other mods (`@ModifyExpressionValue`, `@ModifyArg`) |
 
 ---
 
@@ -45,16 +46,15 @@
 ```mermaid
 flowchart TD
     WP["world_preset players-versus:better_world ('Improved')<br/>listed in the World Type button, still forced as default by 3 mixins"] --> GEN["NoiseChunkGenerator (overworld)"]
-    GEN --> BS["MultiNoiseBiomeSource<br/>preset = minecraft:overworld"]
-    GEN --> SET["noise_settings players-versus:overworld<br/>min_y -64, height 336, sea_level 63"]
-    VBP["VanillaBiomeParameters<br/>(vanilla overworld list)"] --> BS
-    BMIX["VanillaBiomeParametersOverworldMixin<br/>still rewrites the list for EVERY preset (Phase 1 removes it)"] -.->|injects| VBP
+    GEN --> BS["PvBiomeSource, type players-versus:overworld<br/>PvBiomeLayout: vanilla's list cut into disjoint boxes"]
+    GEN --> SET["noise_settings players-versus:overworld<br/>min_y -64, height 336, sea_level 64"]
+    VBP["VanillaBiomeParameters<br/>(vanilla overworld list, unchanged)"] -->|read once per world| BS
     SET --> ROUTER["noise router: PV density functions (JSON)<br/>fluid_level_floodedness = players-versus:aquifer_floodedness"]
     SET --> SURF["surface_rule (JSON, 41 KB)"]
     ROUTER --> CNS["ChunkNoiseSampler<br/>(one per chunk, one per heightmap probe)"]
     CNS -->|"ChunkNoiseSamplerMixin, only for PV settings"| AQ["PvAquifer + PvAquiferRules"]
     CNS -->|"same hook"| ORE["PvOreVeins"]
-    AQ --> NOISE["NOISE status: water / lava / stone barriers"]
+    AQ --> NOISE["NOISE status: water / lava / solid barriers"]
     AQ --> CARV["CARVERS status: fluid for each carved block"]
     ROUTER -->|"temperature, vegetation, continents,<br/>erosion, depth, ridges"| BIO["BIOMES status: biome per 4x4x4 cell"]
     BS --> BIO
@@ -66,15 +66,15 @@ flowchart TD
 |---|---|---|
 | `final_density` | vanilla shape + river carving + ramen caves; `spaghetti_2d` replaced by the constant 1 | terrain (NOISE), heightmap probes |
 | `depth` | vanilla depth + `river_carver_depth` | **biome selection** (the cave-biome depth bands) and the aquifer |
-| `fluid_level_floodedness` | `players-versus:aquifer_floodedness` wrapping the PV sea/river floodedness F′. **Its presence marks a PV generator.** | `PvAquifer`, the hook's gate |
-| `fluid_level_spread` | `cave_basins_y24` (S) | `PvAquifer` |
+| `fluid_level_floodedness` | `players-versus:aquifer_floodedness`: F, computed in Java from the inputs its JSON names (Phase 2b; before, it wrapped the JSON F). **Its presence marks a PV generator.** | `PvAquifer` (its inputs), the hook's gate, `/pvwg probe` |
+| `fluid_level_spread` | `players-versus:aquifer_spread`: S, likewise (before: the JSON `cave_basins_y24`) | `PvAquifer` (its inputs), `/pvwg probe` |
 | `barrier`, `lava` | vanilla-like | unused while the PV aquifer is active |
 | `preliminary_surface_level` | vanilla formula (no rivers) | surface rule `above_preliminary_surface`, vanilla internals |
 | `continents`, `erosion`, `ridges`, `temperature`, `vegetation`, `vein_*` | vanilla | biomes, ore veins |
 
 ### 1.3 The aquifer rules (`PvAquiferRules.decide`)
 
-For a block whose final density is ≤ 0, and for every carved block (carvers pass density 0 **[measure]**). The first matching rule wins:
+For a block whose final density is ≤ 0, and for every carved block (carvers pass density 0, and leave the block alone when the answer is solid). The first matching rule wins:
 
 | # | Condition | Result (`PvAquiferDecision`) |
 |---|---|---|
@@ -82,35 +82,36 @@ For a block whose final density is ≤ 0, and for every carved block (carvers pa
 | 2 | y below the lava level (y < −54) | `LAVA` |
 | 3 | y ≥ `SEA_LEVEL` (64) | `AIR_ABOVE_SEA` |
 | 4a | −32 < y and F′ > 0.34 | `SEA_WATER`, or `SEA_WATER_TICKING` if F′ < 0.54 |
-| 4b | −32 < y and F′ > 0.0001 + max(0, y − 60)·0.015 | `SEA_BARRIER` (stone) |
-| 5a | −4 < y < 32 and S > tW(y), where tW = 0.5 for y > 8, else 0.5 − (8 − y)·0.08 | `BASIN_WATER`, or `BASIN_WATER_TICKING` if S < tW + 0.2 or density < 0.08 (always true: Q8) |
-| 5b | −4 < y < 23 and S > tB(y), where tB = 0.0001 for y < 12, else (y − 12)·0.06 | `BASIN_BARRIER` (stone) |
+| 4b | −32 < y and F′ > 0.0001 + max(0, y − 60)·0.015 | `SEA_BARRIER` (solid: the terrain pass fills it with ore veins or the default block; carvers skip it) |
+| 5a | −4 < y < 32 and S > tW(y), where tW = 0.5 for y > 8, else 0.5 − (8 − y)·0.08 | `BASIN_WATER`, or `BASIN_WATER_TICKING` if S < tW + 0.2 |
+| 5b | −4 < y < 23 and S > tB(y), where tB = 0.0001 for y < 12, else (y − 12)·0.06 | `BASIN_BARRIER` (solid) |
 | 6 | otherwise | `AIR` |
 
 All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans are water connected to the sea surface and walled off from caves by stone; caves above y 32 stay dry; low caves get basins with their own water; the bottom is lava. That is what the revamp keeps.
 
-### 1.4 Biome placement (still the mixin until Phase 1)
+### 1.4 Biome placement (`PvBiomeLayout`, since Phase 1)
 
-Vanilla's `writeBiomeParameters` emits two entries per surface slice (depth 0.0 and 1.0). The mixin cancels every call and emits, in order:
+`PvBiomeLayout.build()` reads vanilla's overworld list once per world: 7,593 entries, which are 3,795 surface slices at depth 0, their copies at depth 1, and lush caves, dripstone caves and the deep dark (a unit test checks this shape). Each surface slice goes through these rules in order. A rule cuts the pieces of the slice that still have the original biome into the part inside its region, which gets the transition biome, and the rest:
 
-1. a **mountain transition** where erosion < −0.475 and continentalness > 0.03 (skipping river-valley slices), at depth 0 and 0.1;
-2. a **frozen transition** for slices crossing temperature −0.55 or −0.375;
-3. **peak fixes**: grove/snowy slopes above T 0.145, stony peaks below T 0.235;
-4. a **humid transition** for slices crossing humidity 0.275 or 0.35;
-5. the **original biome** with narrowed ranges, at depth 0 only (vanilla's depth-1.0 copy is dropped, so the underground belongs to PV cave biomes);
-6. a **surface-cave biome** at depth 0.1–0.25 (frosted, desert-creeper or badlands cave).
+1. **mountainside**: erosion < −0.475 and continentalness > 0.03, except slices whose weirdness lies within ±0.3 (river valleys);
+2. **peak-warm**: grove and snowy slopes above temperature 0.145 become taiga and windswept hills;
+3. **peak-cold**: stony peaks below temperature 0.235 become windswept gravelly hills;
+4. **frozen**: temperature −0.55..−0.375;
+5. **humid**: humidity 0.275..0.35.
 
-It also replaces vanilla's lush and dripstone entries and appends 13 PV cave entries (Section 6.3 turns all of these into one table). Boxes overlap in several places and leave holes in others (Q4), so today the result depends on R-tree tie-breaking.
+The original biome keeps the remaining pieces, all at depth 0. The depth-1 copies are dropped, so the underground belongs to the cave biomes. Each remaining piece also gets its surface-cave biome at depth 0.1–0.25 (frosted, desert-creeper or badlands cave). Vanilla's lush and dripstone entries are replaced as before, and the 13 Players Versus cave entries are appended. The result has 6,293 entries, 5,400 of them at the surface. Unit tests check that the pieces of each slice don't overlap and add up to the slice.
+
+The deleted mixin emitted the same rules, but built each transition from the whole slice and narrowed the original along one axis at most, so its boxes overlapped in places and left holes in others (Q4), and results depended on the search tree's tie-breaking. A test-only copy of it (`OldBiomeLayout`) lets the tests measure what changed: 98.5% of random climate points at the surface keep their biome, and 100% (up to ties) from depth 0.3 down.
 
 ### 1.5 Evaluation contexts (why small JSON edits ripple everywhere)
 
 | Context | Who | `interpolated` | `flat_cache` | `cache_once` |
 |---|---|---|---|---|
-| Corner pass | `ChunkNoiseSampler` filling 5×5×43 cell corners | child at the corner; a *nested* interpolator reached through `sample()` returns stale state **[measure]** | exact at corners | per corner |
+| Corner pass | `ChunkNoiseSampler` filling 5×5×43 cell corners | child at the corner; a *nested* interpolator reached through `sample()` returns the last value it interpolated, 0 before the first block (Q1, measured) | exact at corners | per corner |
 | Block loop | aquifer, ore veins, noodle | trilinear from corners | snapped to 4×4 column | per block |
 | Foreign position | carvers, `NoiseConfig`, structure/biome lookups | **raw** child | snapped inside the chunk | none |
 
-`caves/entrances` feeds all three contexts, and `depth` feeds terrain, biomes and water. The same aquifer inputs therefore mean one thing in the terrain pass and another for carvers. Phase 2 removes that split.
+`caves/entrances` feeds all three contexts, and `depth` feeds terrain, biomes and water. The same aquifer inputs therefore meant one thing in the terrain pass and another for carvers. Since Phase 2b the aquifer reads its smooth inputs from its own lattice, the same for every caller.
 
 ---
 
@@ -130,31 +131,59 @@ Unit: *octave samples*, meaning one single-octave Perlin sample (Appendix C).
 | P6 | Biome lookup | small | bigger list, same R-tree |
 | P7 | 29-octave beach noises | small | once per column per rule, near sea level only |
 
+P1, P2 and P4 are gone since Phase 2b (Section 6.2). On one runner, `noise` went from 35.5 to 25.9 ms per chunk and `carvers` from 2.34 to 1.07 (vanilla: 19.7 and 1.06).
+
 ### 2.2 Scope and correctness
 
-- **S1:** biome placement is still global until Phase 1.
+- **S1** (fixed in Phase 1, verified by the smoke runs): biome placement was global. A Default world with the mod had `players-versus:caves/deep_caves` on 73% of y −40 and `regular_cave` on all of y 0, which also brought this mod's cave spawns (wither skeletons, zombified piglins, deeper creepers) to vanilla world types. It now has only vanilla biomes.
 - **S2 and S3** (fixed by the groundwork): ore veins were global, and the aquifer was switched by `height == 336` through a `@Redirect`.
 - **S5:** there is no single source of truth for density-function thresholds until Phase 2; `PvWorldgenConstants` names where they're duplicated.
 - **S6:** vanilla-namespace data overrides still change vanilla world types (Section 10, question 1).
 
-### 2.3 Quirks (all fixed in the revamp; Section 7 says how)
+### 2.3 Quirks (Section 7 says how each is fixed)
 
-| # | Quirk | Effect today |
+| # | Quirk | Measured / status |
 |---|---|---|
-| Q1 | `cave_basins_y24` nests `caves/noodle` (with its own `interpolated` nodes) inside another `interpolated`, behind `min` and `mul` nodes, which evaluate their second argument with `sample()`. In the corner pass, an interpolator's `sample()` returns the last value it interpolated **[measure]**. For x-planes 0 and 1 that is nothing yet (0). For x-planes 2–4 it is the bottom block of the previous cell column (y −64, where the noodle is off). | The real noodle term never reaches the terrain pass. x-planes 0–1 get a made-up term instead, which matters at y 17–23, so basin water should jump at every chunk border along x. Carvers get the real term. `/pvwg bench` reports `basin_seam_ratio_x`. |
-| Q2 | The humid transition's lower edge uses the *frozen* map | A birch-taiga strip appears where a dark-birch band was intended. |
-| Q3 | The dripstone replacement passes continentalness as **depth** | Dripstone and frosted entries sit at depth 0.8–1.0. |
-| Q4 | Mountain transitions use `max(slice.erosionMax, −0.475)` where `min` was meant. They cover whole slices or extend past them, overlapping the originals. `newContinentalness` is unreachable. Slices with continentalness < 0.03 are dropped entirely. | Mountain edges depend on R-tree tie-breaking, with holes in places. |
-| Q5 | Water reaches y 63, while `sea_level: 63` means water up to y 62 in vanilla | Spawning, structures and icebergs assume a sea level 1 block too low. |
-| Q6 | Barriers are returned to carvers as STONE | Carvers overwrite deepslate, dirt and ores with stone. `/pvwg bench` reports `stone_in_carved_space_below_y-8`. |
-| Q7 | Transitions sit at depth 0 and 0.1, originals only at 0 | Transitions reach further underground than the biomes they sit next to. |
-| Q8 | Basin water's tick test `density < 0.08` is always true, because density is ≤ 0 at that point | Every basin-water block is queued for a fluid update, which runs when its chunk becomes a full chunk **[measure]**. `/pvwg bench` reports `fluid_ticks_queued_per_chunk`. |
+| Q1 | `cave_basins_y24` nests `caves/noodle` (with its own `interpolated` nodes) inside another `interpolated`, behind `min` and `mul` nodes, which evaluate their second argument with `sample()`. In the corner pass, an interpolator's `sample()` returns the last value it interpolated. | **Real; fixed in Phase 2b.** `AquiferTerrainPassTest` runs vanilla's terrain pass with the old JSON: its S differed from S with exact corners at 3,292 of 80,640 blocks in y −3..31 of 9 chunks, all at x 0..7 of their chunk. The pass fills the corner planes x 0 and 4 before it interpolates any block, so the noodle's interpolators still hold 0 there and add a made-up noodle term near y 24. Later planes are filled right after the previous x cell, whose last block is at y −64, where the noodle term is off (in these chunks the exact values had it off there too). It changed 0.47% of the decisions in y 8..31, mostly basin water that shouldn't be there: too few for the seam metrics (water in y 0..31 went from 259.4 to 258.6 blocks per chunk; the x profile didn't move). The aquifer now computes S's inner part from exact values at the corners. |
+| Q2 | The humid transition's lower edge uses the *frozen* map | **Fixed in Phase 1.** The effect was wider than a birch-taiga strip: the lower edge applied the frozen map to every slice crossing humidity 0.275, including every ocean slice, so 1.1% of surface climate points were cold ocean where vanilla has frozen ocean (they're frozen ocean again), and snowy taiga, forest and plains had cold-taiga, taiga and meadow strips. |
+| Q3 | The dripstone replacement passes continentalness as **depth** | **Kept, written out (Phase 1).** It sits at depth 0.8–1.0 (a test confirms vanilla's dripstone continentalness is 0.8–1.0). Moving it to 0.15–0.5, as revision 3 proposed, would have added dripstone to shallow caves after its rarity was tuned in game (commits of 2025-10-25). |
+| Q4 | Mountain transitions use `max(slice.erosionMax, −0.475)` where `min` was meant. They cover whole slices or extend past them, overlapping the originals. `newContinentalness` is unreachable. | **Fixed in Phase 1** (disjoint boxes; a test checks the forest/mountainside edge at erosion −0.475). |
+| Q5 | Water reaches y 63, while `sea_level: 63` means water up to y 62 in vanilla | **Fixed in Phase 2a:** `sea_level` is 64, and a test checks it against `PvWorldgenConstants.SEA_LEVEL`. Spawning, icebergs, ocean structures and the snow line now agree with the water. |
+| Q6 | Barriers are returned to carvers as STONE | **Fixed in Phase 2a.** Carvers placed stone at 2,027 of 173,811 carved positions in y −8..63, against 0 of 173,701 in vanilla (metric `carver_placed_stone`; revision 3's metric looked below y −8, where there are no barriers). Barriers now return "solid" like vanilla's: 0 of 173,811 on the server. |
+| Q7 | Transitions sit at depth 0 and 0.1, originals only at 0 | **Fixed in Phase 1.** At depth 0.12–0.17, 2.5–3% of climate points change, mostly mountainside biomes giving way to cave biomes. |
+| Q8 | Basin water's tick test `density < 0.08` is always true, because density is ≤ 0 at that point | **Fixed in Phase 2a.** It queued 243.6 fluid updates per chunk (175.1 in y 0..31, where there are 259.4 water blocks per chunk), against 47.3 in vanilla. Basin water now ticks only within the margin of its threshold: 110.8 per chunk, 44.8 in y 0..31, with the same water. |
+| Q9 | Surface biomes only exist at depth 0, so where the ground sits more than about 0.135 of depth (≈17 blocks) below the noise surface, a cave biome is nearer | **New, measured.** 2.19% of surface columns in the benchmark region are `regular_cave`, including patches of ocean floor near the coast, where ocean features (kelp, seagrass) can't generate. Vanilla avoids this with the depth-1 copies, which Players Versus drops so caves stay caves. Open question (Section 10). |
 
 ---
 
+### 2.4 Measured on a real server (Phase 0 baseline)
+
+Seed 8675309, 625 chunks around chunk (100, 100), generated status by status up to FULL on a 4-core CI runner (commit 748308c). "Vanilla" is the Default world type with this mod installed, so it still carries the `minecraft:` data overrides (Section 10, question 1).
+
+| Status | Vanilla ms/chunk | Players Versus ms/chunk | Ratio |
+|---|---|---|---|
+| biomes | 6.15 | 6.79 | 1.10 |
+| noise | 16.26 | 24.64 | 1.52 |
+| surface | 5.73 | 11.26 | 1.97 |
+| carvers | 0.78 | 1.97 | 2.53 |
+| features | 10.26 | 12.51 | 1.22 |
+| full | 8.84 | 11.73 | 1.33 |
+| **total** | **48.0** | **68.9** | **1.43** |
+
+The same code measured again varies by about ±10% on these runners (Players Versus total 63.4, vanilla 50.4), so only larger differences mean something. Other baseline metrics: no water at or above y 64 in either world; Q6, Q8 and Q9 as in Section 2.3.
+
+**Compatibility, verified.** C2ME 0.3.6+alpha.0.11 and Lithium 0.20.1 (the newest Modrinth releases for 1.21.10) with both world types: no errors, and the terrain, metrics, biome histograms and maps are identical to the runs without them. Details that matter later:
+
+- C2ME's density-function compiler (`c2me-opts-dfc`) replaces the functions in `NoiseConfig`'s router with compiled ones and treats unknown types such as `players-versus:aquifer_floodedness` as opaque delegates. The gate reads the settings' own router, which C2ME doesn't touch, and `AquiferInputs` (Phase 2b) seeds the settings' functions itself instead of looking for its own types in `NoiseConfig`'s router. With C2ME, Phase 2b's metrics and maps are identical too.
+- C2ME's `min`/`max` compilation skips the second argument using `minValue`/`maxValue`, so correct bounds (Section 5, rule 3) matter with C2ME too.
+- C2ME changes vanilla's fluid-update queueing (47.3 → 771.3 per chunk in the vanilla world) but not Players Versus's, which uses its own aquifer.
+- Lithium `@Overwrite`s `NoiseChunkGenerator.getSeaLevel()` to return the sea level cached when the generator is built. That matters for Phase 4's subclass and for Q5.
+
+The default-preset mixins now chain with other mods (`@ModifyExpressionValue` instead of `@Redirect`, which fails when two mods redirect the same read). A smoke job with no `level-type` in `server.properties` checks that the server still creates an Improved world.
+
 ## 3. Goals and acceptance criteria
 
-- **Vanilla world types run no PV generator code.** Done for aquifer and ore veins; biome layout follows in Phase 1. Data overrides are a separate question (Section 10).
+- **Vanilla world types run no PV generator code.** Done: aquifer and ore veins (groundwork), biome layout (Phase 1). Data overrides are a separate question (Section 10).
 - **The PV world type is selectable**: from the World Type button (done) and via `level-type=players-versus:better_world` on servers.
 - **The spirit is kept**, checked with `/pvwg bench` maps of the same seeds against this checklist:
   - river valleys carved to sea level and filled with water;
@@ -166,7 +195,7 @@ Unit: *octave samples*, meaning one single-octave Perlin sample (Appendix C).
   - sand and gravel beaches;
   - copper veins in terracotta and iron veins in tuff.
 - **Performance:** PV pregeneration is no slower than the vanilla Default preset (stretch goal: faster), and no status costs more than 1.2× vanilla.
-- **Correctness:** Q1–Q8 fixed, `basin_seam_ratio_x` ≈ 1, zero stone in carved deepslate, one sea level, fluid updates queued only at water edges.
+- **Correctness:** Q1–Q9 fixed or decided, `carver_placed_stone` 0, one sea level, fluid updates queued only at water edges.
 - **Maintainability:**
   - no hand-written density-function or noise-settings JSON;
   - constants live in `PvWorldgenConstants`;
@@ -180,16 +209,16 @@ Unit: *octave samples*, meaning one single-octave Perlin sample (Appendix C).
 | Piece | Where | Notes |
 |---|---|---|
 | Gated hook | `mixin/environment/worldgen/ChunkNoiseSamplerMixin` | Two `@WrapOperation`s in `ChunkNoiseSampler.<init>`. The gate is `PvWorldgen.isPvGenerator(settings)`: the **settings'** router has an `AquiferFloodedness` in `fluid_level_floodedness`. It reads the settings (via `@Local(argsOnly = true)`), not the per-chunk router copy, so C2ME's density-function compiler can't hide the marker. |
-| Marker / future F type | `density/AquiferFloodedness` (`players-versus:aquifer_floodedness`) | Wraps the JSON function unchanged for now; Phase 2 turns it into the Java F under the same id. |
+| Marker / F type | `density/AquiferFloodedness` (`players-versus:aquifer_floodedness`) | Wrapped the JSON function at first; since Phase 2b it computes F in Java from named inputs, next to `density/AquiferSpread` for S. |
 | Aquifer | `aquifer/PvAquifer`, `PvAquiferRules`, `PvAquiferDecision` | Same behavior as `SimpleWaterAquifer`, minus a dead per-sampler evaluation. The rules are shared with the probe. |
 | Ore veins | `ore/PvOreVeins` | Same logic as the old `@Overwrite`, now PV-only. |
 | Constants | `PvWorldgenConstants` | Sea level, aquifer thresholds and bands, with notes on where JSON still duplicates them. |
 | `/pvwg probe` | `debug/WorldgenProbe` | Prints the biome (source vs stored), the climate point, raw density values, F, S and the aquifer decision at your position. |
 | `/pvwg bench <radius>` | `debug/WorldgenBench` | Generates a square of chunks status by status. Writes `report.txt` (time per status, metrics, biome histograms) and PNGs (`surface`, `biomes-*`, `slice-y*`) to `<game dir>/pvwg/`. |
 | Headless run | `./gradlew runWorldgenSmoke -Ppv.acceptEula=true [-Ppv.levelType=… -Ppv.seed=… -Ppv.benchRadius=… -Ppv.benchCenter=x,z]` | Fresh world every run in `run/worldgen-smoke/`; stops by itself. |
-| CI benchmark | `.github/workflows/worldgen-smoke.yml` (Actions → worldgen-smoke → Run workflow) | Runs vanilla and PV side by side and uploads both result folders. It only starts if you tick the EULA box. |
+| CI benchmark | `.github/workflows/worldgen-smoke.yml`: push a commit whose message contains `[smoke]` (the repository owner accepted the Minecraft EULA for these runs), or Actions → worldgen-smoke → Run workflow once the file is on the default branch | Runs vanilla and Players Versus side by side, alone and with C2ME + Lithium, plus a server-default job. The report goes to the job log, with text maps of the surface and its biomes. |
 | World-type button | `data/minecraft/tags/worldgen/world_preset/normal.json` | "Improved" can be picked like any other type. |
-| Removed | `AquifersMixin`, `OreVeinMixin`, `SurfaceRulesMixin`, `SimpleWaterAquifer`, `entrances_old.json`, `gravel_beach.json` (density function), `remappedSrc/` | The CI build (`./gradlew build`) passes. The mixin still needs a first in-game or smoke run to be exercised. |
+| Removed | `AquifersMixin`, `OreVeinMixin`, `SurfaceRulesMixin`, `SimpleWaterAquifer`, `entrances_old.json`, `gravel_beach.json` (density function), `remappedSrc/` | Exercised by every smoke run since commit 2d486ef; the report states which aquifer the gate chose. |
 
 ---
 
@@ -198,10 +227,10 @@ Unit: *octave samples*, meaning one single-octave Perlin sample (Appendix C).
 ```mermaid
 flowchart TD
     WT["World Type 'Improved'<br/>preset players-versus:better_world"] --> GEN["PvChunkGenerator (Phase 4)<br/>extends NoiseChunkGenerator, type players-versus:revamp"]
-    GEN --> BS["PvBiomeSource (Phase 1)<br/>PvBiomeLayout: rules as data"]
+    GEN --> BS["PvBiomeSource (done)<br/>PvBiomeLayout: rules as data"]
     GEN --> SET["PvSettings (Phase 4)<br/>PvRouter + PvSurfaceRules, sea level 64"]
     SET --> CNS["vanilla ChunkNoiseSampler"]
-    CNS -->|"ChunkNoiseSamplerMixin (done)"| AQ["PvAquifer v2 (Phase 2)<br/>4-block lattice of F and S"]
+    CNS -->|"ChunkNoiseSamplerMixin (done)"| AQ["PvAquifer (Phase 2, done)<br/>F and S per block, smooth inputs on the 4x8x4 cells"]
     CNS -->|"same hook"| ORE["PvOreVeins"]
     AQ --> NOISE["NOISE"]
     AQ --> CARV["CARVERS"]
@@ -212,11 +241,11 @@ flowchart TD
 ```
 mod/environment/worldgen/
   PvWorldgen, PvWorldgenConstants               (done)
-  aquifer/  PvAquifer, PvAquiferRules, PvAquiferDecision (done), Lattice (2)
+  aquifer/  PvAquifer, PvAquiferRules, PvAquiferDecision, AquiferFormulas, AquiferInputs, Lattice (done)
   ore/      PvOreVeins                          (done)
   debug/    WorldgenProbe, WorldgenBench, WorldgenDebugCommands (done)
-  density/  AquiferFloodedness (done), AquiferNoises (2), PvRouter + kernel/* (3)
-  biome/    PvBiomeKeys, PvBiomeLayout, PvBiomeSource, Box (1)
+  density/  AquiferFloodedness, AquiferSpread (done), PvRouter + kernel/* (3)
+  biome/    PvBiomeLayout (with Box), PvBiomeSource (done; the biome keys stay in CustomOverworldBiomes)
   PvSettings, PvChunkGenerator (4)
   surface/  PvSurfaceRules (4)
 mixin/environment/worldgen/ChunkNoiseSamplerMixin (done)
@@ -226,7 +255,7 @@ mixin/environment/worldgen/ChunkNoiseSamplerMixin (done)
 
 1. Density functions are shared across worker threads, so they hold no mutable state. Memoize with vanilla markers (`cache_once`, `cache_2d`, `flat_cache`), which `ChunkNoiseSampler` turns into per-chunk caches, or inside per-chunk objects such as the aquifer's lattice.
 2. Keep `interpolated`, `flat_cache`, `cache_once` and `blend_*` as vanilla nodes. Kernels only replace the arithmetic between them, and map their children in `apply(visitor)`.
-3. Kernel `minValue`/`maxValue` must be valid bounds, because vanilla's `min`/`max` nodes use them to skip evaluating a child **[measure]**.
+3. Kernel `minValue`/`maxValue` must be valid bounds, because `min`/`max` nodes use them to skip evaluating a child: C2ME's compiled `min`/`max` do (read in its source), and vanilla's likely do too **[measure]**.
 4. Constants shared across components live in `PvWorldgenConstants`, with a *why*.
 
 ---
@@ -238,110 +267,51 @@ Signatures that matter are real 1.21.10 Yarn names (Appendix B); the rest is pse
 ### 6.1 Hook and gate (done)
 
 ```java
-// ChunkNoiseSamplerMixin (real code)
+// ChunkNoiseSamplerMixin (real code, shortened)
 @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = ".../AquiferSampler;aquifer(...)..."))
 AquiferSampler useAquifer(ChunkNoiseSampler s, ChunkPos pos, NoiseRouter router, RandomSplitter r, int minY, int height,
                           FluidLevelSampler fluids, Operation<AquiferSampler> original,
-                          @Local(argsOnly = true) ChunkGeneratorSettings settings) {
-    return PvWorldgen.isPvGenerator(settings) ? new PvAquifer(router, fluids) : original.call(s, pos, router, r, minY, height, fluids);
+                          @Local(argsOnly = true) ChunkGeneratorSettings settings,
+                          @Local(argsOnly = true) NoiseConfig noiseConfig) {
+    return PvWorldgen.isPvGenerator(settings)
+            ? new PvAquifer(AquiferInputs.of(noiseConfig, settings), router.depth(), pos, fluids)
+            : original.call(s, pos, router, r, minY, height, fluids);
 }
-// Phase 2 changes the PV branch to: new PvAquifer(AquiferNoises.of(noiseConfig.getNoiseRouter()), pos, fluids)
-// with @Local(argsOnly = true) NoiseConfig noiseConfig, so the lattice samples raw, seeded functions.
+// router is the chunk's own copy of the router. With C2ME its functions are compiled: sample them, but never check
+// their types (Section 2.4).
 ```
 
-### 6.2 Aquifer v2 (Phase 2): lattice + Java F and S
+### 6.2 Aquifer v2 (Phase 2)
 
-**Idea.** F and S vary smoothly, so sample them on a 4-block lattice per chunk and interpolate. Every caller (terrain pass, carvers, heightmap probes, the neighbouring chunk) then sees the same values: no seams, no terrain/carver disagreement, bounded cost.
+**2a: rules (done, commit `daf1257`).** Q6: barriers return "solid" (`null`) like vanilla's, so carvers leave them alone and the terrain pass fills them with ore veins or the default block. Q8: basin water ticks only within `FLUID_TICK_MARGIN` of its threshold. Q5: `sea_level` 64. Measured in Section 2.3.
 
-```java
-public final class PvAquifer implements AquiferSampler {
-    private final Lattice floodedness, spread;          // per chunk, lazily filled
-    private final FluidLevelSampler fluids;
-    private boolean needsFluidTick;
+**2b, first attempt (commit `373b78f`, reverted in `3f04892`): F and S interpolated whole.** `PvAquifer` sampled F and S on a 4-block lattice per chunk and interpolated them. `AquiferLatticeTest` (since replaced by `AquiferTerrainPassTest`) and the smoke run ruled it out, because both functions step inside their bands:
 
-    PvAquifer(AquiferNoises noises, ChunkPos chunk, FluidLevelSampler fluids) {
-        this.floodedness = new Lattice(noises.floodedness(), chunk);   // raw F from NoiseConfig's router
-        this.spread = new Lattice(noises.spread(), chunk);             // raw S
-        this.fluids = fluids;
-    }
+- F is 0 from y 64 up, so the top lattice level pulled y 61..63 toward 0 and put barriers on ocean surfaces;
+- F adds the ramen term only below y 32, and only where F would otherwise make a barrier;
+- S's factor jumps from 1 to -0.2 at y 24.
 
-    public BlockState apply(NoisePos pos, double density) {
-        if (density > 0) { needsFluidTick = false; return null; }
-        int y = pos.blockY();
-        boolean lava = fluids.getFluidLevel(pos.blockX(), y, pos.blockZ()).getBlockState(y).isOf(Blocks.LAVA);
-        PvAquiferDecision d = PvAquiferRules.decide(pos, density, lava, floodedness, spread); // takes PositionalValue in v2
-        needsFluidTick = d.needsFluidTick;
-        return d.isBarrier() ? null : d.state;           // Q6: barriers stay solid, so carvers leave them alone;
-                                                         // in the terrain pass, ore veins, then the default block, fill them
-    }
-}
+19% of decisions changed in y 48..63 and 9% in y 8..31, water in y 0..31 fell from 259.4 to 224.3 blocks per chunk, and the surface map lost most of its ocean. It did show what a lattice saves: on one runner, `noise` went from 33.9 to 26.8 ms per chunk and `carvers` from 2.43 to 0.90.
 
-/** Values of one function on a 4-block lattice covering one chunk and y -32..64. */
-final class Lattice implements PositionalValue {
-    static final int STEP = 4, MIN_Y = SEA_BAND_MIN_Y, LEVELS = (SEA_LEVEL - MIN_Y) / STEP + 1, SIDE = 16 / STEP + 1;
-    private final DensityFunction source;                // raw, seeded; no interpolated wrappers inside
-    private final int originX, originZ;                  // chunk start / STEP
-    private final float[] values = filledWithNaN(SIDE * SIDE * LEVELS);
+**2b (done, commits `bf27b69` and `ea8dade`): F and S in Java, their smooth inputs on the terrain pass's cells.**
 
-    public double at(NoisePos pos) {
-        int x = pos.blockX(), y = pos.blockY(), z = pos.blockZ();
-        int ix = (x >> 2) - originX, iy = (y - MIN_Y) >> 2, iz = (z >> 2) - originZ;
-        if (outside(ix, iy, iz)) return source.sample(new UnblendedNoisePos(x, y, z));  // safety net, never expected
-        return MathHelper.lerp3((x & 3) / 4.0, ((y - MIN_Y) & 3) / 4.0, (z & 3) / 4.0,
-                corner(ix, iy, iz),     corner(ix + 1, iy, iz),     corner(ix, iy + 1, iz),     corner(ix + 1, iy + 1, iz),
-                corner(ix, iy, iz + 1), corner(ix + 1, iy, iz + 1), corner(ix, iy + 1, iz + 1), corner(ix + 1, iy + 1, iz + 1));
-    }
+- `aquifer/AquiferFormulas` computes F and S from their leaf values, written to give the JSON's exact doubles: the same operations in the same order, vanilla's `mul` (0 times anything is 0, without looking at the other side) where the JSON multiplies two functions, and band checks against vanilla's `minecraft:y`. That function is a `y_clamped_gradient` from -4064 to 4062 and rounds to 31.9999999999995 at y 32, so today's "below 32" ramen band includes y 32; the port keeps that. F takes the coast's cave entrances and the river's as separate values, because the JSON interpolated only the coast's.
+- The router slots hold `players-versus:aquifer_floodedness` (F) and `players-versus:aquifer_spread` (S), whose JSON names their inputs (`depth`, 3D `continentalness`, `ridge`, `entrances`, the `surface` noise at two scales, the `ramen` noise, `noodle`). Their `sample` is exact, so `/pvwg probe` and anything else reading the router get true values. The old aquifer JSON stays in the data, unreferenced, as the reference the tests compare with (`AquiferPortTest`: the Java gives its exact doubles at 20,000 points, half of them on or next to band edges), and the decision thresholds come from `PvWorldgenConstants` only (S5).
+- `aquifer/AquiferInputs` seeds those inputs once per world from the settings, not from `NoiseConfig`'s router (C2ME compiles that one), and `WorldgenDataTest` checks the seeding against `NoiseConfig`'s.
+- `PvAquifer` evaluates F and S per block. Their smooth inputs come from per-chunk lattices on the terrain pass's cell grid: 4 blocks across and 8 tall (`size_vertical` 2, which `WorldgenDataTest` checks), aligned like vanilla's cells and interpolated in vanilla's order (y, then x, then z). They hold `depth` (sampled through the chunk's own router, whose flat cache answers its 2D spline exactly at lattice points), the cave entrances and S's inner part, which the JSON interpolated on those cells in the terrain pass, and 3D continentalness, which it sampled per block but is smooth. Ridge is kept per column (it doesn't depend on y); the surface and ramen noises are sampled per block, so barrier edges keep their per-block roughness. Lattice points are sampled on first use, at most 1,125 per chunk.
+- Every caller that asks about a block gets the same answer: the terrain pass and carvers share the chunk's aquifer, and lattice points sit on absolute multiples of 4 (x, z) and 8 (y), so neighbouring chunks agree along borders. Q1 is gone (Section 2.3): S's inner part is computed from exact values at the corners.
+- The first version (`bf27b69`) used 4-block steps in y too. Its test compared the aquifer with exact values and failed (93.2% of decisions in y 8..31), but exact values were the wrong reference: the terrain pass never used them for the interpolated inputs. `AquiferTerrainPassTest` compares with the terrain pass itself instead. Its helper, `TerrainPass`, builds a real `ChunkNoiseSampler` (so the mixin makes the aquifer) and drives vanilla's interpolation loop in `populateNoise`'s order, calling the sampler's constructor and loop methods reflectively, by their Yarn names, so the test doesn't depend on their access modifiers (which the mappings don't record).
 
-    private double corner(int ix, int iy, int iz) {
-        int i = (ix * SIDE + iz) * LEVELS + iy;
-        if (Float.isNaN(values[i])) {
-            values[i] = (float) source.sample(new UnblendedNoisePos((originX + ix) * STEP, MIN_Y + iy * STEP, (originZ + iz) * STEP));
-        }
-        return values[i];
-    }
-}
-```
+Measured:
 
-- **Cost:** at most 5 × 5 × 25 = 625 points per function per chunk, and only where open space needs them.
-- **Optional refinement:** if barrier edges look too smooth compared with today's per-block noise, evaluate F exactly for blocks within ε of a threshold.
+- **Lattice against vanilla's `interpolated`:** depth and cave entrances are equal to the bit at all 86,016 blocks of each of two chunks (one at negative coordinates).
+- **Decisions against the old JSON in the terrain pass** (9 chunks, every block treated as open): 100% the same in y −31..7, 99.53% in y 8..31 (all from S: Q1), 99.997% in y 32..47 and 99.58% in y 48..63 (from F, mostly air becoming barrier). F's changes come from the inputs that moved: continentalness and the river's entrances (per block before, lattice now) and the ridge noise, whose shift the chunk's flat cache rounded to 4 blocks in the terrain pass. Carvers now get the terrain pass's decision at every block; before, they disagreed on 7.7% of y 8..31, 0.8% of y 48..63 and 0.1% of y −3..7.
+- **Smoke run:** water in y 0..31 258.6 blocks per chunk (2a: 259.4), 110.7 fluid updates queued per chunk (110.8), seam ratios x 0.88 and z 0.96 (0.86, 0.97), `carver_placed_stone` 0. The surface map differs from 2a's in 2 of 2,500 cells, both at a water's edge; the biome map doesn't differ. With C2ME and Lithium the numbers and maps are the same.
+- **Time, one runner:** from 2a to 2b, `noise` went from 35.5 to 25.9 ms per chunk, `carvers` from 2.34 to 1.07 and the total from 92.3 to 74.9 (vanilla: 19.7, 1.06 and 57.9). On another runner, the cell grid (`ea8dade`) timed within 1 to 3% of `bf27b69`.
 
-**F and S in Java (`AquiferNoises`).** These are today's JSON formulas (Appendix A.3), with two changes:
+### 6.3 Biome layout (Phase 1, done): rules as data, disjoint boxes
 
-- `depth`, `entrances` and `noodle` are sampled raw at the lattice point instead of through `interpolated`. That fixes Q1: no nested interpolators.
-- Each leaf is computed once per point.
-
-```java
-double seaFloodedness(x, y, z) {                                  // F′, y in (-32, 64)
-    double depth = terrain.depth(x, y, z), entr = terrain.entrances(x, y, z);
-    double s2 = abs(surfaceNoise.sample(2 * x, y, 2 * z));
-    double ocean = 8 * max(0, 0.06 + 0.02 * s2 - depth);           // below the sea surface of oceans and lakes
-    double river = rivers.aquifer(x, y, z, entr);                   // river channels, y 48..63 (A.1)
-    double coast = 0, entrance = min(0, G(-32, 8, 0.32, -0.18, y) + entr);
-    if (entrance < 0) {                                             // cave entrances opening near the coast
-        double c3 = continentalness3d(x, y, z);                     // shifted continentalness, xz 0.25, y 0.1
-        coast = (G(16, 48, 0, -0.34, y) + c3) * (-64 * min(0, min(-0.08, c3 - 0.1) - 0.08 * s2 + depth)) * entrance;
-    }
-    double f = max(max(ocean, river), coast);
-    if (y >= -4 && y < 32 && f >= SEA_BARRIER_THRESHOLD && f < SEA_WATER_THRESHOLD) f += ramenAquifer(x, y, z);
-    return f;
-}
-
-double basinFloodedness(x, y, z) {                                // S, y in [-2, 48)
-    double entr = terrain.entrances(x, y, z), noodle = terrain.noodleRaw(x, y, z);   // raw noodle: Q1 fixed
-    double walls = -0.12 - 0.06 * abs(surfaceNoise.sample(4 * x, 2 * y, 4 * z))
-                 + entr + min(0, (entr - 0.24) * (-4 * min(0, noodle - 0.08)));
-    double inner = min(1, G(0, 16, 0, -16, y) * min(0, walls));
-    double s = max(0, G(48, 24, -3, -0.1, y) + inner);
-    return y >= 24 ? s * G(24, 48, -0.2, 0, y) : s;
-}
-// G(fromY, toY, fromValue, toValue, y) = MathHelper.clampedMap(y, fromY, toY, fromValue, toValue)
-```
-
-Since F and S are now Java, their thresholds come from `PvWorldgenConstants`, and the JSON copies (`0.0001`, `0.34`) disappear (S5).
-
-**Q5, sea level.** Set the settings' `sea_level` to 64. That keeps today's water surface at y 63 and makes vanilla systems agree with it. `SEA_LEVEL` then feeds the settings, the aquifer, F's `y < 64` band and the surface rules.
-
-### 6.3 Biome layout (Phase 1): rules as data, disjoint boxes
+Implemented as `biome/PvBiomeLayout`; the pseudocode below is the design it follows. Two differences: the dripstone replacement keeps depth 0.8–1.0 (see Q3), and the surface-cave biome goes under each remaining piece of the original rather than under the whole slice, as the old mixin did.
 
 ```java
 record Box(long[] min, long[] max) {                 // axes T, H, C, E, W in MultiNoiseUtil.toLong units
@@ -403,21 +373,21 @@ static void emitSurface(Slice slice, List<...> out) {
 
 | Band | Depth | Offset |
 |---|---|---|
-| `SURFACE_DEPTH` | point 0 (proposal) | 0 |
+| `SURFACE_DEPTH` | point 0 | 0 |
 | `SURFACE_CAVE` | 0.1–0.25 | 0, or 0.04 when rare |
 | `CAVE` | 0.2–0.4 | 0, or 0.04 when rare |
 | `GENERIC_CAVE` | 0.25–0.65 | 0.07 |
 | `DEEP` | point 0.9 | 0.05 for generic deep caves |
 | lush and dripstone replacements | 0.15–0.5 | 0.01 for lush |
 
-Q3 is fixed here: dripstone and frosted replacements get 0.15–0.5, the same band as the lush replacement, instead of continentalness. Every row keeps its current climate ranges. `SURFACE_CAVES` keeps its current mapping: frozen peaks/snowy slopes → frosted caves, desert → desert creeper caves, badlands family → badlands cave.
+Q3: the dripstone and frosted replacements keep depth 0.8–1.0, now written as a named constant instead of reusing the continentalness range (revision 3 proposed 0.15–0.5, which would have added dripstone to shallow caves). Every row keeps its current climate ranges. `SURFACE_CAVES` keeps its current mapping: frozen peaks/snowy slopes → frosted caves, desert → desert creeper caves, badlands family → badlands cave.
 
-**Check:** the bench's biome maps and histograms at the surface, y 0 and y −40, against the reference run.
+**Checks done:** unit tests (Section 1.4 lists them) and the smoke runs. In the benchmark region, which is temperate forest, ocean and plains with no transition rule in play, the Improved world's biome histograms and maps are identical to the baseline; the Default world now has only vanilla biomes.
 
 ### 6.4 Biome source (Phase 1)
 
 ```java
-public final class PvBiomeSource extends BiomeSource {               // registered as players-versus:revamp
+public final class PvBiomeSource extends BiomeSource {               // registered as players-versus:overworld
     public static final MapCodec<PvBiomeSource> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             RegistryOps.getEntryLookupCodec(RegistryKeys.BIOME)).apply(i, i.stable(PvBiomeSource::new)));
     private final RegistryEntryLookup<Biome> biomes;
@@ -438,7 +408,7 @@ public final class PvBiomeSource extends BiomeSource {               // register
 }
 ```
 
-Phase 1 points `better_world.json` at `{"type": "players-versus:revamp"}` and deletes the mixin.
+Phase 1 pointed `better_world.json` at `{"type": "players-versus:overworld"}` and deleted the mixin. The real class stores the rule name next to each biome, for `/pvwg probe` and the F3 screen. It calls `VanillaBiomeParameters.writeOverworldBiomeParameters`, which is protected in 1.21.10, through an access widener (`players-versus.accesswidener`).
 
 ### 6.5 Terrain router and kernels (Phase 3)
 
@@ -466,7 +436,9 @@ static NoiseRouter create(RegistryEntryLookup<DensityFunction> dfs, RegistryEntr
             add(constant(-0.1171875), add(constant(-0.078125), mul(yClampedGradient(240, 256, 1, 0),
             add(constant(0.078125), terrain)))))))))), noodle);
 
-    NoiseRouter router = new NoiseRouter(barrier, new AquiferFloodedness(new SeaFloodedness(...)), new BasinFloodedness(...),
+    NoiseRouter router = new NoiseRouter(barrier,
+            new AquiferFloodedness(depth, continentalness3d, ridge, entrances, surface2, ramen),   // as in the JSON today (6.2)
+            new AquiferSpread(entrances, noodle, surface4),
             lava, temperature, vegetation, continents, erosion, depth, ridges, preliminarySurface, finalDensity,
             veinToggle, veinRidged, veinGap);
     checkSlots(router);   // NoiseRouter's component order isn't in Yarn: assert each accessor returns what we passed
@@ -498,7 +470,7 @@ Also in Phase 3:
 
 - **Speed-up checks:** `/pvwg bench` `noise` time per chunk before and after.
 - **Spirit checks:** the `surface.png` and `slice-y*.png` maps against the reference run.
-- **Cleanup:** delete `density_function/**`.
+- **Cleanup:** delete `density_function/**`, except the old aquifer JSON that `AquiferPortTest` and `AquiferTerrainPassTest` use as their reference (or retire those comparisons with it).
 
 ### 6.6 Settings and chunk generator (Phase 4)
 
@@ -540,7 +512,7 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:re
 
 ### 6.8 Old worlds and future breaking changes
 
-- **Old worlds.** They reference `players-versus:overworld` noise settings. If Section 10, question 3 is "keep them loadable", Phase 4 keeps a stub under that key.
+- **Old worlds.** A world stores its generator in `level.dat` when it's created, and never reads its preset again (verified: the `upgrade` smoke job, Section 10, question 3). Every Improved world references the `players-versus:overworld` noise settings by key, so Phase 4 keeps that key, and Phase 4's generator must also open worlds whose `level.dat` names `minecraft:noise`.
 - **Future breaking changes.** If `PvChunkGenerator` ever needs one, add `"version": 2` to its codec and keep the old behavior behind `version: 1`.
 
 ---
@@ -549,57 +521,81 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:re
 
 | Phase | Work | Exit check |
 |---|---|---|
-| 0 (mostly done) | Tooling (Section 4). **Remaining:** run the `worldgen-smoke` workflow once on the current generator; its artifacts are the reference maps and baseline numbers. | Report shows Q1 (`basin_seam_ratio_x`), Q6 (`stone_in_carved_space…`) and Q8 (`fluid_ticks_queued…`) on PV; vanilla vs PV timings recorded |
-| 1 | `PvBiomeLayout` + `PvBiomeSource` (6.3, 6.4); delete the biome mixin | Biome maps reviewed; the vanilla preset's biomes equal plain vanilla |
-| 2 | `AquiferNoises` + lattice `PvAquifer` (6.2); sea level 64 | `basin_seam_ratio_x` ≈ 1; carved deepslate has no stone; fewer queued fluid ticks; `noise` and `carvers` ms/chunk well below baseline |
+| 0 (done) | Tooling (Section 4), baseline run (Section 2.4) | Baseline recorded; the groundwork runs on a server |
+| 1 (done) | `PvBiomeLayout` + `PvBiomeSource` (6.3, 6.4); delete the biome mixin | Unit tests pass; the Default world has only vanilla biomes; the Improved world's biomes match the baseline where no rule changed |
+| 2a (done) | Aquifer rules: Q5, Q6, Q8 (6.2) | `carver_placed_stone` is 0 (baseline 2,027): **met**; fewer queued fluid updates (baseline 243.6 per chunk): **met**, 110.8 |
+| 2b (done) | F and S in Java, `PvAquifer` with lattices on the terrain pass's cells (6.2) | Seam ratios don't get worse (baseline x 0.86, z 0.97): **met**, 0.88 and 0.96; water and barrier maps close to 2a's: **met**, 2 of 2,500 surface cells differ; `noise` and `carvers` ms/chunk below 2a's in the `perf` job: **met**, 0.73 and 0.46 times 2a's |
 | 3 | `PvRouter` + kernels (6.5); delete density-function JSON | `noise` ms/chunk down; terrain maps reviewed |
 | 4 | `PvSettings`, `PvChunkGenerator`, `PvSurfaceRules` (6.6, 6.7) | No worldgen logic in hand-written JSON; full bench against Default |
 | 5 | Measure-driven tuning: cave-biome features (P5), carvers | Per-status times within 1.2× of vanilla |
 
 | Quirk | Fix | Phase |
 |---|---|---|
-| Q1 | S sampled raw on the lattice; no nested interpolators | 2 |
-| Q2 | Humid map on both humid edges | 1 |
-| Q3 | Real depth band (0.15–0.5) for the dripstone/frosted replacement | 1 |
-| Q4 | Transition = slice ∩ region, original = slice − region (disjoint boxes) | 1 |
-| Q5 | `sea_level` 64, one constant everywhere | 2 |
-| Q6 | Barrier returns "solid" (`null`): carvers skip it, and the terrain pass fills it with ore veins or the default block, as vanilla does | 2 |
-| Q7 | One surface depth for all surface entries | 1 |
-| Q8 | Queue fluid updates only within the S margin, like sea water | 2 |
+| Q1 | S's inner part computed from exact values at the lattice points, so no interpolator is read while corners are filled | 2b, done |
+| Q2 | Humid map on both humid edges | 1, done |
+| Q3 | Keep depth 0.8–1.0, written out as a constant | 1, done |
+| Q4 | Transition = slice ∩ region, original = slice − region (disjoint boxes) | 1, done |
+| Q5 | `sea_level` 64, one constant everywhere | 2a, done |
+| Q6 | Barrier returns "solid" (`null`): carvers skip it, and the terrain pass fills it with ore veins or the default block, as vanilla does | 2a, done |
+| Q7 | One surface depth for all surface entries | 1, done |
+| Q8 | Queue fluid updates only within the S margin, like sea water | 2a, done |
+| Q9 | Open (Section 10, question 4) | 1 or later |
 
 ---
 
 ## 8. Validation
 
-- **Every phase:** run the `worldgen-smoke` workflow (or `runWorldgenSmoke` locally) with the same seed and center. Compare these against the Phase 0 reference:
-  - `report.txt`: times per status, the metrics, and the biome histograms;
-  - the PNGs.
-- **Metrics** (already implemented):
-  - `water_at_or_above_y64` must stay 0 for PV;
-  - `stone_in_carved_space_below_y-8` must reach 0 after Phase 2;
-  - `basin_seam_ratio_x`/`z` must both be ≈ 1 after Phase 2;
-  - `fluid_ticks_queued_per_chunk` for y 0..31 must fall well below the water-block count printed next to it, after Phase 2.
-- **Compatibility:** C2ME and Lithium with a PV world and a vanilla world. The gate reads the settings' router precisely so C2ME can't break it.
+- **Every push:** `./gradlew build` runs the unit tests (`src/test`, JUnit with `fabric-loader-junit`, Fabric Loader in server mode, so the mod's mixins apply). `TestGame` starts the game the same way for every test (vanilla's bootstrap, then this mod's worldgen types; the registries refuse to exist before the bootstrap), and `WorldgenTestData` loads vanilla's data pack plus `src/main/resources` with the game's own `RegistryLoader` and decodes the real noise settings (their surface rule swapped for stone, since it names this mod's blocks). The tests cover:
+  - the biome layout: vanilla's list is untouched and has the expected shape, pieces partition every slice, Q2/Q4 spot checks, old-vs-new agreement at 11 depths;
+  - the data: the gate finds its marker, `sea_level` matches the code, seeding a registry function by hand matches `NoiseConfig` exactly, and a printed baseline of aquifer decisions and raw sample costs;
+  - the aquifer: the rules with constant inputs; the lattice's interpolation; the Java F and S against the old JSON (exact doubles); and, in vanilla's own terrain pass (`TerrainPass`), the lattices against `interpolated` (to the bit), carvers against the terrain pass (the same decision everywhere), and the decisions against the old JSON's, by band;
+  - what the `minecraft:` carver overrides change (printed).
+- **Commits tagged `[smoke]`** also run two more jobs: `upgrade` reopens a world made by an older build (Section 10, question 3), and `perf` times this commit and the previous one, plus vanilla, on the same runner, because timings between runners differ by more than most changes (the same code measured 63.4 and 68.9 ms per chunk, and one Phase 2a run was about 25% slower in every status, including ones the change didn't touch).
+- **Commits tagged `[smoke]`:** the `worldgen-smoke` workflow starts a dedicated server and generates the benchmark region for: Default, Improved, each with C2ME + Lithium, and a server with no `level-type`. A job fails if the bench wrote no report, logged a failure, or the server wrote a crash report. The report is printed to the job log, including text maps of the surface and its biomes (the PNGs are in the uploaded artifact).
+- **Metrics** (per world):
+  - `water_at_or_above_y64`: must stay 0;
+  - `carver_placed_stone_y-8..63`: stone that carvers placed where something else was; vanilla is 0, and Players Versus must reach 0 after Phase 2;
+  - `basin_seam_ratio_x`/`z`, and water in y 0..31 by x and z offset inside the chunk: seams show up as a ratio well above 1 or as an x profile unlike z's; run-to-run spatial noise is about ±10%;
+  - `fluid_ticks_queued_per_chunk`: after Phase 2, far below the water-block count printed next to it.
 - **Later (optional):** once the revamp settles, add a per-chunk hash snapshot to the bench so pure refactors can prove they changed nothing.
 
 ---
 
 ## 9. Risks and notes
 
-- **Runtime coverage.** Mixins and density-function codecs are only exercised when the game loads them. The first smoke run is also the first runtime test of the groundwork.
-- **Build environment.** Fabric's maven and Mojang's servers aren't reachable from the environment this was written in. CI builds every push, and the smoke workflow runs the server there.
-- **Threads.** Kernels are stateless; each lattice belongs to one chunk's aquifer.
-- **Porting to 26.x.** One mixin, plus public extension points (biome source, chunk generator, density-function types). Appendix D maps names.
+- **Runtime coverage.** Mixins, access wideners and codecs only fail when the game loads them, so every worldgen change should go through a `[smoke]` run, not just the build.
+- **Build environment.** The agent environment can't reach Fabric's maven or Mojang, and can't download Actions artifacts; everything is compiled and run in CI, and results are read from job logs. The Yarn mapping files used to look up names contain stale entries (`WrapperLookup.getWrapperOrThrow` doesn't exist in 1.21.10) and no access modifiers, so the compiler has the last word.
+- **Threads.** Kernels are stateless; each lattice belongs to one chunk's aquifer. The biome layout is built per world and immutable.
+- **Existing worlds after Phase 1** (verified, Section 10, question 3). Chunks generated before keep their biomes. Improved worlds created before Phase 1 keep vanilla's biome source in `level.dat`, so their new chunks get vanilla biomes, not the Players Versus layout. Default worlds created with the mod installed also get vanilla biomes in new chunks, as intended. In both, the Players Versus cave biomes stop at the edge of the old chunks.
+- **Existing worlds after Phase 2.** The sea level lives in the noise settings, not in `level.dat`, so existing Improved worlds get sea level 64 too: water mobs' spawn bands, the snow line and similar checks move up one block, to where the water surface already is.
+- **Porting to 26.x.** One mixin, plus public extension points (biome source, chunk generator, density-function types) and one access widener. Appendix D maps names. The test helper `TerrainPass` calls `ChunkNoiseSampler`'s terrain-pass methods by their Yarn names through reflection, so a port renames those strings too; a missing one fails the test with a list of the class's methods.
 
 ---
 
 ## 10. Open questions
 
-1. **Vanilla-namespace data overrides still change vanilla world types.** There are 146 files: 124 under `data/minecraft/worldgen/` and 22 tags under `data/minecraft/tags/worldgen/`. For example, carver probabilities are `cave` 0.02, `cave_extra_underground` 0.03 and `canyon` 0.0125 here, against vanilla's 0.15, 0.07 and 0.01 (vanilla values from memory). So vanilla worlds get far fewer carver caves. Recommendation:
-   - make carvers PV-only: PV cave biomes get their own carver configs, and the three `minecraft:` carver overrides go away;
-   - keep feature and structure tweaks global.
-2. **Pre-selected world type:** keep "Improved" pre-selected in Create World (keep the client mixin), or default to vanilla (delete all three default-preset mixins)?
-3. **Pre-revamp worlds:** keep a stub so they still open (with seams), or let them fail?
+1. **Vanilla-namespace data overrides change vanilla world types.** Files under `data/minecraft/` replace vanilla's in every world type: 124 under `worldgen/` (6 biomes, 3 carvers, 32 configured and 37 placed features, 10 processor lists, 2 structures, 2 structure sets, 32 template pools), 23 worldgen tags, and 55 structure templates (plains and zombie village pieces, two ancient city pieces). The carvers, compared with vanilla's registry by a unit test (`VanillaOverridesTest`):
+
+   | Carver | Vanilla | This mod |
+   |---|---|---|
+   | `cave` | probability 0.15, uniform y −56..180 | 0.02 (13% of vanilla), trapezoid y 32..64 |
+   | `cave_extra_underground` | 0.07, uniform y −56..47 | 0.03 (43%), uniform y −44..−16 |
+   | `canyon` | 0.01, uniform y 10..67 | 0.0125 (125%), y 40..64 (weight 2) or −38..−22 (weight 1) |
+
+   So a vanilla world with this mod installed starts about one cave system in seven, and only at y 32..64 instead of −56..180. Players Versus biomes use the same three carvers (plus their own for `caves/deep_caves` and the deep dark), so the tuning matters to Players Versus too. Options: (a) keep them global; (b) make them Players Versus only: copy them as `players-versus:` carvers and have Phase 4's generator use the copies wherever a biome names the `minecraft:` ones (how it swaps them is to be checked in Phase 4), then delete the three overrides. Recommendation: (b) for carvers, which change the shape of the world; the feature, structure and template changes look like gameplay content that belongs in every world type, so keep them unless you'd rather not.
+2. **Pre-selected world type.** Three mixins make Improved the default: pre-selected in Create World, used for demo worlds, and used by a server whose `server.properties` has no `level-type` (checked by the `server-default` smoke job). They chain with other mods now. Keep them, or default to vanilla and delete all three?
+3. **Worlds created before Phase 1** (verified by the `upgrade` smoke job). A world stores its generator in `level.dat` when it's created. Such an Improved world stores `{"type": "minecraft:noise", "settings": "players-versus:overworld", "biome_source": {"type": "minecraft:multi_noise", "preset": "minecraft:overworld"}}`. It opens without errors and keeps the Players Versus terrain, aquifer and ore veins (the gate reads the settings). But without the old global biome mixin, its new chunks get vanilla's layout: no Players Versus cave biomes (so none of their spawns) and no transition biomes. In the test region, the reopened world's new chunks had forest, plains and ocean from the surface down to y −40, where a fresh world has `caves/deep_caves` (89.5% at y −40) and `caves/regular_cave` (100% at y 0). Options:
+   - (a) accept it (decision 1 allows old worlds to break);
+   - (b) migrate on load: one more mixin wraps the overworld's `new ServerWorld(...)` in `MinecraftServer.createWorlds` and swaps in `PvBiomeSource` when the settings are `players-versus:overworld` and the biome source is vanilla's overworld preset. `level.dat` stays as it is, so older builds still open the world.
+
+   Recommendation: (b) if people play Improved worlds made by earlier builds, otherwise (a).
+4. **Q9, cave biomes at the surface.** Surface biomes only sit at depth 0, so where the ground lies deeper than about 0.135 below the noise surface (≈17 blocks), `caves/regular_cave` (depth 0.25–0.65, offset 0.07) is nearer: 2.19% of surface columns in the benchmark region, including ocean floor near coasts, where kelp, seagrass and ocean structures need an ocean biome. Options:
+   - (a) accept it;
+   - (b) give every surface entry depth 0..0.1: the crossover moves to about 0.19 (≈24 blocks), and the surface-cave biomes (desert creeper, badlands and frosted caves, depth 0.1–0.25) start about 0.075 deeper (≈10 blocks);
+   - (c) give only ocean slices a depth range into the ground, such as 0..0.25: ocean floors keep their ocean biome, and caves just under the sea floor get it too, down to about 0.32 (≈41 blocks below the noise surface).
+
+   Recommendation: (c), since ocean floors are where it breaks generation; land columns that dip that deep are ravines and cliffs.
+5. **Side effects of the Q2 fix** (measured by `PvBiomeLayoutTest`). Frozen oceans come back where vanilla has them: under the old layout, 1.14% of surface climate points were cold ocean instead. And deserts at humidity 0.275–0.35 become desert oases (0.04% of surface points), which have no creeper caves beneath them (0.08% of points at depth 0.22 go from desert creeper caves to regular caves). Keep the fix as is, or add explicit rules to bring back the old look?
 
 ---
 
@@ -652,7 +648,7 @@ S  = y∈[-2,48) ? (y≥24 ? G(24,48,-0.2,0) : 1)·max(0, G(48,24,-3,-0.1)
                + interpolated(min(1, G(0,16,0,-16)·min(0, -0.12 - 0.06|surface(4,2)| + EN + min(0, (EN-0.24)·(-4·min(0, N-0.08))))))) : 0
 ```
 
-(The `interpolated(...)` wrapping `N` inside `S` is Q1.)
+(The `interpolated(...)` wrapping `N` inside `S` is Q1. Since Phase 2b the aquifer computes that inner part from exact values at its lattice points, which sit where the terrain pass's cell corners are.)
 
 ---
 
@@ -661,6 +657,7 @@ S  = y∈[-2,48) ? (y≥24 ? G(24,48,-0.2,0) : 1)·max(0, G(48,24,-3,-0.1)
 | API | Signature (Yarn names) |
 |---|---|
 | `ChunkNoiseSampler.<init>` | `(int horizontalCellCount, NoiseConfig, int startBlockX, int startBlockZ, GenerationShapeConfig, DensityFunctionTypes.Beardifying, ChunkGeneratorSettings, AquiferSampler.FluidLevelSampler, Blender)` |
+| `ChunkNoiseSampler` (terrain pass, called reflectively by the test helper `TerrainPass`) | `getActualDensityFunction(DensityFunction)`, `getAquiferSampler()`, `sampleStartDensity()`, `sampleEndDensity(int cellX)`, `onSampledCellCorners(int cellY, int cellZ)`, `interpolateY(int blockY, double deltaY)`, `interpolateX(int blockX, double deltaX)`, `interpolateZ(int blockZ, double deltaZ)`, `swapBuffers()`, `stopInterpolation()`; confirmed at run time |
 | `AquiferSampler` | `static aquifer(ChunkNoiseSampler, ChunkPos, NoiseRouter, RandomSplitter, int minimumY, int height, FluidLevelSampler)`, `static seaLevel(FluidLevelSampler)`, `apply(NoisePos, double density)`, `needsFluidTick()` |
 | `AquiferSampler.FluidLevel` | record `(int y, BlockState state)`, `getBlockState(int y)` |
 | `OreVeinSampler.create` | `(DensityFunction veinToggle, DensityFunction veinRidged, DensityFunction veinGap, RandomSplitter)` → `ChunkNoiseSampler.BlockStateSampler` |
@@ -679,7 +676,7 @@ S  = y∈[-2,48) ? (y≥24 ? G(24,48,-0.2,0) : 1)·max(0, G(48,24,-3,-0.1)
 | `ChunkGenerator` | `getCodec()`, `appendDebugHudText(List<String>, NoiseConfig, BlockPos)`, `carve(ChunkRegion, long, NoiseConfig, BiomeAccess, StructureAccessor, Chunk)`, `getHeight(int, int, Heightmap.Type, HeightLimitView, NoiseConfig)`, `getColumnSample(int, int, HeightLimitView, NoiseConfig)` |
 | `RegistryOps` | `getEntryLookupCodec(RegistryKey)` and `getEntryCodec(RegistryKey)` → `RecordCodecBuilder` |
 | `MaterialRules` | `sequence, condition, block, biome, noiseThreshold, stoneDepth, aboveY, aboveYWithStoneDepth, water, waterWithStoneDepth, verticalGradient, not, steepSlope, hole, surface, temperature, terracottaBands`; `MaterialRule.CODEC` |
-| `MathHelper` | `lerp3(dx, dy, dz, x0y0z0, x1y0z0, x0y1z0, x1y1z0, x0y0z1, x1y0z1, x0y1z1, x1y1z1)`, `clampedMap(value, oldStart, oldEnd, newStart, newEnd)` |
+| `MathHelper` | `lerp(delta, start, end)` (the lattice's interpolation, in the order vanilla's `interpolated` uses: y, then x, then z), `lerp3(dx, dy, dz, x0y0z0, x1y0z0, x0y1z0, x1y1z0, x0y0z1, x1y0z1, x0y1z1, x1y1z1)`, `clampedMap(value, oldStart, oldEnd, newStart, newEnd)` |
 | Commands (1.21.10) | `CommandManager.literal/argument`; `ServerCommandSource` implements `PermissionLevelSource.hasPermissionLevel(int)`; `CommandManager.requirePermissionLevel(int)` → `PermissionLevelPredicate` |
 
 ## Appendix C: Noise costs used in the estimates

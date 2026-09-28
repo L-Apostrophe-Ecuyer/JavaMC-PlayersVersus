@@ -25,8 +25,9 @@ import java.util.stream.Collectors;
  * <p>Other functions can join the pass ({@link #register}): they go through the sampler's own wrapping, so their
  * {@code interpolated}, {@code flat_cache} and {@code cache_once} parts behave as in the chunk's router.
  *
- * <p>The sampler's loop methods and its constructor aren't all public; this calls them reflectively, by their Yarn
- * names (tests run on the named game jar). No blending, no structures (vanilla's beardifier marker).
+ * <p>It calls the sampler's constructor and loop methods reflectively, by their Yarn names (tests run on the named
+ * game jar), so it doesn't depend on their access modifiers, which the mappings don't record. No blending, no
+ * structures (vanilla's beardifier marker, found the same way).
  */
 public final class TerrainPass {
 

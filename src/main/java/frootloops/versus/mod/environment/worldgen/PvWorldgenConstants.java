@@ -4,8 +4,10 @@ package frootloops.versus.mod.environment.worldgen;
  * Numbers that more than one part of the Players Versus world type depends on.
  *
  * <p>Keep every value that the aquifer, the density functions and the surface rules must agree on here, so a
- * change in one place can't silently break another. Until the density functions move to Java (plan phases 2–3),
- * some of these values are duplicated in {@code data/players-versus/worldgen/**}; those spots are named below.
+ * change in one place can't silently break another. Where a value is still written out elsewhere, the spot is named
+ * below. The aquifer's formulas are Java since plan phase 2b ({@code aquifer/AquiferFormulas}); the JSON they
+ * replaced stays in {@code data/players-versus/worldgen/**}, unreferenced, as the tests' reference, so it repeats
+ * these values without being used.
  */
 public final class PvWorldgenConstants {
 
@@ -19,8 +21,8 @@ public final class PvWorldgenConstants {
     /**
      * The aquifer fills water strictly below this y, so the ocean surface is at y 63. Same meaning as the noise
      * settings' {@code sea_level} (vanilla: water below it), which must hold the same number, since spawning,
-     * icebergs, ocean structures and the snow line read that one. Also the {@code range_choice} bound in
-     * {@code aquifer_floodedness_oceans_and_rivers_y64.json}.
+     * icebergs, ocean structures and the snow line read that one. Also written out as the top of F's band and of
+     * the river term in {@code AquiferFormulas} (y below 64), as in the JSON it replaced.
      */
     public static final int SEA_LEVEL = 64;
 
@@ -32,14 +34,15 @@ public final class PvWorldgenConstants {
     public static final int SEA_BAND_MIN_Y = -32;
 
     /**
-     * Floodedness above this is water. Also the upper bound of the {@code range_choice} in
-     * {@code aquifer_fluid_level_floodedness.json}.
+     * Floodedness above this is water. {@code AquiferFormulas.floodedness} adds the ramen-cave term below it, as the
+     * {@code range_choice} in {@code aquifer_fluid_level_floodedness.json} did.
      */
     public static final double SEA_WATER_THRESHOLD = 0.34;
 
     /**
-     * Floodedness above this (and below {@link #SEA_WATER_THRESHOLD}) is a stone barrier. Also the lower bound of
-     * the {@code range_choice} in {@code aquifer_fluid_level_floodedness.json}.
+     * Floodedness above this (and below {@link #SEA_WATER_THRESHOLD}) is a barrier, which the terrain pass fills with
+     * ore veins or the default block. {@code AquiferFormulas.floodedness} adds the ramen-cave term from here up, as
+     * the {@code range_choice} in {@code aquifer_fluid_level_floodedness.json} did.
      */
     public static final double SEA_BARRIER_THRESHOLD = 0.0001;
 

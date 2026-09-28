@@ -14,7 +14,7 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * {@code aquifer_fluid_level_spread}, {@code aquifer_floodedness_cave_basins_y24}), written so they give the same
  * doubles: the same operations in the same order, vanilla's {@code mul} (0 times anything is 0) where the JSON
  * multiplies two functions, and band checks against vanilla's {@code minecraft:y}, which is 31.9999999999995 at y 32.
- * {@code AquiferFormulaTest} compares them with the JSON.
+ * {@code AquiferPortTest} compares them with the JSON, which stays in the mod's data, unreferenced, as that reference.
  */
 public final class AquiferFormulas {
 
