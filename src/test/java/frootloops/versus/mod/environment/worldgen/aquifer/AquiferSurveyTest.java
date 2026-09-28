@@ -75,6 +75,7 @@ class AquiferSurveyTest {
                 .map(name -> withEntrancesDelta(finalDensity, delta(CANDIDATES.get(name)))).toList();
         Map<ChunkPos, String> chunks = surveyChunks(config);
         Tally tally = new Tally(names.size(), shape.minimumY(), shape.height());
+        WallVariants walls = new WallVariants();
         long[] unchangedMismatches = {0};
         for (Map.Entry<ChunkPos, String> entry : chunks.entrySet()) {
             ChunkPos chunk = entry.getKey();
@@ -91,6 +92,7 @@ class AquiferSurveyTest {
                 blocks.state[i] = (byte) decision.ordinal();
                 PvAquiferDecision carved = decision == PvAquiferDecision.SOLID ? aquifer.decide(pos, 0.0, lava) : decision;
                 blocks.state0[i] = (byte) carved.ordinal();
+                blocks.own[i] = (byte) aquifer.atPosition(x, y, z).ordinal();
                 for (int c = 0; c < registered.length; c++) {
                     double candidate = registered[c].sample(pos);
                     blocks.open[c][i] = candidate <= 0.0;
@@ -98,8 +100,10 @@ class AquiferSurveyTest {
                 }
             });
             tally.add(blocks, entry.getValue());
+            walls.add(blocks);
         }
         tally.print(names);
+        walls.print();
         assertEquals(0, unchangedMismatches[0], "the survey's unchanged candidate differs from the router's final density");
         assertTrue(tally.openWater > 0 && tally.caveBlocks(0) > 0, "the survey found no water or no caves");
         long leaking = tally.leaking[0][0] + tally.leaking[0][1] + tally.leaking[1][0] + tally.leaking[1][1];
@@ -179,6 +183,8 @@ class AquiferSurveyTest {
         final int minY, height;
         /** Decision ordinals: at the block's own density, and at density 0 (what a carver gets there). */
         final byte[] state, state0;
+        /** {@link PvAquifer#atPosition}: what each block's own floodedness says (water, a band, nothing). */
+        final byte[] own;
         /** Per candidate: whether its terrain leaves the block open. */
         final boolean[][] open;
 
@@ -187,6 +193,7 @@ class AquiferSurveyTest {
             this.height = height;
             this.state = new byte[16 * 16 * height];
             this.state0 = new byte[16 * 16 * height];
+            this.own = new byte[16 * 16 * height];
             this.open = new boolean[candidates][16 * 16 * height];
         }
 
@@ -198,12 +205,128 @@ class AquiferSurveyTest {
             return DECISIONS[this.state[this.index(localX, y, localZ)]];
         }
 
+        PvAquiferDecision ownAt(int localX, int y, int localZ) {
+            return DECISIONS[this.own[this.index(localX, y, localZ)]];
+        }
+
         PvAquiferDecision carvedAt(int localX, int y, int localZ) {
             return DECISIONS[this.state0[this.index(localX, y, localZ)]];
         }
 
         boolean inside(int localX, int y, int localZ) {
             return localX >= 0 && localX < 16 && localZ >= 0 && localZ < 16 && y >= this.minY && y < this.minY + this.height;
+        }
+    }
+
+    /**
+     * Wall rules played out on each block's own floodedness ({@link PvAquifer#atPosition}): the barrier bands alone (the
+     * rule until revision 6), and walls where water could flow in plus the bands within 2 steps of water, keeping every
+     * band from a given height up. How much open terrain each fills with stone, and how many columns' surface (their
+     * highest solid block) moves against the bands alone.
+     */
+    private static final class WallVariants {
+        /** The heights from which a variant keeps every band; 64 keeps none (the rule in the code). */
+        private static final int[] KEEP_FROM = {64, 56, 52, 48, 44, 40};
+        private static final int[][] INFLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, 1, 0}};
+        private static final int[][] FLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
+
+        int chunks;
+        /** By variant (0: the bands alone, then one per {@link #KEEP_FROM}): stone in open terrain, in caves and under the sky. */
+        final long[][] stone = new long[KEEP_FROM.length + 1][2];
+        /** By variant: columns whose highest solid block moves down, and up, against the bands alone, and by how much in all. */
+        final long[] surfaceDown = new long[KEEP_FROM.length + 1], surfaceUp = new long[KEEP_FROM.length + 1],
+                surfaceMoved = new long[KEEP_FROM.length + 1];
+        /** By variant: open water next to open dry air. */
+        final long[] leaks = new long[KEEP_FROM.length + 1];
+
+        void add(ChunkBlocks blocks) {
+            this.chunks++;
+            int variants = KEEP_FROM.length + 1, maxY = blocks.minY + blocks.height;
+            boolean[][] wall = new boolean[variants][blocks.state.length];
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int y = blocks.minY; y < maxY; y++) {
+                        PvAquiferDecision own = blocks.ownAt(x, y, z);
+                        if (water(own)) continue;
+                        int i = blocks.index(x, y, z);
+                        boolean band = barrier(own), inflow = this.near(blocks, x, y, z, INFLOW), nearWater = band && this.withinTwoSteps(blocks, x, y, z);
+                        wall[0][i] = band;
+                        for (int v = 0; v < KEEP_FROM.length; v++) {
+                            wall[v + 1][i] = inflow || band && (y >= KEEP_FROM[v] || nearWater);
+                        }
+                    }
+                }
+            }
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    int[] top = new int[variants];
+                    for (int v = 0; v < variants; v++) {
+                        top[v] = blocks.minY - 1;
+                        for (int y = maxY - 1; y >= blocks.minY; y--) {
+                            if (blocks.at(x, y, z) == PvAquiferDecision.SOLID || wall[v][blocks.index(x, y, z)]) {
+                                top[v] = y;
+                                break;
+                            }
+                        }
+                        if (top[v] < top[0]) this.surfaceDown[v]++;
+                        if (top[v] > top[0]) this.surfaceUp[v]++;
+                        this.surfaceMoved[v] += Math.abs(top[v] - top[0]);
+                    }
+                    for (int y = blocks.minY; y < maxY; y++) {
+                        int i = blocks.index(x, y, z);
+                        PvAquiferDecision decision = blocks.at(x, y, z);
+                        if (decision == PvAquiferDecision.SOLID) continue;
+                        for (int v = 0; v < variants; v++) {
+                            if (wall[v][i]) this.stone[v][y < top[v] ? 0 : 1]++;
+                            if (water(decision)) {
+                                for (int[] offset : FLOW) {
+                                    int nx = x + offset[0], ny = y + offset[1], nz = z + offset[2];
+                                    if (!blocks.inside(nx, ny, nz)) continue;
+                                    PvAquiferDecision neighbour = blocks.at(nx, ny, nz);
+                                    if (neighbour != PvAquiferDecision.SOLID && !water(neighbour) && neighbour != PvAquiferDecision.LAVA
+                                            && !wall[v][blocks.index(nx, ny, nz)]) {
+                                        this.leaks[v]++;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private boolean near(ChunkBlocks blocks, int x, int y, int z, int[][] offsets) {
+            for (int[] offset : offsets) {
+                int nx = x + offset[0], ny = y + offset[1], nz = z + offset[2];
+                if (blocks.inside(nx, ny, nz) && water(blocks.ownAt(nx, ny, nz))) return true;
+            }
+            return false;
+        }
+
+        private boolean withinTwoSteps(ChunkBlocks blocks, int x, int y, int z) {
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dy = -2 + Math.abs(dx); dy <= 2 - Math.abs(dx); dy++) {
+                    int reach = 2 - Math.abs(dx) - Math.abs(dy);
+                    for (int dz = -reach; dz <= reach; dz++) {
+                        int nx = x + dx, ny = y + dy, nz = z + dz;
+                        if (blocks.inside(nx, ny, nz) && water(blocks.ownAt(nx, ny, nz))) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        void print() {
+            double n = this.chunks;
+            for (int v = 0; v <= KEEP_FROM.length; v++) {
+                String name = v == 0 ? "the bands alone" : KEEP_FROM[v - 1] >= 64 ? "walls, bands within 2 steps of water"
+                        : "walls, bands within 2 steps of water or from y " + KEEP_FROM[v - 1] + " up";
+                System.out.printf(Locale.ROOT, "[survey] %s: stone in open terrain %.1f in caves, %.1f under the sky per chunk; columns per chunk"
+                                + " whose surface moves against the bands alone: %.2f down, %.2f up (%.1f blocks in all); water next to open dry air %.2f%n",
+                        name, this.stone[v][0] / n, this.stone[v][1] / n, this.surfaceDown[v] / n, this.surfaceUp[v] / n,
+                        this.surfaceMoved[v] / n, this.leaks[v] / n);
+            }
         }
     }
 
