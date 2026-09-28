@@ -228,13 +228,54 @@ jobs:
           ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=minecraft:normal" \
             "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
           cp run/worldgen-smoke/pvwg/*/report.txt reports/3-vanilla.txt
+          rm -rf run/worldgen-smoke/pvwg
+      # The same three runs next to C2ME and Lithium: C2ME compiles density functions it knows and calls the others,
+      # so a change can speed up one setup and slow down the other.
+      - name: download C2ME and Lithium
+        env:
+          UA: "L-Apostrophe-Ecuyer/JavaMC-PlayersVersus worldgen-smoke"
+        run: |
+          mkdir -p perf-mods
+          for slug in c2me-fabric lithium; do
+            read -r version url filename < <(curl -fsSL -A "$UA" \
+              "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%221.21.10%22%5D" \
+              | python3 -c 'import json, sys; v = json.load(sys.stdin)[0]; f = next(f for f in v["files"] if f["primary"]); print(v["version_number"], f["url"], f["filename"])')
+            test -n "$url"
+            echo "$slug $version"
+            curl -fsSL -A "$UA" -o "perf-mods/$filename" "$url"
+          done
+      - name: previous commit with C2ME and Lithium
+        run: |
+          git checkout --detach "$GITHUB_SHA~1"
+          mkdir -p run/worldgen-smoke/mods && cp perf-mods/*.jar run/worldgen-smoke/mods/
+          chmod +x ./gradlew
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/4-previous-c2me.txt
+          rm -rf run/worldgen-smoke/pvwg
+      - name: this commit with C2ME and Lithium
+        run: |
+          git checkout --detach "$GITHUB_SHA"
+          chmod +x ./gradlew
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=players-versus:better_world" \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/5-this-c2me.txt
+          rm -rf run/worldgen-smoke/pvwg
+      - name: vanilla with C2ME and Lithium
+        run: |
+          ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=minecraft:normal" \
+            "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+          cp run/worldgen-smoke/pvwg/*/report.txt reports/6-vanilla-c2me.txt
+          rm -rf run/worldgen-smoke/mods
       - name: compare
         if: always()
         run: |
-          python3 - reports/1-previous.txt reports/2-this.txt reports/3-vanilla.txt <<'EOF'
-          import sys
+          python3 - reports <<'EOF'
+          import os, sys
           def read(path):
               times, metrics = {}, []
+              if not os.path.exists(path):
+                  return times, metrics
               for line in open(path):
                   parts = line.split()
                   if parts and parts[0] == "time":
@@ -242,13 +283,20 @@ jobs:
                   elif parts and parts[0] == "metric":
                       metrics.append(line.rstrip())
               return times, metrics
-          (previous, pm), (this, tm), (vanilla, vm) = (read(path) for path in sys.argv[1:])
-          print(f"{'status':20} {'previous':>9} {'this':>9} {'vanilla':>9} {'this/prev':>10} {'this/vanilla':>13}  (ms/chunk)")
-          for status in this:
-              p, t, v = previous.get(status, float('nan')), this[status], vanilla.get(status, float('nan'))
-              print(f"{status:20} {p:9.2f} {t:9.2f} {v:9.2f} {t / p:10.2f} {t / v:13.2f}")
-          print("\nmetrics, previous commit:"); print("\n".join(pm))
-          print("\nmetrics, this commit:"); print("\n".join(tm))
+          def table(title, previous, this, vanilla):
+              print(f"\n{title}")
+              print(f"{'status':20} {'previous':>9} {'this':>9} {'vanilla':>9} {'this/prev':>10} {'this/vanilla':>13}  (ms/chunk)")
+              nan = float('nan')
+              for status in this:
+                  p, t, v = previous.get(status, nan), this[status], vanilla.get(status, nan)
+                  print(f"{status:20} {p:9.2f} {t:9.2f} {v:9.2f} {t / p:10.2f} {t / v:13.2f}")
+          d = sys.argv[1]
+          runs = {name: read(os.path.join(d, name + ".txt")) for name in
+                  ["1-previous", "2-this", "3-vanilla", "4-previous-c2me", "5-this-c2me", "6-vanilla-c2me"]}
+          table("Players Versus alone", runs["1-previous"][0], runs["2-this"][0], runs["3-vanilla"][0])
+          table("next to C2ME and Lithium", runs["4-previous-c2me"][0], runs["5-this-c2me"][0], runs["6-vanilla-c2me"][0])
+          for name in ["1-previous", "2-this", "5-this-c2me"]:
+              print(f"\nmetrics, {name}:"); print("\n".join(runs[name][1]))
           EOF
       - name: upload results
         if: always()

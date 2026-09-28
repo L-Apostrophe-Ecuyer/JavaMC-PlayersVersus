@@ -35,7 +35,7 @@
 | Aquifer, terrain pass | ~48 octave samples per open block (y −31…63): 60–400k per chunk | at most 1,125 lattice points per chunk, plus the surface and ramen noises per block. **Measured:** `noise` 35.5 → 25.9 (vanilla 19.7) |
 | Aquifer, carvers | ~100–250 per carved block | the chunk's lattices, already filled. **Measured:** `carvers` 2.34 → 1.07 (vanilla 1.06) |
 | Terrain corner pass | ~130–180k per chunk | 25–40% less (no duplicate `sloped_cheese`, per-column river/jagged noise) |
-| Worldgen mixins | 6, three of which changed vanilla world types | 1 (plus the 3 default-preset mixins, depending on Section 10, question 2). Today: `ChunkNoiseSamplerMixin` and the default-preset mixins, which now chain with other mods (`@ModifyExpressionValue`, `@ModifyArg`) |
+| Worldgen mixins | 6, three of which changed vanilla world types | 1 (plus the 3 default-preset mixins, which stay: Section 10, question 2). Today: `ChunkNoiseSamplerMixin` and the default-preset mixins, which now chain with other mods (`@ModifyExpressionValue`, `@ModifyArg`) |
 
 ---
 
@@ -138,7 +138,7 @@ P1, P2 and P4 are gone since Phase 2b (Section 6.2). On one runner, `noise` went
 - **S1** (fixed in Phase 1, verified by the smoke runs): biome placement was global. A Default world with the mod had `players-versus:caves/deep_caves` on 73% of y −40 and `regular_cave` on all of y 0, which also brought this mod's cave spawns (wither skeletons, zombified piglins, deeper creepers) to vanilla world types. It now has only vanilla biomes.
 - **S2 and S3** (fixed by the groundwork): ore veins were global, and the aquifer was switched by `height == 336` through a `@Redirect`.
 - **S5:** there is no single source of truth for density-function thresholds until Phase 2; `PvWorldgenConstants` names where they're duplicated.
-- **S6:** vanilla-namespace data overrides still change vanilla world types (Section 10, question 1).
+- **S6:** vanilla-namespace data overrides still change vanilla world types (Section 10, question 1: the carvers are to become Improved-only; the other overrides stay global by decision).
 
 ### 2.3 Quirks (Section 7 says how each is fixed)
 
@@ -152,7 +152,7 @@ P1, P2 and P4 are gone since Phase 2b (Section 6.2). On one runner, `noise` went
 | Q6 | Barriers are returned to carvers as STONE | **Fixed in Phase 2a.** Carvers placed stone at 2,027 of 173,811 carved positions in y −8..63, against 0 of 173,701 in vanilla (metric `carver_placed_stone`; revision 3's metric looked below y −8, where there are no barriers). Barriers now return "solid" like vanilla's: 0 of 173,811 on the server. |
 | Q7 | Transitions sit at depth 0 and 0.1, originals only at 0 | **Fixed in Phase 1.** At depth 0.12–0.17, 2.5–3% of climate points change, mostly mountainside biomes giving way to cave biomes. |
 | Q8 | Basin water's tick test `density < 0.08` is always true, because density is ≤ 0 at that point | **Fixed in Phase 2a.** It queued 243.6 fluid updates per chunk (175.1 in y 0..31, where there are 259.4 water blocks per chunk), against 47.3 in vanilla. Basin water now ticks only within the margin of its threshold: 110.8 per chunk, 44.8 in y 0..31, with the same water. |
-| Q9 | Surface biomes only exist at depth 0, so where the ground sits more than about 0.135 of depth (≈17 blocks) below the noise surface, a cave biome is nearer | **New, measured.** 2.19% of surface columns in the benchmark region are `regular_cave`, including patches of ocean floor near the coast, where ocean features (kelp, seagrass) can't generate. Vanilla avoids this with the depth-1 copies, which Players Versus drops so caves stay caves. Open question (Section 10). |
+| Q9 | Surface biomes only exist at depth 0, so where the ground sits more than about 0.135 of depth (≈17 blocks) below the noise surface, a cave biome is nearer | **New, measured.** 2.19% of surface columns in the benchmark region are `regular_cave`, including patches of ocean floor near the coast, where ocean features (kelp, seagrass) can't generate. Vanilla avoids this with the depth-1 copies, which Players Versus drops so caves stay caves. **Accepted** (Section 10, question 4). |
 
 ---
 
@@ -539,7 +539,7 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:re
 | Q6 | Barrier returns "solid" (`null`): carvers skip it, and the terrain pass fills it with ore veins or the default block, as vanilla does | 2a, done |
 | Q7 | One surface depth for all surface entries | 1, done |
 | Q8 | Queue fluid updates only within the S margin, like sea water | 2a, done |
-| Q9 | Open (Section 10, question 4) | 1 or later |
+| Q9 | Accepted as is (Section 10, question 4) | none |
 
 ---
 
@@ -572,7 +572,9 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:re
 
 ---
 
-## 10. Open questions
+## 10. Questions and decisions
+
+All five were answered by the repository owner (decisions of 2026-09-28, below each question).
 
 1. **Vanilla-namespace data overrides change vanilla world types.** Files under `data/minecraft/` replace vanilla's in every world type: 124 under `worldgen/` (6 biomes, 3 carvers, 32 configured and 37 placed features, 10 processor lists, 2 structures, 2 structure sets, 32 template pools), 23 worldgen tags, and 55 structure templates (plains and zombie village pieces, two ancient city pieces). The carvers, compared with vanilla's registry by a unit test (`VanillaOverridesTest`):
 
@@ -583,19 +585,29 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:re
    | `canyon` | 0.01, uniform y 10..67 | 0.0125 (125%), y 40..64 (weight 2) or −38..−22 (weight 1) |
 
    So a vanilla world with this mod installed starts about one cave system in seven, and only at y 32..64 instead of −56..180. Players Versus biomes use the same three carvers (plus their own for `caves/deep_caves` and the deep dark), so the tuning matters to Players Versus too. Options: (a) keep them global; (b) make them Players Versus only: copy them as `players-versus:` carvers and have Phase 4's generator use the copies wherever a biome names the `minecraft:` ones (how it swaps them is to be checked in Phase 4), then delete the three overrides. Recommendation: (b) for carvers, which change the shape of the world; the feature, structure and template changes look like gameplay content that belongs in every world type, so keep them unless you'd rather not.
+
+   **Decided: (b), carvers apply to Improved worlds only.** The feature, structure and template changes stay global. The mechanism is still to be chosen (a gated swap of the three carvers for `players-versus:` copies); until then the overrides stay global.
 2. **Pre-selected world type.** Three mixins make Improved the default: pre-selected in Create World, used for demo worlds, and used by a server whose `server.properties` has no `level-type` (checked by the `server-default` smoke job). They chain with other mods now. Keep them, or default to vanilla and delete all three?
+
+   **Decided: keep them.** Improved stays the default.
 3. **Worlds created before Phase 1** (verified by the `upgrade` smoke job). A world stores its generator in `level.dat` when it's created. Such an Improved world stores `{"type": "minecraft:noise", "settings": "players-versus:overworld", "biome_source": {"type": "minecraft:multi_noise", "preset": "minecraft:overworld"}}`. It opens without errors and keeps the Players Versus terrain, aquifer and ore veins (the gate reads the settings). But without the old global biome mixin, its new chunks get vanilla's layout: no Players Versus cave biomes (so none of their spawns) and no transition biomes. In the test region, the reopened world's new chunks had forest, plains and ocean from the surface down to y −40, where a fresh world has `caves/deep_caves` (89.5% at y −40) and `caves/regular_cave` (100% at y 0). Options:
    - (a) accept it (decision 1 allows old worlds to break);
    - (b) migrate on load: one more mixin wraps the overworld's `new ServerWorld(...)` in `MinecraftServer.createWorlds` and swaps in `PvBiomeSource` when the settings are `players-versus:overworld` and the biome source is vanilla's overworld preset. `level.dat` stays as it is, so older builds still open the world.
 
    Recommendation: (b) if people play Improved worlds made by earlier builds, otherwise (a).
+
+   **Decided: (a).** The mod was never released, so no world needs migrating. The goal is to keep the world as similar as possible for gameplay: the terrain and aquifer ports are held to the old output (bit for bit where possible, Sections 6.2 and 6.5).
 4. **Q9, cave biomes at the surface.** Surface biomes only sit at depth 0, so where the ground lies deeper than about 0.135 below the noise surface (≈17 blocks), `caves/regular_cave` (depth 0.25–0.65, offset 0.07) is nearer: 2.19% of surface columns in the benchmark region, including ocean floor near coasts, where kelp, seagrass and ocean structures need an ocean biome. Options:
    - (a) accept it;
    - (b) give every surface entry depth 0..0.1: the crossover moves to about 0.19 (≈24 blocks), and the surface-cave biomes (desert creeper, badlands and frosted caves, depth 0.1–0.25) start about 0.075 deeper (≈10 blocks);
    - (c) give only ocean slices a depth range into the ground, such as 0..0.25: ocean floors keep their ocean biome, and caves just under the sea floor get it too, down to about 0.32 (≈41 blocks below the noise surface).
 
    Recommendation: (c), since ocean floors are where it breaks generation; land columns that dip that deep are ravines and cliffs.
+
+   **Decided: (a), accept it.**
 5. **Side effects of the Q2 fix** (measured by `PvBiomeLayoutTest`). Frozen oceans come back where vanilla has them: under the old layout, 1.14% of surface climate points were cold ocean instead. And deserts at humidity 0.275–0.35 become desert oases (0.04% of surface points), which have no creeper caves beneath them (0.08% of points at depth 0.22 go from desert creeper caves to regular caves). Keep the fix as is, or add explicit rules to bring back the old look?
+
+   **Decided: keep the fix as is.**
 
 ---
 

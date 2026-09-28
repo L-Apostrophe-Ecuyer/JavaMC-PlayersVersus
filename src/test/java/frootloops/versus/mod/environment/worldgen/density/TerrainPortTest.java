@@ -144,13 +144,14 @@ class TerrainPortTest {
     private static List<ChunkPos> testChunks(NoiseConfig config) {
         DensityFunction ridges = WorldgenTestData.seeded(config, "minecraft:overworld/ridges");
         DensityFunction jaggedness = WorldgenTestData.seeded(config, "minecraft:overworld/jaggedness");
-        DensityFunction offset = WorldgenTestData.seeded(config, "minecraft:overworld/offset");
+        // inland (vanilla's coast starts at continentalness -0.11), so the valley is cut into land
+        DensityFunction continents = WorldgenTestData.seeded(config, "minecraft:overworld/continents");
         List<ChunkPos> chunks = new ArrayList<>(List.of(new ChunkPos(100, 100)));
         ChunkPos river = null, peaks = null;
         for (int step = 0; step < 4000 && (river == null || peaks == null); step++) {
             int chunkX = (step % 63) * 7 - 220, chunkZ = (step / 63) * 7 - 220;
             DensityFunction.NoisePos center = new DensityFunction.UnblendedNoisePos(chunkX * 16 + 8, 64, chunkZ * 16 + 8);
-            if (river == null && Math.abs(ridges.sample(center)) < 0.05 && offset.sample(center) > 0.0) river = new ChunkPos(chunkX, chunkZ);
+            if (river == null && Math.abs(ridges.sample(center)) < 0.05 && continents.sample(center) > -0.11) river = new ChunkPos(chunkX, chunkZ);
             if (peaks == null && jaggedness.sample(center) > 0.2) peaks = new ChunkPos(chunkX, chunkZ);
         }
         assertTrue(river != null && peaks != null, "no river or peak chunk found: " + river + ", " + peaks);
