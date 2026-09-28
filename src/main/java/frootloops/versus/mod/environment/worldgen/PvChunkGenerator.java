@@ -22,8 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * biomes carve with the Players Versus carvers ({@link PvCarvers}). Everything else is vanilla's
  * {@link NoiseChunkGenerator}; the terrain, aquifer and ore veins come from the settings, as before.
  *
- * <p>Vanilla's generator asks {@link #getGenerationSettings} for a biome's carvers when it carves a chunk. Features
- * don't come through here, and the settings returned keep the biome's own features anyway.
+ * <p>Vanilla's generator asks {@link #getGenerationSettings} for a biome's carvers when it carves a chunk (the smoke
+ * run's carved-position count shows the swap). The settings returned keep the biome's own features, so anything else
+ * that asks gets the same features as before.
  */
 public final class PvChunkGenerator extends NoiseChunkGenerator {
 

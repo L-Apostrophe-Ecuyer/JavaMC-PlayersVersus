@@ -1,4 +1,4 @@
-# Players Versus world type: worldgen revamp plan (revision 4)
+# Players Versus world type: worldgen revamp plan (revision 5)
 
 **Target:** Minecraft 1.21.10, Yarn `1.21.10+build.2`, Fabric Loader 0.17.3, Loom 1.11, Java 21.
 
@@ -8,7 +8,7 @@
 2. The revamp is **its own world type**. Vanilla world types behave as usual.
 3. **Fix the quirks.**
 
-**Status:** the groundwork (Section 4), Phase 1 (the biome source, Section 6.3) and Phase 2 (the aquifer, Section 6.2) are in, and have run on a real server: every commit tagged `[smoke]` generates the same region with a vanilla world and a Players Versus world, alone and next to C2ME and Lithium, reopens a world made by an older build, and compares timings on one runner (Section 8). Phases 3 to 5 are still a plan. Revision 4 replaces predictions with measurements wherever a run or a test could check them (Section 2.4); several predictions were wrong, among them what happens to existing worlds (Section 10, question 3). Revision 3 (git history) added the verified APIs, the pseudocode and the formulas in Appendix A.
+**Status:** the groundwork (Section 4), Phase 1 (the biome source, Section 6.3), Phase 2 (the aquifer, Section 6.2) and Phase 3 (the terrain kernels, Section 6.5) are in, and so are the owner's answers to Section 10, among them Improved-only carvers. They have run on a real server: every commit tagged `[smoke]` generates the same region with a vanilla world and a Players Versus world, alone and next to C2ME and Lithium, reopens a world made by an older build, and compares timings on one runner (Section 8). Phases 4 and 5 are still a plan. Revision 5 adds Phase 3 and what it taught about where the time goes and about C2ME (Section 6.5). Revision 4 replaced predictions with measurements wherever a run or a test could check them (Section 2.4). Revision 3 (git history) added the verified APIs, the pseudocode and the formulas in Appendix A.
 
 **How vanilla facts were checked.** Names and signatures come from the Yarn 1.21.10 mappings (Appendix B). Mappings don't say what code does, and don't reliably say whether a member is public: `VanillaBiomeParameters.writeOverworldBiomeParameters` turned out to be protected, which only the compiler caught. So behavior is checked by running it: unit tests run Minecraft's code under Fabric Loader (`./gradlew test`), and the smoke workflow runs a dedicated server. Claims nothing has measured yet are still marked **[measure]**.
 
@@ -25,8 +25,9 @@
 | `PvBiomeSource` + `PvBiomeLayout`: layout rules as data, disjoint boxes | `VanillaBiomeParametersOverworldMixin` (global) | **done** |
 | Aquifer rules: solid barriers, fluid ticks only near edges, sea level 64 | stone barriers placed by carvers, every basin block ticking | **2a, done** |
 | `PvAquifer` v2: F and S in Java per block, their smooth inputs on the terrain pass's cells; one answer for every caller | per-block evaluation of the JSON trees, which gave carvers other values than the terrain pass | **2b, done** |
-| `PvRouter` + kernels: terrain density functions in Java | 18 hand-written density-function JSON files | 3 |
-| `PvChunkGenerator` + `PvSettings` + `PvSurfaceRules`: all settings in code | `noise_settings/overworld.json` (41 KB of surface rules) | 4 |
+| Terrain kernels (`PvTerrain`, `PvFinalDensity`, `PvDepth`, `PvEntrances`, `PvNoodle`): the terrain density functions in Java, each shared value computed once | 18 hand-written density-function JSON trees | **3, done** |
+| `PvChunkGenerator` (`players-versus:noise`): the Improved preset's overworld, carving with the tuned carvers | three `minecraft:` carver overrides, which changed every world type | **done** (Section 10, question 1) |
+| `PvSettings` + `PvSurfaceRules`: all settings in code | `noise_settings/overworld.json` (41 KB of surface rules) | 4 |
 
 **Expected effect.** Static estimates, with measurements where a phase is done (Phase 2a against Phase 2b on one runner, ms per chunk). The measured baseline is in Section 2.4: Players Versus generation took 1.3 to 1.6 times as long as vanilla on the same region; after Phase 2 it takes 1.27 to 1.29 times as long.
 
@@ -34,7 +35,7 @@
 |---|---|---|
 | Aquifer, terrain pass | ~48 octave samples per open block (y −31…63): 60–400k per chunk | at most 1,125 lattice points per chunk, plus the surface and ramen noises per block. **Measured:** `noise` 35.5 → 25.9 (vanilla 19.7) |
 | Aquifer, carvers | ~100–250 per carved block | the chunk's lattices, already filled. **Measured:** `carvers` 2.34 → 1.07 (vanilla 1.06) |
-| Terrain corner pass | ~130–180k per chunk | 25–40% less (no duplicate `sloped_cheese`, per-column river/jagged noise) |
+| Terrain | ~130–180k octave samples per chunk at the corners, plus a JSON tree interpreted at every block | **Measured:** the per-block tree, not the corners, was most of the cost (Section 6.5). `noise` 25.88 → 17.85 (vanilla 19.77); next to C2ME 1.24 times vanilla, as before |
 | Worldgen mixins | 6, three of which changed vanilla world types | 1 (plus the 3 default-preset mixins, which stay: Section 10, question 2). Today: `ChunkNoiseSamplerMixin` and the default-preset mixins, which now chain with other mods (`@ModifyExpressionValue`, `@ModifyArg`) |
 
 ---
@@ -131,14 +132,14 @@ Unit: *octave samples*, meaning one single-octave Perlin sample (Appendix C).
 | P6 | Biome lookup | small | bigger list, same R-tree |
 | P7 | 29-octave beach noises | small | once per column per rule, near sea level only |
 
-P1, P2 and P4 are gone since Phase 2b (Section 6.2). On one runner, `noise` went from 35.5 to 25.9 ms per chunk and `carvers` from 2.34 to 1.07 (vanilla: 19.7 and 1.06).
+P1, P2 and P4 are gone since Phase 2b (Section 6.2). On one runner, `noise` went from 35.5 to 25.9 ms per chunk and `carvers` from 2.34 to 1.07 (vanilla: 19.7 and 1.06). P3 is gone since Phase 3 (Section 6.5), which found a bigger cost the estimates missed: interpreting the final density's JSON tree at every block.
 
 ### 2.2 Scope and correctness
 
 - **S1** (fixed in Phase 1, verified by the smoke runs): biome placement was global. A Default world with the mod had `players-versus:caves/deep_caves` on 73% of y −40 and `regular_cave` on all of y 0, which also brought this mod's cave spawns (wither skeletons, zombified piglins, deeper creepers) to vanilla world types. It now has only vanilla biomes.
 - **S2 and S3** (fixed by the groundwork): ore veins were global, and the aquifer was switched by `height == 336` through a `@Redirect`.
 - **S5:** there is no single source of truth for density-function thresholds until Phase 2; `PvWorldgenConstants` names where they're duplicated.
-- **S6:** vanilla-namespace data overrides still change vanilla world types (Section 10, question 1: the carvers are to become Improved-only; the other overrides stay global by decision).
+- **S6** (carvers fixed): vanilla-namespace data overrides changed vanilla world types. The carvers are Improved-only now (Section 10, question 1); the feature, structure and template overrides stay global by decision, and `VanillaOverridesTest` prints what the six biome overrides still change.
 
 ### 2.3 Quirks (Section 7 says how each is fixed)
 
@@ -153,6 +154,7 @@ P1, P2 and P4 are gone since Phase 2b (Section 6.2). On one runner, `noise` went
 | Q7 | Transitions sit at depth 0 and 0.1, originals only at 0 | **Fixed in Phase 1.** At depth 0.12–0.17, 2.5–3% of climate points change, mostly mountainside biomes giving way to cave biomes. |
 | Q8 | Basin water's tick test `density < 0.08` is always true, because density is ≤ 0 at that point | **Fixed in Phase 2a.** It queued 243.6 fluid updates per chunk (175.1 in y 0..31, where there are 259.4 water blocks per chunk), against 47.3 in vanilla. Basin water now ticks only within the margin of its threshold: 110.8 per chunk, 44.8 in y 0..31, with the same water. |
 | Q9 | Surface biomes only exist at depth 0, so where the ground sits more than about 0.135 of depth (≈17 blocks) below the noise surface, a cave biome is nearer | **New, measured.** 2.19% of surface columns in the benchmark region are `regular_cave`, including patches of ocean floor near the coast, where ocean features (kelp, seagrass) can't generate. Vanilla avoids this with the depth-1 copies, which Players Versus drops so caves stay caves. **Accepted** (Section 10, question 4). |
+| Q10 | The terrain's cave branch (cheese caves, the cave layer, pillars) almost never runs. It needs the sloped cheese at 1.5625 or more, but the sloped cheese is `min(river_carver, …)`, and the river carver is 1 away from river valleys. Only near a valley's edge, at y 48 to about 70, can the river carver pass 1.5625. | **New, measured, kept** (the goal is to keep the world as it is, Section 10, question 3). 106 of 20,000 random positions take the branch in `TerrainPortTest`. Players Versus caves come from the entrances (spaghetti and ramen caves), noodles and carvers. Opening the branch up would change the underground a lot. |
 
 ---
 
@@ -226,9 +228,9 @@ The default-preset mixins now chain with other mods (`@ModifyExpressionValue` in
 
 ```mermaid
 flowchart TD
-    WT["World Type 'Improved'<br/>preset players-versus:better_world"] --> GEN["PvChunkGenerator (Phase 4)<br/>extends NoiseChunkGenerator, type players-versus:revamp"]
+    WT["World Type 'Improved'<br/>preset players-versus:better_world"] --> GEN["PvChunkGenerator (done: Improved carvers)<br/>extends NoiseChunkGenerator, type players-versus:noise"]
     GEN --> BS["PvBiomeSource (done)<br/>PvBiomeLayout: rules as data"]
-    GEN --> SET["PvSettings (Phase 4)<br/>PvRouter + PvSurfaceRules, sea level 64"]
+    GEN --> SET["PvSettings (Phase 4)<br/>router in code, calling the Phase 3 kernels<br/>+ PvSurfaceRules, sea level 64"]
     SET --> CNS["vanilla ChunkNoiseSampler"]
     CNS -->|"ChunkNoiseSamplerMixin (done)"| AQ["PvAquifer (Phase 2, done)<br/>F and S per block, smooth inputs on the 4x8x4 cells"]
     CNS -->|"same hook"| ORE["PvOreVeins"]
@@ -244,9 +246,10 @@ mod/environment/worldgen/
   aquifer/  PvAquifer, PvAquiferRules, PvAquiferDecision, AquiferFormulas, AquiferInputs, Lattice (done)
   ore/      PvOreVeins                          (done)
   debug/    WorldgenProbe, WorldgenBench, WorldgenDebugCommands (done)
-  density/  AquiferFloodedness, AquiferSpread (done), PvRouter + kernel/* (3)
+  density/  AquiferFloodedness, AquiferSpread, PvTerrain, PvFinalDensity, PvDepth, PvEntrances, PvNoodle,
+            DensityOps, TerrainFormulas, DensityCompilerCompat (done)
   biome/    PvBiomeLayout (with Box), PvBiomeSource (done; the biome keys stay in CustomOverworldBiomes)
-  PvSettings, PvChunkGenerator (4)
+  PvChunkGenerator, PvCarvers (done), PvSettings (4)
   surface/  PvSurfaceRules (4)
 mixin/environment/worldgen/ChunkNoiseSamplerMixin (done)
 ```
@@ -410,67 +413,33 @@ public final class PvBiomeSource extends BiomeSource {               // register
 
 Phase 1 pointed `better_world.json` at `{"type": "players-versus:overworld"}` and deleted the mixin. The real class stores the rule name next to each biome, for `/pvwg probe` and the F3 screen. It calls `VanillaBiomeParameters.writeOverworldBiomeParameters`, which is protected in 1.21.10, through an access widener (`players-versus.accesswidener`).
 
-### 6.5 Terrain router and kernels (Phase 3)
+### 6.5 Terrain kernels (Phase 3, done)
 
-Build the router in Java from vanilla's registered functions plus PV kernels. Appendix A has each formula.
+The router stays in JSON until Phase 4 builds the settings in code, but each terrain function is now one Java density-function type that takes its inputs as fields. Together they give the replaced JSON's doubles (`TerrainPortTest`, below). Appendix A has the formulas.
 
-```java
-static NoiseRouter create(RegistryEntryLookup<DensityFunction> dfs, RegistryEntryLookup<NoiseParameters> noises) {
-    DensityFunction continents = ref(dfs, "overworld/continents"), erosion = ref(dfs, "overworld/erosion"),
-            ridges = ref(dfs, "overworld/ridges"), offset = ref(dfs, "overworld/offset"), factor = ref(dfs, "overworld/factor"),
-            jaggedness = ref(dfs, "overworld/jaggedness"), base3d = ref(dfs, "overworld/base_3d_noise"),
-            roughness = ref(dfs, "overworld/caves/spaghetti_roughness_function"),
-            shiftX = ref(dfs, "shift_x"), shiftZ = ref(dfs, "shift_z");          // ref = RegistryEntryHolder(lookup.getOrThrow(key))
+| Type | Runs | Replaces | Work saved |
+|---|---|---|---|
+| `players-versus:terrain` (`PvTerrain`) | per cell corner, inside vanilla's `interpolated(blend_density(…))` | the old `final_density` inner tree, `sloped_cheese`, `river_carver`, `depth`, `caves/pillars`, `caves/spaghetti_2d` | The sloped cheese (with the 3D base noise) is computed once per corner; the JSON computed it twice, for the range test and again in the chosen branch. The river ridge noise is read once, from vanilla's `minecraft:overworld/ridges`, which the chunk keeps per column; the JSON sampled it again in the river carver and the depth, twice each in river bands. `jagged` goes through `cache_2d` and is only read where the jaggedness isn't 0. Entrances, spaghetti and pillars are skipped where vanilla's `min` and `max` would skip them. |
+| `players-versus:final_density` (`PvFinalDensity`) | per block | the old `final_density` outer part, `min(squeeze(0.64 × terrain), noodle)` | The noodle is skipped where the terrain is already below any noodle at that height. The JSON's `min` could only skip it below −0.55, which a squeezed value never reaches, so it ran at every block. |
+| `players-versus:depth` (`PvDepth`) | biome sampling, the aquifer's lattice | `depth` with the river depth | ridge read once |
+| `players-versus:entrances` (`PvEntrances`) | per corner, in `cache_once` | `caves/entrances` with the ramen caves | |
+| `players-versus:noodle` (`PvNoodle`) | the aquifer's basins | `caves/noodle` | Its four `interpolated` inputs are registered on their own (`caves/noodle_*`) and shared with the final density. |
 
-    DensityFunction ridge = flatCache(shiftedNoise(shiftX, shiftZ, 0.25, noises.getOrThrow(RIDGE))); // once per 4×4 column
-    DensityFunction depth = cacheOnce(add(add(yClampedGradient(-64, 320, 1.5, -1.5), offset), new RiverDepth(ridge)));
-    DensityFunction jagged = flatCache(new HalfNegativeNoise(noises.getOrThrow(JAGGED), 1500.0));   // 2D, once per column
-    DensityFunction slopedCheese = cacheOnce(min(new RiverCarver(ridge),
-            add(mul(constant(4), quarterNegative(mul(add(depth, mul(jaggedness, jagged)), factor))), base3d)));
-    DensityFunction entrances = cacheOnce(new PvEntrances(continents, roughness, noises /* ramen, cave_entrance, spaghetti_3d */));
-    DensityFunction noodle = vanillaStyleNoodle(noises);                 // keeps its 4 interpolated inputs
-    DensityFunction terrain = new PvTerrainDensity(slopedCheese, entrances, roughness,
-            new PvPillars(noises), noises /* cave_layer, cave_cheese */);  // T in A.2: sloped cheese read once
-    DensityFunction finalDensity = min(squeeze(mul(constant(0.64), interpolated(blendDensity(
-            add(constant(0.1171875), mul(yClampedGradient(-64, -40, 0, 1),
-            add(constant(-0.1171875), add(constant(-0.078125), mul(yClampedGradient(240, 256, 1, 0),
-            add(constant(0.078125), terrain)))))))))), noodle);
+`DensityOps` holds vanilla's operations as static methods (`mul`'s zero rule, `minecraft:y`'s rounding, `squeeze`); `TerrainFormulas` holds the river terms. The aquifer's formulas use them too. No kernel allocates anything per sample.
 
-    NoiseRouter router = new NoiseRouter(barrier,
-            new AquiferFloodedness(depth, continentalness3d, ridge, entrances, surface2, ramen),   // as in the JSON today (6.2)
-            new AquiferSpread(entrances, noodle, surface4),
-            lava, temperature, vegetation, continents, erosion, depth, ridges, preliminarySurface, finalDensity,
-            veinToggle, veinRidged, veinGap);
-    checkSlots(router);   // NoiseRouter's component order isn't in Yarn: assert each accessor returns what we passed
-    return router;
-}
-```
+**Where the time was.** In vanilla's own terrain pass (`TerrainPortTest.finalDensityCost`: one JVM, the variants taking turns), a chunk took 27.5–32.9 ms with the old JSON and 15.7–18.0 ms with the kernels (three runs on three runners). Most of that was the per-block part. With the Java corner kernel but the per-block part left in vanilla types, a chunk took as long as with the old JSON (28.1–33.3 ms). Vanilla interprets a tree of nodes, one call per node, at each of a chunk's 86,016 blocks; next to that, the work at its 1,075 corners is small. On a server (`perf` job, one runner), `noise` went from 25.88 to 17.85 ms per chunk (vanilla: 19.77). Part of that gap is the job's own bias: without a warm-up, the first run on a runner (here the old code) read 14–22% slow.
 
-Every factory above exists under that name in `DensityFunctionTypes` (Appendix B); `squeeze`, `quarterNegative` and friends are default methods on `DensityFunction`.
+**Next to C2ME.** C2ME's density-function compiler turns vanilla's density-function types into bytecode, and runs any other type through vanilla's interface, one position at a time, with a new position object for each call. At every block, that made the Java per-block kernel slower than the compiled JSON: next to C2ME and Lithium, `noise` went from 15.71 to 18.26 ms per chunk (vanilla with C2ME: 12.79). So when the compiler is active, `PvFinalDensity` rebuilds itself from vanilla types as the world's router is built (`asVanillaTypes`: the same `min`, and the same noodle skip as a `range_choice`), and the compiler compiles it. "Active" means its module is loaded and its mixins are applied (`DensityCompilerCompat` looks for its interface on vanilla's `interpolated` marker, which its config can switch off). The terrain kernel stays Java: the compiler calls it once per corner. With this, `noise` next to C2ME went from 18.64 to 16.36 ms per chunk (vanilla with C2ME: 13.22), 1.24 times vanilla, as before Phase 3 (1.23). Without C2ME, the Java kernel stays: in vanilla's own code, the vanilla-type form is as slow as the old JSON (above). `TerrainPortTest` checks the vanilla-type form against the old JSON too, the bench report names the form that ran, and the smoke maps with C2ME are identical to those without.
 
-**Kernel template.**
+A possible next step for C2ME: give the corner kernels a vanilla-type form as well, with `cache_once` for the sloped cheese, so the compiler compiles the corners too. The corner work is small (above), so the gain would likely be around 1 ms per chunk. Not done.
 
-```java
-public record RiverCarver(DensityFunction ridge) implements DensityFunction {        // A.1: RC
-    public double sample(NoisePos pos) {
-        int y = pos.blockY();
-        if (y < 48 || y >= 256) return 1;
-        double r = ridge.sample(pos);
-        if (r < -0.22 || r >= 0.22) return 1;
-        return G(50, 74, 0.8, -1.2, y) + G(68, 90, 0, 0.3, y) + G(68, 128, 0, 0.89, y) + square(7 * r);
-    }
-    public void fill(double[] out, EachApplier applier) { applier.fill(out, this); }
-    public DensityFunction apply(DensityFunctionVisitor v) { return v.apply(new RiverCarver(ridge.apply(v))); }
-    public double minValue() { return -1.2; }  public double maxValue() { return 1 + square(7 * 0.22) + 1.19; }  // loose but valid
-    public CodecHolder<? extends DensityFunction> getCodecHolder() { return CODEC_HOLDER; }
-}
-```
+**Checks.**
 
-Also in Phase 3:
-
-- **Speed-up checks:** `/pvwg bench` `noise` time per chunk before and after.
-- **Spirit checks:** the `surface.png` and `slice-y*.png` maps against the reference run.
-- **Cleanup:** delete `density_function/**`, except the old aquifer JSON that `AquiferPortTest` and `AquiferTerrainPassTest` use as their reference (or retire those comparisons with it).
+- `TerrainPortTest` compares the kernels with the old JSON:
+  - at 20,000 random positions, half of them on the heights where a band or gradient starts or ends, and asserts that rivers, jagged peaks, both cave branches, the ramen band and noodles were all reached;
+  - at every block of vanilla's terrain pass in three chunks: the smoke region, a river valley and jagged peaks. The doubles must be exact.
+- The replaced JSON lives in `src/test/resources/reference` under the namespace `pv_reference`, and only tests load it.
+- On the server, the maps and metrics are identical to Phase 2's, with and without C2ME.
 
 ### 6.6 Settings and chunk generator (Phase 4)
 
@@ -486,7 +455,7 @@ static ChunkGeneratorSettings create(RegistryEntryLookup<DensityFunction> dfs, R
             false, true, true, false);                      // mobGenerationDisabled, aquifers, oreVeins, usesLegacyRandom
 }
 
-public final class PvChunkGenerator extends NoiseChunkGenerator {                   // players-versus:revamp
+public final class PvChunkGenerator extends NoiseChunkGenerator {   // players-versus:noise; exists, with the carvers
     public static final MapCodec<PvChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             RegistryOps.getEntryLookupCodec(RegistryKeys.BIOME),
             RegistryOps.getEntryLookupCodec(RegistryKeys.DENSITY_FUNCTION),
@@ -502,7 +471,7 @@ public final class PvChunkGenerator extends NoiseChunkGenerator {               
 }
 ```
 
-With this, the world preset shrinks to `"generator": {"type": "players-versus:revamp"}`.
+With this, the world preset shrinks to `"generator": {"type": "players-versus:noise"}`. Today the type exists with the fields of vanilla's generator (`biome_source`, `settings`) plus a carver lookup (Section 10, question 1); Phase 4 builds those inside it and keeps the carver swap.
 
 ### 6.7 Surface rules (Phase 4)
 
@@ -525,8 +494,8 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:re
 | 1 (done) | `PvBiomeLayout` + `PvBiomeSource` (6.3, 6.4); delete the biome mixin | Unit tests pass; the Default world has only vanilla biomes; the Improved world's biomes match the baseline where no rule changed |
 | 2a (done) | Aquifer rules: Q5, Q6, Q8 (6.2) | `carver_placed_stone` is 0 (baseline 2,027): **met**; fewer queued fluid updates (baseline 243.6 per chunk): **met**, 110.8 |
 | 2b (done) | F and S in Java, `PvAquifer` with lattices on the terrain pass's cells (6.2) | Seam ratios don't get worse (baseline x 0.86, z 0.97): **met**, 0.88 and 0.96; water and barrier maps close to 2a's: **met**, 2 of 2,500 surface cells differ; `noise` and `carvers` ms/chunk below 2a's in the `perf` job: **met**, 0.73 and 0.46 times 2a's |
-| 3 | `PvRouter` + kernels (6.5); delete density-function JSON | `noise` ms/chunk down; terrain maps reviewed |
-| 4 | `PvSettings`, `PvChunkGenerator`, `PvSurfaceRules` (6.6, 6.7) | No worldgen logic in hand-written JSON; full bench against Default |
+| 3 (done) | Terrain kernels (6.5); the replaced JSON moves to the test resources | `noise` ms/chunk down: **met**, 25.88 → 17.85 (vanilla 19.77), and next to C2ME 1.24 times vanilla, as before (1.23); maps and metrics: **identical** to Phase 2's, with and without C2ME |
+| 4 | `PvSettings`, `PvSurfaceRules` (6.6, 6.7); `PvChunkGenerator` exists already (Section 10, question 1) | No worldgen logic in hand-written JSON; full bench against Default |
 | 5 | Measure-driven tuning: cave-biome features (P5), carvers | Per-status times within 1.2× of vanilla |
 
 | Quirk | Fix | Phase |
@@ -549,8 +518,9 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:re
   - the biome layout: vanilla's list is untouched and has the expected shape, pieces partition every slice, Q2/Q4 spot checks, old-vs-new agreement at 11 depths;
   - the data: the gate finds its marker, `sea_level` matches the code, seeding a registry function by hand matches `NoiseConfig` exactly, and a printed baseline of aquifer decisions and raw sample costs;
   - the aquifer: the rules with constant inputs; the lattice's interpolation; the Java F and S against the old JSON (exact doubles); and, in vanilla's own terrain pass (`TerrainPass`), the lattices against `interpolated` (to the bit), carvers against the terrain pass (the same decision everywhere), and the decisions against the old JSON's, by band;
-  - what the `minecraft:` carver overrides change (printed).
-- **Commits tagged `[smoke]`** also run two more jobs: `upgrade` reopens a world made by an older build (Section 10, question 3), and `perf` times this commit and the previous one, plus vanilla, on the same runner, because timings between runners differ by more than most changes (the same code measured 63.4 and 68.9 ms per chunk, and one Phase 2a run was about 25% slower in every status, including ones the change didn't touch).
+  - the terrain kernels against the old JSON (`TerrainPortTest`, Section 6.5), in both of the final density's forms, and what the terrain pass costs with each;
+  - the carvers: no vanilla carver is overridden and the overridden biomes keep vanilla's carver lists (`VanillaOverridesTest`, which also prints what those overrides still change), and Improved worlds carve with the lists they had before (`PvCarversTest`).
+- **Commits tagged `[smoke]`** also run two more jobs: `upgrade` reopens a world made by an older build (Section 10, question 3), and `perf` times this commit and the previous one, plus vanilla, on the same runner, alone and next to C2ME and Lithium, because timings between runners differ by more than most changes (the same code measured 63.4 and 68.9 ms per chunk, and one Phase 2a run was about 25% slower in every status, including ones the change didn't touch). "Previous" is the commit before the latest change to the mod, so a push that only touches tests or docs still times the last change. A short warm-up run comes first: without it, the first run on a runner read 14–22% slow with the same mod code on both sides.
 - **Commits tagged `[smoke]`:** the `worldgen-smoke` workflow starts a dedicated server and generates the benchmark region for: Default, Improved, each with C2ME + Lithium, and a server with no `level-type`. A job fails if the bench wrote no report, logged a failure, or the server wrote a crash report. The report is printed to the job log, including text maps of the surface and its biomes (the PNGs are in the uploaded artifact).
 - **Metrics** (per world):
   - `water_at_or_above_y64`: must stay 0;
@@ -566,6 +536,8 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:re
 - **Runtime coverage.** Mixins, access wideners and codecs only fail when the game loads them, so every worldgen change should go through a `[smoke]` run, not just the build.
 - **Build environment.** The agent environment can't reach Fabric's maven or Mojang, and can't download Actions artifacts; everything is compiled and run in CI, and results are read from job logs. The Yarn mapping files used to look up names contain stale entries (`WrapperLookup.getWrapperOrThrow` doesn't exist in 1.21.10) and no access modifiers, so the compiler has the last word.
 - **Threads.** Kernels are stateless; each lattice belongs to one chunk's aquifer. The biome layout is built per world and immutable.
+- **C2ME.** Its density-function compiler compiles vanilla's types and calls any other type once per position, with a new position object each time. A custom type is cheap per cell corner and costly per block, so `PvFinalDensity` switches to vanilla types when the compiler is active (Section 6.5). That check relies on the name of one of C2ME's internal interfaces. If C2ME renames it, the Java kernel runs under the compiler again: slower (about 16% on `noise`), but still correct.
+- **Access wideners.** `NoiseChunkGenerator` is widened to extendable for `PvChunkGenerator`, and `GenerationSettings`' constructor to accessible. Other mods see the same classes; the only difference is that they are no longer final.
 - **Existing worlds after Phase 1** (verified, Section 10, question 3). Chunks generated before keep their biomes. Improved worlds created before Phase 1 keep vanilla's biome source in `level.dat`, so their new chunks get vanilla biomes, not the Players Versus layout. Default worlds created with the mod installed also get vanilla biomes in new chunks, as intended. In both, the Players Versus cave biomes stop at the edge of the old chunks.
 - **Existing worlds after Phase 2.** The sea level lives in the noise settings, not in `level.dat`, so existing Improved worlds get sea level 64 too: water mobs' spawn bands, the snow line and similar checks move up one block, to where the water surface already is.
 - **Porting to 26.x.** One mixin, plus public extension points (biome source, chunk generator, density-function types) and one access widener. Appendix D maps names. The test helper `TerrainPass` calls `ChunkNoiseSampler`'s terrain-pass methods by their Yarn names through reflection, so a port renames those strings too; a missing one fails the test with a list of the class's methods.
@@ -586,7 +558,9 @@ All five were answered by the repository owner (decisions of 2026-09-28, below e
 
    So a vanilla world with this mod installed starts about one cave system in seven, and only at y 32..64 instead of −56..180. Players Versus biomes use the same three carvers (plus their own for `caves/deep_caves` and the deep dark), so the tuning matters to Players Versus too. Options: (a) keep them global; (b) make them Players Versus only: copy them as `players-versus:` carvers and have Phase 4's generator use the copies wherever a biome names the `minecraft:` ones (how it swaps them is to be checked in Phase 4), then delete the three overrides. Recommendation: (b) for carvers, which change the shape of the world; the feature, structure and template changes look like gameplay content that belongs in every world type, so keep them unless you'd rather not.
 
-   **Decided: (b), carvers apply to Improved worlds only.** The feature, structure and template changes stay global. The mechanism is still to be chosen (a gated swap of the three carvers for `players-versus:` copies); until then the overrides stay global.
+   **Decided: (b), carvers apply to Improved worlds only.** The feature, structure and template changes stay global.
+
+   **Done.** The three tuned carvers are `players-versus:cave`, `players-versus:cave_extra_underground` and `players-versus:canyon` now, unchanged, and nothing overrides vanilla's. The deep dark's override lists vanilla's carvers again, and keeps its feature changes. The Improved preset's overworld uses a generator type of its own, `players-versus:noise` (`PvChunkGenerator`, the start of Phase 4's generator). It is vanilla's noise generator, except that each biome carves with its Improved carvers (`PvCarvers`): vanilla's three are replaced in place by the copies, and the deep dark gets its old list, `players-versus:cave` and `players-versus:deep_dark_canyon`. A carver's seed comes from its index in the list, so Improved worlds carve exactly as before: 173,811 carved positions in the benchmark region, with identical maps, alone and next to C2ME. The Default world now carves 299,119 positions with vanilla's carvers (173,701 with the old overrides). The mod's own biomes name the copies directly. Improved worlds created before this change keep `minecraft:noise` in `level.dat`: in their new chunks, vanilla's biomes carve with vanilla's carvers, while the mod's own biomes keep the tuned ones (question 3 accepts that).
 2. **Pre-selected world type.** Three mixins make Improved the default: pre-selected in Create World, used for demo worlds, and used by a server whose `server.properties` has no `level-type` (checked by the `server-default` smoke job). They chain with other mods now. Keep them, or default to vanilla and delete all three?
 
    **Decided: keep them.** Improved stays the default.
