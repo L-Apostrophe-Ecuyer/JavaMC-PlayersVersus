@@ -16,10 +16,11 @@ import net.minecraft.world.gen.densityfunction.DensityFunction;
  * <p>{@link #sample} is exact at any position. The aquifer itself reads the smooth inputs (depth, continentalness,
  * entrances) from a per-chunk lattice and the rest per block ({@code PvAquifer}).
  *
- * @param depth           the router's {@code depth}
+ * @param depth           the router's {@code depth} ({@link PvDepth})
  * @param continentalness {@code shifted_noise(minecraft:continentalness, xz 0.25, y 0.1)}
- * @param ridge           {@code shifted_noise(minecraft:ridge, xz 0.25, y 0)}
- * @param entrances       {@code players-versus:overworld/caves/entrances}
+ * @param ridge           vanilla's {@code minecraft:overworld/ridges} (the shifted ridge noise, xz 0.25, y 0; the terrain
+ *                        reads the same function)
+ * @param entrances       {@code players-versus:overworld/caves/entrances} ({@link PvEntrances})
  * @param surface         {@code noise(minecraft:surface, xz 2, y 1)}
  * @param ramen           {@code noise(minecraft:noodle, xz 3, y 3)}
  */
@@ -42,7 +43,7 @@ public record AquiferFloodedness(DensityFunction depth, DensityFunction continen
         double entrances = this.entrances.sample(pos);
         double seaFloodedness = AquiferFormulas.seaFloodedness(y, this.depth.sample(pos), this.continentalness.sample(pos),
                 entrances, entrances, this.ridge.sample(pos), this.surface.sample(pos));
-        return AquiferFormulas.floodedness(y, seaFloodedness, () -> this.ramen.sample(pos));
+        return AquiferFormulas.floodedness(y, seaFloodedness, this.ramen, pos);
     }
 
     @Override

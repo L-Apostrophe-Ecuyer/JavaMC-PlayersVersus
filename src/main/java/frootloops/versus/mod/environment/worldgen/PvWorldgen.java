@@ -6,6 +6,11 @@ import frootloops.versus.mod.environment.worldgen.debug.WorldgenBench;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenDebugCommands;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
+import frootloops.versus.mod.environment.worldgen.density.PvDepth;
+import frootloops.versus.mod.environment.worldgen.density.PvEntrances;
+import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
+import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
+import frootloops.versus.mod.environment.worldgen.density.PvTerrain;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -23,6 +28,11 @@ public final class PvWorldgen {
 
     public static final Identifier AQUIFER_FLOODEDNESS_ID = Identifier.of(VersusMod.MOD_ID, "aquifer_floodedness");
     public static final Identifier AQUIFER_SPREAD_ID = Identifier.of(VersusMod.MOD_ID, "aquifer_spread");
+    public static final Identifier DEPTH_ID = Identifier.of(VersusMod.MOD_ID, "depth");
+    public static final Identifier TERRAIN_ID = Identifier.of(VersusMod.MOD_ID, "terrain");
+    public static final Identifier ENTRANCES_ID = Identifier.of(VersusMod.MOD_ID, "entrances");
+    public static final Identifier NOODLE_ID = Identifier.of(VersusMod.MOD_ID, "noodle");
+    public static final Identifier FINAL_DENSITY_ID = Identifier.of(VersusMod.MOD_ID, "final_density");
     public static final Identifier BIOME_SOURCE_ID = Identifier.of(VersusMod.MOD_ID, "overworld");
 
     private PvWorldgen() {
@@ -31,6 +41,11 @@ public final class PvWorldgen {
     public static void initialize() {
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, AQUIFER_FLOODEDNESS_ID, AquiferFloodedness.CODEC);
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, AQUIFER_SPREAD_ID, AquiferSpread.CODEC);
+        Registry.register(Registries.DENSITY_FUNCTION_TYPE, DEPTH_ID, PvDepth.CODEC);
+        Registry.register(Registries.DENSITY_FUNCTION_TYPE, TERRAIN_ID, PvTerrain.CODEC);
+        Registry.register(Registries.DENSITY_FUNCTION_TYPE, ENTRANCES_ID, PvEntrances.CODEC);
+        Registry.register(Registries.DENSITY_FUNCTION_TYPE, NOODLE_ID, PvNoodle.CODEC);
+        Registry.register(Registries.DENSITY_FUNCTION_TYPE, FINAL_DENSITY_ID, PvFinalDensity.CODEC);
         Registry.register(Registries.BIOME_SOURCE, BIOME_SOURCE_ID, PvBiomeSource.CODEC);
         WorldgenDebugCommands.register();
         WorldgenBench.registerHeadlessRun();

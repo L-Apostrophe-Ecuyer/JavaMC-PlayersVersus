@@ -11,8 +11,8 @@ import net.minecraft.world.gen.densityfunction.DensityFunction;
  * aquifer ({@code fluid_level_spread} slot), computed by {@link AquiferFormulas} from the input functions the JSON
  * names. {@link #sample} is exact at any position; the aquifer reads S's smooth part from a per-chunk lattice.
  *
- * @param entrances {@code players-versus:overworld/caves/entrances}
- * @param noodle    {@code players-versus:overworld/caves/noodle}
+ * @param entrances {@code players-versus:overworld/caves/entrances} ({@link PvEntrances})
+ * @param noodle    {@code players-versus:overworld/caves/noodle} ({@link PvNoodle})
  * @param surface   {@code noise(minecraft:surface, xz 4, y 2)}
  */
 public record AquiferSpread(DensityFunction entrances, DensityFunction noodle, DensityFunction surface) implements DensityFunction {

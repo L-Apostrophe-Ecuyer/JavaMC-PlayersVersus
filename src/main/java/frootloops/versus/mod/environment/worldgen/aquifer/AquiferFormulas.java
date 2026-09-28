@@ -1,20 +1,22 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
-import net.minecraft.util.math.MathHelper;
-
-import java.util.function.DoubleSupplier;
+import net.minecraft.world.gen.densityfunction.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BARRIER_THRESHOLD;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_WATER_THRESHOLD;
+import static frootloops.versus.mod.environment.worldgen.density.DensityOps.gradient;
+import static frootloops.versus.mod.environment.worldgen.density.DensityOps.mul;
+import static frootloops.versus.mod.environment.worldgen.density.DensityOps.yValue;
 
 /**
  * The Players Versus aquifer's two inputs, sea floodedness (F) and basin floodedness (S), computed from their leaf
  * values. These are the formulas of the density-function JSON they replace ({@code aquifer_fluid_level_floodedness},
  * {@code aquifer_floodedness_oceans_and_rivers_y64}, {@code river_carver_aquifer}, {@code ramen_cave_aquifer},
  * {@code aquifer_fluid_level_spread}, {@code aquifer_floodedness_cave_basins_y24}), written so they give the same
- * doubles: the same operations in the same order, vanilla's {@code mul} (0 times anything is 0) where the JSON
- * multiplies two functions, and band checks against vanilla's {@code minecraft:y}, which is 31.9999999999995 at y 32.
- * {@code AquiferPortTest} compares them with the JSON, which stays in the mod's data, unreferenced, as that reference.
+ * doubles: the same operations in the same order, and vanilla's own rules ({@code DensityOps}): {@code mul} of two
+ * functions is 0 when the first is 0, and bands test vanilla's {@code minecraft:y}, which is 31.9999999999995 at y 32.
+ * {@code AquiferPortTest} compares them with that JSON, which the tests keep as their reference
+ * ({@code src/test/resources/reference}).
  */
 public final class AquiferFormulas {
 
@@ -22,34 +24,15 @@ public final class AquiferFormulas {
     }
 
     /**
-     * Vanilla's {@code minecraft:y} function at a block: a {@code y_clamped_gradient} from -4064 to 4062, which rounds
-     * to just below the block's y at a few heights (y 32 among them). The JSON's {@code range_choice} bands test this
-     * value, not the integer.
-     */
-    public static double yValue(int y) {
-        return MathHelper.clampedMap((double) y, -4064.0, 4062.0, -4064.0, 4062.0);
-    }
-
-    /** Vanilla's {@code y_clamped_gradient}. */
-    private static double gradient(int y, int fromY, int toY, double fromValue, double toValue) {
-        return MathHelper.clampedMap((double) y, (double) fromY, (double) toY, fromValue, toValue);
-    }
-
-    /** Vanilla's {@code mul} of two functions: 0 when the first is 0, without looking at the second. */
-    private static double mul(double first, double second) {
-        return first == 0.0 ? 0.0 : first * second;
-    }
-
-    /**
      * F: sea-level floodedness, plus the ramen-cave term in y -4..31 where F alone would make a barrier.
      *
      * @param seaFloodedness F', from {@link #seaFloodedness}
-     * @param ramenNoise     {@code noise(minecraft:noodle, xz 3, y 3)} at the block, only asked for when needed
+     * @param ramenNoise     {@code noise(minecraft:noodle, xz 3, y 3)}, only sampled (at {@code pos}) when the term applies
      */
-    public static double floodedness(int y, double seaFloodedness, DoubleSupplier ramenNoise) {
+    public static double floodedness(int y, double seaFloodedness, DensityFunction ramenNoise, DensityFunction.NoisePos pos) {
         double yValue = yValue(y);
         if (yValue >= -4.0 && yValue < 32.0 && seaFloodedness >= SEA_BARRIER_THRESHOLD && seaFloodedness < SEA_WATER_THRESHOLD) {
-            return seaFloodedness + ramen(y, ramenNoise.getAsDouble());
+            return seaFloodedness + ramen(y, ramenNoise.sample(pos));
         }
         return seaFloodedness;
     }

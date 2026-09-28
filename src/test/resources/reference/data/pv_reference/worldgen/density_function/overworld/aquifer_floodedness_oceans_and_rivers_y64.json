@@ -36,12 +36,12 @@
               },
               "argument2": {
                 "type": "minecraft:interpolated",
-                "argument": "players-versus:overworld/depth"
+                "argument": "pv_reference:overworld/depth"
               }
             }
           }
         },
-        "argument2": "players-versus:overworld/river_carver_aquifer"
+        "argument2": "pv_reference:overworld/river_carver_aquifer"
       },
       "argument2": {
         "type": "minecraft:mul",
@@ -109,7 +109,7 @@
                 },
                 "argument2": {
                   "type": "minecraft:interpolated",
-                  "argument": "players-versus:overworld/depth"
+                  "argument": "pv_reference:overworld/depth"
                 }
               }
             }
@@ -128,7 +128,7 @@
               },
               "argument2": {
                 "type": "minecraft:interpolated",
-                "argument": "players-versus:overworld/caves/entrances"
+                "argument": "pv_reference:overworld/caves/entrances"
               }
             }
           }

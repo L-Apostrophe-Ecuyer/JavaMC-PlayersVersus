@@ -30,10 +30,16 @@ import java.util.List;
 /**
  * Vanilla's data pack plus this mod's data (read from {@code src/main/resources}), loaded into worldgen registries by
  * the game's own loader, so tests can build this mod's noise router the way a world does.
+ *
+ * <p>A third pack, {@code src/test/resources/reference}, holds the density-function JSON that Java kernels replaced,
+ * under the namespace {@value #REFERENCE}: the tests compare the kernels with it.
  */
 public final class WorldgenTestData {
 
     public static final Path MOD_RESOURCES = Path.of("src/main/resources");
+    public static final Path REFERENCE_RESOURCES = Path.of("src/test/resources/reference");
+    /** The namespace of the replaced JSON: {@code pv_reference:overworld/…} is what {@code players-versus:overworld/…} was. */
+    public static final String REFERENCE = "pv_reference";
     private static final List<RegistryKey<? extends Registry<?>>> LOADED = List.of(RegistryKeys.NOISE_PARAMETERS, RegistryKeys.DENSITY_FUNCTION);
 
     private static DynamicRegistryManager.Immutable registries;
@@ -42,13 +48,14 @@ public final class WorldgenTestData {
     private WorldgenTestData() {
     }
 
-    /** Noise parameters and density functions: vanilla's, with this mod's pack on top. */
+    /** Noise parameters and density functions: vanilla's, with this mod's pack and the reference pack on top. */
     public static synchronized DynamicRegistryManager.Immutable registries() {
         if (registries == null) {
             TestGame.start();
             ResourcePack vanilla = VanillaDataPackProvider.createDefaultPack();
             ResourcePack mod = new DirectoryResourcePack(vanilla.getInfo(), MOD_RESOURCES);
-            try (LifecycledResourceManagerImpl resources = new LifecycledResourceManagerImpl(ResourceType.SERVER_DATA, List.of(vanilla, mod))) {
+            ResourcePack reference = new DirectoryResourcePack(vanilla.getInfo(), REFERENCE_RESOURCES);
+            try (LifecycledResourceManagerImpl resources = new LifecycledResourceManagerImpl(ResourceType.SERVER_DATA, List.of(vanilla, mod, reference))) {
                 registries = RegistryLoader.loadFromResource(resources, List.of(),
                         RegistryLoader.DYNAMIC_REGISTRIES.stream().filter(entry -> LOADED.contains(entry.key())).toList());
             }

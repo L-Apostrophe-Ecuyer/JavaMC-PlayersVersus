@@ -104,7 +104,7 @@ public final class PvAquifer implements AquiferSampler {
         double entrances = this.entrances.at(x, y, z);
         double seaFloodedness = AquiferFormulas.seaFloodedness(y, this.depth.at(x, y, z), this.continentalness.at(x, y, z),
                 entrances, entrances, this.ridge(x, z), this.floodednessInputs.surface().sample(pos));
-        return AquiferFormulas.floodedness(y, seaFloodedness, () -> this.floodednessInputs.ramen().sample(pos));
+        return AquiferFormulas.floodedness(y, seaFloodedness, this.floodednessInputs.ramen(), pos);
     }
 
     /** S at a block, from the lattice of its inner part. */

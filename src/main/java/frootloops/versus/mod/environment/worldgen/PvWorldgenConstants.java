@@ -5,9 +5,8 @@ package frootloops.versus.mod.environment.worldgen;
  *
  * <p>Keep every value that the aquifer, the density functions and the surface rules must agree on here, so a
  * change in one place can't silently break another. Where a value is still written out elsewhere, the spot is named
- * below. The aquifer's formulas are Java since plan phase 2b ({@code aquifer/AquiferFormulas}); the JSON they
- * replaced stays in {@code data/players-versus/worldgen/**}, unreferenced, as the tests' reference, so it repeats
- * these values without being used.
+ * below. The aquifer's and the terrain's formulas are Java since plan phases 2b and 3 ({@code aquifer/AquiferFormulas},
+ * {@code density/*}); the JSON they replaced is kept for the tests only ({@code src/test/resources/reference}).
  */
 public final class PvWorldgenConstants {
 

@@ -52,9 +52,9 @@ class AquiferTerrainPassTest {
             // what the aquifer's lattices sample: the chunk's router depth, the settings' entrances
             Lattice depth = new Lattice(pass.register(config.getNoiseRouter().depth()), chunk, minY, maxY, PvAquifer.CELL_HEIGHT);
             Lattice entrances = new Lattice(inputs.floodedness().entrances(), chunk, minY, maxY, PvAquifer.CELL_HEIGHT);
-            // what the JSON F interpolated
-            DensityFunction interpolatedDepth = pass.register(interpolated(config, "players-versus:overworld/depth"));
-            DensityFunction interpolatedEntrances = pass.register(interpolated(config, "players-versus:overworld/caves/entrances"));
+            // what the JSON F interpolated (the reference's depth and entrances: the same values, TerrainPortTest)
+            DensityFunction interpolatedDepth = pass.register(interpolated(config, WorldgenTestData.REFERENCE + ":overworld/depth"));
+            DensityFunction interpolatedEntrances = pass.register(interpolated(config, WorldgenTestData.REFERENCE + ":overworld/caves/entrances"));
             Mismatches depthMismatches = new Mismatches("depth"), entrancesMismatches = new Mismatches("entrances");
             pass.run((x, y, z, pos) -> {
                 depthMismatches.compare(x, y, z, interpolatedDepth.sample(pos), depth.at(x, y, z));
@@ -84,8 +84,8 @@ class AquiferTerrainPassTest {
                 TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
                 PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer(), "ChunkNoiseSamplerMixin didn't make the aquifer");
                 // the router's F and S before Phase 2b
-                DensityFunction jsonF = pass.register(WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_floodedness"));
-                DensityFunction jsonS = pass.register(WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_spread"));
+                DensityFunction jsonF = pass.register(WorldgenTestData.seeded(config, WorldgenTestData.REFERENCE + ":overworld/aquifer_fluid_level_floodedness"));
+                DensityFunction jsonS = pass.register(WorldgenTestData.seeded(config, WorldgenTestData.REFERENCE + ":overworld/aquifer_fluid_level_spread"));
                 pass.run((x, y, z, pos) -> {
                     int band = band(y);
                     if (band < 0) return;

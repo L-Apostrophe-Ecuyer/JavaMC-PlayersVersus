@@ -4,6 +4,7 @@ import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
+import frootloops.versus.mod.environment.worldgen.density.DensityOps;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
 import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 /**
  * The Java aquifer functions ({@link AquiferFormulas}, through the router's {@link AquiferFloodedness} and
- * {@link AquiferSpread}) against the JSON they replace, which stays in the mod's data as the reference: they must give
- * the same doubles everywhere.
+ * {@link AquiferSpread}) against the JSON they replaced, kept as the tests' reference ({@link WorldgenTestData#REFERENCE}):
+ * they must give the same doubles everywhere.
  */
 class AquiferPortTest {
 
@@ -30,7 +31,7 @@ class AquiferPortTest {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
         DensityFunction y = WorldgenTestData.seeded(config, "minecraft:y");
         for (int blockY = -64; blockY < 320; blockY++) {
-            assertEquals(y.sample(new DensityFunction.UnblendedNoisePos(0, blockY, 0)), AquiferFormulas.yValue(blockY), 0.0, "y " + blockY);
+            assertEquals(y.sample(new DensityFunction.UnblendedNoisePos(0, blockY, 0)), DensityOps.yValue(blockY), 0.0, "y " + blockY);
         }
     }
 
@@ -42,8 +43,8 @@ class AquiferPortTest {
         DensityFunction spread = PvWorldgen.unwrap(config.getNoiseRouter().fluidLevelSpreadNoise());
         assertInstanceOf(AquiferFloodedness.class, floodedness);
         assertInstanceOf(AquiferSpread.class, spread);
-        DensityFunction jsonFloodedness = WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_floodedness");
-        DensityFunction jsonSpread = WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_spread");
+        DensityFunction jsonFloodedness = WorldgenTestData.seeded(config, WorldgenTestData.REFERENCE + ":overworld/aquifer_fluid_level_floodedness");
+        DensityFunction jsonSpread = WorldgenTestData.seeded(config, WorldgenTestData.REFERENCE + ":overworld/aquifer_fluid_level_spread");
 
         Random random = new Random(SEED);
         int compared = 0, nonZero = 0;

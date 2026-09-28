@@ -1,6 +1,6 @@
 {
       "type": "minecraft:min",
-      "argument1": "players-versus:overworld/river_carver",
+      "argument1": "pv_reference:overworld/river_carver",
       "argument2": {
         "type": "minecraft:add",
         "argument1": {
@@ -12,7 +12,7 @@
               "type": "minecraft:mul",
               "argument1": {
                 "type": "minecraft:add",
-                "argument1": "players-versus:overworld/depth",
+                "argument1": "pv_reference:overworld/depth",
                 "argument2": {
                   "type": "minecraft:mul",
                   "argument1": "minecraft:overworld/jaggedness",

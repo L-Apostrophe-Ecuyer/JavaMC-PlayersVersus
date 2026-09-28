@@ -39,7 +39,7 @@
               "argument2": {
                 "type": "minecraft:add",
                 "argument1": -0.2,
-                "argument2": "players-versus:overworld/caves/entrances"
+                "argument2": "pv_reference:overworld/caves/entrances"
               }
             }
           },
