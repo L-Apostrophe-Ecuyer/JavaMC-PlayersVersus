@@ -29,12 +29,15 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Files under {@code data/minecraft/} in this mod replace vanilla's for every world type, not just "Improved". This
- * prints what the carver overrides change (how often a carver starts, and at which heights), next to vanilla's values.
+ * Files under {@code data/minecraft/} in this mod replace vanilla's for every world type, not just "Improved". Carvers
+ * are Improved-only (Section 10, question 1): no vanilla carver is overridden, and the overridden biomes keep vanilla's
+ * carver lists. This prints the Improved carvers' tuning next to vanilla's, and what the biome overrides still change.
  */
 class VanillaOverridesTest {
 
@@ -44,26 +47,28 @@ class VanillaOverridesTest {
     }
 
     @Test
-    void carverOverridesComparedWithVanilla() throws IOException {
+    void improvedCarversComparedWithVanilla() throws IOException {
+        assertFalse(Files.exists(Path.of("src/main/resources/data/minecraft/worldgen/configured_carver")),
+                "vanilla carvers are overridden again; Improved's own are under players-versus");
         Map<String, CarverConfig> vanilla = new TreeMap<>();
         BuiltinRegistries.createWrapperLookup().getOrThrow(RegistryKeys.CONFIGURED_CARVER).streamEntries()
                 .forEach(entry -> vanilla.put(entry.registryKey().getValue().getPath(), entry.value().config()));
         for (String carver : List.of("cave", "cave_extra_underground", "canyon")) {
-            JsonObject override = readConfig(Path.of("src/main/resources/data/minecraft/worldgen/configured_carver/" + carver + ".json"));
+            JsonObject improved = readConfig(Path.of("src/main/resources/data/players-versus/worldgen/configured_carver/" + carver + ".json"));
             CarverConfig original = vanilla.get(carver);
             assertNotNull(original, "vanilla has no carver " + carver);
-            float probability = override.get("probability").getAsFloat();
-            System.out.printf(Locale.ROOT, "[overrides] carver minecraft:%s probability vanilla %.4f, this mod %.4f (%.0f%% of vanilla)%n",
+            float probability = improved.get("probability").getAsFloat();
+            System.out.printf(Locale.ROOT, "[overrides] carver %s probability vanilla %.4f, Improved %.4f (%.0f%% of vanilla)%n",
                     carver, original.probability, probability, 100.0 * probability / original.probability);
-            System.out.printf(Locale.ROOT, "[overrides] carver minecraft:%s y vanilla %s, this mod %s%n", carver,
-                    HeightProvider.CODEC.encodeStart(JsonOps.INSTANCE, original.y).getOrThrow(), override.get("y"));
+            System.out.printf(Locale.ROOT, "[overrides] carver %s y vanilla %s, Improved %s%n", carver,
+                    HeightProvider.CODEC.encodeStart(JsonOps.INSTANCE, original.y).getOrThrow(), improved.get("y"));
             assertTrue(probability > 0);
         }
     }
 
     /**
-     * The biomes this mod overrides, next to vanilla's: carvers, and features step by step (which ones this mod adds
-     * or drops).
+     * The biomes this mod overrides, next to vanilla's: the same carvers, and features step by step (which ones this
+     * mod adds or drops).
      */
     @Test
     void biomeOverridesComparedWithVanilla() throws IOException {
@@ -80,8 +85,7 @@ class VanillaOverridesTest {
                     .getGenerationSettings();
             List<String> originalCarvers = new ArrayList<>();
             original.getCarversForStep().forEach(carver -> originalCarvers.add(id(carver)));
-            System.out.printf(Locale.ROOT, "[overrides] biome minecraft:%s carvers vanilla %s, this mod %s%n", name, originalCarvers,
-                    strings(override.getAsJsonArray("carvers")));
+            assertEquals(originalCarvers, strings(override.getAsJsonArray("carvers")), "minecraft:" + name + " overrides vanilla's carvers");
             JsonArray steps = override.getAsJsonArray("features");
             List<RegistryEntryList<PlacedFeature>> originalSteps = original.getFeatures();
             for (int step = 0; step < Math.max(steps.size(), originalSteps.size()); step++) {

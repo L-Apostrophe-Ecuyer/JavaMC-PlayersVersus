@@ -1,2 +1,4 @@
 accessWidener v2 named
 accessible method net/minecraft/world/biome/source/util/VanillaBiomeParameters writeOverworldBiomeParameters (Ljava/util/function/Consumer;)V
+extendable class net/minecraft/world/gen/chunk/NoiseChunkGenerator
+accessible method net/minecraft/world/biome/GenerationSettings <init> (Lnet/minecraft/registry/entry/RegistryEntryList;Ljava/util/List;)V

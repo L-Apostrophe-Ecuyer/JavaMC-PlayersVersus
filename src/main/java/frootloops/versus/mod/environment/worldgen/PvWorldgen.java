@@ -21,8 +21,9 @@ import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
 /**
  * Entry point for the Players Versus world type ("Improved", preset {@code players-versus:better_world}).
  *
- * <p>Code registered here only affects generators whose settings opt in (see {@link #isPvGenerator}); vanilla world
- * types are left alone. The migration plan lives in {@code docs/worldgen-refactor-plan.md}.
+ * <p>Code registered here only affects the Improved world type: the aquifer and ore veins apply to generators whose
+ * settings opt in (see {@link #isPvGenerator}), the carvers to Improved's own generator ({@link PvChunkGenerator});
+ * vanilla world types are left alone. The migration plan lives in {@code docs/worldgen-refactor-plan.md}.
  */
 public final class PvWorldgen {
 
@@ -34,6 +35,7 @@ public final class PvWorldgen {
     public static final Identifier NOODLE_ID = Identifier.of(VersusMod.MOD_ID, "noodle");
     public static final Identifier FINAL_DENSITY_ID = Identifier.of(VersusMod.MOD_ID, "final_density");
     public static final Identifier BIOME_SOURCE_ID = Identifier.of(VersusMod.MOD_ID, "overworld");
+    public static final Identifier CHUNK_GENERATOR_ID = Identifier.of(VersusMod.MOD_ID, "noise");
 
     private PvWorldgen() {
     }
@@ -47,6 +49,7 @@ public final class PvWorldgen {
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, NOODLE_ID, PvNoodle.CODEC);
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, FINAL_DENSITY_ID, PvFinalDensity.CODEC);
         Registry.register(Registries.BIOME_SOURCE, BIOME_SOURCE_ID, PvBiomeSource.CODEC);
+        Registry.register(Registries.CHUNK_GENERATOR, CHUNK_GENERATOR_ID, PvChunkGenerator.CODEC);
         WorldgenDebugCommands.register();
         WorldgenBench.registerHeadlessRun();
     }
