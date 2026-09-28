@@ -34,32 +34,40 @@ class HighRiverSurveyTest {
     private static final byte SOLID = 0, AIR = 1, CARVED = 2, SURFACE_WATER = 3, CORE_WATER = 4, PLUG = 5, BANK = 6;
 
     /**
-     * A river shape. Across the river, {@code m = max(0, 1 - (r / halfWidth)^2)} ({@code r}: the river noise); along
-     * it, {@code f = min(1, 10 d)^2 * clamp((top - d) / fade, 0, 1)}, {@code d} the depth at y 80: 0 where the ground is
-     * below y 80, fading out where it's more than {@code top} above. Column strength {@code s = m f}. Above y 80, the
-     * river opens the terrain where {@code s > edge}; at y 80 that terrain becomes water; below, with
-     * {@code g = max(0, 1 - (80 - y) / below)}, water where {@code s g >= core} and the four blocks beside and the one
-     * below are in the river too, stone elsewhere in the river ({@code s g > 0}), caves included.
+     * A river shape. The river map {@code m = max(0, 1 - (r / halfWidth)^2)} ({@code r}: the river noise) narrows where
+     * the ground rises: {@code s = m * clamp((top - d) / fade, 0, 1)}, {@code d} the depth at y 80, and there's no river
+     * where the ground is below y 80 ({@code d <= 0}). At y 80, water where {@code s > surface}, whatever was there;
+     * above, open up to {@code above} blocks higher where {@code s > surface - (y - 80) * slope} (at least {@code edge}),
+     * so the banks slope back as they rise; below, with {@code g = max(0, 1 - (80 - y) / below)} and the ground factor
+     * {@code f = min(1, d / full)}, water where {@code s g f >= core} and the four blocks beside and the one below are in
+     * the river ({@code s g > 0}), and stone in the rest of the river, caves included.
      */
-    private record Shape(String name, double halfWidth, double top, double fade, int below, double core, double edge) {
+    private record Shape(String name, double halfWidth, double top, double fade, double surface, double slope, double edge,
+                         int above, int below, double full, double core) {
         double strength(double river, double depth80) {
+            if (depth80 <= 0.0) return 0.0;
             double across = river / this.halfWidth;
-            double m = Math.max(0.0, 1.0 - across * across);
-            double rise = Math.min(1.0, 10.0 * depth80);
-            double f = depth80 <= 0.0 ? 0.0 : rise * rise * MathHelper.clamp((this.top - depth80) / this.fade, 0.0, 1.0);
-            return m * f;
+            return Math.max(0.0, 1.0 - across * across) * MathHelper.clamp((this.top - depth80) / this.fade, 0.0, 1.0);
+        }
+
+        double openFrom(int y) {
+            return Math.max(this.edge, this.surface - (y - RIVER_Y) * this.slope);
         }
 
         double below(int y) {
             return Math.max(0.0, 1.0 - (double) (RIVER_Y - y) / this.below);
         }
+
+        double ground(double depth80) {
+            return Math.min(1.0, depth80 / this.full);
+        }
     }
 
     private static final List<Shape> SHAPES = List.of(
-            new Shape("half width 0.05, ground up to d 0.12", 0.05, 0.12, 0.04, 6, 0.3, 0.02),
-            new Shape("half width 0.08, ground up to d 0.12", 0.08, 0.12, 0.04, 6, 0.3, 0.02),
-            new Shape("half width 0.05, ground up to d 0.06", 0.05, 0.06, 0.03, 6, 0.3, 0.02),
-            new Shape("half width 0.05, ground up to d 0.2", 0.05, 0.2, 0.06, 8, 0.3, 0.02));
+            new Shape("half width 0.03, ground up to d 0.06", 0.03, 0.06, 0.02, 0.3, 0.06, 0.02, 12, 4, 0.02, 0.25),
+            new Shape("half width 0.02, ground up to d 0.06", 0.02, 0.06, 0.02, 0.3, 0.06, 0.02, 12, 4, 0.02, 0.25),
+            new Shape("half width 0.04, ground up to d 0.06", 0.04, 0.06, 0.02, 0.3, 0.06, 0.02, 12, 4, 0.02, 0.25),
+            new Shape("half width 0.03, ground up to d 0.1", 0.03, 0.1, 0.03, 0.3, 0.06, 0.02, 16, 4, 0.02, 0.25));
 
     @Test
     void survey() {
@@ -83,7 +91,7 @@ class HighRiverSurveyTest {
                 Shape shape = SHAPES.get(s);
                 double[] strength = new double[AREA * AREA];
                 for (int i = 0; i < strength.length; i++) strength[i] = shape.strength(noise[i], depth80[i]);
-                byte[][] after = apply(shape, strength, terrain);
+                byte[][] after = apply(shape, strength, depth80, terrain);
                 stats[s].add(shape, strength, terrain, after);
                 if (a == 0 && s == 0) print(shape, strength, terrain, after, originX, originZ);
             }
@@ -167,28 +175,29 @@ class HighRiverSurveyTest {
     }
 
     /** The river's blocks by column: null where the river leaves the column as it was. */
-    private static byte[][] apply(Shape shape, double[] strength, Terrain terrain) {
+    private static byte[][] apply(Shape shape, double[] strength, double[] depth80, Terrain terrain) {
         byte[][] after = new byte[AREA * AREA][];
         for (int x = 0; x < AREA; x++) {
             for (int z = 0; z < AREA; z++) {
                 double s = strength[x * AREA + z];
                 if (s <= 0.0) continue;
+                double ground = shape.ground(depth80[x * AREA + z]);
                 byte[] column = terrain.column(x, z).clone();
                 for (int y = MIN_Y; y < MAX_Y; y++) {
                     int i = y - MIN_Y;
                     if (y > RIVER_Y) {
-                        if (s > shape.edge() && column[i] == SOLID) column[i] = CARVED;
+                        if (y <= RIVER_Y + shape.above() && s > shape.openFrom(y) && column[i] == SOLID) column[i] = CARVED;
                     } else if (y == RIVER_Y) {
-                        if (s > shape.edge() && column[i] == SOLID) column[i] = SURFACE_WATER;
+                        if (s > shape.surface()) column[i] = SURFACE_WATER;
                     } else {
-                        double v = s * shape.below(y);
-                        if (v <= 0.0) continue;
-                        boolean core = v >= shape.core() && s * shape.below(y - 1) > 0.0;
+                        double g = shape.below(y);
+                        if (g <= 0.0) continue;
+                        boolean core = s * g * ground >= shape.core() && shape.below(y - 1) > 0.0;
                         for (int[] side : SIDES) {
                             int nx = x + side[0], nz = z + side[1];
-                            if (!inArea(nx, nz) || strength[nx * AREA + nz] * shape.below(y) <= 0.0) core = false;
+                            if (!inArea(nx, nz) || strength[nx * AREA + nz] <= 0.0) core = false;
                         }
-                        column[i] = column[i] == SOLID ? (core ? CORE_WATER : BANK) : PLUG;
+                        column[i] = core ? CORE_WATER : column[i] == SOLID ? BANK : PLUG;
                     }
                 }
                 after[x * AREA + z] = column;
@@ -208,7 +217,7 @@ class HighRiverSurveyTest {
 
     /** Totals for one shape over every area. */
     private static final class Stats {
-        long riverColumns, surfaceWater, naturalAirAtRiver, coreWater, carved, plugs, spills, spillColumns;
+        long riverColumns, surfaceWater, naturalAirAtRiver, coreWater, carved, plugs, spills, spillColumns, roofed;
         /** River columns by the ground's height above y 80: none (below 81), 1..3, 4..7, 8..11, 12..15, 16 and more. */
         final long[] depths = new long[6];
 
@@ -216,7 +225,7 @@ class HighRiverSurveyTest {
             for (int x = 0; x < AREA; x++) {
                 for (int z = 0; z < AREA; z++) {
                     byte[] column = after[x * AREA + z];
-                    if (column == null || strength[x * AREA + z] <= shape.edge()) continue;
+                    if (column == null || column[RIVER_Y - MIN_Y] != SURFACE_WATER) continue;
                     this.riverColumns++;
                     int above = terrain.surface(x, z) - RIVER_Y;
                     this.depths[above <= 0 ? 0 : above < 4 ? 1 : above < 8 ? 2 : above < 12 ? 3 : above < 16 ? 4 : 5]++;
@@ -231,8 +240,16 @@ class HighRiverSurveyTest {
                             }
                         }
                     }
-                    if (column[RIVER_Y - MIN_Y] == AIR) this.naturalAirAtRiver++;
-                    if (column[RIVER_Y - MIN_Y] != SURFACE_WATER) continue;
+                    if (terrain.column(x, z)[RIVER_Y - MIN_Y] == AIR) this.naturalAirAtRiver++;
+                    boolean openSeen = false;
+                    for (int y = RIVER_Y + 1; y < MAX_Y; y++) {
+                        byte block = column[y - MIN_Y];
+                        if (open(block)) openSeen = true;
+                        else if (openSeen && block == SOLID) {
+                            this.roofed++;
+                            break;
+                        }
+                    }
                     for (int[] side : SIDES) {
                         int nx = x + side[0], nz = z + side[1];
                         if (inArea(nx, nz) && open(at(after, terrain, nx, nz, RIVER_Y))) {
@@ -247,12 +264,12 @@ class HighRiverSurveyTest {
 
         String describe(double chunks) {
             return String.format(Locale.ROOT, "river columns %.1f (ground above y 80 by 0: %.1f, 1..3: %.1f, 4..7: %.1f, 8..11: %.1f,"
-                            + " 12..15: %.1f, 16+: %.1f); water at y 80 %.1f (open blocks left at y 80: %.2f), below %.1f; carved above y 80 %.1f;"
-                            + " caves plugged %.1f; water faces spilling %.2f, from %.2f columns",
+                            + " 12..15: %.1f, 16+: %.1f); water at y 80 %.1f (%.2f where it was open), below %.1f; carved above y 80 %.1f;"
+                            + " caves plugged %.1f; water faces spilling %.2f, from %.2f columns; columns with solid over open above the water %.2f",
                     this.riverColumns / chunks, this.depths[0] / chunks, this.depths[1] / chunks, this.depths[2] / chunks,
                     this.depths[3] / chunks, this.depths[4] / chunks, this.depths[5] / chunks, this.surfaceWater / chunks,
                     this.naturalAirAtRiver / chunks, this.coreWater / chunks, this.carved / chunks, this.plugs / chunks,
-                    this.spills / chunks, this.spillColumns / chunks);
+                    this.spills / chunks, this.spillColumns / chunks, this.roofed / chunks);
         }
     }
 
