@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.function.ToDoubleFunction;
 
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BAND_REACH;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MAX_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BAND_MIN_Y;
@@ -33,10 +34,11 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * (the terrain pass, carvers, probes) gets the same answer at a block; {@code AquiferTerrainPassTest} compares it
  * with the terrain pass before.
  *
- * <p>Walls look at a block's neighbours ({@link PvAquiferRules#decide}), up to {@link PvAquiferRules#BAND_REACH}
- * blocks away, so each block's own decision ({@link PvAquiferRules#atPosition}) is kept once computed, for the chunk
- * and that far around it. The lattices and the ridge cache reach past the chunk too, and give there what the
- * neighbouring chunk gives, so both chunks agree on the walls along their border.
+ * <p>Walls look at a block's neighbours ({@link PvAquiferRules#decide}), up to
+ * {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#BAND_REACH} blocks away, so each block's own
+ * decision ({@link PvAquiferRules#atPosition}) is kept once computed, for the chunk and that far around it. The
+ * lattices and the ridge cache reach past the chunk too, and give there what the neighbouring chunk gives, so both
+ * chunks agree on the walls along their border.
  */
 public final class PvAquifer implements AquiferSampler {
 
@@ -47,7 +49,7 @@ public final class PvAquifer implements AquiferSampler {
     public static final int CELL_HEIGHT = 8;
 
     /** How far past the chunk the walls look, and so the columns kept below. */
-    private static final int REACH = PvAquiferRules.BAND_REACH;
+    private static final int REACH = BAND_REACH;
     private static final int SIDE = 16 + 2 * REACH;
     /** The heights where {@link PvAquiferRules#atPosition} can say anything but air: the sea band, y -31..63. */
     private static final int MIN_Y = SEA_BAND_MIN_Y + 1;

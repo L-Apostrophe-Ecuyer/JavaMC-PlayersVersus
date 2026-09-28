@@ -221,12 +221,13 @@ class AquiferSurveyTest {
     /**
      * Wall rules played out on each block's own floodedness ({@link PvAquifer#atPosition}): the barrier bands alone (the
      * rule until revision 6), and walls where water could flow in plus the bands within 2 steps of water, keeping every
-     * band from a given height up. How much open terrain each fills with stone, and how many columns' surface (their
-     * highest solid block) moves against the bands alone.
+     * band from a given height up ({@code BANDS_KEPT_FROM_Y}, 56, is the code's). How much open terrain each fills with
+     * stone, and how many columns' surface (their highest solid block) moves against the bands alone: without the bands
+     * near the sea surface, the dry hollows they filled next to coasts open into pits.
      */
     private static final class WallVariants {
-        /** The heights from which a variant keeps every band; 64 keeps none (the rule in the code). */
-        private static final int[] KEEP_FROM = {64, 56, 52, 48, 44, 40};
+        /** The heights from which a variant keeps every band; 64 keeps none. */
+        private static final int[] KEEP_FROM = {64, 56, 48, 40};
         private static final int[][] INFLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, 1, 0}};
         private static final int[][] FLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
 

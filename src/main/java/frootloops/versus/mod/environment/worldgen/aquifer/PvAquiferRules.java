@@ -19,8 +19,10 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.*;
  *   <li>at or above {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#SEA_LEVEL}: air;</li>
  *   <li>water where its floodedness says so;</li>
  *   <li>a wall where water could flow in: from one of the four sides, or from above;</li>
- *   <li>a barrier band's stone within {@link #BAND_REACH} steps of water, so water keeps a wall of that thickness where
- *   the bands gave it one;</li>
+ *   <li>a barrier band's stone within {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#BAND_REACH}
+ *   steps of water, so water keeps a wall of that thickness where the bands gave it one, and from
+ *   {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#BANDS_KEPT_FROM_Y} up, where the sea's band
+ *   fills coastal hollows;</li>
  *   <li>otherwise air.</li>
  * </ol>
  * So water never touches open air, whatever the terrain or a carver opens (walls don't depend on density), and the
@@ -29,12 +31,9 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.*;
  */
 public final class PvAquiferRules {
 
-    /** How far (in steps along the axes) a barrier band's stone is kept around water. */
-    public static final int BAND_REACH = 2;
-
     /** Where water flows into a position from: the four sides, then above. */
     private static final int[][] INFLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, 1, 0}};
-    /** The positions within {@link #BAND_REACH} steps, nearest first. */
+    /** The positions within {@code BAND_REACH} steps, nearest first. */
     private static final int[][] BAND_NEIGHBOURHOOD = neighbourhood(BAND_REACH);
 
     private PvAquiferRules() {
@@ -103,7 +102,7 @@ public final class PvAquiferRules {
         if (isWater(here)) return here;
         PvAquiferDecision wall = wall(x, y, z, positions);
         if (wall != PvAquiferDecision.AIR) return wall;
-        if (here != PvAquiferDecision.AIR && waterWithinReach(x, y, z, positions)) return here;
+        if (here != PvAquiferDecision.AIR && (y >= BANDS_KEPT_FROM_Y || waterWithinReach(x, y, z, positions))) return here;
         return PvAquiferDecision.AIR;
     }
 

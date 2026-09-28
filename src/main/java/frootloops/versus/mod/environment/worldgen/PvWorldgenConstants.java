@@ -74,6 +74,22 @@ public final class PvWorldgenConstants {
     public static final double BASIN_BARRIER_RAMP_PER_BLOCK = 0.06;
 
     // ------------------------------------------------------------------------------------------------------------
+    // Aquifer: walls
+    // ------------------------------------------------------------------------------------------------------------
+
+    /**
+     * How far, in steps along the axes, a barrier band's stone is kept around water. Stone also stands wherever water
+     * could flow in (one step, from a side or from above), whatever the bands say ({@code aquifer/PvAquiferRules}).
+     */
+    public static final int BAND_REACH = 2;
+
+    /**
+     * From this height up, a barrier band's stone stays wherever it is. Near the sea surface the sea's band fills the dry
+     * hollows next to coasts up to about sea level, which shapes the coast: without it they'd open into pits.
+     */
+    public static final int BANDS_KEPT_FROM_Y = 56;
+
+    // ------------------------------------------------------------------------------------------------------------
     // Aquifer: fluid ticks
     // ------------------------------------------------------------------------------------------------------------
 

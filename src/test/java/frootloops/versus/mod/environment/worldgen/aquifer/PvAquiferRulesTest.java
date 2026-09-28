@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BANDS_KEPT_FROM_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -85,7 +86,7 @@ class PvAquiferRulesTest {
     }
 
     @Test
-    void bandsStayStoneNearWaterOnly() {
+    void bandsStayStoneNearWaterOrTheSeaSurface() {
         // a band with water within two steps, below it included: stone
         assertEquals(PvAquiferDecision.SEA_BARRIER, new Neighbourhood().put(0, 40, 0, PvAquiferDecision.SEA_BARRIER)
                 .put(0, 38, 0, PvAquiferDecision.SEA_WATER).decide(0, 40, 0));
@@ -95,6 +96,11 @@ class PvAquiferRulesTest {
         assertEquals(PvAquiferDecision.AIR, new Neighbourhood().put(0, 40, 0, PvAquiferDecision.SEA_BARRIER)
                 .put(1, 38, 1, PvAquiferDecision.SEA_WATER).decide(0, 40, 0));
         assertEquals(PvAquiferDecision.AIR, new Neighbourhood().put(0, 40, 0, PvAquiferDecision.SEA_BARRIER).decide(0, 40, 0));
+        // near the sea surface a band stays stone, water or not: it fills the hollows next to coasts
+        assertEquals(PvAquiferDecision.SEA_BARRIER, new Neighbourhood().put(0, BANDS_KEPT_FROM_Y, 0, PvAquiferDecision.SEA_BARRIER)
+                .decide(0, BANDS_KEPT_FROM_Y, 0));
+        assertEquals(PvAquiferDecision.AIR, new Neighbourhood().put(0, BANDS_KEPT_FROM_Y - 1, 0, PvAquiferDecision.SEA_BARRIER)
+                .decide(0, BANDS_KEPT_FROM_Y - 1, 0));
     }
 
     @Test
