@@ -87,6 +87,7 @@ class AquiferSurveyTest {
                 .map(name -> withEntrancesDelta(finalDensity, delta(CANDIDATES.get(name)))).toList();
         Map<ChunkPos, String> chunks = surveyChunks(config);
         Tally tally = new Tally(names.size(), shape.minimumY(), shape.height());
+        WallRules walls = new WallRules();
         long[] unchangedMismatches = {0};
         for (Map.Entry<ChunkPos, String> entry : chunks.entrySet()) {
             ChunkPos chunk = entry.getKey();
@@ -110,8 +111,10 @@ class AquiferSurveyTest {
                 }
             });
             tally.add(blocks, entry.getValue());
+            walls.add(blocks);
         }
         tally.print(names);
+        walls.print();
         assertEquals(0, unchangedMismatches[0], "the survey's unchanged candidate differs from the router's final density");
         assertTrue(tally.openWater > 0 && tally.caveBlocks(0) > 0, "the survey found no water or no caves");
     }
@@ -213,6 +216,126 @@ class AquiferSurveyTest {
 
         boolean inside(int localX, int y, int localZ) {
             return localX >= 0 && localX < 16 && localZ >= 0 && localZ < 16 && y >= this.minY && y < this.minY + this.height;
+        }
+    }
+
+    /**
+     * Wall rules played out on the decisions above, which carvers get too: where each rule puts stone in open terrain,
+     * and what it leaves. A rule decides for every block that isn't water, from where the water is:
+     * <ol>
+     *   <li>now: the barrier bands, floodedness between the barrier and water thresholds;</li>
+     *   <li>exact: stone wherever water could flow in, from beside or above, and nowhere else;</li>
+     *   <li>that, and the bands within 2 blocks of water.</li>
+     * </ol>
+     */
+    private static final class WallRules {
+        private static final String[] NAMES = {"barrier bands (now)", "exact walls", "exact walls and bands within 2 blocks of water"};
+        private static final int[][] FLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
+        private static final int[][] INFLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, 1, 0}};
+
+        int chunks;
+        /** Open terrain each rule fills with stone, by [rule][in a cave 0, under the sky 1]. */
+        final long[][] stone = new long[NAMES.length][2];
+        /** Stone with open water right above it and open dry air right below: a floor one block thick. */
+        final long[] thinFloors = new long[NAMES.length];
+        /** Open water with open dry air beside or below it. */
+        final long[] leaks = new long[NAMES.length];
+        /** Dry blocks water could flow into, from beside or above, if a carver opened them. */
+        final long[] carvableLeaks = new long[NAMES.length];
+
+        void add(ChunkBlocks blocks) {
+            this.chunks++;
+            int size = blocks.state.length, maxY = blocks.minY + blocks.height;
+            boolean[][] wall = new boolean[NAMES.length][size];
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int y = blocks.minY; y < maxY; y++) {
+                        PvAquiferDecision carved = blocks.carvedAt(x, y, z);
+                        if (carved != PvAquiferDecision.AIR && !barrier(carved)) continue;
+                        int i = blocks.index(x, y, z);
+                        boolean inflow = this.near(blocks, x, y, z, INFLOW);
+                        wall[0][i] = barrier(carved);
+                        wall[1][i] = inflow;
+                        wall[2][i] = inflow || barrier(carved) && this.waterWithin(blocks, x, y, z, 2);
+                    }
+                }
+            }
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    int top = blocks.minY - 1;
+                    for (int y = maxY - 1; y >= blocks.minY; y--) {
+                        if (solid(blocks.at(x, y, z))) {
+                            top = y;
+                            break;
+                        }
+                    }
+                    for (int y = blocks.minY; y < maxY; y++) {
+                        int i = blocks.index(x, y, z);
+                        PvAquiferDecision decision = blocks.at(x, y, z);
+                        boolean open = decision != PvAquiferDecision.SOLID;
+                        for (int rule = 0; rule < NAMES.length; rule++) {
+                            if (open && wall[rule][i]) {
+                                this.stone[rule][y < top ? 0 : 1]++;
+                                if (y > blocks.minY && y + 1 < maxY && water(blocks.at(x, y + 1, z))
+                                        && this.dryAir(blocks, wall[rule], x, y - 1, z)) {
+                                    this.thinFloors[rule]++;
+                                }
+                            }
+                            if (open && water(decision)) {
+                                for (int[] offset : FLOW) {
+                                    if (this.dryAir(blocks, wall[rule], x + offset[0], y + offset[1], z + offset[2])) {
+                                        this.leaks[rule]++;
+                                        break;
+                                    }
+                                }
+                            }
+                            PvAquiferDecision carved = blocks.carvedAt(x, y, z);
+                            if ((carved == PvAquiferDecision.AIR || barrier(carved)) && !wall[rule][i] && this.near(blocks, x, y, z, INFLOW)) {
+                                this.carvableLeaks[rule]++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /** Open terrain the rule leaves dry: no water, no wall. */
+        private boolean dryAir(ChunkBlocks blocks, boolean[] wall, int x, int y, int z) {
+            if (!blocks.inside(x, y, z)) return false;
+            PvAquiferDecision decision = blocks.at(x, y, z);
+            return decision != PvAquiferDecision.SOLID && !water(decision) && decision != PvAquiferDecision.LAVA
+                    && !wall[blocks.index(x, y, z)];
+        }
+
+        /** Whether water (where the terrain is open or not) is at one of the offsets. */
+        private boolean near(ChunkBlocks blocks, int x, int y, int z, int[][] offsets) {
+            for (int[] offset : offsets) {
+                int nx = x + offset[0], ny = y + offset[1], nz = z + offset[2];
+                if (blocks.inside(nx, ny, nz) && water(blocks.carvedAt(nx, ny, nz))) return true;
+            }
+            return false;
+        }
+
+        private boolean waterWithin(ChunkBlocks blocks, int x, int y, int z, int reach) {
+            for (int dx = -reach; dx <= reach; dx++) {
+                for (int dy = -reach; dy <= reach; dy++) {
+                    for (int dz = -reach; dz <= reach; dz++) {
+                        int nx = x + dx, ny = y + dy, nz = z + dz;
+                        if (blocks.inside(nx, ny, nz) && water(blocks.carvedAt(nx, ny, nz))) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        void print() {
+            double n = this.chunks;
+            for (int rule = 0; rule < NAMES.length; rule++) {
+                System.out.printf(Locale.ROOT, "[survey] walls, %s: stone in open terrain %.1f in caves and %.1f under the sky per chunk;"
+                                + " floors one block thick %.1f; water next to open dry air %.2f; dry blocks water could reach once carved %.1f%n",
+                        NAMES[rule], this.stone[rule][0] / n, this.stone[rule][1] / n, this.thinFloors[rule] / n, this.leaks[rule] / n,
+                        this.carvableLeaks[rule] / n);
+            }
         }
     }
 
