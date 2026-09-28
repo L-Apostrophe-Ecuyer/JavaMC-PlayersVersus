@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.worldgen;
 
+import frootloops.versus.mod.environment.worldgen.aquifer.PvAquifer;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferDecision;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferRules;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
@@ -30,6 +31,8 @@ class WorldgenDataTest {
                 settings.aquifers(), settings.oreVeins());
         assertTrue(PvWorldgen.isPvGenerator(settings), "the router's fluid_level_floodedness has no players-versus:aquifer_floodedness");
         assertEquals(PvWorldgenConstants.SEA_LEVEL, settings.seaLevel(), "sea_level in the noise settings and PvWorldgenConstants.SEA_LEVEL differ");
+        assertEquals(PvAquifer.CELL_HEIGHT, settings.generationShapeConfig().verticalCellBlockCount(), "the aquifer's lattice no longer matches the terrain pass's cells");
+        assertEquals(4, settings.generationShapeConfig().horizontalCellBlockCount(), "the aquifer's lattice no longer matches the terrain pass's cells");
     }
 
     /**

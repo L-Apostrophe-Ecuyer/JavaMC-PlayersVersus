@@ -26,11 +26,20 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * pass {@code density = 0}) and heightmap probes.
  *
  * <p>F and S ({@link AquiferFormulas}) are evaluated per block, because they step inside their bands; interpolating
- * them whole moved those steps (commit 373b78f). Their smooth inputs come from per-chunk {@link Lattice}s instead of
- * per-block noise: depth, 3D continentalness, cave entrances, and S's inner part, which the JSON interpolated anyway.
- * The ridge noise is kept per column, the surface and ramen noises are sampled per block.
+ * them whole moved those steps (commit 373b78f). Their smooth inputs come from per-chunk {@link Lattice}s on the
+ * terrain pass's cell grid (4 x 8 x 4, aligned like vanilla's cells): depth, cave entrances and S's inner part, which
+ * the JSON router interpolated on those cells in the terrain pass; and 3D continentalness, which it sampled per block
+ * but is smooth. The ridge noise is kept per column; the surface and ramen noises are sampled per block. Every caller
+ * (the terrain pass, carvers, probes) gets the same answer at a block; {@code AquiferTerrainPassTest} compares it
+ * with the terrain pass before.
  */
 public final class PvAquifer implements AquiferSampler {
+
+    /**
+     * The vertical size of the terrain pass's cells ({@code size_vertical} 2 in the noise settings, times 4), which
+     * vanilla interpolates {@code interpolated} functions over. {@code WorldgenDataTest} checks the settings.
+     */
+    public static final int CELL_HEIGHT = 8;
 
     private final FluidLevelSampler fluidLevelSampler;
     private final AquiferFloodedness floodednessInputs;
@@ -56,15 +65,15 @@ public final class PvAquifer implements AquiferSampler {
         this.floodednessInputs = inputs.floodedness();
         this.originX = chunkPos.getStartX();
         this.originZ = chunkPos.getStartZ();
-        this.depth = new Lattice(depth, chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL);
-        this.continentalness = new Lattice(this.floodednessInputs.continentalness(), chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL);
-        Lattice entrances = new Lattice(this.floodednessInputs.entrances(), chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL);
+        this.depth = new Lattice(depth, chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL, CELL_HEIGHT);
+        this.continentalness = new Lattice(this.floodednessInputs.continentalness(), chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL, CELL_HEIGHT);
+        Lattice entrances = new Lattice(this.floodednessInputs.entrances(), chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL, CELL_HEIGHT);
         this.entrances = entrances;
         AquiferSpread spread = inputs.spread();
         this.basinInner = new Lattice((x, y, z) -> {
             DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
             return AquiferFormulas.basinInner(y, entrances.exactAt(x, y, z), spread.noodle().sample(pos), spread.surface().sample(pos));
-        }, chunkPos, BASIN_MIN_Y, BASIN_MAX_Y);
+        }, chunkPos, BASIN_MIN_Y, BASIN_MAX_Y, CELL_HEIGHT);
         Arrays.fill(this.ridge, Double.NaN);
     }
 
@@ -92,8 +101,9 @@ public final class PvAquifer implements AquiferSampler {
     /** F at a block, from lattice inputs; {@code /pvwg probe} shows it next to the exact value. */
     public double floodedness(DensityFunction.NoisePos pos) {
         int x = pos.blockX(), y = pos.blockY(), z = pos.blockZ();
+        double entrances = this.entrances.at(x, y, z);
         double seaFloodedness = AquiferFormulas.seaFloodedness(y, this.depth.at(x, y, z), this.continentalness.at(x, y, z),
-                this.entrances.at(x, y, z), this.ridge(x, z), this.floodednessInputs.surface().sample(pos));
+                entrances, entrances, this.ridge(x, z), this.floodednessInputs.surface().sample(pos));
         return AquiferFormulas.floodedness(y, seaFloodedness, () -> this.floodednessInputs.ramen().sample(pos));
     }
 

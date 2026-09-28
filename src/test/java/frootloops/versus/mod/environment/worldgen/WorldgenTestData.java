@@ -84,6 +84,12 @@ public final class WorldgenTestData {
                 .apply(AquiferInputs.seeding(config));
     }
 
+    /** A density function written inline in JSON, its references resolved in {@link #registries()}, seeded like {@link #seeded}. */
+    public static DensityFunction parse(NoiseConfig config, String json) {
+        return DensityFunction.FUNCTION_CODEC.parse(RegistryOps.of(JsonOps.INSTANCE, registries()), JsonParser.parseString(json))
+                .getOrThrow().apply(AquiferInputs.seeding(config));
+    }
+
     public static String read(String resource) {
         try {
             return Files.readString(MOD_RESOURCES.resolve(resource));

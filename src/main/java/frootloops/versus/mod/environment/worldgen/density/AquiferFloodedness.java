@@ -39,8 +39,9 @@ public record AquiferFloodedness(DensityFunction depth, DensityFunction continen
     @Override
     public double sample(NoisePos pos) {
         int y = pos.blockY();
+        double entrances = this.entrances.sample(pos);
         double seaFloodedness = AquiferFormulas.seaFloodedness(y, this.depth.sample(pos), this.continentalness.sample(pos),
-                this.entrances.sample(pos), this.ridge.sample(pos), this.surface.sample(pos));
+                entrances, entrances, this.ridge.sample(pos), this.surface.sample(pos));
         return AquiferFormulas.floodedness(y, seaFloodedness, () -> this.ramen.sample(pos));
     }
 

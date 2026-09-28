@@ -57,22 +57,24 @@ public final class AquiferFormulas {
     /**
      * F': water below the surface of oceans and lakes, in river channels, and in cave entrances near coasts.
      *
-     * @param depth           the {@code depth} router function
+     * @param depth           the {@code depth} router function ({@code interpolated} in the JSON)
      * @param continentalness {@code shifted_noise(minecraft:continentalness, xz 0.25, y 0.1)}
-     * @param entrances       {@code players-versus:overworld/caves/entrances}
+     * @param coastEntrances  {@code players-versus:overworld/caves/entrances} for the coast term ({@code interpolated} in the JSON)
+     * @param riverEntrances  the same function for the river term (not interpolated in the JSON)
      * @param ridge           {@code shifted_noise(minecraft:ridge, xz 0.25, y 0)}
      * @param surface         {@code noise(minecraft:surface, xz 2, y 1)}
      */
-    public static double seaFloodedness(int y, double depth, double continentalness, double entrances, double ridge, double surface) {
+    public static double seaFloodedness(int y, double depth, double continentalness, double coastEntrances, double riverEntrances,
+                                        double ridge, double surface) {
         double yValue = yValue(y);
         if (!(yValue >= -32.0 && yValue < 64.0)) return 0.0;
         double roughness = Math.abs(surface);
         double ocean = Math.min(0.0, (roughness * -0.02 + -0.06) + depth) * -8.0;
-        double oceanOrRiver = Math.max(ocean, river(y, yValue, entrances, ridge));
+        double oceanOrRiver = Math.max(ocean, river(y, yValue, riverEntrances, ridge));
         double coastCondition = gradient(y, 16, 48, 0.0, -0.34) + continentalness;
         double coastDepth = Math.min(0.0, (Math.min(-0.08, continentalness + -0.1) + roughness * -0.08) + depth) * -64.0;
-        double coastEntrances = Math.min(0.0, gradient(y, -32, 8, 0.32, -0.18) + entrances);
-        return Math.max(oceanOrRiver, mul(coastCondition, mul(coastDepth, coastEntrances)));
+        double coastEntrance = Math.min(0.0, gradient(y, -32, 8, 0.32, -0.18) + coastEntrances);
+        return Math.max(oceanOrRiver, mul(coastCondition, mul(coastDepth, coastEntrance)));
     }
 
     /** River channels: y 48..63 where the ridge noise is within 0.3 of 0. */

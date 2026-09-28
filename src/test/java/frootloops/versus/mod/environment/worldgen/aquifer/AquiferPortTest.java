@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
+import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
@@ -36,8 +37,9 @@ class AquiferPortTest {
     @Test
     void javaGivesTheJsonsValues() {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        DensityFunction floodedness = config.getNoiseRouter().fluidLevelFloodednessNoise();
-        DensityFunction spread = config.getNoiseRouter().fluidLevelSpreadNoise();
+        // a router slot decoded from JSON is a registry holder around the function
+        DensityFunction floodedness = PvWorldgen.unwrap(config.getNoiseRouter().fluidLevelFloodednessNoise());
+        DensityFunction spread = PvWorldgen.unwrap(config.getNoiseRouter().fluidLevelSpreadNoise());
         assertInstanceOf(AquiferFloodedness.class, floodedness);
         assertInstanceOf(AquiferSpread.class, spread);
         DensityFunction jsonFloodedness = WorldgenTestData.seeded(config, "players-versus:overworld/aquifer_fluid_level_floodedness");
