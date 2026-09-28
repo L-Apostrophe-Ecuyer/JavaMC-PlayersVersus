@@ -63,17 +63,20 @@ class AquiferSurveyTest {
     private static Map<String, double[][]> candidates() {
         Map<String, double[][]> candidates = new LinkedHashMap<>();
         candidates.put("now", new double[0][]);
-        candidates.put("48 to -0.155", replacing(48, -0.155));
-        candidates.put("50 to -0.155", replacing(50, -0.155));
-        candidates.put("50 to -0.16", replacing(50, -0.16));
-        candidates.put("52 to -0.155", replacing(52, -0.155));
-        candidates.put("52 to -0.16", replacing(52, -0.16));
+        candidates.put("48..36 to -0.155", replacing(48, 36, -0.155));
+        candidates.put("48..38 to -0.155", replacing(48, 38, -0.155));
+        candidates.put("48..38 to -0.16", replacing(48, 38, -0.16));
+        candidates.put("48..40 to -0.15", replacing(48, 40, -0.15));
+        candidates.put("50..38 to -0.155", replacing(50, 38, -0.155));
         return candidates;
     }
 
-    /** The terms that turn {@code (48 -> 36, 0 -> -0.165)} into {@code (fromY -> 36, 0 -> low)}, and the rise under y 28 to match. */
-    private static double[][] replacing(int fromY, double low) {
-        return new double[][]{{fromY, 36, 0.0, low}, {48, 36, 0.0, 0.165}, {28, 18, 0.0, 0.11 - low}, {28, 18, 0.0, -0.275}};
+    /**
+     * The terms that turn {@code (48 -> 36, 0 -> -0.165)} into {@code (fromY -> toY, 0 -> low)}, and the rise under
+     * y 28 to match.
+     */
+    private static double[][] replacing(int fromY, int toY, double low) {
+        return new double[][]{{fromY, toY, 0.0, low}, {48, 36, 0.0, 0.165}, {28, 18, 0.0, 0.11 - low}, {28, 18, 0.0, -0.275}};
     }
 
     @Test
