@@ -11,6 +11,7 @@ import java.util.Map;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BANDS_KEPT_FROM_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_WATER_MIN_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -58,6 +59,10 @@ class PvAquiferRulesTest {
         assertEquals(PvAquiferDecision.AIR, atPosition(SEA_LEVEL, 1.0, 1.0));
         // a sea band takes the place of basin water
         assertEquals(PvAquiferDecision.SEA_BARRIER, atPosition(10, 0.2, 1.0));
+        // sea water starts at y -8; below it, what would be water is a band, kept only near water above it
+        assertEquals(PvAquiferDecision.SEA_WATER, atPosition(SEA_WATER_MIN_Y, 1.0, 0.0));
+        assertEquals(PvAquiferDecision.SEA_BARRIER, atPosition(SEA_WATER_MIN_Y - 1, 1.0, 0.0));
+        assertEquals(PvAquiferDecision.AIR, new Neighbourhood().put(0, -20, 0, PvAquiferDecision.SEA_BARRIER).decide(0, -20, 0));
     }
 
     @Test

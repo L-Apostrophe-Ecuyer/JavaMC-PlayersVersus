@@ -33,6 +33,13 @@ public final class PvWorldgenConstants {
     public static final int SEA_BAND_MIN_Y = -32;
 
     /**
+     * Sea water only from this y up; everything below stays dry (the owner's design, refactor plan Section 10,
+     * question 7). Below it, floodedness that would be water makes the sea's barrier band instead, so water just above
+     * keeps a floor as thick as the bands give ({@link #BAND_REACH}), and caves further down are dry.
+     */
+    public static final int SEA_WATER_MIN_Y = -8;
+
+    /**
      * Floodedness above this is water. {@code AquiferFormulas.floodedness} adds the ramen-cave term below it, as the
      * {@code range_choice} in {@code aquifer_fluid_level_floodedness.json} did.
      */

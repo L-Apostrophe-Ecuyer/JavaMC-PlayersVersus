@@ -98,7 +98,7 @@ public final class WorldgenBench {
     /** Covers every aquifer barrier: the lowest ones are basin barriers at y -3. */
     private static final int CARVER_BAND_MIN_Y = -8;
     private static final int CARVER_BAND_MAX_Y = 64;
-    /** The aquifer's water: the sea band, y -31..63. */
+    /** The sea band, y -31..63 (its water only from y -8 up, since revision 6 of the refactor plan). */
     private static final int LEAK_MIN_Y = -31;
     private static final int LEAK_MAX_Y = 64;
     /** Heights the leak metric is split by: y -31..-1, 0..23, 24..47, 48..63. */

@@ -134,7 +134,7 @@ class AquiferSurveyTest {
     }
 
     /** Chunks to survey, with the kind of place each is: anywhere, on a coast, along a river inland. */
-    private static Map<ChunkPos, String> surveyChunks(NoiseConfig config) {
+    static Map<ChunkPos, String> surveyChunks(NoiseConfig config) {
         DensityFunction continents = config.getNoiseRouter().continents(), ridges = config.getNoiseRouter().ridges();
         Map<ChunkPos, String> chunks = new LinkedHashMap<>();
         Map<String, Integer> wanted = new LinkedHashMap<>();

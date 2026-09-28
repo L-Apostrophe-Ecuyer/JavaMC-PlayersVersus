@@ -47,7 +47,9 @@ public final class PvAquiferRules {
 
     /**
      * What a position's own floodedness says, below sea level: water ({@code SEA_WATER}, {@code BASIN_WATER} and
-     * their ticking forms), a barrier band ({@code SEA_BARRIER}, {@code BASIN_BARRIER}), or {@code AIR}.
+     * their ticking forms), a barrier band ({@code SEA_BARRIER}, {@code BASIN_BARRIER}), or {@code AIR}. Sea water
+     * starts at {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#SEA_WATER_MIN_Y}; below it, sea
+     * floodedness above the water threshold is a band.
      *
      * @param floodedness sea/river floodedness F (router slot {@code fluid_level_floodedness}): the aquifer's
      *                    {@link Lattice}-based F, or the function itself for exact values
@@ -60,7 +62,7 @@ public final class PvAquiferRules {
 
         if (y > SEA_BAND_MIN_Y) {
             double seaFloodedness = floodedness.applyAsDouble(pos);
-            if (seaFloodedness > SEA_WATER_THRESHOLD) {
+            if (seaFloodedness > SEA_WATER_THRESHOLD && y >= SEA_WATER_MIN_Y) {
                 return seaFloodedness < SEA_WATER_THRESHOLD + FLUID_TICK_MARGIN
                         ? PvAquiferDecision.SEA_WATER_TICKING
                         : PvAquiferDecision.SEA_WATER;

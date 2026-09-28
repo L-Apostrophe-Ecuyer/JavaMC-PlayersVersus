@@ -80,8 +80,8 @@ flowchart TD
 
 | # | Condition | Result (`PvAquiferDecision`) |
 |---|---|---|
-| a | −32 < y and F′ > 0.34 | `SEA_WATER`, or `SEA_WATER_TICKING` if F′ < 0.54 |
-| b | −32 < y and F′ > 0.0001 + max(0, y − 60)·0.015 | the sea's barrier band, `SEA_BARRIER` |
+| a | −8 ≤ y and F′ > 0.34 | `SEA_WATER`, or `SEA_WATER_TICKING` if F′ < 0.54 |
+| b | −32 < y and F′ > 0.0001 + max(0, y − 60)·0.015 (below y −8, what would be water in rule a too) | the sea's barrier band, `SEA_BARRIER` |
 | c | −4 < y < 32 and S > tW(y), where tW = 0.5 for y > 8, else 0.5 − (8 − y)·0.08 | `BASIN_WATER`, or `BASIN_WATER_TICKING` if S < tW + 0.2 |
 | d | −4 < y < 23 and S > tB(y), where tB = 0.0001 for y < 12, else (y − 12)·0.06 | the basins' barrier band, `BASIN_BARRIER` |
 | e | otherwise | `AIR` |
@@ -98,7 +98,7 @@ flowchart TD
 | 6 | its own floodedness is a barrier band, and water lies within 2 steps along the axes, or y ≥ 56 | the band's `SEA_BARRIER` or `BASIN_BARRIER` |
 | 7 | otherwise | `AIR` |
 
-All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans are water connected to the sea surface; low caves get basins with their own water up to y 23; caves above them stay dry; stone stands wherever water meets open space, and the barrier bands add to it within 2 blocks of the water, and near the sea surface, where the sea's band fills the dry hollows next to coasts; the bottom is lava. Until revision 6 the bands alone were the walls (rules b and d gave stone wherever they held): Section 6.2, 2c.
+All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans are water connected to the sea surface; low caves get basins with their own water up to y 23; caves above them stay dry, and so does everything below y −8; stone stands wherever water meets open space, and the barrier bands add to it within 2 blocks of the water, and near the sea surface, where the sea's band fills the dry hollows next to coasts; the bottom is lava. Until revision 6 the bands alone were the walls (rules b and d gave stone wherever they held): Section 6.2, 2c.
 
 ### 1.4 Biome placement (`PvBiomeLayout`, since Phase 1)
 
