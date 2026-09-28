@@ -96,9 +96,10 @@ public final class WorldgenProbe {
                 PvAquifer aquifer = new PvAquifer(AquiferInputs.of(noiseConfig, settings), router.depth(), new ChunkPos(pos),
                         (x, y, z) -> { throw new UnsupportedOperationException("the probe passes lavaLevel itself"); });
                 PvAquiferDecision decision = aquifer.decide(noisePos, finalDensity, lavaLevel);
-                lines.add(String.format(Locale.ROOT, "aquifer floodedness %.4f (exact %.4f)  spread %.4f (exact %.4f)  ->  %s",
+                // its own floodedness says water, a barrier band or nothing; the walls come from its neighbours
+                lines.add(String.format(Locale.ROOT, "aquifer floodedness %.4f (exact %.4f)  spread %.4f (exact %.4f)  ->  own %s, placed %s",
                         aquifer.floodedness(noisePos), floodedness.sample(noisePos),
-                        aquifer.spread(noisePos), spread.sample(noisePos), decision));
+                        aquifer.spread(noisePos), spread.sample(noisePos), aquifer.atPosition(pos.getX(), pos.getY(), pos.getZ()), decision));
             } else {
                 lines.add("aquifer: vanilla (not a Players Versus generator)");
             }

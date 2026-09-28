@@ -140,17 +140,29 @@ class AquiferTerrainPassTest {
     }
 
     /**
-     * The terrain pass over a 3 x 3 block of chunks, each with its own aquifer: no open water has open dry air beside or
-     * below it, and no block a carver would leave dry has water beside or above it, across chunk borders too.
+     * The terrain pass over 3 x 3 blocks of chunks (the smoke test's inland one, and one on a coast), each chunk with its
+     * own aquifer: no open water has open dry air beside or below it, and no block a carver would leave dry has water
+     * beside or above it, across chunk borders too.
      */
     @Test
     void waterNeverTouchesOpenAirAcrossChunkBorders() {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
         ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
-        int size = 3 * 16, minX = 99 * 16, minZ = 99 * 16, minY = -32, levels = 96;
+        int water = 0, borderPairs = 0;
+        for (ChunkPos center : List.of(new ChunkPos(100, 100), coastalChunk(config))) {
+            int[] counts = checkWalls(config, settings, center);
+            water += counts[0];
+            borderPairs += counts[1];
+        }
+        assertTrue(water > 1000 && borderPairs > 1000, "too little water to check: " + water + " blocks, " + borderPairs + " border pairs");
+    }
+
+    /** @return open water blocks, and water-neighbour pairs across chunk borders, in the 3 x 3 chunks around {@code center} */
+    private static int[] checkWalls(NoiseConfig config, ChunkGeneratorSettings settings, ChunkPos center) {
+        int size = 3 * 16, minX = (center.x - 1) * 16, minZ = (center.z - 1) * 16, minY = -32, levels = 96;
         byte[] state = new byte[size * size * levels], carved = new byte[size * size * levels];
-        for (int chunkX = 99; chunkX <= 101; chunkX++) {
-            for (int chunkZ = 99; chunkZ <= 101; chunkZ++) {
+        for (int chunkX = center.x - 1; chunkX <= center.x + 1; chunkX++) {
+            for (int chunkZ = center.z - 1; chunkZ <= center.z + 1; chunkZ++) {
                 TerrainPass pass = new TerrainPass(config, settings, new ChunkPos(chunkX, chunkZ), NO_FLUID_LEVELS);
                 PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer());
                 DensityFunction finalDensity = pass.register(config.getNoiseRouter().finalDensity());
@@ -175,33 +187,43 @@ class AquiferTerrainPassTest {
                     if (here == PvAquiferDecision.SEA_BARRIER || here == PvAquiferDecision.BASIN_BARRIER) walls++;
                     boolean open = here != PvAquiferDecision.SOLID;
                     if (open && PvAquiferRules.isWater(here)) water++;
+                    if (!PvAquiferRules.isWater(hereCarved)) continue;
+                    // water here, where it's open or once carved, and the blocks it would flow into
                     for (int[] offset : sidesAndBelow) {
                         int nx = x + offset[0], ny = y + offset[1], nz = z + offset[2];
                         if (nx < 0 || nx >= size || nz < 0 || nz >= size || ny < minY) continue;
                         int n = ((ny - minY) * size + nx) * size + nz;
-                        boolean border = (nx >> 4) != (x >> 4) || (nz >> 4) != (z >> 4);
-                        if (PvAquiferRules.isWater(hereCarved)) {
-                            if (border) borderPairs++;
-                            // water here, where it's open or once carved; the block it would flow into
-                            if (open && PvAquiferRules.isWater(here) && decisions[state[n]] == PvAquiferDecision.AIR) {
-                                leaks++;
-                                if (examples.size() < 5) examples.add("open " + (minX + x) + "," + y + "," + (minZ + z) + " -> " + (minX + nx) + "," + ny + "," + (minZ + nz));
-                            }
-                            if (decisions[carved[n]] == PvAquiferDecision.AIR) {
-                                carvableLeaks++;
-                                if (examples.size() < 5) examples.add("carved " + (minX + x) + "," + y + "," + (minZ + z) + " -> " + (minX + nx) + "," + ny + "," + (minZ + nz));
-                            }
+                        if ((nx >> 4) != (x >> 4) || (nz >> 4) != (z >> 4)) borderPairs++;
+                        String pair = (minX + x) + "," + y + "," + (minZ + z) + " -> " + (minX + nx) + "," + ny + "," + (minZ + nz);
+                        if (open && PvAquiferRules.isWater(here) && decisions[state[n]] == PvAquiferDecision.AIR) {
+                            leaks++;
+                            if (examples.size() < 5) examples.add("open " + pair);
+                        }
+                        if (decisions[carved[n]] == PvAquiferDecision.AIR) {
+                            carvableLeaks++;
+                            if (examples.size() < 5) examples.add("carved " + pair);
                         }
                     }
                 }
             }
         }
-        System.out.printf(Locale.ROOT, "[terrain pass] 3 x 3 chunks, y %d..%d: %d open water blocks, %d wall blocks in open terrain; water next to"
-                        + " open dry air %d, next to dry air once carved %d (%d water-neighbour pairs across chunk borders checked)%s%n",
-                minY, minY + levels - 1, water, walls, leaks, carvableLeaks, borderPairs, examples.isEmpty() ? "" : ", e.g. " + examples);
-        assertTrue(water > 1000 && borderPairs > 100, "too little water to check: " + water + " blocks, " + borderPairs + " border pairs");
+        System.out.printf(Locale.ROOT, "[terrain pass] 3 x 3 chunks around %d,%d, y %d..%d: %d open water blocks, %d wall blocks in open terrain;"
+                        + " water next to open dry air %d, next to dry air once carved %d (%d water-neighbour pairs across chunk borders checked)%s%n",
+                center.x, center.z, minY, minY + levels - 1, water, walls, leaks, carvableLeaks, borderPairs, examples.isEmpty() ? "" : ", e.g. " + examples);
         assertEquals(0, leaks, () -> "water next to open air: " + examples);
         assertEquals(0, carvableLeaks, () -> "water next to air once carved: " + examples);
+        return new int[]{water, borderPairs};
+    }
+
+    /** The first chunk found on a coast (vanilla's coast is continentalness -0.19..-0.11), in a fixed search. */
+    private static ChunkPos coastalChunk(NoiseConfig config) {
+        DensityFunction continents = config.getNoiseRouter().continents();
+        for (int step = 0; step < 4000; step++) {
+            ChunkPos chunk = new ChunkPos((step % 63) * 7 - 220, (step / 63) * 7 - 220);
+            double continentalness = continents.sample(new DensityFunction.UnblendedNoisePos(chunk.getCenterX(), 64, chunk.getCenterZ()));
+            if (continentalness >= -0.19 && continentalness < -0.11) return chunk;
+        }
+        throw new AssertionError("no coastal chunk found");
     }
 
     private static DensityFunction interpolated(NoiseConfig config, String function) {
