@@ -65,9 +65,9 @@ class AquiferSurveyTest {
         candidates.put("now", new double[0][]);
         candidates.put("48 to -0.155", replacing(48, -0.155));
         candidates.put("52 to -0.155", replacing(52, -0.155));
-        candidates.put("54 to -0.155", replacing(54, -0.155));
-        candidates.put("56 to -0.155", replacing(56, -0.155));
-        candidates.put("52 to -0.15", replacing(52, -0.15));
+        candidates.put("52 to -0.16", replacing(52, -0.16));
+        candidates.put("54 to -0.16", replacing(54, -0.16));
+        candidates.put("56 to -0.16", replacing(56, -0.16));
         return candidates;
     }
 
@@ -251,7 +251,7 @@ class AquiferSurveyTest {
                 barrierSeenUnneeded = new long[2][2];
         /** Open air in the sea band's reach (y -32..63), and solid blocks beside or above it, where a wall would read the aquifer. */
         long airInReach, solidNextToAir;
-        // per candidate, by band: blocks under the terrain's highest solid block, and the open ones among them
+        // per candidate, by band: blocks under the highest solid block of the terrain now, and the open ones among them
         final long[][] candidateCovered, candidateCave;
         // per kind of place: chunks, leaking water, wall blocks in caves, wall blocks under the sky, barrier stone
         final Map<String, long[]> byKind = new LinkedHashMap<>();
@@ -366,15 +366,17 @@ class AquiferSurveyTest {
                             this.wallAnywhere++;
                         }
                     }
-                    for (int c = 0; c < this.candidateCave.length; c++) {
-                        int candidateTop = this.minY - 1;
-                        for (int y = maxY - 1; y >= this.minY; y--) {
-                            if (!blocks.open[c][blocks.index(x, y, z)]) {
-                                candidateTop = y;
-                                break;
-                            }
+                    // one surface for every candidate, the terrain's now: a candidate that opens a cave to the sky
+                    // shouldn't take the cave under it out of the count
+                    int surface = this.minY - 1;
+                    for (int y = maxY - 1; y >= this.minY; y--) {
+                        if (!blocks.open[0][blocks.index(x, y, z)]) {
+                            surface = y;
+                            break;
                         }
-                        for (int y = this.minY; y < candidateTop; y++) {
+                    }
+                    for (int c = 0; c < this.candidateCave.length; c++) {
+                        for (int y = this.minY; y < surface; y++) {
                             int band = (y - this.minY) / BAND;
                             this.candidateCovered[c][band]++;
                             if (blocks.open[c][blocks.index(x, y, z)]) this.candidateCave[c][band]++;
@@ -456,7 +458,7 @@ class AquiferSurveyTest {
                         this.leakingByBand[band] / n, this.wallByBand[band] / n);
             }
 
-            StringBuilder header = new StringBuilder("[survey] caves (share of the blocks under the terrain) by height:       y");
+            StringBuilder header = new StringBuilder("[survey] caves (share of the blocks under the terrain's surface now) by height:       y");
             for (String name : names) header.append(String.format(Locale.ROOT, " | %-16s", name));
             System.out.println(header);
             for (int band = 0; band < this.bands; band++) {
