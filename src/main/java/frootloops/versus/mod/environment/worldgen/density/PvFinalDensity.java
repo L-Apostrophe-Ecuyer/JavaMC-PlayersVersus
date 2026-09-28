@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.dynamic.CodecHolder;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
 
 /**
  * Density-function type {@code players-versus:final_density}: the router's {@code final_density}, sampled for every
@@ -15,6 +16,9 @@ import net.minecraft.world.gen.densityfunction.DensityFunction;
  * lowest possible value, about -0.55, which a squeezed value (never below -0.46) doesn't reach. Here the bound
  * includes the noodle's height bias at the block's y, so the noodle is skipped for most air blocks, where the terrain
  * is already lower than any noodle there.
+ *
+ * <p>With C2ME's density-function compiler ({@link DensityCompilerCompat}), {@link #apply} returns
+ * {@link #asVanillaTypes} instead, which the compiler can compile.
  *
  * @param terrain         {@code interpolated(blend_density(players-versus:terrain))}
  * @param noodleToggle    {@code caves/noodle_toggle}
@@ -65,10 +69,29 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
         applier.fill(densities, this);
     }
 
+    /**
+     * This function from vanilla types, for C2ME's compiler, which runs a type it doesn't know through vanilla's
+     * interface with a new position object for every block ({@link DensityCompilerCompat}). The same doubles as
+     * {@link #sample} ({@code TerrainPortTest}), and the same skip: a {@code range_choice} on the terrain minus the
+     * noodle's height bias. Built from this function's inputs as they are, so call it on a function whose references are
+     * bound, as {@link #apply} does; before that, the noodle's bounds aren't known and nothing would be skipped.
+     */
+    public DensityFunction asVanillaTypes() {
+        DensityFunction terrain = DensityFunctionTypes.mul(DensityFunctionTypes.constant(0.64), this.terrain).squeeze();
+        DensityFunction bias = PvNoodle.biasFunction();
+        DensityFunction tunnel = DensityFunctionTypes.rangeChoice(this.noodleToggle, -1000000.0, -0.2, DensityFunctionTypes.constant(64.0),
+                DensityFunctionTypes.add(this.noodleThickness, DensityFunctionTypes.mul(DensityFunctionTypes.constant(1.5),
+                        DensityFunctionTypes.max(this.noodleRidgeA.abs(), this.noodleRidgeB.abs()))));
+        DensityFunction aboveBias = DensityFunctionTypes.add(terrain, DensityFunctionTypes.mul(DensityFunctionTypes.constant(-1.0), bias));
+        return DensityFunctionTypes.rangeChoice(aboveBias, -1000000.0, this.noodleFloor, terrain,
+                DensityFunctionTypes.min(terrain, DensityFunctionTypes.add(bias, tunnel)));
+    }
+
     @Override
     public DensityFunction apply(DensityFunctionVisitor visitor) {
-        return visitor.apply(new PvFinalDensity(this.terrain.apply(visitor), this.noodleToggle.apply(visitor),
-                this.noodleThickness.apply(visitor), this.noodleRidgeA.apply(visitor), this.noodleRidgeB.apply(visitor)));
+        PvFinalDensity applied = new PvFinalDensity(this.terrain.apply(visitor), this.noodleToggle.apply(visitor),
+                this.noodleThickness.apply(visitor), this.noodleRidgeA.apply(visitor), this.noodleRidgeB.apply(visitor));
+        return visitor.apply(DensityCompilerCompat.ACTIVE ? applied.asVanillaTypes() : applied);
     }
 
     @Override

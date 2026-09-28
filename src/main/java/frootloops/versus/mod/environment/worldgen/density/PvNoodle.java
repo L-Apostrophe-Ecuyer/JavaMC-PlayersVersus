@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.dynamic.CodecHolder;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
 
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.gradient;
 
@@ -43,6 +44,15 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
     public static double bias(int y) {
         return gradient(y, 96, 56, -0.05, 0.08) + (gradient(y, 56, 40, 0.0, -0.1) + (gradient(y, 32, 20, 0.0, 0.1)
                 + (gradient(y, -8, -32, 0.0, -0.3) + gradient(y, -52, -64, 0.0, 0.35))));
+    }
+
+    /** {@link #bias} from vanilla types: the same gradients, added in the same order. */
+    static DensityFunction biasFunction() {
+        return DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(96, 56, -0.05, 0.08),
+                DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(56, 40, 0.0, -0.1),
+                        DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(32, 20, 0.0, 0.1),
+                                DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(-8, -32, 0.0, -0.3),
+                                        DensityFunctionTypes.yClampedGradient(-52, -64, 0.0, 0.35)))));
     }
 
     /** The noodle without its bias: 64 (solid) where the toggle is off, else the thickness plus the larger ridge. */

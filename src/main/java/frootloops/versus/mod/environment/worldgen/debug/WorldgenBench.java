@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
+import frootloops.versus.mod.environment.worldgen.density.DensityCompilerCompat;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -442,6 +443,7 @@ public final class WorldgenBench {
             lines.add("settings " + settings);
             lines.add("generator " + generator);
             lines.add("gate " + gate);
+            lines.add("final_density " + (DensityCompilerCompat.ACTIVE ? "vanilla types, for C2ME's compiler" : "Java kernel"));
             lines.add("seed " + seed);
             lines.add(String.format(Locale.ROOT, "region center chunk %d,%d radius %d (%d chunks), heights %d..%d",
                     center.x, center.z, radius, chunkCount, this.bottomY, this.topY));

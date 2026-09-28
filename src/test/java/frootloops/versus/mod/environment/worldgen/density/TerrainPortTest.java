@@ -17,14 +17,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeSet;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The terrain kernels ({@link PvFinalDensity}, {@link PvTerrain}, {@link PvDepth}, {@link PvEntrances},
  * {@link PvNoodle}) against the JSON they replaced ({@link WorldgenTestData#REFERENCE}): the same doubles at random
- * positions, and at every block of vanilla's terrain pass, where vanilla's caches and interpolation are in play.
+ * positions, and at every block of vanilla's terrain pass, where vanilla's caches and interpolation are in play. The
+ * final density is also checked in the vanilla types it takes for C2ME's compiler ({@link PvFinalDensity#asVanillaTypes}).
  */
 class TerrainPortTest {
 
@@ -32,6 +36,7 @@ class TerrainPortTest {
     private static final String NEW = "players-versus:overworld/";
     private static final String OLD = WorldgenTestData.REFERENCE + ":overworld/";
     private static final List<String> PORTED = List.of("final_density", "depth", "caves/entrances", "caves/noodle");
+    private static final String AS_VANILLA_TYPES = "final_density as vanilla types";
     /** Every height where a band or gradient of the formulas starts or ends. */
     private static final int[] EDGES = {-64, -60, -52, -40, -32, -16, -10, -8, -4, 0, 8, 16, 18, 20, 28, 30, 32, 36, 40, 44,
             48, 50, 54, 56, 66, 68, 72, 74, 90, 96, 120, 128, 240, 256};
@@ -46,6 +51,7 @@ class TerrainPortTest {
         for (String name : PORTED) {
             pairs.put(name, new DensityFunction[]{WorldgenTestData.seeded(config, NEW + name), WorldgenTestData.seeded(config, OLD + name)});
         }
+        pairs.put(AS_VANILLA_TYPES, new DensityFunction[]{asVanillaTypes(config), WorldgenTestData.seeded(config, OLD + "final_density")});
         // what each sample exercised, so the comparison can't pass without reaching every branch
         DensityFunction ridges = WorldgenTestData.seeded(config, "minecraft:overworld/ridges");
         DensityFunction jaggedness = WorldgenTestData.seeded(config, "minecraft:overworld/jaggedness");
@@ -71,7 +77,7 @@ class TerrainPortTest {
             if (yValue >= 0.0 && yValue < 44.0) reached.merge("ramen band", 1, Integer::sum);
             if (!(toggle.sample(pos) < -0.2)) reached.merge("noodles on", 1, Integer::sum);
         }
-        System.out.println("[terrain port] " + PORTED + " equal the JSON at 20000 points; reached " + reached);
+        System.out.println("[terrain port] " + pairs.keySet() + " equal the JSON at 20000 points; reached " + reached);
         for (String branch : List.of("river valley", "river depth", "jagged peaks", "surface branch", "cave branch", "ramen band", "noodles on")) {
             assertTrue(reached.getOrDefault(branch, 0) >= 50, "too few samples reached " + branch + ": " + reached);
         }
@@ -96,6 +102,9 @@ class TerrainPortTest {
                 news.add(pass.register(WorldgenTestData.seeded(config, NEW + name)));
                 olds.add(pass.register(WorldgenTestData.seeded(config, OLD + name)));
             }
+            names.add(AS_VANILLA_TYPES);
+            news.add(pass.register(asVanillaTypes(config)));
+            olds.add(pass.register(WorldgenTestData.seeded(config, OLD + "final_density")));
             int[] compared = new int[names.size()];
             pass.run((x, y, z, pos) -> {
                 for (int i = 0; i < names.size(); i++) {
@@ -112,32 +121,41 @@ class TerrainPortTest {
     }
 
     /**
-     * What the final density costs in the terrain pass, the old JSON against the kernel: each gets a pass of its own
-     * over the same chunks (the sampler's own router is the same in both, so the difference is the function's).
+     * What the final density costs in the terrain pass: the old JSON, the kernel, and the kernel in vanilla types, all
+     * run by vanilla's own code (no C2ME here). Each gets a pass of its own over the same chunks; the sampler's own
+     * router is the same in all, so the differences are the function's.
      */
     @Test
     void finalDensityCost() {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
         ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
         List<ChunkPos> chunks = testChunks(config);
+        Map<String, Supplier<DensityFunction>> variants = new LinkedHashMap<>();
+        variants.put("the old final density", () -> WorldgenTestData.seeded(config, OLD + "final_density"));
+        variants.put("the kernel", () -> WorldgenTestData.seeded(config, NEW + "final_density"));
+        variants.put("the kernel in vanilla types", () -> asVanillaTypes(config));
         double[] sink = {0};
-        long[] nanos = new long[2];
+        Map<String, Long> nanos = new LinkedHashMap<>();
         for (int round = 0; round < 4; round++) {  // rounds 0 and 1 warm up the JIT
-            for (int which = 0; which < 2; which++) {
-                String id = (which == 0 ? OLD : NEW) + "final_density";
+            for (Map.Entry<String, Supplier<DensityFunction>> variant : variants.entrySet()) {
                 long start = System.nanoTime();
                 for (ChunkPos chunk : chunks) {
                     TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
-                    DensityFunction finalDensity = pass.register(WorldgenTestData.seeded(config, id));
+                    DensityFunction finalDensity = pass.register(variant.getValue().get());
                     pass.run((x, y, z, pos) -> sink[0] += finalDensity.sample(pos));
                 }
-                if (round >= 2) nanos[which] += System.nanoTime() - start;
+                if (round >= 2) nanos.merge(variant.getKey(), System.nanoTime() - start, Long::sum);
             }
         }
-        System.out.printf(Locale.ROOT, "[terrain port] terrain pass with the old final density %.2f ms per chunk, with the kernel %.2f"
-                        + " (both include the sampler's own router and the pass's reflection)%n",
-                nanos[0] / 2e6 / chunks.size(), nanos[1] / 2e6 / chunks.size());
+        System.out.println("[terrain port] terrain pass per chunk (with the sampler's own router and the pass's reflection): "
+                + nanos.entrySet().stream().map(entry -> String.format(Locale.ROOT, "with %s %.2f ms", entry.getKey(),
+                        entry.getValue() / 2e6 / chunks.size())).collect(Collectors.joining(", ")));
         assertTrue(Double.isFinite(sink[0]));
+    }
+
+    /** The final density in the vanilla types it takes when C2ME's compiler is active. */
+    private static DensityFunction asVanillaTypes(NoiseConfig config) {
+        return assertInstanceOf(PvFinalDensity.class, WorldgenTestData.seeded(config, NEW + "final_density")).asVanillaTypes();
     }
 
     /** The smoke test's chunk, plus the first chunks found with a river valley and with jagged peaks. */
