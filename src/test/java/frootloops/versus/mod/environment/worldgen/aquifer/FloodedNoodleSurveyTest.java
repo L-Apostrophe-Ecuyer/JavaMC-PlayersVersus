@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,11 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Noodle caves back in the basin layers, only around the flooded caves (the refactor plan, Section 10, question 7):
- * candidate rules played out in vanilla's terrain pass over areas of 5 x 5 chunks. The noodle's height bias keeps it
- * out of y -8..20 today ({@link PvNoodle#bias}); a candidate lowers that bias where the basin floodedness S is above
- * a threshold, so noodles open only where the aquifer floods them. Per candidate: the blocks it opens, what the aquifer
- * makes of them (water, stone, dry air), and how the water bodies of y -3..23 join up (neighbours across the whole
- * area).
+ * candidate rules played out in vanilla's terrain pass over areas of 5 x 5 chunks, picked for their lakes. The noodle's
+ * height bias keeps it out of y -8..20 today ({@link PvNoodle#bias}); a candidate lowers that bias where the basin
+ * floodedness S is above a threshold (so noodles open only where the aquifer floods them), or where the entrance value
+ * is low (near the entrance caves, flooded or not). Per candidate: the blocks it opens, what the aquifer makes of them
+ * (water, stone, dry air), and how the water bodies of y -3..23 join up (neighbours across the whole area); and maps of
+ * the middle of the first area.
  */
 class FloodedNoodleSurveyTest {
 
@@ -49,33 +50,37 @@ class FloodedNoodleSurveyTest {
     private static final String[] KINDS = {"solid", "water", "stone", "air"};
 
     /**
-     * A rule for the noodle's height bias in y -3..23: where S passes {@code spreadFrom} (or the basin water threshold,
-     * if that's higher), the bias moves from today's towards {@code bias}, over {@code taper} of S (at once if 0).
+     * A rule for the noodle's height bias in y -3..23. By S: where S passes {@code from} (or the basin water threshold,
+     * if that's higher), the bias moves from today's towards {@code bias}, over {@code taper} of S (at once if 0). By
+     * the entrances: the same where the entrance value is below {@code from}.
      */
-    private record Candidate(String name, double spreadFrom, double taper, double bias) {
-        double biasAt(int y, double spread) {
+    private record Candidate(String name, boolean byEntrances, double from, double taper, double bias) {
+        double biasAt(int y, double spread, double entrances) {
             double now = PvNoodle.bias(y);
-            double threshold = Math.max(this.spreadFrom, PvAquiferRules.basinWaterThreshold(y));
-            double share = this.taper == 0.0 ? (spread > threshold ? 1.0 : 0.0)
-                    : MathHelper.clamp((spread - threshold) / this.taper, 0.0, 1.0);
+            double past = this.byEntrances ? this.from - entrances : spread - Math.max(this.from, PvAquiferRules.basinWaterThreshold(y));
+            double share = this.taper == 0.0 ? (past > 0.0 ? 1.0 : 0.0) : MathHelper.clamp(past / this.taper, 0.0, 1.0);
             return now + (this.bias - now) * share;
         }
     }
 
     private static final List<Candidate> CANDIDATES = List.of(
-            new Candidate("S > 0.5, bias 0", 0.5, 0.0, 0.0),
-            new Candidate("S > 0.5 over 0.1, bias 0", 0.5, 0.1, 0.0),
-            new Candidate("S > 0.5 over 0.1, bias -0.02", 0.5, 0.1, -0.02),
-            new Candidate("S > 0.6 over 0.1, bias 0", 0.6, 0.1, 0.0),
-            new Candidate("S > 0.3 over 0.1, bias 0", 0.3, 0.1, 0.0));
+            new Candidate("S > 0.5, bias 0", false, 0.5, 0.0, 0.0),
+            new Candidate("S > 0.5 over 0.1, bias 0", false, 0.5, 0.1, 0.0),
+            new Candidate("S > 0.5 over 0.1, bias -0.04", false, 0.5, 0.1, -0.04),
+            new Candidate("entrances < 0.15 over 0.05, bias 0", true, 0.15, 0.05, 0.0),
+            new Candidate("entrances < 0.3 over 0.05, bias 0", true, 0.3, 0.05, 0.0));
+    /** The candidates whose maps are printed, and the heights. */
+    private static final int[] MAPPED = {1, 4};
+    private static final int[] MAP_YS = {12, 20};
+    private static final int MAP_SIDE = 48;
 
     @Test
     void survey() {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
         ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
         PvFinalDensity finalDensity = finalDensity(config.getNoiseRouter().finalDensity());
-        List<ChunkPos> centers = AquiferSurveyTest.surveyChunks(config).entrySet().stream()
-                .filter(entry -> entry.getValue().equals("anywhere")).map(Map.Entry::getKey).limit(AREAS).toList();
+        AquiferInputs inputs = AquiferInputs.of(config, settings);
+        List<ChunkPos> centers = lakeCenters(config, inputs);
         int variants = CANDIDATES.size() + 1;
         Stats[] stats = new Stats[variants];
         for (int v = 0; v < variants; v++) stats[v] = new Stats();
@@ -94,6 +99,7 @@ class FloodedNoodleSurveyTest {
                     DensityFunction thickness = pass.register(finalDensity.noodleThickness());
                     DensityFunction ridgeA = pass.register(finalDensity.noodleRidgeA());
                     DensityFunction ridgeB = pass.register(finalDensity.noodleRidgeB());
+                    DensityFunction entrances = pass.register(inputs.floodedness().entrances());
                     pass.run((x, y, z, pos) -> {
                         if (y < MIN_Y || y >= MAX_Y) return;
                         double terrainValue = DensityOps.squeeze(terrain.sample(pos) * 0.64);
@@ -102,15 +108,20 @@ class FloodedNoodleSurveyTest {
                         if (now != router.sample(pos)) routerMismatches[0]++;
                         int i = index(x - originX, y, z - originZ);
                         kinds[0][i] = kind(now, aquifer.decide(pos, now, false));
-                        double spread = aquifer.spread(pos);
+                        double spread = aquifer.spread(pos), entrance = entrances.sample(pos);
                         for (int c = 0; c < CANDIDATES.size(); c++) {
-                            double candidate = Math.min(terrainValue, CANDIDATES.get(c).biasAt(y, spread) + tunnel);
+                            double candidate = Math.min(terrainValue, CANDIDATES.get(c).biasAt(y, spread, entrance) + tunnel);
                             kinds[c + 1][i] = candidate == now ? kinds[0][i] : kind(candidate, aquifer.decide(pos, candidate, false));
                         }
                     });
                 }
             }
             for (int v = 0; v < variants; v++) stats[v].add(kinds[0], kinds[v]);
+            if (center.equals(centers.get(0))) {
+                for (int c : MAPPED) {
+                    for (int y : MAP_YS) printMap(center, CANDIDATES.get(c).name(), y, kinds[0], kinds[c + 1]);
+                }
+            }
         }
 
         double chunks = AREAS * AREA_CHUNKS * AREA_CHUNKS;
@@ -122,6 +133,70 @@ class FloodedNoodleSurveyTest {
         }
         assertEquals(0, routerMismatches[0], "the survey's noodle differs from the router's final density");
         assertTrue(stats[0].water > 0, "the survey found no water in the basin layers");
+    }
+
+    /**
+     * Centers for the areas: of 80 random chunks, the ones with the most lake (open blocks of y 4..20 with S above the
+     * basin water threshold, on a coarse grid of exact values), at least an area apart.
+     */
+    private static List<ChunkPos> lakeCenters(NoiseConfig config, AquiferInputs inputs) {
+        DensityFunction finalDensity = config.getNoiseRouter().finalDensity();
+        Random random = new Random(SEED);
+        List<ChunkPos> chunks = new ArrayList<>();
+        List<Integer> scores = new ArrayList<>();
+        for (int i = 0; i < 80; i++) {
+            ChunkPos chunk = new ChunkPos(random.nextInt(800) - 400, random.nextInt(800) - 400);
+            int score = 0;
+            for (int dx = 0; dx < 16; dx += 4) {
+                for (int dz = 0; dz < 16; dz += 4) {
+                    for (int y = 4; y <= 20; y += 4) {
+                        DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(chunk.getStartX() + dx, y, chunk.getStartZ() + dz);
+                        if (finalDensity.sample(pos) <= 0.0 && inputs.spread().sample(pos) > PvAquiferRules.basinWaterThreshold(y)) score++;
+                    }
+                }
+            }
+            chunks.add(chunk);
+            scores.add(score);
+        }
+        List<Integer> order = new ArrayList<>();
+        for (int i = 0; i < chunks.size(); i++) order.add(i);
+        order.sort((a, b) -> Integer.compare(scores.get(b), scores.get(a)));
+        List<ChunkPos> centers = new ArrayList<>();
+        for (int i : order) {
+            ChunkPos chunk = chunks.get(i);
+            if (centers.stream().anyMatch(other -> Math.abs(other.x - chunk.x) < AREA_CHUNKS && Math.abs(other.z - chunk.z) < AREA_CHUNKS)) continue;
+            centers.add(chunk);
+            System.out.println("[noodles] area around chunk " + chunk + ": " + scores.get(i) + " of 80 coarse samples are lake");
+            if (centers.size() == AREAS) break;
+        }
+        return centers;
+    }
+
+    /**
+     * The middle of an area at one height, north up: {@code #} solid, {@code .} dry, {@code ~} water, {@code +} water the
+     * candidate adds, {@code o} stone it adds, {@code -} dry air it adds.
+     */
+    private static void printMap(ChunkPos center, String name, int y, byte[] now, byte[] candidate) {
+        System.out.println("[noodles] map, " + name + ", y " + y + ", " + MAP_SIDE + " x " + MAP_SIDE + " blocks around chunk " + center + ":");
+        int start = (SIDE - MAP_SIDE) / 2;
+        for (int z = start; z < start + MAP_SIDE; z++) {
+            StringBuilder row = new StringBuilder("[noodles]   ");
+            for (int x = start; x < start + MAP_SIDE; x++) {
+                int i = index(x, y, z);
+                byte before = now[i], after = candidate[i];
+                row.append(before == after ? switch (after) {
+                    case SOLID, STONE -> '#';
+                    case WATER -> '~';
+                    default -> '.';
+                } : switch (after) {
+                    case WATER -> '+';
+                    case STONE -> 'o';
+                    case AIR -> '-';
+                    default -> '!';
+                });
+            }
+            System.out.println(row);
+        }
     }
 
     private static byte kind(double density, PvAquiferDecision decision) {
