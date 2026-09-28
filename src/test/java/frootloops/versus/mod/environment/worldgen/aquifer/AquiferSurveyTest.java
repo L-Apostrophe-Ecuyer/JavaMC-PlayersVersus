@@ -229,7 +229,8 @@ class AquiferSurveyTest {
      * </ol>
      */
     private static final class WallRules {
-        private static final String[] NAMES = {"barrier bands (now)", "exact walls", "exact walls and bands within 2 blocks of water"};
+        private static final String[] NAMES = {"barrier bands (now)", "exact walls", "exact walls and bands within 2 blocks of water",
+                "exact walls and bands within 2 steps of water", "exact walls and bands within 3 steps of water"};
         private static final int[][] FLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
         private static final int[][] INFLOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, 1, 0}};
 
@@ -257,6 +258,8 @@ class AquiferSurveyTest {
                         wall[0][i] = barrier(carved);
                         wall[1][i] = inflow;
                         wall[2][i] = inflow || barrier(carved) && this.waterWithin(blocks, x, y, z, 2);
+                        wall[3][i] = inflow || barrier(carved) && this.waterWithinSteps(blocks, x, y, z, 2);
+                        wall[4][i] = inflow || barrier(carved) && this.waterWithinSteps(blocks, x, y, z, 3);
                     }
                 }
             }
@@ -312,6 +315,20 @@ class AquiferSurveyTest {
             for (int[] offset : offsets) {
                 int nx = x + offset[0], ny = y + offset[1], nz = z + offset[2];
                 if (blocks.inside(nx, ny, nz) && water(blocks.carvedAt(nx, ny, nz))) return true;
+            }
+            return false;
+        }
+
+        /** Water within {@code steps} blocks along the axes, in any order (a Manhattan distance). */
+        private boolean waterWithinSteps(ChunkBlocks blocks, int x, int y, int z, int steps) {
+            for (int dx = -steps; dx <= steps; dx++) {
+                for (int dy = -steps + Math.abs(dx); dy <= steps - Math.abs(dx); dy++) {
+                    int reach = steps - Math.abs(dx) - Math.abs(dy);
+                    for (int dz = -reach; dz <= reach; dz++) {
+                        int nx = x + dx, ny = y + dy, nz = z + dz;
+                        if (blocks.inside(nx, ny, nz) && water(blocks.carvedAt(nx, ny, nz))) return true;
+                    }
+                }
             }
             return false;
         }
