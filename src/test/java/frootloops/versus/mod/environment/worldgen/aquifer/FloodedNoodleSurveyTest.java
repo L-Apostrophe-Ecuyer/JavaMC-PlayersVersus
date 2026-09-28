@@ -52,26 +52,30 @@ class FloodedNoodleSurveyTest {
     /**
      * A rule for the noodle's height bias in y -3..23. By S: where S passes {@code from} (or the basin water threshold,
      * if that's higher), the bias moves from today's towards {@code bias}, over {@code taper} of S (at once if 0). By
-     * the entrances: the same where the entrance value is below {@code from}. A rule that {@code floods} also makes the
-     * aquifer fill the noodle wherever the lower bias opens it (after the sea's water and band, as the basins come), and
-     * stone where that water could flow into dry air, as the walls do.
+     * the entrances: the same where the entrance value is below {@code from}, and nearer the caves (entrance value from
+     * {@code flareTo} down to 0) the bias falls further, to {@code flare}, so the noodles widen into the caves. A rule
+     * that {@code floods} also makes the aquifer fill the noodle wherever the lower bias opens it (after the sea's water
+     * and band, as the basins come), and stone where that water could flow into dry air, as the walls do.
      */
-    private record Candidate(String name, boolean byEntrances, double from, double taper, double bias, boolean floods) {
+    private record Candidate(String name, boolean byEntrances, double from, double taper, double bias, double flare, double flareTo,
+                             boolean floods) {
         double biasAt(int y, double spread, double entrances) {
             double now = PvNoodle.bias(y);
             double past = this.byEntrances ? this.from - entrances : spread - Math.max(this.from, PvAquiferRules.basinWaterThreshold(y));
             double share = this.taper == 0.0 ? (past > 0.0 ? 1.0 : 0.0) : MathHelper.clamp(past / this.taper, 0.0, 1.0);
-            return now + (this.bias - now) * share;
+            double target = this.flareTo <= 0.0 ? this.bias
+                    : this.bias + (this.flare - this.bias) * MathHelper.clamp((this.flareTo - entrances) / this.flareTo, 0.0, 1.0);
+            return now + (target - now) * share;
         }
     }
 
     private static final List<Candidate> CANDIDATES = List.of(
-            new Candidate("S > 0.5 over 0.1, bias 0", false, 0.5, 0.1, 0.0, false),
-            new Candidate("entrances < 0.3 over 0.05, bias 0", true, 0.3, 0.05, 0.0, false),
-            new Candidate("flooded, entrances < 0.2 over 0.05, bias 0", true, 0.2, 0.05, 0.0, true),
-            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0", true, 0.3, 0.05, 0.0, true),
-            new Candidate("flooded, entrances < 0.3 over 0.05, bias -0.03", true, 0.3, 0.05, -0.03, true),
-            new Candidate("flooded, entrances < 0.4 over 0.05, bias 0", true, 0.4, 0.05, 0.0, true));
+            new Candidate("S > 0.5 over 0.1, bias 0", false, 0.5, 0.1, 0.0, 0.0, 0.0, false),
+            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0", true, 0.3, 0.05, 0.0, 0.0, 0.0, true),
+            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0 flaring to -0.06 from 0.1", true, 0.3, 0.05, 0.0, -0.06, 0.1, true),
+            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0 flaring to -0.1 from 0.1", true, 0.3, 0.05, 0.0, -0.1, 0.1, true),
+            new Candidate("flooded, entrances < 0.3 over 0.05, bias 0 flaring to -0.1 from 0.2", true, 0.3, 0.05, 0.0, -0.1, 0.2, true),
+            new Candidate("flooded, entrances < 0.4 over 0.05, bias 0 flaring to -0.06 from 0.15", true, 0.4, 0.05, 0.0, -0.06, 0.15, true));
     /** The candidates whose maps are printed, and the heights. */
     private static final int[] MAPPED = {3};
     private static final int[] MAP_YS = {4, 12, 20};
@@ -276,6 +280,8 @@ class FloodedNoodleSurveyTest {
         long bodies, joining, joined;
         /** Bodies with no water of today's: flooded noodles that meet no cave. */
         long newBodies, newBodyBlocks;
+        /** New water (solid today) in a body that holds some of today's water: corridors reaching a lake. */
+        long connected;
         /** Dry blocks beside or below a flooded corridor, made stone. */
         long walls;
 
@@ -297,6 +303,9 @@ class FloodedNoodleSurveyTest {
                 if (label[i] == 0) continue;
                 size[label[i]]++;
                 if (nowLabel[i] != 0) held.get(label[i]).add(nowLabel[i]);
+            }
+            for (int i = 0; i < label.length; i++) {
+                if (label[i] != 0 && now[i] == SOLID && !held.get(label[i]).isEmpty()) this.connected++;
             }
             for (int b = 1; b <= bodies; b++) {
                 int count = held.get(b).size();
@@ -349,10 +358,10 @@ class FloodedNoodleSurveyTest {
             }
             text.append(String.format(Locale.ROOT, " (bands y %d..%d, %d..%d, %d..%d)", MIN_Y, BAND_TOPS[0] - 1,
                     BAND_TOPS[0], BAND_TOPS[1] - 1, BAND_TOPS[1], BAND_TOPS[2] - 1));
-            text.append(String.format(Locale.ROOT, "; water bodies %.1f, of which %.2f join %.2f of today's, %.2f meet no cave (%.1f blocks);"
-                            + " walls for corridors %.2f",
-                    this.bodies / chunks, this.joining / chunks, this.joined / chunks, this.newBodies / chunks, this.newBodyBlocks / chunks,
-                    this.walls / chunks));
+            text.append(String.format(Locale.ROOT, "; new water reaching a lake %.1f; water bodies %.1f, of which %.2f join %.2f of today's,"
+                            + " %.2f meet no cave (%.1f blocks); walls for corridors %.2f",
+                    this.connected / chunks, this.bodies / chunks, this.joining / chunks, this.joined / chunks, this.newBodies / chunks,
+                    this.newBodyBlocks / chunks, this.walls / chunks));
             return text.toString();
         }
     }
