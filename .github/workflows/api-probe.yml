@@ -2,7 +2,7 @@
 # 26.1, so these are Mojang's names) and prints the member signatures (javap -p -s: names, types and descriptors, no
 # code) of the classes named in .github/api-probe.txt, so the port can be written against the real API.
 #
-# Push a commit whose message contains [api]. The output is a base64 tar.xz between BEGIN/END markers in the log.
+# Push a commit whose message contains [api]. The output is a base64 tar.xz, split between the print jobs' logs.
 
 name: api-probe
 on:
@@ -58,10 +58,37 @@ jobs:
             grep -v '^\s*#' .github/api-probe.txt | grep -v '^\s*$' | xargs -n 200 javap -p -s -cp "$cp" >> probe/out/javap.txt 2>&1 || true
           fi
           wc -l probe/out/javap.txt
-      - name: print the result
+      # A job log can only be read back 5,000 lines at a time, so the result goes out in parts of 4,000 lines, one job each.
+      - name: split the result
         run: |
           tar -C probe/out -cJf probe/out.tar.xz .
           sha256sum probe/out.tar.xz
-          echo "-----BEGIN PROBE-----"
-          base64 -w 76 probe/out.tar.xz
-          echo "-----END PROBE-----"
+          mkdir -p probe/parts
+          base64 -w 76 probe/out.tar.xz | split -l 4000 -d -a 1 - probe/parts/part_
+          ls probe/parts
+      - name: keep the parts
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-probe-parts
+          path: probe/parts/
+
+  print:
+    needs: probe
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        part: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    steps:
+      - name: get the parts
+        uses: actions/download-artifact@v4
+        with:
+          name: api-probe-parts
+          path: parts
+      - name: print part ${{ matrix.part }}
+        run: |
+          if [ -f parts/part_${{ matrix.part }} ]; then
+            echo "parts: $(ls parts | wc -l)"
+            echo "-----BEGIN PROBE PART ${{ matrix.part }}-----"
+            cat parts/part_${{ matrix.part }}
+            echo "-----END PROBE PART ${{ matrix.part }}-----"
+          fi
