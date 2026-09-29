@@ -53,12 +53,22 @@ jobs:
           - level_type: "players-versus:better_world"
             mods: "c2me-fabric lithium"
             variant: "java-kernel"
+          # The high river (y 80) doesn't reach the default region. Chunk -129,23 is the first river chunk the tests
+          # find for the default seed (WorldgenTestData.highRiverChunk); alone and next to C2ME, which should match.
+          - level_type: "players-versus:better_world"
+            mods: ""
+            variant: "river"
+            center: "-129,23"
+          - level_type: "players-versus:better_world"
+            mods: "c2me-fabric lithium"
+            variant: "river"
+            center: "-129,23"
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
       SEED: ${{ inputs.seed || '8675309' }}
       RADIUS: ${{ inputs.radius || '12' }}
-      CENTER: ${{ inputs.center || '100,100' }}
+      CENTER: ${{ matrix.center || inputs.center || '100,100' }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
