@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment.worldgen.aquifer;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
+import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -18,12 +19,14 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BAN
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MAX_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_MAX_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BAND_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
 
 /**
  * The Players Versus aquifer: sea-level water for oceans and rivers, barriers that keep it out of caves, water basins
- * in low caves, dry caves everywhere else, lava at the bottom. The rules live in {@link PvAquiferRules}.
+ * in low caves, dry caves everywhere else, lava at the bottom, and the high river's water at y 80. The rules live in
+ * {@link PvAquiferRules}.
  *
  * <p>One instance exists per {@link net.minecraft.world.gen.chunk.ChunkNoiseSampler}, created by
  * {@code ChunkNoiseSamplerMixin} for Players Versus generators only. It answers the terrain pass, the carvers (which
@@ -34,6 +37,7 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * terrain pass's cell grid (4 x 8 x 4, aligned like vanilla's cells): depth, cave entrances and S's inner part, which
  * the JSON router interpolated on those cells in the terrain pass; and 3D continentalness, which it sampled per block
  * but is smooth; and the noodle's four inputs over the basin layers, for the flooded corridors ({@link #corridor}). The
+ * high river's three inputs, which don't depend on y, sit on {@link Lattice2D}s ({@link #highRiverAt}). The
  * ridge noise is kept per column; the surface and ramen noises are sampled per block. Every caller
  * (the terrain pass, carvers, probes) gets the same answer at a block; {@code AquiferTerrainPassTest} compares it
  * with the terrain pass before.
@@ -66,6 +70,9 @@ public final class PvAquifer implements AquiferSampler {
     private final Lattice depth, continentalness, entrances, basinInner;
     /** The noodle's four inputs over the flooded corridors' layers, for {@link #corridor}. */
     private final Lattice noodleToggle, noodleThickness, noodleRidgeA, noodleRidgeB;
+    /** The high river's inputs ({@link PvHighRiver}), or {@code null} without it. */
+    @Nullable
+    private final Lattice2D riverChannel, riverDepth, riverTerrain;
     /**
      * Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled; made when first needed, since
      * heightmap probes make an aquifer for every column they sample and often never reach the sea band.
@@ -118,6 +125,10 @@ public final class PvAquifer implements AquiferSampler {
         this.noodleThickness = new Lattice(noodle.thickness(), chunkPos, BASIN_MIN_Y, CORRIDOR_MAX_Y, CELL_HEIGHT);
         this.noodleRidgeA = new Lattice(noodle.ridgeA(), chunkPos, BASIN_MIN_Y, CORRIDOR_MAX_Y, CELL_HEIGHT);
         this.noodleRidgeB = new Lattice(noodle.ridgeB(), chunkPos, BASIN_MIN_Y, CORRIDOR_MAX_Y, CELL_HEIGHT);
+        PvHighRiver river = inputs.highRiver();
+        this.riverChannel = river == null ? null : new Lattice2D(river.channel(), chunkPos, HIGH_RIVER_Y);
+        this.riverDepth = river == null ? null : new Lattice2D(river.depth(), chunkPos, HIGH_RIVER_Y);
+        this.riverTerrain = river == null ? null : new Lattice2D(river.terrain(), chunkPos, HIGH_RIVER_Y);
     }
 
     @Override
@@ -136,9 +147,13 @@ public final class PvAquifer implements AquiferSampler {
         return PvAquiferRules.decide(pos, density, lavaLevel, this.atPosition);
     }
 
-    /** {@link PvAquiferRules#atPosition} at a block, computed once for the blocks the walls look at. */
+    /**
+     * {@link PvAquiferRules#atPosition} at a block, computed once for the blocks the walls look at; above sea level, the
+     * high river's water ({@link #highRiverAt}).
+     */
     public PvAquiferDecision atPosition(int x, int y, int z) {
-        if (y < MIN_Y || y >= SEA_LEVEL) return PvAquiferDecision.AIR;
+        if (y >= SEA_LEVEL) return this.highRiverAt(x, y, z);
+        if (y < MIN_Y) return PvAquiferDecision.AIR;
         int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
         if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
             return PvAquiferRules.atPosition(this.position.set(x, y, z), this.floodedness, this.spread, this.corridor);
@@ -171,6 +186,19 @@ public final class PvAquifer implements AquiferSampler {
         double seaFloodedness = AquiferFormulas.seaFloodedness(y, this.depth.at(x, y, z), this.continentalness.at(x, y, z),
                 entrances, entrances, this.ridge(x, z), this.floodednessInputs.surface().sample(pos));
         return AquiferFormulas.floodedness(y, seaFloodedness, this.floodednessInputs.ramen(), pos);
+    }
+
+    /**
+     * The high river's water at a block ({@link PvHighRiver#waterAt}), from lattices of its inputs: at its surface,
+     * water that spills where the ground beside it is open, under it the bed's; elsewhere air. Its inputs are the
+     * valley's, on the same points, so this is water exactly where the valley opens a block at or under the surface.
+     */
+    public PvAquiferDecision highRiverAt(int x, int y, int z) {
+        if (this.riverChannel == null || y < PvHighRiver.MIN_Y || y > HIGH_RIVER_Y) return PvAquiferDecision.AIR;
+        double channel = this.riverChannel.at(x, z);
+        if (Math.abs(channel) >= PvHighRiver.fullHalfWidth(y)) return PvAquiferDecision.AIR;
+        if (!PvHighRiver.waterAt(y, channel, this.riverDepth.at(x, z), this.riverTerrain.at(x, z))) return PvAquiferDecision.AIR;
+        return y == HIGH_RIVER_Y ? PvAquiferDecision.HIGH_RIVER_WATER : PvAquiferDecision.HIGH_RIVER_BED_WATER;
     }
 
     /** S at a block, from the lattice of its inner part. */
@@ -213,11 +241,13 @@ public final class PvAquifer implements AquiferSampler {
 
     /**
      * Lattice points sampled so far (depth, continentalness, entrances, basin inner, then the noodle's toggle, thickness
-     * and ridges), for tests and the benchmark.
+     * and ridges, then the high river's channel, depth and terrain), for tests and the benchmark.
      */
     public int[] latticeSamples() {
         return new int[]{this.depth.samples(), this.continentalness.samples(), this.entrances.samples(), this.basinInner.samples(),
-                this.noodleToggle.samples(), this.noodleThickness.samples(), this.noodleRidgeA.samples(), this.noodleRidgeB.samples()};
+                this.noodleToggle.samples(), this.noodleThickness.samples(), this.noodleRidgeA.samples(), this.noodleRidgeB.samples(),
+                this.riverChannel == null ? 0 : this.riverChannel.samples(), this.riverDepth == null ? 0 : this.riverDepth.samples(),
+                this.riverTerrain == null ? 0 : this.riverTerrain.samples()};
     }
 
     /** Blocks whose own decision was computed so far (each once), for tests and the benchmark. */

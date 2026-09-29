@@ -113,6 +113,31 @@ public final class PvWorldgenConstants {
     public static final double CORRIDOR_FLARE_BIAS = -0.06;
 
     // ------------------------------------------------------------------------------------------------------------
+    // The high river (the refactor plan, Section 10, question 7; shapes tried in HighRiverSurveyTest)
+    // ------------------------------------------------------------------------------------------------------------
+
+    /** The high river's water surface. Its water there spills wherever the ground beside it is open. */
+    public static final int HIGH_RIVER_Y = 80;
+    /** Its bed: water down to this many blocks under the surface, narrowing to nothing at the bottom. */
+    public static final int HIGH_RIVER_BED = 3;
+    /**
+     * Half the river's width at its surface, in the units of its noise ({@code players-versus:overworld/high_river},
+     * which changes by about 0.0028 per block): about 10 blocks.
+     */
+    public static final double HIGH_RIVER_HALF_WIDTH = 0.03;
+    /** How much wider the valley gets per block above the surface, so ground over the water is cut back into banks. */
+    public static final double HIGH_RIVER_WIDENING = 0.006;
+    /**
+     * The river keeps out of ground that rises far above its surface: it runs at full width up to this depth at its
+     * surface's height (0.01 is about 1.3 blocks of ground above it) and narrows to nothing over
+     * {@link #HIGH_RIVER_FADE} more.
+     */
+    public static final double HIGH_RIVER_TOP = 0.06;
+    public static final double HIGH_RIVER_FADE = 0.03;
+    /** The valley's top, exclusive: the final density only looks for the river from the bed's bottom up to here. */
+    public static final int HIGH_RIVER_VALLEY_MAX_Y = 128;
+
+    // ------------------------------------------------------------------------------------------------------------
     // Aquifer: walls
     // ------------------------------------------------------------------------------------------------------------
 

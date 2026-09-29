@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment.worldgen.aquifer;
 import frootloops.versus.mod.environment.worldgen.TerrainPass;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
+import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.gen.chunk.AquiferSampler;
@@ -20,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,7 +36,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   to F or S;</li>
  *   <li>water never touches open air, across chunk borders too, whatever the carvers open;</li>
  *   <li>the flooded corridors: the aquifer's corridor value is the final density's noodle, bit for bit, so it floods
- *   what they open.</li>
+ *   what they open;</li>
+ *   <li>the high river: its water is exactly where its valley opens a block at or under its surface, and its bed's
+ *   water never touches open air.</li>
  * </ul>
  */
 class AquiferTerrainPassTest {
@@ -263,6 +267,111 @@ class AquiferTerrainPassTest {
                 + " %d the sea's band%n", counts[0], counts[1], counts[2], counts[3]);
         assertTrue(counts[1] > 0, "no block opened by the corridors in the chunks tried");
         assertEquals(counts[1], counts[2] + counts[3], "blocks the corridors open that are neither water nor the sea's band");
+    }
+
+    /**
+     * The high river (the refactor plan, Section 10, question 7): at every block of its bed and surface, the aquifer
+     * puts its water ({@link PvAquifer#highRiverAt}, from lattices of its inputs) exactly where its valley, as the terrain
+     * pass interpolates its inputs, opens the block; the final density is open there, and the aquifer fills it.
+     */
+    @Test
+    void highRiverFloodsWhatTheValleyOpens() {
+        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        PvHighRiver river = WorldgenTestData.highRiver(config);
+        ChunkPos center = WorldgenTestData.highRiverChunk(config);
+        long[] counts = new long[4];
+        for (ChunkPos chunk : List.of(center, new ChunkPos(center.x + 1, center.z), new ChunkPos(center.x, center.z - 1))) {
+            TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
+            PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer(), "ChunkNoiseSamplerMixin didn't make the aquifer");
+            DensityFunction router = pass.register(config.getNoiseRouter().finalDensity());
+            DensityFunction valley = pass.register(river);
+            pass.run((x, y, z, pos) -> {
+                if (y < PvHighRiver.MIN_Y || y > HIGH_RIVER_Y) return;
+                double opening = valley.sample(pos);
+                PvAquiferDecision own = aquifer.highRiverAt(x, y, z);
+                assertEquals(opening < 0.0, own != PvAquiferDecision.AIR, () -> "the valley at " + x + "," + y + "," + z + " is " + opening
+                        + " but the aquifer's own decision is " + own);
+                counts[0]++;
+                if (!(opening < 0.0)) return;
+                counts[1]++;
+                double density = router.sample(pos);
+                assertTrue(density <= 0.0, () -> "the valley opens " + x + "," + y + "," + z + " but the final density is " + density);
+                PvAquiferDecision decision = aquifer.decide(pos, density, false);
+                assertEquals(y == HIGH_RIVER_Y ? PvAquiferDecision.HIGH_RIVER_WATER : PvAquiferDecision.HIGH_RIVER_BED_WATER, decision,
+                        () -> "at " + x + "," + y + "," + z);
+                counts[y == HIGH_RIVER_Y ? 2 : 3]++;
+            });
+        }
+        System.out.printf(Locale.ROOT, "[terrain pass] high river around chunk %d,%d: %d blocks of its heights compared, %d opened by the"
+                + " valley, %d water at the surface, %d in the bed%n", center.x, center.z, counts[0], counts[1], counts[2], counts[3]);
+        assertTrue(counts[2] > 0 && counts[3] > 0, "no river water in the chunks tried");
+    }
+
+    /**
+     * Around a chunk the high river runs through: its bed's water never has open dry air beside or under it, whether the
+     * terrain or a carver opened that air, and its surface's water none under it. Beside the surface's water, open air
+     * stays open: the water spills there.
+     */
+    @Test
+    void highRiverBedNeverTouchesOpenAir() {
+        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        ChunkPos center = WorldgenTestData.highRiverChunk(config);
+        int size = 3 * 16, minX = (center.x - 1) * 16, minZ = (center.z - 1) * 16, minY = PvHighRiver.MIN_Y - 1, levels = HIGH_RIVER_Y + 2 - minY;
+        byte[] state = new byte[size * size * levels], carved = new byte[size * size * levels];
+        for (int chunkX = center.x - 1; chunkX <= center.x + 1; chunkX++) {
+            for (int chunkZ = center.z - 1; chunkZ <= center.z + 1; chunkZ++) {
+                TerrainPass pass = new TerrainPass(config, settings, new ChunkPos(chunkX, chunkZ), NO_FLUID_LEVELS);
+                PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer());
+                DensityFunction finalDensity = pass.register(config.getNoiseRouter().finalDensity());
+                pass.run((x, y, z, pos) -> {
+                    if (y < minY || y >= minY + levels) return;
+                    int i = ((y - minY) * size + (x - minX)) * size + (z - minZ);
+                    PvAquiferDecision decision = aquifer.decide(pos, finalDensity.sample(pos), false);
+                    state[i] = (byte) decision.ordinal();
+                    carved[i] = (byte) (decision == PvAquiferDecision.SOLID ? aquifer.decide(pos, 0.0, false) : decision).ordinal();
+                });
+            }
+        }
+        PvAquiferDecision[] decisions = PvAquiferDecision.values();
+        int[][] sidesAndBelow = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
+        int surface = 0, bed = 0, spills = 0, leaks = 0;
+        List<String> examples = new ArrayList<>();
+        for (int y = minY; y < minY + levels; y++) {
+            for (int x = 0; x < size; x++) {
+                for (int z = 0; z < size; z++) {
+                    int i = ((y - minY) * size + x) * size + z;
+                    for (byte[] blocks : new byte[][]{state, carved}) {
+                        PvAquiferDecision here = decisions[blocks[i]];
+                        if (here != PvAquiferDecision.HIGH_RIVER_WATER && here != PvAquiferDecision.HIGH_RIVER_BED_WATER) continue;
+                        if (blocks == state) {
+                            if (here == PvAquiferDecision.HIGH_RIVER_WATER) surface++;
+                            else bed++;
+                        }
+                        for (int[] offset : sidesAndBelow) {
+                            int nx = x + offset[0], ny = y + offset[1], nz = z + offset[2];
+                            if (nx < 0 || nx >= size || nz < 0 || nz >= size || ny < minY) continue;
+                            if (decisions[blocks[((ny - minY) * size + nx) * size + nz]] != PvAquiferDecision.AIR_ABOVE_SEA) continue;
+                            if (here == PvAquiferDecision.HIGH_RIVER_WATER && offset[1] == 0) {
+                                if (blocks == state) spills++;
+                                continue;
+                            }
+                            leaks++;
+                            if (examples.size() < 5) {
+                                examples.add((blocks == state ? "open " : "carved ") + here + " at " + (minX + x) + "," + y + "," + (minZ + z)
+                                        + " -> " + (minX + nx) + "," + ny + "," + (minZ + nz));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        System.out.printf(Locale.ROOT, "[terrain pass] 3 x 3 chunks around the high river's chunk %d,%d: water at the surface %d, in the bed %d;"
+                + " open faces beside the surface's water (spills) %d; water beside or over open dry air %d%s%n", center.x, center.z, surface, bed,
+                spills, leaks, examples.isEmpty() ? "" : ", e.g. " + examples);
+        assertTrue(surface > 0 && bed > 0, "no river water around the chunk");
+        assertEquals(0, leaks, () -> "the river's water next to open air: " + examples);
     }
 
     @Test

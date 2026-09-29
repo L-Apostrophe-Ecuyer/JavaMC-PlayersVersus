@@ -1,0 +1,37 @@
+{
+  "type": "players-versus:terrain",
+  "offset": "minecraft:overworld/offset",
+  "factor": "minecraft:overworld/factor",
+  "jaggedness": "minecraft:overworld/jaggedness",
+  "jagged": {
+    "type": "minecraft:cache_2d",
+    "argument": {
+      "type": "minecraft:noise",
+      "noise": "minecraft:jagged",
+      "xz_scale": 1500,
+      "y_scale": 0
+    }
+  },
+  "ridges": "minecraft:overworld/ridges",
+  "base_3d_noise": "minecraft:overworld/base_3d_noise",
+  "entrances": "players-versus:overworld/caves/entrances",
+  "spaghetti_roughness": "minecraft:overworld/caves/spaghetti_roughness_function",
+  "cave_layer": {
+    "type": "minecraft:noise",
+    "noise": "minecraft:cave_layer",
+    "xz_scale": 1,
+    "y_scale": 8
+  },
+  "cave_cheese": {
+    "type": "minecraft:noise",
+    "noise": "minecraft:cave_cheese",
+    "xz_scale": 1,
+    "y_scale": 0.6666666666666666
+  },
+  "pillar": {
+    "type": "minecraft:noise",
+    "noise": "minecraft:pillar",
+    "xz_scale": 20,
+    "y_scale": 0.5
+  }
+}

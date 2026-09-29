@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquifer;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferDecision;
 import frootloops.versus.mod.environment.worldgen.biome.PvBiomeSource;
+import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerChunkManager;
@@ -100,6 +101,14 @@ public final class WorldgenProbe {
                 lines.add(String.format(Locale.ROOT, "aquifer floodedness %.4f (exact %.4f)  spread %.4f (exact %.4f)  ->  own %s, placed %s",
                         aquifer.floodedness(noisePos), floodedness.sample(noisePos),
                         aquifer.spread(noisePos), spread.sample(noisePos), aquifer.atPosition(pos.getX(), pos.getY(), pos.getZ()), decision));
+                PvHighRiver river = AquiferInputs.of(noiseConfig, settings).highRiver();
+                if (river != null) {
+                    // exact values here; the terrain pass and the aquifer interpolate them on the cell grid
+                    double depth = river.depth().sample(noisePos);
+                    lines.add(String.format(Locale.ROOT, "high river channel %.4f  depth at y 80 %.4f  terrain at y 80 %.4f  ->  half width"
+                                    + " here %.4f, valley %.4f", river.channel().sample(noisePos), depth, river.terrain().sample(noisePos),
+                            PvHighRiver.activity(depth) * PvHighRiver.fullHalfWidth(pos.getY()), river.sample(noisePos)));
+                }
             } else {
                 lines.add("aquifer: vanilla (not a Players Versus generator)");
             }

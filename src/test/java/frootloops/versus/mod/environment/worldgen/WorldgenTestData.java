@@ -5,6 +5,8 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
+import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
+import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -17,6 +19,7 @@ import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.resource.VanillaDataPackProvider;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
 import net.minecraft.world.gen.noise.NoiseConfig;
@@ -26,6 +29,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Vanilla's data pack plus this mod's data (read from {@code src/main/resources}), loaded into worldgen registries by
@@ -95,6 +99,31 @@ public final class WorldgenTestData {
     public static DensityFunction parse(NoiseConfig config, String json) {
         return DensityFunction.FUNCTION_CODEC.parse(RegistryOps.of(JsonOps.INSTANCE, registries()), JsonParser.parseString(json))
                 .getOrThrow().apply(AquiferInputs.seeding(config));
+    }
+
+    /** The high river's valley ({@link PvHighRiver}) from this mod's final density, seeded like {@link #seeded}. */
+    public static PvHighRiver highRiver(NoiseConfig config) {
+        PvFinalDensity finalDensity = (PvFinalDensity) seeded(config, VersusMod.MOD_ID + ":overworld/final_density");
+        return (PvHighRiver) PvWorldgen.unwrap(finalDensity.highRiver());
+    }
+
+    /**
+     * A chunk the high river runs through: its water at the surface at the chunk's centre (a point of the river's
+     * lattice, so exact values decide it), the first of random chunks near the origin.
+     */
+    public static ChunkPos highRiverChunk(NoiseConfig config) {
+        PvHighRiver river = highRiver(config);
+        Random random = new Random(8675309L);
+        for (int i = 0; i < 40000; i++) {
+            int chunkX = random.nextInt(500) - 250, chunkZ = random.nextInt(500) - 250;
+            DensityFunction.NoisePos center = new DensityFunction.UnblendedNoisePos(chunkX * 16 + 8, PvWorldgenConstants.HIGH_RIVER_Y, chunkZ * 16 + 8);
+            double channel = river.channel().sample(center);
+            if (Math.abs(channel) >= PvWorldgenConstants.HIGH_RIVER_HALF_WIDTH) continue;
+            if (PvHighRiver.waterAt(PvWorldgenConstants.HIGH_RIVER_Y, channel, river.depth().sample(center), river.terrain().sample(center))) {
+                return new ChunkPos(chunkX, chunkZ);
+            }
+        }
+        throw new AssertionError("no chunk with the high river's water near the origin");
     }
 
     public static String read(String resource) {

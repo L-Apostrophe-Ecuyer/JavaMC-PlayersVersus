@@ -37,7 +37,9 @@ class WorldgenDataTest {
 
     /**
      * The aquifer seeds its input functions itself ({@code AquiferInputs.seeding}); that must give the exact values of
-     * {@link NoiseConfig}'s own router. {@code AquiferPortTest} relies on it too.
+     * {@link NoiseConfig}'s own router. {@code AquiferPortTest} relies on it too. The final density covers the terrain's
+     * 3D base noise ({@code old_blended_noise}), which NoiseConfig seeds from its own splitter, and the high river's
+     * inputs, whose terrain at y 80 the aquifer reads.
      */
     @Test
     void seedingMatchesNoiseConfig() {
@@ -45,6 +47,7 @@ class WorldgenDataTest {
         NoiseRouter router = config.getNoiseRouter();
         assertEqualValues("depth", WorldgenTestData.seeded(config, "players-versus:overworld/depth"), router.depth());
         assertEqualValues("continents", WorldgenTestData.seeded(config, "minecraft:overworld/continents"), router.continents());
+        assertEqualValues("final density", WorldgenTestData.seeded(config, "players-versus:overworld/final_density"), router.finalDensity());
     }
 
     private static void assertEqualValues(String name, DensityFunction ours, DensityFunction router) {

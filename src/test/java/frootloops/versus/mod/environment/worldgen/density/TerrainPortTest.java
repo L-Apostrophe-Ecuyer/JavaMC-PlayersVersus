@@ -30,7 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * positions, and at every block of vanilla's terrain pass, where vanilla's caches and interpolation are in play. The
  * final density is also checked in the vanilla types it takes for C2ME's compiler ({@link PvFinalDensity#asVanillaTypes}).
  * In the flooded corridors' zone ({@link PvNoodle#corridorBias}), which the JSON never had, the final density is
- * checked against its vanilla types only.
+ * checked against its vanilla types only; in the high river's heights, against the JSON's value cut by the river's
+ * valley ({@link PvHighRiver}).
  */
 class TerrainPortTest {
 
@@ -55,6 +56,7 @@ class TerrainPortTest {
         }
         pairs.put(AS_VANILLA_TYPES, new DensityFunction[]{asVanillaTypes(config), WorldgenTestData.seeded(config, OLD + "final_density")});
         DensityFunction corridorEntrances = kernel(config).entrances();
+        DensityFunction highRiver = kernel(config).highRiver();
         // what each sample exercised, so the comparison can't pass without reaching every branch
         DensityFunction ridges = WorldgenTestData.seeded(config, "minecraft:overworld/ridges");
         DensityFunction jaggedness = WorldgenTestData.seeded(config, "minecraft:overworld/jaggedness");
@@ -69,13 +71,16 @@ class TerrainPortTest {
             int y = i % 2 == 0 ? edgeYs.get(random.nextInt(edgeYs.size())) : random.nextInt(336) - 64;
             DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
             boolean corridor = inCorridorZone(y, corridorEntrances, pos);
+            double valley = riverValley(y, highRiver, pos);
             for (Map.Entry<String, DensityFunction[]> pair : pairs.entrySet()) {
                 boolean finalDensity = pair.getKey().equals("final_density") || pair.getKey().equals(AS_VANILLA_TYPES);
-                double expected = corridor && finalDensity ? pairs.get("final_density")[0].sample(pos) : pair.getValue()[1].sample(pos);
+                double expected = corridor && finalDensity ? pairs.get("final_density")[0].sample(pos)
+                        : finalDensity ? Math.min(pair.getValue()[1].sample(pos), valley) : pair.getValue()[1].sample(pos);
                 double actual = pair.getValue()[0].sample(pos);
                 assertEquals(expected, actual, 0.0, () -> pair.getKey() + " at " + x + "," + y + "," + z + (corridor ? " (in the corridors' zone)" : ""));
             }
             if (corridor) reached.merge("corridors' zone", 1, Integer::sum);
+            if (valley < 0.0) reached.merge("high river's valley", 1, Integer::sum);
             double yValue = DensityOps.yValue(y), ridge = ridges.sample(pos), cheese = slopedCheese.sample(pos);
             if (yValue >= 48.0 && yValue < 256.0 && Math.abs(ridge) < 0.22) reached.merge("river valley", 1, Integer::sum);
             if (yValue >= 54.0 && yValue < 128.0 && Math.abs(ridge) < 0.2) reached.merge("river depth", 1, Integer::sum);
@@ -101,8 +106,10 @@ class TerrainPortTest {
     void kernelsGiveTheJsonsValuesInTheTerrainPass() {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
         ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        long totalValleyBlocks = 0;
         for (ChunkPos chunk : testChunks(config)) {
             TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
+            int[] valleyBlocks = {0};
             List<String> names = new ArrayList<>();
             List<DensityFunction> news = new ArrayList<>(), olds = new ArrayList<>();
             for (String name : PORTED) {
@@ -114,16 +121,21 @@ class TerrainPortTest {
             news.add(pass.register(asVanillaTypes(config)));
             olds.add(pass.register(WorldgenTestData.seeded(config, OLD + "final_density")));
             DensityFunction corridorEntrances = pass.register(kernel(config).entrances());
+            DensityFunction highRiver = pass.register(kernel(config).highRiver());
             int finalDensity = names.indexOf("final_density");
             int[] compared = new int[names.size()];
             int[] corridors = {0};
             pass.run((x, y, z, pos) -> {
                 boolean corridor = inCorridorZone(y, corridorEntrances, pos);
                 if (corridor) corridors[0]++;
+                double valley = riverValley(y, highRiver, pos);
+                if (valley < 0.0) valleyBlocks[0]++;
                 for (int i = 0; i < names.size(); i++) {
                     if (names.get(i).equals("depth") && (Math.floorMod(x, 4) != 0 || Math.floorMod(z, 4) != 0)) continue;
-                    boolean againstKernel = corridor && (i == finalDensity || names.get(i).equals(AS_VANILLA_TYPES));
-                    double expected = againstKernel ? news.get(finalDensity).sample(pos) : olds.get(i).sample(pos);
+                    boolean isFinalDensity = i == finalDensity || names.get(i).equals(AS_VANILLA_TYPES);
+                    boolean againstKernel = corridor && isFinalDensity;
+                    double expected = againstKernel ? news.get(finalDensity).sample(pos)
+                            : isFinalDensity ? Math.min(olds.get(i).sample(pos), valley) : olds.get(i).sample(pos);
                     double actual = news.get(i).sample(pos);
                     int index = i;
                     assertEquals(expected, actual, 0.0, () -> names.get(index) + " at " + x + "," + y + "," + z + " (chunk " + chunk.x + "," + chunk.z
@@ -132,9 +144,11 @@ class TerrainPortTest {
                 }
             });
             System.out.printf(Locale.ROOT, "[terrain port] chunk %d,%d: %s equal the JSON at %s blocks (the final density: the kernel's own"
-                            + " vanilla types at the %d blocks of the corridors' zone)%n", chunk.x, chunk.z, names, Arrays.toString(compared),
-                    corridors[0]);
+                            + " vanilla types at the %d blocks of the corridors' zone, the JSON's cut by the high river at %d blocks it opens)%n",
+                    chunk.x, chunk.z, names, Arrays.toString(compared), corridors[0], valleyBlocks[0]);
+            totalValleyBlocks += valleyBlocks[0];
         }
+        assertTrue(totalValleyBlocks > 0, "the chunks tried never reached the high river's valley");
     }
 
     /**
@@ -174,6 +188,11 @@ class TerrainPortTest {
         return assertInstanceOf(PvFinalDensity.class, WorldgenTestData.seeded(config, NEW + "final_density"));
     }
 
+    /** The high river's valley at a block, which the JSON never had: infinite outside its heights, as the final density asks. */
+    private static double riverValley(int y, DensityFunction highRiver, DensityFunction.NoisePos pos) {
+        return y >= PvHighRiver.MIN_Y && y < PvHighRiver.MAX_Y ? highRiver.sample(pos) : Double.POSITIVE_INFINITY;
+    }
+
     /** Whether the flooded corridors change the noodle's bias at a block, which the JSON never did. */
     private static boolean inCorridorZone(int y, DensityFunction corridorEntrances, DensityFunction.NoisePos pos) {
         return PvNoodle.inCorridorLayers(y) && PvNoodle.corridorBias(y, corridorEntrances.sample(pos)) != PvNoodle.bias(y);
@@ -184,7 +203,7 @@ class TerrainPortTest {
         return assertInstanceOf(PvFinalDensity.class, WorldgenTestData.seeded(config, NEW + "final_density")).asVanillaTypes();
     }
 
-    /** The smoke test's chunk, plus the first chunks found with a river valley and with jagged peaks. */
+    /** The smoke test's chunk, plus the first chunks found with a river valley, with jagged peaks and with the high river. */
     private static List<ChunkPos> testChunks(NoiseConfig config) {
         DensityFunction ridges = WorldgenTestData.seeded(config, "minecraft:overworld/ridges");
         DensityFunction jaggedness = WorldgenTestData.seeded(config, "minecraft:overworld/jaggedness");
@@ -201,6 +220,7 @@ class TerrainPortTest {
         assertTrue(river != null && peaks != null, "no river or peak chunk found: " + river + ", " + peaks);
         chunks.add(river);
         chunks.add(peaks);
+        chunks.add(WorldgenTestData.highRiverChunk(config));
         return chunks;
     }
 

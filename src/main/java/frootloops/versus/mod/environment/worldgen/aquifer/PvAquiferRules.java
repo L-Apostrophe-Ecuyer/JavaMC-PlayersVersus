@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
+import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
 
 import java.util.ArrayList;
@@ -16,7 +17,8 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.*;
  * flooded corridors' noodle opens the block. That's the water the aquifer places, and it depends on nothing else. The walls come from the neighbourhood ({@link #decide}): for a non-solid position, in order:
  * <ol>
  *   <li>below the lava level: lava;</li>
- *   <li>at or above {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#SEA_LEVEL}: air;</li>
+ *   <li>at or above {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#SEA_LEVEL}: the high river's
+ *   water and its walls ({@link #aboveSea}), else air;</li>
  *   <li>water where its floodedness says so;</li>
  *   <li>a wall where water could flow in: from one of the four sides, or from above;</li>
  *   <li>a barrier band's stone within {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#BAND_REACH}
@@ -115,7 +117,7 @@ public final class PvAquiferRules {
         if (lavaLevel) return PvAquiferDecision.LAVA;
 
         int x = pos.blockX(), y = pos.blockY(), z = pos.blockZ();
-        if (y >= SEA_LEVEL) return PvAquiferDecision.AIR_ABOVE_SEA;
+        if (y >= SEA_LEVEL) return aboveSea(x, y, z, positions);
 
         PvAquiferDecision here = positions.at(x, y, z);
         if (isWater(here)) return here;
@@ -123,6 +125,24 @@ public final class PvAquiferRules {
         if (wall != PvAquiferDecision.AIR) return wall;
         if (here != PvAquiferDecision.AIR && (y >= BANDS_KEPT_FROM_Y || waterWithinReach(x, y, z, positions))) return here;
         return PvAquiferDecision.AIR;
+    }
+
+    /**
+     * Above sea level only the high river places water, at y 77..80 ({@code PvAquifer.highRiverAt}, which the positions
+     * give there). A wall keeps it in wherever it could flow into open space: from the bed's water beside, or from any of
+     * its water above. The surface's water gets no wall beside it, so where the ground next to it is open, it spills.
+     */
+    private static PvAquiferDecision aboveSea(int x, int y, int z, Positions positions) {
+        if (y < PvHighRiver.MIN_Y - 1 || y > HIGH_RIVER_Y) return PvAquiferDecision.AIR_ABOVE_SEA;
+        PvAquiferDecision here = positions.at(x, y, z);
+        if (here != PvAquiferDecision.AIR) return here;
+        for (int[] offset : INFLOW) {
+            PvAquiferDecision neighbour = positions.at(x + offset[0], y + offset[1], z + offset[2]);
+            if (neighbour == PvAquiferDecision.HIGH_RIVER_BED_WATER || offset[1] == 1 && neighbour == PvAquiferDecision.HIGH_RIVER_WATER) {
+                return PvAquiferDecision.HIGH_RIVER_BARRIER;
+            }
+        }
+        return PvAquiferDecision.AIR_ABOVE_SEA;
     }
 
     /**
@@ -150,7 +170,8 @@ public final class PvAquiferRules {
 
     public static boolean isWater(PvAquiferDecision decision) {
         return decision == PvAquiferDecision.SEA_WATER || decision == PvAquiferDecision.SEA_WATER_TICKING
-                || decision == PvAquiferDecision.BASIN_WATER || decision == PvAquiferDecision.BASIN_WATER_TICKING;
+                || decision == PvAquiferDecision.BASIN_WATER || decision == PvAquiferDecision.BASIN_WATER_TICKING
+                || decision == PvAquiferDecision.HIGH_RIVER_WATER || decision == PvAquiferDecision.HIGH_RIVER_BED_WATER;
     }
 
     /** Barriers need slightly more floodedness near the sea surface, so they thin out there. */

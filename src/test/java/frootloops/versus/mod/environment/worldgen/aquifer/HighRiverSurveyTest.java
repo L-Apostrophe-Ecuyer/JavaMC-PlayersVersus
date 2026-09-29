@@ -1,8 +1,11 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
+import frootloops.versus.mod.environment.worldgen.PvWorldgenConstants;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
+import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
 import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>The third prototype ended the river where the depth said the ground fell below y 80, which is often short of the
  * real edge, and cut up to 32 blocks into high ground: about 600 blocks per chunk, with few waterfalls. The fourth runs
  * the river to the real edge (water only where the terrain at y 80 was solid) and keeps it out of ground more than 8 to
- * 13 blocks above y 80.
+ * 13 blocks above y 80. Its first shape is the one generation took ({@code PvWorldgenConstants}, {@code PvHighRiver});
+ * the survey plays them all out on the terrain without the river.
  */
 class HighRiverSurveyTest {
 
@@ -73,7 +77,9 @@ class HighRiverSurveyTest {
 
     /** A depth of 0.01 at y 80 is about a block and a quarter of ground above it (the depth falls by 3/384 per block). */
     private static final List<Shape> SHAPES = List.of(
-            new Shape("edge to edge, half width 0.03, widening 0.006, bed 3, ground up to d 0.06", 0.03, 0.006, 3, 0.06, 0.03, true),
+            new Shape("edge to edge, as generated: half width 0.03, widening 0.006, bed 3, ground up to d 0.06",
+                    PvWorldgenConstants.HIGH_RIVER_HALF_WIDTH, PvWorldgenConstants.HIGH_RIVER_WIDENING, PvWorldgenConstants.HIGH_RIVER_BED,
+                    PvWorldgenConstants.HIGH_RIVER_TOP, PvWorldgenConstants.HIGH_RIVER_FADE, true),
             new Shape("edge to edge, half width 0.03, widening 0.006, bed 3, ground up to d 0.10", 0.03, 0.006, 3, 0.10, 0.04, true),
             new Shape("edge to edge, half width 0.02, widening 0.004, bed 2, ground up to d 0.06", 0.02, 0.004, 2, 0.06, 0.03, true),
             new Shape("edge to edge, half width 0.03, widening 0.012, bed 3, ground up to d 0.06", 0.03, 0.012, 3, 0.06, 0.03, true),
@@ -83,7 +89,11 @@ class HighRiverSurveyTest {
     void survey() {
         NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
         DensityFunction river = WorldgenTestData.seeded(config, "players-versus:overworld/high_river");
-        DensityFunction depth = config.getNoiseRouter().depth(), finalDensity = config.getNoiseRouter().finalDensity();
+        DensityFunction depth = config.getNoiseRouter().depth();
+        // the terrain without the high river, which generation now cuts
+        PvFinalDensity withRiver = (PvFinalDensity) config.getNoiseRouter().finalDensity();
+        DensityFunction finalDensity = new PvFinalDensity(withRiver.terrain(), withRiver.noodleToggle(), withRiver.noodleThickness(),
+                withRiver.noodleRidgeA(), withRiver.noodleRidgeB(), withRiver.entrances(), DensityFunctionTypes.constant(Double.POSITIVE_INFINITY));
         List<int[]> origins = hillyAreas(depth);
         Stats[] stats = new Stats[SHAPES.size()];
         for (int s = 0; s < stats.length; s++) stats[s] = new Stats();

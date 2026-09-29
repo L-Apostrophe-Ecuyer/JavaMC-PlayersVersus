@@ -7,6 +7,7 @@ import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
 import frootloops.versus.mod.environment.worldgen.density.DensityCompilerCompat;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
+import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -119,6 +120,8 @@ public final class WorldgenBench {
     private static final int[] WATER_BAND_TOPS = {-8, 0, 24, 48, 64};
     /** Where water flows from a block: the four sides, then below. */
     private static final int[][] SIDES_AND_BELOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
+    /** The high river's water surface; above sea level, only its water is there before features run. */
+    private static final int HIGH_RIVER_Y = frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
     private static final int MAP_CELL = 8;
 
     private WorldgenBench() {
@@ -235,15 +238,10 @@ public final class WorldgenBench {
             return List.of();
         }
         NoiseConfig config = world.getChunkManager().getNoiseConfig();
-        DensityFunction.DensityFunctionVisitor seeding;
-        try {
-            seeding = seedingLikeNoiseConfig(config);
-        } catch (ReflectiveOperationException exception) {
-            return List.of("c2me_check skipped: " + exception);
-        }
+        DensityFunction.DensityFunctionVisitor seeding = AquiferInputs.seeding(config);
         PvFinalDensity kernel = new PvFinalDensity(raw.terrain().apply(seeding), raw.noodleToggle().apply(seeding),
                 raw.noodleThickness().apply(seeding), raw.noodleRidgeA().apply(seeding), raw.noodleRidgeB().apply(seeding),
-                raw.entrances().apply(seeding));
+                raw.entrances().apply(seeding), raw.highRiver().apply(seeding));
         DensityFunction interpreted = kernel.asVanillaTypes();
         DensityFunction compiled = config.getNoiseRouter().finalDensity();
         java.util.Random random = new java.util.Random(world.getSeed());
@@ -274,31 +272,6 @@ public final class WorldgenBench {
         lines.add(layers.toString());
         lines.addAll(examples);
         return lines;
-    }
-
-    /**
-     * Seeds functions the way NoiseConfig seeds its router: noises by key ({@link AquiferInputs#seeding}), and the
-     * blended terrain noise from the config's random deriver split by {@code minecraft:terrain}. The deriver is private,
-     * so this reads it by its Yarn name, which only works in the development environment (the smoke run).
-     */
-    private static DensityFunction.DensityFunctionVisitor seedingLikeNoiseConfig(NoiseConfig config) throws ReflectiveOperationException {
-        java.lang.reflect.Field field = NoiseConfig.class.getDeclaredField("randomDeriver");
-        field.setAccessible(true);
-        net.minecraft.util.math.random.RandomSplitter deriver = (net.minecraft.util.math.random.RandomSplitter) field.get(config);
-        DensityFunction.DensityFunctionVisitor noises = AquiferInputs.seeding(config);
-        Map<DensityFunction, DensityFunction> cache = new HashMap<>();
-        return new DensityFunction.DensityFunctionVisitor() {
-            @Override
-            public DensityFunction apply(DensityFunction function) {
-                return cache.computeIfAbsent(function, key -> key instanceof net.minecraft.util.math.noise.InterpolatedNoiseSampler sampler
-                        ? sampler.copyWithRandom(deriver.split(net.minecraft.util.Identifier.ofVanilla("terrain"))) : key);
-            }
-
-            @Override
-            public DensityFunction.Noise apply(DensityFunction.Noise noise) {
-                return noises.apply(noise);
-            }
-        };
     }
 
     /** The generator, encoded the way level.dat stores it. */
@@ -344,6 +317,12 @@ public final class WorldgenBench {
         /** Water blocks by {@code WATER_BAND_TOPS}, and below them. */
         private final long[] waterByBand = new long[WATER_BAND_TOPS.length];
         private long waterBelowSeaBand;
+        /**
+         * The high river's water (y 77..80, the only water above sea level before features): at its surface and in its
+         * bed; open faces beside the surface's water, where it spills, and the columns they're in; surface water with
+         * open air under it; bed water with open air beside or under it, which the walls should leave none of.
+         */
+        private long riverSurfaceWater, riverBedWater, riverSpillFaces, riverSpillColumns, riverSurfaceOverAir, riverBedBesideAir;
         /** Block hashes by status: [chunk, by {@link #chunkIndex}][16-block section from the bottom]. */
         private final Map<String, long[][]> sectionHashes = new LinkedHashMap<>();
         private final Registry<Structure> structures;
@@ -471,6 +450,7 @@ public final class WorldgenBench {
             }
             BitSet ticking = proto != null ? countQueuedFluidTicks(proto) : new BitSet();
             countLeaks(chunk, carvingMask, ticking);
+            countHighRiver(chunk);
             for (Map.Entry<Structure, StructureStart> entry : chunk.getStructureStarts().entrySet()) {
                 StructureStart start = entry.getValue();
                 if (!start.hasChildren()) continue;
@@ -478,6 +458,36 @@ public final class WorldgenBench {
                 this.structureStarts.add(String.format(Locale.ROOT, "structure %s start chunk %d,%d box %d,%d,%d..%d,%d,%d",
                         this.structures.getId(entry.getKey()), start.getPos().x, start.getPos().z, box.getMinX(), box.getMinY(),
                         box.getMinZ(), box.getMaxX(), box.getMaxY(), box.getMaxZ()));
+            }
+        }
+
+        /** The high river's water and where it can flow, inside the chunk ({@link #riverSurfaceWater} and the rest). */
+        private void countHighRiver(Chunk chunk) {
+            ChunkPos chunkPos = chunk.getPos();
+            BlockPos.Mutable pos = new BlockPos.Mutable();
+            for (int localX = 0; localX < 16; localX++) {
+                for (int localZ = 0; localZ < 16; localZ++) {
+                    int x = chunkPos.getStartX() + localX, z = chunkPos.getStartZ() + localZ;
+                    for (int y = PvHighRiver.MIN_Y; y <= HIGH_RIVER_Y; y++) {
+                        if (!chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.WATER)) continue;
+                        boolean surface = y == HIGH_RIVER_Y;
+                        if (surface) this.riverSurfaceWater++;
+                        else this.riverBedWater++;
+                        boolean spilling = false;
+                        for (int[] offset : SIDES_AND_BELOW) {
+                            int nx = localX + offset[0], nz = localZ + offset[2];
+                            if (nx < 0 || nx > 15 || nz < 0 || nz > 15) continue;
+                            if (!chunk.getBlockState(pos.set(chunkPos.getStartX() + nx, y + offset[1], chunkPos.getStartZ() + nz)).isAir()) continue;
+                            if (!surface) this.riverBedBesideAir++;
+                            else if (offset[1] < 0) this.riverSurfaceOverAir++;
+                            else {
+                                this.riverSpillFaces++;
+                                spilling = true;
+                            }
+                        }
+                        if (spilling) this.riverSpillColumns++;
+                    }
+                }
             }
         }
 
@@ -716,6 +726,10 @@ public final class WorldgenBench {
                     this.basinWater.cardinality() / (this.size * this.size / 256.0)));
 
             appendLowlands(lines);
+            lines.add(String.format(Locale.ROOT, "metric high_river_per_chunk water at y %d %.2f, in the bed %.2f; open faces beside the"
+                            + " surface's water %.2f (in %.2f columns), under it %.2f; bed water beside or over open air %.2f",
+                    HIGH_RIVER_Y, this.riverSurfaceWater / chunks, this.riverBedWater / chunks, this.riverSpillFaces / chunks,
+                    this.riverSpillColumns / chunks, this.riverSurfaceOverAir / chunks, this.riverBedBesideAir / chunks));
             lines.add("biomes at surface:");
             appendHistogram(lines, this.surfaceBiome);
             for (int i = 0; i < BIOME_LAYER_YS.length; i++) {

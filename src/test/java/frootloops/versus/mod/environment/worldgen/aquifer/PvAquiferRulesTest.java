@@ -12,10 +12,12 @@ import java.util.Map;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BANDS_KEPT_FROM_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_MAX_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_WATER_MIN_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PvAquiferRulesTest {
 
@@ -141,5 +143,33 @@ class PvAquiferRulesTest {
     void barriersAreSolidSoCarversLeaveThem() {
         assertNull(PvAquiferDecision.SEA_BARRIER.state);
         assertNull(PvAquiferDecision.BASIN_BARRIER.state);
+        assertNull(PvAquiferDecision.HIGH_RIVER_BARRIER.state);
+    }
+
+    /** The high river's water: walled in its bed and under it, but open beside its surface, where it spills. */
+    @Test
+    void theHighRiverSpillsFromItsSurfaceOnly() {
+        int y = HIGH_RIVER_Y;
+        Neighbourhood river = new Neighbourhood()
+                .put(0, y, 0, PvAquiferDecision.HIGH_RIVER_WATER)
+                .put(0, y - 1, 0, PvAquiferDecision.HIGH_RIVER_BED_WATER);
+        assertEquals(PvAquiferDecision.HIGH_RIVER_WATER, river.decide(0, y, 0));
+        assertEquals(PvAquiferDecision.HIGH_RIVER_BED_WATER, river.decide(0, y - 1, 0));
+        // open space beside the surface's water stays open, so the water spills into it
+        assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, river.decide(1, y, 0));
+        assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, river.decide(0, y, -1));
+        // a wall beside and under the bed's water
+        assertEquals(PvAquiferDecision.HIGH_RIVER_BARRIER, river.decide(1, y - 1, 0));
+        assertEquals(PvAquiferDecision.HIGH_RIVER_BARRIER, river.decide(0, y - 2, 0));
+        // and under the surface's water where there's no bed under it
+        Neighbourhood shallow = new Neighbourhood().put(0, y, 0, PvAquiferDecision.HIGH_RIVER_WATER);
+        assertEquals(PvAquiferDecision.HIGH_RIVER_BARRIER, shallow.decide(0, y - 1, 0));
+        // nothing above the surface, nor diagonally below it
+        assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, river.decide(0, y + 1, 0));
+        assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, shallow.decide(1, y - 1, 0));
+        // solid stays solid
+        assertEquals(PvAquiferDecision.SOLID, PvAquiferRules.decide(new DensityFunction.UnblendedNoisePos(0, y, 0), 0.1, false, river));
+        assertTrue(PvAquiferDecision.HIGH_RIVER_WATER.needsFluidTick, "the surface's water must tick to spill");
+        assertTrue(PvAquiferRules.isWater(PvAquiferDecision.HIGH_RIVER_WATER) && PvAquiferRules.isWater(PvAquiferDecision.HIGH_RIVER_BED_WATER));
     }
 }
