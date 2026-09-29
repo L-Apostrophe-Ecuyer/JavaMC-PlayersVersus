@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.client.players.attacking;
 
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -16,11 +17,12 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(GameRenderer.class)
+// GameRenderer#pick moved to LocalPlayer (static) in 26.3, called by raycastHitResult.
+@Mixin(LocalPlayer.class)
 public abstract class GameRendererMixin {
 
     @Overwrite
-    private HitResult pick(Entity camera, double blockInteractionRange, double entityInteractionRange, float tickDelta) {
+    private static HitResult pick(Entity camera, double blockInteractionRange, double entityInteractionRange, float tickDelta) {
         Vec3 cameraPos = camera.getEyePosition(tickDelta);
         Vec3 cameraRotation = camera.getViewVector(tickDelta);
         Vec3 pointingVect = cameraPos.add(cameraRotation.x * blockInteractionRange, cameraRotation.y * blockInteractionRange, cameraRotation.z * blockInteractionRange);

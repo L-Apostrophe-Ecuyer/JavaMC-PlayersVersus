@@ -28,7 +28,7 @@ public abstract class EnchantingScreenMixin extends AbstractContainerScreen<Ench
     private int index = -1;
 
 
-    @Redirect(method = "renderBg", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/EnchantmentNames;getRandomName(Lnet/minecraft/client/gui/Font;I)Lnet/minecraft/network/chat/FormattedText;"))
+    @Redirect(method = "extractBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/EnchantmentNames;getRandomName(Lnet/minecraft/client/gui/Font;I)Lnet/minecraft/network/chat/FormattedText;"))
     private FormattedText replaceGlyphPhrases(EnchantmentNames enchantingPhrases, Font textRenderer, int width) {
         int originalIndex = index;
         for(int i = 0; i < 3; i++) {

@@ -123,12 +123,12 @@ public abstract class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
         }
     }
 
-    @ModifyConstant(method = "renderLabels", constant = @Constant(intValue = 40))
+    @ModifyConstant(method = "extractLabels", constant = @Constant(intValue = 40))
     private int noMoreLimit(int levelLimit) {
         return 999;
     }
 
-    @Inject(method = "renderLabels", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "extractLabels", at = @At(value = "HEAD"), cancellable = true)
     protected void showBookErrorMessage(GuiGraphicsExtractor context, int mouseX, int mouseY, CallbackInfo ci) {
         boolean isFirstSlotBook = menu.getSlot(0).getItem().is(Items.ENCHANTED_BOOK);
         if(!menu.getSlot(0).hasItem() || (!isFirstSlotBook && !menu.getSlot(1).hasItem() && !menu.getSlot(2).hasItem())) return;
@@ -169,17 +169,17 @@ public abstract class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
         }
         else return;
 
-        context.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, CommonColors.DARK_GRAY, false);
-        context.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, CommonColors.DARK_GRAY, false);
+        context.text(this.font, this.title, this.titleLabelX, this.titleLabelY, CommonColors.DARK_GRAY, false);
+        context.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, CommonColors.DARK_GRAY, false);
 
         int x = this.imageWidth - 8 - this.font.width(text) - 2;
         context.fill(x - 2, 67, this.imageWidth - 8, 79, 1325400064);
-        context.drawString(this.font, text, x, 69, color, true);
+        context.text(this.font, text, x, 69, color, true);
         ci.cancel();
     }
 
-    @Inject(method = "renderBg", at = @At(value = "TAIL"))
-    protected void drawIcons(GuiGraphicsExtractor context, float delta, int mouseX, int mouseY, CallbackInfo info) {
+    @Inject(method = "extractBackground", at = @At(value = "TAIL"))
+    protected void drawIcons(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo info) {
         this.toolSlotIcon.render(this.menu, context, delta, this.leftPos, this.topPos);
         this.repairSlotIcon.render(this.menu, context, delta, this.leftPos, this.topPos);
     }

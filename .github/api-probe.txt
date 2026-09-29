@@ -568,3 +568,15 @@ net.minecraft.world.phys.shapes.CollisionContext
 net.minecraft.world.phys.shapes.EntityCollisionContext
 net.minecraft.world.phys.shapes.Shapes
 net.minecraft.world.phys.shapes.VoxelShape
+net.minecraft.client.gui.Hud
+net.minecraft.client.model.monster.zombie.ZombieModel
+net.minecraft.client.model.monster.zombie.DrownedModel
+net.minecraft.client.model.monster.illager.IllagerModel
+net.minecraft.client.model.npc.VillagerModel
+net.minecraft.client.renderer.LightmapRenderStateExtractor
+net.minecraft.client.renderer.state.LightmapRenderState
+net.minecraft.client.renderer.SkyRenderer
+net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment
+net.minecraft.client.renderer.fog.environment.FogEnvironment
+net.minecraft.client.renderer.fog.FogRenderer
+net.minecraft.client.renderer.fog.FogData

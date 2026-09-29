@@ -41,7 +41,6 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
     @Shadow public ClientLevel level;
     @Shadow protected int missTime;
 
-    @Shadow @Nullable public Entity cameraEntity;
     @Shadow @Nullable public HitResult hitResult;
     @Shadow @Nullable public MultiPlayerGameMode gameMode;
 

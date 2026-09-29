@@ -19,7 +19,7 @@ public abstract class VillagerTradingScreenMixin extends AbstractContainerScreen
         super(handler, inventory, title);
     }
 
-    @Inject(method = "renderLabels", at = @At("TAIL"), cancellable = false)
+    @Inject(method = "extractLabels", at = @At("TAIL"), cancellable = false)
     public void renderMain(GuiGraphicsExtractor context, int mouseX, int mouseY, CallbackInfo info) {
         if(menu.getTraderXp() > 0) {
             if(mouseX > leftPos + 136 && mouseX < leftPos + 234 && mouseY > topPos + 14 && mouseY < topPos + 23) {

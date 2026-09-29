@@ -45,7 +45,7 @@ public abstract class AnimatedResultButtonMixin extends AbstractWidget {
 
 
     @Overwrite
-    public void renderWidget(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
         // FIRST STEP -----------------
         // Draw background:
@@ -84,14 +84,14 @@ public abstract class AnimatedResultButtonMixin extends AbstractWidget {
                 offset = 6;
             }*/
             ItemStack itemStack = ((RecipeButton)((Object)this)).getDisplayStack();
-            context.renderItem(itemStack, this.getX() + offset, this.getY() + offset, 0);
+            context.item(itemStack, this.getX() + offset, this.getY() + offset, 0);
             Identifier overlayTextureID = isCraftable ? RECIPE_BOOK_CRAFTABLE_GROUP_OVERLAY : RECIPE_BOOK_UNCRAFTABLE_GROUP_OVERLAY;
             context.blitSprite(RenderPipelines.GUI_TEXTURED, overlayTextureID, this.getX(), this.getY(), this.width, this.height);
 
         }
         else {
             ItemStack itemStack = ((RecipeButton)((Object)this)).getDisplayStack();
-            context.renderFakeItem(itemStack, this.getX() + 4, this.getY() + 4);
+            context.fakeItem(itemStack, this.getX() + 4, this.getY() + 4);
             if(!isCraftable) context.blitSprite(RenderPipelines.GUI_TEXTURED, RECIPE_BOOK_CRAFTABLE_SINGLE_OVERLAY, this.getX(), this.getY(), this.width, this.height);
         }
 

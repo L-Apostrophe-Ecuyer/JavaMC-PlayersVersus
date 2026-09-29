@@ -50,7 +50,7 @@ public abstract class HotbarSwappingClientMixin extends ReentrantBlockableEventL
      * Pick block improved; will instead swap hotbar with a row of the inventory containing the match (or, if
      * none such row is found, will cycle to the next row.
      */
-    @Inject(method = "pickBlock",at = @At("HEAD"), cancellable = true)
+    @Inject(method = "pickBlockOrEntity",at = @At("HEAD"), cancellable = true)
     private void doItemPick(CallbackInfo info) {
         if(!VersusSettings.QOL.DO_HOTBAR_SWAPPING_ON_PICK_KEY) return;
 
