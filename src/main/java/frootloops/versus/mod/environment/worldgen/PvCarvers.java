@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.carver.WorldCarver;
 
 /**
  * The carvers of Improved worlds ({@link PvChunkGenerator}). Biomes name vanilla's {@code cave},
@@ -39,9 +39,9 @@ public final class PvCarvers {
     static final Map<Identifier, List<Identifier>> LISTS = Map.of(
             Identifier.withDefaultNamespace("deep_dark"), List.of(id("cave"), id("deep_dark_canyon")));
 
-    private final HolderGetter<ConfiguredWorldCarver<?>> carvers;
+    private final HolderGetter<WorldCarver> carvers;
 
-    PvCarvers(HolderGetter<ConfiguredWorldCarver<?>> carvers) {
+    PvCarvers(HolderGetter<WorldCarver> carvers) {
         this.carvers = carvers;
     }
 
@@ -57,19 +57,19 @@ public final class PvCarvers {
 
     /** {@code settings} with the biome's Improved carvers, or {@code settings} itself where they're the same. */
     BiomeGenerationSettings withImprovedCarvers(Holder<Biome> biome, BiomeGenerationSettings settings) {
-        List<Holder<ConfiguredWorldCarver<?>>> carvers = new ArrayList<>();
+        List<Holder<WorldCarver>> carvers = new ArrayList<>();
         settings.getCarvers().forEach(carvers::add);
         Optional<Identifier> biomeId = biome.unwrapKey().map(ResourceKey::location);
         List<Identifier> ids = new ArrayList<>(carvers.size());
-        for (Holder<ConfiguredWorldCarver<?>> carver : carvers) {
-            Optional<ResourceKey<ConfiguredWorldCarver<?>>> key = carver.unwrapKey();
+        for (Holder<WorldCarver> carver : carvers) {
+            Optional<ResourceKey<WorldCarver>> key = carver.unwrapKey();
             if (key.isEmpty()) return settings;  // an inline carver: nothing to match, keep the biome's list as it is
             ids.add(key.get().location());
         }
         List<Identifier> improved = biomeId.map(id -> improved(id, ids)).orElse(ids);
         if (improved.equals(ids)) return settings;
-        List<Holder<ConfiguredWorldCarver<?>>> entries = improved.stream()
-                .<Holder<ConfiguredWorldCarver<?>>>map(id -> this.carvers.getOrThrow(ResourceKey.create(Registries.CONFIGURED_CARVER, id)))
+        List<Holder<WorldCarver>> entries = improved.stream()
+                .<Holder<WorldCarver>>map(id -> this.carvers.getOrThrow(ResourceKey.create(Registries.CARVER, id)))
                 .toList();
         return new BiomeGenerationSettings(HolderSet.direct(entries), settings.features());
     }

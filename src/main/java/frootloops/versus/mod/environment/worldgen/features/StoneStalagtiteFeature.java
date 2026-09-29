@@ -1,41 +1,49 @@
 package frootloops.versus.mod.environment.worldgen.features;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Column;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.phys.Vec3;
 
-public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig> {
-    public StoneStalagtiteFeature(Codec<StoneStalagtiteFeatureConfig> configCodec) {
-        super(configCodec);
-    }
+/**
+ * Feature type {@code players-versus:stone_stalagtite}: a stone stalactite and stalagmite pair between a cave's ceiling
+ * and floor.
+ *
+ * @param floorToCeilingSearchRange how far up and down to look for the ceiling and floor
+ */
+public record StoneStalagtiteFeature(int floorToCeilingSearchRange) implements Feature {
+
+    public static final MapCodec<StoneStalagtiteFeature> CODEC = ExtraCodecs.POSITIVE_INT.fieldOf("floorToCeilingSearchRange")
+            .xmap(StoneStalagtiteFeature::new, StoneStalagtiteFeature::floorToCeilingSearchRange);
 
     private static final BlockState STALAGMITE_BLOCKSTATE = Blocks.STONE.defaultBlockState();
 
     @Override
-    public boolean place(FeaturePlaceContext<StoneStalagtiteFeatureConfig> context) {
-        WorldGenLevel structureWorldAccess = context.level();
-        BlockPos blockPos = context.origin();
-        StoneStalagtiteFeatureConfig config = context.config();
-        RandomSource random = context.random();
+    public MapCodec<StoneStalagtiteFeature> codec() {
+        return CODEC;
+    }
+
+    @Override
+    public boolean place(WorldGenLevel structureWorldAccess, ChunkGenerator generator, RandomSource random, BlockPos blockPos) {
         if (!StoneStalagtiteHelper.isAirOrWater(structureWorldAccess, blockPos)) {
             return false;
         }
 
-        int floorToCeilingSearchRange = config.floorToCeilingSearchRange();
+        int floorToCeilingSearchRange = this.floorToCeilingSearchRange;
         float stalactiteBluntness = 0.8f;
         int columnRadiusMin = 5;
         int columnRadiusMax = 9;
@@ -53,7 +61,7 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
 
         StoneStalagmiteGenerator generatorCeiling = createGenerator(blockPos.atY(bounded.ceiling() - 1), false, random, radius, stalactiteBluntness, heightScale);
         StoneStalagmiteGenerator generatorFloor = createGenerator(blockPos.atY(bounded.floor() + 1), true, random, radius, stalactiteBluntness, heightScale);
-        WindModifier windModifier = generatorCeiling.generateWind(config) && generatorFloor.generateWind(config) ? new WindModifier(blockPos.getY(), random, windSpeed) : WindModifier.create();
+        WindModifier windModifier = generatorCeiling.generateWind() && generatorFloor.generateWind() ? new WindModifier(blockPos.getY(), random, windSpeed) : WindModifier.create();
         boolean canGenerateCeiling = generatorCeiling.canGenerate(structureWorldAccess, windModifier);
         boolean canGenerateFloor = generatorFloor.canGenerate(structureWorldAccess, windModifier);
         if (canGenerateCeiling) {
@@ -149,7 +157,7 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
             }
         }
 
-        boolean generateWind(StoneStalagtiteFeatureConfig config) {
+        boolean generateWind() {
             return this.scale >= 0.0 && this.bluntness >= (double)0.6;
         }
     }

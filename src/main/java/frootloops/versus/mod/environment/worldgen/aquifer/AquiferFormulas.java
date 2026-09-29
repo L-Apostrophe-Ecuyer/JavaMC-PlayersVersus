@@ -6,7 +6,6 @@ import static frootloops.versus.mod.environment.worldgen.density.DensityOps.grad
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.mul;
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.yValue;
 
-import net.minecraft.world.level.levelgen.DensityFunction;
 
 /**
  * The Players Versus aquifer's two inputs, sea floodedness (F) and basin floodedness (S), computed from their leaf
@@ -24,17 +23,22 @@ public final class AquiferFormulas {
     }
 
     /**
-     * F: sea-level floodedness, plus the ramen-cave term in y -4..31 where F alone would make a barrier.
+     * Whether F adds the ramen-cave term: in y -4..31, where F' alone would make a barrier, as the {@code range_choice}
+     * in the JSON did. Only there is the ramen noise read.
+     */
+    public static boolean addsRamen(int y, double seaFloodedness) {
+        double yValue = yValue(y);
+        return yValue >= -4.0 && yValue < 32.0 && seaFloodedness >= SEA_BARRIER_THRESHOLD && seaFloodedness < SEA_WATER_THRESHOLD;
+    }
+
+    /**
+     * F: sea-level floodedness, plus the ramen-cave term where {@link #addsRamen}.
      *
      * @param seaFloodedness F', from {@link #seaFloodedness}
-     * @param ramenNoise     {@code noise(minecraft:noodle, xz 3, y 3)}, only sampled (at {@code pos}) when the term applies
+     * @param ramenNoise     {@code noise(minecraft:noodle, xz 3, y 3)} at the block; only read where {@link #addsRamen}
      */
-    public static double floodedness(int y, double seaFloodedness, DensityFunction ramenNoise, DensityFunction.FunctionContext pos) {
-        double yValue = yValue(y);
-        if (yValue >= -4.0 && yValue < 32.0 && seaFloodedness >= SEA_BARRIER_THRESHOLD && seaFloodedness < SEA_WATER_THRESHOLD) {
-            return seaFloodedness + ramen(y, ramenNoise.compute(pos));
-        }
-        return seaFloodedness;
+    public static double floodedness(int y, double seaFloodedness, double ramenNoise) {
+        return addsRamen(y, seaFloodedness) ? seaFloodedness + ramen(y, ramenNoise) : seaFloodedness;
     }
 
     /**

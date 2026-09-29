@@ -1,17 +1,14 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
 import java.util.Arrays;
-import java.util.function.ToDoubleFunction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.densityfunction.DensitySampler;
 
 /**
  * One smooth function on a lattice over one chunk and a band of y (4 blocks across, {@code stepY} blocks tall): each
  * lattice point is sampled the first time a block next to it needs it, and blocks in between get the trilinear
- * interpolation of their 8 points, computed like vanilla's {@code interpolated} (y first, then x, then z): with
- * vanilla's cell size and alignment, it gives what {@code interpolated} gives in the terrain pass, to the bit, for a
- * function without {@code interpolated} parts of its own ({@code AquiferTerrainPassTest}).
+ * interpolation of their 8 points (y first, then x, then z), as 1.21.10's {@code interpolated} did on the terrain's
+ * cells, which the aquifer's inputs were defined on.
  *
  * <p>Only for functions without steps: interpolating across a step (a {@code range_choice} band, a threshold) moves
  * it. That's why the aquifer puts F's and S's smooth inputs here and evaluates F and S themselves per block.
@@ -21,19 +18,18 @@ import net.minecraft.world.level.levelgen.DensityFunction;
  * reaches one cell past each side of the chunk, so a block just outside it (the aquifer looks at its blocks'
  * neighbours) gets what the neighbouring chunk's own lattice gives there.
  *
- * <p>Not thread-safe; each instance belongs to one aquifer, which belongs to one chunk noise sampler.
+ * <p>Not thread-safe; each instance belongs to one aquifer, which belongs to one chunk's terrain pass.
  */
-public final class Lattice implements ToDoubleFunction<DensityFunction.FunctionContext> {
+public final class Lattice {
 
     /** What a lattice holds: a function of a block position. */
     @FunctionalInterface
     public interface Source {
         double sample(int x, int y, int z);
 
-        /** A density function sampled at {@link DensityFunction.SinglePointContext}, which a chunk's own router
-         * answers with the raw function (no {@code interpolated} state involved) and, inside the chunk, its cached 2D values. */
-        static Source of(DensityFunction function) {
-            return (x, y, z) -> function.compute(new DensityFunction.SinglePointContext(x, y, z));
+        /** A compiled density function bound to the chunk's sampling context (its caches). */
+        static Source of(DensitySampler.Bound sampler) {
+            return sampler::sampleValue;
         }
     }
 
@@ -54,29 +50,17 @@ public final class Lattice implements ToDoubleFunction<DensityFunction.FunctionC
      * Covers the chunk's 16 x 16 columns, one cell around them, and y from {@code minY} up to {@code maxY}, rounded
      * out to the lattice.
      *
-     * @param stepY vertical distance between lattice points; the terrain pass uses the noise settings' cell height
+     * @param originX the chunk's first block's x
+     * @param originZ the chunk's first block's z
+     * @param stepY   vertical distance between lattice points: the terrain's cell height
      */
-    public Lattice(Source source, ChunkPos chunk, int minY, int maxY, int stepY) {
+    public Lattice(Source source, int originX, int originZ, int minY, int maxY, int stepY) {
         this.source = source;
-        this.originX = chunk.getMinBlockX();
-        this.originZ = chunk.getMinBlockZ();
+        this.originX = originX;
+        this.originZ = originZ;
         this.stepY = stepY;
         this.minY = Math.floorDiv(minY, stepY) * stepY;
         this.levels = Math.floorDiv(maxY - this.minY + stepY - 1, stepY) + 1;
-    }
-
-    public Lattice(DensityFunction function, ChunkPos chunk, int minY, int maxY, int stepY) {
-        this(Source.of(function), chunk, minY, maxY, stepY);
-    }
-
-    /** A 4 x 4 x 4 lattice. */
-    public Lattice(DensityFunction function, ChunkPos chunk, int minY, int maxY) {
-        this(Source.of(function), chunk, minY, maxY, STEP_XZ);
-    }
-
-    @Override
-    public double applyAsDouble(DensityFunction.FunctionContext pos) {
-        return this.at(pos.blockX(), pos.blockY(), pos.blockZ());
     }
 
     /**

@@ -14,12 +14,18 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 
 /**
  * Biome source type {@code players-versus:overworld}: multi-noise biome selection over {@link PvBiomeLayout}. The
  * Players Versus world preset uses it, so its layout never reaches other world types.
+ *
+ * <p>The biomes come from a vanilla {@link MultiNoiseBiomeSource} over the layout's list, which since 26.3 samples a
+ * chunk's climate as whole volumes; this source keeps the layout rule of each entry, in the same order, for
+ * {@code /pvwg probe} and the debug screen.
  */
 public final class PvBiomeSource extends BiomeSource {
 
@@ -28,13 +34,18 @@ public final class PvBiomeSource extends BiomeSource {
     ).apply(instance, instance.stable(PvBiomeSource::new)));
 
     private final Climate.ParameterList<Placed> entries;
+    private final MultiNoiseBiomeSource biomes;
 
     private PvBiomeSource(HolderGetter<Biome> biomes) {
         List<Pair<Climate.ParameterPoint, Placed>> list = new ArrayList<>();
+        List<Pair<Climate.ParameterPoint, Holder<Biome>>> biomeList = new ArrayList<>();
         for (PvBiomeLayout.Entry entry : PvBiomeLayout.build()) {
-            list.add(Pair.of(entry.parameters(), new Placed(biomes.getOrThrow(entry.biome()), entry.rule())));
+            Holder<Biome> biome = biomes.getOrThrow(entry.biome());
+            list.add(Pair.of(entry.parameters(), new Placed(biome, entry.rule())));
+            biomeList.add(Pair.of(entry.parameters(), biome));
         }
         this.entries = new Climate.ParameterList<>(list);
+        this.biomes = MultiNoiseBiomeSource.createFromList(new Climate.ParameterList<>(biomeList));
     }
 
     @Override
@@ -48,8 +59,13 @@ public final class PvBiomeSource extends BiomeSource {
     }
 
     @Override
-    public Holder<Biome> getNoiseBiome(int x, int y, int z, Climate.Sampler noise) {
-        return this.entries.findValue(noise.sample(x, y, z)).biome();
+    public BiomeResolver createResolver(Climate.Sampler sampler) {
+        return this.biomes.createResolver(sampler);
+    }
+
+    @Override
+    public BiomeResolver createResolverForChunk(Climate.Sampler sampler, int a, int b, int c, int d, int e, int f) {
+        return this.biomes.createResolverForChunk(sampler, a, b, c, d, e, f);
     }
 
     /** The layout rule that picked the biome at this climate point ("vanilla" when no transition applied). */

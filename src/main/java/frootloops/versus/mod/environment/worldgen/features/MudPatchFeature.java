@@ -2,21 +2,38 @@ package frootloops.versus.mod.environment.worldgen.features;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.IntProviders;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 
-public class MudPatchFeature extends Feature<MudPatchFeatureConfig> {
+/**
+ * Feature type {@code players-versus:mud_patch}: a patch of wet, dry and cooked mud where water, air or lava meets it,
+ * with water and sugar cane in the middle.
+ *
+ * @param isBrownMud brown mud (gray over stone and deepslate), else gray
+ * @param size       the patch's radius
+ */
+public record MudPatchFeature(boolean isBrownMud, IntProvider size) implements Feature {
+
+    public static final MapCodec<MudPatchFeature> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.BOOL.fieldOf("is_brown_mud").forGetter(MudPatchFeature::isBrownMud),
+            IntProviders.codec(0, 16).fieldOf("size").forGetter(MudPatchFeature::size)
+    ).apply(instance, MudPatchFeature::new));
+
     private static final ImmutableList<Block> CAN_REPLACE_BLOCKS = ImmutableList.of(
             Blocks.STONE, Blocks.DEEPSLATE, Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.COARSE_DIRT, Blocks.CLAY, Blocks.MUD, Blocks.PACKED_MUD, CustomBlocks.GRAY_CLAY, CustomBlocks.BROWN_CLAY
     );
@@ -28,30 +45,27 @@ public class MudPatchFeature extends Feature<MudPatchFeatureConfig> {
     private static final BlockState BROWN_MUD = CustomBlocks.BROWN_MUD.defaultBlockState(), BROWN_MUD_DRY = CustomBlocks.BROWN_MUD.getDryVersion().defaultBlockState(), BROWN_MUD_COOKED = CustomBlocks.BROWN_MUD.getCookedVersion().defaultBlockState();
     private static final BlockState GRAY_MUD = CustomBlocks.GRAY_MUD.defaultBlockState(), GRAY_MUD_DRY = CustomBlocks.GRAY_MUD.getDryVersion().defaultBlockState(), GRAY_MUD_COOKED = CustomBlocks.GRAY_MUD.getCookedVersion().defaultBlockState();
 
-    public MudPatchFeature(Codec<MudPatchFeatureConfig> codec) {
-        super(codec);
+    @Override
+    public MapCodec<MudPatchFeature> codec() {
+        return CODEC;
     }
 
     @Override
-    public boolean place(FeaturePlaceContext<MudPatchFeatureConfig> context) {
+    public boolean place(WorldGenLevel world, ChunkGenerator generator, RandomSource random, BlockPos centerPos) {
         boolean wasAbleToGenerate = false;
-        RandomSource random = context.random();
-        WorldGenLevel world = context.level();
-        MudPatchFeatureConfig config = context.config();
-        BlockPos centerPos = context.origin();
 
-        BlockState wetBlock = config.isBrownMud() ? BROWN_MUD : GRAY_MUD;
-        BlockState dryBlock = config.isBrownMud() ? BROWN_MUD_DRY : GRAY_MUD_DRY;
-        BlockState cookedBlock = config.isBrownMud() ? BROWN_MUD_COOKED : GRAY_MUD_COOKED;
+        BlockState wetBlock = this.isBrownMud ? BROWN_MUD : GRAY_MUD;
+        BlockState dryBlock = this.isBrownMud ? BROWN_MUD_DRY : GRAY_MUD_DRY;
+        BlockState cookedBlock = this.isBrownMud ? BROWN_MUD_COOKED : GRAY_MUD_COOKED;
 
-        int size = config.size().sample(random);
+        int size = this.size.sample(random);
         double sizeSquared = (double) (size * size);
         double centerX = centerPos.getX() + 0.5;
         double centerZ = centerPos.getZ() + 0.5;
         while(world.getBlockState(centerPos).isAir()) centerPos = centerPos.below();
         while(!world.getBlockState(centerPos.above()).isAir()) centerPos = centerPos.above();
 
-        for (BlockPos blockPos : BlockPos.withinManhattan(centerPos, size, 0, size)) {
+        for (BlockPos blockPos : BlockPos.withinBoxByManhattanDistance(centerPos, size, 0, size)) {
             double distX = blockPos.getX() - centerX;
             double distZ = blockPos.getZ() - centerZ;
             double squaredDist = distX * distX + distZ * distZ;
@@ -69,7 +83,7 @@ public class MudPatchFeature extends Feature<MudPatchFeatureConfig> {
 
             // Get the correct block type for position:
             BlockState toPlace;
-            if(config.isBrownMud() && BLOCKS_ALWAYS_GRAY.contains(blockState.getBlock())) toPlace = getBlockToPlace(world, blockPos, random, isNearCenter, GRAY_MUD, GRAY_MUD_DRY, GRAY_MUD_COOKED);
+            if(this.isBrownMud && BLOCKS_ALWAYS_GRAY.contains(blockState.getBlock())) toPlace = getBlockToPlace(world, blockPos, random, isNearCenter, GRAY_MUD, GRAY_MUD_DRY, GRAY_MUD_COOKED);
             else toPlace = getBlockToPlace(world, blockPos, random, isNearCenter, wetBlock, dryBlock, cookedBlock);
             if(toPlace == wetBlock && !isNearCenter && random.nextDouble() > squaredDist/sizeSquared) toPlace = dryBlock;
             if(toPlace == null || blockState.is(toPlace.getBlock())) continue;
@@ -91,7 +105,7 @@ public class MudPatchFeature extends Feature<MudPatchFeatureConfig> {
                 blockPos = blockPos.below();
                 blockState = world.getBlockState(blockPos);
                 if(!world.getBlockState(blockPos.above()).canBeReplaced() || !CAN_REPLACE_BLOCKS.contains(blockState.getBlock())) continue;
-                toPlace = config.isBrownMud() && BLOCKS_ALWAYS_GRAY.contains(blockState.getBlock()) ? GRAY_MUD : wetBlock;
+                toPlace = this.isBrownMud && BLOCKS_ALWAYS_GRAY.contains(blockState.getBlock()) ? GRAY_MUD : wetBlock;
 
                 // Place block below:
                 world.setBlock(blockPos, toPlace, Block.UPDATE_CLIENTS);

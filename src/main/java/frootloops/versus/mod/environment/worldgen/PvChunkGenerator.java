@@ -14,7 +14,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.carver.WorldCarver;
 
 /**
  * Generator type {@code players-versus:noise}, the Improved world type's overworld: vanilla's noise generator, whose
@@ -30,7 +30,7 @@ public final class PvChunkGenerator extends NoiseBasedChunkGenerator {
     public static final MapCodec<PvChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BiomeSource.CODEC.fieldOf("biome_source").forGetter(PvChunkGenerator::getBiomeSource),
             NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(PvChunkGenerator::generatorSettings),
-            RegistryOps.retrieveGetter(Registries.CONFIGURED_CARVER)
+            RegistryOps.retrieveGetter(Registries.CARVER)
     ).apply(instance, instance.stable(PvChunkGenerator::new)));
 
     private final PvCarvers carvers;
@@ -38,7 +38,7 @@ public final class PvChunkGenerator extends NoiseBasedChunkGenerator {
     private final Map<Holder<Biome>, BiomeGenerationSettings> generationSettings = new ConcurrentHashMap<>();
 
     public PvChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> settings,
-                            HolderGetter<ConfiguredWorldCarver<?>> carvers) {
+                            HolderGetter<WorldCarver> carvers) {
         super(biomeSource, settings);
         this.carvers = new PvCarvers(carvers);
     }

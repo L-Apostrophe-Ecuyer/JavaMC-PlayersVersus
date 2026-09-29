@@ -18,7 +18,6 @@
     "enchantments.EnchantmentBottleMixin",
 
     "environment.worldgen.ChunkNoiseSamplerMixin",
-    "environment.worldgen.NoiseConfigAccessor",
     "environment.worldgen.WorldPresetsMixin",
     "environment.worldgen.WorldPresetServerDefaultMixin",
 

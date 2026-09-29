@@ -1,10 +1,7 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
-import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.ToDoubleFunction;
-import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.*;
 
@@ -40,8 +37,14 @@ public final class PvAquiferRules {
     private PvAquiferRules() {
     }
 
+    /** A value the rules read at a block: F, S or the corridors' noodle. */
+    @FunctionalInterface
+    public interface Field {
+        double at(int x, int y, int z);
+    }
+
     /** For {@link #atPosition} without the flooded corridors: no corridor anywhere. */
-    public static final ToDoubleFunction<DensityFunction.FunctionContext> NO_CORRIDORS = pos -> Double.POSITIVE_INFINITY;
+    public static final Field NO_CORRIDORS = (x, y, z) -> Double.POSITIVE_INFINITY;
 
     /** What {@link #atPosition} says at a block, for the neighbours {@link #decide} looks at. */
     @FunctionalInterface
@@ -59,26 +62,22 @@ public final class PvAquiferRules {
      *                    {@link Lattice}-based F, or the function itself for exact values
      * @param spread      cave-basin floodedness S (router slot {@code fluid_level_spread}), likewise
      */
-    public static PvAquiferDecision atPosition(DensityFunction.FunctionContext pos, ToDoubleFunction<DensityFunction.FunctionContext> floodedness,
-                                               ToDoubleFunction<DensityFunction.FunctionContext> spread) {
-        return atPosition(pos, floodedness, spread, NO_CORRIDORS);
+    public static PvAquiferDecision atPosition(int x, int y, int z, Field floodedness, Field spread) {
+        return atPosition(x, y, z, floodedness, spread, NO_CORRIDORS);
     }
 
     /**
      * {@link #atPosition}, with the flooded corridors: in their layers, a block that isn't basin water is when the
      * corridors' noodle opens it (the refactor plan, Section 10, question 7).
      *
-     * @param corridors the noodle with the corridors' bias at a block ({@code density/PvNoodle.corridorBias} plus the
-     *                  noodle's tunnel), the value the final density takes there: at most 0 where it opens the block
+     * @param corridors the noodle with the corridors' bias at a block ({@code players-versus:overworld/caves/corridor_noodle}),
+     *                  the value the final density takes the minimum with there: at most 0 where it opens the block
      */
-    public static PvAquiferDecision atPosition(DensityFunction.FunctionContext pos, ToDoubleFunction<DensityFunction.FunctionContext> floodedness,
-                                               ToDoubleFunction<DensityFunction.FunctionContext> spread,
-                                               ToDoubleFunction<DensityFunction.FunctionContext> corridors) {
-        int y = pos.blockY();
+    public static PvAquiferDecision atPosition(int x, int y, int z, Field floodedness, Field spread, Field corridors) {
         if (y >= SEA_LEVEL) return PvAquiferDecision.AIR;
 
         if (y > SEA_BAND_MIN_Y) {
-            double seaFloodedness = floodedness.applyAsDouble(pos);
+            double seaFloodedness = floodedness.at(x, y, z);
             if (seaFloodedness > SEA_WATER_THRESHOLD && y >= SEA_WATER_MIN_Y) {
                 return seaFloodedness < SEA_WATER_THRESHOLD + FLUID_TICK_MARGIN
                         ? PvAquiferDecision.SEA_WATER_TICKING
@@ -88,14 +87,14 @@ public final class PvAquiferRules {
         }
 
         if (y > BASIN_MIN_Y && y < BASIN_MAX_Y) {
-            double basinFloodedness = spread.applyAsDouble(pos);
+            double basinFloodedness = spread.at(x, y, z);
             double waterThreshold = basinWaterThreshold(y);
             if (basinFloodedness > waterThreshold) {
                 return basinFloodedness < waterThreshold + FLUID_TICK_MARGIN
                         ? PvAquiferDecision.BASIN_WATER_TICKING
                         : PvAquiferDecision.BASIN_WATER;
             }
-            if (y < CORRIDOR_MAX_Y && corridors.applyAsDouble(pos) <= 0.0) return PvAquiferDecision.BASIN_WATER;
+            if (y < CORRIDOR_MAX_Y && corridors.at(x, y, z) <= 0.0) return PvAquiferDecision.BASIN_WATER;
             if (basinFloodedness > basinBarrierThreshold(y) && y < BASIN_BARRIER_MAX_Y) {
                 return PvAquiferDecision.BASIN_BARRIER;
             }
@@ -111,11 +110,10 @@ public final class PvAquiferRules {
      * @param lavaLevel whether the position is below the generator's lava level
      * @param positions {@link #atPosition} at any block, for the position itself and its neighbours
      */
-    public static PvAquiferDecision decide(DensityFunction.FunctionContext pos, double density, boolean lavaLevel, Positions positions) {
+    public static PvAquiferDecision decide(int x, int y, int z, double density, boolean lavaLevel, Positions positions) {
         if (density > 0.0) return PvAquiferDecision.SOLID;
         if (lavaLevel) return PvAquiferDecision.LAVA;
 
-        int x = pos.blockX(), y = pos.blockY(), z = pos.blockZ();
         if (y >= SEA_LEVEL) return aboveSea(x, y, z, positions);
 
         PvAquiferDecision here = positions.at(x, y, z);
@@ -132,7 +130,7 @@ public final class PvAquiferRules {
      * its water above. The surface's water gets no wall beside it, so where the ground next to it is open, it spills.
      */
     private static PvAquiferDecision aboveSea(int x, int y, int z, Positions positions) {
-        if (y < PvHighRiver.MIN_Y - 1 || y > HIGH_RIVER_Y) return PvAquiferDecision.AIR_ABOVE_SEA;
+        if (y < HIGH_RIVER_MIN_Y - 1 || y > HIGH_RIVER_Y) return PvAquiferDecision.AIR_ABOVE_SEA;
         PvAquiferDecision here = positions.at(x, y, z);
         if (here != PvAquiferDecision.AIR) return here;
         for (int[] offset : INFLOW) {

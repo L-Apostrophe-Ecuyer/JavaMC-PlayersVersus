@@ -4,9 +4,9 @@ package frootloops.versus.mod.environment.worldgen;
  * Numbers that more than one part of the Players Versus world type depends on.
  *
  * <p>Keep every value that the aquifer, the density functions and the surface rules must agree on here, so a
- * change in one place can't silently break another. Where a value is still written out elsewhere, the spot is named
- * below. The aquifer's and the terrain's formulas are Java since plan phases 2b and 3 ({@code aquifer/AquiferFormulas},
- * {@code density/*}); the JSON they replaced is kept for the tests only ({@code src/test/resources/reference}).
+ * change in one place can't silently break another. The aquifer's formulas are Java ({@code aquifer/AquiferFormulas},
+ * {@code aquifer/PvAquiferRules}); the terrain's density functions are data, which {@code tools/port-26.3/pv_density.py}
+ * writes with the values here (the corridors' and the high river's), so change them here and run it.
  */
 public final class PvWorldgenConstants {
 
@@ -86,8 +86,8 @@ public final class PvWorldgenConstants {
 
     /**
      * Noodle caves come back to the basin layers (above {@link #BASIN_MIN_Y}, below this y) as flooded corridors near
-     * the flooded caves. Elsewhere in these layers the noodle's height bias ({@code density/PvNoodle.bias}) keeps them
-     * out, as before.
+     * the flooded caves. Elsewhere in these layers the noodle's height bias ({@code caves/corridor_noodle} in the data)
+     * keeps them out, as before.
      */
     public static final int CORRIDOR_MAX_Y = 24;
 
@@ -120,6 +120,8 @@ public final class PvWorldgenConstants {
     public static final int HIGH_RIVER_Y = 80;
     /** Its bed: water down to this many blocks under the surface, narrowing to nothing at the bottom. */
     public static final int HIGH_RIVER_BED = 3;
+    /** The bed's bottom: the lowest block the river opens and fills. */
+    public static final int HIGH_RIVER_MIN_Y = HIGH_RIVER_Y - HIGH_RIVER_BED;
     /**
      * Half the river's width at its surface, in the units of its noise ({@code players-versus:overworld/high_river},
      * which changes by about 0.0028 per block): about 10 blocks.
