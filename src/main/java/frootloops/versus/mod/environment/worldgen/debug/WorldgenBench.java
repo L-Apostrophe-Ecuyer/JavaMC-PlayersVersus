@@ -4,7 +4,9 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
+import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
 import frootloops.versus.mod.environment.worldgen.density.DensityCompilerCompat;
+import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -32,6 +34,8 @@ import net.minecraft.world.chunk.WrapperProtoChunk;
 import net.minecraft.world.gen.carver.CarvingMask;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
+import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.world.gen.noise.NoiseConfig;
 import net.minecraft.world.gen.structure.Structure;
 
 import javax.imageio.ImageIO;
@@ -204,17 +208,97 @@ public final class WorldgenBench {
             }
         }
 
+        List<String> compilerCheck = compareCompiledFinalDensity(world, minChunkX * 16, minChunkZ * 16, chunksPerSide * 16);
+
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.ROOT));
         Path dir = FabricLoader.getInstance().getGameDir().resolve("pvwg")
                 .resolve("bench-" + timestamp + "-" + settings.replaceAll("[^A-Za-z0-9_.-]", "_"));
         Files.createDirectories(dir);
         region.writeImages(dir);
         List<String> report = region.report(settings, generator, gate, world.getSeed(), center, radius, stageNanos, chunkCount);
+        report.addAll(compilerCheck);
         Files.write(dir.resolve("report.txt"), report);
         for (String line : report) {
             if (line.startsWith("metric")) log.accept("[pvwg] " + line);
         }
         return dir;
+    }
+
+    /**
+     * With C2ME's compiler at work ({@link DensityCompilerCompat#ACTIVE}): the router's final density as the compiler
+     * built it, against vanilla's own evaluation of the same vanilla-type tree and against the Java kernel, at random
+     * positions over the region, all three exact (no cell interpolation). They should agree to the bit.
+     */
+    private static List<String> compareCompiledFinalDensity(ServerWorld world, int minX, int minZ, int size) {
+        if (!DensityCompilerCompat.ACTIVE || !(world.getChunkManager().getChunkGenerator() instanceof NoiseChunkGenerator generator)
+                || !(PvWorldgen.unwrap(generator.getSettings().value().noiseRouter().finalDensity()) instanceof PvFinalDensity raw)) {
+            return List.of();
+        }
+        NoiseConfig config = world.getChunkManager().getNoiseConfig();
+        DensityFunction.DensityFunctionVisitor seeding;
+        try {
+            seeding = seedingLikeNoiseConfig(config);
+        } catch (ReflectiveOperationException exception) {
+            return List.of("c2me_check skipped: " + exception);
+        }
+        PvFinalDensity kernel = new PvFinalDensity(raw.terrain().apply(seeding), raw.noodleToggle().apply(seeding),
+                raw.noodleThickness().apply(seeding), raw.noodleRidgeA().apply(seeding), raw.noodleRidgeB().apply(seeding),
+                raw.entrances().apply(seeding));
+        DensityFunction interpreted = kernel.asVanillaTypes();
+        DensityFunction compiled = config.getNoiseRouter().finalDensity();
+        java.util.Random random = new java.util.Random(world.getSeed());
+        int points = 20000, compiledDiffers = 0, interpretedDiffers = 0;
+        double largest = 0;
+        int[] byLayer = new int[24];
+        List<String> examples = new ArrayList<>();
+        for (int i = 0; i < points; i++) {
+            int x = minX + random.nextInt(size), y = world.getBottomY() + random.nextInt(world.getHeight()), z = minZ + random.nextInt(size);
+            DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
+            double java = kernel.sample(pos), vanilla = interpreted.sample(pos), fast = compiled.sample(pos);
+            if (Double.doubleToLongBits(vanilla) != Double.doubleToLongBits(java)) interpretedDiffers++;
+            if (Double.doubleToLongBits(fast) != Double.doubleToLongBits(vanilla)) {
+                compiledDiffers++;
+                largest = Math.max(largest, Math.abs(fast - vanilla));
+                byLayer[Math.clamp((y - world.getBottomY()) >> 4, 0, byLayer.length - 1)]++;
+                if (examples.size() < 12) {
+                    examples.add(String.format(Locale.ROOT, "c2me_check differs at %d,%d,%d: compiled %s, vanilla %s, java %s", x, y, z,
+                            fast, vanilla, java));
+                }
+            }
+        }
+        List<String> lines = new ArrayList<>();
+        lines.add(String.format(Locale.ROOT, "c2me_check final density at %d random points: compiled differs from vanilla's evaluation at %d"
+                + " (largest difference %s), vanilla's from the Java kernel at %d", points, compiledDiffers, largest, interpretedDiffers));
+        StringBuilder layers = new StringBuilder("c2me_check differences by 16-block layer from y " + world.getBottomY() + ":");
+        for (int count : byLayer) layers.append(' ').append(count);
+        lines.add(layers.toString());
+        lines.addAll(examples);
+        return lines;
+    }
+
+    /**
+     * Seeds functions the way NoiseConfig seeds its router: noises by key ({@link AquiferInputs#seeding}), and the
+     * blended terrain noise from the config's random deriver split by {@code minecraft:terrain}. The deriver is private,
+     * so this reads it by its Yarn name, which only works in the development environment (the smoke run).
+     */
+    private static DensityFunction.DensityFunctionVisitor seedingLikeNoiseConfig(NoiseConfig config) throws ReflectiveOperationException {
+        java.lang.reflect.Field field = NoiseConfig.class.getDeclaredField("randomDeriver");
+        field.setAccessible(true);
+        net.minecraft.util.math.random.RandomSplitter deriver = (net.minecraft.util.math.random.RandomSplitter) field.get(config);
+        DensityFunction.DensityFunctionVisitor noises = AquiferInputs.seeding(config);
+        Map<DensityFunction, DensityFunction> cache = new HashMap<>();
+        return new DensityFunction.DensityFunctionVisitor() {
+            @Override
+            public DensityFunction apply(DensityFunction function) {
+                return cache.computeIfAbsent(function, key -> key instanceof net.minecraft.util.math.noise.InterpolatedNoiseSampler sampler
+                        ? sampler.copyWithRandom(deriver.split(net.minecraft.util.Identifier.ofVanilla("terrain"))) : key);
+            }
+
+            @Override
+            public DensityFunction.Noise apply(DensityFunction.Noise noise) {
+                return noises.apply(noise);
+            }
+        };
     }
 
     /** The generator, encoded the way level.dat stores it. */

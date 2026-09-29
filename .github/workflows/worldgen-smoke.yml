@@ -48,13 +48,10 @@ jobs:
             mods: ""
             variant: ""
           # Since d79ad84 the run next to C2ME and Lithium differs from the plain one (14 of 2,500 surface cells, water
-          # in y 48..63). These two runs tell the compiled final density, and Lithium, apart from the rest.
+          # in y 48..63); with the Java final density it doesn't (07df535), and without Lithium it differs the same way.
           - level_type: "players-versus:better_world"
             mods: "c2me-fabric lithium"
             variant: "java-kernel"
-          - level_type: "players-versus:better_world"
-            mods: "c2me-fabric"
-            variant: ""
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
