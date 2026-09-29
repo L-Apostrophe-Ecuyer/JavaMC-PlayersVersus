@@ -1,0 +1,69 @@
+# API probe for the port to Minecraft 26.x: lists the classes of a Minecraft version's client jar (unobfuscated since
+# 26.1, so these are Mojang's names) and prints the member signatures (javap -p -s: names, types and descriptors, no
+# code) of the classes named in .github/api-probe.txt, so the port can be written against the real API.
+#
+# Push a commit whose message contains [api]. The output is a base64 tar.xz between BEGIN/END markers in the log.
+
+name: api-probe
+on:
+  push:
+
+jobs:
+  probe:
+    if: contains(github.event.head_commit.message, '[api]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      VERSION: "26.3"
+      FABRIC_API: "0.158.2+26.3"
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: 25
+          distribution: 'microsoft'
+      - name: download the client jar and Fabric API
+        run: |
+          mkdir -p probe/out
+          manifest=$(curl -fsSL https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
+          url=$(echo "$manifest" | python3 -c 'import json, os, sys; m = json.load(sys.stdin); print(next(v["url"] for v in m["versions"] if v["id"] == os.environ["VERSION"]))')
+          curl -fsSL "$url" -o probe/version.json
+          curl -fsSL "$(python3 -c 'import json; print(json.load(open("probe/version.json"))["downloads"]["client"]["url"])')" -o probe/client.jar
+          # The game's libraries (DataFixerUpper, Brigadier, ...), for javap to resolve supertypes.
+          python3 - <<'EOF'
+          import json, os, urllib.request
+          version = json.load(open("probe/version.json"))
+          os.makedirs("probe/libs", exist_ok=True)
+          for library in version["libraries"]:
+              artifact = library.get("downloads", {}).get("artifact")
+              if artifact and not library.get("rules"):
+                  urllib.request.urlretrieve(artifact["url"], "probe/libs/" + artifact["path"].split("/")[-1])
+          EOF
+          curl -fsSL "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FABRIC_API/fabric-api-$FABRIC_API.jar" -o probe/fabric-api.jar
+          ls -la probe
+      - name: list classes and print signatures
+        run: |
+          unzip -Z1 probe/client.jar | grep '\.class$' | sed 's/\.class$//' | sort > probe/out/classes.txt
+          wc -l probe/out/classes.txt
+          # Fabric API's modules are jars inside its jar.
+          mkdir -p probe/fabric && (cd probe/fabric && unzip -q -o ../fabric-api.jar 'META-INF/jars/*' || true)
+          for jar in probe/fabric/META-INF/jars/*.jar; do unzip -Z1 "$jar" | grep '\.class$' | sed "s|\.class$| $(basename "$jar")|"; done | sort > probe/out/fabric-classes.txt
+          wc -l probe/out/fabric-classes.txt
+          cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
+          touch probe/out/javap.txt
+          if [ -f .github/api-probe.txt ]; then
+            grep -v '^\s*#' .github/api-probe.txt | grep -v '^\s*$' | while read -r class; do
+              echo "=== $class" >> probe/out/javap.txt
+              javap -p -s -cp "$cp" "$class" >> probe/out/javap.txt 2>&1 || true
+            done
+          fi
+          wc -l probe/out/javap.txt
+      - name: print the result
+        run: |
+          tar -C probe/out -cJf probe/out.tar.xz .
+          sha256sum probe/out.tar.xz
+          echo "-----BEGIN PROBE-----"
+          base64 -w 76 probe/out.tar.xz
+          echo "-----END PROBE-----"
