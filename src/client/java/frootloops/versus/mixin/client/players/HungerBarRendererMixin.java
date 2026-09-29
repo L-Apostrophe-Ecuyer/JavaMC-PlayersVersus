@@ -5,7 +5,7 @@ import frootloops.versus.VersusModClient;
 import frootloops.versus.VersusSettings;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
@@ -22,7 +22,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(Gui.class)
+// The HUD moved from Gui to Hud in 26.2, and renderFood became extractFood.
+@Mixin(Hud.class)
 public class HungerBarRendererMixin {
 
     @Shadow private static final Identifier FOOD_EMPTY_HUNGER_SPRITE = Identifier.parse("hud/food_empty_hunger"), FOOD_HALF_HUNGER_SPRITE = Identifier.parse("hud/food_half_hunger"), FOOD_FULL_HUNGER_SPRITE = Identifier.parse("hud/food_full_hunger");
@@ -32,7 +33,7 @@ public class HungerBarRendererMixin {
 
     @Shadow @Nullable private Player getCameraPlayer() {return null;}
 
-    @Inject(method = "renderFood", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "extractFood", at = @At("HEAD"), cancellable = true)
     private void renderFood(GuiGraphicsExtractor context, Player player, int top, int left, CallbackInfo info) {
         if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return;
 

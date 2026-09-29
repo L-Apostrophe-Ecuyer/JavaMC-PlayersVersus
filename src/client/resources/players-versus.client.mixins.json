@@ -9,7 +9,6 @@
 
 		"environment.visuals.ClientWorldSkyMixin",
 		"environment.visuals.DarknessFogRendererMixin",
-		"environment.visuals.NetherFogRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",
 

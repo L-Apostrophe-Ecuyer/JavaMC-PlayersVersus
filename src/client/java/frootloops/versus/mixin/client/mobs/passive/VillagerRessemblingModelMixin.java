@@ -2,6 +2,7 @@ package frootloops.versus.mixin.client.mobs.passive;
 
 
 import net.minecraft.client.model.*;
+import net.minecraft.client.model.npc.VillagerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartNames;
 import net.minecraft.client.model.geom.PartPose;
@@ -50,7 +51,7 @@ public abstract class VillagerRessemblingModelMixin extends EntityModel<Villager
     }
 
 
-    @Inject(method = "setupAnim", at = @At("HEAD"))
+    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/VillagerRenderState;)V", at = @At("HEAD"))
     public void setAngles(VillagerRenderState renderState, CallbackInfo info) {
         float f = renderState.walkAnimationPos;
         float g = renderState.walkAnimationSpeed;

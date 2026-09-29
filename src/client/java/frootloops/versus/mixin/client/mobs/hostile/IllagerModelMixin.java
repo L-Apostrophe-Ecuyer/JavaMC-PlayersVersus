@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.client.mobs.hostile;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.model.monster.illager.IllagerModel;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import frootloops.versus.VersusMod;
 import net.minecraft.client.model.*;
@@ -70,7 +71,7 @@ public abstract class IllagerModelMixin<S extends IllagerRenderState> extends En
     }
 
 
-    @Inject(method = "setupAnim", at = @At("HEAD"))
+    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/IllagerRenderState;)V", at = @At("HEAD"))
     public void setAngles(S renderState, CallbackInfo info) {
         float f = renderState.walkAnimationPos;
         float g = renderState.walkAnimationSpeed;
@@ -81,7 +82,7 @@ public abstract class IllagerModelMixin<S extends IllagerRenderState> extends En
         this.rightEar.zRot = (float) (h) + Mth.cos(i) * j;
     }
 
-    @Inject(method = "setupAnim", at = @At("TAIL"))
+    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/IllagerRenderState;)V", at = @At("TAIL"))
     private void setAnglesForTool(S renderState, CallbackInfo info) {
         if(renderState.pose == Pose.CROAKING) {
             this.arms.visible = true;

@@ -26,7 +26,7 @@ public abstract class SkeletonModelMixin<S extends SkeletonRenderState> extends 
         super(root, renderLayerFactory);
     }
 
-    @Inject(method = "setupAnim", at = @At("TAIL"))
+    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/SkeletonRenderState;)V", at = @At("TAIL"))
     private void setAnglesForShield(S renderState, CallbackInfo info) {
         if(renderState.pose == Pose.CROUCHING) {
             this.poseBlockingArm(this.leftArm, false);

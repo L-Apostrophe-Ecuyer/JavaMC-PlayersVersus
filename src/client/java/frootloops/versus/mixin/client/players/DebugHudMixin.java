@@ -37,11 +37,13 @@ public abstract class DebugHudMixin {
         this.minecraft = client;
     }
 
+    // 26.x renamed it extractLines and added the width that right-aligned lines are placed against (vanilla passes
+    // the scaled GUI width; it doesn't read it from the extractor itself).
     @Shadow
-    private void renderLines(GuiGraphicsExtractor context, List<String> text, boolean left) {}
+    private void extractLines(GuiGraphicsExtractor context, List<String> text, boolean left, int width) {}
 
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "extractRenderState", at = @At("HEAD"), cancellable = true)
     private void limitDebugWhenInSurvival(GuiGraphicsExtractor context, CallbackInfo info) {
         if (this.minecraft.getCameraEntity() != null && this.minecraft.level != null) {
             boolean shouldRestrictDebug = this.minecraft.player.gameMode() == null || this.minecraft.player.gameMode().isSurvival();
@@ -90,7 +92,7 @@ public abstract class DebugHudMixin {
                 }
 
                 // And that's it!
-                this.renderLines(context, list, true);
+                this.extractLines(context, list, true, context.guiWidth());
                 info.cancel();
             }
         }

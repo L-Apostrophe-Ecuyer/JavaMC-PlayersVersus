@@ -7,7 +7,7 @@ import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
@@ -20,7 +20,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Environment(EnvType.CLIENT)
-@Mixin(value = Gui.class, priority = 9999)
+// The HUD moved from Gui to Hud in 26.2, and renderCrosshair became extractCrosshair.
+@Mixin(value = Hud.class, priority = 9999)
 public class CrosshairRendererMixin {
 
     @Shadow
@@ -43,7 +44,7 @@ public class CrosshairRendererMixin {
     }
 
     @Overwrite
-    private void renderCrosshair(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+    private void extractCrosshair(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
         Options gameOptions = this.minecraft.options;
         if (gameOptions.getCameraType().isFirstPerson()) {
             if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR || this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {

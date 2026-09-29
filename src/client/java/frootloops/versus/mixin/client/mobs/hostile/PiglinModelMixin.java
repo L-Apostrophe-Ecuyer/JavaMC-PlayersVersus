@@ -22,7 +22,7 @@ public abstract class PiglinModelMixin extends AbstractPiglinModel<PiglinRenderS
         super(modelPart);
     }
 
-    @Inject(method = "setupAnim", at = @At("TAIL"))
+    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/PiglinRenderState;)V", at = @At("TAIL"))
     private void setAnglesForShield(PiglinRenderState renderState, CallbackInfo info) {
         if(renderState.pose == Pose.CROUCHING) {
             this.poseBlockingArm(this.leftArm, false);

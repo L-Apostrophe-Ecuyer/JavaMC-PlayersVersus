@@ -2,7 +2,7 @@ package frootloops.versus.mixin.client.mobs.hostile;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.AbstractZombieModel;
+import net.minecraft.client.model.monster.zombie.ZombieModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.ZombieRenderState;
@@ -14,13 +14,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(AbstractZombieModel.class)
+// AbstractZombieModel is gone since 26.x: ZombieModel (which DrownedModel extends) poses the zombie arms in
+// setupAttackAnimation, so the blocking arm is posed after it.
+@Mixin(ZombieModel.class)
 public abstract class ZombieModelMixin<S extends ZombieRenderState> extends HumanoidModel<S> {
     public ZombieModelMixin(ModelPart root) {
         super(root);
     }
 
-    @Inject(method = "setupAnim", at = @At("TAIL"))
+    @Inject(method = "setupAttackAnimation(Lnet/minecraft/client/renderer/entity/state/ZombieRenderState;)V", at = @At("TAIL"))
     private void setAnglesForShield(S renderState, CallbackInfo info) {
         if(renderState.pose == Pose.CROUCHING) {
             this.poseBlockingArm(this.leftArm, false);
