@@ -31,7 +31,7 @@ public abstract class InventoryScreenShulkerMixin extends AbstractContainerScree
         super.init();
 
         this.buttonSortShulker = new ImageButton(this.leftPos + 155, this.topPos + 5, 13, 11, InventorySorting.TEXTURE_SHULKER_SORT_BUTTON, button -> {
-            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft,  ((InventoryScreenShulkerAccessor)this.menu).getInventory(), InventorySorting.InventoryToSort.CONTAINER_INVENTORY, 0, 27);
+            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft,  ((InventoryScreenShulkerAccessor)this.menu).getContainer(), InventorySorting.InventoryToSort.CONTAINER_INVENTORY, 0, 27);
             if(buttonSortShulker != null) buttonSortShulker.setFocused(false);
         });
 
@@ -41,12 +41,12 @@ public abstract class InventoryScreenShulkerMixin extends AbstractContainerScree
         });
 
         this.buttonQuickMoveToPlayer = new ImageButton(buttonSortInventory.getX() - 15, buttonSortInventory.getY(), 13, 11, ContainerDumping.TEXTURE_DUMP_TO_PLAYER_BUTTON, button -> {
-            if(minecraft.player != null) ContainerDumping.quickDumpIntoPlayerInventory(this.menu, minecraft, minecraft.player.getInventory(), ((InventoryScreenShulkerAccessor)this.menu).getInventory());
+            if(minecraft.player != null) ContainerDumping.quickDumpIntoPlayerInventory(this.menu, minecraft, minecraft.player.getInventory(), ((InventoryScreenShulkerAccessor)this.menu).getContainer());
             if(buttonQuickMoveToPlayer != null) buttonQuickMoveToPlayer.setFocused(false);
         });
 
         this.buttonQuickMoveToStorage = new ImageButton(buttonQuickMoveToPlayer.getX() - 15, buttonSortInventory.getY(), 13, 11, ContainerDumping.TEXTURE_DUMP_TO_STORAGE_BUTTON, button -> {
-            if(minecraft.player != null) ContainerDumping.quickDumpIntoContainer(this.menu, minecraft, minecraft.player.getInventory(), ((InventoryScreenShulkerAccessor)this.menu).getInventory());
+            if(minecraft.player != null) ContainerDumping.quickDumpIntoContainer(this.menu, minecraft, minecraft.player.getInventory(), ((InventoryScreenShulkerAccessor)this.menu).getContainer());
             if(buttonQuickMoveToPlayer != null) buttonQuickMoveToPlayer.setFocused(false);
         });
 

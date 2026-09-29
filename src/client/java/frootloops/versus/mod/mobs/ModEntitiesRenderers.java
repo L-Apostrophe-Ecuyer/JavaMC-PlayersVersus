@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 
 import static frootloops.versus.mod.mobs.ModEntities.*;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 
 @Environment(EnvType.CLIENT)
 public class ModEntitiesRenderers {
@@ -17,7 +18,7 @@ public class ModEntitiesRenderers {
     public static void onInitialize() {
 
         // Register custom item or block entities and their renderers:
-        EntityRendererRegistry.register(SLIMEBALL, context -> new FlyingItemEntityRenderer(context, 1.0f, false));
+        EntityRendererRegistry.register(SLIMEBALL, context -> new ThrownItemRenderer(context, 1.0f, false));
         EntityRendererRegistry.register(DEEPER_CREEPER, context -> new DeeperCreeperRenderer(context));
         EntityRendererRegistry.register(FROSTED_ZOMBIE, context -> new FrostedZombieRenderer(context));
         EntityRendererRegistry.register(WITHERED_ZOMBIE, context -> new WitheredZombieRenderer(context));

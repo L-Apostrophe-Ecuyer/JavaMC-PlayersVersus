@@ -6,6 +6,8 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.BiomeColors;
+import net.minecraft.world.level.GrassColor;
 
 @Environment(EnvType.CLIENT)
 public class CustomBlocksClient {
@@ -57,8 +59,8 @@ public class CustomBlocksClient {
         );
 
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> {
-            if (view == null || pos == null) return GrassColors.getDefaultColor();
-            else return BiomeColors.getGrassColor(view, pos);
+            if (view == null || pos == null) return GrassColor.getDefaultColor();
+            else return BiomeColors.getAverageGrassColor(view, pos);
         }, CustomBlocks.CLOVERS);
     }
 
