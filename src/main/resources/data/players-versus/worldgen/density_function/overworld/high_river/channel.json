@@ -1,7 +1,0 @@
-{
-  "type": "minecraft:interpolated",
-  "argument": {
-    "type": "minecraft:cache_2d",
-    "argument": "players-versus:overworld/high_river"
-  }
-}

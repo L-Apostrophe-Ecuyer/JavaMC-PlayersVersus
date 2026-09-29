@@ -1,24 +1,21 @@
 {
-  "type": "minecraft:interpolated",
-  "argument": {
-    "type": "minecraft:range_choice",
-    "input": "minecraft:y",
-    "min_inclusive": -60,
-    "max_exclusive": 321,
-    "when_in_range": {
-      "type": "minecraft:add",
-      "argument1": -0.07500000000000001,
-      "argument2": {
-        "type": "minecraft:mul",
-        "argument1": -0.025,
-        "argument2": {
-          "type": "minecraft:noise",
-          "noise": "minecraft:noodle_thickness",
-          "xz_scale": 1,
-          "y_scale": 1
-        }
-      }
+  "type": "minecraft:range_choice",
+  "input": "minecraft:y",
+  "min_inclusive": -60.5,
+  "max_exclusive": 320.5,
+  "when_in_range": {
+    "type": "minecraft:add",
+    "left": {
+      "type": "minecraft:mul",
+      "left": {
+        "type": "minecraft:noise",
+        "noise": "minecraft:noodle_thickness",
+        "xz_scale": 1.0,
+        "y_scale": 1.0
+      },
+      "right": -0.025
     },
-    "when_out_of_range": 0
-  }
+    "right": -0.07500000000000001
+  },
+  "when_out_of_range": 0.0
 }

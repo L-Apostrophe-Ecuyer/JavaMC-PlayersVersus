@@ -1,31 +1,30 @@
 {
-  "type": "players-versus:final_density",
-  "terrain": {
-    "type": "minecraft:interpolated",
-    "argument": {
-      "type": "minecraft:blend_density",
-      "argument": "players-versus:overworld/terrain"
-    }
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:min",
+    "left": {
+      "type": "minecraft:min",
+      "left": {
+        "type": "minecraft:squeeze",
+        "input": {
+          "type": "minecraft:interpolated",
+          "cell_size_xz": 4,
+          "cell_size_y": 8,
+          "input": {
+            "type": "minecraft:mul",
+            "left": {
+              "type": "minecraft:blend_density",
+              "input": "players-versus:overworld/terrain"
+            },
+            "right": 0.64
+          }
+        }
+      },
+      "right": "players-versus:overworld/caves/corridor_noodle"
+    },
+    "right": "players-versus:overworld/high_river/valley"
   },
-  "noodle_toggle": "players-versus:overworld/caves/noodle_toggle",
-  "noodle_thickness": "players-versus:overworld/caves/noodle_thickness",
-  "noodle_ridge_a": "players-versus:overworld/caves/noodle_ridge_a",
-  "noodle_ridge_b": "players-versus:overworld/caves/noodle_ridge_b",
-  "corridor_entrances": {
-    "type": "minecraft:interpolated",
-    "argument": {
-      "type": "minecraft:range_choice",
-      "input": "minecraft:y",
-      "min_inclusive": -9,
-      "max_exclusive": 25,
-      "when_in_range": "players-versus:overworld/caves/entrances",
-      "when_out_of_range": 1
-    }
-  },
-  "high_river": {
-    "type": "players-versus:high_river",
-    "channel": "players-versus:overworld/high_river/channel",
-    "depth": "players-versus:overworld/high_river/depth",
-    "terrain": "players-versus:overworld/high_river/terrain"
+  "right": {
+    "type": "minecraft:beardifier"
   }
 }
