@@ -180,7 +180,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     @Override
-    protected float getDamageAfterMagicAbsorb(DamageSource source, float amount) {
+    public float getDamageAfterMagicAbsorb(DamageSource source, float amount) {
         if(source.is(DamageTypes.SONIC_BOOM) && this.level() instanceof ServerLevel serverWorld) {
             float protectionAmount = EnchantmentHelper.getDamageProtection(serverWorld, this, source);
             if (protectionAmount > 0) amount = CombatRules.getDamageAfterMagicAbsorb(amount, protectionAmount);

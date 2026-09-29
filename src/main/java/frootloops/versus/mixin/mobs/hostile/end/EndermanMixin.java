@@ -71,7 +71,7 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
     }
 
     @Override
-    protected int calculateFallDamage(double fallDistance, float damagePerDistance) {
+    public int calculateFallDamage(double fallDistance, float damagePerDistance) {
         return super.calculateFallDamage(fallDistance - 4.0f, damagePerDistance) - 5;
     }
 

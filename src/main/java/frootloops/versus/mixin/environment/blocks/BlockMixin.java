@@ -31,8 +31,11 @@ public abstract class BlockMixin extends BlockBehaviour {
         return this.explosionResistance * 0.4f;
     }
 
+    // Public, not protected: the mixin adds it to Block itself, which BlockStateBase names when it calls it; a
+    // protected method there can't be called from BlockStateBase's package (block.state), which 1.21.10's
+    // intermediary and Yarn packages hid, and 26.x's unobfuscated ones don't (IllegalAccessError).
     @Override
-    protected SoundType getSoundType(BlockState state) {
+    public SoundType getSoundType(BlockState state) {
         if(this.soundType == SoundType.STONE && this.defaultMapColor() == MapColor.QUARTZ) {
             return SoundType.CALCITE;
         }

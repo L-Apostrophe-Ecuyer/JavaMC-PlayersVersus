@@ -28,7 +28,7 @@ public abstract class TallFlowerMixin extends VegetationBlock implements Bonemea
 
 
     @Override
-    protected void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier handler, boolean bl) {
+    public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier handler, boolean bl) {
         if(state.is(Blocks.ROSE_BUSH)) {
             if (!(entity instanceof Player) && !(entity instanceof Monster)) return;
             entity.makeStuckInBlock(state, new Vec3(0.9f, 0.75, 0.9f));

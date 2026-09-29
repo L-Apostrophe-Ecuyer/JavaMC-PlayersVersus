@@ -109,7 +109,7 @@ public abstract class ZombieMixin extends Monster {
     }*/
 
     @Override
-    protected void pickUpItem(ServerLevel world, ItemEntity itemEntity) {
+    public void pickUpItem(ServerLevel world, ItemEntity itemEntity) {
         if(itemEntity.getAge() > 160) super.pickUpItem(world, itemEntity);
     }
 

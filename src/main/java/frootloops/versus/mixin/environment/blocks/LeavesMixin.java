@@ -52,13 +52,13 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
 
     private static final VoxelShape COLLISION_SHAPE_INSIDE = Block.box(4.0, 4.0, 4.0, 12.0, 12.0, 12.0);
 
-    protected VoxelShape getEntityInsideCollisionShape(BlockState state, BlockGetter world, BlockPos pos, Entity entity) {
+    public VoxelShape getEntityInsideCollisionShape(BlockState state, BlockGetter world, BlockPos pos, Entity entity) {
         if(entity instanceof LivingEntity && entity.getDeltaMovement().y < MIN_VELOCITY_TO_BE_SOLID) return Shapes.empty();
         return COLLISION_SHAPE_INSIDE;
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         if (context instanceof EntityCollisionContext && ((EntityCollisionContext) context).getEntity() instanceof LivingEntity livingEntity) {
             if(livingEntity.isAlwaysTicking() && livingEntity.isFallFlying() && livingEntity.getDeltaMovement().lengthSqr() > 0.5) {
                 livingEntity.fallDistance = -(livingEntity.getDeltaMovement().y() + 0.1) * 8.0;
@@ -108,7 +108,7 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
     }
 
     @Override
-    protected void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier handler, boolean bl) {
+    public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier handler, boolean bl) {
         if (entity.isPassenger() || entity.isSpectator()) return;
         if (!entity.blockPosition().equals(pos) && !entity.blockPosition().above().equals(pos)) return;
         if (entity instanceof LivingEntity livingEntity) {

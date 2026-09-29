@@ -76,12 +76,12 @@ public class SpiderMixin extends Monster {
     }
 
     @Override
-    protected int calculateFallDamage(double fallDistance, float damageMultiplier) {
+    public int calculateFallDamage(double fallDistance, float damageMultiplier) {
         return super.calculateFallDamage(fallDistance, damageMultiplier) - 10;
     }
 
     @Override
-    protected void dropFromLootTable(ServerLevel world, DamageSource source, boolean causedByPlayer) {
+    public void dropFromLootTable(ServerLevel world, DamageSource source, boolean causedByPlayer) {
         super.dropFromLootTable(world, source, causedByPlayer);
         if(!this.isBaby()) {
             super.dropFromLootTable(world, source, causedByPlayer); // Triple loot for the big boys!
@@ -193,13 +193,13 @@ public class SpiderMixin extends Monster {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput view) {
+    public void addAdditionalSaveData(ValueOutput view) {
         super.addAdditionalSaveData(view);
         view.putBoolean("IsBaby", this.isBaby());
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput view) {
+    public void readAdditionalSaveData(ValueInput view) {
         super.readAdditionalSaveData(view);
         this.setBaby(view.getBooleanOr("IsBaby", false));
     }
