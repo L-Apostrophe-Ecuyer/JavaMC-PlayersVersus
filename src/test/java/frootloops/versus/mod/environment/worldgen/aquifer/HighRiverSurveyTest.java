@@ -26,6 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * banks, never left over it), water at y 80 and in a shallow bed under it, and stone where the bed's water could flow
  * into dry air beside or below it (the aquifer's walls). The water at y 80 has no wall: where the ground drops away
  * beside it, it spills.
+ *
+ * <p>The third prototype ended the river where the depth said the ground fell below y 80, which is often short of the
+ * real edge, and cut up to 32 blocks into high ground: about 600 blocks per chunk, with few waterfalls. The fourth runs
+ * the river to the real edge (water only where the terrain at y 80 was solid) and keeps it out of ground more than 8 to
+ * 13 blocks above y 80.
  */
 class HighRiverSurveyTest {
 
@@ -40,16 +45,23 @@ class HighRiverSurveyTest {
     private static final byte SOLID = 0, AIR = 1, CARVED = 2, SURFACE_WATER = 3, BED_WATER = 4, WALL = 5;
 
     /**
-     * A river shape. Along the river, its activity {@code a} is 0 where the ground at the column is below y 80 (the
-     * depth at y 80, interpolated between the 4-block corners where vanilla's caches hold it, is at most 0), 1 from a
-     * depth of 0.01 up to {@code top}, and fades to 0 over {@code fade} beyond. Across it, a block is the river's where
-     * the river noise's magnitude is below the half width: {@code a * (halfWidth + (y - 80) * widening)} above y 80,
+     * A river shape. Along the river, its activity {@code a} is 1 up to a depth at y 80 of {@code top} (the depth
+     * interpolated between the 4-block corners where vanilla's caches hold it) and fades to 0 over {@code fade} beyond,
+     * so the river keeps out of ground that rises far above y 80. Across it, a block is the river's where the river
+     * noise's magnitude is below the half width: {@code a * (halfWidth + (y - 80) * widening)} above y 80,
      * {@code a * halfWidth} at y 80, and in the bed below, down to {@code bed} blocks, narrowing to nothing.
+     *
+     * <p>{@code edgeToEdge} (the fourth prototype): the river runs wherever the ground is, and its water (at y 80 and in
+     * the bed) only where the terrain at y 80 was solid, so it ends at the ground's real edge and spills there. Without it
+     * (the third prototype), the activity is also 0 where the depth at y 80 is at most 0, rising to 1 by 0.01, which ends
+     * the river where the depth says the ground drops below y 80, often short of the real edge.
      */
-    private record Shape(String name, double halfWidth, double widening, int bed, double top, double fade) {
+    private record Shape(String name, double halfWidth, double widening, int bed, double top, double fade, boolean edgeToEdge) {
         double activity(double depth80) {
+            double upper = MathHelper.clamp((this.top + this.fade - depth80) / this.fade, 0.0, 1.0);
+            if (this.edgeToEdge) return upper;
             if (depth80 <= 0.0) return 0.0;
-            return MathHelper.clamp(depth80 * 100.0, 0.0, 1.0) * MathHelper.clamp((this.top + this.fade - depth80) / this.fade, 0.0, 1.0);
+            return MathHelper.clamp(depth80 * 100.0, 0.0, 1.0) * upper;
         }
 
         double halfWidth(int y, double activity) {
@@ -59,11 +71,13 @@ class HighRiverSurveyTest {
         }
     }
 
+    /** A depth of 0.01 at y 80 is about a block and a quarter of ground above it (the depth falls by 3/384 per block). */
     private static final List<Shape> SHAPES = List.of(
-            new Shape("half width 0.03, widening 0.006, bed 3, ground up to d 0.25", 0.03, 0.006, 3, 0.25, 0.08),
-            new Shape("half width 0.02, widening 0.004, bed 2, ground up to d 0.25", 0.02, 0.004, 2, 0.25, 0.08),
-            new Shape("half width 0.03, widening 0.012, bed 3, ground up to d 0.25", 0.03, 0.012, 3, 0.25, 0.08),
-            new Shape("half width 0.03, widening 0.006, bed 3, ground up to d 0.12", 0.03, 0.006, 3, 0.12, 0.04));
+            new Shape("edge to edge, half width 0.03, widening 0.006, bed 3, ground up to d 0.06", 0.03, 0.006, 3, 0.06, 0.03, true),
+            new Shape("edge to edge, half width 0.03, widening 0.006, bed 3, ground up to d 0.10", 0.03, 0.006, 3, 0.10, 0.04, true),
+            new Shape("edge to edge, half width 0.02, widening 0.004, bed 2, ground up to d 0.06", 0.02, 0.004, 2, 0.06, 0.03, true),
+            new Shape("edge to edge, half width 0.03, widening 0.012, bed 3, ground up to d 0.06", 0.03, 0.012, 3, 0.06, 0.03, true),
+            new Shape("third prototype, half width 0.03, widening 0.006, bed 3, ground up to d 0.12", 0.03, 0.006, 3, 0.12, 0.04, false));
 
     @Test
     void survey() {
@@ -194,13 +208,16 @@ class HighRiverSurveyTest {
                 double across = Math.abs(noise[x * AREA + z]);
                 if (activity <= 0.0 || across >= shape.halfWidth(MAX_Y - 1, activity)) continue;
                 byte[] column = terrain.column(x, z).clone();
+                boolean wet = !shape.edgeToEdge() || column[RIVER_Y - MIN_Y] == SOLID;
                 boolean changed = false;
                 for (int y = RIVER_Y - shape.bed(); y < MAX_Y; y++) {
                     if (across >= shape.halfWidth(y, activity)) continue;
                     int i = y - MIN_Y;
                     if (y > RIVER_Y) {
-                        if (column[i] == SOLID) column[i] = CARVED;
+                        if (column[i] != SOLID) continue;
+                        column[i] = CARVED;
                     } else {
+                        if (!wet) continue;
                         column[i] = y == RIVER_Y ? SURFACE_WATER : BED_WATER;
                     }
                     changed = true;
@@ -251,6 +268,11 @@ class HighRiverSurveyTest {
         long riverColumns, surfaceWater, bedWater, filledOpen, carved, walls, sideSpills, spillColumns, downSpills, roofed;
         /** River columns by the ground's height above y 80: none (below 81), 1..3, 4..7, 8..11, 12..15, 16 and more. */
         final long[] heights = new long[6];
+        /**
+         * Spilling columns by how far their water falls: from y 80 to the highest solid or water block under the open
+         * side (the lowest of their open sides), 1..3, 4..7, 8..15, 16 and more (to y 64 or below).
+         */
+        final long[] drops = new long[4];
 
         void add(Terrain terrain, byte[][] after) {
             for (int x = 0; x < AREA; x++) {
@@ -275,14 +297,21 @@ class HighRiverSurveyTest {
                     int above = terrain.surface(x, z) - RIVER_Y;
                     this.heights[above <= 0 ? 0 : above < 4 ? 1 : above < 8 ? 2 : above < 12 ? 3 : above < 16 ? 4 : 5]++;
                     boolean spilling = false;
+                    int drop = 0;
                     for (int[] side : SIDES) {
                         int nx = x + side[0], nz = z + side[1];
                         if (inArea(nx, nz) && open(at(after, terrain, nx, nz, RIVER_Y))) {
                             this.sideSpills++;
                             spilling = true;
+                            int floor = RIVER_Y - 1;
+                            while (floor >= MIN_Y && open(at(after, terrain, nx, nz, floor))) floor--;
+                            drop = Math.max(drop, RIVER_Y - floor);
                         }
                     }
-                    if (spilling) this.spillColumns++;
+                    if (spilling) {
+                        this.spillColumns++;
+                        this.drops[drop < 4 ? 0 : drop < 8 ? 1 : drop < 16 ? 2 : 3]++;
+                    }
                     if (open(column[RIVER_Y - 1 - MIN_Y])) this.downSpills++;
                     boolean openSeen = false;
                     for (int y = RIVER_Y + 1; y < MAX_Y; y++) {
@@ -300,12 +329,14 @@ class HighRiverSurveyTest {
         String describe(double chunks) {
             return String.format(Locale.ROOT, "river columns %.1f (ground above y 80 by 0: %.1f, 1..3: %.1f, 4..7: %.1f, 8..11: %.1f,"
                             + " 12..15: %.1f, 16+: %.1f); water at y 80 %.1f, in the bed %.1f (%.2f of it where the terrain was open);"
-                            + " carved above y 80 %.1f; walls %.2f; water faces at y 80 spilling sideways %.2f (from %.2f columns), down %.2f;"
+                            + " carved above y 80 %.1f; walls %.2f; water faces at y 80 spilling sideways %.2f (from %.2f columns, falling"
+                            + " 1..3 blocks: %.2f, 4..7: %.2f, 8..15: %.2f, 16+: %.2f), down %.2f;"
                             + " columns with solid ground over open air above the water %.2f",
                     this.riverColumns / chunks, this.heights[0] / chunks, this.heights[1] / chunks, this.heights[2] / chunks,
                     this.heights[3] / chunks, this.heights[4] / chunks, this.heights[5] / chunks, this.surfaceWater / chunks,
                     this.bedWater / chunks, this.filledOpen / chunks, this.carved / chunks, this.walls / chunks,
-                    this.sideSpills / chunks, this.spillColumns / chunks, this.downSpills / chunks, this.roofed / chunks);
+                    this.sideSpills / chunks, this.spillColumns / chunks, this.drops[0] / chunks, this.drops[1] / chunks,
+                    this.drops[2] / chunks, this.drops[3] / chunks, this.downSpills / chunks, this.roofed / chunks);
         }
     }
 
