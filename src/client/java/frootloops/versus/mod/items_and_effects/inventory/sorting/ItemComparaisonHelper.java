@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
@@ -170,7 +171,7 @@ public abstract class ItemComparaisonHelper {
         }
         else if(stack.getComponents().has(DataComponents.EQUIPPABLE)) {
             Equippable equipComponent = stack.getComponents().get(DataComponents.EQUIPPABLE);
-            if(!equipComponent.canBeEquippedBy(EntityType.PLAYER)) return ItemType.MISC_TOOL;
+            if(!equipComponent.canBeEquippedBy(EntityTypes.PLAYER)) return ItemType.MISC_TOOL;
             else if(stack.is(Items.ELYTRA)) return ItemType.ELYTRA;
             else if(equipComponent.slot() == EquipmentSlot.CHEST) return ItemType.CHESTPLATE;
             else if(equipComponent.slot() == EquipmentSlot.LEGS) return ItemType.LEGGINGS;

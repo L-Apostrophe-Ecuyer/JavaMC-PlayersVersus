@@ -96,7 +96,8 @@ public abstract class DrownedMixin extends Zombie {
         return super.finalizeSpawn(world, difficulty, spawnReason, entityData);
     }
 
-    @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/zombie/Drowned;moveRelative(FLnet/minecraft/world/phys/Vec3;)V"))
+    // Drowned#travel moved to travelInWater in 26.3.
+    @ModifyArg(method = "travelInWater", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/zombie/Drowned;moveRelative(FLnet/minecraft/world/phys/Vec3;)V"))
     private float increaseVelocity(float speed) {
         if(this.isSwimming()) return 0.06F;
         else return speed;

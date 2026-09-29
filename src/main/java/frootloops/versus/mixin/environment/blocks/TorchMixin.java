@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.WorldTime;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -45,7 +46,7 @@ public abstract class TorchMixin extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
-        if(world.dimensionType().ultraWarm()) return;
+        if(WorldTime.ultraWarm(world)) return;
         if(world instanceof ServerLevel && state.is(Blocks.TORCH) || state.is(Blocks.WALL_TORCH)) {
             int randomInteger = random.nextInt(512);
             int offset = 8 + (world.getBlockState(pos.below()).is(Blocks.DEEPSLATE) || world.isRainingAt(pos) ? 48 : 0);

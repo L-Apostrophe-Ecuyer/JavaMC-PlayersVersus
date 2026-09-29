@@ -1,6 +1,7 @@
 package frootloops.versus.mod.environment.blocks.clays;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -81,7 +82,7 @@ public interface MoistureConvertableBlock {
         if((blockStateDown.is(Blocks.POINTED_DRIPSTONE) && blockStateDown.getFluidState().isEmpty()) || (blockStateDownDown.is(Blocks.POINTED_DRIPSTONE) && blockStateDown.getFluidState().isEmpty())) return MOISTURE_LVL_TO_DRY;
 
         int moistureUp = world.getMaxLocalRawBrightness(pos) > 12 ? DRY_BLOCK_MOISTURE : 0;
-        int moistureAmount = moistureDown + moistureUp + (world.dimensionType().ultraWarm() ? DRY_BLOCK_MOISTURE : 0);
+        int moistureAmount = moistureDown + moistureUp + (WorldTime.ultraWarm(world) ? DRY_BLOCK_MOISTURE : 0);
         BlockState neighborState;
         BlockPos[] neighborsPos = new BlockPos[] {pos.above(), pos.north(), pos.south(), pos.west(), pos.east()};
         for (BlockPos blockPos : neighborsPos) {

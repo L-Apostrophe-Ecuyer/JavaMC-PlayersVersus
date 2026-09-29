@@ -71,7 +71,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
             // Bounding strides effect:
             if (hasBounded) {
                 this.setDeltaMovement(velocityX, velocityY, velocityZ);
-                this.hasImpulse = true;
+                this.needsSync = true;
                 this.awardStat(Stats.JUMP);
                 if (this.isSprinting()) ((Player)((Object)this)).causeFoodExhaustion(0.15f);
                 else ((Player)((Object)this)).causeFoodExhaustion(0.075f);

@@ -53,7 +53,7 @@ public class BrushesNotRequiredMixin {
     private void update(CallbackInfo info) {
         if(level.isClientSide()) return;
         int ticksTillBrushing = 6;
-        if(this.gameTicks - destroyProgressStart > ticksTillBrushing && this.gameTicks - destroyProgressStart < 36 && player.swinging) {
+        if(this.gameTicks - destroyProgressStart > ticksTillBrushing && this.gameTicks - destroyProgressStart < 36 && player.isSwinging()) {
             BlockState blockState = level.getBlockState(destroyPos);
             if (blockState.getBlock() instanceof BrushableBlock brushableBlock) {
                 if (level.getBlockEntity(destroyPos) instanceof BrushableBlockEntity brushableBlockEntity) {

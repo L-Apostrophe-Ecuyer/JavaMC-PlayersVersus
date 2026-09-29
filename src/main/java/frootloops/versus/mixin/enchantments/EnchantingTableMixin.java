@@ -112,7 +112,7 @@ public abstract class EnchantingTableMixin extends AbstractContainerMenu {
                         this.enchantSlots.setChanged();
                         this.enchantmentSeed.set(player.getEnchantmentSeed());
                         this.slotsChanged(this.enchantSlots);
-                        world.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0f, world.random.nextFloat() * 0.1f + 0.9f);
+                        world.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0f, world.getRandom().nextFloat() * 0.1f + 0.9f);
                     }
                 });
             }

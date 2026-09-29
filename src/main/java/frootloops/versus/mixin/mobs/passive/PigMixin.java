@@ -3,6 +3,7 @@ package frootloops.versus.mixin.mobs.passive;
 
 import frootloops.versus.mod.mobs.passive.PiggingAroundGoal;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Prediction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -98,7 +99,7 @@ public abstract class PigMixin extends Animal {
         }
 
         for(int j = 0; j < count; ++j) {
-            ItemEntity itemEntity = this.drop(dugUpItem.getDefaultInstance(), true, false);
+            ItemEntity itemEntity = this.drop(dugUpItem.getDefaultInstance(), true, Prediction.SERVER_ONLY);
             if (itemEntity != null) itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().add((double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(this.random.nextFloat() * 0.05F), (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)));
         }
     }

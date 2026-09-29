@@ -21,7 +21,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 @Mixin(targets = "net.minecraft.world.entity.monster.warden.Warden$VibrationUser")
 public abstract class WardenVibrationListenerMixin {
 
-    @Shadow @Final private Warden field_44600;
+    // The inner class's outer instance: intermediary's field_44600, this$0 in the unobfuscated 26.x.
+    @Shadow @Final private Warden this$0;
 
     @Overwrite
     public int getListenerRadius() {
@@ -31,7 +32,7 @@ public abstract class WardenVibrationListenerMixin {
     @Inject(method = "canReceiveVibration", at = @At("RETURN"), cancellable = true)
     public void noDistractions(ServerLevel world, BlockPos pos, Holder<GameEvent> event, GameEvent.Context emitter, CallbackInfoReturnable<Boolean> cir) {
         if(cir.getReturnValue()) {
-            Warden warden = field_44600;
+            Warden warden = this$0;
             if(emitter.sourceEntity() == null) cir.setReturnValue(warden.getClientAngerLevel() < 1);
             else if(!(emitter.sourceEntity() instanceof Player)) {
                 if(warden.getTarget() instanceof Player) cir.setReturnValue(false);

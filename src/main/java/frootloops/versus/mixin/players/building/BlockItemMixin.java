@@ -7,10 +7,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -84,19 +84,19 @@ public abstract class BlockItemMixin extends Item {
             Level world = context.getLevel();
             boolean isPlacingStairs = blockState.getBlock() instanceof StairBlock;
 
-            Tuple<Integer, Direction> scoreAxisX = this.getBestFacingScore(Direction.Axis.X, placementDirection, placementPos, world, isPlacingStairs);
-            if(scoreAxisX.getA() >= 50) return;
+            Pair<Integer, Direction> scoreAxisX = this.getBestFacingScore(Direction.Axis.X, placementDirection, placementPos, world, isPlacingStairs);
+            if(scoreAxisX.getFirst() >= 50) return;
 
-            Tuple<Integer, Direction> scoreAxisZ = this.getBestFacingScore(Direction.Axis.Z, placementDirection, placementPos, world, isPlacingStairs);
-            if(scoreAxisZ.getA() >= 50) return;
+            Pair<Integer, Direction> scoreAxisZ = this.getBestFacingScore(Direction.Axis.Z, placementDirection, placementPos, world, isPlacingStairs);
+            if(scoreAxisZ.getFirst() >= 50) return;
 
-            if(scoreAxisX.getA() <= 3 && scoreAxisZ.getA() <= 3) return;
-            else if((scoreAxisX.getB() == placementDirection || scoreAxisZ.getB() == placementDirection) && Math.abs(scoreAxisX.getA() - scoreAxisZ.getA()) < 4) return;
-            else if(scoreAxisX.getA() > scoreAxisZ.getA()){
-                if(placementDirection != scoreAxisX.getB()) cir.setReturnValue(blockState.setValue(BlockStateProperties.HORIZONTAL_FACING, scoreAxisX.getB()).setValue(StairBlock.SHAPE, StairsShape.STRAIGHT));
+            if(scoreAxisX.getFirst() <= 3 && scoreAxisZ.getFirst() <= 3) return;
+            else if((scoreAxisX.getSecond() == placementDirection || scoreAxisZ.getSecond() == placementDirection) && Math.abs(scoreAxisX.getFirst() - scoreAxisZ.getFirst()) < 4) return;
+            else if(scoreAxisX.getFirst() > scoreAxisZ.getFirst()){
+                if(placementDirection != scoreAxisX.getSecond()) cir.setReturnValue(blockState.setValue(BlockStateProperties.HORIZONTAL_FACING, scoreAxisX.getSecond()).setValue(StairBlock.SHAPE, StairsShape.STRAIGHT));
             }
             else {
-                if(placementDirection != scoreAxisZ.getB()) cir.setReturnValue(blockState.setValue(BlockStateProperties.HORIZONTAL_FACING, scoreAxisZ.getB()).setValue(StairBlock.SHAPE, StairsShape.STRAIGHT));
+                if(placementDirection != scoreAxisZ.getSecond()) cir.setReturnValue(blockState.setValue(BlockStateProperties.HORIZONTAL_FACING, scoreAxisZ.getSecond()).setValue(StairBlock.SHAPE, StairsShape.STRAIGHT));
             }
             return;
         }
@@ -125,7 +125,7 @@ public abstract class BlockItemMixin extends Item {
         return score;
     }
 
-    private Tuple<Integer, Direction> getBestFacingScore(Direction.Axis axisToEvaluate, Direction placementDirection, BlockPos placementPos, Level world, boolean isPlacingStairs) {
+    private Pair<Integer, Direction> getBestFacingScore(Direction.Axis axisToEvaluate, Direction placementDirection, BlockPos placementPos, Level world, boolean isPlacingStairs) {
         Direction clockwise = (axisToEvaluate == Direction.Axis.X) ? Direction.NORTH : Direction.EAST;
         Direction counterClockwise = (axisToEvaluate == Direction.Axis.X) ? Direction.SOUTH : Direction.WEST;
         int scoreClockwise = 0, scoreCounterClockwise = 0;
@@ -142,11 +142,11 @@ public abstract class BlockItemMixin extends Item {
 
             if(!neighborFacing.isPresent())  continue;
             else if (neighborFacing.get() == clockwise) {
-                if (placementDirection == clockwise && isSameBlock) return new Tuple<>(50, clockwise);
+                if (placementDirection == clockwise && isSameBlock) return Pair.of(50, clockwise);
                 else scoreClockwise += (isSameBlock) ? 10 : 4;
             }
             else if (neighborFacing.get() == counterClockwise) {
-                if (placementDirection == counterClockwise && isSameBlock) return new Tuple<>(50, counterClockwise);
+                if (placementDirection == counterClockwise && isSameBlock) return Pair.of(50, counterClockwise);
                 else scoreCounterClockwise += (isSameBlock) ? 10 : 4;
             }
             else if(!neighborState.isAir()) {
@@ -196,9 +196,9 @@ public abstract class BlockItemMixin extends Item {
         if(counterClockwise == placementDirection.getOpposite()) scoreCounterClockwise -= 1;
 
         // Check which direction has the best score and return it:
-        if(scoreClockwise == scoreCounterClockwise &&  (placementDirection == clockwise || placementDirection == counterClockwise)) return new Tuple<>(scoreClockwise, placementDirection);
-        else if(scoreCounterClockwise > scoreClockwise) return new Tuple<>(scoreCounterClockwise, counterClockwise);
-        else if(scoreClockwise > scoreCounterClockwise) return new Tuple<>(scoreClockwise, clockwise);
-        else return new Tuple<>(scoreClockwise, placementDirection);
+        if(scoreClockwise == scoreCounterClockwise &&  (placementDirection == clockwise || placementDirection == counterClockwise)) return Pair.of(scoreClockwise, placementDirection);
+        else if(scoreCounterClockwise > scoreClockwise) return Pair.of(scoreCounterClockwise, counterClockwise);
+        else if(scoreClockwise > scoreCounterClockwise) return Pair.of(scoreClockwise, clockwise);
+        else return Pair.of(scoreClockwise, placementDirection);
     }
 }

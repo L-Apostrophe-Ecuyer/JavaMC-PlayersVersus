@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -64,8 +65,8 @@ public class WardenMixin extends Monster {
                 && this.level() == entity.level()
                 && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity)
                 && !this.isAlliedTo(entity)
-                && livingEntity.getType() != EntityType.ARMOR_STAND
-                && livingEntity.getType() != EntityType.WARDEN
+                && livingEntity.getType() != EntityTypes.ARMOR_STAND
+                && livingEntity.getType() != EntityTypes.WARDEN
                 && !livingEntity.isInvulnerable()
                 && !livingEntity.isDeadOrDying()) {
             return true;

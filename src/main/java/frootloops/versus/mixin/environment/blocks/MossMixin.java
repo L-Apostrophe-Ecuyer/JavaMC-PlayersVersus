@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -27,7 +28,7 @@ public abstract class MossMixin extends Block implements BonemealableBlock {
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader world, BlockPos pos, BlockState state) {
+    public boolean isValidBonemealTarget(LevelReader world, BlockPos pos, BlockState state, BonemealSource source) {
         BlockState stateUp = world.getBlockState(pos.above());
         return (!stateUp.canOcclude() || stateUp.getBlock().defaultDestroyTime() < 1.0f) || stateUp.is(Blocks.MOSS_BLOCK);
     }
@@ -45,7 +46,7 @@ public abstract class MossMixin extends Block implements BonemealableBlock {
     }
 
     @Inject(method = "performBonemeal", at = @At("TAIL"), cancellable = false)
-    private void addBlocksBelow(ServerLevel world, RandomSource random, BlockPos pos, BlockState state, CallbackInfo info) {
+    private void addBlocksBelow(ServerLevel world, RandomSource random, BlockPos pos, BlockState state, BonemealSource source, CallbackInfo info) {
         pos = pos.below();
         BlockState stateDown = world.getBlockState(pos);
         if(stateDown.is(BlockTags.MOSS_REPLACEABLE)) {

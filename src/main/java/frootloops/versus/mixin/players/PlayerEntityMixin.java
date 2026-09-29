@@ -4,6 +4,7 @@ import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.util.Prediction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -223,11 +224,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             else if (target instanceof LivingEntity livingEntity) {
                 double strength = type == Combat.AttackType.SPRINT ? 0.8 : 0.6;
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0f, 1.0f);
-                livingEntity.knockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ());
+                livingEntity.knockback(strength, this.getX() - target.getX(), this.getZ() - target.getZ(), this.damageSources().playerAttack((Player)((Object)this)), (float) amount);
             }
-            else if (target.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE)
+            // The deflection power vanilla's own deflection passes since 26.3.
+            else if (target.is(EntityTypeTags.REDIRECTABLE_PROJECTILE)
                     && target instanceof Projectile projectileEntity
-                    && projectileEntity.deflect(ProjectileDeflection.AIM_DEFLECT, this, EntityReference.of(this), true)) {
+                    && projectileEntity.deflect(ProjectileDeflection.AIM_DEFLECT, this, EntityReference.of(this), true, 1.0)) {
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource());
             }
             ci.cancel(); // Cancel attack
@@ -247,7 +249,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         // Attacking while walking backwards deals less knockback:
         if(isStillOrWalkingBackwards) target.setDeltaMovement(target.getDeltaMovement().multiply(0.3d, 0.8d, 0.3d));
-        else if(target.getDeltaMovement().lengthSqr() < 1.0 && target instanceof LivingEntity livingEntity) livingEntity.knockback(0.4, this.getX() - target.getX(), this.getZ() - target.getZ());
+        else if(target.getDeltaMovement().lengthSqr() < 1.0 && target instanceof LivingEntity livingEntity)
+            livingEntity.knockback(0.4, this.getX() - target.getX(), this.getZ() - target.getZ(), this.damageSources().playerAttack((Player)((Object)this)), (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE));
     }
 
     @Override
@@ -281,12 +284,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             wasKilledByPlayer = true;
         }
 
-        if (!world.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+        if (!world.getGameRules().get(GameRules.KEEP_INVENTORY)) {
             for (int i = 0; i < inventory.getContainerSize(); i++) {
                 ItemStack itemStack = inventory.getItem(i);
                 if (EnchantRegistryHelper.hasEnchantment(itemStack, Enchantments.VANISHING_CURSE)) inventory.setItem(i, ItemStack.EMPTY);
                 else if (!itemStack.isEmpty()) {
-                    ItemEntity entity = this.drop(itemStack, true, false);
+                    // Dropped by the server, not thrown from the hand (the old third argument, false).
+                    ItemEntity entity = this.drop(itemStack, true, Prediction.SERVER_ONLY);
                     boolean shouldNeverDespawn = (itemStack.getRarity() == Rarity.EPIC || itemStack.getComponents().has(DataComponents.CONTAINER) || itemStack.getComponents().has(DataComponents.DAMAGE_RESISTANT));
                     boolean shouldTakeLongerToDespawn = !shouldNeverDespawn && (itemStack.getCount() > 56 || itemStack.getRarity() != Rarity.COMMON || itemStack.getComponents().has(DataComponents.CUSTOM_NAME) || itemStack.getComponents().has(DataComponents.STORED_ENCHANTMENTS));
                     if(shouldNeverDespawn) entity.setUnlimitedLifetime();

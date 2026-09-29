@@ -226,8 +226,9 @@ public abstract class AnvilCostMixin extends ItemCombinerMenu {
     private static int getLevelForApplying(Holder<Enchantment> enchantment, int level) {
         if(enchantment == null || level == 0) return 0;
         int levelRequired = 0;
-        if(enchantment == Enchantments.MENDING) levelRequired = 12;
-        else if(enchantment == Enchantments.PROTECTION) levelRequired = 6;
+        // Compared by key: a Holder never equalled a ResourceKey, so these two costs never applied before 26.3.
+        if(enchantment.is(Enchantments.MENDING)) levelRequired = 12;
+        else if(enchantment.is(Enchantments.PROTECTION)) levelRequired = 6;
         else if(enchantment.is(EnchantmentTags.CURSE)) levelRequired = -12;
         levelRequired += Math.max(levelRequired + enchantment.value().getMinCost(level), enchantment.value().getAnvilCost());
         return Math.clamp(levelRequired, 3, 30);

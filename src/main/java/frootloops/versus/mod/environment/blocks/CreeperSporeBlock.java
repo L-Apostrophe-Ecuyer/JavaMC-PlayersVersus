@@ -2,6 +2,7 @@ package frootloops.versus.mod.environment.blocks;
 
 
 import frootloops.versus.VersusMod;
+import net.minecraft.world.level.block.BonemealSource;
 import frootloops.versus.mod.environment.CustomSpecialEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -10,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -67,7 +69,7 @@ public class CreeperSporeBlock extends SporeBlossomBlock implements Bonemealable
 
                     // Summon 2-4 creepers!
                     for(int i = 0; i < 2 + random.nextInt(2); i++) {
-                        Creeper creeper = new Creeper(EntityType.CREEPER, world);
+                        Creeper creeper = new Creeper(EntityTypes.CREEPER, world);
                         creeper.setPosRaw(pos.getX(), pos.getY() - 1.5, pos.getZ());
                         world.addFreshEntity(creeper);
                     }
@@ -86,17 +88,17 @@ public class CreeperSporeBlock extends SporeBlossomBlock implements Bonemealable
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader world, BlockPos pos, BlockState state) {
+    public boolean isValidBonemealTarget(LevelReader world, BlockPos pos, BlockState state, BonemealSource source) {
         return state.getFluidState().isEmpty();
     }
 
     @Override
-    public boolean isBonemealSuccess(Level world, RandomSource random, BlockPos pos, BlockState state) {
+    public boolean isBonemealSuccess(Level world, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel world, RandomSource random, BlockPos pos, BlockState state) {
+    public void performBonemeal(ServerLevel world, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         int currentAge = state.getValueOrElse(AGE, 0);
         if(currentAge == MAX_AGE) world.setBlock(pos, Blocks.SPORE_BLOSSOM.defaultBlockState(), Block.UPDATE_CLIENTS); // Set to regular pink spore blossom
         else world.setBlock(pos, state.setValue(AGE,currentAge + 1), Block.UPDATE_CLIENTS);

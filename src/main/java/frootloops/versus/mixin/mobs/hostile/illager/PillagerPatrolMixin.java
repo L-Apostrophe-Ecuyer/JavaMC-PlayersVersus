@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.item.ItemStack;
@@ -24,10 +25,10 @@ public class PillagerPatrolMixin {
             int rand = random.nextInt(100);
 
             PatrollingMonster patrolEntity = null;
-            if(rand < 15) patrolEntity = EntityType.VINDICATOR.create(world, EntitySpawnReason.PATROL);
-            else if(rand < 40) patrolEntity = EntityType.WITCH.create(world, EntitySpawnReason.PATROL);
+            if(rand < 15) patrolEntity = EntityTypes.VINDICATOR.create(world, EntitySpawnReason.PATROL);
+            else if(rand < 40) patrolEntity = EntityTypes.WITCH.create(world, EntitySpawnReason.PATROL);
             else if(rand < 65){
-                patrolEntity = EntityType.VINDICATOR.create(world, EntitySpawnReason.PATROL);
+                patrolEntity = EntityTypes.VINDICATOR.create(world, EntitySpawnReason.PATROL);
                 patrolEntity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
                 patrolEntity.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
                 patrolEntity.getItemBySlot(EquipmentSlot.MAINHAND).setDamageValue(180);

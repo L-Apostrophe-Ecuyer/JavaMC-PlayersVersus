@@ -34,7 +34,7 @@ public abstract class VindicatorMixin extends AbstractIllager {
     }
 
     /*
-    @Inject(method = "initGoals", at = @At("HEAD"))
+    @Inject(method = "registerGoals", at = @At("HEAD"))
     private void vindicatorsCanHeal(CallbackInfo ci) {
         this.goalSelector.add(1, new FleeAttackerAndHealGoal<>(this, 1));
     }*/

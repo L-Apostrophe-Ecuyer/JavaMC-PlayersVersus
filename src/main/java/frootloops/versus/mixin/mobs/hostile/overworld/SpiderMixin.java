@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
+import frootloops.versus.mod.environment.WorldTime;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
@@ -13,6 +14,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -99,7 +101,7 @@ public class SpiderMixin extends Monster {
         entityData = super.finalizeSpawn(world, difficulty, spawnReason, entityData);
         if (entityData == null) {
             entityData = new Spider.SpiderEffectsGroupData();
-            if ((world.getDifficulty() == Difficulty.HARD || world.getMoonPhase() == 7 || this.getY() < 32.0) && random.nextFloat() < 0.3f * difficulty.getSpecialMultiplier()) {
+            if ((world.getDifficulty() == Difficulty.HARD || WorldTime.moonPhase(world) == 7 || this.getY() < 32.0) && random.nextFloat() < 0.3f * difficulty.getSpecialMultiplier()) {
                 ((Spider.SpiderEffectsGroupData)entityData).setRandomEffect(random);
             }
         }
@@ -133,7 +135,7 @@ public class SpiderMixin extends Monster {
                 this.setHealth(24.0f);
             }
             Skeleton skeletonEntity;
-            if (random.nextInt(60) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.level(), EntitySpawnReason.JOCKEY)) != null) {
+            if (random.nextInt(60) == 0 && (skeletonEntity = EntityTypes.SKELETON.create(this.level(), EntitySpawnReason.JOCKEY)) != null) {
                 skeletonEntity.snapTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
                 skeletonEntity.finalizeSpawn(world, difficulty, spawnReason, null);
                 skeletonEntity.startRiding(this);

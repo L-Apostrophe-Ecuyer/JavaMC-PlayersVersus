@@ -133,7 +133,7 @@ public abstract class ItemEntityMixin extends Entity {
             for (ItemEntity entity: entitiesNearby) {
                 entity.setUnlimitedLifetime();
                 entity.setGlowingTag(true);
-                entity.setInvulnerable(true);
+                entity.setPermanentlyInvulnerable(true);
             }
             return;
         }

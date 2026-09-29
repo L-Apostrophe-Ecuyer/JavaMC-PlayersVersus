@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.WorldTime;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -26,8 +27,6 @@ import java.util.Optional;
 
 @Mixin(PointedDripstoneBlock.class)
 public abstract class PointedDripstoneMixin extends Block {
-    @Shadow public static final EnumProperty<Direction> TIP_DIRECTION = BlockStateProperties.VERTICAL_DIRECTION;
-
     private static final Map<Block,Block> BLOCKS_THAT_DRIP_WATER = new HashMap<>();
     static {
         BLOCKS_THAT_DRIP_WATER.put(Blocks.MUD, CustomBlocks.GRAY_CLAY);
@@ -47,7 +46,7 @@ public abstract class PointedDripstoneMixin extends Block {
     @Overwrite
     public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if (random.nextBoolean()) return;
-        if (state.getValue(TIP_DIRECTION) != Direction.DOWN) return;
+        if (state.getValue(PointedDripstoneBlock.TIP_DIRECTION) != Direction.DOWN) return;
         dripTickOverhauled(state, world, pos, random);
     }
 
@@ -64,15 +63,15 @@ public abstract class PointedDripstoneMixin extends Block {
             if(maxWorldHeight >= mutableBlockPos.getY()) return; // No fluid here.
 
             mutableBlockState = world.getBlockState(mutableBlockPos);
-            if(mutableBlockState.is(Blocks.DRIPSTONE_BLOCK) || (mutableBlockState.is(Blocks.POINTED_DRIPSTONE) && mutableBlockState.getValue(TIP_DIRECTION) == Direction.UP)) continue;
+            if(mutableBlockState.is(Blocks.DRIPSTONE_BLOCK) || (mutableBlockState.is(Blocks.POINTED_DRIPSTONE) && mutableBlockState.getValue(PointedDripstoneBlock.TIP_DIRECTION) == Direction.UP)) continue;
             break;
         }
 
-        boolean isUltrawarm = world.dimensionType().ultraWarm();
+        boolean isUltrawarm = WorldTime.ultraWarm(world);
         if(isUltrawarm && mutableBlockState.is(Blocks.MAGMA_BLOCK)) {
             fluid = Fluids.LAVA;
         }
-        else if(!world.dimensionType().ultraWarm() && BLOCKS_THAT_DRIP_WATER.containsKey(mutableBlockState.getBlock())) {
+        else if(!isUltrawarm && BLOCKS_THAT_DRIP_WATER.containsKey(mutableBlockState.getBlock())) {
             BlockState resultBlockState = BLOCKS_THAT_DRIP_WATER.get(mutableBlockState.getBlock()).withPropertiesOf(mutableBlockState);
             world.setBlockAndUpdate(mutableBlockPos, resultBlockState);
             Block.pushEntitiesUp(mutableBlockState, resultBlockState, world, mutableBlockPos);
@@ -88,7 +87,8 @@ public abstract class PointedDripstoneMixin extends Block {
 
         // Try to grow the stalagmite:
         if (fluid == Fluids.WATER) {
-            if (random.nextBoolean()) PointedDripstoneBlock.growStalactiteOrStalagmiteIfPossible(state, world, pos, random);
+            // An instance method of SpeleothemBlock since 26.3, which PointedDripstoneBlock extends.
+            if (random.nextBoolean()) ((PointedDripstoneBlock) state.getBlock()).growStalactiteOrStalagmiteIfPossible(state, world, pos, random);
         }
 
         // Possible skip if lava:
@@ -106,7 +106,7 @@ public abstract class PointedDripstoneMixin extends Block {
             mutableBlockState = world.getBlockState(mutableBlockPos);
             if(mutableBlockState.isAir()) continue;
             if(!mutableBlockState.getFluidState().isEmpty()) break; // Already fluid down below
-            if((mutableBlockState.is(Blocks.POINTED_DRIPSTONE) && mutableBlockState.getValue(TIP_DIRECTION) == Direction.DOWN)) continue;
+            if((mutableBlockState.is(Blocks.POINTED_DRIPSTONE) && mutableBlockState.getValue(PointedDripstoneBlock.TIP_DIRECTION) == Direction.DOWN)) continue;
             break;
         }
 

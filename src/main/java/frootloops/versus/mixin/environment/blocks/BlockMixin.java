@@ -48,12 +48,12 @@ public abstract class BlockMixin extends BlockBehaviour {
     }
 
     private static void dropStackTowardsPlayer(Level world, BlockPos pos, ItemStack stack, @Nullable Entity entity) {
-        if (world.isClientSide() || stack.isEmpty() || !((ServerLevel)world).getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) return;
+        if (world.isClientSide() || stack.isEmpty() || !((ServerLevel)world).getGameRules().getBoolean(GameRules.BLOCK_DROPS)) return;
 
         double itemHeight = 0.125;
-        double posX = (double)pos.getX() + 0.5 + Mth.nextDouble(world.random, -0.25, 0.25);
-        double posY = (double)pos.getY() + 0.5 + Mth.nextDouble(world.random, -0.25, 0.25) - itemHeight;
-        double posZ = (double)pos.getZ() + 0.5 + Mth.nextDouble(world.random, -0.25, 0.25);
+        double posX = (double)pos.getX() + 0.5 + Mth.nextDouble(world.getRandom(), -0.25, 0.25);
+        double posY = (double)pos.getY() + 0.5 + Mth.nextDouble(world.getRandom(), -0.25, 0.25) - itemHeight;
+        double posZ = (double)pos.getZ() + 0.5 + Mth.nextDouble(world.getRandom(), -0.25, 0.25);
         ItemEntity itemEntity = new ItemEntity(world, posX, posY, posZ, stack);
         itemEntity.setDefaultPickUpDelay();
 

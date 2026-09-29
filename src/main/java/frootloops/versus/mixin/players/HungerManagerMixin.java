@@ -100,7 +100,7 @@ public class HungerManagerMixin {
     private void doHealthRegeneration(ServerPlayer player, boolean hasHungerEffect) {
         float playerHealth = player.getHealth();
         boolean isPlayerSlowlyDying = playerHealth < 20.0f && (player.hasEffect(MobEffects.WITHER) || (player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
-        boolean canPlayerRegenHealth = player.isHurt() && player.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
+        boolean canPlayerRegenHealth = player.isHurt() && player.level().getGameRules().getBoolean(GameRules.NATURAL_HEALTH_REGENERATION);
         boolean canPlayerFastHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect && isPlayerSlowlyDying;
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFastHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
         boolean canPlayerFoodHeal = canPlayerFastHeal || canPlayerSlowHeal;
@@ -108,7 +108,7 @@ public class HungerManagerMixin {
         // Damage resets slow regen, but not quick regen:
         tickTimer++;
         if (canPlayerFoodHeal) tickTimer = Math.max(tickTimer, 0);
-        else if (player.hurtTime > 0 || player.invulnerableTime > 0) tickTimer = isPlayerSlowlyDying ? -SPRINT_RECOVERY_TIME_FAST: -SPRINT_RECOVERY_TIME_SLOW;
+        else if (player.hurtTime > 0 || player.getInvulnerableTime() > 0) tickTimer = isPlayerSlowlyDying ? -SPRINT_RECOVERY_TIME_FAST: -SPRINT_RECOVERY_TIME_SLOW;
         else if (foodLevel == 0 && hasHungerEffect) tickTimer = Math.min(tickTimer, -2);
 
         if(canPlayerFastHeal) {

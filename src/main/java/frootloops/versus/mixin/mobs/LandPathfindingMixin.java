@@ -21,6 +21,6 @@ public class LandPathfindingMixin {
     )
     private static void onGetCommonNodeType(BlockGetter world, BlockPos pos, CallbackInfoReturnable<PathType> cir) {
         BlockState state = world.getBlockState(pos);
-        if (state.getBlock() instanceof CustomMudBlock) cir.setReturnValue(PathType.DAMAGE_OTHER);
+        if (state.getBlock() instanceof CustomMudBlock) cir.setReturnValue(PathType.DAMAGING);
     }
 }

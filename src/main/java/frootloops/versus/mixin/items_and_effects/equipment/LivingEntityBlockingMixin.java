@@ -1,6 +1,9 @@
 package frootloops.versus.mixin.items_and_effects.equipment;
 
 import frootloops.versus.mod.enchantments.CustomEnchants;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.server.level.ServerPlayer;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -50,9 +53,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
     public ItemStack getItemBlockingWith() {return null;}
 
     @Shadow
-    protected void blockUsingItem(ServerLevel world, LivingEntity attacker) {
-        attacker.knockback(0.5, attacker.getX() - this.getX(), attacker.getZ() - this.getZ());
-    }
+    protected void blockUsingItem(ServerLevel world, LivingEntity attacker, DamageSource source, float damage, boolean fullyBlocked) {}
 
     @Overwrite
     public float applyItemBlocking(ServerLevel world, DamageSource source, float damageAmount) {
@@ -69,7 +70,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                     int ticksToParry = PARRY_TIME_TICKS + levelRiposte;
                     int useTime =  useItem.getUseDuration((LivingEntity) ((Object)this)) - useItemRemaining;
                     boolean wasAttackParried = useTime <= ticksToParry;
-                    boolean doesAttackBypassShield = blocksAttacksComponent.bypassedBy().map(source::is).orElse(false) && !(wasAttackParried && source.is(DamageTypes.SONIC_BOOM));
+                    boolean doesAttackBypassShield = blocksAttacksComponent.bypassedBy().map(types -> types.contains(source.typeHolder())).orElse(false) && !(wasAttackParried && source.is(DamageTypes.SONIC_BOOM));
                     if (doesAttackBypassShield) return 0.0F;
 
                     // Check if we can repel arrow:
@@ -89,7 +90,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                         // Calculate the actual damage reduction amount:
                         float damageTaken = blocksAttacksComponent.resolveBlockedDamage(source, damageAmount, angle);
                         blocksAttacksComponent.hurtBlockingItem(this.level(), blockingItem, (LivingEntity) ((Object)this), this.getUsedItemHand(), damageTaken);
-                        if (!source.is(DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() instanceof LivingEntity livingEntity) this.blockUsingItem(world, livingEntity);
+                        if (!source.is(DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() instanceof LivingEntity livingEntity) this.blockUsingItem(world, livingEntity, source, damageAmount, damageTaken >= damageAmount);
                         if (damageTaken <= 0.0F) return damageTaken;
 
                         // Thorns will deal damage to the attacker
@@ -101,7 +102,10 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                         if(wasAttackParried && angle < MAX_ANGLE_TO_BLOCK) {
                             if ((LivingEntity) (Object) this instanceof Player player) {
                                 player.getCooldowns().addCooldown(blockingItem, PARRY_TIME_TICKS << 1);
-                                player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.2F, 1F);
+                                // Only the player hears it, as Player#playNotifySound did (removed in 1.21.11).
+                                if (player instanceof ServerPlayer serverPlayer) serverPlayer.connection.send(new ClientboundSoundPacket(
+                                        BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.EXPERIENCE_ORB_PICKUP), SoundSource.PLAYERS,
+                                        player.getX(), player.getY(), player.getZ(), 0.2F, 1F, player.getRandom().nextLong()));
                             }
                             if(levelRiposte > 0f) reflectedDamage += 0.2F * damageAmount * levelRiposte;
                             ((LivingEntity) ((Object) this)).stopUsingItem();
@@ -115,7 +119,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                                 if (this.isAlwaysTicking() && (LivingEntity) (Object) this instanceof Player player) attacker.hurtServer((ServerLevel) this.level(), this.damageSources().playerAttack(player), reflectedDamage);
                                 else attacker.hurtServer((ServerLevel) this.level(), this.damageSources().mobAttack((LivingEntity) ((Object)this)), reflectedDamage);
                             }
-                            attacker.knockback(extraKnockbackStrength, this.getX() - attacker.getX(), this.getZ() - attacker.getZ());
+                            attacker.knockback(extraKnockbackStrength, this.getX() - attacker.getX(), this.getZ() - attacker.getZ(), source, reflectedDamage);
                         }
 
                         else if(this.level() instanceof ServerLevel serverWorld && source.getDirectEntity() instanceof LivingEntity attacker) {

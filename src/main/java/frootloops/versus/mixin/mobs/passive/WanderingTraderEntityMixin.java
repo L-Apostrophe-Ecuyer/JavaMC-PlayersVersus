@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.mobs.passive;
 
 import com.google.common.collect.Lists;
+import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.mobs.passive.RevampedTradeFactories;
 import frootloops.versus.mod.mobs.passive.RevampedVillagerOffers;
 import frootloops.versus.mod.mobs.passive.RevampedWandererOffers;
@@ -16,6 +17,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -43,7 +45,7 @@ public abstract class WanderingTraderEntityMixin extends AbstractVillager implem
     private int experience = 0;
 
     @Override
-    public void updateTrades() {
+    protected void updateTrades(ServerLevel level) {
         MerchantOffers tradeOfferList = this.getOffers();
         for (Pair<RevampedTradeFactories.Factory[], Integer> pair : RevampedWandererOffers.WANDERING_TRADER_TRADES) {
 
@@ -68,7 +70,7 @@ public abstract class WanderingTraderEntityMixin extends AbstractVillager implem
             if(experience > 0 && this.getTradingPlayer() instanceof ServerPlayer serverPlayer) {
                 experience = 0;
                 ServerLevel serverWorld = serverPlayer.level();
-                if(!serverWorld.dimensionType().hasRaids() || !serverWorld.dimensionType().hasSkyLight() || serverWorld.getDayTime() > 12000L) return;
+                if(!WorldTime.hasRaids(serverWorld) || !serverWorld.dimensionType().hasSkyLight() || WorldTime.dayTime(serverWorld) > 12000L) return;
 
                 boolean doesTraderWantToSettleDown = serverWorld.isVillage(this.blockPosition());
                 if(!doesTraderWantToSettleDown) {
@@ -78,7 +80,7 @@ public abstract class WanderingTraderEntityMixin extends AbstractVillager implem
                 }
 
                 if (doesTraderWantToSettleDown) {
-                    Villager villagerEntity = this.convertTo(EntityType.VILLAGER, ConversionParams.single(this, true, true), stray -> {});
+                    Villager villagerEntity = this.convertTo(EntityTypes.VILLAGER, ConversionParams.single(this, true, true), stray -> {});
 
                     int randomProfessionIndex = this.random.nextInt(10);
                     ResourceKey<VillagerProfession> profession = (randomProfessionIndex < 6) ? VillagerProfession.NONE : (randomProfessionIndex < 8) ? VillagerProfession.CARTOGRAPHER : (randomProfessionIndex < 9) ? VillagerProfession.FISHERMAN : VillagerProfession.FARMER;

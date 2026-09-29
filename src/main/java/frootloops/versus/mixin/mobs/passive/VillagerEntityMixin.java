@@ -6,6 +6,8 @@ import frootloops.versus.mod.mobs.passive.RevampedTradeFactories;
 import frootloops.versus.mod.mobs.passive.RevampedVillagerOffers;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.SharedConstants;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -47,8 +49,9 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Vi
     @Nullable
     private Player customer, lastCustomer;
 
-    @Shadow private int updateMerchantTimer;
-    @Shadow  private boolean increaseProfessionLevelOnUpdate;
+    // 26.3 levels a villager up right away (1.21.10 waited 40 ticks, with updateMerchantTimer and
+    // increaseProfessionLevelOnUpdate), with the same regeneration.
+    @Shadow private void increaseMerchantCareer(ServerLevel level) {}
 
     @Shadow private boolean shouldIncreaseLevel() {
         int i = this.getVillagerData().level();
@@ -75,7 +78,7 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Vi
 
 
     @Override
-    public void updateTrades() {
+    protected void updateTrades(ServerLevel level) {
         VillagerData villagerData = this.getVillagerData();
         ResourceKey<VillagerProfession> professionKey = villagerData.profession().unwrapKey().orElse(null);
         if (professionKey != null) {
@@ -165,8 +168,8 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Vi
 
         this.villagerXp += 3 + affinityAmount;
         if (this.shouldIncreaseLevel()) {
-            this.updateMerchantTimer = 40;
-            this.increaseProfessionLevelOnUpdate = true;
+            this.increaseMerchantCareer(world);
+            this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 0));
         }
     }
 
@@ -181,8 +184,8 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Vi
         this.villagerXp = this.villagerXp + experienceFromOffer;
         this.lastCustomer = customer;
         if (this.shouldIncreaseLevel()) {
-            this.updateMerchantTimer = 40;
-            this.increaseProfessionLevelOnUpdate = true;
+            if (this.level() instanceof ServerLevel serverLevel) this.increaseMerchantCareer(serverLevel);
+            this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 0));
             this.level().addFreshEntity(new ExperienceOrb(this.level(), this.getX(), this.getY() + 0.5, this.getZ(), this.getVillagerData().level() * 8));
         }
         else {

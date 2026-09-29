@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.items_and_effects.equipment;
 
 import frootloops.versus.VersusSettings;
+import net.minecraft.world.entity.animal.chicken.ChickenSoundVariants;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -44,7 +45,7 @@ public abstract class BrushItemMixin extends Item {
                 int random = user.getRandom().nextInt(5);
                 if (random > 1) {
                     stack.hurtAndBreak(16, user, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
-                    chicken.knockback(0.1, user.getX() - chicken.getX(), user.getZ() - chicken.getZ());
+                    chicken.knockback(0.1, user.getX() - chicken.getX(), user.getZ() - chicken.getZ(), user.damageSources().playerAttack(user), 0.0f);
                     chicken.spawnAtLocation(serverWorld, new ItemStack(Items.FEATHER));
                     chicken.gameEvent(GameEvent.ENTITY_INTERACT);
                     chicken.makeSound(SoundEvents.ARMADILLO_BRUSH);
@@ -52,8 +53,9 @@ public abstract class BrushItemMixin extends Item {
                     chicken.eggTime -= random * 250;
                 } else {
                     stack.hurtAndBreak(8, user, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
-                    chicken.knockback(0.4, user.getX() - chicken.getX(), user.getZ() - chicken.getZ());
-                    chicken.playSound(SoundEvents.CHICKEN_HURT);
+                    chicken.knockback(0.4, user.getX() - chicken.getX(), user.getZ() - chicken.getZ(), user.damageSources().playerAttack(user), 0.0f);
+                    // The hurt sound of the classic chicken, which SoundEvents.CHICKEN_HURT was before chickens had sound variants.
+                    chicken.playSound(SoundEvents.CHICKEN_SOUNDS.get(ChickenSoundVariants.SoundSet.CLASSIC).adultSounds().hurtSound().value());
                     ParticleUtils.spawnParticleInBlock(user.level(), chicken.blockPosition(), 3, ParticleTypes.SMOKE);
                 }
             }

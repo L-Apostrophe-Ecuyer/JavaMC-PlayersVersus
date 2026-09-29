@@ -1,6 +1,7 @@
 package frootloops.versus.mod.mobs;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
@@ -16,6 +17,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -49,25 +51,25 @@ public class MobSpawning {
 
         //BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.WITHERED_ZOMBIE, 100, 4, 4);
         SpawnPlacements.register(ModEntities.WITHERED_ZOMBIE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitheredZombie);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), MobCategory.MONSTER, EntityType.WITHER_SKELETON, 60, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), MobCategory.MONSTER, EntityType.ZOMBIFIED_PIGLIN, 3, 1, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), MobCategory.MONSTER, EntityTypes.WITHER_SKELETON, 60, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), MobCategory.MONSTER, EntityTypes.ZOMBIFIED_PIGLIN, 3, 1, 4);
 
         // Surface:
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.FROZEN_PEAKS), MobCategory.MONSTER, EntityType.BREEZE, 100, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.FROZEN_PEAKS), MobCategory.MONSTER, EntityTypes.BREEZE, 100, 1, 1);
         BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.SPAWNS_SNOW_FOXES), MobCategory.MONSTER, ModEntities.FROSTED_ZOMBIE, 140, 2, 4);
         SpawnPlacements.register(ModEntities.FROSTED_ZOMBIE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnFrostedZombie);
 
         // Desert:
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityType.CAVE_SPIDER, 60, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityType.HUSK, 120, 4, 4);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityType.CAMEL, 40, 3, 4);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityType.CAT, 40, 1, 3);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAVE_SPIDER, 60, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.HUSK, 120, 4, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAMEL, 40, 3, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAT, 40, 1, 3);
 
         // Air:
-        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, EntityType.PHANTOM, 80, 1, 2);
+        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, EntityTypes.PHANTOM, 80, 1, 2);
 
         // Nether:
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.NETHER_WASTES), MobCategory.MONSTER, EntityType.BLAZE, 15, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.NETHER_WASTES), MobCategory.MONSTER, EntityTypes.BLAZE, 15, 1, 1);
 
     }
 
@@ -76,11 +78,11 @@ public class MobSpawning {
     }
 
     public static boolean isNewMoon(LevelAccessor world) {
-        return world.getMoonPhase() == 7;
+        return WorldTime.moonPhase(world) == 7;
     }
 
     public static boolean isMidnight(LevelAccessor world) {
-        long dayTime = world.dayTime() % 24000l;
+        long dayTime = WorldTime.dayTime(world) % 24000l;
         return !(dayTime < 18000l || dayTime > 20000l);
     }
 

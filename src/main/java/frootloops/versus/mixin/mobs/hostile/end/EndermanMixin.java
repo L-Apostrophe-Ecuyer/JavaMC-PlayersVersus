@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.end;
 
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.mobs.hostile.end.EndermanHideAndWaitGoal;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.DifficultyInstance;
@@ -62,7 +63,7 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
             if(worldAccess instanceof Level world && world.isRaining() && !world.isThundering()) { // Endermen more common when foggy or during new moons
                 return true;
             }
-            if((worldAccess.getMoonPhase() + 2) % 8 < 6 && this.random.nextInt(4) < 1) {
+            if((WorldTime.moonPhase(worldAccess) + 2) % 8 < 6 && this.random.nextInt(4) < 1) {
                 return false;
             }
         }
@@ -82,7 +83,8 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
 
         // Targeted players will be attacked if returns false. We make it so endermen only attack when you're looking, making chases more panicky.
         if(this.getTarget() == player) {
-            if(this.getRemainingPersistentAngerTime() < 10) return false;
+            // 26.3 keeps the game time the anger ends at instead of the ticks left.
+            if(this.getPersistentAngerEndTime() - this.level().getGameTime() < 10) return false;
             if(this.hurtTime > 0 && this.lastHurt > 5.0f) return true;
             if(squaredDistance > 64.0) return false;
             else if(squaredDistance > 16.0) return !(Combat.isLookingTowards(player, this.getEyePosition(), -0.3));

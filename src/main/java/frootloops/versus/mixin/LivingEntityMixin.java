@@ -22,11 +22,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.HoeItem;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -50,7 +48,9 @@ public abstract class LivingEntityMixin extends Entity {
         super(type, world);
     }
 
-    @ModifyVariable(method = "travelInFluid", at = @At("STORE"), ordinal = 2)
+    // 26.3 split travelInFluid into travelInWater and travelInLava; the water movement efficiency is the third float
+    // local of travelInWater, as it was of travelInFluid.
+    @ModifyVariable(method = "travelInWater", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
         return isAlwaysTicking() && isSwimming() ? h : h + 0.3f;
     }
@@ -63,7 +63,8 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @ModifyConstant(method = "travelInFluid", constant = @Constant(floatValue = 0.02f))
+    // The 0.02 of moveRelative, in water and in lava as when both were in travelInFluid.
+    @ModifyConstant(method = {"travelInWater", "travelInLava"}, constant = @Constant(floatValue = 0.02f))
     private float applyBuoyancyEffect(float thisMixinIsOnlyCalledWhenInWater) {
         if(((LivingEntity)((Object)this)).hasEffect(CustomStatusEffects.BUOYANCY)) {
             double amplifier = this.isVisuallySwimming() ? 1.5 : this.isShiftKeyDown() ? 0.8 : 1.0 + ((LivingEntity)((Object)this)).getEffect(CustomStatusEffects.BUOYANCY).getAmplifier();
@@ -72,17 +73,20 @@ public abstract class LivingEntityMixin extends Entity {
         return 0.02f;
     }
 
-    @ModifyVariable(method = "knockback", at = @At("HEAD"), ordinal = 0)
+    // The overload every knockback goes through since 26.3: the other one, without the boolean, calls it.
+    @ModifyVariable(method = "knockback(DDDLnet/minecraft/world/damagesource/DamageSource;FZ)V", at = @At("HEAD"), ordinal = 0)
     private double takeMoreKnockback(double strength) {
         return strength * 1.2;
     }
 
-    @Inject(method = "getCurrentSwingDuration", at = @At("HEAD"), cancellable = true)
+    // 26.3: the swing's length comes from the item's SwingAnimation, which getModifiedSwingDuration adjusts
+    // (getCurrentSwingDuration before). Axes, hoes and shovels are item tags since their classes are gone.
+    @Inject(method = "getModifiedSwingDuration", at = @At("HEAD"), cancellable = true)
     private void getHandSwingDuration(CallbackInfoReturnable<Integer> cir) {
         ItemStack mainHand = ((LivingEntity)((Object)this)).getMainHandItem();
         if(((LivingEntity)((Object)this)) instanceof PathfinderMob && mainHand != null){
-            if(mainHand.getItem() instanceof AxeItem) cir.setReturnValue(24);
-            else if(mainHand.getItem() instanceof HoeItem) cir.setReturnValue(10);
+            if(mainHand.is(ItemTags.AXES)) cir.setReturnValue(24);
+            else if(mainHand.is(ItemTags.HOES)) cir.setReturnValue(10);
             else cir.setReturnValue(16);
         }
     }
@@ -95,7 +99,7 @@ public abstract class LivingEntityMixin extends Entity {
             if (mainhandStack.isEmpty()) return;
 
             // Shovel attack and Tossing Enchantment:
-            if (!this.isShiftKeyDown() && this.onGround() && mainhandStack.getItem() instanceof ShovelItem) {
+            if (!this.isShiftKeyDown() && this.onGround() && mainhandStack.is(ItemTags.SHOVELS)) {
                 int tossLevel = EnchantRegistryHelper.getLevel(world, mainhandStack, CustomEnchants.TOSSING);
                 CustomEnchants.performTossAttack(world, self, target, 0.2 + 0.1 * (double)tossLevel);
             }
@@ -148,15 +152,16 @@ public abstract class LivingEntityMixin extends Entity {
         if(source.getEntity() instanceof Monster || source.getEntity() instanceof Player) {
 
             // Modify Invincibility Frames:
+            int invulnerableTime = this.getInvulnerableTime();
             if (invulnerableTime > 10) {
                 if (source.is(DamageTypes.ARROW)) {
                     // Crossbow arrows don't trigger invincibility frames, allowing for multishot shotguns:
-                    if(((LivingEntity)source.getEntity()).getMainHandItem().is(Items.CROSSBOW)) invulnerableTime = 9;
+                    if(((LivingEntity)source.getEntity()).getMainHandItem().is(Items.CROSSBOW)) this.setInvulnerableTime(9);
                     // Regular bow shots give only 4 ticks of invincibility
-                    else invulnerableTime = 14;
+                    else this.setInvulnerableTime(14);
                 }
                 // Anything else gives 8 ticks of invincibility
-                else if (invulnerableTime > 18 && !source.is(DamageTypeTags.BYPASSES_ARMOR)) invulnerableTime = 18;
+                else if (invulnerableTime > 18 && !source.is(DamageTypeTags.BYPASSES_ARMOR)) this.setInvulnerableTime(18);
             }
 
             // Curse of Ender Enchantment:
@@ -164,7 +169,7 @@ public abstract class LivingEntityMixin extends Entity {
                 CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), source.getEntity());
             }
         }
-        else if (invulnerableTime > 10 && source.is(DamageTypes.ARROW)) invulnerableTime = 12;
+        else if (this.getInvulnerableTime() > 10 && source.is(DamageTypes.ARROW)) this.setInvulnerableTime(12);
     }
 
     @Inject(method = "onEffectsRemoved", at = @At("HEAD"))

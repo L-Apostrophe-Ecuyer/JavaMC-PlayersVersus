@@ -8,9 +8,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.cubemob.AbstractCubeMob;
 import net.minecraft.world.entity.monster.cubemob.MagmaCube;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.cubemob.Slime;
@@ -20,19 +22,21 @@ import net.minecraft.world.level.block.LevelEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(Slime.class)
+// Since 26.2 slimes and magma cubes are both AbstractCubeMobs (a magma cube was a slime before), which holds the
+// attack. The class checks below keep each change to the mob it was for; sulfur cubes deal no damage.
+@Mixin(AbstractCubeMob.class)
 public abstract class SlimeMixin extends Mob {
     protected SlimeMixin(EntityType<? extends Monster> entityType, Level world) {
         super(entityType, world);
     }
 
     @Overwrite
-    public float getAttackDamage() {
+    protected float getAttackDamage() {
         return (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE)/2.0f;
     }
 
     @Overwrite
-    public void dealDamage(LivingEntity target) {
+    protected void dealDamage(LivingEntity target) {
         if (this.level() instanceof ServerLevel serverWorld && this.isAlive() && this.isWithinMeleeAttackRange(target) && this.hasLineOfSight(target)) {
             DamageSource damageSource = this.damageSources().mobAttack(this);
             if (target.hurtServer(serverWorld, damageSource, this.getAttackDamage())) {
@@ -41,7 +45,7 @@ public abstract class SlimeMixin extends Mob {
 
                 // SLIMES: Extra knockback:
                 if(this.getClass().equals(Slime.class)) {
-                    target.knockback(0.2f + 0.2f * this.getAttackDamage(), this.getX() - target.getX(), this.getZ() - target.getZ());
+                    target.knockback(0.2f + 0.2f * this.getAttackDamage(), this.getX() - target.getX(), this.getZ() - target.getZ(), damageSource, this.getAttackDamage());
                 }
 
                 // MAGMA: Some fire damage:
@@ -54,8 +58,8 @@ public abstract class SlimeMixin extends Mob {
 
     @Override
     public void die(DamageSource damageSource) {
-        if(damageSource.is(DamageTypes.LAVA) && this.getClass().equals(Slime.class) && ((Slime)((LivingEntity)(this))).getSize() == 1) {
-            this.convertTo(EntityType.MAGMA_CUBE, ConversionParams.single(this, true, true), magmaCube -> {
+        if(damageSource.is(DamageTypes.LAVA) && this.getClass().equals(Slime.class) && ((AbstractCubeMob)((LivingEntity)(this))).getSize() == 1) {
+            this.convertTo(EntityTypes.MAGMA_CUBE, ConversionParams.single(this, true, true), magmaCube -> {
                 this.level().levelEvent(null, LevelEvent.SOUND_EXTINGUISH_FIRE, this.blockPosition(), 0);
             });
         }

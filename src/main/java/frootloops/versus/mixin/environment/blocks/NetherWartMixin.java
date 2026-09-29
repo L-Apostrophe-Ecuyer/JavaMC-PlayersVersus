@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.WorldTime;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -25,7 +26,7 @@ public abstract class NetherWartMixin extends VegetationBlock {
 
     @Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)
     protected void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random, CallbackInfo info) {
-        if (!world.dimensionType().ultraWarm()) {
+        if (!WorldTime.ultraWarm(world)) {
             if(world.getBrightness(LightLayer.BLOCK, pos) < 10) {
                 world.setBlock(pos, CustomBlocks.WITHERED_WART_PLANT.withPropertiesOf(state), Block.UPDATE_CLIENTS);
             }

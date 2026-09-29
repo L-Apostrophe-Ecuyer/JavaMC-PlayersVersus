@@ -1,9 +1,11 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -41,11 +43,11 @@ public abstract class CropMixin extends VegetationBlock {
     }
 
     @Override
-    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
+    public void playerDestroy(ServerLevel world, ServerPlayer player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
         super.playerDestroy(world, player, pos, state, blockEntity, tool);
 
         int age = state.getValue(CropBlock.AGE);
-        boolean isUsingHoe = tool.getItem() instanceof HoeItem;
+        boolean isUsingHoe = tool.is(ItemTags.HOES);
         boolean doOnlyPartialHarvest = (age >= 3 && age > this.getMaxAge() - (isUsingHoe ? 3 : 1));
         if(doOnlyPartialHarvest) {
             world.setBlockAndUpdate(pos, state.setValue(CropBlock.AGE, 1));

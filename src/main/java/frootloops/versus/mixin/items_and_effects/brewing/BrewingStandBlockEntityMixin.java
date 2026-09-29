@@ -6,7 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.crafting.RecipePropertySet;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -27,7 +28,7 @@ public abstract class BrewingStandBlockEntityMixin
     }
 
     @Inject(method = "serverTick", at = @At(value = "HEAD"))
-    private static void setFuel(Level world, BlockPos pos, BlockState state, BrewingStandBlockEntity blockEntity, CallbackInfo info) {
+    private static void setFuel(ServerLevel world, BlockPos pos, BlockState state, BrewingStandBlockEntity blockEntity, CallbackInfo info) {
         ItemStack fuelStack = blockEntity.getItem(4);
         int fuel = ((BrewingStandBlockEntityAccessor)blockEntity).getFuel();
         int brewTime = ((BrewingStandBlockEntityAccessor)blockEntity).getBrewTime();
@@ -47,8 +48,8 @@ public abstract class BrewingStandBlockEntityMixin
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         if (slot == 3) {
-            PotionBrewing brewingRecipeRegistry = this.level != null ? this.level.potionBrewing() : PotionBrewing.EMPTY;
-            return brewingRecipeRegistry.isIngredient(stack);
+            // Brewing is recipes since 26.3: the reagents are the brewing recipes' property set, as vanilla checks it.
+            return this.level != null && this.level.recipeAccess().propertySet(RecipePropertySet.BREWING_REAGENTS).test(stack);
         }
         if (slot == 4) {
             return stack.is(CustomBlockItems.CORRUPTED_WART) || stack.is(CustomBlockItems.WITHERED_WART) || stack.is(Items.NETHER_WART);

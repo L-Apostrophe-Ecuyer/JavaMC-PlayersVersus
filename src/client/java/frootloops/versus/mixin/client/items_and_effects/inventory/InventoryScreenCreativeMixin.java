@@ -38,8 +38,8 @@ public abstract class InventoryScreenCreativeMixin  extends AbstractContainerScr
 
     private static final Item[] itemArray = new Item[]{
             Items.QUARTZ_BLOCK, Items.CALCITE, Items.CLAY, Items.ANDESITE, Items.STONE, Items.COBBLESTONE, Items.TUFF, Items.DEEPSLATE, Items.BLACKSTONE,
-            Items.RED_WOOL, Items.ORANGE_WOOL, Items.YELLOW_WOOL, Items.LIME_WOOL, Items.CYAN_WOOL, Items.BLUE_WOOL, Items.PURPLE_WOOL, Items.PINK_WOOL, Items.MAGENTA_WOOL,
-            Items.RED_TERRACOTTA, Items.ORANGE_TERRACOTTA, Items.YELLOW_TERRACOTTA, Items.LIME_TERRACOTTA, Items.CYAN_TERRACOTTA, Items.BLUE_TERRACOTTA, Items.PURPLE_TERRACOTTA, Items.PINK_TERRACOTTA, Items.MAGENTA_TERRACOTTA,
+            Items.WOOL.red(), Items.WOOL.orange(), Items.WOOL.yellow(), Items.WOOL.lime(), Items.WOOL.cyan(), Items.WOOL.blue(), Items.WOOL.purple(), Items.WOOL.pink(), Items.WOOL.magenta(),
+            Items.DYED_TERRACOTTA.red(), Items.DYED_TERRACOTTA.orange(), Items.DYED_TERRACOTTA.yellow(), Items.DYED_TERRACOTTA.lime(), Items.DYED_TERRACOTTA.cyan(), Items.DYED_TERRACOTTA.blue(), Items.DYED_TERRACOTTA.purple(), Items.DYED_TERRACOTTA.pink(), Items.DYED_TERRACOTTA.magenta(),
             Items.APPLE, Items.GOLDEN_APPLE, Items.CARROT, Items.GOLDEN_CARROT, Items.BEETROOT, CustomBrewingItems.GLISTERING_BEETROOT, Items.MELON_SLICE, Items.GLISTERING_MELON_SLICE, Items.GOLD_INGOT};
 
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)

@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.VersusMod;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -22,11 +23,11 @@ public abstract class ShortPlantMixin extends VegetationBlock implements Bonemea
 
     @Override
     protected boolean mayPlaceOn(BlockState floor, BlockGetter world, BlockPos pos) {
-        return floor.is(BlockTags.DIRT) || floor.is(Blocks.FARMLAND) || floor.is(BlockTags.DRY_VEGETATION_MAY_PLACE_ON);
+        return floor.is(BlockTags.DIRT) || floor.is(Blocks.FARMLAND) || floor.is(BlockTags.SUPPORTS_DRY_VEGETATION);
     }
 
     @Override
-    public boolean isBonemealSuccess(Level world, RandomSource random, BlockPos pos, BlockState state) {
-        return !world.getBlockState(pos.below()).is(BlockTags.DRY_VEGETATION_MAY_PLACE_ON);
+    public boolean isBonemealSuccess(Level world, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
+        return !world.getBlockState(pos.below()).is(BlockTags.SUPPORTS_DRY_VEGETATION);
     }
 }

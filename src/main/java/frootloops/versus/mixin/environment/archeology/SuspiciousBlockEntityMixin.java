@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.archeology;
 
 import frootloops.versus.VersusMod;
+import net.minecraft.world.item.ItemInstance;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import net.minecraft.core.BlockPos;
@@ -68,14 +69,14 @@ public abstract class SuspiciousBlockEntityMixin extends BlockEntity {
     private long fasterBrushing(long tickDelayUntilNextBrushStage) {return VersusSettings.Gameplay.BRUSHING_TICKS_PER_STAGE * 2L;}
 
     @Inject(method = "unpackLootTable", at = @At("HEAD"), cancellable = false)
-    private void generateRandomLootIfNoneAppended(ServerLevel world, LivingEntity brusher, ItemStack brush, CallbackInfo info) {
+    private void generateRandomLootIfNoneAppended(ServerLevel world, LivingEntity brusher, ItemInstance brush, CallbackInfo info) {
         if(item.isEmpty() && lootTable == null) {
             if(this.getBlockState().is(Blocks.SUSPICIOUS_SAND)) {
                 if(world.getFluidState(worldPosition.above()).is(Fluids.WATER)) this.setLootTable(LOOT_SAND_AQUATIC, this.getBlockPos().asLong());
                 else {
                     Holder<Biome> biome = world.getBiome(this.worldPosition);
                     if(biome.is(BiomeTags.HAS_DESERT_PYRAMID)) this.setLootTable(LOOT_SAND_DESERT, this.getBlockPos().asLong());
-                    else if(biome.is(BiomeTags.PLAYS_UNDERWATER_MUSIC)) this.setLootTable(LOOT_SAND_AQUATIC, this.getBlockPos().asLong());
+                    else if(biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) this.setLootTable(LOOT_SAND_AQUATIC, this.getBlockPos().asLong());
                     else this.setLootTable(LOOT_SAND_SURFACE, this.getBlockPos().asLong());
                 }
             }
@@ -84,8 +85,9 @@ public abstract class SuspiciousBlockEntityMixin extends BlockEntity {
                 else if(worldPosition.getY() < 32) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getBlockPos().asLong());
                 else {
                     Holder<Biome> biome = world.getBiome(this.worldPosition);
-                    if(biome == CustomOverworldBiomes.REGULAR_CAVE) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getBlockPos().asLong());
-                    else if (biome.is(BiomeTags.PLAYS_UNDERWATER_MUSIC)) this.setLootTable(LOOT_GRAVEL_AQUATIC, this.getBlockPos().asLong());
+                    // By key: a Holder never equalled a ResourceKey, so this never applied before 26.3.
+                    if(biome.is(CustomOverworldBiomes.REGULAR_CAVE)) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getBlockPos().asLong());
+                    else if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) this.setLootTable(LOOT_GRAVEL_AQUATIC, this.getBlockPos().asLong());
                     else if (worldPosition.getY() < 56 || world.getBrightness(LightLayer.SKY, worldPosition) < 3) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getBlockPos().asLong());
                     else this.setLootTable(LOOT_GRAVEL_SURFACE, this.getBlockPos().asLong());
                 }

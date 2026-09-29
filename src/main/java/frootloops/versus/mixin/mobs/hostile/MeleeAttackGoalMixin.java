@@ -58,7 +58,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     private int getCooldownAmount(){
         if(maxCooldown > 0) return maxCooldown;
-        if(numTicksEndlag == -1) numTicksEndlag = mob.getType().is(EntityTypeTags.ARTHROPOD) ? 4 : 8;
+        if(numTicksEndlag == -1) numTicksEndlag = mob.is(EntityTypeTags.ARTHROPOD) ? 4 : 8;
         if(!this.mob.getMainHandItem().isEmpty()) {
             if(this.mob.getMainHandItem().is(ItemTags.AXES) || this.mob.getMainHandItem().is(Items.TRIDENT))
                 maxCooldown = TICKS_SWING_HEAVY + numTicksEndlag;
@@ -123,7 +123,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     @Inject(method = "tick", at = @At("TAIL"), cancellable = false)
     public void mobsNeedToBeAimingToLandHit(CallbackInfo info) {
         // If the mob started attacking or blocking, it can't properly adjust its aim mid-swing anymore:
-        if(numTicksEndlag == -1) numTicksEndlag = mob.getType().is(EntityTypeTags.ARTHROPOD) ? 1 : 8;
+        if(numTicksEndlag == -1) numTicksEndlag = mob.is(EntityTypeTags.ARTHROPOD) ? 1 : 8;
         if (this.ticksUntilNextAttack < 0 || this.ticksUntilNextAttack > numTicksEndlag) {
             LookControl lookControl = this.mob.getLookControl();
             if (lookControl.isLookingAtTarget()) lookControl.setLookAt(lookControl.getWantedX(), lookControl.getWantedY(), lookControl.getWantedZ(),10f,10f);
@@ -138,19 +138,19 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     private boolean shouldPlayDefensively() {
         if(this.ticksUntilNextAttack > 6) return false;
         if(this.ticksUntilNextAttack < 0) return true;
-        if(this.mob.swinging) return false;
-        if(this.mob.invulnerableTime > 4) return false;
+        if(this.mob.isSwinging()) return false;
+        if(this.mob.getInvulnerableTime() > 4) return false;
 
         LivingEntity opponent = mob.getLastAttacker();
         if(opponent == null) opponent = mob.level().getNearestPlayer(mob, 8d);
         if(opponent != null) {
 
             // If the enemy already attacked, and mob wasn't hurt, exit (attack of opportunity);
-            if(opponent.swinging && this.mob.invulnerableTime < 6) return false;
+            if(opponent.isSwinging() && this.mob.getInvulnerableTime() < 6) return false;
 
             // If enemy isn't in the "danger zone" for an incoming attack, and mob isn't hurt, exit to attack;
             double d = this.mob.position().distanceToSqr(opponent.position());
-            if((d > 16.0d || d < 4.0d) && this.mob.invulnerableTime != 0) return false;
+            if((d > 16.0d || d < 4.0d) && this.mob.getInvulnerableTime() != 0) return false;
 
             // If opponent is about to crit or sprint attack, sometimes try blocking:
             if((!opponent.onGround() || opponent.isSprinting()) && this.ticksUntilNextAttack % 3 == 0) return Combat.isLookingTowards(mob,opponent.position());
@@ -164,7 +164,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     @Overwrite
     public void checkAndPerformAttack(LivingEntity target) {
-        if(numTicksEndlag == -1) numTicksEndlag = mob.getType().is(EntityTypeTags.ARTHROPOD) ? 1 : 8;
+        if(numTicksEndlag == -1) numTicksEndlag = mob.is(EntityTypeTags.ARTHROPOD) ? 1 : 8;
         int cooldownAmount = this.getCooldownAmount();
         boolean canTrySwinging = this.ticksUntilNextAttack <= 0;
         boolean willTryLandingAnAttack = this.mob.isAggressive() && (this.ticksUntilNextAttack == (cooldownAmount - numTicksEndlag) || this.ticksUntilNextAttack == (cooldownAmount - numTicksEndlag) - 1);
@@ -173,7 +173,8 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         if(this.mob.hurtTime > 14 && cooldownAmount > numTicksEndlag) {
             ticksUntilNextAttack = numTicksEndlag - 2;
             mob.setAggressive(false);
-            mob.attackAnim = 0f;
+            // 1.21.10 also reset mob.attackAnim here, which the next tick recomputed from the swing anyway; 26.3 keeps
+            // the swing in LivingEntity's private SwingState.
             if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: interrupted.");
         }
 
@@ -213,7 +214,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     // Start swinging:
                     if (canTrySwinging) {
                         if(DEBUG) VersusMod.MOD_LOGGER.warn("Started swinging!");
-                        this.mob.swing(InteractionHand.MAIN_HAND);
+                        this.mob.swingForAttack(InteractionHand.MAIN_HAND);
                         this.ticksUntilNextAttack = cooldownAmount;
 
                     // After 6 ticks, see if the swing landed:

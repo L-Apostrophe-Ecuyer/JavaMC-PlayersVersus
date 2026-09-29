@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.nether;
 
 import frootloops.versus.mod.mobs.ModEntities;
+import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.mobs.hostile.nether.WildfireEntity;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -48,10 +49,11 @@ public class WitherSkeletonMixin extends Monster {
     @Override
     public boolean checkSpawnRules(LevelAccessor world, EntitySpawnReason spawnReason) {
         boolean result = this.getWalkTargetValue(this.blockPosition(), world) >= 0.0F;
-        if(result && spawnReason != EntitySpawnReason.MOB_SUMMONED && world.dimensionType().ultraWarm() && world.getBlockState(this.blockPosition().below()).getSoundType() == SoundType.NETHER_BRICKS) {
+        if(result && spawnReason != EntitySpawnReason.MOB_SUMMONED && WorldTime.ultraWarm(world) && world.getBlockState(this.blockPosition().below()).getSoundType() == SoundType.NETHER_BRICKS) {
 
             // Rarely spawn a Wildfire:
-            boolean isInSoulSandValley = this.level().getBiome(this.blockPosition()) == Biomes.SOUL_SAND_VALLEY;
+            // By key: a Holder never equalled a ResourceKey, so this was always false before 26.3.
+            boolean isInSoulSandValley = this.level().getBiome(this.blockPosition()).is(Biomes.SOUL_SAND_VALLEY);
             if(this.getRandom().nextInt(isInSoulSandValley ? 6 : 12) == 0) {
                 WildfireEntity wildfireEntity = new WildfireEntity(ModEntities.WILDFIRE, this.level());
                 wildfireEntity.setPos(this.position());

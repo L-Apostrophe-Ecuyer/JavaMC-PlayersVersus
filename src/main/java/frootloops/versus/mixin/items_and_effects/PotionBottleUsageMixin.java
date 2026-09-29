@@ -44,7 +44,7 @@ public abstract class PotionBottleUsageMixin extends Item {
         PotionContents potionContentsComponent = (PotionContents)itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
         BlockState blockState = world.getBlockState(blockPos);
 
-        boolean canConvertToMud = blockState.is(BlockTags.CONVERTABLE_TO_MUD);
+        boolean canConvertToMud = blockState.is(BlockTags.CONVERTIBLE_TO_MUD);
         boolean canConvertToWetClay = !canConvertToMud && blockState.is(Blocks.CLAY);
         if (context.getClickedFace() != Direction.DOWN && potionContentsComponent.is(Potions.WATER) && (canConvertToMud || canConvertToWetClay)) {
             world.playSound((Player)null, blockPos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -54,7 +54,7 @@ public abstract class PotionBottleUsageMixin extends Item {
                 ServerLevel serverWorld = (ServerLevel)world;
 
                 for(int i = 0; i < 5; ++i) {
-                    serverWorld.sendParticles(ParticleTypes.SPLASH, (double)blockPos.getX() + world.random.nextDouble(), (double)(blockPos.getY() + 1), (double)blockPos.getZ() + world.random.nextDouble(), 1, 0.0, 0.0, 0.0, 1.0);
+                    serverWorld.sendParticles(ParticleTypes.SPLASH, (double)blockPos.getX() + world.getRandom().nextDouble(), (double)(blockPos.getY() + 1), (double)blockPos.getZ() + world.getRandom().nextDouble(), 1, 0.0, 0.0, 0.0, 1.0);
                 }
             }
 

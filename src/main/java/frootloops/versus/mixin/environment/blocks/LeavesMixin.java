@@ -13,7 +13,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -71,7 +70,8 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
                 livingEntity.setDeltaMovement(livingEntity.getDeltaMovement().multiply(1.0, 0.95, 1.0));
                 return Shapes.empty();
             }
-            if(livingEntity instanceof Spider || livingEntity instanceof FlyingAnimal || livingEntity instanceof Animal) return Shapes.block();
+            // FlyingAnimal (bees and parrots, both animals) is gone since 26.2.
+            if(livingEntity instanceof Spider || livingEntity instanceof Animal) return Shapes.block();
             if(!context.isAbove(Shapes.block(), pos, true)) return Shapes.empty();
         }
         return Shapes.block();

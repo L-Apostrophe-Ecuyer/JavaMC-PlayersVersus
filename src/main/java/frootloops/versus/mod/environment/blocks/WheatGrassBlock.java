@@ -2,6 +2,7 @@
 package frootloops.versus.mod.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -34,7 +35,7 @@ public class WheatGrassBlock extends TallGrassBlock {
     }
 
     @Override
-    public void performBonemeal(ServerLevel world, RandomSource random, BlockPos pos, BlockState state) {
+    public void performBonemeal(ServerLevel world, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         if((state.getBlock() == CustomBlocks.WILD_WHEAT)) {
             if(random.nextFloat() < 0.33f) world.setBlock(pos, Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 7), UPDATE_CLIENTS);
         }

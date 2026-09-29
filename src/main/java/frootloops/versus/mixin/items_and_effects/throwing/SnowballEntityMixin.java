@@ -27,7 +27,7 @@ public abstract class SnowballEntityMixin extends ThrowableItemProjectile {
         if (entity instanceof Player && !((Player) entity).getAbilities().invulnerable)
         {
             entity.setDeltaMovement(entity.getDeltaMovement().add(this.getDeltaMovement().normalize()));
-            entity.hurtMarked = true;
+            entity.syncVelocity = true;
         }
     }
 }

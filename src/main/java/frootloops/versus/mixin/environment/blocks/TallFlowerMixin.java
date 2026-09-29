@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -42,7 +43,7 @@ public abstract class TallFlowerMixin extends VegetationBlock implements Bonemea
     }
 
     @Override
-    public void performBonemeal(ServerLevel world, RandomSource random, BlockPos pos, BlockState state) {
+    public void performBonemeal(ServerLevel world, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         if(state.is(Blocks.ROSE_BUSH)) TallFlowerBlock.popResource((Level)world, pos, new ItemStack(Items.POPPY));
         else TallFlowerBlock.popResource((Level)world, pos, new ItemStack(this));
     }

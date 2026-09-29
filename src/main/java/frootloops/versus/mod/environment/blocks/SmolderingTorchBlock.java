@@ -1,6 +1,7 @@
 package frootloops.versus.mod.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.WorldTime;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -20,7 +21,7 @@ public class SmolderingTorchBlock extends TorchBlock {
     }
 
     public void tickSmolderingTorchDegradation(BlockState state, ServerLevel world, BlockPos pos) {
-        if(world.dimensionType().ultraWarm()) return;
+        if(WorldTime.ultraWarm(world)) return;
         world.setBlockAndUpdate(pos, CustomBlocks.EXTINGUISHED_TORCH.withPropertiesOf(state));
         world.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 8, 0.1, 0.2, 0.1, 0.03);
         world.playLocalSound(pos, SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, 0.8f, 0.8f, true);
