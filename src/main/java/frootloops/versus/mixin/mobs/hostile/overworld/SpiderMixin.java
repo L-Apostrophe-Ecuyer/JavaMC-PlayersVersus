@@ -3,7 +3,7 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.*;
@@ -19,8 +19,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Skeleton;
-import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.skeleton.Skeleton;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
@@ -43,7 +43,7 @@ import java.util.Objects;
 public class SpiderMixin extends Monster {
     private static final EntityDataAccessor<Boolean> BABY = SynchedEntityData.defineId(Spider.class, EntityDataSerializers.BOOLEAN);
 
-    private static final ResourceLocation BABY_SCALE_MODIFIER_ID = ResourceLocation.withDefaultNamespace("baby");
+    private static final Identifier BABY_SCALE_MODIFIER_ID = Identifier.withDefaultNamespace("baby");
     private static final AttributeModifier BABY_SCALE_MODIFIER  = new AttributeModifier(BABY_SCALE_MODIFIER_ID, -0.5, AttributeModifier.Operation.ADD_VALUE);
 
     protected SpiderMixin(EntityType<? extends Monster> entityType, Level world) {

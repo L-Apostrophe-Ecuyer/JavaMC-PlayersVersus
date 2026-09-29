@@ -7,7 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
@@ -33,8 +33,8 @@ public abstract class Combat {
     public static final double SWORD_SPEED = 1.6, SWORD_DAMAGE = 3.0, SWORD_REACH = 0.0;
     public static final double HOE_SPEED = 2.0, HOE_DAMAGE = 1.0, HOE_REACH = 0.5;
     public static final double AXE_SPEED = 1.0, AXE_DAMAGE = 6.0, AXE_REACH = 0.0;
-    public static final ResourceLocation ATTACK_REACH_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID,"attack_reach_modifier");
-    public static final ResourceLocation ATTACK_KNOCKBACK_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID,"attack_knockback_modifier");
+    public static final Identifier ATTACK_REACH_MODIFIER_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID,"attack_reach_modifier");
+    public static final Identifier ATTACK_KNOCKBACK_MODIFIER_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID,"attack_knockback_modifier");
 
     public static Attribute CRITICAL_ATTACK_DAMAGE_ATTRIBUTE, SPRINT_ATTACK_DAMAGE_ATTRIBUTE;
     public static Holder<Attribute> CRITICAL_ATTACK_DAMAGE, SPRINT_ATTACK_DAMAGE;
@@ -43,14 +43,14 @@ public abstract class Combat {
         // Register critical attack damage
         CRITICAL_ATTACK_DAMAGE_ATTRIBUTE = Registry.register(
                 BuiltInRegistries.ATTRIBUTE,
-                ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "critical_attack_damage"),
+                Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "critical_attack_damage"),
                 new RangedAttribute("attribute.name.critical_attack_damage", 2.0, 0.0, 2048.0).setSyncable(true)
         );
 
         // Register sprint attack damage
         SPRINT_ATTACK_DAMAGE_ATTRIBUTE = Registry.register(
                 BuiltInRegistries.ATTRIBUTE,
-                ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "sprint_attack_damage"),
+                Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "sprint_attack_damage"),
                 new RangedAttribute("attribute.name.sprint_attack_damage", 2.0, 0.0, 2048.0).setSyncable(true)
         );
     }
@@ -143,7 +143,7 @@ public abstract class Combat {
             AABB box2 = mob.getBoundingBox();
             attackBox = new AABB(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
         }
-        else if (mob instanceof EnderMan) {
+        else if (mob instanceof Enderman) {
             attackBox = mob.getBoundingBox().inflate(0.5d, mob.getEyeHeight(mob.getPose())/2 + 1d, 0.5d);
         }
         else if (jump || !mob.onGround()) {

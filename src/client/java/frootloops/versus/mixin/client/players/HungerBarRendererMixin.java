@@ -6,9 +6,9 @@ import frootloops.versus.VersusSettings;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -25,15 +25,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Gui.class)
 public class HungerBarRendererMixin {
 
-    @Shadow private static final ResourceLocation FOOD_EMPTY_HUNGER_SPRITE = ResourceLocation.parse("hud/food_empty_hunger"), FOOD_HALF_HUNGER_SPRITE = ResourceLocation.parse("hud/food_half_hunger"), FOOD_FULL_HUNGER_SPRITE = ResourceLocation.parse("hud/food_full_hunger");
-    @Shadow private static final ResourceLocation FOOD_EMPTY_SPRITE = ResourceLocation.parse("hud/food_empty"), FOOD_HALF_SPRITE = ResourceLocation.parse("hud/food_half"), FOOD_FULL_SPRITE = ResourceLocation.parse("hud/food_full");
+    @Shadow private static final Identifier FOOD_EMPTY_HUNGER_SPRITE = Identifier.parse("hud/food_empty_hunger"), FOOD_HALF_HUNGER_SPRITE = Identifier.parse("hud/food_half_hunger"), FOOD_FULL_HUNGER_SPRITE = Identifier.parse("hud/food_full_hunger");
+    @Shadow private static final Identifier FOOD_EMPTY_SPRITE = Identifier.parse("hud/food_empty"), FOOD_HALF_SPRITE = Identifier.parse("hud/food_half"), FOOD_FULL_SPRITE = Identifier.parse("hud/food_full");
     @Shadow private final RandomSource random = RandomSource.create();
     @Shadow private int tickCount;
 
     @Shadow @Nullable private Player getCameraPlayer() {return null;}
 
     @Inject(method = "renderFood", at = @At("HEAD"), cancellable = true)
-    private void renderFood(GuiGraphics context, Player player, int top, int left, CallbackInfo info) {
+    private void renderFood(GuiGraphicsExtractor context, Player player, int top, int left, CallbackInfo info) {
         if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return;
 
         FoodData hungerManager = player.getFoodData();
@@ -41,7 +41,7 @@ public class HungerBarRendererMixin {
         int foodPointsAvailable = Math.max((int) (player.getMaxHealth() - player.getHealth() + 6), playerFoodLevel);
         boolean makeIconsJiggle = (hungerManager.getSaturationLevel() == 0.0f && this.tickCount % (playerFoodLevel * 3 + 1) == 0) || (VersusSettings.Combat.DO_FOOD_OVERHAUL && player.hasEffect(MobEffects.HUNGER));
 
-        ResourceLocation iconHaunchFull, iconHaunchHalf, iconHaunchEmpty, iconHaunchHalfDisabled, iconHaunchEmptyDisabled;
+        Identifier iconHaunchFull, iconHaunchHalf, iconHaunchEmpty, iconHaunchHalfDisabled, iconHaunchEmptyDisabled;
         if (player.hasEffect(MobEffects.HUNGER)) {
             iconHaunchEmpty = FOOD_EMPTY_HUNGER_SPRITE;
             iconHaunchHalf = FOOD_HALF_HUNGER_SPRITE;

@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.CreeperRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class DeeperCreeperRenderer extends CreeperRenderer {
@@ -15,10 +15,10 @@ public class DeeperCreeperRenderer extends CreeperRenderer {
         super(context);
     }
 
-    private final ResourceLocation TEXTURE = ResourceLocation.parse(VersusMod.MOD_ID  + ":textures/entity/deeper_creeper.png");
+    private final Identifier TEXTURE = Identifier.parse(VersusMod.MOD_ID  + ":textures/entity/deeper_creeper.png");
 
     @Override
-    public ResourceLocation getTextureLocation(CreeperRenderState creeperEntityRenderState) {
+    public Identifier getTextureLocation(CreeperRenderState creeperEntityRenderState) {
         return TEXTURE;
     }
 }

@@ -6,20 +6,20 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.client.renderer.entity.state.ZombieRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class FrostedZombieRenderer extends ZombieRenderer {
 
 
-    private final ResourceLocation TEXTURE = ResourceLocation.parse(VersusMod.MOD_ID  + ":textures/entity/frosted_zombie.png");
+    private final Identifier TEXTURE = Identifier.parse(VersusMod.MOD_ID  + ":textures/entity/frosted_zombie.png");
 
     public FrostedZombieRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ZombieRenderState zombieEntityRenderState) {
+    public Identifier getTextureLocation(ZombieRenderState zombieEntityRenderState) {
         return TEXTURE;
     }
 }

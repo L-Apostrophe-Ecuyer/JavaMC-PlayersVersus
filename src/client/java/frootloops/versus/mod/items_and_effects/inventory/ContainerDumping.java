@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.WidgetSprites;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -18,8 +18,8 @@ public abstract class ContainerDumping {
 
     private static final boolean DEBUG_MODE = false;
 
-    public static final WidgetSprites TEXTURE_DUMP_TO_PLAYER_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/dump_to_player"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/dump_to_player_highlighted"));
-    public static final WidgetSprites TEXTURE_DUMP_TO_STORAGE_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/dump_to_storage"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/dump_to_storage_highlighted"));
+    public static final WidgetSprites TEXTURE_DUMP_TO_PLAYER_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/dump_to_player"), Identifier.fromNamespaceAndPath("players-versus", "container/dump_to_player_highlighted"));
+    public static final WidgetSprites TEXTURE_DUMP_TO_STORAGE_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/dump_to_storage"), Identifier.fromNamespaceAndPath("players-versus", "container/dump_to_storage_highlighted"));
 
     private record InventorySlot(int slodId, ItemStack stack) {}
 

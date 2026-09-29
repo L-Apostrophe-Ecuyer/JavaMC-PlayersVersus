@@ -5,7 +5,7 @@ import frootloops.versus.mod.environment.blocks.LadderBlockItem;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.StandingAndWallBlockItem;
@@ -17,7 +17,7 @@ import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.get
 public abstract class CustomBlockItems {
 
     private static Item.Properties getBlockSettings(String name) {
-        return new Item.Properties().setId(ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, name))).useBlockDescriptionPrefix();
+        return new Item.Properties().setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, name))).useBlockDescriptionPrefix();
     }
 
     public static final LadderBlockItem LADDER = new LadderBlockItem((LadderBlock)Blocks.LADDER, getBlockSettings("ladder"));

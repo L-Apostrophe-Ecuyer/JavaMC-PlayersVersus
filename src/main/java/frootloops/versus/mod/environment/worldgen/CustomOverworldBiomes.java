@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
@@ -120,7 +120,7 @@ public class CustomOverworldBiomes {
     }
 
     private static ResourceKey<Biome> keyOf(String id) {
-        return ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, id));
+        return ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, id));
     }
 
     public record PlacedBiome(ResourceKey<Biome> biome, PlacedBiomeType type, boolean isRare,

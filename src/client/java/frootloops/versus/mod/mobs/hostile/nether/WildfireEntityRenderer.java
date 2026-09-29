@@ -8,13 +8,13 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class WildfireEntityRenderer extends MobRenderer<WildfireEntity, LivingEntityRenderState, WildfireEntityModel> {
 
-    private final ResourceLocation TEXTURE_LIT = ResourceLocation.parse(VersusMod.MOD_ID  + ":textures/entity/wildfire_lit.png");
-    private final ResourceLocation TEXTURE_UNLIT = ResourceLocation.parse(VersusMod.MOD_ID  + ":textures/entity/wildfire_unlit.png");
+    private final Identifier TEXTURE_LIT = Identifier.parse(VersusMod.MOD_ID  + ":textures/entity/wildfire_lit.png");
+    private final Identifier TEXTURE_UNLIT = Identifier.parse(VersusMod.MOD_ID  + ":textures/entity/wildfire_unlit.png");
 
     public WildfireEntityRenderer(EntityRendererProvider.Context context) {
         super(context, new WildfireEntityModel(context.bakeLayer(ModelLayers.BLAZE)), 0.5F);
@@ -25,7 +25,7 @@ public class WildfireEntityRenderer extends MobRenderer<WildfireEntity, LivingEn
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LivingEntityRenderState state) {return state.displayFireAnimation? TEXTURE_LIT : TEXTURE_UNLIT;}
+    public Identifier getTextureLocation(LivingEntityRenderState state) {return state.displayFireAnimation? TEXTURE_LIT : TEXTURE_UNLIT;}
 
     public LivingEntityRenderState createRenderState() {
         return new LivingEntityRenderState();

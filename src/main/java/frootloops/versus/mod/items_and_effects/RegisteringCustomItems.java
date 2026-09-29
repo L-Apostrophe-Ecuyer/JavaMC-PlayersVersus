@@ -8,7 +8,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -146,7 +146,7 @@ public abstract class RegisteringCustomItems {
     }
 
     public static Item.Properties getItemSettings(String name) {
-        return new Item.Properties().setId(ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, name)));
+        return new Item.Properties().setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, name)));
     }
 
     public static Item registerCustomItem(String name, Item item) {
@@ -161,6 +161,6 @@ public abstract class RegisteringCustomItems {
         if(item == null) VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
         if (group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.accept(item));
         if (group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.accept(item));
-        return Registry.register(BuiltInRegistries.ITEM, ResourceLocation.fromNamespaceAndPath(MOD_ID, name), item);
+        return Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID, name), item);
     }
 }

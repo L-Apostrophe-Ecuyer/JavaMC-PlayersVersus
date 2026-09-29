@@ -2,7 +2,7 @@ package frootloops.versus.mixin.client.players;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
@@ -38,11 +38,11 @@ public abstract class DebugHudMixin {
     }
 
     @Shadow
-    private void renderLines(GuiGraphics context, List<String> text, boolean left) {}
+    private void renderLines(GuiGraphicsExtractor context, List<String> text, boolean left) {}
 
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void limitDebugWhenInSurvival(GuiGraphics context, CallbackInfo info) {
+    private void limitDebugWhenInSurvival(GuiGraphicsExtractor context, CallbackInfo info) {
         if (this.minecraft.getCameraEntity() != null && this.minecraft.level != null) {
             boolean shouldRestrictDebug = this.minecraft.player.gameMode() == null || this.minecraft.player.gameMode().isSurvival();
             if (shouldRestrictDebug) {

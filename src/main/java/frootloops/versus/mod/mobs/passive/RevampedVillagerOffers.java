@@ -20,13 +20,13 @@ import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellSusStewFact
 import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.TypedWrapperFactory;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.Map;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;

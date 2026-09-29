@@ -19,7 +19,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
@@ -90,7 +90,7 @@ public final class WorldgenTestData {
      */
     public static DensityFunction seeded(RandomState config, String id) {
         return registries().lookupOrThrow(Registries.DENSITY_FUNCTION)
-                .getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.parse(id))).value()
+                .getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, Identifier.parse(id))).value()
                 .mapAll(AquiferInputs.seeding(config));
     }
 

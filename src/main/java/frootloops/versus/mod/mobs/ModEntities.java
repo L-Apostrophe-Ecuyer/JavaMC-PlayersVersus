@@ -13,7 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -72,14 +72,14 @@ public class ModEntities {
     }
 
     private static ResourceKey<EntityType<?>> keyOf(String id) {
-        return ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, id));
+        return ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, id));
     }
 
     private static <T extends Entity> EntityType<T> register(String id, EntityType.Builder<T> type) {
         return register(keyOf(id), type);
     }
 
-    public static ResourceLocation getId(EntityType<?> type) {
+    public static Identifier getId(EntityType<?> type) {
         return BuiltInRegistries.ENTITY_TYPE.getKey(type);
     }
 

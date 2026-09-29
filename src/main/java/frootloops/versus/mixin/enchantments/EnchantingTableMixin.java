@@ -2,8 +2,8 @@ package frootloops.versus.mixin.enchantments;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
-import net.minecraft.Util;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.util.Util;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.IdMap;

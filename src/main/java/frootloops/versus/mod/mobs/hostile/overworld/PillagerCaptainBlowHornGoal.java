@@ -4,14 +4,14 @@ package frootloops.versus.mod.mobs.hostile.overworld;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.InstrumentItem;
@@ -66,7 +66,7 @@ public class PillagerCaptainBlowHornGoal extends Goal {
         this.prevOffhandStack = this.illager.getOffhandItem();
         this.prevMainhandStack = this.illager.getMainHandItem();
 
-        Holder.Reference<Instrument> entry = illager.level().registryAccess().lookupOrThrow(Registries.INSTRUMENT).get(ResourceLocation.withDefaultNamespace("seek_goat_horn")).get();
+        Holder.Reference<Instrument> entry = illager.level().registryAccess().lookupOrThrow(Registries.INSTRUMENT).get(Identifier.withDefaultNamespace("seek_goat_horn")).get();
         ItemStack goatHornStack = InstrumentItem.create(Items.GOAT_HORN, entry);
         this.illager.setItemSlot(EquipmentSlot.OFFHAND, goatHornStack);
         this.illager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);

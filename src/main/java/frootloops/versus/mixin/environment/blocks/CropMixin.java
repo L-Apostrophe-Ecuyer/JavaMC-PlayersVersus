@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Optional;
 
-import static net.minecraft.world.level.block.FarmBlock.MOISTURE;
+import static net.minecraft.world.level.block.FarmlandBlock.MOISTURE;
 
 @Mixin(CropBlock.class)
 public abstract class CropMixin extends VegetationBlock {

@@ -14,7 +14,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
@@ -183,14 +183,14 @@ public class CustomBlocks {
 
 
     private static BlockBehaviour.Properties getSettings(String name) {
-        return BlockBehaviour.Properties.of().setId(ResourceKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, name)));
+        return BlockBehaviour.Properties.of().setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, name)));
     }
 
     private static BlockBehaviour.Properties getSettings(String name, Block blockToCopy) {
-        return BlockBehaviour.Properties.ofFullCopy(blockToCopy).setId(ResourceKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, name)));
+        return BlockBehaviour.Properties.ofFullCopy(blockToCopy).setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, name)));
     }
     private static Block registerBlock(String name, Block block) {
-        Registry.register(BuiltInRegistries.BLOCK, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, name), block);
+        Registry.register(BuiltInRegistries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, name), block);
         return block;
     }
 

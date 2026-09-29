@@ -8,11 +8,11 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,10 +29,10 @@ public class CrosshairRendererMixin {
     @Shadow
     private final DebugScreenOverlay debugOverlay;
 
-    @Shadow private static final ResourceLocation CROSSHAIR_SPRITE = ResourceLocation.parse("hud/crosshair");
-    @Shadow private static final ResourceLocation CROSSHAIR_ATTACK_INDICATOR_FULL_SPRITE = ResourceLocation.parse("hud/crosshair_attack_indicator_full");
-    @Shadow private static final ResourceLocation CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_SPRITE = ResourceLocation.parse("hud/crosshair_attack_indicator_background");
-    @Shadow private static final ResourceLocation CROSSHAIR_ATTACK_INDICATOR_PROGRESS_SPRITE = ResourceLocation.parse("hud/crosshair_attack_indicator_progress");
+    @Shadow private static final Identifier CROSSHAIR_SPRITE = Identifier.parse("hud/crosshair");
+    @Shadow private static final Identifier CROSSHAIR_ATTACK_INDICATOR_FULL_SPRITE = Identifier.parse("hud/crosshair_attack_indicator_full");
+    @Shadow private static final Identifier CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_SPRITE = Identifier.parse("hud/crosshair_attack_indicator_background");
+    @Shadow private static final Identifier CROSSHAIR_ATTACK_INDICATOR_PROGRESS_SPRITE = Identifier.parse("hud/crosshair_attack_indicator_progress");
 
 
     @Shadow
@@ -43,7 +43,7 @@ public class CrosshairRendererMixin {
     }
 
     @Overwrite
-    private void renderCrosshair(GuiGraphics context, DeltaTracker tickCounter) {
+    private void renderCrosshair(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
         Options gameOptions = this.minecraft.options;
         if (gameOptions.getCameraType().isFirstPerson()) {
             if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR || this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {

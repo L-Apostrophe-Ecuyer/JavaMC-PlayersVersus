@@ -3,7 +3,7 @@ package frootloops.versus.mod.mobs.hostile.nether;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.BlazeModel;
+import net.minecraft.client.model.monster.blaze.BlazeModel;
 import net.minecraft.client.model.geom.ModelPart;
 
 @Environment(EnvType.CLIENT)

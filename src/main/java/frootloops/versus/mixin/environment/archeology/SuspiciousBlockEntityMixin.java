@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,14 +46,14 @@ public abstract class SuspiciousBlockEntityMixin extends BlockEntity {
 
     @Shadow public void setLootTable(ResourceKey<LootTable> lootTable, long seed) {}
 
-    private static final ResourceKey<LootTable> LOOT_SAND_AQUATIC = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_aquatic"));
-    private static final ResourceKey<LootTable> LOOT_SAND_SURFACE = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_surface"));
-    private static final ResourceKey<LootTable> LOOT_SAND_DESERT = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_desert"));
+    private static final ResourceKey<LootTable> LOOT_SAND_AQUATIC = ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_aquatic"));
+    private static final ResourceKey<LootTable> LOOT_SAND_SURFACE = ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_surface"));
+    private static final ResourceKey<LootTable> LOOT_SAND_DESERT = ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_desert"));
 
-    private static final ResourceKey<LootTable> LOOT_GRAVEL_AQUATIC = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_aquatic"));
-    private static final ResourceKey<LootTable> LOOT_GRAVEL_SURFACE = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_surface"));
-    private static final ResourceKey<LootTable> LOOT_GRAVEL_DEEP_CAVE = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_deep_cave"));
-    private static final ResourceKey<LootTable> LOOT_GRAVEL_REGULAR_CAVE = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_regular_cave"));
+    private static final ResourceKey<LootTable> LOOT_GRAVEL_AQUATIC = ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_aquatic"));
+    private static final ResourceKey<LootTable> LOOT_GRAVEL_SURFACE = ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_surface"));
+    private static final ResourceKey<LootTable> LOOT_GRAVEL_DEEP_CAVE = ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_deep_cave"));
+    private static final ResourceKey<LootTable> LOOT_GRAVEL_REGULAR_CAVE = ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_regular_cave"));
 
     @Inject(method = "brushingCompleted", at = @At("RETURN"), cancellable = false)
     private void finishBrushing(ServerLevel world, LivingEntity brusher, ItemStack itemStack, CallbackInfo info) {

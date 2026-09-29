@@ -1,4 +1,4 @@
-accessWidener	v2	named
+accessWidener	v2	official
 accessible	method	net/minecraft/world/level/biome/OverworldBiomeBuilder	addBiomes	(Ljava/util/function/Consumer;)V
 extendable	class	net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator
 accessible	method	net/minecraft/world/level/biome/BiomeGenerationSettings	<init>	(Lnet/minecraft/core/HolderSet;Ljava/util/List;)V

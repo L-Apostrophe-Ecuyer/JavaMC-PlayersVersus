@@ -2,13 +2,13 @@ package frootloops.versus.mixin.client.items_and_effects.inventory.recipe_book;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.recipebook.RecipeButton;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -22,10 +22,10 @@ import static frootloops.versus.VersusModClient.*;
 @Environment(EnvType.CLIENT)
 @Mixin(RecipeButton.class)
 public abstract class AnimatedResultButtonMixin extends AbstractWidget {
-    @Shadow private static final ResourceLocation SLOT_MANY_CRAFTABLE_SPRITE = ResourceLocation.withDefaultNamespace("recipe_book/slot_many_craftable");
-    @Shadow private static final ResourceLocation SLOT_CRAFTABLE_SPRITE = ResourceLocation.withDefaultNamespace("recipe_book/slot_craftable");
-    @Shadow private static final ResourceLocation SLOT_MANY_UNCRAFTABLE_SPRITE = ResourceLocation.withDefaultNamespace("recipe_book/slot_many_uncraftable");
-    @Shadow private static final ResourceLocation SLOT_UNCRAFTABLE_SPRITE = ResourceLocation.withDefaultNamespace("recipe_book/slot_uncraftable");
+    @Shadow private static final Identifier SLOT_MANY_CRAFTABLE_SPRITE = Identifier.withDefaultNamespace("recipe_book/slot_many_craftable");
+    @Shadow private static final Identifier SLOT_CRAFTABLE_SPRITE = Identifier.withDefaultNamespace("recipe_book/slot_craftable");
+    @Shadow private static final Identifier SLOT_MANY_UNCRAFTABLE_SPRITE = Identifier.withDefaultNamespace("recipe_book/slot_many_uncraftable");
+    @Shadow private static final Identifier SLOT_UNCRAFTABLE_SPRITE = Identifier.withDefaultNamespace("recipe_book/slot_uncraftable");
     @Shadow private float animationTime;
     @Shadow private RecipeCollection collection;
     @Shadow private boolean hasMultipleRecipes() {
@@ -45,11 +45,11 @@ public abstract class AnimatedResultButtonMixin extends AbstractWidget {
 
 
     @Overwrite
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
         // FIRST STEP -----------------
         // Draw background:
-        ResourceLocation identifier;
+        Identifier identifier;
         boolean isGroupOfRecipes = this.hasMultipleRecipes();
         boolean isCraftable = this.collection.hasCraftable();
         if (isCraftable) {
@@ -85,7 +85,7 @@ public abstract class AnimatedResultButtonMixin extends AbstractWidget {
             }*/
             ItemStack itemStack = ((RecipeButton)((Object)this)).getDisplayStack();
             context.renderItem(itemStack, this.getX() + offset, this.getY() + offset, 0);
-            ResourceLocation overlayTextureID = isCraftable ? RECIPE_BOOK_CRAFTABLE_GROUP_OVERLAY : RECIPE_BOOK_UNCRAFTABLE_GROUP_OVERLAY;
+            Identifier overlayTextureID = isCraftable ? RECIPE_BOOK_CRAFTABLE_GROUP_OVERLAY : RECIPE_BOOK_UNCRAFTABLE_GROUP_OVERLAY;
             context.blitSprite(RenderPipelines.GUI_TEXTURED, overlayTextureID, this.getX(), this.getY(), this.width, this.height);
 
         }

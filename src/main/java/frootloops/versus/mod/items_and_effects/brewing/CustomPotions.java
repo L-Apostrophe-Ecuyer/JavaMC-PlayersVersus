@@ -5,7 +5,7 @@ import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -89,7 +89,7 @@ public abstract class CustomPotions {
     }
 
     private static Holder<Potion> registerCustomPotion(String name, Potion customPotion) {
-        Registry.register(BuiltInRegistries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, name), customPotion);
+        Registry.register(BuiltInRegistries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, name), customPotion);
         Holder<Potion> entry = BuiltInRegistries.POTION.wrapAsHolder(customPotion);
         if(entry == null) VersusMod.MOD_LOGGER.error("ERROR: Potion Entry for '" + name + "' was returned as null by the registry upon launching the game.");
         return entry;

@@ -3,7 +3,7 @@ package frootloops.versus.mod.mobs.hostile.overworld;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -37,7 +37,7 @@ public class DeeperCreeperEntity extends Creeper {
     //private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     //private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private int lastFuseTime, currentFuseTime, fuseTime = 29, explosionRadius = 4;
-    public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.createFixedRangeEvent(ResourceLocation.parse("ambient.cave"), 32);
+    public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.createFixedRangeEvent(Identifier.parse("ambient.cave"), 32);
 
     public DeeperCreeperEntity(EntityType<? extends Creeper> entityType, Level world) {
         super(entityType, world);

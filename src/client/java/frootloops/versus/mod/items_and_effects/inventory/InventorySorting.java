@@ -8,7 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -27,11 +27,11 @@ public class InventorySorting {
     public static final boolean DEBUG_SORTING_OUTPUT = true;
     private static final boolean DEBUG_ITEM_SWITICHING = true;
 
-    public static final WidgetSprites TEXTURE_HOTBAR_SWAP_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/hotbar_swap_down"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/hotbar_swap_down_highlighted"));
-    public static final WidgetSprites TEXTURE_INVENTORY_SORT_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/sort_inventory"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/sort_inventory_highlighted"));
-    public static final WidgetSprites TEXTURE_SMALL_INVENTORY_SORT_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/sort_inventory_small"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/sort_inventory_small_highlighted"));
-    public static final WidgetSprites TEXTURE_CHEST_SORT_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/sort_chest"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/sort_chest_highlighted"));
-    public static final WidgetSprites TEXTURE_SHULKER_SORT_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/sort_shulker"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/sort_shulker_highlighted"));
+    public static final WidgetSprites TEXTURE_HOTBAR_SWAP_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/hotbar_swap_down"), Identifier.fromNamespaceAndPath("players-versus", "container/hotbar_swap_down_highlighted"));
+    public static final WidgetSprites TEXTURE_INVENTORY_SORT_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/sort_inventory"), Identifier.fromNamespaceAndPath("players-versus", "container/sort_inventory_highlighted"));
+    public static final WidgetSprites TEXTURE_SMALL_INVENTORY_SORT_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/sort_inventory_small"), Identifier.fromNamespaceAndPath("players-versus", "container/sort_inventory_small_highlighted"));
+    public static final WidgetSprites TEXTURE_CHEST_SORT_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/sort_chest"), Identifier.fromNamespaceAndPath("players-versus", "container/sort_chest_highlighted"));
+    public static final WidgetSprites TEXTURE_SHULKER_SORT_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/sort_shulker"), Identifier.fromNamespaceAndPath("players-versus", "container/sort_shulker_highlighted"));
 
     public enum InventoryToSort {
         SURVIVAL_INVENTORY,

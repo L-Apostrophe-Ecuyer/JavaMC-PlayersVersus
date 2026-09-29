@@ -2,7 +2,7 @@ package frootloops.versus.mixin.players;
 
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
@@ -27,7 +27,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @Shadow public void awardStat(ResourceLocation stat) {}
+    @Shadow public void awardStat(Identifier stat) {}
 
 
 

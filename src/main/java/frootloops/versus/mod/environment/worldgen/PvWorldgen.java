@@ -16,7 +16,7 @@ import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
 import frootloops.versus.mod.environment.worldgen.density.PvTerrain;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
@@ -30,18 +30,18 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
  */
 public final class PvWorldgen {
 
-    public static final ResourceLocation AQUIFER_FLOODEDNESS_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "aquifer_floodedness");
-    public static final ResourceLocation AQUIFER_SPREAD_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "aquifer_spread");
-    public static final ResourceLocation DEPTH_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "depth");
-    public static final ResourceLocation TERRAIN_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "terrain");
-    public static final ResourceLocation ENTRANCES_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "entrances");
-    public static final ResourceLocation NOODLE_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "noodle");
-    public static final ResourceLocation FINAL_DENSITY_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "final_density");
-    public static final ResourceLocation CORRIDOR_BIAS_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "corridor_bias");
-    public static final ResourceLocation HIGH_RIVER_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "high_river");
-    public static final ResourceLocation AT_HEIGHT_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "at_height");
-    public static final ResourceLocation BIOME_SOURCE_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "overworld");
-    public static final ResourceLocation CHUNK_GENERATOR_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "noise");
+    public static final Identifier AQUIFER_FLOODEDNESS_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "aquifer_floodedness");
+    public static final Identifier AQUIFER_SPREAD_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "aquifer_spread");
+    public static final Identifier DEPTH_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "depth");
+    public static final Identifier TERRAIN_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "terrain");
+    public static final Identifier ENTRANCES_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "entrances");
+    public static final Identifier NOODLE_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "noodle");
+    public static final Identifier FINAL_DENSITY_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "final_density");
+    public static final Identifier CORRIDOR_BIAS_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "corridor_bias");
+    public static final Identifier HIGH_RIVER_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "high_river");
+    public static final Identifier AT_HEIGHT_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "at_height");
+    public static final Identifier BIOME_SOURCE_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "overworld");
+    public static final Identifier CHUNK_GENERATOR_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "noise");
 
     private PvWorldgen() {
     }

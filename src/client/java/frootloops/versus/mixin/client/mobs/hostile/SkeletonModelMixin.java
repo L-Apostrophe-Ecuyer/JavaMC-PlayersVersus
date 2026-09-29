@@ -3,11 +3,11 @@ package frootloops.versus.mixin.client.mobs.hostile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.SkeletonModel;
+import net.minecraft.client.model.monster.skeleton.SkeletonModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.state.SkeletonRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Pose;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +22,7 @@ import java.util.function.Function;
 public abstract class SkeletonModelMixin<S extends SkeletonRenderState> extends HumanoidModel<S> {
 
 
-    public SkeletonModelMixin(ModelPart root, Function<ResourceLocation, RenderType> renderLayerFactory) {
+    public SkeletonModelMixin(ModelPart root, Function<Identifier, RenderType> renderLayerFactory) {
         super(root, renderLayerFactory);
     }
 

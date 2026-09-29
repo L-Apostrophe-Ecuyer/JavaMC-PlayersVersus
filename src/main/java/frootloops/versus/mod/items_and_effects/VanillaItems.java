@@ -10,7 +10,7 @@ import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -50,7 +50,7 @@ public class VanillaItems {
         setUpTransformVanillaItemsToModded(); // This is to replace vanilla items with modded ones, when components don't do the job
 
         // Modify default components:
-        DefaultItemComponentEvents.MODIFY.addPhaseOrdering(Event.DEFAULT_PHASE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "late"));
+        DefaultItemComponentEvents.MODIFY.addPhaseOrdering(Event.DEFAULT_PHASE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "late"));
 
         // Modify tools:
         modifyVanillaToolsAndWeapons();
@@ -401,7 +401,7 @@ public class VanillaItems {
     public static ItemAttributeModifiers createArmorAttributes(ArmorType type, double armor, double toughness, double kbResistance, double fallDmgMultiplier) {
         ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
         EquipmentSlotGroup attributeModifierSlot = EquipmentSlotGroup.bySlot(type.getSlot());
-        ResourceLocation identifier = ResourceLocation.withDefaultNamespace("armor." + type.getName());
+        Identifier identifier = Identifier.withDefaultNamespace("armor." + type.getName());
 
         builder.add(Attributes.ARMOR, new AttributeModifier(identifier, armor, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
         if (toughness != 0.0) builder.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(identifier, toughness, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
@@ -414,7 +414,7 @@ public class VanillaItems {
     private static ItemAttributeModifiers createTurtleArmorAttributes(ArmorType type, double armor) {
         ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
         EquipmentSlotGroup attributeModifierSlot = EquipmentSlotGroup.bySlot(type.getSlot());
-        ResourceLocation identifier = ResourceLocation.withDefaultNamespace("armor." + type.getName());
+        Identifier identifier = Identifier.withDefaultNamespace("armor." + type.getName());
 
         builder.add(Attributes.ARMOR, new AttributeModifier(identifier, armor, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
         builder.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(identifier, 0.5, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);

@@ -15,7 +15,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -95,8 +95,8 @@ public class RecoveryCompassItem extends Item {
 
                 // Anger nerby Endermen:
                 AABB boundingBox = new AABB(user.getX() - ENDERMAN_AGGRO_RANGE, user.getY() - ENDERMAN_AGGRO_RANGE, user.getZ() - ENDERMAN_AGGRO_RANGE, user.getX() + ENDERMAN_AGGRO_RANGE, user.getY() + ENDERMAN_AGGRO_RANGE, user.getZ() + ENDERMAN_AGGRO_RANGE);
-                List<EnderMan> nearbyEndermen = serverPlayer.level().getEntitiesOfClass(EnderMan.class, boundingBox, EntitySelector.LIVING_ENTITY_STILL_ALIVE);
-                for (EnderMan enderman : nearbyEndermen) {
+                List<Enderman> nearbyEndermen = serverPlayer.level().getEntitiesOfClass(Enderman.class, boundingBox, EntitySelector.LIVING_ENTITY_STILL_ALIVE);
+                for (Enderman enderman : nearbyEndermen) {
                     enderman.setTarget(user);
                 }
                 return new ItemStack(Items.COMPASS, 1);

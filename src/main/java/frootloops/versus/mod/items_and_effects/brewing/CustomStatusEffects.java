@@ -5,7 +5,7 @@ import frootloops.versus.mod.items_and_effects.brewing.effects.*;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 
 import static frootloops.versus.VersusMod.MOD_ID;
@@ -27,12 +27,12 @@ public abstract class CustomStatusEffects {
     }
 
     private static Holder<MobEffect> registerCustomEffect(String name, MobEffect effect) {
-        Registry.register(BuiltInRegistries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath(MOD_ID, name), effect);
+        Registry.register(BuiltInRegistries.MOB_EFFECT, Identifier.fromNamespaceAndPath(MOD_ID, name), effect);
         return BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
     }
 
     public static Holder<MobEffect> registerOverhauledVanillaEffect(String name, MobEffect effect) {
-        Registry.register(BuiltInRegistries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath("minecraft", name), effect);
+        Registry.register(BuiltInRegistries.MOB_EFFECT, Identifier.fromNamespaceAndPath("minecraft", name), effect);
         return BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
     }
 

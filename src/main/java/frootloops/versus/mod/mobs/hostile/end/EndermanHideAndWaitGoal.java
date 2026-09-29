@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,7 +15,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -23,16 +23,16 @@ import net.minecraft.world.phys.Vec3;
 
 public class EndermanHideAndWaitGoal<T extends LivingEntity> extends Goal {
 
-    private static final ResourceLocation FOLLOW_RANGE_MODIFIER_ID = ResourceLocation.withDefaultNamespace("enderman_waiting");
+    private static final Identifier FOLLOW_RANGE_MODIFIER_ID = Identifier.withDefaultNamespace("enderman_waiting");
     private static final AttributeModifier FOLLOW_RANGE_BONUS = new AttributeModifier(FOLLOW_RANGE_MODIFIER_ID, 64.0, AttributeModifier.Operation.ADD_VALUE);
 
-    protected final EnderMan mob;
+    protected final Enderman mob;
     protected final PathNavigation mobNavigation;
     @Nullable
     protected LivingEntity targetEntity;
 
 
-    public EndermanHideAndWaitGoal(EnderMan mob) {
+    public EndermanHideAndWaitGoal(Enderman mob) {
         this.mob = mob;
         this.mobNavigation = mob.getNavigation();
         this.setFlags(EnumSet.of(Flag.MOVE));

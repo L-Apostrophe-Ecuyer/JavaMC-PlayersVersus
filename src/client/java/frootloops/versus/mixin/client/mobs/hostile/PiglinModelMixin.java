@@ -2,8 +2,8 @@ package frootloops.versus.mixin.client.mobs.hostile;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.AbstractPiglinModel;
-import net.minecraft.client.model.PiglinModel;
+import net.minecraft.client.model.monster.piglin.AbstractPiglinModel;
+import net.minecraft.client.model.monster.piglin.PiglinModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.PiglinRenderState;
 import net.minecraft.util.Mth;

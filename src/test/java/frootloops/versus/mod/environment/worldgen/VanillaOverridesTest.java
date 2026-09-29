@@ -22,7 +22,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
@@ -81,7 +81,7 @@ class VanillaOverridesTest {
         for (Path file : overrides) {
             String name = file.getFileName().toString().replace(".json", "");
             JsonObject override = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
-            BiomeGenerationSettings original = vanilla.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace(name))).value()
+            BiomeGenerationSettings original = vanilla.getOrThrow(ResourceKey.create(Registries.BIOME, Identifier.withDefaultNamespace(name))).value()
                     .getGenerationSettings();
             List<String> originalCarvers = new ArrayList<>();
             original.getCarvers().forEach(carver -> originalCarvers.add(id(carver)));

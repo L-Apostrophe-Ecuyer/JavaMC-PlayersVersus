@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.client.mobs.passive;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.network.chat.Component;
@@ -20,7 +20,7 @@ public abstract class VillagerTradingScreenMixin extends AbstractContainerScreen
     }
 
     @Inject(method = "renderLabels", at = @At("TAIL"), cancellable = false)
-    public void renderMain(GuiGraphics context, int mouseX, int mouseY, CallbackInfo info) {
+    public void renderMain(GuiGraphicsExtractor context, int mouseX, int mouseY, CallbackInfo info) {
         if(menu.getTraderXp() > 0) {
             if(mouseX > leftPos + 136 && mouseX < leftPos + 234 && mouseY > topPos + 14 && mouseY < topPos + 23) {
                 Component text = Component.translatable("players-versus.tradeScreen.experienceBarHover");

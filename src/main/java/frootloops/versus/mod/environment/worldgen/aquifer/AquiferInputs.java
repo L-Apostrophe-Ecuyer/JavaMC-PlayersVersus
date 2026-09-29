@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
@@ -65,7 +65,7 @@ public record AquiferInputs(AquiferFloodedness floodedness, AquiferSpread spread
             @Override
             public DensityFunction apply(DensityFunction densityFunction) {
                 return densityFunction instanceof BlendedNoise sampler
-                        ? sampler.withNewRandom(splitter.fromHashOf(ResourceLocation.withDefaultNamespace("terrain")))
+                        ? sampler.withNewRandom(splitter.fromHashOf(Identifier.withDefaultNamespace("terrain")))
                         : densityFunction;
             }
 

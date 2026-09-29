@@ -15,7 +15,7 @@ import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(EnderMan.class)
+@Mixin(Enderman.class)
 public abstract class EndermanMixin extends Monster implements NeutralMob {
 
     private int angerTime = 0;
@@ -52,7 +52,7 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
 
     @Inject(method = "registerGoals", at = @At("HEAD"))
     private void addWaitForPlayerGoal(CallbackInfo ci) {
-        this.goalSelector.addGoal(0, new EndermanHideAndWaitGoal((EnderMan) ((Object)this)));
+        this.goalSelector.addGoal(0, new EndermanHideAndWaitGoal((Enderman) ((Object)this)));
     }
 
     @Override

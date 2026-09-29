@@ -9,9 +9,9 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.state.VillagerRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,7 +28,7 @@ public abstract class VillagerRessemblingModelMixin extends EntityModel<Villager
     private ModelPart rightEar;
     private ModelPart leftEar;
 
-    protected VillagerRessemblingModelMixin(ModelPart modelPart, Function<ResourceLocation, RenderType> function) {
+    protected VillagerRessemblingModelMixin(ModelPart modelPart, Function<Identifier, RenderType> function) {
         super(modelPart, function);
     }
 

@@ -7,7 +7,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -32,7 +32,7 @@ public abstract class CustomEnchants {
     public static final ResourceKey<Enchantment> PIERCING_PROTECTION = of("piercing_protection");
 
     private static ResourceKey<Enchantment> of(String id) {
-        return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, id));
+        return ResourceKey.create(Registries.ENCHANTMENT, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, id));
     }
 
     public final static void performTossAttack(ServerLevel world,LivingEntity user, Entity target, double magnitude){

@@ -9,13 +9,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
 import net.minecraft.client.gui.screens.inventory.ItemCombinerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.entity.player.Inventory;
@@ -43,27 +43,27 @@ public abstract class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
     private static final String TEXT_LVL_COST = "container.repair.book_cost";
     private static final String TEXT_LVL_REQUIRED = "container.repair.cost";
 
-    private static final ResourceLocation EMPTY_ARMOR_SLOT_HELMET_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/helmet");
-    private static final ResourceLocation EMPTY_ARMOR_SLOT_CHESTPLATE_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/chestplate");
-    private static final ResourceLocation EMPTY_ARMOR_SLOT_LEGGINGS_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/leggings");
-    private static final ResourceLocation EMPTY_ARMOR_SLOT_BOOTS_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/boots");
-    private static final ResourceLocation EMPTY_SLOT_HOE_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/hoe");
-    private static final ResourceLocation EMPTY_SLOT_AXE_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/axe");
-    private static final ResourceLocation EMPTY_SLOT_SWORD_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/sword");
-    private static final ResourceLocation EMPTY_SLOT_SHOVEL_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/shovel");
-    private static final ResourceLocation EMPTY_SLOT_PICKAXE_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/pickaxe");
-    private static final ResourceLocation EMPTY_SLOT_SHIELD_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/shield");
-    private static final ResourceLocation EMPTY_SLOT_TRIDENT_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/trident");
-    private static final ResourceLocation EMPTY_SLOT_BOW_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/bow");
-    private static final ResourceLocation EMPTY_SLOT_CROSSBOW_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/crossbow");
-    private static final ResourceLocation EMPTY_SLOT_BOOK_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/enchanted_book");
-    private static final ResourceLocation EMPTY_SLOT_DIAMOND_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/diamond");
-    private static final ResourceLocation EMPTY_SLOT_INGOT_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/ingot");
-    private static final ResourceLocation EMPTY_SLOT_PLANKS_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/planks");
-    private static final ResourceLocation EMPTY_SLOT_PRISMARINE_TEXTURE = ResourceLocation.withDefaultNamespace("container/slot/prismarine");
+    private static final Identifier EMPTY_ARMOR_SLOT_HELMET_TEXTURE = Identifier.withDefaultNamespace("container/slot/helmet");
+    private static final Identifier EMPTY_ARMOR_SLOT_CHESTPLATE_TEXTURE = Identifier.withDefaultNamespace("container/slot/chestplate");
+    private static final Identifier EMPTY_ARMOR_SLOT_LEGGINGS_TEXTURE = Identifier.withDefaultNamespace("container/slot/leggings");
+    private static final Identifier EMPTY_ARMOR_SLOT_BOOTS_TEXTURE = Identifier.withDefaultNamespace("container/slot/boots");
+    private static final Identifier EMPTY_SLOT_HOE_TEXTURE = Identifier.withDefaultNamespace("container/slot/hoe");
+    private static final Identifier EMPTY_SLOT_AXE_TEXTURE = Identifier.withDefaultNamespace("container/slot/axe");
+    private static final Identifier EMPTY_SLOT_SWORD_TEXTURE = Identifier.withDefaultNamespace("container/slot/sword");
+    private static final Identifier EMPTY_SLOT_SHOVEL_TEXTURE = Identifier.withDefaultNamespace("container/slot/shovel");
+    private static final Identifier EMPTY_SLOT_PICKAXE_TEXTURE = Identifier.withDefaultNamespace("container/slot/pickaxe");
+    private static final Identifier EMPTY_SLOT_SHIELD_TEXTURE = Identifier.withDefaultNamespace("container/slot/shield");
+    private static final Identifier EMPTY_SLOT_TRIDENT_TEXTURE = Identifier.withDefaultNamespace("container/slot/trident");
+    private static final Identifier EMPTY_SLOT_BOW_TEXTURE = Identifier.withDefaultNamespace("container/slot/bow");
+    private static final Identifier EMPTY_SLOT_CROSSBOW_TEXTURE = Identifier.withDefaultNamespace("container/slot/crossbow");
+    private static final Identifier EMPTY_SLOT_BOOK_TEXTURE = Identifier.withDefaultNamespace("container/slot/enchanted_book");
+    private static final Identifier EMPTY_SLOT_DIAMOND_TEXTURE = Identifier.withDefaultNamespace("container/slot/diamond");
+    private static final Identifier EMPTY_SLOT_INGOT_TEXTURE = Identifier.withDefaultNamespace("container/slot/ingot");
+    private static final Identifier EMPTY_SLOT_PLANKS_TEXTURE = Identifier.withDefaultNamespace("container/slot/planks");
+    private static final Identifier EMPTY_SLOT_PRISMARINE_TEXTURE = Identifier.withDefaultNamespace("container/slot/prismarine");
 
-    private static List<ResourceLocation> emptySlotRepairTextures = new ArrayList<>(3);
-    private static final List<ResourceLocation> EMPTY_SLOT_TOOL_TEXTURE = List.of(
+    private static List<Identifier> emptySlotRepairTextures = new ArrayList<>(3);
+    private static final List<Identifier> EMPTY_SLOT_TOOL_TEXTURE = List.of(
             EMPTY_ARMOR_SLOT_HELMET_TEXTURE,
             EMPTY_SLOT_SWORD_TEXTURE,
             EMPTY_ARMOR_SLOT_CHESTPLATE_TEXTURE,
@@ -82,7 +82,7 @@ public abstract class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
     private final CyclingSlotBackground toolSlotIcon = new CyclingSlotBackground(0);
     private final CyclingSlotBackground repairSlotIcon = new CyclingSlotBackground(1);
 
-    public AnvilScreenMixin(AnvilMenu handler, Inventory playerInventory, Component title, ResourceLocation texture, Player player) {
+    public AnvilScreenMixin(AnvilMenu handler, Inventory playerInventory, Component title, Identifier texture, Player player) {
         super(handler, playerInventory, title, texture);
         this.player = player;
     }
@@ -129,7 +129,7 @@ public abstract class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
     }
 
     @Inject(method = "renderLabels", at = @At(value = "HEAD"), cancellable = true)
-    protected void showBookErrorMessage(GuiGraphics context, int mouseX, int mouseY, CallbackInfo ci) {
+    protected void showBookErrorMessage(GuiGraphicsExtractor context, int mouseX, int mouseY, CallbackInfo ci) {
         boolean isFirstSlotBook = menu.getSlot(0).getItem().is(Items.ENCHANTED_BOOK);
         if(!menu.getSlot(0).hasItem() || (!isFirstSlotBook && !menu.getSlot(1).hasItem() && !menu.getSlot(2).hasItem())) return;
 
@@ -179,7 +179,7 @@ public abstract class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
     }
 
     @Inject(method = "renderBg", at = @At(value = "TAIL"))
-    protected void drawIcons(GuiGraphics context, float delta, int mouseX, int mouseY, CallbackInfo info) {
+    protected void drawIcons(GuiGraphicsExtractor context, float delta, int mouseX, int mouseY, CallbackInfo info) {
         this.toolSlotIcon.render(this.menu, context, delta, this.leftPos, this.topPos);
         this.repairSlotIcon.render(this.menu, context, delta, this.leftPos, this.topPos);
     }

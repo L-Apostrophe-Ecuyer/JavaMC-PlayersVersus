@@ -10,7 +10,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -35,11 +35,11 @@ import static frootloops.versus.mod.items_and_effects.VanillaItems.getSwordBlock
 public abstract class CustomEquipment {
 
     public static final Item RECOVERY_COMPASS =  new RecoveryCompassItem(getItemSettings("recovery_compass").stacksTo(1));
-    static final ResourceKey<EquipmentAsset> COPPER_ARMOR_MATERIAL_KEY = ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "copper"));
-    static final ResourceKey<EquipmentAsset> COPPER_EXPOSED_ARMOR_MATERIAL_KEY = ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "copper_exposed"));
+    static final ResourceKey<EquipmentAsset> COPPER_ARMOR_MATERIAL_KEY = ResourceKey.create(EquipmentAssets.ROOT_ID, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "copper"));
+    static final ResourceKey<EquipmentAsset> COPPER_EXPOSED_ARMOR_MATERIAL_KEY = ResourceKey.create(EquipmentAssets.ROOT_ID, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "copper_exposed"));
 
     static final int COPPER_ENCHANTABILITY = 1, COPPER_ARMOR_DURABILITY = 4;
-    public static final TagKey<Item> COPPER_TOOL_MATERIALS_TAG = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "copper_tool_materials"));
+    public static final TagKey<Item> COPPER_TOOL_MATERIALS_TAG = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "copper_tool_materials"));
     public static final ToolMaterial COPPER_TOOL_MATERIAL = new ToolMaterial(BlockTags.INCORRECT_FOR_STONE_TOOL, 128, 13.0F, 1.0F, COPPER_ENCHANTABILITY, COPPER_TOOL_MATERIALS_TAG);
     public static final ToolMaterial COPPER_WAXED_TOOL_MATERIAL = new ToolMaterial(BlockTags.INCORRECT_FOR_STONE_TOOL, 196, 13.0F, 1.5F, COPPER_ENCHANTABILITY, COPPER_TOOL_MATERIALS_TAG);
 
