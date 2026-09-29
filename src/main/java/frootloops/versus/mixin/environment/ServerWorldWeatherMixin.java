@@ -13,7 +13,7 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.level.saveddata.WeatherData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -30,13 +30,16 @@ public abstract class ServerWorldWeatherMixin extends Level {
     @Shadow
     private final MinecraftServer server;
 
+    // Since 26.1 the weather is the server's saved data, and the game rules are no longer part of the level data.
     @Shadow
-    private final ServerLevelData serverLevelData;
+    public abstract WeatherData getWeatherData();
 
-    protected ServerWorldWeatherMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates, MinecraftServer server, ServerLevelData worldProperties) {
+    @Shadow
+    public abstract GameRules getGameRules();
+
+    protected ServerWorldWeatherMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates, MinecraftServer server) {
         super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
         this.server = server;
-        this.serverLevelData = worldProperties;
     }
 
     @Override
@@ -49,12 +52,13 @@ public abstract class ServerWorldWeatherMixin extends Level {
     private void advanceWeatherCycle() {
         boolean isWorldRaining = this.isRaining();
         if (this.dimensionType().hasSkyLight()) {
-            if (this.serverLevelData.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
-                int clearWeatherTime = this.serverLevelData.getClearWeatherTime();
-                int thunderTime = this.serverLevelData.getThunderTime();
-                int rainTime = this.serverLevelData.getRainTime();
-                boolean isThundering = this.levelData.isThundering();
-                boolean isRaining = this.levelData.isRaining();
+            WeatherData weather = this.getWeatherData();
+            if (this.getGameRules().get(GameRules.ADVANCE_WEATHER)) {
+                int clearWeatherTime = weather.getClearWeatherTime();
+                int thunderTime = weather.getThunderTime();
+                int rainTime = weather.getRainTime();
+                boolean isThundering = weather.isThundering();
+                boolean isRaining = weather.isRaining();
 
 
                 if (clearWeatherTime > 0) {
@@ -83,20 +87,21 @@ public abstract class ServerWorldWeatherMixin extends Level {
                     }
                 }
 
-                this.serverLevelData.setThunderTime(thunderTime);
-                this.serverLevelData.setRainTime(rainTime);
-                this.serverLevelData.setClearWeatherTime(clearWeatherTime);
-                this.serverLevelData.setThundering(isThundering);
-                this.serverLevelData.setRaining(isRaining);
+                weather.setThunderTime(thunderTime);
+                weather.setRainTime(rainTime);
+                weather.setClearWeatherTime(clearWeatherTime);
+                weather.setThundering(isThundering);
+                weather.setRaining(isRaining);
+                weather.setDirty();
             }
 
             this.oThunderLevel = this.thunderLevel;
-            if (this.levelData.isThundering()) this.thunderLevel += 0.0025F;
+            if (weather.isThundering()) this.thunderLevel += 0.0025F;
             else this.thunderLevel -= 0.0025F;
             this.thunderLevel = Mth.clamp(this.thunderLevel, 0.0F, 1.0F);
 
             this.oRainLevel = this.rainLevel;
-            if (this.levelData.isRaining()) this.rainLevel += 0.0025F;
+            if (weather.isRaining()) this.rainLevel += 0.0025F;
             else this.rainLevel -= 0.0025F;
             this.rainLevel = Mth.clamp(this.rainLevel, 0.0F, 1.0F);
         }

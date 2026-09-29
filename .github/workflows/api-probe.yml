@@ -68,6 +68,17 @@ jobs:
           cut -d' ' -f1 probe/out/fabric-classes.txt | sed 's|/|.|g' | grep -v '\$[0-9]' | grep '^net\.fabricmc\.fabric\.api\.' \
             | xargs -n 300 javap -protected -cp "$cp" > probe/out/fabric-api.txt 2>&1 || true
           wc -l probe/out/all.txt probe/out/fabric-api.txt
+      # With [api-calls]: for every method of the classes in .github/api-calls.txt (the mixin targets), the methods it
+      # calls, the fields it uses and the constants it loads, with counts (api-calls.py), to check the mixins' @At
+      # targets. No code: the order of the instructions and the control flow are left out.
+      - name: what the mixin targets' methods call
+        if: contains(github.event.head_commit.message, '[api-calls]')
+        run: |
+          cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
+          grep -v '^\s*#' .github/api-calls.txt | grep -v '^\s*$' | xargs -n 100 javap -c -p -cp "$cp" > probe/calls-raw.txt 2>&1 || true
+          python3 .github/api-calls.py probe/calls-raw.txt > probe/out/calls.txt
+          rm probe/calls-raw.txt
+          wc -l probe/out/calls.txt
       # A job log can only be read back 5,000 lines at a time, so the result goes out in parts of 4,000 lines, one job each.
       - name: split the result
         run: |
