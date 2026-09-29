@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** The noodle's height bias with the flooded corridors, and its vanilla-type form for C2ME's compiler. */
+/** The noodle's height bias with the flooded corridors, and the form C2ME's compiler gets ({@link PvCorridorBias} in the layers). */
 class PvNoodleTest {
 
     @BeforeAll
@@ -40,7 +40,10 @@ class PvNoodleTest {
         assertEquals((PvNoodle.bias(10) + CORRIDOR_BIAS) / 2, PvNoodle.corridorBias(10, halfway), 1e-12);
     }
 
-    /** {@link PvNoodle#corridorBiasFunction} gives {@link PvNoodle#corridorBias}'s doubles, at every height and entrance value tried. */
+    /**
+     * {@link PvNoodle#corridorBiasFunction} gives {@link PvNoodle#corridorBias}'s doubles, at every height and entrance value
+     * tried: vanilla's bias below and above the layers, {@link PvCorridorBias} in them.
+     */
     @Test
     void corridorBiasFunctionIsTheSame() {
         int compared = 0;
@@ -49,9 +52,15 @@ class PvNoodleTest {
                 double entrances = step * 0.01 + (step % 7) * 1.37e-4;
                 DensityFunction function = PvNoodle.corridorBiasFunction(DensityFunctionTypes.constant(entrances));
                 double expected = PvNoodle.corridorBias(y, entrances);
-                double actual = function.sample(new DensityFunction.UnblendedNoisePos(0, y, 0));
+                DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(0, y, 0);
+                double actual = function.sample(pos);
                 int height = y;
                 assertEquals(expected, actual, 0.0, () -> "y " + height + ", entrances " + entrances);
+                // C2ME's min and max nodes skip a side by these bounds, so they must hold
+                PvCorridorBias corridor = new PvCorridorBias(DensityFunctionTypes.constant(entrances));
+                assertEquals(expected, corridor.sample(pos), 0.0);
+                assertTrue(actual >= corridor.minValue() && actual <= corridor.maxValue(), () -> "bounds at y " + height + ", entrances " + entrances);
+                assertTrue(actual >= function.minValue() && actual <= function.maxValue());
                 compared++;
             }
         }

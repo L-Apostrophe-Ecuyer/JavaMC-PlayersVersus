@@ -47,24 +47,12 @@ jobs:
           - level_type: "server-default"
             mods: ""
             variant: ""
-          # Since d79ad84 the run next to C2ME and Lithium differs from the plain one (14 of 2,500 surface cells, water
-          # in y 48..63); with the Java final density it doesn't (07df535), and without Lithium it differs the same way.
+          # From d79ad84 to 67b95a2 the run next to C2ME and Lithium differed from the plain one (81 of 625 chunks, in
+          # y 32..95) while its compiler compiled the corridors' entrance value; with the Java final density it never
+          # did. Both runs should match the plain one block for block (the hash lines of their reports).
           - level_type: "players-versus:better_world"
             mods: "c2me-fabric lithium"
             variant: "java-kernel"
-          # Temporary: which part of the corridors' height bias C2ME's compiled form reacts to (PvFinalDensity.DEBUG_BIAS).
-          - level_type: "players-versus:better_world"
-            mods: "c2me-fabric lithium"
-            variant: "bias-plain"
-            debug_bias: "plain"
-          - level_type: "players-versus:better_world"
-            mods: "c2me-fabric lithium"
-            variant: "bias-noop-choice"
-            debug_bias: "noop-choice"
-          - level_type: "players-versus:better_world"
-            mods: "c2me-fabric lithium"
-            variant: "bias-no-interpolator"
-            debug_bias: "no-interpolator"
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
@@ -106,7 +94,6 @@ jobs:
           "-Ppv.benchRadius=$RADIUS"
           "-Ppv.benchCenter=$CENTER"
           "-Ppv.vanillaTypes=${{ matrix.variant == 'java-kernel' && 'false' || 'true' }}"
-          "-Ppv.debugBias=${{ matrix.debug_bias || 'full' }}"
       - name: show report
         if: always()
         run: cat run/worldgen-smoke/pvwg/*/report.txt || true
@@ -278,24 +265,27 @@ jobs:
             curl -fsSL -A "$UA" -o "perf-mods/$filename" "$url"
           done
       # The same six runs next to C2ME and Lithium: C2ME compiles density functions it knows and calls the others, so a
-      # change can speed up one setup and slow down the other.
-      - name: previous, this, vanilla, vanilla, this, previous, next to C2ME and Lithium
+      # change can speed up one setup and slow down the other. Two more time this commit with the Java final density
+      # (-Ppv.vanillaTypes=false), which doesn't depend on how C2ME compiles vanilla's types.
+      - name: previous, this, kernel, vanilla, vanilla, kernel, this, previous, next to C2ME and Lithium
         run: |
           mkdir -p run/worldgen-smoke/mods && cp perf-mods/*.jar run/worldgen-smoke/mods/
-          bench() {  # $1 report name, $2 commit, $3 level type
+          bench() {  # $1 report name, $2 commit, $3 level type, $4 vanilla-type final density (default true)
             git checkout --quiet --detach "$2"
             echo "::group::$1: $(git log --oneline -1)"
             chmod +x ./gradlew
             ./gradlew runWorldgenSmoke -Ppv.acceptEula=true "-Ppv.levelType=$3" \
-              "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER"
+              "-Ppv.seed=$SEED" "-Ppv.benchRadius=$RADIUS" "-Ppv.benchCenter=$CENTER" "-Ppv.vanillaTypes=${4:-true}"
             cp run/worldgen-smoke/pvwg/*/report.txt "reports/$1.txt"
             rm -rf run/worldgen-smoke/pvwg
             echo "::endgroup::"
           }
           bench c2me-previous-1 "$PREVIOUS" players-versus:better_world
           bench c2me-this-1 "$GITHUB_SHA" players-versus:better_world
+          bench c2me-kernel-1 "$GITHUB_SHA" players-versus:better_world false
           bench c2me-vanilla-1 "$GITHUB_SHA" minecraft:normal
           bench c2me-vanilla-2 "$GITHUB_SHA" minecraft:normal
+          bench c2me-kernel-2 "$GITHUB_SHA" players-versus:better_world false
           bench c2me-this-2 "$GITHUB_SHA" players-versus:better_world
           bench c2me-previous-2 "$PREVIOUS" players-versus:better_world
           rm -rf run/worldgen-smoke/mods
@@ -325,15 +315,20 @@ jobs:
               previous = [runs[prefix + "previous-1"][0], runs[prefix + "previous-2"][0]]
               this = [runs[prefix + "this-1"][0], runs[prefix + "this-2"][0]]
               vanilla = [runs[prefix + "vanilla-1"][0], runs[prefix + "vanilla-2"][0]]
+              # this commit with the Java final density, next to C2ME only
+              kernel = [runs[name][0] for name in [prefix + "kernel-1", prefix + "kernel-2"] if name in runs and runs[name][0]]
               print(f"\n{title} (each the mean of two runs; spread: how far those two runs differ)")
               print(f"{'status':20} {'previous':>9} {'this':>9} {'vanilla':>9} {'this/prev':>10} {'this/vanilla':>13} "
-                    f"{'spread prev':>12} {'spread this':>12} {'spread van.':>12}  (ms/chunk)")
+                    f"{'spread prev':>12} {'spread this':>12} {'spread van.':>12}"
+                    + (f" {'kernel':>9} {'kernel/this':>12} {'spread ker.':>12}" if kernel else "") + "  (ms/chunk)")
               for status in runs[prefix + "this-1"][0]:
                   p, t, v = mean(previous, status), mean(this, status), mean(vanilla, status)
+                  k = mean(kernel, status) if kernel else float('nan')
                   print(f"{status:20} {p:9.2f} {t:9.2f} {v:9.2f} {t / p:10.2f} {t / v:13.2f} "
-                        f"{spread(previous, status):12.0%} {spread(this, status):12.0%} {spread(vanilla, status):12.0%}")
+                        f"{spread(previous, status):12.0%} {spread(this, status):12.0%} {spread(vanilla, status):12.0%}"
+                        + (f" {k:9.2f} {k / t:12.2f} {spread(kernel, status):12.0%}" if kernel else ""))
           names = [prefix + name for prefix in ["", "c2me-"]
-                   for name in ["previous-1", "this-1", "vanilla-1", "vanilla-2", "this-2", "previous-2"]]
+                   for name in ["previous-1", "this-1", "kernel-1", "vanilla-1", "vanilla-2", "kernel-2", "this-2", "previous-2"]]
           runs = {name: read(os.path.join(sys.argv[1], name + ".txt")) for name in names}
           table("Players Versus alone", "")
           table("next to C2ME and Lithium", "c2me-")

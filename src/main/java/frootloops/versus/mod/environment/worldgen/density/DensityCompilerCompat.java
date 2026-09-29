@@ -13,8 +13,9 @@ import java.util.Arrays;
  * interface, one position at a time, with a new position object for each call. That costs little where a function
  * runs once per cell corner ({@link PvTerrain}, about a thousand corners per chunk), but the final density runs at
  * every block. So with the compiler, {@link PvFinalDensity} rebuilds itself from vanilla types
- * ({@link PvFinalDensity#asVanillaTypes}), which it compiles; without it, the Java kernel is faster. Both give the
- * same doubles ({@code TerrainPortTest}).
+ * ({@link PvFinalDensity#asVanillaTypes}), which it compiles, all but the height bias in the flooded corridors' layers
+ * ({@link PvCorridorBias}), kept Java on purpose; without it, the Java kernel is faster. Both give the same doubles
+ * ({@code TerrainPortTest}).
  *
  * <p>{@code -Dpv.worldgen.vanillaTypes=false} keeps the Java kernel under the compiler too: slower, but it doesn't
  * depend on how the compiler treats vanilla's types.

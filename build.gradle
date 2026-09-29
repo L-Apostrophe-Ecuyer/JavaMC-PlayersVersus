@@ -44,7 +44,6 @@ loom {
 			vmArg "-Dpv.worldgen.bench=${providers.gradleProperty('pv.benchRadius').getOrElse('12')}"
 			vmArg "-Dpv.worldgen.bench.center=${providers.gradleProperty('pv.benchCenter').getOrElse('100,100')}"
 			vmArg "-Dpv.worldgen.vanillaTypes=${providers.gradleProperty('pv.vanillaTypes').getOrElse('true')}"
-			vmArg "-Dpv.worldgen.debugBias=${providers.gradleProperty('pv.debugBias').getOrElse('full')}"
 		}
 	}
 

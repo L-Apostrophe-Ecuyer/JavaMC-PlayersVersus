@@ -74,7 +74,7 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
      * where the entrance value says a flooded cave is near, it moves from {@link #bias} towards
      * {@code PvWorldgenConstants.CORRIDOR_BIAS}, and on to {@code CORRIDOR_FLARE_BIAS} nearer the caves. The final
      * density and the aquifer both use it, with the same interpolated entrance value, so the aquifer floods exactly the
-     * corridors the terrain opens. {@link #corridorBiasFunction} gives the same doubles from vanilla types.
+     * corridors the terrain opens. {@link #corridorBiasFunction} gives the same doubles for C2ME's compiler.
      */
     public static double corridorBias(int y, double entrances) {
         double now = bias(y);
@@ -86,23 +86,15 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
     }
 
     /**
-     * {@link #corridorBias} from vanilla types, for C2ME's compiler: the same operations in the same order (a
-     * subtraction as the addition of a negated value, which IEEE defines as the same), and the layers as a
-     * {@code range_choice} on vanilla's {@code y}, whose value at a block is within a hair of its height.
+     * {@link #corridorBias} for C2ME's compiler: vanilla's {@link #biasFunction} outside the corridors' layers, chosen
+     * by a {@code range_choice} on vanilla's {@code y} (whose value at a block is within a hair of its height), and
+     * {@link PvCorridorBias} in them. That type is Java, which the compiler calls through vanilla's interface, one block at
+     * a time: built from vanilla types instead, the corridors put the entrance value's {@code interpolated} into the
+     * compiled code, and the terrain pass came out different where they aren't (the refactor plan, Section 9).
      */
     static DensityFunction corridorBiasFunction(DensityFunction entrances) {
-        DensityFunction now = biasFunction();
-        DensityFunction negated = DensityFunctionTypes.mul(DensityFunctionTypes.constant(-1.0), entrances);
-        DensityFunction share = DensityFunctionTypes.mul(DensityFunctionTypes.add(DensityFunctionTypes.constant(CORRIDOR_ENTRANCES), negated),
-                DensityFunctionTypes.constant(CORRIDOR_ZONE_SCALE)).clamp(0.0, 1.0);
-        DensityFunction flare = DensityFunctionTypes.mul(DensityFunctionTypes.add(DensityFunctionTypes.constant(CORRIDOR_FLARE_FROM), negated),
-                DensityFunctionTypes.constant(CORRIDOR_FLARE_SCALE)).clamp(0.0, 1.0);
-        DensityFunction target = DensityFunctionTypes.add(DensityFunctionTypes.constant(CORRIDOR_BIAS),
-                DensityFunctionTypes.mul(DensityFunctionTypes.constant(CORRIDOR_FLARE_BIAS - CORRIDOR_BIAS), flare));
-        DensityFunction corridor = DensityFunctionTypes.add(now, DensityFunctionTypes.mul(
-                DensityFunctionTypes.add(target, DensityFunctionTypes.mul(DensityFunctionTypes.constant(-1.0), now)), share));
         DensityFunction y = DensityFunctionTypes.yClampedGradient(-4064, 4062, -4064.0, 4062.0);
-        return DensityFunctionTypes.rangeChoice(y, BASIN_MIN_Y + 0.5, CORRIDOR_MAX_Y - 0.5, corridor, now);
+        return DensityFunctionTypes.rangeChoice(y, BASIN_MIN_Y + 0.5, CORRIDOR_MAX_Y - 0.5, new PvCorridorBias(entrances), biasFunction());
     }
 
     /** The noodle without its bias: 64 (solid) where the toggle is off, else the thickness plus the larger ridge. */

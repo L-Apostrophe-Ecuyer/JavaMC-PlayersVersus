@@ -51,12 +51,6 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
      * value the noodle can take, so skipping it never changes the result.
      */
     private static final double ROUNDING_MARGIN = 1.0e-9;
-    /**
-     * Temporary, to find why C2ME's compiled form differs from the kernel in the terrain pass since the corridors
-     * (refactor plan, Section 9): {@code -Dpv.worldgen.debugBias=plain|noop-choice|no-interpolator} builds the height
-     * bias of {@link #asVanillaTypes} without parts of the corridors. Changes the world; not for play.
-     */
-    private static final String DEBUG_BIAS = System.getProperty("pv.worldgen.debugBias", "full");
 
     public PvFinalDensity(DensityFunction terrain, DensityFunction noodleToggle, DensityFunction noodleThickness,
                           DensityFunction noodleRidgeA, DensityFunction noodleRidgeB, DensityFunction entrances) {
@@ -82,20 +76,15 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
 
     /**
      * This function from vanilla types, for C2ME's compiler, which runs a type it doesn't know through vanilla's
-     * interface with a new position object for every block ({@link DensityCompilerCompat}). The same doubles as
-     * {@link #sample} ({@code TerrainPortTest}), and the same skip: a {@code range_choice} on the terrain minus the
+     * interface with a new position object for every block ({@link DensityCompilerCompat}). All of it but the height
+     * bias in the corridors' layers, which stays Java on purpose ({@link PvNoodle#corridorBiasFunction}). The same doubles
+     * as {@link #sample} ({@code TerrainPortTest}), and the same skip: a {@code range_choice} on the terrain minus the
      * noodle's height bias. Built from this function's inputs as they are, so call it on a function whose references are
      * bound, as {@link #apply} does; before that, the noodle's bounds aren't known and nothing would be skipped.
      */
     public DensityFunction asVanillaTypes() {
         DensityFunction terrain = DensityFunctionTypes.mul(DensityFunctionTypes.constant(0.64), this.terrain).squeeze();
-        DensityFunction bias = switch (DEBUG_BIAS) {
-            case "plain" -> PvNoodle.biasFunction();
-            case "noop-choice" -> DensityFunctionTypes.rangeChoice(DensityFunctionTypes.yClampedGradient(-4064, 4062, -4064.0, 4062.0),
-                    -3.5, 23.5, PvNoodle.biasFunction(), PvNoodle.biasFunction());
-            case "no-interpolator" -> PvNoodle.corridorBiasFunction(DensityFunctionTypes.constant(1.0));
-            default -> PvNoodle.corridorBiasFunction(this.entrances);
-        };
+        DensityFunction bias = PvNoodle.corridorBiasFunction(this.entrances);
         DensityFunction tunnel = DensityFunctionTypes.rangeChoice(this.noodleToggle, -1000000.0, -0.2, DensityFunctionTypes.constant(64.0),
                 DensityFunctionTypes.add(this.noodleThickness, DensityFunctionTypes.mul(DensityFunctionTypes.constant(1.5),
                         DensityFunctionTypes.max(this.noodleRidgeA.abs(), this.noodleRidgeB.abs()))));

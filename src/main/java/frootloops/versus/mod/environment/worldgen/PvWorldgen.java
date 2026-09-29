@@ -6,6 +6,7 @@ import frootloops.versus.mod.environment.worldgen.debug.WorldgenBench;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenDebugCommands;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
+import frootloops.versus.mod.environment.worldgen.density.PvCorridorBias;
 import frootloops.versus.mod.environment.worldgen.density.PvDepth;
 import frootloops.versus.mod.environment.worldgen.density.PvEntrances;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
@@ -34,6 +35,7 @@ public final class PvWorldgen {
     public static final Identifier ENTRANCES_ID = Identifier.of(VersusMod.MOD_ID, "entrances");
     public static final Identifier NOODLE_ID = Identifier.of(VersusMod.MOD_ID, "noodle");
     public static final Identifier FINAL_DENSITY_ID = Identifier.of(VersusMod.MOD_ID, "final_density");
+    public static final Identifier CORRIDOR_BIAS_ID = Identifier.of(VersusMod.MOD_ID, "corridor_bias");
     public static final Identifier BIOME_SOURCE_ID = Identifier.of(VersusMod.MOD_ID, "overworld");
     public static final Identifier CHUNK_GENERATOR_ID = Identifier.of(VersusMod.MOD_ID, "noise");
 
@@ -48,6 +50,7 @@ public final class PvWorldgen {
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, ENTRANCES_ID, PvEntrances.CODEC);
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, NOODLE_ID, PvNoodle.CODEC);
         Registry.register(Registries.DENSITY_FUNCTION_TYPE, FINAL_DENSITY_ID, PvFinalDensity.CODEC);
+        Registry.register(Registries.DENSITY_FUNCTION_TYPE, CORRIDOR_BIAS_ID, PvCorridorBias.CODEC);
         Registry.register(Registries.BIOME_SOURCE, BIOME_SOURCE_ID, PvBiomeSource.CODEC);
         Registry.register(Registries.CHUNK_GENERATOR, CHUNK_GENERATOR_ID, PvChunkGenerator.CODEC);
         WorldgenDebugCommands.register();
