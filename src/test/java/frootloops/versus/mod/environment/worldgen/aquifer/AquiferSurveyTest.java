@@ -111,7 +111,10 @@ class AquiferSurveyTest {
         assertEquals(0, tally.wallAnywhere, "dry blocks water could flow into once carved");
     }
 
-    /** {@code finalDensity} with {@code delta} added to the entrances its terrain reads. */
+    /**
+     * {@code finalDensity} with {@code delta} added to the entrances its terrain reads: the terrain itself, and the copy
+     * the high river reads at its surface, so the river's valley follows the changed terrain as it would in the world.
+     */
     private static DensityFunction withEntrancesDelta(DensityFunction finalDensity, DensityFunction delta) {
         int[] replaced = {0};
         DensityFunction result = finalDensity.apply(function -> {
@@ -121,7 +124,7 @@ class AquiferSurveyTest {
                     terrain.base3d(), DensityFunctionTypes.add(terrain.entrances(), delta), terrain.spaghettiRoughness(),
                     terrain.caveLayer(), terrain.caveCheese(), terrain.pillar());
         });
-        assertEquals(1, replaced[0], "the final density should hold one terrain");
+        assertEquals(2, replaced[0], "the final density should hold the terrain twice: its own and the high river's at y 80");
         return result;
     }
 

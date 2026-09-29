@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
+import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.PvWorldgenConstants;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
@@ -91,7 +92,7 @@ class HighRiverSurveyTest {
         DensityFunction river = WorldgenTestData.seeded(config, "players-versus:overworld/high_river");
         DensityFunction depth = config.getNoiseRouter().depth();
         // the terrain without the high river, which generation now cuts
-        PvFinalDensity withRiver = (PvFinalDensity) config.getNoiseRouter().finalDensity();
+        PvFinalDensity withRiver = (PvFinalDensity) PvWorldgen.unwrap(config.getNoiseRouter().finalDensity());
         DensityFunction finalDensity = new PvFinalDensity(withRiver.terrain(), withRiver.noodleToggle(), withRiver.noodleThickness(),
                 withRiver.noodleRidgeA(), withRiver.noodleRidgeB(), withRiver.entrances(), DensityFunctionTypes.constant(Double.POSITIVE_INFINITY));
         List<int[]> origins = hillyAreas(depth);
