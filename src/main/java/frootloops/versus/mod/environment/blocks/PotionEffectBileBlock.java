@@ -53,7 +53,7 @@ public class PotionEffectBileBlock extends Block {
     @Override
     protected void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier handler, boolean bl) {
         if (!world.isClientSide() && !entity.isSpectator() && entity instanceof LivingEntity livingEntity) {
-            if(entity.fallDistance > 1.0 && (entity instanceof Player || (!world.isClientSide() && ((ServerLevel)world).getGameRules().getBoolean(GameRules.MOB_GRIEFING)) && entity.getBbWidth() * entity.getBbWidth() * entity.getBbHeight() > 0.512F)) {
+            if(entity.fallDistance > 1.0 && (entity instanceof Player || (!world.isClientSide() && ((ServerLevel)world).getGameRules().get(GameRules.MOB_GRIEFING)) && entity.getBbWidth() * entity.getBbWidth() * entity.getBbHeight() > 0.512F)) {
                 this.grantStatusEffect(livingEntity, true);
                 super.entityInside(state, world, pos, entity, handler, bl);
                 world.destroyBlock(pos, false);

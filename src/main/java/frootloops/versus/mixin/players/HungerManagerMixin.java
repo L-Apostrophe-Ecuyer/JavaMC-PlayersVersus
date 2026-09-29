@@ -100,7 +100,7 @@ public class HungerManagerMixin {
     private void doHealthRegeneration(ServerPlayer player, boolean hasHungerEffect) {
         float playerHealth = player.getHealth();
         boolean isPlayerSlowlyDying = playerHealth < 20.0f && (player.hasEffect(MobEffects.WITHER) || (player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
-        boolean canPlayerRegenHealth = player.isHurt() && player.level().getGameRules().getBoolean(GameRules.NATURAL_HEALTH_REGENERATION);
+        boolean canPlayerRegenHealth = player.isHurt() && player.level().getGameRules().get(GameRules.NATURAL_HEALTH_REGENERATION);
         boolean canPlayerFastHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect && isPlayerSlowlyDying;
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFastHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
         boolean canPlayerFoodHeal = canPlayerFastHeal || canPlayerSlowHeal;

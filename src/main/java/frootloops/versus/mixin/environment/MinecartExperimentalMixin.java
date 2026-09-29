@@ -21,7 +21,7 @@ public abstract class MinecartExperimentalMixin extends MinecartBehavior {
     @Overwrite
     public double getMaxSpeed(ServerLevel world) {
         if(world.enabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
-            double gameruleMaxSpeed = (double)world.getGameRules().getInt(GameRules.MAX_MINECART_SPEED);
+            double gameruleMaxSpeed = (double)world.getGameRules().get(GameRules.MAX_MINECART_SPEED);
             return (gameruleMaxSpeed == 8.0 ? 64.0 : gameruleMaxSpeed) / (this.minecart.isInWater() ? 40.0 : 20.0);
         }
         return 64.0 / (this.minecart.isInWater() ? 40.0 : 20.0);
