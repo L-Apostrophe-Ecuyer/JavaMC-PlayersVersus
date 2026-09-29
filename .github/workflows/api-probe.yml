@@ -54,10 +54,8 @@ jobs:
           cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
           touch probe/out/javap.txt
           if [ -f .github/api-probe.txt ]; then
-            grep -v '^\s*#' .github/api-probe.txt | grep -v '^\s*$' | while read -r class; do
-              echo "=== $class" >> probe/out/javap.txt
-              javap -p -s -cp "$cp" "$class" >> probe/out/javap.txt 2>&1 || true
-            done
+            # One javap per 200 classes: it prints each class in turn and "Error: class not found" for missing ones.
+            grep -v '^\s*#' .github/api-probe.txt | grep -v '^\s*$' | xargs -n 200 javap -p -s -cp "$cp" >> probe/out/javap.txt 2>&1 || true
           fi
           wc -l probe/out/javap.txt
       - name: print the result
