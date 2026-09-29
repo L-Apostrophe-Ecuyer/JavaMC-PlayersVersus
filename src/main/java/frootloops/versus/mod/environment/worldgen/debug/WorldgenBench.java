@@ -323,7 +323,7 @@ public final class WorldgenBench {
     private static final class Region {
         private static final byte AIR = 0, WATER = 1, LAVA = 2, STONE = 3, DEEPSLATE = 4, OTHER = 5;
 
-        private final int minX, minZ, size, bottomY, topY;
+        private final int minX, minZ, size, bottomY, topY, seaLevel;
         private final int[] surfaceY, floorY, surfaceColor;
         private final char[] surfaceClass;
         private final int[] surfaceBiome;
@@ -355,6 +355,7 @@ public final class WorldgenBench {
             this.size = size;
             this.bottomY = world.getBottomY();
             this.topY = world.getBottomY() + world.getHeight() - 1;
+            this.seaLevel = world.getSeaLevel();
             int columns = size * size;
             this.surfaceY = new int[columns];
             this.floorY = new int[columns];
@@ -714,6 +715,7 @@ public final class WorldgenBench {
                     perChunk(this.fluidTicksQueued), BASIN_SEAM_MIN_Y, BASIN_SEAM_MAX_Y - 1, perChunk(this.fluidTicksQueuedInBasinLayers),
                     this.basinWater.cardinality() / (this.size * this.size / 256.0)));
 
+            appendLowlands(lines);
             lines.add("biomes at surface:");
             appendHistogram(lines, this.surfaceBiome);
             for (int i = 0; i < BIOME_LAYER_YS.length; i++) {
@@ -769,6 +771,23 @@ public final class WorldgenBench {
 
         private static long mix(long hash, long value) {
             return (Long.rotateLeft(hash, 23) ^ value) * 0x9e3779b97f4a7c15L;
+        }
+
+        /**
+         * Columns whose highest block that isn't air or water lies below the sea surface, with water over it or dry. A
+         * renderer that estimates water as "up to sea level wherever the ground is lower" (Distant Horizons' distant
+         * generator) draws water over the dry ones.
+         */
+        private void appendLowlands(List<String> lines) {
+            long wet = 0, dry = 0;
+            for (int column = 0; column < this.size * this.size; column++) {
+                if (this.floorY[column] < this.bottomY || this.floorY[column] >= this.seaLevel - 1) continue;
+                if (this.surfaceY[column] > this.floorY[column]) wet++;
+                else dry++;
+            }
+            double chunks = this.size * this.size / 256.0;
+            lines.add(String.format(Locale.ROOT, "metric ground_below_sea_surface_columns_per_chunk %.1f under water, %.1f dry (%.1f%% dry)",
+                    wet / chunks, dry / chunks, wet + dry == 0 ? 0.0 : 100.0 * dry / (wet + dry)));
         }
 
         /** Water blocks in y 0..31 per block offset inside the chunk along one axis, relative to the mean of the 16 offsets. */

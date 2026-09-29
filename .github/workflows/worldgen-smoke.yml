@@ -52,6 +52,19 @@ jobs:
           - level_type: "players-versus:better_world"
             mods: "c2me-fabric lithium"
             variant: "java-kernel"
+          # Temporary: which part of the corridors' height bias C2ME's compiled form reacts to (PvFinalDensity.DEBUG_BIAS).
+          - level_type: "players-versus:better_world"
+            mods: "c2me-fabric lithium"
+            variant: "bias-plain"
+            debug_bias: "plain"
+          - level_type: "players-versus:better_world"
+            mods: "c2me-fabric lithium"
+            variant: "bias-noop-choice"
+            debug_bias: "noop-choice"
+          - level_type: "players-versus:better_world"
+            mods: "c2me-fabric lithium"
+            variant: "bias-no-interpolator"
+            debug_bias: "no-interpolator"
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
@@ -93,6 +106,7 @@ jobs:
           "-Ppv.benchRadius=$RADIUS"
           "-Ppv.benchCenter=$CENTER"
           "-Ppv.vanillaTypes=${{ matrix.variant == 'java-kernel' && 'false' || 'true' }}"
+          "-Ppv.debugBias=${{ matrix.debug_bias || 'full' }}"
       - name: show report
         if: always()
         run: cat run/worldgen-smoke/pvwg/*/report.txt || true

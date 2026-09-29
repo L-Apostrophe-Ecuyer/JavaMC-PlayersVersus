@@ -51,6 +51,12 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
      * value the noodle can take, so skipping it never changes the result.
      */
     private static final double ROUNDING_MARGIN = 1.0e-9;
+    /**
+     * Temporary, to find why C2ME's compiled form differs from the kernel in the terrain pass since the corridors
+     * (refactor plan, Section 9): {@code -Dpv.worldgen.debugBias=plain|noop-choice|no-interpolator} builds the height
+     * bias of {@link #asVanillaTypes} without parts of the corridors. Changes the world; not for play.
+     */
+    private static final String DEBUG_BIAS = System.getProperty("pv.worldgen.debugBias", "full");
 
     public PvFinalDensity(DensityFunction terrain, DensityFunction noodleToggle, DensityFunction noodleThickness,
                           DensityFunction noodleRidgeA, DensityFunction noodleRidgeB, DensityFunction entrances) {
@@ -83,7 +89,13 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
      */
     public DensityFunction asVanillaTypes() {
         DensityFunction terrain = DensityFunctionTypes.mul(DensityFunctionTypes.constant(0.64), this.terrain).squeeze();
-        DensityFunction bias = PvNoodle.corridorBiasFunction(this.entrances);
+        DensityFunction bias = switch (DEBUG_BIAS) {
+            case "plain" -> PvNoodle.biasFunction();
+            case "noop-choice" -> DensityFunctionTypes.rangeChoice(DensityFunctionTypes.yClampedGradient(-4064, 4062, -4064.0, 4062.0),
+                    -3.5, 23.5, PvNoodle.biasFunction(), PvNoodle.biasFunction());
+            case "no-interpolator" -> PvNoodle.corridorBiasFunction(DensityFunctionTypes.constant(1.0));
+            default -> PvNoodle.corridorBiasFunction(this.entrances);
+        };
         DensityFunction tunnel = DensityFunctionTypes.rangeChoice(this.noodleToggle, -1000000.0, -0.2, DensityFunctionTypes.constant(64.0),
                 DensityFunctionTypes.add(this.noodleThickness, DensityFunctionTypes.mul(DensityFunctionTypes.constant(1.5),
                         DensityFunctionTypes.max(this.noodleRidgeA.abs(), this.noodleRidgeB.abs()))));

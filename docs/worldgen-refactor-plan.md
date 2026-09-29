@@ -1,4 +1,4 @@
-# Players Versus world type: worldgen revamp plan (revision 6)
+# Players Versus world type: worldgen revamp plan (revision 7)
 
 **Target:** Minecraft 1.21.10, Yarn `1.21.10+build.2`, Fabric Loader 0.17.3, Loom 1.11, Java 21.
 
@@ -8,7 +8,7 @@
 2. The revamp is **its own world type**. Vanilla world types behave as usual.
 3. **Fix the quirks.**
 
-**Status:** the groundwork (Section 4), Phase 1 (the biome source, Section 6.3), Phase 2 (the aquifer, Section 6.2) and Phase 3 (the terrain kernels, Section 6.5) are in, and so are the owner's answers to Section 10, among them Improved-only carvers. They have run on a real server: every commit tagged `[smoke]` generates the same region with a vanilla world and a Players Versus world, alone and next to C2ME and Lithium, reopens a world made by an older build, and compares timings on one runner (Section 8). Phases 4 and 5 are still a plan. Revision 6 answers the owner's notes on cheese caves and water (Section 10, question 6): the aquifer's walls now stand where water meets open space (Section 6.2, 2c), and the caves are a little less concentrated at y 24..32. Revision 5 adds Phase 3 and what it taught about where the time goes and about C2ME (Section 6.5). Revision 4 replaced predictions with measurements wherever a run or a test could check them (Section 2.4). Revision 3 (git history) added the verified APIs, the pseudocode and the formulas in Appendix A.
+**Status:** the groundwork (Section 4), Phase 1 (the biome source, Section 6.3), Phase 2 (the aquifer, Section 6.2) and Phase 3 (the terrain kernels, Section 6.5) are in, and so are the owner's answers to Section 10, among them Improved-only carvers. They have run on a real server: every commit tagged `[smoke]` generates the same region with a vanilla world and a Players Versus world, alone and next to C2ME and Lithium, reopens a world made by an older build, and compares timings on one runner (Section 8). Phases 4 and 5 are still a plan. Revision 7 answers the owner's design notes on the aquifer (Section 10, question 7): flooded corridors under the low lakes and nothing wet below y −8 (Section 6.2, 2d and 2e); it also looks at what Minecraft 26.3 breaks (Section 11) and at Distant Horizons (Section 12). Revision 6 answered the notes on cheese caves and water (question 6): the aquifer's walls now stand where water meets open space (Section 6.2, 2c), and the caves are a little less concentrated at y 24..32. Revision 5 adds Phase 3 and what it taught about where the time goes and about C2ME (Section 6.5). Revision 4 replaced predictions with measurements wherever a run or a test could check them (Section 2.4). Revision 3 (git history) added the verified APIs, the pseudocode and the formulas in Appendix A.
 
 **How vanilla facts were checked.** Names and signatures come from the Yarn 1.21.10 mappings (Appendix B). Mappings don't say what code does, and don't reliably say whether a member is public: `VanillaBiomeParameters.writeOverworldBiomeParameters` turned out to be protected, which only the compiler caught. So behavior is checked by running it: unit tests run Minecraft's code under Fabric Loader (`./gradlew test`), and the smoke workflow runs a dedicated server. Claims nothing has measured yet are still marked **[measure]**.
 
@@ -83,8 +83,9 @@ flowchart TD
 | a | −8 ≤ y and F′ > 0.34 | `SEA_WATER`, or `SEA_WATER_TICKING` if F′ < 0.54 |
 | b | −32 < y and F′ > 0.0001 + max(0, y − 60)·0.015 (below y −8, what would be water in rule a too) | the sea's barrier band, `SEA_BARRIER` |
 | c | −4 < y < 32 and S > tW(y), where tW = 0.5 for y > 8, else 0.5 − (8 − y)·0.08 | `BASIN_WATER`, or `BASIN_WATER_TICKING` if S < tW + 0.2 |
-| d | −4 < y < 23 and S > tB(y), where tB = 0.0001 for y < 12, else (y − 12)·0.06 | the basins' barrier band, `BASIN_BARRIER` |
-| e | otherwise | `AIR` |
+| d | −4 < y < 24 and the flooded corridors' noodle opens the block (its value ≤ 0: Section 6.2, 2d) | `BASIN_WATER` |
+| e | −4 < y < 23 and S > tB(y), where tB = 0.0001 for y < 12, else (y − 12)·0.06 | the basins' barrier band, `BASIN_BARRIER` |
+| f | otherwise | `AIR` |
 
 **What the aquifer places** (`decide`), for a block whose final density is ≤ 0, and for every carved block (carvers pass density 0, and leave the block alone when the answer is solid). The first matching rule wins:
 
@@ -98,7 +99,7 @@ flowchart TD
 | 6 | its own floodedness is a barrier band, and water lies within 2 steps along the axes, or y ≥ 56 | the band's `SEA_BARRIER` or `BASIN_BARRIER` |
 | 7 | otherwise | `AIR` |
 
-All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans are water connected to the sea surface; low caves get basins with their own water up to y 23; caves above them stay dry, and so does everything below y −8; stone stands wherever water meets open space, and the barrier bands add to it within 2 blocks of the water, and near the sea surface, where the sea's band fills the dry hollows next to coasts; the bottom is lava. Until revision 6 the bands alone were the walls (rules b and d gave stone wherever they held): Section 6.2, 2c.
+All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans are water connected to the sea surface; low caves get basins with their own water up to y 23, and flooded corridors under them; caves above them stay dry, and so does everything below y −8; stone stands wherever water meets open space, and the barrier bands add to it within 2 blocks of the water, and near the sea surface, where the sea's band fills the dry hollows next to coasts; the bottom is lava. Until revision 6 the bands alone were the walls (rules b and e gave stone wherever they held): Section 6.2, 2c.
 
 ### 1.4 Biome placement (`PvBiomeLayout`, since Phase 1)
 
@@ -359,6 +360,27 @@ Measured after the change (the smoke region: `85b94d0` against `fc5b0fb`, the co
 - in `AquiferSurveyTest` (40 chunks), stone in open terrain went from 222.7 to 89.1 blocks per chunk (79.4 in caves, 9.7 under the sky), and to 229 per coast chunk from 720;
 - time: in the terrain pass alone (`AquiferTerrainPassTest.aquiferCost`, 18 chunks), the walls add 0.2 to 0.4 ms per chunk (about 3%), with 511 lattice points per chunk instead of 348 and each block's own floodedness computed for 3,538 blocks instead of 2,959. The `perf` job couldn't resolve that: for `85b94d0`, `noise` read 14.98 → 17.65 ms per chunk alone and 18.10 → 17.71 next to C2ME; for `91f014e`, against `8a5e429` (the same aquifer but for the y 56 rule, which only saves work), 14.54 → 16.29 alone and 16.98 → 23.94 next to C2ME. The same code read 0.87 and 0.76 times vanilla's `noise` depending on its place in the run. Single runs of one build vary by up to 40%, so the job now times each build twice (Section 8).
 
+**2d: flooded corridors (done, revision 7, commit `d79ad84`).** Question 7 asks for the lakes of y 0..24 to get flooded corridors under them that may join them up and are a gamble to swim, with everything around dry. The noodle's height bias (0.08 in y −3..19, 0.047 at y 24) kept noodle caves out of those layers, because the JSON couldn't tell where they would meet the lakes. With the entrance value EN in Java, the bias can follow it:
+
+- in y −3..23, where EN < 0.4 (the entrance caves, which in these layers are all basin lakes, are where EN ≤ 0), the bias moves from its usual value to 0 over 0.05 of EN, and falls on to −0.06 as EN goes from 0.15 to 0, so the corridors widen into the caves they reach (`PvNoodle.corridorBias`, constants `CORRIDOR_*`);
+- the final density reads EN interpolated on the terrain pass's cells, only around the layers (a `range_choice` on y −9..24, so the extra corners cost little); the aquifer computes the same noodle from lattices of EN and the noodle's four inputs, to the same doubles (`AquiferTerrainPassTest`), and its new rule (Section 1.3, rule d) makes basin water wherever that noodle opens a block. The walls keep the water from dry air.
+
+`FloodedNoodleSurveyTest` chose the rule in the three lake-richest areas of 5 × 5 chunks it found, per chunk (342.2 water blocks in y −3..23 before):
+
+| Rule | New water | Of it reaching a lake | Opened but left dry |
+|---|---|---|---|
+| noodles opened only where S floods (bias 0 where S > 0.5, over 0.1) | 1.3 | 1.0 | 0.2 |
+| noodles where EN < 0.3 (over 0.05), bias 0, flooded only where S says | 18.2 | | 26.0 |
+| the same, flooded by the aquifer | 47.3 | 6.6 (14%) | 0.2 |
+| … and the bias falling to −0.06 from EN 0.1 | 54.1 | 24.6 (45%) | 0.7 |
+| … to −0.1 from EN 0.1 | 60.2 | 35.4 (59%) | 1.0 |
+| … to −0.1 from EN 0.2 | 87.9 | 53.3 (61%) | 2.6 |
+| **EN < 0.4, the bias falling to −0.06 from EN 0.15 (the code)** | **74.8** | **48.6 (65%)** | **1.0** |
+
+Measured with the code in generation (the survey now reads the router): 74.0 new water blocks per chunk in those areas, 68% of it in water bodies that reach a lake; 0.03 bodies per chunk join 0.11 of the lakes there before, so corridors that link two big caves are rare (about one chunk in 30); 23.5 blocks per chunk in 0.43 bodies meet no cave (sealed tubes); no water beside or above dry air. In the smoke region: surface and biome maps unchanged (0 of 2,500 cells); water 185.97 → 211.39 blocks per chunk in y 0..23 and 2.60 → 3.86 in y −8..−1 (the corridors reach y −3); fluid updates queued 109.4 → 114.5 per chunk (new water in the basins' ticking band, in the same proportion as before); carvers skip barrier stone at 7.31% of their positions (7.29%); water next to air still 0. Time: the `perf` job read `noise` 16.81 → 17.34 ms per chunk alone (its two runs of this commit 39% apart) and 17.41 → 17.16 next to C2ME, so nothing measurable. Next to C2ME the run stopped matching the plain one; Section 9 says why.
+
+**2e: dry below y −8 (done, revision 7, commit `1bdc6df`).** Question 7: "Anything under y −8 should be dry." Below `SEA_WATER_MIN_Y` (−8), sea floodedness above the water threshold makes the sea's barrier band instead of water (Section 1.3, rules a and b); basin water already stopped at y −3. It changed nothing measurable: in 4,000 random ocean columns (1,332 of them deep ocean), none of 4,188 open blocks in y −31..−9 had F above the water threshold (`DeepWaterSurveyTest`), and the smoke region had no water there before or after. F's coast term could pass the threshold in entrance caves under ocean (its formula allows it); now it can't make water there.
+
 ### 6.3 Biome layout (Phase 1, done): rules as data, disjoint boxes
 
 Implemented as `biome/PvBiomeLayout`; the pseudocode below is the design it follows. Two differences: the dripstone replacement keeps depth 0.8–1.0 (see Q3), and the surface-cave biome goes under each remaining piece of the original rather than under the whole slice, as the old mixin did.
@@ -589,6 +611,7 @@ With this, the world preset shrinks to `"generator": {"type": "players-versus:no
 - **Runtime coverage.** Mixins, access wideners and codecs only fail when the game loads them, so every worldgen change should go through a `[smoke]` run, not just the build.
 - **Build environment.** The agent environment can't reach Fabric's maven or Mojang, and can't download Actions artifacts; everything is compiled and run in CI, and results are read from job logs. The Yarn mapping files used to look up names contain stale entries (`WrapperLookup.getWrapperOrThrow` doesn't exist in 1.21.10) and no access modifiers, so the compiler has the last word.
 - **Threads.** Kernels are stateless; each lattice belongs to one chunk's aquifer. The biome layout is built per world and immutable.
+- **C2ME and the corridors.** Since `d79ad84` (Section 6.2, 2d) the Players Versus world next to C2ME no longer matches the plain one. The bench's block hashes (`07df535`): 81 of 625 chunks differ right after NOISE, all in y 32..95, with the same structure starts (14 of 2,500 surface cells, water in y 48..63 986.88 against 990.41 blocks per chunk). With the Java kernel under C2ME (`-Dpv.worldgen.vanillaTypes=false`) every block matches the plain run; without Lithium it differs the same way; and at 20,000 random positions C2ME's compiled final density gives exactly the doubles of vanilla's own evaluation of the same tree (`0f3ec29`). So the difference comes from how C2ME's compiled code reads the terrain pass's interpolators and caches, and only with the corridors' form of the noodle's height bias, though that form only differs from the old one in y −3..23. The `bias-*` smoke runs narrow it down; until then, the Java kernel is the exact choice next to C2ME.
 - **C2ME.** Its density-function compiler compiles vanilla's types and calls any other type once per position, with a new position object each time. A custom type is cheap per cell corner and costly per block, so `PvFinalDensity` switches to vanilla types when the compiler is active (Section 6.5). That check relies on the name of one of C2ME's internal interfaces. If C2ME renames it, the Java kernel runs under the compiler again: slower (about 16% on `noise`), but still correct.
 - **Access wideners.** `NoiseChunkGenerator` is widened to extendable for `PvChunkGenerator`, and `GenerationSettings`' constructor to accessible. Other mods see the same classes; the only difference is that they are no longer final.
 - **Existing worlds after Phase 1** (verified, Section 10, question 3). Chunks generated before keep their biomes. Improved worlds created before Phase 1 keep vanilla's biome source in `level.dat`, so their new chunks get vanilla biomes, not the Players Versus layout. Default worlds created with the mod installed also get vanilla biomes in new chunks, as intended. In both, the Players Versus cave biomes stop at the edge of the old chunks.
@@ -653,7 +676,46 @@ Questions 1 to 6 were answered by the repository owner (decisions of 2026-09-28,
 
    **Thin walls with gaps: fixed** in revision 6 (Section 6.2, 2c): no water block touches air after the carvers (1.29 to 1.40 per chunk before).
 
+   **Flooded corridors: done** in revision 7 (Section 6.2, 2d). Noodle caves come back in y −3..23 near the flooded caves, filled with water and widening into the caves they reach; in lake-rich areas 68% of their water reaches a lake, a few link two lakes (about one chunk in 30 there), and all of it is walled off from dry air.
+
+   **Dry below y −8: done** (Section 6.2, 2e). Nothing measurable changed: no sample had enough floodedness for water down there.
+
+   **The river at y 80: a prototype** (`HighRiverSurveyTest`, on exact terrain in six hilly areas). A river on its own 2D noise, cut into the ground as a valley (open above y 80, widening with height, so no ground is left over the water), water at y 80 over a bed up to 3 blocks deep, stone where the bed's water could run into dry air, and none around the water at y 80 so it can spill. First results, per chunk of those areas: 13 river columns, no roofs, 2.5 blocks of wall; but about 600 blocks cut away where the ground rises high above y 80, more than "a tiny bit", and few waterfalls (0.36 spilling columns), because the river narrows to nothing where the depth says the ground reaches y 80, before any real drop. Next: water at y 80 only where the terrain was solid, so the river runs on to the real edge and spills there, and a lower limit on how high the ground it cuts through can be.
+
 ---
+
+## 11. Minecraft 26.3: what the update breaks
+
+Minecraft 26.3 (the Wilderness Bound drop, released 2026-09-15) rebuilt world generation, which is where its speed-up comes from. What follows comes from Fabric's post for 26.3 (the `FabricMC/fabricmc.net` repository), NeoForged's 26.3 porting primer (`ChampionAsh5357/neoforged-github`, branch `port/26.3`), the 26.3 member lists in RelativityMC's Yarn fork (`RelativityMC/yarn`, branch `ver/26.3`) and C2ME's 26.3 branch. Mojang's servers can't be reached from the agent environment, so none of it has been compiled against the game yet: a 26.3 build has the last word.
+
+**The path.** 1.21.10 → 26.1 is the unobfuscated jump: Mojang's names instead of Yarn, the `net.fabricmc.fabric-loom` plugin without remapping, Java 25, Fabric API renames (Fabric's migration map covers them). 26.2 is small. 26.3 needs Loom 1.17, Gradle 9.6 and Loader 0.19.5. RelativityMC maintains Yarn-style names for 26.x (`org.relativitymc:modern-yarn`, which C2ME builds against), unofficial, if keeping Yarn names matters.
+
+**What changes for the world type**, in the order of the work it means:
+
+| # | 26.3 change | What it means here |
+|---|---|---|
+| 1 | Density functions are split into a description (`DensityFunction`: codec, value range, axes, `rewriteChildren`, `compile`) and a compiled `DensitySampler` (`sampleValue` at a block and `sampleVolume` over a `DensityVolume`), built by vanilla's own compiler. Values are `float`s. `flat_cache`, `cache_2d`, `cache_once` and `cache_all_in_cell` merge into one `cache`; `interpolated` takes cell sizes | Every Java type here (`PvTerrain`, `PvFinalDensity`, `PvNoodle`, `PvEntrances`, `PvDepth`, `AquiferFloodedness`, `AquiferSpread`) becomes a description plus a sampler. The guarantees "the same doubles as the JSON" become "the same floats as 26.3's evaluation", and the tests that hold them (`TerrainPortTest`, `AquiferPortTest`, `PvNoodleTest`, the lattice tests) are redone against it. `asVanillaTypes` and `DensityCompilerCompat` probably go: a custom type now compiles to its own sampler, which is what C2ME's compiler was needed for |
+| 2 | `NoiseChunk` (Yarn `ChunkNoiseSampler`) no longer runs the cell interpolation loop (no `updateForY/X/Z`, `advanceCellX`, `swapSlices`, cell sizes) and is no longer a position; it holds the aquifer, a buffer pool, the samplers and a region | `PvAquifer`'s lattices match vanilla's loop to the bit today; they are rebuilt against 26.3's interpolation. The test helper `TerrainPass`, which drives the loop by reflection, is rewritten |
+| 3 | `Aquifer.create` (Yarn `AquiferSampler.aquifer`) is gone. Aquifers come from a codec'd `Aquifer$Config` in the noise settings (`aquifers`, replacing `aquifers_enabled`), which holds the barrier, floodedness, spread and lava noises (moved out of the noise router), a surface level and an `exclusion` density, and builds the sampler with `createSampler(samplers, random, region, fluid levels)`. `apply` takes the block's `x, y, z` | `ChunkNoiseSamplerMixin`'s aquifer hook moves to that call (a `@WrapOperation` around `createSampler` where `NoiseChunk` makes its aquifer); `PvAquifer` implements the new `apply`. F and S move from the router slots into the aquifer config |
+| 4 | Ore veins are an `OreVeinRule` inside the material rules (`ore_veins_enabled` merged into them) | `PvOreVeins` becomes a material rule; the mixin's ore-vein hook goes |
+| 5 | Surface rules are now material rules and conditions, which can be registered (`worldgen/material_rule`, `worldgen/material_condition`); `surface_rule` → `material_rule` | The 41 KB of surface rules move; Phase 4's `PvSurfaceRules` targets material rules |
+| 6 | Chunk statuses `NOISE`, `SURFACE` and `CARVERS` merge into `TERRAIN` (`buildTerrain`); a chunk no longer keeps its `NoiseChunk`, nor a proto chunk its carving mask | The bench's per-status times and its snapshot before the carvers are reworked |
+| 7 | `ConfiguredWorldCarver` is gone (carvers are records with their settings inline); carving no longer takes the aquifer: `NoiseBasedChunkGenerator.generateCarvers` (now private) applies it to the carved blocks | The three `players-versus:` carvers are rewritten. `PvChunkGenerator` overrides `ChunkGenerator.getGenerationSettings(biome)`, which 26.3 still has next to a new `getGenerationSettings(BiomeSupplier, ChunkPos)`; to check that carving still reads it |
+| 8 | `ConfiguredFeature` is gone (a feature is its type and settings, in `worldgen/feature`); placement modifiers are renamed; number providers split into float and int providers | All 69 feature overrides and the mod's own features are rewritten; data generation is the way to keep them in step |
+| 9 | Noise parameters: `firstOctave` → `base_octave`, `amplitudes` → `amplitude_modifiers`, plus `octave_count`, `base_amplitude`, `normalize`; noises return `float`s | Every noise file, `players-versus:high_river` included |
+| 10 | `BiomeSource` no longer resolves biomes itself (`BiomeResolver`); `Climate.Sampler` takes density samplers; `OverworldBiomeBuilder#addBiomes` (Yarn `writeOverworldBiomeParameters`) is package-private since 26.2 | `PvBiomeSource` changes; the access widener becomes a class tweaker that widens `addBiomes` |
+| 11 | `WorldPresets.DEFAULT`, `createDemoOptions`, `getDefaultOverworldOptions` and `StructurePiece.addBlockWithRandomThreshold` are still there; `Feature.generate` becomes `place(WorldGenLevel, ChunkGenerator, RandomSource, BlockPos)` | `WorldPresetsMixin`, `WorldPresetServerDefaultMixin` and `StructurePieceMixin` port with renames; `DungeonsMixin` retargets to `place` |
+
+**Order.** Finish what's in flight on 1.21.10. Port to 26.1 with the world generation unchanged (names, Loom, Java 25), then 26.2. Then 26.3's rewrite: time vanilla 26.3 first, since its compiler may make some of this mod's JSON fast enough to stay data (Phase 3 moved it to Java for speed); then samplers for the rest, the aquifer on `createSampler`, ore veins as a material rule, and the data files; then the tests against 26.3's evaluation. Items 1 to 3 are most of the work.
+
+## 12. Distant Horizons
+
+Distant Horizons (3.3.4, for 1.21.10 and for 26.3; read from its source, `distant-horizons-team/distant-horizons` on GitLab) draws distant terrain two ways.
+
+- **Near its range (detail level 0) it generates real chunks** with its own pipeline, calling the chunk generator: structure starts and references, biomes, `fillFromNoise` (26.3: `buildTerrain`), `buildSurface`, features; no carvers, for any world type. It treats any `NoiseBasedChunkGenerator` as vanilla's, and `PvChunkGenerator` is one, so the aquifer (through the mixin), `PvBiomeSource`, the surface rules and the features all apply. Everything they share between chunks is immutable, so its worker threads are safe. These chunks match the world, but for the carvers' caves and the C2ME caveat of Section 9.
+- **Further out it estimates.** Its rough generator marches the router's final density down each column at single points (exact values: no cell interpolation), takes the biome from the biome source and each biome's top block from a few real chunks, and puts water "up to sea level wherever the ground is lower". It never asks the aquifer. Players Versus places water where the floodedness says, so ground below y 64 that is dry in the world is drawn under water in the distance, and turns dry as real chunks load; the high river at y 80 wouldn't show at all. The bench counts that ground (`ground_below_sea_surface_columns_per_chunk`, dry against under water) in both world types.
+
+Distant Horizons lets a mod register its own generator for a level (`DhApi` world generator overrides, returning data sources). An optional compatibility module could draw far terrain with Players Versus water: sea floodedness at the surface, from the same inputs the aquifer uses. Worth it if the metric shows much dry low ground.
 
 ## Appendix A: The current density functions as formulas
 
