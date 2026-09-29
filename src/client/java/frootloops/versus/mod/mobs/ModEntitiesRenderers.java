@@ -8,7 +8,6 @@ import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 
 import static frootloops.versus.mod.mobs.ModEntities.*;
 

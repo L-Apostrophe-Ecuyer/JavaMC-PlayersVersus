@@ -1,139 +1,143 @@
 package frootloops.versus.mod.mobs.hostile.nether;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.ai.pathing.PathNodeType;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.BlazeEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.Vec3;
 
-public class WildfireEntity extends HostileEntity {
+public class WildfireEntity extends Monster {
 
     private float eyeOffset = 0.5F;
     private int eyeOffsetCooldown;
-    private static final TrackedData<Byte> FIRE_ACTIVE = DataTracker.registerData(WildfireEntity.class, TrackedDataHandlerRegistry.BYTE);
-    private static final TrackedData<Byte> ACTIVE_SHIELDS_BYTEMASK = DataTracker.registerData(WildfireEntity.class, TrackedDataHandlerRegistry.BYTE);
+    private static final EntityDataAccessor<Byte> FIRE_ACTIVE = SynchedEntityData.defineId(WildfireEntity.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Byte> ACTIVE_SHIELDS_BYTEMASK = SynchedEntityData.defineId(WildfireEntity.class, EntityDataSerializers.BYTE);
 
-    public WildfireEntity(EntityType<? extends HostileEntity> entityType, World world) {
+    public WildfireEntity(EntityType<? extends Monster> entityType, Level world) {
         super(entityType, world);
-        this.setPathfindingPenalty(PathNodeType.WATER, -1.0F);
-        this.setPathfindingPenalty(PathNodeType.LAVA, 8.0F);
-        this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, 0.0F);
-        this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, 0.0F);
-        this.experiencePoints = 40;
+        this.setPathfindingMalus(PathType.WATER, -1.0F);
+        this.setPathfindingMalus(PathType.LAVA, 8.0F);
+        this.setPathfindingMalus(PathType.DANGER_FIRE, 0.0F);
+        this.setPathfindingMalus(PathType.DAMAGE_FIRE, 0.0F);
+        this.xpReward = 40;
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(FIRE_ACTIVE, (byte)1);
-        builder.add(ACTIVE_SHIELDS_BYTEMASK, (byte)17);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FIRE_ACTIVE, (byte)1);
+        builder.define(ACTIVE_SHIELDS_BYTEMASK, (byte)17);
     }
 
     @Override
-    protected void initGoals() {
-        this.goalSelector.add(4, new WildfireShootFireBallsGoal(this));
-        this.goalSelector.add(5, new GoToWalkTargetGoal(this, 1.0));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0, 0.0F));
-        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
-        this.goalSelector.add(8, new LookAroundGoal(this));
-        this.targetSelector.add(1, new RevengeGoal(this).setGroupRevenge());
-        this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, true));
+    protected void registerGoals() {
+        this.goalSelector.addGoal(4, new WildfireShootFireBallsGoal(this));
+        this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0, 0.0F));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
     }
 
-    public static DefaultAttributeContainer.Builder createWildfireAttributes() {
-        return HostileEntity.createMobAttributes()
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.5F)
-                .add(EntityAttributes.MAX_HEALTH, 120.0)
-                .add(EntityAttributes.FOLLOW_RANGE, 40.0)
-                .add(EntityAttributes.ATTACK_DAMAGE, 6.0);
+    public static AttributeSupplier.Builder createWildfireAttributes() {
+        return Monster.createMobAttributes()
+                .add(Attributes.MOVEMENT_SPEED, 0.5F)
+                .add(Attributes.MAX_HEALTH, 120.0)
+                .add(Attributes.FOLLOW_RANGE, 40.0)
+                .add(Attributes.ATTACK_DAMAGE, 6.0);
     }
 
     @Override
-    protected void mobTick(ServerWorld world) {
+    protected void customServerAiStep(ServerLevel world) {
         this.eyeOffsetCooldown--;
         if (this.eyeOffsetCooldown <= 0) {
             this.eyeOffsetCooldown = 100;
-            this.eyeOffset = (float)this.random.nextTriangular(0.5, 6.891);
+            this.eyeOffset = (float)this.random.triangle(0.5, 6.891);
         }
 
         LivingEntity livingEntity = this.getTarget();
-        if (livingEntity != null && livingEntity.getEyeY() > this.getEyeY() + (double)this.eyeOffset && this.canTarget(livingEntity)) {
-            Vec3d vec3d = this.getVelocity();
-            this.setVelocity(this.getVelocity().add(0.0, (0.2F - vec3d.y) * 0.2F, 0.0));
-            this.velocityDirty = true;
+        if (livingEntity != null && livingEntity.getEyeY() > this.getEyeY() + (double)this.eyeOffset && this.canAttack(livingEntity)) {
+            Vec3 vec3d = this.getDeltaMovement();
+            this.setDeltaMovement(this.getDeltaMovement().add(0.0, (0.2F - vec3d.y) * 0.2F, 0.0));
+            this.hasImpulse = true;
         }
 
-        super.mobTick(world);
+        super.customServerAiStep(world);
     }
 
     @Override
-    public void tickMovement() {
-        if (!this.isOnGround() && this.getVelocity().y < 0.0) {
-            this.setVelocity(this.getVelocity().multiply(1.0, 0.6, 1.0));
+    public void aiStep() {
+        if (!this.onGround() && this.getDeltaMovement().y < 0.0) {
+            this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.6, 1.0));
             this.fallDistance = 0.0f;
         }
 
-        if (this.getEntityWorld().isClient()) {
+        if (this.level().isClientSide()) {
             if (this.random.nextInt(24) == 0 && !this.isSilent()) {
-                this.playSound(SoundEvents.ENTITY_BLAZE_BURN, 1.0F + this.random.nextFloat(), this.random.nextFloat() * 0.7F + 0.3F);
+                this.playSound(SoundEvents.BLAZE_BURN, 1.0F + this.random.nextFloat(), this.random.nextFloat() * 0.7F + 0.3F);
             }
 
             for (int i = 0; i < (this.isFireActive() ? 4 : 2); i++) {
-                this.getEntityWorld().addParticleClient(ParticleTypes.SOUL_FIRE_FLAME, this.getParticleX(0.5), this.getRandomBodyY(), this.getParticleZ(0.5), 0.0, 0.0, 0.0);
+                this.level().addParticle(ParticleTypes.SOUL_FIRE_FLAME, this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), 0.0, 0.0, 0.0);
             }
         }
 
-        super.tickMovement();
+        super.aiStep();
     }
 
     public void addSoulFlameParticles(int count) {
-        if(this.getEntityWorld() instanceof ServerWorld serverWorld) {
+        if(this.level() instanceof ServerLevel serverWorld) {
             for (int i = 0; i < count; i++) {
                 double d = this.random.nextGaussian() * 0.02;
                 double e = this.random.nextGaussian() * 0.02;
                 double f = this.random.nextGaussian() * 0.02;
-                serverWorld.addParticleClient(ParticleTypes.SOUL_FIRE_FLAME, this.getParticleX(1.0) - d * 10.0, this.getRandomBodyY() - e * 10.0, this.getParticleZ(1.0) - f * 10.0, d, e, f);
+                serverWorld.addParticle(ParticleTypes.SOUL_FIRE_FLAME, this.getRandomX(1.0) - d * 10.0, this.getRandomY() - e * 10.0, this.getRandomZ(1.0) - f * 10.0, d, e, f);
             }
         }
     }
 
 
 
-    @Override public boolean hurtByWater() {
+    @Override public boolean isSensitiveToWater() {
         return true;
     }
     @Override public boolean isOnFire() {return this.isFireActive();}
     private boolean isFireActive() {
-        return (this.dataTracker.get(FIRE_ACTIVE) & 1) != 0;
+        return (this.entityData.get(FIRE_ACTIVE) & 1) != 0;
     }
     void setFireActive(boolean fireActive) {
-        byte b = this.dataTracker.get(FIRE_ACTIVE);
+        byte b = this.entityData.get(FIRE_ACTIVE);
         if (fireActive) b = (byte)(b | 1);
         else b = (byte)(b & -2);
-        this.dataTracker.set(FIRE_ACTIVE, b);
+        this.entityData.set(FIRE_ACTIVE, b);
     }
 
     @Override protected SoundEvent getAmbientSound() {
-        return SoundEvents.ENTITY_BLAZE_AMBIENT;
+        return SoundEvents.BLAZE_AMBIENT;
     }
     @Override protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_BLAZE_HURT;
+        return SoundEvents.BLAZE_HURT;
     }
     @Override protected SoundEvent getDeathSound() {
-        return SoundEvents.ENTITY_BLAZE_DEATH;
+        return SoundEvents.BLAZE_DEATH;
     }
 }

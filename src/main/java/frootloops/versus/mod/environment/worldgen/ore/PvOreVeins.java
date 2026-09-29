@@ -1,12 +1,11 @@
 package frootloops.versus.mod.environment.worldgen.ore;
 
 import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.math.random.RandomSplitter;
-import net.minecraft.world.gen.chunk.ChunkNoiseSampler;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseChunk;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 
 /**
  * Large ore veins for the Players Versus world type: copper veins in terracotta, iron veins in tuff.
@@ -32,10 +31,10 @@ public final class PvOreVeins {
     private PvOreVeins() {
     }
 
-    public static ChunkNoiseSampler.BlockStateSampler create(DensityFunction veinToggle, DensityFunction veinRidged,
-                                                             DensityFunction veinGap, RandomSplitter randomDeriver) {
+    public static NoiseChunk.BlockStateFiller create(DensityFunction veinToggle, DensityFunction veinRidged,
+                                                             DensityFunction veinGap, PositionalRandomFactory randomDeriver) {
         return pos -> {
-            double toggle = veinToggle.sample(pos);
+            double toggle = veinToggle.compute(pos);
             int y = pos.blockY();
             CustomWorldgen.VeinType veinType = toggle > COPPER_TOGGLE_THRESHOLD ? CustomWorldgen.VeinType.COPPER : CustomWorldgen.VeinType.IRON;
             double toggleStrength = Math.abs(toggle);
@@ -44,15 +43,15 @@ public final class PvOreVeins {
             if (yAboveMin < 0 || yBelowMax < 0) return null;
 
             int yDistanceToEdge = Math.min(yBelowMax, yAboveMin);
-            double edgeFade = MathHelper.clampedMap(yDistanceToEdge, 0.0, MAX_DENSITY_INTRUSION, -LIMINAL_DENSITY_REDUCTION, 0.0);
+            double edgeFade = Mth.clampedMap(yDistanceToEdge, 0.0, MAX_DENSITY_INTRUSION, -LIMINAL_DENSITY_REDUCTION, 0.0);
             if (toggleStrength + edgeFade < DENSITY_THRESHOLD) return null;
 
-            Random random = randomDeriver.split(pos.blockX(), y, pos.blockZ());
+            RandomSource random = randomDeriver.at(pos.blockX(), y, pos.blockZ());
             if (random.nextFloat() > BLOCK_GENERATION_CHANCE) return null;
-            if (veinRidged.sample(pos) >= 0.0) return null;
+            if (veinRidged.compute(pos) >= 0.0) return null;
 
-            double oreChance = MathHelper.clampedMap(toggleStrength, DENSITY_THRESHOLD, DENSITY_FOR_MAX_ORE_CHANCE, MIN_ORE_CHANCE, veinType.oreChance);
-            if ((double) random.nextFloat() < oreChance && veinGap.sample(pos) > VEIN_GAP_THRESHOLD) {
+            double oreChance = Mth.clampedMap(toggleStrength, DENSITY_THRESHOLD, DENSITY_FOR_MAX_ORE_CHANCE, MIN_ORE_CHANCE, veinType.oreChance);
+            if ((double) random.nextFloat() < oreChance && veinGap.compute(pos) > VEIN_GAP_THRESHOLD) {
                 return random.nextFloat() < veinType.rawBlockChance ? veinType.rawOreBlock : veinType.ore;
             }
             return veinType.stone;

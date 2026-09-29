@@ -3,15 +3,15 @@ package frootloops.versus.mixin.client.items_and_effects.inventory;
 import frootloops.versus.mod.environment.CustomBlockItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.ClickType;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ScreenHandler.class)
+@Mixin(AbstractContainerMenu.class)
 public class ItemMergingMixin {
 
-    @Shadow private StackReference getCursorStackReference() {
+    @Shadow private SlotAccess createCarriedSlotAccess() {
         return null;
     }
 
@@ -50,18 +50,18 @@ public class ItemMergingMixin {
     }
 
     @Overwrite
-    private boolean handleSlotClick(PlayerEntity player, ClickType clickType, Slot slot, ItemStack stack, ItemStack cursorStack) {
-        FeatureSet featureSet = player.getEntityWorld().getEnabledFeatures();
-        if (cursorStack.isItemEnabled(featureSet) && (cursorStack.onStackClicked(slot, clickType, player) || ItemMergingMixin.tryFuseWithStack(cursorStack, slot, clickType))) {
+    private boolean tryItemClickBehaviourOverride(Player player, ClickAction clickType, Slot slot, ItemStack stack, ItemStack cursorStack) {
+        FeatureFlagSet featureSet = player.level().enabledFeatures();
+        if (cursorStack.isItemEnabled(featureSet) && (cursorStack.overrideStackedOnOther(slot, clickType, player) || ItemMergingMixin.tryFuseWithStack(cursorStack, slot, clickType))) {
             return true;
         }
-        return stack.isItemEnabled(featureSet) && stack.onClicked(cursorStack, slot, clickType, player, this.getCursorStackReference());
+        return stack.isItemEnabled(featureSet) && stack.overrideOtherStackedOnMe(cursorStack, slot, clickType, player, this.createCarriedSlotAccess());
     }
 
-    private static boolean tryFuseWithStack(ItemStack cursorStack, Slot slot, ClickType clickType) {
-        if(slot == null || cursorStack.isEmpty() || !slot.hasStack()) return false;
-        if(slot.getStack() == cursorStack) return false;
-        if(!clickType.equals(ClickType.LEFT)) return false;
+    private static boolean tryFuseWithStack(ItemStack cursorStack, Slot slot, ClickAction clickType) {
+        if(slot == null || cursorStack.isEmpty() || !slot.hasItem()) return false;
+        if(slot.getItem() == cursorStack) return false;
+        if(!clickType.equals(ClickAction.PRIMARY)) return false;
 
         Item itemToMergeInto;
         int amountRequired, amountBetweenBoth;
@@ -72,26 +72,26 @@ public class ItemMergingMixin {
             itemToMergeInto = (Item)conversionResult[0];
             amountRequired = (int)conversionResult[1];
         }
-        else if(cursorStack.isDamaged() && slot.getStack().isDamaged()) {
-            if(cursorItem != slot.getStack().getItem()) return false;
-            if(cursorStack.hasEnchantments() || slot.getStack().hasEnchantments()) return false;
-            if(!cursorStack.getName().getString().equals(slot.getStack().getName().getString())) return false;
+        else if(cursorStack.isDamaged() && slot.getItem().isDamaged()) {
+            if(cursorItem != slot.getItem().getItem()) return false;
+            if(cursorStack.isEnchanted() || slot.getItem().isEnchanted()) return false;
+            if(!cursorStack.getHoverName().getString().equals(slot.getItem().getHoverName().getString())) return false;
 
             int maxUses = cursorStack.getMaxDamage();
-            int damage =  cursorStack.getDamage() + slot.getStack().getDamage() - maxUses - maxUses/10;
+            int damage =  cursorStack.getDamageValue() + slot.getItem().getDamageValue() - maxUses - maxUses/10;
             if(damage < -maxUses/4) return false;
-            slot.getStack().setDamage(Math.max(0, damage));
+            slot.getItem().setDamageValue(Math.max(0, damage));
             cursorStack.setCount(0);
             return true;
         }
         else return false;
 
         int minAmount = 999;
-        if(cursorStack.isOf(slot.getStack().getItem())) {
-            amountBetweenBoth = cursorStack.getCount() + slot.getStack().getCount();
-            minAmount = cursorStack.getMaxCount() + 1;
+        if(cursorStack.is(slot.getItem().getItem())) {
+            amountBetweenBoth = cursorStack.getCount() + slot.getItem().getCount();
+            minAmount = cursorStack.getMaxStackSize() + 1;
         }
-        else if(itemToMergeInto != null && slot.getStack().isOf(itemToMergeInto)) {
+        else if(itemToMergeInto != null && slot.getItem().is(itemToMergeInto)) {
             amountBetweenBoth = cursorStack.getCount();
             minAmount = amountRequired;
         }
@@ -99,11 +99,11 @@ public class ItemMergingMixin {
 
         if(itemToMergeInto != null && amountBetweenBoth >= minAmount) {
             int numPossibleCrafts = amountBetweenBoth/amountRequired;
-            int numOutputAlreadyThere = slot.getStack().isOf(itemToMergeInto) ? slot.getStack().getCount() : 0;
+            int numOutputAlreadyThere = slot.getItem().is(itemToMergeInto) ? slot.getItem().getCount() : 0;
             int numOutput = Math.min(numPossibleCrafts + numOutputAlreadyThere, 64);
             int numLeftover = amountBetweenBoth % amountRequired + Math.max(0, (numPossibleCrafts + numOutputAlreadyThere - numOutput) * amountRequired);
             cursorStack.setCount(numLeftover);
-            slot.setStack(new ItemStack(itemToMergeInto, numOutput));
+            slot.setByPlayer(new ItemStack(itemToMergeInto, numOutput));
             return true;
         }
         return false;

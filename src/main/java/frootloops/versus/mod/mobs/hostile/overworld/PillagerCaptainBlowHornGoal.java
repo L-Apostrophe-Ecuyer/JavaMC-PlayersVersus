@@ -1,28 +1,29 @@
 
 package frootloops.versus.mod.mobs.hostile.overworld;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.InstrumentComponent;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.IllagerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.event.GameEvent;
-
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Instrument;
+import net.minecraft.world.item.InstrumentItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.InstrumentComponent;
+import net.minecraft.world.level.gameevent.GameEvent;
 import java.util.Optional;
 
 public class PillagerCaptainBlowHornGoal extends Goal {
 
-    private IllagerEntity illager;
+    private AbstractIllager illager;
 
     private int timeSpentTootingHorn;
     private int timeLeftToStart;
@@ -32,7 +33,7 @@ public class PillagerCaptainBlowHornGoal extends Goal {
     private boolean isCaptain;
     private boolean isInRaid;
 
-    public PillagerCaptainBlowHornGoal(IllagerEntity pillagerEntity) {
+    public PillagerCaptainBlowHornGoal(AbstractIllager pillagerEntity) {
         this.illager = pillagerEntity;
         this.timeLeftToStart = 0;
         isCaptain = this.illager.isCaptain();
@@ -40,43 +41,43 @@ public class PillagerCaptainBlowHornGoal extends Goal {
     }
 
     @Override
-    public boolean canStart() {
+    public boolean canUse() {
         if(isInRaid) return false;
         if(!isCaptain) {
-            if(illager.age % 91 != 0) return false;
+            if(illager.tickCount % 91 != 0) return false;
             isCaptain = this.illager.isCaptain();
         }
         isInRaid = isCaptain && this.illager.hasRaid();
-        return (!isInRaid && isCaptain && illager.isAlive() && illager.hurtTime == 0 && illager.getPrimeAdversary() instanceof PlayerEntity player && player.squaredDistanceTo(illager) < 144.0d && !player.hasStatusEffect(StatusEffects.BAD_OMEN) && !player.hasStatusEffect(StatusEffects.RAID_OMEN));
+        return (!isInRaid && isCaptain && illager.isAlive() && illager.hurtTime == 0 && illager.getKillCredit() instanceof Player player && player.distanceToSqr(illager) < 144.0d && !player.hasEffect(MobEffects.BAD_OMEN) && !player.hasEffect(MobEffects.RAID_OMEN));
     }
 
     @Override
-    public boolean shouldContinue() {
+    public boolean canContinueToUse() {
         return this.illager.isAlive() && this.timeSpentTootingHorn < 80 && (timeLeftToStart == 0 || illager.hurtTime == 0);
     }
 
     @Override
-    public boolean canStop(){
+    public boolean isInterruptable(){
         return true;
     }
 
     @Override
     public void start() {
-        this.prevOffhandStack = this.illager.getOffHandStack();
-        this.prevMainhandStack = this.illager.getMainHandStack();
+        this.prevOffhandStack = this.illager.getOffhandItem();
+        this.prevMainhandStack = this.illager.getMainHandItem();
 
-        RegistryEntry.Reference<Instrument> entry = illager.getEntityWorld().getRegistryManager().getOrThrow(RegistryKeys.INSTRUMENT).getEntry(Identifier.ofVanilla("seek_goat_horn")).get();
-        ItemStack goatHornStack = GoatHornItem.getStackForInstrument(Items.GOAT_HORN, entry);
-        this.illager.equipStack(EquipmentSlot.OFFHAND, goatHornStack);
-        this.illager.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        Holder.Reference<Instrument> entry = illager.level().registryAccess().lookupOrThrow(Registries.INSTRUMENT).get(ResourceLocation.withDefaultNamespace("seek_goat_horn")).get();
+        ItemStack goatHornStack = InstrumentItem.create(Items.GOAT_HORN, entry);
+        this.illager.setItemSlot(EquipmentSlot.OFFHAND, goatHornStack);
+        this.illager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 
         timeLeftToStart = 20;
-        illager.setAttacking(true);
-        this.illager.setPose(EntityPose.STANDING);
+        illager.setAggressive(true);
+        this.illager.setPose(Pose.STANDING);
     }
 
     @Override
-    public boolean shouldRunEveryTick() {
+    public boolean requiresUpdateEveryTick() {
         return true;
     }
 
@@ -85,14 +86,14 @@ public class PillagerCaptainBlowHornGoal extends Goal {
         if(timeLeftToStart > 0) timeLeftToStart--;
         else {
             if(timeSpentTootingHorn == 0) {
-                illager.setAttacking(true);
-                this.illager.setPose(EntityPose.CROAKING);
-                InstrumentComponent instrumentComponent = this.illager.getOffHandStack().get(DataComponentTypes.INSTRUMENT);
+                illager.setAggressive(true);
+                this.illager.setPose(Pose.CROAKING);
+                InstrumentComponent instrumentComponent = this.illager.getOffhandItem().get(DataComponents.INSTRUMENT);
                 if (instrumentComponent != null) {
-                    RegistryEntry<Instrument> instrumentRegistryEntry = instrumentComponent.getInstrument(this.illager.getRegistryManager()).get();
+                    Holder<Instrument> instrumentRegistryEntry = instrumentComponent.unwrap(this.illager.registryAccess()).get();
                     float volume = instrumentRegistryEntry.value().range() / 16.0f;
-                    illager.getEntityWorld().playSoundFromEntity(null, illager, instrumentRegistryEntry.value().soundEvent().value(), SoundCategory.HOSTILE, volume, 1.0f);
-                    illager.getEntityWorld().emitGameEvent(GameEvent.INSTRUMENT_PLAY, illager.getEntityPos(), GameEvent.Emitter.of(illager));
+                    illager.level().playSound(null, illager, instrumentRegistryEntry.value().soundEvent().value(), SoundSource.HOSTILE, volume, 1.0f);
+                    illager.level().gameEvent(GameEvent.INSTRUMENT_PLAY, illager.position(), GameEvent.Context.of(illager));
                 }
             }
             timeSpentTootingHorn++;
@@ -102,11 +103,11 @@ public class PillagerCaptainBlowHornGoal extends Goal {
     @Override
     public void stop() {
         if(timeSpentTootingHorn >= 70) {
-            if(this.illager.getAttacker() instanceof PlayerEntity attacker) attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.BAD_OMEN, 3200));
-            else if(this.illager.getPrimeAdversary() instanceof PlayerEntity adversary) adversary.addStatusEffect(new StatusEffectInstance(StatusEffects.BAD_OMEN, 2400));
+            if(this.illager.getLastHurtByMob() instanceof Player attacker) attacker.addEffect(new MobEffectInstance(MobEffects.BAD_OMEN, 3200));
+            else if(this.illager.getKillCredit() instanceof Player adversary) adversary.addEffect(new MobEffectInstance(MobEffects.BAD_OMEN, 2400));
         }
-        this.illager.equipStack(EquipmentSlot.OFFHAND, prevOffhandStack);
-        this.illager.equipStack(EquipmentSlot.MAINHAND, prevMainhandStack);
-        this.illager.setPose(EntityPose.STANDING);
+        this.illager.setItemSlot(EquipmentSlot.OFFHAND, prevOffhandStack);
+        this.illager.setItemSlot(EquipmentSlot.MAINHAND, prevMainhandStack);
+        this.illager.setPose(Pose.STANDING);
     }
 }

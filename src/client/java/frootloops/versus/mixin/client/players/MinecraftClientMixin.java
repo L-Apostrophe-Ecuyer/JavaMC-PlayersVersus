@@ -1,34 +1,33 @@
 package frootloops.versus.mixin.client.players;
 
+import com.mojang.blaze3d.platform.WindowEventHandler;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.AbstractChestBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.WindowEventHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.ItemFrameEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShieldItem;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.thread.ReentrantThreadExecutor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.level.block.AbstractChestBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,99 +36,99 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(value = MinecraftClient.class, priority = 999)
-public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runnable> implements WindowEventHandler {
-    @Shadow public ClientPlayerEntity player;
-    @Shadow public ClientWorld world;
-    @Shadow protected int attackCooldown;
-    @Shadow private int itemUseCooldown;
-    @Shadow @Nullable public HitResult crosshairTarget;
-    @Shadow @Nullable public ClientPlayerInteractionManager interactionManager;
+@Mixin(value = Minecraft.class, priority = 999)
+public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler {
+    @Shadow public LocalPlayer player;
+    @Shadow public ClientLevel level;
+    @Shadow protected int missTime;
+    @Shadow private int rightClickDelay;
+    @Shadow @Nullable public HitResult hitResult;
+    @Shadow @Nullable public MultiPlayerGameMode gameMode;
     @Shadow @Nullable public final GameRenderer gameRenderer;
-    @Shadow public final GameOptions options;
+    @Shadow public final Options options;
 
-    private static final Hand[] OFFHAND_FIRST =  new Hand[] {Hand.OFF_HAND, Hand.MAIN_HAND}, MAINHAND_FIRST = new Hand[] {Hand.MAIN_HAND, Hand.OFF_HAND};
+    private static final InteractionHand[] OFFHAND_FIRST =  new InteractionHand[] {InteractionHand.OFF_HAND, InteractionHand.MAIN_HAND}, MAINHAND_FIRST = new InteractionHand[] {InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND};
 
-    public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, GameOptions options) { super(string);
+    public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, Options options) { super(string);
         this.gameRenderer = gameRenderer;
         this.options = options;
     }
 
 
-    @Inject(method = "doItemUse", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
     private void doItemUse(CallbackInfo info) {
-        this.itemUseCooldown = 4;
-        if (!this.interactionManager.isBreakingBlock() && !this.player.isRiding()) {
+        this.rightClickDelay = 4;
+        if (!this.gameMode.isDestroying() && !this.player.isHandsBusy()) {
 
-            if (this.crosshairTarget == null) {
+            if (this.hitResult == null) {
                 VersusMod.MOD_LOGGER.error("Null returned as 'hitResult', this shouldn't happen!");
             }
 
-            ActionResult actionResult = null;
-            Hand[] hands = this.shouldPrioritizeOffhand() ? OFFHAND_FIRST : MAINHAND_FIRST;
-            for (Hand hand : hands) {
-                ItemStack itemStack = this.player.getStackInHand(hand);
-                if (!itemStack.isItemEnabled(this.world.getEnabledFeatures())) continue;
-                if (this.crosshairTarget != null) {
-                    switch (this.crosshairTarget.getType()) {
+            InteractionResult actionResult = null;
+            InteractionHand[] hands = this.shouldPrioritizeOffhand() ? OFFHAND_FIRST : MAINHAND_FIRST;
+            for (InteractionHand hand : hands) {
+                ItemStack itemStack = this.player.getItemInHand(hand);
+                if (!itemStack.isItemEnabled(this.level.enabledFeatures())) continue;
+                if (this.hitResult != null) {
+                    switch (this.hitResult.getType()) {
                         case ENTITY:
-                            EntityHitResult entityHitResult = (EntityHitResult)this.crosshairTarget;
+                            EntityHitResult entityHitResult = (EntityHitResult)this.hitResult;
                             Entity entity = entityHitResult.getEntity();
-                            if (!this.world.getWorldBorder().contains(entity.getBlockPos())) {
+                            if (!this.level.getWorldBorder().isWithinBounds(entity.blockPosition())) {
                                 info.cancel();
                                 return;
                             }
 
                             // Use chest if item frame clicked on accident
-                            if(!this.player.isSneaking() && entity instanceof ItemFrameEntity itemFrameEntity) {
-                                BlockPos pos = itemFrameEntity.getAttachedBlockPos().offset(itemFrameEntity.getFacing(), -1);
-                                BlockState state = world.getBlockState(pos);
+                            if(!this.player.isShiftKeyDown() && entity instanceof ItemFrame itemFrameEntity) {
+                                BlockPos pos = itemFrameEntity.getPos().relative(itemFrameEntity.getNearestViewDirection(), -1);
+                                BlockState state = level.getBlockState(pos);
                                 if(state.getBlock() instanceof AbstractChestBlock) {
-                                    BlockHitResult blockHitResult = new BlockHitResult(crosshairTarget.getPos(), itemFrameEntity.getFacing(), pos, false);
-                                    actionResult = this.interactionManager.interactBlock(this.player, hand, blockHitResult);
-                                    if (actionResult instanceof ActionResult.Success success && success.swingSource() == ActionResult.SwingSource.CLIENT) this.player.swingHand(hand);
+                                    BlockHitResult blockHitResult = new BlockHitResult(hitResult.getLocation(), itemFrameEntity.getNearestViewDirection(), pos, false);
+                                    actionResult = this.gameMode.useItemOn(this.player, hand, blockHitResult);
+                                    if (actionResult instanceof InteractionResult.Success success && success.swingSource() == InteractionResult.SwingSource.CLIENT) this.player.swing(hand);
                                     info.cancel();
                                     return;
                                 }
                             }
 
-                            actionResult = this.interactionManager.interactEntityAtLocation(this.player, entity, entityHitResult, hand);
-                            if (!actionResult.isAccepted()) actionResult = this.interactionManager.interactEntity(this.player, entity, hand);
-                            if (actionResult instanceof ActionResult.Success success) {
-                                if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
-                                    this.player.swingHand(hand);
+                            actionResult = this.gameMode.interactAt(this.player, entity, entityHitResult, hand);
+                            if (!actionResult.consumesAction()) actionResult = this.gameMode.interact(this.player, entity, hand);
+                            if (actionResult instanceof InteractionResult.Success success) {
+                                if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
+                                    this.player.swing(hand);
                                 }
                                 info.cancel();
                                 return;
                             }
                             break;
                         case BLOCK:
-                            BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
+                            BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
                             int i = itemStack.getCount();
-                            actionResult = this.interactionManager.interactBlock(this.player, hand, blockHitResult);
-                            if (actionResult instanceof ActionResult.Success success) {
-                                if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
-                                    this.player.swingHand(hand);
-                                    if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.isInCreativeMode())) {
-                                        this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
+                            actionResult = this.gameMode.useItemOn(this.player, hand, blockHitResult);
+                            if (actionResult instanceof InteractionResult.Success success) {
+                                if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
+                                    this.player.swing(hand);
+                                    if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {
+                                        this.gameRenderer.itemInHandRenderer.itemUsed(hand);
                                     }
                                 }
                                 info.cancel();
                                 return;
                             }
-                            if (actionResult instanceof ActionResult.Fail) {
+                            if (actionResult instanceof InteractionResult.Fail) {
                                 info.cancel();
                                 return;
                             }
                     }
                 }
 
-                if (!itemStack.isEmpty() && this.interactionManager.interactItem(this.player, hand) instanceof ActionResult.Success success3) {
-                    if (success3.swingSource() == ActionResult.SwingSource.CLIENT) {
-                        this.player.swingHand(hand);
+                if (!itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
+                    if (success3.swingSource() == InteractionResult.SwingSource.CLIENT) {
+                        this.player.swing(hand);
                     }
 
-                    this.gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
+                    this.gameRenderer.itemInHandRenderer.itemUsed(hand);
                     info.cancel();
                     return;
                 }
@@ -140,44 +139,44 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
     }
 
     private boolean shouldPrioritizeOffhand(){
-        ItemStack offhandStack = player.getOffHandStack();
-        ItemStack mainhandStack = player.getMainHandStack();
-        if(offhandStack.isEmpty() || mainhandStack.isEmpty() || player.getItemCooldownManager().isCoolingDown(offhandStack)) return false;
-        if(offhandStack.getUseAction() == UseAction.BLOCK){
-            if (crosshairTarget.getType() == HitResult.Type.ENTITY) {
+        ItemStack offhandStack = player.getOffhandItem();
+        ItemStack mainhandStack = player.getMainHandItem();
+        if(offhandStack.isEmpty() || mainhandStack.isEmpty() || player.getCooldowns().isOnCooldown(offhandStack)) return false;
+        if(offhandStack.getUseAnimation() == ItemUseAnimation.BLOCK){
+            if (hitResult.getType() == HitResult.Type.ENTITY) {
                 if(player.isUsingItem()) {
-                    return player.getActiveItem() == offhandStack;
+                    return player.getUseItem() == offhandStack;
                 } else {
-                    Entity target = ((EntityHitResult) this.crosshairTarget).getEntity();
-                    return (target instanceof HostileEntity || target instanceof PlayerEntity || target == player.getAttacker());
+                    Entity target = ((EntityHitResult) this.hitResult).getEntity();
+                    return (target instanceof Monster || target instanceof Player || target == player.getLastHurtByMob());
                 }
             }
-            else if (mainhandStack.getUseAction() == UseAction.BLOCK) {
+            else if (mainhandStack.getUseAnimation() == ItemUseAnimation.BLOCK) {
                 return true;
             }
-            else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
-                return (Combat.isLookingTowards(player,player.getAttacker().getEntityPos()));
+            else if (player.getLastHurtByMob() != null && player.getLastHurtByMob().isAlive()) {
+                return (Combat.isLookingTowards(player,player.getLastHurtByMob().position()));
             }
         }
-        else if(mainhandStack.getUseAction() == UseAction.BLOCK){
-            if(player.isSneaking()) {
+        else if(mainhandStack.getUseAnimation() == ItemUseAnimation.BLOCK){
+            if(player.isShiftKeyDown()) {
                 return !(mainhandStack.getItem() instanceof ShieldItem);
             }
-            else if (crosshairTarget.getType() == HitResult.Type.ENTITY) {
+            else if (hitResult.getType() == HitResult.Type.ENTITY) {
                 if(player.isUsingItem()) {
-                    return player.getActiveItem() == offhandStack;
+                    return player.getUseItem() == offhandStack;
                 } else {
-                    Entity target = ((EntityHitResult) this.crosshairTarget).getEntity();
-                    return !(target instanceof HostileEntity || target instanceof PlayerEntity || target == player.getAttacker());
+                    Entity target = ((EntityHitResult) this.hitResult).getEntity();
+                    return !(target instanceof Monster || target instanceof Player || target == player.getLastHurtByMob());
                 }
             }
-            else if (player.getAttacker() != null && player.getAttacker().isAlive()) {
-                return (Combat.isLookingTowards(player,player.getAttacker().getEntityPos()));
+            else if (player.getLastHurtByMob() != null && player.getLastHurtByMob().isAlive()) {
+                return (Combat.isLookingTowards(player,player.getLastHurtByMob().position()));
             }
-            else if(offhandStack.getUseAction() == UseAction.EAT || offhandStack.getUseAction() == UseAction.DRINK) {
-                if(offhandStack.getComponents().contains(DataComponentTypes.FOOD)) {
-                    if(offhandStack.getItem().getComponents().get(DataComponentTypes.FOOD).canAlwaysEat()) return true;
-                    return player.getHungerManager().isNotFull();
+            else if(offhandStack.getUseAnimation() == ItemUseAnimation.EAT || offhandStack.getUseAnimation() == ItemUseAnimation.DRINK) {
+                if(offhandStack.getComponents().has(DataComponents.FOOD)) {
+                    if(offhandStack.getItem().components().get(DataComponents.FOOD).canAlwaysEat()) return true;
+                    return player.getFoodData().needsFood();
                 }
                 else return true;
             }

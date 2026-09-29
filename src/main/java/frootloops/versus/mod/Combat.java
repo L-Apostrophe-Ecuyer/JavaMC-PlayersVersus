@@ -3,27 +3,27 @@ package frootloops.versus.mod;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.ClampedEntityAttribute;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.EndermanEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.HungerManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class Combat {
 
@@ -33,25 +33,25 @@ public abstract class Combat {
     public static final double SWORD_SPEED = 1.6, SWORD_DAMAGE = 3.0, SWORD_REACH = 0.0;
     public static final double HOE_SPEED = 2.0, HOE_DAMAGE = 1.0, HOE_REACH = 0.5;
     public static final double AXE_SPEED = 1.0, AXE_DAMAGE = 6.0, AXE_REACH = 0.0;
-    public static final Identifier ATTACK_REACH_MODIFIER_ID = Identifier.of(VersusMod.MOD_ID,"attack_reach_modifier");
-    public static final Identifier ATTACK_KNOCKBACK_MODIFIER_ID = Identifier.of(VersusMod.MOD_ID,"attack_knockback_modifier");
+    public static final ResourceLocation ATTACK_REACH_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID,"attack_reach_modifier");
+    public static final ResourceLocation ATTACK_KNOCKBACK_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID,"attack_knockback_modifier");
 
-    public static EntityAttribute CRITICAL_ATTACK_DAMAGE_ATTRIBUTE, SPRINT_ATTACK_DAMAGE_ATTRIBUTE;
-    public static RegistryEntry<EntityAttribute> CRITICAL_ATTACK_DAMAGE, SPRINT_ATTACK_DAMAGE;
+    public static Attribute CRITICAL_ATTACK_DAMAGE_ATTRIBUTE, SPRINT_ATTACK_DAMAGE_ATTRIBUTE;
+    public static Holder<Attribute> CRITICAL_ATTACK_DAMAGE, SPRINT_ATTACK_DAMAGE;
 
     static {
         // Register critical attack damage
         CRITICAL_ATTACK_DAMAGE_ATTRIBUTE = Registry.register(
-                Registries.ATTRIBUTE,
-                Identifier.of(VersusMod.MOD_ID, "critical_attack_damage"),
-                new ClampedEntityAttribute("attribute.name.critical_attack_damage", 2.0, 0.0, 2048.0).setTracked(true)
+                BuiltInRegistries.ATTRIBUTE,
+                ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "critical_attack_damage"),
+                new RangedAttribute("attribute.name.critical_attack_damage", 2.0, 0.0, 2048.0).setSyncable(true)
         );
 
         // Register sprint attack damage
         SPRINT_ATTACK_DAMAGE_ATTRIBUTE = Registry.register(
-                Registries.ATTRIBUTE,
-                Identifier.of(VersusMod.MOD_ID, "sprint_attack_damage"),
-                new ClampedEntityAttribute("attribute.name.sprint_attack_damage", 2.0, 0.0, 2048.0).setTracked(true)
+                BuiltInRegistries.ATTRIBUTE,
+                ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "sprint_attack_damage"),
+                new RangedAttribute("attribute.name.sprint_attack_damage", 2.0, 0.0, 2048.0).setSyncable(true)
         );
     }
 
@@ -65,113 +65,113 @@ public abstract class Combat {
 
 
     public static void onInitialize() {
-        CRITICAL_ATTACK_DAMAGE = Registries.ATTRIBUTE.getEntry(CRITICAL_ATTACK_DAMAGE_ATTRIBUTE);
-        SPRINT_ATTACK_DAMAGE = Registries.ATTRIBUTE.getEntry(SPRINT_ATTACK_DAMAGE_ATTRIBUTE);
+        CRITICAL_ATTACK_DAMAGE = BuiltInRegistries.ATTRIBUTE.wrapAsHolder(CRITICAL_ATTACK_DAMAGE_ATTRIBUTE);
+        SPRINT_ATTACK_DAMAGE = BuiltInRegistries.ATTRIBUTE.wrapAsHolder(SPRINT_ATTACK_DAMAGE_ATTRIBUTE);
     }
 
-    private static double getCappedAttackSpeedOf(PlayerEntity player) {
-        return Math.min(PLAYER_MAX_ATTACK_SPEED, player.getAttributeValue(EntityAttributes.ATTACK_SPEED));
+    private static double getCappedAttackSpeedOf(Player player) {
+        return Math.min(PLAYER_MAX_ATTACK_SPEED, player.getAttributeValue(Attributes.ATTACK_SPEED));
     }
 
-    public static int getTicksPerAttackOf(PlayerEntity player) {
+    public static int getTicksPerAttackOf(Player player) {
         return (int)(20d / Combat.getCappedAttackSpeedOf(player));
     }
 
-    public static double getAttackChargeProgress(PlayerEntity player) {
-        return player.getAttackCooldownProgress(0.0f);
+    public static double getAttackChargeProgress(Player player) {
+        return player.getAttackStrengthScale(0.0f);
     }
 
     public static double getAttackRangeBonusOf(ItemStack itemStack) {
         if(itemStack == null || itemStack.isEmpty()) return 0.0d;
-        if(itemStack.contains(DataComponentTypes.ATTRIBUTE_MODIFIERS)) {
-            AttributeModifiersComponent attributeModifiersComponent = itemStack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
-            for (AttributeModifiersComponent.Entry modifier : attributeModifiersComponent.modifiers()) {
-                if(modifier.attribute() == EntityAttributes.ENTITY_INTERACTION_RANGE && modifier.slot() == AttributeModifierSlot.MAINHAND) {
-                    return modifier.modifier().value();
+        if(itemStack.has(DataComponents.ATTRIBUTE_MODIFIERS)) {
+            ItemAttributeModifiers attributeModifiersComponent = itemStack.get(DataComponents.ATTRIBUTE_MODIFIERS);
+            for (ItemAttributeModifiers.Entry modifier : attributeModifiersComponent.modifiers()) {
+                if(modifier.attribute() == Attributes.ENTITY_INTERACTION_RANGE && modifier.slot() == EquipmentSlotGroup.MAINHAND) {
+                    return modifier.modifier().amount();
                 }
             }
         }
         return 0.0d;
     }
 
-    public static double getAttackRange(PlayerEntity player, float attackChargeProgress) {
-        double reachAttributeValue = player.getAttributeValue(EntityAttributes.ENTITY_INTERACTION_RANGE);
+    public static double getAttackRange(Player player, float attackChargeProgress) {
+        double reachAttributeValue = player.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE);
         double chargeTimeMult = Math.min(1.0f, attackChargeProgress);
-        double ridingBonus = player.hasVehicle() && player.getVehicle().isAlive() ? 0.5d : 0d;
+        double ridingBonus = player.isPassenger() && player.getVehicle().isAlive() ? 0.5d : 0d;
         return reachAttributeValue * chargeTimeMult + ridingBonus;
     }
 
-    public static double getAttackRange(PlayerEntity player) {
-        return Combat.getAttackRange(player, player.getAttackCooldownProgress(0.0f));
+    public static double getAttackRange(Player player) {
+        return Combat.getAttackRange(player, player.getAttackStrengthScale(0.0f));
     }
 
-    public static boolean isInAttackRangeOf(PlayerEntity player, Entity entity, float attackCooldownProgress) {
+    public static boolean isInAttackRangeOf(Player player, Entity entity, float attackCooldownProgress) {
         double range = Combat.getAttackRange(player, attackCooldownProgress);
-        return (range * range) > player.getEyePos().squaredDistanceTo(entity.getEyePos());
+        return (range * range) > player.getEyePosition().distanceToSqr(entity.getEyePosition());
     }
 
     public static final boolean isLookingTowardsEntity(LivingEntity looker, LivingEntity target, boolean strict){
-        return Combat.isLookingTowards(looker,new Vec3d(target.getX(), target.getEyeY(), target.getZ()),strict);
+        return Combat.isLookingTowards(looker,new Vec3(target.getX(), target.getEyeY(), target.getZ()),strict);
     }
 
     public static final boolean isLookingTowardsEntity(LivingEntity looker, LivingEntity target, double dotProductThreshold){
-        return Combat.isLookingTowards(looker,new Vec3d(target.getX(), target.getEyeY(), target.getZ()),dotProductThreshold);
+        return Combat.isLookingTowards(looker,new Vec3(target.getX(), target.getEyeY(), target.getZ()),dotProductThreshold);
     }
 
 
-    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos){
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3 targetPos){
         return Combat.isLookingTowards(looker,targetPos,false);
     }
 
-    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, boolean strict){
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3 targetPos, boolean strict){
         return Combat.isLookingTowards(looker,targetPos,strict ? -0.75 : -0.5);
     }
 
-    public static final boolean isLookingTowards(LivingEntity looker, Vec3d targetPos, double dotProductThreshold){
+    public static final boolean isLookingTowards(LivingEntity looker, Vec3 targetPos, double dotProductThreshold){
         if(looker==null || targetPos == null) return false;
-        Vec3d rotationVector = looker.getRotationVec(1.0F);
-        Vec3d positionVector = targetPos.relativize(looker.getEyePos());
-        if(rotationVector.dotProduct(positionVector) >= 0.0F) return false;
-        else return (rotationVector.dotProduct(positionVector.normalize()) < dotProductThreshold);
+        Vec3 rotationVector = looker.getViewVector(1.0F);
+        Vec3 positionVector = targetPos.vectorTo(looker.getEyePosition());
+        if(rotationVector.dot(positionVector) >= 0.0F) return false;
+        else return (rotationVector.dot(positionVector.normalize()) < dotProductThreshold);
     }
 
-    public static Box getMobAttackBox(MobEntity mob, boolean jump) {
+    public static AABB getMobAttackBox(Mob mob, boolean jump) {
         Entity ridingEntity = mob.getVehicle();
-        Box attackBox;
+        AABB attackBox;
         if (ridingEntity != null) {
-            Box box = ridingEntity.getBoundingBox();
-            Box box2 = mob.getBoundingBox();
-            attackBox = new Box(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
+            AABB box = ridingEntity.getBoundingBox();
+            AABB box2 = mob.getBoundingBox();
+            attackBox = new AABB(Math.min(box2.minX, box.minX), box2.minY, Math.min(box2.minZ, box.minZ), Math.max(box2.maxX, box.maxX), box2.maxY, Math.max(box2.maxZ, box.maxZ));
         }
-        else if (mob instanceof EndermanEntity) {
-            attackBox = mob.getBoundingBox().expand(0.5d, mob.getEyeHeight(mob.getPose())/2 + 1d, 0.5d);
+        else if (mob instanceof EnderMan) {
+            attackBox = mob.getBoundingBox().inflate(0.5d, mob.getEyeHeight(mob.getPose())/2 + 1d, 0.5d);
         }
-        else if (jump || !mob.isOnGround()) {
-            attackBox = mob.getBoundingBox().expand(0d, mob.getEyeHeight(mob.getPose())/2 + 0.5d, 0d);
+        else if (jump || !mob.onGround()) {
+            attackBox = mob.getBoundingBox().inflate(0d, mob.getEyeHeight(mob.getPose())/2 + 0.5d, 0d);
         }
         else {
-            attackBox = mob.getBoundingBox().offset(0d, mob.getEyeHeight(mob.getPose())/2, 0d);
+            attackBox = mob.getBoundingBox().move(0d, mob.getEyeHeight(mob.getPose())/2, 0d);
         }
-        double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getEquippedStack(EquipmentSlot.MAINHAND));
-        return attackBox.expand(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);
+        double attackRangeBonus = Combat.getAttackRangeBonusOf(mob.getItemBySlot(EquipmentSlot.MAINHAND));
+        return attackBox.inflate(0.8 + attackRangeBonus, attackRangeBonus/2, 0.8 + attackRangeBonus);
     }
 
-    public static Box getEntityHitbox(Entity entity) {
-        Box box = entity.getBoundingBox();
+    public static AABB getEntityHitbox(Entity entity) {
+        AABB box = entity.getBoundingBox();
         Entity ridingEntity = entity.getVehicle();
         if (ridingEntity != null) {
-            Vec3d vec3d = ridingEntity.getPassengerRidingPos(entity);
-            return box.withMinY(Math.max(vec3d.y, box.minY));
+            Vec3 vec3d = ridingEntity.getPassengerRidingPosition(entity);
+            return box.setMinY(Math.max(vec3d.y, box.minY));
         } else {
             return box;
         }
     }
 
-    public static boolean canPlayerSprint(PlayerEntity player) {
-        return canPlayerSprint(player.getHungerManager(), player.hasStatusEffect(StatusEffects.HUNGER));
+    public static boolean canPlayerSprint(Player player) {
+        return canPlayerSprint(player.getFoodData(), player.hasEffect(MobEffects.HUNGER));
     }
 
-    public static boolean canPlayerSprint(HungerManager hungerManager, boolean hasHungerEffect) {
+    public static boolean canPlayerSprint(FoodData hungerManager, boolean hasHungerEffect) {
         if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return hungerManager.getFoodLevel() > 6;
         if(hasHungerEffect) return false;
         if(hungerManager.getFoodLevel() != 0) return true;
@@ -184,19 +184,19 @@ public abstract class Combat {
     }
 
     public static AttackType getAttackType(LivingEntity entity) {
-        if(entity instanceof PlayerEntity player) return getAttackType(player, getAttackChargeProgress(player));
+        if(entity instanceof Player player) return getAttackType(player, getAttackChargeProgress(player));
         return AttackType.NORMAL;
     }
 
-    public static AttackType getAttackType(PlayerEntity player, double attackCharge) {
+    public static AttackType getAttackType(Player player, double attackCharge) {
         if(attackCharge < 0.9) return AttackType.NORMAL;
-        if(player.isSprinting() && player.isOnGround()) return AttackType.SPRINT;
+        if(player.isSprinting() && player.onGround()) return AttackType.SPRINT;
         if(player.fallDistance > 0.0
-                && !player.isOnGround()
-                && !player.isClimbing()
-                && !player.isTouchingWater()
-                && !player.hasBlindnessEffect()
-                && !player.hasVehicle()) return AttackType.CRITICAL;
+                && !player.onGround()
+                && !player.onClimbable()
+                && !player.isInWater()
+                && !player.isMobilityRestricted()
+                && !player.isPassenger()) return AttackType.CRITICAL;
         return AttackType.NORMAL;
     }
 }

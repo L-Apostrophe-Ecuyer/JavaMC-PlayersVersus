@@ -1,12 +1,12 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BARRIER_THRESHOLD;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_WATER_THRESHOLD;
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.gradient;
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.mul;
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.yValue;
+
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 /**
  * The Players Versus aquifer's two inputs, sea floodedness (F) and basin floodedness (S), computed from their leaf
@@ -29,10 +29,10 @@ public final class AquiferFormulas {
      * @param seaFloodedness F', from {@link #seaFloodedness}
      * @param ramenNoise     {@code noise(minecraft:noodle, xz 3, y 3)}, only sampled (at {@code pos}) when the term applies
      */
-    public static double floodedness(int y, double seaFloodedness, DensityFunction ramenNoise, DensityFunction.NoisePos pos) {
+    public static double floodedness(int y, double seaFloodedness, DensityFunction ramenNoise, DensityFunction.FunctionContext pos) {
         double yValue = yValue(y);
         if (yValue >= -4.0 && yValue < 32.0 && seaFloodedness >= SEA_BARRIER_THRESHOLD && seaFloodedness < SEA_WATER_THRESHOLD) {
-            return seaFloodedness + ramen(y, ramenNoise.sample(pos));
+            return seaFloodedness + ramen(y, ramenNoise.compute(pos));
         }
         return seaFloodedness;
     }

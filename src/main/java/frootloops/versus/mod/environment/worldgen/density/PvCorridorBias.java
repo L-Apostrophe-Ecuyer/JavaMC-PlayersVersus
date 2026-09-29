@@ -1,8 +1,8 @@
 package frootloops.versus.mod.environment.worldgen.density;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_BIAS;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_FLARE_BIAS;
@@ -18,24 +18,24 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.COR
  */
 public record PvCorridorBias(DensityFunction entrances) implements DensityFunction {
 
-    public static final MapCodec<PvCorridorBias> CODEC = DensityFunction.FUNCTION_CODEC.fieldOf("entrances")
+    public static final MapCodec<PvCorridorBias> CODEC = DensityFunction.HOLDER_HELPER_CODEC.fieldOf("entrances")
             .xmap(PvCorridorBias::new, PvCorridorBias::entrances);
-    private static final CodecHolder<PvCorridorBias> CODEC_HOLDER = CodecHolder.of(CODEC);
+    private static final KeyDispatchDataCodec<PvCorridorBias> CODEC_HOLDER = KeyDispatchDataCodec.of(CODEC);
 
     @Override
-    public double sample(NoisePos pos) {
+    public double compute(FunctionContext pos) {
         int y = pos.blockY();
-        return PvNoodle.inCorridorLayers(y) ? PvNoodle.corridorBias(y, this.entrances.sample(pos)) : PvNoodle.bias(y);
+        return PvNoodle.inCorridorLayers(y) ? PvNoodle.corridorBias(y, this.entrances.compute(pos)) : PvNoodle.bias(y);
     }
 
     @Override
-    public void fill(double[] densities, EachApplier applier) {
-        applier.fill(densities, this);
+    public void fillArray(double[] densities, ContextProvider applier) {
+        applier.fillAllDirectly(densities, this);
     }
 
     @Override
-    public DensityFunction apply(DensityFunctionVisitor visitor) {
-        return visitor.apply(new PvCorridorBias(this.entrances.apply(visitor)));
+    public DensityFunction mapAll(Visitor visitor) {
+        return visitor.apply(new PvCorridorBias(this.entrances.mapAll(visitor)));
     }
 
     /** The bias moves from {@link PvNoodle#bias} towards the corridors' values, so it stays within all of them. */
@@ -50,7 +50,7 @@ public record PvCorridorBias(DensityFunction entrances) implements DensityFuncti
     }
 
     @Override
-    public CodecHolder<? extends DensityFunction> getCodecHolder() {
+    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
         return CODEC_HOLDER;
     }
 }

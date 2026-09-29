@@ -1,37 +1,36 @@
 package frootloops.versus.mod.environment.worldgen.features;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.util.CaveSurface;
-import net.minecraft.world.gen.feature.util.FeatureContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Column;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.phys.Vec3;
 
 public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig> {
     public StoneStalagtiteFeature(Codec<StoneStalagtiteFeatureConfig> configCodec) {
         super(configCodec);
     }
 
-    private static final BlockState STALAGMITE_BLOCKSTATE = Blocks.STONE.getDefaultState();
+    private static final BlockState STALAGMITE_BLOCKSTATE = Blocks.STONE.defaultBlockState();
 
     @Override
-    public boolean generate(FeatureContext<StoneStalagtiteFeatureConfig> context) {
-        StructureWorldAccess structureWorldAccess = context.getWorld();
-        BlockPos blockPos = context.getOrigin();
-        StoneStalagtiteFeatureConfig config = context.getConfig();
-        Random random = context.getRandom();
+    public boolean place(FeaturePlaceContext<StoneStalagtiteFeatureConfig> context) {
+        WorldGenLevel structureWorldAccess = context.level();
+        BlockPos blockPos = context.origin();
+        StoneStalagtiteFeatureConfig config = context.config();
+        RandomSource random = context.random();
         if (!StoneStalagtiteHelper.isAirOrWater(structureWorldAccess, blockPos)) {
             return false;
         }
@@ -43,17 +42,17 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
         float heightScale = 1.5f;
         float windSpeed = 0.0f;
 
-        Optional<CaveSurface> optional = CaveSurface.create(structureWorldAccess, blockPos, floorToCeilingSearchRange, StoneStalagtiteHelper::isAirOrWater, StoneStalagtiteHelper::canReplace);
-        if (optional.isEmpty() || !(optional.get() instanceof CaveSurface.Bounded)) {
+        Optional<Column> optional = Column.scan(structureWorldAccess, blockPos, floorToCeilingSearchRange, StoneStalagtiteHelper::isAirOrWater, StoneStalagtiteHelper::canReplace);
+        if (optional.isEmpty() || !(optional.get() instanceof Column.Range)) {
             return false;
         }
-        CaveSurface.Bounded bounded = (CaveSurface.Bounded)optional.get();
-        int height = bounded.getHeight();
+        Column.Range bounded = (Column.Range)optional.get();
+        int height = bounded.height();
         if (height < columnRadiusMin) return false;
-        int radius = MathHelper.nextBetween(random, columnRadiusMin, Math.min(height, columnRadiusMax));
+        int radius = Mth.randomBetweenInclusive(random, columnRadiusMin, Math.min(height, columnRadiusMax));
 
-        StoneStalagmiteGenerator generatorCeiling = createGenerator(blockPos.withY(bounded.getCeiling() - 1), false, random, radius, stalactiteBluntness, heightScale);
-        StoneStalagmiteGenerator generatorFloor = createGenerator(blockPos.withY(bounded.getFloor() + 1), true, random, radius, stalactiteBluntness, heightScale);
+        StoneStalagmiteGenerator generatorCeiling = createGenerator(blockPos.atY(bounded.ceiling() - 1), false, random, radius, stalactiteBluntness, heightScale);
+        StoneStalagmiteGenerator generatorFloor = createGenerator(blockPos.atY(bounded.floor() + 1), true, random, radius, stalactiteBluntness, heightScale);
         WindModifier windModifier = generatorCeiling.generateWind(config) && generatorFloor.generateWind(config) ? new WindModifier(blockPos.getY(), random, windSpeed) : WindModifier.create();
         boolean canGenerateCeiling = generatorCeiling.canGenerate(structureWorldAccess, windModifier);
         boolean canGenerateFloor = generatorFloor.canGenerate(structureWorldAccess, windModifier);
@@ -66,7 +65,7 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
         return true;
     }
 
-    private static StoneStalagmiteGenerator createGenerator(BlockPos pos, boolean isStalagmite, Random random, int scale, float bluntness, float heightScale) {
+    private static StoneStalagmiteGenerator createGenerator(BlockPos pos, boolean isStalagmite, RandomSource random, int scale, float bluntness, float heightScale) {
         return new StoneStalagmiteGenerator(pos, isStalagmite, scale, bluntness, heightScale);
     }
 
@@ -103,9 +102,9 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
             return this.pos.getY() + this.getBaseScale();
         }
 
-        boolean canGenerate(StructureWorldAccess world, WindModifier wind) {
+        boolean canGenerate(WorldGenLevel world, WindModifier wind) {
             while (this.scale > 1) {
-                BlockPos.Mutable mutable = this.pos.mutableCopy();
+                BlockPos.MutableBlockPos mutable = this.pos.mutable();
                 int i = Math.min(10, this.getBaseScale());
                 for (int j = 0; j < i; ++j) {
                     if (StoneStalagtiteHelper.canGenerateBase(world, wind.modify(mutable), this.scale)) {
@@ -123,24 +122,24 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
             return (int)StoneStalagtiteHelper.scaleHeightFromRadius(height, this.scale, this.heightScale, this.bluntness);
         }
 
-        void generate(StructureWorldAccess world, Random random, WindModifier wind) {
+        void generate(WorldGenLevel world, RandomSource random, WindModifier wind) {
             for (int x = -this.scale; x <= this.scale; ++x) {
                 forZ: for (int z = -this.scale; z <= this.scale; ++z) {
                     int scale;
-                    float distance = (x == 0 && z == 0) ? 1.0f : MathHelper.sqrt(x * x + z * z);
+                    float distance = (x == 0 && z == 0) ? 1.0f : Mth.sqrt(x * x + z * z);
                     if (distance > (float)this.scale || (scale = this.scale(distance)) <= 0) continue;
                     if ((double)random.nextFloat() < 0.2) {
-                        scale = (int)((float)scale * MathHelper.nextBetween(random, 0.8f, 1.0f));
+                        scale = (int)((float)scale * Mth.randomBetween(random, 0.8f, 1.0f));
                     }
-                    BlockPos.Mutable mutable = this.pos.add(x, 0, z).mutableCopy();
+                    BlockPos.MutableBlockPos mutable = this.pos.offset(x, 0, z).mutable();
                     boolean hasPlacedBlock = false;
-                    int topY = this.isStalagmite ? world.getTopY(Heightmap.Type.WORLD_SURFACE_WG, mutable.getX(), mutable.getZ()) : Integer.MAX_VALUE;
+                    int topY = this.isStalagmite ? world.getHeight(Heightmap.Types.WORLD_SURFACE_WG, mutable.getX(), mutable.getZ()) : Integer.MAX_VALUE;
                     for (int y = 0; y < scale && mutable.getY() < topY; ++y) {
                         BlockPos blockPos = wind.modify(mutable);
                         BlockState state = world.getBlockState(blockPos);
                         if (StoneStalagtiteHelper.isAirOrWater(state)) {
                             hasPlacedBlock = true;
-                            world.setBlockState(blockPos, STALAGMITE_BLOCKSTATE, Block.NOTIFY_LISTENERS);
+                            world.setBlock(blockPos, STALAGMITE_BLOCKSTATE, Block.UPDATE_CLIENTS);
                         } else if (hasPlacedBlock && StoneStalagtiteHelper.canReplace(state)) {
                             continue forZ;
                         }
@@ -158,12 +157,12 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
     static final class WindModifier {
         private final int y;
         @Nullable
-        private final Vec3d wind;
+        private final Vec3 wind;
 
-        WindModifier(int y, Random random, float wind) {
+        WindModifier(int y, RandomSource random, float wind) {
             this.y = y;
-            float g = MathHelper.nextBetween(random, 0.0f, (float)Math.PI);
-            this.wind = new Vec3d(MathHelper.cos(g) * wind, 0.0, MathHelper.sin(g) * wind);
+            float g = Mth.randomBetween(random, 0.0f, (float)Math.PI);
+            this.wind = new Vec3(Mth.cos(g) * wind, 0.0, Mth.sin(g) * wind);
         }
 
         private WindModifier() {
@@ -180,8 +179,8 @@ public class StoneStalagtiteFeature extends Feature<StoneStalagtiteFeatureConfig
                 return pos;
             }
             int i = this.y - pos.getY();
-            Vec3d vec3d = this.wind.multiply(i);
-            return pos.add(MathHelper.floor(vec3d.x), 0, MathHelper.floor(vec3d.z));
+            Vec3 vec3d = this.wind.scale(i);
+            return pos.offset(Mth.floor(vec3d.x), 0, Mth.floor(vec3d.z));
         }
     }
 }

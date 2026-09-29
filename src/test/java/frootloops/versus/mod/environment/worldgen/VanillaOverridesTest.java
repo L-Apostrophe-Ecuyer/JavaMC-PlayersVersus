@@ -4,18 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import com.google.gson.JsonParser;
-import net.minecraft.registry.BuiltinRegistries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.GenerationSettings;
-import net.minecraft.world.gen.carver.CarverConfig;
-import net.minecraft.world.gen.feature.PlacedFeature;
-import net.minecraft.world.gen.heightprovider.HeightProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -28,6 +16,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
+import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
+import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,12 +50,12 @@ class VanillaOverridesTest {
     void improvedCarversComparedWithVanilla() throws IOException {
         assertFalse(Files.exists(Path.of("src/main/resources/data/minecraft/worldgen/configured_carver")),
                 "vanilla carvers are overridden again; Improved's own are under players-versus");
-        Map<String, CarverConfig> vanilla = new TreeMap<>();
-        BuiltinRegistries.createWrapperLookup().getOrThrow(RegistryKeys.CONFIGURED_CARVER).streamEntries()
-                .forEach(entry -> vanilla.put(entry.registryKey().getValue().getPath(), entry.value().config()));
+        Map<String, CarverConfiguration> vanilla = new TreeMap<>();
+        VanillaRegistries.createLookup().lookupOrThrow(Registries.CONFIGURED_CARVER).listElements()
+                .forEach(entry -> vanilla.put(entry.key().location().getPath(), entry.value().config()));
         for (String carver : List.of("cave", "cave_extra_underground", "canyon")) {
             JsonObject improved = readConfig(Path.of("src/main/resources/data/players-versus/worldgen/configured_carver/" + carver + ".json"));
-            CarverConfig original = vanilla.get(carver);
+            CarverConfiguration original = vanilla.get(carver);
             assertNotNull(original, "vanilla has no carver " + carver);
             float probability = improved.get("probability").getAsFloat();
             System.out.printf(Locale.ROOT, "[overrides] carver %s probability vanilla %.4f, Improved %.4f (%.0f%% of vanilla)%n",
@@ -72,7 +72,7 @@ class VanillaOverridesTest {
      */
     @Test
     void biomeOverridesComparedWithVanilla() throws IOException {
-        RegistryWrapper.Impl<Biome> vanilla = BuiltinRegistries.createWrapperLookup().getOrThrow(RegistryKeys.BIOME);
+        HolderLookup.RegistryLookup<Biome> vanilla = VanillaRegistries.createLookup().lookupOrThrow(Registries.BIOME);
         List<Path> overrides;
         try (Stream<Path> files = Files.list(Path.of("src/main/resources/data/minecraft/worldgen/biome"))) {
             overrides = files.filter(file -> file.toString().endsWith(".json")).sorted().toList();
@@ -81,13 +81,13 @@ class VanillaOverridesTest {
         for (Path file : overrides) {
             String name = file.getFileName().toString().replace(".json", "");
             JsonObject override = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
-            GenerationSettings original = vanilla.getOrThrow(RegistryKey.of(RegistryKeys.BIOME, Identifier.ofVanilla(name))).value()
+            BiomeGenerationSettings original = vanilla.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace(name))).value()
                     .getGenerationSettings();
             List<String> originalCarvers = new ArrayList<>();
-            original.getCarversForStep().forEach(carver -> originalCarvers.add(id(carver)));
+            original.getCarvers().forEach(carver -> originalCarvers.add(id(carver)));
             assertEquals(originalCarvers, strings(override.getAsJsonArray("carvers")), "minecraft:" + name + " overrides vanilla's carvers");
             JsonArray steps = override.getAsJsonArray("features");
-            List<RegistryEntryList<PlacedFeature>> originalSteps = original.getFeatures();
+            List<HolderSet<PlacedFeature>> originalSteps = original.features();
             for (int step = 0; step < Math.max(steps.size(), originalSteps.size()); step++) {
                 List<String> before = step < originalSteps.size() ? originalSteps.get(step).stream().map(VanillaOverridesTest::id).toList() : List.of();
                 List<String> after = step < steps.size() ? strings(steps.get(step).getAsJsonArray()) : List.of();
@@ -100,8 +100,8 @@ class VanillaOverridesTest {
         }
     }
 
-    private static String id(RegistryEntry<?> entry) {
-        return entry.getKey().orElseThrow().getValue().toString();
+    private static String id(Holder<?> entry) {
+        return entry.unwrapKey().orElseThrow().location().toString();
     }
 
     private static List<String> strings(JsonArray array) {

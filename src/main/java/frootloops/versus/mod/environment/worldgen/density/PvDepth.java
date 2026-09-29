@@ -2,8 +2,8 @@ package frootloops.versus.mod.environment.worldgen.density;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 /**
  * Density-function type {@code players-versus:depth}: the router's {@code depth} (cave-biome bands, the aquifer),
@@ -16,27 +16,27 @@ import net.minecraft.world.gen.densityfunction.DensityFunction;
 public record PvDepth(DensityFunction offset, DensityFunction ridges) implements DensityFunction {
 
     public static final MapCodec<PvDepth> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DensityFunction.FUNCTION_CODEC.fieldOf("offset").forGetter(PvDepth::offset),
-            DensityFunction.FUNCTION_CODEC.fieldOf("ridges").forGetter(PvDepth::ridges)
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("offset").forGetter(PvDepth::offset),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("ridges").forGetter(PvDepth::ridges)
     ).apply(instance, PvDepth::new));
-    private static final CodecHolder<PvDepth> CODEC_HOLDER = CodecHolder.of(CODEC);
+    private static final KeyDispatchDataCodec<PvDepth> CODEC_HOLDER = KeyDispatchDataCodec.of(CODEC);
 
     @Override
-    public double sample(NoisePos pos) {
+    public double compute(FunctionContext pos) {
         int y = pos.blockY();
         double yValue = DensityOps.yValue(y);
-        double ridge = TerrainFormulas.inRiverBand(yValue) ? this.ridges.sample(pos) : 0.0;
-        return TerrainFormulas.depth(y, this.offset.sample(pos), TerrainFormulas.riverDepth(y, yValue, ridge));
+        double ridge = TerrainFormulas.inRiverBand(yValue) ? this.ridges.compute(pos) : 0.0;
+        return TerrainFormulas.depth(y, this.offset.compute(pos), TerrainFormulas.riverDepth(y, yValue, ridge));
     }
 
     @Override
-    public void fill(double[] densities, EachApplier applier) {
-        applier.fill(densities, this);
+    public void fillArray(double[] densities, ContextProvider applier) {
+        applier.fillAllDirectly(densities, this);
     }
 
     @Override
-    public DensityFunction apply(DensityFunctionVisitor visitor) {
-        return visitor.apply(new PvDepth(this.offset.apply(visitor), this.ridges.apply(visitor)));
+    public DensityFunction mapAll(Visitor visitor) {
+        return visitor.apply(new PvDepth(this.offset.mapAll(visitor), this.ridges.mapAll(visitor)));
     }
 
     /** The height gradient spans -1.5..1.5 and the river term -1..0. */
@@ -51,7 +51,7 @@ public record PvDepth(DensityFunction offset, DensityFunction ridges) implements
     }
 
     @Override
-    public CodecHolder<? extends DensityFunction> getCodecHolder() {
+    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
         return CODEC_HOLDER;
     }
 }

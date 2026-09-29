@@ -2,52 +2,56 @@
 package frootloops.versus.mod.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
-import net.minecraft.block.*;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.TallGrassBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.jetbrains.annotations.Nullable;
 
-public class WheatGrassBlock extends ShortPlantBlock {
+public class WheatGrassBlock extends TallGrassBlock {
 
-    public static final BooleanProperty IS_MUDDY = BooleanProperty.of("is_muddy");
+    public static final BooleanProperty IS_MUDDY = BooleanProperty.create("is_muddy");
 
-    public WheatGrassBlock(Settings settings) {
+    public WheatGrassBlock(Properties settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(IS_MUDDY, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(IS_MUDDY, false));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(IS_MUDDY);
     }
 
     @Override
-    public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
+    public void performBonemeal(ServerLevel world, RandomSource random, BlockPos pos, BlockState state) {
         if((state.getBlock() == CustomBlocks.WILD_WHEAT)) {
-            if(random.nextFloat() < 0.33f) world.setBlockState(pos, Blocks.WHEAT.getDefaultState().with(CropBlock.AGE, 7), NOTIFY_LISTENERS);
+            if(random.nextFloat() < 0.33f) world.setBlock(pos, Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 7), UPDATE_CLIENTS);
         }
         else {
-            world.setBlockState(pos, CustomBlocks.WILD_WHEAT.getStateWithProperties(state), NOTIFY_LISTENERS);
+            world.setBlock(pos, CustomBlocks.WILD_WHEAT.withPropertiesOf(state), UPDATE_CLIENTS);
         }
     }
 
     @Override
-    protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) {
-        return floor.isIn(BlockTags.DIRT) || floor.isOf(Blocks.FARMLAND) || floor.isIn(BlockTags.DRY_VEGETATION_MAY_PLACE_ON);
+    protected boolean mayPlaceOn(BlockState floor, BlockGetter world, BlockPos pos) {
+        return floor.is(BlockTags.DIRT) || floor.is(Blocks.FARMLAND) || floor.is(BlockTags.DRY_VEGETATION_MAY_PLACE_ON);
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        if(world.getBlockState(pos.down()).isOf(CustomBlocks.BROWN_MUD)) {
-            world.setBlockState(pos, state.with(IS_MUDDY, true), Block.NOTIFY_LISTENERS);
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+        if(world.getBlockState(pos.below()).is(CustomBlocks.BROWN_MUD)) {
+            world.setBlock(pos, state.setValue(IS_MUDDY, true), Block.UPDATE_CLIENTS);
         }
     }
 }

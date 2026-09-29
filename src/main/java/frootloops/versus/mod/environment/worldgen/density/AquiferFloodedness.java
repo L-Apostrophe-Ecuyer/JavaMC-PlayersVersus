@@ -3,8 +3,8 @@ package frootloops.versus.mod.environment.worldgen.density;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import frootloops.versus.mod.environment.worldgen.aquifer.AquiferFormulas;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 /**
  * Density-function type {@code players-versus:aquifer_floodedness}: the sea/river floodedness F of the Players Versus
@@ -13,7 +13,7 @@ import net.minecraft.world.gen.densityfunction.DensityFunction;
  * <p>Putting this type in a noise router's {@code fluid_level_floodedness} slot is what turns on the Players Versus
  * aquifer and ore veins for that generator ({@code PvWorldgen.isPvGenerator}); no magic numbers involved.
  *
- * <p>{@link #sample} is exact at any position. The aquifer itself reads the smooth inputs (depth, continentalness,
+ * <p>{@link #compute} is exact at any position. The aquifer itself reads the smooth inputs (depth, continentalness,
  * entrances) from a per-chunk lattice and the rest per block ({@code PvAquifer}).
  *
  * @param depth           the router's {@code depth} ({@link PvDepth})
@@ -28,33 +28,33 @@ public record AquiferFloodedness(DensityFunction depth, DensityFunction continen
                                  DensityFunction entrances, DensityFunction surface, DensityFunction ramen) implements DensityFunction {
 
     public static final MapCodec<AquiferFloodedness> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DensityFunction.FUNCTION_CODEC.fieldOf("depth").forGetter(AquiferFloodedness::depth),
-            DensityFunction.FUNCTION_CODEC.fieldOf("continentalness").forGetter(AquiferFloodedness::continentalness),
-            DensityFunction.FUNCTION_CODEC.fieldOf("ridge").forGetter(AquiferFloodedness::ridge),
-            DensityFunction.FUNCTION_CODEC.fieldOf("entrances").forGetter(AquiferFloodedness::entrances),
-            DensityFunction.FUNCTION_CODEC.fieldOf("surface").forGetter(AquiferFloodedness::surface),
-            DensityFunction.FUNCTION_CODEC.fieldOf("ramen").forGetter(AquiferFloodedness::ramen)
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("depth").forGetter(AquiferFloodedness::depth),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("continentalness").forGetter(AquiferFloodedness::continentalness),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("ridge").forGetter(AquiferFloodedness::ridge),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("entrances").forGetter(AquiferFloodedness::entrances),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("surface").forGetter(AquiferFloodedness::surface),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("ramen").forGetter(AquiferFloodedness::ramen)
     ).apply(instance, AquiferFloodedness::new));
-    private static final CodecHolder<AquiferFloodedness> CODEC_HOLDER = CodecHolder.of(CODEC);
+    private static final KeyDispatchDataCodec<AquiferFloodedness> CODEC_HOLDER = KeyDispatchDataCodec.of(CODEC);
 
     @Override
-    public double sample(NoisePos pos) {
+    public double compute(FunctionContext pos) {
         int y = pos.blockY();
-        double entrances = this.entrances.sample(pos);
-        double seaFloodedness = AquiferFormulas.seaFloodedness(y, this.depth.sample(pos), this.continentalness.sample(pos),
-                entrances, entrances, this.ridge.sample(pos), this.surface.sample(pos));
+        double entrances = this.entrances.compute(pos);
+        double seaFloodedness = AquiferFormulas.seaFloodedness(y, this.depth.compute(pos), this.continentalness.compute(pos),
+                entrances, entrances, this.ridge.compute(pos), this.surface.compute(pos));
         return AquiferFormulas.floodedness(y, seaFloodedness, this.ramen, pos);
     }
 
     @Override
-    public void fill(double[] densities, EachApplier applier) {
-        applier.fill(densities, this);
+    public void fillArray(double[] densities, ContextProvider applier) {
+        applier.fillAllDirectly(densities, this);
     }
 
     @Override
-    public DensityFunction apply(DensityFunctionVisitor visitor) {
-        return visitor.apply(new AquiferFloodedness(this.depth.apply(visitor), this.continentalness.apply(visitor),
-                this.ridge.apply(visitor), this.entrances.apply(visitor), this.surface.apply(visitor), this.ramen.apply(visitor)));
+    public DensityFunction mapAll(Visitor visitor) {
+        return visitor.apply(new AquiferFloodedness(this.depth.mapAll(visitor), this.continentalness.mapAll(visitor),
+                this.ridge.mapAll(visitor), this.entrances.mapAll(visitor), this.surface.mapAll(visitor), this.ramen.mapAll(visitor)));
     }
 
     /** F is at least 0: its ocean and river terms are, and it's their maximum with the coast term, plus the ramen term (also at least 0). */
@@ -69,7 +69,7 @@ public record AquiferFloodedness(DensityFunction depth, DensityFunction continen
     }
 
     @Override
-    public CodecHolder<? extends DensityFunction> getCodecHolder() {
+    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
         return CODEC_HOLDER;
     }
 }

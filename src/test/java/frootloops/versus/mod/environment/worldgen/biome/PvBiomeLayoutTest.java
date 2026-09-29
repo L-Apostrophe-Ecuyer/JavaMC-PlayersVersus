@@ -4,12 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.environment.worldgen.TestGame;
 import frootloops.versus.mod.environment.worldgen.biome.PvBiomeLayout.Box;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil.NoiseHypercube;
-import net.minecraft.world.biome.source.util.VanillaBiomeParameters;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +15,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.Climate.ParameterPoint;
+import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -29,20 +29,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PvBiomeLayoutTest {
 
-    private static List<Pair<NoiseHypercube, RegistryKey<Biome>>> vanilla;
+    private static List<Pair<ParameterPoint, ResourceKey<Biome>>> vanilla;
 
     @BeforeAll
     static void bootstrap() {
         TestGame.start();
         vanilla = new ArrayList<>();
-        new VanillaBiomeParameters().writeOverworldBiomeParameters(vanilla::add);
+        new OverworldBiomeBuilder().addBiomes(vanilla::add);
     }
 
     /** Guards against anything (a mixin, another mod) changing vanilla's layout, which every world type shares. */
     @Test
     void vanillaLayoutHasNoPlayersVersusBiomes() {
-        for (Pair<NoiseHypercube, RegistryKey<Biome>> entry : vanilla) {
-            assertFalse(entry.getSecond().getValue().getNamespace().equals("players-versus"), () -> "vanilla layout contains " + entry.getSecond());
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            assertFalse(entry.getSecond().location().getNamespace().equals("players-versus"), () -> "vanilla layout contains " + entry.getSecond());
         }
     }
 
@@ -50,12 +50,12 @@ class PvBiomeLayoutTest {
     @Test
     void vanillaLayoutHasTheExpectedShape() {
         int surface = 0, deep = 0;
-        Map<RegistryKey<Biome>, Integer> other = new HashMap<>();
+        Map<ResourceKey<Biome>, Integer> other = new HashMap<>();
         for (int i = 0; i < vanilla.size(); i++) {
-            NoiseHypercube h = vanilla.get(i).getFirst();
+            ParameterPoint h = vanilla.get(i).getFirst();
             if (PvBiomeLayout.isPoint(h.depth(), 0.0F)) {
                 surface++;
-                NoiseHypercube twin = vanilla.get(i + 1).getFirst();
+                ParameterPoint twin = vanilla.get(i + 1).getFirst();
                 assertTrue(PvBiomeLayout.isPoint(twin.depth(), 1.0F), "surface entry " + i + " has no depth-1 twin");
                 assertEquals(vanilla.get(i).getSecond(), vanilla.get(i + 1).getSecond());
                 assertEquals(Box.of(h).toHypercube(twin.depth(), h.offset()), twin);
@@ -67,13 +67,13 @@ class PvBiomeLayoutTest {
         }
         System.out.printf(Locale.ROOT, "[layout] vanilla: %d entries, %d surface slices, other %s%n", vanilla.size(), surface, other);
         assertEquals(surface, deep);
-        assertEquals(Map.of(BiomeKeys.LUSH_CAVES, 1, BiomeKeys.DRIPSTONE_CAVES, 1, BiomeKeys.DEEP_DARK, 1), other);
+        assertEquals(Map.of(Biomes.LUSH_CAVES, 1, Biomes.DRIPSTONE_CAVES, 1, Biomes.DEEP_DARK, 1), other);
     }
 
     /** The replacement dripstone keeps the depth the old mixin gave it by passing continentalness as depth. */
     @Test
     void deepDripstoneKeepsItsOldDepth() {
-        NoiseHypercube dripstone = vanilla.stream().filter(e -> e.getSecond() == BiomeKeys.DRIPSTONE_CAVES).findFirst().orElseThrow().getFirst();
+        ParameterPoint dripstone = vanilla.stream().filter(e -> e.getSecond() == Biomes.DRIPSTONE_CAVES).findFirst().orElseThrow().getFirst();
         assertEquals(dripstone.continentalness(), PvBiomeLayout.DEEP_DRIPSTONE_DEPTH);
     }
 
@@ -88,14 +88,14 @@ class PvBiomeLayoutTest {
                 layoutVolume += volume(Box.of(entry.parameters()));
             }
         }
-        for (Pair<NoiseHypercube, RegistryKey<Biome>> entry : vanilla) {
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
             if (PvBiomeLayout.isPoint(entry.getFirst().depth(), 0.0F)) vanillaVolume += volume(Box.of(entry.getFirst()));
         }
         System.out.printf(Locale.ROOT, "[layout] players versus: %d entries, %d at the surface%n", layout.size(), surfaceEntries);
         assertEquals(vanillaVolume, layoutVolume, vanillaVolume * 1e-12, "surface pieces don't add up to vanilla's slices");
 
         // pieces of one slice never overlap and stay inside it
-        for (Pair<NoiseHypercube, RegistryKey<Biome>> entry : vanilla) {
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
             if (!PvBiomeLayout.isPoint(entry.getFirst().depth(), 0.0F)) continue;
             Box slice = Box.of(entry.getFirst());
             List<Box> pieces = new ArrayList<>();
@@ -109,30 +109,30 @@ class PvBiomeLayoutTest {
             for (int a = 0; a < pieces.size(); a++) {
                 sum += volume(pieces.get(a));
                 for (int b = a + 1; b < pieces.size(); b++) {
-                    assertNull(pieces.get(a).intersect(pieces.get(b)), "overlapping pieces in slice " + entry.getSecond().getValue());
+                    assertNull(pieces.get(a).intersect(pieces.get(b)), "overlapping pieces in slice " + entry.getSecond().location());
                 }
             }
-            assertEquals(volume(slice), sum, volume(slice) * 1e-9, "pieces don't cover slice " + entry.getSecond().getValue());
+            assertEquals(volume(slice), sum, volume(slice) * 1e-9, "pieces don't cover slice " + entry.getSecond().location());
         }
     }
 
     /** Q2: both edges of the humid transition use the humid map (birch forest turns into dark birch forest). */
     @Test
     void humidTransitionUsesTheHumidMapOnBothEdges() {
-        MultiNoiseUtil.Entries<RegistryKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
         int checked = 0;
-        for (Pair<NoiseHypercube, RegistryKey<Biome>> entry : vanilla) {
-            NoiseHypercube h = entry.getFirst();
-            if (entry.getSecond() != BiomeKeys.BIRCH_FOREST || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
-            if (h.humidity().min() > MultiNoiseUtil.toLong(0.29F) || h.humidity().max() < MultiNoiseUtil.toLong(0.29F)) continue;
-            if (h.erosion().max() < MultiNoiseUtil.toLong(-0.4F)) continue;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.BIRCH_FOREST || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            if (h.humidity().min() > Climate.quantizeCoord(0.29F) || h.humidity().max() < Climate.quantizeCoord(0.29F)) continue;
+            if (h.erosion().max() < Climate.quantizeCoord(-0.4F)) continue;
             long temperature = mid(h.temperature());
-            if (temperature >= MultiNoiseUtil.toLong(-0.55F) && temperature <= MultiNoiseUtil.toLong(-0.375F)) continue;
+            if (temperature >= Climate.quantizeCoord(-0.55F) && temperature <= Climate.quantizeCoord(-0.375F)) continue;
             // erosion above the mountainside limit and temperature outside the frozen band: only the humid rule applies
             // slice edges are other slices' edges too, where the nearest entry is a tie: stay strictly inside
-            MultiNoiseUtil.NoiseValuePoint point = point(temperature, MultiNoiseUtil.toLong(0.29F), mid(h.continentalness()),
-                    Math.max(mid(h.erosion()), MultiNoiseUtil.toLong(-0.4F)), mid(h.weirdness()));
-            assertEquals(CustomOverworldBiomes.DARK_BIRCH_FOREST, layout.get(point), "at " + point);
+            Climate.TargetPoint point = point(temperature, Climate.quantizeCoord(0.29F), mid(h.continentalness()),
+                    Math.max(mid(h.erosion()), Climate.quantizeCoord(-0.4F)), mid(h.weirdness()));
+            assertEquals(CustomOverworldBiomes.DARK_BIRCH_FOREST, layout.findValue(point), "at " + point);
             checked++;
         }
         assertTrue(checked > 0, "no birch forest slice crosses humidity 0.29");
@@ -141,23 +141,23 @@ class PvBiomeLayoutTest {
     /** Q4: a mountainside covers only erosion below -0.475; the forest keeps the rest of its slice. */
     @Test
     void mountainsideStopsAtItsErosionLimit() {
-        MultiNoiseUtil.Entries<RegistryKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
-        long limit = MultiNoiseUtil.toLong(-0.475F);
-        long inland = MultiNoiseUtil.toLong(0.1F);
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long limit = Climate.quantizeCoord(-0.475F);
+        long inland = Climate.quantizeCoord(0.1F);
         int checked = 0;
-        for (Pair<NoiseHypercube, RegistryKey<Biome>> entry : vanilla) {
-            NoiseHypercube h = entry.getFirst();
-            if (entry.getSecond() != BiomeKeys.FOREST || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.FOREST || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
             if (h.erosion().min() >= limit - 100 || h.erosion().max() <= limit + 100) continue;
             if (h.continentalness().max() <= inland) continue;
-            if (h.weirdness().min() >= MultiNoiseUtil.toLong(-0.3F) && h.weirdness().max() <= MultiNoiseUtil.toLong(0.3F)) continue;
+            if (h.weirdness().min() >= Climate.quantizeCoord(-0.3F) && h.weirdness().max() <= Climate.quantizeCoord(0.3F)) continue;
             long temperature = mid(h.temperature());
-            if (temperature >= MultiNoiseUtil.toLong(-0.55F) && temperature <= MultiNoiseUtil.toLong(-0.375F)) continue;
+            if (temperature >= Climate.quantizeCoord(-0.55F) && temperature <= Climate.quantizeCoord(-0.375F)) continue;
             long continentalness = Math.max(mid(h.continentalness()), inland);
-            RegistryKey<Biome> below = layout.get(point(temperature, mid(h.humidity()), continentalness, limit - 100, mid(h.weirdness())));
-            RegistryKey<Biome> above = layout.get(point(temperature, mid(h.humidity()), continentalness, limit + 100, mid(h.weirdness())));
+            ResourceKey<Biome> below = layout.findValue(point(temperature, mid(h.humidity()), continentalness, limit - 100, mid(h.weirdness())));
+            ResourceKey<Biome> above = layout.findValue(point(temperature, mid(h.humidity()), continentalness, limit + 100, mid(h.weirdness())));
             assertTrue(below == CustomOverworldBiomes.MOUNTAINSIDE_FOREST || below == CustomOverworldBiomes.MOUNTAINSIDE_FOREST_WARM, "below: " + below);
-            assertEquals(BiomeKeys.FOREST, above, "above");
+            assertEquals(Biomes.FOREST, above, "above");
             checked++;
         }
         assertTrue(checked > 0, "no forest slice crosses erosion -0.475 outside river valleys");
@@ -170,10 +170,10 @@ class PvBiomeLayoutTest {
      */
     @Test
     void newLayoutStaysCloseToTheOldOne() {
-        List<Pair<NoiseHypercube, RegistryKey<Biome>>> oldList = OldBiomeLayout.build();
-        List<Pair<NoiseHypercube, RegistryKey<Biome>>> newList = toPairs(PvBiomeLayout.build());
-        MultiNoiseUtil.Entries<RegistryKey<Biome>> oldLayout = entries(oldList);
-        MultiNoiseUtil.Entries<RegistryKey<Biome>> newLayout = entries(newList);
+        List<Pair<ParameterPoint, ResourceKey<Biome>>> oldList = OldBiomeLayout.build();
+        List<Pair<ParameterPoint, ResourceKey<Biome>>> newList = toPairs(PvBiomeLayout.build());
+        Climate.ParameterList<ResourceKey<Biome>> oldLayout = entries(oldList);
+        Climate.ParameterList<ResourceKey<Biome>> newLayout = entries(newList);
         float[] depths = {0.0F, 0.05F, 0.12F, 0.17F, 0.22F, 0.3F, 0.45F, 0.7F, 0.85F, 0.95F, 1.05F};
         Random random = new Random(8675309L);
         int samples = 40_000;
@@ -181,17 +181,17 @@ class PvBiomeLayoutTest {
             Map<String, Integer> changes = new HashMap<>();
             int changed = 0, ties = 0;
             for (int i = 0; i < samples; i++) {
-                MultiNoiseUtil.NoiseValuePoint point = MultiNoiseUtil.createNoiseValuePoint(
+                Climate.TargetPoint point = Climate.target(
                         uniform(random), uniform(random), uniform(random), uniform(random), depth, uniform(random));
-                RegistryKey<Biome> before = oldLayout.get(point);
-                RegistryKey<Biome> after = newLayout.get(point);
+                ResourceKey<Biome> before = oldLayout.findValue(point);
+                ResourceKey<Biome> after = newLayout.findValue(point);
                 if (before == after) continue;
                 if (nearest(oldList, point).contains(after) || nearest(newList, point).contains(before)) {
                     ties++;
                     continue;
                 }
                 changed++;
-                changes.merge(before.getValue().getPath() + " -> " + after.getValue().getPath(), 1, Integer::sum);
+                changes.merge(before.location().getPath() + " -> " + after.location().getPath(), 1, Integer::sum);
             }
             double agreement = 1.0 - (double) changed / samples;
             System.out.printf(Locale.ROOT, "[layout] depth %.2f: %.2f%% unchanged (%d ties); top changes %s%n",
@@ -202,10 +202,10 @@ class PvBiomeLayoutTest {
     }
 
     /** Every biome whose entry is nearest to the point, by the same squared distance the search tree minimizes. */
-    private static Set<RegistryKey<Biome>> nearest(List<Pair<NoiseHypercube, RegistryKey<Biome>>> list, MultiNoiseUtil.NoiseValuePoint point) {
+    private static Set<ResourceKey<Biome>> nearest(List<Pair<ParameterPoint, ResourceKey<Biome>>> list, Climate.TargetPoint point) {
         long best = Long.MAX_VALUE;
-        Set<RegistryKey<Biome>> biomes = new HashSet<>();
-        for (Pair<NoiseHypercube, RegistryKey<Biome>> entry : list) {
+        Set<ResourceKey<Biome>> biomes = new HashSet<>();
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : list) {
             long distance = squaredDistance(entry.getFirst(), point);
             if (distance < best) {
                 best = distance;
@@ -216,13 +216,13 @@ class PvBiomeLayoutTest {
         return biomes;
     }
 
-    private static long squaredDistance(NoiseHypercube h, MultiNoiseUtil.NoiseValuePoint p) {
-        return square(axis(h.temperature(), p.temperatureNoise())) + square(axis(h.humidity(), p.humidityNoise()))
-                + square(axis(h.continentalness(), p.continentalnessNoise())) + square(axis(h.erosion(), p.erosionNoise()))
-                + square(axis(h.depth(), p.depth())) + square(axis(h.weirdness(), p.weirdnessNoise())) + square(h.offset());
+    private static long squaredDistance(ParameterPoint h, Climate.TargetPoint p) {
+        return square(axis(h.temperature(), p.temperature())) + square(axis(h.humidity(), p.humidity()))
+                + square(axis(h.continentalness(), p.continentalness())) + square(axis(h.erosion(), p.erosion()))
+                + square(axis(h.depth(), p.depth())) + square(axis(h.weirdness(), p.weirdness())) + square(h.offset());
     }
 
-    private static long axis(MultiNoiseUtil.ParameterRange range, long value) {
+    private static long axis(Climate.Parameter range, long value) {
         return value < range.min() ? range.min() - value : value > range.max() ? value - range.max() : 0L;
     }
 
@@ -243,11 +243,11 @@ class PvBiomeLayoutTest {
     }
 
     /** A surface point (depth 0). */
-    private static MultiNoiseUtil.NoiseValuePoint point(long temperature, long humidity, long continentalness, long erosion, long weirdness) {
-        return new MultiNoiseUtil.NoiseValuePoint(temperature, humidity, continentalness, erosion, 0L, weirdness);
+    private static Climate.TargetPoint point(long temperature, long humidity, long continentalness, long erosion, long weirdness) {
+        return new Climate.TargetPoint(temperature, humidity, continentalness, erosion, 0L, weirdness);
     }
 
-    private static long mid(MultiNoiseUtil.ParameterRange range) {
+    private static long mid(Climate.Parameter range) {
         return (range.min() + range.max()) / 2;
     }
 
@@ -257,11 +257,11 @@ class PvBiomeLayoutTest {
         return volume;
     }
 
-    private static List<Pair<NoiseHypercube, RegistryKey<Biome>>> toPairs(List<PvBiomeLayout.Entry> layout) {
+    private static List<Pair<ParameterPoint, ResourceKey<Biome>>> toPairs(List<PvBiomeLayout.Entry> layout) {
         return layout.stream().map(e -> Pair.of(e.parameters(), e.biome())).toList();
     }
 
-    private static MultiNoiseUtil.Entries<RegistryKey<Biome>> entries(List<Pair<NoiseHypercube, RegistryKey<Biome>>> list) {
-        return new MultiNoiseUtil.Entries<>(list);
+    private static Climate.ParameterList<ResourceKey<Biome>> entries(List<Pair<ParameterPoint, ResourceKey<Biome>>> list) {
+        return new Climate.ParameterList<>(list);
     }
 }

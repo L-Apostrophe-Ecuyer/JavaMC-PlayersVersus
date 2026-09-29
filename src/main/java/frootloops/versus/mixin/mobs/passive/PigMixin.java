@@ -2,80 +2,88 @@
 package frootloops.versus.mixin.mobs.passive;
 
 import frootloops.versus.mod.mobs.passive.PiggingAroundGoal;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.*;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.PigEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.FollowParentGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(PigEntity.class)
-public abstract class PigMixin extends AnimalEntity {
+@Mixin(Pig.class)
+public abstract class PigMixin extends Animal {
 
-    protected PigMixin(EntityType<? extends AnimalEntity> entityType, World world) {
+    protected PigMixin(EntityType<? extends Animal> entityType, Level world) {
         super(entityType, world);
     }
 
-    private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.CARROT_ON_A_STICK);
+    private static final Ingredient BREEDING_INGREDIENT = Ingredient.of(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.CARROT_ON_A_STICK);
 
-    @Inject(method = "createPigAttributes", at = @At("HEAD"), cancellable = true)
-    private static void createPigAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-        cir.setReturnValue(AnimalEntity.createAnimalAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 16.0)
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.28)
-                .add(EntityAttributes.ATTACK_DAMAGE, 1.0)
-                .add(EntityAttributes.FOLLOW_RANGE, 9.0));
+    @Inject(method = "createAttributes", at = @At("HEAD"), cancellable = true)
+    private static void createPigAttributes(CallbackInfoReturnable<AttributeSupplier.Builder> cir) {
+        cir.setReturnValue(Animal.createAnimalAttributes()
+                .add(Attributes.MAX_HEALTH, 16.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.28)
+                .add(Attributes.ATTACK_DAMAGE, 1.0)
+                .add(Attributes.FOLLOW_RANGE, 9.0));
     }
 
     @Override
-    public boolean tryAttack(ServerWorld world, Entity target) {
-        if(super.tryAttack(world, target)) {
-            this.playSound(SoundEvents.ENTITY_HOGLIN_RETREAT, 0.5F, 1.8F);
+    public boolean doHurtTarget(ServerLevel world, Entity target) {
+        if(super.doHurtTarget(world, target)) {
+            this.playSound(SoundEvents.HOGLIN_RETREAT, 0.5F, 1.8F);
             return true;
         }
         else return false;
     }
 
     @Override
-    public void initGoals() {
-        this.goalSelector.add(0, new SwimGoal(this));
-        this.goalSelector.add(1, new EscapeDangerGoal(this, 1.25));
-        this.goalSelector.add(3, new AnimalMateGoal(this, 1.0));
-        this.goalSelector.add(4, new TemptGoal(this, 1.2, BREEDING_INGREDIENT, false));
-        this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
-        this.goalSelector.add(6, new WanderAroundFarGoal(this, 1.0));
-        this.goalSelector.add(7, new LookAtEntityGoal(this, PlayerEntity.class, 6.0f));
-        this.goalSelector.add(8, new LookAroundGoal(this));
+    public void registerGoals() {
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.25));
+        this.goalSelector.addGoal(3, new BreedGoal(this, 1.0));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.2, BREEDING_INGREDIENT, false));
+        this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.1));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0f));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
-        this.goalSelector.add(6, new PiggingAroundGoal(this));
-        this.goalSelector.add(2, new MeleeAttackGoal(this, 1.3, true));
-        this.targetSelector.add(0, new RevengeGoal(this, AbstractPiglinEntity.class).setGroupRevenge(new Class[0]).setGroupRevenge((Class<?>) null));
-        this.targetSelector.add(1, new ActiveTargetGoal<ZombieEntity>((MobEntity)this, ZombieEntity.class, false));
+        this.goalSelector.addGoal(6, new PiggingAroundGoal(this));
+        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.3, true));
+        this.targetSelector.addGoal(0, new HurtByTargetGoal(this, AbstractPiglin.class).setAlertOthers(new Class[0]).setAlertOthers((Class<?>) null));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<Zombie>((Mob)this, Zombie.class, false));
     }
 
-    public void onEatingGrass() {
-        super.onEatingGrass();
-        this.setPitch(60f);
-        int count = 1 + this.random.nextBetween(0,1);
-        if(this.getEntityWorld().isClient()) return;
+    public void ate() {
+        super.ate();
+        this.setXRot(60f);
+        int count = 1 + this.random.nextIntBetweenInclusive(0,1);
+        if(this.level().isClientSide()) return;
 
         Item dugUpItem = Items.BROWN_MUSHROOM;
         int rand = this.random.nextInt(100);
@@ -90,13 +98,13 @@ public abstract class PigMixin extends AnimalEntity {
         }
 
         for(int j = 0; j < count; ++j) {
-            ItemEntity itemEntity = this.dropItem(dugUpItem.getDefaultStack(), true, false);
-            if (itemEntity != null) itemEntity.setVelocity(itemEntity.getVelocity().add((double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(this.random.nextFloat() * 0.05F), (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)));
+            ItemEntity itemEntity = this.drop(dugUpItem.getDefaultInstance(), true, false);
+            if (itemEntity != null) itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().add((double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(this.random.nextFloat() * 0.05F), (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)));
         }
     }
 
     @Override
-    public void setPitch(float pitch) {
-        super.setPitch(pitch);
+    public void setXRot(float pitch) {
+        super.setXRot(pitch);
     }
 }

@@ -3,28 +3,27 @@ package frootloops.versus.mixin.environment.archeology;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BrushableBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.BrushableBlockEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootTables;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.BiomeTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.LightType;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BrushableBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BrushableBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,24 +42,24 @@ public abstract class SuspiciousBlockEntityMixin extends BlockEntity {
     }
 
     @Shadow private ItemStack item = ItemStack.EMPTY;
-    @Shadow @Nullable private RegistryKey<LootTable> lootTable;
+    @Shadow @Nullable private ResourceKey<LootTable> lootTable;
 
-    @Shadow public void setLootTable(RegistryKey<LootTable> lootTable, long seed) {}
+    @Shadow public void setLootTable(ResourceKey<LootTable> lootTable, long seed) {}
 
-    private static final RegistryKey<LootTable> LOOT_SAND_AQUATIC = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(VersusMod.MOD_ID, "archaeology/default_sand_aquatic"));
-    private static final RegistryKey<LootTable> LOOT_SAND_SURFACE = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(VersusMod.MOD_ID, "archaeology/default_sand_surface"));
-    private static final RegistryKey<LootTable> LOOT_SAND_DESERT = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(VersusMod.MOD_ID, "archaeology/default_sand_desert"));
+    private static final ResourceKey<LootTable> LOOT_SAND_AQUATIC = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_aquatic"));
+    private static final ResourceKey<LootTable> LOOT_SAND_SURFACE = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_surface"));
+    private static final ResourceKey<LootTable> LOOT_SAND_DESERT = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_sand_desert"));
 
-    private static final RegistryKey<LootTable> LOOT_GRAVEL_AQUATIC = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(VersusMod.MOD_ID, "archaeology/default_gravel_aquatic"));
-    private static final RegistryKey<LootTable> LOOT_GRAVEL_SURFACE = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(VersusMod.MOD_ID, "archaeology/default_gravel_surface"));
-    private static final RegistryKey<LootTable> LOOT_GRAVEL_DEEP_CAVE = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(VersusMod.MOD_ID, "archaeology/default_gravel_deep_cave"));
-    private static final RegistryKey<LootTable> LOOT_GRAVEL_REGULAR_CAVE = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(VersusMod.MOD_ID, "archaeology/default_gravel_regular_cave"));
+    private static final ResourceKey<LootTable> LOOT_GRAVEL_AQUATIC = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_aquatic"));
+    private static final ResourceKey<LootTable> LOOT_GRAVEL_SURFACE = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_surface"));
+    private static final ResourceKey<LootTable> LOOT_GRAVEL_DEEP_CAVE = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_deep_cave"));
+    private static final ResourceKey<LootTable> LOOT_GRAVEL_REGULAR_CAVE = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, "archaeology/default_gravel_regular_cave"));
 
-    @Inject(method = "finishBrushing", at = @At("RETURN"), cancellable = false)
-    private void finishBrushing(ServerWorld world, LivingEntity brusher, ItemStack itemStack, CallbackInfo info) {
-        if(itemStack.getUseAction() != UseAction.BRUSH || !itemStack.isOf(Items.BRUSH)) {
-            if(!(world.getBlockState(this.getPos()).getBlock() instanceof BrushableBlock)) {
-                world.breakBlock(this.getPos(), true, brusher);
+    @Inject(method = "brushingCompleted", at = @At("RETURN"), cancellable = false)
+    private void finishBrushing(ServerLevel world, LivingEntity brusher, ItemStack itemStack, CallbackInfo info) {
+        if(itemStack.getUseAnimation() != ItemUseAnimation.BRUSH || !itemStack.is(Items.BRUSH)) {
+            if(!(world.getBlockState(this.getBlockPos()).getBlock() instanceof BrushableBlock)) {
+                world.destroyBlock(this.getBlockPos(), true, brusher);
             }
         }
     }
@@ -68,27 +67,27 @@ public abstract class SuspiciousBlockEntityMixin extends BlockEntity {
     @ModifyConstant(method = "brush", constant = @Constant(longValue = 10L))
     private long fasterBrushing(long tickDelayUntilNextBrushStage) {return VersusSettings.Gameplay.BRUSHING_TICKS_PER_STAGE * 2L;}
 
-    @Inject(method = "generateItem", at = @At("HEAD"), cancellable = false)
-    private void generateRandomLootIfNoneAppended(ServerWorld world, LivingEntity brusher, ItemStack brush, CallbackInfo info) {
+    @Inject(method = "unpackLootTable", at = @At("HEAD"), cancellable = false)
+    private void generateRandomLootIfNoneAppended(ServerLevel world, LivingEntity brusher, ItemStack brush, CallbackInfo info) {
         if(item.isEmpty() && lootTable == null) {
-            if(this.getCachedState().isOf(Blocks.SUSPICIOUS_SAND)) {
-                if(world.getFluidState(pos.up()).isOf(Fluids.WATER)) this.setLootTable(LOOT_SAND_AQUATIC, this.getPos().asLong());
+            if(this.getBlockState().is(Blocks.SUSPICIOUS_SAND)) {
+                if(world.getFluidState(worldPosition.above()).is(Fluids.WATER)) this.setLootTable(LOOT_SAND_AQUATIC, this.getBlockPos().asLong());
                 else {
-                    RegistryEntry<Biome> biome = world.getBiome(this.pos);
-                    if(biome.isIn(BiomeTags.DESERT_PYRAMID_HAS_STRUCTURE)) this.setLootTable(LOOT_SAND_DESERT, this.getPos().asLong());
-                    else if(biome.isIn(BiomeTags.PLAYS_UNDERWATER_MUSIC)) this.setLootTable(LOOT_SAND_AQUATIC, this.getPos().asLong());
-                    else this.setLootTable(LOOT_SAND_SURFACE, this.getPos().asLong());
+                    Holder<Biome> biome = world.getBiome(this.worldPosition);
+                    if(biome.is(BiomeTags.HAS_DESERT_PYRAMID)) this.setLootTable(LOOT_SAND_DESERT, this.getBlockPos().asLong());
+                    else if(biome.is(BiomeTags.PLAYS_UNDERWATER_MUSIC)) this.setLootTable(LOOT_SAND_AQUATIC, this.getBlockPos().asLong());
+                    else this.setLootTable(LOOT_SAND_SURFACE, this.getBlockPos().asLong());
                 }
             }
             else {
-                if(pos.getY() < 8) this.setLootTable(LOOT_GRAVEL_DEEP_CAVE, this.getPos().asLong());
-                else if(pos.getY() < 32) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getPos().asLong());
+                if(worldPosition.getY() < 8) this.setLootTable(LOOT_GRAVEL_DEEP_CAVE, this.getBlockPos().asLong());
+                else if(worldPosition.getY() < 32) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getBlockPos().asLong());
                 else {
-                    RegistryEntry<Biome> biome = world.getBiome(this.pos);
-                    if(biome == CustomOverworldBiomes.REGULAR_CAVE) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getPos().asLong());
-                    else if (biome.isIn(BiomeTags.PLAYS_UNDERWATER_MUSIC)) this.setLootTable(LOOT_GRAVEL_AQUATIC, this.getPos().asLong());
-                    else if (pos.getY() < 56 || world.getLightLevel(LightType.SKY, pos) < 3) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getPos().asLong());
-                    else this.setLootTable(LOOT_GRAVEL_SURFACE, this.getPos().asLong());
+                    Holder<Biome> biome = world.getBiome(this.worldPosition);
+                    if(biome == CustomOverworldBiomes.REGULAR_CAVE) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getBlockPos().asLong());
+                    else if (biome.is(BiomeTags.PLAYS_UNDERWATER_MUSIC)) this.setLootTable(LOOT_GRAVEL_AQUATIC, this.getBlockPos().asLong());
+                    else if (worldPosition.getY() < 56 || world.getBrightness(LightLayer.SKY, worldPosition) < 3) this.setLootTable(LOOT_GRAVEL_REGULAR_CAVE, this.getBlockPos().asLong());
+                    else this.setLootTable(LOOT_GRAVEL_SURFACE, this.getBlockPos().asLong());
                 }
             }
         }

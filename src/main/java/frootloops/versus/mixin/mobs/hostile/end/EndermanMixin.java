@@ -2,22 +2,27 @@ package frootloops.versus.mixin.mobs.hostile.end;
 
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.mobs.hostile.end.EndermanHideAndWaitGoal;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.Angerable;
-import net.minecraft.entity.mob.EndermanEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -26,35 +31,35 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(EndermanEntity.class)
-public abstract class EndermanMixin extends HostileEntity implements Angerable {
+@Mixin(EnderMan.class)
+public abstract class EndermanMixin extends Monster implements NeutralMob {
 
     private int angerTime = 0;
-    protected EndermanMixin(EntityType<? extends HostileEntity> entityType, World world) {
+    protected EndermanMixin(EntityType<? extends Monster> entityType, Level world) {
         super(entityType, world);
     }
 
     @Shadow
-    private boolean teleportTo(double x, double y, double z) {return false;}
+    private boolean teleport(double x, double y, double z) {return false;}
 
     @Nullable
     @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
-        EntityAttributeInstance instanceKnockback = this.getAttributes().getCustomInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData) {
+        AttributeInstance instanceKnockback = this.getAttributes().getInstance(Attributes.KNOCKBACK_RESISTANCE);
         if (instanceKnockback != null) instanceKnockback.setBaseValue(0.6D);
-        return super.initialize(world, difficulty, spawnReason, entityData);
+        return super.finalizeSpawn(world, difficulty, spawnReason, entityData);
     }
 
-    @Inject(method = "initGoals", at = @At("HEAD"))
+    @Inject(method = "registerGoals", at = @At("HEAD"))
     private void addWaitForPlayerGoal(CallbackInfo ci) {
-        this.goalSelector.add(0, new EndermanHideAndWaitGoal((EndermanEntity) ((Object)this)));
+        this.goalSelector.addGoal(0, new EndermanHideAndWaitGoal((EnderMan) ((Object)this)));
     }
 
     @Override
-    public boolean canSpawn(WorldAccess worldAccess, SpawnReason spawnReason) {
-        if(!super.canSpawn(worldAccess, spawnReason)) return false;
-        if(spawnReason == SpawnReason.NATURAL && worldAccess.getDimension().hasSkyLight()) {
-            if(worldAccess instanceof World world && world.isRaining() && !world.isThundering()) { // Endermen more common when foggy or during new moons
+    public boolean checkSpawnRules(LevelAccessor worldAccess, EntitySpawnReason spawnReason) {
+        if(!super.checkSpawnRules(worldAccess, spawnReason)) return false;
+        if(spawnReason == EntitySpawnReason.NATURAL && worldAccess.dimensionType().hasSkyLight()) {
+            if(worldAccess instanceof Level world && world.isRaining() && !world.isThundering()) { // Endermen more common when foggy or during new moons
                 return true;
             }
             if((worldAccess.getMoonPhase() + 2) % 8 < 6 && this.random.nextInt(4) < 1) {
@@ -65,44 +70,44 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
     }
 
     @Override
-    protected int computeFallDamage(double fallDistance, float damagePerDistance) {
-        return super.computeFallDamage(fallDistance - 4.0f, damagePerDistance) - 5;
+    protected int calculateFallDamage(double fallDistance, float damagePerDistance) {
+        return super.calculateFallDamage(fallDistance - 4.0f, damagePerDistance) - 5;
     }
 
 
     @Overwrite
-    public boolean isPlayerStaring(PlayerEntity player) {
-        if (player.getEquippedStack(EquipmentSlot.HEAD).isOf(Blocks.CARVED_PUMPKIN.asItem())) return false;
-        double squaredDistance = this.squaredDistanceTo(player);
+    public boolean isBeingStaredBy(Player player) {
+        if (player.getItemBySlot(EquipmentSlot.HEAD).is(Blocks.CARVED_PUMPKIN.asItem())) return false;
+        double squaredDistance = this.distanceToSqr(player);
 
         // Targeted players will be attacked if returns false. We make it so endermen only attack when you're looking, making chases more panicky.
         if(this.getTarget() == player) {
-            if(this.getAngerTime() < 10) return false;
-            if(this.hurtTime > 0 && this.lastDamageTaken > 5.0f) return true;
+            if(this.getRemainingPersistentAngerTime() < 10) return false;
+            if(this.hurtTime > 0 && this.lastHurt > 5.0f) return true;
             if(squaredDistance > 64.0) return false;
-            else if(squaredDistance > 16.0) return !(Combat.isLookingTowards(player, this.getEyePos(), -0.3));
+            else if(squaredDistance > 16.0) return !(Combat.isLookingTowards(player, this.getEyePosition(), -0.3));
             else return false;
         }
         // Untargeted players, Endermen will teleport up to them until they're in range for aggro:
         else {
-            if (player.lastHeadYaw != player.headYaw) return false;
+            if (player.yHeadRotO != player.yHeadRot) return false;
             else if(squaredDistance > 8192.0) return false;
 
-            Vec3d playerRotationVect = player.getRotationVec(1.0f).normalize();
-            Vec3d directionVect = new Vec3d(this.getX() - player.getX(), this.getBodyY(0.6) - player.getEyeY(), this.getZ() - player.getZ());
+            Vec3 playerRotationVect = player.getViewVector(1.0f).normalize();
+            Vec3 directionVect = new Vec3(this.getX() - player.getX(), this.getY(0.6) - player.getEyeY(), this.getZ() - player.getZ());
             double distance = directionVect.length();
-            double dotProduct = (playerRotationVect).dotProduct(directionVect.multiply(1.0/distance));
+            double dotProduct = (playerRotationVect).dot(directionVect.scale(1.0/distance));
             double dotProductThreshold = distance < 10.0 ? 0.95 : 1.0 - 0.05 / (distance - 9.0);
             if (dotProduct > dotProductThreshold) {
-                if (squaredDistance > 256.0 && player.canSee(this)) {
+                if (squaredDistance > 256.0 && player.hasLineOfSight(this)) {
                     angerTime = 0;
-                    Vec3d target = this.getEntityPos().add(directionVect.multiply(0.5));
-                    teleportTo(target.x + (this.random.nextDouble() - 0.5) * 4.0, target.y + (double) this.random.nextInt(16) - 8.0, target.z + (this.random.nextDouble() - 0.5) * 4.0);
-                    this.lookAtEntity(player, 100f, 100f);
+                    Vec3 target = this.position().add(directionVect.scale(0.5));
+                    teleport(target.x + (this.random.nextDouble() - 0.5) * 4.0, target.y + (double) this.random.nextInt(16) - 8.0, target.z + (this.random.nextDouble() - 0.5) * 4.0);
+                    this.lookAt(player, 100f, 100f);
                     this.playAmbientSound();
                     return false;
                 }
-                else if(!player.canSee(this)) {
+                else if(!player.hasLineOfSight(this)) {
                     angerTime = Math.max(0, angerTime - 8);
                 }
                 else {
@@ -119,12 +124,12 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
 
 
     boolean teleportToEntity(Entity entity, double distance) {
-        Vec3d direction = new Vec3d(this.getX() - entity.getX(), this.getBodyY(0.5) - entity.getEyeY(), this.getZ() - entity.getZ());
+        Vec3 direction = new Vec3(this.getX() - entity.getX(), this.getY(0.5) - entity.getEyeY(), this.getZ() - entity.getZ());
         direction = direction.normalize();
         double e = this.getX() + (this.random.nextDouble() - 0.5) * 4.0 - direction.x * distance;
         double f = this.getY() + (double)(this.random.nextInt(16) - 8) - direction.y * distance;
         double g = this.getZ() + (this.random.nextDouble() - 0.5) * 4.0 - direction.z * distance;
-        return this.teleportTo(e, f, g);
+        return this.teleport(e, f, g);
     }
 
     @Override
@@ -132,17 +137,17 @@ public abstract class EndermanMixin extends HostileEntity implements Angerable {
         if (!this.isSilent()) {
             volume *= 0.8f;
             pitch *= 0.75f;
-            this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundCategory(), volume, pitch);
+            this.level().playSound(null, this.getX(), this.getY(), this.getZ(), sound, this.getSoundSource(), volume, pitch);
         }
     }
 
     @Inject(method = "setTarget", at = @At("TAIL"))
     private void darknessWhenAngered(@Nullable LivingEntity target, CallbackInfo ci) {
-        if(target != null) target.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 90, 0, false, false));
+        if(target != null) target.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 90, 0, false, false));
     }
 
     @Override
-    public int getMinAmbientSoundDelay() {
+    public int getAmbientSoundInterval() {
         return 300;
     }
 }

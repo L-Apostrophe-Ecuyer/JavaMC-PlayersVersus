@@ -2,9 +2,9 @@ package frootloops.versus.mod.environment.worldgen.density;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.gradient;
 
@@ -45,19 +45,19 @@ public record PvTerrain(DensityFunction offset, DensityFunction factor, DensityF
                         DensityFunction pillar, double entrancesMin, double spaghettiMin) implements DensityFunction {
 
     public static final MapCodec<PvTerrain> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DensityFunction.FUNCTION_CODEC.fieldOf("offset").forGetter(PvTerrain::offset),
-            DensityFunction.FUNCTION_CODEC.fieldOf("factor").forGetter(PvTerrain::factor),
-            DensityFunction.FUNCTION_CODEC.fieldOf("jaggedness").forGetter(PvTerrain::jaggedness),
-            DensityFunction.FUNCTION_CODEC.fieldOf("jagged").forGetter(PvTerrain::jagged),
-            DensityFunction.FUNCTION_CODEC.fieldOf("ridges").forGetter(PvTerrain::ridges),
-            DensityFunction.FUNCTION_CODEC.fieldOf("base_3d_noise").forGetter(PvTerrain::base3d),
-            DensityFunction.FUNCTION_CODEC.fieldOf("entrances").forGetter(PvTerrain::entrances),
-            DensityFunction.FUNCTION_CODEC.fieldOf("spaghetti_roughness").forGetter(PvTerrain::spaghettiRoughness),
-            DensityFunction.FUNCTION_CODEC.fieldOf("cave_layer").forGetter(PvTerrain::caveLayer),
-            DensityFunction.FUNCTION_CODEC.fieldOf("cave_cheese").forGetter(PvTerrain::caveCheese),
-            DensityFunction.FUNCTION_CODEC.fieldOf("pillar").forGetter(PvTerrain::pillar)
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("offset").forGetter(PvTerrain::offset),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("factor").forGetter(PvTerrain::factor),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("jaggedness").forGetter(PvTerrain::jaggedness),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("jagged").forGetter(PvTerrain::jagged),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("ridges").forGetter(PvTerrain::ridges),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("base_3d_noise").forGetter(PvTerrain::base3d),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("entrances").forGetter(PvTerrain::entrances),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("spaghetti_roughness").forGetter(PvTerrain::spaghettiRoughness),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("cave_layer").forGetter(PvTerrain::caveLayer),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("cave_cheese").forGetter(PvTerrain::caveCheese),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("pillar").forGetter(PvTerrain::pillar)
     ).apply(instance, PvTerrain::new));
-    private static final CodecHolder<PvTerrain> CODEC_HOLDER = CodecHolder.of(CODEC);
+    private static final KeyDispatchDataCodec<PvTerrain> CODEC_HOLDER = KeyDispatchDataCodec.of(CODEC);
 
     /** Pillars are {@code min(0.3, …)}, so a value above 0.3 can't be raised by them. */
     private static final double PILLARS_MAX = 0.3;
@@ -71,7 +71,7 @@ public record PvTerrain(DensityFunction offset, DensityFunction factor, DensityF
 
     /** The terrain at a corner, faded to its fixed values at the bottom (y -64..-40) and top (y 240..256) of the world. */
     @Override
-    public double sample(NoisePos pos) {
+    public double compute(FunctionContext pos) {
         int y = pos.blockY();
         double bottom = gradient(y, -64, -40, 0.0, 1.0);
         if (bottom == 0.0) return 0.1171875;
@@ -84,45 +84,45 @@ public record PvTerrain(DensityFunction offset, DensityFunction factor, DensityF
      * Near and above the surface (sloped cheese below 1.5625): the surface, cut by cave entrances. Below: cheese caves
      * and the cave layer, cut by entrances and spaghetti, with pillars standing in them.
      */
-    private double caves(NoisePos pos, int y) {
+    private double caves(FunctionContext pos, int y) {
         double slopedCheese = this.slopedCheese(pos, y);
         if (slopedCheese >= -1000000.0 && slopedCheese < 1.5625) {
-            return slopedCheese < this.entrancesMin * 5.0 ? slopedCheese : Math.min(slopedCheese, this.entrances.sample(pos) * 5.0);
+            return slopedCheese < this.entrancesMin * 5.0 ? slopedCheese : Math.min(slopedCheese, this.entrances.compute(pos) * 5.0);
         }
-        double layer = this.caveLayer.sample(pos);
-        double cheese = layer * layer * 4.0 + (MathHelper.clamp(this.caveCheese.sample(pos) + 0.27, -1.0, 1.0)
-                + MathHelper.clamp(slopedCheese * -0.64 + 1.5, 0.0, 0.5));
-        double withEntrances = cheese < this.entrancesMin ? cheese : Math.min(cheese, this.entrances.sample(pos));
+        double layer = this.caveLayer.compute(pos);
+        double cheese = layer * layer * 4.0 + (Mth.clamp(this.caveCheese.compute(pos) + 0.27, -1.0, 1.0)
+                + Mth.clamp(slopedCheese * -0.64 + 1.5, 0.0, 0.5));
+        double withEntrances = cheese < this.entrancesMin ? cheese : Math.min(cheese, this.entrances.compute(pos));
         double withSpaghetti = withEntrances < this.spaghettiMin ? withEntrances
-                : Math.min(withEntrances, 1.0 + this.spaghettiRoughness.sample(pos));
+                : Math.min(withEntrances, 1.0 + this.spaghettiRoughness.compute(pos));
         if (withSpaghetti > PILLARS_MAX) return withSpaghetti;
-        double pillars = Math.min(0.3, Math.max(-0.02, Math.max(0.0, this.pillar.sample(pos) + -0.15) * 0.7 + -0.2));
+        double pillars = Math.min(0.3, Math.max(-0.02, Math.max(0.0, this.pillar.compute(pos) + -0.15) * 0.7 + -0.2));
         return Math.max(withSpaghetti, pillars >= -1000000.0 && pillars < 0.03 ? -1000000.0 : pillars);
     }
 
     /** The terrain surface: depth with jagged peaks, scaled by the factor, plus the 3D base noise; river valleys cut in. */
-    private double slopedCheese(NoisePos pos, int y) {
+    private double slopedCheese(FunctionContext pos, int y) {
         double yValue = DensityOps.yValue(y);
-        double ridge = TerrainFormulas.inRiverBand(yValue) ? this.ridges.sample(pos) : 0.0;
+        double ridge = TerrainFormulas.inRiverBand(yValue) ? this.ridges.compute(pos) : 0.0;
         double riverCarver = TerrainFormulas.riverCarver(y, yValue, ridge);
-        double depth = TerrainFormulas.depth(y, this.offset.sample(pos), TerrainFormulas.riverDepth(y, yValue, ridge));
-        double jaggedness = this.jaggedness.sample(pos);
-        double withPeaks = depth + (jaggedness == 0.0 ? 0.0 : jaggedness * DensityOps.halfNegative(this.jagged.sample(pos)));
-        double shaped = withPeaks == 0.0 ? 0.0 : withPeaks * this.factor.sample(pos);
-        return Math.min(riverCarver, DensityOps.quarterNegative(shaped) * 4.0 + this.base3d.sample(pos));
+        double depth = TerrainFormulas.depth(y, this.offset.compute(pos), TerrainFormulas.riverDepth(y, yValue, ridge));
+        double jaggedness = this.jaggedness.compute(pos);
+        double withPeaks = depth + (jaggedness == 0.0 ? 0.0 : jaggedness * DensityOps.halfNegative(this.jagged.compute(pos)));
+        double shaped = withPeaks == 0.0 ? 0.0 : withPeaks * this.factor.compute(pos);
+        return Math.min(riverCarver, DensityOps.quarterNegative(shaped) * 4.0 + this.base3d.compute(pos));
     }
 
     @Override
-    public void fill(double[] densities, EachApplier applier) {
-        applier.fill(densities, this);
+    public void fillArray(double[] densities, ContextProvider applier) {
+        applier.fillAllDirectly(densities, this);
     }
 
     @Override
-    public DensityFunction apply(DensityFunctionVisitor visitor) {
-        return visitor.apply(new PvTerrain(this.offset.apply(visitor), this.factor.apply(visitor), this.jaggedness.apply(visitor),
-                this.jagged.apply(visitor), this.ridges.apply(visitor), this.base3d.apply(visitor), this.entrances.apply(visitor),
-                this.spaghettiRoughness.apply(visitor), this.caveLayer.apply(visitor), this.caveCheese.apply(visitor),
-                this.pillar.apply(visitor)));
+    public DensityFunction mapAll(Visitor visitor) {
+        return visitor.apply(new PvTerrain(this.offset.mapAll(visitor), this.factor.mapAll(visitor), this.jaggedness.mapAll(visitor),
+                this.jagged.mapAll(visitor), this.ridges.mapAll(visitor), this.base3d.mapAll(visitor), this.entrances.mapAll(visitor),
+                this.spaghettiRoughness.mapAll(visitor), this.caveLayer.mapAll(visitor), this.caveCheese.mapAll(visitor),
+                this.pillar.mapAll(visitor)));
     }
 
     /**
@@ -140,7 +140,7 @@ public record PvTerrain(DensityFunction offset, DensityFunction factor, DensityF
     }
 
     @Override
-    public CodecHolder<? extends DensityFunction> getCodecHolder() {
+    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
         return CODEC_HOLDER;
     }
 }

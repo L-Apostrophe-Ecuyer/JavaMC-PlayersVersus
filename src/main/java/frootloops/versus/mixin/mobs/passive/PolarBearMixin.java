@@ -1,32 +1,32 @@
 package frootloops.versus.mixin.mobs.passive;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.passive.PolarBearEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.PolarBear;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
-@Mixin(PolarBearEntity.class)
-public abstract class PolarBearMixin extends PassiveEntity {
+@Mixin(PolarBear.class)
+public abstract class PolarBearMixin extends AgeableMob {
 
-    protected PolarBearMixin(EntityType<? extends PassiveEntity> entityType, World world) {
+    protected PolarBearMixin(EntityType<? extends AgeableMob> entityType, Level world) {
         super(entityType, world);
     }
 
-    @Inject(method = "createPolarBearAttributes", at = @At("HEAD"), cancellable = true)
-    private static void createPolarBearAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
+    @Inject(method = "createAttributes", at = @At("HEAD"), cancellable = true)
+    private static void createPolarBearAttributes(CallbackInfoReturnable<AttributeSupplier.Builder> cir) {
         cir.setReturnValue(
-                MobEntity.createMobAttributes()
-                        .add(EntityAttributes.FOLLOW_RANGE, 30.0)
-                        .add(EntityAttributes.MOVEMENT_SPEED, 0.36f)
-                        .add(EntityAttributes.ATTACK_DAMAGE, 12.0)
-                        .add(EntityAttributes.MAX_HEALTH, 60.0));
+                Mob.createMobAttributes()
+                        .add(Attributes.FOLLOW_RANGE, 30.0)
+                        .add(Attributes.MOVEMENT_SPEED, 0.36f)
+                        .add(Attributes.ATTACK_DAMAGE, 12.0)
+                        .add(Attributes.MAX_HEALTH, 60.0));
     }
 }

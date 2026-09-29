@@ -3,10 +3,6 @@ package frootloops.versus.mod.environment.worldgen;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquifer;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferDecision;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquiferRules;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
-import net.minecraft.world.gen.noise.NoiseRouter;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumMap;
@@ -14,6 +10,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.ToDoubleFunction;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseRouter;
+import net.minecraft.world.level.levelgen.RandomState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,26 +25,26 @@ class WorldgenDataTest {
 
     @Test
     void settingsMatchTheCode() {
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         System.out.printf(Locale.ROOT, "[data] players-versus:overworld min_y %d height %d sea_level %d aquifers %s ore_veins %s%n",
-                settings.generationShapeConfig().minimumY(), settings.generationShapeConfig().height(), settings.seaLevel(),
-                settings.aquifers(), settings.oreVeins());
+                settings.noiseSettings().minY(), settings.noiseSettings().height(), settings.seaLevel(),
+                settings.aquifersEnabled(), settings.oreVeinsEnabled());
         assertTrue(PvWorldgen.isPvGenerator(settings), "the router's fluid_level_floodedness has no players-versus:aquifer_floodedness");
         assertEquals(PvWorldgenConstants.SEA_LEVEL, settings.seaLevel(), "sea_level in the noise settings and PvWorldgenConstants.SEA_LEVEL differ");
-        assertEquals(PvAquifer.CELL_HEIGHT, settings.generationShapeConfig().verticalCellBlockCount(), "the aquifer's lattice no longer matches the terrain pass's cells");
-        assertEquals(4, settings.generationShapeConfig().horizontalCellBlockCount(), "the aquifer's lattice no longer matches the terrain pass's cells");
+        assertEquals(PvAquifer.CELL_HEIGHT, settings.noiseSettings().getCellHeight(), "the aquifer's lattice no longer matches the terrain pass's cells");
+        assertEquals(4, settings.noiseSettings().getCellWidth(), "the aquifer's lattice no longer matches the terrain pass's cells");
     }
 
     /**
      * The aquifer seeds its input functions itself ({@code AquiferInputs.seeding}); that must give the exact values of
-     * {@link NoiseConfig}'s own router. {@code AquiferPortTest} relies on it too. The final density covers the terrain's
+     * {@link RandomState}'s own router. {@code AquiferPortTest} relies on it too. The final density covers the terrain's
      * 3D base noise ({@code old_blended_noise}), which NoiseConfig seeds from its own splitter, and the high river's
      * inputs, whose terrain at y 80 the aquifer reads.
      */
     @Test
     void seedingMatchesNoiseConfig() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        NoiseRouter router = config.getNoiseRouter();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseRouter router = config.router();
         assertEqualValues("depth", WorldgenTestData.seeded(config, "players-versus:overworld/depth"), router.depth());
         assertEqualValues("continents", WorldgenTestData.seeded(config, "minecraft:overworld/continents"), router.continents());
         assertEqualValues("final density", WorldgenTestData.seeded(config, "players-versus:overworld/final_density"), router.finalDensity());
@@ -53,9 +53,9 @@ class WorldgenDataTest {
     private static void assertEqualValues(String name, DensityFunction ours, DensityFunction router) {
         Random random = new Random(SEED);
         for (int i = 0; i < 2000; i++) {
-            DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(random.nextInt(60000) - 30000, random.nextInt(384) - 64, random.nextInt(60000) - 30000);
-            double expected = router.sample(pos);
-            assertEquals(expected, ours.sample(pos), 0.0, () -> name + " at " + pos.blockX() + "," + pos.blockY() + "," + pos.blockZ());
+            DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(random.nextInt(60000) - 30000, random.nextInt(384) - 64, random.nextInt(60000) - 30000);
+            double expected = router.compute(pos);
+            assertEquals(expected, ours.compute(pos), 0.0, () -> name + " at " + pos.blockX() + "," + pos.blockY() + "," + pos.blockZ());
         }
     }
 
@@ -66,8 +66,8 @@ class WorldgenDataTest {
      */
     @Test
     void aquiferBaseline() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        NoiseRouter router = config.getNoiseRouter();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseRouter router = config.router();
         int[][] bands = {{-31, -4}, {-3, 7}, {8, 31}, {32, 47}, {48, 63}};
         for (int[] band : bands) {
             Map<PvAquiferDecision, Integer> counts = new EnumMap<>(PvAquiferDecision.class);
@@ -75,8 +75,8 @@ class WorldgenDataTest {
             for (int x = 1408; x < 1808; x += 4) {
                 for (int z = 1408; z < 1808; z += 4) {
                     for (int y = band[0]; y <= band[1]; y += 2) {
-                        DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
-                        PvAquiferDecision decision = PvAquiferRules.atPosition(pos, router.fluidLevelFloodednessNoise()::sample, router.fluidLevelSpreadNoise()::sample);
+                        DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(x, y, z);
+                        PvAquiferDecision decision = PvAquiferRules.atPosition(pos, router.fluidLevelFloodednessNoise()::compute, router.fluidLevelSpreadNoise()::compute);
                         counts.merge(decision, 1, Integer::sum);
                         total++;
                     }
@@ -88,16 +88,16 @@ class WorldgenDataTest {
             }
             System.out.println(line);
         }
-        time("floodedness", pos -> router.fluidLevelFloodednessNoise().sample(pos));
-        time("spread", pos -> router.fluidLevelSpreadNoise().sample(pos));
-        time("depth", pos -> router.depth().sample(pos));
+        time("floodedness", pos -> router.fluidLevelFloodednessNoise().compute(pos));
+        time("spread", pos -> router.fluidLevelSpreadNoise().compute(pos));
+        time("depth", pos -> router.depth().compute(pos));
         DensityFunction entrances = WorldgenTestData.seeded(config, "players-versus:overworld/caves/entrances");
-        time("entrances", entrances::sample);
+        time("entrances", entrances::compute);
         DensityFunction noodle = WorldgenTestData.seeded(config, "players-versus:overworld/caves/noodle");
-        time("noodle", noodle::sample);
+        time("noodle", noodle::compute);
     }
 
-    private static void time(String name, ToDoubleFunction<DensityFunction.NoisePos> function) {
+    private static void time(String name, ToDoubleFunction<DensityFunction.FunctionContext> function) {
         double sink = 0;
         for (int round = 0; round < 2; round++) {  // the first round warms up the JIT
             long start = System.nanoTime();
@@ -105,7 +105,7 @@ class WorldgenDataTest {
             for (int x = 0; x < 64; x++) {
                 for (int z = 0; z < 64; z++) {
                     for (int y = -28; y < 64; y += 4) {
-                        sink += function.applyAsDouble(new DensityFunction.UnblendedNoisePos(1600 + x * 4, y, 1600 + z * 4));
+                        sink += function.applyAsDouble(new DensityFunction.SinglePointContext(1600 + x * 4, y, 1600 + z * 4));
                         samples++;
                     }
                 }

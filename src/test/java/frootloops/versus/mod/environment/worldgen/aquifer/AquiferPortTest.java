@@ -5,11 +5,11 @@ import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
 import frootloops.versus.mod.environment.worldgen.density.DensityOps;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.RandomState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -28,19 +28,19 @@ class AquiferPortTest {
 
     @Test
     void yValueIsVanillasY() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
         DensityFunction y = WorldgenTestData.seeded(config, "minecraft:y");
         for (int blockY = -64; blockY < 320; blockY++) {
-            assertEquals(y.sample(new DensityFunction.UnblendedNoisePos(0, blockY, 0)), DensityOps.yValue(blockY), 0.0, "y " + blockY);
+            assertEquals(y.compute(new DensityFunction.SinglePointContext(0, blockY, 0)), DensityOps.yValue(blockY), 0.0, "y " + blockY);
         }
     }
 
     @Test
     void javaGivesTheJsonsValues() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
         // a router slot decoded from JSON is a registry holder around the function
-        DensityFunction floodedness = PvWorldgen.unwrap(config.getNoiseRouter().fluidLevelFloodednessNoise());
-        DensityFunction spread = PvWorldgen.unwrap(config.getNoiseRouter().fluidLevelSpreadNoise());
+        DensityFunction floodedness = PvWorldgen.unwrap(config.router().fluidLevelFloodednessNoise());
+        DensityFunction spread = PvWorldgen.unwrap(config.router().fluidLevelSpreadNoise());
         assertInstanceOf(AquiferFloodedness.class, floodedness);
         assertInstanceOf(AquiferSpread.class, spread);
         DensityFunction jsonFloodedness = WorldgenTestData.seeded(config, WorldgenTestData.REFERENCE + ":overworld/aquifer_fluid_level_floodedness");
@@ -51,10 +51,10 @@ class AquiferPortTest {
         for (int i = 0; i < 20000; i++) {
             int x = random.nextInt(8000) - 4000, z = random.nextInt(8000) - 4000;
             int y = i % 2 == 0 ? EDGE_YS[random.nextInt(EDGE_YS.length)] : random.nextInt(110) - 40;
-            DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
-            double expectedFloodedness = jsonFloodedness.sample(pos), expectedSpread = jsonSpread.sample(pos);
-            assertEquals(expectedFloodedness, floodedness.sample(pos), 0.0, () -> "floodedness at " + x + "," + y + "," + z);
-            assertEquals(expectedSpread, spread.sample(pos), 0.0, () -> "spread at " + x + "," + y + "," + z);
+            DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(x, y, z);
+            double expectedFloodedness = jsonFloodedness.compute(pos), expectedSpread = jsonSpread.compute(pos);
+            assertEquals(expectedFloodedness, floodedness.compute(pos), 0.0, () -> "floodedness at " + x + "," + y + "," + z);
+            assertEquals(expectedSpread, spread.compute(pos), 0.0, () -> "spread at " + x + "," + y + "," + z);
             compared++;
             if (expectedFloodedness != 0.0 || expectedSpread != 0.0) nonZero++;
         }

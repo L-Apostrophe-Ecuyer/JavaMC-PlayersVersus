@@ -4,9 +4,8 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import net.minecraft.item.Item;
-
 import java.util.LinkedList;
+import net.minecraft.world.item.Item;
 
 import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_GROUPS;
 

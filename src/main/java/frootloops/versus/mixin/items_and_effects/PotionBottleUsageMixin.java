@@ -1,66 +1,71 @@
 package frootloops.versus.mixin.items_and_effects;
 
 import frootloops.versus.mod.environment.CustomBlocks;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.potion.Potions;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 
 
 @Mixin(PotionItem.class)
 public abstract class PotionBottleUsageMixin extends Item {
 
-    public PotionBottleUsageMixin(Settings settings) {
+    public PotionBottleUsageMixin(Properties settings) {
         super(settings);
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        World world = context.getWorld();
-        BlockPos blockPos = context.getBlockPos();
-        PlayerEntity playerEntity = context.getPlayer();
-        ItemStack itemStack = context.getStack();
-        PotionContentsComponent potionContentsComponent = (PotionContentsComponent)itemStack.getOrDefault(DataComponentTypes.POTION_CONTENTS, PotionContentsComponent.DEFAULT);
+    public InteractionResult useOn(UseOnContext context) {
+        Level world = context.getLevel();
+        BlockPos blockPos = context.getClickedPos();
+        Player playerEntity = context.getPlayer();
+        ItemStack itemStack = context.getItemInHand();
+        PotionContents potionContentsComponent = (PotionContents)itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
         BlockState blockState = world.getBlockState(blockPos);
 
-        boolean canConvertToMud = blockState.isIn(BlockTags.CONVERTABLE_TO_MUD);
-        boolean canConvertToWetClay = !canConvertToMud && blockState.isOf(Blocks.CLAY);
-        if (context.getSide() != Direction.DOWN && potionContentsComponent.matches(Potions.WATER) && (canConvertToMud || canConvertToWetClay)) {
-            world.playSound((PlayerEntity)null, blockPos, SoundEvents.ENTITY_GENERIC_SPLASH, SoundCategory.BLOCKS, 1.0F, 1.0F);
-            playerEntity.setStackInHand(context.getHand(), ItemUsage.exchangeStack(itemStack, playerEntity, new ItemStack(Items.GLASS_BOTTLE)));
-            playerEntity.incrementStat(Stats.USED.getOrCreateStat(itemStack.getItem()));
-            if (!world.isClient()) {
-                ServerWorld serverWorld = (ServerWorld)world;
+        boolean canConvertToMud = blockState.is(BlockTags.CONVERTABLE_TO_MUD);
+        boolean canConvertToWetClay = !canConvertToMud && blockState.is(Blocks.CLAY);
+        if (context.getClickedFace() != Direction.DOWN && potionContentsComponent.is(Potions.WATER) && (canConvertToMud || canConvertToWetClay)) {
+            world.playSound((Player)null, blockPos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 1.0F, 1.0F);
+            playerEntity.setItemInHand(context.getHand(), ItemUtils.createFilledResult(itemStack, playerEntity, new ItemStack(Items.GLASS_BOTTLE)));
+            playerEntity.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+            if (!world.isClientSide()) {
+                ServerLevel serverWorld = (ServerLevel)world;
 
                 for(int i = 0; i < 5; ++i) {
-                    serverWorld.spawnParticles(ParticleTypes.SPLASH, (double)blockPos.getX() + world.random.nextDouble(), (double)(blockPos.getY() + 1), (double)blockPos.getZ() + world.random.nextDouble(), 1, 0.0, 0.0, 0.0, 1.0);
+                    serverWorld.sendParticles(ParticleTypes.SPLASH, (double)blockPos.getX() + world.random.nextDouble(), (double)(blockPos.getY() + 1), (double)blockPos.getZ() + world.random.nextDouble(), 1, 0.0, 0.0, 0.0, 1.0);
                 }
             }
 
-            world.playSound((PlayerEntity)null, blockPos, SoundEvents.ITEM_BOTTLE_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
-            world.emitGameEvent((Entity)null, GameEvent.FLUID_PLACE, blockPos);
+            world.playSound((Player)null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
+            world.gameEvent((Entity)null, GameEvent.FLUID_PLACE, blockPos);
 
-            if(canConvertToMud) world.setBlockState(blockPos, CustomBlocks.BROWN_MUD.getDefaultState());
-            else if(canConvertToWetClay) world.setBlockState(blockPos, Blocks.MUD.getDefaultState());
-            return ActionResult.SUCCESS;
+            if(canConvertToMud) world.setBlockAndUpdate(blockPos, CustomBlocks.BROWN_MUD.defaultBlockState());
+            else if(canConvertToWetClay) world.setBlockAndUpdate(blockPos, Blocks.MUD.defaultBlockState());
+            return InteractionResult.SUCCESS;
         } else {
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         }
     }
 }

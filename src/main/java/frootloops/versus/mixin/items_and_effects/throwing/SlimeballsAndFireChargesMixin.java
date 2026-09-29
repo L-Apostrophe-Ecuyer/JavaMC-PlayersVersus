@@ -1,19 +1,19 @@
 package frootloops.versus.mixin.items_and_effects.throwing;
 
 import frootloops.versus.mod.items_and_effects.throwing.SlimeballEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.FireballEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,47 +23,47 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SlimeballsAndFireChargesMixin {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    public void use(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        if(itemStack.isOf(Items.SLIME_BALL)) {
+    public void use(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        ItemStack itemStack = user.getItemInHand(hand);
+        if(itemStack.is(Items.SLIME_BALL)) {
             throwSnowball(world, user, itemStack);
-            cir.setReturnValue(ActionResult.SUCCESS);
+            cir.setReturnValue(InteractionResult.SUCCESS);
         }
-        else if(itemStack.isOf(Items.FIRE_CHARGE)) {
+        else if(itemStack.is(Items.FIRE_CHARGE)) {
             throwFireCharge(world, user, itemStack);
-            cir.setReturnValue(ActionResult.SUCCESS);
+            cir.setReturnValue(InteractionResult.SUCCESS);
         }
     }
 
-    private static void throwSnowball(World world, PlayerEntity user, ItemStack itemStack) {
-        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_EGG_THROW, SoundCategory.NEUTRAL, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
-        if (!world.isClient()) {
+    private static void throwSnowball(Level world, Player user, ItemStack itemStack) {
+        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.EGG_THROW, SoundSource.NEUTRAL, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
+        if (!world.isClientSide()) {
             SlimeballEntity slimeballEntity = new SlimeballEntity(world, user, itemStack);
-            slimeballEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0f, 1.5f, 1.0f);
-            world.spawnEntity(slimeballEntity);
+            slimeballEntity.shootFromRotation(user, user.getXRot(), user.getYRot(), 0.0f, 1.5f, 1.0f);
+            world.addFreshEntity(slimeballEntity);
         }
-        user.incrementStat(Stats.USED.getOrCreateStat(Items.SLIME_BALL));
-        if (!user.getAbilities().creativeMode) {
-            itemStack.decrement(1);
-            user.getItemCooldownManager().set(itemStack, 8);
+        user.awardStat(Stats.ITEM_USED.get(Items.SLIME_BALL));
+        if (!user.getAbilities().instabuild) {
+            itemStack.shrink(1);
+            user.getCooldowns().addCooldown(itemStack, 8);
         }
     }
 
 
-    private static void throwFireCharge(World world, PlayerEntity user, ItemStack itemStack) {
-        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.NEUTRAL, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
-        if (!world.isClient()) {
-            double vx = -MathHelper.sin(user.getYaw() * ((float)Math.PI / 180)) * MathHelper.cos(user.getPitch() * ((float)Math.PI / 180));
-            double vy = -MathHelper.sin((user.getPitch()) * ((float)Math.PI / 180));
-            double vz = MathHelper.cos(user.getYaw() * ((float)Math.PI / 180)) * MathHelper.cos(user.getPitch() * ((float)Math.PI / 180));
-            FireballEntity fireballEntity = new FireballEntity(world, user, new Vec3d(vx, vy, vz), 1);
-            fireballEntity.setPosition(user.getEyePos().add(0.0, -0.05, 0.0));
-            world.spawnEntity(fireballEntity);
+    private static void throwFireCharge(Level world, Player user, ItemStack itemStack) {
+        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.NEUTRAL, 0.5f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
+        if (!world.isClientSide()) {
+            double vx = -Mth.sin(user.getYRot() * ((float)Math.PI / 180)) * Mth.cos(user.getXRot() * ((float)Math.PI / 180));
+            double vy = -Mth.sin((user.getXRot()) * ((float)Math.PI / 180));
+            double vz = Mth.cos(user.getYRot() * ((float)Math.PI / 180)) * Mth.cos(user.getXRot() * ((float)Math.PI / 180));
+            LargeFireball fireballEntity = new LargeFireball(world, user, new Vec3(vx, vy, vz), 1);
+            fireballEntity.setPos(user.getEyePosition().add(0.0, -0.05, 0.0));
+            world.addFreshEntity(fireballEntity);
         }
-        user.incrementStat(Stats.USED.getOrCreateStat(Items.FIRE_CHARGE));
-        if (!user.getAbilities().creativeMode) {
-            itemStack.decrement(1);
-            user.getItemCooldownManager().set(itemStack, 20);
+        user.awardStat(Stats.ITEM_USED.get(Items.FIRE_CHARGE));
+        if (!user.getAbilities().instabuild) {
+            itemStack.shrink(1);
+            user.getCooldowns().addCooldown(itemStack, 20);
         }
     }
 

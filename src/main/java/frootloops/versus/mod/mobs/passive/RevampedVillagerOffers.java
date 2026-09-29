@@ -7,29 +7,39 @@ import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.items_and_effects.CustomEquipment;
 import frootloops.versus.mod.items_and_effects.brewing.CustomPotions;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.BuyItemFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.EnchantBookFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.Factory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.ProcessItemFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellDyedArmorFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellEnchantedToolFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellItemFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellMapFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellPotionHoldingItemFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellSusStewFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.TypedWrapperFactory;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.provider.TradeRebalanceEnchantmentProviders;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.map.MapDecorationTypes;
-import net.minecraft.potion.Potions;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.registry.tag.StructureTags;
-import net.minecraft.util.Util;
-import net.minecraft.village.VillagerProfession;
-import net.minecraft.village.VillagerType;
-
 import java.util.Map;
+import net.minecraft.Util;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.enchantment.providers.TradeRebalanceEnchantmentProviders;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 
 import static frootloops.versus.mod.mobs.passive.RevampedTradeFactories.*;
 
 public class RevampedVillagerOffers {
 
-    public static final Map<RegistryKey<VillagerProfession>, Int2ObjectMap<Factory[]>> PROFESSION_TO_LEVELED_TRADE = Util.make(
-            Maps.<RegistryKey<VillagerProfession>, Int2ObjectMap<Factory[]>>newHashMap(),
+    public static final Map<ResourceKey<VillagerProfession>, Int2ObjectMap<Factory[]>> PROFESSION_TO_LEVELED_TRADE = Util.make(
+            Maps.<ResourceKey<VillagerProfession>, Int2ObjectMap<Factory[]>>newHashMap(),
             map -> {
 
                 map.put(VillagerProfession.BUTCHER, getButcherOffers());
@@ -51,7 +61,7 @@ public class RevampedVillagerOffers {
                                         2, new Factory[]{
                                                 new BuyItemFactory(Items.GLASS_PANE, 11, 10),
                                                 TypedWrapperFactory.of(
-                                                                new SellMapFactory(8, StructureTags.ON_TAIGA_VILLAGE_MAPS, "filled_map.village_taiga", MapDecorationTypes.VILLAGE_TAIGA, 12, 5),
+                                                                new SellMapFactory(8, StructureTags.ON_TAIGA_VILLAGE_MAPS, "filled_map.village_taiga", MapDecorationTypes.TAIGA_VILLAGE, 12, 5),
                                                                 VillagerType.SWAMP, VillagerType.SNOW, VillagerType.PLAINS
                                                         ),
                                                 TypedWrapperFactory.of(
@@ -59,15 +69,15 @@ public class RevampedVillagerOffers {
                                                                 VillagerType.TAIGA, VillagerType.SNOW, VillagerType.JUNGLE
                                                         ),
                                                 TypedWrapperFactory.of(
-                                                                new SellMapFactory(8, StructureTags.ON_SNOWY_VILLAGE_MAPS, "filled_map.village_snowy", MapDecorationTypes.VILLAGE_SNOWY, 12, 5),
+                                                                new SellMapFactory(8, StructureTags.ON_SNOWY_VILLAGE_MAPS, "filled_map.village_snowy", MapDecorationTypes.SNOWY_VILLAGE, 12, 5),
                                                                 VillagerType.TAIGA, VillagerType.SWAMP
                                                         ),
                                                 TypedWrapperFactory.of(
-                                                                new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapDecorationTypes.VILLAGE_SAVANNA, 12, 5),
+                                                                new SellMapFactory(8, StructureTags.ON_SAVANNA_VILLAGE_MAPS, "filled_map.village_savanna", MapDecorationTypes.SAVANNA_VILLAGE, 12, 5),
                                                                 VillagerType.PLAINS, VillagerType.JUNGLE, VillagerType.DESERT
                                                         ),
                                                 TypedWrapperFactory.of(
-                                                                new SellMapFactory(8, StructureTags.ON_PLAINS_VILLAGE_MAPS, "filled_map.village_plains", MapDecorationTypes.VILLAGE_PLAINS, 12, 5),
+                                                                new SellMapFactory(8, StructureTags.ON_PLAINS_VILLAGE_MAPS, "filled_map.village_plains", MapDecorationTypes.PLAINS_VILLAGE, 12, 5),
                                                                 VillagerType.TAIGA, VillagerType.SNOW, VillagerType.SAVANNA, VillagerType.DESERT
                                                         ),
                                                 TypedWrapperFactory.of(
@@ -75,14 +85,14 @@ public class RevampedVillagerOffers {
                                                                 VillagerType.SWAMP, VillagerType.SAVANNA, VillagerType.DESERT
                                                         ),
                                                 TypedWrapperFactory.of(
-                                                                new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapDecorationTypes.VILLAGE_DESERT, 12, 5),
+                                                                new SellMapFactory(8, StructureTags.ON_DESERT_VILLAGE_MAPS, "filled_map.village_desert", MapDecorationTypes.DESERT_VILLAGE, 12, 5),
                                                                 VillagerType.SAVANNA,
                                                                 VillagerType.JUNGLE
                                                         )
                                         },
                                         3, new Factory[]{
                                                 new BuyItemFactory(Items.COMPASS, 1, 20),
-                                                new SellMapFactory(13, StructureTags.ON_OCEAN_EXPLORER_MAPS, "filled_map.monument", MapDecorationTypes.MONUMENT, 12, 10),
+                                                new SellMapFactory(13, StructureTags.ON_OCEAN_EXPLORER_MAPS, "filled_map.monument", MapDecorationTypes.OCEAN_MONUMENT, 12, 10),
                                                 new SellMapFactory(12, StructureTags.ON_TRIAL_CHAMBERS_MAPS, "filled_map.trial_chambers", MapDecorationTypes.TRIAL_CHAMBERS, 12, 10)
                                         },
                                         4, new Factory[]{
@@ -105,7 +115,7 @@ public class RevampedVillagerOffers {
                                         },
                                         5, new Factory[]{
                                                 new SellItemFactory(Items.GLOBE_BANNER_PATTERN, 8, 1, 12, 30, 0.05F),
-                                                new SellMapFactory(14, StructureTags.ON_WOODLAND_EXPLORER_MAPS, "filled_map.mansion", MapDecorationTypes.MANSION, 12, 30)
+                                                new SellMapFactory(14, StructureTags.ON_WOODLAND_EXPLORER_MAPS, "filled_map.mansion", MapDecorationTypes.WOODLAND_MANSION, 12, 30)
                                         }
                                 )
                         )
@@ -263,11 +273,11 @@ public class RevampedVillagerOffers {
                                 new SellItemFactory(Items.PUMPKIN_PIE, 1, 8, 8)
                         },
                         4, new Factory[]{
-                                new SellSusStewFactory(StatusEffects.NIGHT_VISION, 100, 12),
-                                new SellSusStewFactory(StatusEffects.JUMP_BOOST, 160, 12), new SellSusStewFactory(StatusEffects.STRENGTH, 140, 12),
-                                new SellSusStewFactory(StatusEffects.REGENERATION, 120, 12), new SellSusStewFactory(StatusEffects.SLOW_FALLING, 280, 12),
-                                new SellSusStewFactory(StatusEffects.LEVITATION, 120, 12), new SellSusStewFactory(StatusEffects.RESISTANCE, 120, 12),
-                                new SellSusStewFactory(StatusEffects.SATURATION, 7, 12), new SellSusStewFactory(StatusEffects.SATURATION, 7, 12),
+                                new SellSusStewFactory(MobEffects.NIGHT_VISION, 100, 12),
+                                new SellSusStewFactory(MobEffects.JUMP_BOOST, 160, 12), new SellSusStewFactory(MobEffects.STRENGTH, 140, 12),
+                                new SellSusStewFactory(MobEffects.REGENERATION, 120, 12), new SellSusStewFactory(MobEffects.SLOW_FALLING, 280, 12),
+                                new SellSusStewFactory(MobEffects.LEVITATION, 120, 12), new SellSusStewFactory(MobEffects.RESISTANCE, 120, 12),
+                                new SellSusStewFactory(MobEffects.SATURATION, 7, 12), new SellSusStewFactory(MobEffects.SATURATION, 7, 12),
                                 new SellSusStewFactory(CustomStatusEffects.BUOYANCY, 280, 12), new SellSusStewFactory(CustomStatusEffects.SMALLNESS, 280, 12),
                         },
                         5, new Factory[]{
@@ -532,7 +542,7 @@ public class RevampedVillagerOffers {
                                         new SellItemFactory(Blocks.CHISELED_BOOKSHELF, 12, 2),
                                         new SellItemFactory(Blocks.CHISELED_BOOKSHELF, 14, 2),
                                         new EnchantBookFactory(1, EnchantmentTags.IN_ENCHANTING_TABLE),
-                                        new EnchantBookFactory(5, EnchantmentTags.MINING_EXCLUSIVE_SET),
+                                        new EnchantBookFactory(5, EnchantmentTags.MINING_EXCLUSIVE),
                                         createLibrarianTradeFactory(5)
                                 }
                         )
@@ -543,8 +553,8 @@ public class RevampedVillagerOffers {
                                         new BuyItemFactory(Items.LAPIS_LAZULI, 6, 4),
                                         new SellItemFactory(Items.LANTERN, 1, 8, 5),
                                         new SellItemFactory(Items.SOUL_LANTERN, 1, 6, 5),
-                                        new SellItemFactory(Items.COPPER_LANTERNS.weathered(), 1, 6, 5),
-                                        new SellItemFactory(Items.COPPER_LANTERNS.waxed(), 1, 6, 5),
+                                        new SellItemFactory(Items.COPPER_LANTERN.weathered(), 1, 6, 5),
+                                        new SellItemFactory(Items.COPPER_LANTERN.waxed(), 1, 6, 5),
                                         new SellItemFactory(Items.NAME_TAG, 6, 1, 12)
                                 }
                         )
@@ -571,7 +581,7 @@ public class RevampedVillagerOffers {
                         .put(5,
                                 new Factory[]{
                                         new EnchantBookFactory(20, EnchantmentTags.TRADEABLE),
-                                        new EnchantBookFactory(16, EnchantmentTags.BOW_EXCLUSIVE_SET), // Mending or infinity
+                                        new EnchantBookFactory(16, EnchantmentTags.BOW_EXCLUSIVE), // Mending or infinity
                                 }
                         )
                         .build()
@@ -601,47 +611,47 @@ public class RevampedVillagerOffers {
                                 new SellItemFactory(Items.SHIELD, 5, 1, 12, 1),
                                 new SellItemFactory(Items.BELL, 36, 1, 12, 5, 0.2F)},
                         4, new Factory[]{
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.DESERT_ARMORER_BOOTS_4), VillagerType.DESERT),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.DESERT_ARMORER_HELMET_4), VillagerType.DESERT),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_LEGGINGS, 11, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.DESERT_ARMORER_LEGGINGS_4), VillagerType.DESERT),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_CHESTPLATE, 13, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.DESERT_ARMORER_CHESTPLATE_4), VillagerType.DESERT),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.PLAINS_ARMORER_BOOTS_4), VillagerType.PLAINS),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.PLAINS_ARMORER_HELMET_4), VillagerType.PLAINS),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_LEGGINGS, 11, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.PLAINS_ARMORER_LEGGINGS_4), VillagerType.PLAINS),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_CHESTPLATE, 13, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.PLAINS_ARMORER_CHESTPLATE_4), VillagerType.PLAINS),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_BOOTS, 2, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SAVANNA_ARMORER_BOOTS_4), VillagerType.SAVANNA),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_HELMET, 3, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SAVANNA_ARMORER_HELMET_4), VillagerType.SAVANNA),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_LEGGINGS, 5, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SAVANNA_ARMORER_LEGGINGS_4), VillagerType.SAVANNA),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_CHESTPLATE, 7, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SAVANNA_ARMORER_CHESTPLATE_4), VillagerType.SAVANNA),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SNOW_ARMORER_BOOTS_4), VillagerType.SNOW),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SNOW_ARMORER_HELMET_4), VillagerType.SNOW),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.JUNGLE_ARMORER_BOOTS_4), VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.JUNGLE_ARMORER_HELMET_4), VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_LEGGINGS, 11, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.JUNGLE_ARMORER_LEGGINGS_4), VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_CHESTPLATE, 13, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.JUNGLE_ARMORER_CHESTPLATE_4), VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SWAMP_ARMORER_BOOTS_4), VillagerType.SWAMP),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SWAMP_ARMORER_HELMET_4), VillagerType.SWAMP),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_LEGGINGS, 11, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SWAMP_ARMORER_LEGGINGS_4), VillagerType.SWAMP),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_CHESTPLATE, 13, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.SWAMP_ARMORER_CHESTPLATE_4), VillagerType.SWAMP),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_BOOTS_4), VillagerType.DESERT),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_HELMET_4), VillagerType.DESERT),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_LEGGINGS, 11, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_LEGGINGS_4), VillagerType.DESERT),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_CHESTPLATE, 13, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_CHESTPLATE_4), VillagerType.DESERT),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_BOOTS_4), VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_HELMET_4), VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_LEGGINGS, 11, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_LEGGINGS_4), VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_CHESTPLATE, 13, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_CHESTPLATE_4), VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_BOOTS, 2, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_BOOTS_4), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_HELMET, 3, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_HELMET_4), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_LEGGINGS, 5, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_LEGGINGS_4), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_CHESTPLATE, 7, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_CHESTPLATE_4), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SNOW_ARMORER_BOOTS_4), VillagerType.SNOW),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.IRON_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SNOW_ARMORER_HELMET_4), VillagerType.SNOW),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_BOOTS_4), VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_HELMET_4), VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_LEGGINGS, 11, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_LEGGINGS_4), VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_CHESTPLATE, 13, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_CHESTPLATE_4), VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_BOOTS, 8, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_BOOTS_4), VillagerType.SWAMP),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_HELMET, 9, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_HELMET_4), VillagerType.SWAMP),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_LEGGINGS, 11, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_LEGGINGS_4), VillagerType.SWAMP),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_CHESTPLATE, 13, 1, 3, 6, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_CHESTPLATE_4), VillagerType.SWAMP),
                                 TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND_BOOTS, 1, 4, Items.DIAMOND_LEGGINGS, 1, 3, 6, 0.05F), VillagerType.TAIGA),
                                 TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND_LEGGINGS, 1, 4, Items.DIAMOND_CHESTPLATE, 1, 3, 6, 0.05F), VillagerType.TAIGA),
                                 TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND_HELMET, 1, 4, Items.DIAMOND_BOOTS, 1, 3, 6, 0.05F), VillagerType.TAIGA),
                                 TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND_CHESTPLATE, 1, 2, Items.DIAMOND_HELMET, 1, 3, 6, 0.05F), VillagerType.TAIGA)},
                         5, new Factory[]{
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 4, 16, Items.DIAMOND_CHESTPLATE, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.DESERT_ARMORER_CHESTPLATE_5), VillagerType.DESERT),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 16, Items.DIAMOND_LEGGINGS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.DESERT_ARMORER_LEGGINGS_5), VillagerType.DESERT),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 16, Items.DIAMOND_LEGGINGS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.PLAINS_ARMORER_LEGGINGS_5), VillagerType.PLAINS),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 2, 12, Items.DIAMOND_BOOTS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.PLAINS_ARMORER_BOOTS_5), VillagerType.PLAINS),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 2, 6, Items.DIAMOND_HELMET, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.SAVANNA_ARMORER_HELMET_5), VillagerType.SAVANNA),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 8, Items.DIAMOND_CHESTPLATE, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.SAVANNA_ARMORER_CHESTPLATE_5), VillagerType.SAVANNA),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 2, 12, Items.DIAMOND_BOOTS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.SNOW_ARMORER_BOOTS_5), VillagerType.SNOW),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 12, Items.DIAMOND_HELMET, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.SNOW_ARMORER_HELMET_5), VillagerType.SNOW),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_HELMET, 9, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.JUNGLE_ARMORER_HELMET_5), VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_BOOTS, 8, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.JUNGLE_ARMORER_BOOTS_5), VillagerType.JUNGLE),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_HELMET, 9, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.SWAMP_ARMORER_HELMET_5), VillagerType.SWAMP),
-                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_BOOTS, 8, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.SWAMP_ARMORER_BOOTS_5), VillagerType.SWAMP),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 4, 18, Items.DIAMOND_CHESTPLATE, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TAIGA_ARMORER_CHESTPLATE_5), VillagerType.TAIGA),
-                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 18, Items.DIAMOND_LEGGINGS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TAIGA_ARMORER_LEGGINGS_5), VillagerType.TAIGA),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 4, 16, Items.DIAMOND_CHESTPLATE, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_CHESTPLATE_5), VillagerType.DESERT),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 16, Items.DIAMOND_LEGGINGS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_LEGGINGS_5), VillagerType.DESERT),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 16, Items.DIAMOND_LEGGINGS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_LEGGINGS_5), VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 2, 12, Items.DIAMOND_BOOTS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_BOOTS_5), VillagerType.PLAINS),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 2, 6, Items.DIAMOND_HELMET, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_HELMET_5), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 8, Items.DIAMOND_CHESTPLATE, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_CHESTPLATE_5), VillagerType.SAVANNA),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 2, 12, Items.DIAMOND_BOOTS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SNOW_ARMORER_BOOTS_5), VillagerType.SNOW),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 12, Items.DIAMOND_HELMET, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SNOW_ARMORER_HELMET_5), VillagerType.SNOW),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_HELMET, 9, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_HELMET_5), VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_BOOTS, 8, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_BOOTS_5), VillagerType.JUNGLE),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_HELMET, 9, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_HELMET_5), VillagerType.SWAMP),
+                                TypedWrapperFactory.of(new SellItemFactory(Items.CHAINMAIL_BOOTS, 8, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_BOOTS_5), VillagerType.SWAMP),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 4, 18, Items.DIAMOND_CHESTPLATE, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_TAIGA_ARMORER_CHESTPLATE_5), VillagerType.TAIGA),
+                                TypedWrapperFactory.of(new ProcessItemFactory(Items.DIAMOND, 3, 18, Items.DIAMOND_LEGGINGS, 1, 3, 12, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_TAIGA_ARMORER_LEGGINGS_5), VillagerType.TAIGA),
                                 TypedWrapperFactory.of(new BuyItemFactory(Items.GOLD_BLOCK, 1, 12, 8, 5), VillagerType.TAIGA),
                                 TypedWrapperFactory.of(new BuyItemFactory(Items.IRON_BLOCK, 1, 12, 8, 4), VillagerType.DESERT, VillagerType.JUNGLE, VillagerType.PLAINS, VillagerType.SAVANNA, VillagerType.SNOW, VillagerType.SWAMP)}
                 ));

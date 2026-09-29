@@ -5,15 +5,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.minecraft.client.color.world.BiomeColors;
-import net.minecraft.client.render.BlockRenderLayer;
-import net.minecraft.world.biome.GrassColors;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 @Environment(EnvType.CLIENT)
 public class CustomBlocksClient {
 
     public static void onInitialize() {
-        BlockRenderLayerMap.putBlocks(BlockRenderLayer.CUTOUT,
+        BlockRenderLayerMap.putBlocks(ChunkSectionLayer.CUTOUT,
                 CustomBlocks.SMOLDERING_TORCH,
                 CustomBlocks.SMOLDERING_WALL_TORCH,
                 CustomBlocks.EXTINGUISHED_TORCH,

@@ -5,41 +5,48 @@ import com.google.common.collect.Lists;
 import frootloops.versus.mod.items_and_effects.brewing.CustomPotions;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.block.Block;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.DyedColorComponent;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.component.type.SuspiciousStewEffectsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.enchantment.provider.EnchantmentProvider;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.*;
-import net.minecraft.item.map.MapDecorationType;
-import net.minecraft.item.map.MapState;
-import net.minecraft.potion.Potion;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.village.*;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.npc.VillagerDataHolder;
+import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.enchantment.providers.EnchantmentProvider;
+import net.minecraft.world.item.trading.ItemCost;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.saveddata.maps.MapDecorationType;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -52,28 +59,28 @@ public class RevampedTradeFactories {
 
     public static Factory createLibrarianTradeFactory(int experience) {
         return new TypedWrapperFactory(
-                ImmutableMap.<RegistryKey<VillagerType>, Factory>builder()
-                        .put(VillagerType.DESERT, new EnchantBookFactory(experience, EnchantmentTags.DESERT_COMMON_TRADE))
-                        .put(VillagerType.JUNGLE, new EnchantBookFactory(experience, EnchantmentTags.JUNGLE_COMMON_TRADE))
-                        .put(VillagerType.PLAINS, new EnchantBookFactory(experience, EnchantmentTags.PLAINS_COMMON_TRADE))
-                        .put(VillagerType.SAVANNA, new EnchantBookFactory(experience, EnchantmentTags.SAVANNA_COMMON_TRADE))
-                        .put(VillagerType.SNOW, new EnchantBookFactory(experience, EnchantmentTags.SNOW_COMMON_TRADE))
-                        .put(VillagerType.SWAMP, new EnchantBookFactory(experience, EnchantmentTags.SWAMP_COMMON_TRADE))
-                        .put(VillagerType.TAIGA, new EnchantBookFactory(experience, EnchantmentTags.TAIGA_COMMON_TRADE))
+                ImmutableMap.<ResourceKey<VillagerType>, Factory>builder()
+                        .put(VillagerType.DESERT, new EnchantBookFactory(experience, EnchantmentTags.TRADES_DESERT_COMMON))
+                        .put(VillagerType.JUNGLE, new EnchantBookFactory(experience, EnchantmentTags.TRADES_JUNGLE_COMMON))
+                        .put(VillagerType.PLAINS, new EnchantBookFactory(experience, EnchantmentTags.TRADES_PLAINS_COMMON))
+                        .put(VillagerType.SAVANNA, new EnchantBookFactory(experience, EnchantmentTags.TRADES_SAVANNA_COMMON))
+                        .put(VillagerType.SNOW, new EnchantBookFactory(experience, EnchantmentTags.TRADES_SNOW_COMMON))
+                        .put(VillagerType.SWAMP, new EnchantBookFactory(experience, EnchantmentTags.TRADES_SWAMP_COMMON))
+                        .put(VillagerType.TAIGA, new EnchantBookFactory(experience, EnchantmentTags.TRADES_TAIGA_COMMON))
                         .build()
         );
     }
 
     public static Factory createMasterLibrarianTradeFactory() {
         return new TypedWrapperFactory(
-                ImmutableMap.<RegistryKey<VillagerType>, Factory>builder()
-                        .put(VillagerType.DESERT, new EnchantBookFactory(30, 3, 3, EnchantmentTags.DESERT_SPECIAL_TRADE))
-                        .put(VillagerType.JUNGLE, new EnchantBookFactory(30, 2, 2, EnchantmentTags.JUNGLE_SPECIAL_TRADE))
-                        .put(VillagerType.PLAINS, new EnchantBookFactory(30, 3, 3, EnchantmentTags.PLAINS_SPECIAL_TRADE))
-                        .put(VillagerType.SAVANNA, new EnchantBookFactory(30, 3, 3, EnchantmentTags.SAVANNA_SPECIAL_TRADE))
-                        .put(VillagerType.SNOW, new EnchantBookFactory(30, EnchantmentTags.SNOW_SPECIAL_TRADE))
-                        .put(VillagerType.SWAMP, new EnchantBookFactory(30, EnchantmentTags.SWAMP_SPECIAL_TRADE))
-                        .put(VillagerType.TAIGA, new EnchantBookFactory(30, 2, 2, EnchantmentTags.TAIGA_SPECIAL_TRADE))
+                ImmutableMap.<ResourceKey<VillagerType>, Factory>builder()
+                        .put(VillagerType.DESERT, new EnchantBookFactory(30, 3, 3, EnchantmentTags.TRADES_DESERT_SPECIAL))
+                        .put(VillagerType.JUNGLE, new EnchantBookFactory(30, 2, 2, EnchantmentTags.TRADES_JUNGLE_SPECIAL))
+                        .put(VillagerType.PLAINS, new EnchantBookFactory(30, 3, 3, EnchantmentTags.TRADES_PLAINS_SPECIAL))
+                        .put(VillagerType.SAVANNA, new EnchantBookFactory(30, 3, 3, EnchantmentTags.TRADES_SAVANNA_SPECIAL))
+                        .put(VillagerType.SNOW, new EnchantBookFactory(30, EnchantmentTags.TRADES_SNOW_SPECIAL))
+                        .put(VillagerType.SWAMP, new EnchantBookFactory(30, EnchantmentTags.TRADES_SWAMP_SPECIAL))
+                        .put(VillagerType.TAIGA, new EnchantBookFactory(30, 2, 2, EnchantmentTags.TRADES_TAIGA_SPECIAL))
                         .build()
         );
     }
@@ -82,39 +89,39 @@ public class RevampedTradeFactories {
         return new Int2ObjectOpenHashMap<>(map);
     }
 
-    public static TradedItem createPotion(RegistryEntry<Potion> potion) {
-        return new TradedItem(Items.POTION).withComponents(builder -> builder.add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(potion)));
+    public static ItemCost createPotion(Holder<Potion> potion) {
+        return new ItemCost(Items.POTION).withComponents(builder -> builder.expect(DataComponents.POTION_CONTENTS, new PotionContents(potion)));
     }
 
-    public static ItemStack createPotionStack(RegistryEntry<Potion> potion) {
-        return PotionContentsComponent.createStack(Items.POTION, potion);
+    public static ItemStack createPotionStack(Holder<Potion> potion) {
+        return PotionContents.createItemStack(Items.POTION, potion);
     }
 
-    public static ItemStack createSplashPotionStack(RegistryEntry<Potion> potion) {
-        return PotionContentsComponent.createStack(Items.SPLASH_POTION, potion);
+    public static ItemStack createSplashPotionStack(Holder<Potion> potion) {
+        return PotionContents.createItemStack(Items.SPLASH_POTION, potion);
     }
 
     public static class BuyItemFactory implements Factory {
-        private final TradedItem stack;
+        private final ItemCost stack;
         private final int maxUses;
         private final int experience;
         private final int price;
         private final float multiplier;
 
-        public BuyItemFactory(ItemConvertible item, int count, int experience) {
+        public BuyItemFactory(ItemLike item, int count, int experience) {
             this(item, count, 12, experience, 1);
         }
 
 
-        public BuyItemFactory(ItemConvertible item, int count, int maxUses, int experience) {
+        public BuyItemFactory(ItemLike item, int count, int maxUses, int experience) {
             this(item, count, maxUses, experience, 1);
         }
 
-        public BuyItemFactory(ItemConvertible item, int count, int maxUses, int experience, int price) {
-            this(new TradedItem(item.asItem(), count), maxUses, experience, price);
+        public BuyItemFactory(ItemLike item, int count, int maxUses, int experience, int price) {
+            this(new ItemCost(item.asItem(), count), maxUses, experience, price);
         }
 
-        public BuyItemFactory(TradedItem stack, int maxUses, int experience, int price) {
+        public BuyItemFactory(ItemCost stack, int maxUses, int experience, int price) {
             this.stack = stack;
             this.maxUses = maxUses;
             this.experience = experience;
@@ -123,8 +130,8 @@ public class RevampedTradeFactories {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
-            return new TradeOffer(this.stack, new ItemStack(Items.EMERALD, this.price), this.maxUses, this.experience, this.multiplier);
+        public MerchantOffer create(Entity entity, RandomSource random) {
+            return new MerchantOffer(this.stack, new ItemStack(Items.EMERALD, this.price), this.maxUses, this.experience, this.multiplier);
         }
     }
 
@@ -133,7 +140,7 @@ public class RevampedTradeFactories {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public MerchantOffer create(Entity entity, RandomSource random) {
             return null;
         }
     }
@@ -156,22 +163,22 @@ public class RevampedTradeFactories {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
-            Optional<RegistryEntry<Enchantment>> optional = entity.getEntityWorld()
-                    .getRegistryManager()
-                    .getOrThrow(RegistryKeys.ENCHANTMENT)
-                    .getRandomEntry(this.possibleEnchantments, random);
+        public MerchantOffer create(Entity entity, RandomSource random) {
+            Optional<Holder<Enchantment>> optional = entity.level()
+                    .registryAccess()
+                    .lookupOrThrow(Registries.ENCHANTMENT)
+                    .getRandomElementOf(this.possibleEnchantments, random);
             int l;
             ItemStack itemStack;
             if (!optional.isEmpty()) {
-                RegistryEntry<Enchantment> registryEntry = (RegistryEntry<Enchantment>)optional.get();
+                Holder<Enchantment> registryEntry = (Holder<Enchantment>)optional.get();
                 Enchantment enchantment = registryEntry.value();
                 int i = Math.max(enchantment.getMinLevel(), this.minLevel);
                 int j = Math.min(enchantment.getMaxLevel(), this.maxLevel);
-                int k = MathHelper.nextInt(random, i, j);
-                itemStack = EnchantmentHelper.getEnchantedBookWith(new EnchantmentLevelEntry(registryEntry, k));
+                int k = Mth.nextInt(random, i, j);
+                itemStack = EnchantmentHelper.createBook(new EnchantmentInstance(registryEntry, k));
                 l = 2 + random.nextInt(5 + k * 10) + 3 * k;
-                if (registryEntry.isIn(EnchantmentTags.DOUBLE_TRADE_PRICE)) {
+                if (registryEntry.is(EnchantmentTags.DOUBLE_TRADE_PRICE)) {
                     l *= 2;
                 }
 
@@ -183,7 +190,7 @@ public class RevampedTradeFactories {
                 itemStack = new ItemStack(Items.BOOK);
             }
 
-            return new TradeOffer(new TradedItem(Items.EMERALD, l), Optional.of(new TradedItem(Items.BOOK)), itemStack, 12, this.experience, 0.2F);
+            return new MerchantOffer(new ItemCost(Items.EMERALD, l), Optional.of(new ItemCost(Items.BOOK)), itemStack, 12, this.experience, 0.2F);
         }
     }
 
@@ -197,48 +204,48 @@ public class RevampedTradeFactories {
          * @return a new trade offer, or {@code null} if none should be created
          */
         @Nullable
-        TradeOffer create(Entity entity, Random random);
+        MerchantOffer create(Entity entity, RandomSource random);
     }
 
     public static class ProcessItemFactory implements Factory {
-        private final TradedItem toBeProcessed;
+        private final ItemCost toBeProcessed;
         private final int price;
         private final ItemStack processed;
         private final int maxUses;
         private final int experience;
         private final float multiplier;
-        private final Optional<RegistryKey<EnchantmentProvider>> enchantmentProviderKey;
+        private final Optional<ResourceKey<EnchantmentProvider>> enchantmentProviderKey;
 
-        public ProcessItemFactory(ItemConvertible item, int count, int price, Item processed, int processedCount, int maxUses, int experience, float multiplier) {
+        public ProcessItemFactory(ItemLike item, int count, int price, Item processed, int processedCount, int maxUses, int experience, float multiplier) {
             this(item, count, price, new ItemStack(processed), processedCount, maxUses, experience, multiplier);
         }
 
-        private ProcessItemFactory(ItemConvertible item, int count, int price, ItemStack processed, int processedCount, int maxUses, int experience, float multiplier) {
-            this(new TradedItem(item, count), price, processed.copyWithCount(processedCount), maxUses, experience, multiplier, Optional.empty());
+        private ProcessItemFactory(ItemLike item, int count, int price, ItemStack processed, int processedCount, int maxUses, int experience, float multiplier) {
+            this(new ItemCost(item, count), price, processed.copyWithCount(processedCount), maxUses, experience, multiplier, Optional.empty());
         }
 
         ProcessItemFactory(
-                ItemConvertible item,
+                ItemLike item,
                 int count,
                 int price,
-                ItemConvertible processed,
+                ItemLike processed,
                 int processedCount,
                 int maxUses,
                 int experience,
                 float multiplier,
-                RegistryKey<EnchantmentProvider> enchantmentProviderKey
+                ResourceKey<EnchantmentProvider> enchantmentProviderKey
         ) {
-            this(new TradedItem(item, count), price, new ItemStack(processed, processedCount), maxUses, experience, multiplier, Optional.of(enchantmentProviderKey));
+            this(new ItemCost(item, count), price, new ItemStack(processed, processedCount), maxUses, experience, multiplier, Optional.of(enchantmentProviderKey));
         }
 
         public ProcessItemFactory(
-                TradedItem toBeProcessed,
+                ItemCost toBeProcessed,
                 int count,
                 ItemStack processed,
                 int maxUses,
                 int processedCount,
                 float multiplier,
-                Optional<RegistryKey<EnchantmentProvider>> enchantmentProviderKey
+                Optional<ResourceKey<EnchantmentProvider>> enchantmentProviderKey
         ) {
             this.toBeProcessed = toBeProcessed;
             this.price = count;
@@ -251,15 +258,15 @@ public class RevampedTradeFactories {
 
         @Nullable
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public MerchantOffer create(Entity entity, RandomSource random) {
             ItemStack itemStack = this.processed.copy();
-            World world = entity.getEntityWorld();
+            Level world = entity.level();
             this.enchantmentProviderKey
                     .ifPresent(
-                            key -> EnchantmentHelper.applyEnchantmentProvider(itemStack, world.getRegistryManager(), key, world.getLocalDifficulty(entity.getBlockPos()), random)
+                            key -> EnchantmentHelper.enchantItemFromProvider(itemStack, world.registryAccess(), key, world.getCurrentDifficultyAt(entity.blockPosition()), random)
                     );
-            return new TradeOffer(
-                    new TradedItem(Items.EMERALD, this.price), Optional.of(this.toBeProcessed), itemStack, 0, this.maxUses, this.experience, this.multiplier
+            return new MerchantOffer(
+                    new ItemCost(Items.EMERALD, this.price), Optional.of(this.toBeProcessed), itemStack, 0, this.maxUses, this.experience, this.multiplier
             );
         }
     }
@@ -282,10 +289,10 @@ public class RevampedTradeFactories {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
-            TradedItem tradedItem = new TradedItem(Items.EMERALD, this.price);
+        public MerchantOffer create(Entity entity, RandomSource random) {
+            ItemCost tradedItem = new ItemCost(Items.EMERALD, this.price);
             ItemStack itemStack = new ItemStack(this.sell);
-            if (itemStack.isIn(ItemTags.DYEABLE)) {
+            if (itemStack.is(ItemTags.DYEABLE)) {
                 List<DyeItem> list = Lists.<DyeItem>newArrayList();
                 list.add(getDye(random));
                 if (random.nextFloat() > 0.7F) {
@@ -296,14 +303,14 @@ public class RevampedTradeFactories {
                     list.add(getDye(random));
                 }
 
-                itemStack = DyedColorComponent.setColor(itemStack, list);
+                itemStack = DyedItemColor.applyDyes(itemStack, list);
             }
 
-            return new TradeOffer(tradedItem, itemStack, this.maxUses, this.experience, 0.2F);
+            return new MerchantOffer(tradedItem, itemStack, this.maxUses, this.experience, 0.2F);
         }
 
-        private static DyeItem getDye(Random random) {
-            return DyeItem.byColor(DyeColor.byIndex(random.nextInt(16)));
+        private static DyeItem getDye(RandomSource random) {
+            return DyeItem.byColor(DyeColor.byId(random.nextInt(16)));
         }
     }
 
@@ -327,14 +334,14 @@ public class RevampedTradeFactories {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public MerchantOffer create(Entity entity, RandomSource random) {
             int enchantLevels = 2 + random.nextInt(this.experience);
-            DynamicRegistryManager dynamicRegistryManager = entity.getEntityWorld().getRegistryManager();
-            Optional<RegistryEntryList.Named<Enchantment>> optional = dynamicRegistryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOptional(EnchantmentTags.ON_TRADED_EQUIPMENT);
-            ItemStack itemStack = EnchantmentHelper.enchant(random, new ItemStack(this.tool.getItem()), enchantLevels, dynamicRegistryManager, optional);
+            RegistryAccess dynamicRegistryManager = entity.level().registryAccess();
+            Optional<HolderSet.Named<Enchantment>> optional = dynamicRegistryManager.lookupOrThrow(Registries.ENCHANTMENT).get(EnchantmentTags.ON_TRADED_EQUIPMENT);
+            ItemStack itemStack = EnchantmentHelper.enchantItem(random, new ItemStack(this.tool.getItem()), enchantLevels, dynamicRegistryManager, optional);
             int j = Math.min(this.basePrice + enchantLevels, 64);
-            TradedItem tradedItem = new TradedItem(Items.EMERALD, j);
-            return new TradeOffer(tradedItem, itemStack, this.maxUses, this.experience, this.multiplier);
+            ItemCost tradedItem = new ItemCost(Items.EMERALD, j);
+            return new MerchantOffer(tradedItem, itemStack, this.maxUses, this.experience, this.multiplier);
         }
     }
 
@@ -344,7 +351,7 @@ public class RevampedTradeFactories {
         private final int maxUses;
         private final int experience;
         private final float multiplier;
-        private final Optional<RegistryKey<EnchantmentProvider>> enchantmentProviderKey;
+        private final Optional<ResourceKey<EnchantmentProvider>> enchantmentProviderKey;
 
         public SellItemFactory(Block block, int price, int count, int maxUses, int experience) {
             this(new ItemStack(block), price, count, maxUses, experience);
@@ -375,7 +382,7 @@ public class RevampedTradeFactories {
         }
 
         public SellItemFactory(
-                Item item, int price, int count, int maxUses, int experience, float multiplier, RegistryKey<EnchantmentProvider> enchantmentProviderKey
+                Item item, int price, int count, int maxUses, int experience, float multiplier, ResourceKey<EnchantmentProvider> enchantmentProviderKey
         ) {
             this(new ItemStack(item), price, count, maxUses, experience, multiplier, Optional.of(enchantmentProviderKey));
         }
@@ -385,7 +392,7 @@ public class RevampedTradeFactories {
         }
 
         public SellItemFactory(
-                ItemStack sell, int price, int count, int maxUses, int experience, float multiplier, Optional<RegistryKey<EnchantmentProvider>> enchantmentProviderKey
+                ItemStack sell, int price, int count, int maxUses, int experience, float multiplier, Optional<ResourceKey<EnchantmentProvider>> enchantmentProviderKey
         ) {
             this.sell = sell;
             this.price = price;
@@ -397,14 +404,14 @@ public class RevampedTradeFactories {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public MerchantOffer create(Entity entity, RandomSource random) {
             ItemStack itemStack = this.sell.copy();
-            World world = entity.getEntityWorld();
+            Level world = entity.level();
             this.enchantmentProviderKey
                     .ifPresent(
-                            key -> EnchantmentHelper.applyEnchantmentProvider(itemStack, world.getRegistryManager(), key, world.getLocalDifficulty(entity.getBlockPos()), random)
+                            key -> EnchantmentHelper.enchantItemFromProvider(itemStack, world.registryAccess(), key, world.getCurrentDifficultyAt(entity.blockPosition()), random)
                     );
-            return new TradeOffer(new TradedItem(Items.EMERALD, this.price), itemStack, this.maxUses, this.experience, this.multiplier);
+            return new MerchantOffer(new ItemCost(Items.EMERALD, this.price), itemStack, this.maxUses, this.experience, this.multiplier);
         }
     }
 
@@ -412,11 +419,11 @@ public class RevampedTradeFactories {
         private final int price;
         private final TagKey<Structure> structure;
         private final String nameKey;
-        private final RegistryEntry<MapDecorationType> decoration;
+        private final Holder<MapDecorationType> decoration;
         private final int maxUses;
         private final int experience;
 
-        public SellMapFactory(int price, TagKey<Structure> structure, String nameKey, RegistryEntry<MapDecorationType> decoration, int maxUses, int experience) {
+        public SellMapFactory(int price, TagKey<Structure> structure, String nameKey, Holder<MapDecorationType> decoration, int maxUses, int experience) {
             this.price = price;
             this.structure = structure;
             this.nameKey = nameKey;
@@ -427,16 +434,16 @@ public class RevampedTradeFactories {
 
         @Nullable
         @Override
-        public TradeOffer create(Entity entity, Random random) {
-            if (entity.getEntityWorld() instanceof ServerWorld serverWorld) {
-                BlockPos blockPos = serverWorld.locateStructure(this.structure, entity.getBlockPos(), 100, true);
+        public MerchantOffer create(Entity entity, RandomSource random) {
+            if (entity.level() instanceof ServerLevel serverWorld) {
+                BlockPos blockPos = serverWorld.findNearestMapStructure(this.structure, entity.blockPosition(), 100, true);
                 if (blockPos != null) {
-                    ItemStack itemStack = FilledMapItem.createMap(serverWorld, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
-                    FilledMapItem.fillExplorationMap(serverWorld, itemStack);
-                    MapState.addDecorationsNbt(itemStack, blockPos, "+", this.decoration);
-                    itemStack.set(DataComponentTypes.ITEM_NAME, Text.translatable(this.nameKey));
-                    return new TradeOffer(
-                            new TradedItem(Items.EMERALD, this.price), Optional.of(new TradedItem(Items.COMPASS)), itemStack, this.maxUses, this.experience, 0.2F
+                    ItemStack itemStack = MapItem.create(serverWorld, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
+                    MapItem.renderBiomePreviewMap(serverWorld, itemStack);
+                    MapItemSavedData.addTargetDecoration(itemStack, blockPos, "+", this.decoration);
+                    itemStack.set(DataComponents.ITEM_NAME, Component.translatable(this.nameKey));
+                    return new MerchantOffer(
+                            new ItemCost(Items.EMERALD, this.price), Optional.of(new ItemCost(Items.COMPASS)), itemStack, this.maxUses, this.experience, 0.2F
                     );
                 } else {
                     return null;
@@ -469,30 +476,30 @@ public class RevampedTradeFactories {
         }
 
         @Override
-        public TradeOffer create(Entity entity, Random random) {
-            TradedItem tradedItem = new TradedItem(Items.EMERALD, this.price);
-            List<RegistryEntry<Potion>> list = Registries.POTION.streamEntries()
-                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && entity.getEntityWorld().getBrewingRecipeRegistry().isBrewable(entry) && !entry.value().getEffects().getFirst().getEffectType().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
+        public MerchantOffer create(Entity entity, RandomSource random) {
+            ItemCost tradedItem = new ItemCost(Items.EMERALD, this.price);
+            List<Holder<Potion>> list = BuiltInRegistries.POTION.listElements()
+                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && entity.level().potionBrewing().isBrewablePotion(entry) && !entry.value().getEffects().getFirst().getEffect().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
                     .collect(Collectors.toList());
-            RegistryEntry<Potion> registryEntry = Util.getRandom(list, random);
+            Holder<Potion> registryEntry = Util.getRandom(list, random);
             ItemStack itemStack = new ItemStack(this.sell.getItem(), this.sellCount);
-            itemStack.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(registryEntry));
-            return new TradeOffer(
-                    tradedItem, Optional.of(new TradedItem(this.secondBuy, this.secondCount)), itemStack, this.maxUses, this.experience, this.priceMultiplier
+            itemStack.set(DataComponents.POTION_CONTENTS, new PotionContents(registryEntry));
+            return new MerchantOffer(
+                    tradedItem, Optional.of(new ItemCost(this.secondBuy, this.secondCount)), itemStack, this.maxUses, this.experience, this.priceMultiplier
             );
         }
     }
 
     public static class SellSusStewFactory implements Factory {
-        private final SuspiciousStewEffectsComponent stewEffects;
+        private final SuspiciousStewEffects stewEffects;
         private final int experience;
         private final float multiplier;
 
-        public SellSusStewFactory(RegistryEntry<StatusEffect> effect, int duration, int experience) {
-            this(new SuspiciousStewEffectsComponent(List.of(new SuspiciousStewEffectsComponent.StewEffect(effect, duration))), experience, 0.05F);
+        public SellSusStewFactory(Holder<MobEffect> effect, int duration, int experience) {
+            this(new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(effect, duration))), experience, 0.05F);
         }
 
-        public SellSusStewFactory(SuspiciousStewEffectsComponent stewEffects, int experience, float multiplier) {
+        public SellSusStewFactory(SuspiciousStewEffects stewEffects, int experience, float multiplier) {
             this.stewEffects = stewEffects;
             this.experience = experience;
             this.multiplier = multiplier;
@@ -500,21 +507,21 @@ public class RevampedTradeFactories {
 
         @Nullable
         @Override
-        public TradeOffer create(Entity entity, Random random) {
+        public MerchantOffer create(Entity entity, RandomSource random) {
             ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
-            itemStack.set(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS, this.stewEffects);
-            return new TradeOffer(new TradedItem(Items.EMERALD), itemStack, 12, this.experience, this.multiplier);
+            itemStack.set(DataComponents.SUSPICIOUS_STEW_EFFECTS, this.stewEffects);
+            return new MerchantOffer(new ItemCost(Items.EMERALD), itemStack, 12, this.experience, this.multiplier);
         }
     }
 
     public static class TypeAwareBuyForOneEmeraldFactory implements Factory {
-        private final Map<RegistryKey<VillagerType>, Item> map;
+        private final Map<ResourceKey<VillagerType>, Item> map;
         private final int count;
         private final int maxUses;
         private final int experience;
 
-        public TypeAwareBuyForOneEmeraldFactory(int count, int maxUses, int experience, Map<RegistryKey<VillagerType>, Item> map) {
-            Registries.VILLAGER_TYPE.getKeys().stream().filter(typeKey -> !map.containsKey(typeKey)).findAny().ifPresent(typeKey -> {
+        public TypeAwareBuyForOneEmeraldFactory(int count, int maxUses, int experience, Map<ResourceKey<VillagerType>, Item> map) {
+            BuiltInRegistries.VILLAGER_TYPE.registryKeySet().stream().filter(typeKey -> !map.containsKey(typeKey)).findAny().ifPresent(typeKey -> {
                 throw new IllegalStateException("Missing trade for villager type: " + typeKey);
             });
             this.map = map;
@@ -525,14 +532,14 @@ public class RevampedTradeFactories {
 
         @Nullable
         @Override
-        public TradeOffer create(Entity entity, Random random) {
-            if (entity instanceof VillagerDataContainer villagerDataContainer) {
-                RegistryKey<VillagerType> registryKey = (RegistryKey<VillagerType>)villagerDataContainer.getVillagerData().type().getKey().orElse(null);
+        public MerchantOffer create(Entity entity, RandomSource random) {
+            if (entity instanceof VillagerDataHolder villagerDataContainer) {
+                ResourceKey<VillagerType> registryKey = (ResourceKey<VillagerType>)villagerDataContainer.getVillagerData().type().unwrapKey().orElse(null);
                 if (registryKey == null) {
                     return null;
                 } else {
-                    TradedItem tradedItem = new TradedItem((ItemConvertible)this.map.get(registryKey), this.count);
-                    return new TradeOffer(tradedItem, new ItemStack(Items.EMERALD), this.maxUses, this.experience, 0.05F);
+                    ItemCost tradedItem = new ItemCost((ItemLike)this.map.get(registryKey), this.count);
+                    return new MerchantOffer(tradedItem, new ItemStack(Items.EMERALD), this.maxUses, this.experience, 0.05F);
                 }
             } else {
                 return null;
@@ -540,19 +547,19 @@ public class RevampedTradeFactories {
         }
     }
 
-    public record TypedWrapperFactory(Map<RegistryKey<VillagerType>, Factory> typeToFactory) implements Factory {
+    public record TypedWrapperFactory(Map<ResourceKey<VillagerType>, Factory> typeToFactory) implements Factory {
         @SafeVarargs
-        public static TypedWrapperFactory of(Factory factory, RegistryKey<VillagerType>... types) {
+        public static TypedWrapperFactory of(Factory factory, ResourceKey<VillagerType>... types) {
             return new TypedWrapperFactory(
-                    (Map<RegistryKey<VillagerType>, Factory>) Arrays.stream(types).collect(Collectors.toMap(registryKey -> registryKey, registryKey -> factory))
+                    (Map<ResourceKey<VillagerType>, Factory>) Arrays.stream(types).collect(Collectors.toMap(registryKey -> registryKey, registryKey -> factory))
             );
         }
 
         @Nullable
         @Override
-        public TradeOffer create(Entity entity, Random random) {
-            if (entity instanceof VillagerDataContainer villagerDataContainer) {
-                RegistryKey<VillagerType> registryKey = (RegistryKey<VillagerType>)villagerDataContainer.getVillagerData().type().getKey().orElse(null);
+        public MerchantOffer create(Entity entity, RandomSource random) {
+            if (entity instanceof VillagerDataHolder villagerDataContainer) {
+                ResourceKey<VillagerType> registryKey = (ResourceKey<VillagerType>)villagerDataContainer.getVillagerData().type().unwrapKey().orElse(null);
                 if (registryKey == null) {
                     return null;
                 } else {

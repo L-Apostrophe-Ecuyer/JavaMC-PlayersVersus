@@ -3,25 +3,35 @@ package frootloops.versus.mixin.environment.blocks;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mixin.LivingEntityAccessor;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
-import net.minecraft.block.*;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.*;
-import net.minecraft.entity.mob.SpiderEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.FlyingAnimal;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,116 +40,116 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.HashMap;
 
 @Mixin(LeavesBlock.class)
-public abstract class LeavesMixin extends Block implements Waterloggable {
+public abstract class LeavesMixin extends Block implements SimpleWaterloggedBlock {
 
-    public LeavesMixin(Settings settings) {
+    public LeavesMixin(Properties settings) {
         super(settings);
     }
     private static final double FALL_DISTANCE_REDUCTION = 3.0;
     private static final double MIN_VELOCITY_TO_BE_SOLID = -0.4;
-    private static Vec3d NORMAL_MULT = new Vec3d(0.6, 0.8, 0.6);
-    private static Vec3d SNEAKING_MULT = new Vec3d(0.8, 0.8, 0.8);
-    private static Vec3d JUMPING_MULT = new Vec3d(0.9, 1.0, 0.9);
+    private static Vec3 NORMAL_MULT = new Vec3(0.6, 0.8, 0.6);
+    private static Vec3 SNEAKING_MULT = new Vec3(0.8, 0.8, 0.8);
+    private static Vec3 JUMPING_MULT = new Vec3(0.9, 1.0, 0.9);
 
-    private static final VoxelShape COLLISION_SHAPE_INSIDE = Block.createCuboidShape(4.0, 4.0, 4.0, 12.0, 12.0, 12.0);
+    private static final VoxelShape COLLISION_SHAPE_INSIDE = Block.box(4.0, 4.0, 4.0, 12.0, 12.0, 12.0);
 
-    protected VoxelShape getInsideCollisionShape(BlockState state, BlockView world, BlockPos pos, Entity entity) {
-        if(entity instanceof LivingEntity && entity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) return VoxelShapes.empty();
+    protected VoxelShape getEntityInsideCollisionShape(BlockState state, BlockGetter world, BlockPos pos, Entity entity) {
+        if(entity instanceof LivingEntity && entity.getDeltaMovement().y < MIN_VELOCITY_TO_BE_SOLID) return Shapes.empty();
         return COLLISION_SHAPE_INSIDE;
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if (context instanceof EntityShapeContext && ((EntityShapeContext) context).getEntity() instanceof LivingEntity livingEntity) {
-            if(livingEntity.isPlayer() && livingEntity.isGliding() && livingEntity.getVelocity().lengthSquared() > 0.5) {
-                livingEntity.fallDistance = -(livingEntity.getVelocity().getY() + 0.1) * 8.0;
-                livingEntity.setVelocity(livingEntity.getVelocity().multiply(0.95));
-                return VoxelShapes.empty();
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        if (context instanceof EntityCollisionContext && ((EntityCollisionContext) context).getEntity() instanceof LivingEntity livingEntity) {
+            if(livingEntity.isAlwaysTicking() && livingEntity.isFallFlying() && livingEntity.getDeltaMovement().lengthSqr() > 0.5) {
+                livingEntity.fallDistance = -(livingEntity.getDeltaMovement().y() + 0.1) * 8.0;
+                livingEntity.setDeltaMovement(livingEntity.getDeltaMovement().scale(0.95));
+                return Shapes.empty();
             }
-            if(livingEntity.hasPassengers() || livingEntity.hasVehicle() || livingEntity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) {
-                livingEntity.fallDistance = -(livingEntity.getVelocity().getY() + 0.1) * 8.0;
-                livingEntity.setVelocity(livingEntity.getVelocity().multiply(1.0, 0.95, 1.0));
-                return VoxelShapes.empty();
+            if(livingEntity.isVehicle() || livingEntity.isPassenger() || livingEntity.getDeltaMovement().y < MIN_VELOCITY_TO_BE_SOLID) {
+                livingEntity.fallDistance = -(livingEntity.getDeltaMovement().y() + 0.1) * 8.0;
+                livingEntity.setDeltaMovement(livingEntity.getDeltaMovement().multiply(1.0, 0.95, 1.0));
+                return Shapes.empty();
             }
-            if(livingEntity instanceof SpiderEntity || livingEntity instanceof Flutterer || livingEntity instanceof AnimalEntity) return VoxelShapes.fullCube();
-            if(!context.isAbove(VoxelShapes.fullCube(), pos, true)) return VoxelShapes.empty();
+            if(livingEntity instanceof Spider || livingEntity instanceof FlyingAnimal || livingEntity instanceof Animal) return Shapes.block();
+            if(!context.isAbove(Shapes.block(), pos, true)) return Shapes.empty();
         }
-        return VoxelShapes.fullCube();
+        return Shapes.block();
     }
 
     @Override
-    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
+    public void fallOn(Level world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
         if(entity instanceof FallingBlockEntity fallingBlock) {
-            if(fallingBlock.getBlockState().getSoundGroup() != BlockSoundGroup.ANVIL) return;
-            Block.dropStacks(state, world, pos);
+            if(fallingBlock.getBlockState().getSoundType() != SoundType.ANVIL) return;
+            Block.dropResources(state, world, pos);
             world.removeBlock(pos, false);
         }
         else if(entity instanceof LivingEntity livingEntity) {
-            fallDistance = Math.max(fallDistance, -(livingEntity.getVelocity().getY() + 0.1) * 8.0);
-            if(livingEntity.isPlayer() && livingEntity.isGliding() && livingEntity.getVelocity().lengthSquared() > 0.5) {
+            fallDistance = Math.max(fallDistance, -(livingEntity.getDeltaMovement().y() + 0.1) * 8.0);
+            if(livingEntity.isAlwaysTicking() && livingEntity.isFallFlying() && livingEntity.getDeltaMovement().lengthSqr() > 0.5) {
                 livingEntity.fallDistance = fallDistance;
-                livingEntity.setVelocity(livingEntity.getVelocity().multiply(0.95));
+                livingEntity.setDeltaMovement(livingEntity.getDeltaMovement().scale(0.95));
             }
-            else if(livingEntity.getVelocity().y < MIN_VELOCITY_TO_BE_SOLID) {
+            else if(livingEntity.getDeltaMovement().y < MIN_VELOCITY_TO_BE_SOLID) {
                 livingEntity.fallDistance = fallDistance;
-                livingEntity.setVelocity(livingEntity.getVelocity().x, -0.15, livingEntity.getVelocity().z);
+                livingEntity.setDeltaMovement(livingEntity.getDeltaMovement().x, -0.15, livingEntity.getDeltaMovement().z);
             }
-            else if(!state.getFluidState().isEmpty() && EnchantRegistryHelper.hasEnchantment(livingEntity.getEquippedStack(EquipmentSlot.FEET), Enchantments.FROST_WALKER)) {
-                world.breakBlock(pos, true);
-                world.setBlockState(pos, Blocks.FROSTED_ICE.getDefaultState());
-                world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(entity, Blocks.FROSTED_ICE.getDefaultState()));
-                super.onLandedUpon(world, state, pos, livingEntity, fallDistance);
+            else if(!state.getFluidState().isEmpty() && EnchantRegistryHelper.hasEnchantment(livingEntity.getItemBySlot(EquipmentSlot.FEET), Enchantments.FROST_WALKER)) {
+                world.destroyBlock(pos, true);
+                world.setBlockAndUpdate(pos, Blocks.FROSTED_ICE.defaultBlockState());
+                world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(entity, Blocks.FROSTED_ICE.defaultBlockState()));
+                super.fallOn(world, state, pos, livingEntity, fallDistance);
             }
             else {
                 fallDistance = fallDistance / FALL_DISTANCE_REDUCTION;
-                super.onLandedUpon(world, state, pos, livingEntity, fallDistance);
+                super.fallOn(world, state, pos, livingEntity, fallDistance);
             }
         }
     }
 
     @Override
-    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bl) {
-        if (entity.hasVehicle() || entity.isSpectator()) return;
-        if (!entity.getBlockPos().equals(pos) && !entity.getBlockPos().up().equals(pos)) return;
+    protected void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier handler, boolean bl) {
+        if (entity.isPassenger() || entity.isSpectator()) return;
+        if (!entity.blockPosition().equals(pos) && !entity.blockPosition().above().equals(pos)) return;
         if (entity instanceof LivingEntity livingEntity) {
-            if(livingEntity.isPlayer() && livingEntity.isGliding()) return;
+            if(livingEntity.isAlwaysTicking() && livingEntity.isFallFlying()) return;
             else if(((LivingEntityAccessor)livingEntity).isJumping()) {
-                Vec3d v = livingEntity.getVelocity();
-                if(livingEntity.isOnGround() || (v.y < -0.07 && v.y > -0.08))
-                    livingEntity.setVelocity(v.x * 0.9, 0.33, v.z * 0.9);
+                Vec3 v = livingEntity.getDeltaMovement();
+                if(livingEntity.onGround() || (v.y < -0.07 && v.y > -0.08))
+                    livingEntity.setDeltaMovement(v.x * 0.9, 0.33, v.z * 0.9);
             }
             else {
-                if (livingEntity.isSneaking()) entity.slowMovement(state, SNEAKING_MULT);
-                else entity.slowMovement(state, NORMAL_MULT);
+                if (livingEntity.isShiftKeyDown()) entity.makeStuckInBlock(state, SNEAKING_MULT);
+                else entity.makeStuckInBlock(state, NORMAL_MULT);
             }
         }
     }
 
-    @Redirect(method = "getStateForNeighborUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/LeavesBlock;getDistanceFromLog(Lnet/minecraft/block/BlockState;)I"))
+    @Redirect(method = "updateShape", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LeavesBlock;getDistanceAt(Lnet/minecraft/world/level/block/state/BlockState;)I"))
     private int getDistanceFromLog_OnUpdate(BlockState state) {
         boolean hasMatchingLog = LEAVES_WITH_MATCHING_LOG.getOrDefault(this, false);
         if(hasMatchingLog && LOG_MAP.get(state.getBlock()) == this) return 0;
-        else if(!hasMatchingLog && state.isIn(BlockTags.LOGS)) return 0;
-        else if(state.getBlock() == this) return state.get(LeavesBlock.DISTANCE);
+        else if(!hasMatchingLog && state.is(BlockTags.LOGS)) return 0;
+        else if(state.getBlock() == this) return state.getValue(LeavesBlock.DISTANCE);
         return 7;
     }
 
-    @Redirect(method = "getPlacementState", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/LeavesBlock;updateDistanceFromLogs(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-    private BlockState updateDistanceFromLogs_OnPlace(BlockState state, WorldAccess world, BlockPos pos) {
-        if(state.get(LeavesBlock.PERSISTENT)) return state;
-        return state.with(LeavesBlock.DISTANCE, getUpdatedDistance(state, world, pos));
+    @Redirect(method = "getStateForPlacement", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LeavesBlock;updateDistance(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"))
+    private BlockState updateDistanceFromLogs_OnPlace(BlockState state, LevelAccessor world, BlockPos pos) {
+        if(state.getValue(LeavesBlock.PERSISTENT)) return state;
+        return state.setValue(LeavesBlock.DISTANCE, getUpdatedDistance(state, world, pos));
     }
 
-    private int getUpdatedDistance(BlockState state, WorldAccess world, BlockPos pos) {
+    private int getUpdatedDistance(BlockState state, LevelAccessor world, BlockPos pos) {
         int i = 7;
         boolean hasMatchingLog = LEAVES_WITH_MATCHING_LOG.getOrDefault(this, false);
-        BlockPos.Mutable mutable = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {
-            mutable.set(pos, direction);
+            mutable.setWithOffset(pos, direction);
             BlockState neighborState = world.getBlockState(mutable);
             if(hasMatchingLog && LOG_MAP.get(neighborState.getBlock()) == this) i = 1;
-            else if(!hasMatchingLog && neighborState.isIn(BlockTags.LOGS)) i = 1;
-            else if(neighborState.isOf(state.getBlock())){
+            else if(!hasMatchingLog && neighborState.is(BlockTags.LOGS)) i = 1;
+            else if(neighborState.is(state.getBlock())){
                 int d = getDistanceFromLog_OnUpdate(world.getBlockState(mutable));
                 i = Math.min(i, d + 1);
             }
@@ -150,12 +160,12 @@ public abstract class LeavesMixin extends Block implements Waterloggable {
     }
 
     @Overwrite
-    public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        if(!(Boolean)state.get(LeavesBlock.PERSISTENT)) {
-            int currentDistance = state.get(LeavesBlock.DISTANCE);
+    public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        if(!(Boolean)state.getValue(LeavesBlock.PERSISTENT)) {
+            int currentDistance = state.getValue(LeavesBlock.DISTANCE);
             int newDistance = getUpdatedDistance(state, world, pos);
             if(currentDistance == 1 && newDistance > 1) newDistance = 7;
-            if(currentDistance != newDistance) world.setBlockState(pos, state.with(LeavesBlock.DISTANCE, newDistance), Block.NOTIFY_ALL);
+            if(currentDistance != newDistance) world.setBlock(pos, state.setValue(LeavesBlock.DISTANCE, newDistance), Block.UPDATE_ALL);
         }
     }
 

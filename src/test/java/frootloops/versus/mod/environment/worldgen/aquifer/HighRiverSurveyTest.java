@@ -4,16 +4,16 @@ import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.PvWorldgenConstants;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
-import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
+import net.minecraft.world.level.levelgen.RandomState;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -63,10 +63,10 @@ class HighRiverSurveyTest {
      */
     private record Shape(String name, double halfWidth, double widening, int bed, double top, double fade, boolean edgeToEdge) {
         double activity(double depth80) {
-            double upper = MathHelper.clamp((this.top + this.fade - depth80) / this.fade, 0.0, 1.0);
+            double upper = Mth.clamp((this.top + this.fade - depth80) / this.fade, 0.0, 1.0);
             if (this.edgeToEdge) return upper;
             if (depth80 <= 0.0) return 0.0;
-            return MathHelper.clamp(depth80 * 100.0, 0.0, 1.0) * upper;
+            return Mth.clamp(depth80 * 100.0, 0.0, 1.0) * upper;
         }
 
         double halfWidth(int y, double activity) {
@@ -88,13 +88,13 @@ class HighRiverSurveyTest {
 
     @Test
     void survey() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
         DensityFunction river = WorldgenTestData.seeded(config, "players-versus:overworld/high_river");
-        DensityFunction depth = config.getNoiseRouter().depth();
+        DensityFunction depth = config.router().depth();
         // the terrain without the high river, which generation now cuts
-        PvFinalDensity withRiver = (PvFinalDensity) PvWorldgen.unwrap(config.getNoiseRouter().finalDensity());
+        PvFinalDensity withRiver = (PvFinalDensity) PvWorldgen.unwrap(config.router().finalDensity());
         DensityFunction finalDensity = new PvFinalDensity(withRiver.terrain(), withRiver.noodleToggle(), withRiver.noodleThickness(),
-                withRiver.noodleRidgeA(), withRiver.noodleRidgeB(), withRiver.entrances(), DensityFunctionTypes.constant(Double.POSITIVE_INFINITY));
+                withRiver.noodleRidgeA(), withRiver.noodleRidgeB(), withRiver.entrances(), DensityFunctions.constant(Double.POSITIVE_INFINITY));
         List<int[]> origins = hillyAreas(depth);
         Stats[] stats = new Stats[SHAPES.size()];
         for (int s = 0; s < stats.length; s++) stats[s] = new Stats();
@@ -107,17 +107,17 @@ class HighRiverSurveyTest {
             double[] corners = new double[cornersPerSide * cornersPerSide];
             for (int cx = 0; cx < cornersPerSide; cx++) {
                 for (int cz = 0; cz < cornersPerSide; cz++) {
-                    corners[cx * cornersPerSide + cz] = depth.sample(new DensityFunction.UnblendedNoisePos(originX + cx * 4, RIVER_Y, originZ + cz * 4));
+                    corners[cx * cornersPerSide + cz] = depth.compute(new DensityFunction.SinglePointContext(originX + cx * 4, RIVER_Y, originZ + cz * 4));
                 }
             }
             for (int x = 0; x < AREA; x++) {
                 for (int z = 0; z < AREA; z++) {
-                    noise[x * AREA + z] = river.sample(new DensityFunction.UnblendedNoisePos(originX + x, 0, originZ + z));
+                    noise[x * AREA + z] = river.compute(new DensityFunction.SinglePointContext(originX + x, 0, originZ + z));
                     int cx = x >> 2, cz = z >> 2;
                     double fx = (x & 3) / 4.0, fz = (z & 3) / 4.0;
                     double d00 = corners[cx * cornersPerSide + cz], d10 = corners[(cx + 1) * cornersPerSide + cz];
                     double d01 = corners[cx * cornersPerSide + cz + 1], d11 = corners[(cx + 1) * cornersPerSide + cz + 1];
-                    depth80[x * AREA + z] = MathHelper.lerp(fz, MathHelper.lerp(fx, d00, d10), MathHelper.lerp(fx, d01, d11));
+                    depth80[x * AREA + z] = Mth.lerp(fz, Mth.lerp(fx, d00, d10), Mth.lerp(fx, d01, d11));
                     if (x > 0) {
                         gradient += Math.abs(noise[x * AREA + z] - noise[(x - 1) * AREA + z]);
                         gradients++;
@@ -153,7 +153,7 @@ class HighRiverSurveyTest {
             int score = 0;
             for (int dx = 0; dx < AREA; dx += 16) {
                 for (int dz = 0; dz < AREA; dz += 16) {
-                    double d = depth.sample(new DensityFunction.UnblendedNoisePos(x + dx, RIVER_Y, z + dz));
+                    double d = depth.compute(new DensityFunction.SinglePointContext(x + dx, RIVER_Y, z + dz));
                     if (d > 0.0 && d < 0.12) score++;
                 }
             }
@@ -190,7 +190,7 @@ class HighRiverSurveyTest {
             if (this.columns[i] == null) {
                 byte[] column = new byte[HEIGHT];
                 for (int y = MIN_Y; y < MAX_Y; y++) {
-                    double density = this.finalDensity.sample(new DensityFunction.UnblendedNoisePos(this.originX + x, y, this.originZ + z));
+                    double density = this.finalDensity.compute(new DensityFunction.SinglePointContext(this.originX + x, y, this.originZ + z));
                     column[y - MIN_Y] = density > 0.0 ? SOLID : AIR;
                 }
                 this.columns[i] = column;

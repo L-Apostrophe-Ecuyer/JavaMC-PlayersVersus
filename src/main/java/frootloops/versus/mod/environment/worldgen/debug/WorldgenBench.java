@@ -11,34 +11,33 @@ import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerChunkManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.structure.StructureStart;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.biome.source.BiomeCoords;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.ProtoChunk;
-import net.minecraft.world.chunk.WrapperProtoChunk;
-import net.minecraft.world.gen.carver.CarvingMask;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
-import net.minecraft.world.gen.structure.Structure;
-
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.CarvingMask;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -135,34 +134,34 @@ public final class WorldgenBench {
             try {
                 int radius = Math.clamp(Integer.parseInt(radiusProperty.trim()), 1, MAX_RADIUS);
                 ChunkPos center = parseCenter(System.getProperty("pv.worldgen.bench.center", "100,100"));
-                Path out = run(server.getOverworld(), center, radius, VersusMod.MOD_LOGGER::info);
+                Path out = run(server.overworld(), center, radius, VersusMod.MOD_LOGGER::info);
                 VersusMod.MOD_LOGGER.info("[pvwg] bench written to {}", out.toAbsolutePath());
             } catch (Throwable throwable) {
                 VersusMod.MOD_LOGGER.error("[pvwg] bench failed", throwable);
             } finally {
-                server.stop(false);
+                server.halt(false);
             }
         });
     }
 
-    static int runCommand(ServerCommandSource source, int radius) {
-        ChunkPos center = new ChunkPos(BlockPos.ofFloored(source.getPosition()));
+    static int runCommand(CommandSourceStack source, int radius) {
+        ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
         try {
-            Path out = run(source.getWorld(), center, radius, message -> source.sendFeedback(() -> Text.literal(message), false));
-            source.sendFeedback(() -> Text.literal("[pvwg] bench written to " + out.toAbsolutePath()), false);
+            Path out = run(source.getLevel(), center, radius, message -> source.sendSuccess(() -> Component.literal(message), false));
+            source.sendSuccess(() -> Component.literal("[pvwg] bench written to " + out.toAbsolutePath()), false);
             return 1;
         } catch (IOException exception) {
-            source.sendError(Text.literal("[pvwg] bench failed: " + exception.getMessage()));
+            source.sendFailure(Component.literal("[pvwg] bench failed: " + exception.getMessage()));
             return 0;
         }
     }
 
-    public static Path run(ServerWorld world, ChunkPos center, int radius, Consumer<String> log) throws IOException {
-        ServerChunkManager chunkManager = world.getChunkManager();
-        String settings = describeGenerator(chunkManager.getChunkGenerator());
-        String generator = encodeGenerator(world, chunkManager.getChunkGenerator());
-        String gate = chunkManager.getChunkGenerator() instanceof NoiseChunkGenerator noiseGenerator
-                ? "players_versus_aquifer_and_ore_veins=" + PvWorldgen.isPvGenerator(noiseGenerator.getSettings().value())
+    public static Path run(ServerLevel world, ChunkPos center, int radius, Consumer<String> log) throws IOException {
+        ServerChunkCache chunkManager = world.getChunkSource();
+        String settings = describeGenerator(chunkManager.getGenerator());
+        String generator = encodeGenerator(world, chunkManager.getGenerator());
+        String gate = chunkManager.getGenerator() instanceof NoiseBasedChunkGenerator noiseGenerator
+                ? "players_versus_aquifer_and_ore_veins=" + PvWorldgen.isPvGenerator(noiseGenerator.generatorSettings().value())
                 : "not a noise generator";
         int minChunkX = center.x - radius;
         int minChunkZ = center.z - radius;
@@ -182,9 +181,9 @@ public final class WorldgenBench {
                 }
             }
             long elapsed = System.nanoTime() - start;
-            stageNanos.put(status.getId(), elapsed);
+            stageNanos.put(status.getName(), elapsed);
             log.accept(String.format(Locale.ROOT, "[pvwg] %-9s %9.1f ms  %7.2f ms/chunk",
-                    status.getId(), elapsed / 1e6, elapsed / 1e6 / chunkCount));
+                    status.getName(), elapsed / 1e6, elapsed / 1e6 / chunkCount));
 
             if (status == ChunkStatus.NOISE) {
                 for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
@@ -203,7 +202,7 @@ public final class WorldgenBench {
             if (status == ChunkStatus.CARVERS) {
                 for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
                     for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
-                        Chunk chunk = chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.CARVERS, true);
+                        ChunkAccess chunk = chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.CARVERS, true);
                         region.capture(chunk);
                         region.hashBlocks("carvers", chunk);
                     }
@@ -232,32 +231,32 @@ public final class WorldgenBench {
      * built it, against vanilla's own evaluation of the same vanilla-type tree and against the Java kernel, at random
      * positions over the region, all three exact (no cell interpolation). They should agree to the bit.
      */
-    private static List<String> compareCompiledFinalDensity(ServerWorld world, int minX, int minZ, int size) {
-        if (!DensityCompilerCompat.ACTIVE || !(world.getChunkManager().getChunkGenerator() instanceof NoiseChunkGenerator generator)
-                || !(PvWorldgen.unwrap(generator.getSettings().value().noiseRouter().finalDensity()) instanceof PvFinalDensity raw)) {
+    private static List<String> compareCompiledFinalDensity(ServerLevel world, int minX, int minZ, int size) {
+        if (!DensityCompilerCompat.ACTIVE || !(world.getChunkSource().getGenerator() instanceof NoiseBasedChunkGenerator generator)
+                || !(PvWorldgen.unwrap(generator.generatorSettings().value().noiseRouter().finalDensity()) instanceof PvFinalDensity raw)) {
             return List.of();
         }
-        NoiseConfig config = world.getChunkManager().getNoiseConfig();
-        DensityFunction.DensityFunctionVisitor seeding = AquiferInputs.seeding(config);
-        PvFinalDensity kernel = new PvFinalDensity(raw.terrain().apply(seeding), raw.noodleToggle().apply(seeding),
-                raw.noodleThickness().apply(seeding), raw.noodleRidgeA().apply(seeding), raw.noodleRidgeB().apply(seeding),
-                raw.entrances().apply(seeding), raw.highRiver().apply(seeding));
+        RandomState config = world.getChunkSource().randomState();
+        DensityFunction.Visitor seeding = AquiferInputs.seeding(config);
+        PvFinalDensity kernel = new PvFinalDensity(raw.terrain().mapAll(seeding), raw.noodleToggle().mapAll(seeding),
+                raw.noodleThickness().mapAll(seeding), raw.noodleRidgeA().mapAll(seeding), raw.noodleRidgeB().mapAll(seeding),
+                raw.entrances().mapAll(seeding), raw.highRiver().mapAll(seeding));
         DensityFunction interpreted = kernel.asVanillaTypes();
-        DensityFunction compiled = config.getNoiseRouter().finalDensity();
+        DensityFunction compiled = config.router().finalDensity();
         java.util.Random random = new java.util.Random(world.getSeed());
         int points = 20000, compiledDiffers = 0, interpretedDiffers = 0;
         double largest = 0;
         int[] byLayer = new int[24];
         List<String> examples = new ArrayList<>();
         for (int i = 0; i < points; i++) {
-            int x = minX + random.nextInt(size), y = world.getBottomY() + random.nextInt(world.getHeight()), z = minZ + random.nextInt(size);
-            DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
-            double java = kernel.sample(pos), vanilla = interpreted.sample(pos), fast = compiled.sample(pos);
+            int x = minX + random.nextInt(size), y = world.getMinY() + random.nextInt(world.getHeight()), z = minZ + random.nextInt(size);
+            DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(x, y, z);
+            double java = kernel.compute(pos), vanilla = interpreted.compute(pos), fast = compiled.compute(pos);
             if (Double.doubleToLongBits(vanilla) != Double.doubleToLongBits(java)) interpretedDiffers++;
             if (Double.doubleToLongBits(fast) != Double.doubleToLongBits(vanilla)) {
                 compiledDiffers++;
                 largest = Math.max(largest, Math.abs(fast - vanilla));
-                byLayer[Math.clamp((y - world.getBottomY()) >> 4, 0, byLayer.length - 1)]++;
+                byLayer[Math.clamp((y - world.getMinY()) >> 4, 0, byLayer.length - 1)]++;
                 if (examples.size() < 12) {
                     examples.add(String.format(Locale.ROOT, "c2me_check differs at %d,%d,%d: compiled %s, vanilla %s, java %s", x, y, z,
                             fast, vanilla, java));
@@ -267,7 +266,7 @@ public final class WorldgenBench {
         List<String> lines = new ArrayList<>();
         lines.add(String.format(Locale.ROOT, "c2me_check final density at %d random points: compiled differs from vanilla's evaluation at %d"
                 + " (largest difference %s), vanilla's from the Java kernel at %d", points, compiledDiffers, largest, interpretedDiffers));
-        StringBuilder layers = new StringBuilder("c2me_check differences by 16-block layer from y " + world.getBottomY() + ":");
+        StringBuilder layers = new StringBuilder("c2me_check differences by 16-block layer from y " + world.getMinY() + ":");
         for (int count : byLayer) layers.append(' ').append(count);
         lines.add(layers.toString());
         lines.addAll(examples);
@@ -275,14 +274,14 @@ public final class WorldgenBench {
     }
 
     /** The generator, encoded the way level.dat stores it. */
-    static String encodeGenerator(ServerWorld world, ChunkGenerator generator) {
-        return ChunkGenerator.CODEC.encodeStart(RegistryOps.of(JsonOps.INSTANCE, world.getRegistryManager()), generator)
+    static String encodeGenerator(ServerLevel world, ChunkGenerator generator) {
+        return ChunkGenerator.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, world.registryAccess()), generator)
                 .result().map(JsonElement::toString).orElse("unencodable " + generator.getClass().getName());
     }
 
     static String describeGenerator(ChunkGenerator generator) {
-        if (generator instanceof NoiseChunkGenerator noiseGenerator) {
-            return noiseGenerator.getSettings().getKey().map(key -> key.getValue().toString()).orElse("inline-settings");
+        if (generator instanceof NoiseBasedChunkGenerator noiseGenerator) {
+            return noiseGenerator.generatorSettings().unwrapKey().map(key -> key.location().toString()).orElse("inline-settings");
         }
         return generator.getClass().getSimpleName();
     }
@@ -328,12 +327,12 @@ public final class WorldgenBench {
         private final Registry<Structure> structures;
         private final List<String> structureStarts = new ArrayList<>();
 
-        Region(ServerWorld world, int minX, int minZ, int size) {
+        Region(ServerLevel world, int minX, int minZ, int size) {
             this.minX = minX;
             this.minZ = minZ;
             this.size = size;
-            this.bottomY = world.getBottomY();
-            this.topY = world.getBottomY() + world.getHeight() - 1;
+            this.bottomY = world.getMinY();
+            this.topY = world.getMinY() + world.getHeight() - 1;
             this.seaLevel = world.getSeaLevel();
             int columns = size * size;
             this.surfaceY = new int[columns];
@@ -345,7 +344,7 @@ public final class WorldgenBench {
             for (int i = 0; i < SLICE_YS.length; i++) this.slices[i] = new byte[columns];
             this.basinWater = new BitSet(columns * (BASIN_SEAM_MAX_Y - BASIN_SEAM_MIN_Y));
             this.stoneBeforeCarvers = new BitSet(columns * (CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y));
-            this.structures = world.getRegistryManager().getOrThrow(RegistryKeys.STRUCTURE);
+            this.structures = world.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         }
 
         private int chunksPerSide() {
@@ -357,17 +356,17 @@ public final class WorldgenBench {
         }
 
         /** FNV-1a over the raw ids of every block of each 16-block section, for {@link #appendHashes}. */
-        void hashBlocks(String status, Chunk chunk) {
+        void hashBlocks(String status, ChunkAccess chunk) {
             long[][] byChunk = this.sectionHashes.computeIfAbsent(status, key -> new long[chunksPerSide() * chunksPerSide()][]);
-            ChunkSection[] sections = chunk.getSectionArray();
+            LevelChunkSection[] sections = chunk.getSections();
             long[] hashes = new long[sections.length];
             for (int i = 0; i < sections.length; i++) {
-                ChunkSection section = sections[i];
+                LevelChunkSection section = sections[i];
                 long hash = 0xcbf29ce484222325L;
                 for (int y = 0; y < 16; y++) {
                     for (int z = 0; z < 16; z++) {
                         for (int x = 0; x < 16; x++) {
-                            hash = (hash ^ Block.getRawIdFromState(section.getBlockState(x, y, z))) * 0x100000001b3L;
+                            hash = (hash ^ Block.getId(section.getBlockState(x, y, z))) * 0x100000001b3L;
                         }
                     }
                 }
@@ -381,17 +380,17 @@ public final class WorldgenBench {
         }
 
         /** Remembers where stone was before the carvers ran, to tell stone the carvers placed from stone they skipped. */
-        void captureBeforeCarvers(Chunk chunk) {
+        void captureBeforeCarvers(ChunkAccess chunk) {
             ChunkPos chunkPos = chunk.getPos();
-            BlockPos.Mutable pos = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             int layers = CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y;
             for (int localX = 0; localX < 16; localX++) {
                 for (int localZ = 0; localZ < 16; localZ++) {
-                    int x = chunkPos.getStartX() + localX;
-                    int z = chunkPos.getStartZ() + localZ;
+                    int x = chunkPos.getMinBlockX() + localX;
+                    int z = chunkPos.getMinBlockZ() + localZ;
                     int column = column(x, z);
                     for (int y = CARVER_BAND_MIN_Y; y < CARVER_BAND_MAX_Y; y++) {
-                        if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.STONE)) {
+                        if (chunk.getBlockState(pos.set(x, y, z)).is(Blocks.STONE)) {
                             this.stoneBeforeCarvers.set(column * layers + (y - CARVER_BAND_MIN_Y));
                         }
                     }
@@ -399,22 +398,22 @@ public final class WorldgenBench {
             }
         }
 
-        void capture(Chunk chunk) {
+        void capture(ChunkAccess chunk) {
             ChunkPos chunkPos = chunk.getPos();
             // A WrapperProtoChunk wraps a chunk that is already full: its carving mask and post-processing lists are gone.
-            ProtoChunk proto = chunk instanceof ProtoChunk protoChunk && !(chunk instanceof WrapperProtoChunk) ? protoChunk : null;
+            ProtoChunk proto = chunk instanceof ProtoChunk protoChunk && !(chunk instanceof ImposterProtoChunk) ? protoChunk : null;
             CarvingMask carvingMask = proto != null ? proto.getCarvingMask() : null;
-            BlockPos.Mutable pos = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             for (int localX = 0; localX < 16; localX++) {
                 for (int localZ = 0; localZ < 16; localZ++) {
-                    int x = chunkPos.getStartX() + localX;
-                    int z = chunkPos.getStartZ() + localZ;
+                    int x = chunkPos.getMinBlockX() + localX;
+                    int z = chunkPos.getMinBlockZ() + localZ;
                     int column = column(x, z);
 
                     int surface = this.topY;
                     while (surface >= this.bottomY && chunk.getBlockState(pos.set(x, surface, z)).isAir()) surface--;
                     int floor = surface;
-                    while (floor >= this.bottomY && chunk.getBlockState(pos.set(x, floor, z)).isOf(Blocks.WATER)) floor--;
+                    while (floor >= this.bottomY && chunk.getBlockState(pos.set(x, floor, z)).is(Blocks.WATER)) floor--;
                     this.surfaceY[column] = surface;
                     this.floorY[column] = floor;
                     this.surfaceColor[column] = surface >= this.bottomY ? baseColor(chunk.getBlockState(pos.set(x, floor, z))) : 0;
@@ -428,19 +427,19 @@ public final class WorldgenBench {
                         this.slices[i][column] = y < this.bottomY || y > this.topY ? AIR : classify(chunk.getBlockState(pos.set(x, y, z)));
                     }
                     for (int y = BASIN_SEAM_MIN_Y; y < BASIN_SEAM_MAX_Y; y++) {
-                        if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.WATER)) {
+                        if (chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) {
                             this.basinWater.set(column * (BASIN_SEAM_MAX_Y - BASIN_SEAM_MIN_Y) + (y - BASIN_SEAM_MIN_Y));
                         }
                     }
                     for (int y = WATER_CEILING_Y; y <= surface; y++) {
-                        if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.WATER)) this.waterAtOrAboveCeiling++;
+                        if (chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) this.waterAtOrAboveCeiling++;
                     }
                     if (carvingMask != null) {
                         int layers = CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y;
                         for (int y = CARVER_BAND_MIN_Y; y < CARVER_BAND_MAX_Y; y++) {
                             if (!carvingMask.get(localX, y, localZ)) continue;
                             this.carvedInBand++;
-                            if (chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.STONE)) {
+                            if (chunk.getBlockState(pos.set(x, y, z)).is(Blocks.STONE)) {
                                 if (this.stoneBeforeCarvers.get(column * layers + (y - CARVER_BAND_MIN_Y))) this.carverSkippedStone++;
                                 else this.carverPlacedStone++;
                             }
@@ -451,25 +450,25 @@ public final class WorldgenBench {
             BitSet ticking = proto != null ? countQueuedFluidTicks(proto) : new BitSet();
             countLeaks(chunk, carvingMask, ticking);
             countHighRiver(chunk);
-            for (Map.Entry<Structure, StructureStart> entry : chunk.getStructureStarts().entrySet()) {
+            for (Map.Entry<Structure, StructureStart> entry : chunk.getAllStarts().entrySet()) {
                 StructureStart start = entry.getValue();
-                if (!start.hasChildren()) continue;
-                BlockBox box = start.getBoundingBox();
+                if (!start.isValid()) continue;
+                BoundingBox box = start.getBoundingBox();
                 this.structureStarts.add(String.format(Locale.ROOT, "structure %s start chunk %d,%d box %d,%d,%d..%d,%d,%d",
-                        this.structures.getId(entry.getKey()), start.getPos().x, start.getPos().z, box.getMinX(), box.getMinY(),
-                        box.getMinZ(), box.getMaxX(), box.getMaxY(), box.getMaxZ()));
+                        this.structures.getKey(entry.getKey()), start.getChunkPos().x, start.getChunkPos().z, box.minX(), box.minY(),
+                        box.minZ(), box.maxX(), box.maxY(), box.maxZ()));
             }
         }
 
         /** The high river's water and where it can flow, inside the chunk ({@link #riverSurfaceWater} and the rest). */
-        private void countHighRiver(Chunk chunk) {
+        private void countHighRiver(ChunkAccess chunk) {
             ChunkPos chunkPos = chunk.getPos();
-            BlockPos.Mutable pos = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             for (int localX = 0; localX < 16; localX++) {
                 for (int localZ = 0; localZ < 16; localZ++) {
-                    int x = chunkPos.getStartX() + localX, z = chunkPos.getStartZ() + localZ;
+                    int x = chunkPos.getMinBlockX() + localX, z = chunkPos.getMinBlockZ() + localZ;
                     for (int y = PvHighRiver.MIN_Y; y <= HIGH_RIVER_Y; y++) {
-                        if (!chunk.getBlockState(pos.set(x, y, z)).isOf(Blocks.WATER)) continue;
+                        if (!chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) continue;
                         boolean surface = y == HIGH_RIVER_Y;
                         if (surface) this.riverSurfaceWater++;
                         else this.riverBedWater++;
@@ -477,7 +476,7 @@ public final class WorldgenBench {
                         for (int[] offset : SIDES_AND_BELOW) {
                             int nx = localX + offset[0], nz = localZ + offset[2];
                             if (nx < 0 || nx > 15 || nz < 0 || nz > 15) continue;
-                            if (!chunk.getBlockState(pos.set(chunkPos.getStartX() + nx, y + offset[1], chunkPos.getStartZ() + nz)).isAir()) continue;
+                            if (!chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + nx, y + offset[1], chunkPos.getMinBlockZ() + nz)).isAir()) continue;
                             if (!surface) this.riverBedBesideAir++;
                             else if (offset[1] < 0) this.riverSurfaceOverAir++;
                             else {
@@ -495,28 +494,28 @@ public final class WorldgenBench {
          * Water blocks by height, and those with air beside or below them, inside the chunk: the water spills there once
          * it's updated, or right away if it has a fluid tick queued ({@code ticking}, by {@link #localIndex}).
          */
-        private void countLeaks(Chunk chunk, CarvingMask carvingMask, BitSet ticking) {
+        private void countLeaks(ChunkAccess chunk, CarvingMask carvingMask, BitSet ticking) {
             ChunkPos chunkPos = chunk.getPos();
-            BlockPos.Mutable pos = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             for (int localX = 0; localX < 16; localX++) {
                 for (int localZ = 0; localZ < 16; localZ++) {
                     for (int y = this.bottomY; y < LEAK_MIN_Y; y++) {
-                        if (chunk.getBlockState(pos.set(chunkPos.getStartX() + localX, y, chunkPos.getStartZ() + localZ)).isOf(Blocks.WATER)) {
+                        if (chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + localX, y, chunkPos.getMinBlockZ() + localZ)).is(Blocks.WATER)) {
                             this.waterBelowSeaBand++;
                         }
                     }
                     for (int y = LEAK_MIN_Y; y < LEAK_MAX_Y; y++) {
-                        BlockState state = chunk.getBlockState(pos.set(chunkPos.getStartX() + localX, y, chunkPos.getStartZ() + localZ));
-                        if (!state.isOf(Blocks.WATER)) continue;
+                        BlockState state = chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + localX, y, chunkPos.getMinBlockZ() + localZ));
+                        if (!state.is(Blocks.WATER)) continue;
                         int waterBand = 0;
                         while (y >= WATER_BAND_TOPS[waterBand]) waterBand++;
                         this.waterByBand[waterBand]++;
-                        if (!state.getFluidState().isStill()) continue;
+                        if (!state.getFluidState().isSource()) continue;
                         boolean waterCarved = carvingMask != null && carvingMask.get(localX, y, localZ), leaks = false;
                         for (int[] offset : SIDES_AND_BELOW) {
                             int nx = localX + offset[0], ny = y + offset[1], nz = localZ + offset[2];
                             if (nx < 0 || nx > 15 || nz < 0 || nz > 15) continue;
-                            if (!chunk.getBlockState(pos.set(chunkPos.getStartX() + nx, ny, chunkPos.getStartZ() + nz)).isAir()) continue;
+                            if (!chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + nx, ny, chunkPos.getMinBlockZ() + nz)).isAir()) continue;
                             leaks = true;
                             boolean airCarved = carvingMask != null && carvingMask.get(nx, ny, nz);
                             this.leakPairsBySource[(waterCarved ? 2 : 0) + (airCarved ? 1 : 0)]++;
@@ -544,13 +543,13 @@ public final class WorldgenBench {
         private BitSet countQueuedFluidTicks(ProtoChunk chunk) {
             this.protoChunks++;
             BitSet marked = new BitSet();
-            ShortList[] lists = chunk.getPostProcessingLists();
+            ShortList[] lists = chunk.getPostProcessing();
             for (int index = 0; index < lists.length; index++) {
                 ShortList packed = lists[index];
                 if (packed == null) continue;
-                int sectionY = chunk.sectionIndexToCoord(index);
+                int sectionY = chunk.getSectionYFromSectionIndex(index);
                 for (int i = 0; i < packed.size(); i++) {
-                    BlockPos pos = ProtoChunk.joinBlockPos(packed.getShort(i), sectionY, chunk.getPos());
+                    BlockPos pos = ProtoChunk.unpackOffsetCoordinates(packed.getShort(i), sectionY, chunk.getPos());
                     int y = pos.getY();
                     this.fluidTicksQueued++;
                     if (y >= BASIN_SEAM_MIN_Y && y < BASIN_SEAM_MAX_Y) this.fluidTicksQueuedInBasinLayers++;
@@ -560,8 +559,8 @@ public final class WorldgenBench {
             return marked;
         }
 
-        private int biomeIndex(Chunk chunk, int x, int y, int z) {
-            String id = chunk.getBiomeForNoiseGen(BiomeCoords.fromBlock(x), BiomeCoords.fromBlock(y), BiomeCoords.fromBlock(z)).getIdAsString();
+        private int biomeIndex(ChunkAccess chunk, int x, int y, int z) {
+            String id = chunk.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)).getRegisteredName();
             return this.biomeIndex.computeIfAbsent(id, key -> {
                 this.biomeIds.add(key);
                 return this.biomeIds.size() - 1;
@@ -570,10 +569,10 @@ public final class WorldgenBench {
 
         private static byte classify(BlockState state) {
             if (state.isAir()) return AIR;
-            if (state.isOf(Blocks.WATER)) return WATER;
-            if (state.isOf(Blocks.LAVA)) return LAVA;
-            if (state.isOf(Blocks.STONE)) return STONE;
-            if (state.isOf(Blocks.DEEPSLATE)) return DEEPSLATE;
+            if (state.is(Blocks.WATER)) return WATER;
+            if (state.is(Blocks.LAVA)) return LAVA;
+            if (state.is(Blocks.STONE)) return STONE;
+            if (state.is(Blocks.DEEPSLATE)) return DEEPSLATE;
             return OTHER;
         }
 
@@ -590,7 +589,7 @@ public final class WorldgenBench {
             if (block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.ROOTED_DIRT) return 0x785A3C;
             if (block == Blocks.MYCELIUM) return 0x826E82;
             if (block == Blocks.CALCITE) return 0xDDDDD5;
-            if (Registries.BLOCK.getId(block).getPath().contains("terracotta")) return 0xAA6446;
+            if (BuiltInRegistries.BLOCK.getKey(block).getPath().contains("terracotta")) return 0xAA6446;
             return 0x808080;
         }
 
@@ -864,7 +863,7 @@ public final class WorldgenBench {
             if (block == Blocks.MUD || block == Blocks.MUDDY_MANGROVE_ROOTS) return 'm';
             if (block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.ROOTED_DIRT
                     || block == Blocks.MYCELIUM) return 'd';
-            if (Registries.BLOCK.getId(block).getPath().contains("terracotta")) return 't';
+            if (BuiltInRegistries.BLOCK.getKey(block).getPath().contains("terracotta")) return 't';
             if (block == Blocks.CALCITE) return 'c';
             if (block == Blocks.STONE || block == Blocks.DEEPSLATE || block == Blocks.ANDESITE || block == Blocks.DIORITE
                     || block == Blocks.GRANITE || block == Blocks.TUFF) return '#';

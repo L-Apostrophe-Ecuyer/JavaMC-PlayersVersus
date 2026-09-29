@@ -1,11 +1,10 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
 import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.*;
 
@@ -42,7 +41,7 @@ public final class PvAquiferRules {
     }
 
     /** For {@link #atPosition} without the flooded corridors: no corridor anywhere. */
-    public static final ToDoubleFunction<DensityFunction.NoisePos> NO_CORRIDORS = pos -> Double.POSITIVE_INFINITY;
+    public static final ToDoubleFunction<DensityFunction.FunctionContext> NO_CORRIDORS = pos -> Double.POSITIVE_INFINITY;
 
     /** What {@link #atPosition} says at a block, for the neighbours {@link #decide} looks at. */
     @FunctionalInterface
@@ -60,8 +59,8 @@ public final class PvAquiferRules {
      *                    {@link Lattice}-based F, or the function itself for exact values
      * @param spread      cave-basin floodedness S (router slot {@code fluid_level_spread}), likewise
      */
-    public static PvAquiferDecision atPosition(DensityFunction.NoisePos pos, ToDoubleFunction<DensityFunction.NoisePos> floodedness,
-                                               ToDoubleFunction<DensityFunction.NoisePos> spread) {
+    public static PvAquiferDecision atPosition(DensityFunction.FunctionContext pos, ToDoubleFunction<DensityFunction.FunctionContext> floodedness,
+                                               ToDoubleFunction<DensityFunction.FunctionContext> spread) {
         return atPosition(pos, floodedness, spread, NO_CORRIDORS);
     }
 
@@ -72,9 +71,9 @@ public final class PvAquiferRules {
      * @param corridors the noodle with the corridors' bias at a block ({@code density/PvNoodle.corridorBias} plus the
      *                  noodle's tunnel), the value the final density takes there: at most 0 where it opens the block
      */
-    public static PvAquiferDecision atPosition(DensityFunction.NoisePos pos, ToDoubleFunction<DensityFunction.NoisePos> floodedness,
-                                               ToDoubleFunction<DensityFunction.NoisePos> spread,
-                                               ToDoubleFunction<DensityFunction.NoisePos> corridors) {
+    public static PvAquiferDecision atPosition(DensityFunction.FunctionContext pos, ToDoubleFunction<DensityFunction.FunctionContext> floodedness,
+                                               ToDoubleFunction<DensityFunction.FunctionContext> spread,
+                                               ToDoubleFunction<DensityFunction.FunctionContext> corridors) {
         int y = pos.blockY();
         if (y >= SEA_LEVEL) return PvAquiferDecision.AIR;
 
@@ -112,7 +111,7 @@ public final class PvAquiferRules {
      * @param lavaLevel whether the position is below the generator's lava level
      * @param positions {@link #atPosition} at any block, for the position itself and its neighbours
      */
-    public static PvAquiferDecision decide(DensityFunction.NoisePos pos, double density, boolean lavaLevel, Positions positions) {
+    public static PvAquiferDecision decide(DensityFunction.FunctionContext pos, double density, boolean lavaLevel, Positions positions) {
         if (density > 0.0) return PvAquiferDecision.SOLID;
         if (lavaLevel) return PvAquiferDecision.LAVA;
 

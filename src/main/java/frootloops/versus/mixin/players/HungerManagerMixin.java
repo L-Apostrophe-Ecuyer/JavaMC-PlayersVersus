@@ -1,11 +1,11 @@
 package frootloops.versus.mixin.players;
 
 import frootloops.versus.VersusSettings;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.HungerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.GameRules;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodData;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,15 +13,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
-@Mixin(HungerManager.class)
+@Mixin(FoodData.class)
 public class HungerManagerMixin {
 
     @Shadow
     private int foodLevel;
     @Shadow
-    private float exhaustion;
+    private float exhaustionLevel;
     @Shadow
-    private int foodTickTimer;
+    private int tickTimer;
     @Shadow
     private float saturationLevel;
 
@@ -33,23 +33,23 @@ public class HungerManagerMixin {
     private static final int FOOD_REQUIRED_FOR_SLOW_REGEN = 1;
     private static boolean IS_SLOW_REGEN_ENABLED = true;
 
-    @Inject(method = "eat", at = @At("HEAD"), cancellable = false)
-    public void eat(FoodComponent foodComponent, CallbackInfo info) {
-        exhaustion = 0.0F;
+    @Inject(method = "eat(Lnet/minecraft/world/food/FoodProperties;)V", at = @At("HEAD"), cancellable = false)
+    public void eat(FoodProperties foodComponent, CallbackInfo info) {
+        exhaustionLevel = 0.0F;
         foodLevel = Math.max(foodLevel, 0);
         saturationLevel = Math.max(0.1F, saturationLevel);
-        foodTickTimer = Math.max(16, foodTickTimer);
+        tickTimer = Math.max(16, tickTimer);
     }
 
 
-    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    public void update(ServerPlayerEntity player, CallbackInfo ci) {
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
+    public void update(ServerPlayer player, CallbackInfo ci) {
 
         if(!VersusSettings.Combat.DO_FOOD_OVERHAUL) return;
 
         // Hunger effect is more punishing:
-        boolean hasHungerEffect = player.hasStatusEffect(StatusEffects.HUNGER);
-        if (hasHungerEffect) this.exhaustion += foodLevel > 0 ? 0.03125f : 0.00390625f;
+        boolean hasHungerEffect = player.hasEffect(MobEffects.HUNGER);
+        if (hasHungerEffect) this.exhaustionLevel += foodLevel > 0 ? 0.03125f : 0.00390625f;
 
         // Food exhaustion:
         this.doHungerExhaustion(player, hasHungerEffect);
@@ -62,73 +62,73 @@ public class HungerManagerMixin {
 
     }
 
-    private void doHungerExhaustion(ServerPlayerEntity player, boolean hasHungerEffect) {
+    private void doHungerExhaustion(ServerPlayer player, boolean hasHungerEffect) {
 
         // Starvation: When starving, activities deal damage.
         if(foodLevel == 0) {
             if(VersusSettings.Combat.IS_STARVATION_ENABLED || hasHungerEffect) {
                 //if(FOOD_REQUIRED_FOR_SLOW_REGEN > 0) saturationLevel = 0.0f;
-                if (exhaustion > 0.75F) {
-                    exhaustion = 0.0F;
-                    if(saturationLevel == 0.0f) player.damage(player.getEntityWorld(), player.getDamageSources().starve(), 1.0f);
+                if (exhaustionLevel > 0.75F) {
+                    exhaustionLevel = 0.0F;
+                    if(saturationLevel == 0.0f) player.hurtServer(player.level(), player.damageSources().starve(), 1.0f);
                     else saturationLevel = Math.max(0.0F, saturationLevel - 0.5F);
                 }
             }
             else {
                 if(saturationLevel > 0.25f) {
-                    if(exhaustion > 2.0F){
-                        exhaustion = 0.0F;
+                    if(exhaustionLevel > 2.0F){
+                        exhaustionLevel = 0.0F;
                         saturationLevel = Math.min(0.25F, saturationLevel - 1.0F);
                     }
                     prevSaturationLevel = saturationLevel;
                 }
 
-                if(foodTickTimer == -1) saturationLevel = prevSaturationLevel;
-                else if(foodTickTimer < 0) saturationLevel = 0.0f;
+                if(tickTimer == -1) saturationLevel = prevSaturationLevel;
+                else if(tickTimer < 0) saturationLevel = 0.0f;
                 else if(saturationLevel < 0.25f) saturationLevel = 0.25f;
             }
         }
 
         // Regular food exhaustion, accelerated, to disincentive players filling their food bar unnecessarily:
-        else if(exhaustion > 4.0F){
-            exhaustion = 0.0F;
+        else if(exhaustionLevel > 4.0F){
+            exhaustionLevel = 0.0F;
             if(saturationLevel > 0.0f) foodLevel--;
             else saturationLevel = Math.max(0.0F, saturationLevel - 0.5F);
         }
     }
 
-    private void doHealthRegeneration(ServerPlayerEntity player, boolean hasHungerEffect) {
+    private void doHealthRegeneration(ServerPlayer player, boolean hasHungerEffect) {
         float playerHealth = player.getHealth();
-        boolean isPlayerSlowlyDying = playerHealth < 20.0f && (player.hasStatusEffect(StatusEffects.WITHER) || (player.isOnFire() && !player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasStatusEffect(StatusEffects.POISON)));
-        boolean canPlayerRegenHealth = player.canFoodHeal() && player.getEntityWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
+        boolean isPlayerSlowlyDying = playerHealth < 20.0f && (player.hasEffect(MobEffects.WITHER) || (player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
+        boolean canPlayerRegenHealth = player.isHurt() && player.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
         boolean canPlayerFastHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect && isPlayerSlowlyDying;
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFastHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
         boolean canPlayerFoodHeal = canPlayerFastHeal || canPlayerSlowHeal;
 
         // Damage resets slow regen, but not quick regen:
-        foodTickTimer++;
-        if (canPlayerFoodHeal) foodTickTimer = Math.max(foodTickTimer, 0);
-        else if (player.hurtTime > 0 || player.timeUntilRegen > 0) foodTickTimer = isPlayerSlowlyDying ? -SPRINT_RECOVERY_TIME_FAST: -SPRINT_RECOVERY_TIME_SLOW;
-        else if (foodLevel == 0 && hasHungerEffect) foodTickTimer = Math.min(foodTickTimer, -2);
+        tickTimer++;
+        if (canPlayerFoodHeal) tickTimer = Math.max(tickTimer, 0);
+        else if (player.hurtTime > 0 || player.invulnerableTime > 0) tickTimer = isPlayerSlowlyDying ? -SPRINT_RECOVERY_TIME_FAST: -SPRINT_RECOVERY_TIME_SLOW;
+        else if (foodLevel == 0 && hasHungerEffect) tickTimer = Math.min(tickTimer, -2);
 
         if(canPlayerFastHeal) {
-            if (foodTickTimer > REGEN_TIME_FAST) {
+            if (tickTimer > REGEN_TIME_FAST) {
                 player.setHealth((float) Math.ceil(playerHealth) + 1);
-                foodTickTimer = 0;
-                exhaustion = (exhaustion + 0.5F)/2.0f;
+                tickTimer = 0;
+                exhaustionLevel = (exhaustionLevel + 0.5F)/2.0f;
                 if(saturationLevel > 1.0F) saturationLevel = Math.max(1.0F, saturationLevel - 1.0F);
                 else foodLevel--;
             }
         }
         else if(canPlayerSlowHeal) {
-            if (foodTickTimer > REGEN_TIME_SLOW) {
+            if (tickTimer > REGEN_TIME_SLOW) {
                 player.setHealth((float) Math.ceil(playerHealth) + 1f);
-                foodTickTimer = 0;
-                exhaustion += 0.25F;
+                tickTimer = 0;
+                exhaustionLevel += 0.25F;
                 if(saturationLevel > 1.0F) saturationLevel = Math.max(1.0F, saturationLevel - 1.0F);
                 else if(foodLevel > 0) foodLevel--;
             }
         }
-        else foodTickTimer = Math.min(foodTickTimer, 0);
+        else tickTimer = Math.min(tickTimer, 0);
     }
 }

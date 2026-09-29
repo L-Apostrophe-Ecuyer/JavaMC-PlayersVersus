@@ -1,13 +1,13 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
 import java.util.Random;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.RandomState;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BAND_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_WATER_MIN_Y;
@@ -28,23 +28,23 @@ class DeepWaterSurveyTest {
 
     @Test
     void waterBelowTheSeaWaterFloor() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         AquiferInputs inputs = AquiferInputs.of(config, settings);
-        DensityFunction continents = config.getNoiseRouter().continents(), finalDensity = config.getNoiseRouter().finalDensity();
+        DensityFunction continents = config.router().continents(), finalDensity = config.router().finalDensity();
         Random random = new Random(SEED);
         int columns = 0, deepColumns = 0;
         long open = 0, wet = 0, openAbove = 0, wetAbove = 0;
         for (int attempt = 0; attempt < 200000 && columns < 4000; attempt++) {
             int x = random.nextInt(40000) - 20000, z = random.nextInt(40000) - 20000;
-            double continentalness = continents.sample(new DensityFunction.UnblendedNoisePos(x, 0, z));
+            double continentalness = continents.compute(new DensityFunction.SinglePointContext(x, 0, z));
             if (continentalness >= OCEAN) continue;
             columns++;
             if (continentalness < DEEP_OCEAN) deepColumns++;
             for (int y = SEA_BAND_MIN_Y + 1; y < SEA_WATER_MIN_Y + 8; y++) {
-                DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
-                if (finalDensity.sample(pos) > 0.0) continue;
-                boolean water = inputs.floodedness().sample(pos) > SEA_WATER_THRESHOLD;
+                DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(x, y, z);
+                if (finalDensity.compute(pos) > 0.0) continue;
+                boolean water = inputs.floodedness().compute(pos) > SEA_WATER_THRESHOLD;
                 if (y < SEA_WATER_MIN_Y) {
                     open++;
                     if (water) wet++;
@@ -61,7 +61,7 @@ class DeepWaterSurveyTest {
         assertEquals(4000, columns, "not enough ocean columns found");
         assertTrue(open > 0, "no open blocks below the sea water floor under oceans");
         // what the rules make of F above the water threshold down there: a band, not water
-        DensityFunction.NoisePos deep = new DensityFunction.UnblendedNoisePos(0, SEA_WATER_MIN_Y - 1, 0);
+        DensityFunction.FunctionContext deep = new DensityFunction.SinglePointContext(0, SEA_WATER_MIN_Y - 1, 0);
         assertEquals(PvAquiferDecision.SEA_BARRIER, PvAquiferRules.atPosition(deep, pos -> 1.0, pos -> 0.0));
     }
 }

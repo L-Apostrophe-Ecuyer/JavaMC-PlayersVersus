@@ -1,12 +1,16 @@
 package frootloops.versus.mod.mobs.passive;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Items;
-import net.minecraft.potion.Potions;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.BuyItemFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.Factory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellEnchantedToolFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellItemFactory;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.block.Blocks;
 
 import static frootloops.versus.mod.mobs.passive.RevampedTradeFactories.*;
 
@@ -122,7 +126,7 @@ public class RevampedWandererOffers {
                                     new SellItemFactory(Items.MOSS_BLOCK, 1, 2, 5, 1),
                                     new SellItemFactory(Items.PALE_MOSS_BLOCK, 1, 2, 5, 1),
                                     new SellItemFactory(Items.WILDFLOWERS, 1, 1, 12, 1),
-                                    new SellItemFactory(Items.TALL_DRY_GRASS, 1, 1, 12, 1),
+                                    new SellItemFactory(Items.DRY_TALL_GRASS, 1, 1, 12, 1),
                                     new SellItemFactory(Items.FIREFLY_BUSH, 3, 1, 12, 1)
                             },
                             5

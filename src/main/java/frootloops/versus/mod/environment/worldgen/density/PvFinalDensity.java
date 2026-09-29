@@ -2,9 +2,9 @@ package frootloops.versus.mod.environment.worldgen.density;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
 
 /**
  * Density-function type {@code players-versus:final_density}: the router's {@code final_density}, sampled for every
@@ -19,7 +19,7 @@ import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
  * includes the noodle's height bias at the block's y, so the noodle is skipped for most air blocks, where the terrain
  * is already lower than any noodle there. The river is only asked about in its valley's heights.
  *
- * <p>With C2ME's density-function compiler ({@link DensityCompilerCompat}), {@link #apply} returns
+ * <p>With C2ME's density-function compiler ({@link DensityCompilerCompat}), {@link #mapAll} returns
  * {@link #asVanillaTypes} instead, which the compiler can compile.
  *
  * @param terrain         {@code interpolated(blend_density(players-versus:overworld/terrain))}
@@ -39,15 +39,15 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
                              DensityFunction highRiver, double noodleFloor, double minValue, double maxValue) implements DensityFunction {
 
     public static final MapCodec<PvFinalDensity> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DensityFunction.FUNCTION_CODEC.fieldOf("terrain").forGetter(PvFinalDensity::terrain),
-            DensityFunction.FUNCTION_CODEC.fieldOf("noodle_toggle").forGetter(PvFinalDensity::noodleToggle),
-            DensityFunction.FUNCTION_CODEC.fieldOf("noodle_thickness").forGetter(PvFinalDensity::noodleThickness),
-            DensityFunction.FUNCTION_CODEC.fieldOf("noodle_ridge_a").forGetter(PvFinalDensity::noodleRidgeA),
-            DensityFunction.FUNCTION_CODEC.fieldOf("noodle_ridge_b").forGetter(PvFinalDensity::noodleRidgeB),
-            DensityFunction.FUNCTION_CODEC.fieldOf("corridor_entrances").forGetter(PvFinalDensity::entrances),
-            DensityFunction.FUNCTION_CODEC.fieldOf("high_river").forGetter(PvFinalDensity::highRiver)
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("terrain").forGetter(PvFinalDensity::terrain),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("noodle_toggle").forGetter(PvFinalDensity::noodleToggle),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("noodle_thickness").forGetter(PvFinalDensity::noodleThickness),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("noodle_ridge_a").forGetter(PvFinalDensity::noodleRidgeA),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("noodle_ridge_b").forGetter(PvFinalDensity::noodleRidgeB),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("corridor_entrances").forGetter(PvFinalDensity::entrances),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("high_river").forGetter(PvFinalDensity::highRiver)
     ).apply(instance, PvFinalDensity::new));
-    private static final CodecHolder<PvFinalDensity> CODEC_HOLDER = CodecHolder.of(CODEC);
+    private static final KeyDispatchDataCodec<PvFinalDensity> CODEC_HOLDER = KeyDispatchDataCodec.of(CODEC);
 
     /**
      * Interpolation can land a hair outside its corners' range; this margin keeps {@link #noodleFloor} below any
@@ -65,54 +65,54 @@ public record PvFinalDensity(DensityFunction terrain, DensityFunction noodleTogg
     }
 
     @Override
-    public double sample(NoisePos pos) {
-        double terrain = DensityOps.squeeze(this.terrain.sample(pos) * 0.64);
+    public double compute(FunctionContext pos) {
+        double terrain = DensityOps.squeeze(this.terrain.compute(pos) * 0.64);
         int y = pos.blockY();
-        double bias = PvNoodle.inCorridorLayers(y) ? PvNoodle.corridorBias(y, this.entrances.sample(pos)) : PvNoodle.bias(y);
+        double bias = PvNoodle.inCorridorLayers(y) ? PvNoodle.corridorBias(y, this.entrances.compute(pos)) : PvNoodle.bias(y);
         double carved = terrain < bias + this.noodleFloor ? terrain
                 : Math.min(terrain, bias + PvNoodle.tunnel(pos, this.noodleToggle, this.noodleThickness, this.noodleRidgeA, this.noodleRidgeB));
-        return y >= PvHighRiver.MIN_Y && y < PvHighRiver.MAX_Y ? Math.min(carved, this.highRiver.sample(pos)) : carved;
+        return y >= PvHighRiver.MIN_Y && y < PvHighRiver.MAX_Y ? Math.min(carved, this.highRiver.compute(pos)) : carved;
     }
 
     @Override
-    public void fill(double[] densities, EachApplier applier) {
-        applier.fill(densities, this);
+    public void fillArray(double[] densities, ContextProvider applier) {
+        applier.fillAllDirectly(densities, this);
     }
 
     /**
      * This function from vanilla types, for C2ME's compiler, which runs a type it doesn't know through vanilla's
      * interface with a new position object for every block ({@link DensityCompilerCompat}). All of it but two parts that
      * stay Java on purpose: the height bias in the corridors' layers ({@link PvNoodle#corridorBiasFunction}) and the high
-     * river's valley, which a {@code range_choice} on y only asks for in its heights. The same doubles as {@link #sample}
+     * river's valley, which a {@code range_choice} on y only asks for in its heights. The same doubles as {@link #compute}
      * ({@code TerrainPortTest}), and the same skip: a {@code range_choice} on the terrain minus the noodle's height bias.
      * Built from this function's inputs as they are, so call it on a function whose references are bound, as
-     * {@link #apply} does; before that, the noodle's bounds aren't known and nothing would be skipped.
+     * {@link #mapAll} does; before that, the noodle's bounds aren't known and nothing would be skipped.
      */
     public DensityFunction asVanillaTypes() {
-        DensityFunction terrain = DensityFunctionTypes.mul(DensityFunctionTypes.constant(0.64), this.terrain).squeeze();
+        DensityFunction terrain = DensityFunctions.mul(DensityFunctions.constant(0.64), this.terrain).squeeze();
         DensityFunction bias = PvNoodle.corridorBiasFunction(this.entrances);
-        DensityFunction tunnel = DensityFunctionTypes.rangeChoice(this.noodleToggle, -1000000.0, -0.2, DensityFunctionTypes.constant(64.0),
-                DensityFunctionTypes.add(this.noodleThickness, DensityFunctionTypes.mul(DensityFunctionTypes.constant(1.5),
-                        DensityFunctionTypes.max(this.noodleRidgeA.abs(), this.noodleRidgeB.abs()))));
-        DensityFunction aboveBias = DensityFunctionTypes.add(terrain, DensityFunctionTypes.mul(DensityFunctionTypes.constant(-1.0), bias));
-        DensityFunction carved = DensityFunctionTypes.rangeChoice(aboveBias, -1000000.0, this.noodleFloor, terrain,
-                DensityFunctionTypes.min(terrain, DensityFunctionTypes.add(bias, tunnel)));
-        DensityFunction y = DensityFunctionTypes.yClampedGradient(-4064, 4062, -4064.0, 4062.0);
-        DensityFunction river = DensityFunctionTypes.rangeChoice(y, PvHighRiver.MIN_Y - 0.5, PvHighRiver.MAX_Y - 0.5, this.highRiver,
-                DensityFunctionTypes.constant(Double.POSITIVE_INFINITY));
-        return DensityFunctionTypes.min(carved, river);
+        DensityFunction tunnel = DensityFunctions.rangeChoice(this.noodleToggle, -1000000.0, -0.2, DensityFunctions.constant(64.0),
+                DensityFunctions.add(this.noodleThickness, DensityFunctions.mul(DensityFunctions.constant(1.5),
+                        DensityFunctions.max(this.noodleRidgeA.abs(), this.noodleRidgeB.abs()))));
+        DensityFunction aboveBias = DensityFunctions.add(terrain, DensityFunctions.mul(DensityFunctions.constant(-1.0), bias));
+        DensityFunction carved = DensityFunctions.rangeChoice(aboveBias, -1000000.0, this.noodleFloor, terrain,
+                DensityFunctions.min(terrain, DensityFunctions.add(bias, tunnel)));
+        DensityFunction y = DensityFunctions.yClampedGradient(-4064, 4062, -4064.0, 4062.0);
+        DensityFunction river = DensityFunctions.rangeChoice(y, PvHighRiver.MIN_Y - 0.5, PvHighRiver.MAX_Y - 0.5, this.highRiver,
+                DensityFunctions.constant(Double.POSITIVE_INFINITY));
+        return DensityFunctions.min(carved, river);
     }
 
     @Override
-    public DensityFunction apply(DensityFunctionVisitor visitor) {
-        PvFinalDensity applied = new PvFinalDensity(this.terrain.apply(visitor), this.noodleToggle.apply(visitor),
-                this.noodleThickness.apply(visitor), this.noodleRidgeA.apply(visitor), this.noodleRidgeB.apply(visitor),
-                this.entrances.apply(visitor), this.highRiver.apply(visitor));
+    public DensityFunction mapAll(Visitor visitor) {
+        PvFinalDensity applied = new PvFinalDensity(this.terrain.mapAll(visitor), this.noodleToggle.mapAll(visitor),
+                this.noodleThickness.mapAll(visitor), this.noodleRidgeA.mapAll(visitor), this.noodleRidgeB.mapAll(visitor),
+                this.entrances.mapAll(visitor), this.highRiver.mapAll(visitor));
         return visitor.apply(DensityCompilerCompat.ACTIVE ? applied.asVanillaTypes() : applied);
     }
 
     @Override
-    public CodecHolder<? extends DensityFunction> getCodecHolder() {
+    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
         return CODEC_HOLDER;
     }
 }

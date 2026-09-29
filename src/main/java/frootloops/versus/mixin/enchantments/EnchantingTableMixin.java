@@ -2,27 +2,31 @@ package frootloops.versus.mixin.enchantments;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.screen.*;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.Util;
-import net.minecraft.util.collection.IndexedIterable;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.Util;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -35,128 +39,128 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(EnchantmentScreenHandler.class)
-public abstract class EnchantingTableMixin extends ScreenHandler {
+@Mixin(EnchantmentMenu.class)
+public abstract class EnchantingTableMixin extends AbstractContainerMenu {
 
-    protected EnchantingTableMixin(@Nullable ScreenHandlerType<?> type, int syncId, Random random, Inventory inventory, int[] enchantmentPower, ScreenHandlerContext context, Property seed, int[] enchantmentId, int[] enchantmentLevel) {
+    protected EnchantingTableMixin(@Nullable MenuType<?> type, int syncId, RandomSource random, Container inventory, int[] enchantmentPower, ContainerLevelAccess context, DataSlot seed, int[] enchantmentId, int[] enchantmentLevel) {
         super(type, syncId);
         this.random = random;
-        this.inventory = inventory;
-        this.enchantmentPower = enchantmentPower;
-        this.context = context;
-        this.seed = seed;
-        this.enchantmentId = enchantmentId;
-        this.enchantmentLevel = enchantmentLevel;
+        this.enchantSlots = inventory;
+        this.costs = enchantmentPower;
+        this.access = context;
+        this.enchantmentSeed = seed;
+        this.enchantClue = enchantmentId;
+        this.levelClue = enchantmentLevel;
     }
 
-    @Shadow private final Random random;
-    @Shadow private final Inventory inventory;
-    @Shadow public final int[] enchantmentPower;
-    @Shadow public final int[] enchantmentId;
-    @Shadow public final int[] enchantmentLevel;
-    @Shadow private final ScreenHandlerContext context;
-    @Shadow private final Property seed;
+    @Shadow private final RandomSource random;
+    @Shadow private final Container enchantSlots;
+    @Shadow public final int[] costs;
+    @Shadow public final int[] enchantClue;
+    @Shadow public final int[] levelClue;
+    @Shadow private final ContainerLevelAccess access;
+    @Shadow private final DataSlot enchantmentSeed;
 
     @Overwrite
-    public boolean onButtonClick(PlayerEntity player, int id) {
-        if (id >= 0 && id < this.enchantmentPower.length) {
-            ItemStack inputStack = this.inventory.getStack(0);
-            ItemStack lapisStack = this.inventory.getStack(1);
+    public boolean clickMenuButton(Player player, int id) {
+        if (id >= 0 && id < this.costs.length) {
+            ItemStack inputStack = this.enchantSlots.getItem(0);
+            ItemStack lapisStack = this.enchantSlots.getItem(1);
             int lapisCost = id + 1;
-            if ((lapisStack.isEmpty() || lapisStack.getCount() < lapisCost) && !player.getAbilities().creativeMode) {
+            if ((lapisStack.isEmpty() || lapisStack.getCount() < lapisCost) && !player.getAbilities().instabuild) {
                 return false;
             }
 
-            if (this.enchantmentPower[id] > 0 && !inputStack.isEmpty() && (player.experienceLevel >= lapisCost && player.experienceLevel >= this.enchantmentPower[id] || player.getAbilities().creativeMode)) {
-                this.context.run((world, pos) -> {
+            if (this.costs[id] > 0 && !inputStack.isEmpty() && (player.experienceLevel >= lapisCost && player.experienceLevel >= this.costs[id] || player.getAbilities().instabuild)) {
+                this.access.execute((world, pos) -> {
                     ItemStack stack = inputStack;
-                    List<EnchantmentLevelEntry> listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id, this.enchantmentPower[id]);
+                    List<EnchantmentInstance> listCandidateEnchantments = this.generateEnchantments(world.registryAccess(), stack, id, this.costs[id]);
                     if (listCandidateEnchantments.isEmpty())
-                        listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id + 1, this.enchantmentPower[id]);
+                        listCandidateEnchantments = this.generateEnchantments(world.registryAccess(), stack, id + 1, this.costs[id]);
                     if (listCandidateEnchantments.isEmpty())
-                        listCandidateEnchantments = this.generateEnchantments(world.getRegistryManager(), stack, id + 2, this.enchantmentPower[id]);
+                        listCandidateEnchantments = this.generateEnchantments(world.registryAccess(), stack, id + 2, this.costs[id]);
                     if (!listCandidateEnchantments.isEmpty()) {
 
                         // Apply costs:
-                        player.applyEnchantmentCosts(stack, lapisCost);
+                        player.onEnchantmentPerformed(stack, lapisCost);
 
                         // Switching to a book:
-                        if (stack.isOf(Items.BOOK)) {
-                            stack = stack.copyComponentsToNewStack(Items.ENCHANTED_BOOK, 1);
-                            this.inventory.setStack(0, stack);
+                        if (stack.is(Items.BOOK)) {
+                            stack = stack.transmuteCopy(Items.ENCHANTED_BOOK, 1);
+                            this.enchantSlots.setItem(0, stack);
                         }
 
                         // Add new enchantments, or improve old ones:
                         Iterator enchantmentLevelEntryIterator = listCandidateEnchantments.iterator();
                         while (enchantmentLevelEntryIterator.hasNext()) {
-                            EnchantmentLevelEntry entry = (EnchantmentLevelEntry) enchantmentLevelEntryIterator.next();
-                            stack.addEnchantment(entry.enchantment(), entry.level());
+                            EnchantmentInstance entry = (EnchantmentInstance) enchantmentLevelEntryIterator.next();
+                            stack.enchant(entry.enchantment(), entry.level());
                         }
 
                         // Update the item:
-                        if (!player.getAbilities().creativeMode) {
-                            lapisStack.decrement(lapisCost);
+                        if (!player.getAbilities().instabuild) {
+                            lapisStack.shrink(lapisCost);
                             if (lapisStack.isEmpty()) {
-                                this.inventory.setStack(1, ItemStack.EMPTY);
+                                this.enchantSlots.setItem(1, ItemStack.EMPTY);
                             }
                         }
 
                         // Update player and client effects:
-                        player.incrementStat(Stats.ENCHANT_ITEM);
-                        if (player instanceof ServerPlayerEntity)
-                            Criteria.ENCHANTED_ITEM.trigger((ServerPlayerEntity) player, stack, lapisCost);
-                        this.inventory.markDirty();
-                        this.seed.set(player.getEnchantingTableSeed());
-                        this.onContentChanged(this.inventory);
-                        world.playSound(null, pos, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0f, world.random.nextFloat() * 0.1f + 0.9f);
+                        player.awardStat(Stats.ENCHANT_ITEM);
+                        if (player instanceof ServerPlayer)
+                            CriteriaTriggers.ENCHANTED_ITEM.trigger((ServerPlayer) player, stack, lapisCost);
+                        this.enchantSlots.setChanged();
+                        this.enchantmentSeed.set(player.getEnchantmentSeed());
+                        this.slotsChanged(this.enchantSlots);
+                        world.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0f, world.random.nextFloat() * 0.1f + 0.9f);
                     }
                 });
             }
             return true;
         } else {
-            Util.logErrorOrPause(player.getName() + " pressed invalid button id: " + id);
+            Util.logAndPauseIfInIde(player.getName() + " pressed invalid button id: " + id);
             return false;
         }
     }
 
-    @Inject(method = "onContentChanged", at = @At(value = "TAIL"))
-    private void updateUnavailableEnchantments(Inventory inventory, CallbackInfo ci) {
-        if(inventory != this.inventory) return;
-        this.context.run((world, pos) -> {
-            List<EnchantmentLevelEntry> list;
-            ItemStack itemStack = inventory.getStack(0);
+    @Inject(method = "slotsChanged", at = @At(value = "TAIL"))
+    private void updateUnavailableEnchantments(Container inventory, CallbackInfo ci) {
+        if(inventory != this.enchantSlots) return;
+        this.access.execute((world, pos) -> {
+            List<EnchantmentInstance> list;
+            ItemStack itemStack = inventory.getItem(0);
             if(!itemStack.isEmpty() && itemStack.isEnchantable()) {
-                IndexedIterable<RegistryEntry<Enchantment>> indexedIterable = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT).getIndexedEntries();
+                IdMap<Holder<Enchantment>> indexedIterable = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).asHolderIdMap();
                 for (int slotID = 0; slotID < 3; ++slotID) {
-                    list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID, this.enchantmentPower[slotID]);
+                    list = this.generateEnchantments(world.registryAccess(), itemStack, slotID, this.costs[slotID]);
                     if (list.isEmpty())
-                        list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID + 1, this.enchantmentPower[slotID]);
+                        list = this.generateEnchantments(world.registryAccess(), itemStack, slotID + 1, this.costs[slotID]);
                     if (list.isEmpty())
-                        list = this.generateEnchantments(world.getRegistryManager(), itemStack, slotID + 2, this.enchantmentPower[slotID]);
-                    if (this.enchantmentPower[slotID] <= 0 || list.isEmpty()) {
-                        this.enchantmentPower[slotID] = 0;
-                        this.enchantmentLevel[slotID] = -1;
-                        this.enchantmentId[slotID] = -1;
+                        list = this.generateEnchantments(world.registryAccess(), itemStack, slotID + 2, this.costs[slotID]);
+                    if (this.costs[slotID] <= 0 || list.isEmpty()) {
+                        this.costs[slotID] = 0;
+                        this.levelClue[slotID] = -1;
+                        this.enchantClue[slotID] = -1;
                     }
                     else {
-                        EnchantmentLevelEntry enchantmentLevelEntry = EnchantRegistryHelper.getMostImportantEnchant(list);
-                        this.enchantmentId[slotID] = indexedIterable.getRawId(enchantmentLevelEntry.enchantment());
-                        this.enchantmentLevel[slotID] = enchantmentLevelEntry.level();
+                        EnchantmentInstance enchantmentLevelEntry = EnchantRegistryHelper.getMostImportantEnchant(list);
+                        this.enchantClue[slotID] = indexedIterable.getId(enchantmentLevelEntry.enchantment());
+                        this.levelClue[slotID] = enchantmentLevelEntry.level();
                     }
                 }
             }
-            this.sendContentUpdates();
+            this.broadcastChanges();
         });
     }
 
-    private List<EnchantmentLevelEntry> generateEnchantments(DynamicRegistryManager registryManager, ItemStack stack, int seedOffset, int level) {
-        this.random.setSeed((long)(this.seed.get() + seedOffset));
-        Optional<RegistryEntryList.Named<Enchantment>> optional = registryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOptional(EnchantmentTags.IN_ENCHANTING_TABLE);
+    private List<EnchantmentInstance> generateEnchantments(RegistryAccess registryManager, ItemStack stack, int seedOffset, int level) {
+        this.random.setSeed((long)(this.enchantmentSeed.get() + seedOffset));
+        Optional<HolderSet.Named<Enchantment>> optional = registryManager.lookupOrThrow(Registries.ENCHANTMENT).get(EnchantmentTags.IN_ENCHANTING_TABLE);
         if (optional.isEmpty()) {
             return List.of();
         } else {
-            List<EnchantmentLevelEntry> list = EnchantmentHelper.generateEnchantments(this.random, stack, level, ((RegistryEntryList.Named)optional.get()).stream());
-            if (stack.isOf(Items.BOOK) && list.size() > 1) {
+            List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(this.random, stack, level, ((HolderSet.Named)optional.get()).stream());
+            if (stack.is(Items.BOOK) && list.size() > 1) {
                 return List.of(EnchantRegistryHelper.getMostImportantEnchant(list));
             }
             return list;

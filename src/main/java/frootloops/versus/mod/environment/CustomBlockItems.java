@@ -2,26 +2,28 @@ package frootloops.versus.mod.environment;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.LadderBlockItem;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.LadderBlock;
-import net.minecraft.item.*;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LadderBlock;
 
 import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getItemSettings;
 
 public abstract class CustomBlockItems {
 
-    private static Item.Settings getBlockSettings(String name) {
-        return new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(VersusMod.MOD_ID, name))).useBlockPrefixedTranslationKey();
+    private static Item.Properties getBlockSettings(String name) {
+        return new Item.Properties().setId(ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(VersusMod.MOD_ID, name))).useBlockDescriptionPrefix();
     }
 
     public static final LadderBlockItem LADDER = new LadderBlockItem((LadderBlock)Blocks.LADDER, getBlockSettings("ladder"));
 
-    public static final VerticallyAttachableBlockItem SMOLDERING_TORCH = new VerticallyAttachableBlockItem(CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH,  Direction.DOWN, getBlockSettings("smoldering_torch"));
-    public static final VerticallyAttachableBlockItem EXTINGUISHED_TORCH = new VerticallyAttachableBlockItem(CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, Direction.DOWN, getBlockSettings("extinguished_torch"));
+    public static final StandingAndWallBlockItem SMOLDERING_TORCH = new StandingAndWallBlockItem(CustomBlocks.SMOLDERING_TORCH, CustomBlocks.SMOLDERING_WALL_TORCH,  Direction.DOWN, getBlockSettings("smoldering_torch"));
+    public static final StandingAndWallBlockItem EXTINGUISHED_TORCH = new StandingAndWallBlockItem(CustomBlocks.EXTINGUISHED_TORCH, CustomBlocks.EXTINGUISHED_WALL_TORCH, Direction.DOWN, getBlockSettings("extinguished_torch"));
 
     public static final BlockItem CORRUPTED_WART = new BlockItem(CustomBlocks.CORRUPTED_WART_PLANT, getBlockSettings("corrupted_wart"));
     public static final BlockItem WITHERED_WART = new BlockItem(CustomBlocks.WITHERED_WART_PLANT, getBlockSettings("withered_wart"));

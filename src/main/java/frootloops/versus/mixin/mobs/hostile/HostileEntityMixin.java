@@ -1,30 +1,30 @@
 package frootloops.versus.mixin.mobs.hostile;
 
 import frootloops.versus.mod.mobs.MobSpawning;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.LightType;
-import net.minecraft.world.ServerWorldAccess;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(HostileEntity.class)
+@Mixin(Monster.class)
 public class HostileEntityMixin {
 
     @Overwrite
-    public static boolean canSpawnInDark(EntityType<? extends HostileEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) {
+    public static boolean checkMonsterSpawnRules(EntityType<? extends Monster> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL) return false;
-        if(spawnReason != SpawnReason.NATURAL) return HostileEntity.canMobSpawn(type, world, spawnReason, pos, random);
+        if(spawnReason != EntitySpawnReason.NATURAL) return Monster.checkMobSpawnRules(type, world, spawnReason, pos, random);
         if(!MobSpawning.isMidnight(world)) {
-            if ((type == EntityType.ZOMBIE || type == EntityType.SKELETON) && (pos.getY() < 0 || !world.getBlockState(pos.down()).isIn(MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE) || (pos.getY() > 64 && world.isSkyVisible(pos))))
+            if ((type == EntityType.ZOMBIE || type == EntityType.SKELETON) && (pos.getY() < 0 || !world.getBlockState(pos.below()).is(MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE) || (pos.getY() > 64 && world.canSeeSky(pos))))
                 return false;
-            else if (!MobSpawning.isNewMoon(world) && type == EntityType.CREEPER && (pos.getY() > 128 || world.getLightLevel(LightType.SKY, pos) > 7 || !world.getBlockState(pos.down()).isIn(MobSpawning.CREEPER_SPAWNABLE)))
+            else if (!MobSpawning.isNewMoon(world) && type == EntityType.CREEPER && (pos.getY() > 128 || world.getBrightness(LightLayer.SKY, pos) > 7 || !world.getBlockState(pos.below()).is(MobSpawning.CREEPER_SPAWNABLE)))
                 return false;
         }
-        return (HostileEntity.isSpawnDark(world, pos, random)) && HostileEntity.canMobSpawn(type, world, spawnReason, pos, random);
+        return (Monster.isDarkEnoughToSpawn(world, pos, random)) && Monster.checkMobSpawnRules(type, world, spawnReason, pos, random);
     }
 }

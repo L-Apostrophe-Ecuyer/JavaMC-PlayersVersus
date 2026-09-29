@@ -5,12 +5,6 @@ import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
 import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.gen.chunk.AquiferSampler;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.chunk.GenerationShapeConfig;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -20,6 +14,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseSettings;
+import net.minecraft.world.level.levelgen.RandomState;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,29 +46,29 @@ class AquiferTerrainPassTest {
     private static final long SEED = 8675309L;
     /** The sea band is y -31..63 ({@code y > SEA_BAND_MIN_Y}), the basin band y -3..31. */
     private static final int[][] BANDS = {{-31, -4}, {-3, 7}, {8, 31}, {32, 47}, {48, 63}};
-    private static final AquiferSampler.FluidLevelSampler NO_FLUID_LEVELS = (x, y, z) -> {
+    private static final Aquifer.FluidPicker NO_FLUID_LEVELS = (x, y, z) -> {
         throw new UnsupportedOperationException("the test passes lavaLevel itself");
     };
 
     @Test
     void latticesGiveTheTerrainPassInterpolation() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         AquiferInputs inputs = AquiferInputs.of(config, settings);
-        GenerationShapeConfig shape = settings.generationShapeConfig();
-        int minY = shape.minimumY(), maxY = shape.minimumY() + shape.height();
+        NoiseSettings shape = settings.noiseSettings();
+        int minY = shape.minY(), maxY = shape.minY() + shape.height();
         for (ChunkPos chunk : List.of(new ChunkPos(100, 100), new ChunkPos(-7, 3))) {
             TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
             // what the aquifer's lattices sample: the chunk's router depth, the settings' entrances
-            Lattice depth = new Lattice(pass.register(config.getNoiseRouter().depth()), chunk, minY, maxY, PvAquifer.CELL_HEIGHT);
+            Lattice depth = new Lattice(pass.register(config.router().depth()), chunk, minY, maxY, PvAquifer.CELL_HEIGHT);
             Lattice entrances = new Lattice(inputs.floodedness().entrances(), chunk, minY, maxY, PvAquifer.CELL_HEIGHT);
             // what the JSON F interpolated (the reference's depth and entrances: the same values, TerrainPortTest)
             DensityFunction interpolatedDepth = pass.register(interpolated(config, WorldgenTestData.REFERENCE + ":overworld/depth"));
             DensityFunction interpolatedEntrances = pass.register(interpolated(config, WorldgenTestData.REFERENCE + ":overworld/caves/entrances"));
             Mismatches depthMismatches = new Mismatches("depth"), entrancesMismatches = new Mismatches("entrances");
             pass.run((x, y, z, pos) -> {
-                depthMismatches.compare(x, y, z, interpolatedDepth.sample(pos), depth.at(x, y, z));
-                entrancesMismatches.compare(x, y, z, interpolatedEntrances.sample(pos), entrances.at(x, y, z));
+                depthMismatches.compare(x, y, z, interpolatedDepth.compute(pos), depth.at(x, y, z));
+                entrancesMismatches.compare(x, y, z, interpolatedEntrances.compute(pos), entrances.at(x, y, z));
             });
             System.out.println("[terrain pass] chunk " + chunk.x + "," + chunk.z + ": " + depthMismatches + "; " + entrancesMismatches);
             assertEquals(0, depthMismatches.count, depthMismatches::toString);
@@ -79,8 +79,8 @@ class AquiferTerrainPassTest {
 
     @Test
     void aquiferKeepsTheTerrainPassDecisions() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         int bands = BANDS.length;
         int[] total = new int[bands], same = new int[bands], sameForCarvers = new int[bands], beforeSameForCarvers = new int[bands];
         int[] sameWithNewF = new int[bands], sameWithNewS = new int[bands];
@@ -99,21 +99,21 @@ class AquiferTerrainPassTest {
                 pass.run((x, y, z, pos) -> {
                     int band = band(y);
                     if (band < 0) return;
-                    DensityFunction.NoisePos carverPos = new DensityFunction.UnblendedNoisePos(x, y, z);
+                    DensityFunction.FunctionContext carverPos = new DensityFunction.SinglePointContext(x, y, z);
                     PvAquiferDecision now = aquifer.atPosition(x, y, z);
-                    PvAquiferDecision before = PvAquiferRules.atPosition(pos, jsonF::sample, jsonS::sample);
+                    PvAquiferDecision before = PvAquiferRules.atPosition(pos, jsonF::compute, jsonS::compute);
                     total[band]++;
                     if (now == before) same[band]++;
                     else changes.merge(before + " -> " + now, 1, Integer::sum);
                     if (aquifer.decide(pos, 0.0, false) == aquifer.decide(carverPos, 0.0, false)) sameForCarvers[band]++;
-                    if (before == PvAquiferRules.atPosition(carverPos, jsonF::sample, jsonS::sample)) beforeSameForCarvers[band]++;
-                    if (before == PvAquiferRules.atPosition(pos, aquifer::floodedness, jsonS::sample)) sameWithNewF[band]++;
-                    if (before == PvAquiferRules.atPosition(pos, jsonF::sample, aquifer::spread)) sameWithNewS[band]++;
+                    if (before == PvAquiferRules.atPosition(carverPos, jsonF::compute, jsonS::compute)) beforeSameForCarvers[band]++;
+                    if (before == PvAquiferRules.atPosition(pos, aquifer::floodedness, jsonS::compute)) sameWithNewF[band]++;
+                    if (before == PvAquiferRules.atPosition(pos, jsonF::compute, aquifer::spread)) sameWithNewS[band]++;
 
-                    floodedness.compare(x, y, z, jsonF.sample(pos), aquifer.floodedness(pos));
+                    floodedness.compare(x, y, z, jsonF.compute(pos), aquifer.floodedness(pos));
                     if (y > -4 && y < 32) {
-                        double spreadBefore = jsonS.sample(pos), spreadNow = aquifer.spread(pos);
-                        if (spread.compare(x, y, z, spreadBefore, spreadNow)) spreadChangesByLocalX[x - chunk.getStartX()]++;
+                        double spreadBefore = jsonS.compute(pos), spreadNow = aquifer.spread(pos);
+                        if (spread.compare(x, y, z, spreadBefore, spreadNow)) spreadChangesByLocalX[x - chunk.getMinBlockX()]++;
                         if (Math.floorMod(x, 4) == 0 && Math.floorMod(y, PvAquifer.CELL_HEIGHT) == 0 && Math.floorMod(z, 4) == 0) {
                             spreadAtCorners.compare(x, y, z, spreadBefore, spreadNow);
                         }
@@ -154,8 +154,8 @@ class AquiferTerrainPassTest {
      */
     @Test
     void waterNeverTouchesOpenAirAcrossChunkBorders() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         int water = 0, borderPairs = 0;
         for (ChunkPos center : List.of(new ChunkPos(100, 100), coastalChunk(config))) {
             int[] counts = checkWalls(config, settings, center);
@@ -166,18 +166,18 @@ class AquiferTerrainPassTest {
     }
 
     /** @return open water blocks, and water-neighbour pairs across chunk borders, in the 3 x 3 chunks around {@code center} */
-    private static int[] checkWalls(NoiseConfig config, ChunkGeneratorSettings settings, ChunkPos center) {
+    private static int[] checkWalls(RandomState config, NoiseGeneratorSettings settings, ChunkPos center) {
         int size = 3 * 16, minX = (center.x - 1) * 16, minZ = (center.z - 1) * 16, minY = -32, levels = 96;
         byte[] state = new byte[size * size * levels], carved = new byte[size * size * levels];
         for (int chunkX = center.x - 1; chunkX <= center.x + 1; chunkX++) {
             for (int chunkZ = center.z - 1; chunkZ <= center.z + 1; chunkZ++) {
                 TerrainPass pass = new TerrainPass(config, settings, new ChunkPos(chunkX, chunkZ), NO_FLUID_LEVELS);
                 PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer());
-                DensityFunction finalDensity = pass.register(config.getNoiseRouter().finalDensity());
+                DensityFunction finalDensity = pass.register(config.router().finalDensity());
                 pass.run((x, y, z, pos) -> {
                     if (y < minY || y >= minY + levels) return;
                     int i = ((y - minY) * size + (x - minX)) * size + (z - minZ);
-                    PvAquiferDecision decision = aquifer.decide(pos, finalDensity.sample(pos), false);
+                    PvAquiferDecision decision = aquifer.decide(pos, finalDensity.compute(pos), false);
                     state[i] = (byte) decision.ordinal();
                     carved[i] = (byte) (decision == PvAquiferDecision.SOLID ? aquifer.decide(pos, 0.0, false) : decision).ordinal();
                 });
@@ -237,26 +237,26 @@ class AquiferTerrainPassTest {
      */
     @Test
     void corridorsFloodWhatTheTerrainOpens() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         PvFinalDensity kernel = assertInstanceOf(PvFinalDensity.class, WorldgenTestData.seeded(config, "players-versus:overworld/final_density"));
         long[] counts = new long[4];
         // a chunk of the smoke region, and one full of flooded caves (FloodedNoodleSurveyTest's first area)
         for (ChunkPos chunk : List.of(new ChunkPos(100, 100), new ChunkPos(96, 128), new ChunkPos(97, 128))) {
             TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
             PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer(), "ChunkNoiseSamplerMixin didn't make the aquifer");
-            DensityFunction router = pass.register(config.getNoiseRouter().finalDensity());
+            DensityFunction router = pass.register(config.router().finalDensity());
             DensityFunction entrances = pass.register(kernel.entrances());
             DensityFunction toggle = pass.register(kernel.noodleToggle()), thickness = pass.register(kernel.noodleThickness());
             DensityFunction ridgeA = pass.register(kernel.noodleRidgeA()), ridgeB = pass.register(kernel.noodleRidgeB());
             pass.run((x, y, z, pos) -> {
                 if (!PvNoodle.inCorridorLayers(y)) return;
-                double noodle = PvNoodle.corridorBias(y, entrances.sample(pos)) + PvNoodle.tunnel(pos, toggle, thickness, ridgeA, ridgeB);
+                double noodle = PvNoodle.corridorBias(y, entrances.compute(pos)) + PvNoodle.tunnel(pos, toggle, thickness, ridgeA, ridgeB);
                 assertEquals(noodle, aquifer.corridor(pos), 0.0, () -> "the corridors' noodle at " + x + "," + y + "," + z);
                 counts[0]++;
                 if (noodle > 0.0) return;
                 counts[1]++;
-                double density = router.sample(pos);
+                double density = router.compute(pos);
                 assertTrue(density <= 0.0, () -> "the corridors' noodle opens " + x + "," + y + "," + z + " but the final density is " + density);
                 PvAquiferDecision decision = aquifer.decide(pos, density, false);
                 if (PvAquiferRules.isWater(decision)) counts[2]++;
@@ -276,26 +276,26 @@ class AquiferTerrainPassTest {
      */
     @Test
     void highRiverFloodsWhatTheValleyOpens() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         PvHighRiver river = WorldgenTestData.highRiver(config);
         ChunkPos center = WorldgenTestData.highRiverChunk(config);
         long[] counts = new long[4];
         for (ChunkPos chunk : List.of(center, new ChunkPos(center.x + 1, center.z), new ChunkPos(center.x, center.z - 1))) {
             TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
             PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer(), "ChunkNoiseSamplerMixin didn't make the aquifer");
-            DensityFunction router = pass.register(config.getNoiseRouter().finalDensity());
+            DensityFunction router = pass.register(config.router().finalDensity());
             DensityFunction valley = pass.register(river);
             pass.run((x, y, z, pos) -> {
                 if (y < PvHighRiver.MIN_Y || y > HIGH_RIVER_Y) return;
-                double opening = valley.sample(pos);
+                double opening = valley.compute(pos);
                 PvAquiferDecision own = aquifer.highRiverAt(x, y, z);
                 assertEquals(opening < 0.0, own != PvAquiferDecision.AIR, () -> "the valley at " + x + "," + y + "," + z + " is " + opening
                         + " but the aquifer's own decision is " + own);
                 counts[0]++;
                 if (!(opening < 0.0)) return;
                 counts[1]++;
-                double density = router.sample(pos);
+                double density = router.compute(pos);
                 assertTrue(density <= 0.0, () -> "the valley opens " + x + "," + y + "," + z + " but the final density is " + density);
                 PvAquiferDecision decision = aquifer.decide(pos, density, false);
                 assertEquals(y == HIGH_RIVER_Y ? PvAquiferDecision.HIGH_RIVER_WATER : PvAquiferDecision.HIGH_RIVER_BED_WATER, decision,
@@ -315,8 +315,8 @@ class AquiferTerrainPassTest {
      */
     @Test
     void highRiverBedNeverTouchesOpenAir() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         ChunkPos center = WorldgenTestData.highRiverChunk(config);
         int size = 3 * 16, minX = (center.x - 1) * 16, minZ = (center.z - 1) * 16, minY = PvHighRiver.MIN_Y - 1, levels = HIGH_RIVER_Y + 2 - minY;
         byte[] state = new byte[size * size * levels], carved = new byte[size * size * levels];
@@ -324,11 +324,11 @@ class AquiferTerrainPassTest {
             for (int chunkZ = center.z - 1; chunkZ <= center.z + 1; chunkZ++) {
                 TerrainPass pass = new TerrainPass(config, settings, new ChunkPos(chunkX, chunkZ), NO_FLUID_LEVELS);
                 PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer());
-                DensityFunction finalDensity = pass.register(config.getNoiseRouter().finalDensity());
+                DensityFunction finalDensity = pass.register(config.router().finalDensity());
                 pass.run((x, y, z, pos) -> {
                     if (y < minY || y >= minY + levels) return;
                     int i = ((y - minY) * size + (x - minX)) * size + (z - minZ);
-                    PvAquiferDecision decision = aquifer.decide(pos, finalDensity.sample(pos), false);
+                    PvAquiferDecision decision = aquifer.decide(pos, finalDensity.compute(pos), false);
                     state[i] = (byte) decision.ordinal();
                     carved[i] = (byte) (decision == PvAquiferDecision.SOLID ? aquifer.decide(pos, 0.0, false) : decision).ordinal();
                 });
@@ -376,8 +376,8 @@ class AquiferTerrainPassTest {
 
     @Test
     void aquiferCost() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         List<ChunkPos> chunks = new ArrayList<>();
         for (ChunkPos center : List.of(new ChunkPos(100, 100), coastalChunk(config))) {
             for (int dx = -1; dx <= 1; dx++) {
@@ -395,10 +395,10 @@ class AquiferTerrainPassTest {
                 for (ChunkPos chunk : chunks) {
                     TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
                     PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer());
-                    DensityFunction finalDensity = pass.register(config.getNoiseRouter().finalDensity());
+                    DensityFunction finalDensity = pass.register(config.router().finalDensity());
                     long[] asked = {0};
                     pass.run((x, y, z, pos) -> {
-                        double density = finalDensity.sample(pos);
+                        double density = finalDensity.compute(pos);
                         if (density > 0.0) return;
                         asked[0]++;
                         PvAquiferDecision decision = switch (variant) {
@@ -438,17 +438,17 @@ class AquiferTerrainPassTest {
     }
 
     /** The first chunk found on a coast (vanilla's coast is continentalness -0.19..-0.11), in a fixed search. */
-    private static ChunkPos coastalChunk(NoiseConfig config) {
-        DensityFunction continents = config.getNoiseRouter().continents();
+    private static ChunkPos coastalChunk(RandomState config) {
+        DensityFunction continents = config.router().continents();
         for (int step = 0; step < 4000; step++) {
             ChunkPos chunk = new ChunkPos((step % 63) * 7 - 220, (step / 63) * 7 - 220);
-            double continentalness = continents.sample(new DensityFunction.UnblendedNoisePos(chunk.getCenterX(), 64, chunk.getCenterZ()));
+            double continentalness = continents.compute(new DensityFunction.SinglePointContext(chunk.getMiddleBlockX(), 64, chunk.getMiddleBlockZ()));
             if (continentalness >= -0.19 && continentalness < -0.11) return chunk;
         }
         throw new AssertionError("no coastal chunk found");
     }
 
-    private static DensityFunction interpolated(NoiseConfig config, String function) {
+    private static DensityFunction interpolated(RandomState config, String function) {
         return WorldgenTestData.parse(config, "{\"type\": \"minecraft:interpolated\", \"argument\": \"" + function + "\"}");
     }
 

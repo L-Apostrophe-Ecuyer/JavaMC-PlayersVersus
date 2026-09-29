@@ -2,15 +2,15 @@ package frootloops.versus.mod.items_and_effects.inventory;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public abstract class HotbarCycling {
 
-    public static void doHotbarSwap(PlayerInventory inventory, int numTypesToSwap) {
+    public static void doHotbarSwap(Inventory inventory, int numTypesToSwap) {
         if(numTypesToSwap > 0) {
             for (int i = 0; i < 9; i++) {
                 swapItemsFromSlots(inventory, i, i + numTypesToSwap * 9);
@@ -20,7 +20,7 @@ public abstract class HotbarCycling {
         }
     }
 
-    public static void doHotbarSwap(PlayerInventory inventory) {
+    public static void doHotbarSwap(Inventory inventory) {
         for (int i = 0; i < 9; i++) {
             swapItemsFromSlots(inventory, i, i + 9);
             swapItemsFromSlots(inventory, i, i + 18);
@@ -28,7 +28,7 @@ public abstract class HotbarCycling {
         }
     }
 
-    public static void doInverseHotbarSwap(PlayerInventory inventory) {
+    public static void doInverseHotbarSwap(Inventory inventory) {
         for (int i = 0; i < 9; i++) {
             swapItemsFromSlots(inventory, i + 9, i);
             swapItemsFromSlots(inventory,i + 18, i);
@@ -36,11 +36,11 @@ public abstract class HotbarCycling {
         }
     }
 
-    private static void swapItemsFromSlots(PlayerInventory inventory, int slotOne, int slotTwo) {
+    private static void swapItemsFromSlots(Inventory inventory, int slotOne, int slotTwo) {
         if(slotOne == slotTwo) return;
-        ItemStack stackOne = inventory.getStack(slotOne);
-        ItemStack stackTwo = inventory.getStack(slotTwo);
+        ItemStack stackOne = inventory.getItem(slotOne);
+        ItemStack stackTwo = inventory.getItem(slotTwo);
         if(stackOne.isEmpty() && stackTwo.isEmpty()) return;
-        MinecraftClient.getInstance().interactionManager.clickSlot(0, slotTwo, slotOne, SlotActionType.SWAP, MinecraftClient.getInstance().player);
+        Minecraft.getInstance().gameMode.handleInventoryMouseClick(0, slotTwo, slotOne, ClickType.SWAP, Minecraft.getInstance().player);
     }
 }

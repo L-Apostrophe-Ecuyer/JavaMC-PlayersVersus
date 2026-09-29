@@ -1,28 +1,36 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.CobwebBlock;
-import net.minecraft.entity.*;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.SkeletonEntity;
-import net.minecraft.entity.mob.SpiderEntity;
-import net.minecraft.registry.tag.BiomeTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.*;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.WebBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,14 +39,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Objects;
 
-@Mixin(SpiderEntity.class)
-public class SpiderMixin extends HostileEntity {
-    private static final TrackedData<Boolean> BABY = DataTracker.registerData(SpiderEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+@Mixin(Spider.class)
+public class SpiderMixin extends Monster {
+    private static final EntityDataAccessor<Boolean> BABY = SynchedEntityData.defineId(Spider.class, EntityDataSerializers.BOOLEAN);
 
-    private static final Identifier BABY_SCALE_MODIFIER_ID = Identifier.ofVanilla("baby");
-    private static final EntityAttributeModifier BABY_SCALE_MODIFIER  = new EntityAttributeModifier(BABY_SCALE_MODIFIER_ID, -0.5, EntityAttributeModifier.Operation.ADD_VALUE);
+    private static final ResourceLocation BABY_SCALE_MODIFIER_ID = ResourceLocation.withDefaultNamespace("baby");
+    private static final AttributeModifier BABY_SCALE_MODIFIER  = new AttributeModifier(BABY_SCALE_MODIFIER_ID, -0.5, AttributeModifier.Operation.ADD_VALUE);
 
-    protected SpiderMixin(EntityType<? extends HostileEntity> entityType, World world) {
+    protected SpiderMixin(EntityType<? extends Monster> entityType, Level world) {
         super(entityType, world);
     }
 
@@ -48,64 +56,64 @@ public class SpiderMixin extends HostileEntity {
     }
 
     @Override
-    public float getSoundPitch() {
+    public float getVoicePitch() {
         return this.isBaby() ? (this.random.nextFloat() - this.random.nextFloat()) * 0.3F + 1.5F : (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F;
     }
 
     @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
+    public boolean checkSpawnRules(LevelAccessor world, EntitySpawnReason spawnReason) {
+        if(spawnReason != EntitySpawnReason.NATURAL) return super.checkSpawnRules(world, spawnReason);
 
-        int y = this.getBlockPos().getY();
+        int y = this.blockPosition().getY();
         if(y < -8) return false;
 
-        int ySpawnBonus = world.getBiome(this.getBlockPos()).isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS) ? 32 : 0;
+        int ySpawnBonus = world.getBiome(this.blockPosition()).is(BiomeTags.SPAWNS_WARM_VARIANT_FROGS) ? 32 : 0;
         if(y > 96 + ySpawnBonus) return false;
-        if(y > 64 + ySpawnBonus && world.getLightLevel(LightType.SKY, this.getBlockPos()) > 2) return false;
-        return super.canSpawn(world, spawnReason);
+        if(y > 64 + ySpawnBonus && world.getBrightness(LightLayer.SKY, this.blockPosition()) > 2) return false;
+        return super.checkSpawnRules(world, spawnReason);
     }
 
     @Override
-    protected int computeFallDamage(double fallDistance, float damageMultiplier) {
-        return super.computeFallDamage(fallDistance, damageMultiplier) - 10;
+    protected int calculateFallDamage(double fallDistance, float damageMultiplier) {
+        return super.calculateFallDamage(fallDistance, damageMultiplier) - 10;
     }
 
     @Override
-    protected void dropLoot(ServerWorld world, DamageSource source, boolean causedByPlayer) {
-        super.dropLoot(world, source, causedByPlayer);
+    protected void dropFromLootTable(ServerLevel world, DamageSource source, boolean causedByPlayer) {
+        super.dropFromLootTable(world, source, causedByPlayer);
         if(!this.isBaby()) {
-            super.dropLoot(world, source, causedByPlayer); // Triple loot for the big boys!
-            super.dropLoot(world, source, causedByPlayer);
+            super.dropFromLootTable(world, source, causedByPlayer); // Triple loot for the big boys!
+            super.dropFromLootTable(world, source, causedByPlayer);
         }
     }
 
     @Override
-    public int getExperienceToDrop(ServerWorld world) {
-        if (!this.isBaby()) this.experiencePoints = 17;
-        return super.getExperienceToDrop(world);
+    public int getBaseExperienceReward(ServerLevel world) {
+        if (!this.isBaby()) this.xpReward = 17;
+        return super.getBaseExperienceReward(world);
     }
 
     @Override
     @Nullable
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
-        entityData = super.initialize(world, difficulty, spawnReason, entityData);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData) {
+        entityData = super.finalizeSpawn(world, difficulty, spawnReason, entityData);
         if (entityData == null) {
-            entityData = new SpiderEntity.SpiderData();
-            if ((world.getDifficulty() == Difficulty.HARD || world.getMoonPhase() == 7 || this.getY() < 32.0) && random.nextFloat() < 0.3f * difficulty.getClampedLocalDifficulty()) {
-                ((SpiderEntity.SpiderData)entityData).setEffect(random);
+            entityData = new Spider.SpiderEffectsGroupData();
+            if ((world.getDifficulty() == Difficulty.HARD || world.getMoonPhase() == 7 || this.getY() < 32.0) && random.nextFloat() < 0.3f * difficulty.getSpecialMultiplier()) {
+                ((Spider.SpiderEffectsGroupData)entityData).setRandomEffect(random);
             }
         }
-        if (entityData instanceof SpiderEntity.SpiderData) {
-            SpiderEntity.SpiderData spiderData = (SpiderEntity.SpiderData)entityData;
-            if (spiderData.effect != null && spiderData.effect.hasKeyAndValue()) {
-                this.addStatusEffect(new StatusEffectInstance(spiderData.effect, -1));
+        if (entityData instanceof Spider.SpiderEffectsGroupData) {
+            Spider.SpiderEffectsGroupData spiderData = (Spider.SpiderEffectsGroupData)entityData;
+            if (spiderData.effect != null && spiderData.effect.isBound()) {
+                this.addEffect(new MobEffectInstance(spiderData.effect, -1));
             }
         }
 
-        EntityAttributeInstance instanceMvt = this.getAttributes().getCustomInstance(EntityAttributes.MOVEMENT_SPEED);
-        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_DAMAGE);
-        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
-        EntityAttributeInstance instanceScale = this.getAttributes().getCustomInstance(EntityAttributes.SCALE);
+        AttributeInstance instanceMvt = this.getAttributes().getInstance(Attributes.MOVEMENT_SPEED);
+        AttributeInstance instanceDmg = this.getAttributes().getInstance(Attributes.ATTACK_DAMAGE);
+        AttributeInstance instanceHP = this.getAttributes().getInstance(Attributes.MAX_HEALTH);
+        AttributeInstance instanceScale = this.getAttributes().getInstance(Attributes.SCALE);
 
         if(random.nextFloat() < 0.85F) {
             this.setBaby(true);
@@ -124,39 +132,39 @@ public class SpiderMixin extends HostileEntity {
                 instanceHP.setBaseValue(24.0f);
                 this.setHealth(24.0f);
             }
-            SkeletonEntity skeletonEntity;
-            if (random.nextInt(60) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.getEntityWorld(), SpawnReason.JOCKEY)) != null) {
-                skeletonEntity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.getYaw(), 0.0f);
-                skeletonEntity.initialize(world, difficulty, spawnReason, null);
+            Skeleton skeletonEntity;
+            if (random.nextInt(60) == 0 && (skeletonEntity = EntityType.SKELETON.create(this.level(), EntitySpawnReason.JOCKEY)) != null) {
+                skeletonEntity.snapTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
+                skeletonEntity.finalizeSpawn(world, difficulty, spawnReason, null);
                 skeletonEntity.startRiding(this);
             }
         }
 
-        this.getNavigation().setCanSwim(true);
+        this.getNavigation().setCanFloat(true);
         return entityData;
     }
 
 
-    @Inject(method = "initDataTracker", at = @At("TAIL"))
-    private void addBabyData(DataTracker.Builder builder, CallbackInfo ci) {
-        builder.add(BABY, false);
+    @Inject(method = "defineSynchedData", at = @At("TAIL"))
+    private void addBabyData(SynchedEntityData.Builder builder, CallbackInfo ci) {
+        builder.define(BABY, false);
     }
 
     @Override
-    public boolean tryAttack(ServerWorld world, Entity target) {
-        if (super.tryAttack(world, target)) {
+    public boolean doHurtTarget(ServerLevel world, Entity target) {
+        if (super.doHurtTarget(world, target)) {
             if (target instanceof LivingEntity && !this.isBaby()) {
                 int i = 0;
-                if (this.getEntityWorld().getDifficulty() == Difficulty.NORMAL) i = 3;
-                else if (this.getEntityWorld().getDifficulty() == Difficulty.HARD) i = 6;
+                if (this.level().getDifficulty() == Difficulty.NORMAL) i = 3;
+                else if (this.level().getDifficulty() == Difficulty.HARD) i = 6;
                 if (i > 0) {
-                    ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, i * 10, 0), this);
-                    ((LivingEntity)target).addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, i * 10, 0), this);
+                    ((LivingEntity)target).addEffect(new MobEffectInstance(MobEffects.SLOWNESS, i * 10, 0), this);
+                    ((LivingEntity)target).addEffect(new MobEffectInstance(MobEffects.BLINDNESS, i * 10, 0), this);
                 }
-                if(this.getEntityWorld().getTime() % 5 == 0) {
-                    if(this.getEntityWorld().getBlockState(target.getBlockPos()) == Blocks.AIR.getDefaultState()) {
-                        if (Blocks.COBWEB.getDefaultState().canPlaceAt(this.getEntityWorld(), target.getBlockPos())) {
-                            this.getEntityWorld().setBlockState(target.getBlockPos(), Blocks.COBWEB.getDefaultState());
+                if(this.level().getGameTime() % 5 == 0) {
+                    if(this.level().getBlockState(target.blockPosition()) == Blocks.AIR.defaultBlockState()) {
+                        if (Blocks.COBWEB.defaultBlockState().canSurvive(this.level(), target.blockPosition())) {
+                            this.level().setBlockAndUpdate(target.blockPosition(), Blocks.COBWEB.defaultBlockState());
                         }
                     }
                 }
@@ -168,41 +176,41 @@ public class SpiderMixin extends HostileEntity {
 
     @Override
     public boolean isBaby() {
-        return this.getDataTracker().get(BABY);
+        return this.getEntityData().get(BABY);
     }
 
     @Override
     public void setBaby(boolean baby) {
-        this.getDataTracker().set(BABY, baby);
+        this.getEntityData().set(BABY, baby);
     }
 
     @Override
-    public void onTrackedDataSet(TrackedData<?> data) {
-        if (BABY.equals(data)) {this.calculateDimensions();}
-        super.onTrackedDataSet(data);
+    public void onSyncedDataUpdated(EntityDataAccessor<?> data) {
+        if (BABY.equals(data)) {this.refreshDimensions();}
+        super.onSyncedDataUpdated(data);
     }
 
     @Override
-    protected void writeCustomData(WriteView view) {
-        super.writeCustomData(view);
+    protected void addAdditionalSaveData(ValueOutput view) {
+        super.addAdditionalSaveData(view);
         view.putBoolean("IsBaby", this.isBaby());
     }
 
     @Override
-    protected void readCustomData(ReadView view) {
-        super.readCustomData(view);
-        this.setBaby(view.getBoolean("IsBaby", false));
+    protected void readAdditionalSaveData(ValueInput view) {
+        super.readAdditionalSaveData(view);
+        this.setBaby(view.getBooleanOr("IsBaby", false));
     }
 
     @Override
-    public float getScaleFactor() {
+    public float getAgeScale() {
         return this.isBaby() ? 0.85F : 1.3F;
     }
 
     @Override
-    public void slowMovement(BlockState state, Vec3d multiplier) {
-        if (!(state.getBlock() instanceof CobwebBlock)) {
-            super.slowMovement(state, multiplier);
+    public void makeStuckInBlock(BlockState state, Vec3 multiplier) {
+        if (!(state.getBlock() instanceof WebBlock)) {
+            super.makeStuckInBlock(state, multiplier);
         }
     }
 }

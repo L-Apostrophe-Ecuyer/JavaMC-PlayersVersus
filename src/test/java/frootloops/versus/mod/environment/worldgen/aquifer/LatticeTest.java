@@ -1,13 +1,13 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
 import frootloops.versus.mod.environment.worldgen.TestGame;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.ToDoubleFunction;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,16 +20,16 @@ class LatticeTest {
     }
 
     /** A test function that counts its samples. */
-    private static final class Counting implements DensityFunction.Base {
-        private final ToDoubleFunction<NoisePos> function;
+    private static final class Counting implements DensityFunction.SimpleFunction {
+        private final ToDoubleFunction<FunctionContext> function;
         int samples;
 
-        Counting(ToDoubleFunction<NoisePos> function) {
+        Counting(ToDoubleFunction<FunctionContext> function) {
             this.function = function;
         }
 
         @Override
-        public double sample(NoisePos pos) {
+        public double compute(FunctionContext pos) {
             this.samples++;
             return this.function.applyAsDouble(pos);
         }
@@ -45,13 +45,13 @@ class LatticeTest {
         }
 
         @Override
-        public CodecHolder<? extends DensityFunction> getCodecHolder() {
+        public KeyDispatchDataCodec<? extends DensityFunction> codec() {
             throw new UnsupportedOperationException("test function");
         }
     }
 
-    private static DensityFunction.NoisePos at(int x, int y, int z) {
-        return new DensityFunction.UnblendedNoisePos(x, y, z);
+    private static DensityFunction.FunctionContext at(int x, int y, int z) {
+        return new DensityFunction.SinglePointContext(x, y, z);
     }
 
     @Test
@@ -59,8 +59,8 @@ class LatticeTest {
         Counting linear = new Counting(pos -> 0.25 * pos.blockX() - 0.5 * pos.blockY() + 0.125 * pos.blockZ() + 3.0);
         ChunkPos chunk = new ChunkPos(-3, 7);
         Lattice lattice = new Lattice(linear, chunk, -32, 64);
-        for (int x = chunk.getStartX(); x <= chunk.getEndX(); x++) {
-            for (int z = chunk.getStartZ(); z <= chunk.getEndZ(); z++) {
+        for (int x = chunk.getMinBlockX(); x <= chunk.getMaxBlockX(); x++) {
+            for (int z = chunk.getMinBlockZ(); z <= chunk.getMaxBlockZ(); z++) {
                 for (int y = -32; y < 64; y++) {
                     double expected = 0.25 * x - 0.5 * y + 0.125 * z + 3.0;
                     assertEquals(expected, lattice.applyAsDouble(at(x, y, z)), 1e-9, "at " + x + "," + y + "," + z);
@@ -77,8 +77,8 @@ class LatticeTest {
         Counting wavy = new Counting(pos -> Math.sin(pos.blockX() * 0.7) * Math.cos(pos.blockY() * 0.3) + pos.blockZ() * pos.blockZ() * 0.01);
         ChunkPos chunk = new ChunkPos(12, -40);
         Lattice lattice = new Lattice(wavy, chunk, -4, 32);
-        for (int x = chunk.getStartX(); x <= chunk.getEndX(); x += 4) {
-            for (int z = chunk.getStartZ(); z <= chunk.getEndZ(); z += 4) {
+        for (int x = chunk.getMinBlockX(); x <= chunk.getMaxBlockX(); x += 4) {
+            for (int z = chunk.getMinBlockZ(); z <= chunk.getMaxBlockZ(); z += 4) {
                 for (int y = -4; y < 32; y += 4) {
                     assertEquals(wavy.function.applyAsDouble(at(x, y, z)), lattice.applyAsDouble(at(x, y, z)), 0.0);
                 }

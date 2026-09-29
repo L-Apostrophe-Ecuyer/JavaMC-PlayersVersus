@@ -2,11 +2,6 @@ package frootloops.versus.mod.environment.worldgen.density;
 
 import frootloops.versus.mod.environment.worldgen.TerrainPass;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.gen.chunk.AquiferSampler;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -19,6 +14,11 @@ import java.util.Random;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.RandomState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -43,13 +43,13 @@ class TerrainPortTest {
     /** Every height where a band or gradient of the formulas starts or ends. */
     private static final int[] EDGES = {-64, -60, -52, -40, -32, -16, -10, -8, -4, 0, 8, 16, 18, 20, 28, 30, 32, 36, 38, 40, 44,
             48, 50, 54, 56, 66, 68, 72, 74, 90, 96, 120, 128, 240, 256};
-    private static final AquiferSampler.FluidLevelSampler NO_FLUID_LEVELS = (x, y, z) -> {
+    private static final Aquifer.FluidPicker NO_FLUID_LEVELS = (x, y, z) -> {
         throw new UnsupportedOperationException("not needed");
     };
 
     @Test
     void kernelsGiveTheJsonsValues() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
         Map<String, DensityFunction[]> pairs = new LinkedHashMap<>();
         for (String name : PORTED) {
             pairs.put(name, new DensityFunction[]{WorldgenTestData.seeded(config, NEW + name), WorldgenTestData.seeded(config, OLD + name)});
@@ -69,25 +69,25 @@ class TerrainPortTest {
         for (int i = 0; i < 20000; i++) {
             int x = random.nextInt(12000) - 6000, z = random.nextInt(12000) - 6000;
             int y = i % 2 == 0 ? edgeYs.get(random.nextInt(edgeYs.size())) : random.nextInt(336) - 64;
-            DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
+            DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(x, y, z);
             boolean corridor = inCorridorZone(y, corridorEntrances, pos);
             double valley = riverValley(y, highRiver, pos);
             for (Map.Entry<String, DensityFunction[]> pair : pairs.entrySet()) {
                 boolean finalDensity = pair.getKey().equals("final_density") || pair.getKey().equals(AS_VANILLA_TYPES);
-                double expected = corridor && finalDensity ? pairs.get("final_density")[0].sample(pos)
-                        : finalDensity ? Math.min(pair.getValue()[1].sample(pos), valley) : pair.getValue()[1].sample(pos);
-                double actual = pair.getValue()[0].sample(pos);
+                double expected = corridor && finalDensity ? pairs.get("final_density")[0].compute(pos)
+                        : finalDensity ? Math.min(pair.getValue()[1].compute(pos), valley) : pair.getValue()[1].compute(pos);
+                double actual = pair.getValue()[0].compute(pos);
                 assertEquals(expected, actual, 0.0, () -> pair.getKey() + " at " + x + "," + y + "," + z + (corridor ? " (in the corridors' zone)" : ""));
             }
             if (corridor) reached.merge("corridors' zone", 1, Integer::sum);
             if (valley < 0.0) reached.merge("high river's valley", 1, Integer::sum);
-            double yValue = DensityOps.yValue(y), ridge = ridges.sample(pos), cheese = slopedCheese.sample(pos);
+            double yValue = DensityOps.yValue(y), ridge = ridges.compute(pos), cheese = slopedCheese.compute(pos);
             if (yValue >= 48.0 && yValue < 256.0 && Math.abs(ridge) < 0.22) reached.merge("river valley", 1, Integer::sum);
             if (yValue >= 54.0 && yValue < 128.0 && Math.abs(ridge) < 0.2) reached.merge("river depth", 1, Integer::sum);
-            if (jaggedness.sample(pos) != 0.0) reached.merge("jagged peaks", 1, Integer::sum);
+            if (jaggedness.compute(pos) != 0.0) reached.merge("jagged peaks", 1, Integer::sum);
             reached.merge(cheese < 1.5625 ? "surface branch" : "cave branch", 1, Integer::sum);
             if (yValue >= 0.0 && yValue < 44.0) reached.merge("ramen band", 1, Integer::sum);
-            if (!(toggle.sample(pos) < -0.2)) reached.merge("noodles on", 1, Integer::sum);
+            if (!(toggle.compute(pos) < -0.2)) reached.merge("noodles on", 1, Integer::sum);
         }
         System.out.println("[terrain port] " + pairs.keySet() + " equal the JSON at 20000 points; reached " + reached);
         for (String branch : List.of("river valley", "river depth", "jagged peaks", "surface branch", "cave branch", "ramen band", "noodles on",
@@ -104,8 +104,8 @@ class TerrainPortTest {
      */
     @Test
     void kernelsGiveTheJsonsValuesInTheTerrainPass() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         long totalValleyBlocks = 0;
         for (ChunkPos chunk : testChunks(config)) {
             TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
@@ -134,9 +134,9 @@ class TerrainPortTest {
                     if (names.get(i).equals("depth") && (Math.floorMod(x, 4) != 0 || Math.floorMod(z, 4) != 0)) continue;
                     boolean isFinalDensity = i == finalDensity || names.get(i).equals(AS_VANILLA_TYPES);
                     boolean againstKernel = corridor && isFinalDensity;
-                    double expected = againstKernel ? news.get(finalDensity).sample(pos)
-                            : isFinalDensity ? Math.min(olds.get(i).sample(pos), valley) : olds.get(i).sample(pos);
-                    double actual = news.get(i).sample(pos);
+                    double expected = againstKernel ? news.get(finalDensity).compute(pos)
+                            : isFinalDensity ? Math.min(olds.get(i).compute(pos), valley) : olds.get(i).compute(pos);
+                    double actual = news.get(i).compute(pos);
                     int index = i;
                     assertEquals(expected, actual, 0.0, () -> names.get(index) + " at " + x + "," + y + "," + z + " (chunk " + chunk.x + "," + chunk.z
                             + (againstKernel ? ", in the corridors' zone" : "") + ")");
@@ -158,8 +158,8 @@ class TerrainPortTest {
      */
     @Test
     void finalDensityCost() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
         List<ChunkPos> chunks = testChunks(config);
         Map<String, Supplier<DensityFunction>> variants = new LinkedHashMap<>();
         variants.put("the old final density", () -> WorldgenTestData.seeded(config, OLD + "final_density"));
@@ -173,7 +173,7 @@ class TerrainPortTest {
                 for (ChunkPos chunk : chunks) {
                     TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
                     DensityFunction finalDensity = pass.register(variant.getValue().get());
-                    pass.run((x, y, z, pos) -> sink[0] += finalDensity.sample(pos));
+                    pass.run((x, y, z, pos) -> sink[0] += finalDensity.compute(pos));
                 }
                 if (round >= 2) nanos.merge(variant.getKey(), System.nanoTime() - start, Long::sum);
             }
@@ -184,27 +184,27 @@ class TerrainPortTest {
         assertTrue(Double.isFinite(sink[0]));
     }
 
-    private static PvFinalDensity kernel(NoiseConfig config) {
+    private static PvFinalDensity kernel(RandomState config) {
         return assertInstanceOf(PvFinalDensity.class, WorldgenTestData.seeded(config, NEW + "final_density"));
     }
 
     /** The high river's valley at a block, which the JSON never had: infinite outside its heights, as the final density asks. */
-    private static double riverValley(int y, DensityFunction highRiver, DensityFunction.NoisePos pos) {
-        return y >= PvHighRiver.MIN_Y && y < PvHighRiver.MAX_Y ? highRiver.sample(pos) : Double.POSITIVE_INFINITY;
+    private static double riverValley(int y, DensityFunction highRiver, DensityFunction.FunctionContext pos) {
+        return y >= PvHighRiver.MIN_Y && y < PvHighRiver.MAX_Y ? highRiver.compute(pos) : Double.POSITIVE_INFINITY;
     }
 
     /** Whether the flooded corridors change the noodle's bias at a block, which the JSON never did. */
-    private static boolean inCorridorZone(int y, DensityFunction corridorEntrances, DensityFunction.NoisePos pos) {
-        return PvNoodle.inCorridorLayers(y) && PvNoodle.corridorBias(y, corridorEntrances.sample(pos)) != PvNoodle.bias(y);
+    private static boolean inCorridorZone(int y, DensityFunction corridorEntrances, DensityFunction.FunctionContext pos) {
+        return PvNoodle.inCorridorLayers(y) && PvNoodle.corridorBias(y, corridorEntrances.compute(pos)) != PvNoodle.bias(y);
     }
 
     /** The final density in the vanilla types it takes when C2ME's compiler is active. */
-    private static DensityFunction asVanillaTypes(NoiseConfig config) {
+    private static DensityFunction asVanillaTypes(RandomState config) {
         return assertInstanceOf(PvFinalDensity.class, WorldgenTestData.seeded(config, NEW + "final_density")).asVanillaTypes();
     }
 
     /** The smoke test's chunk, plus the first chunks found with a river valley, with jagged peaks and with the high river. */
-    private static List<ChunkPos> testChunks(NoiseConfig config) {
+    private static List<ChunkPos> testChunks(RandomState config) {
         DensityFunction ridges = WorldgenTestData.seeded(config, "minecraft:overworld/ridges");
         DensityFunction jaggedness = WorldgenTestData.seeded(config, "minecraft:overworld/jaggedness");
         // inland (vanilla's coast starts at continentalness -0.11), so the valley is cut into land
@@ -213,9 +213,9 @@ class TerrainPortTest {
         ChunkPos river = null, peaks = null;
         for (int step = 0; step < 4000 && (river == null || peaks == null); step++) {
             int chunkX = (step % 63) * 7 - 220, chunkZ = (step / 63) * 7 - 220;
-            DensityFunction.NoisePos center = new DensityFunction.UnblendedNoisePos(chunkX * 16 + 8, 64, chunkZ * 16 + 8);
-            if (river == null && Math.abs(ridges.sample(center)) < 0.05 && continents.sample(center) > -0.11) river = new ChunkPos(chunkX, chunkZ);
-            if (peaks == null && jaggedness.sample(center) > 0.2) peaks = new ChunkPos(chunkX, chunkZ);
+            DensityFunction.FunctionContext center = new DensityFunction.SinglePointContext(chunkX * 16 + 8, 64, chunkZ * 16 + 8);
+            if (river == null && Math.abs(ridges.compute(center)) < 0.05 && continents.compute(center) > -0.11) river = new ChunkPos(chunkX, chunkZ);
+            if (peaks == null && jaggedness.compute(center) > 0.2) peaks = new ChunkPos(chunkX, chunkZ);
         }
         assertTrue(river != null && peaks != null, "no river or peak chunk found: " + river + ", " + peaks);
         chunks.add(river);

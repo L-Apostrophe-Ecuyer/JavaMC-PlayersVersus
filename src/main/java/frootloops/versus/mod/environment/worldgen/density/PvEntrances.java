@@ -2,9 +2,9 @@ package frootloops.versus.mod.environment.worldgen.density;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.density.DensityOps.gradient;
 
@@ -40,16 +40,16 @@ public record PvEntrances(DensityFunction continents, DensityFunction spaghettiR
                           double tunnelsMin, double minValue, double maxValue) implements DensityFunction {
 
     public static final MapCodec<PvEntrances> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DensityFunction.FUNCTION_CODEC.fieldOf("continents").forGetter(PvEntrances::continents),
-            DensityFunction.FUNCTION_CODEC.fieldOf("spaghetti_roughness").forGetter(PvEntrances::spaghettiRoughness),
-            DensityFunction.FUNCTION_CODEC.fieldOf("ramen_ridge").forGetter(PvEntrances::ramenRidge),
-            DensityFunction.FUNCTION_CODEC.fieldOf("ramen_noodle").forGetter(PvEntrances::ramenNoodle),
-            DensityFunction.FUNCTION_CODEC.fieldOf("cave_entrance").forGetter(PvEntrances::caveEntrance),
-            DensityFunction.FUNCTION_CODEC.fieldOf("spaghetti_1").forGetter(PvEntrances::spaghetti1),
-            DensityFunction.FUNCTION_CODEC.fieldOf("spaghetti_2").forGetter(PvEntrances::spaghetti2),
-            DensityFunction.FUNCTION_CODEC.fieldOf("spaghetti_thickness").forGetter(PvEntrances::spaghettiThickness)
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("continents").forGetter(PvEntrances::continents),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("spaghetti_roughness").forGetter(PvEntrances::spaghettiRoughness),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("ramen_ridge").forGetter(PvEntrances::ramenRidge),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("ramen_noodle").forGetter(PvEntrances::ramenNoodle),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("cave_entrance").forGetter(PvEntrances::caveEntrance),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("spaghetti_1").forGetter(PvEntrances::spaghetti1),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("spaghetti_2").forGetter(PvEntrances::spaghetti2),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("spaghetti_thickness").forGetter(PvEntrances::spaghettiThickness)
     ).apply(instance, PvEntrances::new));
-    private static final CodecHolder<PvEntrances> CODEC_HOLDER = CodecHolder.of(CODEC);
+    private static final KeyDispatchDataCodec<PvEntrances> CODEC_HOLDER = KeyDispatchDataCodec.of(CODEC);
 
     /** The ramen shape's largest value: its three gradients peak at 1, 1.4 and 1.2. */
     private static final double RAMEN_SHAPE_MAX = 1.0 * 1.4 * 1.2;
@@ -74,48 +74,48 @@ public record PvEntrances(DensityFunction continents, DensityFunction spaghettiR
     }
 
     @Override
-    public double sample(NoisePos pos) {
+    public double compute(FunctionContext pos) {
         int y = pos.blockY();
         double yValue = DensityOps.yValue(y);
         double ramen = yValue >= 0.0 && yValue < 44.0 ? this.ramen(pos, y) : 0.0;
-        double base = Math.min(this.continents.sample(pos), 0.1) * -0.1
+        double base = Math.min(this.continents.compute(pos), 0.1) * -0.1
                 + ((gradient(y, 96, 72, 0.15, 0.0) + gradient(y, 66, 56, -0.1, 0.025))
                 + (gradient(y, 48, 38, 0.0, -0.155) + (gradient(y, 28, 18, 0.0, 0.265)
                 + (gradient(y, -16, -40, 0.0, -0.2) + gradient(y, -40, -60, 0.0, 0.215)))));
-        double entrance = (this.caveEntrance.sample(pos) + 0.37) + gradient(y, -10, 30, 0.3, 0.0);
+        double entrance = (this.caveEntrance.compute(pos) + 0.37) + gradient(y, -10, 30, 0.3, 0.0);
         double caves = entrance < this.tunnelsMin ? entrance : Math.min(entrance, this.tunnels(pos));
         return ramen + (base + caves);
     }
 
     /** Ramen caves: a band of noodle-noise tunnels that fades in from y -4 and out towards y 44. */
-    private double ramen(NoisePos pos, int y) {
+    private double ramen(FunctionContext pos, int y) {
         double shape = DensityOps.mul(DensityOps.mul(gradient(y, -4, 8, 0.0, 1.0), gradient(y, 8, 16, 1.4, 1.0)), gradient(y, 16, 44, 1.2, 0.0));
         double carved = shape == 0.0 ? 0.0
-                : shape * ((this.ramenRidge.sample(pos) * 0.08 + -0.2) + Math.abs(this.ramenNoodle.sample(pos)));
+                : shape * ((this.ramenRidge.compute(pos) * 0.08 + -0.2) + Math.abs(this.ramenNoodle.compute(pos)));
         return Math.min(0.0, (carved + 0.1) * 2.0);
     }
 
     /** Spaghetti tunnels. */
-    private double tunnels(NoisePos pos) {
-        double spaghetti = Math.max(this.spaghetti1.sample(pos), this.spaghetti2.sample(pos))
-                + (this.spaghettiThickness.sample(pos) * -0.011499999999999996 + -0.0765);
-        return this.spaghettiRoughness.sample(pos) + MathHelper.clamp(spaghetti, -1.0, 1.0);
+    private double tunnels(FunctionContext pos) {
+        double spaghetti = Math.max(this.spaghetti1.compute(pos), this.spaghetti2.compute(pos))
+                + (this.spaghettiThickness.compute(pos) * -0.011499999999999996 + -0.0765);
+        return this.spaghettiRoughness.compute(pos) + Mth.clamp(spaghetti, -1.0, 1.0);
     }
 
     @Override
-    public void fill(double[] densities, EachApplier applier) {
-        applier.fill(densities, this);
+    public void fillArray(double[] densities, ContextProvider applier) {
+        applier.fillAllDirectly(densities, this);
     }
 
     @Override
-    public DensityFunction apply(DensityFunctionVisitor visitor) {
-        return visitor.apply(new PvEntrances(this.continents.apply(visitor), this.spaghettiRoughness.apply(visitor),
-                this.ramenRidge.apply(visitor), this.ramenNoodle.apply(visitor), this.caveEntrance.apply(visitor),
-                this.spaghetti1.apply(visitor), this.spaghetti2.apply(visitor), this.spaghettiThickness.apply(visitor)));
+    public DensityFunction mapAll(Visitor visitor) {
+        return visitor.apply(new PvEntrances(this.continents.mapAll(visitor), this.spaghettiRoughness.mapAll(visitor),
+                this.ramenRidge.mapAll(visitor), this.ramenNoodle.mapAll(visitor), this.caveEntrance.mapAll(visitor),
+                this.spaghetti1.mapAll(visitor), this.spaghetti2.mapAll(visitor), this.spaghettiThickness.mapAll(visitor)));
     }
 
     @Override
-    public CodecHolder<? extends DensityFunction> getCodecHolder() {
+    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
         return CODEC_HOLDER;
     }
 }

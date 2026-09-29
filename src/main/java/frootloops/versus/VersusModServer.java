@@ -5,22 +5,17 @@ import frootloops.versus.mod.players.death.RespawnNearbyPayload;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import net.minecraft.world.gen.noise.NoiseConfig;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Climate;
 import java.util.UUID;
 
 public class VersusModServer implements DedicatedServerModInitializer {
 
     private static MinecraftServer serverInstance;
-    private static MultiNoiseUtil.MultiNoiseSampler multiNoiseSampler;
-    private static World prevWorld;
+    private static Climate.Sampler multiNoiseSampler;
+    private static Level prevWorld;
 
     @Override
     public void onInitializeServer() {
@@ -29,25 +24,25 @@ public class VersusModServer implements DedicatedServerModInitializer {
 
     public static void addPacketRecievers(){
         ServerPlayNetworking.registerGlobalReceiver(RespawnNearbyPayload.ID, (payload, context) -> {
-            context.player().getEntityWorld().getServer().execute(() -> {
-                RespawnNearLastDeath.respawnPlayerNearTheirDeath(context.player(), context.player().getEntityWorld().getServer(), payload.playerUUID());
+            context.player().level().getServer().execute(() -> {
+                RespawnNearLastDeath.respawnPlayerNearTheirDeath(context.player(), context.player().level().getServer(), payload.playerUUID());
             });
         });
     }
 
-    public static ServerWorld getServerWorld(World world) {
+    public static ServerLevel getServerWorld(Level world) {
         if(serverInstance == null || !serverInstance.isRunning()) serverInstance = world.getServer();
-        if(serverInstance != null) return serverInstance.getWorld(world.getRegistryKey());
+        if(serverInstance != null) return serverInstance.getLevel(world.dimension());
         return null;
     }
 
-    public static MultiNoiseUtil.MultiNoiseSampler getNoiseSampler(World world) {
+    public static Climate.Sampler getNoiseSampler(Level world) {
         if(multiNoiseSampler != null && world == prevWorld) {
             return multiNoiseSampler;
         }
         else {
-            ServerWorld serverWorld = getServerWorld(world);
-            multiNoiseSampler = (serverWorld == null) ? null : getServerWorld(world).getChunkManager().getNoiseConfig().getMultiNoiseSampler();
+            ServerLevel serverWorld = getServerWorld(world);
+            multiNoiseSampler = (serverWorld == null) ? null : getServerWorld(world).getChunkSource().randomState().sampler();
             return multiNoiseSampler;
         }
     }

@@ -5,15 +5,15 @@ import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
 import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.gen.chunk.AquiferSampler;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.function.ToDoubleFunction;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BAND_REACH;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MAX_Y;
@@ -28,7 +28,7 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * in low caves, dry caves everywhere else, lava at the bottom, and the high river's water at y 80. The rules live in
  * {@link PvAquiferRules}.
  *
- * <p>One instance exists per {@link net.minecraft.world.gen.chunk.ChunkNoiseSampler}, created by
+ * <p>One instance exists per {@link net.minecraft.world.level.levelgen.NoiseChunk}, created by
  * {@code ChunkNoiseSamplerMixin} for Players Versus generators only. It answers the terrain pass, the carvers (which
  * pass {@code density = 0}) and heightmap probes.
  *
@@ -48,7 +48,7 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * lattices and the ridge cache reach past the chunk too, and give there what the neighbouring chunk gives, so both
  * chunks agree on the walls along their border.
  */
-public final class PvAquifer implements AquiferSampler {
+public final class PvAquifer implements Aquifer {
 
     /**
      * The vertical size of the terrain pass's cells ({@code size_vertical} 2 in the noise settings, times 4), which
@@ -64,7 +64,7 @@ public final class PvAquifer implements AquiferSampler {
     private static final int LEVELS = SEA_LEVEL - MIN_Y;
     private static final PvAquiferDecision[] DECISIONS = PvAquiferDecision.values();
 
-    private final FluidLevelSampler fluidLevelSampler;
+    private final FluidPicker fluidLevelSampler;
     private final AquiferFloodedness floodednessInputs;
     private final int originX, originZ;
     private final Lattice depth, continentalness, entrances, basinInner;
@@ -87,15 +87,15 @@ public final class PvAquifer implements AquiferSampler {
     private byte[][] positions;
     /** Where {@link #atPosition} samples the noises; one per aquifer, which only one thread uses at a time. */
     private final Position position = new Position();
-    private final ToDoubleFunction<DensityFunction.NoisePos> floodedness = this::floodedness;
-    private final ToDoubleFunction<DensityFunction.NoisePos> spread = this::spread;
-    private final ToDoubleFunction<DensityFunction.NoisePos> corridor = this::corridor;
+    private final ToDoubleFunction<DensityFunction.FunctionContext> floodedness = this::floodedness;
+    private final ToDoubleFunction<DensityFunction.FunctionContext> spread = this::spread;
+    private final ToDoubleFunction<DensityFunction.FunctionContext> corridor = this::corridor;
     private final PvAquiferRules.Positions atPosition = this::atPosition;
     /** Blocks whose own decision was computed, for tests and the benchmark. */
     private int computedPositions;
 
     /**
-     * Only read right after {@link #apply} returned a fluid, and every fluid decision sets it, so it never leaks a
+     * Only read right after {@link #computeSubstance} returned a fluid, and every fluid decision sets it, so it never leaks a
      * stale value between positions.
      */
     private boolean needsFluidTick;
@@ -104,19 +104,19 @@ public final class PvAquifer implements AquiferSampler {
      * @param depth the chunk's own router's {@code depth}: sampled at lattice points, where its 2D parts come from the
      *              chunk's cache
      */
-    public PvAquifer(AquiferInputs inputs, DensityFunction depth, ChunkPos chunkPos, FluidLevelSampler fluidLevelSampler) {
+    public PvAquifer(AquiferInputs inputs, DensityFunction depth, ChunkPos chunkPos, FluidPicker fluidLevelSampler) {
         this.fluidLevelSampler = fluidLevelSampler;
         this.floodednessInputs = inputs.floodedness();
-        this.originX = chunkPos.getStartX();
-        this.originZ = chunkPos.getStartZ();
+        this.originX = chunkPos.getMinBlockX();
+        this.originZ = chunkPos.getMinBlockZ();
         this.depth = new Lattice(depth, chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL, CELL_HEIGHT);
         this.continentalness = new Lattice(this.floodednessInputs.continentalness(), chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL, CELL_HEIGHT);
         Lattice entrances = new Lattice(this.floodednessInputs.entrances(), chunkPos, SEA_BAND_MIN_Y, SEA_LEVEL, CELL_HEIGHT);
         this.entrances = entrances;
         AquiferSpread spread = inputs.spread();
         this.basinInner = new Lattice((x, y, z) -> {
-            DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(x, y, z);
-            return AquiferFormulas.basinInner(y, entrances.exactAt(x, y, z), spread.noodle().sample(pos), spread.surface().sample(pos));
+            DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(x, y, z);
+            return AquiferFormulas.basinInner(y, entrances.exactAt(x, y, z), spread.noodle().compute(pos), spread.surface().compute(pos));
         }, chunkPos, BASIN_MIN_Y, BASIN_MAX_Y, CELL_HEIGHT);
         if (!(PvWorldgen.unwrap(spread.noodle()) instanceof PvNoodle noodle)) {
             throw new IllegalStateException("players-versus:aquifer_spread needs players-versus:noodle as its noodle, found " + spread.noodle());
@@ -133,17 +133,17 @@ public final class PvAquifer implements AquiferSampler {
 
     @Override
     @Nullable
-    public BlockState apply(DensityFunction.NoisePos pos, double density) {
+    public BlockState computeSubstance(DensityFunction.FunctionContext pos, double density) {
         int y = pos.blockY();
         boolean lavaLevel = density <= 0.0
-                && this.fluidLevelSampler.getFluidLevel(pos.blockX(), y, pos.blockZ()).getBlockState(y).isOf(Blocks.LAVA);
+                && this.fluidLevelSampler.getFluidLevel(pos.blockX(), y, pos.blockZ()).at(y).is(Blocks.LAVA);
         PvAquiferDecision decision = this.decide(pos, density, lavaLevel);
         this.needsFluidTick = decision.needsFluidTick;
         return decision.state;
     }
 
     /** What the aquifer places at {@code pos}; {@code /pvwg probe} asks this too. */
-    public PvAquiferDecision decide(DensityFunction.NoisePos pos, double density, boolean lavaLevel) {
+    public PvAquiferDecision decide(DensityFunction.FunctionContext pos, double density, boolean lavaLevel) {
         return PvAquiferRules.decide(pos, density, lavaLevel, this.atPosition);
     }
 
@@ -175,16 +175,16 @@ public final class PvAquifer implements AquiferSampler {
     }
 
     @Override
-    public boolean needsFluidTick() {
+    public boolean shouldScheduleFluidUpdate() {
         return this.needsFluidTick;
     }
 
     /** F at a block, from lattice inputs; {@code /pvwg probe} shows it next to the exact value. */
-    public double floodedness(DensityFunction.NoisePos pos) {
+    public double floodedness(DensityFunction.FunctionContext pos) {
         int x = pos.blockX(), y = pos.blockY(), z = pos.blockZ();
         double entrances = this.entrances.at(x, y, z);
         double seaFloodedness = AquiferFormulas.seaFloodedness(y, this.depth.at(x, y, z), this.continentalness.at(x, y, z),
-                entrances, entrances, this.ridge(x, z), this.floodednessInputs.surface().sample(pos));
+                entrances, entrances, this.ridge(x, z), this.floodednessInputs.surface().compute(pos));
         return AquiferFormulas.floodedness(y, seaFloodedness, this.floodednessInputs.ramen(), pos);
     }
 
@@ -202,7 +202,7 @@ public final class PvAquifer implements AquiferSampler {
     }
 
     /** S at a block, from the lattice of its inner part. */
-    public double spread(DensityFunction.NoisePos pos) {
+    public double spread(DensityFunction.FunctionContext pos) {
         int y = pos.blockY();
         return AquiferFormulas.spread(y, this.basinInner.at(pos.blockX(), y, pos.blockZ()));
     }
@@ -212,7 +212,7 @@ public final class PvAquifer implements AquiferSampler {
      * ({@link PvNoodle#corridorBias}): the same doubles as the terrain pass, since the entrance value and the noodle's
      * inputs come from lattices on its cells. At most 0 where the corridor opens the block.
      */
-    public double corridor(DensityFunction.NoisePos pos) {
+    public double corridor(DensityFunction.FunctionContext pos) {
         int x = pos.blockX(), y = pos.blockY(), z = pos.blockZ();
         double bias = PvNoodle.corridorBias(y, this.entrances.at(x, y, z));
         double on = this.noodleToggle.at(x, y, z);
@@ -224,7 +224,7 @@ public final class PvAquifer implements AquiferSampler {
     private double ridge(int x, int z) {
         int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
         if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
-            return this.floodednessInputs.ridge().sample(new DensityFunction.UnblendedNoisePos(x, 0, z));
+            return this.floodednessInputs.ridge().compute(new DensityFunction.SinglePointContext(x, 0, z));
         }
         if (this.ridge == null) {
             this.ridge = new double[SIDE * SIDE];
@@ -233,7 +233,7 @@ public final class PvAquifer implements AquiferSampler {
         int index = localX * SIDE + localZ;
         double value = this.ridge[index];
         if (Double.isNaN(value)) {
-            value = this.floodednessInputs.ridge().sample(new DensityFunction.UnblendedNoisePos(x, 0, z));
+            value = this.floodednessInputs.ridge().compute(new DensityFunction.SinglePointContext(x, 0, z));
             this.ridge[index] = value;
         }
         return value;
@@ -256,7 +256,7 @@ public final class PvAquifer implements AquiferSampler {
     }
 
     /** A block position to sample the noises at, set for each block {@link #atPosition} computes. */
-    private static final class Position implements DensityFunction.NoisePos {
+    private static final class Position implements DensityFunction.FunctionContext {
         private int x, y, z;
 
         Position set(int x, int y, int z) {

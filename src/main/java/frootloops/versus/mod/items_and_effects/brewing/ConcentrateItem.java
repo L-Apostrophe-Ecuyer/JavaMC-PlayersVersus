@@ -1,52 +1,52 @@
 package frootloops.versus.mod.items_and_effects.brewing;
 
-import net.minecraft.block.Block;
-import net.minecraft.component.type.ConsumableComponent;
-import net.minecraft.component.type.ConsumableComponents;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.TintedParticleEffect;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.*;
-import net.minecraft.world.World;
-
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import java.util.List;
 
 
 public class ConcentrateItem extends BlockItem {
 
-    public static final ConsumableComponent CONCENTRATE_COMPONENT = ConsumableComponents.food().consumeSeconds(2.0f).consumeEffect(new ApplyEffectsConsumeEffect(List.of(new StatusEffectInstance(StatusEffects.HUNGER, 120, 2),new StatusEffectInstance(StatusEffects.NAUSEA, 140, 2)))).build();
+    public static final Consumable CONCENTRATE_COMPONENT = Consumables.defaultFood().consumeSeconds(2.0f).onConsume(new ApplyStatusEffectsConsumeEffect(List.of(new MobEffectInstance(MobEffects.HUNGER, 120, 2),new MobEffectInstance(MobEffects.NAUSEA, 140, 2)))).build();
 
-    protected final RegistryEntry<StatusEffect> effect;
+    protected final Holder<MobEffect> effect;
     protected final int amplifier;
     protected final int duration;
 
-    private final TintedParticleEffect particle;
+    private final ColorParticleOption particle;
 
-    public ConcentrateItem(Settings settings, RegistryEntry<StatusEffect> registeredEffect, Block block) {
-        this(settings, registeredEffect, 0, registeredEffect.value().isInstant() ? 1 : 30, block);
+    public ConcentrateItem(Properties settings, Holder<MobEffect> registeredEffect, Block block) {
+        this(settings, registeredEffect, 0, registeredEffect.value().isInstantenous() ? 1 : 30, block);
     }
 
-    public ConcentrateItem(Settings settings, RegistryEntry<StatusEffect> registeredEffect, int amplifier, int duration, Block block) {
+    public ConcentrateItem(Properties settings, Holder<MobEffect> registeredEffect, int amplifier, int duration, Block block) {
         super(block, settings);
         if(registeredEffect != null) {
             this.effect = registeredEffect;
             this.amplifier = amplifier;
             this.duration = duration;
-            this.particle = TintedParticleEffect.create(ParticleTypes.ENTITY_EFFECT, effect.value().getColor());
+            this.particle = ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, effect.value().getColor());
         }
         else {
             this.effect = null;
@@ -56,69 +56,69 @@ public class ConcentrateItem extends BlockItem {
         }
     }
 
-    public RegistryEntry<StatusEffect> getEffect() {
+    public Holder<MobEffect> getEffect() {
         return effect;
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.EAT;
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.EAT;
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getUseDuration(ItemStack stack, LivingEntity user) {
         return 60;
     }
 
     @Override
-    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if(remainingUseTicks % 8 == 0) user.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 16, 4));
+    public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if(remainingUseTicks % 8 == 0) user.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 16, 4));
     }
 
     @Override
-    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
+    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
         ConcentrateItem item = (ConcentrateItem) stack.getItem();
         if(user.getRandom().nextInt(10) < 7 && item.effect != null) {
-            user.addStatusEffect(new StatusEffectInstance(item.effect, item.duration, item.amplifier));
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 40, 1));
+            user.addEffect(new MobEffectInstance(item.effect, item.duration, item.amplifier));
+            user.addEffect(new MobEffectInstance(MobEffects.POISON, 40, 1));
         }
-        else user.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 80, 1));
-        stack.decrement(1);
-        return super.finishUsing(stack,world,user);
+        else user.addEffect(new MobEffectInstance(MobEffects.POISON, 80, 1));
+        stack.shrink(1);
+        return super.finishUsingItem(stack,world,user);
     }
 
     @Override
-    public ActionResult useOnEntity(ItemStack stack, PlayerEntity user, LivingEntity entity, Hand hand) {
+    public InteractionResult interactLivingEntity(ItemStack stack, Player user, LivingEntity entity, InteractionHand hand) {
         ConcentrateItem item = (ConcentrateItem) stack.getItem();
         if(item.effect != null) {
-            StatusEffectInstance effectInstance = new StatusEffectInstance(item.effect, (item.duration * 2)/3, 0);
-            if (entity.canHaveStatusEffect(effectInstance)) {
-                if(user.getEntityWorld() instanceof ServerWorld serverWorld) {
-                    if(effect.value().isInstant()) {
+            MobEffectInstance effectInstance = new MobEffectInstance(item.effect, (item.duration * 2)/3, 0);
+            if (entity.canBeAffected(effectInstance)) {
+                if(user.level() instanceof ServerLevel serverWorld) {
+                    if(effect.value().isInstantenous()) {
                         if(user.getRandom().nextInt(10) < 7) {
-                            if (item.effect == StatusEffects.INSTANT_DAMAGE)
-                                entity.damage(serverWorld, serverWorld.getDamageSources().create(DamageTypes.MAGIC, user), 1.0F);
-                            else if (item.effect == StatusEffects.INSTANT_DAMAGE) entity.heal(1.0F);
+                            if (item.effect == MobEffects.INSTANT_DAMAGE)
+                                entity.hurtServer(serverWorld, serverWorld.damageSources().source(DamageTypes.MAGIC, user), 1.0F);
+                            else if (item.effect == MobEffects.INSTANT_DAMAGE) entity.heal(1.0F);
                         }
                     }
                     else {
-                        entity.addStatusEffect(effectInstance);
+                        entity.addEffect(effectInstance);
                     }
                 }
                 for (int i = 0; i < 20; i++) {
                     double d = entity.getRandom().nextGaussian() * 0.02;
                     double e = entity.getRandom().nextGaussian() * 0.02;
                     double f = entity.getRandom().nextGaussian() * 0.02;
-                    entity.getEntityWorld().addParticleClient(this.particle, entity.getParticleX(1.0) - d * 10.0, entity.getRandomBodyY() - e * 10.0, entity.getParticleZ(1.0) - f * 10.0, d, e, f);
+                    entity.level().addParticle(this.particle, entity.getRandomX(1.0) - d * 10.0, entity.getRandomY() - e * 10.0, entity.getRandomZ(1.0) - f * 10.0, d, e, f);
                 }
-                if(entity instanceof MobEntity mobEntity) mobEntity.playAmbientSound();
-                else if(entity instanceof PlayerEntity playerEntity) playerEntity.playSound(SoundEvents.ENTITY_GENERIC_EAT.value());
+                if(entity instanceof Mob mobEntity) mobEntity.playAmbientSound();
+                else if(entity instanceof Player playerEntity) playerEntity.makeSound(SoundEvents.GENERIC_EAT.value());
 
-                user.getItemCooldownManager().set(stack, 4 + (item.duration * 2)/3);
-                stack.decrement(1);
-                return ActionResult.CONSUME;
+                user.getCooldowns().addCooldown(stack, 4 + (item.duration * 2)/3);
+                stack.shrink(1);
+                return InteractionResult.CONSUME;
             }
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 }

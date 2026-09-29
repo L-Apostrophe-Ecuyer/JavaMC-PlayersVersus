@@ -1,8 +1,8 @@
 package frootloops.versus.mod.environment.worldgen.density;
 
 import frootloops.versus.mod.environment.worldgen.TestGame;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -26,11 +26,11 @@ class PvHighRiverTest {
     }
 
     private static PvHighRiver river(double channel, double depth, double terrain) {
-        return new PvHighRiver(DensityFunctionTypes.constant(channel), DensityFunctionTypes.constant(depth), DensityFunctionTypes.constant(terrain));
+        return new PvHighRiver(DensityFunctions.constant(channel), DensityFunctions.constant(depth), DensityFunctions.constant(terrain));
     }
 
     private static double valley(double channel, double depth, double terrain, int y) {
-        return river(channel, depth, terrain).sample(new DensityFunction.UnblendedNoisePos(0, y, 0));
+        return river(channel, depth, terrain).compute(new DensityFunction.SinglePointContext(0, y, 0));
     }
 
     @Test
@@ -115,7 +115,7 @@ class PvHighRiverTest {
     void boundsHold() {
         PvHighRiver river = river(0.0, 0.0, 1.0);
         for (int y = PvHighRiver.MIN_Y - 1; y <= PvHighRiver.MAX_Y; y++) {
-            double valley = river.sample(new DensityFunction.UnblendedNoisePos(0, y, 0));
+            double valley = river.compute(new DensityFunction.SinglePointContext(0, y, 0));
             assertTrue(valley >= river.minValue() && valley <= river.maxValue(), "at y " + y);
         }
     }

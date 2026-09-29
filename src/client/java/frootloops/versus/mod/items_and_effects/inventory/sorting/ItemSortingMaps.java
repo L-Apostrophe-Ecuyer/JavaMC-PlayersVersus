@@ -2,11 +2,10 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.items_and_effects.CustomBrewingItems;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public abstract class ItemSortingMaps {
 
@@ -624,7 +623,7 @@ public abstract class ItemSortingMaps {
         ITEMS_PICKAXE_PALE_STONES.put(Items.CHISELED_SANDSTONE, index++);
         ITEMS_PICKAXE_PALE_STONES.put(Items.SANDSTONE_SLAB, index++);
         ITEMS_PICKAXE_PALE_STONES.put(Items.SMOOTH_SANDSTONE_SLAB, index++);
-        ITEMS_PICKAXE_PALE_STONES.put(Items.CUT_SANDSTONE_SLAB, index++);
+        ITEMS_PICKAXE_PALE_STONES.put(Items.CUT_STANDSTONE_SLAB, index++);
         ITEMS_PICKAXE_PALE_STONES.put(Items.SANDSTONE_STAIRS, index++);
         ITEMS_PICKAXE_PALE_STONES.put(Items.SMOOTH_SANDSTONE_STAIRS, index++);
     }
@@ -921,14 +920,14 @@ public abstract class ItemSortingMaps {
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.waxedOxidized(), index++);
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_BARS.waxedWeathered(), index++);
 
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.unaffected(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.exposed(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.oxidized(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.weathered(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.waxed(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.waxedExposed(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.waxedOxidized(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAINS.waxedWeathered(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAIN.unaffected(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAIN.exposed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAIN.oxidized(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAIN.weathered(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAIN.waxed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAIN.waxedExposed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAIN.waxedOxidized(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.COPPER_CHAIN.waxedWeathered(), index++);
 
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD, index++);
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.EXPOSED_LIGHTNING_ROD, index++);

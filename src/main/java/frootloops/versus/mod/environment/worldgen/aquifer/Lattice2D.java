@@ -1,10 +1,9 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-
 import java.util.Arrays;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 /**
  * {@link Lattice} for a function that doesn't depend on y, on the terrain pass's columns of cell corners (every 4
@@ -34,8 +33,8 @@ public final class Lattice2D {
     /** @param y the height the function is sampled at (any, for a function of the column alone) */
     public Lattice2D(DensityFunction function, ChunkPos chunk, int y) {
         this.function = function;
-        this.originX = chunk.getStartX();
-        this.originZ = chunk.getStartZ();
+        this.originX = chunk.getMinBlockX();
+        this.originZ = chunk.getMinBlockZ();
         this.y = y;
         Arrays.fill(this.points, Double.NaN);
     }
@@ -48,8 +47,8 @@ public final class Lattice2D {
         int ix = Math.floorDiv(x, STEP), iz = Math.floorDiv(z, STEP);
         double deltaX = Math.floorMod(x, STEP) / (double) STEP;
         double deltaZ = Math.floorMod(z, STEP) / (double) STEP;
-        return MathHelper.lerp(deltaZ, MathHelper.lerp(deltaX, this.point(ix, iz), this.point(ix + 1, iz)),
-                MathHelper.lerp(deltaX, this.point(ix, iz + 1), this.point(ix + 1, iz + 1)));
+        return Mth.lerp(deltaZ, Mth.lerp(deltaX, this.point(ix, iz), this.point(ix + 1, iz)),
+                Mth.lerp(deltaX, this.point(ix, iz + 1), this.point(ix + 1, iz + 1)));
     }
 
     /** The point at column {@code ix, iz} of the corners (-1 for the border cell before the chunk). */
@@ -65,7 +64,7 @@ public final class Lattice2D {
     }
 
     private double sample(int x, int z) {
-        return this.function.sample(new DensityFunction.UnblendedNoisePos(x, this.y, z));
+        return this.function.compute(new DensityFunction.SinglePointContext(x, this.y, z));
     }
 
     /** How many points were sampled so far, for tests and the benchmark. */

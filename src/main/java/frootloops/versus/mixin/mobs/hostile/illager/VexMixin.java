@@ -1,29 +1,29 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
-import net.minecraft.entity.EntityData;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.VexEntity;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Vex;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(VexEntity.class)
-public abstract class VexMixin extends HostileEntity {
-    protected VexMixin(EntityType<? extends HostileEntity> entityType, World world) {
+@Mixin(Vex.class)
+public abstract class VexMixin extends Monster {
+    protected VexMixin(EntityType<? extends Monster> entityType, Level world) {
         super(entityType, world);
     }
 
-    @Inject(method = "initialize", at = @At("HEAD"))
-    private void decreaseHealth(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
-        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
+    @Inject(method = "finalizeSpawn", at = @At("HEAD"))
+    private void decreaseHealth(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, SpawnGroupData entityData, CallbackInfoReturnable<SpawnGroupData> cir) {
+        AttributeInstance instanceHP = this.getAttributes().getInstance(Attributes.MAX_HEALTH);
         if (instanceHP != null) {
             instanceHP.setBaseValue(8.0D);
             this.setHealth(this.getMaxHealth());
@@ -31,7 +31,7 @@ public abstract class VexMixin extends HostileEntity {
     }
 
     @Override
-    public float getTargetingMargin() {
+    public float getPickRadius() {
         return 0.5F;
     }
 }

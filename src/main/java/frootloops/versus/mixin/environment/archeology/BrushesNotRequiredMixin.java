@@ -1,88 +1,87 @@
 package frootloops.versus.mixin.environment.archeology;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BrushableBlock;
-import net.minecraft.block.entity.BrushableBlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.loot.LootTables;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Arm;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BrushableBlock;
+import net.minecraft.world.level.block.entity.BrushableBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ServerPlayerInteractionManager.class)
+@Mixin(ServerPlayerGameMode.class)
 public class BrushesNotRequiredMixin {
 
-    @Shadow protected ServerWorld world;
-    @Shadow protected final ServerPlayerEntity player;
-    @Shadow private boolean mining;
-    @Shadow private BlockPos miningPos;
+    @Shadow protected ServerLevel level;
+    @Shadow protected final ServerPlayer player;
+    @Shadow private boolean isDestroyingBlock;
+    @Shadow private BlockPos destroyPos;
 
-    @Shadow private int startMiningTime;
+    @Shadow private int destroyProgressStart;
 
-    @Shadow private int tickCounter;
+    @Shadow private int gameTicks;
 
 
-    public BrushesNotRequiredMixin(ServerPlayerEntity player) {
+    public BrushesNotRequiredMixin(ServerPlayer player) {
         this.player = player;
     }
 
     private Direction prevDirection = Direction.UP;
 
 
-    @Inject(method = "processBlockBreakingAction", at = @At("RETURN"), cancellable = false)
-    private void processBlockBreakingAction(BlockPos blockPos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo info) {
-        if(mining) prevDirection = direction;
+    @Inject(method = "handleBlockBreakAction", at = @At("RETURN"), cancellable = false)
+    private void processBlockBreakingAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo info) {
+        if(isDestroyingBlock) prevDirection = direction;
     }
 
 
-    @Inject(method = "update", at = @At("HEAD"), cancellable = false)
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = false)
     private void update(CallbackInfo info) {
-        if(world.isClient()) return;
+        if(level.isClientSide()) return;
         int ticksTillBrushing = 6;
-        if(this.tickCounter - startMiningTime > ticksTillBrushing && this.tickCounter - startMiningTime < 36 && player.handSwinging) {
-            BlockState blockState = world.getBlockState(miningPos);
+        if(this.gameTicks - destroyProgressStart > ticksTillBrushing && this.gameTicks - destroyProgressStart < 36 && player.swinging) {
+            BlockState blockState = level.getBlockState(destroyPos);
             if (blockState.getBlock() instanceof BrushableBlock brushableBlock) {
-                if (world.getBlockEntity(miningPos) instanceof BrushableBlockEntity brushableBlockEntity) {
-                    addDustParticles(world, prevDirection, miningPos, blockState, player);
-                    brushableBlockEntity.brush(world.getTime(), (ServerWorld)world, player, prevDirection, player.getMainHandStack());
-                    brushableBlockEntity.scheduledTick((ServerWorld)world);
+                if (level.getBlockEntity(destroyPos) instanceof BrushableBlockEntity brushableBlockEntity) {
+                    addDustParticles(level, prevDirection, destroyPos, blockState, player);
+                    brushableBlockEntity.brush(level.getGameTime(), (ServerLevel)level, player, prevDirection, player.getMainHandItem());
+                    brushableBlockEntity.checkReset((ServerLevel)level);
                 }
                 else {
-                    BrushableBlockEntity brushableBlockEntity = (BrushableBlockEntity)brushableBlock.createBlockEntity(miningPos, blockState);
-                    if(brushableBlock == Blocks.SUSPICIOUS_SAND) brushableBlockEntity.setLootTable(LootTables.DESERT_WELL_ARCHAEOLOGY, world.getSeed());
-                    else brushableBlockEntity.setLootTable(LootTables.DESERT_WELL_ARCHAEOLOGY, world.getSeed());
+                    BrushableBlockEntity brushableBlockEntity = (BrushableBlockEntity)brushableBlock.newBlockEntity(destroyPos, blockState);
+                    if(brushableBlock == Blocks.SUSPICIOUS_SAND) brushableBlockEntity.setLootTable(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY, level.getSeed());
+                    else brushableBlockEntity.setLootTable(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY, level.getSeed());
 
-                    addDustParticles(world, prevDirection, miningPos, blockState, player);
-                    brushableBlockEntity.brush(world.getTime(), (ServerWorld)world, player, prevDirection, player.getMainHandStack());
-                    brushableBlockEntity.scheduledTick((ServerWorld)world);
+                    addDustParticles(level, prevDirection, destroyPos, blockState, player);
+                    brushableBlockEntity.brush(level.getGameTime(), (ServerLevel)level, player, prevDirection, player.getMainHandItem());
+                    brushableBlockEntity.checkReset((ServerLevel)level);
                 }
             }
         }
     }
 
-    private static void addDustParticles(World world, Direction direction, BlockPos blockPos, BlockState state, PlayerEntity playerEntity) {
-        int i = playerEntity.getMainArm() == Arm.RIGHT ? 1 : -1;
-        int j = world.getRandom().nextBetweenExclusive(7, 12);
-        BlockStateParticleEffect blockStateParticleEffect = new BlockStateParticleEffect(ParticleTypes.BLOCK, state);
-        DustParticlesOffset dustParticlesOffset = DustParticlesOffset.fromSide(playerEntity.getRotationVector(), direction);
+    private static void addDustParticles(Level world, Direction direction, BlockPos blockPos, BlockState state, Player playerEntity) {
+        int i = playerEntity.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
+        int j = world.getRandom().nextInt(7, 12);
+        BlockParticleOption blockStateParticleEffect = new BlockParticleOption(ParticleTypes.BLOCK, state);
+        DustParticlesOffset dustParticlesOffset = DustParticlesOffset.fromSide(playerEntity.getLookAngle(), direction);
 
         for(int k = 0; k < j; ++k) {
-            world.addParticleClient(blockStateParticleEffect, blockPos.getX() - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), blockPos.getY(), blockPos.getZ() - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * 3.0 * world.getRandom().nextDouble(), 0.0, dustParticlesOffset.zd() * (double)i * 3.0 * world.getRandom().nextDouble());
+            world.addParticle(blockStateParticleEffect, blockPos.getX() - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), blockPos.getY(), blockPos.getZ() - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * 3.0 * world.getRandom().nextDouble(), 0.0, dustParticlesOffset.zd() * (double)i * 3.0 * world.getRandom().nextDouble());
         }
     }
 
@@ -96,13 +95,13 @@ public class BrushesNotRequiredMixin {
             this.zd = zd;
         }
 
-        public static DustParticlesOffset fromSide(Vec3d userRotation, Direction side) {
+        public static DustParticlesOffset fromSide(Vec3 userRotation, Direction side) {
             double d = 0.0;
             DustParticlesOffset var10000;
             switch (side) {
                 case DOWN:
                 case UP:
-                    var10000 = new DustParticlesOffset(userRotation.getZ(), 0.0, -userRotation.getX());
+                    var10000 = new DustParticlesOffset(userRotation.z(), 0.0, -userRotation.x());
                     break;
                 case NORTH:
                     var10000 = new DustParticlesOffset(1.0, 0.0, -0.1);
@@ -117,7 +116,7 @@ public class BrushesNotRequiredMixin {
                     var10000 = new DustParticlesOffset(0.1, 0.0, 1.0);
                     break;
                 default:
-                    var10000 = new DustParticlesOffset(userRotation.getZ(), 0.0, -userRotation.getX());
+                    var10000 = new DustParticlesOffset(userRotation.z(), 0.0, -userRotation.x());
             }
 
             return var10000;

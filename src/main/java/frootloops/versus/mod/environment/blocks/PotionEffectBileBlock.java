@@ -1,123 +1,130 @@
 package frootloops.versus.mod.environment.blocks;
 
 import frootloops.versus.VersusMod;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCollisionHandler;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.TintedParticleEffect;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 
 public class PotionEffectBileBlock extends Block {
 
-    private static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 0.0, 16.0);
+    private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 0.0, 16.0);
 
-    private final TintedParticleEffect PARTICLE;
+    private final ColorParticleOption PARTICLE;
     private final int MAX_DURATION, AMPLIFIER;
     private final float AMBIENT_OCCLUSION_AMOUNT;
-    private final RegistryEntry<StatusEffect> effect;
+    private final Holder<MobEffect> effect;
 
-    public PotionEffectBileBlock(Settings settings, int color, RegistryEntry<StatusEffect> statusEffectToGrant, int maxDuration, int amplifier, float ambientOcclusion) {
+    public PotionEffectBileBlock(Properties settings, int color, Holder<MobEffect> statusEffectToGrant, int maxDuration, int amplifier, float ambientOcclusion) {
         super(settings.noCollision());
         this.effect = statusEffectToGrant;
-        this.PARTICLE = TintedParticleEffect.create(ParticleTypes.ENTITY_EFFECT, color);
+        this.PARTICLE = ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, color);
         this.MAX_DURATION = Math.min(210, maxDuration);
         this.AMPLIFIER = amplifier;
         this.AMBIENT_OCCLUSION_AMOUNT = ambientOcclusion;
     }
 
     @Override
-    protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bl) {
-        if (!world.isClient() && !entity.isSpectator() && entity instanceof LivingEntity livingEntity) {
-            if(entity.fallDistance > 1.0 && (entity instanceof PlayerEntity || (!world.isClient() && ((ServerWorld)world).getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && entity.getWidth() * entity.getWidth() * entity.getHeight() > 0.512F)) {
+    protected void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier handler, boolean bl) {
+        if (!world.isClientSide() && !entity.isSpectator() && entity instanceof LivingEntity livingEntity) {
+            if(entity.fallDistance > 1.0 && (entity instanceof Player || (!world.isClientSide() && ((ServerLevel)world).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) && entity.getBbWidth() * entity.getBbWidth() * entity.getBbHeight() > 0.512F)) {
                 this.grantStatusEffect(livingEntity, true);
-                super.onEntityCollision(state, world, pos, entity, handler, bl);
-                world.breakBlock(pos, false);
+                super.entityInside(state, world, pos, entity, handler, bl);
+                world.destroyBlock(pos, false);
             }
-            else if(world.getTime() % 10L == 0 || entity.fallDistance > 0.0){
+            else if(world.getGameTime() % 10L == 0 || entity.fallDistance > 0.0){
                 this.grantStatusEffect(livingEntity, false);
             }
         }
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     private void grantStatusEffect(LivingEntity entity, boolean extraStrongEffect) {
         if(effect == null) {
-            VersusMod.MOD_LOGGER.error("[ERROR] Status effect isn't registered properly for PotionEffectBileBlock: " + effect.getIdAsString());
+            VersusMod.MOD_LOGGER.error("[ERROR] Status effect isn't registered properly for PotionEffectBileBlock: " + effect.getRegisteredName());
             return;
         }
-        if (entity.bypassesSteppingEffects()) return;
-        if(effect == StatusEffects.INSTANT_DAMAGE && !entity.getEntityWorld().isClient()) entity.damage((ServerWorld) entity.getEntityWorld(), entity.getDamageSources().magic(), extraStrongEffect ? 2 : 1);
-        else if(effect == StatusEffects.INSTANT_HEALTH) entity.heal(extraStrongEffect ? 2 : 1);
+        if (entity.isSteppingCarefully()) return;
+        if(effect == MobEffects.INSTANT_DAMAGE && !entity.level().isClientSide()) entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().magic(), extraStrongEffect ? 2 : 1);
+        else if(effect == MobEffects.INSTANT_HEALTH) entity.heal(extraStrongEffect ? 2 : 1);
         else {
             int duration = 20 + (extraStrongEffect ? 40 : 0);
-            if(entity.hasStatusEffect(effect)) {
-                int currentDuration = entity.getStatusEffect(effect).getDuration();
+            if(entity.hasEffect(effect)) {
+                int currentDuration = entity.getEffect(effect).getDuration();
                 if(currentDuration > MAX_DURATION) return;
                 else duration = 15 + currentDuration;
             }
-            entity.addStatusEffect(new StatusEffectInstance(effect, duration, AMPLIFIER));
+            entity.addEffect(new MobEffectInstance(effect, duration, AMPLIFIER));
         }
     }
 
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         double randomDouble = random.nextDouble();
         if(randomDouble < 0.1) {
             double d = (double) pos.getX() + 0.25 + randomDouble * 0.5;
             double e = (double) pos.getY() + 0.5;
             double f = (double) pos.getZ() + 0.25 + random.nextDouble() * 0.5;
-            world.addParticleClient(PARTICLE, d, e, f, 0.0, 0.05, 0.0);
+            world.addParticle(PARTICLE, d, e, f, 0.0, 0.05, 0.0);
         }
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(
-            BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random
+    protected BlockState updateShape(
+            BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random
     ) {
-        return !state.canPlaceAt(world, pos)
-                ? Blocks.AIR.getDefaultState()
-                : super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+        return !state.canSurvive(world, pos)
+                ? Blocks.AIR.defaultBlockState()
+                : super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override
-    protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        return world.getFluidState(pos).isEmpty() && (world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos, Direction.DOWN));
+    protected boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+        return world.getFluidState(pos).isEmpty() && (world.getBlockState(pos.below()).isFaceSturdy(world, pos, Direction.DOWN));
     }
 
     @Override
-    public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
-        player.incrementStat(Stats.MINED.getOrCreateStat(this)); // Nothing dropped
+    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
+        player.awardStat(Stats.BLOCK_MINED.get(this)); // Nothing dropped
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    protected float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {
+    protected float getShadeBrightness(BlockState state, BlockGetter world, BlockPos pos) {
         return AMBIENT_OCCLUSION_AMOUNT;
     }
 }

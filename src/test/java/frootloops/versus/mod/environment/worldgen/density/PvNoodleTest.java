@@ -1,8 +1,8 @@
 package frootloops.versus.mod.environment.worldgen.density;
 
 import frootloops.versus.mod.environment.worldgen.TestGame;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -50,15 +50,15 @@ class PvNoodleTest {
         for (int y = -10; y <= 30; y++) {
             for (int step = -40; step <= 60; step++) {
                 double entrances = step * 0.01 + (step % 7) * 1.37e-4;
-                DensityFunction function = PvNoodle.corridorBiasFunction(DensityFunctionTypes.constant(entrances));
+                DensityFunction function = PvNoodle.corridorBiasFunction(DensityFunctions.constant(entrances));
                 double expected = PvNoodle.corridorBias(y, entrances);
-                DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(0, y, 0);
-                double actual = function.sample(pos);
+                DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(0, y, 0);
+                double actual = function.compute(pos);
                 int height = y;
                 assertEquals(expected, actual, 0.0, () -> "y " + height + ", entrances " + entrances);
                 // C2ME's min and max nodes skip a side by these bounds, so they must hold
-                PvCorridorBias corridor = new PvCorridorBias(DensityFunctionTypes.constant(entrances));
-                assertEquals(expected, corridor.sample(pos), 0.0);
+                PvCorridorBias corridor = new PvCorridorBias(DensityFunctions.constant(entrances));
+                assertEquals(expected, corridor.compute(pos), 0.0);
                 assertTrue(actual >= corridor.minValue() && actual <= corridor.maxValue(), () -> "bounds at y " + height + ", entrances " + entrances);
                 assertTrue(actual >= function.minValue() && actual <= function.maxValue());
                 compared++;

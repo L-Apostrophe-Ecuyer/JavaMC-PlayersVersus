@@ -5,11 +5,6 @@ import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.DensityOps;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
 import frootloops.versus.mod.environment.worldgen.density.PvNoodle;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.gen.chunk.AquiferSampler;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -18,6 +13,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.RandomState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -44,7 +44,7 @@ class FloodedNoodleSurveyTest {
     private static final int[] BAND_TOPS = {8, 16, 24};
     private static final int AREA_CHUNKS = 5, AREAS = 3, SIDE = AREA_CHUNKS * 16;
     private static final int[][] NEIGHBOURS = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
-    private static final AquiferSampler.FluidLevelSampler NO_FLUID_LEVELS = (x, y, z) -> {
+    private static final Aquifer.FluidPicker NO_FLUID_LEVELS = (x, y, z) -> {
         throw new UnsupportedOperationException("the survey passes lavaLevel itself");
     };
 
@@ -59,9 +59,9 @@ class FloodedNoodleSurveyTest {
 
     @Test
     void survey() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
-        PvFinalDensity finalDensity = finalDensity(config.getNoiseRouter().finalDensity());
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
+        PvFinalDensity finalDensity = finalDensity(config.router().finalDensity());
         AquiferInputs inputs = AquiferInputs.of(config, settings);
         List<ChunkPos> centers = lakeCenters(config, inputs);
         Stats without = new Stats(), with = new Stats();
@@ -74,7 +74,7 @@ class FloodedNoodleSurveyTest {
                     ChunkPos chunk = new ChunkPos((originX >> 4) + chunkX, (originZ >> 4) + chunkZ);
                     TerrainPass pass = new TerrainPass(config, settings, chunk, NO_FLUID_LEVELS);
                     PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer(), "ChunkNoiseSamplerMixin didn't make the aquifer");
-                    DensityFunction router = pass.register(config.getNoiseRouter().finalDensity());
+                    DensityFunction router = pass.register(config.router().finalDensity());
                     DensityFunction terrain = pass.register(finalDensity.terrain());
                     DensityFunction toggle = pass.register(finalDensity.noodleToggle());
                     DensityFunction thickness = pass.register(finalDensity.noodleThickness());
@@ -83,11 +83,11 @@ class FloodedNoodleSurveyTest {
                     DensityFunction entrances = pass.register(finalDensity.entrances());
                     pass.run((x, y, z, pos) -> {
                         if (y < MIN_Y || y >= MAX_Y) return;
-                        double terrainValue = DensityOps.squeeze(terrain.sample(pos) * 0.64);
+                        double terrainValue = DensityOps.squeeze(terrain.compute(pos) * 0.64);
                         double tunnel = PvNoodle.tunnel(pos, toggle, thickness, ridgeA, ridgeB);
                         double old = Math.min(terrainValue, PvNoodle.bias(y) + tunnel);
-                        double now = router.sample(pos);
-                        if (now != Math.min(terrainValue, PvNoodle.corridorBias(y, entrances.sample(pos)) + tunnel)) routerMismatches[0]++;
+                        double now = router.compute(pos);
+                        if (now != Math.min(terrainValue, PvNoodle.corridorBias(y, entrances.compute(pos)) + tunnel)) routerMismatches[0]++;
                         int i = index(x - originX, y, z - originZ);
                         after[i] = kind(now, aquifer.decide(pos, now, false));
                         before[i] = old == now ? after[i] : kind(old, aquifer.decide(pos, old, false));
@@ -132,8 +132,8 @@ class FloodedNoodleSurveyTest {
      * Centers for the areas: of 80 random chunks, the ones with the most lake (open blocks of y 4..20 with S above the
      * basin water threshold, on a coarse grid of exact values), at least an area apart.
      */
-    private static List<ChunkPos> lakeCenters(NoiseConfig config, AquiferInputs inputs) {
-        DensityFunction finalDensity = config.getNoiseRouter().finalDensity();
+    private static List<ChunkPos> lakeCenters(RandomState config, AquiferInputs inputs) {
+        DensityFunction finalDensity = config.router().finalDensity();
         Random random = new Random(SEED);
         List<ChunkPos> chunks = new ArrayList<>();
         List<Integer> scores = new ArrayList<>();
@@ -143,8 +143,8 @@ class FloodedNoodleSurveyTest {
             for (int dx = 0; dx < 16; dx += 4) {
                 for (int dz = 0; dz < 16; dz += 4) {
                     for (int y = 4; y <= 20; y += 4) {
-                        DensityFunction.NoisePos pos = new DensityFunction.UnblendedNoisePos(chunk.getStartX() + dx, y, chunk.getStartZ() + dz);
-                        if (finalDensity.sample(pos) <= 0.0 && inputs.spread().sample(pos) > PvAquiferRules.basinWaterThreshold(y)) score++;
+                        DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(chunk.getMinBlockX() + dx, y, chunk.getMinBlockZ() + dz);
+                        if (finalDensity.compute(pos) <= 0.0 && inputs.spread().compute(pos) > PvAquiferRules.basinWaterThreshold(y)) score++;
                     }
                 }
             }
@@ -210,7 +210,7 @@ class FloodedNoodleSurveyTest {
 
     private static PvFinalDensity finalDensity(DensityFunction router) {
         List<PvFinalDensity> found = new ArrayList<>();
-        router.apply(function -> {
+        router.mapAll(function -> {
             if (function instanceof PvFinalDensity candidate) found.add(candidate);
             return function;
         });

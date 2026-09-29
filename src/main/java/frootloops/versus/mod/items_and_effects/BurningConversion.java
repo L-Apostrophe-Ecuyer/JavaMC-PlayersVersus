@@ -1,11 +1,10 @@
 package frootloops.versus.mod.items_and_effects;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public class BurningConversion {
 

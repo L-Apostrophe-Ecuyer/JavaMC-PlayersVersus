@@ -3,20 +3,19 @@ package frootloops.versus.mod.environment.worldgen.biome;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeCoords;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.QuartPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Climate;
 
 /**
  * Biome source type {@code players-versus:overworld}: multi-noise biome selection over {@link PvBiomeLayout}. The
@@ -25,53 +24,53 @@ import java.util.stream.Stream;
 public final class PvBiomeSource extends BiomeSource {
 
     public static final MapCodec<PvBiomeSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            RegistryOps.getEntryLookupCodec(RegistryKeys.BIOME)
+            RegistryOps.retrieveGetter(Registries.BIOME)
     ).apply(instance, instance.stable(PvBiomeSource::new)));
 
-    private final MultiNoiseUtil.Entries<Placed> entries;
+    private final Climate.ParameterList<Placed> entries;
 
-    private PvBiomeSource(RegistryEntryLookup<Biome> biomes) {
-        List<Pair<MultiNoiseUtil.NoiseHypercube, Placed>> list = new ArrayList<>();
+    private PvBiomeSource(HolderGetter<Biome> biomes) {
+        List<Pair<Climate.ParameterPoint, Placed>> list = new ArrayList<>();
         for (PvBiomeLayout.Entry entry : PvBiomeLayout.build()) {
             list.add(Pair.of(entry.parameters(), new Placed(biomes.getOrThrow(entry.biome()), entry.rule())));
         }
-        this.entries = new MultiNoiseUtil.Entries<>(list);
+        this.entries = new Climate.ParameterList<>(list);
     }
 
     @Override
-    protected MapCodec<? extends BiomeSource> getCodec() {
+    protected MapCodec<? extends BiomeSource> codec() {
         return CODEC;
     }
 
     @Override
-    protected Stream<RegistryEntry<Biome>> biomeStream() {
-        return this.entries.getEntries().stream().map(pair -> pair.getSecond().biome()).distinct();
+    protected Stream<Holder<Biome>> collectPossibleBiomes() {
+        return this.entries.values().stream().map(pair -> pair.getSecond().biome()).distinct();
     }
 
     @Override
-    public RegistryEntry<Biome> getBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise) {
-        return this.entries.get(noise.sample(x, y, z)).biome();
+    public Holder<Biome> getNoiseBiome(int x, int y, int z, Climate.Sampler noise) {
+        return this.entries.findValue(noise.sample(x, y, z)).biome();
     }
 
     /** The layout rule that picked the biome at this climate point ("vanilla" when no transition applied). */
-    public String ruleAt(MultiNoiseUtil.NoiseValuePoint point) {
-        return this.entries.get(point).rule();
+    public String ruleAt(Climate.TargetPoint point) {
+        return this.entries.findValue(point).rule();
     }
 
     @Override
-    public void addDebugInfo(List<String> info, BlockPos pos, MultiNoiseUtil.MultiNoiseSampler noise) {
-        MultiNoiseUtil.NoiseValuePoint point = noise.sample(
-                BiomeCoords.fromBlock(pos.getX()), BiomeCoords.fromBlock(pos.getY()), BiomeCoords.fromBlock(pos.getZ()));
+    public void addDebugInfo(List<String> info, BlockPos pos, Climate.Sampler noise) {
+        Climate.TargetPoint point = noise.sample(
+                QuartPos.fromBlock(pos.getX()), QuartPos.fromBlock(pos.getY()), QuartPos.fromBlock(pos.getZ()));
         info.add(String.format(Locale.ROOT, "PV biome rule: %s  T %.3f H %.3f C %.3f E %.3f D %.3f W %.3f",
                 ruleAt(point),
-                MultiNoiseUtil.toFloat(point.temperatureNoise()),
-                MultiNoiseUtil.toFloat(point.humidityNoise()),
-                MultiNoiseUtil.toFloat(point.continentalnessNoise()),
-                MultiNoiseUtil.toFloat(point.erosionNoise()),
-                MultiNoiseUtil.toFloat(point.depth()),
-                MultiNoiseUtil.toFloat(point.weirdnessNoise())));
+                Climate.unquantizeCoord(point.temperature()),
+                Climate.unquantizeCoord(point.humidity()),
+                Climate.unquantizeCoord(point.continentalness()),
+                Climate.unquantizeCoord(point.erosion()),
+                Climate.unquantizeCoord(point.depth()),
+                Climate.unquantizeCoord(point.weirdness())));
     }
 
-    private record Placed(RegistryEntry<Biome> biome, String rule) {
+    private record Placed(Holder<Biome> biome, String rule) {
     }
 }

@@ -7,14 +7,14 @@ import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
 import frootloops.versus.mod.environment.worldgen.aquifer.PvAquifer;
 import frootloops.versus.mod.environment.worldgen.ore.PvOreVeins;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.random.RandomSplitter;
-import net.minecraft.world.gen.chunk.AquiferSampler;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.chunk.ChunkNoiseSampler;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
-import net.minecraft.world.gen.noise.NoiseRouter;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseChunk;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseRouter;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+import net.minecraft.world.level.levelgen.RandomState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -25,22 +25,22 @@ import org.spongepowered.asm.mixin.injection.At;
  *
  * <p>{@code @WrapOperation} chains with other mods that wrap the same calls, unlike {@code @Redirect}/{@code @Overwrite}.
  */
-@Mixin(ChunkNoiseSampler.class)
+@Mixin(NoiseChunk.class)
 public abstract class ChunkNoiseSamplerMixin {
 
     @WrapOperation(
             method = "<init>",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/gen/chunk/AquiferSampler;aquifer(Lnet/minecraft/world/gen/chunk/ChunkNoiseSampler;Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/world/gen/noise/NoiseRouter;Lnet/minecraft/util/math/random/RandomSplitter;IILnet/minecraft/world/gen/chunk/AquiferSampler$FluidLevelSampler;)Lnet/minecraft/world/gen/chunk/AquiferSampler;"
+                    target = "Lnet/minecraft/world/level/levelgen/Aquifer;create(Lnet/minecraft/world/level/levelgen/NoiseChunk;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/levelgen/NoiseRouter;Lnet/minecraft/world/level/levelgen/PositionalRandomFactory;IILnet/minecraft/world/level/levelgen/Aquifer$FluidPicker;)Lnet/minecraft/world/level/levelgen/Aquifer;"
             )
     )
-    private AquiferSampler playersVersus$useAquifer(ChunkNoiseSampler chunkNoiseSampler, ChunkPos chunkPos, NoiseRouter noiseRouter,
-                                                   RandomSplitter randomSplitter, int minimumY, int height,
-                                                   AquiferSampler.FluidLevelSampler fluidLevelSampler,
-                                                   Operation<AquiferSampler> original,
-                                                   @Local(argsOnly = true) ChunkGeneratorSettings settings,
-                                                   @Local(argsOnly = true) NoiseConfig noiseConfig) {
+    private Aquifer playersVersus$useAquifer(NoiseChunk chunkNoiseSampler, ChunkPos chunkPos, NoiseRouter noiseRouter,
+                                                   PositionalRandomFactory randomSplitter, int minimumY, int height,
+                                                   Aquifer.FluidPicker fluidLevelSampler,
+                                                   Operation<Aquifer> original,
+                                                   @Local(argsOnly = true) NoiseGeneratorSettings settings,
+                                                   @Local(argsOnly = true) RandomState noiseConfig) {
         if (PvWorldgen.isPvGenerator(settings)) {
             return new PvAquifer(AquiferInputs.of(noiseConfig, settings), noiseRouter.depth(), chunkPos, fluidLevelSampler);
         }
@@ -51,13 +51,13 @@ public abstract class ChunkNoiseSamplerMixin {
             method = "<init>",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/gen/OreVeinSampler;create(Lnet/minecraft/world/gen/densityfunction/DensityFunction;Lnet/minecraft/world/gen/densityfunction/DensityFunction;Lnet/minecraft/world/gen/densityfunction/DensityFunction;Lnet/minecraft/util/math/random/RandomSplitter;)Lnet/minecraft/world/gen/chunk/ChunkNoiseSampler$BlockStateSampler;"
+                    target = "Lnet/minecraft/world/level/levelgen/OreVeinifier;create(Lnet/minecraft/world/level/levelgen/DensityFunction;Lnet/minecraft/world/level/levelgen/DensityFunction;Lnet/minecraft/world/level/levelgen/DensityFunction;Lnet/minecraft/world/level/levelgen/PositionalRandomFactory;)Lnet/minecraft/world/level/levelgen/NoiseChunk$BlockStateFiller;"
             )
     )
-    private ChunkNoiseSampler.BlockStateSampler playersVersus$useOreVeins(DensityFunction veinToggle, DensityFunction veinRidged,
-                                                                         DensityFunction veinGap, RandomSplitter randomDeriver,
-                                                                         Operation<ChunkNoiseSampler.BlockStateSampler> original,
-                                                                         @Local(argsOnly = true) ChunkGeneratorSettings settings) {
+    private NoiseChunk.BlockStateFiller playersVersus$useOreVeins(DensityFunction veinToggle, DensityFunction veinRidged,
+                                                                         DensityFunction veinGap, PositionalRandomFactory randomDeriver,
+                                                                         Operation<NoiseChunk.BlockStateFiller> original,
+                                                                         @Local(argsOnly = true) NoiseGeneratorSettings settings) {
         if (PvWorldgen.isPvGenerator(settings)) {
             return PvOreVeins.create(veinToggle, veinRidged, veinGap, randomDeriver);
         }

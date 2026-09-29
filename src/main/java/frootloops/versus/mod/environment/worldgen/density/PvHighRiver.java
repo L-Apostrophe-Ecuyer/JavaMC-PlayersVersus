@@ -2,9 +2,9 @@ package frootloops.versus.mod.environment.worldgen.density;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_BED;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_FADE;
@@ -38,11 +38,11 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIG
 public record PvHighRiver(DensityFunction channel, DensityFunction depth, DensityFunction terrain) implements DensityFunction {
 
     public static final MapCodec<PvHighRiver> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DensityFunction.FUNCTION_CODEC.fieldOf("channel").forGetter(PvHighRiver::channel),
-            DensityFunction.FUNCTION_CODEC.fieldOf("depth").forGetter(PvHighRiver::depth),
-            DensityFunction.FUNCTION_CODEC.fieldOf("terrain").forGetter(PvHighRiver::terrain)
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("channel").forGetter(PvHighRiver::channel),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("depth").forGetter(PvHighRiver::depth),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("terrain").forGetter(PvHighRiver::terrain)
     ).apply(instance, PvHighRiver::new));
-    private static final CodecHolder<PvHighRiver> CODEC_HOLDER = CodecHolder.of(CODEC);
+    private static final KeyDispatchDataCodec<PvHighRiver> CODEC_HOLDER = KeyDispatchDataCodec.of(CODEC);
 
     /** The bed's bottom: the lowest block the river opens. */
     public static final int MIN_Y = HIGH_RIVER_Y - HIGH_RIVER_BED;
@@ -54,7 +54,7 @@ public record PvHighRiver(DensityFunction channel, DensityFunction depth, Densit
      * {@code HIGH_RIVER_TOP}, none from {@code HIGH_RIVER_FADE} further.
      */
     public static double activity(double depth) {
-        return MathHelper.clamp((HIGH_RIVER_TOP + HIGH_RIVER_FADE - depth) / HIGH_RIVER_FADE, 0.0, 1.0);
+        return Mth.clamp((HIGH_RIVER_TOP + HIGH_RIVER_FADE - depth) / HIGH_RIVER_FADE, 0.0, 1.0);
     }
 
     /**
@@ -69,7 +69,7 @@ public record PvHighRiver(DensityFunction channel, DensityFunction depth, Densit
 
     /**
      * Whether the aquifer puts the river's water at a block: at or under the surface, where the valley opens it (the
-     * same comparisons as {@link #sample}).
+     * same comparisons as {@link #compute}).
      */
     public static boolean waterAt(int y, double channel, double depth, double terrain) {
         if (y < MIN_Y || y > HIGH_RIVER_Y) return false;
@@ -77,26 +77,26 @@ public record PvHighRiver(DensityFunction channel, DensityFunction depth, Densit
     }
 
     @Override
-    public double sample(NoisePos pos) {
+    public double compute(FunctionContext pos) {
         int y = pos.blockY();
         double full = fullHalfWidth(y);
         if (full == 0.0) return Double.POSITIVE_INFINITY;
-        double across = Math.abs(this.channel.sample(pos));
+        double across = Math.abs(this.channel.compute(pos));
         if (across >= full) return Double.POSITIVE_INFINITY;
-        double halfWidth = activity(this.depth.sample(pos)) * full;
+        double halfWidth = activity(this.depth.compute(pos)) * full;
         if (across >= halfWidth) return Double.POSITIVE_INFINITY;
-        if (y <= HIGH_RIVER_Y && !(this.terrain.sample(pos) > 0.0)) return Double.POSITIVE_INFINITY;
+        if (y <= HIGH_RIVER_Y && !(this.terrain.compute(pos) > 0.0)) return Double.POSITIVE_INFINITY;
         return across - halfWidth;
     }
 
     @Override
-    public void fill(double[] densities, EachApplier applier) {
-        applier.fill(densities, this);
+    public void fillArray(double[] densities, ContextProvider applier) {
+        applier.fillAllDirectly(densities, this);
     }
 
     @Override
-    public DensityFunction apply(DensityFunctionVisitor visitor) {
-        return visitor.apply(new PvHighRiver(this.channel.apply(visitor), this.depth.apply(visitor), this.terrain.apply(visitor)));
+    public DensityFunction mapAll(Visitor visitor) {
+        return visitor.apply(new PvHighRiver(this.channel.mapAll(visitor), this.depth.mapAll(visitor), this.terrain.mapAll(visitor)));
     }
 
     /** The widest the valley gets, at its top, where the channel's value is 0. */
@@ -111,7 +111,7 @@ public record PvHighRiver(DensityFunction channel, DensityFunction depth, Densit
     }
 
     @Override
-    public CodecHolder<? extends DensityFunction> getCodecHolder() {
+    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
         return CODEC_HOLDER;
     }
 }

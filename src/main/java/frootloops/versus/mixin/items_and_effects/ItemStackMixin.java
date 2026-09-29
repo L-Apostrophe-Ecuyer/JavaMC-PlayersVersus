@@ -1,22 +1,21 @@
 package frootloops.versus.mixin.items_and_effects;
 
 import frootloops.versus.mod.items_and_effects.VanillaItems;
-import net.minecraft.block.BlockState;
-import net.minecraft.component.ComponentHolder;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.MergedComponentMap;
-import net.minecraft.component.type.EnchantableComponent;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantable;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,60 +24,60 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin implements ComponentHolder {
+public abstract class ItemStackMixin implements DataComponentHolder {
 
     @Shadow private final Item item;
     @Shadow private int count;
-    @Shadow final MergedComponentMap components;
+    @Shadow final PatchedDataComponentMap components;
 
-    protected ItemStackMixin(Item item, int count, MergedComponentMap components) {
+    protected ItemStackMixin(Item item, int count, PatchedDataComponentMap components) {
         this.item = item;
         this.count = count;
         this.components = components;
     }
 
     @Shadow
-    public Text getName() { return null; }
+    public Component getHoverName() { return null; }
 
     @Shadow
-    public boolean hasEnchantments() {return false;}
+    public boolean isEnchanted() {return false;}
 
-    @ModifyVariable(method = "<init>(Lnet/minecraft/registry/entry/RegistryEntry;I)V", at = @At("HEAD"), argsOnly = true)
-    private static RegistryEntry<Item> modifyItemRegistry(RegistryEntry<Item> item) {
-        if(VanillaItems.hasReplacementItem(item.value())) return Registries.ITEM.getEntry(VanillaItems.getReplacementItem(item.value()));
+    @ModifyVariable(method = "<init>(Lnet/minecraft/core/Holder;I)V", at = @At("HEAD"), argsOnly = true)
+    private static Holder<Item> modifyItemRegistry(Holder<Item> item) {
+        if(VanillaItems.hasReplacementItem(item.value())) return BuiltInRegistries.ITEM.wrapAsHolder(VanillaItems.getReplacementItem(item.value()));
         return item;
     }
 
-    @ModifyVariable(method = "<init>(Lnet/minecraft/item/ItemConvertible;I)V", at = @At("HEAD"), argsOnly = true)
-    private static ItemConvertible modifyItemConvertible(ItemConvertible item) {
+    @ModifyVariable(method = "<init>(Lnet/minecraft/world/level/ItemLike;I)V", at = @At("HEAD"), argsOnly = true)
+    private static ItemLike modifyItemConvertible(ItemLike item) {
         return VanillaItems.getReplacementItem(item.asItem());
     }
 
     @Inject(method = "isEnchantable", at = @At("RETURN"), cancellable = true)
     public void isEnchantable(CallbackInfoReturnable<Boolean> cir) {
-        if(!cir.getReturnValue() && item.getComponents().contains(DataComponentTypes.ENCHANTABLE)) {
-            ItemEnchantmentsComponent itemEnchantmentsComponent = this.get(DataComponentTypes.ENCHANTMENTS);
+        if(!cir.getReturnValue() && item.components().has(DataComponents.ENCHANTABLE)) {
+            ItemEnchantments itemEnchantmentsComponent = this.get(DataComponents.ENCHANTMENTS);
             if(itemEnchantmentsComponent == null || itemEnchantmentsComponent.isEmpty()) {
                 cir.setReturnValue(true);
                 return;
             }
             else {
                 int enchantmentPower = 1;
-                for (RegistryEntry<Enchantment> enchant : itemEnchantmentsComponent.getEnchantments()) {
-                    enchantmentPower += enchant.value().getMinPower(itemEnchantmentsComponent.getLevel(enchant));
+                for (Holder<Enchantment> enchant : itemEnchantmentsComponent.keySet()) {
+                    enchantmentPower += enchant.value().getMinCost(itemEnchantmentsComponent.getLevel(enchant));
                 }
 
-                EnchantableComponent enchantabilityComponent = item.getComponents().get(DataComponentTypes.ENCHANTABLE);
+                Enchantable enchantabilityComponent = item.components().get(DataComponents.ENCHANTABLE);
                 int maxLevel = 4 * enchantabilityComponent.value();
                 if(enchantmentPower < maxLevel) cir.setReturnValue(true);
             }
         }
     }
 
-    @Inject(method = "getMiningSpeedMultiplier", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getDestroySpeed", at = @At("RETURN"), cancellable = true)
     public void getMiningSpeedMultiplier(BlockState state, CallbackInfoReturnable<Float> cir) {
         float miningSpeed = cir.getReturnValue();
-        if(state.getSoundGroup() == BlockSoundGroup.DEEPSLATE) {
+        if(state.getSoundType() == SoundType.DEEPSLATE) {
             if(this.item == Items.NETHERITE_PICKAXE) miningSpeed *= 1.3f;
             else if(this.item == Items.DIAMOND_PICKAXE) miningSpeed *= 1.1f;
             else if(this.item == Items.IRON_PICKAXE) return;

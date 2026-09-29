@@ -3,13 +3,6 @@ package frootloops.versus.mod.environment.worldgen.aquifer;
 import frootloops.versus.mod.environment.worldgen.TerrainPass;
 import frootloops.versus.mod.environment.worldgen.WorldgenTestData;
 import frootloops.versus.mod.environment.worldgen.density.PvTerrain;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.gen.chunk.AquiferSampler;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.chunk.GenerationShapeConfig;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
-import net.minecraft.world.gen.noise.NoiseConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -18,6 +11,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseSettings;
+import net.minecraft.world.level.levelgen.RandomState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -45,7 +45,7 @@ class AquiferSurveyTest {
     /** Heights the tables print, in bands of {@link #BAND}. */
     private static final int TABLE_MIN_Y = -64, TABLE_MAX_Y = 128;
     private static final PvAquiferDecision[] DECISIONS = PvAquiferDecision.values();
-    private static final AquiferSampler.FluidLevelSampler NO_FLUID_LEVELS = (x, y, z) -> {
+    private static final Aquifer.FluidPicker NO_FLUID_LEVELS = (x, y, z) -> {
         throw new UnsupportedOperationException("the survey passes lavaLevel itself");
     };
 
@@ -66,15 +66,15 @@ class AquiferSurveyTest {
 
     @Test
     void survey() {
-        NoiseConfig config = WorldgenTestData.noiseConfig(SEED);
-        ChunkGeneratorSettings settings = WorldgenTestData.pvSettings();
-        GenerationShapeConfig shape = settings.generationShapeConfig();
-        DensityFunction finalDensity = config.getNoiseRouter().finalDensity();
+        RandomState config = WorldgenTestData.noiseConfig(SEED);
+        NoiseGeneratorSettings settings = WorldgenTestData.pvSettings();
+        NoiseSettings shape = settings.noiseSettings();
+        DensityFunction finalDensity = config.router().finalDensity();
         List<String> names = new ArrayList<>(CANDIDATES.keySet());
         List<DensityFunction> candidates = names.stream()
                 .map(name -> withEntrancesDelta(finalDensity, delta(CANDIDATES.get(name)))).toList();
         Map<ChunkPos, String> chunks = surveyChunks(config);
-        Tally tally = new Tally(names.size(), shape.minimumY(), shape.height());
+        Tally tally = new Tally(names.size(), shape.minY(), shape.height());
         WallVariants walls = new WallVariants();
         long[] unchangedMismatches = {0};
         for (Map.Entry<ChunkPos, String> entry : chunks.entrySet()) {
@@ -83,10 +83,10 @@ class AquiferSurveyTest {
             PvAquifer aquifer = assertInstanceOf(PvAquifer.class, pass.aquifer(), "ChunkNoiseSamplerMixin didn't make the aquifer");
             DensityFunction density = pass.register(finalDensity);
             DensityFunction[] registered = candidates.stream().map(pass::register).toArray(DensityFunction[]::new);
-            ChunkBlocks blocks = new ChunkBlocks(names.size(), shape.minimumY(), shape.height());
+            ChunkBlocks blocks = new ChunkBlocks(names.size(), shape.minY(), shape.height());
             pass.run((x, y, z, pos) -> {
-                int i = blocks.index(x - chunk.getStartX(), y, z - chunk.getStartZ());
-                double value = density.sample(pos);
+                int i = blocks.index(x - chunk.getMinBlockX(), y, z - chunk.getMinBlockZ());
+                double value = density.compute(pos);
                 boolean lava = y < LAVA_BELOW_Y;
                 PvAquiferDecision decision = aquifer.decide(pos, value, lava);
                 blocks.state[i] = (byte) decision.ordinal();
@@ -94,7 +94,7 @@ class AquiferSurveyTest {
                 blocks.state0[i] = (byte) carved.ordinal();
                 blocks.own[i] = (byte) aquifer.atPosition(x, y, z).ordinal();
                 for (int c = 0; c < registered.length; c++) {
-                    double candidate = registered[c].sample(pos);
+                    double candidate = registered[c].compute(pos);
                     blocks.open[c][i] = candidate <= 0.0;
                     if (c == 0 && candidate != value) unchangedMismatches[0]++;
                 }
@@ -117,11 +117,11 @@ class AquiferSurveyTest {
      */
     private static DensityFunction withEntrancesDelta(DensityFunction finalDensity, DensityFunction delta) {
         int[] replaced = {0};
-        DensityFunction result = finalDensity.apply(function -> {
+        DensityFunction result = finalDensity.mapAll(function -> {
             if (!(function instanceof PvTerrain terrain)) return function;
             replaced[0]++;
             return new PvTerrain(terrain.offset(), terrain.factor(), terrain.jaggedness(), terrain.jagged(), terrain.ridges(),
-                    terrain.base3d(), DensityFunctionTypes.add(terrain.entrances(), delta), terrain.spaghettiRoughness(),
+                    terrain.base3d(), DensityFunctions.add(terrain.entrances(), delta), terrain.spaghettiRoughness(),
                     terrain.caveLayer(), terrain.caveCheese(), terrain.pillar());
         });
         assertEquals(2, replaced[0], "the final density should hold the terrain twice: its own and the high river's at y 80");
@@ -129,16 +129,16 @@ class AquiferSurveyTest {
     }
 
     private static DensityFunction delta(double[][] terms) {
-        DensityFunction delta = DensityFunctionTypes.constant(0.0);
+        DensityFunction delta = DensityFunctions.constant(0.0);
         for (double[] term : terms) {
-            delta = DensityFunctionTypes.add(delta, DensityFunctionTypes.yClampedGradient((int) term[0], (int) term[1], term[2], term[3]));
+            delta = DensityFunctions.add(delta, DensityFunctions.yClampedGradient((int) term[0], (int) term[1], term[2], term[3]));
         }
         return delta;
     }
 
     /** Chunks to survey, with the kind of place each is: anywhere, on a coast, along a river inland. */
-    static Map<ChunkPos, String> surveyChunks(NoiseConfig config) {
-        DensityFunction continents = config.getNoiseRouter().continents(), ridges = config.getNoiseRouter().ridges();
+    static Map<ChunkPos, String> surveyChunks(RandomState config) {
+        DensityFunction continents = config.router().continents(), ridges = config.router().ridges();
         Map<ChunkPos, String> chunks = new LinkedHashMap<>();
         Map<String, Integer> wanted = new LinkedHashMap<>();
         wanted.put("anywhere", 20);
@@ -149,8 +149,8 @@ class AquiferSurveyTest {
         for (int attempt = 0; attempt < 100000 && chunks.size() < 40; attempt++) {
             ChunkPos chunk = new ChunkPos(random.nextInt(800) - 400, random.nextInt(800) - 400);
             if (chunks.containsKey(chunk)) continue;
-            DensityFunction.NoisePos center = new DensityFunction.UnblendedNoisePos(chunk.getCenterX(), SEA_LEVEL, chunk.getCenterZ());
-            double continentalness = continents.sample(center), ridge = ridges.sample(center);
+            DensityFunction.FunctionContext center = new DensityFunction.SinglePointContext(chunk.getMiddleBlockX(), SEA_LEVEL, chunk.getMiddleBlockZ());
+            double continentalness = continents.compute(center), ridge = ridges.compute(center);
             // vanilla's coast is continentalness -0.19..-0.11
             String kind = found.getOrDefault("anywhere", 0) < wanted.get("anywhere") ? "anywhere"
                     : continentalness >= -0.19 && continentalness < -0.11 ? "coast"

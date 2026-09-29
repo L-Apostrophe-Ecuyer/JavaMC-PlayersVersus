@@ -2,10 +2,10 @@ package frootloops.versus.mod.environment.worldgen.density;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_BIAS;
@@ -34,12 +34,12 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
                        double minValue, double maxValue) implements DensityFunction {
 
     public static final MapCodec<PvNoodle> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DensityFunction.FUNCTION_CODEC.fieldOf("toggle").forGetter(PvNoodle::toggle),
-            DensityFunction.FUNCTION_CODEC.fieldOf("thickness").forGetter(PvNoodle::thickness),
-            DensityFunction.FUNCTION_CODEC.fieldOf("ridge_a").forGetter(PvNoodle::ridgeA),
-            DensityFunction.FUNCTION_CODEC.fieldOf("ridge_b").forGetter(PvNoodle::ridgeB)
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("toggle").forGetter(PvNoodle::toggle),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("thickness").forGetter(PvNoodle::thickness),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("ridge_a").forGetter(PvNoodle::ridgeA),
+            DensityFunction.HOLDER_HELPER_CODEC.fieldOf("ridge_b").forGetter(PvNoodle::ridgeB)
     ).apply(instance, PvNoodle::new));
-    private static final CodecHolder<PvNoodle> CODEC_HOLDER = CodecHolder.of(CODEC);
+    private static final KeyDispatchDataCodec<PvNoodle> CODEC_HOLDER = KeyDispatchDataCodec.of(CODEC);
 
     /** The lowest and highest {@link #bias}: the sums of its five gradients' extremes. */
     static final double BIAS_MIN = -0.05 + -0.1 + 0.0 + -0.3 + 0.0;
@@ -57,11 +57,11 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
 
     /** {@link #bias} from vanilla types: the same gradients, added in the same order. */
     static DensityFunction biasFunction() {
-        return DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(96, 56, -0.05, 0.08),
-                DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(56, 40, 0.0, -0.1),
-                        DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(32, 20, 0.0, 0.1),
-                                DensityFunctionTypes.add(DensityFunctionTypes.yClampedGradient(-8, -32, 0.0, -0.3),
-                                        DensityFunctionTypes.yClampedGradient(-52, -64, 0.0, 0.35)))));
+        return DensityFunctions.add(DensityFunctions.yClampedGradient(96, 56, -0.05, 0.08),
+                DensityFunctions.add(DensityFunctions.yClampedGradient(56, 40, 0.0, -0.1),
+                        DensityFunctions.add(DensityFunctions.yClampedGradient(32, 20, 0.0, 0.1),
+                                DensityFunctions.add(DensityFunctions.yClampedGradient(-8, -32, 0.0, -0.3),
+                                        DensityFunctions.yClampedGradient(-52, -64, 0.0, 0.35)))));
     }
 
     /** Whether {@code y} is in the flooded corridors' layers, the basin water's: y -3..23. */
@@ -79,8 +79,8 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
     public static double corridorBias(int y, double entrances) {
         double now = bias(y);
         if (!inCorridorLayers(y)) return now;
-        double share = MathHelper.clamp((CORRIDOR_ENTRANCES - entrances) * CORRIDOR_ZONE_SCALE, 0.0, 1.0);
-        double flare = MathHelper.clamp((CORRIDOR_FLARE_FROM - entrances) * CORRIDOR_FLARE_SCALE, 0.0, 1.0);
+        double share = Mth.clamp((CORRIDOR_ENTRANCES - entrances) * CORRIDOR_ZONE_SCALE, 0.0, 1.0);
+        double flare = Mth.clamp((CORRIDOR_FLARE_FROM - entrances) * CORRIDOR_FLARE_SCALE, 0.0, 1.0);
         double target = CORRIDOR_BIAS + (CORRIDOR_FLARE_BIAS - CORRIDOR_BIAS) * flare;
         return now + (target - now) * share;
     }
@@ -93,16 +93,16 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
      * compiled code, and the terrain pass came out different where they aren't (the refactor plan, Section 9).
      */
     static DensityFunction corridorBiasFunction(DensityFunction entrances) {
-        DensityFunction y = DensityFunctionTypes.yClampedGradient(-4064, 4062, -4064.0, 4062.0);
-        return DensityFunctionTypes.rangeChoice(y, BASIN_MIN_Y + 0.5, CORRIDOR_MAX_Y - 0.5, new PvCorridorBias(entrances), biasFunction());
+        DensityFunction y = DensityFunctions.yClampedGradient(-4064, 4062, -4064.0, 4062.0);
+        return DensityFunctions.rangeChoice(y, BASIN_MIN_Y + 0.5, CORRIDOR_MAX_Y - 0.5, new PvCorridorBias(entrances), biasFunction());
     }
 
     /** The noodle without its bias: 64 (solid) where the toggle is off, else the thickness plus the larger ridge. */
-    public static double tunnel(NoisePos pos, DensityFunction toggle, DensityFunction thickness, DensityFunction ridgeA,
+    public static double tunnel(FunctionContext pos, DensityFunction toggle, DensityFunction thickness, DensityFunction ridgeA,
                                 DensityFunction ridgeB) {
-        double on = toggle.sample(pos);
+        double on = toggle.compute(pos);
         if (on >= -1000000.0 && on < -0.2) return 64.0;
-        return thickness.sample(pos) + Math.max(Math.abs(ridgeA.sample(pos)), Math.abs(ridgeB.sample(pos))) * 1.5;
+        return thickness.compute(pos) + Math.max(Math.abs(ridgeA.compute(pos)), Math.abs(ridgeB.compute(pos))) * 1.5;
     }
 
     /** {@link #tunnel} is at least the thickness: the ridge term is at least 0. */
@@ -117,23 +117,23 @@ public record PvNoodle(DensityFunction toggle, DensityFunction thickness, Densit
     }
 
     @Override
-    public double sample(NoisePos pos) {
+    public double compute(FunctionContext pos) {
         return bias(pos.blockY()) + tunnel(pos, this.toggle, this.thickness, this.ridgeA, this.ridgeB);
     }
 
     @Override
-    public void fill(double[] densities, EachApplier applier) {
-        applier.fill(densities, this);
+    public void fillArray(double[] densities, ContextProvider applier) {
+        applier.fillAllDirectly(densities, this);
     }
 
     @Override
-    public DensityFunction apply(DensityFunctionVisitor visitor) {
-        return visitor.apply(new PvNoodle(this.toggle.apply(visitor), this.thickness.apply(visitor), this.ridgeA.apply(visitor),
-                this.ridgeB.apply(visitor)));
+    public DensityFunction mapAll(Visitor visitor) {
+        return visitor.apply(new PvNoodle(this.toggle.mapAll(visitor), this.thickness.mapAll(visitor), this.ridgeA.mapAll(visitor),
+                this.ridgeB.mapAll(visitor)));
     }
 
     @Override
-    public CodecHolder<? extends DensityFunction> getCodecHolder() {
+    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
         return CODEC_HOLDER;
     }
 }

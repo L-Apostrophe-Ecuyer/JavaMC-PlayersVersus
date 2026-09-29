@@ -1,11 +1,10 @@
 package frootloops.versus.mod.environment.worldgen.aquifer;
 
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-
 import java.util.Arrays;
 import java.util.function.ToDoubleFunction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 /**
  * One smooth function on a lattice over one chunk and a band of y (4 blocks across, {@code stepY} blocks tall): each
@@ -24,17 +23,17 @@ import java.util.function.ToDoubleFunction;
  *
  * <p>Not thread-safe; each instance belongs to one aquifer, which belongs to one chunk noise sampler.
  */
-public final class Lattice implements ToDoubleFunction<DensityFunction.NoisePos> {
+public final class Lattice implements ToDoubleFunction<DensityFunction.FunctionContext> {
 
     /** What a lattice holds: a function of a block position. */
     @FunctionalInterface
     public interface Source {
         double sample(int x, int y, int z);
 
-        /** A density function sampled at {@link DensityFunction.UnblendedNoisePos}, which a chunk's own router
+        /** A density function sampled at {@link DensityFunction.SinglePointContext}, which a chunk's own router
          * answers with the raw function (no {@code interpolated} state involved) and, inside the chunk, its cached 2D values. */
         static Source of(DensityFunction function) {
-            return (x, y, z) -> function.sample(new DensityFunction.UnblendedNoisePos(x, y, z));
+            return (x, y, z) -> function.compute(new DensityFunction.SinglePointContext(x, y, z));
         }
     }
 
@@ -59,8 +58,8 @@ public final class Lattice implements ToDoubleFunction<DensityFunction.NoisePos>
      */
     public Lattice(Source source, ChunkPos chunk, int minY, int maxY, int stepY) {
         this.source = source;
-        this.originX = chunk.getStartX();
-        this.originZ = chunk.getStartZ();
+        this.originX = chunk.getMinBlockX();
+        this.originZ = chunk.getMinBlockZ();
         this.stepY = stepY;
         this.minY = Math.floorDiv(minY, stepY) * stepY;
         this.levels = Math.floorDiv(maxY - this.minY + stepY - 1, stepY) + 1;
@@ -76,7 +75,7 @@ public final class Lattice implements ToDoubleFunction<DensityFunction.NoisePos>
     }
 
     @Override
-    public double applyAsDouble(DensityFunction.NoisePos pos) {
+    public double applyAsDouble(DensityFunction.FunctionContext pos) {
         return this.at(pos.blockX(), pos.blockY(), pos.blockZ());
     }
 
@@ -95,11 +94,11 @@ public final class Lattice implements ToDoubleFunction<DensityFunction.NoisePos>
         double deltaX = Math.floorMod(x, STEP_XZ) / (double) STEP_XZ;
         double deltaY = (y % this.stepY) / (double) this.stepY;
         double deltaZ = Math.floorMod(z, STEP_XZ) / (double) STEP_XZ;
-        double x0z0 = MathHelper.lerp(deltaY, this.point(ix, iy, iz), this.point(ix, iy + 1, iz));
-        double x1z0 = MathHelper.lerp(deltaY, this.point(ix + 1, iy, iz), this.point(ix + 1, iy + 1, iz));
-        double x0z1 = MathHelper.lerp(deltaY, this.point(ix, iy, iz + 1), this.point(ix, iy + 1, iz + 1));
-        double x1z1 = MathHelper.lerp(deltaY, this.point(ix + 1, iy, iz + 1), this.point(ix + 1, iy + 1, iz + 1));
-        return MathHelper.lerp(deltaZ, MathHelper.lerp(deltaX, x0z0, x1z0), MathHelper.lerp(deltaX, x0z1, x1z1));
+        double x0z0 = Mth.lerp(deltaY, this.point(ix, iy, iz), this.point(ix, iy + 1, iz));
+        double x1z0 = Mth.lerp(deltaY, this.point(ix + 1, iy, iz), this.point(ix + 1, iy + 1, iz));
+        double x0z1 = Mth.lerp(deltaY, this.point(ix, iy, iz + 1), this.point(ix, iy + 1, iz + 1));
+        double x1z1 = Mth.lerp(deltaY, this.point(ix + 1, iy, iz + 1), this.point(ix + 1, iy + 1, iz + 1));
+        return Mth.lerp(deltaZ, Mth.lerp(deltaX, x0z0, x1z0), Mth.lerp(deltaX, x0z1, x1z1));
     }
 
     /** The exact value at a block: the stored lattice point if the block is one, the source otherwise. */

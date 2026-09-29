@@ -1,14 +1,14 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
-import net.minecraft.entity.mob.PhantomEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.monster.Phantom;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(PhantomEntity.class)
+@Mixin(Phantom.class)
 public interface PhantomAccessor {
 
-    @Accessor("targetPosition")
-    Vec3d getTargetPosition();
+    @Accessor("moveTargetPoint")
+    Vec3 getTargetPosition();
 
 }

@@ -3,26 +3,23 @@ package frootloops.versus.mod.mobs.hostile.overworld;
 import frootloops.versus.VersusMod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.ZombieEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.render.entity.state.CreeperEntityRenderState;
-import net.minecraft.client.render.entity.state.ZombieEntityRenderState;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.ZombieRenderer;
+import net.minecraft.client.renderer.entity.state.ZombieRenderState;
+import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
-public class FrostedZombieRenderer extends ZombieEntityRenderer {
+public class FrostedZombieRenderer extends ZombieRenderer {
 
 
-    private final Identifier TEXTURE = Identifier.of(VersusMod.MOD_ID  + ":textures/entity/frosted_zombie.png");
+    private final ResourceLocation TEXTURE = ResourceLocation.parse(VersusMod.MOD_ID  + ":textures/entity/frosted_zombie.png");
 
-    public FrostedZombieRenderer(EntityRendererFactory.Context context) {
+    public FrostedZombieRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    public Identifier getTexture(ZombieEntityRenderState zombieEntityRenderState) {
+    public ResourceLocation getTextureLocation(ZombieRenderState zombieEntityRenderState) {
         return TEXTURE;
     }
 }

@@ -5,21 +5,20 @@ import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.WindowEventHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.thread.ReentrantThreadExecutor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,36 +28,38 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static frootloops.versus.VersusMod.DEBUG_MODE;
-import static net.minecraft.util.hit.HitResult.Type.BLOCK;
-import static net.minecraft.util.hit.HitResult.Type.ENTITY;
+import static net.minecraft.world.phys.HitResult.Type.BLOCK;
+import static net.minecraft.world.phys.HitResult.Type.ENTITY;
+
+import com.mojang.blaze3d.platform.WindowEventHandler;
 
 @Environment(EnvType.CLIENT)
-@Mixin(value = MinecraftClient.class, priority = 100000)
-public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runnable> implements WindowEventHandler {
-    @Shadow public ClientPlayerEntity player;
-    @Shadow private GameOptions options;
-    @Shadow public ClientWorld world;
-    @Shadow protected int attackCooldown;
+@Mixin(value = Minecraft.class, priority = 100000)
+public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler {
+    @Shadow public LocalPlayer player;
+    @Shadow private Options options;
+    @Shadow public ClientLevel level;
+    @Shadow protected int missTime;
 
     @Shadow @Nullable public Entity cameraEntity;
-    @Shadow @Nullable public HitResult crosshairTarget;
-    @Shadow @Nullable public ClientPlayerInteractionManager interactionManager;
+    @Shadow @Nullable public HitResult hitResult;
+    @Shadow @Nullable public MultiPlayerGameMode gameMode;
 
-    @Shadow protected abstract boolean doAttack();
+    @Shadow protected abstract boolean startAttack();
 
     private int ticksAttackKeyPressed = 0;
     private Entity prevTargettedEntity = null;
 
     public MinecraftClientMixin(String string) { super(string); }
 
-    @Inject(method = "handleBlockBreaking",at = @At("HEAD"), cancellable = true)
+    @Inject(method = "continueAttack",at = @At("HEAD"), cancellable = true)
     private void holdToAttack(boolean bl, CallbackInfo ci) {
         if(VersusSettings.Combat.CAN_HOLD_TO_ATTACK == false) return;
 
         boolean tryAttacking = false;
-        float attackChargeProgress = player.getAttackCooldownProgress(0.0f);
+        float attackChargeProgress = player.getAttackStrengthScale(0.0f);
         if(attackChargeProgress > Combat.MIN_COOLDOWN_TO_SWING) {
-            if (options.attackKey.isPressed()) {
+            if (options.keyAttack.isDown()) {
                 ticksAttackKeyPressed++;
 
                 // If the cooldown is complete, swing:
@@ -68,7 +69,7 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
                 // Otherwise, if at some point we can attack something, we do:
                 else if (attackChargeProgress > 0.85d) {
                     double attackRange = Combat.getAttackRange(player, attackChargeProgress);
-                    tryAttacking = (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos());
+                    tryAttacking = (attackRange * attackRange) > player.distanceToSqr(hitResult.getLocation());
                 }
             }
             else ticksAttackKeyPressed = 0;
@@ -76,23 +77,23 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
 
         if(tryAttacking) {
             // If the player is breaking a block, return;
-            if (crosshairTarget != null && crosshairTarget.getType() == BLOCK) {
-                BlockPos pos = ((BlockHitResult)crosshairTarget).getBlockPos();
-                if(isMineableBlock(pos, world.getBlockState(pos))) return;
+            if (hitResult != null && hitResult.getType() == BLOCK) {
+                BlockPos pos = ((BlockHitResult)hitResult).getBlockPos();
+                if(isMineableBlock(pos, level.getBlockState(pos))) return;
             }
             ticksAttackKeyPressed = 0;
-            this.doAttack();
-            this.player.resetLastAttackedTicks();
+            this.startAttack();
+            this.player.resetAttackStrengthTicker();
             ci.cancel();
         }
     }
 
     private boolean isMineableBlock(BlockPos pos, BlockState block) {
-        return !block.getCollisionShape(world, pos).isEmpty() || block.getHardness(world, pos) != 0.0F;
+        return !block.getCollisionShape(level, pos).isEmpty() || block.getDestroySpeed(level, pos) != 0.0F;
     }
 
 
-    @Inject(method = "doAttack",at = @At("HEAD"), cancellable = true)
+    @Inject(method = "startAttack",at = @At("HEAD"), cancellable = true)
     private void doAttackOverhaul(CallbackInfoReturnable<Boolean> cir) {
         long timeStart;
         if(DEBUG_MODE) {
@@ -102,37 +103,37 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
         }
 
         this.ticksAttackKeyPressed = 0;
-        float attackProgress =  player.getAttackCooldownProgress(0.0f);
+        float attackProgress =  player.getAttackStrengthScale(0.0f);
         double attackRange = Combat.getAttackRange(player, attackProgress);
         boolean canAttackEntities = attackProgress > Combat.MIN_COOLDOWN_TO_SWING;
         boolean canSoonAttackEntities = !canAttackEntities && attackProgress > 0.2f;
 
         if(VersusSettings.Combat.CAN_AIM_ASSIST && (canAttackEntities || canSoonAttackEntities)) { // Enables some help & coyote time
             if(attackProgress == 1.0f) prevTargettedEntity = null;
-            else if(this.crosshairTarget.getType() != ENTITY) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
-            else if(this.crosshairTarget.getType() != ENTITY) attemptToAimAssistTarget(player.getAttacker(), attackRange);
+            else if(this.hitResult.getType() != ENTITY) attemptToAimAssistTarget(prevTargettedEntity, attackRange);
+            else if(this.hitResult.getType() != ENTITY) attemptToAimAssistTarget(player.getLastHurtByMob(), attackRange);
         }
 
         if(DEBUG_MODE && System.nanoTime() - timeStart > 200000) VersusMod.MOD_LOGGER.warn("PLAYERS - ATTACKING - Aim assist was incredibly slow: " + ((double)(System.nanoTime() - timeStart)/1000000.0) + " ms");
 
         boolean breakingBlock = false;
         boolean missedSwing = true;
-        switch (this.crosshairTarget.getType()) {
+        switch (this.hitResult.getType()) {
             case ENTITY: {
-                if(canAttackEntities && (attackRange * attackRange) > player.squaredDistanceTo(crosshairTarget.getPos())) {
+                if(canAttackEntities && (attackRange * attackRange) > player.distanceToSqr(hitResult.getLocation())) {
                     missedSwing = false;
-                    prevTargettedEntity = ((EntityHitResult) this.crosshairTarget).getEntity();
-                    interactionManager.attackEntity(this.player, prevTargettedEntity);
+                    prevTargettedEntity = ((EntityHitResult) this.hitResult).getEntity();
+                    gameMode.attack(this.player, prevTargettedEntity);
                 }
                 else ticksAttackKeyPressed++;
                 if(DEBUG_MODE && System.nanoTime() - timeStart > 200000) VersusMod.MOD_LOGGER.warn("PLAYERS - ATTACKING - Attacking an entity took: " + ((double)(System.nanoTime() - timeStart)/1000000.0) + " ms");
                 break;
             }
             case BLOCK: {
-                BlockHitResult blockHitResult = (BlockHitResult)this.crosshairTarget;
+                BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
                 BlockPos pos = blockHitResult.getBlockPos();
-                interactionManager.attackBlock(pos, blockHitResult.getSide());
-                if(isMineableBlock(pos, this.world.getBlockState(pos))) {
+                gameMode.startDestroyBlock(pos, blockHitResult.getDirection());
+                if(isMineableBlock(pos, this.level.getBlockState(pos))) {
                     missedSwing = false;
                     breakingBlock = true;
                     break;
@@ -143,9 +144,9 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             }
         }
         if(missedSwing && canAttackEntities) {
-            if (!interactionManager.hasLimitedAttackSpeed()) this.attackCooldown = 1;
-            else this.attackCooldown = 5;
-            this.player.resetLastAttackedTicks();
+            if (!gameMode.hasMissTime()) this.missTime = 1;
+            else this.missTime = 5;
+            this.player.resetAttackStrengthTicker();
         }
 
         if(DEBUG_MODE) {
@@ -153,16 +154,16 @@ public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runna
             if(System.nanoTime() - timeStart > 1000000) VersusMod.MOD_LOGGER.warn("  *************** WARNING: EXCESSIVELY SLOW FUNCTION  *************** \n");
         }
 
-        if(canAttackEntities || breakingBlock) this.player.swingHand(Hand.MAIN_HAND);
+        if(canAttackEntities || breakingBlock) this.player.swing(InteractionHand.MAIN_HAND);
         cir.setReturnValue(breakingBlock);
         cir.cancel();
     }
 
     private void attemptToAimAssistTarget(Entity entity, double range) {
-        if(entity == null || !(entity instanceof HostileEntity)) return;
-        if(entity.squaredDistanceTo(player) > range * range) return;
-        if(!Combat.isLookingTowards(player, entity.getEyePos(),-0.9)) return;
-        if(!player.canSee(entity)) return;
-        this.crosshairTarget = new EntityHitResult(entity);
+        if(entity == null || !(entity instanceof Monster)) return;
+        if(entity.distanceToSqr(player) > range * range) return;
+        if(!Combat.isLookingTowards(player, entity.getEyePosition(),-0.9)) return;
+        if(!player.hasLineOfSight(entity)) return;
+        this.hitResult = new EntityHitResult(entity);
     }
 }

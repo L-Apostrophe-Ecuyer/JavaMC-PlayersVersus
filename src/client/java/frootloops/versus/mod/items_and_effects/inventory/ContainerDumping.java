@@ -2,15 +2,14 @@ package frootloops.versus.mod.items_and_effects.inventory;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,14 +18,14 @@ public abstract class ContainerDumping {
 
     private static final boolean DEBUG_MODE = false;
 
-    public static final ButtonTextures TEXTURE_DUMP_TO_PLAYER_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/dump_to_player"), Identifier.of("players-versus", "container/dump_to_player_highlighted"));
-    public static final ButtonTextures TEXTURE_DUMP_TO_STORAGE_BUTTON = new ButtonTextures(Identifier.of("players-versus", "container/dump_to_storage"), Identifier.of("players-versus", "container/dump_to_storage_highlighted"));
+    public static final WidgetSprites TEXTURE_DUMP_TO_PLAYER_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/dump_to_player"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/dump_to_player_highlighted"));
+    public static final WidgetSprites TEXTURE_DUMP_TO_STORAGE_BUTTON = new WidgetSprites(ResourceLocation.fromNamespaceAndPath("players-versus", "container/dump_to_storage"), ResourceLocation.fromNamespaceAndPath("players-versus", "container/dump_to_storage_highlighted"));
 
     private record InventorySlot(int slodId, ItemStack stack) {}
 
 
-    public static void quickDumpIntoContainer(ScreenHandler handler, MinecraftClient client, Inventory playerInventory, Inventory containerInventory) {
-        int numSlotsInContainer = containerInventory.size();
+    public static void quickDumpIntoContainer(AbstractContainerMenu handler, Minecraft client, Container playerInventory, Container containerInventory) {
+        int numSlotsInContainer = containerInventory.getContainerSize();
         InventoryManagementHelper.placeOrDropCursorStack(handler, client, playerInventory);
         InventoryManagementHelper.mergeStacksTogether(handler, client, containerInventory, 0, numSlotsInContainer);
         InventoryManagementHelper.mergeStacksTogether(handler, client, playerInventory, numSlotsInContainer, 36);
@@ -35,8 +34,8 @@ public abstract class ContainerDumping {
         //InventorySorting.sortInventory(handler, client, containerInventory, InventorySorting.InventoryToSort.INVENTORY_WHILE_CHEST_OPEN, 0, numSlotsInContainer);
     }
 
-    public static void quickDumpIntoPlayerInventory(ScreenHandler handler, MinecraftClient client, Inventory playerInventory, Inventory containerInventory) {
-        int numSlotsInContainer = containerInventory.size();
+    public static void quickDumpIntoPlayerInventory(AbstractContainerMenu handler, Minecraft client, Container playerInventory, Container containerInventory) {
+        int numSlotsInContainer = containerInventory.getContainerSize();
         InventoryManagementHelper.placeOrDropCursorStack(handler, client, playerInventory);
         InventoryManagementHelper.mergeStacksTogether(handler, client, containerInventory, 0, numSlotsInContainer);
         InventoryManagementHelper.mergeStacksTogether(handler, client, playerInventory, numSlotsInContainer, 36);
@@ -45,7 +44,7 @@ public abstract class ContainerDumping {
         //InventorySorting.sortInventory(handler, client, playerInventory, InventorySorting.InventoryToSort.INVENTORY_WHILE_CHEST_OPEN, numSlotsInContainer, 36);
     }
 
-    private static void doQuickDump(ScreenHandler handler, MinecraftClient client, Inventory invOrigin, Inventory invDestination, int numSlotsOrigin, int numSlotsDestination, int startingIndexOrigin) {
+    private static void doQuickDump(AbstractContainerMenu handler, Minecraft client, Container invOrigin, Container invDestination, int numSlotsOrigin, int numSlotsDestination, int startingIndexOrigin) {
 
         ItemStack stack;
         int numEmptySlots = 0;
@@ -54,10 +53,10 @@ public abstract class ContainerDumping {
 
         // First step: for each item in invDestination, store how many of that item there are. This will be used to know which items from invOrigin to send to invDestination
         for (int i = 0; i < numSlotsDestination; i++) {
-            stack = invDestination.getStack(i);
+            stack = invDestination.getItem(i);
             if(stack.isEmpty()) numEmptySlots++;
 
-            else if(ItemStack.areItemsAndComponentsEqual(stack, stack.getItem().getDefaultStack())) {
+            else if(ItemStack.isSameItemSameComponents(stack, stack.getItem().getDefaultInstance())) {
                 destinationItems.put(stack.getItem(), stack.getCount() + destinationItems.getOrDefault(stack.getItem(), 0));
             }
             //else destinationUniqueStacks.add(i);
@@ -67,14 +66,14 @@ public abstract class ContainerDumping {
         //List<Integer> slotsToMove = new ArrayList<>(numSlotsOrigin);
         boolean isPlayerInventory = (startingIndexOrigin > 0 && numSlotsOrigin == 36);
         for (int i = 0; i < numSlotsOrigin; i++) {
-            stack = invOrigin.getStack(i);
-            if(!stack.isEmpty() && destinationItems.containsKey(stack.getItem()) && ItemStack.areItemsAndComponentsEqual(stack, stack.getItem().getDefaultStack())) {
+            stack = invOrigin.getItem(i);
+            if(!stack.isEmpty() && destinationItems.containsKey(stack.getItem()) && ItemStack.isSameItemSameComponents(stack, stack.getItem().getDefaultInstance())) {
 
                 if(isPlayerInventory) {
                     int actualSlotOrigin = (i < 9) ? (i + startingIndexOrigin + 27) : i + startingIndexOrigin - 9;
-                    client.interactionManager.clickSlot(handler.syncId, actualSlotOrigin, 0, SlotActionType.QUICK_MOVE, client.player);
+                    client.gameMode.handleInventoryMouseClick(handler.containerId, actualSlotOrigin, 0, ClickType.QUICK_MOVE, client.player);
                 }
-                else client.interactionManager.clickSlot(handler.syncId, i + startingIndexOrigin, 0, SlotActionType.QUICK_MOVE, client.player);
+                else client.gameMode.handleInventoryMouseClick(handler.containerId, i + startingIndexOrigin, 0, ClickType.QUICK_MOVE, client.player);
             }
         }
     }

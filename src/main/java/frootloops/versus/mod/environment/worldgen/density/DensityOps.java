@@ -1,6 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.density;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 /**
  * Vanilla's density-function operations as plain static methods, written to give the same doubles as the nodes they
@@ -21,12 +21,12 @@ public final class DensityOps {
      * heights (y 32 among them) to just below the integer. Bands that test {@code minecraft:y} test this value.
      */
     public static double yValue(int y) {
-        return MathHelper.clampedMap((double) y, -4064.0, 4062.0, -4064.0, 4062.0);
+        return Mth.clampedMap((double) y, -4064.0, 4062.0, -4064.0, 4062.0);
     }
 
     /** {@code y_clamped_gradient}. */
     public static double gradient(int y, int fromY, int toY, double fromValue, double toValue) {
-        return MathHelper.clampedMap((double) y, (double) fromY, (double) toY, fromValue, toValue);
+        return Mth.clampedMap((double) y, (double) fromY, (double) toY, fromValue, toValue);
     }
 
     /**
@@ -49,7 +49,7 @@ public final class DensityOps {
 
     /** {@code squeeze}: clamped to -1..1, then {@code x / 2 - x³ / 24}. */
     public static double squeeze(double value) {
-        double clamped = MathHelper.clamp(value, -1.0, 1.0);
+        double clamped = Mth.clamp(value, -1.0, 1.0);
         return clamped / 2.0 - clamped * clamped * clamped / 24.0;
     }
 

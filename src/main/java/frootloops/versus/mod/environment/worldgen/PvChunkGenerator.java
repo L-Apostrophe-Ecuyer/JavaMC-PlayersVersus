@@ -2,57 +2,56 @@ package frootloops.versus.mod.environment.worldgen;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.GenerationSettings;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.gen.carver.ConfiguredCarver;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 
 /**
  * Generator type {@code players-versus:noise}, the Improved world type's overworld: vanilla's noise generator, whose
  * biomes carve with the Players Versus carvers ({@link PvCarvers}). Everything else is vanilla's
- * {@link NoiseChunkGenerator}; the terrain, aquifer and ore veins come from the settings, as before.
+ * {@link NoiseBasedChunkGenerator}; the terrain, aquifer and ore veins come from the settings, as before.
  *
- * <p>Vanilla's generator asks {@link #getGenerationSettings} for a biome's carvers when it carves a chunk (the smoke
+ * <p>Vanilla's generator asks {@link #getBiomeGenerationSettings} for a biome's carvers when it carves a chunk (the smoke
  * run's carved-position count shows the swap). The settings returned keep the biome's own features, so anything else
  * that asks gets the same features as before.
  */
-public final class PvChunkGenerator extends NoiseChunkGenerator {
+public final class PvChunkGenerator extends NoiseBasedChunkGenerator {
 
     public static final MapCodec<PvChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BiomeSource.CODEC.fieldOf("biome_source").forGetter(PvChunkGenerator::getBiomeSource),
-            ChunkGeneratorSettings.REGISTRY_CODEC.fieldOf("settings").forGetter(PvChunkGenerator::getSettings),
-            RegistryOps.getEntryLookupCodec(RegistryKeys.CONFIGURED_CARVER)
+            NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(PvChunkGenerator::generatorSettings),
+            RegistryOps.retrieveGetter(Registries.CONFIGURED_CARVER)
     ).apply(instance, instance.stable(PvChunkGenerator::new)));
 
     private final PvCarvers carvers;
     /** Each biome's settings with its Improved carvers, made once. */
-    private final Map<RegistryEntry<Biome>, GenerationSettings> generationSettings = new ConcurrentHashMap<>();
+    private final Map<Holder<Biome>, BiomeGenerationSettings> generationSettings = new ConcurrentHashMap<>();
 
-    public PvChunkGenerator(BiomeSource biomeSource, RegistryEntry<ChunkGeneratorSettings> settings,
-                            RegistryEntryLookup<ConfiguredCarver<?>> carvers) {
+    public PvChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> settings,
+                            HolderGetter<ConfiguredWorldCarver<?>> carvers) {
         super(biomeSource, settings);
         this.carvers = new PvCarvers(carvers);
     }
 
     @Override
-    protected MapCodec<? extends ChunkGenerator> getCodec() {
+    protected MapCodec<? extends ChunkGenerator> codec() {
         return CODEC;
     }
 
     @Override
-    public GenerationSettings getGenerationSettings(RegistryEntry<Biome> biome) {
-        GenerationSettings cached = this.generationSettings.get(biome);
+    public BiomeGenerationSettings getBiomeGenerationSettings(Holder<Biome> biome) {
+        BiomeGenerationSettings cached = this.generationSettings.get(biome);
         if (cached != null) return cached;
-        return this.generationSettings.computeIfAbsent(biome, entry -> this.carvers.withImprovedCarvers(entry, super.getGenerationSettings(entry)));
+        return this.generationSettings.computeIfAbsent(biome, entry -> this.carvers.withImprovedCarvers(entry, super.getBiomeGenerationSettings(entry)));
     }
 }

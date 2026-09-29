@@ -1,11 +1,6 @@
 package frootloops.versus.mod.environment.worldgen;
 
 import com.google.gson.JsonParser;
-import net.minecraft.registry.BuiltinRegistries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.biome.Biome;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PvCarversTest {
 
     private static final Path DATA = Path.of("src/main/resources/data");
-    private static final Identifier DEEP_DARK = Identifier.ofVanilla("deep_dark");
+    private static final ResourceLocation DEEP_DARK = ResourceLocation.withDefaultNamespace("deep_dark");
 
     @BeforeAll
     static void bootstrap() {
@@ -38,14 +38,14 @@ class PvCarversTest {
 
     @Test
     void vanillaBiomesCarveWithTheImprovedCopies() {
-        RegistryWrapper.Impl<Biome> biomes = BuiltinRegistries.createWrapperLookup().getOrThrow(RegistryKeys.BIOME);
+        HolderLookup.RegistryLookup<Biome> biomes = VanillaRegistries.createLookup().lookupOrThrow(Registries.BIOME);
         Map<String, Integer> replaced = new TreeMap<>();
-        biomes.streamEntries().forEach(entry -> {
-            Identifier biome = entry.registryKey().getValue();
-            List<Identifier> vanilla = new ArrayList<>();
-            entry.value().getGenerationSettings().getCarversForStep()
-                    .forEach(carver -> vanilla.add(carver.getKey().orElseThrow().getValue()));
-            List<Identifier> improved = PvCarvers.improved(biome, vanilla);
+        biomes.listElements().forEach(entry -> {
+            ResourceLocation biome = entry.key().location();
+            List<ResourceLocation> vanilla = new ArrayList<>();
+            entry.value().getGenerationSettings().getCarvers()
+                    .forEach(carver -> vanilla.add(carver.unwrapKey().orElseThrow().location()));
+            List<ResourceLocation> improved = PvCarvers.improved(biome, vanilla);
             if (biome.equals(DEEP_DARK)) {
                 // its override listed minecraft:cave (under this mod's tuning) and players-versus:deep_dark_canyon
                 assertEquals(List.of(id("cave"), id("deep_dark_canyon")), improved);
@@ -53,7 +53,7 @@ class PvCarversTest {
             }
             assertEquals(vanilla.size(), improved.size(), biome + ": carvers added or dropped");
             for (int i = 0; i < vanilla.size(); i++) {
-                Identifier expected = PvCarvers.COPIES.getOrDefault(vanilla.get(i), vanilla.get(i));
+                ResourceLocation expected = PvCarvers.COPIES.getOrDefault(vanilla.get(i), vanilla.get(i));
                 assertEquals(expected, improved.get(i), biome + ": carver " + i);
                 if (!expected.equals(vanilla.get(i))) replaced.merge(vanilla.get(i).toString(), 1, Integer::sum);
             }
@@ -77,17 +77,17 @@ class PvCarversTest {
             }
             for (Path file : files) {
                 String path = folder.relativize(file).toString().replace('\\', '/').replace(".json", "");
-                Identifier biome = Identifier.of(namespace, path);
-                List<Identifier> carvers = new ArrayList<>();
+                ResourceLocation biome = ResourceLocation.fromNamespaceAndPath(namespace, path);
+                List<ResourceLocation> carvers = new ArrayList<>();
                 JsonParser.parseString(Files.readString(file)).getAsJsonObject().getAsJsonArray("carvers")
-                        .forEach(carver -> carvers.add(Identifier.of(carver.getAsString())));
-                List<Identifier> improved = PvCarvers.improved(biome, carvers);
+                        .forEach(carver -> carvers.add(ResourceLocation.parse(carver.getAsString())));
+                List<ResourceLocation> improved = PvCarvers.improved(biome, carvers);
                 if (namespace.equals("players-versus")) {
                     // Improved worlds only: the file names the carvers Improved worlds use
                     assertEquals(carvers, improved, biome + " names carvers Improved worlds replace");
                     carvers.forEach(carver -> assertEquals("players-versus", carver.getNamespace(), biome + " names " + carver));
                 }
-                for (Identifier carver : improved) {
+                for (ResourceLocation carver : improved) {
                     if (carver.getNamespace().equals("players-versus")) {
                         Path json = DATA.resolve("players-versus/worldgen/configured_carver/" + carver.getPath() + ".json");
                         assertTrue(Files.isRegularFile(json), biome + " carves with " + carver + ", which doesn't exist");
@@ -100,7 +100,7 @@ class PvCarversTest {
         assertTrue(biomes > 20, "only " + biomes + " biome files found");
     }
 
-    private static Identifier id(String path) {
-        return Identifier.of("players-versus", path);
+    private static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath("players-versus", path);
     }
 }

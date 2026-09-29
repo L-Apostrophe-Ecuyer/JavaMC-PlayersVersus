@@ -2,8 +2,7 @@ package frootloops.versus.mod.environment.worldgen.density;
 
 import frootloops.versus.VersusMod;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.world.gen.densityfunction.DensityFunctionTypes;
-
+import net.minecraft.world.level.levelgen.DensityFunctions;
 import java.util.Arrays;
 
 /**
@@ -38,7 +37,7 @@ public final class DensityCompilerCompat {
     private static boolean detect() {
         if (!FabricLoader.getInstance().isModLoaded(MODULE_ID)) return false;
         // the marker's class isn't public, so take it from an instance
-        Class<?> marker = DensityFunctionTypes.interpolated(DensityFunctionTypes.constant(0.0)).getClass();
+        Class<?> marker = DensityFunctions.interpolated(DensityFunctions.constant(0.0)).getClass();
         boolean compiler = Arrays.stream(marker.getInterfaces()).anyMatch(type -> type.getName().equals(MIXED_IN_INTERFACE));
         if (!compiler) {
             VersusMod.MOD_LOGGER.info("C2ME is loaded, but its density-function compiler isn't active: the Players Versus final density stays a Java kernel");

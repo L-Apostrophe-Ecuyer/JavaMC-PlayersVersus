@@ -7,29 +7,28 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
 import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
 import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryLoader;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.resource.DirectoryResourcePack;
-import net.minecraft.resource.LifecycledResourceManagerImpl;
-import net.minecraft.resource.ResourcePack;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.resource.VanillaDataPackProvider;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.noise.NoiseConfig;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.repository.ServerPacksSource;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.RandomState;
 
 /**
  * Vanilla's data pack plus this mod's data (read from {@code src/main/resources}), loaded into worldgen registries by
@@ -44,24 +43,24 @@ public final class WorldgenTestData {
     public static final Path REFERENCE_RESOURCES = Path.of("src/test/resources/reference");
     /** The namespace of the replaced JSON: {@code pv_reference:overworld/…} is what {@code players-versus:overworld/…} was. */
     public static final String REFERENCE = "pv_reference";
-    private static final List<RegistryKey<? extends Registry<?>>> LOADED = List.of(RegistryKeys.NOISE_PARAMETERS, RegistryKeys.DENSITY_FUNCTION);
+    private static final List<ResourceKey<? extends Registry<?>>> LOADED = List.of(Registries.NOISE, Registries.DENSITY_FUNCTION);
 
-    private static DynamicRegistryManager.Immutable registries;
-    private static ChunkGeneratorSettings pvSettings;
+    private static RegistryAccess.Frozen registries;
+    private static NoiseGeneratorSettings pvSettings;
 
     private WorldgenTestData() {
     }
 
     /** Noise parameters and density functions: vanilla's, with this mod's pack and the reference pack on top. */
-    public static synchronized DynamicRegistryManager.Immutable registries() {
+    public static synchronized RegistryAccess.Frozen registries() {
         if (registries == null) {
             TestGame.start();
-            ResourcePack vanilla = VanillaDataPackProvider.createDefaultPack();
-            ResourcePack mod = new DirectoryResourcePack(vanilla.getInfo(), MOD_RESOURCES);
-            ResourcePack reference = new DirectoryResourcePack(vanilla.getInfo(), REFERENCE_RESOURCES);
-            try (LifecycledResourceManagerImpl resources = new LifecycledResourceManagerImpl(ResourceType.SERVER_DATA, List.of(vanilla, mod, reference))) {
-                registries = RegistryLoader.loadFromResource(resources, List.of(),
-                        RegistryLoader.DYNAMIC_REGISTRIES.stream().filter(entry -> LOADED.contains(entry.key())).toList());
+            PackResources vanilla = ServerPacksSource.createVanillaPackSource();
+            PackResources mod = new PathPackResources(vanilla.location(), MOD_RESOURCES);
+            PackResources reference = new PathPackResources(vanilla.location(), REFERENCE_RESOURCES);
+            try (MultiPackResourceManager resources = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(vanilla, mod, reference))) {
+                registries = RegistryDataLoader.load(resources, List.of(),
+                        RegistryDataLoader.WORLDGEN_REGISTRIES.stream().filter(entry -> LOADED.contains(entry.key())).toList());
             }
         }
         return registries;
@@ -72,37 +71,37 @@ public final class WorldgenTestData {
      * plain stone: it names this mod's blocks, which only exist after the whole mod initialized, and these tests build
      * no surfaces.
      */
-    public static synchronized ChunkGeneratorSettings pvSettings() {
+    public static synchronized NoiseGeneratorSettings pvSettings() {
         if (pvSettings == null) {
             JsonObject json = JsonParser.parseString(read("data/" + VersusMod.MOD_ID + "/worldgen/noise_settings/overworld.json")).getAsJsonObject();
             json.add("surface_rule", JsonParser.parseString("{\"type\": \"minecraft:block\", \"result_state\": {\"Name\": \"minecraft:stone\"}}"));
-            pvSettings = ChunkGeneratorSettings.CODEC.parse(RegistryOps.of(JsonOps.INSTANCE, registries()), json).getOrThrow();
+            pvSettings = NoiseGeneratorSettings.DIRECT_CODEC.parse(RegistryOps.create(JsonOps.INSTANCE, registries()), json).getOrThrow();
         }
         return pvSettings;
     }
 
-    public static NoiseConfig noiseConfig(long seed) {
-        return NoiseConfig.create(pvSettings(), registries().getOrThrow(RegistryKeys.NOISE_PARAMETERS), seed);
+    public static RandomState noiseConfig(long seed) {
+        return RandomState.create(pvSettings(), registries().lookupOrThrow(Registries.NOISE), seed);
     }
 
     /**
      * A density function from the registry, seeded by the aquifer's own seeding ({@link AquiferInputs#seeding}), which
-     * must match how {@link NoiseConfig} seeds its router.
+     * must match how {@link RandomState} seeds its router.
      */
-    public static DensityFunction seeded(NoiseConfig config, String id) {
-        return registries().getOrThrow(RegistryKeys.DENSITY_FUNCTION)
-                .getOrThrow(RegistryKey.of(RegistryKeys.DENSITY_FUNCTION, Identifier.of(id))).value()
-                .apply(AquiferInputs.seeding(config));
+    public static DensityFunction seeded(RandomState config, String id) {
+        return registries().lookupOrThrow(Registries.DENSITY_FUNCTION)
+                .getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.parse(id))).value()
+                .mapAll(AquiferInputs.seeding(config));
     }
 
     /** A density function written inline in JSON, its references resolved in {@link #registries()}, seeded like {@link #seeded}. */
-    public static DensityFunction parse(NoiseConfig config, String json) {
-        return DensityFunction.FUNCTION_CODEC.parse(RegistryOps.of(JsonOps.INSTANCE, registries()), JsonParser.parseString(json))
-                .getOrThrow().apply(AquiferInputs.seeding(config));
+    public static DensityFunction parse(RandomState config, String json) {
+        return DensityFunction.HOLDER_HELPER_CODEC.parse(RegistryOps.create(JsonOps.INSTANCE, registries()), JsonParser.parseString(json))
+                .getOrThrow().mapAll(AquiferInputs.seeding(config));
     }
 
     /** The high river's valley ({@link PvHighRiver}) from this mod's final density, seeded like {@link #seeded}. */
-    public static PvHighRiver highRiver(NoiseConfig config) {
+    public static PvHighRiver highRiver(RandomState config) {
         PvFinalDensity finalDensity = (PvFinalDensity) seeded(config, VersusMod.MOD_ID + ":overworld/final_density");
         return (PvHighRiver) PvWorldgen.unwrap(finalDensity.highRiver());
     }
@@ -111,15 +110,15 @@ public final class WorldgenTestData {
      * A chunk the high river runs through: its water at the surface at the chunk's centre (a point of the river's
      * lattice, so exact values decide it), the first of random chunks near the origin.
      */
-    public static ChunkPos highRiverChunk(NoiseConfig config) {
+    public static ChunkPos highRiverChunk(RandomState config) {
         PvHighRiver river = highRiver(config);
         Random random = new Random(8675309L);
         for (int i = 0; i < 40000; i++) {
             int chunkX = random.nextInt(500) - 250, chunkZ = random.nextInt(500) - 250;
-            DensityFunction.NoisePos center = new DensityFunction.UnblendedNoisePos(chunkX * 16 + 8, PvWorldgenConstants.HIGH_RIVER_Y, chunkZ * 16 + 8);
-            double channel = river.channel().sample(center);
+            DensityFunction.FunctionContext center = new DensityFunction.SinglePointContext(chunkX * 16 + 8, PvWorldgenConstants.HIGH_RIVER_Y, chunkZ * 16 + 8);
+            double channel = river.channel().compute(center);
             if (Math.abs(channel) >= PvWorldgenConstants.HIGH_RIVER_HALF_WIDTH) continue;
-            if (PvHighRiver.waterAt(PvWorldgenConstants.HIGH_RIVER_Y, channel, river.depth().sample(center), river.terrain().sample(center))) {
+            if (PvHighRiver.waterAt(PvWorldgenConstants.HIGH_RIVER_Y, channel, river.depth().compute(center), river.terrain().compute(center))) {
                 return new ChunkPos(chunkX, chunkZ);
             }
         }

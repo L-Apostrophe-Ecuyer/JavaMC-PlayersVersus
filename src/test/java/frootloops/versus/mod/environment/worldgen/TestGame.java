@@ -1,7 +1,7 @@
 package frootloops.versus.mod.environment.worldgen;
 
-import net.minecraft.Bootstrap;
 import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
 
 /**
  * Starts the parts of the game that tests need: the game version, vanilla's bootstrap, then this mod's worldgen types
@@ -20,8 +20,8 @@ public final class TestGame {
         if (failure != null) throw failure;
         if (started) return;
         try {
-            SharedConstants.createGameVersion();
-            Bootstrap.initialize();
+            SharedConstants.tryDetectVersion();
+            Bootstrap.bootStrap();
             PvWorldgen.initialize();
             started = true;
         } catch (RuntimeException | Error exception) {
