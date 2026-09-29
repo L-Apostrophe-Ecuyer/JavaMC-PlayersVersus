@@ -40,7 +40,7 @@ public abstract class DrownedMixin extends Zombie {
         super(entityType, world);
     }
 
-    @ModifyConstant(method = "canSpawn", constant = @Constant(intValue = 15))
+    @ModifyConstant(method = "checkDrownedSpawnRules", constant = @Constant(intValue = 15))
     private static int lessSpawning(int spawnChance) {return 30;}
 
     @Inject(method = "populateDefaultEquipmentSlots", at = @At("HEAD"), cancellable = true)

@@ -136,7 +136,7 @@ public final class PvAquifer implements Aquifer {
     public BlockState computeSubstance(DensityFunction.FunctionContext pos, double density) {
         int y = pos.blockY();
         boolean lavaLevel = density <= 0.0
-                && this.fluidLevelSampler.getFluidLevel(pos.blockX(), y, pos.blockZ()).at(y).is(Blocks.LAVA);
+                && this.fluidLevelSampler.computeFluid(pos.blockX(), y, pos.blockZ()).at(y).is(Blocks.LAVA);
         PvAquiferDecision decision = this.decide(pos, density, lavaLevel);
         this.needsFluidTick = decision.needsFluidTick;
         return decision.state;

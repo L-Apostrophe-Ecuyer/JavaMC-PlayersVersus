@@ -34,11 +34,11 @@ public abstract class ServerSleepingMixin extends Level {
     protected ServerSleepingMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates, List<ServerPlayer> players, SleepStatus sleepManager, MinecraftServer server, SleepStatus sleepManager1) {
         super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
         this.server = server;
-        this.DEEPSLATE_BRICKS = sleepManager1;
+        this.sleepStatus = sleepManager1;
     }
 
     @Shadow private final MinecraftServer server;
-    @Shadow private final SleepStatus DEEPSLATE_BRICKS;
+    @Shadow private final SleepStatus sleepStatus;
     @Shadow public TickRateManager tickRateManager() {return this.server.tickRateManager();}
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/SleepStatus;areEnoughSleeping(I)Z"))
@@ -66,7 +66,7 @@ public abstract class ServerSleepingMixin extends Level {
         isFastForwardingTime = false;
         ((ServerLevel) ((Object)this)).resetWeatherCycle();
         (players.stream().filter(LivingEntity::isSleeping).collect(Collectors.toList())).forEach(player -> player.stopSleepInBed(false, false));
-        this.DEEPSLATE_BRICKS.removeAllSleepers();
+        this.sleepStatus.removeAllSleepers();
 
         TickRateManager tickManager = this.server.tickRateManager();
         if(tickManager.tickrate() == VersusSettings.Gameplay.SLEEP_TICK_SPEED) tickManager.setTickRate(20.0f);
