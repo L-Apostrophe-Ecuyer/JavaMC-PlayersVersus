@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 20
     env:
       VERSION: "26.3"
-      FABRIC_API: "0.158.2+26.3"
+      FABRIC_API: "0.161.0+26.3"
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
