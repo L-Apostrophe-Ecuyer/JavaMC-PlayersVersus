@@ -22,7 +22,7 @@ public final class WorldgenDebugCommands {
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
                 Commands.literal("pvwg")
-                        .requires(source -> source.hasPermission(2))
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .then(Commands.literal("probe")
                                 .executes(context -> WorldgenProbe.run(context.getSource())))
                         .then(Commands.literal("bench")

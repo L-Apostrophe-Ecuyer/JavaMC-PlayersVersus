@@ -4,10 +4,6 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
-import frootloops.versus.mod.environment.worldgen.aquifer.AquiferInputs;
-import frootloops.versus.mod.environment.worldgen.density.DensityCompilerCompat;
-import frootloops.versus.mod.environment.worldgen.density.PvFinalDensity;
-import frootloops.versus.mod.environment.worldgen.density.PvHighRiver;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -25,16 +21,13 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
-import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -70,46 +63,36 @@ import java.util.function.Consumer;
  *   <li>{@code slice-y<Y>.png}: horizontal cuts (air black, water blue, lava orange, stone light, deepslate dark).</li>
  * </ul>
  *
- * <p>Metrics, measured right after the carvers ran:
+ * <p>Metrics, measured right after {@code TERRAIN} (26.3's one status for the terrain, the surface and the carvers):
  * <ul>
- *   <li>water at or above y 64: the Players Versus aquifer never places any there;</li>
- *   <li>stone placed by carvers in y -8..63: carved positions that hold stone after the carvers ran but held something
- *   else before. The aquifer's barriers are the only source: vanilla's aquifer tells carvers to leave barrier blocks
- *   alone, while the Players Versus aquifer hands them stone (quirk Q6). Vanilla world types should report 0;</li>
+ *   <li>water at or above y 64: the Players Versus aquifer never places any there but the high river's, at y 77..80;</li>
  *   <li>basin seam ratio: water/non-water changes across chunk borders divided by the same count across chunk
  *   middles, for y 0..31. About 1 means no seams;</li>
- *   <li>water in y 0..31 by x (and z) offset inside the chunk, relative to the mean. Quirk Q1 predicts extra water at
- *   x offsets 0..7 only; z is the control;</li>
- *   <li>fluid ticks queued: fluid blocks the aquifer marked for a fluid update during NOISE and CARVERS, per chunk,
- *   overall and for y 0..31 next to the water blocks there. Each one runs when its chunk becomes a full chunk. Almost as
- *   many ticks as water blocks in y 0..31 is quirk Q8;</li>
- *   <li>stone the carvers skipped in y -8..63: carved positions that held stone before and after the carvers ran. A
- *   carver skips a position when the aquifer answers "barrier";</li>
+ *   <li>water in y 0..31 by x (and z) offset inside the chunk, relative to the mean; z is the control;</li>
+ *   <li>fluid ticks queued: fluid blocks the aquifer marked for a fluid update, per chunk, overall and for y 0..31 next to
+ *   the water blocks there. Each one runs when its chunk becomes a full chunk;</li>
  *   <li>water beside or above air in y -31..63 (neighbours inside the chunk): where water spills, or stands as a wall of
- *   water until something updates it. Split by what made the water and the air (the terrain pass or a carver), by
- *   height, and by whether the water has a fluid tick queued;</li>
+ *   water until something updates it. Split by height, and by whether the water has a fluid tick queued;</li>
  *   <li>water by height, per chunk: below y -31, where the aquifer places none; y -31..-9, which should stay dry
- *   (Section 10, question 7 of the refactor plan); y -8..-1, 0..23, 24..47 and 48..63.</li>
+ *   (Section 10, question 7 of the refactor plan); y -8..-1, 0..23, 24..47 and 48..63;</li>
+ *   <li>the high river's water and where it spills.</li>
  * </ul>
  * The report also holds text maps (one character per 8x8 blocks, north up) of the surface and its biomes, so results
- * can be compared without the images; hashes of every block after NOISE and after CARVERS, by 16-block layer and by
- * chunk, so two runs that should agree can be checked block for block and their differences located; and the
- * structure starts in the region.
+ * can be compared without the images; hashes of every block after {@code TERRAIN}, by 16-block layer and by chunk, so
+ * two runs that should agree can be checked block for block and their differences located; and the structure starts
+ * in the region.
  */
 public final class WorldgenBench {
 
     public static final int MAX_RADIUS = 32;
 
     private static final List<ChunkStatus> STAGES = List.of(
-            ChunkStatus.BIOMES, ChunkStatus.NOISE, ChunkStatus.SURFACE, ChunkStatus.CARVERS, ChunkStatus.FEATURES, ChunkStatus.FULL);
+            ChunkStatus.BIOMES, ChunkStatus.TERRAIN, ChunkStatus.FEATURES, ChunkStatus.FULL);
     private static final int[] SLICE_YS = {-40, -20, 0, 16, 28, 40, 56, 62};
     private static final int[] BIOME_LAYER_YS = {-40, 0, 32};
     private static final int BASIN_SEAM_MIN_Y = 0;
     private static final int BASIN_SEAM_MAX_Y = 32;
     private static final int WATER_CEILING_Y = 64;
-    /** Covers every aquifer barrier: the lowest ones are basin barriers at y -3. */
-    private static final int CARVER_BAND_MIN_Y = -8;
-    private static final int CARVER_BAND_MAX_Y = 64;
     /** The sea band, y -31..63 (its water only from y -8 up, since revision 6 of the refactor plan). */
     private static final int LEAK_MIN_Y = -31;
     private static final int LEAK_MAX_Y = 64;
@@ -121,6 +104,7 @@ public final class WorldgenBench {
     private static final int[][] SIDES_AND_BELOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
     /** The high river's water surface; above sea level, only its water is there before features run. */
     private static final int HIGH_RIVER_Y = frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
+    private static final int HIGH_RIVER_MIN_Y = frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_MIN_Y;
     private static final int MAP_CELL = 8;
 
     private WorldgenBench() {
@@ -145,7 +129,7 @@ public final class WorldgenBench {
     }
 
     static int runCommand(CommandSourceStack source, int radius) {
-        ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
+        ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
         try {
             Path out = run(source.getLevel(), center, radius, message -> source.sendSuccess(() -> Component.literal(message), false));
             source.sendSuccess(() -> Component.literal("[pvwg] bench written to " + out.toAbsolutePath()), false);
@@ -163,12 +147,12 @@ public final class WorldgenBench {
         String gate = chunkManager.getGenerator() instanceof NoiseBasedChunkGenerator noiseGenerator
                 ? "players_versus_aquifer_and_ore_veins=" + PvWorldgen.isPvGenerator(noiseGenerator.generatorSettings().value())
                 : "not a noise generator";
-        int minChunkX = center.x - radius;
-        int minChunkZ = center.z - radius;
+        int minChunkX = center.x() - radius;
+        int minChunkZ = center.z() - radius;
         int chunksPerSide = radius * 2 + 1;
         int chunkCount = chunksPerSide * chunksPerSide;
         log.accept(String.format(Locale.ROOT, "[pvwg] bench: %d chunks around chunk %d,%d, settings %s",
-                chunkCount, center.x, center.z, settings));
+                chunkCount, center.x(), center.z(), settings));
         log.accept("[pvwg] generator " + generator);
 
         Region region = new Region(world, minChunkX * 16, minChunkZ * 16, chunksPerSide * 16);
@@ -185,32 +169,16 @@ public final class WorldgenBench {
             log.accept(String.format(Locale.ROOT, "[pvwg] %-9s %9.1f ms  %7.2f ms/chunk",
                     status.getName(), elapsed / 1e6, elapsed / 1e6 / chunkCount));
 
-            if (status == ChunkStatus.NOISE) {
+            if (status == ChunkStatus.TERRAIN) {
                 for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
                     for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
-                        region.hashBlocks("noise", chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.NOISE, true));
-                    }
-                }
-            }
-            if (status == ChunkStatus.SURFACE) {
-                for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
-                    for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
-                        region.captureBeforeCarvers(chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.SURFACE, true));
-                    }
-                }
-            }
-            if (status == ChunkStatus.CARVERS) {
-                for (int chunkX = minChunkX; chunkX < minChunkX + chunksPerSide; chunkX++) {
-                    for (int chunkZ = minChunkZ; chunkZ < minChunkZ + chunksPerSide; chunkZ++) {
-                        ChunkAccess chunk = chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.CARVERS, true);
+                        ChunkAccess chunk = chunkManager.getChunk(chunkX, chunkZ, ChunkStatus.TERRAIN, true);
                         region.capture(chunk);
-                        region.hashBlocks("carvers", chunk);
+                        region.hashBlocks("terrain", chunk);
                     }
                 }
             }
         }
-
-        List<String> compilerCheck = compareCompiledFinalDensity(world, minChunkX * 16, minChunkZ * 16, chunksPerSide * 16);
 
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.ROOT));
         Path dir = FabricLoader.getInstance().getGameDir().resolve("pvwg")
@@ -218,59 +186,11 @@ public final class WorldgenBench {
         Files.createDirectories(dir);
         region.writeImages(dir);
         List<String> report = region.report(settings, generator, gate, world.getSeed(), center, radius, stageNanos, chunkCount);
-        report.addAll(compilerCheck);
         Files.write(dir.resolve("report.txt"), report);
         for (String line : report) {
             if (line.startsWith("metric")) log.accept("[pvwg] " + line);
         }
         return dir;
-    }
-
-    /**
-     * With C2ME's compiler at work ({@link DensityCompilerCompat#ACTIVE}): the router's final density as the compiler
-     * built it, against vanilla's own evaluation of the same vanilla-type tree and against the Java kernel, at random
-     * positions over the region, all three exact (no cell interpolation). They should agree to the bit.
-     */
-    private static List<String> compareCompiledFinalDensity(ServerLevel world, int minX, int minZ, int size) {
-        if (!DensityCompilerCompat.ACTIVE || !(world.getChunkSource().getGenerator() instanceof NoiseBasedChunkGenerator generator)
-                || !(PvWorldgen.unwrap(generator.generatorSettings().value().noiseRouter().finalDensity()) instanceof PvFinalDensity raw)) {
-            return List.of();
-        }
-        RandomState config = world.getChunkSource().randomState();
-        DensityFunction.Visitor seeding = AquiferInputs.seeding(config);
-        PvFinalDensity kernel = new PvFinalDensity(raw.terrain().mapAll(seeding), raw.noodleToggle().mapAll(seeding),
-                raw.noodleThickness().mapAll(seeding), raw.noodleRidgeA().mapAll(seeding), raw.noodleRidgeB().mapAll(seeding),
-                raw.entrances().mapAll(seeding), raw.highRiver().mapAll(seeding));
-        DensityFunction interpreted = kernel.asVanillaTypes();
-        DensityFunction compiled = config.router().finalDensity();
-        java.util.Random random = new java.util.Random(world.getSeed());
-        int points = 20000, compiledDiffers = 0, interpretedDiffers = 0;
-        double largest = 0;
-        int[] byLayer = new int[24];
-        List<String> examples = new ArrayList<>();
-        for (int i = 0; i < points; i++) {
-            int x = minX + random.nextInt(size), y = world.getMinY() + random.nextInt(world.getHeight()), z = minZ + random.nextInt(size);
-            DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(x, y, z);
-            double java = kernel.compute(pos), vanilla = interpreted.compute(pos), fast = compiled.compute(pos);
-            if (Double.doubleToLongBits(vanilla) != Double.doubleToLongBits(java)) interpretedDiffers++;
-            if (Double.doubleToLongBits(fast) != Double.doubleToLongBits(vanilla)) {
-                compiledDiffers++;
-                largest = Math.max(largest, Math.abs(fast - vanilla));
-                byLayer[Math.clamp((y - world.getMinY()) >> 4, 0, byLayer.length - 1)]++;
-                if (examples.size() < 12) {
-                    examples.add(String.format(Locale.ROOT, "c2me_check differs at %d,%d,%d: compiled %s, vanilla %s, java %s", x, y, z,
-                            fast, vanilla, java));
-                }
-            }
-        }
-        List<String> lines = new ArrayList<>();
-        lines.add(String.format(Locale.ROOT, "c2me_check final density at %d random points: compiled differs from vanilla's evaluation at %d"
-                + " (largest difference %s), vanilla's from the Java kernel at %d", points, compiledDiffers, largest, interpretedDiffers));
-        StringBuilder layers = new StringBuilder("c2me_check differences by 16-block layer from y " + world.getMinY() + ":");
-        for (int count : byLayer) layers.append(' ').append(count);
-        lines.add(layers.toString());
-        lines.addAll(examples);
-        return lines;
     }
 
     /** The generator, encoded the way level.dat stores it. */
@@ -281,7 +201,7 @@ public final class WorldgenBench {
 
     static String describeGenerator(ChunkGenerator generator) {
         if (generator instanceof NoiseBasedChunkGenerator noiseGenerator) {
-            return noiseGenerator.generatorSettings().unwrapKey().map(key -> key.location().toString()).orElse("inline-settings");
+            return noiseGenerator.generatorSettings().unwrapKey().map(key -> key.identifier().toString()).orElse("inline-settings");
         }
         return generator.getClass().getSimpleName();
     }
@@ -302,16 +222,13 @@ public final class WorldgenBench {
         private final int[][] layerBiome = new int[BIOME_LAYER_YS.length][];
         private final byte[][] slices = new byte[SLICE_YS.length][];
         private final BitSet basinWater;
-        private final BitSet stoneBeforeCarvers;
         private final List<String> biomeIds = new ArrayList<>();
         private final Map<String, Integer> biomeIndex = new HashMap<>();
-        private long waterAtOrAboveCeiling, carverPlacedStone, carverSkippedStone, carvedInBand;
+        private long waterAtOrAboveCeiling;
         private long fluidTicksQueued, fluidTicksQueuedInBasinLayers;
         private int protoChunks;
         /** Water blocks beside or above air, and those among them with a fluid tick queued. */
         private long leakingWater, leakingWaterTicking;
-        /** Water and air side by side, by what made them: [water carved * 2 + air carved]. */
-        private final long[] leakPairsBySource = new long[4];
         private final long[] leakingWaterByBand = new long[LEAK_BAND_TOPS.length];
         /** Water blocks by {@code WATER_BAND_TOPS}, and below them. */
         private final long[] waterByBand = new long[WATER_BAND_TOPS.length];
@@ -343,7 +260,6 @@ public final class WorldgenBench {
             for (int i = 0; i < BIOME_LAYER_YS.length; i++) this.layerBiome[i] = new int[columns];
             for (int i = 0; i < SLICE_YS.length; i++) this.slices[i] = new byte[columns];
             this.basinWater = new BitSet(columns * (BASIN_SEAM_MAX_Y - BASIN_SEAM_MIN_Y));
-            this.stoneBeforeCarvers = new BitSet(columns * (CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y));
             this.structures = world.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         }
 
@@ -352,7 +268,7 @@ public final class WorldgenBench {
         }
 
         private int chunkIndex(ChunkPos pos) {
-            return (pos.x - (this.minX >> 4)) + (pos.z - (this.minZ >> 4)) * chunksPerSide();
+            return (pos.x() - (this.minX >> 4)) + (pos.z() - (this.minZ >> 4)) * chunksPerSide();
         }
 
         /** FNV-1a over the raw ids of every block of each 16-block section, for {@link #appendHashes}. */
@@ -379,30 +295,10 @@ public final class WorldgenBench {
             return (x - this.minX) + (z - this.minZ) * this.size;
         }
 
-        /** Remembers where stone was before the carvers ran, to tell stone the carvers placed from stone they skipped. */
-        void captureBeforeCarvers(ChunkAccess chunk) {
-            ChunkPos chunkPos = chunk.getPos();
-            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            int layers = CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y;
-            for (int localX = 0; localX < 16; localX++) {
-                for (int localZ = 0; localZ < 16; localZ++) {
-                    int x = chunkPos.getMinBlockX() + localX;
-                    int z = chunkPos.getMinBlockZ() + localZ;
-                    int column = column(x, z);
-                    for (int y = CARVER_BAND_MIN_Y; y < CARVER_BAND_MAX_Y; y++) {
-                        if (chunk.getBlockState(pos.set(x, y, z)).is(Blocks.STONE)) {
-                            this.stoneBeforeCarvers.set(column * layers + (y - CARVER_BAND_MIN_Y));
-                        }
-                    }
-                }
-            }
-        }
-
         void capture(ChunkAccess chunk) {
             ChunkPos chunkPos = chunk.getPos();
-            // A WrapperProtoChunk wraps a chunk that is already full: its carving mask and post-processing lists are gone.
+            // An ImposterProtoChunk wraps a chunk that is already full: its post-processing lists are gone.
             ProtoChunk proto = chunk instanceof ProtoChunk protoChunk && !(chunk instanceof ImposterProtoChunk) ? protoChunk : null;
-            CarvingMask carvingMask = proto != null ? proto.getCarvingMask() : null;
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             for (int localX = 0; localX < 16; localX++) {
                 for (int localZ = 0; localZ < 16; localZ++) {
@@ -434,28 +330,17 @@ public final class WorldgenBench {
                     for (int y = WATER_CEILING_Y; y <= surface; y++) {
                         if (chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) this.waterAtOrAboveCeiling++;
                     }
-                    if (carvingMask != null) {
-                        int layers = CARVER_BAND_MAX_Y - CARVER_BAND_MIN_Y;
-                        for (int y = CARVER_BAND_MIN_Y; y < CARVER_BAND_MAX_Y; y++) {
-                            if (!carvingMask.get(localX, y, localZ)) continue;
-                            this.carvedInBand++;
-                            if (chunk.getBlockState(pos.set(x, y, z)).is(Blocks.STONE)) {
-                                if (this.stoneBeforeCarvers.get(column * layers + (y - CARVER_BAND_MIN_Y))) this.carverSkippedStone++;
-                                else this.carverPlacedStone++;
-                            }
-                        }
-                    }
                 }
             }
             BitSet ticking = proto != null ? countQueuedFluidTicks(proto) : new BitSet();
-            countLeaks(chunk, carvingMask, ticking);
+            countLeaks(chunk, ticking);
             countHighRiver(chunk);
             for (Map.Entry<Structure, StructureStart> entry : chunk.getAllStarts().entrySet()) {
                 StructureStart start = entry.getValue();
                 if (!start.isValid()) continue;
                 BoundingBox box = start.getBoundingBox();
                 this.structureStarts.add(String.format(Locale.ROOT, "structure %s start chunk %d,%d box %d,%d,%d..%d,%d,%d",
-                        this.structures.getKey(entry.getKey()), start.getChunkPos().x, start.getChunkPos().z, box.minX(), box.minY(),
+                        this.structures.getKey(entry.getKey()), start.getChunkPos().x(), start.getChunkPos().z(), box.minX(), box.minY(),
                         box.minZ(), box.maxX(), box.maxY(), box.maxZ()));
             }
         }
@@ -467,7 +352,7 @@ public final class WorldgenBench {
             for (int localX = 0; localX < 16; localX++) {
                 for (int localZ = 0; localZ < 16; localZ++) {
                     int x = chunkPos.getMinBlockX() + localX, z = chunkPos.getMinBlockZ() + localZ;
-                    for (int y = PvHighRiver.MIN_Y; y <= HIGH_RIVER_Y; y++) {
+                    for (int y = HIGH_RIVER_MIN_Y; y <= HIGH_RIVER_Y; y++) {
                         if (!chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) continue;
                         boolean surface = y == HIGH_RIVER_Y;
                         if (surface) this.riverSurfaceWater++;
@@ -494,7 +379,7 @@ public final class WorldgenBench {
          * Water blocks by height, and those with air beside or below them, inside the chunk: the water spills there once
          * it's updated, or right away if it has a fluid tick queued ({@code ticking}, by {@link #localIndex}).
          */
-        private void countLeaks(ChunkAccess chunk, CarvingMask carvingMask, BitSet ticking) {
+        private void countLeaks(ChunkAccess chunk, BitSet ticking) {
             ChunkPos chunkPos = chunk.getPos();
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             for (int localX = 0; localX < 16; localX++) {
@@ -511,14 +396,12 @@ public final class WorldgenBench {
                         while (y >= WATER_BAND_TOPS[waterBand]) waterBand++;
                         this.waterByBand[waterBand]++;
                         if (!state.getFluidState().isSource()) continue;
-                        boolean waterCarved = carvingMask != null && carvingMask.get(localX, y, localZ), leaks = false;
+                        boolean leaks = false;
                         for (int[] offset : SIDES_AND_BELOW) {
                             int nx = localX + offset[0], ny = y + offset[1], nz = localZ + offset[2];
                             if (nx < 0 || nx > 15 || nz < 0 || nz > 15) continue;
                             if (!chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + nx, ny, chunkPos.getMinBlockZ() + nz)).isAir()) continue;
                             leaks = true;
-                            boolean airCarved = carvingMask != null && carvingMask.get(nx, ny, nz);
-                            this.leakPairsBySource[(waterCarved ? 2 : 0) + (airCarved ? 1 : 0)]++;
                         }
                         if (!leaks) continue;
                         this.leakingWater++;
@@ -536,7 +419,7 @@ public final class WorldgenBench {
         }
 
         /**
-         * Counts the fluid blocks NOISE and CARVERS marked for a fluid update (the chunk's post-processing lists).
+         * Counts the fluid blocks the terrain and the carvers marked for a fluid update (the chunk's post-processing lists).
          *
          * @return the marked positions, by {@link #localIndex}
          */
@@ -676,7 +559,7 @@ public final class WorldgenBench {
             lines.add("final_density " + (DensityCompilerCompat.ACTIVE ? "vanilla types, for C2ME's compiler" : "Java kernel"));
             lines.add("seed " + seed);
             lines.add(String.format(Locale.ROOT, "region center chunk %d,%d radius %d (%d chunks), heights %d..%d",
-                    center.x, center.z, radius, chunkCount, this.bottomY, this.topY));
+                    center.x(), center.z(), radius, chunkCount, this.bottomY, this.topY));
             lines.add("cpus " + Runtime.getRuntime().availableProcessors() + ", java " + System.getProperty("java.version"));
             lines.add("mods " + FabricLoader.getInstance().getAllMods().stream()
                     .map(mod -> mod.getMetadata().getId() + " " + mod.getMetadata().getVersion().getFriendlyString())
@@ -693,17 +576,10 @@ public final class WorldgenBench {
             lines.add(String.format(Locale.ROOT, "time %-9s %10.1f ms %8.2f ms/chunk", "total", total / 1e6, total / 1e6 / chunkCount));
 
             lines.add("metric water_at_or_above_y" + WATER_CEILING_Y + " " + this.waterAtOrAboveCeiling);
-            lines.add(String.format(Locale.ROOT, "metric carver_placed_stone_y%d..%d %d of %d carved positions",
-                    CARVER_BAND_MIN_Y, CARVER_BAND_MAX_Y - 1, this.carverPlacedStone, this.carvedInBand));
-            lines.add(String.format(Locale.ROOT, "metric carver_skipped_stone_y%d..%d %d of %d carved positions",
-                    CARVER_BAND_MIN_Y, CARVER_BAND_MAX_Y - 1, this.carverSkippedStone, this.carvedInBand));
             double chunks = this.size * this.size / 256.0;
             lines.add(String.format(Locale.ROOT, "metric water_beside_or_above_air_y%d..%d_per_chunk %.2f (%.2f with a fluid tick);"
-                            + " pairs by what made the water and the air: noise and noise %.2f, noise and carver %.2f, carver and noise %.2f,"
-                            + " carver and carver %.2f; by height: y %d..%d %.2f, %d..%d %.2f, %d..%d %.2f, %d..%d %.2f",
+                            + " by height: y %d..%d %.2f, %d..%d %.2f, %d..%d %.2f, %d..%d %.2f",
                     LEAK_MIN_Y, LEAK_MAX_Y - 1, this.leakingWater / chunks, this.leakingWaterTicking / chunks,
-                    this.leakPairsBySource[0] / chunks, this.leakPairsBySource[1] / chunks, this.leakPairsBySource[2] / chunks,
-                    this.leakPairsBySource[3] / chunks,
                     LEAK_MIN_Y, LEAK_BAND_TOPS[0] - 1, this.leakingWaterByBand[0] / chunks,
                     LEAK_BAND_TOPS[0], LEAK_BAND_TOPS[1] - 1, this.leakingWaterByBand[1] / chunks,
                     LEAK_BAND_TOPS[1], LEAK_BAND_TOPS[2] - 1, this.leakingWaterByBand[2] / chunks,
