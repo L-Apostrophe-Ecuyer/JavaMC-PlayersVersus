@@ -78,7 +78,7 @@ public class EndermanHideAndWaitGoal<T extends LivingEntity> extends Goal {
 
     @Override
     public void tick() {
-        if(mob.invulnerableTime == 20) {
+        if(mob.getInvulnerableTime() == 20) {
             LivingEntity attacker = (LivingEntity) mob.getLastDamageSource().getEntity();
             if (attacker != null && attacker.isInWater()) this.targetEntity = attacker;
             this.teleportAway();
@@ -133,7 +133,7 @@ public class EndermanHideAndWaitGoal<T extends LivingEntity> extends Goal {
         if (isBlockPermitted && !isBlockWet) {
             Vec3 vec3d = mob.position();
             //VersusMod.MOD_LOGGER.warn("    > " + mob.getEntityWorld().getTime() + ": Teleport attempt to " + mutable);
-            if (mob.randomTeleport(x, y, z, true)) {
+            if (mob.randomTeleport(x, y, z, true, state -> false)) {
                 mob.level().gameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Context.of(mob));
                 if (!mob.isSilent()) {
                     mob.level().playSound(null, mob.xo, mob.yo, mob.zo, SoundEvents.ENDERMAN_TELEPORT, mob.getSoundSource(), 1.0F, 1.0F);

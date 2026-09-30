@@ -46,7 +46,7 @@ public class WheatGrassBlock extends TallGrassBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState floor, BlockGetter world, BlockPos pos) {
-        return floor.is(BlockTags.DIRT) || floor.is(Blocks.FARMLAND) || floor.is(BlockTags.DRY_VEGETATION_MAY_PLACE_ON);
+        return floor.is(BlockTags.DIRT) || floor.is(Blocks.FARMLAND) || floor.is(BlockTags.SUPPORTS_DRY_VEGETATION);
     }
 
     @Override

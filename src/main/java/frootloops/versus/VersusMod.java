@@ -55,7 +55,7 @@ public class VersusMod implements ModInitializer {
 		CustomWorldgen.onInitialize();
 
 		MOD_LOGGER.info("Registering networking packets...");
-		PayloadTypeRegistry.playC2S().register(RespawnNearbyPayload.ID, RespawnNearbyPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(RespawnNearbyPayload.ID, RespawnNearbyPayload.CODEC);
 		VersusModServer.addPacketRecievers();
 
 		MOD_LOGGER.info("Done! This mod is ready to party.");

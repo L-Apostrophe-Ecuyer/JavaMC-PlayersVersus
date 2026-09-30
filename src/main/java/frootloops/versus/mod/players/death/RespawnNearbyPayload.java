@@ -1,8 +1,6 @@
 package frootloops.versus.mod.players.death;
 
 import frootloops.versus.VersusMod;
-import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientPayloadC2S;
-import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientSync;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;

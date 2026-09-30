@@ -8,8 +8,10 @@ import frootloops.versus.mod.environment.CustomSpecialEffects;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -267,8 +269,8 @@ public class VanillaItems {
             modifyToolComponents(context, Items.TRIDENT, TRIDENT_DAMAGE, TRIDENT_SPEED, TRIDENT_REACH);
 
             // Shields are instant:
-            context.modify(Items.SHIELD, builder -> {
-                builder.set(DataComponents.BLOCKS_ATTACKS, createDamageBlockingComponent(0.0625F, 1.0F, 5.0F, 0.8F, SoundEvents.SHIELD_BLOCK, SoundEvents.SHIELD_BREAK));
+            context.modify(Items.SHIELD, (builder, registries, shield) -> {
+                builder.set(DataComponents.BLOCKS_ATTACKS, createDamageBlockingComponent(registries, 0.0625F, 1.0F, 5.0F, 0.8F, SoundEvents.SHIELD_BLOCK, SoundEvents.SHIELD_BREAK));
             });
 
             double extra = 0.0;
@@ -315,9 +317,9 @@ public class VanillaItems {
     }
 
     private static void modifySwordComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount, Holder.Reference<SoundEvent> blockingSound) {
-        context.modify(item, builder -> {builder
+        context.modify(item, (builder, registries, sword) -> {builder
                 .set(DataComponents.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange, 0.0))
-                .set(DataComponents.BLOCKS_ATTACKS, getSwordBlockingComponent(baseBlockingAmount, blockingSound, blockingSound));
+                .set(DataComponents.BLOCKS_ATTACKS, getSwordBlockingComponent(registries, baseBlockingAmount, blockingSound, blockingSound));
         });
     }
 
@@ -353,12 +355,13 @@ public class VanillaItems {
         return consumeComponent.build();
     }
 
-    public static BlocksAttacks getSwordBlockingComponent(float baseBlockingAmount, Holder.Reference<SoundEvent> soundBlocking, Holder.Reference<SoundEvent> soundBreaking) {
-        return createDamageBlockingComponent(0.0625F, 0.5F, Math.max(0F, baseBlockingAmount), 0.5F, soundBlocking, soundBreaking);
+    public static BlocksAttacks getSwordBlockingComponent(HolderLookup.Provider registries, float baseBlockingAmount, Holder.Reference<SoundEvent> soundBlocking, Holder.Reference<SoundEvent> soundBreaking) {
+        return createDamageBlockingComponent(registries, 0.0625F, 0.5F, Math.max(0F, baseBlockingAmount), 0.5F, soundBlocking, soundBreaking);
     }
 
 
     public static BlocksAttacks createDamageBlockingComponent(
+            HolderLookup.Provider registries,
             float blockDelaySeconds,    // The amount of time (in seconds) that use must be held before successfully blocking attacks
             float disableCooldownScale, // The multiplier applied to the cooldown time for the item when attacked by a disabling attack
             float amountBlockedBase,    // The constant amount of damage to be blocked
@@ -374,7 +377,7 @@ public class VanillaItems {
                 disableCooldownScale,
                 List.of(new BlocksAttacks.DamageReduction(horizontalBlockingAngle, Optional.empty(), amountBlockedBase, amountBlockedFactor)),
                 new BlocksAttacks.ItemDamageFunction(itemDamageThreshold, itemDamageBase, itemDamageFactor),
-                Optional.of(DamageTypeTags.BYPASSES_SHIELD),
+                Optional.of(registries.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypeTags.BYPASSES_SHIELD)),
                 Optional.of(soundBlocking),
                 Optional.of(soundBreaking)
         );

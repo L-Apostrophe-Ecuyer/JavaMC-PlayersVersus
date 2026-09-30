@@ -74,13 +74,13 @@ public class RevampedTradeFactories {
     public static Factory createMasterLibrarianTradeFactory() {
         return new TypedWrapperFactory(
                 ImmutableMap.<ResourceKey<VillagerType>, Factory>builder()
-                        .put(VillagerType.DESERT, new EnchantBookFactory(30, 3, 3, EnchantmentTags.TRADES_DESERT_SPECIAL))
-                        .put(VillagerType.JUNGLE, new EnchantBookFactory(30, 2, 2, EnchantmentTags.TRADES_JUNGLE_SPECIAL))
-                        .put(VillagerType.PLAINS, new EnchantBookFactory(30, 3, 3, EnchantmentTags.TRADES_PLAINS_SPECIAL))
-                        .put(VillagerType.SAVANNA, new EnchantBookFactory(30, 3, 3, EnchantmentTags.TRADES_SAVANNA_SPECIAL))
-                        .put(VillagerType.SNOW, new EnchantBookFactory(30, EnchantmentTags.TRADES_SNOW_SPECIAL))
-                        .put(VillagerType.SWAMP, new EnchantBookFactory(30, EnchantmentTags.TRADES_SWAMP_SPECIAL))
-                        .put(VillagerType.TAIGA, new EnchantBookFactory(30, 2, 2, EnchantmentTags.TRADES_TAIGA_SPECIAL))
+                        .put(VillagerType.DESERT, new EnchantBookFactory(30, 3, 3, TradeKeys.TRADES_DESERT_SPECIAL))
+                        .put(VillagerType.JUNGLE, new EnchantBookFactory(30, 2, 2, TradeKeys.TRADES_JUNGLE_SPECIAL))
+                        .put(VillagerType.PLAINS, new EnchantBookFactory(30, 3, 3, TradeKeys.TRADES_PLAINS_SPECIAL))
+                        .put(VillagerType.SAVANNA, new EnchantBookFactory(30, 3, 3, TradeKeys.TRADES_SAVANNA_SPECIAL))
+                        .put(VillagerType.SNOW, new EnchantBookFactory(30, TradeKeys.TRADES_SNOW_SPECIAL))
+                        .put(VillagerType.SWAMP, new EnchantBookFactory(30, TradeKeys.TRADES_SWAMP_SPECIAL))
+                        .put(VillagerType.TAIGA, new EnchantBookFactory(30, 2, 2, TradeKeys.TRADES_TAIGA_SPECIAL))
                         .build()
         );
     }
@@ -260,7 +260,7 @@ public class RevampedTradeFactories {
         @Override
         public MerchantOffer create(Entity entity, RandomSource random) {
             ItemStack itemStack = this.processed.copy();
-            Level world = entity.level();
+            if (!(entity.level() instanceof ServerLevel world)) return null;
             this.enchantmentProviderKey
                     .ifPresent(
                             key -> EnchantmentHelper.enchantItemFromProvider(itemStack, world.registryAccess(), key, world.getCurrentDifficultyAt(entity.blockPosition()), random)
@@ -292,8 +292,8 @@ public class RevampedTradeFactories {
         public MerchantOffer create(Entity entity, RandomSource random) {
             ItemCost tradedItem = new ItemCost(Items.EMERALD, this.price);
             ItemStack itemStack = new ItemStack(this.sell);
-            if (itemStack.is(ItemTags.DYEABLE)) {
-                List<DyeItem> list = Lists.<DyeItem>newArrayList();
+            if (itemStack.has(DataComponents.DYED_COLOR)) {
+                List<DyeColor> list = Lists.<DyeColor>newArrayList();
                 list.add(getDye(random));
                 if (random.nextFloat() > 0.7F) {
                     list.add(getDye(random));
@@ -309,8 +309,8 @@ public class RevampedTradeFactories {
             return new MerchantOffer(tradedItem, itemStack, this.maxUses, this.experience, 0.2F);
         }
 
-        private static DyeItem getDye(RandomSource random) {
-            return DyeItem.byColor(DyeColor.byId(random.nextInt(16)));
+        private static DyeColor getDye(RandomSource random) {
+            return DyeColor.byId(random.nextInt(16));
         }
     }
 
@@ -406,7 +406,7 @@ public class RevampedTradeFactories {
         @Override
         public MerchantOffer create(Entity entity, RandomSource random) {
             ItemStack itemStack = this.sell.copy();
-            Level world = entity.level();
+            if (!(entity.level() instanceof ServerLevel world)) return null;
             this.enchantmentProviderKey
                     .ifPresent(
                             key -> EnchantmentHelper.enchantItemFromProvider(itemStack, world.registryAccess(), key, world.getCurrentDifficultyAt(entity.blockPosition()), random)
@@ -479,7 +479,7 @@ public class RevampedTradeFactories {
         public MerchantOffer create(Entity entity, RandomSource random) {
             ItemCost tradedItem = new ItemCost(Items.EMERALD, this.price);
             List<Holder<Potion>> list = BuiltInRegistries.POTION.listElements()
-                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && entity.level().potionBrewing().isBrewablePotion(entry) && !entry.value().getEffects().getFirst().getEffect().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
+                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && !entry.value().getEffects().getFirst().getEffect().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
                     .collect(Collectors.toList());
             Holder<Potion> registryEntry = Util.getRandom(list, random);
             ItemStack itemStack = new ItemStack(this.sell.getItem(), this.sellCount);

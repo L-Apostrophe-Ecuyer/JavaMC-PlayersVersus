@@ -1,7 +1,6 @@
 package frootloops.versus.mod.players;
 
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -19,8 +18,8 @@ public class RayTraceHandler {
     }
 
     public static HitResult rayTrace(Entity entity, Level world, Entity player, ClipContext.Block blockMode, ClipContext.Fluid fluidMode, double range) {
-        Tuple<Vec3, Vec3> params = getEntityParams(player);
-        return rayTrace(entity, world, params.getA(), params.getB(), blockMode, fluidMode, range);
+        Params params = getEntityParams(player);
+        return rayTrace(entity, world, params.start(), params.direction(), blockMode, fluidMode, range);
     }
 
     public static HitResult rayTrace(Entity entity, Level world, Vec3 startPos, Vec3 ray, ClipContext.Block blockMode, ClipContext.Fluid fluidMode, double range) {
@@ -33,11 +32,14 @@ public class RayTraceHandler {
         return world.clip(context);
     }
 
+    /** Where a ray starts and which way it points. */
+    public record Params(Vec3 start, Vec3 direction) {}
+
     /**
      * @param player - the player entity using the raycast guide.
-     * @return Pair | Left = Starting position, Right = Direction
+     * @return the ray's starting position and its direction
      */
-    public static Tuple<Vec3, Vec3> getEntityParams(Entity player) {
+    public static Params getEntityParams(Entity player) {
         float pitch = player.xRotO + (player.getXRot() - player.xRotO);
         float yaw = player.yRotO + (player.getYRot() - player.yRotO);
         Vec3 pos = player.position();
@@ -55,6 +57,6 @@ public class RayTraceHandler {
         float yLen = zYaw * pitchMod;
         Vec3 ray = new Vec3(xLen, azimuth, yLen);
 
-        return new Tuple<>(rayPos, ray);
+        return new Params(rayPos, ray);
     }
 }

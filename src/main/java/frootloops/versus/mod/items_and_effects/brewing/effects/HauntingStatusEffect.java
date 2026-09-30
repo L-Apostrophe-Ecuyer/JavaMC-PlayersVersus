@@ -24,7 +24,7 @@ public class HauntingStatusEffect extends MobEffect  {
     }
 
     @Override
-    public void applyInstantenousEffect(
+    public void applyInstantaneousEffect(
             ServerLevel world, @Nullable Entity effectEntity, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity
     ) {
         target.hurtServer(world, target.damageSources().fellOutOfWorld(), 2.0f);

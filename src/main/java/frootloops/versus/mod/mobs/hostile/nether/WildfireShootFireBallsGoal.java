@@ -205,9 +205,9 @@ public class WildfireShootFireBallsGoal extends Goal {
             this.wildfireEntity.push(0.0, -1.0, 0.0);
         }
         else {
-            this.wildfireEntity.setInvulnerable(true);
+            this.wildfireEntity.setPermanentlyInvulnerable(true);
             this.wildfireEntity.level().explode(wildfireEntity, wildfireEntity.getX(), wildfireEntity.getY(), wildfireEntity.getZ(), 2, true, Level.ExplosionInteraction.MOB);
-            this.wildfireEntity.setInvulnerable(false);
+            this.wildfireEntity.setPermanentlyInvulnerable(false);
 
             // Long Cooldown (5-8s)
             this.ticksGroundPound = 0;

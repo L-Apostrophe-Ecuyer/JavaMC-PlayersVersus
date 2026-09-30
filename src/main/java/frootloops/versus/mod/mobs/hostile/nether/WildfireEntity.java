@@ -35,8 +35,8 @@ public class WildfireEntity extends Monster {
         super(entityType, world);
         this.setPathfindingMalus(PathType.WATER, -1.0F);
         this.setPathfindingMalus(PathType.LAVA, 8.0F);
-        this.setPathfindingMalus(PathType.DANGER_FIRE, 0.0F);
-        this.setPathfindingMalus(PathType.DAMAGE_FIRE, 0.0F);
+        this.setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, 0.0F);
+        this.setPathfindingMalus(PathType.FIRE, 0.0F);
         this.xpReward = 40;
     }
 
@@ -78,7 +78,7 @@ public class WildfireEntity extends Monster {
         if (livingEntity != null && livingEntity.getEyeY() > this.getEyeY() + (double)this.eyeOffset && this.canAttack(livingEntity)) {
             Vec3 vec3d = this.getDeltaMovement();
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, (0.2F - vec3d.y) * 0.2F, 0.0));
-            this.hasImpulse = true;
+            this.needsSync = true;
         }
 
         super.customServerAiStep(world);

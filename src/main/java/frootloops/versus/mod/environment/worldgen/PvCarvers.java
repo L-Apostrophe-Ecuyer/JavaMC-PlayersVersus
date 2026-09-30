@@ -59,12 +59,12 @@ public final class PvCarvers {
     BiomeGenerationSettings withImprovedCarvers(Holder<Biome> biome, BiomeGenerationSettings settings) {
         List<Holder<WorldCarver>> carvers = new ArrayList<>();
         settings.getCarvers().forEach(carvers::add);
-        Optional<Identifier> biomeId = biome.unwrapKey().map(ResourceKey::location);
+        Optional<Identifier> biomeId = biome.unwrapKey().map(ResourceKey::identifier);
         List<Identifier> ids = new ArrayList<>(carvers.size());
         for (Holder<WorldCarver> carver : carvers) {
             Optional<ResourceKey<WorldCarver>> key = carver.unwrapKey();
             if (key.isEmpty()) return settings;  // an inline carver: nothing to match, keep the biome's list as it is
-            ids.add(key.get().location());
+            ids.add(key.get().identifier());
         }
         List<Identifier> improved = biomeId.map(id -> improved(id, ids)).orElse(ids);
         if (improved.equals(ids)) return settings;

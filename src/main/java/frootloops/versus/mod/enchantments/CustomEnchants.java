@@ -69,7 +69,7 @@ public abstract class CustomEnchants {
                 if(!user.isAlive())
                     return;
 
-                user.invulnerableTime = 18; // 8 ticks of invincibility frames
+                user.setInvulnerableTime(18); // 8 ticks of invincibility frames
                 double d = user.getX();
                 double e = user.getY();
                 double f = user.getZ();
@@ -81,7 +81,7 @@ public abstract class CustomEnchants {
                         user.stopRiding();
                     }
                     Vec3 vec3d = user.position();
-                    if (!user.randomTeleport(g, h, j, true)) continue;
+                    if (!user.randomTeleport(g, h, j, true, state -> false)) continue;
 
                     user.level().gameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Context.of(user));
                     user.level().playSound(null, d, e, f, SoundEvents.ENDERMAN_TELEPORT, user.getSoundSource(), 1.0f, 1.0f);

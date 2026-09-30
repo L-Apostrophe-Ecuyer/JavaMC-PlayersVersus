@@ -102,7 +102,7 @@ public class CustomMudBlock extends MoistBlock {
             super.fallOn(world, state, pos, entity, fallDistance);
         }
         else if(entity instanceof LivingEntity && fallDistance > MIN_FALL_DISTANCE_TO_DRY) {
-            if(fallDistance < 20f && entity.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) return;
+            if(fallDistance < 20f && entity.is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) return;
             entity.fallDistance = entity.fallDistance - MIN_FALL_DISTANCE_TO_DRY;
             if(fallDistance < MIN_FALL_DISTANCE_TO_DRY) return;
             world.setBlockAndUpdate(pos, this.getDryVersion().defaultBlockState());
@@ -138,7 +138,7 @@ public class CustomMudBlock extends MoistBlock {
 
     public static boolean canWalkOnWetMud(Entity entity) {
         if (entity.isInLiquid() && !entity.isAlwaysTicking()) return true; // Unrealistic but fairly useful!
-        if (entity instanceof Pig || entity instanceof TamableAnimal || entity.getType().is(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) return true;
+        if (entity instanceof Pig || entity instanceof TamableAnimal || entity.is(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) return true;
         if (entity instanceof LivingEntity) return ((LivingEntity)entity).getItemBySlot(EquipmentSlot.FEET).is(Items.LEATHER_BOOTS);
         return false;
     }

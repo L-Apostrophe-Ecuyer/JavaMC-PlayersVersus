@@ -76,7 +76,7 @@ public class SlimeballEntity extends ThrowableItemProjectile {
         if(entity instanceof LivingEntity livingEntity) {
             double strength = 0.3 + 0.5 * Math.max(1.0, this.getDeltaMovement().lengthSqr());
             livingEntity.setDeltaMovement(livingEntity.getDeltaMovement().add(0.0, 0.05 + 0.3 * this.getDeltaMovement().y, 0.0));
-            livingEntity.knockback(strength, -this.getDeltaMovement().x, -this.getDeltaMovement().z);
+            livingEntity.knockback(strength, -this.getDeltaMovement().x, -this.getDeltaMovement().z, this.damageSources().thrown(this, this.getOwner()), 0.0F);
         }
     }
 
@@ -104,7 +104,7 @@ public class SlimeballEntity extends ThrowableItemProjectile {
                     if(direction.getAxis() == Direction.Axis.X) this.setDeltaMovement(this.getDeltaMovement().multiply(-0.4, 0.6, 0.6));
                     else if(direction.getAxis() == Direction.Axis.Y) this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, -0.4, 0.6));
                     else if(direction.getAxis() == Direction.Axis.Z) this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 0.6, -0.4));
-                    this.hasImpulse = true;
+                    this.needsSync = true;
                 }
             }
         }

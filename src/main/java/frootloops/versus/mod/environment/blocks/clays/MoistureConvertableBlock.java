@@ -61,7 +61,7 @@ public interface MoistureConvertableBlock {
             world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(entity, result));
         }
         else if(entity instanceof LivingEntity && fallDistance > MIN_FALL_DISTANCE_TO_DRY) {
-            if(fallDistance < 20f && entity.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) return;
+            if(fallDistance < 20f && entity.is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) return;
             BlockState blockState = dryBlock.withPropertiesOf(state);
             world.setBlockAndUpdate(pos, blockState);
             world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(entity, blockState));

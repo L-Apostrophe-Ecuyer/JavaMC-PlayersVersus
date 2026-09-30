@@ -3,7 +3,7 @@ package frootloops.versus.mod.items_and_effects;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.mobs.ModEntities;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -159,8 +159,8 @@ public abstract class RegisteringCustomItems {
 
     public static Item registerCustomItem(String name, Item item, ResourceKey<CreativeModeTab> group1, ResourceKey<CreativeModeTab> group2) {
         if(item == null) VersusMod.MOD_LOGGER.error("  > [ERROR] Couldn't register 'players-versus:" + name + "' because the item was null.");
-        if (group1 != null) ItemGroupEvents.modifyEntriesEvent(group1).register(entries -> entries.accept(item));
-        if (group2 != null) ItemGroupEvents.modifyEntriesEvent(group2).register(entries -> entries.accept(item));
+        if (group1 != null) CreativeModeTabEvents.modifyOutputEvent(group1).register(output -> output.accept(item));
+        if (group2 != null) CreativeModeTabEvents.modifyOutputEvent(group2).register(output -> output.accept(item));
         return Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID, name), item);
     }
 }

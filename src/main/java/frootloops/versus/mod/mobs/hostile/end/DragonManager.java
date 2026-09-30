@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.hurtingprojectile.DragonFireball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +40,7 @@ public class DragonManager {
 
 		double chance = chargePlayerMaxChance;
 
-		BlockPos centerPodium = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.ZERO);
 		AABB boundingBox = new AABB(centerPodium).inflate(64d);
 		List<Player> players = dragon.level().getEntitiesOfClass(Player.class, boundingBox, EntitySelector.NO_CREATIVE_OR_SPECTATOR);
 
@@ -57,7 +56,7 @@ public class DragonManager {
 	}
 
 	private static void chargePlayer(EnderDragon dragon) {
-		BlockPos centerPodium = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.ZERO);
 		AABB bb = new AABB(centerPodium).inflate(64d);
 		ServerPlayer player = (ServerPlayer) getRandomPlayerNearCrystal(dragon.level(), bb);
 
@@ -78,7 +77,7 @@ public class DragonManager {
 	}
 
 	private static void fireballPlayer(EnderDragon dragon) {
-		BlockPos centerPodium = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(new BlockPos(0,0,0)));
+		BlockPos centerPodium = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.ZERO);
 		AABB bb = new AABB(centerPodium).inflate(64d);
 
 		ServerPlayer player = (ServerPlayer) getRandomPlayer(dragon.level(), bb);
@@ -132,7 +131,7 @@ public class DragonManager {
 		if (players.isEmpty())
 			return null;
 
-		int r = world.random.nextInt(players.size());
+		int r = world.getRandom().nextInt(players.size());
 		return players.get(r);
 	}
 
@@ -153,11 +152,11 @@ public class DragonManager {
 
  		int r;
  		if (playersNearCrystals.isEmpty()) {
-			r = world.random.nextInt(players.size());
+			r = world.getRandom().nextInt(players.size());
 			return players.get(r);
 		}
 
-		r = world.random.nextInt(playersNearCrystals.size());
+		r = world.getRandom().nextInt(playersNearCrystals.size());
 		return playersNearCrystals.get(r);
 	}
 }

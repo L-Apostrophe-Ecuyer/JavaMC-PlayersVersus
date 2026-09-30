@@ -78,10 +78,10 @@ public class CustomBlocks {
 
     public static void onInitialize() {
 
-        SMOLDERING_TORCH = registerBlock("smoldering_torch", new SmolderingTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(SoundType.WOOD).pushReaction(PushReaction.DESTROY)));
-        SMOLDERING_WALL_TORCH = registerBlock("smoldering_wall_torch", new SmolderingWallTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_wall_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(SoundType.WOOD).pushReaction(PushReaction.DESTROY)));
-        EXTINGUISHED_TORCH = registerBlock("extinguished_torch", new TorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_torch").noCollision().instabreak().lightLevel((state) -> 6).sound(SoundType.WOOD).pushReaction(PushReaction.DESTROY)));
-        EXTINGUISHED_WALL_TORCH = registerBlock("extinguished_wall_torch", new WallTorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_wall_torch").noCollision().instabreak().lightLevel((state) -> 6).sound(SoundType.WOOD).pushReaction(PushReaction.DESTROY)));
+        SMOLDERING_TORCH = registerBlock("smoldering_torch", new SmolderingTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(SoundType.WOOD).pushReaction(PushReaction.POPPED)));
+        SMOLDERING_WALL_TORCH = registerBlock("smoldering_wall_torch", new SmolderingWallTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_wall_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(SoundType.WOOD).pushReaction(PushReaction.POPPED)));
+        EXTINGUISHED_TORCH = registerBlock("extinguished_torch", new TorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_torch").noCollision().instabreak().lightLevel((state) -> 6).sound(SoundType.WOOD).pushReaction(PushReaction.POPPED)));
+        EXTINGUISHED_WALL_TORCH = registerBlock("extinguished_wall_torch", new WallTorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_wall_torch").noCollision().instabreak().lightLevel((state) -> 6).sound(SoundType.WOOD).pushReaction(PushReaction.POPPED)));
 
         CORRUPTED_WART_PLANT = registerBlock("corrupted_wart", new NetherWartBlock(getSettings("corrupted_wart", Blocks.NETHER_WART)));
         WITHERED_WART_PLANT = registerBlock("withered_wart", new NetherWartBlock(getSettings("withered_wart", Blocks.NETHER_WART)));
@@ -119,12 +119,12 @@ public class CustomBlocks {
 
         // Clay & Grey Mud
         GRAY_CLAY = (MoistBlock) registerBlock("gray_clay", new MoistBlock(getSettings("gray_clay", Blocks.CLAY).strength(1.1f, 2.5f).friction(0.92f).speedFactor(0.98f).sound(SoundType.PACKED_MUD), null, Blocks.DYED_TERRACOTTA.cyan()));
-        GRAY_MUD = (CustomMudBlock)registerBlock("gray_mud", new CustomMudBlock(getSettings("gray_mud", Blocks.DIRT).mapColor(MapColor.COLOR_GRAY).dynamicShape().isValidSpawn(Blocks::never).isViewBlocking(Blocks::always).forceSolidOn().isSuffocating(Blocks::never).sound(SoundType.MUD), CustomBlocks.GRAY_CLAY, Blocks.DYED_TERRACOTTA.cyan()));
+        GRAY_MUD = (CustomMudBlock)registerBlock("gray_mud", new CustomMudBlock(getSettings("gray_mud", Blocks.DIRT).mapColor(MapColor.COLOR_GRAY).dynamicShape().isValidSpawn(Blocks::never).isViewBlocking((state, world, pos, box) -> true).forceSolidOn().isSuffocating(Blocks::never).sound(SoundType.MUD), CustomBlocks.GRAY_CLAY, Blocks.DYED_TERRACOTTA.cyan()));
         ((MoistBlock)GRAY_CLAY).wetterVersion = GRAY_MUD;
 
         // Brown Mud & Clay
         BROWN_CLAY = (MoistBlock)registerBlock("brown_clay", new MoistBlock(getSettings("brown_clay", Blocks.PACKED_MUD).strength(1.1f, 2.5f).friction(0.92f).sound(SoundType.PACKED_MUD), null, Blocks.DYED_TERRACOTTA.lightGray()));
-        BROWN_MUD = (CustomMudBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.COLOR_BROWN).dynamicShape().isValidSpawn(Blocks::never).isViewBlocking(Blocks::always).forceSolidOn().isSuffocating(Blocks::never).sound(SoundType.MUD), CustomBlocks.BROWN_CLAY, Blocks.DYED_TERRACOTTA.lightGray()));
+        BROWN_MUD = (CustomMudBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.COLOR_BROWN).dynamicShape().isValidSpawn(Blocks::never).isViewBlocking((state, world, pos, box) -> true).forceSolidOn().isSuffocating(Blocks::never).sound(SoundType.MUD), CustomBlocks.BROWN_CLAY, Blocks.DYED_TERRACOTTA.lightGray()));
         ((MoistBlock)BROWN_CLAY).wetterVersion = BROWN_MUD;
 
         BROWN_CLAY_BRICKS = (MoistBlock)registerBlock("brown_clay_bricks", new MoistBlock(getSettings("brown_clay_bricks", Blocks.MUD_BRICKS).friction(0.98f), null, TERRACOTTA_BRICKS));
@@ -215,7 +215,7 @@ public class CustomBlocks {
     }
 
     private static PotionEffectBileBlock registerBileBlock(String name, int color, Holder<MobEffect> statusEffectToGrant, int maxDuration, int amplifier, int luminance, float ambientOcclusion) {
-        BlockBehaviour.Properties settings = getSettings(name).sound(SoundType.SLIME_BLOCK).lightLevel(state -> luminance).noCollision().strength(0.2f, 0.4f).pushReaction(PushReaction.DESTROY).isValidSpawn((state, world, pos, entityType) -> false);
+        BlockBehaviour.Properties settings = getSettings(name).sound(SoundType.SLIME_BLOCK).lightLevel(state -> luminance).noCollision().strength(0.2f, 0.4f).pushReaction(PushReaction.POPPED).isValidSpawn((state, world, pos, entityType) -> false);
         return (PotionEffectBileBlock) registerBlock(name, new PotionEffectBileBlock(settings, color, statusEffectToGrant, maxDuration, amplifier, ambientOcclusion));
     }
 

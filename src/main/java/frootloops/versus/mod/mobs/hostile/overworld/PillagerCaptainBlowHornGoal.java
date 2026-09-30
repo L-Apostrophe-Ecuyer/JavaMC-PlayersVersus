@@ -90,7 +90,7 @@ public class PillagerCaptainBlowHornGoal extends Goal {
                 this.illager.setPose(Pose.CROAKING);
                 InstrumentComponent instrumentComponent = this.illager.getOffhandItem().get(DataComponents.INSTRUMENT);
                 if (instrumentComponent != null) {
-                    Holder<Instrument> instrumentRegistryEntry = instrumentComponent.unwrap(this.illager.registryAccess()).get();
+                    Holder<Instrument> instrumentRegistryEntry = instrumentComponent.instrument();
                     float volume = instrumentRegistryEntry.value().range() / 16.0f;
                     illager.level().playSound(null, illager, instrumentRegistryEntry.value().soundEvent().value(), SoundSource.HOSTILE, volume, 1.0f);
                     illager.level().gameEvent(GameEvent.INSTRUMENT_PLAY, illager.position(), GameEvent.Context.of(illager));

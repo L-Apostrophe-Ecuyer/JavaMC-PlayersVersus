@@ -41,7 +41,7 @@ public class StoneStalagtiteHelper {
 
     public static boolean generateStoneBlock(LevelAccessor world, BlockPos pos) {
         BlockState blockState = world.getBlockState(pos);
-        if (blockState.is(BlockTags.CONVERTABLE_TO_MUD)) {
+        if (blockState.is(BlockTags.CONVERTIBLE_TO_MUD)) {
             world.setBlock(pos, Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
             return true;
         }
@@ -49,7 +49,7 @@ public class StoneStalagtiteHelper {
     }
 
     public static boolean canReplace(BlockState state) {
-        return state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.CONVERTABLE_TO_MUD) || state.is(Blocks.SAND);
+        return state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.CONVERTIBLE_TO_MUD) || state.is(Blocks.SAND);
     }
 
     public static boolean isAirOrWater(BlockState state) {

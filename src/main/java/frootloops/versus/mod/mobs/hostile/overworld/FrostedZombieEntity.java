@@ -33,6 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -54,7 +55,7 @@ public class FrostedZombieEntity extends Zombie implements RangedAttackMob {
         snowballEntity.shoot(e, f + h, g, 1.6f, 12.0f);
         this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0f, 0.4f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
         this.level().addFreshEntity(snowballEntity);
-        this.swing(InteractionHand.OFF_HAND);
+        this.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT);
         this.getOffhandItem().setCount(this.getOffhandItem().getCount() - 1);
     }
 

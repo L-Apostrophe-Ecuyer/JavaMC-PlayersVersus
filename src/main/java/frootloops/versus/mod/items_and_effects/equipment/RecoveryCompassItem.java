@@ -25,6 +25,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 
 public class RecoveryCompassItem extends Item {
@@ -115,7 +116,7 @@ public class RecoveryCompassItem extends Item {
     }
 
     private static TeleportTransition createTeleportTarget(ServerLevel serverWorld, ServerPlayer entity, BlockPos pos) {
-        return new TeleportTransition(serverWorld, entity.adjustSpawnLocation(serverWorld, pos).getBottomCenter(), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET));
+        return new TeleportTransition(serverWorld, Vec3.atBottomCenterOf(entity.adjustSpawnLocation(serverWorld, pos)), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET));
     }
 
 }

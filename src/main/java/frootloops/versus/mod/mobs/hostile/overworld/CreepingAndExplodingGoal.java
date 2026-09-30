@@ -93,7 +93,7 @@ public class CreepingAndExplodingGoal extends Goal {
 
         // If the player is looking, but the creeper is close enough, start charging:
         else {
-            if (targetEntity.swinging && isPlayerLooking && canPlayerSeeCreeper) this.wasCoverBlown = true;
+            if (targetEntity.isSwinging() && isPlayerLooking && canPlayerSeeCreeper) this.wasCoverBlown = true;
             if(this.wasCoverBlown && !canPlayerSeeCreeper) this.wasCoverBlown = false;
             if(this.wasCoverBlown || !(isPlayerLooking && canPlayerSeeCreeper) || this.creeper.getNavigation().isDone()) {
                 this.creeper.getNavigation().moveTo(targetEntity, this.speed * (this.creeper.getSwellDir() > 0 ? 0.5 : 1.0));

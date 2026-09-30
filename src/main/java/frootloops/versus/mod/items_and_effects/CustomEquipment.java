@@ -15,10 +15,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -62,17 +59,17 @@ public abstract class CustomEquipment {
     public static final Item COPPER_LEGGINGS_WAXED = customArmor("copper_leggings_waxed", ArmorType.LEGGINGS, COPPER_ARMOR_WAXED_MATERIAL);
     public static final Item COPPER_BOOTS_WAXED = customArmor("copper_boots_waxed", ArmorType.BOOTS, COPPER_ARMOR_WAXED_MATERIAL);
 
-    public final static HoeItem COPPER_HOE = customHoe("copper_hoe", COPPER_TOOL_MATERIAL);
-    public final static AxeItem COPPER_AXE = customAxe("copper_axe", COPPER_TOOL_MATERIAL);
+    public final static Item COPPER_HOE = customHoe("copper_hoe", COPPER_TOOL_MATERIAL);
+    public final static Item COPPER_AXE = customAxe("copper_axe", COPPER_TOOL_MATERIAL);
     public final static Item COPPER_PICKAXE = customPickaxe("copper_pickaxe", COPPER_TOOL_MATERIAL);
     public final static Item COPPER_SWORD = customSword("copper_sword", COPPER_TOOL_MATERIAL, CustomSpecialEffects.SWORD_BLOCKING_METAL);
-    public final static ShovelItem COPPER_SHOVEL = customShovel("copper_shovel", COPPER_TOOL_MATERIAL);
+    public final static Item COPPER_SHOVEL = customShovel("copper_shovel", COPPER_TOOL_MATERIAL);
 
-    public final static HoeItem COPPER_HOE_WAXED = customHoe("copper_hoe_waxed", COPPER_WAXED_TOOL_MATERIAL);
-    public final static AxeItem COPPER_AXE_WAXED = customAxe("copper_axe_waxed", COPPER_WAXED_TOOL_MATERIAL);
+    public final static Item COPPER_HOE_WAXED = customHoe("copper_hoe_waxed", COPPER_WAXED_TOOL_MATERIAL);
+    public final static Item COPPER_AXE_WAXED = customAxe("copper_axe_waxed", COPPER_WAXED_TOOL_MATERIAL);
     public final static Item COPPER_PICKAXE_WAXED = customPickaxe("copper_pickaxe_waxed", COPPER_WAXED_TOOL_MATERIAL);
     public final static Item COPPER_SWORD_WAXED = customSword("copper_sword_waxed", COPPER_WAXED_TOOL_MATERIAL, CustomSpecialEffects.SWORD_BLOCKING_METAL);
-    public final static ShovelItem COPPER_SHOVEL_WAXED = customShovel("copper_shovel_waxed", COPPER_WAXED_TOOL_MATERIAL);
+    public final static Item COPPER_SHOVEL_WAXED = customShovel("copper_shovel_waxed", COPPER_WAXED_TOOL_MATERIAL);
 
     private static Map<ArmorType, Integer> createDefenseMap(int bootsDefense, int leggingsDefense, int chestplateDefense, int helmetDefense, int bodyDefense) {
         return Maps.newEnumMap(
@@ -86,16 +83,19 @@ public abstract class CustomEquipment {
         );
     }
 
-    private static ShovelItem customShovel(String name, ToolMaterial material) {
-        return new ShovelItem(material, (float) (SHOVEL_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (SHOVEL_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED),
-                getItemSettings(name).component(DataComponents.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SHOVEL_DAMAGE, SHOVEL_SPEED, SHOVEL_REACH, 1.0)));
+    private static Item customShovel(String name, ToolMaterial material) {
+        return new Item(getItemSettings(name)
+                .shovel(material, (float) (SHOVEL_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (SHOVEL_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED))
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SHOVEL_DAMAGE, SHOVEL_SPEED, SHOVEL_REACH, 1.0)));
     }
-    private static HoeItem customHoe(String name, ToolMaterial material) {
-        return new HoeItem(material, (float) (HOE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (HOE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED),
-                getItemSettings(name).component(DataComponents.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + HOE_DAMAGE, HOE_SPEED, HOE_REACH, 1.0)));
+    private static Item customHoe(String name, ToolMaterial material) {
+        return new Item(getItemSettings(name)
+                .hoe(material, (float) (HOE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (HOE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED))
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + HOE_DAMAGE, HOE_SPEED, HOE_REACH, 1.0)));
     }
-    private static AxeItem customAxe(String name, ToolMaterial material) {
-        return new AxeItem(material, (float) (AXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (AXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED), getItemSettings(name));
+    private static Item customAxe(String name, ToolMaterial material) {
+        return new Item(getItemSettings(name)
+                .axe(material, (float) (AXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (AXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED)));
     }
     private static Item customPickaxe(String name, ToolMaterial material) {
         return new Item(getItemSettings(name).pickaxe(material, (float) (PICKAXE_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (PICKAXE_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED)));
@@ -105,7 +105,7 @@ public abstract class CustomEquipment {
         return new Item(getItemSettings(name)
                 .sword(material, (float) (SWORD_DAMAGE - Combat.PLAYER_BASE_ATTACK_DAMAGE), (float) (SWORD_SPEED - Combat.PLAYER_BASE_ATTACK_SPEED))
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(material.attackDamageBonus() + SWORD_DAMAGE, SWORD_SPEED, SWORD_REACH, 0.0))
-                .component(DataComponents.BLOCKS_ATTACKS, getSwordBlockingComponent(material.attackDamageBonus() - 1F, soundBlocking, SoundEvents.SHIELD_BREAK)));
+                .delayedComponent(DataComponents.BLOCKS_ATTACKS, registries -> getSwordBlockingComponent(registries, material.attackDamageBonus() - 1F, soundBlocking, SoundEvents.SHIELD_BREAK)));
     }
 
     private static Item customArmor(String name, ArmorType type, ArmorMaterial material) {

@@ -37,7 +37,7 @@ public class ConcentrateItem extends BlockItem {
     private final ColorParticleOption particle;
 
     public ConcentrateItem(Properties settings, Holder<MobEffect> registeredEffect, Block block) {
-        this(settings, registeredEffect, 0, registeredEffect.value().isInstantenous() ? 1 : 30, block);
+        this(settings, registeredEffect, 0, registeredEffect.value().isInstantaneous() ? 1 : 30, block);
     }
 
     public ConcentrateItem(Properties settings, Holder<MobEffect> registeredEffect, int amplifier, int duration, Block block) {
@@ -94,7 +94,7 @@ public class ConcentrateItem extends BlockItem {
             MobEffectInstance effectInstance = new MobEffectInstance(item.effect, (item.duration * 2)/3, 0);
             if (entity.canBeAffected(effectInstance)) {
                 if(user.level() instanceof ServerLevel serverWorld) {
-                    if(effect.value().isInstantenous()) {
+                    if(effect.value().isInstantaneous()) {
                         if(user.getRandom().nextInt(10) < 7) {
                             if (item.effect == MobEffects.INSTANT_DAMAGE)
                                 entity.hurtServer(serverWorld, serverWorld.damageSources().source(DamageTypes.MAGIC, user), 1.0F);

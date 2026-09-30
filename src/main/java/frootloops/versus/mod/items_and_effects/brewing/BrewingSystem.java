@@ -6,17 +6,29 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
 import java.util.HashMap;
 
+/**
+ * The brewing recipe graph of Players Versus: which ingredient turns which potion into which (strong, long, inverted and
+ * decayed variants, one concentrate per effect), and the vanilla container recipes.
+ *
+ * <p>Since 26.3 brewing is data (recipes of type {@code minecraft:brewing}) instead of a registry that mods add mixes
+ * to, so this class no longer registers anything by itself: it describes the graph to a {@link Recipes} sink, which the
+ * data step turns into recipes. The potions themselves are registered by {@link CustomPotions#registerCustomPotions}.
+ */
 public abstract class BrewingSystem {
 
-    private record RelatedPotions(Holder<Potion> strongPotion, Holder<Potion> longPotion,  Holder<Potion> invertedPotion) {}
-    public static void setBrewingRecipeRegistry(PotionBrewing.Builder builder) {
+    /** What {@link #describeRecipes} tells about the graph: the mixes and container recipes, in vanilla's terms. */
+    public interface Recipes {
+        void addContainer(Item container);
+        void addMix(Holder<Potion> from, Item ingredient, Holder<Potion> to);
+        void addContainerRecipe(Item from, Item ingredient, Item to);
+    }
 
-        // Register potions:
-        CustomPotions.registerCustomPotions();
+    private record RelatedPotions(Holder<Potion> strongPotion, Holder<Potion> longPotion,  Holder<Potion> invertedPotion) {}
+
+    public static void describeRecipes(Recipes builder) {
 
         // Generate recipes:
         HashMap<Holder<Potion>, RelatedPotions> brewablePotionTypes = new HashMap<>() {{
@@ -131,7 +143,7 @@ public abstract class BrewingSystem {
         brewablePotionTypes.clear();
     }
 
-    private static void  registerConcentrateRecipe(PotionBrewing.Builder builder, HashMap<Holder<Potion>, RelatedPotions> brewablePotionTypes, Item ingredient, Holder<Potion> potion) {
+    private static void  registerConcentrateRecipe(Recipes builder, HashMap<Holder<Potion>, RelatedPotions> brewablePotionTypes, Item ingredient, Holder<Potion> potion) {
         builder.addMix(Potions.WATER, ingredient, potion);
         builder.addMix(potion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY);
         if(brewablePotionTypes.containsKey(potion)) {
