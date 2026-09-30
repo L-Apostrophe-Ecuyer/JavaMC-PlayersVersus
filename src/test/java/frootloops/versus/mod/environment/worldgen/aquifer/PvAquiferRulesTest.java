@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.DensityFunction;
 
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BANDS_KEPT_FROM_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
@@ -27,7 +26,11 @@ class PvAquiferRulesTest {
     }
 
     private static PvAquiferDecision atPosition(int y, double floodedness, double spread) {
-        return PvAquiferRules.atPosition(new DensityFunction.SinglePointContext(0, y, 0), pos -> floodedness, pos -> spread);
+        return PvAquiferRules.atPosition(0, y, 0, (x, py, z) -> floodedness, (x, py, z) -> spread);
+    }
+
+    private static PvAquiferDecision atPosition(int y, double floodedness, double spread, double corridors) {
+        return PvAquiferRules.atPosition(0, y, 0, (x, py, z) -> floodedness, (x, py, z) -> spread, (x, py, z) -> corridors);
     }
 
     /** A made-up neighbourhood: the given decisions at some blocks, dry everywhere else. */
@@ -45,7 +48,7 @@ class PvAquiferRulesTest {
         }
 
         PvAquiferDecision decide(int x, int y, int z) {
-            return PvAquiferRules.decide(new DensityFunction.SinglePointContext(x, y, z), 0.0, false, this);
+            return PvAquiferRules.decide(x, y, z, 0.0, false, this);
         }
 
         private static long key(int x, int y, int z) {
@@ -114,28 +117,25 @@ class PvAquiferRulesTest {
 
     @Test
     void corridorsAreBasinWaterWhereTheirNoodleOpens() {
-        DensityFunction.FunctionContext pos = new DensityFunction.SinglePointContext(0, 10, 0);
         // S below the basin water threshold, the corridors' noodle open (at most 0): basin water, no tick
-        assertEquals(PvAquiferDecision.BASIN_WATER, PvAquiferRules.atPosition(pos, p -> 0.0, p -> 0.0, p -> -0.01));
-        assertEquals(PvAquiferDecision.BASIN_WATER, PvAquiferRules.atPosition(pos, p -> 0.0, p -> 0.0, p -> 0.0));
+        assertEquals(PvAquiferDecision.BASIN_WATER, atPosition(10, 0.0, 0.0, -0.01));
+        assertEquals(PvAquiferDecision.BASIN_WATER, atPosition(10, 0.0, 0.0, 0.0));
         // closed: nothing (and without corridors, nothing either)
-        assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(pos, p -> 0.0, p -> 0.0, p -> 0.01));
-        assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(pos, p -> 0.0, p -> 0.0));
+        assertEquals(PvAquiferDecision.AIR, atPosition(10, 0.0, 0.0, 0.01));
+        assertEquals(PvAquiferDecision.AIR, atPosition(10, 0.0, 0.0));
         // only in the corridors' layers, y -3..23
-        assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(new DensityFunction.SinglePointContext(0, CORRIDOR_MAX_Y, 0),
-                p -> 0.0, p -> 0.0, p -> -1.0));
-        assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(new DensityFunction.SinglePointContext(0, BASIN_MIN_Y, 0),
-                p -> 0.0, p -> 0.0, p -> -1.0));
+        assertEquals(PvAquiferDecision.AIR, atPosition(CORRIDOR_MAX_Y, 0.0, 0.0, -1.0));
+        assertEquals(PvAquiferDecision.AIR, atPosition(BASIN_MIN_Y, 0.0, 0.0, -1.0));
         // the sea's water and band come first
-        assertEquals(PvAquiferDecision.SEA_BARRIER, PvAquiferRules.atPosition(pos, p -> 0.2, p -> 0.0, p -> -1.0));
+        assertEquals(PvAquiferDecision.SEA_BARRIER, atPosition(10, 0.2, 0.0, -1.0));
     }
 
     @Test
     void theRestOfTheRules() {
         Neighbourhood flooded = new Neighbourhood().put(0, 10, 0, PvAquiferDecision.SEA_WATER).put(0, SEA_LEVEL, 0, PvAquiferDecision.SEA_WATER);
-        assertEquals(PvAquiferDecision.SOLID, PvAquiferRules.decide(new DensityFunction.SinglePointContext(0, 10, 0), 0.1, false, flooded));
+        assertEquals(PvAquiferDecision.SOLID, PvAquiferRules.decide(0, 10, 0, 0.1, false, flooded));
         assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, flooded.decide(0, SEA_LEVEL, 0));
-        assertEquals(PvAquiferDecision.LAVA, PvAquiferRules.decide(new DensityFunction.SinglePointContext(0, -60, 0), 0.0, true, flooded));
+        assertEquals(PvAquiferDecision.LAVA, PvAquiferRules.decide(0, -60, 0, 0.0, true, flooded));
         assertEquals(Blocks.WATER.defaultBlockState(), PvAquiferDecision.BASIN_WATER.state);
     }
 
@@ -168,7 +168,7 @@ class PvAquiferRulesTest {
         assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, river.decide(0, y + 1, 0));
         assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, shallow.decide(1, y - 1, 0));
         // solid stays solid
-        assertEquals(PvAquiferDecision.SOLID, PvAquiferRules.decide(new DensityFunction.SinglePointContext(0, y, 0), 0.1, false, river));
+        assertEquals(PvAquiferDecision.SOLID, PvAquiferRules.decide(0, y, 0, 0.1, false, river));
         assertTrue(PvAquiferDecision.HIGH_RIVER_WATER.needsFluidTick, "the surface's water must tick to spill");
         assertTrue(PvAquiferRules.isWater(PvAquiferDecision.HIGH_RIVER_WATER) && PvAquiferRules.isWater(PvAquiferDecision.HIGH_RIVER_BED_WATER));
     }

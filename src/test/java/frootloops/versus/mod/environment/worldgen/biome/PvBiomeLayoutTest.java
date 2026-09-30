@@ -42,7 +42,7 @@ class PvBiomeLayoutTest {
     @Test
     void vanillaLayoutHasNoPlayersVersusBiomes() {
         for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
-            assertFalse(entry.getSecond().location().getNamespace().equals("players-versus"), () -> "vanilla layout contains " + entry.getSecond());
+            assertFalse(entry.getSecond().identifier().getNamespace().equals("players-versus"), () -> "vanilla layout contains " + entry.getSecond());
         }
     }
 
@@ -109,10 +109,10 @@ class PvBiomeLayoutTest {
             for (int a = 0; a < pieces.size(); a++) {
                 sum += volume(pieces.get(a));
                 for (int b = a + 1; b < pieces.size(); b++) {
-                    assertNull(pieces.get(a).intersect(pieces.get(b)), "overlapping pieces in slice " + entry.getSecond().location());
+                    assertNull(pieces.get(a).intersect(pieces.get(b)), "overlapping pieces in slice " + entry.getSecond().identifier());
                 }
             }
-            assertEquals(volume(slice), sum, volume(slice) * 1e-9, "pieces don't cover slice " + entry.getSecond().location());
+            assertEquals(volume(slice), sum, volume(slice) * 1e-9, "pieces don't cover slice " + entry.getSecond().identifier());
         }
     }
 
@@ -191,7 +191,7 @@ class PvBiomeLayoutTest {
                     continue;
                 }
                 changed++;
-                changes.merge(before.location().getPath() + " -> " + after.location().getPath(), 1, Integer::sum);
+                changes.merge(before.identifier().getPath() + " -> " + after.identifier().getPath(), 1, Integer::sum);
             }
             double agreement = 1.0 - (double) changed / samples;
             System.out.printf(Locale.ROOT, "[layout] depth %.2f: %.2f%% unchanged (%d ties); top changes %s%n",

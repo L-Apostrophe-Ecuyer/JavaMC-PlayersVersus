@@ -556,7 +556,7 @@ public final class WorldgenBench {
             lines.add("settings " + settings);
             lines.add("generator " + generator);
             lines.add("gate " + gate);
-            lines.add("final_density " + (DensityCompilerCompat.ACTIVE ? "vanilla types, for C2ME's compiler" : "Java kernel"));
+            lines.add("final_density data, compiled by the game");
             lines.add("seed " + seed);
             lines.add(String.format(Locale.ROOT, "region center chunk %d,%d radius %d (%d chunks), heights %d..%d",
                     center.x(), center.z(), radius, chunkCount, this.bottomY, this.topY));
