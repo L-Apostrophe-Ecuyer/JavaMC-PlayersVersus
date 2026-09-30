@@ -8,29 +8,23 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:blaze_rod",
-          "conditions": [
-            {
-              "condition": "minecraft:random_chance",
-              "chance": 0.1
-            }
-          ]
+          "condition": {
+            "chance": 0.1,
+            "type": "minecraft:random_chance"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:brewing_stand",
-          "conditions": [
-            {
-              "condition": "minecraft:random_chance",
-              "chance": 0.4
-            }
-          ]
+          "condition": {
+            "chance": 0.4,
+            "type": "minecraft:random_chance"
+          }
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:killed_by_player"
+      }
     },
     {
       "rolls": {
@@ -42,52 +36,42 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:healing"
-            }
-          ]
+          "modifier": {
+            "id": "minecraft:healing",
+            "type": "minecraft:set_potion"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:strong_healing"
-            }
-          ]
+          "modifier": {
+            "id": "minecraft:strong_healing",
+            "type": "minecraft:set_potion"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:fire_resistance"
-            }
-          ]
+          "modifier": {
+            "id": "minecraft:fire_resistance",
+            "type": "minecraft:set_potion"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:water_breathing"
-            }
-          ]
+          "modifier": {
+            "id": "minecraft:water_breathing",
+            "type": "minecraft:set_potion"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:splash_potion",
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:weakness"
-            }
-          ]
+          "modifier": {
+            "id": "minecraft:weakness",
+            "type": "minecraft:set_potion"
+          }
         }
       ]
     },
@@ -102,178 +86,176 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:healing"
-            }
-          ]
+          "modifier": {
+            "id": "minecraft:healing",
+            "type": "minecraft:set_potion"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:redstone",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 3,
                 "max": 8
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 4
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:glistering_melon_slice",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "players-versus:concentrate_of_harm",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "players-versus:concentrate_of_poison",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "players-versus:concentrate_of_weakness",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:glass_bottle",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:gunpowder",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 3
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         }

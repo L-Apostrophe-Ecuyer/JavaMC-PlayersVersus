@@ -146,6 +146,7 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
         ItemStack offhandStack = player.getOffhandItem();
         ItemStack mainhandStack = player.getMainHandItem();
         if(offhandStack.isEmpty() || mainhandStack.isEmpty() || player.getCooldowns().isOnCooldown(offhandStack)) return false;
+        if(offhandStack.getItem() instanceof ShieldItem && hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) return false;
         if(offhandStack.getUseAnimation() == ItemUseAnimation.BLOCK){
             if (hitResult.getType() == HitResult.Type.ENTITY) {
                 if(player.isUsingItem()) {

@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "copper_grates",
   "key": {
     "M": "minecraft:waxed_exposed_copper"

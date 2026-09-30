@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": {
+          "id": "minecraft:flowering_azalea"
+        },
+        "weight": 4
+      },
+      {
+        "data": {
+          "id": "minecraft:azalea"
+        },
+        "weight": 7
+      },
+      {
+        "data": {
+          "id": "minecraft:short_grass"
+        },
+        "weight": 50
+      },
+      {
+        "data": {
+          "id": "minecraft:tall_grass",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 10
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:disk",
+  "half_height": 1,
+  "radius": {
+    "type": "minecraft:uniform",
+    "max_inclusive": 3,
+    "min_inclusive": 2
+  },
+  "state_provider": {
+    "type": "minecraft:rule_based",
+    "fallback": {
+      "id": "players-versus:gray_mud"
+    },
+    "rules": []
+  },
+  "target": {
+    "type": "minecraft:matching_blocks",
+    "blocks": [
+      "minecraft:dirt",
+      "minecraft:clay"
+    ]
+  }
+}

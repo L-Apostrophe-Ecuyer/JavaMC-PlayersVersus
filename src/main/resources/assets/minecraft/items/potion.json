@@ -2,12 +2,16 @@
   "model": {
     "type": "minecraft:condition",
     "predicate": "minecraft:potion_contents",
-    "value": "players-versus:haunting",
+    "value": {
+      "potions": ["players-versus:haunting"]
+    },
     "on_false": {
       "type": "minecraft:condition",
       "property": "minecraft:component",
       "predicate": "minecraft:potion_contents",
-      "value": "minecraft:water",
+      "value": {
+        "potions": ["minecraft:water"]
+      },
       "on_true": {
         "type": "minecraft:model",
         "model": "minecraft:item/water_bottle",

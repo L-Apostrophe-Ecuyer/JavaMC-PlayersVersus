@@ -1,12 +1,9 @@
 {
-    "type": "minecraft:smelting",
-    "category": "food",
-  
-    "ingredient": "minecraft:crimson_fungus",
-    "result": {
-      "id": "players-versus:concentrate_of_largeness"
-    },
-    "experience": 5,
-    "cookingtime": 200
+  "type": "minecraft:smelting",
+  "ingredient": "minecraft:crimson_fungus",
+  "result": {
+    "id": "players-versus:concentrate_of_largeness"
+  },
+  "experience": 5,
+  "cookingtime": 200
 }
-  

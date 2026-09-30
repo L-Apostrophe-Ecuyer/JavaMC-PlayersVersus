@@ -1,0 +1,99 @@
+{
+  "type": "minecraft:simple_random_selector",
+  "features": [
+    {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "id": "minecraft:sugar_cane"
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:all_of",
+            "predicates": [
+              {
+                "type": "minecraft:matching_blocks",
+                "offset": [
+                  0,
+                  0,
+                  0
+                ],
+                "blocks": "#minecraft:air"
+              },
+              {
+                "type": "minecraft:matching_blocks",
+                "offset": [
+                  0,
+                  -1,
+                  0
+                ],
+                "blocks": "players-versus:brown_mud"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "feature": {
+        "type": "minecraft:ore",
+        "size": 32,
+        "discard_chance_on_air_exposure": 0,
+        "targets": [
+          {
+            "target": {
+              "block": "minecraft:water",
+              "probability": 0.5,
+              "predicate_type": "minecraft:random_block_match"
+            },
+            "state": {
+              "id": "players-versus:brown_mud"
+            }
+          },
+          {
+            "target": {
+              "block": "minecraft:water",
+              "probability": 0.2,
+              "predicate_type": "minecraft:random_block_match"
+            },
+            "state": {
+              "id": "players-versus:brown_clay"
+            }
+          },
+          {
+            "target": {
+              "block": "minecraft:water",
+              "probability": 0.2,
+              "predicate_type": "minecraft:random_block_match"
+            },
+            "state": {
+              "id": "minecraft:stone"
+            }
+          }
+        ]
+      },
+      "placement": []
+    },
+    {
+      "feature": {
+        "type": "minecraft:spring_feature",
+        "state": {
+          "id": "minecraft:water",
+          "properties": {
+            "falling": "true"
+          }
+        },
+        "rock_count": 3,
+        "hole_count": 1,
+        "requires_block_below": true,
+        "valid_blocks": [
+          "players-versus:brown_mud"
+        ]
+      },
+      "placement": []
+    }
+  ]
+}

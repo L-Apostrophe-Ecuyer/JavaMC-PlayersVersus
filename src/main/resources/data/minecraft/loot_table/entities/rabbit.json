@@ -8,24 +8,24 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:rabbit_hide",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 3
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         }
@@ -38,38 +38,36 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:rabbit",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:furnace_smelt",
-              "conditions": [
-                {
-                  "condition": "minecraft:entity_properties",
-                  "entity": "this",
-                  "predicate": {
-                    "flags": {
-                      "is_on_fire": true
-                    }
+              "condition": {
+                "entity": "this",
+                "predicate": {
+                  "flags": {
+                    "is_on_fire": true
                   }
-                }
-              ]
+                },
+                "type": "minecraft:entity_properties"
+              },
+              "type": "minecraft:furnace_smelt"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         }
@@ -82,38 +80,39 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:rabbit_foot",
-          "functions": [
-            {
-              "function": "minecraft:set_components",
-              "components": {
-                "minecraft:attribute_modifiers": [
-                  {
-                    "type": "minecraft:luck",
-                    "id": "minecraft:",
-                    "amount": 1,
-                    "operation": "add_value"
-                  }
-                ]
-              }
-            }
-          ]
+          "modifier": {
+            "components": {
+              "minecraft:attribute_modifiers": [
+                {
+                  "type": "minecraft:luck",
+                  "id": "minecraft:",
+                  "amount": 1,
+                  "operation": "add_value"
+                }
+              ]
+            },
+            "type": "minecraft:set_components"
+          }
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        },
-        {
-          "condition": "minecraft:random_chance_with_enchanted_bonus",
-          "enchanted_chance": {
-            "type": "minecraft:linear",
-            "base": 0.05,
-            "per_level_above_first": 0.02
+      "condition": {
+        "terms": [
+          {
+            "type": "minecraft:killed_by_player"
           },
-          "enchantment": "minecraft:looting",
-          "unenchanted_chance": 0.04
-        }
-      ]
+          {
+            "enchanted_chance": {
+              "type": "minecraft:linear",
+              "base": 0.05,
+              "per_level_above_first": 0.02
+            },
+            "enchantment": "minecraft:looting",
+            "unenchanted_chance": 0.04,
+            "type": "minecraft:random_chance_with_enchanted_bonus"
+          }
+        ],
+        "type": "minecraft:all_of"
+      }
     }
   ]
 }

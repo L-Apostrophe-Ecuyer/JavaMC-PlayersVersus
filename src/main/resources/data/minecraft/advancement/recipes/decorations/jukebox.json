@@ -4,7 +4,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:jukebox"
+        "recipes": "minecraft:jukebox"
       }
     },
     "has_disc": {
@@ -19,7 +19,6 @@
     }
   },
   "requirements": [
-    [],
     [
       "has_disc",
       "has_the_recipe"

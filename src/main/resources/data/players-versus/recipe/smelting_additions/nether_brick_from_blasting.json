@@ -1,6 +1,5 @@
 {
   "type": "minecraft:blasting",
-  "category": "misc",
   "ingredient": "minecraft:netherrack",
   "result": {
     "id": "minecraft:nether_brick"

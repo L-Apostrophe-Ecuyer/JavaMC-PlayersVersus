@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:waterlogged_vegetation_patch",
+  "surface": "floor",
+  "depth": 3,
+  "vertical_range": 5,
+  "extra_bottom_block_chance": 0.8,
+  "extra_edge_column_chance": 0.7,
+  "vegetation_chance": 0.08,
+  "xz_radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 2,
+    "max_inclusive": 5
+  },
+  "replaceable": "#minecraft:sand",
+  "ground_state": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": {
+          "id": "minecraft:dirt"
+        },
+        "weight": 4
+      },
+      {
+        "data": {
+          "id": "minecraft:rooted_dirt"
+        },
+        "weight": 2
+      },
+      {
+        "data": {
+          "id": "players-versus:brown_clay"
+        },
+        "weight": 1
+      }
+    ]
+  },
+  "vegetation_feature": {
+    "feature": "minecraft:jungle_bush",
+    "placement": []
+  }
+}

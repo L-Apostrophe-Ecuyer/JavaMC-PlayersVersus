@@ -4,7 +4,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:composter"
+        "recipes": "minecraft:composter"
       }
     },
     "has_wood_slab": {
@@ -16,27 +16,9 @@
           }
         ]
       }
-    },
-    "has_used_bonemeal": {
-      "trigger": "minecraft:item_used_on_block",
-      "conditions": {
-        "location": [
-          {
-            "condition": "minecraft:match_tool",
-            "predicate": {
-              "items": [
-                "minecraft:bone_meal"
-              ]
-            }
-          }
-        ]
-      }
     }
   },
   "requirements": [
-    [
-      "has_used_bonemeal"
-    ],
     [
       "has_the_recipe",
       "has_wood_slab"

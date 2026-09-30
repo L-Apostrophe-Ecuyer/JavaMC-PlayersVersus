@@ -36,7 +36,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:dark_oak_button"
+        "recipes": "minecraft:dark_oak_button"
       }
     },
     "knows_what_buttons_are": {
@@ -79,8 +79,3 @@
     ]
   }
 }
-
-
-
-
-

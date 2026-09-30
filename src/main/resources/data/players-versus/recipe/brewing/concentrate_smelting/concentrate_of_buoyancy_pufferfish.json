@@ -1,6 +1,5 @@
 {
   "type": "minecraft:smelting",
-  "category": "food",
   "group": "concentrate_of_buoyancy",
   "ingredient": [
     "minecraft:pufferfish"

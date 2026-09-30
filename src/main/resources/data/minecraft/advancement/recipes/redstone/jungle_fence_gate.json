@@ -36,7 +36,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:jungle_button"
+        "recipes": "minecraft:jungle_button"
       }
     },
     "knows_what_fences_are": {
@@ -68,6 +68,3 @@
     ]
   }
 }
-
-
-

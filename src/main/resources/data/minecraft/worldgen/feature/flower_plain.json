@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:noise_threshold",
+    "seed": 2345,
+    "noise": {
+      "base_amplitude": 1,
+      "base_octave": 0
+    },
+    "scale": 0.005,
+    "threshold": -0.8,
+    "high_chance": 0.33333334,
+    "default_state": {
+      "id": "minecraft:dandelion"
+    },
+    "low_states": [
+      {
+        "id": "minecraft:dandelion"
+      },
+      {
+        "id": "minecraft:orange_tulip"
+      },
+      {
+        "id": "minecraft:red_tulip"
+      },
+      {
+        "id": "minecraft:dandelion"
+      }
+    ],
+    "high_states": [
+      {
+        "id": "minecraft:azure_bluet"
+      },
+      {
+        "id": "minecraft:cornflower"
+      },
+      {
+        "id": "minecraft:oxeye_daisy"
+      },
+      {
+        "id": "minecraft:dandelion"
+      }
+    ]
+  }
+}

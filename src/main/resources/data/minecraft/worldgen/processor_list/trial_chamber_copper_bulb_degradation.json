@@ -8,13 +8,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:waxed_copper_bulb",
-            "probability": 0.1
+            "probability": 0.1,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:waxed_oxidized_copper_bulb",
-            "Properties": {
+            "id": "minecraft:waxed_oxidized_copper_bulb",
+            "properties": {
               "lit": "true",
               "powered": "false"
             }
@@ -25,13 +25,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:waxed_copper_bulb",
-            "probability": 0.33333334
+            "probability": 0.33333334,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:waxed_weathered_copper_bulb",
-            "Properties": {
+            "id": "minecraft:waxed_weathered_copper_bulb",
+            "properties": {
               "lit": "true",
               "powered": "false"
             }
@@ -42,13 +42,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:waxed_copper_bulb",
-            "probability": 0.5
+            "probability": 0.5,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:waxed_exposed_copper_bulb",
-            "Properties": {
+            "id": "minecraft:waxed_exposed_copper_bulb",
+            "properties": {
               "lit": "true",
               "powered": "false"
             }
@@ -59,12 +59,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:waxed_copper_block",
-            "probability": 0.4
+            "probability": 0.4,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:waxed_weathered_copper"
+            "id": "minecraft:waxed_weathered_copper"
           }
         },
         {
@@ -72,12 +72,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:waxed_copper_block",
-            "probability": 0.5
+            "probability": 0.5,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:waxed_exposed_copper"
+            "id": "minecraft:waxed_exposed_copper"
           }
         }
       ]

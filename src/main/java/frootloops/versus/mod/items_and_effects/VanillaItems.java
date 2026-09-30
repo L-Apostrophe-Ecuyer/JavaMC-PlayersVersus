@@ -238,26 +238,26 @@ public class VanillaItems {
     }
 
     private static void modifyVanillaFoodItem(final Item item, final float eatTime) {
-        UseRemainder remainderComponent = item.getDefaultInstance().getOrDefault(DataComponents.USE_REMAINDER, null);
-        boolean isHoneyBottle = item == Items.HONEY_BOTTLE;
-        boolean isBottled = !isHoneyBottle && (remainderComponent != null && remainderComponent.convertInto().is(Items.GLASS_BOTTLE));
-        boolean isBucket = !isBottled && remainderComponent != null && remainderComponent.convertInto().is(Items.BUCKET);
-        boolean isStew = !isBucket && !isBottled && remainderComponent != null && remainderComponent.convertInto().is(Items.BOWL);
-
-        Consumable consumeComponent = item.getDefaultInstance().getOrDefault(DataComponents.CONSUMABLE, null);
-        boolean isDrink = isHoneyBottle || isStew || isBucket || isBottled || consumeComponent.sound() == SoundEvents.GENERIC_DRINK;
-        boolean hasParticles = !isDrink && remainderComponent == null;
-
-        Consumable newConsumeComponent = isDrink ?
-                createDrinkConsumptionComponent(eatTime, consumeComponent.onConsumeEffects(), isHoneyBottle) :
-                createFoodConsumptionComponent(eatTime, hasParticles, consumeComponent.onConsumeEffects());
-
-        final int maxCount;
-        if(isBottled) maxCount = VersusSettings.Items.MAX_COUNT_BOTTLED;
-        else if(isStew) maxCount = VersusSettings.Items.MAX_COUNT_STEWS;
-        else if(isBucket) maxCount = VersusSettings.Items.MAX_COUNT_BUCKETS;
-        else maxCount = VersusSettings.Items.MAX_COUNT_FOOD;
         DefaultItemComponentEvents.MODIFY.register(context -> {
+            UseRemainder remainderComponent = item.getDefaultInstance().getOrDefault(DataComponents.USE_REMAINDER, null);
+            boolean isHoneyBottle = item == Items.HONEY_BOTTLE;
+            boolean isBottled = !isHoneyBottle && (remainderComponent != null && remainderComponent.convertInto().is(Items.GLASS_BOTTLE));
+            boolean isBucket = !isBottled && remainderComponent != null && remainderComponent.convertInto().is(Items.BUCKET);
+            boolean isStew = !isBucket && !isBottled && remainderComponent != null && remainderComponent.convertInto().is(Items.BOWL);
+
+            Consumable consumeComponent = item.getDefaultInstance().getOrDefault(DataComponents.CONSUMABLE, null);
+            boolean isDrink = isHoneyBottle || isStew || isBucket || isBottled || consumeComponent.sound() == SoundEvents.GENERIC_DRINK;
+            boolean hasParticles = !isDrink && remainderComponent == null;
+
+            Consumable newConsumeComponent = isDrink ?
+                    createDrinkConsumptionComponent(eatTime, consumeComponent.onConsumeEffects(), isHoneyBottle) :
+                    createFoodConsumptionComponent(eatTime, hasParticles, consumeComponent.onConsumeEffects());
+
+            int maxCount;
+            if(isBottled) maxCount = VersusSettings.Items.MAX_COUNT_BOTTLED;
+            else if(isStew) maxCount = VersusSettings.Items.MAX_COUNT_STEWS;
+            else if(isBucket) maxCount = VersusSettings.Items.MAX_COUNT_BUCKETS;
+            else maxCount = VersusSettings.Items.MAX_COUNT_FOOD;
             if(maxCount != item.getDefaultInstance().getMaxStackSize()) modifyVanillaStackSizeOf(context, item, maxCount);
             context.modify(item, builder -> {builder.set(DataComponents.CONSUMABLE, newConsumeComponent);});
         });

@@ -1,18 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "dripstone",
-  "category": "building",
   "pattern": [
     "##"
   ],
   "key": {
-    "#" : "players-versus:dripstone_bricks"
+    "#": "players-versus:dripstone_bricks"
   },
   "result": {
     "id": "players-versus:dripstone_brick_slab",
     "count": 4
   }
 }
-
-
-

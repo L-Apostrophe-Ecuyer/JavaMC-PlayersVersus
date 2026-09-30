@@ -1,13 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "pattern": [
     "###",
     "###",
     "###"
   ],
   "key": {
-    "#" : "players-versus:corrupted_wart"
+    "#": "players-versus:corrupted_wart"
   },
   "result": {
     "id": "minecraft:warped_wart_block",

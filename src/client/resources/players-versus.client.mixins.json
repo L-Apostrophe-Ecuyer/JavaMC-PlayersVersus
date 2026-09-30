@@ -18,6 +18,7 @@
 		"mobs.hostile.ZombieModelMixin",
 		"mobs.hostile.PiglinModelMixin",
 		"mobs.hostile.IllagerModelMixin",
+		"mobs.passive.BabyVillagerEarModelMixin",
 		"mobs.passive.VillagerRessemblingModelMixin",
 		"mobs.passive.VillagerTradingScreenMixin",
 

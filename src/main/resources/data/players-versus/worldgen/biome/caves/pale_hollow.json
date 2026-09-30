@@ -6,21 +6,10 @@
   ],
   "downfall": 0.8,
   "effects": {
-    "dry_foliage_color": 10528412,
-    "fog_color": 8818594,
-    "foliage_color": 8489578,
-    "grass_color": 7900015,
-    "mood_sound": {
-      "block_search_extent": 8,
-      "offset": 2,
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000
-    },
-    "music": [],
-    "music_volume": 0,
-    "sky_color": 9611987,
-    "water_color": 6456748,
-    "water_fog_color": 4678272
+    "dry_foliage_color": "#a0a69c",
+    "foliage_color": "#818a6a",
+    "grass_color": "#788b6f",
+    "water_color": "#6285ac"
   },
   "features": [
     [],
@@ -77,77 +66,102 @@
     ]
   ],
   "has_precipitation": true,
-  "spawn_costs": {},
-  "spawners": {
-    "ambient": [
-      {
-        "type": "minecraft:bat",
-        "maxCount": 8,
-        "minCount": 8,
-        "weight": 10
+  "temperature": 0.7,
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawns_by_category": {
+          "ambient": [
+            {
+              "type": "minecraft:bat",
+              "weight": 10,
+              "count": 8
+            }
+          ],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [
+            {
+              "type": "minecraft:spider",
+              "weight": 100,
+              "count": 4
+            },
+            {
+              "type": "minecraft:zombie",
+              "weight": 20,
+              "count": 4
+            },
+            {
+              "type": "players-versus:withered_zombie",
+              "weight": 80,
+              "count": 1
+            },
+            {
+              "type": "minecraft:skeleton",
+              "weight": 20,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 2,
+                "max_inclusive": 4
+              }
+            },
+            {
+              "type": "minecraft:wither_skeleton",
+              "weight": 20,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 2,
+                "max_inclusive": 4
+              }
+            },
+            {
+              "type": "minecraft:creeper",
+              "weight": 100,
+              "count": 4
+            },
+            {
+              "type": "minecraft:enderman",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 1,
+                "max_inclusive": 4
+              }
+            },
+            {
+              "type": "minecraft:witch",
+              "weight": 10,
+              "count": 1
+            },
+            {
+              "type": "minecraft:silverfish",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 2,
+                "max_inclusive": 4
+              }
+            }
+          ],
+          "water_ambient": [],
+          "water_creature": []
+        },
+        "spawn_costs": {}
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/sky_color": "#92aad3",
+    "minecraft:visual/fog_color": "#868fa2",
+    "minecraft:visual/water_fog_color": "#476280",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "block_search_extent": 8,
+        "offset": 2,
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000
       }
-    ],
-    "axolotls": [],
-    "creature": [],
-    "misc": [],
-    "monster": [
-      {
-        "type": "minecraft:spider",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 100
-      },
-      {
-        "type": "minecraft:zombie",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 20
-      },
-      {
-        "type": "players-versus:withered_zombie",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 80
-      },
-      {
-        "type": "minecraft:skeleton",
-        "maxCount": 4,
-        "minCount": 2,
-        "weight": 20
-      },
-      {
-        "type": "minecraft:wither_skeleton",
-        "maxCount": 4,
-        "minCount": 2,
-        "weight": 20
-      },
-      {
-        "type": "minecraft:creeper",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 100
-      },
-      {
-        "type": "minecraft:enderman",
-        "maxCount": 4,
-        "minCount": 1,
-        "weight": 10
-      },
-      {
-        "type": "minecraft:witch",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 10
-      },
-      {
-        "type": "minecraft:silverfish",
-        "weight": 10,
-        "minCount": 2,
-        "maxCount": 4
-      }
-    ],
-    "water_ambient": [],
-    "water_creature": []
-  },
-  "temperature": 0.7
+    },
+    "minecraft:audio/music_volume": 0
+  }
 }

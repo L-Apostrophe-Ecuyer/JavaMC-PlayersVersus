@@ -1,42 +1,5 @@
 {
-  "feature": {
-    "type": "minecraft:ore",
-    "config": {
-      "size": 32,
-      "discard_chance_on_air_exposure": 0,
-      "targets": [
-        {
-          "target": {
-            "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:stone",
-            "probability": 0.4
-          },
-          "state": {
-            "Name": "minecraft:stone"
-          }
-        },
-        {
-          "target": {
-            "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:stone",
-            "probability": 0.2
-          },
-          "state": {
-            "Name": "players-versus:brown_mud"
-          }
-        },
-        {
-          "target": {
-            "predicate_type": "minecraft:tag_match",
-            "tag": "minecraft:base_stone_overworld"
-          },
-          "state": {
-            "Name": "players-versus:brown_clay"
-          }
-        }
-      ]
-    }
-  },
+  "feature": "minecraft:ore_diorite_lower",
   "placement": [
     {
       "type": "minecraft:in_square"

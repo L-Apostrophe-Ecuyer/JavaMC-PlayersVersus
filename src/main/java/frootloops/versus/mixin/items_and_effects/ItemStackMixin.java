@@ -26,11 +26,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements DataComponentHolder {
 
-    @Shadow private final Item item;
+    @Shadow private final Holder<Item> item;
     @Shadow private int count;
     @Shadow final PatchedDataComponentMap components;
 
-    protected ItemStackMixin(Item item, int count, PatchedDataComponentMap components) {
+    protected ItemStackMixin(Holder<Item> item, int count, PatchedDataComponentMap components) {
         this.item = item;
         this.count = count;
         this.components = components;
@@ -41,6 +41,9 @@ public abstract class ItemStackMixin implements DataComponentHolder {
 
     @Shadow
     public boolean isEnchanted() {return false;}
+
+    @Shadow public abstract boolean isEmpty();
+    @Shadow public abstract Item getItem();
 
     @ModifyVariable(method = "<init>(Lnet/minecraft/core/Holder;I)V", at = @At("HEAD"), argsOnly = true)
     private static Holder<Item> modifyItemRegistry(Holder<Item> item) {
@@ -55,7 +58,7 @@ public abstract class ItemStackMixin implements DataComponentHolder {
 
     @Inject(method = "isEnchantable", at = @At("RETURN"), cancellable = true)
     public void isEnchantable(CallbackInfoReturnable<Boolean> cir) {
-        if(!cir.getReturnValue() && item.components().has(DataComponents.ENCHANTABLE)) {
+        if(!cir.getReturnValue() && !this.isEmpty() && item.value().components().has(DataComponents.ENCHANTABLE)) {
             ItemEnchantments itemEnchantmentsComponent = this.get(DataComponents.ENCHANTMENTS);
             if(itemEnchantmentsComponent == null || itemEnchantmentsComponent.isEmpty()) {
                 cir.setReturnValue(true);
@@ -67,7 +70,7 @@ public abstract class ItemStackMixin implements DataComponentHolder {
                     enchantmentPower += enchant.value().getMinCost(itemEnchantmentsComponent.getLevel(enchant));
                 }
 
-                Enchantable enchantabilityComponent = item.components().get(DataComponents.ENCHANTABLE);
+                Enchantable enchantabilityComponent = item.value().components().get(DataComponents.ENCHANTABLE);
                 int maxLevel = 4 * enchantabilityComponent.value();
                 if(enchantmentPower < maxLevel) cir.setReturnValue(true);
             }
@@ -78,9 +81,9 @@ public abstract class ItemStackMixin implements DataComponentHolder {
     public void getMiningSpeedMultiplier(BlockState state, CallbackInfoReturnable<Float> cir) {
         float miningSpeed = cir.getReturnValue();
         if(state.getSoundType() == SoundType.DEEPSLATE) {
-            if(this.item == Items.NETHERITE_PICKAXE) miningSpeed *= 1.3f;
-            else if(this.item == Items.DIAMOND_PICKAXE) miningSpeed *= 1.1f;
-            else if(this.item == Items.IRON_PICKAXE) return;
+            if(this.getItem() == Items.NETHERITE_PICKAXE) miningSpeed *= 1.3f;
+            else if(this.getItem() == Items.DIAMOND_PICKAXE) miningSpeed *= 1.1f;
+            else if(this.getItem() == Items.IRON_PICKAXE) return;
             else miningSpeed *= 0.6f;
             cir.setReturnValue(miningSpeed);
         }

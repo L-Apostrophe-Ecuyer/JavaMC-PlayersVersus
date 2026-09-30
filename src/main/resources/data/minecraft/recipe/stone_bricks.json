@@ -1,13 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "stone_bricks",
   "pattern": [
     "##",
     "##"
   ],
   "key": {
-    "#" : "players-versus:polished_stone"
+    "#": "players-versus:polished_stone"
   },
   "result": {
     "id": "minecraft:stone_bricks",

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:replace_single_block",
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:sand",
+        "predicate_type": "minecraft:block_match"
+      },
+      "state": {
+        "id": "minecraft:suspicious_sand"
+      }
+    }
+  ]
+}

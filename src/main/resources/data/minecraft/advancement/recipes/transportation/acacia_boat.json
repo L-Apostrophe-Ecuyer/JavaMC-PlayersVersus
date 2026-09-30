@@ -4,13 +4,13 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:acacia_boat"
+        "recipes": "minecraft:acacia_boat"
       }
     },
     "in_water": {
       "trigger": "minecraft:enter_block",
       "conditions": {
-        "block": "minecraft:water"
+        "blocks": "minecraft:water"
       }
     },
     "has_planks": {

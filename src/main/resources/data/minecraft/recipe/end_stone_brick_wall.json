@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "end",
   "key": {
     "#": "minecraft:end_stone_bricks"

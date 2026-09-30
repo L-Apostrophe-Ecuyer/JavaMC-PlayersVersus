@@ -4,13 +4,13 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:cherry_raft"
+        "recipes": "minecraft:cherry_boat"
       }
     },
     "in_water": {
       "trigger": "minecraft:enter_block",
       "conditions": {
-        "block": "minecraft:water"
+        "blocks": "minecraft:water"
       }
     },
     "has_planks": {
@@ -36,19 +36,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:cherry_raft"
+      "minecraft:cherry_boat"
     ]
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-

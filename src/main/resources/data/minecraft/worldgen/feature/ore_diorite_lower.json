@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:ore",
+  "size": 32,
+  "discard_chance_on_air_exposure": 0,
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.4,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:stone"
+      }
+    },
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.2,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "players-versus:brown_mud"
+      }
+    },
+    {
+      "target": {
+        "tag": "minecraft:base_stone_overworld",
+        "predicate_type": "minecraft:tag_match"
+      },
+      "state": {
+        "id": "players-versus:brown_clay"
+      }
+    }
+  ]
+}

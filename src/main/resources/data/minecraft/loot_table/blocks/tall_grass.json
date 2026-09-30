@@ -11,91 +11,87 @@
             {
               "type": "minecraft:item",
               "name": "minecraft:short_grass",
-              "functions": [
-                {
-                  "function": "minecraft:set_count",
-                  "count": 2
-                }
-              ],
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "items": [
-                      "minecraft:shears"
-                    ]
-                  }
-                }
-              ]
+              "modifier": {
+                "count": 2,
+                "type": "minecraft:set_count"
+              },
+              "condition": {
+                "predicate": {
+                  "items": [
+                    "minecraft:shears"
+                  ]
+                },
+                "type": "minecraft:match_tool"
+              }
             },
             {
               "type": "minecraft:item",
               "name": "minecraft:short_grass",
-              "functions": [
-                {
-                  "function": "minecraft:set_count",
-                  "count": 2
-                }
-              ],
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "items": "#minecraft:hoes"
-                  }
-                },
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "predicates": {
-                      "minecraft:enchantments": [
-                        {
-                          "enchantments": "minecraft:silk_touch",
-                          "levels": {
-                            "min": 1
+              "modifier": {
+                "count": 2,
+                "type": "minecraft:set_count"
+              },
+              "condition": {
+                "terms": [
+                  {
+                    "predicate": {
+                      "items": "#minecraft:hoes"
+                    },
+                    "type": "minecraft:match_tool"
+                  },
+                  {
+                    "predicate": {
+                      "predicates": {
+                        "minecraft:enchantments": [
+                          {
+                            "enchantments": "minecraft:silk_touch",
+                            "levels": {
+                              "min": 1
+                            }
                           }
-                        }
-                      ]
-                    }
+                        ]
+                      }
+                    },
+                    "type": "minecraft:match_tool"
                   }
-                }
-              ]
+                ],
+                "type": "minecraft:all_of"
+              }
             },
             {
               "type": "minecraft:item",
               "name": "minecraft:wheat_seeds",
-              "functions": [
-                {
-                  "function": "minecraft:apply_bonus",
-                  "enchantment": "minecraft:fortune",
-                  "formula": "minecraft:uniform_bonus_count",
-                  "parameters": {
-                    "bonusMultiplier": 2
-                  }
-                }
-              ],
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "items": "#minecraft:hoes"
-                  }
+              "modifier": {
+                "enchantment": "minecraft:fortune",
+                "formula": "minecraft:uniform_bonus_count",
+                "parameters": {
+                  "bonusMultiplier": 2
                 },
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.12
-                }
-              ]
+                "type": "minecraft:apply_bonus"
+              },
+              "condition": {
+                "terms": [
+                  {
+                    "predicate": {
+                      "items": "#minecraft:hoes"
+                    },
+                    "type": "minecraft:match_tool"
+                  },
+                  {
+                    "chance": 0.12,
+                    "type": "minecraft:random_chance"
+                  }
+                ],
+                "type": "minecraft:all_of"
+              }
             },
             {
               "type": "minecraft:item",
               "name": "minecraft:wheat_seeds",
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.05
-                }
-              ]
+              "condition": {
+                "chance": 0.05,
+                "type": "minecraft:random_chance"
+              }
             }
           ]
         }

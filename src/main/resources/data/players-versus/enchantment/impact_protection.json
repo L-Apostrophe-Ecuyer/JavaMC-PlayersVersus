@@ -42,11 +42,10 @@
           }
         },
         "requirements": {
-          "condition": "minecraft:damage_source_properties",
           "predicate": {
             "tags": [
               {
-                "id": "players-versus:is_melee_attack",
+                "id": "#players-versus:is_melee_attack",
                 "expected": true
               }
             ],
@@ -58,7 +57,8 @@
               }
             },
             "is_direct": true
-          }
+          },
+          "type": "minecraft:damage_source_properties"
         }
       },
       {
@@ -71,15 +71,15 @@
           }
         },
         "requirements": {
-          "condition": "minecraft:damage_source_properties",
           "predicate": {
             "tags": [
               {
-                "id": "players-versus:is_protected_by_impact_enchant",
+                "id": "#players-versus:is_protected_by_impact_enchant",
                 "expected": true
               }
             ]
-          }
+          },
+          "type": "minecraft:damage_source_properties"
         }
       },
       {
@@ -91,36 +91,39 @@
             "per_level_above_first": 1
           }
         },
-        "requirements": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "equipment": {
-                "head": {
-                  "predicates": {
-                    "minecraft:enchantments": [
-                      {
-                        "enchantments": "players-versus:impact_protection"
-                      }
-                    ]
+        "requirements": {
+          "type": "minecraft:all_of",
+          "terms": [
+            {
+              "entity": "this",
+              "predicate": {
+                "equipment": {
+                  "head": {
+                    "predicates": {
+                      "minecraft:enchantments": [
+                        {
+                          "enchantments": "players-versus:impact_protection"
+                        }
+                      ]
+                    }
                   }
                 }
-              }
+              },
+              "type": "minecraft:entity_properties"
+            },
+            {
+              "predicate": {
+                "tags": [
+                  {
+                    "id": "#players-versus:is_head_impact",
+                    "expected": true
+                  }
+                ]
+              },
+              "type": "minecraft:damage_source_properties"
             }
-          },
-          {
-            "condition": "minecraft:damage_source_properties",
-            "predicate": {
-              "tags": [
-                {
-                  "id": "players-versus:is_head_impact",
-                  "expected": true
-                }
-              ]
-            }
-          }
-        ]
+          ]
+        }
       },
       {
         "effect": {
@@ -131,36 +134,39 @@
             "per_level_above_first": 1
           }
         },
-        "requirements": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "equipment": {
-                "feet": {
-                  "predicates": {
-                    "minecraft:enchantments": [
-                      {
-                        "enchantments": "players-versus:impact_protection"
-                      }
-                    ]
+        "requirements": {
+          "type": "minecraft:all_of",
+          "terms": [
+            {
+              "entity": "this",
+              "predicate": {
+                "equipment": {
+                  "feet": {
+                    "predicates": {
+                      "minecraft:enchantments": [
+                        {
+                          "enchantments": "players-versus:impact_protection"
+                        }
+                      ]
+                    }
                   }
                 }
-              }
+              },
+              "type": "minecraft:entity_properties"
+            },
+            {
+              "predicate": {
+                "tags": [
+                  {
+                    "id": "#minecraft:is_fall",
+                    "expected": true
+                  }
+                ]
+              },
+              "type": "minecraft:damage_source_properties"
             }
-          },
-          {
-            "condition": "minecraft:damage_source_properties",
-            "predicate": {
-              "tags": [
-                {
-                  "id": "minecraft:is_fall",
-                  "expected": true
-                }
-              ]
-            }
-          }
-        ]
+          ]
+        }
       }
     ]
   }

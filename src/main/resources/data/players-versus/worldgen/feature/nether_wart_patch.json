@@ -1,0 +1,58 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "surface": "floor",
+  "depth": 2,
+  "vertical_range": 4,
+  "extra_bottom_block_chance": 0,
+  "extra_edge_column_chance": 0,
+  "vegetation_chance": 0.4,
+  "xz_radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 3,
+    "max_inclusive": 8
+  },
+  "replaceable": "#minecraft:base_stone_nether",
+  "ground_state": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": {
+          "id": "minecraft:netherrack"
+        },
+        "weight": 14
+      },
+      {
+        "data": {
+          "id": "minecraft:soul_sand"
+        },
+        "weight": 6
+      },
+      {
+        "data": {
+          "id": "minecraft:nether_wart_block"
+        },
+        "weight": 1
+      }
+    ]
+  },
+  "vegetation_feature": {
+    "feature": "players-versus:nether_wart_patch_vegetation",
+    "placement": [
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:all_of",
+          "predicates": [
+            {
+              "type": "minecraft:matching_blocks",
+              "blocks": "minecraft:air"
+            },
+            {
+              "type": "minecraft:true"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

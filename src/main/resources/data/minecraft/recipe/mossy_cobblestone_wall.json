@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "cobblestone",
   "key": {
     "#": "minecraft:mossy_cobblestone"

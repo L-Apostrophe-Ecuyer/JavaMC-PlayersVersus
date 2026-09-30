@@ -36,7 +36,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:pale_oak_button"
+        "recipes": "minecraft:pale_oak_button"
       }
     },
     "knows_what_buttons_are": {
@@ -68,4 +68,3 @@
     ]
   }
 }
-

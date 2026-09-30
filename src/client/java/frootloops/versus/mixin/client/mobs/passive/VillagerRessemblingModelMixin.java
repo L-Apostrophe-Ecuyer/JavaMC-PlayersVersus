@@ -5,15 +5,12 @@ import net.minecraft.client.model.*;
 import net.minecraft.client.model.npc.VillagerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartNames;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeDeformation;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.state.VillagerRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import frootloops.versus.mod.mobs.VillagerEarParts;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,9 +41,7 @@ public abstract class VillagerRessemblingModelMixin extends EntityModel<Villager
     @Inject(method = "createBodyModel", at = @At("RETURN"), cancellable = true)
     private static void constructorHead(CallbackInfoReturnable<MeshDefinition> cir) {
         MeshDefinition modelData = cir.getReturnValue();
-        PartDefinition modelPartData = modelData.getRoot().getChild(PartNames.HEAD);
-        modelPartData.addOrReplaceChild(PartNames.LEFT_EAR, CubeListBuilder.create().texOffs(56, 0).addBox(0.0f, 0.0f, -2.0f, 1.0f, 4.0f, 3.0f, CubeDeformation.NONE), PartPose.offsetAndRotation(3.9f, -6.0f, 0.0f, 0.0f, 0.0f, -0.5235988f));
-        modelPartData.addOrReplaceChild(PartNames.RIGHT_EAR, CubeListBuilder.create().texOffs(56, 0).addBox(-1.0f, 0.0f, -2.0f, 1.0f, 4.0f, 3.0f, CubeDeformation.NONE), PartPose.offsetAndRotation(-3.9f, -6.0f, 0.0f, 0.0f, 0.0f, 0.5235988f));
+        VillagerEarParts.addTo(modelData);
         cir.setReturnValue(modelData);
     }
 

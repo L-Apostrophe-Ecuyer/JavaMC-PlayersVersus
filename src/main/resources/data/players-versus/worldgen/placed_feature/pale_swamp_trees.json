@@ -1,23 +1,5 @@
 {
-  "feature": {
-    "type": "minecraft:random_selector",
-    "config": {
-      "default": {
-        "feature": "minecraft:swamp_oak",
-        "placement": []
-      },
-      "features": [
-        {
-          "chance": 0.1,
-          "feature": "minecraft:pale_oak_creaking_checked"
-        },
-        {
-          "chance": 0.2,
-          "feature": "minecraft:pale_oak_checked"
-        }
-      ]
-    }
-  },
+  "feature": "players-versus:pale_swamp_trees",
   "placement": [
     {
       "type": "minecraft:count",
@@ -54,8 +36,8 @@
       "predicate": {
         "type": "minecraft:would_survive",
         "state": {
-          "Name": "minecraft:oak_sapling",
-          "Properties": {
+          "id": "minecraft:oak_sapling",
+          "properties": {
             "stage": "0"
           }
         }

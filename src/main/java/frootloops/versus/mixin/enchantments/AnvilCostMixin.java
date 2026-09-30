@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.enchantments;
 
 import frootloops.versus.VersusMod;
+import net.fabricmc.fabric.api.item.v1.EnchantingContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -25,10 +26,11 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
 
@@ -65,11 +67,14 @@ public abstract class AnvilCostMixin extends ItemCombinerMenu {
     }
 
 
-    @Overwrite
-    public void createResult() {
+    @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
+    private void createResult(CallbackInfo ci) {
         boolean isUpdatingName = isRenaming();
         boolean isUpdatingItems = (toolStack != inputSlots.getItem(0) || repairStack != inputSlots.getItem(1));
-        if(!isUpdatingItems && !isUpdatingName) return;
+        if(!isUpdatingItems && !isUpdatingName) {
+            ci.cancel();
+            return;
+        }
 
         repairItemCountCost = 1;
         toolStack = inputSlots.getItem(0);
@@ -146,21 +151,21 @@ public abstract class AnvilCostMixin extends ItemCombinerMenu {
 
             // Check if we're adding a new enchantment:
             boolean isEnchantingBook = toolStack.is(Items.ENCHANTED_BOOK);
-            for (Holder<Enchantment> repairEnchant : repairEnchantmentComponent.keySet()) {
-                int levelTool = toolEnchantBuilder.getLevel(repairEnchant);
-                int levelRepair = repairEnchantmentComponent.getLevel(repairEnchant);
-                if(levelTool == 0 && (repairEnchant.value().canEnchant(toolStack) || isEnchantingBook)) {
+            for (Holder<Enchantment> enchantmentHolder : repairEnchantmentComponent.keySet()) {
+                int levelTool = toolEnchantBuilder.getLevel(enchantmentHolder);
+                int levelRepair = repairEnchantmentComponent.getLevel(enchantmentHolder);
+                if(levelTool == 0 && (toolStack.canBeEnchantedWith(enchantmentHolder, EnchantingContext.ACCEPTABLE) || isEnchantingBook)) {
 
                     boolean canAddNewEnchant = true;
                     for (Holder<Enchantment> toolEnchant : toolEnchantBuilder.keySet()) {
-                        if (toolEnchant.equals(repairEnchant) || (!Enchantment.areCompatible(repairEnchant, toolEnchant) && !isEnchantingBook)) {
+                        if (toolEnchant.equals(enchantmentHolder) || (!Enchantment.areCompatible(enchantmentHolder, toolEnchant) && !isEnchantingBook)) {
                             canAddNewEnchant = false;
                             break;
                         }
                     }
                     if (canAddNewEnchant) {
-                        toolEnchantBuilder.upgrade(repairEnchant, levelRepair);
-                        levelForEnchants += getLevelForApplying(repairEnchant, levelRepair);
+                        toolEnchantBuilder.upgrade(enchantmentHolder, levelRepair);
+                        levelForEnchants += getLevelForApplying(enchantmentHolder, levelRepair);
                         numNewEnchantments++;
                     }
                 }
@@ -210,6 +215,7 @@ public abstract class AnvilCostMixin extends ItemCombinerMenu {
             cost.set(0);
         }
         broadcastChanges();
+        ci.cancel();
     }
 
     private boolean isRenaming() {

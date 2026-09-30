@@ -1,17 +1,15 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "group": "copper_armor",
-    "category": "equipment",
-    "pattern": [
-      "X X",
-      "XXX",
-      "XXX"
-    ],
-    "key": {
-      "X": "minecraft:copper_ingot"
-    },
-    "result": {
-      "id": "players-versus:copper_chestplate"
-    }
+  "type": "minecraft:crafting_shaped",
+  "group": "copper_armor",
+  "pattern": [
+    "X X",
+    "XXX",
+    "XXX"
+  ],
+  "key": {
+    "X": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "players-versus:copper_chestplate"
   }
-  
+}
