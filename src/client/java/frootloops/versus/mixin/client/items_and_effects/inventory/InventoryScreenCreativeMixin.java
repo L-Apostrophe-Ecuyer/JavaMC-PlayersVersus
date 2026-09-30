@@ -5,7 +5,7 @@ import frootloops.versus.mod.items_and_effects.inventory.HotbarCycling;
 import frootloops.versus.mod.items_and_effects.inventory.InventorySorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.itemgroup.v1.FabricCreativeInventoryScreen;
+import net.fabricmc.fabric.api.client.creativetab.v1.FabricCreativeModeInventoryScreen;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Environment(EnvType.CLIENT)
 @Mixin(CreativeModeInventoryScreen.class)
-public abstract class InventoryScreenCreativeMixin  extends AbstractContainerScreen<CreativeModeInventoryScreen.ItemPickerMenu> implements FabricCreativeInventoryScreen {
+public abstract class InventoryScreenCreativeMixin  extends AbstractContainerScreen<CreativeModeInventoryScreen.ItemPickerMenu> implements FabricCreativeModeInventoryScreen {
 
     @Shadow private static CreativeModeTab selectedTab;
 
@@ -44,7 +44,7 @@ public abstract class InventoryScreenCreativeMixin  extends AbstractContainerScr
 
     @Inject(method = "init",at = @At("TAIL"), cancellable = false)
     private void addInventoryButtons(CallbackInfo info) {
-        if (this.minecraft.screen instanceof CreativeModeInventoryScreen) {
+        if (this.minecraft.gui.screen() instanceof CreativeModeInventoryScreen) {
 
             this.buttonHotbarSwap = new ImageButton(this.leftPos + 104 + 24, this.height / 2 - 36, 20, 18, InventorySorting.TEXTURE_HOTBAR_SWAP_BUTTON, button -> {
                 HotbarCycling.doHotbarSwap(minecraft.player.getInventory());

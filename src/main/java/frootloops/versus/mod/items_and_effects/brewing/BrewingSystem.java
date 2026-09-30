@@ -8,6 +8,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.Potions;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The brewing recipe graph of Players Versus: which ingredient turns which potion into which (strong, long, inverted and
@@ -27,6 +29,33 @@ public abstract class BrewingSystem {
     }
 
     private record RelatedPotions(Holder<Potion> strongPotion, Holder<Potion> longPotion,  Holder<Potion> invertedPotion) {}
+
+    private static volatile Set<Item> ingredients;
+
+    /** Whether an item is the ingredient of some mix or container recipe of the graph (for sorting and tooltips). */
+    public static boolean isIngredient(Item item) {
+        Set<Item> known = ingredients;
+        if (known == null) {
+            Set<Item> found = new HashSet<>();
+            describeRecipes(new Recipes() {
+                @Override
+                public void addContainer(Item container) {
+                }
+
+                @Override
+                public void addMix(Holder<Potion> from, Item ingredient, Holder<Potion> to) {
+                    found.add(ingredient);
+                }
+
+                @Override
+                public void addContainerRecipe(Item from, Item ingredient, Item to) {
+                    found.add(ingredient);
+                }
+            });
+            ingredients = known = Set.copyOf(found);
+        }
+        return known.contains(item);
+    }
 
     public static void describeRecipes(Recipes builder) {
 

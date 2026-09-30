@@ -933,9 +933,9 @@ public abstract class ItemSortingMaps {
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.weathering().exposed(), index++);
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.weathering().weathered(), index++);
         ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.weathering().oxidized(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.waxed().unaffected().unaffected(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.waxed().unaffected().exposed(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.waxed().unaffected().weathered(), index++);
-        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.waxed().unaffected().oxidized(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.waxed().unaffected(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.waxed().exposed(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.waxed().weathered(), index++);
+        ITEMS_AND_BLOCKS_OF_COPPER.put(Items.LIGHTNING_ROD.waxed().oxidized(), index++);
     }
 }

@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
@@ -20,7 +20,7 @@ public class InventoryManagementHelper {
             for (int i = 9; i < 44; i++) {
                 ItemStack otherStack = inventory.getItem(i);
                 if(!otherStack.isEmpty() && ItemStack.isSameItemSameComponents(cursorStack, otherStack)) {
-                    client.gameMode.handleInventoryMouseClick(handler.containerId, i, 0, ClickType.PICKUP, client.player);
+                    client.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.PICKUP, client.player);
                     if(cursorStack.getCount() == 0 || cursorStack.isEmpty()) return;
                 }
             }
@@ -29,13 +29,13 @@ public class InventoryManagementHelper {
         // Find an empty slot to insert the cursor stack in:
         for (int i = 9; i < 44; i++) {
             if(inventory.getItem(i).isEmpty()) {
-                client.gameMode.handleInventoryMouseClick(handler.containerId, i, 0, ClickType.PICKUP, client.player);
+                client.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.PICKUP, client.player);
                 return;
             }
         }
 
         // Drop the cursor stack:
-        client.gameMode.handleInventoryMouseClick(handler.containerId, -999, 0, ClickType.THROW, client.player);
+        client.gameMode.handleContainerInput(handler.containerId, -999, 0, ContainerInput.THROW, client.player);
     }
 
     protected static void mergeStacksTogether(AbstractContainerMenu handler, Minecraft client, Container inventory, int startingSlotIndex, int totalNumSlots) {
@@ -47,9 +47,9 @@ public class InventoryManagementHelper {
             for (int j = i + 1; j < maxSlotIndex; j++) {
                 stackTwo = inventory.getItem(j);
                 if(stackTwo.isEmpty() || !stackTwo.is(stackOne.getItem()) || stackTwo.getCount() == stackTwo.getMaxStackSize() || !ItemStack.isSameItemSameComponents(stackOne, stackTwo)) continue;
-                client.gameMode.handleInventoryMouseClick(handler.containerId, j, 0, ClickType.PICKUP, client.player); // Grab the stack
-                client.gameMode.handleInventoryMouseClick(handler.containerId, i, 0, ClickType.PICKUP, client.player); // Combine with other
-                if(!handler.getCarried().isEmpty()) client.gameMode.handleInventoryMouseClick(handler.containerId, j, 0, ClickType.PICKUP, client.player); // Place leftovers back down
+                client.gameMode.handleContainerInput(handler.containerId, j, 0, ContainerInput.PICKUP, client.player); // Grab the stack
+                client.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.PICKUP, client.player); // Combine with other
+                if(!handler.getCarried().isEmpty()) client.gameMode.handleContainerInput(handler.containerId, j, 0, ContainerInput.PICKUP, client.player); // Place leftovers back down
                 if(inventory.getItem(i).getCount() == stackOne.getMaxStackSize()) break;
             }
         }

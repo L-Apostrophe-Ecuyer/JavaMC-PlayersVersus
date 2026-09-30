@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
+import frootloops.versus.mod.items_and_effects.brewing.BrewingSystem;
 import frootloops.versus.mod.items_and_effects.brewing.ConcentrateItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SmithingTemplateItem;
@@ -171,7 +173,7 @@ public abstract class ItemComparaisonHelper {
         }
         else if(stack.getComponents().has(DataComponents.EQUIPPABLE)) {
             Equippable equipComponent = stack.getComponents().get(DataComponents.EQUIPPABLE);
-            if(!equipComponent.canBeEquippedBy(EntityTypes.PLAYER)) return ItemType.MISC_TOOL;
+            if(!equipComponent.canBeEquippedBy(EntityTypes.PLAYER.builtInRegistryHolder())) return ItemType.MISC_TOOL;
             else if(stack.is(Items.ELYTRA)) return ItemType.ELYTRA;
             else if(equipComponent.slot() == EquipmentSlot.CHEST) return ItemType.CHESTPLATE;
             else if(equipComponent.slot() == EquipmentSlot.LEGS) return ItemType.LEGGINGS;
@@ -187,8 +189,8 @@ public abstract class ItemComparaisonHelper {
         else if(stack.getItem() instanceof SmithingTemplateItem) return ItemType.SMITHING_TEMPLATE;
         else if(stack.getComponents().has(DataComponents.INSTRUMENT)) return ItemType.MISC_TOOL;
         else if(stack.is(Items.MAP) || stack.is(Items.FILLED_MAP)) return ItemType.MISC_TOOL;
-        else if(stack.is(Items.BUCKET) || stack.getRecipeRemainder() == Items.BUCKET.getDefaultInstance()) return ItemType.MISC_TOOL;
-        else if(Minecraft.getInstance().level.potionBrewing().isPotionIngredient(stack)  || stack.getItem() instanceof ConcentrateItem) return ItemType.BREWING_INGREDIENT;
+        else if(stack.is(Items.BUCKET) || leavesBucket(stack)) return ItemType.MISC_TOOL;
+        else if(BrewingSystem.isIngredient(stack.getItem())  || stack.getItem() instanceof ConcentrateItem) return ItemType.BREWING_INGREDIENT;
         else if(stack.is(Items.GOLDEN_APPLE) || stack.is(Items.ENCHANTED_GOLDEN_APPLE)) return ItemType.GAPPLES;
         else if(stack.getComponents().has(DataComponents.FOOD)) return ItemType.FOOD;
         else if(stack.is(ItemTags.SHULKER_BOXES)) return ItemType.SHULKER_BOX;
@@ -222,8 +224,26 @@ public abstract class ItemComparaisonHelper {
     }
 
     private static double getAttributeValueWithStack(ItemStack stack, EquipmentSlot slot) {
+        // What the item's modifiers add up to in this slot, whichever attributes they belong to (1.21.10's compute, which
+        // 26.3 limits to one attribute): the sorting ranks items by how strong they are, attack damage or armor alike.
         ItemAttributeModifiers attributeModifiersComponent = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-        return attributeModifiersComponent.compute(0.0, slot);
+        double total = 0.0;
+        for (ItemAttributeModifiers.Entry entry : attributeModifiersComponent.modifiers()) {
+            if (!entry.slot().test(slot)) continue;
+            double amount = entry.modifier().amount();
+            total += switch (entry.modifier().operation()) {
+                case ADD_VALUE -> amount;
+                case ADD_MULTIPLIED_BASE -> 0.0;
+                case ADD_MULTIPLIED_TOTAL -> amount * total;
+            };
+        }
+        return total;
+    }
+
+    /** Items that leave a bucket behind when crafted with (milk, water and so on), which sort with the buckets. */
+    private static boolean leavesBucket(ItemStack stack) {
+        ItemStackTemplate remainder = stack.getItem().getCraftingRemainder();
+        return remainder != null && remainder.is(Items.BUCKET);
     }
 
     private static double getArmorPreferenceValue(ItemStack stack, EquipmentSlot slot) {

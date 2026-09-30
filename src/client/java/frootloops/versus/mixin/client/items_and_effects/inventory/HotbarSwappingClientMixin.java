@@ -36,7 +36,7 @@ public abstract class HotbarSwappingClientMixin extends ReentrantBlockableEventL
     @Shadow @Nullable public MultiPlayerGameMode gameMode;
 
     public HotbarSwappingClientMixin(String string) {
-        super(string);
+        super(string, true);
     }
 
     @Shadow

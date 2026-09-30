@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
@@ -41,6 +41,6 @@ public abstract class HotbarCycling {
         ItemStack stackOne = inventory.getItem(slotOne);
         ItemStack stackTwo = inventory.getItem(slotTwo);
         if(stackOne.isEmpty() && stackTwo.isEmpty()) return;
-        Minecraft.getInstance().gameMode.handleInventoryMouseClick(0, slotTwo, slotOne, ClickType.SWAP, Minecraft.getInstance().player);
+        Minecraft.getInstance().gameMode.handleContainerInput(0, slotTwo, slotOne, ContainerInput.SWAP, Minecraft.getInstance().player);
     }
 }

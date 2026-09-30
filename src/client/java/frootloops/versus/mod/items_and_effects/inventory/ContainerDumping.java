@@ -7,7 +7,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import java.util.HashMap;
@@ -71,9 +71,9 @@ public abstract class ContainerDumping {
 
                 if(isPlayerInventory) {
                     int actualSlotOrigin = (i < 9) ? (i + startingIndexOrigin + 27) : i + startingIndexOrigin - 9;
-                    client.gameMode.handleInventoryMouseClick(handler.containerId, actualSlotOrigin, 0, ClickType.QUICK_MOVE, client.player);
+                    client.gameMode.handleContainerInput(handler.containerId, actualSlotOrigin, 0, ContainerInput.QUICK_MOVE, client.player);
                 }
-                else client.gameMode.handleInventoryMouseClick(handler.containerId, i + startingIndexOrigin, 0, ClickType.QUICK_MOVE, client.player);
+                else client.gameMode.handleContainerInput(handler.containerId, i + startingIndexOrigin, 0, ContainerInput.QUICK_MOVE, client.player);
             }
         }
     }

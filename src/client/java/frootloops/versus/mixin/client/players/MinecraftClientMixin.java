@@ -49,7 +49,7 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
 
     private static final InteractionHand[] OFFHAND_FIRST =  new InteractionHand[] {InteractionHand.OFF_HAND, InteractionHand.MAIN_HAND}, MAINHAND_FIRST = new InteractionHand[] {InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND};
 
-    public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, Options options) { super(string);
+    public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, Options options) { super(string, true);
         this.gameRenderer = gameRenderer;
         this.options = options;
     }
@@ -78,6 +78,11 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                                 info.cancel();
                                 return;
                             }
+                            // 26.3 also checks the reach: an entity can be picked from further than it can be interacted with
+                            if (!this.player.isWithinEntityInteractionRange(entity, 0.0)) {
+                                info.cancel();
+                                return;
+                            }
 
                             // Use chest if item frame clicked on accident
                             if(!this.player.isShiftKeyDown() && entity instanceof ItemFrame itemFrameEntity) {
@@ -86,17 +91,16 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                                 if(state.getBlock() instanceof AbstractChestBlock) {
                                     BlockHitResult blockHitResult = new BlockHitResult(hitResult.getLocation(), itemFrameEntity.getNearestViewDirection(), pos, false);
                                     actionResult = this.gameMode.useItemOn(this.player, hand, blockHitResult);
-                                    if (actionResult instanceof InteractionResult.Success success && success.swingSource() == InteractionResult.SwingSource.CLIENT) this.player.swing(hand);
+                                    if (actionResult instanceof InteractionResult.Success success && success.swingSource() == InteractionResult.SwingSource.PREDICTED) this.player.swing(hand, itemStack.getInteractAnimation(), false);
                                     info.cancel();
                                     return;
                                 }
                             }
 
-                            actionResult = this.gameMode.interactAt(this.player, entity, entityHitResult, hand);
-                            if (!actionResult.consumesAction()) actionResult = this.gameMode.interact(this.player, entity, hand);
+                            actionResult = this.gameMode.interact(this.player, entity, entityHitResult, hand);
                             if (actionResult instanceof InteractionResult.Success success) {
-                                if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
-                                    this.player.swing(hand);
+                                if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                                    this.player.swing(hand, itemStack.getInteractAnimation(), false);
                                 }
                                 info.cancel();
                                 return;
@@ -107,10 +111,10 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                             int i = itemStack.getCount();
                             actionResult = this.gameMode.useItemOn(this.player, hand, blockHitResult);
                             if (actionResult instanceof InteractionResult.Success success) {
-                                if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
-                                    this.player.swing(hand);
+                                if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                                    this.player.swing(hand, itemStack.getInteractAnimation(), false);
                                     if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {
-                                        this.gameRenderer.itemInHandRenderer.itemUsed(hand);
+                                        this.player.itemUsed(hand);
                                     }
                                 }
                                 info.cancel();
@@ -124,11 +128,11 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                 }
 
                 if (!itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
-                    if (success3.swingSource() == InteractionResult.SwingSource.CLIENT) {
-                        this.player.swing(hand);
+                    if (success3.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                        this.player.swing(hand, itemStack.getInteractAnimation(), false);
                     }
 
-                    this.gameRenderer.itemInHandRenderer.itemUsed(hand);
+                    this.player.itemUsed(hand);
                     info.cancel();
                     return;
                 }

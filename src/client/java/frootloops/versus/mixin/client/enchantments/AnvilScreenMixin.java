@@ -180,8 +180,8 @@ public abstract class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
 
     @Inject(method = "extractBackground", at = @At(value = "TAIL"))
     protected void drawIcons(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo info) {
-        this.toolSlotIcon.render(this.menu, context, delta, this.leftPos, this.topPos);
-        this.repairSlotIcon.render(this.menu, context, delta, this.leftPos, this.topPos);
+        this.toolSlotIcon.extractRenderState(this.menu, context, delta, this.leftPos, this.topPos);
+        this.repairSlotIcon.extractRenderState(this.menu, context, delta, this.leftPos, this.topPos);
     }
 
 }

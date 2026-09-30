@@ -11,6 +11,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -49,7 +51,7 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
     private int ticksAttackKeyPressed = 0;
     private Entity prevTargettedEntity = null;
 
-    public MinecraftClientMixin(String string) { super(string); }
+    public MinecraftClientMixin(String string) { super(string, true); }
 
     @Inject(method = "continueAttack",at = @At("HEAD"), cancellable = true)
     private void holdToAttack(boolean bl, CallbackInfo ci) {
@@ -94,6 +96,9 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
 
     @Inject(method = "startAttack",at = @At("HEAD"), cancellable = true)
     private void doAttackOverhaul(CallbackInfoReturnable<Boolean> cir) {
+        // Spears attack through 26.3's own piercing attack, which this overhaul of the melee attack doesn't know
+        if (this.player.getMainHandItem().has(DataComponents.PIERCING_WEAPON)) return;
+
         long timeStart;
         if(DEBUG_MODE) {
             timeStart = System.nanoTime();
@@ -153,7 +158,11 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             if(System.nanoTime() - timeStart > 1000000) VersusMod.MOD_LOGGER.warn("  *************** WARNING: EXCESSIVELY SLOW FUNCTION  *************** \n");
         }
 
-        if(canAttackEntities || breakingBlock) this.player.swing(InteractionHand.MAIN_HAND);
+        if(canAttackEntities || breakingBlock) {
+            this.player.swing(InteractionHand.MAIN_HAND, this.player.getMainHandItem().getAttackAnimation(), false);
+            // 26.3's swing no longer tells the server by itself: the punch packet does (1.21.10's swing packet)
+            this.player.connection.send(ServerboundPunchPacket.INSTANCE);
+        }
         cir.setReturnValue(breakingBlock);
         cir.cancel();
     }

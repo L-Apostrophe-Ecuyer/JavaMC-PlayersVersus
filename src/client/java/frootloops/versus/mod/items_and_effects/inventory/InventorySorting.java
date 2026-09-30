@@ -12,7 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -93,7 +93,7 @@ public class InventorySorting {
             String remappedSlotsAndItemsStr = "";
             for (int i = 0; i < totalNumSlots; i++) {
                 remappedSlotsStr += (remappedSlots[i] == 0 ? "  -," : (remappedSlots[i] - 9 < 10 ? "  " + (remappedSlots[i] - 9) + "," : " " + (remappedSlots[i] - 9) + ","));
-                remappedSlotsAndItemsStr += (remappedSlots[i] < 9 ? " -," : " " + (inventory.getItem(remappedSlots[i] - 9).getItem().getName().getString() + ","));
+                remappedSlotsAndItemsStr += (remappedSlots[i] < 9 ? " -," : " " + (inventory.getItem(remappedSlots[i] - 9).getHoverName().getString() + ","));
                 if ((i + 1) % 9 == 0) {
                     VersusMod.MOD_LOGGER.warn("     -> [" + (remappedSlotsStr.substring(0, remappedSlotsStr.length() - 1)) + " ]   -->   {" + (remappedSlotsAndItemsStr.substring(0, remappedSlotsAndItemsStr.length() - 1)) + " }");
                     remappedSlotsStr = "";
@@ -106,7 +106,7 @@ public class InventorySorting {
 
             for (int i = 0; i < totalNumSlots; i++) {
                 remappedSlotsStr += inventory.getItem(i).isEmpty() ? "  -," : (i < 10 ? "  " + i + "," : " " + i + ",");
-                remappedSlotsAndItemsStr += (inventory.getItem(i).isEmpty() ? " -," : " " + (inventory.getItem(i).getItem().getName().getString() + ","));
+                remappedSlotsAndItemsStr += (inventory.getItem(i).isEmpty() ? " -," : " " + (inventory.getItem(i).getHoverName().getString() + ","));
                 if ((i + 1) % 9 == 0) {
                     VersusMod.MOD_LOGGER.warn("     -> [" + (remappedSlotsStr.substring(0, remappedSlotsStr.length() - 1)) + " ]   -->   {" + (remappedSlotsAndItemsStr.substring(0, remappedSlotsAndItemsStr.length() - 1)) + " }");
                     remappedSlotsStr = "";
@@ -164,8 +164,8 @@ public class InventorySorting {
                         VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + prevOrigin + " (which got moved to " + slotOrigin + (!inventory.getItem(slotDestination).isEmpty() ? " - displacedSlots[" + slotDestination + "] = " + (slotOrigin) + " + 9)" : ")"));
                     else
                         VersusMod.MOD_LOGGER.warn("            -> Now populating slot " + slotDestination + " with slot " + slotOrigin + (!inventory.getItem(slotDestination).isEmpty() ? " (displacedSlots[" + slotDestination + "] = " + (slotOrigin) + " + 9)" : ""));
-                    VersusMod.MOD_LOGGER.warn("                   Origin: " + slotOrigin + " (" + inventory.getItem(slotOrigin).getItem().getName().getString() + ")");
-                    VersusMod.MOD_LOGGER.warn("                   Dest. : " + slotDestination + " (" + inventory.getItem(slotDestination).getItem().getName().getString() + ")");
+                    VersusMod.MOD_LOGGER.warn("                   Origin: " + slotOrigin + " (" + inventory.getItem(slotOrigin).getHoverName().getString() + ")");
+                    VersusMod.MOD_LOGGER.warn("                   Dest. : " + slotDestination + " (" + inventory.getItem(slotDestination).getHoverName().getString() + ")");
                 }
 
                 if (inventoryToSort == InventoryToSort.CREATIVE_INVENTORY) {
@@ -173,9 +173,9 @@ public class InventorySorting {
                     inventory.setItem(slotOrigin, inventory.getItem(slotDestination).copy());
                     inventory.setItem(slotDestination, stackOrigin);
                 } else if (inventoryToSort == InventoryToSort.CONTAINER_INVENTORY) {
-                    client.gameMode.handleInventoryMouseClick(handler.containerId, slotOrigin, 8, ClickType.SWAP, client.player);
-                    client.gameMode.handleInventoryMouseClick(handler.containerId, slotDestination, 8, ClickType.SWAP, client.player);
-                    client.gameMode.handleInventoryMouseClick(handler.containerId, slotOrigin, 8, ClickType.SWAP, client.player);
+                    client.gameMode.handleContainerInput(handler.containerId, slotOrigin, 8, ContainerInput.SWAP, client.player);
+                    client.gameMode.handleContainerInput(handler.containerId, slotDestination, 8, ContainerInput.SWAP, client.player);
+                    client.gameMode.handleContainerInput(handler.containerId, slotOrigin, 8, ContainerInput.SWAP, client.player);
                 } else if (inventoryToSort == InventoryToSort.INVENTORY_WHITH_SLOTS_ABOVE) {
 
                     // Inversed row: in containers and chests, the hotbar slot indices go AFTER regular inventory slots rather than before.
@@ -184,27 +184,27 @@ public class InventorySorting {
                     int rowStartingIndex = startingSlotIndex + totalNumSlots - 9;
 
                     if (actualSlotDest >= rowStartingIndex && actualSlotOrigin >= rowStartingIndex) {
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, actualSlotDest, (actualSlotOrigin - rowStartingIndex) % 9, ClickType.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, actualSlotDest, (actualSlotOrigin - rowStartingIndex) % 9, ContainerInput.SWAP, client.player);
                     } else if (actualSlotDest >= rowStartingIndex) {
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, actualSlotOrigin, (actualSlotDest - rowStartingIndex) % 9, ClickType.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, actualSlotOrigin, (actualSlotDest - rowStartingIndex) % 9, ContainerInput.SWAP, client.player);
                     } else if (slotOrigin >= rowStartingIndex) {
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, actualSlotDest, (actualSlotOrigin - rowStartingIndex) % 9, ClickType.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, actualSlotDest, (actualSlotOrigin - rowStartingIndex) % 9, ContainerInput.SWAP, client.player);
                     } else {
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, actualSlotOrigin, 8, ClickType.SWAP, client.player);
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, actualSlotDest, 8, ClickType.SWAP, client.player);
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, actualSlotOrigin, 8, ClickType.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, actualSlotOrigin, 8, ContainerInput.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, actualSlotDest, 8, ContainerInput.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, actualSlotOrigin, 8, ContainerInput.SWAP, client.player);
                     }
                 } else if (inventoryToSort == InventoryToSort.SURVIVAL_INVENTORY) {
                     if (slotDestination < 9 && slotOrigin < 9) {
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, slotDestination + totalNumSlots, slotOrigin, ClickType.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, slotDestination + totalNumSlots, slotOrigin, ContainerInput.SWAP, client.player);
                     } else if (slotDestination < 9) {
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, slotOrigin, slotDestination, ClickType.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, slotOrigin, slotDestination, ContainerInput.SWAP, client.player);
                     } else if (slotOrigin < 9) {
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, slotDestination, slotOrigin, ClickType.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, slotDestination, slotOrigin, ContainerInput.SWAP, client.player);
                     } else {
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, slotOrigin, 8, ClickType.SWAP, client.player);
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, slotDestination, 8, ClickType.SWAP, client.player);
-                        client.gameMode.handleInventoryMouseClick(handler.containerId, slotOrigin, 8, ClickType.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, slotOrigin, 8, ContainerInput.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, slotDestination, 8, ContainerInput.SWAP, client.player);
+                        client.gameMode.handleContainerInput(handler.containerId, slotOrigin, 8, ContainerInput.SWAP, client.player);
                     }
                 }
             }

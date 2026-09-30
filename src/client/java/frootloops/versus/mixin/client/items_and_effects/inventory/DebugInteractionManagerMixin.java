@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MultiPlayerGameMode.class)
 public abstract class DebugInteractionManagerMixin {
 
-    @Inject(method = "handleInventoryMouseClick",at = @At("HEAD"), cancellable = false)
-    public void clickSlot(int syncId, int slotId, int button, ClickType actionType, Player player, CallbackInfo info) {
+    @Inject(method = "handleContainerInput",at = @At("HEAD"), cancellable = false)
+    public void clickSlot(int syncId, int slotId, int button, ContainerInput actionType, Player player, CallbackInfo info) {
         VersusMod.MOD_LOGGER.warn("               * Clicked slot " + slotId + " with button " + button + " and action type: " + actionType.name());
     }
 }

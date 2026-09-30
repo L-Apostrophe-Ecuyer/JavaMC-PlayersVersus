@@ -59,7 +59,7 @@ public abstract class DebugHudMixin {
 
                 final List<String> list = new ArrayList();
                 boolean isDebugReduced = this.minecraft.showOnlyReducedInfo();
-                boolean isF3Enabled = this.minecraft.debugEntries.isF3Visible();
+                boolean isF3Enabled = this.minecraft.debugEntries.isOverlayVisible();
 
                 // Show player position if enabled:
                 BlockPos blockPos = minecraft.player.blockPosition();
@@ -101,6 +101,6 @@ public abstract class DebugHudMixin {
     private static String getBiomeName(Holder<Biome> biome) {
         Optional<ResourceKey<Biome>> biomeKey = biome.unwrapKey();
         if(biomeKey.isEmpty()) return "[Unregistered]";
-        return Language.getInstance().getOrDefault(biomeKey.get().location().toLanguageKey("biome"));
+        return Language.getInstance().getOrDefault(biomeKey.get().identifier().toLanguageKey("biome"));
     }
 }
