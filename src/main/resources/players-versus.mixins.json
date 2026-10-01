@@ -29,6 +29,7 @@
     "environment.sleeping.ServerSleepingMixin",
     "environment.blocks.BlockMixin",
     "environment.blocks.CropMixin",
+    "environment.blocks.CreakingHeartBlockEntityMixin",
     "environment.blocks.SugarCaneMixin",
     "environment.blocks.LadderMixin",
     "environment.blocks.LeavesMixin",
@@ -48,6 +49,7 @@
     "items_and_effects.brewing.BrewingStandScreenHandlerMixin",
     "items_and_effects.brewing.BrewingStandBlockEntityAccessor",
     "items_and_effects.brewing.BrewingStandBlockEntityMixin",
+    "items_and_effects.brewing.RecipeMapMixin",
     "items_and_effects.brewing.VanillaStatusEffectsMixin",
 
     "items_and_effects.equipment.ArmorProtectionMixin",

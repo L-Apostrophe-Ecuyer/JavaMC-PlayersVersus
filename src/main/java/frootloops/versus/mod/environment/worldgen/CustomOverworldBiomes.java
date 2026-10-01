@@ -30,6 +30,7 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> FROSTED_CAVE = keyOf("caves/frosted_caves");
     public static final ResourceKey<Biome> REGULAR_CAVE = keyOf("caves/regular_cave");
     public static final ResourceKey<Biome> DEEP_CAVES = keyOf("caves/deep_caves");
+    public static final ResourceKey<Biome> PALE_GROTTO = keyOf("caves/pale_grotto");
 
     public enum PlacedBiomeType {
         SKY, SURFACE, SURFACE_CAVE, CAVE, DEEP_CAVE, GENERIC_CAVE, GENERIC_DEEP_CAVE
@@ -53,6 +54,8 @@ public class CustomOverworldBiomes {
             new PlacedBiome(Biomes.DRIPSTONE_CAVES, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.0f, 0.7f), defaultParameter, Climate.Parameter.span(0.4f, 1.0f), Climate.Parameter.span(-0.8f, 0.0f), Climate.Parameter.span(-0.75f, 0.3f)),
             new PlacedBiome(Biomes.DEEP_DARK, PlacedBiomeType.DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, Climate.Parameter.span(-1.0f, -0.8f), defaultParameter),
 
+            // Shares the humid, temperate climate ranges of Dark Forest, Dark Birch, and Pale Garden surface biomes.
+            new PlacedBiome(PALE_GROTTO, PlacedBiomeType.CAVE, false, Climate.Parameter.span(-0.45f, 0.2f), Climate.Parameter.span(0.275f, 1.0f), defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, Climate.Parameter.span(-0.7f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter)
     };

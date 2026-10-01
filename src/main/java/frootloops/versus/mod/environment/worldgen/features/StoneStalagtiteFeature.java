@@ -1,8 +1,12 @@
 package frootloops.versus.mod.environment.worldgen.features;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,7 +16,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CreakingHeartBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.CreakingHeartState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Column;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -24,11 +31,16 @@ import net.minecraft.world.phys.Vec3;
  * and floor.
  *
  * @param floorToCeilingSearchRange how far up and down to look for the ceiling and floor
+ * @param paleOakLogChance chance for generated stone to be pale oak logs
+ * @param creakingHeartChance chance for adjacent pale oak logs to contain a creaking heart
  */
-public record StoneStalagtiteFeature(int floorToCeilingSearchRange) implements Feature {
+public record StoneStalagtiteFeature(int floorToCeilingSearchRange, float paleOakLogChance, float creakingHeartChance) implements Feature {
 
-    public static final MapCodec<StoneStalagtiteFeature> CODEC = ExtraCodecs.POSITIVE_INT.fieldOf("floorToCeilingSearchRange")
-            .xmap(StoneStalagtiteFeature::new, StoneStalagtiteFeature::floorToCeilingSearchRange);
+    public static final MapCodec<StoneStalagtiteFeature> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            ExtraCodecs.POSITIVE_INT.fieldOf("floorToCeilingSearchRange").forGetter(StoneStalagtiteFeature::floorToCeilingSearchRange),
+            Codec.floatRange(0.0f, 1.0f).optionalFieldOf("paleOakLogChance", 0.0f).forGetter(StoneStalagtiteFeature::paleOakLogChance),
+            Codec.floatRange(0.0f, 1.0f).optionalFieldOf("creakingHeartChance", 0.0f).forGetter(StoneStalagtiteFeature::creakingHeartChance)
+    ).apply(instance, StoneStalagtiteFeature::new));
 
     private static final BlockState STALAGMITE_BLOCKSTATE = Blocks.STONE.defaultBlockState();
 
@@ -59,8 +71,8 @@ public record StoneStalagtiteFeature(int floorToCeilingSearchRange) implements F
         if (height < columnRadiusMin) return false;
         int radius = Mth.randomBetweenInclusive(random, columnRadiusMin, Math.min(height, columnRadiusMax));
 
-        StoneStalagmiteGenerator generatorCeiling = createGenerator(blockPos.atY(bounded.ceiling() - 1), false, random, radius, stalactiteBluntness, heightScale);
-        StoneStalagmiteGenerator generatorFloor = createGenerator(blockPos.atY(bounded.floor() + 1), true, random, radius, stalactiteBluntness, heightScale);
+        StoneStalagmiteGenerator generatorCeiling = createGenerator(blockPos.atY(bounded.ceiling() - 1), false, radius, stalactiteBluntness, heightScale);
+        StoneStalagmiteGenerator generatorFloor = createGenerator(blockPos.atY(bounded.floor() + 1), true, radius, stalactiteBluntness, heightScale);
         WindModifier windModifier = generatorCeiling.generateWind() && generatorFloor.generateWind() ? new WindModifier(blockPos.getY(), random, windSpeed) : WindModifier.create();
         boolean canGenerateCeiling = generatorCeiling.canGenerate(structureWorldAccess, windModifier);
         boolean canGenerateFloor = generatorFloor.canGenerate(structureWorldAccess, windModifier);
@@ -73,8 +85,8 @@ public record StoneStalagtiteFeature(int floorToCeilingSearchRange) implements F
         return true;
     }
 
-    private static StoneStalagmiteGenerator createGenerator(BlockPos pos, boolean isStalagmite, RandomSource random, int scale, float bluntness, float heightScale) {
-        return new StoneStalagmiteGenerator(pos, isStalagmite, scale, bluntness, heightScale);
+    private StoneStalagmiteGenerator createGenerator(BlockPos pos, boolean isStalagmite, int scale, float bluntness, float heightScale) {
+        return new StoneStalagmiteGenerator(pos, isStalagmite, scale, bluntness, heightScale, this.paleOakLogChance, this.creakingHeartChance);
     }
 
     static final class StoneStalagmiteGenerator {
@@ -83,13 +95,18 @@ public record StoneStalagtiteFeature(int floorToCeilingSearchRange) implements F
         private int scale;
         private final double bluntness;
         private final double heightScale;
+        private final float paleOakLogChance;
+        private final float creakingHeartChance;
 
-        StoneStalagmiteGenerator(BlockPos pos, boolean isStalagmite, int scale, double bluntness, double heightScale) {
+        StoneStalagmiteGenerator(BlockPos pos, boolean isStalagmite, int scale, double bluntness, double heightScale,
+                                 float paleOakLogChance, float creakingHeartChance) {
             this.pos = pos;
             this.isStalagmite = isStalagmite;
             this.scale = scale;
             this.bluntness = bluntness;
             this.heightScale = heightScale;
+            this.paleOakLogChance = paleOakLogChance;
+            this.creakingHeartChance = creakingHeartChance;
         }
 
         private int getBaseScale() {
@@ -131,6 +148,7 @@ public record StoneStalagtiteFeature(int floorToCeilingSearchRange) implements F
         }
 
         void generate(WorldGenLevel world, RandomSource random, WindModifier wind) {
+            List<BlockPos> paleOakLogs = this.creakingHeartChance > 0.0f ? new ArrayList<>() : List.of();
             for (int x = -this.scale; x <= this.scale; ++x) {
                 forZ: for (int z = -this.scale; z <= this.scale; ++z) {
                     int scale;
@@ -147,12 +165,30 @@ public record StoneStalagtiteFeature(int floorToCeilingSearchRange) implements F
                         BlockState state = world.getBlockState(blockPos);
                         if (StoneStalagtiteHelper.isAirOrWater(state)) {
                             hasPlacedBlock = true;
-                            world.setBlock(blockPos, STALAGMITE_BLOCKSTATE, Block.UPDATE_CLIENTS);
+                            if (this.paleOakLogChance > 0.0f && random.nextFloat() < this.paleOakLogChance) {
+                                world.setBlock(blockPos, Blocks.PALE_OAK_LOG.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.Y), Block.UPDATE_CLIENTS);
+                                if (this.creakingHeartChance > 0.0f) {
+                                    paleOakLogs.add(blockPos.immutable());
+                                }
+                            } else {
+                                world.setBlock(blockPos, STALAGMITE_BLOCKSTATE, Block.UPDATE_CLIENTS);
+                            }
                         } else if (hasPlacedBlock && StoneStalagtiteHelper.canReplace(state)) {
                             continue forZ;
                         }
                         mutable.move(this.isStalagmite ? Direction.UP : Direction.DOWN);
                     }
+                }
+            }
+            for (BlockPos logPos : paleOakLogs) {
+                if (random.nextFloat() < this.creakingHeartChance
+                        && world.getBlockState(logPos.above()).is(Blocks.PALE_OAK_LOG)
+                        && world.getBlockState(logPos.below()).is(Blocks.PALE_OAK_LOG)) {
+                    BlockState heart = Blocks.CREAKING_HEART.defaultBlockState()
+                            .setValue(CreakingHeartBlock.AXIS, Direction.Axis.Y)
+                            .setValue(CreakingHeartBlock.STATE, CreakingHeartState.DORMANT)
+                            .setValue(CreakingHeartBlock.NATURAL, true);
+                    world.setBlock(logPos, heart, Block.UPDATE_CLIENTS);
                 }
             }
         }

@@ -78,6 +78,48 @@ class PvBiomeLayoutTest {
     }
 
     @Test
+    void paleGrottoFollowsDarkAndPaleForestClimateRanges() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Climate.TargetPoint darkForest = surfacePoint(layout, Biomes.DARK_FOREST);
+        Climate.TargetPoint darkBirch = darkBirchPoint(layout);
+        Climate.TargetPoint paleGarden = surfacePoint(layout, Biomes.PALE_GARDEN);
+        assertEquals(CustomOverworldBiomes.PALE_GROTTO, layout.findValue(withDepth(darkForest, 0.3F)), "dark forest at " + darkForest);
+        assertEquals(CustomOverworldBiomes.PALE_GROTTO, layout.findValue(withDepth(darkBirch, 0.3F)), "dark birch at " + darkBirch);
+        assertEquals(CustomOverworldBiomes.PALE_GROTTO, layout.findValue(withDepth(paleGarden, 0.3F)), "pale garden at " + paleGarden);
+    }
+
+    private static Climate.TargetPoint surfacePoint(Climate.ParameterList<ResourceKey<Biome>> layout, ResourceKey<Biome> biome) {
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != biome || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            Climate.TargetPoint point = point(mid(h.temperature()), mid(h.humidity()), mid(h.continentalness()),
+                    mid(h.erosion()), mid(h.weirdness()));
+            if (layout.findValue(point) == biome) return point;
+        }
+        throw new AssertionError("no surface climate point for " + biome);
+    }
+
+    private static Climate.TargetPoint darkBirchPoint(Climate.ParameterList<ResourceKey<Biome>> layout) {
+        long humidity = Climate.quantizeCoord(0.29F);
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if ((entry.getSecond() != Biomes.BIRCH_FOREST && entry.getSecond() != Biomes.DARK_FOREST)
+                    || !PvBiomeLayout.isPoint(h.depth(), 0.0F)
+                    || humidity < h.humidity().min() || humidity > h.humidity().max()) continue;
+            long temperature = mid(h.temperature());
+            long erosion = Math.max(mid(h.erosion()), Climate.quantizeCoord(-0.4F));
+            Climate.TargetPoint point = point(temperature, humidity, mid(h.continentalness()), erosion, mid(h.weirdness()));
+            if (layout.findValue(point) == CustomOverworldBiomes.DARK_BIRCH_FOREST) return point;
+        }
+        throw new AssertionError("no Dark Birch Forest climate point");
+    }
+
+    private static Climate.TargetPoint withDepth(Climate.TargetPoint point, float depth) {
+        return new Climate.TargetPoint(point.temperature(), point.humidity(), point.continentalness(), point.erosion(),
+                Climate.quantizeCoord(depth), point.weirdness());
+    }
+
+    @Test
     void piecesPartitionEachSurfaceSlice() {
         List<PvBiomeLayout.Entry> layout = PvBiomeLayout.build();
         int surfaceEntries = 0;
@@ -165,8 +207,9 @@ class PvBiomeLayoutTest {
 
     /**
      * How far the new layout moves biomes compared with the old mixin, over random climate points at several depths.
-     * The surface changes by design (Q2, Q4, Q7); caves must not change. Where two entries are exactly as near, the
-     * search tree's layout decides, so a different pick that ties in either layout isn't counted as a change.
+     * The surface changes by design (Q2, Q4, Q7), and Pale Grotto is a new cave addition. Other caves must not change.
+     * Where two entries are exactly as near, the search tree's layout decides, so a different pick that ties in either
+     * layout isn't counted as a change.
      */
     @Test
     void newLayoutStaysCloseToTheOldOne() {
@@ -185,6 +228,7 @@ class PvBiomeLayoutTest {
                         uniform(random), uniform(random), uniform(random), uniform(random), depth, uniform(random));
                 ResourceKey<Biome> before = oldLayout.findValue(point);
                 ResourceKey<Biome> after = newLayout.findValue(point);
+                if (after == CustomOverworldBiomes.PALE_GROTTO) continue;
                 if (before == after) continue;
                 if (nearest(oldList, point).contains(after) || nearest(newList, point).contains(before)) {
                     ties++;
