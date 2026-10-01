@@ -31,6 +31,11 @@ loom {
 	}
 
 	runs {
+		client {
+			// Avoid the JDK 25 tiered-JIT native crash seen during client startup.
+			vmArg "-XX:-TieredCompilation"
+		}
+
 		// Headless worldgen benchmark: starts a dedicated server on a fresh world, generates a square of chunks
 		// stage by stage, writes timings, metrics and map images to run/worldgen-smoke/pvwg/, then stops.
 		// Options: -Ppv.levelType=<world preset> -Ppv.seed=<seed> -Ppv.benchRadius=<chunks> -Ppv.benchCenter=<x,z>
