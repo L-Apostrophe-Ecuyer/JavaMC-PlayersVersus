@@ -8,23 +8,19 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:seagrass",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 2,
-              "add": false
-            }
-          ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:match_tool",
-          "predicate": {
-            "items": "minecraft:shears"
+          "modifier": {
+            "count": 2,
+            "add": false,
+            "type": "minecraft:set_count"
           }
         }
-      ]
+      ],
+      "condition": {
+        "predicate": {
+          "items": "minecraft:shears"
+        },
+        "type": "minecraft:match_tool"
+      }
     },
     {
       "rolls": 1,
@@ -33,23 +29,19 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:seagrass",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 2,
-              "add": false
-            }
-          ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:match_tool",
-          "predicate": {
-            "items": "#minecraft:hoes"
+          "modifier": {
+            "count": 2,
+            "add": false,
+            "type": "minecraft:set_count"
           }
         }
-      ]
+      ],
+      "condition": {
+        "predicate": {
+          "items": "#minecraft:hoes"
+        },
+        "type": "minecraft:match_tool"
+      }
     }
   ]
 }

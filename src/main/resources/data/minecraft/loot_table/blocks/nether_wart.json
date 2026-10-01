@@ -8,50 +8,44 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:nether_wart",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:apply_bonus",
               "enchantment": "minecraft:fortune",
               "formula": "minecraft:uniform_bonus_count",
               "parameters": {
                 "bonusMultiplier": 1
               },
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "minecraft:nether_wart",
-                  "properties": {
-                    "age": "3"
-                  }
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "minecraft:nether_wart",
+                "state": {
+                  "age": "3"
                 }
-              ]
+              },
+              "type": "minecraft:apply_bonus"
             }
           ],
-          "conditions": [
-            {
-              "condition": "minecraft:block_state_property",
-              "block": "minecraft:nether_wart",
-              "properties": {
-                "age": "3"
-              }
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "minecraft:nether_wart",
+            "state": {
+              "age": "3"
             }
-          ]
+          }
         }
       ],
-      "functions": [
-        {
-          "function": "minecraft:explosion_decay"
-        }
-      ]
+      "modifier": {
+        "type": "minecraft:explosion_decay"
+      }
     },
     {
       "rolls": 1,
@@ -60,28 +54,22 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:nether_wart",
-          "conditions": [
-            {
-              "condition": "minecraft:block_state_property",
-              "block": "minecraft:nether_wart",
-              "properties": {
-                "age": "3"
-              }
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "minecraft:nether_wart",
+            "state": {
+              "age": "3"
             }
-          ]
+          }
         }
       ],
-      "functions": [
-        {
-          "function": "minecraft:explosion_decay"
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance",
-          "chance": 0.2
-        }
-      ]
+      "modifier": {
+        "type": "minecraft:explosion_decay"
+      },
+      "condition": {
+        "chance": 0.2,
+        "type": "minecraft:random_chance"
+      }
     }
   ],
   "random_sequence": "minecraft:blocks/nether_wart"

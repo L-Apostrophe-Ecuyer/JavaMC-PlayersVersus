@@ -1,57 +1,5 @@
 {
-  "feature": {
-    "type": "minecraft:random_patch",
-    "config": {
-      "tries": 32,
-      "xz_spread": 7,
-      "y_spread": 3,
-      "feature": {
-        "feature": {
-          "type": "minecraft:simple_block",
-          "config": {
-            "to_place": {
-              "type": "minecraft:weighted_state_provider",
-              "entries": [
-                {
-                  "weight": 8,
-                  "data": {
-                    "Name": "minecraft:short_grass"
-                  }
-                },
-                {
-                  "weight": 6,
-                  "data": {
-                    "Name": "minecraft:fern"
-                  }
-                },
-                {
-                  "weight": 1,
-                  "data": {
-                    "Name": "minecraft:red_mushroom"
-                  }
-                },
-                {
-                  "weight": 24,
-                  "data": {
-                    "Name": "players-versus:clovers"
-                  }
-                }
-              ]
-            }
-          }
-        },
-        "placement": [
-          {
-            "type": "minecraft:block_predicate_filter",
-            "predicate": {
-              "type": "minecraft:matching_blocks",
-              "blocks": "minecraft:air"
-            }
-          }
-        ]
-      }
-    }
-  },
+  "feature": "minecraft:red_mushroom_taiga",
   "placement": [
     {
       "type": "minecraft:count",
@@ -66,6 +14,35 @@
     },
     {
       "type": "minecraft:biome"
+    },
+    {
+      "type": "minecraft:count",
+      "count": 32
+    },
+    {
+      "type": "minecraft:offset",
+      "x": {
+        "type": "minecraft:uniform",
+        "min_inclusive": -7,
+        "max_inclusive": 7
+      },
+      "y": {
+        "type": "minecraft:uniform",
+        "min_inclusive": -3,
+        "max_inclusive": 3
+      },
+      "z": {
+        "type": "minecraft:uniform",
+        "min_inclusive": -7,
+        "max_inclusive": 7
+      }
+    },
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:matching_blocks",
+        "blocks": "minecraft:air"
+      }
     }
   ]
 }

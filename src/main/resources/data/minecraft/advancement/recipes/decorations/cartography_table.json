@@ -16,7 +16,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:cartography_table"
+        "recipes": "minecraft:cartography_table"
       }
     },
     "has_used_map": {

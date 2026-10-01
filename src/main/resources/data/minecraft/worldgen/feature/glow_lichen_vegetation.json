@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:multiface_growth",
+  "block": "minecraft:glow_lichen",
+  "search_range": 1,
+  "chance_of_spreading": 0,
+  "can_place_on_floor": false,
+  "can_place_on_ceiling": true,
+  "can_place_on_wall": false,
+  "can_be_placed_on": "minecraft:stone"
+}

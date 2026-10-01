@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:ore",
+  "size": 9,
+  "discard_chance_on_air_exposure": 0.5,
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:gravel",
+        "predicate_type": "minecraft:block_match"
+      },
+      "state": {
+        "id": "minecraft:diamond_ore"
+      }
+    },
+    {
+      "target": {
+        "tag": "minecraft:stone_ore_replaceables",
+        "predicate_type": "minecraft:tag_match"
+      },
+      "state": {
+        "id": "minecraft:diamond_ore"
+      }
+    },
+    {
+      "target": {
+        "tag": "minecraft:deepslate_ore_replaceables",
+        "predicate_type": "minecraft:tag_match"
+      },
+      "state": {
+        "id": "minecraft:deepslate_diamond_ore"
+      }
+    }
+  ]
+}

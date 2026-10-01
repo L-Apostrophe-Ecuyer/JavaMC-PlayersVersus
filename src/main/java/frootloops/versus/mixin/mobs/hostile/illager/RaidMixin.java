@@ -1,17 +1,17 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
-import net.minecraft.entity.boss.ServerBossBar;
-import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.entity.raid.RaiderEntity;
-import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.village.raid.Raid;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.entity.raid.Raider;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,30 +25,30 @@ import java.util.Optional;
 @Mixin(Raid.class)
 public abstract class RaidMixin {
 
-    @Shadow private final ServerBossBar bar;
-    @Shadow private int wavesSpawned;
-    @Shadow private Optional<BlockPos> preCalculatedRaidersSpawnLocation;
+    @Shadow private final ServerBossEvent raidEvent;
+    @Shadow private int groupsSpawned;
+    @Shadow private Optional<BlockPos> waveSpawnPos;
     private int numPlayerDeaths = 0;
     private boolean isRaidingVillage = false;
     private boolean isRaidingBase = false;
-    private ServerWorld serverWorld = null;
+    private ServerLevel serverWorld = null;
 
-    protected RaidMixin(ServerBossBar bar, Optional<BlockPos> preCalculatedRaidersSpawnLocation) {
-        this.bar = bar;
-        this.preCalculatedRaidersSpawnLocation = preCalculatedRaidersSpawnLocation;
+    protected RaidMixin(ServerBossEvent bar, Optional<BlockPos> preCalculatedRaidersSpawnLocation) {
+        this.raidEvent = bar;
+        this.waveSpawnPos = preCalculatedRaidersSpawnLocation;
     }
 
 
-    @Inject(method = "getMaxWaves", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getNumGroups", at = @At("HEAD"), cancellable = true)
     public void getMaxWaves(Difficulty difficulty, CallbackInfoReturnable<Integer> cir) {
         numPlayerDeaths = 0;
         if(this.serverWorld == null) return;
-        if(this.wavesSpawned > 0) return;
-        if(preCalculatedRaidersSpawnLocation.isEmpty()) return;
+        if(this.groupsSpawned > 0) return;
+        if(waveSpawnPos.isEmpty()) return;
 
-        BlockPos center = preCalculatedRaidersSpawnLocation.get();
-        Box boundingBox = new Box(center.getX() - 48.0, center.getY() - 24.0, center.getZ() - 48.0, center.getX() + 48.0, center.getY() + 24.0, center.getZ() + 48.0);
-        int numVillagers = serverWorld.getEntitiesByClass(VillagerEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY).size();
+        BlockPos center = waveSpawnPos.get();
+        AABB boundingBox = new AABB(center.getX() - 48.0, center.getY() - 24.0, center.getZ() - 48.0, center.getX() + 48.0, center.getY() + 24.0, center.getZ() + 48.0);
+        int numVillagers = serverWorld.getEntitiesOfClass(Villager.class, boundingBox, EntitySelector.LIVING_ENTITY_STILL_ALIVE).size();
         int difficultyBonus = difficulty == Difficulty.EASY ? 1 : difficulty == Difficulty.NORMAL ? 2 : 3;
 
         if(numVillagers == 0) {
@@ -57,22 +57,22 @@ public abstract class RaidMixin {
         }
         else {
             isRaidingVillage = true;
-            wavesSpawned = 1;
+            groupsSpawned = 1;
             cir.setReturnValue(Math.min(7, 2 + difficultyBonus + numVillagers/8));
         }
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;isNearOccupiedPointOfInterest(Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean shouldContinueRaid(ServerWorld world, BlockPos pos) {
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;isVillage(Lnet/minecraft/core/BlockPos;)Z"))
+    private boolean shouldContinueRaid(ServerLevel world, BlockPos pos) {
         if(this.serverWorld == null) this.serverWorld = world;
-        if (this.wavesSpawned == 0) return true;
+        if (this.groupsSpawned == 0) return true;
         boolean hasSomeoneDied = false;
 
-        int numParticipatingPlayers = this.bar.getPlayers().size();
-        if(numParticipatingPlayers == 0 && world.getTime() % 120L == 0) this.numPlayerDeaths++;
-        for (ServerPlayerEntity player : this.bar.getPlayers()) {
+        int numParticipatingPlayers = this.raidEvent.getPlayers().size();
+        if(numParticipatingPlayers == 0 && world.getGameTime() % 120L == 0) this.numPlayerDeaths++;
+        for (ServerPlayer player : this.raidEvent.getPlayers()) {
             if(!player.isCreative() && !player.isSpectator()) {
-                if(player.deathTime == 2 && player.getLastAttacker() instanceof RaiderEntity) {
+                if(player.deathTime == 2 && player.getLastAttacker() instanceof Raider) {
                     this.numPlayerDeaths++;
                     hasSomeoneDied = true;
                 }
@@ -80,19 +80,19 @@ public abstract class RaidMixin {
         }
 
         if(numPlayerDeaths > 5 + numParticipatingPlayers) {
-            if(hasSomeoneDied)  bar.setName(Text.of("Raid - " + (5 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
+            if(hasSomeoneDied)  raidEvent.setName(Component.nullToEmpty("Raid - " + (5 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
             return false;
         }
-        else if(world.getOccupiedPointOfInterestDistance(ChunkSectionPos.from(pos)) <= 2) {
-            if(hasSomeoneDied)  bar.setName(Text.of("Raid - " + (5 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
+        else if(world.sectionsToVillage(SectionPos.of(pos)) <= 2) {
+            if(hasSomeoneDied)  raidEvent.setName(Component.nullToEmpty("Raid - " + (5 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
             return true;
         }
-        if(hasSomeoneDied)  bar.setName(Text.of("Raid - " + (3 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
+        if(hasSomeoneDied)  raidEvent.setName(Component.nullToEmpty("Raid - " + (3 + numParticipatingPlayers - numPlayerDeaths) + " attempts remain"));
         return numPlayerDeaths < 3 + numParticipatingPlayers;
     }
 
 
-    @Inject(method = "moveRaidCenter", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "moveRaidCenterToNearbyVillageSection", at = @At("HEAD"), cancellable = true)
     private void moveRaidCenter(CallbackInfo info) {
         if(isRaidingBase || !isRaidingVillage) info.cancel(); // This is so that the game doesn't keep trying to find a village where there isn't one
     }

@@ -41,7 +41,6 @@
           ]
         },
         "requirements": {
-          "condition": "minecraft:location_check",
           "predicate": {
             "block": {
               "blocks": "#minecraft:fire_aspect_lightable",
@@ -52,17 +51,15 @@
             "fluid": {
               "fluids": "minecraft:empty"
             }
-          }
+          },
+          "type": "minecraft:location_check"
         }
       },
       {
         "effect": {
           "type": "minecraft:replace_block",
           "block_state": {
-            "type": "minecraft:simple_state_provider",
-            "state": {
-              "Name": "minecraft:frosted_ice"
-            }
+            "id": "minecraft:frosted_ice"
           },
           "predicate": {
             "type": "minecraft:matching_blocks",

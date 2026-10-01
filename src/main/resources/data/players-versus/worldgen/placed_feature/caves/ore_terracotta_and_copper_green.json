@@ -1,48 +1,11 @@
 {
-  "feature": {
-    "type": "minecraft:ore",
-    "config": {
-      "size": 40,
-      "discard_chance_on_air_exposure": 0,
-      "targets": [
-        {
-          "target": {
-            "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:stone",
-            "probability": 0.3
-          },
-          "state": {
-            "Name": "minecraft:stone"
-          }
-        },
-        {
-          "target": {
-            "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:stone",
-            "probability": 0.03
-          },
-          "state": {
-            "Name": "minecraft:copper_ore"
-          }
-        },
-        {
-          "target": {
-            "predicate_type": "minecraft:tag_match",
-            "tag": "minecraft:base_stone_overworld"
-          },
-          "state": {
-            "Name": "minecraft:green_terracotta"
-          }
-        }
-      ]
-    }
-  },
+  "feature": "players-versus:caves/ore_terracotta_and_copper_green",
   "placement": [
     {
       "type": "minecraft:noise_based_count",
       "noise_to_count_ratio": 12,
-      "noise_factor": 16.0,
-      "noise_offset": 0.0
+      "noise_factor": 16,
+      "noise_offset": 0
     },
     {
       "type": "minecraft:in_square"

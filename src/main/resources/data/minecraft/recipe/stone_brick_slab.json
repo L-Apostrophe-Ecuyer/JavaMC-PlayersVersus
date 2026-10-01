@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "stone",
   "key": {
     "#": "minecraft:stone_bricks"
@@ -9,7 +8,7 @@
     "##"
   ],
   "result": {
-    "count":  4,
+    "count": 4,
     "id": "minecraft:stone_brick_slab"
   }
 }

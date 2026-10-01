@@ -1,5 +1,4 @@
 {
-  "asset_name": "copper",
   "description": {
     "color": "#B4684D",
     "translate": "trim_material.minecraft.copper"
@@ -8,5 +7,6 @@
     "minecraft:copper": "copper_darker",
     "players-versus:copper": "copper_darker",
     "players-versus:copper_exposed": "copper_darker_exposed"
-  }
+  },
+  "palette_id": "copper"
 }

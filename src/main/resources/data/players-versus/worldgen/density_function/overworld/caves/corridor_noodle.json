@@ -1,0 +1,219 @@
+{
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:range_choice",
+    "input": "minecraft:y",
+    "min_inclusive": -3.5,
+    "max_exclusive": 23.5,
+    "when_in_range": {
+      "type": "minecraft:lerp",
+      "alpha": {
+        "type": "minecraft:clamp",
+        "input": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:sub",
+            "left": 0.4,
+            "right": {
+              "type": "minecraft:interpolated",
+              "cell_size_xz": 4,
+              "cell_size_y": 8,
+              "input": {
+                "type": "minecraft:range_choice",
+                "input": "minecraft:y",
+                "min_inclusive": -9.5,
+                "max_exclusive": 25.5,
+                "when_in_range": "players-versus:overworld/caves/entrances",
+                "when_out_of_range": 1.0
+              }
+            }
+          },
+          "right": 20.0
+        },
+        "min": 0.0,
+        "max": 1.0
+      },
+      "first": {
+        "type": "minecraft:add",
+        "left": {
+          "type": "minecraft:gradient",
+          "axis": "y",
+          "from_coordinate": 96,
+          "from_value": -0.05,
+          "to_coordinate": 56,
+          "to_value": 0.08
+        },
+        "right": {
+          "type": "minecraft:add",
+          "left": {
+            "type": "minecraft:gradient",
+            "axis": "y",
+            "from_coordinate": 56,
+            "from_value": 0.0,
+            "to_coordinate": 40,
+            "to_value": -0.1
+          },
+          "right": {
+            "type": "minecraft:add",
+            "left": {
+              "type": "minecraft:gradient",
+              "axis": "y",
+              "from_coordinate": 32,
+              "from_value": 0.0,
+              "to_coordinate": 20,
+              "to_value": 0.1
+            },
+            "right": {
+              "type": "minecraft:add",
+              "left": {
+                "type": "minecraft:gradient",
+                "axis": "y",
+                "from_coordinate": -8,
+                "from_value": 0.0,
+                "to_coordinate": -32,
+                "to_value": -0.3
+              },
+              "right": {
+                "type": "minecraft:gradient",
+                "axis": "y",
+                "from_coordinate": -52,
+                "from_value": 0.0,
+                "to_coordinate": -64,
+                "to_value": 0.35
+              }
+            }
+          }
+        }
+      },
+      "second": {
+        "type": "minecraft:lerp",
+        "alpha": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:mul",
+            "left": {
+              "type": "minecraft:sub",
+              "left": 0.15,
+              "right": {
+                "type": "minecraft:interpolated",
+                "cell_size_xz": 4,
+                "cell_size_y": 8,
+                "input": {
+                  "type": "minecraft:range_choice",
+                  "input": "minecraft:y",
+                  "min_inclusive": -9.5,
+                  "max_exclusive": 25.5,
+                  "when_in_range": "players-versus:overworld/caves/entrances",
+                  "when_out_of_range": 1.0
+                }
+              }
+            },
+            "right": 6.666666666666667
+          },
+          "min": 0.0,
+          "max": 1.0
+        },
+        "first": 0.0,
+        "second": -0.06
+      }
+    },
+    "when_out_of_range": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:gradient",
+        "axis": "y",
+        "from_coordinate": 96,
+        "from_value": -0.05,
+        "to_coordinate": 56,
+        "to_value": 0.08
+      },
+      "right": {
+        "type": "minecraft:add",
+        "left": {
+          "type": "minecraft:gradient",
+          "axis": "y",
+          "from_coordinate": 56,
+          "from_value": 0.0,
+          "to_coordinate": 40,
+          "to_value": -0.1
+        },
+        "right": {
+          "type": "minecraft:add",
+          "left": {
+            "type": "minecraft:gradient",
+            "axis": "y",
+            "from_coordinate": 32,
+            "from_value": 0.0,
+            "to_coordinate": 20,
+            "to_value": 0.1
+          },
+          "right": {
+            "type": "minecraft:add",
+            "left": {
+              "type": "minecraft:gradient",
+              "axis": "y",
+              "from_coordinate": -8,
+              "from_value": 0.0,
+              "to_coordinate": -32,
+              "to_value": -0.3
+            },
+            "right": {
+              "type": "minecraft:gradient",
+              "axis": "y",
+              "from_coordinate": -52,
+              "from_value": 0.0,
+              "to_coordinate": -64,
+              "to_value": 0.35
+            }
+          }
+        }
+      }
+    }
+  },
+  "right": {
+    "type": "minecraft:range_choice",
+    "input": {
+      "type": "minecraft:interpolated",
+      "cell_size_xz": 4,
+      "cell_size_y": 8,
+      "input": "players-versus:overworld/caves/noodle_toggle"
+    },
+    "min_inclusive": -1000000.0,
+    "max_exclusive": -0.2,
+    "when_in_range": 64.0,
+    "when_out_of_range": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:interpolated",
+        "cell_size_xz": 4,
+        "cell_size_y": 8,
+        "input": "players-versus:overworld/caves/noodle_thickness"
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:max",
+          "left": {
+            "type": "minecraft:abs",
+            "input": {
+              "type": "minecraft:interpolated",
+              "cell_size_xz": 4,
+              "cell_size_y": 8,
+              "input": "players-versus:overworld/caves/noodle_ridge_a"
+            }
+          },
+          "right": {
+            "type": "minecraft:abs",
+            "input": {
+              "type": "minecraft:interpolated",
+              "cell_size_xz": 4,
+              "cell_size_y": 8,
+              "input": "players-versus:overworld/caves/noodle_ridge_b"
+            }
+          }
+        },
+        "right": 1.5
+      }
+    }
+  }
+}

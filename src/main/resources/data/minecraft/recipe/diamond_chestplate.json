@@ -1,9 +1,8 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "diamond_armor",
-  "category": "equipment",
   "key": {
-    "X" : "minecraft:diamond"
+    "X": "minecraft:diamond"
   },
   "pattern": [
     "X X",

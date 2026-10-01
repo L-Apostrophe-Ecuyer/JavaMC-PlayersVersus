@@ -1,0 +1,116 @@
+# API probe for the port to Minecraft 26.x: lists the classes of a Minecraft version's client jar (unobfuscated since
+# 26.1, so these are Mojang's names) and prints the member signatures (javap -p -s: names, types and descriptors, no
+# code) of the classes named in .github/api-probe.txt, so the port can be written against the real API.
+#
+# Push a commit whose message contains [api]. The output is a base64 tar.xz, split between the print jobs' logs.
+
+name: api-probe
+on:
+  push:
+
+jobs:
+  probe:
+    if: contains(github.event.head_commit.message, '[api]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      VERSION: "26.3"
+      FABRIC_API: "0.161.0+26.3"
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: 25
+          distribution: 'microsoft'
+      - name: download the client jar and Fabric API
+        run: |
+          mkdir -p probe/out
+          manifest=$(curl -fsSL https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
+          url=$(echo "$manifest" | python3 -c 'import json, os, sys; m = json.load(sys.stdin); print(next(v["url"] for v in m["versions"] if v["id"] == os.environ["VERSION"]))')
+          curl -fsSL "$url" -o probe/version.json
+          curl -fsSL "$(python3 -c 'import json; print(json.load(open("probe/version.json"))["downloads"]["client"]["url"])')" -o probe/client.jar
+          # The game's libraries (DataFixerUpper, Brigadier, ...), for javap to resolve supertypes.
+          python3 - <<'EOF'
+          import json, os, urllib.request
+          version = json.load(open("probe/version.json"))
+          os.makedirs("probe/libs", exist_ok=True)
+          for library in version["libraries"]:
+              artifact = library.get("downloads", {}).get("artifact")
+              if artifact and not library.get("rules"):
+                  urllib.request.urlretrieve(artifact["url"], "probe/libs/" + artifact["path"].split("/")[-1])
+          EOF
+          curl -fsSL "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FABRIC_API/fabric-api-$FABRIC_API.jar" -o probe/fabric-api.jar
+          ls -la probe
+      - name: list classes and print signatures
+        run: |
+          unzip -Z1 probe/client.jar | grep '\.class$' | sed 's/\.class$//' | sort > probe/out/classes.txt
+          wc -l probe/out/classes.txt
+          # Fabric API's modules are jars inside its jar.
+          mkdir -p probe/fabric && (cd probe/fabric && unzip -q -o ../fabric-api.jar 'META-INF/jars/*' || true)
+          for jar in probe/fabric/META-INF/jars/*.jar; do unzip -Z1 "$jar" | grep '\.class$' | sed "s|\.class$| $(basename "$jar")|"; done | sort > probe/out/fabric-classes.txt
+          wc -l probe/out/fabric-classes.txt
+          cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
+          touch probe/out/javap.txt
+          if [ -f .github/api-probe.txt ]; then
+            # One javap per 200 classes: it prints each class in turn and "Error: class not found" for missing ones.
+            grep -v '^\s*#' .github/api-probe.txt | grep -v '^\s*$' | xargs -n 200 javap -p -s -cp "$cp" >> probe/out/javap.txt 2>&1 || true
+          fi
+          wc -l probe/out/javap.txt
+      # With [api-all]: public and protected signatures of every class of the game and Fabric API, for looking up
+      # the whole API offline.
+      - name: every class's public and protected signatures
+        if: contains(github.event.head_commit.message, '[api-all]')
+        run: |
+          cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
+          sed 's|/|.|g' probe/out/classes.txt | grep -v '\$[0-9]' | xargs -n 300 javap -protected -cp "$cp" > probe/out/all.txt 2>&1 || true
+          cut -d' ' -f1 probe/out/fabric-classes.txt | sed 's|/|.|g' | grep -v '\$[0-9]' | grep '^net\.fabricmc\.fabric\.api\.' \
+            | xargs -n 300 javap -protected -cp "$cp" > probe/out/fabric-api.txt 2>&1 || true
+          wc -l probe/out/all.txt probe/out/fabric-api.txt
+      # With [api-calls]: for every method of the classes in .github/api-calls.txt (the mixin targets), the methods it
+      # calls, the fields it uses and the constants it loads, with counts (api-calls.py), to check the mixins' @At
+      # targets. No code: the order of the instructions and the control flow are left out.
+      - name: what the mixin targets' methods call
+        if: contains(github.event.head_commit.message, '[api-calls]')
+        run: |
+          cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
+          grep -v '^\s*#' .github/api-calls.txt | grep -v '^\s*$' | xargs -n 100 javap -c -p -cp "$cp" > probe/calls-raw.txt 2>&1 || true
+          python3 .github/api-calls.py probe/calls-raw.txt > probe/out/calls.txt
+          rm probe/calls-raw.txt
+          wc -l probe/out/calls.txt
+      # A job log can only be read back 5,000 lines at a time, so the result goes out in parts of 4,000 lines, one job each.
+      - name: split the result
+        run: |
+          tar -C probe/out -cJf probe/out.tar.xz .
+          sha256sum probe/out.tar.xz
+          mkdir -p probe/parts
+          base64 -w 76 probe/out.tar.xz | split -l 4000 -d -a 2 - probe/parts/part_
+          ls probe/parts
+      - name: keep the parts
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-probe-parts
+          path: probe/parts/
+
+  print:
+    needs: probe
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        part: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - name: get the parts
+        uses: actions/download-artifact@v4
+        with:
+          name: api-probe-parts
+          path: parts
+      - name: print part ${{ matrix.part }}
+        run: |
+          part=$(printf '%02d' ${{ matrix.part }})
+          if [ -f parts/part_$part ]; then
+            echo "parts: $(ls parts | wc -l)"
+            echo "-----BEGIN PROBE PART ${{ matrix.part }}-----"
+            cat parts/part_$part
+            echo "-----END PROBE PART ${{ matrix.part }}-----"
+          fi

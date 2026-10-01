@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "nether",
   "key": {
     "#": "minecraft:nether_bricks"

@@ -1,8 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "building",
   "ingredients": [
-   "#minecraft:terracotta"
+    "#minecraft:terracotta"
   ],
   "result": {
     "id": "minecraft:brick",

@@ -3,42 +3,12 @@
   "downfall": 0.3,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 3885411,
-    "fog_color": 2304825,
-    "water_color": 3629753,
-    "water_fog_color": 329011,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2
-    },
-    "music": [
-      {
-        "data": {
-          "max_delay": 24000,
-          "min_delay": 12000,
-          "replace_current_music": false,
-          "sound": "minecraft:music.overworld.deep_dark"
-        },
-        "weight": 1
-      }
-    ]
+    "water_color": "#3762b9"
   },
-  "spawners": {
-    "ambient": [],
-    "axolotls": [],
-    "creature": [],
-    "misc": [],
-    "monster": [],
-    "underground_water_creature": [],
-    "water_ambient": [],
-    "water_creature": []
-  },
-  "spawn_costs": {},
   "carvers": [
     "minecraft:cave",
-    "players-versus:deep_dark_canyon"
+    "minecraft:cave_extra_underground",
+    "minecraft:canyon"
   ],
   "features": [
     [],
@@ -92,5 +62,42 @@
     [
       "minecraft:freeze_top_layer"
     ]
-  ]
+  ],
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        },
+        "spawn_costs": {}
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/sky_color": "#3b4963",
+    "minecraft:visual/fog_color": "#232b39",
+    "minecraft:visual/water_fog_color": "#050533",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2
+      }
+    },
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "replace_current_music": false,
+        "sound": "minecraft:music.overworld.deep_dark"
+      }
+    }
+  }
 }

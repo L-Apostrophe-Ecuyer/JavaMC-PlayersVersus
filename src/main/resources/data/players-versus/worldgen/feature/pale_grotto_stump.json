@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:block_column",
+  "direction": "up",
+  "allowed_placement": {
+    "type": "minecraft:replaceable"
+  },
+  "prioritize_tip": false,
+  "layers": [
+    {
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": 1,
+        "max_inclusive": 3
+      },
+      "provider": {
+        "id": "minecraft:pale_oak_log",
+        "properties": {
+          "axis": "y"
+        }
+      }
+    }
+  ]
+}

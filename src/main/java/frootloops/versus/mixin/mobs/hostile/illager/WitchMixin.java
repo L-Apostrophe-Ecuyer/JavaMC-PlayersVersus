@@ -1,39 +1,39 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
 import frootloops.versus.mod.mobs.hostile.overworld.FleeAttackerAndHealGoal;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.mob.WitchEntity;
-import net.minecraft.entity.raid.RaiderEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Witch;
+import net.minecraft.world.entity.raid.Raider;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LightLayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WitchEntity.class)
-public abstract class WitchMixin extends RaiderEntity {
+@Mixin(Witch.class)
+public abstract class WitchMixin extends Raider {
 
-    protected WitchMixin(EntityType<? extends RaiderEntity> entityType, World world) {
+    protected WitchMixin(EntityType<? extends Raider> entityType, Level world) {
         super(entityType, world);
     }
 
-    @Inject(method = "initGoals", at = @At("HEAD"))
+    @Inject(method = "registerGoals", at = @At("HEAD"))
     private void witchesCanHeal(CallbackInfo ci) {
-        this.goalSelector.add(1, new FleeAttackerAndHealGoal<>(this, 1));
+        this.goalSelector.addGoal(1, new FleeAttackerAndHealGoal<>(this, 1));
     }
 
     @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason != SpawnReason.NATURAL) return true;
+    public boolean checkSpawnRules(LevelAccessor world, EntitySpawnReason spawnReason) {
+        if(spawnReason != EntitySpawnReason.NATURAL) return true;
 
-        BlockPos pos = this.getBlockPos();
+        BlockPos pos = this.blockPosition();
         int y = pos.getY();
         if (y < 32) return false;
-        if (y < 56 && world.getLightLevel(LightType.SKY, pos) < 4) return false;
+        if (y < 56 && world.getBrightness(LightLayer.SKY, pos) < 4) return false;
         return true;
     }
 }

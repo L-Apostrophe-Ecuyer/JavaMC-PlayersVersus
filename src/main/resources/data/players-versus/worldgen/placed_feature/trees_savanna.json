@@ -1,24 +1,5 @@
 {
-  "feature": {
-    "type": "minecraft:random_selector",
-    "config": {
-      "features": [
-        {
-          "chance": 0.2,
-          "feature": "minecraft:jungle_bush"
-        },
-        {
-          "chance": 0.55,
-          "feature": "minecraft:oak_checked"
-        },
-        {
-          "chance": 0.0125,
-          "feature": "minecraft:fallen_oak_tree"
-        }
-      ],
-      "default": "minecraft:acacia_checked"
-    }
-  },
+  "feature": "players-versus:trees_savanna",
   "placement": [
     {
       "type": "minecraft:noise_based_count",
@@ -42,8 +23,8 @@
       "predicate": {
         "type": "minecraft:would_survive",
         "state": {
-          "Name": "minecraft:acacia_sapling",
-          "Properties": {
+          "id": "minecraft:acacia_sapling",
+          "properties": {
             "stage": "0"
           }
         }

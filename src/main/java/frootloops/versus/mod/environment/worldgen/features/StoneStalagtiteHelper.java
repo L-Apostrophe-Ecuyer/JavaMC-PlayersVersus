@@ -1,13 +1,13 @@
 package frootloops.versus.mod.environment.worldgen.features;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 
 public class StoneStalagtiteHelper {
@@ -24,35 +24,35 @@ public class StoneStalagtiteHelper {
         return i / d * scale;
     }
 
-    public static boolean canGenerateBase(StructureWorldAccess world, BlockPos pos, int height) {
+    public static boolean canGenerateBase(WorldGenLevel world, BlockPos pos, int height) {
         float g = 6.0f / (float)height;
         for (float h = 0.0f; h < (float)Math.PI * 2; h += g) {
             int j;
-            int i = (int)(MathHelper.cos(h) * (float)height);
-            if (!StoneStalagtiteHelper.isAirOrWater(world, pos.add(i, 0, j = (int)(MathHelper.sin(h) * (float)height)))) continue;
+            int i = (int)(Mth.cos(h) * (float)height);
+            if (!StoneStalagtiteHelper.isAirOrWater(world, pos.offset(i, 0, j = (int)(Mth.sin(h) * (float)height)))) continue;
             return false;
         }
         return true;
     }
 
-    public static boolean isAirOrWater(WorldAccess world, BlockPos pos) {
-        return world.testBlockState(pos, StoneStalagtiteHelper::isAirOrWater);
+    public static boolean isAirOrWater(LevelAccessor world, BlockPos pos) {
+        return world.isStateAtPosition(pos, StoneStalagtiteHelper::isAirOrWater);
     }
 
-    public static boolean generateStoneBlock(WorldAccess world, BlockPos pos) {
+    public static boolean generateStoneBlock(LevelAccessor world, BlockPos pos) {
         BlockState blockState = world.getBlockState(pos);
-        if (blockState.isIn(BlockTags.CONVERTABLE_TO_MUD)) {
-            world.setBlockState(pos, Blocks.STONE.getDefaultState(), Block.NOTIFY_LISTENERS);
+        if (blockState.is(BlockTags.CONVERTIBLE_TO_MUD)) {
+            world.setBlock(pos, Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
             return true;
         }
         return false;
     }
 
     public static boolean canReplace(BlockState state) {
-        return state.isIn(BlockTags.BASE_STONE_OVERWORLD) || state.isIn(BlockTags.CONVERTABLE_TO_MUD) || state.isOf(Blocks.SAND);
+        return state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.CONVERTIBLE_TO_MUD) || state.is(Blocks.SAND);
     }
 
     public static boolean isAirOrWater(BlockState state) {
-        return state.isAir() || state.isOf(Blocks.WATER);
+        return state.isAir() || state.is(Blocks.WATER);
     }
 }

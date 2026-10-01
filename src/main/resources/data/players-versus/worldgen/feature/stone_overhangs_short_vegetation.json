@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:block_column",
+  "direction": "down",
+  "allowed_placement": {
+    "type": "minecraft:replaceable"
+  },
+  "prioritize_tip": false,
+  "layers": [
+    {
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": 1,
+        "max_inclusive": 2
+      },
+      "provider": {
+        "id": "minecraft:stone"
+      }
+    }
+  ]
+}

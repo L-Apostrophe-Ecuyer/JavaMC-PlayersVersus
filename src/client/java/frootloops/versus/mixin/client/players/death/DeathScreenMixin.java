@@ -4,12 +4,12 @@ import frootloops.versus.mod.players.death.RespawnNearbyPayload;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.world.World;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,24 +23,24 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 @Mixin(DeathScreen.class)
 public class DeathScreenMixin extends Screen {
-    protected DeathScreenMixin(Text title, boolean isHardcore, List<ButtonWidget> buttons) {
+    protected DeathScreenMixin(Component title, boolean isHardcore, List<Button> buttons) {
         super(title);
-        this.isHardcore = isHardcore;
-        this.buttons = buttons;
+        this.hardcore = isHardcore;
+        this.exitButtons = buttons;
     }
 
-    @Shadow private final boolean isHardcore;
-    @Shadow private final List<ButtonWidget> buttons;
+    @Shadow private final boolean hardcore;
+    @Shadow private final List<Button> exitButtons;
 
     @ModifyConstant(method = "init", constant = @Constant(intValue = 72))
     private int lowerRespawnButton(int height) {
-        if(!client.player.getEntityWorld().getRegistryKey().equals(World.OVERWORLD)) return 72;
+        if(!minecraft.player.level().dimension().equals(Level.OVERWORLD)) return 72;
         else return 84;
     }
 
     @ModifyConstant(method = "init", constant = @Constant(intValue = 96))
     private int lowerTitleButton(int height) {
-        if(!client.player.getEntityWorld().getRegistryKey().equals(World.OVERWORLD)) return 96;
+        if(!minecraft.player.level().dimension().equals(Level.OVERWORLD)) return 96;
         else return 108;
     }
 
@@ -56,14 +56,14 @@ public class DeathScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"), cancellable = false)
     public void addRespawnNearbyButton(CallbackInfo info) {
-        if(client.player.getEntityWorld().getRegistryKey().equals(World.OVERWORLD)) {
-            MutableText text = this.isHardcore ? Text.translatable("players-versus.deathScreen.spectateNearby") : Text.translatable("players-versus.deathScreen.respawnNearby");
-            this.buttons.add(this.addDrawableChild(ButtonWidget.builder(text, button -> {
-                this.client.player.requestRespawn();
-                ClientPlayNetworking.send(new RespawnNearbyPayload(this.client.player.getUuid()));
+        if(minecraft.player.level().dimension().equals(Level.OVERWORLD)) {
+            MutableComponent text = this.hardcore ? Component.translatable("players-versus.deathScreen.spectateNearby") : Component.translatable("players-versus.deathScreen.respawnNearby");
+            this.exitButtons.add(this.addRenderableWidget(Button.builder(text, button -> {
+                this.minecraft.player.respawn();
+                ClientPlayNetworking.send(new RespawnNearbyPayload(this.minecraft.player.getUUID()));
                 button.active = false;
-            }).dimensions(this.width / 2 - 100, this.height / 4 + 60, 200, 20).build()));
-            this.buttons.get(this.buttons.size() - 1).active = false;
+            }).bounds(this.width / 2 - 100, this.height / 4 + 60, 200, 20).build()));
+            this.exitButtons.get(this.exitButtons.size() - 1).active = false;
         }
     }
 }

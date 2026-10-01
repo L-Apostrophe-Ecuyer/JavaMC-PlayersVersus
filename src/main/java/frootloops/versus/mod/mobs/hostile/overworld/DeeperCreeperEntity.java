@@ -1,97 +1,98 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.AreaEffectCloudEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LightningEntity;
-import net.minecraft.entity.ai.goal.LookAroundGoal;
-import net.minecraft.entity.ai.goal.LookAtEntityGoal;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.*;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.AreaEffectCloud;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 
-public class DeeperCreeperEntity extends CreeperEntity {
+public class DeeperCreeperEntity extends Creeper {
     //private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     //private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private int lastFuseTime, currentFuseTime, fuseTime = 29, explosionRadius = 4;
-    public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.of(Identifier.of("ambient.cave"), 32);
+    public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.createFixedRangeEvent(Identifier.parse("ambient.cave"), 32);
 
-    public DeeperCreeperEntity(EntityType<? extends CreeperEntity> entityType, World world) {
+    public DeeperCreeperEntity(EntityType<? extends Creeper> entityType, Level world) {
         super(entityType, world);
-        this.experiencePoints = 29;
+        this.xpReward = 29;
     }
 
-    public static DefaultAttributeContainer.Builder createDeeperCreeperAttributes() {
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.MOVEMENT_SPEED, 0.36).add(EntityAttributes.FOLLOW_RANGE, 40.0).add(EntityAttributes.ARMOR, 10.0).add(EntityAttributes.ARMOR_TOUGHNESS, 3.0);
+    public static AttributeSupplier.Builder createDeeperCreeperAttributes() {
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.36).add(Attributes.FOLLOW_RANGE, 40.0).add(Attributes.ARMOR, 10.0).add(Attributes.ARMOR_TOUGHNESS, 3.0);
     }
 
     @Override
-    protected void initGoals() {
-        this.goalSelector.add(1, new SwimGoal(this));
-        this.goalSelector.add(2, new CreepingAndExplodingGoal(this, 1.0));
-        this.goalSelector.add(5, new WanderAroundFarGoal(this, 0.8));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 8.0f));
-        this.goalSelector.add(6, new LookAroundGoal(this));
-        this.targetSelector.add(1, new CreeperFollowTargetThroughWallsGoal<PlayerEntity>((MobEntity)this, PlayerEntity.class, true));
-    }
-
-
-    @Override
-    public boolean damage(ServerWorld serverWorld, DamageSource source, float amount) {
-        if(source.isOf(DamageTypes.WITHER)) return false;
-        return super.damage(serverWorld, source, amount);
+    protected void registerGoals() {
+        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, new CreepingAndExplodingGoal(this, 1.0));
+        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0f));
+        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
+        this.targetSelector.addGoal(1, new CreeperFollowTargetThroughWallsGoal<Player>((Mob)this, Player.class, true));
     }
 
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
+    public boolean hurtServer(ServerLevel serverWorld, DamageSource source, float amount) {
+        if(source.is(DamageTypes.WITHER)) return false;
+        return super.hurtServer(serverWorld, source, amount);
+    }
+
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
     }
 
     @Override
-    protected void writeCustomData(WriteView view) {
-        super.writeCustomData(view);
+    protected void addAdditionalSaveData(ValueOutput view) {
+        super.addAdditionalSaveData(view);
         view.putShort("Fuse", (short)this.fuseTime);
         view.putByte("ExplosionRadius", (byte)this.explosionRadius);
         view.putBoolean("ignited", this.isIgnited());
     }
 
     @Override
-    protected void readCustomData(ReadView view) {
-        super.readCustomData(view);
-        this.fuseTime = view.getShort("Fuse", (short)30);
-        this.explosionRadius = view.getByte("ExplosionRadius", (byte)3);
-        if (view.getBoolean("ignited", false)) {
+    protected void readAdditionalSaveData(ValueInput view) {
+        super.readAdditionalSaveData(view);
+        this.fuseTime = view.getShortOr("Fuse", (short)30);
+        this.explosionRadius = view.getByteOr("ExplosionRadius", (byte)3);
+        if (view.getBooleanOr("ignited", false)) {
             this.ignite();
         }
     }
 
 
     @Override
-    public void onStruckByLightning(ServerWorld world, LightningEntity lightning) {
-        super.onStruckByLightning(world, lightning);
+    public void thunderHit(ServerLevel world, LightningBolt lightning) {
+        super.thunderHit(world, lightning);
     }
 
     @Override
@@ -100,11 +101,11 @@ public class DeeperCreeperEntity extends CreeperEntity {
             int i;
             this.lastFuseTime = this.currentFuseTime;
             if (this.isIgnited()) {
-                this.setFuseSpeed(1);
+                this.setSwellDir(1);
             }
-            if ((i = this.getFuseSpeed()) > 0 && this.currentFuseTime == 0) {
-                this.playSound(SoundEvents.ENTITY_CREEPER_PRIMED, 1.0f, 0.5f);
-                this.emitGameEvent(GameEvent.PRIME_FUSE);
+            if ((i = this.getSwellDir()) > 0 && this.currentFuseTime == 0) {
+                this.playSound(SoundEvents.CREEPER_PRIMED, 1.0f, 0.5f);
+                this.gameEvent(GameEvent.PRIME_FUSE);
             }
             this.currentFuseTime += i;
             if (this.currentFuseTime < 0) {
@@ -112,49 +113,49 @@ public class DeeperCreeperEntity extends CreeperEntity {
             }
             if (this.currentFuseTime >= this.fuseTime) {
                 this.currentFuseTime = this.fuseTime;
-                this.explode();
+                this.explodeCreeper();
             }
         }
         super.tick();
     }
 
-    private void explode() {
-        if (!this.getEntityWorld().isClient()) {
-            float explosionMultiplier = this.isCharged() ? 2.0f : this.hurtTime > 0 ? 0.5f : 1.0f;
+    private void explodeCreeper() {
+        if (!this.level().isClientSide()) {
+            float explosionMultiplier = this.isPowered() ? 2.0f : this.hurtTime > 0 ? 0.5f : 1.0f;
             this.dead = true;
-            this.getEntityWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * explosionMultiplier, World.ExplosionSourceType.MOB);
-            this.spawnEffectsCloud();
-            this.onRemoval((ServerWorld) this.getEntityWorld(), Entity.RemovalReason.KILLED);
+            this.level().explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * explosionMultiplier, Level.ExplosionInteraction.MOB);
+            this.spawnLingeringCloud();
+            this.triggerOnDeathMobEffects((ServerLevel) this.level(), Entity.RemovalReason.KILLED);
             this.discard();
         }
     }
 
-    private void spawnEffectsCloud() {
-        AreaEffectCloudEntity areaEffectCloudEntity = new AreaEffectCloudEntity(this.getEntityWorld(), this.getX(), this.getY(), this.getZ());
+    private void spawnLingeringCloud() {
+        AreaEffectCloud areaEffectCloudEntity = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
         areaEffectCloudEntity.setRadius(5f);
         areaEffectCloudEntity.setRadiusOnUse(-0.5f);
         areaEffectCloudEntity.setWaitTime(10);
         areaEffectCloudEntity.setDuration(300);
-        areaEffectCloudEntity.setRadiusGrowth(-areaEffectCloudEntity.getRadius() / 300.0f);
-        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 600, 0, false, false));
-        areaEffectCloudEntity.addEffect(new StatusEffectInstance(StatusEffects.WITHER, 600, 0, false, true));
-        this.getEntityWorld().spawnEntity(areaEffectCloudEntity);
+        areaEffectCloudEntity.setRadiusPerTick(-areaEffectCloudEntity.getRadius() / 300.0f);
+        areaEffectCloudEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 600, 0, false, false));
+        areaEffectCloudEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 600, 0, false, true));
+        this.level().addFreshEntity(areaEffectCloudEntity);
     }
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.BLOCK_STONE_STEP, 1.2f, 1.0f + 0.2f * random.nextFloat());
-        this.playSound(SoundEvents.BLOCK_MANGROVE_ROOTS_STEP, 0.2f, 0.8F);
+        this.playSound(SoundEvents.STONE_STEP, 1.2f, 1.0f + 0.2f * random.nextFloat());
+        this.playSound(SoundEvents.MANGROVE_ROOTS_STEP, 0.2f, 0.8F);
     }
 
     @Override
     protected void playHurtSound(DamageSource source) {
-        this.playSound(SoundEvents.ENTITY_CREEPER_HURT, this.getSoundVolume(), this.getSoundPitch());
-        this.playSound(SoundEvents.BLOCK_MANGROVE_ROOTS_BREAK, 0.4f, 0.8F);
+        this.playSound(SoundEvents.CREEPER_HURT, this.getSoundVolume(), this.getVoicePitch());
+        this.playSound(SoundEvents.MANGROVE_ROOTS_BREAK, 0.4f, 0.8F);
     }
 
     @Override
-    public int getMinAmbientSoundDelay() {
+    public int getAmbientSoundInterval() {
         return 500;
     }
 

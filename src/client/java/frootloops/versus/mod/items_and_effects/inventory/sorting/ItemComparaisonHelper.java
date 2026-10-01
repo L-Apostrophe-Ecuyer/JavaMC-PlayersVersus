@@ -1,21 +1,34 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
+import frootloops.versus.mod.items_and_effects.brewing.BrewingSystem;
 import frootloops.versus.mod.items_and_effects.brewing.ConcentrateItem;
-import net.minecraft.block.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.component.type.EquippableComponent;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.*;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SmithingTemplateItem;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CraftingTableBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.VegetationBlock;
+import net.minecraft.world.level.block.WallBlock;
 
 public abstract class ItemComparaisonHelper {
 
@@ -32,7 +45,7 @@ public abstract class ItemComparaisonHelper {
         if(slot == null) return false;
         if(slot.itemType() != slotToCompareTo.itemType() && slot.itemType() == ItemType.TRASH) return false;
         if(slot.itemType() != slotToCompareTo.itemType() && slotToCompareTo.itemType() == ItemType.TRASH) return true;
-        if(ItemStack.areItemsAndComponentsEqual(slot.stack(), slotToCompareTo.stack())) return slot.stack().getCount() > slotToCompareTo.stack().getCount();
+        if(ItemStack.isSameItemSameComponents(slot.stack(), slotToCompareTo.stack())) return slot.stack().getCount() > slotToCompareTo.stack().getCount();
         if(skipNonTools) {
             if(slot.isToolOrWeapon() && !slotToCompareTo.isToolOrWeapon()) return true;
             if(!slot.isToolOrWeapon() && slotToCompareTo.isToolOrWeapon()) return false;
@@ -62,11 +75,11 @@ public abstract class ItemComparaisonHelper {
 
         // Food special comparaison:
         else if(slot.isFood()) {
-            if(slot.stack().hasGlint() && !slotToCompareTo.stack().hasGlint()) return true;
-            if(slot.stack().contains(DataComponentTypes.USE_REMAINDER)  && !slotToCompareTo.stack().contains(DataComponentTypes.USE_REMAINDER) ) return false;
+            if(slot.stack().hasFoil() && !slotToCompareTo.stack().hasFoil()) return true;
+            if(slot.stack().has(DataComponents.USE_REMAINDER)  && !slotToCompareTo.stack().has(DataComponents.USE_REMAINDER) ) return false;
 
-            FoodComponent food = slot.stack().getComponents().getOrDefault(DataComponentTypes.FOOD, null);
-            FoodComponent otherFood = slotToCompareTo.stack().getComponents().getOrDefault(DataComponentTypes.FOOD, null);
+            FoodProperties food = slot.stack().getComponents().getOrDefault(DataComponents.FOOD, null);
+            FoodProperties otherFood = slotToCompareTo.stack().getComponents().getOrDefault(DataComponents.FOOD, null);
             boolean isNewerFoodBetter = (food.nutrition() + 3F * food.saturation()) >= (otherFood.nutrition() + 3F * otherFood.saturation());
             if(isNewerFoodBetter) return true;
             else if(food.saturation() == otherFood.saturation() && food.nutrition() == otherFood.nutrition() && slot.stack().getCount() > slotToCompareTo.stack().getCount()) return true;
@@ -75,12 +88,12 @@ public abstract class ItemComparaisonHelper {
 
         // Potion comparaison:
         else if(slot.itemType() == ItemType.POTIONS) {
-            if(slot.stack().getMaxCount() > slotToCompareTo.stack().getMaxCount()) return true;
-            if(slot.stack().isOf(Items.POTION) && !slotToCompareTo.stack().isOf(Items.POTION)) return true;
+            if(slot.stack().getMaxStackSize() > slotToCompareTo.stack().getMaxStackSize()) return true;
+            if(slot.stack().is(Items.POTION) && !slotToCompareTo.stack().is(Items.POTION)) return true;
 
-            PotionContentsComponent potion = slot.stack().getComponents().getOrDefault(DataComponentTypes.POTION_CONTENTS, null);
+            PotionContents potion = slot.stack().getComponents().getOrDefault(DataComponents.POTION_CONTENTS, null);
             if(potion == null || !potion.hasEffects()) return false;
-            PotionContentsComponent otherPotion = slotToCompareTo.stack().getComponents().getOrDefault(DataComponentTypes.POTION_CONTENTS, null);
+            PotionContents otherPotion = slotToCompareTo.stack().getComponents().getOrDefault(DataComponents.POTION_CONTENTS, null);
             if(otherPotion == null || !potion.hasEffects()) return true;
             return (potion.getColor() <= otherPotion.getColor());
         }
@@ -88,33 +101,33 @@ public abstract class ItemComparaisonHelper {
         // Blocks comparaison:
         else if(slot.isBlock() && slot.stack().getItem() instanceof BlockItem blockItem && slot.stack().getItem() instanceof BlockItem otherBlockItem) {
             if(skipBlocks) return false;
-            if(blockItem.getBlock().getDefaultState().isIn(BlockTags.AXE_MINEABLE) && blockItem.getBlock().getHardness() >= 1.0f) {
-                if(otherBlockItem.getBlock().getDefaultState().isIn(BlockTags.AXE_MINEABLE) && otherBlockItem.getBlock().getHardness() >= 1.0f) {
+            if(blockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && blockItem.getBlock().defaultDestroyTime() >= 1.0f) {
+                if(otherBlockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && otherBlockItem.getBlock().defaultDestroyTime() >= 1.0f) {
                     return slot.toString().compareTo(slotToCompareTo.toString()) < 1;
                 }
                 else return true;
             }
-            if(otherBlockItem.getBlock().getDefaultState().isIn(BlockTags.AXE_MINEABLE)) return false;
-            if(blockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
-                if(otherBlockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) {
+            if(otherBlockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE)) return false;
+            if(blockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE)) {
+                if(otherBlockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE)) {
                     if(ItemSortingMaps.ITEMS_HOE_NETHER_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_HOE_NETHER_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_CORAL.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_CORAL.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
-                    return blockItem.getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color < otherBlockItem.getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color;
+                    return blockItem.getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col < otherBlockItem.getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col;
                 }
                 else return true;
             }
-            if(otherBlockItem.getBlock().getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE)) return false;
-            return blockItem.getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color < otherBlockItem.getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color;
+            if(otherBlockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE)) return false;
+            return blockItem.getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col < otherBlockItem.getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col;
         }
 
         // Clutch items:
         if(slot.itemType() == ItemType.CLUTCH_TOOL) {
-            if(slot.stack().isOf(Items.ENDER_PEARL)) return true;
-            if(slot.stack().isOf(Items.WIND_CHARGE)) return true;
-            if(slot.stack().isOf(Items.WATER_BUCKET)) return true;
+            if(slot.stack().is(Items.ENDER_PEARL)) return true;
+            if(slot.stack().is(Items.WIND_CHARGE)) return true;
+            if(slot.stack().is(Items.WATER_BUCKET)) return true;
         }
 
         if(!compareNames) return false;
@@ -141,89 +154,107 @@ public abstract class ItemComparaisonHelper {
     }
 
     public static ItemType getItemTypeOf(ItemStack stack) {
-        if(stack.isOf(Items.PUFFERFISH) || stack.isOf(Items.ROTTEN_FLESH) || stack.isOf(Items.SPIDER_EYE) || stack.isOf(Items.POISONOUS_POTATO) || stack.isOf(Items.INK_SAC) || stack.isOf(Items.GLOW_INK_SAC)) return ItemType.TRASH;
-        if((stack.getComponents().contains(DataComponentTypes.TOOL) || stack.getMaxDamage() > 0) && !stack.getComponents().contains(DataComponentTypes.EQUIPPABLE)) {
-            if(stack.isIn(ItemTags.SWORDS)) return ItemType.SWORD;
-            else if(stack.isIn(ItemTags.PICKAXES)) return ItemType.PICKAXE;
-            else if(stack.isIn(ItemTags.AXES)) return ItemType.AXE;
-            else if(stack.isIn(ItemTags.SHOVELS)) return ItemType.SHOVEL;
-            else if(stack.isIn(ItemTags.HOES)) return ItemType.HOE;
-            else if(stack.isIn(ItemTags.BOW_ENCHANTABLE) && !stack.isOf(Items.CROSSBOW)) return ItemType.BOW;
-            else if(stack.isIn(ItemTags.CROSSBOW_ENCHANTABLE) || stack.isOf(Items.CROSSBOW)) return ItemType.CROSSBOW;
-            else if(stack.getUseAction() == UseAction.BLOCK || stack.isOf(Items.SHIELD)) return ItemType.SHIELD;
-            else if(stack.isOf(Items.SHEARS)) return ItemType.SHEARS;
-            else if(stack.isOf(Items.FISHING_ROD)) return ItemType.FISHING_ROD;
-            else if(stack.isOf(Items.BRUSH)) return ItemType.MISC_TOOL;
-            else if(getAttributeValueWithStack(stack, EquipmentSlot.MAINHAND) > 1.0 || stack.isIn(ItemTags.WEAPON_ENCHANTABLE))
+        if(stack.is(Items.PUFFERFISH) || stack.is(Items.ROTTEN_FLESH) || stack.is(Items.SPIDER_EYE) || stack.is(Items.POISONOUS_POTATO) || stack.is(Items.INK_SAC) || stack.is(Items.GLOW_INK_SAC)) return ItemType.TRASH;
+        if((stack.getComponents().has(DataComponents.TOOL) || stack.getMaxDamage() > 0) && !stack.getComponents().has(DataComponents.EQUIPPABLE)) {
+            if(stack.is(ItemTags.SWORDS)) return ItemType.SWORD;
+            else if(stack.is(ItemTags.PICKAXES)) return ItemType.PICKAXE;
+            else if(stack.is(ItemTags.AXES)) return ItemType.AXE;
+            else if(stack.is(ItemTags.SHOVELS)) return ItemType.SHOVEL;
+            else if(stack.is(ItemTags.HOES)) return ItemType.HOE;
+            else if(stack.is(ItemTags.BOW_ENCHANTABLE) && !stack.is(Items.CROSSBOW)) return ItemType.BOW;
+            else if(stack.is(ItemTags.CROSSBOW_ENCHANTABLE) || stack.is(Items.CROSSBOW)) return ItemType.CROSSBOW;
+            else if(stack.getUseAnimation() == ItemUseAnimation.BLOCK || stack.is(Items.SHIELD)) return ItemType.SHIELD;
+            else if(stack.is(Items.SHEARS)) return ItemType.SHEARS;
+            else if(stack.is(Items.FISHING_ROD)) return ItemType.FISHING_ROD;
+            else if(stack.is(Items.BRUSH)) return ItemType.MISC_TOOL;
+            else if(getAttributeValueWithStack(stack, EquipmentSlot.MAINHAND) > 1.0 || stack.is(ItemTags.WEAPON_ENCHANTABLE))
                 return ItemType.SPECIAL_WEAPON;
             else return ItemType.MISC_TOOL;
         }
-        else if(stack.getComponents().contains(DataComponentTypes.EQUIPPABLE)) {
-            EquippableComponent equipComponent = stack.getComponents().get(DataComponentTypes.EQUIPPABLE);
-            if(!equipComponent.allows(EntityType.PLAYER)) return ItemType.MISC_TOOL;
-            else if(stack.isOf(Items.ELYTRA)) return ItemType.ELYTRA;
+        else if(stack.getComponents().has(DataComponents.EQUIPPABLE)) {
+            Equippable equipComponent = stack.getComponents().get(DataComponents.EQUIPPABLE);
+            if(!equipComponent.canBeEquippedBy(EntityTypes.PLAYER.builtInRegistryHolder())) return ItemType.MISC_TOOL;
+            else if(stack.is(Items.ELYTRA)) return ItemType.ELYTRA;
             else if(equipComponent.slot() == EquipmentSlot.CHEST) return ItemType.CHESTPLATE;
             else if(equipComponent.slot() == EquipmentSlot.LEGS) return ItemType.LEGGINGS;
             else if(equipComponent.slot() == EquipmentSlot.FEET) return ItemType.BOOTS;
             else if(equipComponent.slot() == EquipmentSlot.HEAD) return ItemType.HELMET;
             else return ItemType.MISC_TOOL;
         }
-        else if(stack.getComponents().contains(DataComponentTypes.DEATH_PROTECTION)) return ItemType.TOTEMS;
-        else if(stack.isIn(ItemTags.ARROWS)) return ItemType.ARROWS;
-        else if(stack.isOf(Items.WATER_BUCKET) || stack.isOf(Items.ENDER_PEARL) || stack.isOf(Items.WIND_CHARGE)) return ItemType.CLUTCH_TOOL;
-        else if(stack.isOf(Items.END_CRYSTAL) || stack.isOf(Items.ENDER_PEARL) || stack.isOf(Items.COBWEB) || stack.isOf(Items.SNOWBALL) || stack.isOf(Items.FIRE_CHARGE)) return ItemType.COMBAT_ITEMS;
-        else if(stack.isOf(Items.SPYGLASS)) return ItemType.SPYGLASS;
+        else if(stack.getComponents().has(DataComponents.DEATH_PROTECTION)) return ItemType.TOTEMS;
+        else if(stack.is(ItemTags.ARROWS)) return ItemType.ARROWS;
+        else if(stack.is(Items.WATER_BUCKET) || stack.is(Items.ENDER_PEARL) || stack.is(Items.WIND_CHARGE)) return ItemType.CLUTCH_TOOL;
+        else if(stack.is(Items.END_CRYSTAL) || stack.is(Items.ENDER_PEARL) || stack.is(Items.COBWEB) || stack.is(Items.SNOWBALL) || stack.is(Items.FIRE_CHARGE)) return ItemType.COMBAT_ITEMS;
+        else if(stack.is(Items.SPYGLASS)) return ItemType.SPYGLASS;
         else if(stack.getItem() instanceof SmithingTemplateItem) return ItemType.SMITHING_TEMPLATE;
-        else if(stack.getComponents().contains(DataComponentTypes.INSTRUMENT)) return ItemType.MISC_TOOL;
-        else if(stack.isOf(Items.MAP) || stack.isOf(Items.FILLED_MAP)) return ItemType.MISC_TOOL;
-        else if(stack.isOf(Items.BUCKET) || stack.getRecipeRemainder() == Items.BUCKET.getDefaultStack()) return ItemType.MISC_TOOL;
-        else if(MinecraftClient.getInstance().world.getBrewingRecipeRegistry().isPotionRecipeIngredient(stack)  || stack.getItem() instanceof ConcentrateItem) return ItemType.BREWING_INGREDIENT;
-        else if(stack.isOf(Items.GOLDEN_APPLE) || stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) return ItemType.GAPPLES;
-        else if(stack.getComponents().contains(DataComponentTypes.FOOD)) return ItemType.FOOD;
-        else if(stack.isIn(ItemTags.SHULKER_BOXES)) return ItemType.SHULKER_BOX;
-        else if(stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS)) return ItemType.BUNDLE;
-        else if(stack.getComponents().contains(DataComponentTypes.CONTAINER)) return ItemType.ITEM_CONTAINER;
-        else if(stack.getComponents().contains(DataComponentTypes.CONTAINER_LOOT)) return ItemType.ITEM_CONTAINER;
-        else if(stack.getComponents().contains(DataComponentTypes.POTION_CONTENTS)) {
-            return stack.get(DataComponentTypes.POTION_CONTENTS).hasEffects() ? ItemType.POTIONS : ItemType.MISC;
+        else if(stack.getComponents().has(DataComponents.INSTRUMENT)) return ItemType.MISC_TOOL;
+        else if(stack.is(Items.MAP) || stack.is(Items.FILLED_MAP)) return ItemType.MISC_TOOL;
+        else if(stack.is(Items.BUCKET) || leavesBucket(stack)) return ItemType.MISC_TOOL;
+        else if(BrewingSystem.isIngredient(stack.getItem())  || stack.getItem() instanceof ConcentrateItem) return ItemType.BREWING_INGREDIENT;
+        else if(stack.is(Items.GOLDEN_APPLE) || stack.is(Items.ENCHANTED_GOLDEN_APPLE)) return ItemType.GAPPLES;
+        else if(stack.getComponents().has(DataComponents.FOOD)) return ItemType.FOOD;
+        else if(stack.is(ItemTags.SHULKER_BOXES)) return ItemType.SHULKER_BOX;
+        else if(stack.getComponents().has(DataComponents.BUNDLE_CONTENTS)) return ItemType.BUNDLE;
+        else if(stack.getComponents().has(DataComponents.CONTAINER)) return ItemType.ITEM_CONTAINER;
+        else if(stack.getComponents().has(DataComponents.CONTAINER_LOOT)) return ItemType.ITEM_CONTAINER;
+        else if(stack.getComponents().has(DataComponents.POTION_CONTENTS)) {
+            return stack.get(DataComponents.POTION_CONTENTS).hasEffects() ? ItemType.POTIONS : ItemType.MISC;
         }
-        else if(stack.getUseAction() != UseAction.NONE || stack.isOf(Items.TORCH) || stack.isOf(Items.SOUL_TORCH) || stack.isOf(Items.LANTERN) || stack.isOf(Items.SOUL_LANTERN)) return ItemType.TORCHES_AND_LANTERNS;
+        else if(stack.getUseAnimation() != ItemUseAnimation.NONE || stack.is(Items.TORCH) || stack.is(Items.SOUL_TORCH) || stack.is(Items.LANTERN) || stack.is(Items.SOUL_LANTERN)) return ItemType.TORCHES_AND_LANTERNS;
         else if(stack.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
-            if(block instanceof CraftingTableBlock || block instanceof BlockWithEntity || block.getDefaultState().isIn(BlockTags.ANVIL)) return ItemType.BLOCK_WORKSTATION;
-            if(block.getHardness() > 32F && block.getBlastResistance() > 128F) return ItemType.BLOCK_OTHER;
-            if(block.getDefaultState().isOpaqueFullCube()) return ItemType.BLOCK_FULL;
-            else if(block.getDefaultState().getLuminance() > 4) return ItemType.MISC_TOOL;
+            if(block instanceof CraftingTableBlock || block instanceof BaseEntityBlock || block.defaultBlockState().is(BlockTags.ANVIL)) return ItemType.BLOCK_WORKSTATION;
+            if(block.defaultDestroyTime() > 32F && block.getExplosionResistance() > 128F) return ItemType.BLOCK_OTHER;
+            if(block.defaultBlockState().isSolidRender()) return ItemType.BLOCK_FULL;
+            else if(block.defaultBlockState().getLightEmission() > 4) return ItemType.MISC_TOOL;
             else if(block instanceof SlabBlock) return ItemType.BLOCK_SLAB;
-            else if(block instanceof StairsBlock) return ItemType.BLOCK_STAIRS;
+            else if(block instanceof StairBlock) return ItemType.BLOCK_STAIRS;
             else if(block instanceof WallBlock) return ItemType.BLOCK_WALL;
             else if(block instanceof FenceBlock) return ItemType.BLOCK_FENCE;
-            else if(block instanceof PlantBlock || (block.getHardness() < 1F && block.getDefaultState().getSoundGroup() == BlockSoundGroup.GRASS)) return ItemType.PLANTS_AND_FLOWERS;
+            else if(block instanceof VegetationBlock || (block.defaultDestroyTime() < 1F && block.defaultBlockState().getSoundType() == SoundType.GRASS)) return ItemType.PLANTS_AND_FLOWERS;
             else return ItemType.BLOCK_OTHER;
         }
-        else if(stack.getOrDefault(DataComponentTypes.BANNER_PATTERNS, null) != null) return ItemType.BANNER_PATTERNS;
-        else if(stack.getItem().getTranslationKey().endsWith("pottery_sherd")) return ItemType.POTTERY;
-        else if(stack.isOf(Items.BRICK)) return ItemType.POTTERY;
-        else if(stack.isOf(Items.FLOWER_POT)) return ItemType.POTTERY;
-        else if(stack.isOf(Items.DISC_FRAGMENT_5)) return ItemType.DISCS;
-        else if(stack.getOrDefault(DataComponentTypes.JUKEBOX_PLAYABLE, null) != null) return ItemType.DISCS;
+        else if(stack.getOrDefault(DataComponents.BANNER_PATTERNS, null) != null) return ItemType.BANNER_PATTERNS;
+        else if(stack.getItem().getDescriptionId().endsWith("pottery_sherd")) return ItemType.POTTERY;
+        else if(stack.is(Items.BRICK)) return ItemType.POTTERY;
+        else if(stack.is(Items.FLOWER_POT)) return ItemType.POTTERY;
+        else if(stack.is(Items.DISC_FRAGMENT_5)) return ItemType.DISCS;
+        else if(stack.getOrDefault(DataComponents.JUKEBOX_PLAYABLE, null) != null) return ItemType.DISCS;
         else return ItemType.MISC;
     }
 
     private static double getAttributeValueWithStack(ItemStack stack, EquipmentSlot slot) {
-        AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-        return attributeModifiersComponent.applyOperations(0.0, slot);
+        // What the item's modifiers add up to in this slot, whichever attributes they belong to (1.21.10's compute, which
+        // 26.3 limits to one attribute): the sorting ranks items by how strong they are, attack damage or armor alike.
+        ItemAttributeModifiers attributeModifiersComponent = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        double total = 0.0;
+        for (ItemAttributeModifiers.Entry entry : attributeModifiersComponent.modifiers()) {
+            if (!entry.slot().test(slot)) continue;
+            double amount = entry.modifier().amount();
+            total += switch (entry.modifier().operation()) {
+                case ADD_VALUE -> amount;
+                case ADD_MULTIPLIED_BASE -> 0.0;
+                case ADD_MULTIPLIED_TOTAL -> amount * total;
+            };
+        }
+        return total;
+    }
+
+    /** Items that leave a bucket behind when crafted with (milk, water and so on), which sort with the buckets. */
+    private static boolean leavesBucket(ItemStack stack) {
+        ItemStackTemplate remainder = stack.getItem().getCraftingRemainder();
+        return remainder != null && remainder.is(Items.BUCKET);
     }
 
     private static double getArmorPreferenceValue(ItemStack stack, EquipmentSlot slot) {
         double attributeValue = getAttributeValueWithStack(stack, slot);
-        double durabilityPoints = (double)(stack.getMaxDamage() * 2 - stack.getDamage())/64.0;
+        double durabilityPoints = (double)(stack.getMaxDamage() * 2 - stack.getDamageValue())/64.0;
         return attributeValue + durabilityPoints;
     }
 
     private static double getToolPreferenceValue(ItemStack stack) {
         double attributeValue = getAttributeValueWithStack(stack, EquipmentSlot.MAINHAND);
-        double durabilityPoints = (double)(stack.getMaxDamage() * 2 - stack.getDamage())/32.0;
+        double durabilityPoints = (double)(stack.getMaxDamage() * 2 - stack.getDamageValue())/32.0;
         return attributeValue + durabilityPoints;
     }
 }

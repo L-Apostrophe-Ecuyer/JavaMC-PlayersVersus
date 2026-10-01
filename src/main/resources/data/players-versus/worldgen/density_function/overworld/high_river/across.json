@@ -1,0 +1,61 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:sub",
+    "left": {
+      "type": "minecraft:abs",
+      "input": {
+        "type": "minecraft:interpolated",
+        "cell_size_xz": 4,
+        "cell_size_y": 8,
+        "input": "players-versus:overworld/high_river"
+      }
+    },
+    "right": {
+      "type": "minecraft:mul",
+      "left": {
+        "type": "minecraft:clamp",
+        "input": {
+          "type": "minecraft:div",
+          "left": {
+            "type": "minecraft:sub",
+            "left": 0.09,
+            "right": {
+              "type": "minecraft:interpolated",
+              "cell_size_xz": 4,
+              "cell_size_y": 8,
+              "input": {
+                "type": "minecraft:slice",
+                "axis": "y",
+                "coordinate": 80,
+                "input": "players-versus:overworld/depth"
+              }
+            }
+          },
+          "right": 0.03
+        },
+        "min": 0.0,
+        "max": 1.0
+      },
+      "right": {
+        "type": "minecraft:add",
+        "left": {
+          "type": "minecraft:gradient",
+          "axis": "y",
+          "from_coordinate": 76,
+          "from_value": 0.0,
+          "to_coordinate": 80,
+          "to_value": 0.03
+        },
+        "right": {
+          "type": "minecraft:gradient",
+          "axis": "y",
+          "from_coordinate": 80,
+          "from_value": 0.0,
+          "to_coordinate": 128,
+          "to_value": 0.28800000000000003
+        }
+      }
+    }
+  }
+}

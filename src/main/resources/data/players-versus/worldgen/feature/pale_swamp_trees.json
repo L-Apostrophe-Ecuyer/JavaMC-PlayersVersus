@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "minecraft:swamp_oak",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.1,
+      "feature": "minecraft:pale_oak_creaking_checked"
+    },
+    {
+      "chance": 0.2,
+      "feature": "minecraft:pale_oak_checked"
+    }
+  ]
+}

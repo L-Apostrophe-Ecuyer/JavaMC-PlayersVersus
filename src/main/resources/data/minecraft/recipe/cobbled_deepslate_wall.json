@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "cobbled",
   "key": {
     "#": "minecraft:cobbled_deepslate"

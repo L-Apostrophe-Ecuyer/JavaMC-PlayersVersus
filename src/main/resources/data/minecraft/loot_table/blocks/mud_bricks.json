@@ -8,11 +8,9 @@
         {
           "type": "minecraft:item",
           "name": "players-versus:brown_clay_bricks",
-          "conditions": [
-            {
-              "condition": "minecraft:survives_explosion"
-            }
-          ]
+          "condition": {
+            "type": "minecraft:survives_explosion"
+          }
         }
       ]
     }

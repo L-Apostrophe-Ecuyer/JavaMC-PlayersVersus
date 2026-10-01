@@ -2,24 +2,23 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.sound.BlockSoundGroup;
-
 import java.util.LinkedList;
 import java.util.Map;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 
 
 
 public class SortedBlockItemList extends SortedItemList {
 
     protected final TagKey<Block> blockTagKey;
-    protected final BlockSoundGroup blockSoundGroup;
+    protected final SoundType blockSoundGroup;
     protected final Map<Item, Integer> blockIndexMap;
 
     private final float minHardness, maxHardness;
@@ -40,11 +39,11 @@ public class SortedBlockItemList extends SortedItemList {
         this(blockTagKey, null, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
-    public SortedBlockItemList(TagKey<Block> blockTagKey, BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap) {
+    public SortedBlockItemList(TagKey<Block> blockTagKey, SoundType blockSoundGroup, Map<Item, Integer> blockIndexMap) {
         this(blockTagKey, blockSoundGroup, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
-    public SortedBlockItemList(BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap) {
+    public SortedBlockItemList(SoundType blockSoundGroup, Map<Item, Integer> blockIndexMap) {
         this(null, blockSoundGroup, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
@@ -52,7 +51,7 @@ public class SortedBlockItemList extends SortedItemList {
         this(blockTagKey, null, null, minHardness, maxHardness, ItemType.BLOCK_FULL);
     }
 
-    public SortedBlockItemList(TagKey<Block> blockTagKey, BlockSoundGroup blockSoundGroup, Map<Item, Integer> blockIndexMap, float minHardness, float maxHardness, ItemType type) {
+    public SortedBlockItemList(TagKey<Block> blockTagKey, SoundType blockSoundGroup, Map<Item, Integer> blockIndexMap, float minHardness, float maxHardness, ItemType type) {
         this.blockTagKey = blockTagKey;
         this.blockSoundGroup = blockSoundGroup;
         this.blockIndexMap = blockIndexMap;
@@ -86,15 +85,15 @@ public class SortedBlockItemList extends SortedItemList {
             Block block = blockItem.getBlock();
 
             // Check if block meets hardness requirements:
-            if(block.getHardness() < minHardness || block.getHardness() > maxHardness) return -1;
+            if(block.defaultDestroyTime() < minHardness || block.defaultDestroyTime() > maxHardness) return -1;
 
             // Check if block is valid for this group:
-            boolean isInBlockTag = (this.blockTagKey != null && block.getDefaultState().isIn(this.blockTagKey));
-            boolean isInSoundGroup = (this.blockSoundGroup != null && block.getDefaultState().getSoundGroup() == this.blockSoundGroup);
+            boolean isInBlockTag = (this.blockTagKey != null && block.defaultBlockState().is(this.blockTagKey));
+            boolean isInSoundGroup = (this.blockSoundGroup != null && block.defaultBlockState().getSoundType() == this.blockSoundGroup);
             if(!isInBlockTag && !isInSoundGroup && indexInMap == -1) return -1;
 
             // Special case: Gravel is both pickaxe mineable and shovel mineable. Privilege should go to shovels:
-            if(block == Blocks.GRAVEL && this.size() == 0 && indexInMap == -1 && this.blockTagKey == BlockTags.PICKAXE_MINEABLE) return -1;
+            if(block == Blocks.GRAVEL && this.size() == 0 && indexInMap == -1 && this.blockTagKey == BlockTags.MINEABLE_WITH_PICKAXE) return -1;
 
             // Insert and return true:
             int indexMapEnd = 0, otherValueInMap;
@@ -109,7 +108,7 @@ public class SortedBlockItemList extends SortedItemList {
 
                 // If the item currently in the list somehow isn't in the block tag, then insert before:
                 Item otherItem = slots.get(i).stack().getItem();
-                if(!(otherItem instanceof BlockItem otherBlockItem) || ((this.blockTagKey == null || !otherBlockItem.getBlock().getDefaultState().isIn(this.blockTagKey)) && otherBlockItem.getBlock().getDefaultState().getSoundGroup() != this.blockSoundGroup)) {
+                if(!(otherItem instanceof BlockItem otherBlockItem) || ((this.blockTagKey == null || !otherBlockItem.getBlock().defaultBlockState().is(this.blockTagKey)) && otherBlockItem.getBlock().defaultBlockState().getSoundType() != this.blockSoundGroup)) {
                     this.addBetween(newSlot, indexMapEnd, i);
                     return i;
                 }
@@ -126,7 +125,7 @@ public class SortedBlockItemList extends SortedItemList {
 
         LinkedList<ItemSlot> slotsToReturn = new LinkedList<>();
         for(int i = 0; i < this.size(); i++) {
-            if(slots.get(i).stack().isOf(Items.GRAVEL)) {
+            if(slots.get(i).stack().is(Items.GRAVEL)) {
                 slotsToReturn.add(this.slots.remove(i));
                 count--;
                 if(count == 0) return slotsToReturn;

@@ -1,8 +1,6 @@
 {
   "type": "minecraft:smelting",
-  "category": "food",
-
-  "ingredient":"minecraft:phantom_membrane",
+  "ingredient": "minecraft:phantom_membrane",
   "result": {
     "id": "players-versus:concentrate_of_slow_fall"
   },

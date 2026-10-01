@@ -2,16 +2,17 @@
 package frootloops.versus.mixin.items_and_effects.brewing;
 
 import frootloops.versus.mod.environment.CustomBlockItems;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.BrewingStandBlockEntity;
-import net.minecraft.block.entity.LockableContainerBlockEntity;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.BrewingRecipeRegistry;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.crafting.RecipePropertySet;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,16 +20,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BrewingStandBlockEntity.class)
 public abstract class BrewingStandBlockEntityMixin
-        extends LockableContainerBlockEntity
-        implements SidedInventory {
+        extends BaseContainerBlockEntity
+        implements WorldlyContainer {
 
     protected BrewingStandBlockEntityMixin(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
         super(blockEntityType, blockPos, blockState);
     }
 
-    @Inject(method = "tick", at = @At(value = "HEAD"))
-    private static void setFuel(World world, BlockPos pos, BlockState state, BrewingStandBlockEntity blockEntity, CallbackInfo info) {
-        ItemStack fuelStack = blockEntity.getStack(4);
+    @Inject(method = "serverTick", at = @At(value = "HEAD"))
+    private static void setFuel(ServerLevel world, BlockPos pos, BlockState state, BrewingStandBlockEntity blockEntity, CallbackInfo info) {
+        ItemStack fuelStack = blockEntity.getItem(4);
         int fuel = ((BrewingStandBlockEntityAccessor)blockEntity).getFuel();
         int brewTime = ((BrewingStandBlockEntityAccessor)blockEntity).getBrewTime();
 
@@ -37,23 +38,23 @@ public abstract class BrewingStandBlockEntityMixin
             fuel--;
         }
 
-        if (fuel <= 0 && fuelStack.isOf(Items.NETHER_WART)) {
+        if (fuel <= 0 && fuelStack.is(Items.NETHER_WART)) {
             ((BrewingStandBlockEntityAccessor)blockEntity).setFuel(21);
-            fuelStack.decrement(1);
-            BrewingStandBlockEntity.markDirty(world, pos, state);
+            fuelStack.shrink(1);
+            BrewingStandBlockEntity.setChanged(world, pos, state);
         }
     }
 
     @Override
-    public boolean isValid(int slot, ItemStack stack) {
+    public boolean canPlaceItem(int slot, ItemStack stack) {
         if (slot == 3) {
-            BrewingRecipeRegistry brewingRecipeRegistry = this.world != null ? this.world.getBrewingRecipeRegistry() : BrewingRecipeRegistry.EMPTY;
-            return brewingRecipeRegistry.isValidIngredient(stack);
+            // Brewing is recipes since 26.3: the reagents are the brewing recipes' property set, as vanilla checks it.
+            return this.level != null && this.level.recipeAccess().propertySet(RecipePropertySet.BREWING_REAGENTS).test(stack);
         }
         if (slot == 4) {
-            return stack.isOf(CustomBlockItems.CORRUPTED_WART) || stack.isOf(CustomBlockItems.WITHERED_WART) || stack.isOf(Items.NETHER_WART);
+            return stack.is(CustomBlockItems.CORRUPTED_WART) || stack.is(CustomBlockItems.WITHERED_WART) || stack.is(Items.NETHER_WART);
         }
-        return (stack.isOf(Items.POTION) || stack.isOf(Items.SPLASH_POTION) || stack.isOf(Items.LINGERING_POTION)) && this.getStack(slot).isEmpty();
+        return (stack.is(Items.POTION) || stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION)) && this.getItem(slot).isEmpty();
     }
 }
 

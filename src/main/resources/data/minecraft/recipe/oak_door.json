@@ -1,12 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "redstone",
   "group": "oak_misc",
   "key": {
     "#": "minecraft:oak_planks"
   },
   "pattern": [
-    "##", "##", "##"
+    "##",
+    "##",
+    "##"
   ],
   "result": {
     "count": 2,

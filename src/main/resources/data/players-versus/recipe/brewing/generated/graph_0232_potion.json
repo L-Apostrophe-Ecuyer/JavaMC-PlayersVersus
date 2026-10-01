@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "minecraft:potion",
+    "potion_contents": {
+      "potions": "minecraft:thick"
+    }
+  },
+  "output": {
+    "components": {
+      "minecraft:potion_contents": {
+        "potion": "players-versus:glowing_long"
+      }
+    },
+    "id": "minecraft:potion"
+  },
+  "reagent": {
+    "item": "players-versus:concentrate_of_glowing"
+  }
+}

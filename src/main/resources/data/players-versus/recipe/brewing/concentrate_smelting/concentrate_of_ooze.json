@@ -1,12 +1,9 @@
 {
-    "type": "minecraft:smelting",
-    "category": "food",
-  
-    "ingredient": "minecraft:slime_ball",
-    "result": {
-      "id": "players-versus:concentrate_of_ooze"
-    },
-    "experience": 5,
-    "cookingtime": 200
+  "type": "minecraft:smelting",
+  "ingredient": "minecraft:slime_ball",
+  "result": {
+    "id": "players-versus:concentrate_of_ooze"
+  },
+  "experience": 5,
+  "cookingtime": 200
 }
-  

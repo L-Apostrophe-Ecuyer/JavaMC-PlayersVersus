@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "redstone",
   "group": "weighted_pressure_plates",
   "key": {
     "#": "minecraft:gold_ingot"
@@ -9,7 +8,7 @@
     "###"
   ],
   "result": {
-    "count":  2,
+    "count": 2,
     "id": "minecraft:light_weighted_pressure_plate"
   }
 }

@@ -36,7 +36,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:crimson_button"
+        "recipes": "minecraft:crimson_button"
       }
     },
     "knows_what_buttons_are": {
@@ -79,9 +79,3 @@
     ]
   }
 }
-
-
-
-
-
-

@@ -1,32 +1,32 @@
 package frootloops.versus.mixin.mobs.hostile.illager;
 
-import net.minecraft.entity.EntityData;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.IllagerEntity;
-import net.minecraft.entity.mob.VindicatorEntity;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
+import net.minecraft.world.entity.monster.illager.Vindicator;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(VindicatorEntity.class)
-public abstract class VindicatorMixin extends IllagerEntity {
-    protected VindicatorMixin(EntityType<? extends IllagerEntity> entityType, World world) {
+@Mixin(Vindicator.class)
+public abstract class VindicatorMixin extends AbstractIllager {
+    protected VindicatorMixin(EntityType<? extends AbstractIllager> entityType, Level world) {
         super(entityType, world);
     }
 
-    @Inject(method = "initialize", at = @At("TAIL"))
-    private void increaseAttributes(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
-        EntityAttributeInstance instanceDmg = this.getAttributes().getCustomInstance(EntityAttributes.ATTACK_DAMAGE);
+    @Inject(method = "finalizeSpawn", at = @At("TAIL"))
+    private void increaseAttributes(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, SpawnGroupData entityData, CallbackInfoReturnable<SpawnGroupData> cir) {
+        AttributeInstance instanceDmg = this.getAttributes().getInstance(Attributes.ATTACK_DAMAGE);
         if (instanceDmg != null) instanceDmg.setBaseValue(3.0);
 
-        EntityAttributeInstance instanceHP = this.getAttributes().getCustomInstance(EntityAttributes.MAX_HEALTH);
+        AttributeInstance instanceHP = this.getAttributes().getInstance(Attributes.MAX_HEALTH);
         if (instanceHP != null) {
             instanceHP.setBaseValue(30.0D);
             this.setHealth(this.getMaxHealth());
@@ -34,7 +34,7 @@ public abstract class VindicatorMixin extends IllagerEntity {
     }
 
     /*
-    @Inject(method = "initGoals", at = @At("HEAD"))
+    @Inject(method = "registerGoals", at = @At("HEAD"))
     private void vindicatorsCanHeal(CallbackInfo ci) {
         this.goalSelector.add(1, new FleeAttackerAndHealGoal<>(this, 1));
     }*/

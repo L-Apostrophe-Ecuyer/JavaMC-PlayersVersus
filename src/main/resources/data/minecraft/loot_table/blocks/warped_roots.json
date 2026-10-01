@@ -10,23 +10,21 @@
           "name": "minecraft:warped_roots"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:match_tool",
-          "predicate": {
-            "items": [
-              "players-versus:copper_hoe",
-              "minecraft:shears",	
-              "minecraft:wooden_hoe",
-              "minecraft:golden_hoe",
-              "minecraft:iron_hoe",
-              "minecraft:stone_hoe",
-              "minecraft:diamond_hoe",
-              "minecraft:netherite_hoe"
-            ]
-          }
-        }
-      ]
+      "condition": {
+        "predicate": {
+          "items": [
+            "players-versus:copper_hoe",
+            "minecraft:shears",
+            "minecraft:wooden_hoe",
+            "minecraft:golden_hoe",
+            "minecraft:iron_hoe",
+            "minecraft:stone_hoe",
+            "minecraft:diamond_hoe",
+            "minecraft:netherite_hoe"
+          ]
+        },
+        "type": "minecraft:match_tool"
+      }
     }
   ]
 }

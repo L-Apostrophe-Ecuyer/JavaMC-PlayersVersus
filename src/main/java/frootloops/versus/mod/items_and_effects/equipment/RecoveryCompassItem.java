@@ -1,31 +1,31 @@
 package frootloops.versus.mod.items_and_effects.equipment;
 
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.EndermanEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rarity;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.world.TeleportTarget;
-import net.minecraft.world.World;
-
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Enderman;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 
 public class RecoveryCompassItem extends Item {
@@ -33,77 +33,77 @@ public class RecoveryCompassItem extends Item {
     private static final double ENDERMAN_AGGRO_RANGE = 8.0;
     private static final int USE_TIME_TICKS = 160;
 
-    public RecoveryCompassItem(Settings settings) {
-        super(settings.maxDamage(USE_TIME_TICKS * 2).rarity(Rarity.RARE));
+    public RecoveryCompassItem(Properties settings) {
+        super(settings.durability(USE_TIME_TICKS * 2).rarity(Rarity.RARE));
     }
 
-    public int getMaxCount() {
+    public int getDefaultMaxStackSize() {
         return 1;
     }
 
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.BOW;
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.BOW;
     }
 
-    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        stack.damage(1, user, EquipmentSlot.MAINHAND);
+    public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        stack.hurtAndBreak(1, user, EquipmentSlot.MAINHAND);
 
         // If attacked while using, cancel and apply cooldown:
-        if(remainingUseTicks < USE_TIME_TICKS - 20 && world.getTime() - user.getLastAttackedTime() < 2 && user instanceof PlayerEntity player) {
-            player.getItemCooldownManager().set(stack, 240);
+        if(remainingUseTicks < USE_TIME_TICKS - 20 && world.getGameTime() - user.getLastHurtByMobTimestamp() < 2 && user instanceof Player player) {
+            player.getCooldowns().addCooldown(stack, 240);
         }
 
         // Otherwise: Add effects
-        else if(remainingUseTicks % 10 == 0 && user instanceof ServerPlayerEntity serverPlayer) {
-            serverPlayer.getEntityWorld().spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, user.getX(), user.getEyeY(), user.getZ(), 16, 0.0, 1.0, 0.0, 0.3);
+        else if(remainingUseTicks % 10 == 0 && user instanceof ServerPlayer serverPlayer) {
+            serverPlayer.level().sendParticles(ParticleTypes.SOUL_FIRE_FLAME, user.getX(), user.getEyeY(), user.getZ(), 16, 0.0, 1.0, 0.0, 0.3);
             if(remainingUseTicks % 40 == 0) {
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 120, 0));
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 120, 3, true, false));
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 120, 0));
-                world.playSound(user, user.getBlockPos(), SoundEvents.ENTITY_PLAYER_BREATH, user.getSoundCategory(), 0.1F, 0.4f);
+                user.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 120, 0));
+                user.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, 3, true, false));
+                user.addEffect(new MobEffectInstance(MobEffects.WITHER, 120, 0));
+                world.playSound(user, user.blockPosition(), SoundEvents.PLAYER_BREATH, user.getSoundSource(), 0.1F, 0.4f);
 
-                Optional<GlobalPos> lastDeathPos = serverPlayer.getLastDeathPos();
-                if(!lastDeathPos.isPresent() || lastDeathPos.get().dimension() != world.getRegistryKey()) {
-                    serverPlayer.getItemCooldownManager().set(stack, 60);
+                Optional<GlobalPos> lastDeathPos = serverPlayer.getLastDeathLocation();
+                if(!lastDeathPos.isPresent() || lastDeathPos.get().dimension() != world.dimension()) {
+                    serverPlayer.getCooldowns().addCooldown(stack, 60);
                 }
             }
         }
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        Optional<GlobalPos> lastDeathPos = user.getLastDeathPos(); // Check if in same dimension as last death location:
-        if(!lastDeathPos.isPresent() || lastDeathPos.get().dimension() != world.getRegistryKey()) return ActionResult.FAIL;
-        user.setCurrentHand(hand);
-        return ActionResult.CONSUME;
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
+        ItemStack itemStack = user.getItemInHand(hand);
+        Optional<GlobalPos> lastDeathPos = user.getLastDeathLocation(); // Check if in same dimension as last death location:
+        if(!lastDeathPos.isPresent() || lastDeathPos.get().dimension() != world.dimension()) return InteractionResult.FAIL;
+        user.startUsingItem(hand);
+        return InteractionResult.CONSUME;
     }
 
-    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        if(user instanceof ServerPlayerEntity serverPlayer) {
+    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
+        if(user instanceof ServerPlayer serverPlayer) {
 
             // Teleport near last death location:
-            Optional<GlobalPos> lastDeathPos = serverPlayer.getLastDeathPos();
-            if(lastDeathPos.isPresent() && lastDeathPos.get().dimension() == world.getRegistryKey()) {
+            Optional<GlobalPos> lastDeathPos = serverPlayer.getLastDeathLocation();
+            if(lastDeathPos.isPresent() && lastDeathPos.get().dimension() == world.dimension()) {
                 GlobalPos deathPos = lastDeathPos.get();
-                ServerWorld serverWorld = world.getServer().getWorld(lastDeathPos.get().dimension());
-                serverPlayer.teleportTo(createTeleportTarget(serverWorld, serverPlayer, deathPos.pos()));
+                ServerLevel serverWorld = world.getServer().getLevel(lastDeathPos.get().dimension());
+                serverPlayer.teleport(createTeleportTarget(serverWorld, serverPlayer, deathPos.pos()));
 
                 // Reset Player's last death location:
-                serverPlayer.setLastDeathPos(Optional.empty());
-                world.playSound(user, user.getBlockPos(), SoundEvents.BLOCK_PORTAL_TRIGGER, user.getSoundCategory(), 0.8f, 1.8f);
-                world.playSound(user, user.getBlockPos(), SoundEvents.ENTITY_ENDERMAN_TELEPORT, user.getSoundCategory(), 1f, 0.8f);
+                serverPlayer.setLastDeathLocation(Optional.empty());
+                world.playSound(user, user.blockPosition(), SoundEvents.PORTAL_TRIGGER, user.getSoundSource(), 0.8f, 1.8f);
+                world.playSound(user, user.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, user.getSoundSource(), 1f, 0.8f);
 
                 // Anger nerby Endermen:
-                Box boundingBox = new Box(user.getX() - ENDERMAN_AGGRO_RANGE, user.getY() - ENDERMAN_AGGRO_RANGE, user.getZ() - ENDERMAN_AGGRO_RANGE, user.getX() + ENDERMAN_AGGRO_RANGE, user.getY() + ENDERMAN_AGGRO_RANGE, user.getZ() + ENDERMAN_AGGRO_RANGE);
-                List<EndermanEntity> nearbyEndermen = serverPlayer.getEntityWorld().getEntitiesByClass(EndermanEntity.class, boundingBox, EntityPredicates.VALID_LIVING_ENTITY);
-                for (EndermanEntity enderman : nearbyEndermen) {
+                AABB boundingBox = new AABB(user.getX() - ENDERMAN_AGGRO_RANGE, user.getY() - ENDERMAN_AGGRO_RANGE, user.getZ() - ENDERMAN_AGGRO_RANGE, user.getX() + ENDERMAN_AGGRO_RANGE, user.getY() + ENDERMAN_AGGRO_RANGE, user.getZ() + ENDERMAN_AGGRO_RANGE);
+                List<Enderman> nearbyEndermen = serverPlayer.level().getEntitiesOfClass(Enderman.class, boundingBox, EntitySelector.LIVING_ENTITY_STILL_ALIVE);
+                for (Enderman enderman : nearbyEndermen) {
                     enderman.setTarget(user);
                 }
                 return new ItemStack(Items.COMPASS, 1);
             }
             else {
-                world.playSound(user, user.getBlockPos(), SoundEvents.ENTITY_ITEM_BREAK.value(), user.getSoundCategory(), 1f, 0.8f);
+                world.playSound(user, user.blockPosition(), SoundEvents.ITEM_BREAK.value(), user.getSoundSource(), 1f, 0.8f);
             }
         }
 
@@ -111,12 +111,12 @@ public class RecoveryCompassItem extends Item {
         return stack;
     }
 
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getUseDuration(ItemStack stack, LivingEntity user) {
         return USE_TIME_TICKS;
     }
 
-    private static TeleportTarget createTeleportTarget(ServerWorld serverWorld, ServerPlayerEntity entity, BlockPos pos) {
-        return new TeleportTarget(serverWorld, entity.getWorldSpawnPos(serverWorld, pos).toBottomCenterPos(), entity.getVelocity(), entity.getYaw(), entity.getPitch(), TeleportTarget.SEND_TRAVEL_THROUGH_PORTAL_PACKET.then(TeleportTarget.ADD_PORTAL_CHUNK_TICKET));
+    private static TeleportTransition createTeleportTarget(ServerLevel serverWorld, ServerPlayer entity, BlockPos pos) {
+        return new TeleportTransition(serverWorld, Vec3.atBottomCenterOf(entity.adjustSpawnLocation(serverWorld, pos)), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET));
     }
 
 }

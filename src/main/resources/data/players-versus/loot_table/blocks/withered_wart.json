@@ -8,50 +8,44 @@
         {
           "type": "minecraft:item",
           "name": "players-versus:concentrate_of_decay",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:apply_bonus",
               "enchantment": "minecraft:fortune",
               "formula": "minecraft:uniform_bonus_count",
               "parameters": {
                 "bonusMultiplier": 1
               },
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "players-versus:corrupted_wart",
-                  "properties": {
-                    "age": "3"
-                  }
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "players-versus:corrupted_wart",
+                "state": {
+                  "age": "3"
                 }
-              ]
+              },
+              "type": "minecraft:apply_bonus"
             }
           ],
-          "conditions": [
-            {
-              "condition": "minecraft:block_state_property",
-              "block": "players-versus:withered_wart",
-              "properties": {
-                "age": "3"
-              }
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "players-versus:withered_wart",
+            "state": {
+              "age": "3"
             }
-          ]
+          }
         }
       ],
-      "functions": [
-        {
-          "function": "minecraft:explosion_decay"
-        }
-      ]
+      "modifier": {
+        "type": "minecraft:explosion_decay"
+      }
     }
   ],
   "random_sequence": "minecraft:blocks/nether_wart"

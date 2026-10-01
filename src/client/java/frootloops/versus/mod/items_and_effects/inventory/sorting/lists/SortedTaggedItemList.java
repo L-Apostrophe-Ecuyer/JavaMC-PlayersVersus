@@ -2,8 +2,8 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import net.minecraft.item.Item;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 
 public class SortedTaggedItemList extends SortedItemList {
 
@@ -16,12 +16,12 @@ public class SortedTaggedItemList extends SortedItemList {
 
     @Override
     public int trySortedInsert(ItemSlot newSlot) {
-        boolean isInitemTag = (this.itemTagKey != null && newSlot.stack().isIn(this.itemTagKey));
+        boolean isInitemTag = (this.itemTagKey != null && newSlot.stack().is(this.itemTagKey));
         if(!isInitemTag) return -1;
 
         // If the item currently in the list somehow isn't in the item tag, then insert before:
         for(int i = 0; i < this.size(); i++) {
-            if(!slots.get(i).stack().isIn(this.itemTagKey)) {
+            if(!slots.get(i).stack().is(this.itemTagKey)) {
                 this.addBetween(newSlot, 0, i);
                 return i;
             }

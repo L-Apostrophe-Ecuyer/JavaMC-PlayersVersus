@@ -1,6 +1,5 @@
 {
   "type": "minecraft:blasting",
-  "category": "misc",
   "group": "gold_ingot",
   "ingredient": "minecraft:raw_gold_block",
   "result": {

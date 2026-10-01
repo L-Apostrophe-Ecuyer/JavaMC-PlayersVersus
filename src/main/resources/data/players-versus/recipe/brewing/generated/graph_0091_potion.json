@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "minecraft:potion",
+    "potion_contents": {
+      "potions": "players-versus:vulnerability"
+    }
+  },
+  "output": {
+    "components": {
+      "minecraft:potion_contents": {
+        "potion": "players-versus:mining_fatigue_strong"
+      }
+    },
+    "id": "minecraft:potion"
+  },
+  "reagent": {
+    "item": "minecraft:glowstone_dust"
+  }
+}

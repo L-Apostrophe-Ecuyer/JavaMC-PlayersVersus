@@ -1,16 +1,14 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "group": "copper_armor",
-    "category": "equipment",
-    "pattern": [
-      "X X",
-      "X X"
-    ],
-    "key": {
-      "X": "minecraft:copper_ingot"
-    },
-    "result": {
-      "id": "players-versus:copper_boots"
-    }
+  "type": "minecraft:crafting_shaped",
+  "group": "copper_armor",
+  "pattern": [
+    "X X",
+    "X X"
+  ],
+  "key": {
+    "X": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "players-versus:copper_boots"
   }
-  
+}

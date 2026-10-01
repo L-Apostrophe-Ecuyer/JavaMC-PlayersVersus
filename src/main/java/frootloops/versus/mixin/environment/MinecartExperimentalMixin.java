@@ -1,29 +1,29 @@
 package frootloops.versus.mixin.environment;
 
-import net.minecraft.entity.vehicle.AbstractMinecartEntity;
-import net.minecraft.entity.vehicle.ExperimentalMinecartController;
-import net.minecraft.entity.vehicle.MinecartController;
-import net.minecraft.resource.featuretoggle.FeatureFlags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.GameRules;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.MinecartBehavior;
+import net.minecraft.world.entity.vehicle.minecart.NewMinecartBehavior;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 
-@Mixin(ExperimentalMinecartController.class)
-public abstract class MinecartExperimentalMixin extends MinecartController {
+@Mixin(NewMinecartBehavior.class)
+public abstract class MinecartExperimentalMixin extends MinecartBehavior {
 
 
-    protected MinecartExperimentalMixin(AbstractMinecartEntity minecart) {
+    protected MinecartExperimentalMixin(AbstractMinecart minecart) {
         super(minecart);
     }
 
     @Overwrite
-    public double getMaxSpeed(ServerWorld world) {
-        if(world.getEnabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
-            double gameruleMaxSpeed = (double)world.getGameRules().getInt(GameRules.MINECART_MAX_SPEED);
-            return (gameruleMaxSpeed == 8.0 ? 64.0 : gameruleMaxSpeed) / (this.minecart.isTouchingWater() ? 40.0 : 20.0);
+    public double getMaxSpeed(ServerLevel world) {
+        if(world.enabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS)) {
+            double gameruleMaxSpeed = (double)world.getGameRules().get(GameRules.MAX_MINECART_SPEED);
+            return (gameruleMaxSpeed == 8.0 ? 64.0 : gameruleMaxSpeed) / (this.minecart.isInWater() ? 40.0 : 20.0);
         }
-        return 64.0 / (this.minecart.isTouchingWater() ? 40.0 : 20.0);
+        return 64.0 / (this.minecart.isInWater() ? 40.0 : 20.0);
     }
 }

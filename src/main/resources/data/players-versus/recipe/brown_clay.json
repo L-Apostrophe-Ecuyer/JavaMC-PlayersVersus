@@ -1,9 +1,8 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "clay",
   "key": {
-    "#" : "players-versus:brown_clay_ball"
+    "#": "players-versus:brown_clay_ball"
   },
   "pattern": [
     "###",

@@ -1,17 +1,22 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
-import net.minecraft.block.*;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
+import frootloops.versus.mod.environment.WorldTime;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.world.level.block.PointedDripstoneBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,8 +27,6 @@ import java.util.Optional;
 
 @Mixin(PointedDripstoneBlock.class)
 public abstract class PointedDripstoneMixin extends Block {
-    @Shadow public static final EnumProperty<Direction> VERTICAL_DIRECTION = Properties.VERTICAL_DIRECTION;
-
     private static final Map<Block,Block> BLOCKS_THAT_DRIP_WATER = new HashMap<>();
     static {
         BLOCKS_THAT_DRIP_WATER.put(Blocks.MUD, CustomBlocks.GRAY_CLAY);
@@ -36,55 +39,56 @@ public abstract class PointedDripstoneMixin extends Block {
         BLOCKS_THAT_DRIP_WATER.put(Blocks.DIRT, Blocks.COARSE_DIRT);
     }
 
-    public PointedDripstoneMixin(Settings settings) {
+    public PointedDripstoneMixin(Properties settings) {
         super(settings);
     }
 
     @Overwrite
-    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if (random.nextBoolean()) return;
-        if (state.get(VERTICAL_DIRECTION) != Direction.DOWN) return;
+        if (state.getValue(PointedDripstoneBlock.TIP_DIRECTION) != Direction.DOWN) return;
         dripTickOverhauled(state, world, pos, random);
     }
 
 
-    private static void dripTickOverhauled(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    private static void dripTickOverhauled(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
 
         Fluid fluid;
-        BlockPos.Mutable mutableBlockPos = pos.mutableCopy();
+        BlockPos.MutableBlockPos mutableBlockPos = pos.mutable();
         BlockState mutableBlockState = null;
-        int maxWorldHeight = world.getDimension().logicalHeight();
+        int maxWorldHeight = world.dimensionType().logicalHeight();
 
         for (int i = 1; i < 11; ++i) {
             mutableBlockPos.move(Direction.UP);
             if(maxWorldHeight >= mutableBlockPos.getY()) return; // No fluid here.
 
             mutableBlockState = world.getBlockState(mutableBlockPos);
-            if(mutableBlockState.isOf(Blocks.DRIPSTONE_BLOCK) || (mutableBlockState.isOf(Blocks.POINTED_DRIPSTONE) && mutableBlockState.get(VERTICAL_DIRECTION) == Direction.UP)) continue;
+            if(mutableBlockState.is(Blocks.DRIPSTONE_BLOCK) || (mutableBlockState.is(Blocks.POINTED_DRIPSTONE) && mutableBlockState.getValue(PointedDripstoneBlock.TIP_DIRECTION) == Direction.UP)) continue;
             break;
         }
 
-        boolean isUltrawarm = world.getDimension().ultrawarm();
-        if(isUltrawarm && mutableBlockState.isOf(Blocks.MAGMA_BLOCK)) {
+        boolean isUltrawarm = WorldTime.ultraWarm(world);
+        if(isUltrawarm && mutableBlockState.is(Blocks.MAGMA_BLOCK)) {
             fluid = Fluids.LAVA;
         }
-        else if(!world.getDimension().ultrawarm() && BLOCKS_THAT_DRIP_WATER.containsKey(mutableBlockState.getBlock())) {
-            BlockState resultBlockState = BLOCKS_THAT_DRIP_WATER.get(mutableBlockState.getBlock()).getStateWithProperties(mutableBlockState);
-            world.setBlockState(mutableBlockPos, resultBlockState);
-            Block.pushEntitiesUpBeforeBlockChange(mutableBlockState, resultBlockState, world, mutableBlockPos);
-            world.emitGameEvent(GameEvent.BLOCK_CHANGE, mutableBlockPos, GameEvent.Emitter.of(resultBlockState));
-            world.syncWorldEvent(WorldEvents.POINTED_DRIPSTONE_DRIPS, pos, 0);
+        else if(!isUltrawarm && BLOCKS_THAT_DRIP_WATER.containsKey(mutableBlockState.getBlock())) {
+            BlockState resultBlockState = BLOCKS_THAT_DRIP_WATER.get(mutableBlockState.getBlock()).withPropertiesOf(mutableBlockState);
+            world.setBlockAndUpdate(mutableBlockPos, resultBlockState);
+            Block.pushEntitiesUp(mutableBlockState, resultBlockState, world, mutableBlockPos);
+            world.gameEvent(GameEvent.BLOCK_CHANGE, mutableBlockPos, GameEvent.Context.of(resultBlockState));
+            world.levelEvent(LevelEvent.DRIPSTONE_DRIP, pos, 0);
             fluid = Fluids.WATER;
         }
         else {
-            fluid = world.getFluidState(mutableBlockPos).getFluid();
+            fluid = world.getFluidState(mutableBlockPos).getType();
             if(fluid == Fluids.FLOWING_LAVA && isUltrawarm) fluid = Fluids.LAVA;
         }
 
 
         // Try to grow the stalagmite:
         if (fluid == Fluids.WATER) {
-            if (random.nextBoolean()) PointedDripstoneBlock.tryGrow(state, world, pos, random);
+            // An instance method of SpeleothemBlock since 26.3, which PointedDripstoneBlock extends.
+            if (random.nextBoolean()) ((PointedDripstoneBlock) state.getBlock()).growStalactiteOrStalagmiteIfPossible(state, world, pos, random);
         }
 
         // Possible skip if lava:
@@ -97,42 +101,42 @@ public abstract class PointedDripstoneMixin extends Block {
         // Check if we can make something down below wet:
         for (int i = 1; i < 11; ++i) {
             mutableBlockPos.move(Direction.DOWN);
-            if(world.getBottomY() <= mutableBlockPos.getY()) return; // No fluid here.
+            if(world.getMinY() <= mutableBlockPos.getY()) return; // No fluid here.
 
             mutableBlockState = world.getBlockState(mutableBlockPos);
             if(mutableBlockState.isAir()) continue;
             if(!mutableBlockState.getFluidState().isEmpty()) break; // Already fluid down below
-            if((mutableBlockState.isOf(Blocks.POINTED_DRIPSTONE) && mutableBlockState.get(VERTICAL_DIRECTION) == Direction.DOWN)) continue;
+            if((mutableBlockState.is(Blocks.POINTED_DRIPSTONE) && mutableBlockState.getValue(PointedDripstoneBlock.TIP_DIRECTION) == Direction.DOWN)) continue;
             break;
         }
 
         Optional<Integer> optionalMoisture;
-        if(mutableBlockState.isOf(Blocks.CAULDRON)) {
+        if(mutableBlockState.is(Blocks.CAULDRON)) {
             if (fluid == Fluids.WATER) {
-                world.setBlockState(mutableBlockPos, Blocks.WATER_CAULDRON.getDefaultState());
-                world.emitGameEvent(null, GameEvent.BLOCK_CHANGE, pos);
-                world.syncWorldEvent(WorldEvents.POINTED_DRIPSTONE_DRIPS_WATER_INTO_CAULDRON, pos, 0);
+                world.setBlockAndUpdate(mutableBlockPos, Blocks.WATER_CAULDRON.defaultBlockState());
+                world.gameEvent(null, GameEvent.BLOCK_CHANGE, pos);
+                world.levelEvent(LevelEvent.SOUND_DRIP_WATER_INTO_CAULDRON, pos, 0);
             }
             else if (fluid == Fluids.LAVA) {
-                world.setBlockState(mutableBlockPos, Blocks.LAVA_CAULDRON.getDefaultState());
-                world.emitGameEvent(null, GameEvent.BLOCK_CHANGE, pos);
-                world.syncWorldEvent(WorldEvents.POINTED_DRIPSTONE_DRIPS_WATER_INTO_CAULDRON, pos, 0);
+                world.setBlockAndUpdate(mutableBlockPos, Blocks.LAVA_CAULDRON.defaultBlockState());
+                world.gameEvent(null, GameEvent.BLOCK_CHANGE, pos);
+                world.levelEvent(LevelEvent.SOUND_DRIP_WATER_INTO_CAULDRON, pos, 0);
             }
         }
-        else if(mutableBlockState.isOf(Blocks.WATER_CAULDRON) && fluid == Fluids.WATER) {
-            int currentLevel = mutableBlockState.get(Properties.LEVEL_3);
+        else if(mutableBlockState.is(Blocks.WATER_CAULDRON) && fluid == Fluids.WATER) {
+            int currentLevel = mutableBlockState.getValue(BlockStateProperties.LEVEL_CAULDRON);
             if (currentLevel < 3) {
-                world.setBlockState(mutableBlockPos, mutableBlockState.with(Properties.LEVEL_3, currentLevel + 1));
-                world.emitGameEvent(null, GameEvent.BLOCK_CHANGE, pos);
-                world.syncWorldEvent(WorldEvents.POINTED_DRIPSTONE_DRIPS_WATER_INTO_CAULDRON, pos, 0);
+                world.setBlockAndUpdate(mutableBlockPos, mutableBlockState.setValue(BlockStateProperties.LEVEL_CAULDRON, currentLevel + 1));
+                world.gameEvent(null, GameEvent.BLOCK_CHANGE, pos);
+                world.levelEvent(LevelEvent.SOUND_DRIP_WATER_INTO_CAULDRON, pos, 0);
             }
         }
-        else if((optionalMoisture = mutableBlockState.getOrEmpty(Properties.MOISTURE)).isPresent()) {
+        else if((optionalMoisture = mutableBlockState.getOptionalValue(BlockStateProperties.MOISTURE)).isPresent()) {
             int currentMoisture = optionalMoisture.get();
             if(currentMoisture < 5) {
-                world.setBlockState(mutableBlockPos, mutableBlockState.with(Properties.MOISTURE, 5));
-                world.emitGameEvent(null, GameEvent.BLOCK_CHANGE, pos);
-                world.syncWorldEvent(WorldEvents.POINTED_DRIPSTONE_DRIPS_WATER_INTO_CAULDRON, pos, 0);
+                world.setBlockAndUpdate(mutableBlockPos, mutableBlockState.setValue(BlockStateProperties.MOISTURE, 5));
+                world.gameEvent(null, GameEvent.BLOCK_CHANGE, pos);
+                world.levelEvent(LevelEvent.SOUND_DRIP_WATER_INTO_CAULDRON, pos, 0);
             }
         }
     }

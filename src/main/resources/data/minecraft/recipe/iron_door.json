@@ -1,15 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "redstone",
   "group": "weighted_pressure_plates",
   "key": {
     "#": "minecraft:iron_ingot"
   },
   "pattern": [
-    "##", "##", "##"
+    "##",
+    "##",
+    "##"
   ],
   "result": {
-    "count":  1,
+    "count": 1,
     "id": "minecraft:iron_door"
   }
 }
