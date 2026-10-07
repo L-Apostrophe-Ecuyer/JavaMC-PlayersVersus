@@ -43,9 +43,10 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * noises are sampled per block.
  *
  * <p>The flooded corridors and the high river are water exactly where the final density opens them: the aquifer reads
- * the same functions the final density takes the minimum with ({@code caves/corridor_noodle}, {@code high_river/valley}
- * and {@code high_river/upper_valley}), over the chunk and {@code BAND_REACH} blocks around it, with one volume sample
- * each ({@link Region}), which is how the terrain pass samples them, so both get the same floats at every block.
+ * the functions the final density takes the minimum with ({@code high_river/valley} and {@code high_river/upper_valley},
+ * and {@code caves/flooded_corridors}, which is {@code caves/corridor_noodle} inside the corridors' zone), over the
+ * chunk and {@code BAND_REACH} blocks around it, with one volume sample each ({@link Region}), which is how the terrain
+ * pass samples them, so both get the same floats at every block.
  *
  * <p>Walls look at a block's neighbours ({@link PvAquiferRules#decide}), up to {@code BAND_REACH} blocks away, so each
  * block's own decision ({@link PvAquiferRules#atPosition}) is kept once computed, for the chunk and that far around it.
@@ -197,8 +198,8 @@ public final class PvAquifer implements Aquifer {
     }
 
     /**
-     * The final density's noodle at a block of the flooded corridors' layers, with the corridors' bias: at most 0 where
-     * the corridor opens the block.
+     * The flooded corridors at a block of their layers: the final density's noodle inside the corridors' zone, at most
+     * 0 where a corridor opens the block; outside the zone no corridor, so the dry noodles there stay dry.
      */
     public double corridor(int x, int y, int z) {
         if (this.corridors == null) {

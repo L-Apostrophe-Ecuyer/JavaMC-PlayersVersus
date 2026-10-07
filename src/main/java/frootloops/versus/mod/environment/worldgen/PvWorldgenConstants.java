@@ -86,8 +86,8 @@ public final class PvWorldgenConstants {
 
     /**
      * Noodle caves come back to the basin layers (above {@link #BASIN_MIN_Y}, below this y) as flooded corridors near
-     * the flooded caves. Elsewhere in these layers the noodle's height bias ({@code caves/corridor_noodle} in the data)
-     * keeps them out, as before.
+     * the flooded caves. Elsewhere in these layers they're the dry noodles ({@link #DRY_NOODLE_BIAS}): the noodle's
+     * height bias ({@code caves/corridor_noodle} in the data) lets fewer through, and the aquifer leaves them dry.
      */
     public static final int CORRIDOR_MAX_Y = 24;
 
@@ -111,6 +111,17 @@ public final class PvWorldgenConstants {
     public static final double CORRIDOR_FLARE_FROM = 0.15;
     public static final double CORRIDOR_FLARE_SCALE = 1.0 / CORRIDOR_FLARE_FROM;
     public static final double CORRIDOR_FLARE_BIAS = -0.06;
+
+    /**
+     * Dry noodles: from {@link #DRY_NOODLE_MIN_Y} to {@link #DRY_NOODLE_MAX_Y}, where the noodle's height bias otherwise
+     * keeps noodles out (0.08 in y -8..20), it's at most this away from the flooded caves, so some noodles run through
+     * those layers and lead down dry from y 32 to y -16. They fade in over {@link #CORRIDOR_ZONE_TAPER} outside the
+     * corridors' zone; inside it the corridors keep their own bias, and the aquifer floods only what opens there
+     * ({@code caves/flooded_corridors}).
+     */
+    public static final double DRY_NOODLE_BIAS = 0.02;
+    public static final int DRY_NOODLE_MIN_Y = -16;
+    public static final int DRY_NOODLE_MAX_Y = 32;
 
     // ------------------------------------------------------------------------------------------------------------
     // The high river (the refactor plan, Section 10, question 7; Section 6.2, 2f): water at y 80, and a thinner upper

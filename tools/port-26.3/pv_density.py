@@ -151,6 +151,7 @@ REF_SLOPED_CHEESE, REF_TERRAIN = pv("overworld/sloped_cheese"), pv("overworld/te
 REF_TOGGLE, REF_THICKNESS = pv("overworld/caves/noodle_toggle"), pv("overworld/caves/noodle_thickness")
 REF_RIDGE_A, REF_RIDGE_B = pv("overworld/caves/noodle_ridge_a"), pv("overworld/caves/noodle_ridge_b")
 REF_CORRIDOR_NOODLE, REF_VALLEY = pv("overworld/caves/corridor_noodle"), pv("overworld/high_river/valley")
+REF_CORRIDOR_ENTRANCES, REF_FLOODED_CORRIDORS = pv("overworld/caves/corridor_entrances"), pv("overworld/caves/flooded_corridors")
 REF_ACROSS = pv("overworld/high_river/across")
 REF_UPPER_VALLEY, REF_UPPER_ACROSS = pv("overworld/high_river/upper_valley"), pv("overworld/high_river/upper_across")
 
@@ -179,25 +180,33 @@ def sloped_cheese():
 
 
 def terrain():
-    """PvTerrain: the terrain at a cell corner, faded to fixed values at the world's bottom and top."""
+    """PvTerrain: the terrain at a cell corner, faded to fixed values at the world's bottom and top. Pillars stand in
+    every cave: below the surface layer in the cheese caves, entrances and spaghetti; in the surface layer (sloped
+    cheese under 1.5625) in the entrances, scaled with them (5 times), and under the min with the sloped cheese, so
+    never above the ground."""
     cheese = add(mul(square(noise(mc("cave_layer"), 1.0, 8.0)), 4.0),
                  add(clamp(add(noise(mc("cave_cheese"), 1.0, 0.6666666666666666), 0.27), -1.0, 1.0),
                      clamp(add(mul(REF_SLOPED_CHEESE, -0.64), 1.5), 0.0, 0.5)))
     with_spaghetti = min_(min_(cheese, REF_ENTRANCES), add(1.0, REF_ROUGHNESS))
     pillars = min_(0.3, max_(-0.02, add(mul(max_(0.0, add(noise(mc("pillar"), 20.0, 0.5), -0.15)), 0.7), -0.2)))
-    underground = max_(with_spaghetti, range_choice(pillars, -1000000.0, 0.03, -1000000.0, pillars))
-    caves = range_choice(REF_SLOPED_CHEESE, -1000000.0, 1.5625, min_(REF_SLOPED_CHEESE, mul(REF_ENTRANCES, 5.0)), underground)
+    standing = range_choice(pillars, -1000000.0, 0.03, -1000000.0, pillars)
+    underground = max_(with_spaghetti, standing)
+    surface_layer = min_(REF_SLOPED_CHEESE, mul(max_(REF_ENTRANCES, standing), 5.0))
+    caves = range_choice(REF_SLOPED_CHEESE, -1000000.0, 1.5625, surface_layer, underground)
     return lerp(gradient(-64, -40, 0.0, 1.0), 0.1171875, lerp(gradient(240, 256, 1.0, 0.0), -0.078125, caves))
 
 
 def entrances():
-    """PvEntrances: cave entrances and spaghetti tunnels, plus the ramen caves in y 0..43."""
+    """PvEntrances: cave entrances and spaghetti tunnels, plus the ramen caves in y 0..43. The height terms (lower is
+    more caves): fewer near the surface, most in y 28..38, few in y -16..18 but the basins' lakes, more again around
+    y -40. A small rise centred on y 24 (0.03, gone by y 18 and 30) thins the caves there, just over the lakes."""
     shape = mul(mul(gradient(-4, 8, 0.0, 1.0), gradient(8, 16, 1.4, 1.0)), gradient(16, 44, 1.2, 0.0))
     carved = mul(shape, add(add(mul(noise(mc("noodle_ridge_a"), 4.0, 2.0), 0.08), -0.2), abs_(noise(mc("noodle"), 3.0, 3.0))))
     ramen = y_band(0, 44, min_(0.0, mul(add(carved, 0.1), 2.0)), 0.0)
+    around_y24 = add(gradient(30, 24, 0.0, 0.03), gradient(24, 18, 0.0, -0.03))
     heights = add(add(gradient(96, 72, 0.15, 0.0), gradient(66, 56, -0.1, 0.025)),
-                  add(gradient(48, 38, 0.0, -0.155), add(gradient(28, 18, 0.0, 0.265),
-                                                          add(gradient(-16, -40, 0.0, -0.2), gradient(-40, -60, 0.0, 0.215)))))
+                  add(gradient(48, 38, 0.0, -0.155), add(add(gradient(28, 18, 0.0, 0.265), around_y24),
+                                                          add(gradient(-16, -40, 0.0, -0.23), gradient(-40, -60, 0.0, 0.245)))))
     base = add(mul(min_(REF_CONTINENTS, 0.1), -0.1), heights)
     entrance = add(add(noise(mc("cave_entrance"), 0.8, 0.75), 0.37), gradient(-10, 30, 0.3, 0.0))
     spaghetti_sum = add(max_(spaghetti("spaghetti_3d_1"), spaghetti("spaghetti_3d_2")),
@@ -227,18 +236,41 @@ def noodle():
     return add(noodle_bias(), tunnel(REF_TOGGLE, REF_THICKNESS, REF_RIDGE_A, REF_RIDGE_B))
 
 
+def path_bias():
+    """The noodle's height bias with dry paths: at most DRY_NOODLE_BIAS in y DRY_NOODLE_MIN_Y..DRY_NOODLE_MAX_Y, where
+    the bias otherwise keeps noodles out, so some lead down through those layers. It meets the bias at the band's ends,
+    where that is lower already."""
+    low, high = band(C["DRY_NOODLE_MIN_Y"], C["DRY_NOODLE_MAX_Y"] + 1)
+    return range_choice(mc("y"), low, high, min_(noodle_bias(), C["DRY_NOODLE_BIAS"]), noodle_bias())
+
+
+def corridor_entrances():
+    """The entrance value the corridors' zone is decided by, interpolated, in y -9..24 (1 elsewhere): the final
+    density's noodle and the flooded corridors read the same one."""
+    return interpolated(y_band(-9, 25, REF_ENTRANCES, 1.0))
+
+
 def corridor_noodle():
     """The final density's noodle (PvFinalDensity): the tunnel from interpolated inputs, with the corridors' bias
-    (PvNoodle.corridorBias) in the basin layers, y -3..23: where the entrance value says a flooded cave is near, the
-    bias moves to CORRIDOR_BIAS, and on to CORRIDOR_FLARE_BIAS nearer the caves. The aquifer floods what it opens there
-    by reading this function itself."""
-    corridor_entrances = interpolated(y_band(-9, 25, REF_ENTRANCES, 1.0))
-    share = clamp(mul(sub(C["CORRIDOR_ENTRANCES"], corridor_entrances), C["CORRIDOR_ZONE_SCALE"]), 0.0, 1.0)
-    flare = clamp(mul(sub(C["CORRIDOR_FLARE_FROM"], corridor_entrances), C["CORRIDOR_FLARE_SCALE"]), 0.0, 1.0)
+    (PvNoodle.corridorBias) in the basin layers, y -3..23: where the entrance value says a flooded cave is near (below
+    CORRIDOR_ENTRANCES), the bias moves to CORRIDOR_BIAS, and on to CORRIDOR_FLARE_BIAS nearer the caves; away from
+    them it moves to the dry paths' bias over the same taper. Outside those layers, the dry paths' bias."""
+    entrances_value = REF_CORRIDOR_ENTRANCES
+    share = clamp(mul(sub(C["CORRIDOR_ENTRANCES"], entrances_value), C["CORRIDOR_ZONE_SCALE"]), 0.0, 1.0)
+    dry = clamp(mul(sub(entrances_value, C["CORRIDOR_ENTRANCES"]), C["CORRIDOR_ZONE_SCALE"]), 0.0, 1.0)
+    flare = clamp(mul(sub(C["CORRIDOR_FLARE_FROM"], entrances_value), C["CORRIDOR_FLARE_SCALE"]), 0.0, 1.0)
     target = lerp(flare, C["CORRIDOR_BIAS"], C["CORRIDOR_FLARE_BIAS"])
+    away = lerp(dry, noodle_bias(), path_bias())
     layers = band(C["BASIN_MIN_Y"] + 1, C["CORRIDOR_MAX_Y"])
-    bias = range_choice(mc("y"), layers[0], layers[1], lerp(share, noodle_bias(), target), noodle_bias())
+    bias = range_choice(mc("y"), layers[0], layers[1], lerp(share, away, target), path_bias())
     return add(bias, tunnel(interpolated(REF_TOGGLE), interpolated(REF_THICKNESS), interpolated(REF_RIDGE_A), interpolated(REF_RIDGE_B)))
+
+
+def flooded_corridors():
+    """What the aquifer floods in the basin layers: the final density's noodle inside the corridors' zone (the
+    entrance value below CORRIDOR_ENTRANCES), NO_CUT outside it, so the dry paths stay dry. Where this is at most 0 the
+    final density's noodle has opened the block."""
+    return range_choice(REF_CORRIDOR_ENTRANCES, -1000000.0, C["CORRIDOR_ENTRANCES"], REF_CORRIDOR_NOODLE, NO_CUT)
 
 
 # The high river's two layers on one path (the noise's zero line): the river at HIGH_RIVER_Y, and a thinner one at
@@ -386,7 +418,9 @@ FUNCTIONS = {
     "overworld/caves/noodle_ridge_a": lambda: noodle_input(noise(mc("noodle_ridge_a"), 2.6666666666666665, 2.6666666666666665), 0.0),
     "overworld/caves/noodle_ridge_b": lambda: noodle_input(noise(mc("noodle_ridge_b"), 2.6666666666666665, 2.6666666666666665), 0.0),
     "overworld/caves/noodle": noodle,
+    "overworld/caves/corridor_entrances": corridor_entrances,
     "overworld/caves/corridor_noodle": corridor_noodle,
+    "overworld/caves/flooded_corridors": flooded_corridors,
     "overworld/high_river": lambda: noise(pv("high_river"), 0.25, 0.0),
     "overworld/high_river/across": lambda: high_river_across(HIGH_RIVER),
     "overworld/high_river/valley": lambda: high_river_valley(HIGH_RIVER, REF_ACROSS),
@@ -423,7 +457,7 @@ def noise_settings():
                 "entrances": REF_ENTRANCES,
                 "noodle": pv("overworld/caves/noodle"),
                 "surface": noise(mc("surface"), 4.0, 2.0),
-                "corridors": REF_CORRIDOR_NOODLE,
+                "corridors": REF_FLOODED_CORRIDORS,
             },
             "lava": noise(mc("aquifer_lava"), 1.0, 1.0),
             "surface_level": mc("overworld/preliminary_surface_level"),

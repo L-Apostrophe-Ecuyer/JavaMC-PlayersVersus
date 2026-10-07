@@ -20,8 +20,9 @@ import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
  * @param entrances {@code players-versus:overworld/caves/entrances}
  * @param noodle    {@code players-versus:overworld/caves/noodle}: the noodle at the block, without interpolation
  * @param surface   {@code noise(minecraft:surface, xz 4, y 2)}
- * @param corridors the final density's noodle ({@code players-versus:overworld/caves/corridor_noodle}), with the flooded
- *                  corridors' bias: the aquifer floods the basin layers where it's at most 0. Not part of S.
+ * @param corridors the flooded corridors ({@code players-versus:overworld/caves/flooded_corridors}): the final density's
+ *                  noodle inside the corridors' zone, near the flooded caves, and nothing outside it, so the dry noodles
+ *                  stay dry. The aquifer floods the basin layers where it's at most 0. Not part of S.
  */
 public record AquiferSpread(DensityFunction entrances, DensityFunction noodle, DensityFunction surface,
                             DensityFunction corridors) implements DensityFunction {

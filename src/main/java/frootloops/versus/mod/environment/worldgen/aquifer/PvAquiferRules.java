@@ -70,8 +70,8 @@ public final class PvAquiferRules {
      * {@link #atPosition}, with the flooded corridors: in their layers, a block that isn't basin water is when the
      * corridors' noodle opens it (the refactor plan, Section 10, question 7).
      *
-     * @param corridors the noodle with the corridors' bias at a block ({@code players-versus:overworld/caves/corridor_noodle}),
-     *                  the value the final density takes the minimum with there: at most 0 where it opens the block
+     * @param corridors the flooded corridors at a block ({@code players-versus:overworld/caves/flooded_corridors}): the
+     *                  final density's noodle inside the corridors' zone, at most 0 where it opens the block there
      */
     public static PvAquiferDecision atPosition(int x, int y, int z, Field floodedness, Field spread, Field corridors) {
         if (y >= SEA_LEVEL) return PvAquiferDecision.AIR;

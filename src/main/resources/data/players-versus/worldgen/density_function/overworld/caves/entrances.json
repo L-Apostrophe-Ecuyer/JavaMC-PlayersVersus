@@ -127,12 +127,34 @@
             "right": {
               "type": "minecraft:add",
               "left": {
-                "type": "minecraft:gradient",
-                "axis": "y",
-                "from_coordinate": 28,
-                "from_value": 0.0,
-                "to_coordinate": 18,
-                "to_value": 0.265
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": 28,
+                  "from_value": 0.0,
+                  "to_coordinate": 18,
+                  "to_value": 0.265
+                },
+                "right": {
+                  "type": "minecraft:add",
+                  "left": {
+                    "type": "minecraft:gradient",
+                    "axis": "y",
+                    "from_coordinate": 30,
+                    "from_value": 0.0,
+                    "to_coordinate": 24,
+                    "to_value": 0.03
+                  },
+                  "right": {
+                    "type": "minecraft:gradient",
+                    "axis": "y",
+                    "from_coordinate": 24,
+                    "from_value": 0.0,
+                    "to_coordinate": 18,
+                    "to_value": -0.03
+                  }
+                }
               },
               "right": {
                 "type": "minecraft:add",
@@ -142,7 +164,7 @@
                   "from_coordinate": -16,
                   "from_value": 0.0,
                   "to_coordinate": -40,
-                  "to_value": -0.2
+                  "to_value": -0.23
                 },
                 "right": {
                   "type": "minecraft:gradient",
@@ -150,7 +172,7 @@
                   "from_coordinate": -40,
                   "from_value": 0.0,
                   "to_coordinate": -60,
-                  "to_value": 0.215
+                  "to_value": 0.245
                 }
               }
             }
