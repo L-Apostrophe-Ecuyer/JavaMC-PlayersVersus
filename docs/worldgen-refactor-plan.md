@@ -492,6 +492,8 @@ Q3: the dripstone and frosted replacements keep depth 0.8–1.0, now written as 
 
 **Checks done:** unit tests (Section 1.4 lists them) and the smoke runs. In the benchmark region, which is temperate forest, ocean and plains with no transition rule in play, the Improved world's biome histograms and maps are identical to the baseline; the Default world now has only vanilla biomes.
 
+**Weirdness rules (the owner's notes on the port).** Three rules after the transitions, so they only take what those leave: vanilla's dappled forest (26.3) becomes flower forest everywhere (`flower-forest`); where the weirdness is above 0.2 and the temperature below 0, birch forest becomes `players-versus:sparse_dappled_forest` (`weird-cool`), or below −0.2 `players-versus:dappled_taiga` (`weird-cold`), and old growth birch forest becomes vanilla's dappled forest. Dappled taiga is the birch taiga with dappled trees (26.3's red, orange and yellow poplars with their leaf litter, `players-versus:dappled_trees`) where it has birch; sparse dappled forest is the same biome with mostly dappled trees and a few birch, spruce and pine, placed like the mod's savanna trees (`noise_based_count` 20/8/0.05), so they clump with open ground between. `weirdColdBirchTurnsDappled` checks the rules inside vanilla's slices and prints where vanilla puts these biomes.
+
 ### 6.4 Biome source (Phase 1)
 
 ```java

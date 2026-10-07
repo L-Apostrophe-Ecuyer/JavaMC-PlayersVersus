@@ -48,6 +48,11 @@ public final class PvBiomeLayout {
     private static final long MOUNTAIN_CONTINENTALNESS_MIN = Climate.quantizeCoord(0.03F);
     private static final long RIVER_VALLEY_WEIRDNESS = Climate.quantizeCoord(0.3F);
     private static final long WARM_MOUNTAINSIDE_FOREST_TEMPERATURE = Climate.quantizeCoord(0.1998F);
+    /** Birch forests turn dappled where the weirdness is above this and the temperature below {@link #DAPPLED_COOL_MAX}. */
+    private static final long DAPPLED_WEIRDNESS_MIN = Climate.quantizeCoord(0.2F);
+    private static final long DAPPLED_COOL_MAX = Climate.quantizeCoord(0.0F);
+    /** Below this temperature they become dappled taiga instead of sparse dappled forest. */
+    private static final long DAPPLED_COLD_MAX = Climate.quantizeCoord(-0.2F);
 
     private record Rule(String name, Box region, BiFunction<Box, ResourceKey<Biome>, ResourceKey<Biome>> target) {
     }
@@ -65,7 +70,17 @@ public final class PvBiomeLayout {
             new Rule("frozen", Box.ALL.withMin(Box.T, Climate.quantizeCoord(-0.55F)).withMax(Box.T, Climate.quantizeCoord(-0.375F)),
                     (slice, biome) -> CustomOverworldBiomes.getSnowyToTemperateTransitionBiome(biome)),
             new Rule("humid", Box.ALL.withMin(Box.H, Climate.quantizeCoord(0.275F)).withMax(Box.H, Climate.quantizeCoord(0.35F)),
-                    (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)));
+                    (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)),
+            // Dappled trees (26.3's poplars) where it's weird and cold enough, after the transitions, so only in the birch
+            // forests they leave; vanilla's own dappled forests give way to flower forests.
+            new Rule("flower-forest", Box.ALL,
+                    (slice, biome) -> CustomOverworldBiomes.DAPPLED_FOREST.equals(biome) ? Biomes.FLOWER_FOREST : null),
+            new Rule("weird-cold", Box.ALL.withMin(Box.W, DAPPLED_WEIRDNESS_MIN).withMax(Box.T, DAPPLED_COLD_MAX),
+                    (slice, biome) -> biome == Biomes.BIRCH_FOREST ? CustomOverworldBiomes.DAPPLED_TAIGA
+                            : biome == Biomes.OLD_GROWTH_BIRCH_FOREST ? CustomOverworldBiomes.DAPPLED_FOREST : null),
+            new Rule("weird-cool", Box.ALL.withMin(Box.W, DAPPLED_WEIRDNESS_MIN).withMax(Box.T, DAPPLED_COOL_MAX),
+                    (slice, biome) -> biome == Biomes.BIRCH_FOREST ? CustomOverworldBiomes.SPARSE_DAPPLED_FOREST
+                            : biome == Biomes.OLD_GROWTH_BIRCH_FOREST ? CustomOverworldBiomes.DAPPLED_FOREST : null));
 
     private PvBiomeLayout() {
     }

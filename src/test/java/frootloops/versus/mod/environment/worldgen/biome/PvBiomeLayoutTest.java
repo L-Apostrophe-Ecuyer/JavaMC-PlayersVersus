@@ -15,6 +15,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -178,6 +180,73 @@ class PvBiomeLayoutTest {
             checked++;
         }
         assertTrue(checked > 0, "no birch forest slice crosses humidity 0.29");
+    }
+
+    /**
+     * The weirdness rules: where the weirdness is above 0.2 and the temperature below 0, birch forests turn into sparse
+     * dappled forest, and below -0.2 into dappled taiga, and old growth birch into vanilla's dappled forest; vanilla's
+     * dappled forests turn into flower forests. Checked inside vanilla's slices away from the transitions that come
+     * first (mountainside, and for birch the frozen and humid bands). Also prints where vanilla puts these biomes.
+     */
+    @Test
+    void weirdColdBirchTurnsDappled() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Map<String, Integer> checked = new TreeMap<>();
+        Map<String, Set<String>> placement = new TreeMap<>();
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            boolean birch = biome == Biomes.BIRCH_FOREST, oldGrowth = biome == Biomes.OLD_GROWTH_BIRCH_FOREST;
+            boolean dappled = CustomOverworldBiomes.DAPPLED_FOREST.equals(biome);
+            if (!birch && !oldGrowth && !dappled && biome != Biomes.FLOWER_FOREST) continue;
+            placement.computeIfAbsent(biome.identifier().getPath(), k -> new TreeSet<>()).add(String.format(Locale.ROOT,
+                    "T %s H %s W %s", range(h.temperature()), range(h.humidity()), range(h.weirdness())));
+            Long erosion = inside(h.erosion(), -0.4F, 1.0F);
+            if (dappled) {
+                Climate.TargetPoint point = point(mid(h.temperature()), mid(h.humidity()), mid(h.continentalness()), mid(h.erosion()), mid(h.weirdness()));
+                assertEquals(Biomes.FLOWER_FOREST, layout.findValue(point), "dappled forest at " + point);
+                checked.merge("dappled forest -> flower forest", 1, Integer::sum);
+                continue;
+            }
+            Long weirdness = inside(h.weirdness(), 0.2F, 1.0F);
+            if (!birch && !oldGrowth || erosion == null || weirdness == null) continue;
+            Long humidity = birch ? either(inside(h.humidity(), -1.0F, 0.275F), inside(h.humidity(), 0.35F, 1.0F)) : Long.valueOf(mid(h.humidity()));
+            if (humidity == null) continue;
+            Long cold = birch ? either(inside(h.temperature(), -0.375F, -0.2F), inside(h.temperature(), -1.0F, -0.55F))
+                    : inside(h.temperature(), -1.0F, -0.2F);
+            Long cool = inside(h.temperature(), -0.2F, 0.0F);
+            ResourceKey<Biome> coldTarget = birch ? CustomOverworldBiomes.DAPPLED_TAIGA : CustomOverworldBiomes.DAPPLED_FOREST;
+            ResourceKey<Biome> coolTarget = birch ? CustomOverworldBiomes.SPARSE_DAPPLED_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
+            String name = birch ? "birch forest" : "old growth birch forest";
+            if (cold != null) {
+                Climate.TargetPoint point = point(cold, humidity, mid(h.continentalness()), erosion, weirdness);
+                assertEquals(coldTarget, layout.findValue(point), name + " at " + point);
+                checked.merge(name + " below -0.2 -> " + coldTarget.identifier().getPath(), 1, Integer::sum);
+            }
+            if (cool != null) {
+                Climate.TargetPoint point = point(cool, humidity, mid(h.continentalness()), erosion, weirdness);
+                assertEquals(coolTarget, layout.findValue(point), name + " at " + point);
+                checked.merge(name + " -0.2..0 -> " + coolTarget.identifier().getPath(), 1, Integer::sum);
+            }
+        }
+        placement.forEach((biome, slices) -> System.out.printf(Locale.ROOT, "[dappled] vanilla %s, %d surface slices: %s%n", biome, slices.size(), slices));
+        System.out.println("[dappled] checked slices: " + checked);
+        assertTrue(checked.containsKey("dappled forest -> flower forest"), "vanilla has no dappled forest at the surface");
+    }
+
+    /** The middle of the part of {@code range} between {@code from} and {@code to}, or null if it has no width there. */
+    private static Long inside(Climate.Parameter range, float from, float to) {
+        long lo = Math.max(range.min(), Climate.quantizeCoord(from)), hi = Math.min(range.max(), Climate.quantizeCoord(to));
+        return lo < hi ? (lo + hi) / 2 : null;
+    }
+
+    private static Long either(Long first, Long second) {
+        return first != null ? first : second;
+    }
+
+    private static String range(Climate.Parameter range) {
+        return String.format(Locale.ROOT, "%.2f..%.2f", Climate.unquantizeCoord(range.min()), Climate.unquantizeCoord(range.max()));
     }
 
     /** Q4: a mountainside covers only erosion below -0.475; the forest keeps the rest of its slice. */
