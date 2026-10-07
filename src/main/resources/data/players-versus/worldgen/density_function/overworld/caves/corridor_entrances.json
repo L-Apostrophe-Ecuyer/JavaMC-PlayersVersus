@@ -5,8 +5,8 @@
   "input": {
     "type": "minecraft:range_choice",
     "input": "minecraft:y",
-    "min_inclusive": -9.5,
-    "max_exclusive": 25.5,
+    "min_inclusive": -16.5,
+    "max_exclusive": 32.5,
     "when_in_range": "players-versus:overworld/caves/entrances",
     "when_out_of_range": 1.0
   }

@@ -245,16 +245,18 @@ def path_bias():
 
 
 def corridor_entrances():
-    """The entrance value the corridors' zone is decided by, interpolated, in y -9..24 (1 elsewhere): the final
-    density's noodle and the flooded corridors read the same one."""
-    return interpolated(y_band(-9, 25, REF_ENTRANCES, 1.0))
+    """The entrance value the corridors' zone and the dry noodles are decided by, interpolated, over the dry noodles'
+    heights (1 elsewhere): the final density's noodle and the flooded corridors read the same one. It reaches the cell
+    corners at y -16 and 32; the corridors' layers (y -3..23) only read the corners from y -8 to 24."""
+    return interpolated(y_band(C["DRY_NOODLE_MIN_Y"], C["DRY_NOODLE_MAX_Y"] + 1, REF_ENTRANCES, 1.0))
 
 
 def corridor_noodle():
     """The final density's noodle (PvFinalDensity): the tunnel from interpolated inputs, with the corridors' bias
     (PvNoodle.corridorBias) in the basin layers, y -3..23: where the entrance value says a flooded cave is near (below
-    CORRIDOR_ENTRANCES), the bias moves to CORRIDOR_BIAS, and on to CORRIDOR_FLARE_BIAS nearer the caves; away from
-    them it moves to the dry paths' bias over the same taper. Outside those layers, the dry paths' bias."""
+    CORRIDOR_ENTRANCES), the bias moves to CORRIDOR_BIAS, and on to CORRIDOR_FLARE_BIAS nearer the caves. At every
+    height the dry paths' bias only holds away from the entrance caves (from CORRIDOR_ENTRANCES up, over the same
+    taper), so the noodles it adds rarely meet them."""
     entrances_value = REF_CORRIDOR_ENTRANCES
     share = clamp(mul(sub(C["CORRIDOR_ENTRANCES"], entrances_value), C["CORRIDOR_ZONE_SCALE"]), 0.0, 1.0)
     dry = clamp(mul(sub(entrances_value, C["CORRIDOR_ENTRANCES"]), C["CORRIDOR_ZONE_SCALE"]), 0.0, 1.0)
@@ -262,7 +264,7 @@ def corridor_noodle():
     target = lerp(flare, C["CORRIDOR_BIAS"], C["CORRIDOR_FLARE_BIAS"])
     away = lerp(dry, noodle_bias(), path_bias())
     layers = band(C["BASIN_MIN_Y"] + 1, C["CORRIDOR_MAX_Y"])
-    bias = range_choice(mc("y"), layers[0], layers[1], lerp(share, away, target), path_bias())
+    bias = range_choice(mc("y"), layers[0], layers[1], lerp(share, away, target), away)
     return add(bias, tunnel(interpolated(REF_TOGGLE), interpolated(REF_THICKNESS), interpolated(REF_RIDGE_A), interpolated(REF_RIDGE_B)))
 
 

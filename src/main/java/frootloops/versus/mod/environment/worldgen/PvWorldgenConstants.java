@@ -114,10 +114,10 @@ public final class PvWorldgenConstants {
 
     /**
      * Dry noodles: from {@link #DRY_NOODLE_MIN_Y} to {@link #DRY_NOODLE_MAX_Y}, where the noodle's height bias otherwise
-     * keeps noodles out (0.08 in y -8..20), it's at most this away from the flooded caves, so some noodles run through
-     * those layers and lead down dry from y 32 to y -16. They fade in over {@link #CORRIDOR_ZONE_TAPER} outside the
-     * corridors' zone; inside it the corridors keep their own bias, and the aquifer floods only what opens there
-     * ({@code caves/flooded_corridors}).
+     * keeps noodles out (0.08 in y -8..20), it's at most this away from the entrance caves (an entrance value from
+     * {@link #CORRIDOR_ENTRANCES} up, fading in over {@link #CORRIDOR_ZONE_TAPER}), so some tunnels lead down dry from
+     * y 32 to y -16 and rarely meet an entrance cave. Nearer them the bias is as before: in the corridors' layers the
+     * corridors keep their own, and the aquifer floods only what opens there ({@code caves/flooded_corridors}).
      */
     public static final double DRY_NOODLE_BIAS = 0.02;
     public static final int DRY_NOODLE_MIN_Y = -16;
