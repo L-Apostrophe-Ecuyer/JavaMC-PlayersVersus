@@ -22,7 +22,11 @@
       },
       "right": "players-versus:overworld/caves/corridor_noodle"
     },
-    "right": "players-versus:overworld/high_river/valley"
+    "right": {
+      "type": "minecraft:min",
+      "left": "players-versus:overworld/high_river/valley",
+      "right": "players-versus:overworld/high_river/upper_valley"
+    }
   },
   "right": {
     "type": "minecraft:beardifier"

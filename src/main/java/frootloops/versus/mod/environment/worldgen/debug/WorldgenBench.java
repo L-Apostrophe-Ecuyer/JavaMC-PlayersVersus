@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
+import frootloops.versus.mod.environment.worldgen.PvWorldgenConstants;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -65,7 +66,8 @@ import java.util.function.Consumer;
  *
  * <p>Metrics, measured right after {@code TERRAIN} (26.3's one status for the terrain, the surface and the carvers):
  * <ul>
- *   <li>water at or above y 64: the Players Versus aquifer never places any there but the high river's, at y 77..80;</li>
+ *   <li>water at or above y 64: the Players Versus aquifer never places any there but the high river's, at y 77..80 and
+ *   94..96;</li>
  *   <li>basin seam ratio: water/non-water changes across chunk borders divided by the same count across chunk
  *   middles, for y 0..31. About 1 means no seams;</li>
  *   <li>water in y 0..31 by x (and z) offset inside the chunk, relative to the mean; z is the control;</li>
@@ -75,7 +77,7 @@ import java.util.function.Consumer;
  *   water until something updates it. Split by height, and by whether the water has a fluid tick queued;</li>
  *   <li>water by height, per chunk: below y -31, where the aquifer places none; y -31..-9, which should stay dry
  *   (Section 10, question 7 of the refactor plan); y -8..-1, 0..23, 24..47 and 48..63;</li>
- *   <li>the high river's water and where it spills.</li>
+ *   <li>the high river's water and where it spills, for each of its layers.</li>
  * </ul>
  * The report also holds text maps (one character per 8x8 blocks, north up) of the surface and its biomes, so results
  * can be compared without the images; hashes of every block after {@code TERRAIN}, by 16-block layer and by chunk, so
@@ -102,9 +104,14 @@ public final class WorldgenBench {
     private static final int[] WATER_BAND_TOPS = {-8, 0, 24, 48, 64};
     /** Where water flows from a block: the four sides, then below. */
     private static final int[][] SIDES_AND_BELOW = {{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1}, {0, -1, 0}};
-    /** The high river's water surface; above sea level, only its water is there before features run. */
-    private static final int HIGH_RIVER_Y = frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
-    private static final int HIGH_RIVER_MIN_Y = frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_MIN_Y;
+    /**
+     * The high river's layers, each its water surface and its bed's bottom, with its metric's name; above sea level, only
+     * their water is there before features run.
+     */
+    private static final int[][] HIGH_RIVER_LAYERS = {
+            {PvWorldgenConstants.HIGH_RIVER_Y, PvWorldgenConstants.HIGH_RIVER_MIN_Y},
+            {PvWorldgenConstants.HIGH_RIVER_UPPER_Y, PvWorldgenConstants.HIGH_RIVER_UPPER_MIN_Y}};
+    private static final String[] HIGH_RIVER_METRICS = {"high_river_per_chunk", "high_river_upper_per_chunk"};
     private static final int MAP_CELL = 8;
 
     private WorldgenBench() {
@@ -234,11 +241,14 @@ public final class WorldgenBench {
         private final long[] waterByBand = new long[WATER_BAND_TOPS.length];
         private long waterBelowSeaBand;
         /**
-         * The high river's water (y 77..80, the only water above sea level before features): at its surface and in its
-         * bed; open faces beside the surface's water, where it spills, and the columns they're in; surface water with
-         * open air under it; bed water with open air beside or under it, which the walls should leave none of.
+         * The high river's water by layer ({@link #HIGH_RIVER_LAYERS}, the only water above sea level before features): at
+         * its surface and in its bed; open faces beside the surface's water, where it spills, and the columns they're in;
+         * surface water with open air under it; bed water with open air beside or under it, which the walls should leave
+         * none of.
          */
-        private long riverSurfaceWater, riverBedWater, riverSpillFaces, riverSpillColumns, riverSurfaceOverAir, riverBedBesideAir;
+        private final long[] riverSurfaceWater = new long[HIGH_RIVER_LAYERS.length], riverBedWater = new long[HIGH_RIVER_LAYERS.length],
+                riverSpillFaces = new long[HIGH_RIVER_LAYERS.length], riverSpillColumns = new long[HIGH_RIVER_LAYERS.length],
+                riverSurfaceOverAir = new long[HIGH_RIVER_LAYERS.length], riverBedBesideAir = new long[HIGH_RIVER_LAYERS.length];
         /** Block hashes by status: [chunk, by {@link #chunkIndex}][16-block section from the bottom]. */
         private final Map<String, long[][]> sectionHashes = new LinkedHashMap<>();
         private final Registry<Structure> structures;
@@ -349,27 +359,30 @@ public final class WorldgenBench {
         private void countHighRiver(ChunkAccess chunk) {
             ChunkPos chunkPos = chunk.getPos();
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            for (int localX = 0; localX < 16; localX++) {
-                for (int localZ = 0; localZ < 16; localZ++) {
-                    int x = chunkPos.getMinBlockX() + localX, z = chunkPos.getMinBlockZ() + localZ;
-                    for (int y = HIGH_RIVER_MIN_Y; y <= HIGH_RIVER_Y; y++) {
-                        if (!chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) continue;
-                        boolean surface = y == HIGH_RIVER_Y;
-                        if (surface) this.riverSurfaceWater++;
-                        else this.riverBedWater++;
-                        boolean spilling = false;
-                        for (int[] offset : SIDES_AND_BELOW) {
-                            int nx = localX + offset[0], nz = localZ + offset[2];
-                            if (nx < 0 || nx > 15 || nz < 0 || nz > 15) continue;
-                            if (!chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + nx, y + offset[1], chunkPos.getMinBlockZ() + nz)).isAir()) continue;
-                            if (!surface) this.riverBedBesideAir++;
-                            else if (offset[1] < 0) this.riverSurfaceOverAir++;
-                            else {
-                                this.riverSpillFaces++;
-                                spilling = true;
+            for (int layer = 0; layer < HIGH_RIVER_LAYERS.length; layer++) {
+                int surfaceY = HIGH_RIVER_LAYERS[layer][0], minY = HIGH_RIVER_LAYERS[layer][1];
+                for (int localX = 0; localX < 16; localX++) {
+                    for (int localZ = 0; localZ < 16; localZ++) {
+                        int x = chunkPos.getMinBlockX() + localX, z = chunkPos.getMinBlockZ() + localZ;
+                        for (int y = minY; y <= surfaceY; y++) {
+                            if (!chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) continue;
+                            boolean surface = y == surfaceY;
+                            if (surface) this.riverSurfaceWater[layer]++;
+                            else this.riverBedWater[layer]++;
+                            boolean spilling = false;
+                            for (int[] offset : SIDES_AND_BELOW) {
+                                int nx = localX + offset[0], nz = localZ + offset[2];
+                                if (nx < 0 || nx > 15 || nz < 0 || nz > 15) continue;
+                                if (!chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + nx, y + offset[1], chunkPos.getMinBlockZ() + nz)).isAir()) continue;
+                                if (!surface) this.riverBedBesideAir[layer]++;
+                                else if (offset[1] < 0) this.riverSurfaceOverAir[layer]++;
+                                else {
+                                    this.riverSpillFaces[layer]++;
+                                    spilling = true;
+                                }
                             }
+                            if (spilling) this.riverSpillColumns[layer]++;
                         }
-                        if (spilling) this.riverSpillColumns++;
                     }
                 }
             }
@@ -601,10 +614,13 @@ public final class WorldgenBench {
                     this.basinWater.cardinality() / (this.size * this.size / 256.0)));
 
             appendLowlands(lines);
-            lines.add(String.format(Locale.ROOT, "metric high_river_per_chunk water at y %d %.2f, in the bed %.2f; open faces beside the"
-                            + " surface's water %.2f (in %.2f columns), under it %.2f; bed water beside or over open air %.2f",
-                    HIGH_RIVER_Y, this.riverSurfaceWater / chunks, this.riverBedWater / chunks, this.riverSpillFaces / chunks,
-                    this.riverSpillColumns / chunks, this.riverSurfaceOverAir / chunks, this.riverBedBesideAir / chunks));
+            for (int layer = 0; layer < HIGH_RIVER_LAYERS.length; layer++) {
+                lines.add(String.format(Locale.ROOT, "metric %s water at y %d %.2f, in the bed %.2f; open faces beside the"
+                                + " surface's water %.2f (in %.2f columns), under it %.2f; bed water beside or over open air %.2f",
+                        HIGH_RIVER_METRICS[layer], HIGH_RIVER_LAYERS[layer][0], this.riverSurfaceWater[layer] / chunks,
+                        this.riverBedWater[layer] / chunks, this.riverSpillFaces[layer] / chunks, this.riverSpillColumns[layer] / chunks,
+                        this.riverSurfaceOverAir[layer] / chunks, this.riverBedBesideAir[layer] / chunks));
+            }
             lines.add("biomes at surface:");
             appendHistogram(lines, this.surfaceBiome);
             for (int i = 0; i < BIOME_LAYER_YS.length; i++) {

@@ -32,11 +32,11 @@ public enum PvAquiferDecision {
     /** The same for basin water, and the basins' barrier band; solid like {@link #SEA_BARRIER}. */
     BASIN_BARRIER(null, false),
     /**
-     * The high river's water at its surface (y 80). It gets a fluid tick and no wall beside it, so where the ground next
-     * to it is open it spills over the edge.
+     * The high river's water at its surface (y 80, or y 96 in its upper layer). It gets a fluid tick and no wall beside
+     * it, so where the ground next to it is open it spills over the edge.
      */
     HIGH_RIVER_WATER(Blocks.WATER.defaultBlockState(), true),
-    /** The high river's water under its surface, in its bed. */
+    /** The high river's water under a surface, in its bed. */
     HIGH_RIVER_BED_WATER(Blocks.WATER.defaultBlockState(), false),
     /**
      * A wall where the high river's water could flow into open space: beside or under the bed's water, or under the

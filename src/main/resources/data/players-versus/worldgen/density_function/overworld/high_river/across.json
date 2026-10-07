@@ -14,28 +14,49 @@
     "right": {
       "type": "minecraft:mul",
       "left": {
-        "type": "minecraft:clamp",
+        "type": "minecraft:range_choice",
         "input": {
-          "type": "minecraft:div",
-          "left": {
-            "type": "minecraft:sub",
-            "left": 0.09,
+          "type": "minecraft:interpolated",
+          "cell_size_xz": 4,
+          "cell_size_y": 8,
+          "input": {
+            "type": "minecraft:slice",
+            "axis": "y",
+            "coordinate": 80,
+            "input": "players-versus:overworld/depth"
+          }
+        },
+        "min_inclusive": -1000000.0,
+        "max_exclusive": 0.155,
+        "when_in_range": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:add",
+            "left": 1.0,
             "right": {
-              "type": "minecraft:interpolated",
-              "cell_size_xz": 4,
-              "cell_size_y": 8,
-              "input": {
-                "type": "minecraft:slice",
-                "axis": "y",
-                "coordinate": 80,
-                "input": "players-versus:overworld/depth"
-              }
+              "type": "minecraft:mul",
+              "left": {
+                "type": "minecraft:sub",
+                "left": {
+                  "type": "minecraft:interpolated",
+                  "cell_size_xz": 4,
+                  "cell_size_y": 8,
+                  "input": {
+                    "type": "minecraft:slice",
+                    "axis": "y",
+                    "coordinate": 80,
+                    "input": "players-versus:overworld/depth"
+                  }
+                },
+                "right": 0.05
+              },
+              "right": -4.761904761904762
             }
           },
-          "right": 0.03
+          "min": 0.5,
+          "max": 1.0
         },
-        "min": 0.0,
-        "max": 1.0
+        "when_out_of_range": 0.0
       },
       "right": {
         "type": "minecraft:add",

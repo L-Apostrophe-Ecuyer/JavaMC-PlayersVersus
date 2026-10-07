@@ -152,6 +152,7 @@ REF_TOGGLE, REF_THICKNESS = pv("overworld/caves/noodle_toggle"), pv("overworld/c
 REF_RIDGE_A, REF_RIDGE_B = pv("overworld/caves/noodle_ridge_a"), pv("overworld/caves/noodle_ridge_b")
 REF_CORRIDOR_NOODLE, REF_VALLEY = pv("overworld/caves/corridor_noodle"), pv("overworld/high_river/valley")
 REF_ACROSS = pv("overworld/high_river/across")
+REF_UPPER_VALLEY, REF_UPPER_ACROSS = pv("overworld/high_river/upper_valley"), pv("overworld/high_river/upper_across")
 
 
 def depth():
@@ -240,40 +241,76 @@ def corridor_noodle():
     return add(bias, tunnel(interpolated(REF_TOGGLE), interpolated(REF_THICKNESS), interpolated(REF_RIDGE_A), interpolated(REF_RIDGE_B)))
 
 
-def high_river_across():
-    """How far a block is inside the high river's valley across it: its channel's distance from the river's middle, less
-    the valley's half width there (PvHighRiver.fullHalfWidth times its activity); negative inside. The half width is 0
-    at the bed's bottom less one, the surface's (HIGH_RIVER_HALF_WIDTH) at the surface (HIGH_RIVER_Y), and wider by
-    HIGH_RIVER_WIDENING per block above it; the activity keeps the river out of ground that rises far above its surface.
-    The inputs are 2D and interpolated on the terrain's cells."""
-    y_surface, bed, top = C["HIGH_RIVER_Y"], C["HIGH_RIVER_BED"], C["HIGH_RIVER_VALLEY_MAX_Y"]
-    channel = interpolated(pv("overworld/high_river"))
-    depth_at_surface = interpolated(slice_y(y_surface, REF_DEPTH))
-    full = add(gradient(y_surface - bed - 1, y_surface, 0.0, C["HIGH_RIVER_HALF_WIDTH"]),
-               gradient(y_surface, top, 0.0, (top - y_surface) * C["HIGH_RIVER_WIDENING"]))
-    activity = clamp(div(sub(C["HIGH_RIVER_TOP"] + C["HIGH_RIVER_FADE"], depth_at_surface), C["HIGH_RIVER_FADE"]), 0.0, 1.0)
-    return cache(sub(abs_(channel), mul(activity, full)))
+# The high river's two layers on one path (the noise's zero line): the river at HIGH_RIVER_Y, and a thinner one at
+# HIGH_RIVER_UPPER_Y. Where the ground climbs from one to the other, the lower one cuts a gorge that the upper one ends
+# at and falls into.
+HIGH_RIVER = {"y": C["HIGH_RIVER_Y"], "bed": C["HIGH_RIVER_BED"], "half_width": C["HIGH_RIVER_HALF_WIDTH"],
+              "widening": C["HIGH_RIVER_WIDENING"], "closed": C["HIGH_RIVER_CLOSED"], "gorge": C["HIGH_RIVER_GORGE_WIDTH"]}
+HIGH_RIVER_UPPER = {"y": C["HIGH_RIVER_UPPER_Y"], "bed": C["HIGH_RIVER_UPPER_BED"], "half_width": C["HIGH_RIVER_UPPER_HALF_WIDTH"],
+                    "widening": C["HIGH_RIVER_UPPER_WIDENING"], "closed": C["HIGH_RIVER_UPPER_CLOSED"]}
 
 
-def high_river_valley():
-    """PvHighRiver: the high river's valley, negative where it opens a block, NO_CUT elsewhere: in y from the bed's
-    bottom (HIGH_RIVER_Y - HIGH_RIVER_BED) up to HIGH_RIVER_VALLEY_MAX_Y, inside its width (high_river/across); at and
-    under the surface only where the terrain at the surface was solid, so the river runs on to the ground's edge. The
-    aquifer puts water where this is negative at or under the surface."""
-    y_surface, bed, top = C["HIGH_RIVER_Y"], C["HIGH_RIVER_BED"], C["HIGH_RIVER_VALLEY_MAX_Y"]
-    across = REF_ACROSS
+def high_river_channel():
+    """The river's noise, interpolated on the terrain's cells: 0 in the middle of the river."""
+    return interpolated(pv("overworld/high_river"))
+
+
+def high_river_activity(layer):
+    """How open a layer is, from the depth at its surface's height: 1 up to HIGH_RIVER_FULL_DEPTH (the ground's nominal
+    surface a few blocks above its water), then narrowing into higher ground. A layer with a gorge narrows to that share
+    of its width at its closing depth and stops there, so the gorge's head is a wall; the others narrow to nothing."""
+    depth_at_surface = interpolated(slice_y(layer["y"], REF_DEPTH))
+    full, closed = C["HIGH_RIVER_FULL_DEPTH"], layer["closed"]
+    if "gorge" not in layer:
+        return clamp(div(sub(closed, depth_at_surface), closed - full), 0.0, 1.0)
+    gorge = layer["gorge"]
+    narrowing = clamp(add(1.0, mul(sub(depth_at_surface, full), -(1.0 - gorge) / (closed - full))), gorge, 1.0)
+    return range_choice(depth_at_surface, -1000000.0, closed, narrowing, 0.0)
+
+
+def high_river_full_half_width(layer):
+    """A layer's valley's half width by height at full activity: 0 at its bed's bottom less one, its half width at its
+    surface, and wider by its widening per block above it."""
+    y_surface, bed, top = layer["y"], layer["bed"], C["HIGH_RIVER_VALLEY_MAX_Y"]
+    return add(gradient(y_surface - bed - 1, y_surface, 0.0, layer["half_width"]),
+               gradient(y_surface, top, 0.0, (top - y_surface) * layer["widening"]))
+
+
+def high_river_across(layer):
+    """How far a block is inside a layer's valley across it: its channel's distance from the river's middle, less the
+    valley's half width there times the layer's activity; negative inside. The inputs are 2D and interpolated on the
+    terrain's cells."""
+    return cache(sub(abs_(high_river_channel()), mul(high_river_activity(layer), high_river_full_half_width(layer))))
+
+
+def high_river_valley(layer, across, below=None):
+    """A layer's valley, negative where it opens a block, NO_CUT elsewhere: in y from its bed's bottom up to
+    HIGH_RIVER_VALLEY_MAX_Y, inside its width (across). At and under its surface it opens a block where the depth at
+    its surface is above 0 (the ground's nominal surface is above its water), so it runs on over caves and dips, or
+    else where the terrain at its surface is solid, so it runs on to the ground's real edge and spills there. A layer
+    over another (below) opens nothing there inside the lower one's valley at its surface, so it ends at the lower
+    one's gorge and falls into it. The aquifer puts water where this is negative at or under the surface."""
+    y_surface, bed, top = layer["y"], layer["bed"], C["HIGH_RIVER_VALLEY_MAX_Y"]
     opened = range_choice(across, -1000000.0, 0.0, across, NO_CUT)
+    depth_at_surface = interpolated(slice_y(y_surface, REF_DEPTH))
     terrain_at_surface = interpolated(slice_y(y_surface, REF_TERRAIN))
     on_ground = range_choice(terrain_at_surface, -1000000.0, MIN_POSITIVE, NO_CUT, opened)
-    in_valley = range_choice(mc("y"), y_surface - bed - 0.5, y_surface + 0.5, on_ground, opened)
+    in_ground = range_choice(depth_at_surface, -1000000.0, MIN_POSITIVE, on_ground, opened)
+    if below is not None:
+        # the lower layer's across at this layer's surface: the same terms as its own, its half width taken at that height
+        below_at_surface = sub(abs_(high_river_channel()),
+                               mul(high_river_activity(below), slice_y(y_surface, high_river_full_half_width(below))))
+        in_ground = range_choice(below_at_surface, -1000000.0, 0.0, NO_CUT, in_ground)
+    in_valley = range_choice(mc("y"), y_surface - bed - 0.5, y_surface + 0.5, in_ground, opened)
     return range_choice(mc("y"), y_surface - bed - 0.5, top - 0.5, in_valley, NO_CUT)
 
 
 def final_density():
-    """PvFinalDensity: the interpolated terrain, scaled and squeezed, cut by the noodles and the high river's valley;
-    plus the beardifier, which 26.3 names in the data (1.21.10 added it in code)."""
+    """PvFinalDensity: the interpolated terrain, scaled and squeezed, cut by the noodles and the high river's two
+    valleys; plus the beardifier, which 26.3 names in the data (1.21.10 added it in code)."""
     terrain_interpolated = squeeze(interpolated(mul(blend_density(REF_TERRAIN), 0.64)))
-    return add(min_(min_(terrain_interpolated, REF_CORRIDOR_NOODLE), REF_VALLEY), {"type": mc("beardifier")})
+    valleys = min_(REF_VALLEY, REF_UPPER_VALLEY)
+    return add(min_(min_(terrain_interpolated, REF_CORRIDOR_NOODLE), valleys), {"type": mc("beardifier")})
 
 
 # --- ore veins (PvOreVeins, as 26.3's ore_vein material rules) -----------------------------------------------------
@@ -351,8 +388,10 @@ FUNCTIONS = {
     "overworld/caves/noodle": noodle,
     "overworld/caves/corridor_noodle": corridor_noodle,
     "overworld/high_river": lambda: noise(pv("high_river"), 0.25, 0.0),
-    "overworld/high_river/across": high_river_across,
-    "overworld/high_river/valley": high_river_valley,
+    "overworld/high_river/across": lambda: high_river_across(HIGH_RIVER),
+    "overworld/high_river/valley": lambda: high_river_valley(HIGH_RIVER, REF_ACROSS),
+    "overworld/high_river/upper_across": lambda: high_river_across(HIGH_RIVER_UPPER),
+    "overworld/high_river/upper_valley": lambda: high_river_valley(HIGH_RIVER_UPPER, REF_UPPER_ACROSS, below=HIGH_RIVER),
     "overworld/aquifer_barrier": lambda: noise(mc("aquifer_barrier"), 1.0, 0.5),
 }
 # Replaced by the functions above and gone: the kernels' inputs that only they read.
@@ -377,6 +416,7 @@ def noise_settings():
                 "surface": noise(mc("surface"), 2.0, 1.0),
                 "ramen": noise(mc("noodle"), 3.0, 3.0),
                 "high_river": REF_VALLEY,
+                "high_river_upper": REF_UPPER_VALLEY,
             },
             "fluid_level_spread": {
                 "type": pv("aquifer_spread"),
