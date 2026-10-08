@@ -183,10 +183,11 @@ class PvBiomeLayoutTest {
     }
 
     /**
-     * The weirdness rules: where the weirdness is above 0.2 and the temperature below 0, birch forests turn into sparse
-     * dappled forest, and below -0.2 into dappled taiga, and old growth birch into vanilla's dappled forest; vanilla's
-     * dappled forests turn into flower forests. Checked inside vanilla's slices away from the transitions that come
-     * first (mountainside, and for birch the frozen and humid bands). Also prints where vanilla puts these biomes.
+     * The weirdness rules: where the weirdness is positive and the temperature negative, birch forests turn into sparse
+     * dappled forest, and nearer the taigas into dappled taiga, and old growth birch into vanilla's dappled forest;
+     * vanilla's dappled forests turn into flower forests. Checked inside vanilla's slices away from the transitions that
+     * come first (mountainside, and for birch the frozen and humid bands), and both dappled biomes must turn up. Also
+     * prints where vanilla puts these biomes.
      */
     @Test
     void weirdColdBirchTurnsDappled() {
@@ -209,30 +210,33 @@ class PvBiomeLayoutTest {
                 checked.merge("dappled forest -> flower forest", 1, Integer::sum);
                 continue;
             }
-            Long weirdness = inside(h.weirdness(), 0.2F, 1.0F);
+            Long weirdness = inside(h.weirdness(), PvBiomeLayout.DAPPLED_WEIRDNESS, 1.0F);
             if (!birch && !oldGrowth || erosion == null || weirdness == null) continue;
             Long humidity = birch ? either(inside(h.humidity(), -1.0F, 0.275F), inside(h.humidity(), 0.35F, 1.0F)) : Long.valueOf(mid(h.humidity()));
             if (humidity == null) continue;
-            Long cold = birch ? either(inside(h.temperature(), -0.375F, -0.2F), inside(h.temperature(), -1.0F, -0.55F))
-                    : inside(h.temperature(), -1.0F, -0.2F);
-            Long cool = inside(h.temperature(), -0.2F, 0.0F);
+            float cold = PvBiomeLayout.DAPPLED_COLD;
+            Long coldPoint = birch ? either(inside(h.temperature(), -0.375F, cold), inside(h.temperature(), -1.0F, Math.min(cold, -0.55F)))
+                    : inside(h.temperature(), -1.0F, cold);
+            Long coolPoint = inside(h.temperature(), cold, PvBiomeLayout.DAPPLED_COOL);
             ResourceKey<Biome> coldTarget = birch ? CustomOverworldBiomes.DAPPLED_TAIGA : CustomOverworldBiomes.DAPPLED_FOREST;
             ResourceKey<Biome> coolTarget = birch ? CustomOverworldBiomes.SPARSE_DAPPLED_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
             String name = birch ? "birch forest" : "old growth birch forest";
-            if (cold != null) {
-                Climate.TargetPoint point = point(cold, humidity, mid(h.continentalness()), erosion, weirdness);
+            if (coldPoint != null) {
+                Climate.TargetPoint point = point(coldPoint, humidity, mid(h.continentalness()), erosion, weirdness);
                 assertEquals(coldTarget, layout.findValue(point), name + " at " + point);
-                checked.merge(name + " below -0.2 -> " + coldTarget.identifier().getPath(), 1, Integer::sum);
+                checked.merge(name + " cold -> " + coldTarget.identifier().getPath(), 1, Integer::sum);
             }
-            if (cool != null) {
-                Climate.TargetPoint point = point(cool, humidity, mid(h.continentalness()), erosion, weirdness);
+            if (coolPoint != null) {
+                Climate.TargetPoint point = point(coolPoint, humidity, mid(h.continentalness()), erosion, weirdness);
                 assertEquals(coolTarget, layout.findValue(point), name + " at " + point);
-                checked.merge(name + " -0.2..0 -> " + coolTarget.identifier().getPath(), 1, Integer::sum);
+                checked.merge(name + " cool -> " + coolTarget.identifier().getPath(), 1, Integer::sum);
             }
         }
         placement.forEach((biome, slices) -> System.out.printf(Locale.ROOT, "[dappled] vanilla %s, %d surface slices: %s%n", biome, slices.size(), slices));
         System.out.println("[dappled] checked slices: " + checked);
         assertTrue(checked.containsKey("dappled forest -> flower forest"), "vanilla has no dappled forest at the surface");
+        assertTrue(checked.containsKey("birch forest cold -> dappled_taiga"), "no birch forest turns into dappled taiga");
+        assertTrue(checked.containsKey("birch forest cool -> sparse_dappled_forest"), "no birch forest turns into sparse dappled forest");
     }
 
     /** The middle of the part of {@code range} between {@code from} and {@code to}, or null if it has no width there. */
