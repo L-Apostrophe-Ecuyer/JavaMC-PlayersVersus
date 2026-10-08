@@ -184,13 +184,13 @@ class PvBiomeLayoutTest {
 
     /**
      * The weirdness rules: where the weirdness is positive and the temperature negative, birch forests turn into sparse
-     * dappled forest, and nearer the taigas into dappled taiga, and old growth birch into vanilla's dappled forest;
-     * vanilla's dappled forests turn into flower forests. Checked inside vanilla's slices away from the transitions that
-     * come first (mountainside, and for birch the frozen and humid bands), and both dappled biomes must turn up. Also
-     * prints where vanilla puts these biomes.
+     * dappled forest, and nearer the taigas into dappled taiga, old growth birch into vanilla's dappled forest, and dark
+     * forest into dark taiga; vanilla's dappled forests turn into flower forests. Checked inside vanilla's slices away
+     * from the transitions that come first (mountainside, the humid band for birch and dark forest, the frozen band for
+     * birch), and every new biome must turn up. Also prints where vanilla puts these biomes.
      */
     @Test
-    void weirdColdBirchTurnsDappled() {
+    void weirdColdForestsChange() {
         Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
         Map<String, Integer> checked = new TreeMap<>();
         Map<String, Set<String>> placement = new TreeMap<>();
@@ -199,8 +199,8 @@ class PvBiomeLayoutTest {
             ResourceKey<Biome> biome = entry.getSecond();
             if (!PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
             boolean birch = biome == Biomes.BIRCH_FOREST, oldGrowth = biome == Biomes.OLD_GROWTH_BIRCH_FOREST;
-            boolean dappled = CustomOverworldBiomes.DAPPLED_FOREST.equals(biome);
-            if (!birch && !oldGrowth && !dappled && biome != Biomes.FLOWER_FOREST) continue;
+            boolean dark = biome == Biomes.DARK_FOREST, dappled = CustomOverworldBiomes.DAPPLED_FOREST.equals(biome);
+            if (!birch && !oldGrowth && !dark && !dappled && biome != Biomes.FLOWER_FOREST) continue;
             placement.computeIfAbsent(biome.identifier().getPath(), k -> new TreeSet<>()).add(String.format(Locale.ROOT,
                     "T %s H %s W %s", range(h.temperature()), range(h.humidity()), range(h.weirdness())));
             Long erosion = inside(h.erosion(), -0.4F, 1.0F);
@@ -211,16 +211,19 @@ class PvBiomeLayoutTest {
                 continue;
             }
             Long weirdness = inside(h.weirdness(), PvBiomeLayout.DAPPLED_WEIRDNESS, 1.0F);
-            if (!birch && !oldGrowth || erosion == null || weirdness == null) continue;
-            Long humidity = birch ? either(inside(h.humidity(), -1.0F, 0.275F), inside(h.humidity(), 0.35F, 1.0F)) : Long.valueOf(mid(h.humidity()));
+            if (!birch && !oldGrowth && !dark || erosion == null || weirdness == null) continue;
+            Long humidity = birch || dark ? either(inside(h.humidity(), -1.0F, 0.275F), inside(h.humidity(), 0.35F, 1.0F))
+                    : Long.valueOf(mid(h.humidity()));
             if (humidity == null) continue;
             float cold = PvBiomeLayout.DAPPLED_COLD;
             Long coldPoint = birch ? either(inside(h.temperature(), -0.375F, cold), inside(h.temperature(), -1.0F, Math.min(cold, -0.55F)))
                     : inside(h.temperature(), -1.0F, cold);
             Long coolPoint = inside(h.temperature(), cold, PvBiomeLayout.DAPPLED_COOL);
-            ResourceKey<Biome> coldTarget = birch ? CustomOverworldBiomes.DAPPLED_TAIGA : CustomOverworldBiomes.DAPPLED_FOREST;
-            ResourceKey<Biome> coolTarget = birch ? CustomOverworldBiomes.SPARSE_DAPPLED_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
-            String name = birch ? "birch forest" : "old growth birch forest";
+            ResourceKey<Biome> coldTarget = birch ? CustomOverworldBiomes.DAPPLED_TAIGA
+                    : dark ? CustomOverworldBiomes.DARK_TAIGA_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
+            ResourceKey<Biome> coolTarget = birch ? CustomOverworldBiomes.SPARSE_DAPPLED_FOREST
+                    : dark ? CustomOverworldBiomes.DARK_TAIGA_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
+            String name = birch ? "birch forest" : dark ? "dark forest" : "old growth birch forest";
             if (coldPoint != null) {
                 Climate.TargetPoint point = point(coldPoint, humidity, mid(h.continentalness()), erosion, weirdness);
                 assertEquals(coldTarget, layout.findValue(point), name + " at " + point);
@@ -237,6 +240,7 @@ class PvBiomeLayoutTest {
         assertTrue(checked.containsKey("dappled forest -> flower forest"), "vanilla has no dappled forest at the surface");
         assertTrue(checked.containsKey("birch forest cold -> dappled_taiga"), "no birch forest turns into dappled taiga");
         assertTrue(checked.containsKey("birch forest cool -> sparse_dappled_forest"), "no birch forest turns into sparse dappled forest");
+        assertTrue(checked.keySet().stream().anyMatch(key -> key.startsWith("dark forest ")), "no dark forest turns into dark taiga");
     }
 
     /** The middle of the part of {@code range} between {@code from} and {@code to}, or null if it has no width there. */
