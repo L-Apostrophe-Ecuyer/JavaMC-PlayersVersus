@@ -1,23 +1,12 @@
 # What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Mob melee, second look: the baby models and textures, the outer layers over the faces, how the zombie, skeleton and
-# piglin renderers pick their textures, and the networking and attribute calls the melee rework uses.
-find Baby
-find ResourceLoader
-sig net.minecraft.client.renderer.entity.state.UndeadRenderState
-sig net.minecraft.world.entity.ai.attributes.AttributeInstance
-sig net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-sig net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking$Context
-sig net.fabricmc.fabric.api.networking.v1.PlayerLookup
-net.minecraft.client.renderer.entity.AbstractZombieRenderer
-net.minecraft.client.renderer.entity.ZombieRenderer
-net.minecraft.client.renderer.entity.AbstractSkeletonRenderer
-net.minecraft.client.renderer.entity.PiglinRenderer
-asset textures/entity/zombie/zombie_baby.png
-asset textures/entity/zombie/husk_baby.png
-asset textures/entity/zombie/drowned_baby.png
-asset textures/entity/zombie/drowned_outer_layer.png
-asset textures/entity/skeleton/parched.png
-asset textures/entity/skeleton/stray_overlay.png
-asset textures/entity/skeleton/bogged_overlay.png
-asset textures/entity/piglin/piglin_baby.png
-asset textures/entity/piglin/zombified_piglin_baby.png
+# Mob melee, third look: adding a layer that draws angry brows over a mob's face — Fabric's layer registration, the
+# cutout model helpers on RenderLayer and the vanilla layers that use them, and the skeleton model layers.
+uses renderColoredCutoutModel
+uses coloredCutoutModelCopyLayerRender
+find SkeletonRenderer
+find ParchedRenderer
+sig net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback
+sig net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback$RegistrationHelper
+sig net.minecraft.client.renderer.SubmitNodeCollector
+net.minecraft.client.renderer.entity.layers.RenderLayer
+net.minecraft.client.renderer.entity.SkeletonRenderer
