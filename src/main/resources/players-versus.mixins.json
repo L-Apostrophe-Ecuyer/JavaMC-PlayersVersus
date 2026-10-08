@@ -111,6 +111,8 @@
 
     "mobs.hostile.MobEntityMixin",
     "mobs.hostile.MeleeAttackGoalMixin",
+    "mobs.hostile.MeleeAttackMixin",
+    "mobs.hostile.MobMeleeMixin",
     "mobs.passive.VillagerEntityMixin",
     "mobs.passive.WanderingTraderEntityMixin",
     "mobs.passive.SheepMixin",

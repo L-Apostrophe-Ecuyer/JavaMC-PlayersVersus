@@ -1,5 +1,6 @@
 package frootloops.versus.mixin.client.mobs.hostile;
 
+import frootloops.versus.mod.mobs.melee.MeleeAnimation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
@@ -31,6 +32,7 @@ public abstract class SkeletonModelMixin<S extends SkeletonRenderState> extends 
         if(renderState.pose == Pose.CROUCHING) {
             this.poseBlockingArm(this.leftArm, false);
         }
+        MeleeAnimation.poseHumanoid(this, renderState);
     }
 
     private void poseBlockingArm(ModelPart arm, boolean rightArm) {
