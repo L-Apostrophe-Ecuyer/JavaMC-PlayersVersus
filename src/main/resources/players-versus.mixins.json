@@ -29,6 +29,7 @@
     "environment.sleeping.ServerSleepingMixin",
     "environment.blocks.BlockMixin",
     "environment.blocks.CropMixin",
+    "environment.blocks.CreakingHeartBlockMixin",
     "environment.blocks.CreakingHeartBlockEntityMixin",
     "environment.blocks.SugarCaneMixin",
     "environment.blocks.LadderMixin",

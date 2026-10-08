@@ -91,6 +91,7 @@ net.minecraft.world.item.ThrowablePotionItem
 net.minecraft.world.item.enchantment.EnchantmentHelper
 net.minecraft.world.level.block.Block
 net.minecraft.world.level.block.BonemealableFeaturePlacerBlock
+net.minecraft.world.level.block.CreakingHeartBlock
 net.minecraft.world.level.block.CropBlock
 net.minecraft.world.level.block.LadderBlock
 net.minecraft.world.level.block.LeavesBlock
@@ -101,6 +102,7 @@ net.minecraft.world.level.block.TallFlowerBlock
 net.minecraft.world.level.block.TorchBlock
 net.minecraft.world.level.block.entity.BrewingStandBlockEntity
 net.minecraft.world.level.block.entity.BrushableBlockEntity
+net.minecraft.world.level.block.entity.CreakingHeartBlockEntity
 net.minecraft.world.level.levelgen.NoiseChunk
 net.minecraft.world.level.levelgen.PatrolSpawner
 net.minecraft.world.level.levelgen.RandomState
