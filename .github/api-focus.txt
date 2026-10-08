@@ -1,0 +1,6 @@
+# Classes api-probe prints straight into its log with [api-focus]: their signatures and what their methods call. A
+# "find" line lists the game's classes whose names contain its text.
+find creaking
+net.minecraft.world.level.block.CreakingHeartBlock
+net.minecraft.world.level.block.entity.CreakingHeartBlockEntity
+net.minecraft.world.entity.monster.creaking.Creaking

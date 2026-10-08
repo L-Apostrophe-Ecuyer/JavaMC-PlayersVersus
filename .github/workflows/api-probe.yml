@@ -79,6 +79,20 @@ jobs:
           python3 .github/api-calls.py probe/calls-raw.txt > probe/out/calls.txt
           rm probe/calls-raw.txt
           wc -l probe/out/calls.txt
+      # With [api-focus] (and [api], which runs this job): the signatures and call summaries (api-calls.py) of only the
+      # classes in .github/api-focus.txt, and the game's classes whose names contain a "find" line's text, printed
+      # straight into this job's log.
+      - name: a few classes, in this log
+        if: contains(github.event.head_commit.message, '[api-focus]')
+        run: |
+          cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
+          classes=$(grep -v -e '^\s*#' -e '^find ' .github/api-focus.txt | grep -v '^\s*$')
+          echo "-----BEGIN FOCUS-----"
+          grep '^find ' .github/api-focus.txt | cut -d' ' -f2- | while read -r text; do grep -i -F -- "$text" probe/out/classes.txt || true; done
+          javap -p -cp "$cp" $classes 2>&1 || true
+          javap -c -p -cp "$cp" $classes > probe/focus-raw.txt 2>&1 || true
+          python3 .github/api-calls.py probe/focus-raw.txt
+          echo "-----END FOCUS-----"
       # A job log can only be read back 5,000 lines at a time, so the result goes out in parts of 4,000 lines, one job each.
       - name: split the result
         run: |
