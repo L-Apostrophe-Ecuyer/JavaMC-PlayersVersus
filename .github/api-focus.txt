@@ -1,6 +1,52 @@
-# Classes api-probe prints straight into its log with [api-focus]: their signatures and what their methods call. A
-# "find" line lists the game's classes whose names contain its text.
-find creaking
-net.minecraft.world.level.block.CreakingHeartBlock
-net.minecraft.world.level.block.entity.CreakingHeartBlockEntity
-net.minecraft.world.entity.monster.creaking.Creaking
+# What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
+# Mob melee: the goal and the brain behaviour and who uses them, the swing and entity events, the humanoid models,
+# render states and renderer the animations go through, and the faces of the mobs that get an angry look.
+uses net/minecraft/world/entity/ai/behavior/MeleeAttack
+uses net/minecraft/world/entity/ai/goal/MeleeAttackGoal
+find HumanoidMobRenderer
+find ZombieRenderer
+find SkeletonRenderer
+find PiglinRenderer
+find VindicatorRenderer
+find DrownedModel
+find RenderLayerRegistration
+find RenderState
+assets textures/entity/zombie
+assets textures/entity/skeleton
+assets textures/entity/piglin
+assets textures/entity/illager
+asset textures/entity/zombie/zombie.png
+asset textures/entity/zombie/husk.png
+asset textures/entity/zombie/drowned.png
+asset textures/entity/skeleton/skeleton.png
+asset textures/entity/skeleton/stray.png
+asset textures/entity/skeleton/wither_skeleton.png
+asset textures/entity/skeleton/bogged.png
+asset textures/entity/piglin/piglin.png
+asset textures/entity/piglin/piglin_brute.png
+asset textures/entity/piglin/zombified_piglin.png
+asset textures/entity/illager/vindicator.png
+sig net.minecraft.world.entity.LivingEntity
+sig net.minecraft.world.entity.Mob
+sig net.minecraft.world.entity.EntityEvent
+sig net.minecraft.client.model.AnimationUtils
+sig net.minecraft.client.model.geom.ModelPart
+sig net.minecraft.client.renderer.entity.layers.RenderLayer
+sig net.minecraft.client.renderer.entity.state.EntityRenderState
+sig net.minecraft.client.renderer.entity.state.LivingEntityRenderState
+sig net.minecraft.client.renderer.entity.state.ArmedEntityRenderState
+sig net.minecraft.client.renderer.entity.state.HumanoidRenderState
+sig net.minecraft.client.renderer.entity.state.ZombieRenderState
+sig net.minecraft.client.renderer.entity.state.SkeletonRenderState
+sig net.minecraft.client.renderer.entity.state.PiglinRenderState
+sig net.minecraft.client.renderer.entity.state.IllagerRenderState
+net.minecraft.world.entity.ai.goal.MeleeAttackGoal
+net.minecraft.world.entity.ai.behavior.MeleeAttack
+net.minecraft.client.model.HumanoidModel
+net.minecraft.client.model.monster.zombie.ZombieModel
+net.minecraft.client.model.monster.skeleton.SkeletonModel
+net.minecraft.client.model.monster.piglin.AbstractPiglinModel
+net.minecraft.client.model.monster.piglin.PiglinModel
+net.minecraft.client.model.monster.illager.IllagerModel
+net.minecraft.client.renderer.entity.HumanoidMobRenderer
+net.minecraft.client.renderer.entity.LivingEntityRenderer
