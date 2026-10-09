@@ -1,10 +1,45 @@
 # What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Mob melee, heavy attacks as a crouch, a leap and a crit: the crit's sound, particles and animate packet, how the
-# player lands one, and a mob's jump strength.
-uses PLAYER_ATTACK_CRIT
-uses JUMP_STRENGTH
-uses sendToTrackingPlayersAndSelf
-sig net.minecraft.network.protocol.game.ClientboundAnimatePacket
-sig net.minecraft.core.particles.ParticleTypes
-sig net.minecraft.world.entity.LivingEntity
-net.minecraft.world.entity.player.Player
+# Spiders that climb any surface, scarier creakings, blinder wardens: 26.3's pathfinding (node evaluators, navigation,
+# move control), the spider's renderer and model, the creaking's brain, the enderman's teleport, and the warden's
+# brain and its sniffing, digging, emerging and sonic boom.
+find SpiderModel
+find SpiderRenderer
+find EnderMan
+find Sniffing
+find Digging
+find Emerging
+find SonicBoom
+find NodeEvaluator
+uses net/minecraft/world/entity/ai/navigation/WallClimberNavigation
+sig net.minecraft.world.level.pathfinder.NodeEvaluator
+sig net.minecraft.world.level.pathfinder.WalkNodeEvaluator
+sig net.minecraft.world.level.pathfinder.PathfindingContext
+sig net.minecraft.world.level.pathfinder.Node
+sig net.minecraft.world.level.pathfinder.PathType
+sig net.minecraft.world.level.pathfinder.Path
+sig net.minecraft.world.level.pathfinder.PathFinder
+sig net.minecraft.network.syncher.EntityDataSerializers
+sig com.mojang.blaze3d.vertex.PoseStack
+sig net.minecraft.world.entity.ai.memory.WalkTarget
+sig net.minecraft.world.entity.ai.behavior.BlockPosTracker
+sig net.minecraft.world.entity.monster.warden.AngerManagement
+sig net.minecraft.world.entity.ai.Brain
+sig net.minecraft.world.entity.monster.creaking.Creaking$CreakingPathNavigation
+sig net.minecraft.world.entity.monster.creaking.Creaking$HomeNodeEvaluator
+net.minecraft.world.level.pathfinder.FlyNodeEvaluator
+net.minecraft.world.entity.ai.navigation.PathNavigation
+net.minecraft.world.entity.ai.navigation.FlyingPathNavigation
+net.minecraft.world.entity.ai.navigation.WallClimberNavigation
+net.minecraft.world.entity.ai.control.MoveControl
+net.minecraft.world.entity.monster.spider.Spider
+net.minecraft.client.renderer.entity.SpiderRenderer
+net.minecraft.world.entity.monster.creaking.CreakingAi
+net.minecraft.world.entity.monster.EnderMan
+net.minecraft.world.entity.monster.enderman.EnderMan
+net.minecraft.world.entity.monster.warden.Warden
+net.minecraft.world.entity.monster.warden.WardenAi
+net.minecraft.world.entity.ai.behavior.warden.Sniffing
+net.minecraft.world.entity.ai.behavior.warden.Digging
+net.minecraft.world.entity.ai.behavior.warden.Emerging
+net.minecraft.world.entity.ai.behavior.warden.SonicBoom
+net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach
