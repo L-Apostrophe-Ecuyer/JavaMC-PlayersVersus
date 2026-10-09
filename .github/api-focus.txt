@@ -1,12 +1,10 @@
 # What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Mob melee, third look: adding a layer that draws angry brows over a mob's face — Fabric's layer registration, the
-# cutout model helpers on RenderLayer and the vanilla layers that use them, and the skeleton model layers.
-uses renderColoredCutoutModel
-uses coloredCutoutModelCopyLayerRender
-find SkeletonRenderer
-find ParchedRenderer
-sig net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback
-sig net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback$RegistrationHelper
-sig net.minecraft.client.renderer.SubmitNodeCollector
-net.minecraft.client.renderer.entity.layers.RenderLayer
-net.minecraft.client.renderer.entity.SkeletonRenderer
+# Mob melee, heavy attacks as a crouch, a leap and a crit: the crit's sound, particles and animate packet, how the
+# player lands one, and a mob's jump strength.
+uses PLAYER_ATTACK_CRIT
+uses JUMP_STRENGTH
+uses sendToTrackingPlayersAndSelf
+sig net.minecraft.network.protocol.game.ClientboundAnimatePacket
+sig net.minecraft.core.particles.ParticleTypes
+sig net.minecraft.world.entity.LivingEntity
+net.minecraft.world.entity.player.Player
