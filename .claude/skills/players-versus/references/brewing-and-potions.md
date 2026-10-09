@@ -27,10 +27,11 @@ vanilla items are disabled and swapped on every stack).
   1. `water + ingredient → base potion`.
   2. `base potion + Concentrate of Decay → Decay potion` (every potion has a corrupted/decay path).
   3. If the potion has a "long" variant in the internal `brewablePotionTypes` map: `base + sugar →
-     long`, **and** `awkward + ingredient → long` (a shortcut skipping the base potion entirely),
+     long`, **and** `thick + ingredient → long` (a shortcut skipping the base potion entirely),
      plus `long + Concentrate of Decay → Decay (long)`.
-  4. If it has a "strong" variant: same pattern with glowstone dust / thick potion, and a strong
-     decay variant.
+  4. If it has a "strong" variant: `base + glowstone dust → strong` and `awkward + ingredient → strong`
+     (note the pairing: thick, made with glowstone, shortcuts to *long*; awkward, made with sugar, to
+     *strong*), and a strong decay variant.
   5. If it has an **inverted** potion (its "opposite", e.g. Healing↔Harming, Haste↔Mining Fatigue,
      Leaping↔Slow Falling, Luck↔Unluck, Regeneration↔Decay): `base + fermented spider eye → inverted`,
      with the long/strong variants inverted the same way if both sides define them — **this is the
