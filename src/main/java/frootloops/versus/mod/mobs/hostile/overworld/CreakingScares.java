@@ -18,11 +18,13 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Scarier creakings. One stuck for a few seconds, chasing something it can't get to, teleports like an enderman once
- * nobody's looking at it: somewhere near its target that no player can see, within reach of its heart. And hitting one
+ * nobody's looking at it: somewhere near its target that no player can see, within reach of its heart. Hitting one
  * is a gamble: {@link #VANISH_CHANCE} of the time the attacker goes blind and the creaking is gone; otherwise a
- * silverfish crawls out of it.
+ * silverfish crawls out of it. And its own hits land twice as hard as vanilla's.
  */
 public final class CreakingScares {
+    /** Twice vanilla's 3. */
+    public static final double ATTACK_DAMAGE = 6.0;
     public static final float VANISH_CHANCE = 0.4F;
     static final int BLINDNESS_TICKS = 80;
     /** Ticks without getting anywhere before a creaking counts as stuck, and before it may teleport again. */

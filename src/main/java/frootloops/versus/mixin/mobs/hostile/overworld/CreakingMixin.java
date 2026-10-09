@@ -5,6 +5,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.creaking.Creaking;
@@ -18,7 +20,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Creakings that teleport when stuck and nobody's looking, and that answer a hit with blindness or a silverfish ({@link CreakingScares}). */
+/**
+ * Creakings that hit twice as hard, teleport when stuck and nobody's looking, and answer a hit with blindness or a
+ * silverfish ({@link CreakingScares}).
+ */
 @Mixin(Creaking.class)
 public abstract class CreakingMixin extends Monster {
 
@@ -56,6 +61,12 @@ public abstract class CreakingMixin extends Monster {
             this.playersVersus$teleportCooldown = CreakingScares.TELEPORT_COOLDOWN;
             this.playersVersus$stuckAt = this.position();
         }
+    }
+
+    /** The builder keeps the last value added for an attribute. */
+    @Inject(method = "createAttributes", at = @At("RETURN"))
+    private static void playersVersus$hitTwiceAsHard(CallbackInfoReturnable<AttributeSupplier.Builder> info) {
+        info.getReturnValue().add(Attributes.ATTACK_DAMAGE, CreakingScares.ATTACK_DAMAGE);
     }
 
     @Inject(method = "hurtServer", at = @At("RETURN"))

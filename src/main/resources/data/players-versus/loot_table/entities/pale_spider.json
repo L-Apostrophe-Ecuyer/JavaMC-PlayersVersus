@@ -1,0 +1,104 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:cobweb",
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 0,
+              "max": 2
+            },
+            "add": false,
+            "type": "minecraft:set_count"
+          }
+        }
+      ],
+      "condition": {
+        "entity": "this",
+        "predicate": {
+          "flags": {
+            "is_baby": false
+          }
+        },
+        "type": "minecraft:entity_properties"
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:spider_eye",
+          "condition": {
+            "chance": 0.2,
+            "type": "minecraft:random_chance"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:string",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 2
+              },
+              "add": false,
+              "type": "minecraft:set_count"
+            },
+            {
+              "enchantment": "minecraft:looting",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 1
+              },
+              "type": "minecraft:enchanted_count_increase"
+            }
+          ],
+          "condition": {
+            "term": {
+              "predicate": {
+                "source_entity": {
+                  "entity_type": "minecraft:frog"
+                }
+              },
+              "type": "minecraft:damage_source_properties"
+            },
+            "type": "minecraft:inverted"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:concentrate_of_leaping",
+          "modifier": {
+            "count": 1,
+            "add": false,
+            "type": "minecraft:set_count"
+          },
+          "condition": {
+            "predicate": {
+              "source_entity": {
+                "entity_type": "minecraft:frog"
+              }
+            },
+            "type": "minecraft:damage_source_properties"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "players-versus:entities/pale_spider"
+}
