@@ -70,7 +70,8 @@ public abstract class WanderingTraderEntityMixin extends AbstractVillager implem
             if(experience > 0 && this.getTradingPlayer() instanceof ServerPlayer serverPlayer) {
                 experience = 0;
                 ServerLevel serverWorld = serverPlayer.level();
-                if(!WorldTime.hasRaids(serverWorld) || !serverWorld.dimensionType().hasSkyLight() || WorldTime.dayTime(serverWorld) > 12000L) return;
+                // Only by day: the clock isn't wrapped at a day, so the time of day is its remainder.
+                if(!WorldTime.hasRaids(serverWorld) || !serverWorld.dimensionType().hasSkyLight() || WorldTime.dayTime(serverWorld) % 24000L > 12000L) return;
 
                 boolean doesTraderWantToSettleDown = serverWorld.isVillage(this.blockPosition());
                 if(!doesTraderWantToSettleDown) {
@@ -81,6 +82,8 @@ public abstract class WanderingTraderEntityMixin extends AbstractVillager implem
 
                 if (doesTraderWantToSettleDown) {
                     Villager villagerEntity = this.convertTo(EntityTypes.VILLAGER, ConversionParams.single(this, true, true), stray -> {});
+                    // Null once the trader has settled: a shift-click keeps trading after the first trade converted it.
+                    if (villagerEntity == null) return;
 
                     int randomProfessionIndex = this.random.nextInt(10);
                     ResourceKey<VillagerProfession> profession = (randomProfessionIndex < 6) ? VillagerProfession.NONE : (randomProfessionIndex < 8) ? VillagerProfession.CARTOGRAPHER : (randomProfessionIndex < 9) ? VillagerProfession.FISHERMAN : VillagerProfession.FARMER;

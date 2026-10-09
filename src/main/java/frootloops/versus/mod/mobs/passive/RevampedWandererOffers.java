@@ -1,6 +1,7 @@
 package frootloops.versus.mod.mobs.passive;
 
 import com.google.common.collect.ImmutableList;
+import frootloops.versus.mod.items_and_effects.CustomBrewingItems;
 import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.BuyItemFactory;
 import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.Factory;
 import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellEnchantedToolFactory;
@@ -23,7 +24,7 @@ public class RevampedWandererOffers {
                                     new RevampedTradeFactories.BuyItemFactory(createPotion(Potions.WATER), 2, 1, 1),
                                     new BuyItemFactory(Items.WATER_BUCKET, 1, 2, 1, 2),
                                     new BuyItemFactory(Items.MILK_BUCKET, 1, 2, 1, 2),
-                                    new BuyItemFactory(Items.FERMENTED_SPIDER_EYE, 1, 2, 1, 3),
+                                    new BuyItemFactory(CustomBrewingItems.CORRUPTED_WART_POWDER, 1, 2, 1, 3), // Fermented spider eyes' replacement
                                     new BuyItemFactory(Items.BAKED_POTATO, 4, 2, 1),
                                     new BuyItemFactory(Items.HAY_BLOCK, 1, 2, 1)
                             },

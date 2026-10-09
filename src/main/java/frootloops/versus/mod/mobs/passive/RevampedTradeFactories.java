@@ -35,6 +35,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
+import net.minecraft.world.item.crafting.BrewingRecipe;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
@@ -52,7 +53,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RevampedTradeFactories {
@@ -291,21 +294,19 @@ public class RevampedTradeFactories {
         @Override
         public MerchantOffer create(Entity entity, RandomSource random) {
             ItemCost tradedItem = new ItemCost(Items.EMERALD, this.price);
-            ItemStack itemStack = new ItemStack(this.sell);
-            if (itemStack.has(DataComponents.DYED_COLOR)) {
-                List<DyeColor> list = Lists.<DyeColor>newArrayList();
+            // Everything sold here is leather. 26.x dyes whatever it's given (1.21's dyeable item tag is gone), and an
+            // undyed item has no dyed color to look for, so there's nothing to check first.
+            List<DyeColor> list = Lists.<DyeColor>newArrayList();
+            list.add(getDye(random));
+            if (random.nextFloat() > 0.7F) {
                 list.add(getDye(random));
-                if (random.nextFloat() > 0.7F) {
-                    list.add(getDye(random));
-                }
-
-                if (random.nextFloat() > 0.8F) {
-                    list.add(getDye(random));
-                }
-
-                itemStack = DyedItemColor.applyDyes(itemStack, list);
             }
 
+            if (random.nextFloat() > 0.8F) {
+                list.add(getDye(random));
+            }
+
+            ItemStack itemStack = DyedItemColor.applyDyes(new ItemStack(this.sell), list);
             return new MerchantOffer(tradedItem, itemStack, this.maxUses, this.experience, 0.2F);
         }
 
@@ -477,16 +478,32 @@ public class RevampedTradeFactories {
 
         @Override
         public MerchantOffer create(Entity entity, RandomSource random) {
+            if (!(entity.level() instanceof ServerLevel world)) return null;
             ItemCost tradedItem = new ItemCost(Items.EMERALD, this.price);
+            Set<ResourceKey<Potion>> brewable = brewablePotions(world);
             List<Holder<Potion>> list = BuiltInRegistries.POTION.listElements()
-                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && !entry.value().getEffects().getFirst().getEffect().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
+                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && brewable.contains(entry.key()) && !entry.value().getEffects().getFirst().getEffect().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
                     .collect(Collectors.toList());
+            if (list.isEmpty()) return null;
             Holder<Potion> registryEntry = Util.getRandom(list, random);
             ItemStack itemStack = new ItemStack(this.sell.getItem(), this.sellCount);
             itemStack.set(DataComponents.POTION_CONTENTS, new PotionContents(registryEntry));
             return new MerchantOffer(
                     tradedItem, Optional.of(new ItemCost(this.secondBuy, this.secondCount)), itemStack, this.maxUses, this.experience, this.priceMultiplier
             );
+        }
+
+        /**
+         * The potions the brewing stand's recipes make: what 1.21's {@code isBrewable} checked, before brewing became
+         * recipes, so tipped arrows only carry potions players can brew.
+         */
+        private static Set<ResourceKey<Potion>> brewablePotions(ServerLevel world) {
+            return world.recipeAccess().getRecipes().stream()
+                    .filter(recipe -> recipe.value() instanceof BrewingRecipe)
+                    .map(recipe -> ((BrewingRecipe) recipe.value()).getOutput().get(DataComponents.POTION_CONTENTS))
+                    .filter(Objects::nonNull)
+                    .flatMap(contents -> contents.potion().flatMap(Holder::unwrapKey).stream())
+                    .collect(Collectors.toSet());
         }
     }
 
