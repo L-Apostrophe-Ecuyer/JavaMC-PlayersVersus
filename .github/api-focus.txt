@@ -1,46 +1,10 @@
 # What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Brewing in code: how 26.3 loads recipes as a reloadable registry and indexes them (the recipe manager and map, the
-# brewing stand's property sets), the brewing recipe, its potion ingredient and fuel, the brewing stand and its menu,
-# vanilla's brewing recipes (their provider and files), and the recipe and loot mixins of Fabric API.
-find RegistryLoadTask
-find Brewing
-find mixin/recipe
-find mixin/loot
-uses net/minecraft/world/item/crafting/BrewingRecipe
-uses net/minecraft/world/item/crafting/PotionIngredient
-uses net/minecraft/world/item/component/BrewingFuel
-uses BREWING_FUEL
-uses RELOADABLE_REGISTRIES
-assets ../../data/minecraft/recipe
-sig net.minecraft.world.item.ItemStackTemplate
-sig net.minecraft.core.component.predicates.PotionsPredicate
-sig net.minecraft.world.item.crafting.Recipe$CommonInfo
-sig net.minecraft.world.item.crafting.Recipe
-sig net.minecraft.world.item.crafting.Ingredient
-sig net.minecraft.core.HolderLookup
-sig net.minecraft.core.HolderLookup$RegistryLookup
-sig net.minecraft.core.HolderGetter
-sig net.minecraft.core.WritableRegistry
-sig net.minecraft.core.MappedRegistry
-sig net.minecraft.core.Holder$Reference
-sig net.minecraft.core.RegistrationInfo
-net.minecraft.server.ReloadableServerRegistries
-net.minecraft.server.ReloadableServerResources
-net.minecraft.resources.RegistryLoadTask
-net.minecraft.resources.RegistryDataLoader
-net.minecraft.world.item.crafting.RecipeManager
-net.minecraft.world.item.crafting.RecipeManager$IngredientCollector
-net.minecraft.world.item.crafting.RecipeMap
-net.minecraft.world.item.crafting.BrewingRecipe
-net.minecraft.world.item.crafting.PotionIngredient
-net.minecraft.world.item.component.BrewingFuel
-net.minecraft.world.level.block.entity.BrewingStandBlockEntity
-net.minecraft.world.inventory.BrewingStandMenu
-net.minecraft.world.inventory.BrewingStandMenu$FuelSlot
-net.minecraft.world.inventory.BrewingStandMenu$IngredientsSlot
-net.minecraft.world.inventory.BrewingStandMenu$PotionSlot
-net.minecraft.client.gui.screens.inventory.BrewingStandScreen
-net.minecraft.data.recipes.packs.VanillaBrewingProvider
-net.minecraft.data.recipes.BrewingProvider
-net.minecraft.data.recipes.BrewingProvider$ContainerTransformation
-net.minecraft.data.recipes.BrewingRecipeBuilder
+# Brewing in code, second round: Fabric's recipe mixins next to a wrapped RecipeMap.create, whether a component map
+# builder removes a component set to null, which items are brewing fuel, and what the potion slots take.
+uses brewingFuel
+asset ../../data/minecraft/tags/item/brewing_potion_inputs.json
+net.fabricmc.fabric.mixin.recipe.RecipeManagerMixin
+net.fabricmc.fabric.mixin.recipe.sync.RecipeMapMixin
+net.fabricmc.fabric.mixin.recipe.sync.RecipeManagerAccessor
+net.fabricmc.fabric.mixin.item.BrewingStandBlockEntityMixin
+net.minecraft.core.component.DataComponentMap$Builder
