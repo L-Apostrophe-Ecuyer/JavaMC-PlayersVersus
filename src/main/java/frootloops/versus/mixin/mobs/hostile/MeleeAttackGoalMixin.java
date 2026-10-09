@@ -29,7 +29,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Mob melee on MeleeAttackGoal as a telegraphed swing ({@link MobMelee}): a swing starts when the target is in reach,
  * winds up (holding still at first), then strikes, hitting if the target is still in reach and in sight and missing
- * otherwise. {@code ticksUntilNextAttack} counts down the whole cycle, wind-up and recovery; mobs with a shield block
+ * otherwise. Now and then a humanoid swings heavy instead and leaps at the target, which MobMelee runs while the goal
+ * waits. {@code ticksUntilNextAttack} counts down the whole cycle, wind-up and recovery; mobs with a shield block
  * between swings.
  */
 @Mixin(MeleeAttackGoal.class)
@@ -45,11 +46,12 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     private final int TICKS_SWING_QUICK = 20;
     private final int TICKS_SWING_TOOLS = 30;
     private final int TICKS_SWING_HEAVY = 40;
+    /** How long a regular swing holds the mob still at the start of its wind-up. */
+    private final int TICKS_FREEZE = 4;
 
-    /** The swing in progress: ticks until it strikes (0 when none), its whole wind-up, and its kind. */
+    /** The regular swing in progress: ticks until it strikes (0 when none), and its whole wind-up. */
     private int windUpLeft;
     private int windUpTicks;
-    private MobMelee.Kind kind = MobMelee.Kind.REGULAR;
 
     @Shadow
     private final double speedModifier;
@@ -75,17 +77,12 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     /** A regular swing's whole cycle, wind-up and recovery: vanilla's attack interval. */
     private int getCooldownAmount() {
-        return MobMelee.windUpTicks(this.mob, MobMelee.Kind.REGULAR) + this.getRecovery();
+        return MobMelee.windUpTicks(this.mob) + this.getRecovery();
     }
 
     /** The last ticks of a cycle, when the mob aims freely again. */
     private int getEndlag() {
         return this.mob.is(EntityTypeTags.ARTHROPOD) ? 4 : 8;
-    }
-
-    /** How long a swing holds the mob still at the start of its wind-up. */
-    private int getFreezeTicks() {
-        return this.kind == MobMelee.Kind.HEAVY ? this.windUpTicks - 4 : 4;
     }
 
     @Inject(method = "canContinueToUse", at = @At("HEAD"), cancellable = true)
@@ -115,6 +112,12 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(CallbackInfo info) {
+        // Leaping (a heavy swing): MobMelee has the mob until it's back on its feet, and the cycle waits for it.
+        if (MobMelee.isLeaping(this.mob)) {
+            this.mob.setAggressive(true);
+            info.cancel();
+            return;
+        }
         LivingEntity target = this.mob.getTarget();
         if (target == null && this.windUpLeft > 0) {
             this.windUpLeft = 0;
@@ -122,9 +125,9 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         }
         if (target != null) {
 
-            // Swinging: a hit cuts a regular swing short; otherwise it holds still at first, then strikes.
+            // Swinging: a hit cuts the swing short; otherwise it holds still at first, then strikes.
             if (this.windUpLeft > 0) {
-                if (this.kind == MobMelee.Kind.REGULAR && MobMelee.interrupted(this.mob)) {
+                if (MobMelee.interrupted(this.mob)) {
                     this.windUpLeft = 0;
                     this.ticksUntilNextAttack = this.getEndlag() - 2;
                     this.mob.setAggressive(false);
@@ -132,7 +135,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                     if (DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: interrupted.");
                 } else if (--this.windUpLeft == 0) {
                     this.strike(target);
-                } else if (this.windUpTicks - this.windUpLeft <= this.getFreezeTicks() && this.mob.hurtTime < 8) {
+                } else if (this.windUpTicks - this.windUpLeft <= TICKS_FREEZE && this.mob.hurtTime < 8) {
                     this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
                     this.mob.setAggressive(true);
                     info.cancel();
@@ -204,7 +207,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         return false;
     }
 
-    /** Starts a swing once the cycle is over and the target is in reach, leaping at it if only a jump reaches. */
+    /** Starts a swing once the cycle is over and the target is in reach, jumping at it if only a jump reaches. */
     @Overwrite
     public void checkAndPerformAttack(LivingEntity target) {
         if (this.windUpLeft > 0 || this.ticksUntilNextAttack > 0) return;
@@ -222,20 +225,27 @@ public abstract class MeleeAttackGoalMixin extends Goal {
             jumping = true;
         }
 
-        // A leap is too quick for a heavy swing.
-        this.kind = jumping ? MobMelee.Kind.REGULAR : MobMelee.pickKind(this.mob);
-        this.windUpTicks = MobMelee.windUpTicks(this.mob, this.kind);
+        // Now and then a humanoid swings heavy, leaping at the target (not when already jumping at it); its recovery
+        // counts down once it's back on its feet.
+        if (!jumping && MobMelee.pickKind(this.mob, target) == MobMelee.Kind.HEAVY) {
+            MobMelee.leap(this.mob, target);
+            this.ticksUntilNextAttack = this.getRecovery();
+            this.mob.setAggressive(true);
+            if(DEBUG) VersusMod.MOD_LOGGER.warn("Leaping.");
+            return;
+        }
+        this.windUpTicks = MobMelee.windUpTicks(this.mob);
         this.windUpLeft = this.windUpTicks;
-        this.ticksUntilNextAttack = this.windUpTicks + this.getRecovery() + (this.kind == MobMelee.Kind.HEAVY ? MobMelee.HEAVY_EXTRA_RECOVERY : 0);
+        this.ticksUntilNextAttack = this.windUpTicks + this.getRecovery();
         this.mob.setAggressive(true);
-        MobMelee.windUp(this.mob, this.kind, this.windUpTicks);
-        if(DEBUG) VersusMod.MOD_LOGGER.warn("Started a " + this.kind + " swing.");
+        MobMelee.windUp(this.mob, this.windUpTicks);
+        if(DEBUG) VersusMod.MOD_LOGGER.warn("Started a swing.");
     }
 
     /** The end of the wind-up: hits if the target is still in reach and in sight; a miss takes longer to recover. */
     private void strike(LivingEntity target) {
         boolean lands = this.mob.hasLineOfSight(target) && MobMelee.reaches(this.mob, target, false);
-        if (!MobMelee.strike(getServerLevel(this.mob), this.mob, target, this.kind, lands)) {
+        if (!MobMelee.strike(getServerLevel(this.mob), this.mob, target, MobMelee.Kind.REGULAR, lands)) {
             this.ticksUntilNextAttack += MobMelee.MISS_EXTRA_RECOVERY;
         }
         if(DEBUG) VersusMod.MOD_LOGGER.warn(lands ? "Landed the swing." : "Missed.");

@@ -17,7 +17,8 @@ import org.spongepowered.asm.mixin.injection.At;
 /**
  * Brain mobs (piglins, brutes, hoglins, zoglins, the warden, the creaking) swing like goal mobs do ({@link MobMelee}):
  * where the brain's MeleeAttack would swing and hit at once, a hostile mob starts a swing that winds up and strikes
- * later, and the attack cooldown waits for it. {@code lambda$create$3} is the behaviour's trigger.
+ * later (or, for piglins now and then, a leap), and the attack cooldown waits for it. {@code lambda$create$3} is the
+ * behaviour's trigger.
  */
 @Mixin(MeleeAttack.class)
 public abstract class MeleeAttackMixin {

@@ -16,16 +16,19 @@ import net.minecraft.world.entity.Mob;
 
 /**
  * Clients animate mob swings from the server's {@link MobMeleePayload}s: a regular wind-up draws the main arm back and
- * turns that shoulder away, a heavy one raises both arms overhead; the strike swings the arm through (the vanilla swing
- * plays with it), and a miss carries the mob forward, head down, before it straightens. The brows layer shows meanwhile
+ * turns that shoulder away, and the strike swings it through (the vanilla swing plays with it). A heavy swing is a leap:
+ * the mob crouches with both arms swung back, raises them overhead in the air, and brings them down with the strike. A
+ * miss carries the mob forward, head down, before it straightens. The brows layer shows meanwhile
  * ({@link AngryBrowsLayer}). Rotations are in radians; an arm hanging down is at 0 and negative points it forward.
  */
 @Environment(EnvType.CLIENT)
 public final class MeleeAnimation {
     /** How far back a regular swing draws the main arm, and how far the body turns that shoulder away. */
     static final float DRAWN_BACK_ARM = 0.6F, DRAWN_BACK_TWIST = 0.45F;
-    /** A heavy swing raises both arms overhead, spread a little, the body leaning back. */
-    static final float HEAVY_ARMS = -3.0F, HEAVY_SPREAD = 0.25F, HEAVY_LEAN = -0.15F;
+    /** A leap's crouch swings both arms back. */
+    static final float CROUCH_ARMS = 0.9F;
+    /** In the air, both arms go up overhead, spread a little, the body leaning back. */
+    static final float RAISED_ARMS = -3.0F, RAISED_SPREAD = 0.25F, RAISED_LEAN = -0.15F;
     /** Illagers raise their weapon overhead for a regular swing. */
     static final float ILLAGER_RAISED_ARM = -3.0F;
     /** A miss's lunge at its fullest: the body tips forward as far as this much of a crouch, the head tilts down. */
@@ -57,54 +60,55 @@ public final class MeleeAnimation {
     /** Poses a humanoid (zombies, skeletons, piglins, endermen...) after its own animation. */
     public static void poseHumanoid(HumanoidModel<?> model, HumanoidRenderState state) {
         MeleeState.Look look = look(state);
-        float windUp = look.windUp();
-        if (windUp > 0.0F) {
-            if (look.heavy()) {
-                model.rightArm.xRot = Mth.lerp(windUp, model.rightArm.xRot, HEAVY_ARMS);
-                model.leftArm.xRot = Mth.lerp(windUp, model.leftArm.xRot, HEAVY_ARMS);
-                model.rightArm.zRot -= HEAVY_SPREAD * windUp;
-                model.leftArm.zRot += HEAVY_SPREAD * windUp;
-                model.body.xRot += HEAVY_LEAN * windUp;
-            } else {
-                float twist = (state.mainArm == HumanoidArm.RIGHT ? 1.0F : -1.0F) * DRAWN_BACK_TWIST * windUp;
-                model.body.yRot += twist;
-                turnShoulder(model.rightArm, twist);
-                turnShoulder(model.leftArm, twist);
-                ModelPart arm = model.getArm(state.mainArm);
-                arm.xRot = Mth.lerp(windUp, arm.xRot, DRAWN_BACK_ARM);
-            }
+        float drawBack = look.drawBack();
+        if (drawBack > 0.0F) {
+            float twist = (state.mainArm == HumanoidArm.RIGHT ? 1.0F : -1.0F) * DRAWN_BACK_TWIST * drawBack;
+            model.body.yRot += twist;
+            turnShoulder(model.rightArm, twist);
+            turnShoulder(model.leftArm, twist);
+            ModelPart arm = model.getArm(state.mainArm);
+            arm.xRot = Mth.lerp(drawBack, arm.xRot, DRAWN_BACK_ARM);
+        }
+        float crouch = look.crouch();
+        if (crouch > 0.0F) {
+            crouch(model, crouch, state.isBaby);
+            model.rightArm.xRot = Mth.lerp(crouch, model.rightArm.xRot, CROUCH_ARMS);
+            model.leftArm.xRot = Mth.lerp(crouch, model.leftArm.xRot, CROUCH_ARMS);
+        }
+        float raise = look.raise();
+        if (raise > 0.0F) {
+            model.rightArm.xRot = Mth.lerp(raise, model.rightArm.xRot, RAISED_ARMS);
+            model.leftArm.xRot = Mth.lerp(raise, model.leftArm.xRot, RAISED_ARMS);
+            model.rightArm.zRot -= RAISED_SPREAD * raise;
+            model.leftArm.zRot += RAISED_SPREAD * raise;
+            model.body.xRot += RAISED_LEAN * raise;
         }
         float lunge = look.lunge();
         if (lunge > 0.0F) {
-            // Part of a crouch, as HumanoidModel crouches, with the head dipping further.
-            float crouch = lunge * LUNGE_CROUCH * (state.isBaby ? 0.5F : 1.0F);
-            model.body.xRot += 0.5F * crouch;
-            model.body.y += 3.2F * crouch;
-            model.head.y += 4.2F * crouch;
+            crouch(model, lunge * LUNGE_CROUCH, state.isBaby);
             model.head.xRot += LUNGE_HEAD * lunge;
-            model.rightArm.y += 3.2F * crouch;
-            model.leftArm.y += 3.2F * crouch;
-            model.rightArm.xRot += 0.4F * crouch;
-            model.leftArm.xRot += 0.4F * crouch;
-            model.rightLeg.z += 4.0F * crouch;
-            model.leftLeg.z += 4.0F * crouch;
         }
     }
 
     /** Poses an illager's arms and head after its own animation; its body isn't a part of its own. */
     public static void poseIllager(ModelPart head, ModelPart rightArm, ModelPart leftArm, IllagerRenderState state) {
         MeleeState.Look look = look(state);
-        float windUp = look.windUp();
-        if (windUp > 0.0F) {
-            if (look.heavy()) {
-                rightArm.xRot = Mth.lerp(windUp, rightArm.xRot, HEAVY_ARMS);
-                leftArm.xRot = Mth.lerp(windUp, leftArm.xRot, HEAVY_ARMS);
-                rightArm.zRot -= HEAVY_SPREAD * windUp;
-                leftArm.zRot += HEAVY_SPREAD * windUp;
-            } else {
-                ModelPart arm = state.mainArm == HumanoidArm.RIGHT ? rightArm : leftArm;
-                arm.xRot = Mth.lerp(windUp, arm.xRot, ILLAGER_RAISED_ARM);
-            }
+        float drawBack = look.drawBack();
+        if (drawBack > 0.0F) {
+            ModelPart arm = state.mainArm == HumanoidArm.RIGHT ? rightArm : leftArm;
+            arm.xRot = Mth.lerp(drawBack, arm.xRot, ILLAGER_RAISED_ARM);
+        }
+        float crouch = look.crouch();
+        if (crouch > 0.0F) {
+            rightArm.xRot = Mth.lerp(crouch, rightArm.xRot, CROUCH_ARMS);
+            leftArm.xRot = Mth.lerp(crouch, leftArm.xRot, CROUCH_ARMS);
+        }
+        float raise = look.raise();
+        if (raise > 0.0F) {
+            rightArm.xRot = Mth.lerp(raise, rightArm.xRot, RAISED_ARMS);
+            leftArm.xRot = Mth.lerp(raise, leftArm.xRot, RAISED_ARMS);
+            rightArm.zRot -= RAISED_SPREAD * raise;
+            leftArm.zRot += RAISED_SPREAD * raise;
         }
         float lunge = look.lunge();
         if (lunge > 0.0F) {
@@ -112,6 +116,23 @@ public final class MeleeAnimation {
             rightArm.xRot += 0.4F * LUNGE_CROUCH * lunge;
             leftArm.xRot += 0.4F * LUNGE_CROUCH * lunge;
         }
+    }
+
+    /**
+     * Bends a humanoid {@code amount} of the way into a crouch, as HumanoidModel crouches: the body tips forward, head
+     * and arms drop with it and the legs step back (half as far on a baby's smaller parts).
+     */
+    private static void crouch(HumanoidModel<?> model, float amount, boolean baby) {
+        float offset = amount * (baby ? 0.5F : 1.0F);
+        model.body.xRot += 0.5F * amount;
+        model.body.y += 3.2F * offset;
+        model.head.y += 4.2F * offset;
+        model.rightArm.y += 3.2F * offset;
+        model.leftArm.y += 3.2F * offset;
+        model.rightArm.xRot += 0.4F * amount;
+        model.leftArm.xRot += 0.4F * amount;
+        model.rightLeg.z += 4.0F * offset;
+        model.leftLeg.z += 4.0F * offset;
     }
 
     /** Turns an arm's shoulder about the body's axis with the body, as HumanoidModel does for its own swing. */
