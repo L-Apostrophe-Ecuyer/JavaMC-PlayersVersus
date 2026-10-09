@@ -25,7 +25,7 @@ class ScarierMobsTest {
         assertTrue(hasHandler(Spider.class, "playersVersus$pathAlongSurfaces"), "spiders path as walkers");
         assertTrue(hasHandler(Spider.class, "playersVersus$crawl"), "spiders don't crawl");
         assertTrue(hasHandler(Spider.class, "playersVersus$keepGrip"), "spiders don't track their surface");
-        assertTrue(hasHandler(Spider.class, "playersVersus$defineClimbingData"), "spiders don't sync their surface");
+        assertTrue(hasHandler(Spider.class, "playersVersus$defineGripData"), "spiders don't sync their surface");
     }
 
     @Test

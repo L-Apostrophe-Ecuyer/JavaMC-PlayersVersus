@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.overworld.climbing;
+package frootloops.versus.mod.mobs.hostile.overworld.crawling;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Mob;
@@ -7,14 +7,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Spiders on any surface, as in Nyf's Spiders: they path along floors, walls and ceilings ({@link SurfaceNavigation}),
- * crawl along them without falling ({@link ClimbingMoveControl}), and clients turn their model to the surface they
- * cling to, facing the way they crawl.
+ * Spiders that crawl on any surface: they path along floors, walls and ceilings ({@link SurfaceNavigation}), crawl along
+ * them without falling ({@link CrawlingMoveControl}), and clients tilt their model onto the surface they grip, facing
+ * the way they crawl.
  *
- * <p>A face is the side of the spider's box that its surface touches: DOWN for the floor, UP for a ceiling, a
+ * <p>The grip face is the side of the spider's box that its surface touches: DOWN for the floor, UP for a ceiling, a
  * horizontal direction for a wall. The server picks one every tick and syncs it to clients.
  */
-public final class SurfaceClimbing {
+public final class SurfaceGrip {
     /** How close a block must be to a side of the spider's box to hold it. */
     static final double GRIP = 0.1;
     /** How far below a path node ground may be for the spider to walk to it rather than crawl. */
@@ -22,7 +22,7 @@ public final class SurfaceClimbing {
     /** The sides of a box are probed a little narrower than they are, so a block at a neighbouring side doesn't count. */
     private static final double INSET = 0.05;
 
-    private SurfaceClimbing() {
+    private SurfaceGrip() {
     }
 
     /** The sides of the mob's box that touch a block, as a mask of {@link #bit} values. */
@@ -58,7 +58,7 @@ public final class SurfaceClimbing {
 
     /**
      * The face the spider clings by, from the sides it touches, how it moved this tick and the face it clung by before:
-     * climbing up or down a wall takes the wall it runs along, standing on the ground takes the floor, a ceiling takes
+     * crawling up or down a wall takes the wall it runs along, standing on the ground takes the floor, a ceiling takes
      * over once the spider is under one, and otherwise it keeps to a wall it touches. Touching nothing, it's the floor.
      */
     public static Direction chooseFace(int touching, double dx, double dy, double dz, Direction previous, boolean onGround) {

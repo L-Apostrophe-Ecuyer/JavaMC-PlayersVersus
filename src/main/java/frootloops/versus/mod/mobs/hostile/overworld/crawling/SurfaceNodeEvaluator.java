@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.overworld.climbing;
+package frootloops.versus.mod.mobs.hostile.overworld.crawling;
 
 import it.unimi.dsi.fastutil.longs.Long2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
@@ -11,9 +11,9 @@ import net.minecraft.world.level.pathfinder.PathType;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Path nodes for a climber: the flyer's nodes in every direction, but only where the mob's box rests on or clings to a
+ * Path nodes for a crawler: the flyer's nodes in every direction, but only where the mob's box rests on or clings to a
  * block, on any side or around an edge, so paths run along floors, up walls and across ceilings and never through open
- * air. Walls cost a little extra and ceilings a little more, so a climber keeps to the floor when that's as short.
+ * air. Walls cost a little extra and ceilings a little more, so a crawler keeps to the floor when that's as short.
  */
 public class SurfaceNodeEvaluator extends FlyNodeEvaluator {
     static final float FLOOR_COST = 0.0F, WALL_COST = 0.5F, EDGE_COST = 0.5F, CEILING_COST = 1.0F, OFF_SURFACES = -1.0F;

@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.overworld.climbing;
+package frootloops.versus.mod.mobs.hostile.overworld.crawling;
 
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -12,7 +12,7 @@ import org.joml.Vector3fc;
  * the way out of its surface and the way it faces along it, turned toward the synced face a little each tick so the
  * model swings smoothly from floor to wall to ceiling.
  */
-public final class ClimbState {
+public final class GripState {
     /** How much of the way to the new surface, and the new heading, a client turns each tick. */
     static final float NORMAL_RATE = 0.35F, FORWARD_RATE = 0.4F;
     /** How far the heading must turn before the server syncs it again: cos 5°. */
@@ -41,7 +41,7 @@ public final class ClimbState {
      */
     @Nullable
     public static Vector3f heading(Direction face, Vec3 motion, @Nullable Vec3 toTarget) {
-        Vec3 normal = SurfaceClimbing.normal(face);
+        Vec3 normal = SurfaceGrip.normal(face);
         Vec3 along = motion.subtract(normal.scale(motion.dot(normal)));
         if (along.lengthSqr() < 1.0E-4 && toTarget != null) along = toTarget.subtract(normal.scale(toTarget.dot(normal)));
         return along.lengthSqr() < 1.0E-4 ? null : along.normalize().toVector3f();
@@ -56,7 +56,7 @@ public final class ClimbState {
     public void turnToward(Direction face, Vector3fc syncedHeading, float bodyYaw) {
         this.normalO.set(this.normal);
         this.forwardO.set(this.forward);
-        approach(this.normal, SurfaceClimbing.normal(face).toVector3f(), NORMAL_RATE);
+        approach(this.normal, SurfaceGrip.normal(face).toVector3f(), NORMAL_RATE);
         approach(this.forward, face == Direction.DOWN ? yawHeading(bodyYaw) : new Vector3f(syncedHeading), FORWARD_RATE);
     }
 

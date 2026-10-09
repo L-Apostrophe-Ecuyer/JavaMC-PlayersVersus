@@ -1,4 +1,4 @@
-package frootloops.versus.mod.mobs.hostile.overworld.climbing;
+package frootloops.versus.mod.mobs.hostile.overworld.crawling;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
@@ -8,7 +8,7 @@ import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A climber's navigation: paths in three dimensions like a flyer's, along surfaces only ({@link SurfaceNodeEvaluator}),
+ * A crawler's navigation: paths in three dimensions like a flyer's, along surfaces only ({@link SurfaceNodeEvaluator}),
  * searched twice as far since they wind over walls and ceilings, and followed node by node: a shortcut in a straight
  * line could leave the surfaces.
  */
