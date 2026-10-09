@@ -47,10 +47,7 @@
     "environment.ServerWorldWeatherMixin",
 
     "items_and_effects.brewing.BadOmenEffectInstanceMixin",
-    "items_and_effects.brewing.BrewingStandScreenHandlerMixin",
-    "items_and_effects.brewing.BrewingStandBlockEntityAccessor",
-    "items_and_effects.brewing.BrewingStandBlockEntityMixin",
-    "items_and_effects.brewing.RecipeMapMixin",
+    "items_and_effects.brewing.RecipeManagerMixin",
     "items_and_effects.brewing.VanillaStatusEffectsMixin",
 
     "items_and_effects.equipment.ArmorProtectionMixin",

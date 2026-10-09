@@ -8,7 +8,20 @@ built around **concentrates** — new craftable ingredient items, one per effect
 potions directly (`water + concentrate → potion`) and can be eaten/thrown-on-entities directly for
 a punchier, riskier, no-brewing-required version of the same effect.
 
-## Brewing graph (`BrewingSystem.setBrewingRecipeRegistry`, replaces vanilla's registry builder)
+## Brewing graph (`BrewingSystem`, brewed in code by `RecipeManagerMixin`)
+
+On 26.3 brewing is recipes (`minecraft:brewing`: a `PotionIngredient` input and reagent, an `ItemStackTemplate`
+output) in the reloadable recipe registry; `PotionBrewing` is gone. The graph still lives in code:
+`RecipeManagerMixin` (`@ModifyArg` on the `RecipeMap.create` call in `RecipeManager`'s constructor) hands the recipe
+map `BrewingSystem.replaceVanillaBrewing(recipes)`: every data pack recipe except `minecraft`-namespace brewing ones,
+plus the graph's recipes (`players-versus:brewing/<container>_<potion>_<reagent>`, ~1157 of them). Everything that asks
+the recipe manager follows, including the `BREWING_INPUTS`/`BREWING_REAGENTS` property sets that the stand's slots and
+hoppers check, and Fabric's own `RecipeMap.create` hook still runs. The recipe registry itself is untouched. Each mix
+becomes one recipe per container; each container recipe one per potion in the registry (a brewing recipe's output is a
+fixed potion). The first mix for a container, potion and reagent wins, as 1.21.x's registry did; a server log line gives
+the counts. `describeRecipes` hands out reagents through `VanillaItems.getReplacementItem`, so blaze powder, magma cream
+and the fermented spider eye brew as Concentrate of Strength, Concentrate of Fire and Corrupted Wart Powder (the
+vanilla items are disabled and swapped on every stack).
 
 - Registers ~30 `registerConcentrateRecipe(ingredient, potion)` calls, each of which:
   1. `water + ingredient → base potion`.
@@ -23,14 +36,11 @@ a punchier, riskier, no-brewing-required version of the same effect.
      with the long/strong variants inverted the same way if both sides define them — **this is the
      "corrupt any potion with a fermented spider eye" README claim**, generalized data-driven via the
      `RelatedPotions` record rather than one-off vanilla-style overrides.
-- A handful of vanilla potions keep their **original** vanilla ingredient instead of a concentrate
-  (`Items.BLAZE_POWDER` → Strength, `Items.MAGMA_CREAM` → Fire Resistance) even though both those
-  items are simultaneously being *replaced* by mod items elsewhere (`VanillaItems.ITEM_REPLACEMENT_MAP`:
-  `BLAZE_POWDER → CONCENTRATE_OF_STRENGTH`, `MAGMA_CREAM → CONCENTRATE_OF_FIRE`) — because of that
-  replacement mechanism (see `items-and-equipment.md`), these two `registerConcentrateRecipe` calls
-  passing the vanilla `Item` constant actually register the recipe against the **already-swapped**
-  concentrate item at runtime, so there's no duplication; just don't be confused reading the source
-  literally as "vanilla item brews this."
+- The graph names `Items.BLAZE_POWDER` (Strength), `Items.MAGMA_CREAM` (Fire Resistance) and
+  `Items.FERMENTED_SPIDER_EYE` (every inversion), but those vanilla items are replaced
+  (`VanillaItems.ITEM_REPLACEMENT_MAP`: Concentrate of Strength, Concentrate of Fire, Corrupted Wart Powder) and
+  disabled. `describeRecipes` resolves them to their replacements, so the recipes use the items players actually have.
+  Recipes naming the vanilla items could never brew (the 26.3 JSON recipes did, and lost all three).
 - Vanilla-untouched: Thick/Awkward from glowstone/sugar, splash/lingering conversion via
   gunpowder/redstone (unchanged from vanilla).
 - **New potion effects not in vanilla combos**: Haste/Mining Fatigue/Vulnerability/Darkness/
@@ -104,16 +114,15 @@ The placed, walkable form of a concentrate — a thin (0-height), no-collision h
 
 ## Brewing stand & nether wart
 
-- **`BrewingStandBlockEntityMixin`**: fuel now also accepts **Withered Wart** and **Corrupted
-  Wart** (`CustomBlockItems.WITHERED_WART`/`CORRUPTED_WART`) alongside vanilla Nether Wart in the
-  fuel slot (slot 4) — refuels to 21 charges. `setFuel` (`@Inject HEAD` on `tick`) duplicates part
-  of vanilla's own fuel-consumption tick logic (`brewTime % 20 == 10`) ahead of the vanilla body —
-  check this doesn't double-decrement fuel on a future MC version where vanilla's own tick timing
-  changes; it currently coexists because it mutates the same accessor-exposed field vanilla's
-  original method also touches, via `BrewingStandBlockEntityAccessor`.
-- **`isValid`** (slot filter override): input slot (3) delegates to the world's *live*
-  `BrewingRecipeRegistry` (so custom recipes above are honored for slot validity, not just brewing
-  itself); output slots (0-2) only accept empty vanilla potion item types.
+- **Fuel** is the 26.3 `BREWING_FUEL` item component (uses + speed multiplier): `VanillaItems` gives it to
+  Nether Wart (`VersusSettings.Items.BREWS_PER_NETHER_WART` brews each, speed 1) and removes it from blaze powder.
+  Vanilla's stand, fuel slot, quick-move, hoppers and fuel bar (`fuel`/`totalFuel`) then handle nether wart
+  themselves. This replaced 1.21.x's brewing-stand and menu mixins: a `tick` HEAD inject that refilled 21 "charges"
+  from nether wart and drained one a second (on 26.3 it never set `totalFuel`, which the fuel bar divides by), a
+  custom fuel slot, a quick-move redirect, and a `canPlaceItem` override. Those mixins also let Withered and
+  Corrupted Wart into the fuel slot, but only Nether Wart ever burned; neither is fuel now.
+- **Slots**: vanilla's own rules, driven by the recipes above: the reagent slot takes `BREWING_REAGENTS`, the
+  potion slots the `brewing_potion_inputs` tag (potions and glass bottles) or `BREWING_INPUTS`.
 - **`NetherWartMixin`** (target `NetherWartBlock`, covers Nether Wart's growth stage state machine):
   outside ultrawarm dimensions, wart below light level 10 turns into **Withered Wart** (a stalled,
   presumably lower-value state — see `blocks-and-environment.md` for the block itself); a mature
@@ -125,8 +134,8 @@ The placed, walkable form of a concentrate — a thin (0-height), no-collision h
   turns out to be implemented via ambient light/biome temperature checks elsewhere, since this
   mixin alone shows *darkness withering* and a *separate* random corruption chance, not a
   heat-accelerates-growth mechanic — don't assume this file is the whole "needs heat" story.
-- **`BrewingRecipeRegistryMixin`** / **`VanillaStatusEffectsMixin`** / **`BadOmenEffectInstanceMixin`**
-  exist alongside these (not read in this pass — see file paths) for registry-building plumbing,
+- **`VanillaStatusEffectsMixin`** / **`BadOmenEffectInstanceMixin`**
+  exist alongside these (not read in this pass — see file paths) for
   vanilla status-effect tweaks, and Bad Omen/raid interaction (`VersusSettings.Gameplay.DO_RAIDS_OUTSIDE_VILLAGES`
   gate lives in `BadOmenEffectInstanceMixin`, per `architecture.md`'s settings grep) — read those
   directly before changing raid or vanilla-status-effect behavior; not re-verified in this pass.

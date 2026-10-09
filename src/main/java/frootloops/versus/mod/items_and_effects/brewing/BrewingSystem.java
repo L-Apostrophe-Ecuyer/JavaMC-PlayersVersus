@@ -1,23 +1,48 @@
 package frootloops.versus.mod.items_and_effects.brewing;
 
 
+import com.mojang.serialization.Lifecycle;
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.CustomBrewingItems;
+import frootloops.versus.mod.items_and_effects.VanillaItems;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.predicates.PotionsPredicate;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.crafting.BrewingRecipe;
+import net.minecraft.world.item.crafting.PotionIngredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * The brewing recipe graph of Players Versus: which ingredient turns which potion into which (strong, long, inverted and
  * decayed variants, one concentrate per effect), and the vanilla container recipes.
  *
- * <p>Since 26.3 brewing is data (recipes of type {@code minecraft:brewing}) instead of a registry that mods add mixes
- * to, so this class no longer registers anything by itself: it describes the graph to a {@link Recipes} sink, which the
- * data step turns into recipes. The potions themselves are registered by {@link CustomPotions#registerCustomPotions}.
+ * <p>Since 26.3 brewing is recipes (type {@code minecraft:brewing}) instead of a registry that mods add mixes to. The
+ * graph stays in code all the same: {@link #replaceVanillaBrewing} turns it into brewing recipes whenever the recipe
+ * manager loads, in place of vanilla's ({@code RecipeManagerMixin}), as the 1.21.x registry builder did. The potions
+ * themselves are registered by {@link CustomPotions#registerCustomPotions}; nether wart is the brewing stand's fuel
+ * ({@code VanillaItems}).
  */
 public abstract class BrewingSystem {
 
@@ -29,6 +54,11 @@ public abstract class BrewingSystem {
     }
 
     private record RelatedPotions(Holder<Potion> strongPotion, Holder<Potion> longPotion,  Holder<Potion> invertedPotion) {}
+
+    private record Mix<T>(T from, Item ingredient, T to) {}
+
+    /** A potion in a container with a reagent: what a brewing recipe brews. */
+    private record Brew(Item container, Holder<Potion> potion, Item reagent) {}
 
     private static volatile Set<Item> ingredients;
 
@@ -57,7 +87,108 @@ public abstract class BrewingSystem {
         return known.contains(item);
     }
 
-    public static void describeRecipes(Recipes builder) {
+    /**
+     * The recipes for the recipe manager to index: the data packs' but vanilla's brewing recipes, then the graph's. A data
+     * pack recipe keeps its id should one of the graph's have it too.
+     */
+    public static HolderLookup<Recipe<?>> replaceVanillaBrewing(HolderLookup<Recipe<?>> recipes) {
+        MappedRegistry<Recipe<?>> replaced = new MappedRegistry<>(Registries.RECIPE, Lifecycle.stable());
+        int vanillaBrewing = 0;
+        for (Holder.Reference<Recipe<?>> recipe : recipes.listElements().toList()) {
+            if (recipe.value().getType() == RecipeType.BREWING && recipe.key().identifier().getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) vanillaBrewing++;
+            else replaced.register(recipe.key(), recipe.value(), RegistrationInfo.BUILT_IN);
+        }
+        Map<ResourceKey<Recipe<?>>, BrewingRecipe> graph = createRecipes();
+        graph.forEach((key, recipe) -> {
+            if (!replaced.containsKey(key)) replaced.register(key, recipe, RegistrationInfo.BUILT_IN);
+        });
+        VersusMod.MOD_LOGGER.info("Brewing: {} recipes from the brewing graph, in place of vanilla's {}", graph.size(), vanillaBrewing);
+        return replaced;
+    }
+
+    /**
+     * The graph as brewing recipes, the way vanilla's brewing provider writes its own: each mix in each container, and
+     * each container recipe for each potion. As with 1.21.x's registry, the first mix of a potion with a reagent is the
+     * one that brews. Ids read like vanilla's: brewing/potion_water_concentrate_of_speed.
+     */
+    private static Map<ResourceKey<Recipe<?>>, BrewingRecipe> createRecipes() {
+        List<Item> containers = new ArrayList<>();
+        List<Mix<Holder<Potion>>> potionMixes = new ArrayList<>();
+        List<Mix<Item>> containerMixes = new ArrayList<>();
+        describeRecipes(new Recipes() {
+            @Override
+            public void addContainer(Item container) {
+                containers.add(container);
+            }
+
+            @Override
+            public void addMix(Holder<Potion> from, Item ingredient, Holder<Potion> to) {
+                potionMixes.add(new Mix<>(from, ingredient, to));
+            }
+
+            @Override
+            public void addContainerRecipe(Item from, Item ingredient, Item to) {
+                containerMixes.add(new Mix<>(from, ingredient, to));
+            }
+        });
+
+        Map<Brew, BrewingRecipe> brews = new LinkedHashMap<>();
+        for (Mix<Holder<Potion>> mix : potionMixes) {
+            for (Item container : containers) addBrew(brews, container, mix.from(), mix.ingredient(), container, mix.to());
+        }
+        // A brewing recipe has one potion for an output, so a container recipe is a recipe for each potion.
+        for (Mix<Item> mix : containerMixes) {
+            BuiltInRegistries.POTION.listElements().forEach(potion -> addBrew(brews, mix.from(), potion, mix.ingredient(), mix.to(), potion));
+        }
+
+        Map<ResourceKey<Recipe<?>>, BrewingRecipe> recipes = new LinkedHashMap<>();
+        brews.forEach((brew, recipe) -> {
+            String path = "brewing/" + BuiltInRegistries.ITEM.getKey(brew.container()).getPath()
+                    + "_" + brew.potion().unwrapKey().orElseThrow().identifier().getPath()
+                    + "_" + BuiltInRegistries.ITEM.getKey(brew.reagent()).getPath();
+            ResourceKey<Recipe<?>> key = recipeKey(path);
+            // Potions and items of different mods can share a path.
+            for (int n = 2; recipes.containsKey(key); n++) key = recipeKey(path + "_" + n);
+            recipes.put(key, recipe);
+        });
+        return recipes;
+    }
+
+    private static void addBrew(Map<Brew, BrewingRecipe> brews, Item container, Holder<Potion> potion, Item reagent, Item outputContainer, Holder<Potion> output) {
+        brews.computeIfAbsent(new Brew(container, potion, reagent), brew -> new BrewingRecipe(
+                PotionIngredient.of(container, PotionsPredicate.ofPotion(potion)),
+                PotionIngredient.of(reagent),
+                new ItemStackTemplate(outputContainer, DataComponentPatch.builder().set(DataComponents.POTION_CONTENTS, new PotionContents(output)).build())));
+    }
+
+    private static ResourceKey<Recipe<?>> recipeKey(String path) {
+        return ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, path));
+    }
+
+    /**
+     * Describes the graph to {@code recipes}, with the reagents the mod replaces (blaze powder, magma cream, the fermented
+     * spider eye) as their replacements: the items players have.
+     */
+    public static void describeRecipes(Recipes recipes) {
+        describeGraph(new Recipes() {
+            @Override
+            public void addContainer(Item container) {
+                recipes.addContainer(container);
+            }
+
+            @Override
+            public void addMix(Holder<Potion> from, Item ingredient, Holder<Potion> to) {
+                recipes.addMix(from, VanillaItems.getReplacementItem(ingredient), to);
+            }
+
+            @Override
+            public void addContainerRecipe(Item from, Item ingredient, Item to) {
+                recipes.addContainerRecipe(from, VanillaItems.getReplacementItem(ingredient), to);
+            }
+        });
+    }
+
+    private static void describeGraph(Recipes builder) {
 
         // Generate recipes:
         HashMap<Holder<Potion>, RelatedPotions> brewablePotionTypes = new HashMap<>() {{

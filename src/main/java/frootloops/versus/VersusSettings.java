@@ -43,6 +43,7 @@ public abstract class VersusSettings {
         public static float EAT_TIME_VEGGIES = 1.2F;
         public static float EAT_TIME_POISON = 2.4F;
         public static float EAT_TIME_LIQUIDS = 1.0F;
+        public static int BREWS_PER_NETHER_WART = 1; // Nether wart is the brewing stand's fuel
     }
 
 }

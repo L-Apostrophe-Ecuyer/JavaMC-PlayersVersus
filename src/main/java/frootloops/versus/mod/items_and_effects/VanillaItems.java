@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MinecartItem;
 import net.minecraft.world.item.component.BlocksAttacks;
+import net.minecraft.world.item.component.BrewingFuel;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.UseRemainder;
@@ -38,6 +39,8 @@ import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.storage.loot.providers.number.floats.ResolvableFloat;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +90,11 @@ public class VanillaItems {
 
             // Give turtle helmets more buffs:
             context.modify(Items.TURTLE_HELMET, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createTurtleArmorAttributes(ArmorType.HELMET, 2.0));});
+
+            // Nether wart fuels brewing stands instead of blaze powder; the stand's fuel slot, hoppers and fuel bar follow:
+            context.modify(Items.NETHER_WART, builder -> {builder.set(DataComponents.BREWING_FUEL, new BrewingFuel(
+                    new ResolvableInt.Constant(VersusSettings.Items.BREWS_PER_NETHER_WART), new ResolvableFloat.Constant(1.0F)));});
+            context.modify(Items.BLAZE_POWDER, builder -> {builder.set(DataComponents.BREWING_FUEL, null);});
         });
     }
 
