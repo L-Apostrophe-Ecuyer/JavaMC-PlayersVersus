@@ -2,6 +2,12 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
 import frootloops.versus.mod.environment.WorldTime;
+import frootloops.versus.mod.mobs.hostile.overworld.climbing.ClimbState;
+import frootloops.versus.mod.mobs.hostile.overworld.climbing.ClimbingMoveControl;
+import frootloops.versus.mod.mobs.hostile.overworld.climbing.ClimbingSpider;
+import frootloops.versus.mod.mobs.hostile.overworld.climbing.SurfaceClimbing;
+import frootloops.versus.mod.mobs.hostile.overworld.climbing.SurfaceNavigation;
+import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
@@ -20,6 +26,7 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.minecraft.world.entity.monster.spider.Spider;
@@ -34,16 +41,28 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
 @Mixin(Spider.class)
-public class SpiderMixin extends Monster {
+public class SpiderMixin extends Monster implements ClimbingSpider {
     private static final EntityDataAccessor<Boolean> BABY = SynchedEntityData.defineId(Spider.class, EntityDataSerializers.BOOLEAN);
+    /** The face a spider clings by, and the way it faces along a wall or ceiling (SurfaceClimbing). */
+    @Unique
+    private static final EntityDataAccessor<Direction> ATTACH_FACE = SynchedEntityData.defineId(Spider.class, EntityDataSerializers.DIRECTION);
+    @Unique
+    private static final EntityDataAccessor<Vector3fc> CLIMB_HEADING = SynchedEntityData.defineId(Spider.class, EntityDataSerializers.VECTOR3);
+
+    @Unique
+    private final ClimbState playersVersus$climb = new ClimbState();
 
     private static final Identifier BABY_SCALE_MODIFIER_ID = Identifier.withDefaultNamespace("baby");
     private static final AttributeModifier BABY_SCALE_MODIFIER  = new AttributeModifier(BABY_SCALE_MODIFIER_ID, -0.5, AttributeModifier.Operation.ADD_VALUE);
@@ -150,6 +169,74 @@ public class SpiderMixin extends Monster {
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     private void addBabyData(SynchedEntityData.Builder builder, CallbackInfo ci) {
         builder.define(BABY, false);
+    }
+
+    /**
+     *  - SPIDERS CLIMB ANY SURFACE
+     * As in Nyf's Spiders: they path along floors, walls and ceilings, crawl along them without falling, and turn
+     * their body to the surface they cling to (SurfaceClimbing).
+     */
+    @Inject(method = "defineSynchedData", at = @At("TAIL"))
+    private void playersVersus$defineClimbingData(SynchedEntityData.Builder builder, CallbackInfo ci) {
+        builder.define(ATTACH_FACE, Direction.DOWN);
+        builder.define(CLIMB_HEADING, new Vector3f(0.0F, 0.0F, 1.0F));
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void playersVersus$crawl(EntityType<? extends Spider> type, Level level, CallbackInfo ci) {
+        this.moveControl = new ClimbingMoveControl(this);
+    }
+
+    @Inject(method = "createNavigation", at = @At("HEAD"), cancellable = true)
+    private void playersVersus$pathAlongSurfaces(Level level, CallbackInfoReturnable<PathNavigation> cir) {
+        cir.setReturnValue(new SurfaceNavigation(this, level));
+    }
+
+    /** After moving: the server picks the face the spider clings by and its heading; clients turn the model toward them. */
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void playersVersus$keepGrip(CallbackInfo ci) {
+        Direction face = this.getEntityData().get(ATTACH_FACE);
+        if (this.level().isClientSide()) {
+            this.playersVersus$climb.turnToward(face, this.getEntityData().get(CLIMB_HEADING), this.yBodyRot);
+            return;
+        }
+        int touching = SurfaceClimbing.touching(this);
+        this.playersVersus$climb.setTouching(touching);
+        Vec3 motion = new Vec3(this.getX() - this.xo, this.getY() - this.yo, this.getZ() - this.zo);
+        face = SurfaceClimbing.chooseFace(touching, motion.x, motion.y, motion.z, face, this.onGround());
+        this.getEntityData().set(ATTACH_FACE, face);
+        if (face == Direction.DOWN) return;
+        LivingEntity target = this.getTarget();
+        Vector3f heading = ClimbState.heading(face, motion, target == null ? null : target.position().subtract(this.position()));
+        if (heading != null && ClimbState.worthSyncing(this.getEntityData().get(CLIMB_HEADING), heading)) {
+            this.getEntityData().set(CLIMB_HEADING, heading);
+        }
+    }
+
+    /** Legs move with the distance crawled up and down walls too. */
+    @Override
+    public void calculateEntityAnimation(boolean includeHeight) {
+        super.calculateEntityAnimation(includeHeight || this.getEntityData().get(ATTACH_FACE) != Direction.DOWN);
+    }
+
+    @Override
+    public Direction playersVersus$attachFace() {
+        return this.getEntityData().get(ATTACH_FACE);
+    }
+
+    @Override
+    public int playersVersus$touching() {
+        return this.playersVersus$climb.touching();
+    }
+
+    @Override
+    public Vector3f playersVersus$surfaceNormal(float partialTick) {
+        return this.playersVersus$climb.normal(partialTick);
+    }
+
+    @Override
+    public Vector3f playersVersus$surfaceForward(float partialTick) {
+        return this.playersVersus$climb.forward(partialTick);
     }
 
     @Override

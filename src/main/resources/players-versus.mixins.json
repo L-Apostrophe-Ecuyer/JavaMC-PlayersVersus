@@ -93,6 +93,7 @@
     "mobs.hostile.illager.WitchMixin",
     "mobs.hostile.illager.RaidMixin",
 
+    "mobs.hostile.overworld.CreakingMixin",
     "mobs.hostile.overworld.CreeperMixin",
     "mobs.hostile.overworld.DrownedMixin",
     "mobs.hostile.overworld.PhantomAccessor",
