@@ -14,7 +14,10 @@ empty when the layout gives up — the client then leaves the inventory as it is
 one `InventorySorter` with its own `SortingLists` and `SortingGroups`, so **nothing carries over
 between sorts** (the pre-26.3 code kept static singletons, which leaked the Deep Dark block lock,
 potion flags and leftover stacks into later sorts — duplicated and ghost stacks, "a hotbar of torches
-and food"). Group sizes are always read from their lists; never add counters.
+and food"). Group sizes are always read from their lists; never add counters. The input is first put in a
+fixed order (item, count, components), so the layout depends only on which stacks there are and sorting a
+sorted inventory changes nothing. A sort that throws, or a layout that doesn't hold every slot exactly once,
+returns empty.
 
 - `ItemSlot(slotId, stack, itemType, name)` — `ItemSlot.of(slotId, stack)` works out the type
   (`ItemClassifier.typeOf`) and shown name once.
@@ -40,6 +43,8 @@ Stages, in `InventorySorter.layOut`:
    - A hotbar with no weapon and no tool takes a whole tool row (exactly 9: pickaxe, axe, shovel, hoe,
      then shears group) instead, its items going back to their groups; without one, the best tool of
      the first tool group that has one joins it.
+   - The hotbar never takes another group once it holds 9 stacks (`tryCombiningTwoGroups` would read
+     9 % 9 as empty), and gives back misc stacks past nine (`MainHotbarGroup.trimTo`).
    - Food, light, clutch item, potion, extra weapon and building block as before, with the Deep Dark
      (hoe/shears, vibration-blocking wool), Nether and water rules.
 3. **Clean up groups** (`cleanUpGroups`, `cleanUpToolGroup`, `giveExtraToolsFromAndTo`, `cleanUpMisc`):
