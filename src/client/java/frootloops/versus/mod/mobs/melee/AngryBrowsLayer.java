@@ -46,9 +46,9 @@ public class AngryBrowsLayer<S extends LivingEntityRenderState, M extends Entity
     /** Adds the brows to the mobs whose faces they fit; baby zombies' faces put the eyes on the same pixels. */
     static void register() {
         LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
-            if (type == EntityTypes.ZOMBIE || type == EntityTypes.HUSK || type == EntityTypes.PARCHED || type == ModEntities.PALE_ZOMBIE) {
+            if (type == EntityTypes.ZOMBIE || type == EntityTypes.HUSK || type == EntityTypes.PARCHED) {
                 add(helper, renderer, HUMANOID, HUMANOID);
-            } else if (type == EntityTypes.SKELETON || type == EntityTypes.WITHER_SKELETON) {
+            } else if (type == EntityTypes.SKELETON || type == EntityTypes.WITHER_SKELETON || type == ModEntities.PALE_ZOMBIE) {
                 add(helper, renderer, HUMANOID_64X32, HUMANOID_64X32);
             } else if (type == EntityTypes.PIGLIN || type == EntityTypes.PIGLIN_BRUTE || type == EntityTypes.ZOMBIFIED_PIGLIN) {
                 add(helper, renderer, PIGLIN, PIGLIN_BABY);
