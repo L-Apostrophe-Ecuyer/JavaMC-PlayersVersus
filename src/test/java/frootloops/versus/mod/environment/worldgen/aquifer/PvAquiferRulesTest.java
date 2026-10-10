@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BANDS_KEPT_FROM_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_MAX_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.DRY_PATH_SHELL;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_UPPER_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_UPPER_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
@@ -130,6 +131,28 @@ class PvAquiferRulesTest {
         assertEquals(PvAquiferDecision.AIR, atPosition(BASIN_MIN_Y, 0.0, 0.0, -1.0));
         // the sea's water and band come first
         assertEquals(PvAquiferDecision.SEA_BARRIER, atPosition(10, 0.2, 0.0, -1.0));
+    }
+
+    /**
+     * The dry noodles' surroundings stay dry in the basin layers, even at their bottom, where the basins flood
+     * everything (S 0 is over the water threshold there), and the corridors' water doesn't wall them shut; the sea's
+     * water still comes first.
+     */
+    @Test
+    void dryPathsLeadDownThroughTheBasins() {
+        PvAquiferRules.Field sea = (x, y, z) -> 0.0, basins = (x, y, z) -> 0.0, noCorridor = (x, y, z) -> 1.0;
+        PvAquiferRules.Field path = (x, y, z) -> x == 0 ? -0.02 : x == 1 ? DRY_PATH_SHELL : 1.0;
+        for (int y = BASIN_MIN_Y + 1; y < BASIN_MIN_Y + 6; y++) {
+            assertTrue(PvAquiferRules.isWater(PvAquiferRules.atPosition(2, y, 0, sea, basins, noCorridor, path)), "y " + y);
+            assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(0, y, 0, sea, basins, noCorridor, path), "y " + y);
+            assertEquals(PvAquiferDecision.AIR, PvAquiferRules.atPosition(1, y, 0, sea, basins, noCorridor, path), "y " + y);
+        }
+        assertEquals(PvAquiferDecision.SEA_WATER, PvAquiferRules.atPosition(0, 10, 0, (x, y, z) -> 1.0, basins, noCorridor, path));
+        // the path's block beside its shell stays air; the shell's beside the water gets the wall
+        int y = BASIN_MIN_Y + 2;
+        Neighbourhood around = new Neighbourhood().put(2, y, 0, PvAquiferDecision.BASIN_WATER);
+        assertEquals(PvAquiferDecision.AIR, around.decide(0, y, 0));
+        assertEquals(PvAquiferDecision.BASIN_BARRIER, around.decide(1, y, 0));
     }
 
     @Test
