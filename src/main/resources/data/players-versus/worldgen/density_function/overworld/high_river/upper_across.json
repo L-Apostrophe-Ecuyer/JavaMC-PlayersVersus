@@ -14,28 +14,55 @@
     "right": {
       "type": "minecraft:mul",
       "left": {
-        "type": "minecraft:clamp",
-        "input": {
-          "type": "minecraft:div",
-          "left": {
-            "type": "minecraft:sub",
-            "left": 0.15,
-            "right": {
-              "type": "minecraft:interpolated",
-              "cell_size_xz": 4,
-              "cell_size_y": 8,
-              "input": {
-                "type": "minecraft:slice",
-                "axis": "y",
-                "coordinate": 96,
-                "input": "players-versus:overworld/depth"
-              }
-            }
+        "type": "minecraft:min",
+        "left": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:div",
+            "left": {
+              "type": "minecraft:sub",
+              "left": {
+                "type": "minecraft:interpolated",
+                "cell_size_xz": 4,
+                "cell_size_y": 8,
+                "input": {
+                  "type": "minecraft:slice",
+                  "axis": "y",
+                  "coordinate": 96,
+                  "input": "players-versus:overworld/depth"
+                }
+              },
+              "right": 0.0
+            },
+            "right": 0.05
           },
-          "right": 0.04999999999999999
+          "min": 0.0,
+          "max": 1.0
         },
-        "min": 0.0,
-        "max": 1.0
+        "right": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:div",
+            "left": {
+              "type": "minecraft:sub",
+              "left": 0.15,
+              "right": {
+                "type": "minecraft:interpolated",
+                "cell_size_xz": 4,
+                "cell_size_y": 8,
+                "input": {
+                  "type": "minecraft:slice",
+                  "axis": "y",
+                  "coordinate": 96,
+                  "input": "players-versus:overworld/depth"
+                }
+              }
+            },
+            "right": 0.04999999999999999
+          },
+          "min": 0.0,
+          "max": 1.0
+        }
       },
       "right": {
         "type": "minecraft:add",
