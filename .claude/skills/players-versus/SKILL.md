@@ -37,13 +37,13 @@ require re-reading the others first.
 | [`blocks-and-environment.md`](references/blocks-and-environment.md) | Custom block registry, mud/clay moisture hazard system, torch burn-out, sleep/lunar fast-forward mechanic, weather timing rework, archaeology speed-up |
 | [`worldgen-engine.md`](references/worldgen-engine.md) | **The most volatile subsystem.** The Players Versus world type, gated aquifer/ore-vein hook, biome layout, `/pvwg` debug tools, worldgen-smoke CI, doc-vs-code status table — points to `docs/worldgen-refactor-plan.md` for full design detail |
 | [`worldgen-content-and-structures.md`](references/worldgen-content-and-structures.md) | Custom biomes/features directory map, vanilla-namespace worldgen override blast-radius warning, Trial Towers / Desert Pyramids / Cold Trail Ruins / zombie villages |
-| [`inventory-sorting.md`](references/inventory-sorting.md) | Client-side sorting algorithm (lists→groups→row-assembly), hotbar swap/cycle, container quick-dump |
+| [`inventory-sorting.md`](references/inventory-sorting.md) | Inventory sorting (common-code `InventorySorter`: lists→groups→hotbar rules→row layout; client SWAP clicks via `MovePlanner`), its game tests, hotbar swap/cycle, container quick-dump |
 | [`data-and-assets.md`](references/data-and-assets.md) | Data/asset directory map (2405 JSON files), vanilla-vs-mod-namespace override distinction, recommended (not-yet-run) validation checks |
 | [`porting-and-history.md`](references/porting-and-history.md) | Branch-per-version model, version-bump checklist, what breaks first on a port, repo hygiene |
 
 ## Quick facts
 - **Build**: `export JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot"; export PATH="$JAVA_HOME/bin:$PATH"; ./gradlew build` — confirmed passing (~2 min), ~39 cosmetic `@Overwrite`-javadoc warnings expected.
-- **Tests**: `./gradlew test` (JUnit 5, worldgen regression suite only, server-side classpath).
+- **Tests**: `./gradlew test` (JUnit 5, server-side classpath). Game tests: `./gradlew runGameTest -Ppv.acceptEula=true` (Fabric game test server; skipped without the property); CI runs them in the `gametest` workflow.
 - **Read vanilla/Fabric API source**: `./gradlew genSources`, then browse `.gradle/loom-cache/**/*-sources.jar`.
 - Source sets: `src/main` (common/server), `src/client` (client-only), `src/test` (JUnit, worldgen-only, added recently).
 - `mixin/` and `mod/` both mirror the same taxonomy: `players/`, `enchantments/`, `environment/{blocks,worldgen,sleeping,archeology}/`, `items_and_effects/{brewing,equipment,throwing}/`, `mobs/{hostile/{end,nether,overworld,illager},passive}/`.
