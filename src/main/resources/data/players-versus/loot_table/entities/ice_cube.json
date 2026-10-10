@@ -2,21 +2,20 @@
   "type": "minecraft:entity",
   "pools": [
     {
-      "condition": {
-        "type": "minecraft:inverted",
-        "term": {
-          "type": "minecraft:entity_properties",
-          "entity": "this",
-          "predicate": {
-            "minecraft:type_specific/cube_mob": {
-              "size": 1
-            }
-          }
-        }
-      },
       "entries": [
         {
           "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:type_specific/cube_mob": {
+                "size": {
+                  "min": 2
+                }
+              }
+            }
+          },
           "modifier": [
             {
               "type": "minecraft:set_count",
