@@ -1,48 +1,47 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
-# of line. 26.4-snapshot-3's ice caves, frostbite, freezing and ice balls, its slimes and leaves: for replacing the frosted
-# zombie and caves with vanilla's, the Ice Cube, the freezing concentrate and the leaves' rustling.
-find frostbite
-find freez
-find icicle
-find iceball
-find ice_ball
-find icecrystal
-find soundset
-find SoundType
-findsig frostbite
-findsig freezing
-findsig iceball
-findsig cubemob
-findsig SlimeRenderer
-findsig SlimeModel
-findsig SlimeOuterLayer
-findsig SlimeRenderState
-findsig LeavesBlock
-findcalls frostbite
-findcalls freezing
-findcalls cubemob/Slime
-member net.minecraft.world.effect.MobEffects FREEZ
-member net.minecraft.world.item.alchemy.Potions FREEZ|FIRE
-member net.minecraft.world.level.biome.Biomes ICE|FROZEN
-member net.minecraft.world.entity.EntityTypes FROST|SLIME|MAGMA|SULFUR
-member net.minecraft.world.item.Items ICE|FROST|SNOWBALL|SLIME_SPAWN
-member net.minecraft.world.level.block.Blocks ICICLE|CRYSTAL|_ICE
-member net.minecraft.tags.BiomeTags ICE|FROZEN|SNOW|COLD
-member net.minecraft.tags.EntityTypeTags FREEZ|ZOMBIE
-member net.minecraft.tags.BlockTags LEAVES|PATHFINDING
-member net.minecraft.core.particles.ParticleTypes LEAVES|FREEZ|SNOW|ITEM_
-member net.minecraft.sounds.SoundEvents LEAVES|LEAF_LITTER|AZALEA|GRASS_STEP|FROSTBITE|ICE_BALL|FREEZ
-member net.minecraft.client.model.geom.ModelLayers SLIME|FROSTBITE
-member net.minecraft.world.level.Level LeafTint|playLocalSound|addParticle
-member net.minecraft.client.multiplayer.ClientLevel LeafTint|playLocalSound|addParticle
-sig net.minecraft.util.ParticleUtils
-sig net.minecraft.world.level.block.SoundType
-assets textures/entity/slime
-assets textures/entity/zombie
-assets particles
-asset textures/entity/slime/slime.png
-asset textures/item/slime_spawn_egg.png
-data worldgen/biome/ice_caves.json
-data loot_table/entities/frostbite.json
-data loot_table/entities/slime.json
-data tags/entity_type/freeze_immune_entity_types.json
+# of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
+# Port to 26.4-snapshot-3, round 2: what replaced the members the mod's code still uses.
+# Block sounds are a registry of sound sets since 26.4-snapshot-3.
+sig net.minecraft.world.level.block.sounds.BlockSoundSet
+sig net.minecraft.world.level.block.sounds.BlockSoundSets
+sig net.minecraft.tags.BlockSoundSetTags
+member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase sound|spawnAfterBreak|getDrops
+member net.minecraft.world.level.block.state.BlockBehaviour$Properties sound
+member net.minecraft.world.level.block.Block getDrops|dropResources|sound|playerDestroy
+calls net.minecraft.world.entity.Entity ^playStepSound$|^playMuffledStepSound$
+calls net.minecraft.world.level.block.Block ^playerDestroy$|^dropResources$
+# DyeColor kept only its id and name.
+find Dye
+member net.minecraft.world.level.material.MapColor dye
+calls net.minecraft.world.entity.monster.Shulker colou?r|variant
+# The worldgen debug tools.
+sig net.minecraft.world.level.levelgen.structure.StructureStart
+member net.minecraft.world.level.chunk.ChunkAccess biome
+member net.minecraft.world.level.biome.BiomeSource debug|resolver
+sig net.minecraft.world.level.biome.NoiseBiomeResolver
+member net.minecraft.world.level.levelgen.NoiseGeneratorSettings sea|aquifer|lava
+findsig Speleothem
+# Spawning the Ice Cube, and zombies freezing into frostbites.
+member net.minecraft.world.entity.monster.Monster spawn|dark
+member net.minecraft.world.level.block.LevelEvent zombie|frostbite|drowned
+calls net.minecraft.world.entity.monster.zombie.Zombie onFreeze|[Ff]rost|[Cc]onvert
+# The debug screen, rebuilt in 26.4-snapshot-2.
+sig net.minecraft.client.gui.components.DebugScreenOverlay
+calls net.minecraft.client.gui.components.DebugScreenOverlay ^extract
+findsig components/debug/DebugColumn
+# Projectiles: snowballs and ice balls share a base since 26.4-snapshot-3.
+findsig ThrowableBallProjectile
+sig net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile
+sig net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball
+# Data the mod's own worldgen files follow.
+datadiff data/minecraft/worldgen/noise_settings/overworld.json
+datadiff data/minecraft/worldgen/material_rule/overworld.json
+datadiff data/minecraft/worldgen/material_rule/overworld/underground.json
+datadiff data/minecraft/worldgen/material_rule/overworld/biome_surface.json
+datadiff data/minecraft/worldgen/material_rule/overworld/under_biome_surface.json
+datadiff data/minecraft/worldgen/biome/plains.json
+datadiff data/minecraft/worldgen/biome/lush_caves.json
+datadiff data/minecraft/worldgen/feature/large_dripstone.json
+datadiff data/minecraft/dimension_type/overworld.json
+datadiff data/minecraft/tags/block/speleothems.json
+datadiff data/minecraft/worldgen/placed_feature/brown_mushroom_normal.json

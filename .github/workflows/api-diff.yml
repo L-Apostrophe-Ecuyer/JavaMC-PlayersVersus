@@ -63,17 +63,18 @@ jobs:
           distribution: 'microsoft'
       - name: download both client jars
         run: bash .github/fetch-client.sh "$OLD" old && bash .github/fetch-client.sh "$NEW" new
-      - name: what the mixin targets' methods call, OLD against NEW
+      - name: the mod's mixins against OLD and NEW
         run: |
+          python3 .github/mixin-check.py targets src/main/java src/client/java > targets.txt
+          wc -l targets.txt
           for v in old new; do
-            grep -v '^\s*#' .github/api-calls.txt | grep -v '^\s*$' | xargs -n 100 javap -c -p -cp $v/client.jar > $v/calls-raw.txt 2>&1 || true
+            xargs -n 100 javap -p -s -cp $v/client.jar < targets.txt > $v/members.txt 2>&1 || true
+            xargs -n 100 javap -c -p -cp $v/client.jar < targets.txt > $v/calls-raw.txt 2>&1 || true
             # Lambdas are numbered by order in the class: drop the numbers so a new lambda doesn't renumber the rest.
             python3 .github/api-calls.py $v/calls-raw.txt | sed -E 's/lambda\$([A-Za-z0-9_]+)\$[0-9]+/lambda$\1$N/g' > $v/calls.txt
           done
-          wc -l old/calls.txt new/calls.txt
           echo "-----BEGIN MIXINS-----"
-          grep -h 'class not found' old/calls-raw.txt new/calls-raw.txt | sort | uniq -c || true
-          diff -U2 old/calls.txt new/calls.txt || true
+          python3 .github/mixin-check.py check old new src/main/java src/client/java
           echo "-----END MIXINS-----"
 
   signatures:
@@ -124,6 +125,9 @@ jobs:
               *) echo "== $f: changed (binary)" ;;
             esac
           done
+          grep '^datadiff ' .github/api-focus.txt | cut -d' ' -f2- | while read -r f; do
+            echo "== datadiff $f"; diff -U2 "old/jar/$f" "new/jar/$f" | tail -n +3 | head -300 || true
+          done
           echo "-----END OVERRIDES-----"
 
   focus:
@@ -152,13 +156,24 @@ jobs:
           focus() { grep "^$1 " .github/api-focus.txt | cut -d' ' -f2- || true; }
           # Classes (binary names) whose simple or package name contains the text, without anonymous classes.
           matching() { grep -i -F -- "$1" new/classes.txt | grep -v '\$[0-9]' | sed 's|/|.|g'; }
-          classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|sig|member|uses|assets|asset|data) ' .github/api-focus.txt || true)
+          classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|calls|sig|member|uses|assets|asset|data|datadiff) ' .github/api-focus.txt || true)
           echo "-----BEGIN FOCUS-----"
           focus find | while read -r text; do echo "== find $text"; grep -i -F -- "$text" new/classes.txt new/fabric-classes.txt || true; done
           focus findsig | while read -r text; do echo "== findsig $text"; m=$(matching "$text"); [ -n "$m" ] && javap -p -constants -cp "$cp" $m 2>&1 | grep -v '^Compiled from'; done
           focus findcalls | while read -r text; do
             echo "== findcalls $text"; m=$(matching "$text")
             if [ -n "$m" ]; then javap -c -p -cp "$cp" $m > new/findcalls-raw.txt 2>&1 || true; python3 .github/api-calls.py new/findcalls-raw.txt; fi
+          done
+          focus calls | while read -r cls regex; do
+            echo "== calls $cls $regex"; javap -c -p -cp "$cp" "$cls" > new/one-raw.txt 2>&1 || true
+            python3 .github/api-calls.py new/one-raw.txt | python3 -c 'import re, sys
+          keep = False
+          for line in sys.stdin:
+              if line.startswith("  ") and not line.startswith("    "):
+                  name = re.search(r"([\w$<>]+)\(", line)
+                  keep = bool(name and re.search(sys.argv[1], name.group(1)))
+              if keep:
+                  sys.stdout.write(line)' "$regex"
           done
           focus member | while read -r cls text; do echo "== member $cls $text"; javap -p -constants -cp "$cp" "$cls" 2>&1 | grep -i -E -- "$text" || true; done
           focus uses | while read -r name; do echo "== uses $name"; (cd new/jar && grep -rlF --include='*.class' -- "$name" . | sed 's|^\./||; s|\.class$||' | sort) || true; done
