@@ -6,11 +6,11 @@
     "X": "minecraft:copper_ingot"
   },
   "pattern": [
-    "XX",
-    " #",
-    " #"
+    "  X",
+    " # ",
+    "#  "
   ],
   "result": {
-    "id": "players-versus:copper_hoe"
+    "id": "minecraft:copper_spear"
   }
 }

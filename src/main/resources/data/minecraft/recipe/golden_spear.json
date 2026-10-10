@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "golden_tools",
+  "key": {
+    "#": "minecraft:stick",
+    "X": "minecraft:gold_ingot"
+  },
+  "pattern": [
+    "  X",
+    " # ",
+    "#  "
+  ],
+  "result": {
+    "id": "minecraft:golden_spear"
+  }
+}
