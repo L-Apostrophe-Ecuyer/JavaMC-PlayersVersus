@@ -60,7 +60,7 @@ public class CustomOverworldBiomes {
             new PlacedBiome(Biomes.LUSH_CAVES, PlacedBiomeType.SURFACE_CAVE, true, Climate.Parameter.span(-0.3f, 0.7f), Climate.Parameter.span(-0.4f, 1.1f), Climate.Parameter.span(0.35f, 0.5f), Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-0.4f, -0.2f)),
             new PlacedBiome(Biomes.DRIPSTONE_CAVES, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.0f, 0.7f), defaultParameter, Climate.Parameter.span(0.4f, 1.0f), Climate.Parameter.span(-0.8f, 0.0f), Climate.Parameter.span(-0.75f, 0.3f)),
             new PlacedBiome(Biomes.DEEP_DARK, PlacedBiomeType.DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, Climate.Parameter.span(-1.0f, -0.8f), defaultParameter),
-            new PlacedBiome(PALE_GROTTO, PlacedBiomeType.CAVE, true, Climate.Parameter.span(-0.45f, 0.2f), Climate.Parameter.span(0.275f, 1.0f), defaultParameter, defaultParameter, defaultParameter),
+            new PlacedBiome(PALE_GROTTO, PlacedBiomeType.CAVE, true, Climate.Parameter.span(-0.45f, 0.2f), Climate.Parameter.span(0.275f, 1.0f), Climate.Parameter.span(0.0f, 1.0f), Climate.Parameter.span(-0.4f, 1.0f), defaultParameter),
 
             new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, Climate.Parameter.span(-0.7f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter)
