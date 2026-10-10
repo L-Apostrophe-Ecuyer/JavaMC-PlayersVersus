@@ -58,7 +58,7 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
             if(this.isBlock()) {
                 BlockState thisState = ((BlockItem)this.stack.getItem()).getBlock().defaultBlockState();
                 BlockState otherState = ((BlockItem)other.stack.getItem()).getBlock().defaultBlockState();
-                if(thisState.getSoundType() == otherState.getSoundType()) {
+                if(thisState.getSounds().equals(otherState.getSounds())) {
                     if(strict) return true;
                     else return thisState.getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col == otherState.getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col;
                 }

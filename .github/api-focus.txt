@@ -1,47 +1,14 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Port to 26.4-snapshot-3, round 2: what replaced the members the mod's code still uses.
-# Block sounds are a registry of sound sets since 26.4-snapshot-3.
-sig net.minecraft.world.level.block.sounds.BlockSoundSet
-sig net.minecraft.world.level.block.sounds.BlockSoundSets
-sig net.minecraft.tags.BlockSoundSetTags
-member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase sound|spawnAfterBreak|getDrops
-member net.minecraft.world.level.block.state.BlockBehaviour$Properties sound
-member net.minecraft.world.level.block.Block getDrops|dropResources|sound|playerDestroy
-calls net.minecraft.world.entity.Entity ^playStepSound$|^playMuffledStepSound$
-calls net.minecraft.world.level.block.Block ^playerDestroy$|^dropResources$
-# DyeColor kept only its id and name.
-find Dye
-member net.minecraft.world.level.material.MapColor dye
-calls net.minecraft.world.entity.monster.Shulker colou?r|variant
-# The worldgen debug tools.
-sig net.minecraft.world.level.levelgen.structure.StructureStart
-member net.minecraft.world.level.chunk.ChunkAccess biome
-member net.minecraft.world.level.biome.BiomeSource debug|resolver
-sig net.minecraft.world.level.biome.NoiseBiomeResolver
-member net.minecraft.world.level.levelgen.NoiseGeneratorSettings sea|aquifer|lava
-findsig Speleothem
-# Spawning the Ice Cube, and zombies freezing into frostbites.
-member net.minecraft.world.entity.monster.Monster spawn|dark
-member net.minecraft.world.level.block.LevelEvent zombie|frostbite|drowned
-calls net.minecraft.world.entity.monster.zombie.Zombie onFreeze|[Ff]rost|[Cc]onvert
-# The debug screen, rebuilt in 26.4-snapshot-2.
-sig net.minecraft.client.gui.components.DebugScreenOverlay
-calls net.minecraft.client.gui.components.DebugScreenOverlay ^extract
-findsig components/debug/DebugColumn
-# Projectiles: snowballs and ice balls share a base since 26.4-snapshot-3.
-findsig ThrowableBallProjectile
-sig net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile
-sig net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball
-# Data the mod's own worldgen files follow.
-datadiff data/minecraft/worldgen/noise_settings/overworld.json
-datadiff data/minecraft/worldgen/material_rule/overworld.json
-datadiff data/minecraft/worldgen/material_rule/overworld/underground.json
-datadiff data/minecraft/worldgen/material_rule/overworld/biome_surface.json
-datadiff data/minecraft/worldgen/material_rule/overworld/under_biome_surface.json
-datadiff data/minecraft/worldgen/biome/plains.json
-datadiff data/minecraft/worldgen/biome/lush_caves.json
-datadiff data/minecraft/worldgen/feature/large_dripstone.json
-datadiff data/minecraft/dimension_type/overworld.json
-datadiff data/minecraft/tags/block/speleothems.json
-datadiff data/minecraft/worldgen/placed_feature/brown_mushroom_normal.json
+# Port to 26.4-snapshot-3, round 3.
+# MeleeAttackMixin wraps calls in one of MeleeAttack.create's lambdas, by name.
+calls net.minecraft.world.entity.ai.behavior.MeleeAttack lambda
+# The leaves' rustling ticks with Fabric's client tick event.
+sig net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+# A dye colour's map colours are ColorCollections since 26.4.
+sig net.minecraft.world.level.block.ColorCollection
+# The ice caves' material rules, for the Players Versus material rule.
+data worldgen/material_rule/overworld.json
+data worldgen/material_rule/overworld/ice_cave_bands.json
+data worldgen/material_rule/overworld/biome_surface/ice_caves.json
+data worldgen/material_rule/overworld/surface.json

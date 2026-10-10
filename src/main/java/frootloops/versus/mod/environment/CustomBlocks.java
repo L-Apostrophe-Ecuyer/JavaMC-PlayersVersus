@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.WallBlock;
@@ -32,6 +31,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 
 public class CustomBlocks {
@@ -72,16 +72,16 @@ public class CustomBlocks {
     public static CreeperSporeBlock CREEPER_SPORE_BLOSSOM;
 
     public static PotionEffectBileBlock DEATHLY_BILE, CORRUPTED_BILE, HARMFUL_BILE, HEALTHY_BILE, REGENERATION_BILE, WITHERING_BILE, MINING_SPEED_BILE, MINING_FATIGUE_BILE, TOUGHNESS_BILE, VISION_BILE, DARKNESS_BILE, LEAPING_BILE, SLOW_FALL_BILE, LEVITATION_BILE, SPEED_BILE, SLOWNESS_BILE, BREATH_BILE;
-    public static PotionEffectBileBlock INVISIBILITY_BILE, GLOWING_BILE, WEAKNESS_BILE, STRENGTH_BILE, WIND_BILE, FIRE_BILE, OOZE_BILE, INFESTATION_BILE, POISON_BILE, WEAVING_BILE, LUCK_BILE, UNLUCK_BILE;
+    public static PotionEffectBileBlock INVISIBILITY_BILE, GLOWING_BILE, WEAKNESS_BILE, STRENGTH_BILE, WIND_BILE, FIRE_BILE, FREEZING_BILE, OOZE_BILE, INFESTATION_BILE, POISON_BILE, WEAVING_BILE, LUCK_BILE, UNLUCK_BILE;
     public static PotionEffectBileBlock LARGENESS_BILE,SMALLNESS_BILE, VULNERABILITY_BILE, BUOYANCY_BILE;
 
 
     public static void onInitialize() {
 
-        SMOLDERING_TORCH = registerBlock("smoldering_torch", new SmolderingTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(SoundType.WOOD).pushReaction(PushReaction.POPPED)));
-        SMOLDERING_WALL_TORCH = registerBlock("smoldering_wall_torch", new SmolderingWallTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_wall_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(SoundType.WOOD).pushReaction(PushReaction.POPPED)));
-        EXTINGUISHED_TORCH = registerBlock("extinguished_torch", new TorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_torch").noCollision().instabreak().lightLevel((state) -> 6).sound(SoundType.WOOD).pushReaction(PushReaction.POPPED)));
-        EXTINGUISHED_WALL_TORCH = registerBlock("extinguished_wall_torch", new WallTorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_wall_torch").noCollision().instabreak().lightLevel((state) -> 6).sound(SoundType.WOOD).pushReaction(PushReaction.POPPED)));
+        SMOLDERING_TORCH = registerBlock("smoldering_torch", new SmolderingTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(BlockSoundSets.WOOD).pushReaction(PushReaction.POPPED)));
+        SMOLDERING_WALL_TORCH = registerBlock("smoldering_wall_torch", new SmolderingWallTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_wall_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(BlockSoundSets.WOOD).pushReaction(PushReaction.POPPED)));
+        EXTINGUISHED_TORCH = registerBlock("extinguished_torch", new TorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_torch").noCollision().instabreak().lightLevel((state) -> 6).sound(BlockSoundSets.WOOD).pushReaction(PushReaction.POPPED)));
+        EXTINGUISHED_WALL_TORCH = registerBlock("extinguished_wall_torch", new WallTorchBlock(ParticleTypes.SMOKE, getSettings("extinguished_wall_torch").noCollision().instabreak().lightLevel((state) -> 6).sound(BlockSoundSets.WOOD).pushReaction(PushReaction.POPPED)));
 
         CORRUPTED_WART_PLANT = registerBlock("corrupted_wart", new NetherWartBlock(getSettings("corrupted_wart", Blocks.NETHER_WART)));
         WITHERED_WART_PLANT = registerBlock("withered_wart", new NetherWartBlock(getSettings("withered_wart", Blocks.NETHER_WART)));
@@ -118,20 +118,20 @@ public class CustomBlocks {
         DRIPSTONE_BRICK_WALL = registerBlock("dripstone_brick_wall", new WallBlock(getSettings("dripstone_brick_wall", DRIPSTONE_BRICKS)));
 
         // Clay & Grey Mud
-        GRAY_CLAY = (MoistBlock) registerBlock("gray_clay", new MoistBlock(getSettings("gray_clay", Blocks.CLAY).strength(1.1f, 2.5f).friction(0.92f).speedFactor(0.98f).sound(SoundType.PACKED_MUD), null, Blocks.DYED_TERRACOTTA.cyan()));
-        GRAY_MUD = (CustomMudBlock)registerBlock("gray_mud", new CustomMudBlock(getSettings("gray_mud", Blocks.DIRT).mapColor(MapColor.COLOR_GRAY).dynamicShape().isValidSpawn(Blocks::never).isViewBlocking((state, world, pos, box) -> true).forceSolidOn().isSuffocating(Blocks::never).sound(SoundType.MUD), CustomBlocks.GRAY_CLAY, Blocks.DYED_TERRACOTTA.cyan()));
+        GRAY_CLAY = (MoistBlock) registerBlock("gray_clay", new MoistBlock(getSettings("gray_clay", Blocks.CLAY).strength(1.1f, 2.5f).friction(0.92f).speedFactor(0.98f).sound(BlockSoundSets.PACKED_MUD), null, Blocks.DYED_TERRACOTTA.cyan()));
+        GRAY_MUD = (CustomMudBlock)registerBlock("gray_mud", new CustomMudBlock(getSettings("gray_mud", Blocks.DIRT).mapColor(MapColor.COLOR_GRAY).dynamicShape().isValidSpawn(Blocks::never).isViewBlocking((state, world, pos, box) -> true).forceSolidOn().isSuffocating(Blocks::never).sound(BlockSoundSets.MUD), CustomBlocks.GRAY_CLAY, Blocks.DYED_TERRACOTTA.cyan()));
         ((MoistBlock)GRAY_CLAY).wetterVersion = GRAY_MUD;
 
         // Brown Mud & Clay
-        BROWN_CLAY = (MoistBlock)registerBlock("brown_clay", new MoistBlock(getSettings("brown_clay", Blocks.PACKED_MUD).strength(1.1f, 2.5f).friction(0.92f).sound(SoundType.PACKED_MUD), null, Blocks.DYED_TERRACOTTA.lightGray()));
-        BROWN_MUD = (CustomMudBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.COLOR_BROWN).dynamicShape().isValidSpawn(Blocks::never).isViewBlocking((state, world, pos, box) -> true).forceSolidOn().isSuffocating(Blocks::never).sound(SoundType.MUD), CustomBlocks.BROWN_CLAY, Blocks.DYED_TERRACOTTA.lightGray()));
+        BROWN_CLAY = (MoistBlock)registerBlock("brown_clay", new MoistBlock(getSettings("brown_clay", Blocks.PACKED_MUD).strength(1.1f, 2.5f).friction(0.92f).sound(BlockSoundSets.PACKED_MUD), null, Blocks.DYED_TERRACOTTA.lightGray()));
+        BROWN_MUD = (CustomMudBlock)registerBlock("brown_mud", new CustomMudBlock(getSettings("brown_mud", Blocks.DIRT).mapColor(MapColor.COLOR_BROWN).dynamicShape().isValidSpawn(Blocks::never).isViewBlocking((state, world, pos, box) -> true).forceSolidOn().isSuffocating(Blocks::never).sound(BlockSoundSets.MUD), CustomBlocks.BROWN_CLAY, Blocks.DYED_TERRACOTTA.lightGray()));
         ((MoistBlock)BROWN_CLAY).wetterVersion = BROWN_MUD;
 
         BROWN_CLAY_BRICKS = (MoistBlock)registerBlock("brown_clay_bricks", new MoistBlock(getSettings("brown_clay_bricks", Blocks.MUD_BRICKS).friction(0.98f), null, TERRACOTTA_BRICKS));
         BROWN_CLAY_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_clay_brick_slab", new MoistSlabBlock(getSettings("brown_clay_brick_slab", BROWN_CLAY_BRICKS), null, TERRACOTTA_BRICK_SLAB));
         BROWN_CLAY_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_clay_brick_stairs", new MoistStairsBlock(getSettings("brown_clay_brick_stairs", BROWN_CLAY_BRICKS), BROWN_CLAY_BRICKS.defaultBlockState(), null, TERRACOTTA_BRICK_STAIRS));
         BROWN_CLAY_BRICK_WALL = (MoistWallBlock)registerBlock("brown_clay_brick_wall", new MoistWallBlock(getSettings("brown_clay_brick_wall", BROWN_CLAY_BRICKS), null, TERRACOTTA_BRICK_WALL));
-        BROWN_MUD_BRICKS = (MoistBlock)registerBlock("brown_mud_bricks", new MoistBlock(getSettings("brown_mud_bricks", BROWN_MUD).strength(1.1f, 2.5f).friction(0.92f).speedFactor(0.94f).sound(SoundType.MUD), BROWN_CLAY_BRICKS));
+        BROWN_MUD_BRICKS = (MoistBlock)registerBlock("brown_mud_bricks", new MoistBlock(getSettings("brown_mud_bricks", BROWN_MUD).strength(1.1f, 2.5f).friction(0.92f).speedFactor(0.94f).sound(BlockSoundSets.MUD), BROWN_CLAY_BRICKS));
         BROWN_MUD_BRICK_SLAB = (MoistSlabBlock)registerBlock("brown_mud_brick_slab", new MoistSlabBlock(getSettings("brown_mud_brick_slab", BROWN_MUD_BRICKS), BROWN_CLAY_BRICK_SLAB));
         BROWN_MUD_BRICK_STAIRS = (MoistStairsBlock)registerBlock("brown_mud_brick_stairs", new MoistStairsBlock(getSettings("brown_mud_brick_stairs", BROWN_MUD_BRICKS), BROWN_MUD_BRICKS.defaultBlockState(), BROWN_CLAY_BRICK_SLAB));
         BROWN_MUD_BRICK_WALL =(MoistWallBlock)registerBlock("brown_mud_brick_wall", new MoistWallBlock(getSettings("brown_mud_brick_wall", BROWN_MUD_BRICKS), BROWN_CLAY_BRICK_WALL));
@@ -169,6 +169,7 @@ public class CustomBlocks {
         STRENGTH_BILE = registerBileBlock("strength_bile", MobEffects.STRENGTH); //-> Will be replacing Blaze Powder
         WIND_BILE = registerBileBlock("wind_bile", MobEffects.WIND_CHARGED);
         FIRE_BILE = registerBileBlock("fire_bile", MobEffects.FIRE_RESISTANCE); //-> Will be replacing Magma Cream
+        FREEZING_BILE = registerBileBlock("freezing_bile", MobEffects.FREEZING); // Vanilla's freezing (26.4), fire resistance's opposite
         OOZE_BILE = registerBileBlock("ooze_bile", MobEffects.OOZING);
         INFESTATION_BILE = registerBileBlock("infestation_bile", MobEffects.INFESTED);
         POISON_BILE = registerBileBlock("poison_bile", MobEffects.POISON);
@@ -215,7 +216,7 @@ public class CustomBlocks {
     }
 
     private static PotionEffectBileBlock registerBileBlock(String name, int color, Holder<MobEffect> statusEffectToGrant, int maxDuration, int amplifier, int luminance, float ambientOcclusion) {
-        BlockBehaviour.Properties settings = getSettings(name).sound(SoundType.SLIME_BLOCK).lightLevel(state -> luminance).noCollision().strength(0.2f, 0.4f).pushReaction(PushReaction.POPPED).isValidSpawn((state, world, pos, entityType) -> false);
+        BlockBehaviour.Properties settings = getSettings(name).sound(BlockSoundSets.SLIME_BLOCK).lightLevel(state -> luminance).noCollision().strength(0.2f, 0.4f).pushReaction(PushReaction.POPPED).isValidSpawn((state, world, pos, entityType) -> false);
         return (PotionEffectBileBlock) registerBlock(name, new PotionEffectBileBlock(settings, color, statusEffectToGrant, maxDuration, amplifier, ambientOcclusion));
     }
 

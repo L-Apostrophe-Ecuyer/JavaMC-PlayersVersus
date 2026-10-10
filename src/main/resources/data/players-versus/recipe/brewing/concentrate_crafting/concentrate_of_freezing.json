@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:ice_ball"
+  ],
+  "result": {
+    "id": "players-versus:concentrate_of_freezing",
+    "count": 1
+  }
+}

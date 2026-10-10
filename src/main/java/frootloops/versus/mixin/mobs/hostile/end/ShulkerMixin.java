@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.world.level.block.ColorCollection;
 
 @Mixin(Shulker.class)
 public abstract class ShulkerMixin extends AbstractGolem implements Enemy {
@@ -72,14 +73,30 @@ public abstract class ShulkerMixin extends AbstractGolem implements Enemy {
             DYE_COLOR_BY_MAP_COLOR.putIfAbsent(MapColor.SNOW.col, DyeColor.WHITE);
             DYE_COLOR_BY_MAP_COLOR.putIfAbsent(MapColor.SAND.col, DyeColor.YELLOW);
             DYE_COLOR_BY_MAP_COLOR.putIfAbsent(MapColor.WOOD.col, DyeColor.BROWN);
-            for (DyeColor dyeColor : DyeColor.values()) {
-                DYE_COLOR_BY_MAP_COLOR.putIfAbsent(dyeColor.getMapColor().col, dyeColor);
-                DYE_COLOR_BY_MAP_COLOR.putIfAbsent(dyeColor.getTerracottaColor().col, dyeColor);
-                DYE_COLOR_BY_MAP_COLOR.putIfAbsent(dyeColor.getTextureDiffuseColor(), dyeColor);
-            }
+            // Since 26.4 a dye colour is only an id and a name; its map colours are collections keyed by colour.
+            putDyeColors(MapColor.DYE_TO_DEFAULT_COLOR);
+            putDyeColors(MapColor.DYE_TO_TERRACOTTA_COLOR);
         }
         DyeColor shulkerVariant = DYE_COLOR_BY_MAP_COLOR.get(color.col);
         this.versus$setVariant(shulkerVariant == null ? Optional.empty() : Optional.of(shulkerVariant));
     }
 
+    private static void putDyeColors(ColorCollection<MapColor> colors) {
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.white().col, DyeColor.WHITE);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.orange().col, DyeColor.ORANGE);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.magenta().col, DyeColor.MAGENTA);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.lightBlue().col, DyeColor.LIGHT_BLUE);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.yellow().col, DyeColor.YELLOW);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.lime().col, DyeColor.LIME);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.pink().col, DyeColor.PINK);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.gray().col, DyeColor.GRAY);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.lightGray().col, DyeColor.LIGHT_GRAY);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.cyan().col, DyeColor.CYAN);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.purple().col, DyeColor.PURPLE);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.blue().col, DyeColor.BLUE);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.brown().col, DyeColor.BROWN);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.green().col, DyeColor.GREEN);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.red().col, DyeColor.RED);
+        DYE_COLOR_BY_MAP_COLOR.putIfAbsent(colors.black().col, DyeColor.BLACK);
+    }
 }

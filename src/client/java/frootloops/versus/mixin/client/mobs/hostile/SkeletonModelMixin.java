@@ -36,7 +36,7 @@ public abstract class SkeletonModelMixin<S extends SkeletonRenderState> extends 
     }
 
     private void poseBlockingArm(ModelPart arm, boolean rightArm) {
-        arm.xRot = arm.xRot * 0.5F - 0.9424779F + Mth.clamp(this.head.xRot, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
-        arm.yRot = (rightArm ? -30.0F : 30.0F) * (float) (Math.PI / 180.0) + Mth.clamp(this.head.yRot, (float) (-Math.PI / 6), (float) (Math.PI / 6));
+        arm.xRot = arm.xRot * 0.5F - 0.9424779F + Math.clamp(this.head.xRot, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
+        arm.yRot = (rightArm ? -30.0F : 30.0F) * (float) (Math.PI / 180.0) + Math.clamp(this.head.yRot, (float) (-Math.PI / 6), (float) (Math.PI / 6));
     }
 }

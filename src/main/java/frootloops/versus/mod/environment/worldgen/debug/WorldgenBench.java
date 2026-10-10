@@ -458,7 +458,7 @@ public final class WorldgenBench {
             countHighRiver(chunk);
             for (Map.Entry<Structure, StructureStart> entry : chunk.getAllStarts().entrySet()) {
                 StructureStart start = entry.getValue();
-                if (!start.isValid()) continue;
+                if (start.getPieces().isEmpty()) continue; // 26.3's isValid()
                 BoundingBox box = start.getBoundingBox();
                 this.structureStarts.add(String.format(Locale.ROOT, "structure %s start chunk %d,%d box %d,%d,%d..%d,%d,%d",
                         this.structures.getKey(entry.getKey()), start.getChunkPos().x(), start.getChunkPos().z(), box.minX(), box.minY(),
@@ -593,7 +593,7 @@ public final class WorldgenBench {
         }
 
         private int biomeIndex(ChunkAccess chunk, int x, int y, int z) {
-            String id = chunk.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)).getRegisteredName();
+            String id = chunk.getBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)).getRegisteredName();
             return this.biomeIndex.computeIfAbsent(id, key -> {
                 this.biomeIds.add(key);
                 return this.biomeIds.size() - 1;

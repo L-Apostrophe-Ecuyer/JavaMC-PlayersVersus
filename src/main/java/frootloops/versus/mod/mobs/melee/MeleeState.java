@@ -157,7 +157,7 @@ public final class MeleeState {
 
     /** Smoothstep over {@code t}, clamped to 0 to 1. */
     private static float ease(float t) {
-        t = Mth.clamp(t, 0.0F, 1.0F);
+        t = Math.clamp(t, 0.0F, 1.0F);
         return t * t * (3.0F - 2.0F * t);
     }
 

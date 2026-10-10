@@ -90,10 +90,10 @@ public abstract class IllagerModelMixin<S extends IllagerRenderState> extends En
             this.leftArm.visible = true;
             this.rightArm.visible = true;
 
-            this.rightArm.xRot = Mth.clamp((float)(this.head.xRot - 1.9198622f), (float)-2.4f, (float)3.3f);
+            this.rightArm.xRot = Math.clamp((float)(this.head.xRot - 1.9198622f), (float)-2.4f, (float)3.3f);
             this.rightArm.yRot = this.head.yRot - 0.2617994f;
 
-            this.leftArm.xRot = Mth.clamp((float)(this.head.xRot - 1.9198622f), (float)-2.4f, (float)3.3f);
+            this.leftArm.xRot = Math.clamp((float)(this.head.xRot - 1.9198622f), (float)-2.4f, (float)3.3f);
             this.leftArm.yRot = this.head.yRot + 0.2617994f;
         }
         else if(renderState.pose == Pose.CROUCHING) {
@@ -106,7 +106,7 @@ public abstract class IllagerModelMixin<S extends IllagerRenderState> extends En
     }
 
     private void positionBlockingArm(ModelPart arm, boolean rightArm) {
-        arm.xRot = arm.xRot * 0.5F - 0.9424779F + Mth.clamp(this.head.xRot, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
-        arm.yRot = (rightArm ? -30.0F : 30.0F) * (float) (Math.PI / 180.0) + Mth.clamp(this.head.yRot, (float) (-Math.PI / 6), (float) (Math.PI / 6));
+        arm.xRot = arm.xRot * 0.5F - 0.9424779F + Math.clamp(this.head.xRot, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
+        arm.yRot = (rightArm ? -30.0F : 30.0F) * (float) (Math.PI / 180.0) + Math.clamp(this.head.yRot, (float) (-Math.PI / 6), (float) (Math.PI / 6));
     }
 }

@@ -77,7 +77,8 @@ class PvBiomeLayoutTest {
         }
         System.out.printf(Locale.ROOT, "[layout] vanilla: %d entries, %d surface slices, other %s%n", vanilla.size(), surface, other);
         assertEquals(surface, deep);
-        assertEquals(Map.of(Biomes.LUSH_CAVES, 1, Biomes.DRIPSTONE_CAVES, 1, Biomes.SULFUR_CAVES, 1, Biomes.DEEP_DARK, 1), other);
+        assertEquals(Map.of(Biomes.LUSH_CAVES, 1, Biomes.DRIPSTONE_CAVES, 1, Biomes.SULFUR_CAVES, 1, Biomes.ICE_CAVES, 1,
+                Biomes.DEEP_DARK, 1), other);
     }
 
     /** The replacement dripstone keeps the depth the old mixin gave it by passing continentalness as depth. */

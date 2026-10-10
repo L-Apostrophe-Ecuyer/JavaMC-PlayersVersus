@@ -66,6 +66,8 @@ public abstract class CustomBrewingItems {
 
     public static final ConcentrateItem CONCENTRATE_OF_WIND = new ConcentrateItem(getBileSettings("concentrate_of_wind"),MobEffects.WIND_CHARGED, CustomBlocks.WIND_BILE);
     public static final ConcentrateItem CONCENTRATE_OF_FIRE = new ConcentrateItem(getBileSettings("concentrate_of_fire"),MobEffects.FIRE_RESISTANCE, CustomBlocks.FIRE_BILE); //-> Will be replacing Magma Cream
+    // Freezing adds one tick of frost per tick (FreezingMobEffect), so a usual concentrate's 30 ticks would barely chill.
+    public static final ConcentrateItem CONCENTRATE_OF_FREEZING = new ConcentrateItem(getBileSettings("concentrate_of_freezing"),MobEffects.FREEZING, 0, 120, CustomBlocks.FREEZING_BILE); // Fire resistance's opposite
 
     public static final ConcentrateItem CONCENTRATE_OF_OOZE = new ConcentrateItem(getBileSettings("concentrate_of_ooze"),MobEffects.OOZING, CustomBlocks.OOZE_BILE);
     public static final ConcentrateItem CONCENTRATE_OF_INFESTATION = new ConcentrateItem(getBileSettings("concentrate_of_infestation"),MobEffects.INFESTED, CustomBlocks.INFESTATION_BILE);

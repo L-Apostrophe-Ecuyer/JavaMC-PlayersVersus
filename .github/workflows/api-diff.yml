@@ -70,8 +70,8 @@ jobs:
           for v in old new; do
             xargs -n 100 javap -p -s -cp $v/client.jar < targets.txt > $v/members.txt 2>&1 || true
             xargs -n 100 javap -c -p -cp $v/client.jar < targets.txt > $v/calls-raw.txt 2>&1 || true
-            # Lambdas are numbered by order in the class: drop the numbers so a new lambda doesn't renumber the rest.
-            python3 .github/api-calls.py $v/calls-raw.txt | sed -E 's/lambda\$([A-Za-z0-9_]+)\$[0-9]+/lambda$\1$N/g' > $v/calls.txt
+            # Lambdas keep their numbers: a mixin that targets one by name breaks when vanilla renumbers them.
+            python3 .github/api-calls.py $v/calls-raw.txt > $v/calls.txt
           done
           echo "-----BEGIN MIXINS-----"
           python3 .github/mixin-check.py check old new src/main/java src/client/java

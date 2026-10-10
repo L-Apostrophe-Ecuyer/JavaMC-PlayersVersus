@@ -540,7 +540,6 @@ def noise_settings():
             "lava": noise(mc("aquifer_lava"), 1.0, 1.0),
             "surface_level": mc("overworld/preliminary_surface_level"),
         },
-        "default_block": mc("stone"),
         "default_fluid": mc("water"),
         "disable_mob_generation": False,
         "legacy_random_source": False,
@@ -585,10 +584,20 @@ def material(rule):
 
 
 def material_rule(surface_rule):
-    """The surface rule with the ore veins after the bedrock floor, where vanilla 26.3 puts its own."""
+    """The surface rule with the ore veins after the bedrock floor, where vanilla 26.3 puts its own; 26.4's ice caves'
+    bands of ice underground, as vanilla's underground rule starts with them; and stone wherever nothing else applies,
+    which 26.4 moved from the noise settings' default block into the material rules' last entry."""
     rule = material(surface_rule)
     assert rule["type"] == mc("sequence") and rule["sequence"][0]["if_true"].get("random_name") == mc("bedrock_floor")
     rule["sequence"][1:1] = [vein_rule("copper"), vein_rule("iron")]
+    underground = next(i for i, r in enumerate(rule["sequence"])
+                        if r.get("if_true", {}).get("type") == mc("biome") and mc("deep_dark") in r["if_true"]["biome_is"])
+    rule["sequence"].insert(underground, {
+        "type": mc("condition"),
+        "if_true": {"type": mc("biome"), "biome_is": mc("ice_caves")},
+        "then_run": mc("overworld/ice_cave_bands"),
+    })
+    rule["sequence"].append({"type": mc("block"), "result_state": mc("stone")})
     return rule
 
 

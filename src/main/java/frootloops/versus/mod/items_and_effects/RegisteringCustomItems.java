@@ -22,7 +22,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS);
 
         registerCustomItem("pale_zombie_spawn_egg", ModEntities.PALE_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
-        registerCustomItem("frosted_zombie_spawn_egg", ModEntities.FROSTED_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("ice_cube_spawn_egg", ModEntities.ICE_CUBE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("pale_creeper_spawn_egg", ModEntities.PALE_CREEPER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("pale_spider_spawn_egg", ModEntities.PALE_SPIDER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("wildfire_spawn_egg", ModEntities.WILDFIRE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
@@ -83,6 +83,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_weakness", CustomBrewingItems.CONCENTRATE_OF_WEAKNESS, CreativeModeTabs.INGREDIENTS);
         registerCustomItem("concentrate_of_strength", CustomBrewingItems.CONCENTRATE_OF_STRENGTH); //-> Replacing Blaze Powder
         registerCustomItem("concentrate_of_fire", CustomBrewingItems.CONCENTRATE_OF_FIRE);// -> Replacing Magma Cream
+        registerCustomItem("concentrate_of_freezing", CustomBrewingItems.CONCENTRATE_OF_FREEZING, CreativeModeTabs.INGREDIENTS);
         registerCustomItem("concentrate_of_wind", CustomBrewingItems.CONCENTRATE_OF_WIND, CreativeModeTabs.INGREDIENTS);
         registerCustomItem("concentrate_of_ooze", CustomBrewingItems.CONCENTRATE_OF_OOZE, CreativeModeTabs.INGREDIENTS);
         registerCustomItem("concentrate_of_poison", CustomBrewingItems.CONCENTRATE_OF_POISON, CreativeModeTabs.INGREDIENTS);
