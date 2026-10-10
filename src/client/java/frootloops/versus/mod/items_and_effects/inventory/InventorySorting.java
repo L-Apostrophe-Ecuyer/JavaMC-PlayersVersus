@@ -1,8 +1,7 @@
 package frootloops.versus.mod.items_and_effects.inventory;
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemComparaisonHelper;
+import frootloops.versus.mod.items_and_effects.inventory.sorting.InventorySorter;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
-import frootloops.versus.mod.items_and_effects.inventory.sorting.SortingHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -16,8 +15,10 @@ import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class InventorySorting {
@@ -50,10 +51,10 @@ public class InventorySorting {
 
     private static int[] getRemappedSlotIndices(Container inventory, int numRows, int totalNumSlots, boolean isPlayerInventory) {
         int[] remappedSlotIndices = new int[totalNumSlots];
-        LinkedList<ItemSlot> slots = new LinkedList<>();
+        List<ItemSlot> slots = new ArrayList<>();
         for (int i = 0; i < totalNumSlots; i++) {
             ItemStack stack = inventory.getItem(i);
-            if (!stack.isEmpty()) slots.add(new ItemSlot(i, stack, ItemComparaisonHelper.getItemTypeOf(stack)));
+            if (!stack.isEmpty()) slots.add(ItemSlot.of(i, stack));
         }
 
         // For situational hotbar item priority:
@@ -65,10 +66,12 @@ public class InventorySorting {
             isInWater = !isInDeepDark && (playerBiome.is(BiomeTags.IS_OCEAN) || Minecraft.getInstance().player.isUnderWater());
         }
 
-        ItemSlot[] newSlots = SortingHelper.getOptimalInventoryRows(slots, numRows, isPlayerInventory, isInDeepDark, isInNether, isInWater);
+        Optional<ItemSlot[]> sorted = InventorySorter.sort(slots, numRows, new InventorySorter.Situation(isPlayerInventory, isInDeepDark, isInNether, isInWater));
+        if (sorted.isEmpty()) return null;
+        ItemSlot[] newSlots = sorted.get();
         for (int i = 0; i < totalNumSlots; i++) {
             if (newSlots[i] != null) {
-                remappedSlotIndices[i] = newSlots[i].slodId() + 9;
+                remappedSlotIndices[i] = newSlots[i].slotId() + 9;
             }
         }
         return remappedSlotIndices;
@@ -81,6 +84,7 @@ public class InventorySorting {
         int numRows = totalNumSlots / 9;
         if (totalNumSlots < 2) return;
         int[] remappedSlots = getRemappedSlotIndices(inventory, numRows, totalNumSlots, inventoryToSort != InventoryToSort.CONTAINER_INVENTORY);
+        if (remappedSlots == null) return; // The sort gave up: leave the inventory as it is.
 
         if (DEBUG_ITEM_SWITICHING) {
             VersusMod.MOD_LOGGER.warn("");

@@ -2,7 +2,8 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -119,11 +120,11 @@ public class SortedBlockItemList extends SortedItemList {
     }
 
     @Override
-    public LinkedList<ItemSlot> take(int count) {
-        if(this.size() == 0 || count == 0) return new LinkedList<>();
+    public List<ItemSlot> take(int count) {
+        if(this.size() == 0 || count == 0) return new ArrayList<>();
         if(count == this.size()) return this.takeAll();
 
-        LinkedList<ItemSlot> slotsToReturn = new LinkedList<>();
+        List<ItemSlot> slotsToReturn = new ArrayList<>();
         for(int i = 0; i < this.size(); i++) {
             if(slots.get(i).stack().is(Items.GRAVEL)) {
                 slotsToReturn.add(this.slots.remove(i));
@@ -131,10 +132,7 @@ public class SortedBlockItemList extends SortedItemList {
                 if(count == 0) return slotsToReturn;
             }
         }
-
-        for(int i = 0; i < Math.min(this.size(), count); i++)
-            slotsToReturn.add(this.removeLast());
-
+        slotsToReturn.addAll(this.takeLast(count));
         return slotsToReturn;
     }
 }

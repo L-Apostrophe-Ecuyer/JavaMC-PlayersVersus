@@ -1,30 +1,56 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting.groups;
 
-import frootloops.versus.mod.items_and_effects.inventory.sorting.lists.SortedItemLists;
+import frootloops.versus.mod.items_and_effects.inventory.sorting.lists.SortingLists;
 
-public abstract class SortingGroups {
-
+/**
+ * The groups of one sort, over that sort's lists.
+ */
+public class SortingGroups {
     // VIP: The main hotbar
-    public static final MainHotbarGroup MAIN_HOTBAR = new MainHotbarGroup();
+    public final MainHotbarGroup hotbar = new MainHotbarGroup();
 
     // First class: Tool groups
-    public static final ToolSortingGroup PICKAXE_GROUP = new ToolSortingGroup(SortedItemLists.PICKAXES, SortedItemLists.PICKAXE_MINEABLES, "GROUP: PICKAXES");
-    public static final ToolSortingGroup AXE_GROUP = new ToolSortingGroup(SortedItemLists.AXES, SortedItemLists.AXE_MINEABLES, "GROUP: AXES");
-    public static final ToolSortingGroup SHOVEL_GROUP = new ToolSortingGroup(SortedItemLists.SHOVELS, SortedItemLists.SHOVEL_MINEABLES, "GROUP: SHOVELS");
-    public static final ToolSortingGroup SHEARS_GROUP = new ToolSortingGroup(SortedItemLists.SHEARS, SortedItemLists.SHEAR_MINEABLES, "GROUP: SHEARS");
-    public static final ToolSortingGroup HOE_GROUP = new ToolSortingGroup(SortedItemLists.HOES, SortedItemLists.HOES_MINEABLE, "GROUP: HOES");
+    public final ToolSortingGroup pickaxes;
+    public final ToolSortingGroup axes;
+    public final ToolSortingGroup shovels;
+    public final ToolSortingGroup shears;
+    public final ToolSortingGroup hoes;
 
     // Second class: Valuables, misc
-    public static final SimpleSortingGroup CONSUMABLES_GROUP = new SimpleSortingGroup(SortedItemLists.CONSUMEABLE_ITEMS, "GROUP: CONSUMABLES");
-    public static final ToolSortingGroup COMBAT_GROUP = new ToolSortingGroup(SortedItemLists.WEAPONS, SortedItemLists.COMBAT_ITEMS, "GROUP: COMBAT");
-    public static final SimpleSortingGroup REDSTONE_GROUP = new SimpleSortingGroup(SortedItemLists.REDSTONE_ITEMS, "GROUP: REDSTONE");
-    public static final SimpleSortingGroup GOODIES_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_GOODIES, "GROUP: GOODIES");
-    public static final SimpleSortingGroup CONTAINERS_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_GOODIES, "GROUP: CONTAINERS");
-    public static final SimpleSortingGroup RARE_MINERALS_GROUP = new SimpleSortingGroup(SortedItemLists.MINERAL_RESSOURCE_ITEMS, "GROUP: RARE MINERALS");
-    public static final SimpleSortingGroup COMMON_MINERALS_GROUP = new SimpleSortingGroup(SortedItemLists.MINERAL_RESSOURCE_COMMON_ITEMS, "GROUP: COMMON MINERALS");
-    public static final SimpleSortingGroup BREWING_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_BREWING, "GROUP: BREWING");
-    public static final ToolSortingGroup WORLD_GROUP = new ToolSortingGroup(SortedItemLists.FISHING, SortedItemLists.MISC_EXPLORATION, "GROUP: WORLD");
-    public static final SimpleSortingGroup RANDOM_GROUP = new SimpleSortingGroup(SortedItemLists.MISC_OTHER, "GROUP: MISC OTHER");
+    public final SimpleSortingGroup consumables;
+    public final ToolSortingGroup combat;
+    public final SimpleSortingGroup redstone;
+    public final SimpleSortingGroup goodies;
+    public final SimpleSortingGroup containers;
+    public final SimpleSortingGroup rareMinerals;
+    public final SimpleSortingGroup commonMinerals;
+    public final SimpleSortingGroup brewing;
+    public final ToolSortingGroup world;
+    public final SimpleSortingGroup random;
 
-    public static final SortingGroup[] SORTING_GROUPS = {COMBAT_GROUP, CONSUMABLES_GROUP, GOODIES_GROUP, RARE_MINERALS_GROUP, COMMON_MINERALS_GROUP, REDSTONE_GROUP, PICKAXE_GROUP, AXE_GROUP, SHOVEL_GROUP, HOE_GROUP, SHEARS_GROUP, BREWING_GROUP, WORLD_GROUP, CONTAINERS_GROUP, RANDOM_GROUP};
+    private final SortingGroup[] all;
+
+    public SortingGroups(SortingLists lists) {
+        this.pickaxes = new ToolSortingGroup(lists.PICKAXES, lists.PICKAXE_MINEABLES, "GROUP: PICKAXES");
+        this.axes = new ToolSortingGroup(lists.AXES, lists.AXE_MINEABLES, "GROUP: AXES");
+        this.shovels = new ToolSortingGroup(lists.SHOVELS, lists.SHOVEL_MINEABLES, "GROUP: SHOVELS");
+        this.shears = new ToolSortingGroup(lists.SHEARS, lists.SHEAR_MINEABLES, "GROUP: SHEARS");
+        this.hoes = new ToolSortingGroup(lists.HOES, lists.HOES_MINEABLE, "GROUP: HOES");
+        this.consumables = new SimpleSortingGroup(lists.CONSUMEABLE_ITEMS, "GROUP: CONSUMABLES");
+        this.combat = new ToolSortingGroup(lists.WEAPONS, lists.COMBAT_ITEMS, "GROUP: COMBAT");
+        this.redstone = new SimpleSortingGroup(lists.REDSTONE_ITEMS, "GROUP: REDSTONE");
+        this.goodies = new SimpleSortingGroup(lists.MISC_GOODIES, "GROUP: GOODIES");
+        this.containers = new SimpleSortingGroup(lists.MISC_GONTAINERS, "GROUP: CONTAINERS");
+        this.rareMinerals = new SimpleSortingGroup(lists.MINERAL_RESSOURCE_ITEMS, "GROUP: RARE MINERALS");
+        this.commonMinerals = new SimpleSortingGroup(lists.MINERAL_RESSOURCE_COMMON_ITEMS, "GROUP: COMMON MINERALS");
+        this.brewing = new SimpleSortingGroup(lists.MISC_BREWING, "GROUP: BREWING");
+        this.world = new ToolSortingGroup(lists.FISHING, lists.MISC_EXPLORATION, "GROUP: WORLD");
+        this.random = new SimpleSortingGroup(lists.MISC_OTHER, "GROUP: MISC OTHER");
+        this.all = new SortingGroup[]{combat, consumables, goodies, rareMinerals, commonMinerals, redstone, pickaxes, axes, shovels, hoes, shears, brewing, world, containers, random};
+    }
+
+    /** Every group but the hotbar, in the order stacks try them. */
+    public SortingGroup[] all() {
+        return all;
+    }
 }

@@ -1,17 +1,21 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
-import frootloops.versus.mod.items_and_effects.inventory.sorting.SortingDebug;
-import frootloops.versus.VersusMod;
-import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemComparaisonHelper;
+import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemOrdering;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import java.util.LinkedList;
+import frootloops.versus.mod.items_and_effects.inventory.sorting.SortingDebug;
 import net.minecraft.world.item.Item;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-
+/**
+ * An ordered list of stacks that go together, such as pickaxes or wooden blocks. Each subclass decides which stacks
+ * it accepts and where they go.
+ */
 public abstract class SortedItemList {
-    protected LinkedList<ItemSlot> slots = new LinkedList<>();
+    protected final List<ItemSlot> slots = new ArrayList<>();
     protected ItemType itemType;
 
     public int trySortedInsert(ItemSlot newSlot) {
@@ -61,15 +65,18 @@ public abstract class SortedItemList {
             }
             for (int i = startIndex; i < endIndex + 1; i++) {
                 ItemSlot otherSlot = slots.get(i);
-                boolean shouldGoBefore = slot.shouldAlwaysGoBefore(otherSlot, doSortedInsert) || (doSortedInsert && ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, false, true));
+                boolean shouldGoBefore = slot.shouldAlwaysGoBefore(otherSlot, doSortedInsert) || (doSortedInsert && ItemOrdering.shouldGoBefore(slot, otherSlot, skipNonToolTypes, false, true));
                 if (shouldGoBefore) {
-                    if(SortingDebug.ENABLED && startIndex == 0 && doSortedInsert) VersusMod.MOD_LOGGER.warn("                            - Found a better spot for " + slot + " -> Inserting it at pos " + i + " -> List: " + this);
+                    if(startIndex == 0 && doSortedInsert) {
+                        int position = i;
+                        SortingDebug.log(() -> "                            - Found a better spot for " + slot + " -> Inserting it at pos " + position + " -> List: " + this);
+                    }
                     slots.add(i, slot);
                     return i;
                 }
             }
         }
-        if(endIndex >= this.size() - 1) slots.addLast(slot);
+        if(endIndex >= this.size() - 1) slots.add(slot);
         else slots.add(endIndex, slot);
         return endIndex + 1;
     }
@@ -96,28 +103,31 @@ public abstract class SortedItemList {
         return this.slots.get(index);
     }
 
-
-    public LinkedList<ItemSlot> take(int count) {
-        if(this.size() == 0) return new LinkedList<>();
+    /**
+     * Takes {@code count} stacks (or all of them, if fewer), from the end of the list, last first.
+     */
+    public List<ItemSlot> take(int count) {
+        if(this.size() == 0) return new ArrayList<>();
         if(count == this.size()) return this.takeAll();
+        return this.takeLast(count);
+    }
 
-        LinkedList<ItemSlot> slotsToReturn = new LinkedList<>();
-        for(int i = 0; i < Math.min(this.size(), count); i++)
-            slotsToReturn.add(this.removeLast());
+    protected List<ItemSlot> takeLast(int count) {
+        int numToTake = Math.min(this.size(), count);
+        List<ItemSlot> slotsToReturn = new ArrayList<>(numToTake);
+        for(int i = 0; i < numToTake; i++) slotsToReturn.add(this.removeLast());
         return slotsToReturn;
     }
 
-    public LinkedList<ItemSlot> takeAll() {
-        LinkedList<ItemSlot> allSlots = (LinkedList<ItemSlot>) this.slots.clone();
+    public List<ItemSlot> takeAll() {
+        List<ItemSlot> allSlots = new ArrayList<>(this.slots);
         this.clear();
         return allSlots;
     }
 
     @Override
     public String toString() {
-        String output = "";
-        for(int i = 0; i < this.size(); i++) output += this.slots.get(i) + ", ";
-        return output.substring(0, Math.max(0, output.length() - 2));
+        return this.slots.stream().map(ItemSlot::toString).collect(Collectors.joining(", "));
     }
 
     public boolean containsItem(Item item) {

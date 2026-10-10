@@ -2,13 +2,13 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
 import frootloops.versus.VersusMod;
 
-import java.util.LinkedList;
+import java.util.List;
 
 
 public class SortedInventoryOutput {
 
     private final ItemSlot[] invSlots;
-    private LinkedList<ItemSlot> slotsToAdd;
+    private List<ItemSlot> slotsToAdd;
     private final int numRows, numEmptySlots;
     public int numGroupsToPlace;
     private final boolean isPlayerInventory;
@@ -60,8 +60,8 @@ public class SortedInventoryOutput {
         if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn(this.toString());
     }
 
-    public boolean addAll(LinkedList<ItemSlot> slots) { return this.addAll(slots, false, true);}
-    public boolean addAll(LinkedList<ItemSlot> slots, boolean isNewGroup, boolean allowBacktracking) {
+    public boolean addAll(List<ItemSlot> slots) { return this.addAll(slots, false, true);}
+    public boolean addAll(List<ItemSlot> slots, boolean isNewGroup, boolean allowBacktracking) {
         slotsToAdd = slots;
         if(slotsToAdd == null || slotsToAdd.size() == 0) return true;
 

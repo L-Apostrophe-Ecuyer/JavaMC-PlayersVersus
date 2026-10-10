@@ -6,8 +6,15 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
-public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
+/**
+ * A stack to sort: where it was, its type, and its name as shown, worked out once.
+ */
+public record ItemSlot(int slotId, ItemStack stack, ItemType itemType, String name) {
 
+    public static ItemSlot of(int slotId, ItemStack stack) {
+        String name = stack.getHoverName().getString() + (stack.getCount() != stack.getMaxStackSize() ? "(" + stack.getCount() + ")" : "");
+        return new ItemSlot(slotId, stack, ItemClassifier.typeOf(stack), name);
+    }
 
     public boolean isWeapon() {
         return (itemType == ItemType.SWORD || itemType == ItemType.SPECIAL_WEAPON || itemType == ItemType.BOW || itemType == ItemType.CROSSBOW);
@@ -91,13 +98,13 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
         // Otherwise, tools and potentially armor first:
         if(this.isToolOrWeapon()) {
             if(!other.isToolOrWeapon()) return true;
-            else return ItemComparaisonHelper.shouldGoBefore(this, other);
+            else return ItemOrdering.shouldGoBefore(this, other);
         }
         if(other.isToolOrWeapon()) return false;
         if(proritizeArmor) {
             if(this.isArmor()) {
                 if(!other.isArmor()) return true;
-                else return ItemComparaisonHelper.shouldGoBefore(this, other);
+                else return ItemOrdering.shouldGoBefore(this, other);
             }
             if(other.isArmor()) return false;
         }
@@ -106,6 +113,6 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
     @Override
     public String toString() {
-        return this.stack.getHoverName().getString() + (this.stack.getCount() != stack.getMaxStackSize() ? "(" + stack.getCount() + ")" : "");
+        return this.name;
     }
 }
