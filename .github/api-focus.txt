@@ -1,17 +1,8 @@
 # What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Inventory sorting on 26.3: how a container screen hands a click to its buttons and slots, what happens to an
-# exception thrown on the way, how a container click is simulated and sent, and what a block's map colour reads.
-uses net/minecraft/client/gui/components/ImageButton
-net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
-net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen
-net.minecraft.client.gui.screens.inventory.InventoryScreen
-net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
-net.minecraft.client.gui.screens.Screen
-net.minecraft.client.MouseHandler
-net.minecraft.client.gui.components.ImageButton
-net.minecraft.client.gui.components.Button
-net.minecraft.client.gui.components.AbstractButton
-net.minecraft.client.gui.components.AbstractWidget
-net.minecraft.client.multiplayer.MultiPlayerGameMode
-net.minecraft.world.inventory.AbstractContainerMenu
-sig net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase
+# Inventory sorting moves to common code with a Fabric game test: the game test API of this Fabric API build, the
+# game test helper, and what a block state's map colour reads (to drop the client level from it).
+find gametest
+find GameTest
+sig net.minecraft.gametest.framework.GameTestHelper
+sig net.minecraft.world.level.EmptyBlockGetter
+net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase
