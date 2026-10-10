@@ -42,6 +42,10 @@ jobs:
                   urllib.request.urlretrieve(artifact["url"], "probe/libs/" + artifact["path"].split("/")[-1])
           EOF
           curl -fsSL "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FABRIC_API/fabric-api-$FABRIC_API.jar" -o probe/fabric-api.jar
+          # The game test module isn't inside Fabric API's jar: Loom adds it for development.
+          mkdir -p probe/extra
+          curl -fsSL "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-gametest-api-v1/maven-metadata.xml" | grep -o '<version>[^<]*</version>' | tail -5
+          curl -fsSL "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-gametest-api-v1/4.0.32+3434d6d95d/fabric-gametest-api-v1-4.0.32+3434d6d95d.jar" -o probe/extra/fabric-gametest-api-v1.jar || true
           ls -la probe
       - name: list classes and print signatures
         run: |
@@ -49,6 +53,7 @@ jobs:
           wc -l probe/out/classes.txt
           # Fabric API's modules are jars inside its jar.
           mkdir -p probe/fabric && (cd probe/fabric && unzip -q -o ../fabric-api.jar 'META-INF/jars/*' || true)
+          cp probe/extra/*.jar probe/fabric/META-INF/jars/ 2>/dev/null || true
           for jar in probe/fabric/META-INF/jars/*.jar; do unzip -Z1 "$jar" | grep '\.class$' | sed "s|\.class$| $(basename "$jar")|"; done | sort > probe/out/fabric-classes.txt
           wc -l probe/out/fabric-classes.txt
           cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"

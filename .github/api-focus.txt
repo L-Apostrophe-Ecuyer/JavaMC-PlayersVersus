@@ -1,8 +1,5 @@
 # What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Inventory sorting moves to common code with a Fabric game test: the game test API of this Fabric API build, the
-# game test helper, and what a block state's map colour reads (to drop the client level from it).
+# Fabric's game test API for 26.3 (its own module, fetched next to Fabric API's jar).
 find gametest
-find GameTest
-sig net.minecraft.gametest.framework.GameTestHelper
-sig net.minecraft.world.level.EmptyBlockGetter
-net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase
+sig net.fabricmc.fabric.api.gametest.v1.GameTest
+sig net.fabricmc.fabric.api.gametest.v1.CustomTestMethodInvoker
