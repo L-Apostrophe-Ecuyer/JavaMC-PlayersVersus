@@ -42,7 +42,7 @@ public class SortingHelper {
         if(DEBUG_SORTING_GROUPS) printGroups("[ INVENTORY SORTING ] ---- AFTER INSERTING -----\n");
 
         // Step 2: Try forming rows withing a group, and combining similar groups
-        if(isPlayerInventory) {
+        if(isPlayerInventory && numItems > 18) {
             SortingHelper.cleanUpHotbar(isInDeepDark);
             LinkedList<ItemSlot> slotsRemovedFromHotbar = MAIN_HOTBAR.keepOnlyEssentials();
             for (ItemSlot slot:slotsRemovedFromHotbar) insertItemIntoGroup(slot);
