@@ -17,8 +17,8 @@ import net.minecraft.client.renderer.entity.state.ZombieRenderState;
 import net.minecraft.resources.Identifier;
 
 /**
- * The pale zombie, built like the drowned: a black skull and bones underneath, and over them a slightly larger layer of
- * pale flesh and rags, torn where the bones show through.
+ * The pale zombie, built like the drowned: a black skeleton underneath (the skeleton's own model, its thin bones posed
+ * like a zombie's), and over it a layer of pale flesh and rags the size of a zombie, torn where the bones show through.
  */
 @Environment(EnvType.CLIENT)
 public class PaleZombieRenderer extends AbstractZombieRenderer<PaleZombieEntity, ZombieRenderState, DrownedModel> {
@@ -28,8 +28,8 @@ public class PaleZombieRenderer extends AbstractZombieRenderer<PaleZombieEntity,
     /** Pale zombies are never babies, so the baby's models are the adult's too. */
     public PaleZombieRenderer(EntityRendererProvider.Context context) {
         super(context,
-                new DrownedModel(context.bakeLayer(ModelLayers.DROWNED)),
-                new DrownedModel(context.bakeLayer(ModelLayers.DROWNED)),
+                new DrownedModel(context.bakeLayer(ModelLayers.SKELETON)),
+                new DrownedModel(context.bakeLayer(ModelLayers.SKELETON)),
                 ArmorModelSet.bake(ModelLayers.DROWNED_ARMOR, context.getModelSet(), DrownedModel::new),
                 ArmorModelSet.bake(ModelLayers.DROWNED_ARMOR, context.getModelSet(), DrownedModel::new));
         this.addLayer(new OuterLayer(this, context.getModelSet()));
