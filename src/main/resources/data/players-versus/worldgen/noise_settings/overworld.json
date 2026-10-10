@@ -27,7 +27,8 @@
         "xz_scale": 3.0,
         "y_scale": 3.0
       },
-      "high_river": "players-versus:overworld/high_river/valley"
+      "high_river": "players-versus:overworld/high_river/valley",
+      "high_river_upper": "players-versus:overworld/high_river/upper_valley"
     },
     "fluid_level_spread": {
       "type": "players-versus:aquifer_spread",
@@ -39,7 +40,7 @@
         "xz_scale": 4.0,
         "y_scale": 2.0
       },
-      "corridors": "players-versus:overworld/caves/corridor_noodle"
+      "corridors": "players-versus:overworld/caves/flooded_corridors"
     },
     "lava": {
       "type": "minecraft:noise",

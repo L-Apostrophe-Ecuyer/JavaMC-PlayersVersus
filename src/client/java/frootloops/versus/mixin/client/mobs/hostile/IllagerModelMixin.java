@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.model.monster.illager.IllagerModel;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.mobs.melee.MeleeAnimation;
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartNames;
@@ -101,6 +102,7 @@ public abstract class IllagerModelMixin<S extends IllagerRenderState> extends En
             this.rightArm.visible = true;
             this.positionBlockingArm(leftArm, false);
         }
+        MeleeAnimation.poseIllager(this.head, this.rightArm, this.leftArm, renderState);
     }
 
     private void positionBlockingArm(ModelPart arm, boolean rightArm) {

@@ -20,14 +20,16 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BAS
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_MAX_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_MIN_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_UPPER_MIN_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_UPPER_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_BAND_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
 
 /**
  * The Players Versus aquifer: sea-level water for oceans and rivers, barriers that keep it out of caves, water basins
- * in low caves, dry caves everywhere else, lava at the bottom, and the high river's water at y 80. The rules live in
- * {@link PvAquiferRules}.
+ * in low caves, dry caves everywhere else, lava at the bottom, and the high river's water at y 80 and in its upper
+ * layer at y 96. The rules live in {@link PvAquiferRules}.
  *
  * <p>One instance exists per {@link net.minecraft.world.level.levelgen.NoiseChunk}, created by
  * {@code ChunkNoiseSamplerMixin} for generators whose aquifer config names {@link AquiferFloodedness} ({@link #create}).
@@ -41,9 +43,10 @@ import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA
  * noises are sampled per block.
  *
  * <p>The flooded corridors and the high river are water exactly where the final density opens them: the aquifer reads
- * the same two functions the final density takes the minimum with ({@code caves/corridor_noodle} and
- * {@code high_river/valley}), over the chunk and {@code BAND_REACH} blocks around it, with one volume sample each
- * ({@link Region}), which is how the terrain pass samples them, so both get the same floats at every block.
+ * the functions the final density takes the minimum with ({@code high_river/valley} and {@code high_river/upper_valley},
+ * and {@code caves/flooded_corridors}, which is {@code caves/corridor_noodle} inside the corridors' zone), over the
+ * chunk and {@code BAND_REACH} blocks around it, with one volume sample each ({@link Region}), which is how the terrain
+ * pass samples them, so both get the same floats at every block.
  *
  * <p>Walls look at a block's neighbours ({@link PvAquiferRules#decide}), up to {@code BAND_REACH} blocks away, so each
  * block's own decision ({@link PvAquiferRules#atPosition}) is kept once computed, for the chunk and that far around it.
@@ -71,7 +74,7 @@ public final class PvAquifer implements Aquifer {
 
     private final FluidPicker fluidPicker;
     private final DensitySamplerSet samplers;
-    /** The functions the config names: F's and S's inputs, the corridors' noodle and the high river's valley. */
+    /** The functions the config names: F's and S's inputs, the corridors' noodle and the high river's valleys. */
     private final AquiferFloodedness floodednessConfig;
     private final AquiferSpread spreadConfig;
     /** The chunk's first block, which the lattices and the kept decisions are laid out from. */
@@ -84,7 +87,7 @@ public final class PvAquifer implements Aquifer {
     @Nullable
     private SpreadInputs spread;
     @Nullable
-    private Region corridors, valley;
+    private Region corridors, valley, upperValley;
     /** Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled. */
     @Nullable
     private double[] ridge;
@@ -195,8 +198,8 @@ public final class PvAquifer implements Aquifer {
     }
 
     /**
-     * The final density's noodle at a block of the flooded corridors' layers, with the corridors' bias: at most 0 where
-     * the corridor opens the block.
+     * The flooded corridors at a block of their layers: the final density's noodle inside the corridors' zone, at most
+     * 0 where a corridor opens the block; outside the zone no corridor, so the dry noodles there stay dry.
      */
     public double corridor(int x, int y, int z) {
         if (this.corridors == null) {
@@ -206,17 +209,30 @@ public final class PvAquifer implements Aquifer {
     }
 
     /**
-     * The high river's water at a block: at and under its surface, where its valley opens the block (the valley is
-     * negative there), water that spills where the ground beside it is open at the surface, the bed's under it; air
-     * elsewhere.
+     * The high river's water at a block, in either layer: at and under the layer's surface, where its valley opens the
+     * block (the valley is negative there), water that spills where the ground beside it is open at the surface, the
+     * bed's under it; air elsewhere.
      */
     public PvAquiferDecision highRiverAt(int x, int y, int z) {
-        if (y < HIGH_RIVER_MIN_Y || y > HIGH_RIVER_Y) return PvAquiferDecision.AIR;
-        if (this.valley == null) {
-            this.valley = this.region(this.floodednessConfig.highRiver(), HIGH_RIVER_MIN_Y, HIGH_RIVER_Y);
+        if (y >= HIGH_RIVER_MIN_Y && y <= HIGH_RIVER_Y) {
+            if (this.valley == null) {
+                this.valley = this.region(this.floodednessConfig.highRiver(), HIGH_RIVER_MIN_Y, HIGH_RIVER_Y);
+            }
+            return riverWater(this.valley.at(x, y, z), y == HIGH_RIVER_Y);
         }
-        if (!(this.valley.at(x, y, z) < 0.0F)) return PvAquiferDecision.AIR;
-        return y == HIGH_RIVER_Y ? PvAquiferDecision.HIGH_RIVER_WATER : PvAquiferDecision.HIGH_RIVER_BED_WATER;
+        if (y >= HIGH_RIVER_UPPER_MIN_Y && y <= HIGH_RIVER_UPPER_Y) {
+            if (this.upperValley == null) {
+                this.upperValley = this.region(this.floodednessConfig.upperHighRiver(), HIGH_RIVER_UPPER_MIN_Y, HIGH_RIVER_UPPER_Y);
+            }
+            return riverWater(this.upperValley.at(x, y, z), y == HIGH_RIVER_UPPER_Y);
+        }
+        return PvAquiferDecision.AIR;
+    }
+
+    /** A layer's water where its valley opens a block: at its surface, or in its bed. */
+    private static PvAquiferDecision riverWater(float valley, boolean surface) {
+        if (!(valley < 0.0F)) return PvAquiferDecision.AIR;
+        return surface ? PvAquiferDecision.HIGH_RIVER_WATER : PvAquiferDecision.HIGH_RIVER_BED_WATER;
     }
 
     private double ridge(int x, int z) {

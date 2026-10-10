@@ -86,8 +86,8 @@ public final class PvWorldgenConstants {
 
     /**
      * Noodle caves come back to the basin layers (above {@link #BASIN_MIN_Y}, below this y) as flooded corridors near
-     * the flooded caves. Elsewhere in these layers the noodle's height bias ({@code caves/corridor_noodle} in the data)
-     * keeps them out, as before.
+     * the flooded caves. Elsewhere in these layers they're the dry noodles ({@link #DRY_NOODLE_BIAS}): the noodle's
+     * height bias ({@code caves/corridor_noodle} in the data) lets fewer through, and the aquifer leaves them dry.
      */
     public static final int CORRIDOR_MAX_Y = 24;
 
@@ -112,8 +112,20 @@ public final class PvWorldgenConstants {
     public static final double CORRIDOR_FLARE_SCALE = 1.0 / CORRIDOR_FLARE_FROM;
     public static final double CORRIDOR_FLARE_BIAS = -0.06;
 
+    /**
+     * Dry noodles: from {@link #DRY_NOODLE_MIN_Y} to {@link #DRY_NOODLE_MAX_Y}, where the noodle's height bias otherwise
+     * keeps noodles out (0.08 in y -8..20), it's at most this away from the entrance caves (an entrance value from
+     * {@link #CORRIDOR_ENTRANCES} up, fading in over {@link #CORRIDOR_ZONE_TAPER}), so some tunnels lead down dry from
+     * y 32 to y -16 and rarely meet an entrance cave. Nearer them the bias is as before: in the corridors' layers the
+     * corridors keep their own, and the aquifer floods only what opens there ({@code caves/flooded_corridors}).
+     */
+    public static final double DRY_NOODLE_BIAS = 0.02;
+    public static final int DRY_NOODLE_MIN_Y = -16;
+    public static final int DRY_NOODLE_MAX_Y = 32;
+
     // ------------------------------------------------------------------------------------------------------------
-    // The high river (the refactor plan, Section 10, question 7; shapes tried in HighRiverSurveyTest)
+    // The high river (the refactor plan, Section 10, question 7; Section 6.2, 2f): water at y 80, and a thinner upper
+    // layer at y 96 on the same path, which falls into it where the ground climbs from one to the other
     // ------------------------------------------------------------------------------------------------------------
 
     /** The high river's water surface. Its water there spills wherever the ground beside it is open. */
@@ -129,14 +141,38 @@ public final class PvWorldgenConstants {
     public static final double HIGH_RIVER_HALF_WIDTH = 0.03;
     /** How much wider the valley gets per block above the surface, so ground over the water is cut back into banks. */
     public static final double HIGH_RIVER_WIDENING = 0.006;
+
+    /** The upper layer's water surface, which spills like the high river's. */
+    public static final int HIGH_RIVER_UPPER_Y = 96;
+    /** Its bed, shallower than the high river's. */
+    public static final int HIGH_RIVER_UPPER_BED = 2;
+    public static final int HIGH_RIVER_UPPER_MIN_Y = HIGH_RIVER_UPPER_Y - HIGH_RIVER_UPPER_BED;
+    /** Its half width at its surface (about 5 blocks) and its banks' widening: half the high river's. */
+    public static final double HIGH_RIVER_UPPER_HALF_WIDTH = 0.015;
+    public static final double HIGH_RIVER_UPPER_WIDENING = 0.003;
+
+    /** How much vanilla's depth falls per block up (1.5 to -1.5 over y -64..320): 0.01 is about 1.3 blocks. */
+    public static final double DEPTH_PER_BLOCK = 3.0 / 384;
     /**
-     * The river keeps out of ground that rises far above its surface: it runs at full width up to this depth at its
-     * surface's height (0.01 is about 1.3 blocks of ground above it) and narrows to nothing over
-     * {@link #HIGH_RIVER_FADE} more.
+     * Each layer runs at full width where the depth at its surface's height is up to this, the ground's nominal surface
+     * up to about 6 blocks above its water. On the low side it runs on wherever that depth is above 0, over caves and
+     * dips, and past that while the terrain at its surface is solid, to the ground's real edge, where it spills.
      */
-    public static final double HIGH_RIVER_TOP = 0.06;
-    public static final double HIGH_RIVER_FADE = 0.03;
-    /** The valley's top, exclusive: the final density only looks for the river from the bed's bottom up to here. */
+    public static final double HIGH_RIVER_FULL_DEPTH = 0.05;
+    /**
+     * Into higher ground the high river cuts a gorge: from {@link #HIGH_RIVER_FULL_DEPTH} it narrows to this share of
+     * its width (as wide as the upper layer), and keeps it up to the gorge's head.
+     */
+    public static final double HIGH_RIVER_GORGE_WIDTH = 0.5;
+    /**
+     * The gorge's head, a wall where the depth at the high river's surface reaches this: past the depth where the upper
+     * layer's surface meets the ground's nominal surface (0.125), so the upper layer runs on above the wall and its
+     * water falls over it into the river. About 20 blocks of ground above the water, before the terrain's own bumps.
+     */
+    public static final double HIGH_RIVER_CLOSED = (HIGH_RIVER_UPPER_Y - HIGH_RIVER_Y) * DEPTH_PER_BLOCK + 0.03;
+    /** The upper layer narrows from {@link #HIGH_RIVER_FULL_DEPTH} and is closed at this depth at its surface. */
+    public static final double HIGH_RIVER_UPPER_CLOSED = 0.1;
+    /** The valleys' top, exclusive: the final density only looks for the river from a bed's bottom up to here. */
     public static final int HIGH_RIVER_VALLEY_MAX_Y = 128;
 
     // ------------------------------------------------------------------------------------------------------------

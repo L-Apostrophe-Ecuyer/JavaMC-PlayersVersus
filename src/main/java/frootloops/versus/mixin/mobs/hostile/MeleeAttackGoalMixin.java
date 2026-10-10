@@ -2,7 +2,7 @@ package frootloops.versus.mixin.mobs.hostile;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.Combat;
-import net.minecraft.sounds.SoundEvents;
+import frootloops.versus.mod.mobs.melee.MobMelee;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.monster.illager.AbstractIllager;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.pathfinder.Path;
@@ -25,6 +26,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+/**
+ * Mob melee on MeleeAttackGoal as a telegraphed swing ({@link MobMelee}): a swing starts when the target is in reach,
+ * winds up (holding still at first), then strikes, hitting if the target is still in reach and in sight and missing
+ * otherwise. Now and then a humanoid swings heavy instead and leaps at the target, which MobMelee runs while the goal
+ * waits. {@code ticksUntilNextAttack} counts down the whole cycle, wind-up and recovery; mobs with a shield block
+ * between swings.
+ */
 @Mixin(MeleeAttackGoal.class)
 public abstract class MeleeAttackGoalMixin extends Goal {
     protected MeleeAttackGoalMixin(double speed, PathfinderMob mob) {
@@ -34,12 +42,16 @@ public abstract class MeleeAttackGoalMixin extends Goal {
 
     private final boolean DEBUG = false;
 
-    private int numTicksEndlag = -1;
+    /** Recovery after a strike, by what the mob holds: nothing, a tool or weapon, or an axe or trident. */
     private final int TICKS_SWING_QUICK = 20;
     private final int TICKS_SWING_TOOLS = 30;
     private final int TICKS_SWING_HEAVY = 40;
+    /** How long a regular swing holds the mob still at the start of its wind-up. */
+    private final int TICKS_FREEZE = 4;
 
-    private int maxCooldown = 0;
+    /** The regular swing in progress: ticks until it strikes (0 when none), and its whole wind-up. */
+    private int windUpLeft;
+    private int windUpTicks;
 
     @Shadow
     private final double speedModifier;
@@ -56,23 +68,29 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     @Shadow
     private int ticksUntilNextAttack;
 
-    private int getCooldownAmount(){
-        if(maxCooldown > 0) return maxCooldown;
-        if(numTicksEndlag == -1) numTicksEndlag = mob.is(EntityTypeTags.ARTHROPOD) ? 4 : 8;
-        if(!this.mob.getMainHandItem().isEmpty()) {
-            if(this.mob.getMainHandItem().is(ItemTags.AXES) || this.mob.getMainHandItem().is(Items.TRIDENT))
-                maxCooldown = TICKS_SWING_HEAVY + numTicksEndlag;
-        }
-        else maxCooldown = TICKS_SWING_QUICK + numTicksEndlag;
-        return maxCooldown;
+    private int getRecovery() {
+        ItemStack held = this.mob.getMainHandItem();
+        if (held.isEmpty()) return TICKS_SWING_QUICK;
+        if (held.is(ItemTags.AXES) || held.is(Items.TRIDENT)) return TICKS_SWING_HEAVY;
+        return TICKS_SWING_TOOLS;
+    }
+
+    /** A regular swing's whole cycle, wind-up and recovery: vanilla's attack interval. */
+    private int getCooldownAmount() {
+        return MobMelee.windUpTicks(this.mob) + this.getRecovery();
+    }
+
+    /** The last ticks of a cycle, when the mob aims freely again. */
+    private int getEndlag() {
+        return this.mob.is(EntityTypeTags.ARTHROPOD) ? 4 : 8;
     }
 
     @Inject(method = "canContinueToUse", at = @At("HEAD"), cancellable = true)
-    public void shouldContinue(CallbackInfoReturnable cir) {
-        if(this.ticksUntilNextAttack > 0) {
+    public void shouldContinue(CallbackInfoReturnable<Boolean> cir) {
+        // Only with a target: without one, nothing counts the swing or its cooldown down.
+        if ((this.ticksUntilNextAttack > 0 || this.windUpLeft > 0) && this.mob.getTarget() != null) {
             mob.setAggressive(true);
             cir.setReturnValue(true);
-            cir.cancel();
         }
     }
 
@@ -84,10 +102,46 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         info.cancel();
     }
 
+    @Inject(method = "stop", at = @At("HEAD"))
+    public void stop(CallbackInfo info) {
+        if (this.windUpLeft > 0) {
+            this.windUpLeft = 0;
+            MobMelee.cancel(this.mob);
+        }
+    }
+
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(CallbackInfo info) {
+        // Leaping (a heavy swing): MobMelee has the mob until it's back on its feet, and the cycle waits for it.
+        if (MobMelee.isLeaping(this.mob)) {
+            this.mob.setAggressive(true);
+            info.cancel();
+            return;
+        }
         LivingEntity target = this.mob.getTarget();
+        if (target == null && this.windUpLeft > 0) {
+            this.windUpLeft = 0;
+            MobMelee.cancel(this.mob);
+        }
         if (target != null) {
+
+            // Swinging: a hit cuts the swing short; otherwise it holds still at first, then strikes.
+            if (this.windUpLeft > 0) {
+                if (MobMelee.interrupted(this.mob)) {
+                    this.windUpLeft = 0;
+                    this.ticksUntilNextAttack = this.getEndlag() - 2;
+                    this.mob.setAggressive(false);
+                    MobMelee.cancel(this.mob);
+                    if (DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: interrupted.");
+                } else if (--this.windUpLeft == 0) {
+                    this.strike(target);
+                } else if (this.windUpTicks - this.windUpLeft <= TICKS_FREEZE && this.mob.hurtTime < 8) {
+                    this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
+                    this.mob.setAggressive(true);
+                    info.cancel();
+                    return;
+                }
+            }
 
             // Shield Blocking:
             boolean shouldBlockWithShield = false;
@@ -104,18 +158,10 @@ public abstract class MeleeAttackGoalMixin extends Goal {
                 this.mob.startUsingItem(InteractionHand.OFF_HAND);
                 info.cancel();
 
-            // Attacking:
-            } else if (this.ticksUntilNextAttack >= 0) {
-                if (this.mob.getPose() == Pose.CROUCHING) {
-                    this.mob.setPose(Pose.STANDING);
-                    this.mob.releaseUsingItem();
-                    info.cancel();
-                }
-                if (this.ticksUntilNextAttack > this.getCooldownAmount() - 4 && this.mob.hurtTime < 8) {
-                    this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
-                    this.mob.setAggressive(true);
-                    info.cancel();
-                }
+            } else if (this.ticksUntilNextAttack >= 0 && this.mob.getPose() == Pose.CROUCHING) {
+                this.mob.setPose(Pose.STANDING);
+                this.mob.releaseUsingItem();
+                info.cancel();
             }
         }
     }
@@ -123,8 +169,7 @@ public abstract class MeleeAttackGoalMixin extends Goal {
     @Inject(method = "tick", at = @At("TAIL"), cancellable = false)
     public void mobsNeedToBeAimingToLandHit(CallbackInfo info) {
         // If the mob started attacking or blocking, it can't properly adjust its aim mid-swing anymore:
-        if(numTicksEndlag == -1) numTicksEndlag = mob.is(EntityTypeTags.ARTHROPOD) ? 1 : 8;
-        if (this.ticksUntilNextAttack < 0 || this.ticksUntilNextAttack > numTicksEndlag) {
+        if (this.windUpLeft > 0 || this.ticksUntilNextAttack < 0 || this.ticksUntilNextAttack > this.getEndlag()) {
             LookControl lookControl = this.mob.getLookControl();
             if (lookControl.isLookingAtTarget()) lookControl.setLookAt(lookControl.getWantedX(), lookControl.getWantedY(), lookControl.getWantedZ(),10f,10f);
         }
@@ -162,87 +207,48 @@ public abstract class MeleeAttackGoalMixin extends Goal {
         return false;
     }
 
+    /** Starts a swing once the cycle is over and the target is in reach, jumping at it if only a jump reaches. */
     @Overwrite
     public void checkAndPerformAttack(LivingEntity target) {
-        if(numTicksEndlag == -1) numTicksEndlag = mob.is(EntityTypeTags.ARTHROPOD) ? 1 : 8;
-        int cooldownAmount = this.getCooldownAmount();
-        boolean canTrySwinging = this.ticksUntilNextAttack <= 0;
-        boolean willTryLandingAnAttack = this.mob.isAggressive() && (this.ticksUntilNextAttack == (cooldownAmount - numTicksEndlag) || this.ticksUntilNextAttack == (cooldownAmount - numTicksEndlag) - 1);
+        if (this.windUpLeft > 0 || this.ticksUntilNextAttack > 0) return;
+        boolean isInCloseQuarters = MobMelee.inCloseQuarters(this.mob, target);
+        if (!isInCloseQuarters && !Combat.isLookingTowards(this.mob, target.getEyePosition(), true)) return;
 
-        // Attack interruption, if the player swung right after the mob did:
-        if(this.mob.hurtTime > 14 && cooldownAmount > numTicksEndlag) {
-            ticksUntilNextAttack = numTicksEndlag - 2;
-            mob.setAggressive(false);
-            // 1.21.10 also reset mob.attackAnim here, which the next tick recomputed from the swing anyway; 26.3 keeps
-            // the swing in LivingEntity's private SwingState.
-            if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: interrupted.");
+        boolean jumping = false;
+        if (!isInCloseQuarters && !Combat.getMobAttackBox(mob, false).intersects(Combat.getEntityHitbox(target))) {
+            if (target.getVehicle() != null || !mob.onGround() || !Combat.getMobAttackBox(mob, true).intersects(Combat.getEntityHitbox(target))) return;
+            if(DEBUG) VersusMod.MOD_LOGGER.warn("Jump attack!");
+            double jumpBlockMultiplier = mob.level().getBlockState(mob.blockPosition()).getBlock().getJumpFactor();
+            double jumpVelocity = 0.5 * jumpBlockMultiplier + mob.getJumpBoostPower();
+            mob.getDeltaMovement().scale(1.6);
+            mob.push(0.0, jumpVelocity, 0.0);
+            jumping = true;
         }
 
-        // Otherwise, see if we can attack (cooldown is reduced in tick()):
-        else if (canTrySwinging || willTryLandingAnAttack) {
-            boolean isInCloseQuarters = (target.getEyePosition().distanceToSqr(mob.getEyePosition()) < 1.5d) || (target.position().distanceToSqr(mob.position()) < 1.5d);
-            if(isInCloseQuarters || Combat.isLookingTowards(this.mob, target.getEyePosition(), true)) {
-
-                if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("-------------------- SWING ATTEMPT");
-                else if(DEBUG) VersusMod.MOD_LOGGER.warn("-------------------- ATTACK ATTEMPT");
-
-                boolean canAttack = false;
-                if(isInCloseQuarters) {
-                    if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("Can swing, by means of being near the player");
-                    else if(DEBUG) VersusMod.MOD_LOGGER.warn("Can land attack, by means of being near the player");
-                    canAttack = true;
-                }
-                else {
-                    if(Combat.getMobAttackBox(mob, false).intersects(Combat.getEntityHitbox(target))) {
-                        if(DEBUG && canTrySwinging) VersusMod.MOD_LOGGER.warn("Can swing, by means of intersecting with the player");
-                        else if(DEBUG) VersusMod.MOD_LOGGER.warn("Can land attack, by means of intersecting with the player");
-                        canAttack = true;
-                    }
-                    else if(canTrySwinging && target.getVehicle() == null && mob.onGround() && Combat.getMobAttackBox(mob, true).intersects(Combat.getEntityHitbox(target))) {
-                        if(DEBUG) VersusMod.MOD_LOGGER.warn("Jump attack!");
-                        double jumpBlockMultiplier = mob.level().getBlockState(mob.blockPosition()).getBlock().getJumpFactor();
-                        double jumpVelocity = 0.5 * jumpBlockMultiplier + mob.getJumpBoostPower();
-                        mob.getDeltaMovement().scale(1.6);
-                        mob.push(0.0, jumpVelocity, 0.0);
-                        canAttack = true;
-                    }
-                }
-
-                if(canAttack) {
-                    if(DEBUG) VersusMod.MOD_LOGGER.warn("Can attack...");
-
-                    // Start swinging:
-                    if (canTrySwinging) {
-                        if(DEBUG) VersusMod.MOD_LOGGER.warn("Started swinging!");
-                        this.mob.swingForAttack(InteractionHand.MAIN_HAND);
-                        this.ticksUntilNextAttack = cooldownAmount;
-
-                    // After 6 ticks, see if the swing landed:
-                    } else if (willTryLandingAnAttack) {
-                        if(this.mob.hasLineOfSight(target)) {
-                            if(DEBUG) VersusMod.MOD_LOGGER.warn("Landing attack!");
-                            if(this.mob.doHurtTarget(getServerLevel(this.mob), target)) {
-                                this.mob.playSound(SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 1.4F);
-                            }
-                            this.ticksUntilNextAttack -= 2;
-                        }
-                        else {
-                            if(DEBUG) VersusMod.MOD_LOGGER.warn("Missed: couldn't see target.");
-                            this.mob.playSound(SoundEvents.PLAYER_ATTACK_NODAMAGE, 1.2F, 0.9F);
-                            this.ticksUntilNextAttack -= 1;
-                        }
-                    }
-                }
-                else if (willTryLandingAnAttack) {
-                    if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack.");
-                    this.mob.playSound(SoundEvents.PLAYER_ATTACK_NODAMAGE, 0.8F, 0.8F);
-                }
-            }
-            else if (willTryLandingAnAttack) {
-                if(DEBUG) VersusMod.MOD_LOGGER.warn("Couldn't attack: neither in close quarters, nor looking towards target");
-                this.mob.playSound(SoundEvents.PLAYER_ATTACK_NODAMAGE, 0.8F, 0.8F);
-            }
+        // Now and then a humanoid swings heavy, leaping at the target (not when already jumping at it); its recovery
+        // counts down once it's back on its feet.
+        if (!jumping && MobMelee.pickKind(this.mob, target) == MobMelee.Kind.HEAVY) {
+            MobMelee.leap(this.mob, target);
+            this.ticksUntilNextAttack = this.getRecovery();
+            this.mob.setAggressive(true);
+            if(DEBUG) VersusMod.MOD_LOGGER.warn("Leaping.");
+            return;
         }
+        this.windUpTicks = MobMelee.windUpTicks(this.mob);
+        this.windUpLeft = this.windUpTicks;
+        this.ticksUntilNextAttack = this.windUpTicks + this.getRecovery();
+        this.mob.setAggressive(true);
+        MobMelee.windUp(this.mob, this.windUpTicks);
+        if(DEBUG) VersusMod.MOD_LOGGER.warn("Started a swing.");
+    }
+
+    /** The end of the wind-up: hits if the target is still in reach and in sight; a miss takes longer to recover. */
+    private void strike(LivingEntity target) {
+        boolean lands = this.mob.hasLineOfSight(target) && MobMelee.reaches(this.mob, target, false);
+        if (!MobMelee.strike(getServerLevel(this.mob), this.mob, target, MobMelee.Kind.REGULAR, lands)) {
+            this.ticksUntilNextAttack += MobMelee.MISS_EXTRA_RECOVERY;
+        }
+        if(DEBUG) VersusMod.MOD_LOGGER.warn(lands ? "Landed the swing." : "Missed.");
     }
 
     @Overwrite

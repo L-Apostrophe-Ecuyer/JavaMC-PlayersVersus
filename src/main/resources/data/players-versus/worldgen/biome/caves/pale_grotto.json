@@ -107,6 +107,11 @@
               "type": "minecraft:creeper",
               "weight": 80,
               "count": 4
+            },
+            {
+              "type": "players-versus:pale_creeper",
+              "weight": 80,
+              "count": 1
             }
           ],
           "underground_water_creature": [

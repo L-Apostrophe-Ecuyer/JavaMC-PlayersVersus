@@ -70,8 +70,8 @@ public final class PvAquiferRules {
      * {@link #atPosition}, with the flooded corridors: in their layers, a block that isn't basin water is when the
      * corridors' noodle opens it (the refactor plan, Section 10, question 7).
      *
-     * @param corridors the noodle with the corridors' bias at a block ({@code players-versus:overworld/caves/corridor_noodle}),
-     *                  the value the final density takes the minimum with there: at most 0 where it opens the block
+     * @param corridors the flooded corridors at a block ({@code players-versus:overworld/caves/flooded_corridors}): the
+     *                  final density's noodle inside the corridors' zone, at most 0 where it opens the block there
      */
     public static PvAquiferDecision atPosition(int x, int y, int z, Field floodedness, Field spread, Field corridors) {
         if (y >= SEA_LEVEL) return PvAquiferDecision.AIR;
@@ -125,12 +125,15 @@ public final class PvAquiferRules {
     }
 
     /**
-     * Above sea level only the high river places water, at y 77..80 ({@code PvAquifer.highRiverAt}, which the positions
-     * give there). A wall keeps it in wherever it could flow into open space: from the bed's water beside, or from any of
-     * its water above. The surface's water gets no wall beside it, so where the ground next to it is open, it spills.
+     * Above sea level only the high river places water, at y 77..80 and in its upper layer at y 94..96
+     * ({@code PvAquifer.highRiverAt}, which the positions give there). A wall keeps it in wherever it could flow into
+     * open space: from a bed's water beside, or from any of its water above. A surface's water gets no wall beside it, so
+     * where the ground next to it is open, it spills: off the ground's edge, and from the upper layer into the high
+     * river's gorge.
      */
     private static PvAquiferDecision aboveSea(int x, int y, int z, Positions positions) {
-        if (y < HIGH_RIVER_MIN_Y - 1 || y > HIGH_RIVER_Y) return PvAquiferDecision.AIR_ABOVE_SEA;
+        boolean nearRiver = y >= HIGH_RIVER_MIN_Y - 1 && y <= HIGH_RIVER_Y || y >= HIGH_RIVER_UPPER_MIN_Y - 1 && y <= HIGH_RIVER_UPPER_Y;
+        if (!nearRiver) return PvAquiferDecision.AIR_ABOVE_SEA;
         PvAquiferDecision here = positions.at(x, y, z);
         if (here != PvAquiferDecision.AIR) return here;
         for (int[] offset : INFLOW) {

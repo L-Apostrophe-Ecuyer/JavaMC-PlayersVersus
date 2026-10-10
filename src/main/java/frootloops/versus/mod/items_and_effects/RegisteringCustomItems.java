@@ -24,6 +24,9 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("withered_zombie_spawn_egg", ModEntities.WITHERED_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("frosted_zombie_spawn_egg", ModEntities.FROSTED_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("deeper_creeper_spawn_egg", ModEntities.DEEPER_CREEPER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("pale_creeper_spawn_egg", ModEntities.PALE_CREEPER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("pale_zombie_spawn_egg", ModEntities.PALE_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("pale_spider_spawn_egg", ModEntities.PALE_SPIDER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("wildfire_spawn_egg", ModEntities.WILDFIRE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
 
         registerCustomItem("copper_chestplate", CustomEquipment.COPPER_CHESTPLATE, CreativeModeTabs.COMBAT);

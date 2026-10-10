@@ -48,6 +48,15 @@ public final class PvBiomeLayout {
     private static final long MOUNTAIN_CONTINENTALNESS_MIN = Climate.quantizeCoord(0.03F);
     private static final long RIVER_VALLEY_WEIRDNESS = Climate.quantizeCoord(0.3F);
     private static final long WARM_MOUNTAINSIDE_FOREST_TEMPERATURE = Climate.quantizeCoord(0.1998F);
+    /**
+     * Birch forests turn dappled where the weirdness is above this and the temperature below {@link #DAPPLED_COOL}, old
+     * growth birch forests turn into vanilla's dappled forest, and dark forests into dark taiga ({@link #weirdTarget}).
+     * Vanilla's birch forests reach down to -0.15, where they border taigas.
+     */
+    static final float DAPPLED_WEIRDNESS = 0.0F;
+    static final float DAPPLED_COOL = 0.0F;
+    /** Below this temperature, next to the taigas, birch forests become dappled taiga instead of sparse dappled forest. */
+    static final float DAPPLED_COLD = -0.075F;
 
     private record Rule(String name, Box region, BiFunction<Box, ResourceKey<Biome>, ResourceKey<Biome>> target) {
     }
@@ -65,7 +74,16 @@ public final class PvBiomeLayout {
             new Rule("frozen", Box.ALL.withMin(Box.T, Climate.quantizeCoord(-0.55F)).withMax(Box.T, Climate.quantizeCoord(-0.375F)),
                     (slice, biome) -> CustomOverworldBiomes.getSnowyToTemperateTransitionBiome(biome)),
             new Rule("humid", Box.ALL.withMin(Box.H, Climate.quantizeCoord(0.275F)).withMax(Box.H, Climate.quantizeCoord(0.35F)),
-                    (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)));
+                    (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)),
+            // Where the weirdness is positive and the temperature negative, after the transitions, so only in what they
+            // leave: dappled trees (26.3's poplars) for birch, dark taiga for dark forest (weirdTarget); vanilla's own
+            // dappled forests give way to flower forests.
+            new Rule("flower-forest", Box.ALL,
+                    (slice, biome) -> CustomOverworldBiomes.DAPPLED_FOREST.equals(biome) ? Biomes.FLOWER_FOREST : null),
+            new Rule("weird-cold", Box.ALL.withMin(Box.W, Climate.quantizeCoord(DAPPLED_WEIRDNESS)).withMax(Box.T, Climate.quantizeCoord(DAPPLED_COLD)),
+                    (slice, biome) -> weirdTarget(biome, true)),
+            new Rule("weird-cool", Box.ALL.withMin(Box.W, Climate.quantizeCoord(DAPPLED_WEIRDNESS)).withMax(Box.T, Climate.quantizeCoord(DAPPLED_COOL)),
+                    (slice, biome) -> weirdTarget(biome, false)));
 
     private PvBiomeLayout() {
     }
@@ -132,6 +150,20 @@ public final class PvBiomeLayout {
                 out.add(new Entry(piece.toHypercube(SURFACE_CAVE_DEPTH, caveOffset), cave, "surface-cave"));
             }
         }
+    }
+
+    /**
+     * What a biome becomes where the weirdness is positive and the temperature negative: birch forest turns dappled
+     * (dappled taiga nearer the taigas, below {@link #DAPPLED_COLD}, else sparse dappled forest), old growth birch into
+     * vanilla's dappled forest, and dark forest into the dark taiga forest (dark oak among spruce and pine), as it does on
+     * mountainsides.
+     */
+    @Nullable
+    private static ResourceKey<Biome> weirdTarget(ResourceKey<Biome> biome, boolean cold) {
+        if (biome == Biomes.BIRCH_FOREST) return cold ? CustomOverworldBiomes.DAPPLED_TAIGA : CustomOverworldBiomes.SPARSE_DAPPLED_FOREST;
+        if (biome == Biomes.OLD_GROWTH_BIRCH_FOREST) return CustomOverworldBiomes.DAPPLED_FOREST;
+        if (biome == Biomes.DARK_FOREST) return CustomOverworldBiomes.DARK_TAIGA_FOREST;
+        return null;
     }
 
     @Nullable

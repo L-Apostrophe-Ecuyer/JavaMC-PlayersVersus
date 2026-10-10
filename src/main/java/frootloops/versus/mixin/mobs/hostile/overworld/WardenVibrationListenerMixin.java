@@ -8,11 +8,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import frootloops.versus.mod.mobs.hostile.overworld.warden.WardenSenses;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -33,6 +35,11 @@ public abstract class WardenVibrationListenerMixin {
     public void noDistractions(ServerLevel world, BlockPos pos, Holder<GameEvent> event, GameEvent.Context emitter, CallbackInfoReturnable<Boolean> cir) {
         if(cir.getReturnValue()) {
             Warden warden = this$0;
+            // Steps out of smell range go unheard unless the player sprints, as if they sneaked.
+            if(emitter.sourceEntity() instanceof Player player && event.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING) && WardenSenses.losesTrackOf(warden, player)) {
+                cir.setReturnValue(false);
+                return;
+            }
             if(emitter.sourceEntity() == null) cir.setReturnValue(warden.getClientAngerLevel() < 1);
             else if(!(emitter.sourceEntity() instanceof Player)) {
                 if(warden.getTarget() instanceof Player) cir.setReturnValue(false);

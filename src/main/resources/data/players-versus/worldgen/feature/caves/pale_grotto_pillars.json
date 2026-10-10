@@ -1,6 +1,7 @@
 {
   "type": "players-versus:stone_stalagtite",
   "floorToCeilingSearchRange": 32,
-  "paleOakLogChance": 0.1,
+  "paleOakWoodReach": 0.5,
+  "tuffReach": 0.8,
   "creakingHeartChance": 0.1
 }

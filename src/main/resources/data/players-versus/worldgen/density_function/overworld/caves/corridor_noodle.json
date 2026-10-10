@@ -14,19 +14,226 @@
           "left": {
             "type": "minecraft:sub",
             "left": 0.4,
+            "right": "players-versus:overworld/caves/corridor_entrances"
+          },
+          "right": 20.0
+        },
+        "min": 0.0,
+        "max": 1.0
+      },
+      "first": {
+        "type": "minecraft:lerp",
+        "alpha": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:mul",
+            "left": {
+              "type": "minecraft:sub",
+              "left": "players-versus:overworld/caves/corridor_entrances",
+              "right": 0.4
+            },
+            "right": 20.0
+          },
+          "min": 0.0,
+          "max": 1.0
+        },
+        "first": {
+          "type": "minecraft:add",
+          "left": {
+            "type": "minecraft:gradient",
+            "axis": "y",
+            "from_coordinate": 96,
+            "from_value": -0.05,
+            "to_coordinate": 56,
+            "to_value": 0.08
+          },
+          "right": {
+            "type": "minecraft:add",
+            "left": {
+              "type": "minecraft:gradient",
+              "axis": "y",
+              "from_coordinate": 56,
+              "from_value": 0.0,
+              "to_coordinate": 40,
+              "to_value": -0.1
+            },
             "right": {
-              "type": "minecraft:interpolated",
-              "cell_size_xz": 4,
-              "cell_size_y": 8,
-              "input": {
-                "type": "minecraft:range_choice",
-                "input": "minecraft:y",
-                "min_inclusive": -9.5,
-                "max_exclusive": 25.5,
-                "when_in_range": "players-versus:overworld/caves/entrances",
-                "when_out_of_range": 1.0
+              "type": "minecraft:add",
+              "left": {
+                "type": "minecraft:gradient",
+                "axis": "y",
+                "from_coordinate": 32,
+                "from_value": 0.0,
+                "to_coordinate": 20,
+                "to_value": 0.1
+              },
+              "right": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": -8,
+                  "from_value": 0.0,
+                  "to_coordinate": -32,
+                  "to_value": -0.3
+                },
+                "right": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": -52,
+                  "from_value": 0.0,
+                  "to_coordinate": -64,
+                  "to_value": 0.35
+                }
               }
             }
+          }
+        },
+        "second": {
+          "type": "minecraft:range_choice",
+          "input": "minecraft:y",
+          "min_inclusive": -16.5,
+          "max_exclusive": 32.5,
+          "when_in_range": {
+            "type": "minecraft:min",
+            "left": {
+              "type": "minecraft:add",
+              "left": {
+                "type": "minecraft:gradient",
+                "axis": "y",
+                "from_coordinate": 96,
+                "from_value": -0.05,
+                "to_coordinate": 56,
+                "to_value": 0.08
+              },
+              "right": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": 56,
+                  "from_value": 0.0,
+                  "to_coordinate": 40,
+                  "to_value": -0.1
+                },
+                "right": {
+                  "type": "minecraft:add",
+                  "left": {
+                    "type": "minecraft:gradient",
+                    "axis": "y",
+                    "from_coordinate": 32,
+                    "from_value": 0.0,
+                    "to_coordinate": 20,
+                    "to_value": 0.1
+                  },
+                  "right": {
+                    "type": "minecraft:add",
+                    "left": {
+                      "type": "minecraft:gradient",
+                      "axis": "y",
+                      "from_coordinate": -8,
+                      "from_value": 0.0,
+                      "to_coordinate": -32,
+                      "to_value": -0.3
+                    },
+                    "right": {
+                      "type": "minecraft:gradient",
+                      "axis": "y",
+                      "from_coordinate": -52,
+                      "from_value": 0.0,
+                      "to_coordinate": -64,
+                      "to_value": 0.35
+                    }
+                  }
+                }
+              }
+            },
+            "right": 0.02
+          },
+          "when_out_of_range": {
+            "type": "minecraft:add",
+            "left": {
+              "type": "minecraft:gradient",
+              "axis": "y",
+              "from_coordinate": 96,
+              "from_value": -0.05,
+              "to_coordinate": 56,
+              "to_value": 0.08
+            },
+            "right": {
+              "type": "minecraft:add",
+              "left": {
+                "type": "minecraft:gradient",
+                "axis": "y",
+                "from_coordinate": 56,
+                "from_value": 0.0,
+                "to_coordinate": 40,
+                "to_value": -0.1
+              },
+              "right": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": 32,
+                  "from_value": 0.0,
+                  "to_coordinate": 20,
+                  "to_value": 0.1
+                },
+                "right": {
+                  "type": "minecraft:add",
+                  "left": {
+                    "type": "minecraft:gradient",
+                    "axis": "y",
+                    "from_coordinate": -8,
+                    "from_value": 0.0,
+                    "to_coordinate": -32,
+                    "to_value": -0.3
+                  },
+                  "right": {
+                    "type": "minecraft:gradient",
+                    "axis": "y",
+                    "from_coordinate": -52,
+                    "from_value": 0.0,
+                    "to_coordinate": -64,
+                    "to_value": 0.35
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "second": {
+        "type": "minecraft:lerp",
+        "alpha": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:mul",
+            "left": {
+              "type": "minecraft:sub",
+              "left": 0.15,
+              "right": "players-versus:overworld/caves/corridor_entrances"
+            },
+            "right": 6.666666666666667
+          },
+          "min": 0.0,
+          "max": 1.0
+        },
+        "first": 0.0,
+        "second": -0.06
+      }
+    },
+    "when_out_of_range": {
+      "type": "minecraft:lerp",
+      "alpha": {
+        "type": "minecraft:clamp",
+        "input": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:sub",
+            "left": "players-versus:overworld/caves/corridor_entrances",
+            "right": 0.4
           },
           "right": 20.0
         },
@@ -86,84 +293,115 @@
         }
       },
       "second": {
-        "type": "minecraft:lerp",
-        "alpha": {
-          "type": "minecraft:clamp",
-          "input": {
-            "type": "minecraft:mul",
+        "type": "minecraft:range_choice",
+        "input": "minecraft:y",
+        "min_inclusive": -16.5,
+        "max_exclusive": 32.5,
+        "when_in_range": {
+          "type": "minecraft:min",
+          "left": {
+            "type": "minecraft:add",
             "left": {
-              "type": "minecraft:sub",
-              "left": 0.15,
+              "type": "minecraft:gradient",
+              "axis": "y",
+              "from_coordinate": 96,
+              "from_value": -0.05,
+              "to_coordinate": 56,
+              "to_value": 0.08
+            },
+            "right": {
+              "type": "minecraft:add",
+              "left": {
+                "type": "minecraft:gradient",
+                "axis": "y",
+                "from_coordinate": 56,
+                "from_value": 0.0,
+                "to_coordinate": 40,
+                "to_value": -0.1
+              },
               "right": {
-                "type": "minecraft:interpolated",
-                "cell_size_xz": 4,
-                "cell_size_y": 8,
-                "input": {
-                  "type": "minecraft:range_choice",
-                  "input": "minecraft:y",
-                  "min_inclusive": -9.5,
-                  "max_exclusive": 25.5,
-                  "when_in_range": "players-versus:overworld/caves/entrances",
-                  "when_out_of_range": 1.0
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": 32,
+                  "from_value": 0.0,
+                  "to_coordinate": 20,
+                  "to_value": 0.1
+                },
+                "right": {
+                  "type": "minecraft:add",
+                  "left": {
+                    "type": "minecraft:gradient",
+                    "axis": "y",
+                    "from_coordinate": -8,
+                    "from_value": 0.0,
+                    "to_coordinate": -32,
+                    "to_value": -0.3
+                  },
+                  "right": {
+                    "type": "minecraft:gradient",
+                    "axis": "y",
+                    "from_coordinate": -52,
+                    "from_value": 0.0,
+                    "to_coordinate": -64,
+                    "to_value": 0.35
+                  }
                 }
               }
-            },
-            "right": 6.666666666666667
+            }
           },
-          "min": 0.0,
-          "max": 1.0
+          "right": 0.02
         },
-        "first": 0.0,
-        "second": -0.06
-      }
-    },
-    "when_out_of_range": {
-      "type": "minecraft:add",
-      "left": {
-        "type": "minecraft:gradient",
-        "axis": "y",
-        "from_coordinate": 96,
-        "from_value": -0.05,
-        "to_coordinate": 56,
-        "to_value": 0.08
-      },
-      "right": {
-        "type": "minecraft:add",
-        "left": {
-          "type": "minecraft:gradient",
-          "axis": "y",
-          "from_coordinate": 56,
-          "from_value": 0.0,
-          "to_coordinate": 40,
-          "to_value": -0.1
-        },
-        "right": {
+        "when_out_of_range": {
           "type": "minecraft:add",
           "left": {
             "type": "minecraft:gradient",
             "axis": "y",
-            "from_coordinate": 32,
-            "from_value": 0.0,
-            "to_coordinate": 20,
-            "to_value": 0.1
+            "from_coordinate": 96,
+            "from_value": -0.05,
+            "to_coordinate": 56,
+            "to_value": 0.08
           },
           "right": {
             "type": "minecraft:add",
             "left": {
               "type": "minecraft:gradient",
               "axis": "y",
-              "from_coordinate": -8,
+              "from_coordinate": 56,
               "from_value": 0.0,
-              "to_coordinate": -32,
-              "to_value": -0.3
+              "to_coordinate": 40,
+              "to_value": -0.1
             },
             "right": {
-              "type": "minecraft:gradient",
-              "axis": "y",
-              "from_coordinate": -52,
-              "from_value": 0.0,
-              "to_coordinate": -64,
-              "to_value": 0.35
+              "type": "minecraft:add",
+              "left": {
+                "type": "minecraft:gradient",
+                "axis": "y",
+                "from_coordinate": 32,
+                "from_value": 0.0,
+                "to_coordinate": 20,
+                "to_value": 0.1
+              },
+              "right": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": -8,
+                  "from_value": 0.0,
+                  "to_coordinate": -32,
+                  "to_value": -0.3
+                },
+                "right": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": -52,
+                  "from_value": 0.0,
+                  "to_coordinate": -64,
+                  "to_value": 0.35
+                }
+              }
             }
           }
         }

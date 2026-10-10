@@ -32,10 +32,12 @@ import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
  * @param highRiver       the high river's valley ({@code players-versus:overworld/high_river/valley}), which the final
  *                        density takes the minimum with: the aquifer puts the river's water where it's negative at or
  *                        under its surface. Not part of F.
+ * @param upperHighRiver  the same for the high river's upper layer ({@code players-versus:overworld/high_river/upper_valley}).
+ *                        Not part of F.
  */
 public record AquiferFloodedness(DensityFunction depth, DensityFunction continentalness, DensityFunction ridge,
                                  DensityFunction entrances, DensityFunction surface, DensityFunction ramen,
-                                 DensityFunction highRiver) implements DensityFunction {
+                                 DensityFunction highRiver, DensityFunction upperHighRiver) implements DensityFunction {
 
     public static final MapCodec<AquiferFloodedness> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             DensityFunction.CODEC.fieldOf("depth").forGetter(AquiferFloodedness::depth),
@@ -44,7 +46,8 @@ public record AquiferFloodedness(DensityFunction depth, DensityFunction continen
             DensityFunction.CODEC.fieldOf("entrances").forGetter(AquiferFloodedness::entrances),
             DensityFunction.CODEC.fieldOf("surface").forGetter(AquiferFloodedness::surface),
             DensityFunction.CODEC.fieldOf("ramen").forGetter(AquiferFloodedness::ramen),
-            DensityFunction.CODEC.fieldOf("high_river").forGetter(AquiferFloodedness::highRiver)
+            DensityFunction.CODEC.fieldOf("high_river").forGetter(AquiferFloodedness::highRiver),
+            DensityFunction.CODEC.fieldOf("high_river_upper").forGetter(AquiferFloodedness::upperHighRiver)
     ).apply(instance, AquiferFloodedness::new));
 
     @Override
@@ -68,12 +71,12 @@ public record AquiferFloodedness(DensityFunction depth, DensityFunction continen
         DensityFunction depth = rule.rewrite(this.depth), continentalness = rule.rewrite(this.continentalness);
         DensityFunction ridge = rule.rewrite(this.ridge), entrances = rule.rewrite(this.entrances);
         DensityFunction surface = rule.rewrite(this.surface), ramen = rule.rewrite(this.ramen);
-        DensityFunction highRiver = rule.rewrite(this.highRiver);
+        DensityFunction highRiver = rule.rewrite(this.highRiver), upperHighRiver = rule.rewrite(this.upperHighRiver);
         if (depth == this.depth && continentalness == this.continentalness && ridge == this.ridge && entrances == this.entrances
-                && surface == this.surface && ramen == this.ramen && highRiver == this.highRiver) {
+                && surface == this.surface && ramen == this.ramen && highRiver == this.highRiver && upperHighRiver == this.upperHighRiver) {
             return this;
         }
-        return new AquiferFloodedness(depth, continentalness, ridge, entrances, surface, ramen, highRiver);
+        return new AquiferFloodedness(depth, continentalness, ridge, entrances, surface, ramen, highRiver, upperHighRiver);
     }
 
     @Override

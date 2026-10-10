@@ -119,9 +119,10 @@ public final class WorldgenProbe {
                 aquifer.spread(x, y, z), noiseConfig.sampleBlockValueUncached(config.fluidLevelSpreadNoise(), x, y, z),
                 aquifer.atPosition(x, y, z), decision));
         if (PvWorldgen.unwrap(config.fluidLevelFloodednessNoise()) instanceof AquiferFloodedness floodedness) {
-            // the valley the final density takes the minimum with: negative where it opens the block
-            lines.add(String.format(Locale.ROOT, "high river valley %.4f, corridor noodle %.4f",
-                    noiseConfig.sampleBlockValueUncached(floodedness.highRiver(), x, y, z), aquifer.corridor(x, y, z)));
+            // the valleys the final density takes the minimum with: negative where they open the block
+            lines.add(String.format(Locale.ROOT, "high river valley %.4f, upper layer %.4f, flooded corridors %.4f",
+                    noiseConfig.sampleBlockValueUncached(floodedness.highRiver(), x, y, z),
+                    noiseConfig.sampleBlockValueUncached(floodedness.upperHighRiver(), x, y, z), aquifer.corridor(x, y, z)));
         }
         return lines;
     }

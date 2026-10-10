@@ -3,6 +3,7 @@ package frootloops.versus;
 import frootloops.versus.mod.environment.CustomSpecialEffects;
 import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
+import frootloops.versus.mod.mobs.melee.MeleeAnimation;
 import frootloops.versus.mod.environment.CustomBlocksClient;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -28,6 +29,7 @@ public class VersusModClient implements ClientModInitializer {
 
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
 		ModEntitiesRenderers.onInitialize();
+		MeleeAnimation.register();
 		CustomBlocksClient.onInitialize();
 
 		ParticleProviderRegistry.getInstance().register(CustomSpecialEffects.SPARKS_PARTICLE, SparksParticle.Factory::new);

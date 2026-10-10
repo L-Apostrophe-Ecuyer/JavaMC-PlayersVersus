@@ -1,0 +1,25 @@
+# What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
+# Pale mobs: the vanilla spider, creaking and pale garden textures and spawn egg sprites to paint them from, and the
+# drowned's outer layer, the zombie renderer and the spider's eyes to render them like.
+assets textures/entity/spider
+assets textures/entity/creaking
+assets textures/entity/creeper
+asset textures/entity/spider/spider.png
+asset textures/entity/spider/spider_eyes.png
+asset textures/entity/spider_eyes.png
+asset textures/entity/creaking/creaking.png
+asset textures/entity/creaking/creaking_eyes.png
+asset textures/entity/creeper/creeper.png
+asset textures/item/spider_spawn_egg.png
+asset textures/item/zombie_spawn_egg.png
+asset textures/item/creeper_spawn_egg.png
+asset textures/block/pale_oak_planks.png
+asset textures/block/pale_oak_log.png
+asset textures/block/pale_moss_block.png
+uses DROWNED_OUTER_LAYER
+net.minecraft.client.renderer.entity.DrownedRenderer
+net.minecraft.client.renderer.entity.layers.DrownedOuterLayer
+net.minecraft.client.renderer.entity.ZombieRenderer
+net.minecraft.client.renderer.entity.AbstractZombieRenderer
+net.minecraft.client.renderer.entity.layers.SpiderEyesLayer
+net.minecraft.client.renderer.entity.layers.EyesLayer

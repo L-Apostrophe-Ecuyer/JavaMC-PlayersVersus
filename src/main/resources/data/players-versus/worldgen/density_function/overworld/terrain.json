@@ -30,7 +30,76 @@
         "left": "players-versus:overworld/sloped_cheese",
         "right": {
           "type": "minecraft:mul",
-          "left": "players-versus:overworld/caves/entrances",
+          "left": {
+            "type": "minecraft:max",
+            "left": "players-versus:overworld/caves/entrances",
+            "right": {
+              "type": "minecraft:range_choice",
+              "input": {
+                "type": "minecraft:min",
+                "left": 0.3,
+                "right": {
+                  "type": "minecraft:max",
+                  "left": -0.02,
+                  "right": {
+                    "type": "minecraft:add",
+                    "left": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:max",
+                        "left": 0.0,
+                        "right": {
+                          "type": "minecraft:add",
+                          "left": {
+                            "type": "minecraft:noise",
+                            "noise": "minecraft:pillar",
+                            "xz_scale": 20.0,
+                            "y_scale": 0.5
+                          },
+                          "right": -0.15
+                        }
+                      },
+                      "right": 0.7
+                    },
+                    "right": -0.2
+                  }
+                }
+              },
+              "min_inclusive": -1000000.0,
+              "max_exclusive": 0.03,
+              "when_in_range": -1000000.0,
+              "when_out_of_range": {
+                "type": "minecraft:min",
+                "left": 0.3,
+                "right": {
+                  "type": "minecraft:max",
+                  "left": -0.02,
+                  "right": {
+                    "type": "minecraft:add",
+                    "left": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:max",
+                        "left": 0.0,
+                        "right": {
+                          "type": "minecraft:add",
+                          "left": {
+                            "type": "minecraft:noise",
+                            "noise": "minecraft:pillar",
+                            "xz_scale": 20.0,
+                            "y_scale": 0.5
+                          },
+                          "right": -0.15
+                        }
+                      },
+                      "right": 0.7
+                    },
+                    "right": -0.2
+                  }
+                }
+              }
+            }
+          },
           "right": 5.0
         }
       },

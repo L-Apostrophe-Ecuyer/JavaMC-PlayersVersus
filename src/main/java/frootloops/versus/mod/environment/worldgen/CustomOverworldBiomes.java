@@ -15,6 +15,13 @@ public class CustomOverworldBiomes {
 
     private static final Climate.Parameter defaultParameter = Climate.Parameter.span(-1.0F, 1.0F);
     public static final ResourceKey<Biome> BIRCH_TAIGA_FOREST = keyOf("birch_taiga_forest");
+    /** The birch taiga with dappled trees (26.3's poplars) where it has birch. */
+    public static final ResourceKey<Biome> DAPPLED_TAIGA = keyOf("dappled_taiga");
+    /** Dappled trees with a few birch and taiga trees, clumped with open ground between, like the savanna's. */
+    public static final ResourceKey<Biome> SPARSE_DAPPLED_FOREST = keyOf("sparse_dappled_forest");
+    /** Vanilla's dappled forest (new in 26.3), by its id. */
+    public static final ResourceKey<Biome> DAPPLED_FOREST = ResourceKey.create(Registries.BIOME,
+            Identifier.fromNamespaceAndPath("minecraft", "dappled_forest"));
     public static final ResourceKey<Biome> DARK_TAIGA_FOREST = keyOf("dark_taiga_forest");
     public static final ResourceKey<Biome> DARK_BIRCH_FOREST = keyOf("dark_birch_forest");
     public static final ResourceKey<Biome> COLD_BEACH = keyOf("cold_beach");

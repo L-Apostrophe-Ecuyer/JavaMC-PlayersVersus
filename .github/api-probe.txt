@@ -175,6 +175,9 @@ net.minecraft.world.InteractionHand
 net.minecraft.world.InteractionResult
 net.minecraft.world.TickRateManager
 net.minecraft.world.WorldlyContainer
+net.minecraft.world.attribute.EnvironmentAttribute
+net.minecraft.world.attribute.EnvironmentAttributeSystem
+net.minecraft.world.attribute.EnvironmentAttributes
 net.minecraft.world.damagesource.CombatRules
 net.minecraft.world.damagesource.DamageSource
 net.minecraft.world.damagesource.DamageType
@@ -456,6 +459,7 @@ net.minecraft.world.level.block.BonemealableBlock
 net.minecraft.world.level.block.BonemealableFeaturePlacerBlock
 net.minecraft.world.level.block.BrushableBlock
 net.minecraft.world.level.block.CraftingTableBlock
+net.minecraft.world.level.block.CreakingHeartBlock
 net.minecraft.world.level.block.CropBlock
 net.minecraft.world.level.block.FarmlandBlock
 net.minecraft.world.level.block.FenceBlock
@@ -484,6 +488,7 @@ net.minecraft.world.level.block.entity.BlockEntity
 net.minecraft.world.level.block.entity.BlockEntityType
 net.minecraft.world.level.block.entity.BrewingStandBlockEntity
 net.minecraft.world.level.block.entity.BrushableBlockEntity
+net.minecraft.world.level.block.entity.CreakingHeartBlockEntity
 net.minecraft.world.level.block.entity.SpawnerBlockEntity
 net.minecraft.world.level.block.state.BlockBehaviour
 net.minecraft.world.level.block.state.BlockState

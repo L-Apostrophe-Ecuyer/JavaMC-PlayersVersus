@@ -29,6 +29,7 @@
     "environment.sleeping.ServerSleepingMixin",
     "environment.blocks.BlockMixin",
     "environment.blocks.CropMixin",
+    "environment.blocks.CreakingHeartBlockMixin",
     "environment.blocks.CreakingHeartBlockEntityMixin",
     "environment.blocks.SugarCaneMixin",
     "environment.blocks.LadderMixin",
@@ -92,6 +93,7 @@
     "mobs.hostile.illager.WitchMixin",
     "mobs.hostile.illager.RaidMixin",
 
+    "mobs.hostile.overworld.CreakingMixin",
     "mobs.hostile.overworld.CreeperMixin",
     "mobs.hostile.overworld.DrownedMixin",
     "mobs.hostile.overworld.PhantomAccessor",
@@ -110,6 +112,8 @@
 
     "mobs.hostile.MobEntityMixin",
     "mobs.hostile.MeleeAttackGoalMixin",
+    "mobs.hostile.MeleeAttackMixin",
+    "mobs.hostile.MobMeleeMixin",
     "mobs.passive.VillagerEntityMixin",
     "mobs.passive.WanderingTraderEntityMixin",
     "mobs.passive.SheepMixin",

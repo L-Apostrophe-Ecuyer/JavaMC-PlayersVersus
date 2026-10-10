@@ -79,6 +79,31 @@ jobs:
           python3 .github/api-calls.py probe/calls-raw.txt > probe/out/calls.txt
           rm probe/calls-raw.txt
           wc -l probe/out/calls.txt
+      # With [api-focus] (and [api], which runs this job): what .github/api-focus.txt asks for, printed straight into this
+      # job's log. A class name gets its signatures and call summary (api-calls.py); "sig <class>" only its signatures
+      # and constants; "find <text>" lists the game's and Fabric API's classes whose names contain the text; "uses
+      # <internal/name>" the game's classes that refer to it; "assets <dir>" the files under assets/minecraft/<dir>; and
+      # "asset <path>" one of them, as base64.
+      - name: a few classes, in this log
+        if: contains(github.event.head_commit.message, '[api-focus]')
+        run: |
+          cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
+          focus() { grep "^$1 " .github/api-focus.txt | cut -d' ' -f2- || true; }
+          classes=$(grep -v -E '^\s*(#|$)|^(find|sig|uses|assets|asset) ' .github/api-focus.txt || true)
+          sigs=$(focus sig)
+          mkdir -p probe/jar && unzip -q -o probe/client.jar -d probe/jar
+          echo "-----BEGIN FOCUS-----"
+          focus find | while read -r text; do echo "== find $text"; grep -i -F -- "$text" probe/out/classes.txt probe/out/fabric-classes.txt || true; done
+          focus uses | while read -r name; do echo "== uses $name"; (cd probe/jar && grep -rlF --include='*.class' -- "$name" . | sed 's|^\./||; s|\.class$||' | sort) || true; done
+          focus assets | while read -r dir; do echo "== assets $dir"; (cd probe/jar/assets/minecraft && find "$dir" -type f | sort) || true; done
+          focus asset | while read -r path; do echo "== asset $path"; base64 -w 0 "probe/jar/assets/minecraft/$path" && echo || echo "missing"; done
+          if [ -n "$sigs" ]; then javap -p -constants -cp "$cp" $sigs 2>&1 || true; fi
+          if [ -n "$classes" ]; then
+            javap -p -cp "$cp" $classes 2>&1 || true
+            javap -c -p -cp "$cp" $classes > probe/focus-raw.txt 2>&1 || true
+            python3 .github/api-calls.py probe/focus-raw.txt
+          fi
+          echo "-----END FOCUS-----"
       # A job log can only be read back 5,000 lines at a time, so the result goes out in parts of 4,000 lines, one job each.
       - name: split the result
         run: |

@@ -11,6 +11,8 @@ import net.minecraft.world.level.block.Blocks;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BANDS_KEPT_FROM_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.BASIN_MIN_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.CORRIDOR_MAX_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_UPPER_MIN_Y;
+import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_UPPER_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.HIGH_RIVER_Y;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_LEVEL;
 import static frootloops.versus.mod.environment.worldgen.PvWorldgenConstants.SEA_WATER_MIN_Y;
@@ -171,5 +173,23 @@ class PvAquiferRulesTest {
         assertEquals(PvAquiferDecision.SOLID, PvAquiferRules.decide(0, y, 0, 0.1, false, river));
         assertTrue(PvAquiferDecision.HIGH_RIVER_WATER.needsFluidTick, "the surface's water must tick to spill");
         assertTrue(PvAquiferRules.isWater(PvAquiferDecision.HIGH_RIVER_WATER) && PvAquiferRules.isWater(PvAquiferDecision.HIGH_RIVER_BED_WATER));
+    }
+
+    @Test
+    void theUpperLayerIsWalledLikeTheHighRiver() {
+        int y = HIGH_RIVER_UPPER_Y, bottom = HIGH_RIVER_UPPER_MIN_Y;
+        Neighbourhood river = new Neighbourhood()
+                .put(0, y, 0, PvAquiferDecision.HIGH_RIVER_WATER)
+                .put(0, bottom, 0, PvAquiferDecision.HIGH_RIVER_BED_WATER);
+        assertEquals(PvAquiferDecision.HIGH_RIVER_WATER, river.decide(0, y, 0));
+        assertEquals(PvAquiferDecision.HIGH_RIVER_BED_WATER, river.decide(0, bottom, 0));
+        // open space beside its surface's water stays open: where it ends at the high river's gorge, it falls in
+        assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, river.decide(1, y, 0));
+        // a wall beside its bed's water, and under the bed's bottom
+        assertEquals(PvAquiferDecision.HIGH_RIVER_BARRIER, river.decide(1, bottom, 0));
+        assertEquals(PvAquiferDecision.HIGH_RIVER_BARRIER, river.decide(0, bottom - 1, 0));
+        // between the layers nothing is walled
+        Neighbourhood under = new Neighbourhood().put(0, bottom - 1, 0, PvAquiferDecision.HIGH_RIVER_BED_WATER);
+        assertEquals(PvAquiferDecision.AIR_ABOVE_SEA, under.decide(0, bottom - 2, 0));
     }
 }
