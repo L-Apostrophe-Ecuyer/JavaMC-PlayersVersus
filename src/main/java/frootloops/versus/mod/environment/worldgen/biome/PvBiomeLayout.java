@@ -44,7 +44,8 @@ public final class PvBiomeLayout {
      */
     static final Parameter DEEP_DRIPSTONE_DEPTH = Parameter.span(0.8F, 1.0F);
 
-    private static final long MOUNTAIN_EROSION_MAX = Climate.quantizeCoord(-0.385F);
+    /** Mountainsides cover erosion up to this (the tests probe just above it). */
+    static final long MOUNTAIN_EROSION_MAX = Climate.quantizeCoord(-0.385F);
     private static final long MOUNTAIN_CONTINENTALNESS_MIN = Climate.quantizeCoord(0.03F);
     private static final long RIVER_VALLEY_WEIRDNESS = Climate.quantizeCoord(0.3F);
     private static final long WARM_MOUNTAINSIDE_FOREST_TEMPERATURE = Climate.quantizeCoord(0.1998F);

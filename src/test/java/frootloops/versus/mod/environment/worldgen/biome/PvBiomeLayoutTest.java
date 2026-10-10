@@ -31,6 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PvBiomeLayoutTest {
 
+    /**
+     * How far inside a range the probes stay (0.005): slice edges are other slices' edges too, where the nearest entry
+     * is a tie; and the mountainsides' limit can be as close as 0.01 to vanilla's slice edge at -0.375.
+     */
+    private static final long EDGE = 50;
+    /** Erosion just above the mountainsides' limit. */
+    private static final long ABOVE_MOUNTAINS = PvBiomeLayout.MOUNTAIN_EROSION_MAX + EDGE;
+
     private static List<Pair<ParameterPoint, ResourceKey<Biome>>> vanilla;
 
     @BeforeAll
@@ -169,13 +177,13 @@ class PvBiomeLayoutTest {
             ParameterPoint h = entry.getFirst();
             if (entry.getSecond() != Biomes.BIRCH_FOREST || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
             if (h.humidity().min() > Climate.quantizeCoord(0.29F) || h.humidity().max() < Climate.quantizeCoord(0.29F)) continue;
-            if (h.erosion().max() < Climate.quantizeCoord(-0.4F)) continue;
+            if (h.erosion().max() <= ABOVE_MOUNTAINS) continue;
             long temperature = mid(h.temperature());
             if (temperature >= Climate.quantizeCoord(-0.55F) && temperature <= Climate.quantizeCoord(-0.375F)) continue;
             // erosion above the mountainside limit and temperature outside the frozen band: only the humid rule applies
             // slice edges are other slices' edges too, where the nearest entry is a tie: stay strictly inside
             Climate.TargetPoint point = point(temperature, Climate.quantizeCoord(0.29F), mid(h.continentalness()),
-                    Math.max(mid(h.erosion()), Climate.quantizeCoord(-0.4F)), mid(h.weirdness()));
+                    Math.max(mid(h.erosion()), ABOVE_MOUNTAINS), mid(h.weirdness()));
             assertEquals(CustomOverworldBiomes.DARK_BIRCH_FOREST, layout.findValue(point), "at " + point);
             checked++;
         }
@@ -203,7 +211,7 @@ class PvBiomeLayoutTest {
             if (!birch && !oldGrowth && !dark && !dappled && biome != Biomes.FLOWER_FOREST) continue;
             placement.computeIfAbsent(biome.identifier().getPath(), k -> new TreeSet<>()).add(String.format(Locale.ROOT,
                     "T %s H %s W %s", range(h.temperature()), range(h.humidity()), range(h.weirdness())));
-            Long erosion = inside(h.erosion(), -0.4F, 1.0F);
+            Long erosion = inside(h.erosion(), Climate.unquantizeCoord(ABOVE_MOUNTAINS), 1.0F);
             if (dappled) {
                 Climate.TargetPoint point = point(mid(h.temperature()), mid(h.humidity()), mid(h.continentalness()), mid(h.erosion()), mid(h.weirdness()));
                 assertEquals(Biomes.FLOWER_FOREST, layout.findValue(point), "dappled forest at " + point);
@@ -257,29 +265,29 @@ class PvBiomeLayoutTest {
         return String.format(Locale.ROOT, "%.2f..%.2f", Climate.unquantizeCoord(range.min()), Climate.unquantizeCoord(range.max()));
     }
 
-    /** Q4: a mountainside covers only erosion below -0.475; the forest keeps the rest of its slice. */
+    /** Q4: a mountainside covers only erosion below its limit; the forest keeps the rest of its slice. */
     @Test
     void mountainsideStopsAtItsErosionLimit() {
         Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
-        long limit = Climate.quantizeCoord(-0.475F);
+        long limit = PvBiomeLayout.MOUNTAIN_EROSION_MAX;
         long inland = Climate.quantizeCoord(0.1F);
         int checked = 0;
         for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
             ParameterPoint h = entry.getFirst();
             if (entry.getSecond() != Biomes.FOREST || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
-            if (h.erosion().min() >= limit - 100 || h.erosion().max() <= limit + 100) continue;
+            if (h.erosion().min() >= limit - EDGE || h.erosion().max() <= limit + EDGE) continue;
             if (h.continentalness().max() <= inland) continue;
             if (h.weirdness().min() >= Climate.quantizeCoord(-0.3F) && h.weirdness().max() <= Climate.quantizeCoord(0.3F)) continue;
             long temperature = mid(h.temperature());
             if (temperature >= Climate.quantizeCoord(-0.55F) && temperature <= Climate.quantizeCoord(-0.375F)) continue;
             long continentalness = Math.max(mid(h.continentalness()), inland);
-            ResourceKey<Biome> below = layout.findValue(point(temperature, mid(h.humidity()), continentalness, limit - 100, mid(h.weirdness())));
-            ResourceKey<Biome> above = layout.findValue(point(temperature, mid(h.humidity()), continentalness, limit + 100, mid(h.weirdness())));
+            ResourceKey<Biome> below = layout.findValue(point(temperature, mid(h.humidity()), continentalness, limit - EDGE, mid(h.weirdness())));
+            ResourceKey<Biome> above = layout.findValue(point(temperature, mid(h.humidity()), continentalness, limit + EDGE, mid(h.weirdness())));
             assertTrue(below == CustomOverworldBiomes.MOUNTAINSIDE_FOREST || below == CustomOverworldBiomes.MOUNTAINSIDE_FOREST_WARM, "below: " + below);
             assertEquals(Biomes.FOREST, above, "above");
             checked++;
         }
-        assertTrue(checked > 0, "no forest slice crosses erosion -0.475 outside river valleys");
+        assertTrue(checked > 0, "no forest slice crosses the mountainside erosion limit outside river valleys");
     }
 
     /**
