@@ -66,13 +66,13 @@ assuming full overlap).
   desert fauna (cave spider, husk, camel, cat); Phantom spawn weight raised overworld-wide (80,
   group 1-2 — vanilla Phantoms normally only spawn via the sleep-deprivation mechanic, this is an
   **additional**, ordinary biome-based spawn on top of that); Blaze added to Nether Wastes (15).
-  A commented-out Wither Skeleton overworld-wide line and a commented-out Withered Zombie
+  A commented-out Wither Skeleton overworld-wide line and a commented-out Pale Zombie
   BiomeModifications call remain in source — both custom undead mobs currently spawn **only** via
   their `SpawnRestriction` predicate (below), not via `BiomeModifications.addSpawn`; if you want
-  Withered Zombies to actually spawn naturally, that line needs uncommenting (verify intentional
+  Pale Zombies to actually spawn naturally, that line needs uncommenting (verify intentional
   before doing so — could be deliberately disabled pending balance work).
 - Per-mob `SpawnRestriction` predicates add fine-grained placement logic beyond the biome-modification
-  weight: Deeper Creeper needs light ≤1, `#pale_creeper_spawnable_on`, and y<32; Withered Zombie needs
+  weight: Deeper Creeper needs light ≤1, `#pale_creeper_spawnable_on`, and y<32; Pale Zombie needs
   light 0, `#undead_overworld_spawnable_on`, auto-allowed in Deep Caves biome, otherwise y-gated
   (never above y64, midnight-during-new-moon only between y24-64, unconditional below y24) — a
   three-tier depth/rarity curve; Frosted Zombie walks up through any stacked powder snow first, then
@@ -105,7 +105,7 @@ assuming full overlap).
   peppering it with a bow from max range.
 - **`WardenVibrationListenerMixin`** — not re-read this pass; likely tunes the sniff/vibration
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
-- **Frosted Zombie / Withered Zombie** (`mod/mobs/hostile/overworld/{FrostedZombieEntity,WitheredZombieEntity}.java`,
+- **Frosted Zombie / Pale Zombie** (`mod/mobs/hostile/overworld/{FrostedZombieEntity,PaleZombieEntity}.java`,
   renderers under `src/client/.../mobs/hostile/overworld/`) — snow-biome and deep-cave zombie
   variants respectively (spawn conditions above); not re-read in this pass for their own
   attribute/behavior overrides beyond spawn placement — check those files directly.
@@ -157,7 +157,7 @@ assuming full overlap).
 
 ## Entity registration (`ModEntities`)
 Central registry for every custom entity type: `SlimeballEntity` (misc group, tiny 0.25×0.25 hitbox
-— see `items-and-equipment.md`), `PaleCreeperEntity`, `FrostedZombieEntity`, `WitheredZombieEntity`,
+— see `items-and-equipment.md`), `PaleCreeperEntity`, `FrostedZombieEntity`, `PaleZombieEntity`,
 `WildfireEntity` (all monster group, tracking ranges 4-8 blocks — short compared to vanilla hostiles,
 worth checking if intentional for a "you need to be close to notice these" cave-mob design or just
 unconsidered). Each gets a `FabricDefaultAttributeRegistry.register` call plus (except Slimeball) a

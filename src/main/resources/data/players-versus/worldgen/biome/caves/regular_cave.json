@@ -125,7 +125,7 @@
               "count": 1
             },
             {
-              "type": "players-versus:withered_zombie",
+              "type": "players-versus:pale_zombie",
               "weight": 10,
               "count": {
                 "type": "minecraft:uniform",

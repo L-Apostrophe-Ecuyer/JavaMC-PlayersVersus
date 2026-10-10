@@ -9,11 +9,11 @@ import net.minecraft.client.renderer.entity.state.ZombieRenderState;
 import net.minecraft.resources.Identifier;
 
 @Environment(EnvType.CLIENT)
-public class WitheredZombieRenderer extends ZombieRenderer {
+public class PaleZombieRenderer extends ZombieRenderer {
 
-    private final Identifier TEXTURE = Identifier.parse(VersusMod.MOD_ID  + ":textures/entity/withered_zombie.png");
+    private final Identifier TEXTURE = Identifier.parse(VersusMod.MOD_ID  + ":textures/entity/pale_zombie.png");
 
-    public WitheredZombieRenderer(EntityRendererProvider.Context context) {
+    public PaleZombieRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 

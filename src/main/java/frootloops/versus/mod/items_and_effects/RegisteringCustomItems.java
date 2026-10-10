@@ -21,7 +21,7 @@ public abstract class RegisteringCustomItems {
 
         registerCustomItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS);
 
-        registerCustomItem("withered_zombie_spawn_egg", ModEntities.WITHERED_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("pale_zombie_spawn_egg", ModEntities.PALE_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("frosted_zombie_spawn_egg", ModEntities.FROSTED_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("pale_creeper_spawn_egg", ModEntities.PALE_CREEPER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("pale_creeper_spawn_egg", ModEntities.PALE_CREEPER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);

@@ -18,7 +18,7 @@ Two groups:
   `pale_hollow`, `regular_cave` — the README's "new cave biomes; frozen caves, deep caves, badland
   caves, desert caves, & creeper caves." Spot-checked `deep_caves.json` (above table shows the
   pattern all cave biomes likely follow): heavy monster-spawner weighting toward the mod's own mobs
-  (`players-versus:pale_creeper` weight 80, `players-versus:withered_zombie` weight 100 vs.
+  (`players-versus:pale_creeper` weight 80, `players-versus:pale_zombie` weight 100 vs.
   vanilla zombie weight 20 — **the custom mobs are the majority of what spawns in Deep Caves**, not
   a rare addition), a dedicated ambient music track per cave biome (`players-versus:music.overworld.*`,
   see `assets/players-versus/sounds/music/caves/`), and custom-namespace carvers/ore

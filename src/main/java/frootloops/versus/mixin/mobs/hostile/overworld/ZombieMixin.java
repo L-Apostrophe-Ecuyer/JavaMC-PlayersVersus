@@ -89,7 +89,7 @@ public abstract class ZombieMixin extends Monster {
             });
         }
         else if(source.is(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
-            this.convertTo(ModEntities.WITHERED_ZOMBIE, ConversionParams.single(this, true, true), zombie -> {
+            this.convertTo(ModEntities.PALE_ZOMBIE, ConversionParams.single(this, true, true), zombie -> {
                 if (!this.isSilent()) {
                     this.level().levelEvent(null, LevelEvent.SOUND_ZOMBIE_TO_DROWNED, this.blockPosition(), 0);
                 }
