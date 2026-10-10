@@ -154,6 +154,8 @@ REF_CORRIDOR_NOODLE, REF_VALLEY = pv("overworld/caves/corridor_noodle"), pv("ove
 REF_CORRIDOR_ENTRANCES, REF_FLOODED_CORRIDORS = pv("overworld/caves/corridor_entrances"), pv("overworld/caves/flooded_corridors")
 REF_ACROSS = pv("overworld/high_river/across")
 REF_UPPER_VALLEY, REF_UPPER_ACROSS = pv("overworld/high_river/upper_valley"), pv("overworld/high_river/upper_across")
+REF_BANK, REF_UPPER_BANK = pv("overworld/high_river/bank"), pv("overworld/high_river/upper_bank")
+REF_DRY_PATHS = pv("overworld/caves/dry_paths")
 
 
 def depth():
@@ -254,9 +256,10 @@ def corridor_entrances():
 def corridor_noodle():
     """The final density's noodle (PvFinalDensity): the tunnel from interpolated inputs, with the corridors' bias
     (PvNoodle.corridorBias) in the basin layers, y -3..23: where the entrance value says a flooded cave is near (below
-    CORRIDOR_ENTRANCES), the bias moves to CORRIDOR_BIAS, and on to CORRIDOR_FLARE_BIAS nearer the caves. At every
-    height the dry paths' bias only holds away from the entrance caves (from CORRIDOR_ENTRANCES up, over the same
-    taper), so the noodles it adds rarely meet them."""
+    CORRIDOR_ENTRANCES), the bias moves to CORRIDOR_BIAS, and on to CORRIDOR_FLARE_BIAS nearer the caves. In those
+    layers the dry paths' bias only holds away from the entrance caves (from CORRIDOR_ENTRANCES up, over the same
+    taper), so the noodles it adds rarely meet the flooded ones; above and below them it holds everywhere in its
+    heights, so the paths join the caves there."""
     entrances_value = REF_CORRIDOR_ENTRANCES
     share = clamp(mul(sub(C["CORRIDOR_ENTRANCES"], entrances_value), C["CORRIDOR_ZONE_SCALE"]), 0.0, 1.0)
     dry = clamp(mul(sub(entrances_value, C["CORRIDOR_ENTRANCES"]), C["CORRIDOR_ZONE_SCALE"]), 0.0, 1.0)
@@ -264,8 +267,15 @@ def corridor_noodle():
     target = lerp(flare, C["CORRIDOR_BIAS"], C["CORRIDOR_FLARE_BIAS"])
     away = lerp(dry, noodle_bias(), path_bias())
     layers = band(C["BASIN_MIN_Y"] + 1, C["CORRIDOR_MAX_Y"])
-    bias = range_choice(mc("y"), layers[0], layers[1], lerp(share, away, target), away)
+    bias = range_choice(mc("y"), layers[0], layers[1], lerp(share, away, target), path_bias())
     return add(bias, tunnel(interpolated(REF_TOGGLE), interpolated(REF_THICKNESS), interpolated(REF_RIDGE_A), interpolated(REF_RIDGE_B)))
+
+
+def dry_paths():
+    """What the aquifer keeps dry in the basin layers: the final density's noodle outside the corridors' zone (the
+    entrance value from CORRIDOR_ENTRANCES up), NO_CUT inside it. Within DRY_PATH_SHELL of where it opens a block the
+    basins place no water, so the dry noodles lead down through them."""
+    return range_choice(REF_CORRIDOR_ENTRANCES, C["CORRIDOR_ENTRANCES"], 1000000.0, REF_CORRIDOR_NOODLE, NO_CUT)
 
 
 def flooded_corridors():
@@ -279,9 +289,13 @@ def flooded_corridors():
 # HIGH_RIVER_UPPER_Y. Where the ground climbs from one to the other, the lower one cuts a gorge that the upper one ends
 # at and falls into.
 HIGH_RIVER = {"y": C["HIGH_RIVER_Y"], "bed": C["HIGH_RIVER_BED"], "half_width": C["HIGH_RIVER_HALF_WIDTH"],
-              "widening": C["HIGH_RIVER_WIDENING"], "closed": C["HIGH_RIVER_CLOSED"], "gorge": C["HIGH_RIVER_GORGE_WIDTH"]}
+              "widening": C["HIGH_RIVER_WIDENING"], "flare": C["HIGH_RIVER_FLARE_WIDENING"], "closed": C["HIGH_RIVER_CLOSED"],
+              "gorge": C["HIGH_RIVER_GORGE_WIDTH"], "bank_bottom": C["HIGH_RIVER_BANK_MIN_Y"]}
 HIGH_RIVER_UPPER = {"y": C["HIGH_RIVER_UPPER_Y"], "bed": C["HIGH_RIVER_UPPER_BED"], "half_width": C["HIGH_RIVER_UPPER_HALF_WIDTH"],
-                    "widening": C["HIGH_RIVER_UPPER_WIDENING"], "closed": C["HIGH_RIVER_UPPER_CLOSED"]}
+                    "widening": C["HIGH_RIVER_UPPER_WIDENING"], "flare": C["HIGH_RIVER_UPPER_FLARE_WIDENING"],
+                    "closed": C["HIGH_RIVER_UPPER_CLOSED"], "bank_bottom": C["HIGH_RIVER_UPPER_BANK_MIN_Y"]}
+# The banks' value where they make ground, and where they don't (the final density takes the maximum with them).
+BANK_SOLID, NO_FILL = 1.0, -64.0
 
 
 def high_river_channel():
@@ -302,12 +316,29 @@ def high_river_activity(layer):
     return range_choice(depth_at_surface, -1000000.0, closed, narrowing, 0.0)
 
 
+def high_river_flare(layer, depth):
+    """How far a layer's walls have leaned out by a depth under the ground's nominal surface: nothing from
+    HIGH_RIVER_FLARE_DEPTH down, then leaning out more the higher they get (the square of the height into that depth, so
+    the lean grows smoothly to the layer's flare per block at the nominal surface), and by the full flare per block
+    above it."""
+    full = C["HIGH_RIVER_FLARE_DEPTH"]
+    into = clamp(sub(full, depth), 0.0, full)
+    curve = mul(square(into), layer["flare"] / (2.0 * full * C["DEPTH_PER_BLOCK"]))
+    above = mul(max_(0.0, mul(depth, -1.0)), layer["flare"] / C["DEPTH_PER_BLOCK"])
+    return add(curve, above)
+
+
 def high_river_full_half_width(layer):
     """A layer's valley's half width by height at full activity: 0 at its bed's bottom less one, its half width at its
-    surface, and wider by its widening per block above it."""
+    surface, and wider above it by its widening per block, plus its walls' flare near the ground's nominal surface (from
+    the depth at its surface and the height above it, the depth at each height), as far as it reaches past the flare at
+    the water: so the walls rise steeply from the water where the ground stands high and open out at the rim."""
     y_surface, bed, top = layer["y"], layer["bed"], C["HIGH_RIVER_VALLEY_MAX_Y"]
-    return add(gradient(y_surface - bed - 1, y_surface, 0.0, layer["half_width"]),
-               gradient(y_surface, top, 0.0, (top - y_surface) * layer["widening"]))
+    depth_at_surface = interpolated(slice_y(y_surface, REF_DEPTH))
+    depth_here = sub(depth_at_surface, gradient(y_surface, top, 0.0, (top - y_surface) * C["DEPTH_PER_BLOCK"]))
+    flare = max_(0.0, sub(high_river_flare(layer, depth_here), high_river_flare(layer, depth_at_surface)))
+    return add(add(gradient(y_surface - bed - 1, y_surface, 0.0, layer["half_width"]),
+                   gradient(y_surface, top, 0.0, (top - y_surface) * layer["widening"])), flare)
 
 
 def high_river_across(layer):
@@ -317,34 +348,61 @@ def high_river_across(layer):
     return cache(sub(abs_(high_river_channel()), mul(high_river_activity(layer), high_river_full_half_width(layer))))
 
 
+def high_river_runs(layer, running, elsewhere):
+    """Where a layer's water runs, its bed's gate: where the depth at its surface is at least HIGH_RIVER_RUN_DEPTH (the
+    ground's nominal surface a few blocks above its water), whatever dips or caves the terrain has there, or else where
+    the terrain at its surface is solid, so it runs on to the ground's real edge and spills there."""
+    depth_at_surface = interpolated(slice_y(layer["y"], REF_DEPTH))
+    terrain_at_surface = interpolated(slice_y(layer["y"], REF_TERRAIN))
+    on_ground = range_choice(terrain_at_surface, -1000000.0, MIN_POSITIVE, elsewhere, running)
+    return range_choice(depth_at_surface, -1000000.0, C["HIGH_RIVER_RUN_DEPTH"], on_ground, running)
+
+
+def below_layer_at_surface(layer, below):
+    """The lower layer's across at this layer's surface: the same terms as its own, its half width taken at that height."""
+    return sub(abs_(high_river_channel()), mul(high_river_activity(below), slice_y(layer["y"], high_river_full_half_width(below))))
+
+
+def high_river_bank(layer, below=None):
+    """The ground a layer runs in where the terrain leaves it open (a dip, a cave's mouth, a cliff's edge), so its water
+    never stands over open ground on a wall: from its surface down to its bank's bottom, solid within its half width
+    plus HIGH_RIVER_BANK_MARGIN at its surface, and wider by HIGH_RIVER_BANK_SLOPE per block down, so the deeper a bank
+    reaches, the further it slopes out. Only where its water runs (its activity above 0 and its bed's gate), and for a
+    layer over another not inside the lower one's valley; NO_FILL elsewhere. The valleys' cut comes after it in the final
+    density, so the river's own channel stays open."""
+    y_surface, bottom = layer["y"], layer["bank_bottom"]
+    margin, slope = C["HIGH_RIVER_BANK_MARGIN"], C["HIGH_RIVER_BANK_SLOPE"]
+    activity = high_river_activity(layer)
+    half_width = add(mul(activity, layer["half_width"]), gradient(y_surface, bottom, margin, margin + (y_surface - bottom) * slope))
+    inside = range_choice(sub(half_width, abs_(high_river_channel())), MIN_POSITIVE, 1000000.0, BANK_SOLID, NO_FILL)
+    bank = range_choice(activity, MIN_POSITIVE, 1000000.0, high_river_runs(layer, inside, NO_FILL), NO_FILL)
+    if below is not None:
+        bank = range_choice(below_layer_at_surface(layer, below), -1000000.0, 0.0, NO_FILL, bank)
+    return range_choice(mc("y"), bottom - 0.5, y_surface + 0.5, bank, NO_FILL)
+
+
 def high_river_valley(layer, across, below=None):
     """A layer's valley, negative where it opens a block, NO_CUT elsewhere: in y from its bed's bottom up to
-    HIGH_RIVER_VALLEY_MAX_Y, inside its width (across). At and under its surface it opens a block where the depth at
-    its surface is above 0 (the ground's nominal surface is above its water), so it runs on over caves and dips, or
-    else where the terrain at its surface is solid, so it runs on to the ground's real edge and spills there. A layer
-    over another (below) opens nothing there inside the lower one's valley at its surface, so it ends at the lower
-    one's gorge and falls into it. The aquifer puts water where this is negative at or under the surface."""
+    HIGH_RIVER_VALLEY_MAX_Y, inside its width (across). At and under its surface it opens a block where its water runs
+    (high_river_runs), in the ground its bank gives it where the terrain doesn't. A layer over another (below) opens
+    nothing there inside the lower one's valley at its surface, so it ends at the lower one's gorge and falls into it.
+    The aquifer puts water where this is negative at or under the surface."""
     y_surface, bed, top = layer["y"], layer["bed"], C["HIGH_RIVER_VALLEY_MAX_Y"]
     opened = range_choice(across, -1000000.0, 0.0, across, NO_CUT)
-    depth_at_surface = interpolated(slice_y(y_surface, REF_DEPTH))
-    terrain_at_surface = interpolated(slice_y(y_surface, REF_TERRAIN))
-    on_ground = range_choice(terrain_at_surface, -1000000.0, MIN_POSITIVE, NO_CUT, opened)
-    in_ground = range_choice(depth_at_surface, -1000000.0, MIN_POSITIVE, on_ground, opened)
+    in_ground = high_river_runs(layer, opened, NO_CUT)
     if below is not None:
-        # the lower layer's across at this layer's surface: the same terms as its own, its half width taken at that height
-        below_at_surface = sub(abs_(high_river_channel()),
-                               mul(high_river_activity(below), slice_y(y_surface, high_river_full_half_width(below))))
-        in_ground = range_choice(below_at_surface, -1000000.0, 0.0, NO_CUT, in_ground)
+        in_ground = range_choice(below_layer_at_surface(layer, below), -1000000.0, 0.0, NO_CUT, in_ground)
     in_valley = range_choice(mc("y"), y_surface - bed - 0.5, y_surface + 0.5, in_ground, opened)
     return range_choice(mc("y"), y_surface - bed - 0.5, top - 0.5, in_valley, NO_CUT)
 
 
 def final_density():
-    """PvFinalDensity: the interpolated terrain, scaled and squeezed, cut by the noodles and the high river's two
-    valleys; plus the beardifier, which 26.3 names in the data (1.21.10 added it in code)."""
+    """PvFinalDensity: the interpolated terrain, scaled and squeezed, cut by the noodles, filled by the high river's
+    banks and cut by its two valleys; plus the beardifier, which 26.3 names in the data (1.21.10 added it in code)."""
     terrain_interpolated = squeeze(interpolated(mul(blend_density(REF_TERRAIN), 0.64)))
+    banks = max_(REF_BANK, REF_UPPER_BANK)
     valleys = min_(REF_VALLEY, REF_UPPER_VALLEY)
-    return add(min_(min_(terrain_interpolated, REF_CORRIDOR_NOODLE), valleys), {"type": mc("beardifier")})
+    return add(min_(max_(min_(terrain_interpolated, REF_CORRIDOR_NOODLE), banks), valleys), {"type": mc("beardifier")})
 
 
 # --- ore veins (PvOreVeins, as 26.3's ore_vein material rules) -----------------------------------------------------
@@ -423,11 +481,14 @@ FUNCTIONS = {
     "overworld/caves/corridor_entrances": corridor_entrances,
     "overworld/caves/corridor_noodle": corridor_noodle,
     "overworld/caves/flooded_corridors": flooded_corridors,
+    "overworld/caves/dry_paths": dry_paths,
     "overworld/high_river": lambda: noise(pv("high_river"), 0.25, 0.0),
     "overworld/high_river/across": lambda: high_river_across(HIGH_RIVER),
     "overworld/high_river/valley": lambda: high_river_valley(HIGH_RIVER, REF_ACROSS),
     "overworld/high_river/upper_across": lambda: high_river_across(HIGH_RIVER_UPPER),
     "overworld/high_river/upper_valley": lambda: high_river_valley(HIGH_RIVER_UPPER, REF_UPPER_ACROSS, below=HIGH_RIVER),
+    "overworld/high_river/bank": lambda: high_river_bank(HIGH_RIVER),
+    "overworld/high_river/upper_bank": lambda: high_river_bank(HIGH_RIVER_UPPER, below=HIGH_RIVER),
     "overworld/aquifer_barrier": lambda: noise(mc("aquifer_barrier"), 1.0, 0.5),
 }
 # Replaced by the functions above and gone: the kernels' inputs that only they read.
@@ -460,6 +521,7 @@ def noise_settings():
                 "noodle": pv("overworld/caves/noodle"),
                 "surface": noise(mc("surface"), 4.0, 2.0),
                 "corridors": REF_FLOODED_CORRIDORS,
+                "dry_paths": REF_DRY_PATHS,
             },
             "lava": noise(mc("aquifer_lava"), 1.0, 1.0),
             "surface_level": mc("overworld/preliminary_surface_level"),

@@ -87,7 +87,7 @@ public final class PvAquifer implements Aquifer {
     @Nullable
     private SpreadInputs spread;
     @Nullable
-    private Region corridors, valley, upperValley;
+    private Region corridors, dryPaths, valley, upperValley;
     /** Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled. */
     @Nullable
     private double[] ridge;
@@ -97,6 +97,7 @@ public final class PvAquifer implements Aquifer {
     private final PvAquiferRules.Field floodednessField = this::floodedness;
     private final PvAquiferRules.Field spreadField = this::spread;
     private final PvAquiferRules.Field corridorField = this::corridor;
+    private final PvAquiferRules.Field dryPathField = this::dryPath;
     private final PvAquiferRules.Positions atPosition = this::atPosition;
     /** Blocks whose own decision was computed, for tests and the benchmark. */
     private int computedPositions;
@@ -164,7 +165,7 @@ public final class PvAquifer implements Aquifer {
         if (y < MIN_Y) return PvAquiferDecision.AIR;
         int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
         if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
-            return PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField);
+            return PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField, this.dryPathField);
         }
         int column = localX * SIDE + localZ;
         if (this.positions == null) this.positions = new byte[SIDE * SIDE][];
@@ -176,7 +177,8 @@ public final class PvAquifer implements Aquifer {
         int level = y - MIN_Y;
         int stored = levels[level];
         if (stored != 0) return DECISIONS[stored - 1];
-        PvAquiferDecision decision = PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField);
+        PvAquiferDecision decision = PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField,
+                this.dryPathField);
         levels[level] = (byte) (decision.ordinal() + 1);
         this.computedPositions++;
         return decision;
@@ -206,6 +208,17 @@ public final class PvAquifer implements Aquifer {
             this.corridors = this.region(this.spreadConfig.corridors(), BASIN_MIN_Y + 1, CORRIDOR_MAX_Y - 1);
         }
         return this.corridors.at(x, y, z);
+    }
+
+    /**
+     * The dry noodles at a block of the basin layers: the final density's noodle outside the corridors' zone, at most 0
+     * where it opens the block. The basins leave its surroundings dry.
+     */
+    public double dryPath(int x, int y, int z) {
+        if (this.dryPaths == null) {
+            this.dryPaths = this.region(this.spreadConfig.dryPaths(), BASIN_MIN_Y + 1, BASIN_MAX_Y - 1);
+        }
+        return this.dryPaths.at(x, y, z);
     }
 
     /**

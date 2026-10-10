@@ -22,7 +22,7 @@
         }
       },
       "min_inclusive": -1000000.0,
-      "max_exclusive": 1.4e-45,
+      "max_exclusive": 0.03,
       "when_in_range": {
         "type": "minecraft:range_choice",
         "input": {
