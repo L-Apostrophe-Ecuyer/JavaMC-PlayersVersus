@@ -6,3 +6,6 @@ net.minecraft.client.renderer.entity.WitherSkeletonRenderer
 net.minecraft.client.renderer.entity.AbstractSkeletonRenderer
 net.minecraft.client.model.geom.builders.LayerDefinition
 uses createSingleModelDualBodyLayer
+# The pale mobs' spawn rules and the warden's bats: whether these names exist in 26.3.
+uses getEffectiveSkyBrightness
+find ambient/Bat

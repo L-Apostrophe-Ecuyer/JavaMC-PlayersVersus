@@ -46,16 +46,6 @@ public class ModEntities {
             EntityType.Builder.of(PaleZombieEntity::new, MobCategory.MONSTER).sized(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.0125f).ridingOffset(-0.7f).clientTrackingRange(8)
     );
 
-    public static final EntityType<PaleCreeperEntity> PALE_CREEPER = register(
-            "pale_creeper",
-            EntityType.Builder.of(PaleCreeperEntity::new, MobCategory.MONSTER).sized(0.6f, 1.7f).clientTrackingRange(6)
-    );
-
-    public static final EntityType<PaleZombieEntity> PALE_ZOMBIE = register(
-            "pale_zombie",
-            EntityType.Builder.of(PaleZombieEntity::new, MobCategory.MONSTER).sized(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.0125f).ridingOffset(-0.7f).clientTrackingRange(8)
-    );
-
     public static final EntityType<PaleSpiderEntity> PALE_SPIDER = register(
             "pale_spider",
             EntityType.Builder.of(PaleSpiderEntity::new, MobCategory.MONSTER).sized(1.4f, 0.9f).eyeHeight(0.65f).passengerAttachments(0.765f).clientTrackingRange(8)
@@ -68,8 +58,6 @@ public class ModEntities {
     public static final Item PALE_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_creeper_spawn_egg").spawnEgg(PALE_CREEPER));
     public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("frosted_zombie_spawn_egg").spawnEgg(FROSTED_ZOMBIE));
     public static final Item PALE_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_zombie_spawn_egg").spawnEgg(PALE_ZOMBIE));
-    public static final Item PALE_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_creeper_spawn_egg").spawnEgg(PALE_CREEPER));
-    public static final Item PALE_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_zombie_spawn_egg").spawnEgg(PALE_ZOMBIE));
     public static final Item PALE_SPIDER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_spider_spawn_egg").spawnEgg(PALE_SPIDER));
     public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("wildfire_spawn_egg").spawnEgg(WILDFIRE));
 
@@ -79,8 +67,6 @@ public class ModEntities {
         // Register custom entities:
         FabricDefaultAttributeRegistry.register(PALE_CREEPER, PaleCreeperEntity.createPaleCreeperAttributes());
         FabricDefaultAttributeRegistry.register(FROSTED_ZOMBIE, FrostedZombieEntity.createFrostedAttributes());
-        FabricDefaultAttributeRegistry.register(PALE_ZOMBIE, PaleZombieEntity.createPaleZombieAttributes());
-        FabricDefaultAttributeRegistry.register(PALE_CREEPER, PaleCreeperEntity.createPaleCreeperAttributes());
         FabricDefaultAttributeRegistry.register(PALE_ZOMBIE, PaleZombieEntity.createPaleZombieAttributes());
         FabricDefaultAttributeRegistry.register(PALE_SPIDER, Spider.createAttributes());
         FabricDefaultAttributeRegistry.register(WILDFIRE, WildfireEntity.createWildfireAttributes());
