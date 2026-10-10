@@ -22,11 +22,9 @@ public class ModEntitiesRenderers {
 
         // Register custom item or block entities and their renderers:
         EntityRendererRegistry.register(SLIMEBALL, context -> new ThrownItemRenderer(context, 1.0f, false));
-        EntityRendererRegistry.register(PALE_CREEPER, context -> new PaleCreeperRenderer(context));
         EntityRendererRegistry.register(FROSTED_ZOMBIE, context -> new FrostedZombieRenderer(context));
         EntityRendererRegistry.register(PALE_ZOMBIE, context -> new PaleZombieRenderer(context));
         EntityRendererRegistry.register(PALE_CREEPER, context -> new PaleCreeperRenderer(context));
-        EntityRendererRegistry.register(PALE_ZOMBIE, context -> new PaleZombieRenderer(context));
         EntityRendererRegistry.register(PALE_SPIDER, context -> new PaleSpiderRenderer(context));
         EntityRendererRegistry.register(WILDFIRE, context -> new WildfireEntityRenderer(context));
     }
