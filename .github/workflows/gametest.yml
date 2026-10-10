@@ -1,0 +1,32 @@
+# Game tests: sorts inventories on Fabric's headless game test server, with the game's real items and tags (src/gametest).
+# It starts a Minecraft server, which requires accepting the Minecraft EULA (https://aka.ms/MinecraftEULA): the run
+# passes -Ppv.acceptEula=true, as the worldgen smoke test does. Without it, Gradle skips runGameTest.
+
+name: gametest
+on: [push]
+
+jobs:
+  gametest:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: 25
+          distribution: 'microsoft'
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: run the game tests
+        run: ./gradlew runGameTest -Ppv.acceptEula=true
+      - name: upload the game test log and report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: gametest-logs
+          path: |
+            build/run/gameTest/logs/
+            build/run/gameTest/report.xml
+          if-no-files-found: ignore

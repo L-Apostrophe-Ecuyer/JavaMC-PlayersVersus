@@ -4,7 +4,6 @@ import frootloops.versus.VersusMod;
 
 import java.util.LinkedList;
 
-import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_OUTPUT;
 
 public class SortedInventoryOutput {
 
@@ -34,7 +33,7 @@ public class SortedInventoryOutput {
             int indexEnd, indexStart = 0;
             for(indexEnd = 8; indexEnd > this.currentCol; indexEnd--) if(this.get(this.currentRow, indexEnd) == null) break;
             if(indexEnd >= currentCol) { // If enough empty columns at end of row to fit the item slots. This should always be true... but better safe than sorry
-                if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("================= MOVING ITEMS OF GROUP TO END OF ROW! Current group's col start was " + currentGroupColStart + " and current col is " + currentCol);
+                if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("================= MOVING ITEMS OF GROUP TO END OF ROW! Current group's col start was " + currentGroupColStart + " and current col is " + currentCol);
                 for (int i = this.currentCol; i >= 0; i--) {
                     ItemSlot slotToMove = this.get(this.currentRow, i);
                     if (!slotToMove.isToolOrWeapon()) {
@@ -53,12 +52,12 @@ public class SortedInventoryOutput {
                     if(this.invSlots[this.currentRow * 9 + i] == null) break;
                     else this.currentCol += 1;
                 }
-            } else if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("----------------- End of group. Unable to move last items to the right, IndexEnd is " + indexEnd);
-        } else if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("----------------- End of group. Group's col value started at " + currentGroupColStart + " and ended at " + currentCol);
+            } else if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("----------------- End of group. Unable to move last items to the right, IndexEnd is " + indexEnd);
+        } else if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("----------------- End of group. Group's col value started at " + currentGroupColStart + " and ended at " + currentCol);
         this.currentSlotsColStart = currentCol;
         this.numGroupsToPlace--;
 
-        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn(this.toString());
+        if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn(this.toString());
     }
 
     public boolean addAll(LinkedList<ItemSlot> slots) { return this.addAll(slots, false, true);}
@@ -66,7 +65,7 @@ public class SortedInventoryOutput {
         slotsToAdd = slots;
         if(slotsToAdd == null || slotsToAdd.size() == 0) return true;
 
-        if(DEBUG_SORTING_OUTPUT) {
+        if(SortingDebug.ENABLED) {
             String debugMsg = isNewGroup ? "[ ITEM SORTING ] - Inventory, at (" + this.currentRow + ", " + this.currentCol + ") - Placing new group in inventory: " : "                 - Inventory, at (" + this.currentRow + ", " + this.currentCol + ") - Placing subgroup of size " + slots.size() + ": ";
             for (ItemSlot slot: slots) debugMsg += slot + ",";
             VersusMod.MOD_LOGGER.warn(debugMsg);
@@ -87,18 +86,18 @@ public class SortedInventoryOutput {
         int numItemsToAdd = slotsToAdd.size();
         for(int i = 0; i < numItemsToAdd; i++) {
             if(!this.moveToNextAvailableSlot()) {
-                if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.error("                  Returning. Failed to move to next available slot. (" + this.currentRow + ", " + this.currentCol + "). There were still " + slotsToAdd.size() + " num items to add.");
+                if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.error("                  Returning. Failed to move to next available slot. (" + this.currentRow + ", " + this.currentCol + "). There were still " + slotsToAdd.size() + " num items to add.");
                 return false;
             }
 
             ItemSlot slotToInsert =  this.slotsToAdd.removeFirst();
             if(slotToInsert == null) continue;
             if(!this.set(this.currentRow, this.currentCol, slotToInsert)) {
-                if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.error("                  Returning. Failed to set slot. (" + this.currentRow + ", " + this.currentCol + ")");
+                if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.error("                  Returning. Failed to set slot. (" + this.currentRow + ", " + this.currentCol + ")");
                 return false;
             }
         }
-        if(DEBUG_SORTING_OUTPUT) {
+        if(SortingDebug.ENABLED) {
             if(isNewGroup) VersusMod.MOD_LOGGER.warn(this.toString());
             VersusMod.MOD_LOGGER.warn("");
         }
@@ -152,7 +151,7 @@ public class SortedInventoryOutput {
         }
         // This should only very rarely ever occur:
         if(this.currentCol == 8 && this.currentRow == this.numRows - 1 && this.goToLastEmptySlot()) return true;
-        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.error("[ ITEM SORTING ] SORTED INVENTORY OUTPUT - Tried to move out of bounds!");
+        if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.error("[ ITEM SORTING ] SORTED INVENTORY OUTPUT - Tried to move out of bounds!");
         return false;
     }
 
@@ -175,7 +174,7 @@ public class SortedInventoryOutput {
             VersusMod.MOD_LOGGER.error("[ ITEM SORTING ] SORTED INVENTORY OUTPUT - Tried to move to a row that was out of bounds!");
             return false;
         }
-        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                 - Skipping to next row, from (" + this.currentRow + ", " + this.currentCol + ") to (" + (this.currentRow + 1) + ", 0) -------  There are currently " + (numEmptySlots - numSlotsSkipped) + " out of " + numEmptySlots + " empty slots, and so " + ((this.numEmptySlots - this.numSlotsSkipped)/Math.min(1, this.numRows - this.currentRow)) + " empty slots left per row");
+        if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 - Skipping to next row, from (" + this.currentRow + ", " + this.currentCol + ") to (" + (this.currentRow + 1) + ", 0) -------  There are currently " + (numEmptySlots - numSlotsSkipped) + " out of " + numEmptySlots + " empty slots, and so " + ((this.numEmptySlots - this.numSlotsSkipped)/Math.min(1, this.numRows - this.currentRow)) + " empty slots left per row");
         this.numSlotsSkipped += 9 - (this.currentCol + 1);
         this.currentRow++;
         this.currentCol = 0;
@@ -198,7 +197,7 @@ public class SortedInventoryOutput {
         if(this.get(this.currentRow,8) != null) {
             numEmptySlotsInRow = 0;
             for(int i = 7; i > this.currentCol; i--) if(this.get(this.currentRow,i) == null) numEmptySlotsInRow++;
-            if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                                 Checking if needing to go to next row: There are " + numEmptySlotsInRow + " empty slots left in row " + this.currentRow);
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                                 Checking if needing to go to next row: There are " + numEmptySlotsInRow + " empty slots left in row " + this.currentRow);
             if(numEmptySlotsInRow == 0) return true;
         }
 
@@ -223,13 +222,13 @@ public class SortedInventoryOutput {
 
         // Try sorting each individual row as well:
         if(column > 0) {
-            if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this item: " + slot + " of type " + slot.itemType().name());
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Attempting to find a better slot than (" + this.currentRow + ", " + this.currentCol + ") for this item: " + slot + " of type " + slot.itemType().name());
             for(int i = 0; i < column; i++) {
                 ItemSlot other = this.get(row, i);
                 boolean isSameGroup = i >= this.currentSlotsColStart;
                 boolean isHotbar = this.isPlayerInventory && row == 0;
                 boolean mustGoBefore = slot != null && ((isSameGroup && other == null) || slot.shouldAlwaysGoBefore(other, !isHotbar)) && (other != null && !other.shouldAlwaysGoBefore(slot, !isHotbar));
-                if(mustGoBefore && DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                               - Will swap at column " + i + "! Should " + slot + " always go before " + other + "? " + slot.shouldAlwaysGoBefore(other, !isHotbar));
+                if(mustGoBefore && SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                               - Will swap at column " + i + "! Should " + slot + " always go before " + other + "? " + slot.shouldAlwaysGoBefore(other, !isHotbar));
                 if(mustGoBefore) {
 
                     // Move back to not separate similar items:
@@ -244,7 +243,7 @@ public class SortedInventoryOutput {
                     }
 
                     // Place item:
-                    if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                                 Setting slot (" + this.currentRow + ", " + i + ") as " + slot + ", replacing " + other + " (Must: " + mustGoBefore + ")");
+                    if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                                 Setting slot (" + this.currentRow + ", " + i + ") as " + slot + ", replacing " + other + " (Must: " + mustGoBefore + ")");
                     invSlots[row * 9 + i] = slot;
                     slot = other;
 
@@ -254,7 +253,7 @@ public class SortedInventoryOutput {
                     // Move items to the right:
                     for(int k = i + 1; k < column + 1; k++) {
                         other = invSlots[row * 9 + k];
-                        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                                 Moving down slot (" + this.currentRow + ", " + k + ") as " + slot + (slot == null ? "" : " of type " + slot.itemType()) + ", replacing " + other + (other == null ? "" : " of type " + other.itemType()));
+                        if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                                 Moving down slot (" + this.currentRow + ", " + k + ") as " + slot + (slot == null ? "" : " of type " + slot.itemType()) + ", replacing " + other + (other == null ? "" : " of type " + other.itemType()));
                         invSlots[row * 9 + k] = slot;
                         slot = other;
                     }
@@ -263,7 +262,7 @@ public class SortedInventoryOutput {
             }
         }
 
-        if(DEBUG_SORTING_OUTPUT) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Setting slot (" + this.currentRow + ", " + this.currentCol + ") as " + slot);
+        if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                   List item " + this.slotsToAdd.size() + " - Setting slot (" + this.currentRow + ", " + this.currentCol + ") as " + slot);
         invSlots[row * 9 + column] = slot;
         return true;
     }

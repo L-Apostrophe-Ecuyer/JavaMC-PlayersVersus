@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting.groups;
 
+import frootloops.versus.mod.items_and_effects.inventory.sorting.SortingDebug;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
@@ -8,7 +9,6 @@ import frootloops.versus.mod.items_and_effects.inventory.sorting.lists.SortedIte
 import java.util.Arrays;
 import java.util.LinkedList;
 
-import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_GROUPS;
 
 
 public class ToolSortingGroup extends SimpleSortingGroup {
@@ -30,7 +30,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
 
     public ItemSlot tryInsertingSlot(ItemSlot slot) {
         if(sortedToolList.trySortedInsert(slot) != -1) {
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Inserting " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "'s tools");
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                   -> Inserting " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "'s tools");
             this.numTools++;
             return null; // Inserted!
         }
@@ -41,7 +41,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         slot = this.tryInsertingSlot(slot);
         if(slot != null) {
             if(slot.isToolOrWeapon()) {
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "'s tools");
+                if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "'s tools");
                 sortedToolList.add(slot);
                 this.numTools++;
             }
@@ -93,19 +93,19 @@ public class ToolSortingGroup extends SimpleSortingGroup {
     private LinkedList<ItemSlot> mergeAndTakeAllItems(boolean includeTools) {
         LinkedList<ItemSlot> items = new LinkedList<>();
         if(this.size() == 0) {
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Returned nothing, thought it had size zero.");
-            if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Returned nothing, thought it had size zero.");
+            if(SortingDebug.ENABLED) this.debugCalculateActualSize();
             return items;
         }
 
         if(includeTools && numTools > 0) {
             items.addAll(this.takeAllTools());
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + items.size() + " tools: " + items);
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + items.size() + " tools: " + items);
         }
 
         for(int i = 1; i < sortedItemLists.length; i++) sortedItemLists[i].giveFirstSlotsTo(Integer.MAX_VALUE, sortedItemLists[0]);
         if(this.miscItems.size() > 0) miscItems.giveFirstSlotsTo(Integer.MAX_VALUE, sortedItemLists[0]);
-        if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + sortedItemLists[0].size() + " items: " + sortedItemLists[0]);
+        if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + sortedItemLists[0].size() + " items: " + sortedItemLists[0]);
         this.numItems = 0;
         items.addAll(sortedItemLists[0].takeAll());
         return items;
@@ -156,19 +156,19 @@ public class ToolSortingGroup extends SimpleSortingGroup {
 
     public LinkedList<ItemSlot> takeFirstSlots(int numSlotsToTake, final boolean splitUpSubGroups, final boolean prioritizeNonTools) {
         if(numSlotsToTake < 1 || this.size() < 1) {
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("[ ITEM SORTING ] " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake + ", " + splitUpSubGroups + ") - Group was empty!! Has " + this.sortedToolList.size() + " tools and " + Arrays.stream(this.sortedItemLists).mapToInt(SortedItemList::size) + " items");
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("[ ITEM SORTING ] " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake + ", " + splitUpSubGroups + ") - Group was empty!! Has " + this.sortedToolList.size() + " tools and " + Arrays.stream(this.sortedItemLists).mapToInt(SortedItemList::size) + " items");
             return new LinkedList<>();
         }
 
         // If there's enough to fill the quota when combining both tools and others, send both:
         numSlotsToTake = Math.min(this.size(), numSlotsToTake);
         if(this.numItems + this.numTools == numSlotsToTake) {
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("[ ITEM SORTING ] " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake + ", " + splitUpSubGroups + ") - Returning everything.");
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("[ ITEM SORTING ] " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake + ", " + splitUpSubGroups + ") - Returning everything.");
             return this.mergeAndTakeAllItems(true);
         }
 
         if(this.numItems < numSlotsToTake && this.numItems + this.numTools >= numSlotsToTake) {
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("[ ITEM SORTING ]  " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + this.numItems + " items and " + this.numTools + " tools");
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("[ ITEM SORTING ]  " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + this.numItems + " items and " + this.numTools + " tools");
             LinkedList<ItemSlot> slotList = this.mergeAndTakeAllItems(false);
             slotList.addAll(0, this.sortedToolList.take(numSlotsToTake - this.numItems));
             this.numTools = sortedToolList.size();
@@ -185,7 +185,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
             numToolsTaken = slotList.size();
             this.numTools -= numToolsTaken;
             if(numToolsTaken >= numSlotsToTake) {
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numToolsTaken + " tools");
+                if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numToolsTaken + " tools");
                 return slotList;
             }
         }
@@ -196,7 +196,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
                 slotList.addAll(sortedItemLists[i].take(Math.min(sortedItemLists[i].size(), numSlotsToTake - numToolsTaken - numItemsTaken)));
                 numItemsTaken = slotList.size() - numToolsTaken;
                 if(numItemsTaken + numToolsTaken >= numSlotsToTake) {
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numItemsTaken + " items and " + numToolsTaken + " tools");
+                    if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - Returning " + numItemsTaken + " items and " + numToolsTaken + " tools");
                     this.numItems -= numItemsTaken;
                     return slotList;
                 }
@@ -209,7 +209,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
             numItemsTaken = slotList.size() - numToolsTaken;
         }
 
-        if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - At the end of the fct, returning " + numItemsTaken + " items (misc included) and " + numToolsTaken + " tools");
+        if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + splitUpSubGroups + ") - At the end of the fct, returning " + numItemsTaken + " items (misc included) and " + numToolsTaken + " tools");
         this.numItems -= numItemsTaken;
         return slotList;
     }
@@ -250,12 +250,12 @@ public class ToolSortingGroup extends SimpleSortingGroup {
                 slotList.addAll(this.takeTools(numSlotsToTake - sizeOfList));
                 this.numItems -= sizeOfList;
                 this.numTools = this.sortedToolList.size();
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + withTool + ", " + startFromEnd + ") - Quick return of " + (sizeOfList) + " items and " + (numSlotsToTake - sizeOfList) + " tools");
+                if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + withTool + ", " + startFromEnd + ") - Quick return of " + (sizeOfList) + " items and " + (numSlotsToTake - sizeOfList) + " tools");
                 return slotList;
             }
             else if (sizeOfList == numSlotsToTake) {
                 this.numItems -= numSlotsToTake;
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + withTool + ", " + startFromEnd + ") -  Quick return of  " + (sizeOfList) + " items, found a perfect match!");
+                if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - TakeFirstSlots(" + numSlotsToTake+", " + withTool + ", " + startFromEnd + ") -  Quick return of  " + (sizeOfList) + " items, found a perfect match!");
                 return sortedItemLists[i].take(numSlotsToTake);
             }
         }

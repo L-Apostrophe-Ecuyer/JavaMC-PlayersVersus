@@ -2,7 +2,7 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
 import frootloops.versus.mod.items_and_effects.brewing.BrewingSystem;
 import frootloops.versus.mod.items_and_effects.brewing.ConcentrateItem;
-import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
@@ -115,12 +115,12 @@ public abstract class ItemComparaisonHelper {
                     if(ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_PALE_STONES.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
                     if(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS.getOrDefault(blockItem, Integer.MAX_VALUE) < ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS.getOrDefault(otherBlockItem, Integer.MAX_VALUE)) return true;
-                    return blockItem.getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col < otherBlockItem.getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col;
+                    return blockItem.getBlock().defaultBlockState().getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col < otherBlockItem.getBlock().defaultBlockState().getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col;
                 }
                 else return true;
             }
             if(otherBlockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE)) return false;
-            return blockItem.getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col < otherBlockItem.getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col;
+            return blockItem.getBlock().defaultBlockState().getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col < otherBlockItem.getBlock().defaultBlockState().getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col;
         }
 
         // Clutch items:

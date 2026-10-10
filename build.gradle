@@ -55,6 +55,31 @@ loom {
 
 }
 
+// Game tests (src/gametest) sort inventories on Fabric's headless game test server, with the game's real items and tags.
+// Loom runs them as part of `check`. The server only starts with -Ppv.acceptEula=true (you accept
+// https://aka.ms/MinecraftEULA); without it the task is skipped, since Fabric's game test server doesn't check the EULA.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "players-versus-gametest"
+		enableGameTests = true
+		enableClientGameTests = false
+	}
+}
+
+def gameTestDir = file("build/run/gameTest")
+def gameTestAcceptEula = providers.gradleProperty("pv.acceptEula").getOrElse("false") == "true"
+loom.runs.matching { it.name == "gameTest" }.configureEach {
+	vmArg "-Dfabric-api.gametest.report-file=${new File(gameTestDir, "report.xml")}"
+}
+tasks.matching { it.name == "runGameTest" }.configureEach {
+	onlyIf("the game test server only starts with -Ppv.acceptEula=true") { gameTestAcceptEula }
+	doFirst {
+		gameTestDir.mkdirs()
+		new File(gameTestDir, "eula.txt").text = "eula=true\n"
+	}
+}
+
 def worldgenSmokeDir = file("run/worldgen-smoke")
 def worldgenSmokeAcceptEula = providers.gradleProperty("pv.acceptEula").getOrElse("false") == "true"
 def worldgenSmokeKeepWorld = providers.gradleProperty("pv.keepWorld").getOrElse("false") == "true"

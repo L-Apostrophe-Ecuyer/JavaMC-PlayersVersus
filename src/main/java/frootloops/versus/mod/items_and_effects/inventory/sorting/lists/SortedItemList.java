@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
+import frootloops.versus.mod.items_and_effects.inventory.sorting.SortingDebug;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
@@ -7,7 +8,6 @@ import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
 import java.util.LinkedList;
 import net.minecraft.world.item.Item;
 
-import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_GROUPS;
 
 
 public abstract class SortedItemList {
@@ -63,7 +63,7 @@ public abstract class SortedItemList {
                 ItemSlot otherSlot = slots.get(i);
                 boolean shouldGoBefore = slot.shouldAlwaysGoBefore(otherSlot, doSortedInsert) || (doSortedInsert && ItemComparaisonHelper.shouldGoBefore(slot, slots.get(i), skipNonToolTypes, false, true));
                 if (shouldGoBefore) {
-                    if(DEBUG_SORTING_GROUPS && startIndex == 0 && doSortedInsert) VersusMod.MOD_LOGGER.warn("                            - Found a better spot for " + slot + " -> Inserting it at pos " + i + " -> List: " + this);
+                    if(SortingDebug.ENABLED && startIndex == 0 && doSortedInsert) VersusMod.MOD_LOGGER.warn("                            - Found a better spot for " + slot + " -> Inserting it at pos " + i + " -> List: " + this);
                     slots.add(i, slot);
                     return i;
                 }

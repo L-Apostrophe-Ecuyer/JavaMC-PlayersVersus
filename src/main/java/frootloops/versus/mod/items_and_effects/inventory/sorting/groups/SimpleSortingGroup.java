@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting.groups;
 
+import frootloops.versus.mod.items_and_effects.inventory.sorting.SortingDebug;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemComparaisonHelper;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
@@ -8,7 +9,6 @@ import frootloops.versus.mod.items_and_effects.inventory.sorting.lists.SortedIte
 
 import java.util.LinkedList;
 
-import static frootloops.versus.mod.items_and_effects.inventory.InventorySorting.DEBUG_SORTING_GROUPS;
 
 
 public class SimpleSortingGroup extends SortingGroup {
@@ -43,7 +43,7 @@ public class SimpleSortingGroup extends SortingGroup {
             int insertPos = sortedList.trySortedInsert(slot);
             if (insertPos != -1) {
                 this.numItems++;
-                if(DEBUG_SORTING_GROUPS) {
+                if(SortingDebug.ENABLED) {
                     VersusMod.MOD_LOGGER.warn("                   -> " + this.GROUP_NAME + ": Inserting " + slot.stack().getHoverName().getString() + " of type " + slot.itemType() + " into list: " + sortedList);
                 }
                 return null; // Inserted!
@@ -85,8 +85,8 @@ public class SimpleSortingGroup extends SortingGroup {
             if(slot.isToolOrWeapon()) sortedItemLists[0].add(slot);
             else this.miscItems.add(slot);
             this.numItems++;
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "");
-            if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
+            if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "");
+            if(SortingDebug.ENABLED) this.debugCalculateActualSize();
         }
     }
 
@@ -98,8 +98,8 @@ public class SimpleSortingGroup extends SortingGroup {
 
     @Override
     public LinkedList<ItemSlot> takeAllItems() {
-        if(this.size() == 0 && DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Returned nothing, thought it had size zero.");
-        if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
+        if(this.size() == 0 && SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Returned nothing, thought it had size zero.");
+        if(SortingDebug.ENABLED) this.debugCalculateActualSize();
         if(this.size() == 0) return new LinkedList<>();
         for(int i = 1; i < sortedItemLists.length; i++) sortedItemLists[0].appendListToEnd(sortedItemLists[i]);
         if(this.miscItems.size() > 0) {
@@ -108,7 +108,7 @@ public class SimpleSortingGroup extends SortingGroup {
             }
             else sortedItemLists[0].appendListToEnd(miscItems);
         }
-        if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + sortedItemLists[0].size() + " items: " + sortedItemLists[0]);
+        if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeAllItems() - Took " + sortedItemLists[0].size() + " items: " + sortedItemLists[0]);
         this.numItems = 0;
         return sortedItemLists[0].takeAll();
     }
@@ -145,14 +145,14 @@ public class SimpleSortingGroup extends SortingGroup {
             if(sortedItemLists[i].size() > 0 && (splitUpSubgroups || sortedItemLists[i].size() <= numSlotsToTake - numItemsTaken)) {
                 int numItemsToTakeFromList = Math.min(sortedItemLists[i].size(), numSlotsToTake - numItemsTaken);
                 if( numItemsToTakeFromList < 1) continue;
-                if( DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeFirstSlots(" + numSlotsToTake + ", " + splitUpSubgroups + ") - Current Size: " + this.numItems + " - Taking " +numItemsToTakeFromList + " items from: " + sortedItemLists[i].toString());
+                if( SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeFirstSlots(" + numSlotsToTake + ", " + splitUpSubgroups + ") - Current Size: " + this.numItems + " - Taking " +numItemsToTakeFromList + " items from: " + sortedItemLists[i].toString());
                 slotList.addAll(sortedItemLists[i].take(numItemsToTakeFromList));
 
                 numItemsTaken = slotList.size();
                 if(numItemsTaken >= numSlotsToTake) {
                     this.numItems -= numItemsTaken;
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeFirstSlots(" + numSlotsToTake + ", " + splitUpSubgroups + ") - Quick return, took " + numItemsTaken + " items");
-                    if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
+                    if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - takeFirstSlots(" + numSlotsToTake + ", " + splitUpSubgroups + ") - Quick return, took " + numItemsTaken + " items");
+                    if(SortingDebug.ENABLED) this.debugCalculateActualSize();
                     return slotList;
                 }
             }
@@ -165,7 +165,7 @@ public class SimpleSortingGroup extends SortingGroup {
         }
 
         this.numItems -= numItemsTaken;
-        if(DEBUG_SORTING_GROUPS) {
+        if(SortingDebug.ENABLED) {
             VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + "   takeFirstSlots(" + numSlotsToTake + ", " + splitUpSubgroups + ") - Took " + numItemsTaken + " items, including possibly misc (actual list is of size " + slotList.size() + ")");
             if(this.debugCalculateActualSize() != this.numItems) {
                 String namesItemsTaken = "";
@@ -192,8 +192,8 @@ public class SimpleSortingGroup extends SortingGroup {
             int sizeOfList = sortedItemLists[i].size() % 9;
             if (sizeOfList == numSlotsToTake) {
                 this.numItems -= numSlotsToTake;
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - tryTakingExactNumSlots(" + numSlotsToTake + ", " + withTools + ", " + startFromEnd + ") - Found perfect match, taking " + numSlotsToTake + " items (had " + (this.numItems + numSlotsToTake) + ")");
-                if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
+                if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - tryTakingExactNumSlots(" + numSlotsToTake + ", " + withTools + ", " + startFromEnd + ") - Found perfect match, taking " + numSlotsToTake + " items (had " + (this.numItems + numSlotsToTake) + ")");
+                if(SortingDebug.ENABLED) this.debugCalculateActualSize();
                 return sortedItemLists[i].take(numSlotsToTake);
             }
         }
@@ -216,8 +216,8 @@ public class SimpleSortingGroup extends SortingGroup {
                     slotList.addAll(sortedItemLists[i].take(sizeFirst));
                     slotList.addAll(sortedItemLists[j].take(sizeSecond));
                     this.numItems -= combinedSize;
-                    if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - tryTakingExactNumSlots(" + numSlotsToTake + ", " + withTools + ", " + startFromEnd + ") - Found combination of two groups, taking " + sizeFirst + " and " + sizeSecond + " items (had " + (this.numItems + combinedSize) + ")");
-                    if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
+                    if(SortingDebug.ENABLED) VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + " - tryTakingExactNumSlots(" + numSlotsToTake + ", " + withTools + ", " + startFromEnd + ") - Found combination of two groups, taking " + sizeFirst + " and " + sizeSecond + " items (had " + (this.numItems + combinedSize) + ")");
+                    if(SortingDebug.ENABLED) this.debugCalculateActualSize();
                     return slotList;
                 }
             }

@@ -1,6 +1,6 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -60,7 +60,7 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
                 BlockState otherState = ((BlockItem)other.stack.getItem()).getBlock().defaultBlockState();
                 if(thisState.getSoundType() == otherState.getSoundType()) {
                     if(strict) return true;
-                    else return thisState.getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col == otherState.getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col;
+                    else return thisState.getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col == otherState.getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col;
                 }
             }
             else return true;
