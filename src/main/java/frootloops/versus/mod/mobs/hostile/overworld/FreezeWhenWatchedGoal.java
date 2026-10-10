@@ -9,7 +9,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * Holds a mob still while a player has it in view, as the stalker's creeping does ({@link CreepingAndExplodingGoal}):
+ * Holds a mob still while a player has it in view, as the pale_creeper's creeping does ({@link CreepingAndExplodingGoal}):
  * it only creeps up while unseen. It stops pretending within {@link #POUNCE_DISTANCE} of its target, and for a while
  * after it's hurt. Takes over moving and looking, so put it ahead of the mob's attack and wandering goals.
  */

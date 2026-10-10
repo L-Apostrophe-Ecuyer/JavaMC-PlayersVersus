@@ -33,18 +33,18 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 
-public class DeeperCreeperEntity extends Creeper {
+public class PaleCreeperEntity extends Creeper {
     //private static final TrackedData<Integer> FUSE_SPEED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.INTEGER);
     //private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private int lastFuseTime, currentFuseTime, fuseTime = 29, explosionRadius = 4;
     public static final SoundEvent DREEPER_AMBIENCE_SOUND = SoundEvent.createFixedRangeEvent(Identifier.parse("ambient.cave"), 32);
 
-    public DeeperCreeperEntity(EntityType<? extends Creeper> entityType, Level world) {
+    public PaleCreeperEntity(EntityType<? extends Creeper> entityType, Level world) {
         super(entityType, world);
         this.xpReward = 29;
     }
 
-    public static AttributeSupplier.Builder createDeeperCreeperAttributes() {
+    public static AttributeSupplier.Builder createPaleCreeperAttributes() {
         return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.36).add(Attributes.FOLLOW_RANGE, 40.0).add(Attributes.ARMOR, 10.0).add(Attributes.ARMOR_TOUGHNESS, 3.0);
     }
 

@@ -9,13 +9,13 @@ import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.resources.Identifier;
 
 @Environment(EnvType.CLIENT)
-public class DeeperCreeperRenderer extends CreeperRenderer {
+public class PaleCreeperRenderer extends CreeperRenderer {
 
-    public DeeperCreeperRenderer(EntityRendererProvider.Context context) {
+    public PaleCreeperRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
-    private final Identifier TEXTURE = Identifier.parse(VersusMod.MOD_ID  + ":textures/entity/deeper_creeper.png");
+    private final Identifier TEXTURE = Identifier.parse(VersusMod.MOD_ID  + ":textures/entity/pale_creeper.png");
 
     @Override
     public Identifier getTextureLocation(CreeperRenderState creeperEntityRenderState) {

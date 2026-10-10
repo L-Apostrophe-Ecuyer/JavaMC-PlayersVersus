@@ -24,6 +24,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.AngerLevel;
 import net.minecraft.world.entity.monster.warden.AngerManagement;
@@ -319,10 +320,13 @@ public class WardenMixin extends Monster {
             return Mth.lengthSquared(deltaX, deltaZ) < (4.0d) && deltaY < 2.0d;
 
         // Sonic booms:
-        if(horizontalRadius == 15.0d && verticalRadius == 20.0d && entity instanceof Player) {
-            if(this.getLastHurtMobTimestamp() < this.tickCount - BOOM_COOLDOWN_AFTER_ATTACK) return false;
-            if(this.playersVersus$ticksWithoutPath < BOOM_WITHOUT_PATH_TICKS) return false; // Chasing with a path to follow: run or hide instead.
-            return Mth.lengthSquared(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
+        if(horizontalRadius == 15.0d && verticalRadius == 20.0d) {
+            if(entity instanceof Bat) return true;
+            if(entity instanceof Player) {
+                if(this.getLastHurtMobTimestamp() < this.tickCount - BOOM_COOLDOWN_AFTER_ATTACK) return false;
+                if(this.playersVersus$ticksWithoutPath < BOOM_WITHOUT_PATH_TICKS) return false; // Chasing with a path to follow: run or hide instead.
+                return Mth.lengthSquared(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
+            }
         }
 
         // Anything else:

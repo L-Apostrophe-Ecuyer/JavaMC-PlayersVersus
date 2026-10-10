@@ -64,7 +64,7 @@
           "misc": [],
           "monster": [
             {
-              "type": "players-versus:deeper_creeper",
+              "type": "players-versus:pale_creeper",
               "weight": 80,
               "count": 1
             },

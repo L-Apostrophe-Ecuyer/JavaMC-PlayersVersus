@@ -21,14 +21,14 @@ public class SilverfishMixin extends Monster {
 
     @ModifyConstant(method = "createAttributes", constant = @Constant(doubleValue = 8.0))
     private static double lessHealth(double hp) {
-        return 5.0f;
+        return 3.0f;
     }
 
     @Override
     public boolean doHurtTarget(ServerLevel world, Entity target) {
         boolean hasAttacked = super.doHurtTarget(world, target);
-        if (hasAttacked && target instanceof LivingEntity livingEntity && this.getRandom().nextBoolean()) {
-            livingEntity.addEffect(new MobEffectInstance(MobEffects.INFESTED, 240), this);
+        if (hasAttacked && target instanceof LivingEntity livingEntity && this.getRandom().nextInt(4) == 1) {
+            livingEntity.addEffect(new MobEffectInstance(MobEffects.INFESTED, 80), this);
         }
         return hasAttacked;
     }

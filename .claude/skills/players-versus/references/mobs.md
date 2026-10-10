@@ -72,7 +72,7 @@ assuming full overlap).
   Withered Zombies to actually spawn naturally, that line needs uncommenting (verify intentional
   before doing so — could be deliberately disabled pending balance work).
 - Per-mob `SpawnRestriction` predicates add fine-grained placement logic beyond the biome-modification
-  weight: Deeper Creeper needs light ≤1, `#stalker_spawnable_on`, and y<32; Withered Zombie needs
+  weight: Deeper Creeper needs light ≤1, `#pale_creeper_spawnable_on`, and y<32; Withered Zombie needs
   light 0, `#undead_overworld_spawnable_on`, auto-allowed in Deep Caves biome, otherwise y-gated
   (never above y64, midnight-during-new-moon only between y24-64, unconditional below y24) — a
   three-tier depth/rarity curve; Frosted Zombie walks up through any stacked powder snow first, then
@@ -81,7 +81,7 @@ assuming full overlap).
 
 ## Custom hostile entities
 
-- **`DeeperCreeperEntity`** (extends `CreeperEntity`, spawn egg registered): faster (0.36 speed),
+- **`PaleCreeperEntity`** (extends `CreeperEntity`, spawn egg registered): faster (0.36 speed),
   longer follow range (40), armored (10/3.0 armor/toughness), immune to Wither damage (explicit
   `damage()` override), explodes with a Darkness+Wither area-effect cloud on death (5-block radius,
   300-tick duration, shrinking) instead of vanilla's plain explosion, and has bespoke footstep/hurt
@@ -157,7 +157,7 @@ assuming full overlap).
 
 ## Entity registration (`ModEntities`)
 Central registry for every custom entity type: `SlimeballEntity` (misc group, tiny 0.25×0.25 hitbox
-— see `items-and-equipment.md`), `DeeperCreeperEntity`, `FrostedZombieEntity`, `WitheredZombieEntity`,
+— see `items-and-equipment.md`), `PaleCreeperEntity`, `FrostedZombieEntity`, `WitheredZombieEntity`,
 `WildfireEntity` (all monster group, tracking ranges 4-8 blocks — short compared to vanilla hostiles,
 worth checking if intentional for a "you need to be close to notice these" cave-mob design or just
 unconsidered). Each gets a `FabricDefaultAttributeRegistry.register` call plus (except Slimeball) a

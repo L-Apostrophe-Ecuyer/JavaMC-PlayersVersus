@@ -2,7 +2,7 @@ package frootloops.versus.mod.mobs;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.hostile.nether.WildfireEntity;
-import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
@@ -33,9 +33,9 @@ public class ModEntities {
             EntityType.Builder.of((EntityType.EntityFactory<SlimeballEntity>)SlimeballEntity::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10)
     );
 
-    public static final EntityType<DeeperCreeperEntity> DEEPER_CREEPER = register(
-           "deeper_creeper",
-            EntityType.Builder.of(DeeperCreeperEntity::new, MobCategory.MONSTER).sized(0.6f, 1.7f).clientTrackingRange(6)
+    public static final EntityType<PaleCreeperEntity> PALE_CREEPER = register(
+           "pale_creeper",
+            EntityType.Builder.of(PaleCreeperEntity::new, MobCategory.MONSTER).sized(0.6f, 1.7f).clientTrackingRange(6)
     );
 
     public static final EntityType<FrostedZombieEntity> FROSTED_ZOMBIE = register(
@@ -67,7 +67,7 @@ public class ModEntities {
             "wildfire", EntityType.Builder.of(WildfireEntity::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.8F).clientTrackingRange(8)
     );
 
-    public static final Item DEEPER_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("deeper_creeper_spawn_egg").spawnEgg(DEEPER_CREEPER));
+    public static final Item PALE_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_creeper_spawn_egg").spawnEgg(PALE_CREEPER));
     public static final Item FROSTED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("frosted_zombie_spawn_egg").spawnEgg(FROSTED_ZOMBIE));
     public static final Item WITHERED_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("withered_zombie_spawn_egg").spawnEgg(WITHERED_ZOMBIE));
     public static final Item PALE_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_creeper_spawn_egg").spawnEgg(PALE_CREEPER));
@@ -79,10 +79,10 @@ public class ModEntities {
     public static void onInitialize() {
 
         // Register custom entities:
-        FabricDefaultAttributeRegistry.register(DEEPER_CREEPER, DeeperCreeperEntity.createDeeperCreeperAttributes());
+        FabricDefaultAttributeRegistry.register(PALE_CREEPER, PaleCreeperEntity.createPaleCreeperAttributes());
         FabricDefaultAttributeRegistry.register(FROSTED_ZOMBIE, FrostedZombieEntity.createFrostedAttributes());
         FabricDefaultAttributeRegistry.register(WITHERED_ZOMBIE, WitheredZombieEntity.createWitheredAttributes());
-        FabricDefaultAttributeRegistry.register(PALE_CREEPER, DeeperCreeperEntity.createDeeperCreeperAttributes());
+        FabricDefaultAttributeRegistry.register(PALE_CREEPER, PaleCreeperEntity.createPaleCreeperAttributes());
         FabricDefaultAttributeRegistry.register(PALE_ZOMBIE, WitheredZombieEntity.createWitheredAttributes());
         FabricDefaultAttributeRegistry.register(PALE_SPIDER, Spider.createAttributes());
         FabricDefaultAttributeRegistry.register(WILDFIRE, WildfireEntity.createWildfireAttributes());

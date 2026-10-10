@@ -94,7 +94,7 @@ public final class MobMelee {
 
     /** Whether a swing reaches the target: in close quarters, or facing it with it inside the attack box. */
     public static boolean reaches(Mob mob, LivingEntity target, boolean jumping) {
-        return inCloseQuarters(mob, target) || Combat.isLookingTowards(mob, target.getEyePosition(), true)
+        return inCloseQuarters(mob, target) || Combat.isLookingTowards(mob, target.getEyePosition(), -0.6)
                 && Combat.getMobAttackBox(mob, jumping).intersects(Combat.getEntityHitbox(target));
     }
 
