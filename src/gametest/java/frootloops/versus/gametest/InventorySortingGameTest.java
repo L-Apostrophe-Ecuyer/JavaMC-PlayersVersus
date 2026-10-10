@@ -183,6 +183,58 @@ public class InventorySortingGameTest {
         helper.succeed();
     }
 
+    @GameTest
+    public void sortingTwiceChangesNothing(GameTestHelper helper) {
+        List<ItemStack> loadout = List.of(
+                new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.BREAD, 16), new ItemStack(Items.WATER_BUCKET),
+                new ItemStack(Items.ENDER_PEARL, 16), new ItemStack(Items.COOKED_BEEF, 32), new ItemStack(Items.COOKED_PORKCHOP, 32),
+                new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.TORCH, 32));
+        assertSortingTwiceChangesNothing(helper, loadout, 4, true, false, false, false, "a loadout with tied stacks");
+
+        RandomSource random = RandomSource.create(20261011L);
+        for (int test = 0; test < 100; test++) {
+            boolean playerInventory = test % 3 == 0;
+            int numRows = playerInventory ? 4 : test % 3 == 1 ? 3 : 6;
+            int situation = playerInventory ? random.nextInt(4) : 0;
+            List<ItemStack> stacks = TestInventories.random(random, numRows * 9);
+            assertSortingTwiceChangesNothing(helper, stacks, numRows, playerInventory, situation == 1, situation == 2, situation == 3, "inventory " + test);
+        }
+        helper.succeed();
+    }
+
+    @GameTest
+    public void aFullHotbarTakesNoMoreGroups(GameTestHelper helper) {
+        List<ItemStack> stacks = new ArrayList<>(List.of(
+                new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.BOW), new ItemStack(Items.BREAD, 16),
+                PotionContents.createItemStack(Items.POTION, Potions.HEALING), new ItemStack(Items.WATER_BUCKET), new ItemStack(Items.TORCH, 32),
+                new ItemStack(Items.IRON_AXE)));
+        addCopies(stacks, Items.OAK_LOG, 3);
+        stacks.add(new ItemStack(Items.IRON_PICKAXE));
+        addCopies(stacks, Items.COBBLESTONE, 12);
+        stacks.add(new ItemStack(Items.IRON_SHOVEL));
+        stacks.add(new ItemStack(Items.IRON_SHOVEL));
+        addCopies(stacks, Items.DIRT, 8);
+
+        int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
+        assertInRow(helper, sorted, 0, List.of(0, 6, 10), stacks, "the sword, axe and pickaxe");
+        helper.succeed();
+    }
+
+    /** Sorts the stacks, lays them out as sorted, sorts again: every position must hold an equal stack. */
+    private static void assertSortingTwiceChangesNothing(GameTestHelper helper, List<ItemStack> stacks, int numRows, boolean playerInventory, boolean inDeepDark, boolean inNether, boolean inWater, String label) {
+        int[] first = sort(helper, stacks, numRows, playerInventory, inDeepDark, inNether, inWater, label);
+        List<ItemStack> laidOut = new ArrayList<>();
+        for (int id : first) if (id >= 0) laidOut.add(stacks.get(id));
+        int[] second = sort(helper, laidOut, numRows, playerInventory, inDeepDark, inNether, inWater, label + " sorted again");
+        for (int position = 0; position < first.length; position++) {
+            ItemStack before = first[position] < 0 ? ItemStack.EMPTY : stacks.get(first[position]);
+            ItemStack after = second[position] < 0 ? ItemStack.EMPTY : laidOut.get(second[position]);
+            if (!ItemStack.matches(before, after)) {
+                helper.fail(label + ": sorting again moved " + before.getHoverName().getString() + " at " + position + " for " + after.getHoverName().getString() + ", in " + TestInventories.describe(stacks));
+            }
+        }
+    }
+
     private static void addCopies(List<ItemStack> stacks, Item item, int numStacks) {
         for (int i = 0; i < numStacks; i++) stacks.add(new ItemStack(item, 64));
     }
