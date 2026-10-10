@@ -4,14 +4,19 @@ import frootloops.versus.VersusMod;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * Sorts inventories on the game test server, with the game's real items and tags.
@@ -115,6 +120,99 @@ public class InventorySortingGameTest {
             helper.fail("Expected smooth stone, purpur then end stone, got " + Arrays.toString(sorted));
         }
         helper.succeed();
+    }
+
+    @GameTest
+    public void wholeToolRowsStayWhole(GameTestHelper helper) {
+        List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.BREAD, 16), new ItemStack(Items.TORCH, 32), new ItemStack(Items.IRON_AXE)));
+        addCopies(stacks, Items.OAK_PLANKS, 8);
+        stacks.add(new ItemStack(Items.IRON_PICKAXE));
+        addCopies(stacks, Items.COBBLESTONE, 8);
+
+        int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
+        assertInRow(helper, sorted, 0, List.of(0, 1, 2), stacks, "the sword, bread and torches");
+        assertWholeRow(helper, sorted, range(12, 21), stacks, "the pickaxe and its cobblestone");
+        assertWholeRow(helper, sorted, range(3, 12), stacks, "the axe and its planks");
+        helper.succeed();
+    }
+
+    @GameTest
+    public void aWeakHotbarTakesTheBestWholeToolRow(GameTestHelper helper) {
+        List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.BREAD, 16), new ItemStack(Items.TORCH, 32), new ItemStack(Items.IRON_PICKAXE)));
+        addCopies(stacks, Items.COBBLESTONE, 8);
+        stacks.add(new ItemStack(Items.IRON_AXE));
+        addCopies(stacks, Items.OAK_PLANKS, 8);
+
+        int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
+        assertRowIs(helper, sorted, 0, range(2, 11), stacks, "the pickaxe and its cobblestone");
+        assertWholeRow(helper, sorted, range(11, 20), stacks, "the axe and its planks");
+        helper.succeed();
+    }
+
+    @GameTest
+    public void aLonePickaxeJoinsTheHotbar(GameTestHelper helper) {
+        List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.BREAD, 16), new ItemStack(Items.IRON_PICKAXE)));
+        addCopies(stacks, Items.COBBLESTONE, 12);
+
+        int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
+        assertInRow(helper, sorted, 0, List.of(0, 1, 2), stacks, "the sword, bread and pickaxe");
+        helper.succeed();
+    }
+
+    @GameTest
+    public void theSwordStaysWithoutFood(GameTestHelper helper) {
+        // The pickaxe, torches and cobblestone keep the hotbar busy, so a sword dropped from it would sort further down.
+        List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.TORCH, 32)));
+        addCopies(stacks, Items.COBBLESTONE, 6);
+        addCopies(stacks, Items.DIRT, 5);
+        addCopies(stacks, Items.OAK_PLANKS, 4);
+
+        int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
+        assertInRow(helper, sorted, 0, List.of(0), stacks, "the sword");
+        helper.succeed();
+    }
+
+    @GameTest
+    public void aShovelAvoidsAWeakHotbar(GameTestHelper helper) {
+        // Too many dirt stacks for the shovel's group to fit in the hotbar along with them.
+        List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.BREAD, 16), new ItemStack(Items.TORCH, 32), new ItemStack(Items.IRON_SHOVEL)));
+        addCopies(stacks, Items.DIRT, 10);
+
+        int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
+        assertInRow(helper, sorted, 0, List.of(2), stacks, "the shovel");
+        helper.succeed();
+    }
+
+    private static void addCopies(List<ItemStack> stacks, Item item, int numStacks) {
+        for (int i = 0; i < numStacks; i++) stacks.add(new ItemStack(item, 64));
+    }
+
+    private static List<Integer> range(int from, int to) {
+        return IntStream.range(from, to).boxed().toList();
+    }
+
+    /** Each of the given stacks is in that row. */
+    private static void assertInRow(GameTestHelper helper, int[] sorted, int row, List<Integer> ids, List<ItemStack> stacks, String what) {
+        for (int i = 0; i < sorted.length; i++) {
+            if (ids.contains(sorted[i]) && i / 9 != row) helper.fail(what + " should be in row " + row + ": " + Arrays.toString(sorted) + " for " + TestInventories.describe(stacks));
+        }
+    }
+
+    /** That row holds exactly the given stacks. */
+    private static void assertRowIs(GameTestHelper helper, int[] sorted, int row, List<Integer> ids, List<ItemStack> stacks, String what) {
+        Set<Integer> inRow = new HashSet<>();
+        for (int column = 0; column < 9; column++) if (sorted[row * 9 + column] >= 0) inRow.add(sorted[row * 9 + column]);
+        if (!inRow.equals(new HashSet<>(ids))) helper.fail("Row " + row + " should hold just " + what + ": " + Arrays.toString(sorted) + " for " + TestInventories.describe(stacks));
+    }
+
+    /** Some row below the hotbar holds exactly the given stacks. */
+    private static void assertWholeRow(GameTestHelper helper, int[] sorted, List<Integer> ids, List<ItemStack> stacks, String what) {
+        for (int row = 1; row < sorted.length / 9; row++) {
+            Set<Integer> inRow = new HashSet<>();
+            for (int column = 0; column < 9; column++) if (sorted[row * 9 + column] >= 0) inRow.add(sorted[row * 9 + column]);
+            if (inRow.equals(new HashSet<>(ids))) return;
+        }
+        helper.fail("No row holds just " + what + ": " + Arrays.toString(sorted) + " for " + TestInventories.describe(stacks));
     }
 
     /** Sorts the stacks, failing the test if the sort throws or gives up. */
