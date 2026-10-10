@@ -26,9 +26,9 @@ public abstract class ContainerDumping {
 
     public static void quickDumpIntoContainer(AbstractContainerMenu handler, Minecraft client, Container playerInventory, Container containerInventory) {
         int numSlotsInContainer = containerInventory.getContainerSize();
-        InventoryManagementHelper.placeOrDropCursorStack(handler, client, playerInventory);
-        InventoryManagementHelper.mergeStacksTogether(handler, client, containerInventory, 0, numSlotsInContainer);
-        InventoryManagementHelper.mergeStacksTogether(handler, client, playerInventory, numSlotsInContainer, 36);
+        InventoryManagementHelper.placeOrDropCursorStack(handler, client, playerInventory, 36);
+        InventoryManagementHelper.mergeStacksTogether(handler, client, containerInventory, numSlotsInContainer);
+        InventoryManagementHelper.mergeStacksTogether(handler, client, playerInventory, 36);
 
         doQuickDump(handler, client, playerInventory, containerInventory, 36, numSlotsInContainer, numSlotsInContainer);
         //InventorySorting.sortInventory(handler, client, containerInventory, InventorySorting.InventoryToSort.INVENTORY_WHILE_CHEST_OPEN, 0, numSlotsInContainer);
@@ -36,9 +36,9 @@ public abstract class ContainerDumping {
 
     public static void quickDumpIntoPlayerInventory(AbstractContainerMenu handler, Minecraft client, Container playerInventory, Container containerInventory) {
         int numSlotsInContainer = containerInventory.getContainerSize();
-        InventoryManagementHelper.placeOrDropCursorStack(handler, client, playerInventory);
-        InventoryManagementHelper.mergeStacksTogether(handler, client, containerInventory, 0, numSlotsInContainer);
-        InventoryManagementHelper.mergeStacksTogether(handler, client, playerInventory, numSlotsInContainer, 36);
+        InventoryManagementHelper.placeOrDropCursorStack(handler, client, playerInventory, 36);
+        InventoryManagementHelper.mergeStacksTogether(handler, client, containerInventory, numSlotsInContainer);
+        InventoryManagementHelper.mergeStacksTogether(handler, client, playerInventory, 36);
 
         doQuickDump(handler, client, containerInventory, playerInventory, numSlotsInContainer, 36, 0);
         //InventorySorting.sortInventory(handler, client, playerInventory, InventorySorting.InventoryToSort.INVENTORY_WHILE_CHEST_OPEN, numSlotsInContainer, 36);

@@ -8,49 +8,60 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.OptionalInt;
+
 @Environment(EnvType.CLIENT)
 public class InventoryManagementHelper {
 
-    protected static void placeOrDropCursorStack(AbstractContainerMenu handler, Minecraft client, Container inventory) {
-        ItemStack cursorStack = handler.getCarried();
+    /**
+     * Puts the carried stack back in the inventory's first {@code numSlots} slots, onto equal stacks first, or drops it
+     * when there's no room.
+     */
+    protected static void placeOrDropCursorStack(AbstractContainerMenu menu, Minecraft client, Container inventory, int numSlots) {
+        ItemStack cursorStack = menu.getCarried();
         if(cursorStack.isEmpty()) return;
 
         // Find another stack to merge the cursor stack with:
         if(cursorStack.isStackable() && cursorStack.getCount() < cursorStack.getMaxStackSize()) {
-            for (int i = 9; i < 44; i++) {
+            for (int i = 0; i < numSlots; i++) {
                 ItemStack otherStack = inventory.getItem(i);
-                if(!otherStack.isEmpty() && ItemStack.isSameItemSameComponents(cursorStack, otherStack)) {
-                    client.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.PICKUP, client.player);
-                    if(cursorStack.getCount() == 0 || cursorStack.isEmpty()) return;
+                OptionalInt menuSlot = menu.findSlot(inventory, i);
+                if(menuSlot.isPresent() && !otherStack.isEmpty() && ItemStack.isSameItemSameComponents(menu.getCarried(), otherStack)) {
+                    client.gameMode.handleContainerInput(menu.containerId, menuSlot.getAsInt(), 0, ContainerInput.PICKUP, client.player);
+                    if(menu.getCarried().isEmpty()) return;
                 }
             }
         }
 
         // Find an empty slot to insert the cursor stack in:
-        for (int i = 9; i < 44; i++) {
-            if(inventory.getItem(i).isEmpty()) {
-                client.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.PICKUP, client.player);
+        for (int i = 0; i < numSlots; i++) {
+            OptionalInt menuSlot = menu.findSlot(inventory, i);
+            if(menuSlot.isPresent() && inventory.getItem(i).isEmpty()) {
+                client.gameMode.handleContainerInput(menu.containerId, menuSlot.getAsInt(), 0, ContainerInput.PICKUP, client.player);
                 return;
             }
         }
 
-        // Drop the cursor stack:
-        client.gameMode.handleContainerInput(handler.containerId, -999, 0, ContainerInput.THROW, client.player);
+        // Drop the cursor stack, by clicking outside the menu:
+        client.gameMode.handleContainerInput(menu.containerId, AbstractContainerMenu.SLOT_CLICKED_OUTSIDE, 0, ContainerInput.PICKUP, client.player);
     }
 
-    protected static void mergeStacksTogether(AbstractContainerMenu handler, Minecraft client, Container inventory, int startingSlotIndex, int totalNumSlots) {
-        ItemStack stackOne, stackTwo;
-        int maxSlotIndex = startingSlotIndex + totalNumSlots; // + 9 + 1;
-        for (int i = startingSlotIndex; i < maxSlotIndex; i++) {
-            stackOne = inventory.getItem(i);
-            if(stackOne.isEmpty() || !stackOne.isStackable() || stackOne.getCount() == stackOne.getMaxStackSize()) continue;
-            for (int j = i + 1; j < maxSlotIndex; j++) {
-                stackTwo = inventory.getItem(j);
-                if(stackTwo.isEmpty() || !stackTwo.is(stackOne.getItem()) || stackTwo.getCount() == stackTwo.getMaxStackSize() || !ItemStack.isSameItemSameComponents(stackOne, stackTwo)) continue;
-                client.gameMode.handleContainerInput(handler.containerId, j, 0, ContainerInput.PICKUP, client.player); // Grab the stack
-                client.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.PICKUP, client.player); // Combine with other
-                if(!handler.getCarried().isEmpty()) client.gameMode.handleContainerInput(handler.containerId, j, 0, ContainerInput.PICKUP, client.player); // Place leftovers back down
-                if(inventory.getItem(i).getCount() == stackOne.getMaxStackSize()) break;
+    /**
+     * Fills up partial stacks with equal stacks further on, among the inventory's first {@code numSlots} slots.
+     */
+    protected static void mergeStacksTogether(AbstractContainerMenu menu, Minecraft client, Container inventory, int numSlots) {
+        for (int i = 0; i < numSlots; i++) {
+            ItemStack stackOne = inventory.getItem(i);
+            OptionalInt menuSlotOne = menu.findSlot(inventory, i);
+            if(menuSlotOne.isEmpty() || stackOne.isEmpty() || !stackOne.isStackable() || stackOne.getCount() == stackOne.getMaxStackSize()) continue;
+            for (int j = i + 1; j < numSlots; j++) {
+                ItemStack stackTwo = inventory.getItem(j);
+                OptionalInt menuSlotTwo = menu.findSlot(inventory, j);
+                if(menuSlotTwo.isEmpty() || stackTwo.isEmpty() || stackTwo.getCount() == stackTwo.getMaxStackSize() || !ItemStack.isSameItemSameComponents(stackOne, stackTwo)) continue;
+                client.gameMode.handleContainerInput(menu.containerId, menuSlotTwo.getAsInt(), 0, ContainerInput.PICKUP, client.player); // Grab the stack
+                client.gameMode.handleContainerInput(menu.containerId, menuSlotOne.getAsInt(), 0, ContainerInput.PICKUP, client.player); // Combine with other
+                if(!menu.getCarried().isEmpty()) client.gameMode.handleContainerInput(menu.containerId, menuSlotTwo.getAsInt(), 0, ContainerInput.PICKUP, client.player); // Place leftovers back down
+                if(inventory.getItem(i).getCount() == inventory.getItem(i).getMaxStackSize()) break;
             }
         }
     }
