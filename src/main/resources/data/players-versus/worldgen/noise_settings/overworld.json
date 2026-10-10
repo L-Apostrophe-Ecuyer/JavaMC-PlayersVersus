@@ -41,7 +41,9 @@
         "y_scale": 2.0
       },
       "corridors": "players-versus:overworld/caves/flooded_corridors",
-      "dry_paths": "players-versus:overworld/caves/dry_paths"
+      "dry_paths": "players-versus:overworld/caves/dry_paths",
+      "level": "players-versus:overworld/caves/basin_level",
+      "floor": "players-versus:overworld/caves/basin_floor"
     },
     "lava": {
       "type": "minecraft:noise",

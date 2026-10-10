@@ -156,6 +156,7 @@ REF_ACROSS = pv("overworld/high_river/across")
 REF_UPPER_VALLEY, REF_UPPER_ACROSS = pv("overworld/high_river/upper_valley"), pv("overworld/high_river/upper_across")
 REF_BANK, REF_UPPER_BANK = pv("overworld/high_river/bank"), pv("overworld/high_river/upper_bank")
 REF_DRY_PATHS = pv("overworld/caves/dry_paths")
+REF_BASIN_LEVEL, REF_BASIN_FLOOR = pv("overworld/caves/basin_level"), pv("overworld/caves/basin_floor")
 
 
 def depth():
@@ -278,6 +279,24 @@ def dry_paths():
     return range_choice(REF_CORRIDOR_ENTRANCES, C["CORRIDOR_ENTRANCES"], 1000000.0, REF_CORRIDOR_NOODLE, NO_CUT)
 
 
+def basin_level():
+    """The basins' level by column (PvAquiferRules): their water, barriers and flooded corridors only reach up to it.
+    BASIN_LEVEL_DRY, the basin layers' bottom, where the broad noise players-versus:cave_basins is below
+    BASIN_LEVEL_DRY_BELOW, so the caves there are dry from y 32 down; rising to BASIN_LEVEL_FULL where it reaches
+    BASIN_LEVEL_FULL_ABOVE, so between them the lakes stand at different heights."""
+    lo, hi = C["BASIN_LEVEL_DRY_BELOW"], C["BASIN_LEVEL_FULL_ABOVE"]
+    share = clamp(div(sub(noise(pv("cave_basins"), 1.0, 0.0), lo), hi - lo), 0.0, 1.0)
+    return add(float(C["BASIN_LEVEL_DRY"]), mul(share, float(C["BASIN_LEVEL_FULL"] - C["BASIN_LEVEL_DRY"])))
+
+
+def basin_floor():
+    """The basins' floor by column (PvAquiferRules): their water stays above it, so the stone that holds a lake where
+    its cave goes on down is rough: BASIN_FLOOR_MID plus BASIN_FLOOR_BUMPS blocks per unit of the surface noise (flat in
+    y), within BASIN_FLOOR_Y..2 x BASIN_FLOOR_MID."""
+    bumps = add(float(C["BASIN_FLOOR_MID"]), mul(noise(mc("surface"), 2.0, 0.0), C["BASIN_FLOOR_BUMPS"]))
+    return clamp(bumps, float(C["BASIN_FLOOR_Y"]), 2.0 * C["BASIN_FLOOR_MID"])
+
+
 def flooded_corridors():
     """What the aquifer floods in the basin layers: the final density's noodle inside the corridors' zone (the
     entrance value below CORRIDOR_ENTRANCES), NO_CUT outside it, so the dry paths stay dry. Where this is at most 0 the
@@ -304,16 +323,19 @@ def high_river_channel():
 
 
 def high_river_activity(layer):
-    """How open a layer is, from the depth at its surface's height: 1 up to HIGH_RIVER_FULL_DEPTH (the ground's nominal
-    surface a few blocks above its water), then narrowing into higher ground. A layer with a gorge narrows to that share
-    of its width at its closing depth and stops there, so the gorge's head is a wall; the others narrow to nothing."""
+    """How open a layer is, from the depth at its surface's height: nothing up to HIGH_RIVER_MIN_DEPTH (where the
+    ground's nominal surface isn't above its water, so it would only run on the ground or over it, not in it), widening
+    to 1 at HIGH_RIVER_WIDE_DEPTH, 1 up to HIGH_RIVER_FULL_DEPTH, then narrowing into higher ground. A layer with a gorge
+    narrows to that share of its width at its closing depth and stops there, so the gorge's head is a wall; the others
+    narrow to nothing."""
     depth_at_surface = interpolated(slice_y(layer["y"], REF_DEPTH))
-    full, closed = C["HIGH_RIVER_FULL_DEPTH"], layer["closed"]
+    lowest, wide, full, closed = C["HIGH_RIVER_MIN_DEPTH"], C["HIGH_RIVER_WIDE_DEPTH"], C["HIGH_RIVER_FULL_DEPTH"], layer["closed"]
+    widening = clamp(div(sub(depth_at_surface, lowest), wide - lowest), 0.0, 1.0)
     if "gorge" not in layer:
-        return clamp(div(sub(closed, depth_at_surface), closed - full), 0.0, 1.0)
+        return min_(widening, clamp(div(sub(closed, depth_at_surface), closed - full), 0.0, 1.0))
     gorge = layer["gorge"]
     narrowing = clamp(add(1.0, mul(sub(depth_at_surface, full), -(1.0 - gorge) / (closed - full))), gorge, 1.0)
-    return range_choice(depth_at_surface, -1000000.0, closed, narrowing, 0.0)
+    return range_choice(depth_at_surface, -1000000.0, closed, min_(widening, narrowing), 0.0)
 
 
 def high_river_flare(layer, depth):
@@ -348,34 +370,26 @@ def high_river_across(layer):
     return cache(sub(abs_(high_river_channel()), mul(high_river_activity(layer), high_river_full_half_width(layer))))
 
 
-def high_river_runs(layer, running, elsewhere):
-    """Where a layer's water runs, its bed's gate: where the depth at its surface is at least HIGH_RIVER_RUN_DEPTH (the
-    ground's nominal surface a few blocks above its water), whatever dips or caves the terrain has there, or else where
-    the terrain at its surface is solid, so it runs on to the ground's real edge and spills there."""
-    depth_at_surface = interpolated(slice_y(layer["y"], REF_DEPTH))
-    terrain_at_surface = interpolated(slice_y(layer["y"], REF_TERRAIN))
-    on_ground = range_choice(terrain_at_surface, -1000000.0, MIN_POSITIVE, elsewhere, running)
-    return range_choice(depth_at_surface, -1000000.0, C["HIGH_RIVER_RUN_DEPTH"], on_ground, running)
-
-
 def below_layer_at_surface(layer, below):
     """The lower layer's across at this layer's surface: the same terms as its own, its half width taken at that height."""
     return sub(abs_(high_river_channel()), mul(high_river_activity(below), slice_y(layer["y"], high_river_full_half_width(below))))
 
 
 def high_river_bank(layer, below=None):
-    """The ground a layer runs in where the terrain leaves it open (a dip, a cave's mouth, a cliff's edge), so its water
-    never stands over open ground on a wall: from its surface down to its bank's bottom, solid within its half width
-    plus HIGH_RIVER_BANK_MARGIN at its surface, and wider by HIGH_RIVER_BANK_SLOPE per block down, so the deeper a bank
-    reaches, the further it slopes out. Only where its water runs (its activity above 0 and its bed's gate), and for a
-    layer over another not inside the lower one's valley; NO_FILL elsewhere. The valleys' cut comes after it in the final
+    """The ground a layer runs in where the terrain leaves it open (a dip, a cave's mouth), so its water never stands
+    over open ground on a wall: from its surface down to its bank's bottom, solid within its half width plus
+    HIGH_RIVER_BANK_MARGIN at its surface, and wider by HIGH_RIVER_BANK_SLOPE per block down, so the deeper a bank
+    reaches, the further it slopes out; the margin and the slope shrink with a river under half its full width, so a
+    narrowing river's tip has no more bank than water. Only where its water runs (its activity above 0), and for a layer
+    over another not inside the lower one's valley; NO_FILL elsewhere. The valleys' cut comes after it in the final
     density, so the river's own channel stays open."""
     y_surface, bottom = layer["y"], layer["bank_bottom"]
     margin, slope = C["HIGH_RIVER_BANK_MARGIN"], C["HIGH_RIVER_BANK_SLOPE"]
     activity = high_river_activity(layer)
-    half_width = add(mul(activity, layer["half_width"]), gradient(y_surface, bottom, margin, margin + (y_surface - bottom) * slope))
+    reach = mul(clamp(mul(activity, 2.0), 0.0, 1.0), gradient(y_surface, bottom, margin, margin + (y_surface - bottom) * slope))
+    half_width = add(mul(activity, layer["half_width"]), reach)
     inside = range_choice(sub(half_width, abs_(high_river_channel())), MIN_POSITIVE, 1000000.0, BANK_SOLID, NO_FILL)
-    bank = range_choice(activity, MIN_POSITIVE, 1000000.0, high_river_runs(layer, inside, NO_FILL), NO_FILL)
+    bank = range_choice(activity, MIN_POSITIVE, 1000000.0, inside, NO_FILL)
     if below is not None:
         bank = range_choice(below_layer_at_surface(layer, below), -1000000.0, 0.0, NO_FILL, bank)
     return range_choice(mc("y"), bottom - 0.5, y_surface + 0.5, bank, NO_FILL)
@@ -383,13 +397,14 @@ def high_river_bank(layer, below=None):
 
 def high_river_valley(layer, across, below=None):
     """A layer's valley, negative where it opens a block, NO_CUT elsewhere: in y from its bed's bottom up to
-    HIGH_RIVER_VALLEY_MAX_Y, inside its width (across). At and under its surface it opens a block where its water runs
-    (high_river_runs), in the ground its bank gives it where the terrain doesn't. A layer over another (below) opens
-    nothing there inside the lower one's valley at its surface, so it ends at the lower one's gorge and falls into it.
-    The aquifer puts water where this is negative at or under the surface."""
+    HIGH_RIVER_VALLEY_MAX_Y, inside its width (across), which is nothing where the ground's nominal surface isn't above
+    its water (high_river_activity), so it only runs cut into the ground, and in the ground its bank gives it where the
+    terrain dips. A layer over another (below) opens nothing at and under its surface inside the lower one's valley at
+    its surface, so it ends at the lower one's gorge and falls into it. The aquifer puts water where this is negative at
+    or under the surface."""
     y_surface, bed, top = layer["y"], layer["bed"], C["HIGH_RIVER_VALLEY_MAX_Y"]
     opened = range_choice(across, -1000000.0, 0.0, across, NO_CUT)
-    in_ground = high_river_runs(layer, opened, NO_CUT)
+    in_ground = opened
     if below is not None:
         in_ground = range_choice(below_layer_at_surface(layer, below), -1000000.0, 0.0, NO_CUT, in_ground)
     in_valley = range_choice(mc("y"), y_surface - bed - 0.5, y_surface + 0.5, in_ground, opened)
@@ -482,6 +497,8 @@ FUNCTIONS = {
     "overworld/caves/corridor_noodle": corridor_noodle,
     "overworld/caves/flooded_corridors": flooded_corridors,
     "overworld/caves/dry_paths": dry_paths,
+    "overworld/caves/basin_level": basin_level,
+    "overworld/caves/basin_floor": basin_floor,
     "overworld/high_river": lambda: noise(pv("high_river"), 0.25, 0.0),
     "overworld/high_river/across": lambda: high_river_across(HIGH_RIVER),
     "overworld/high_river/valley": lambda: high_river_valley(HIGH_RIVER, REF_ACROSS),
@@ -522,6 +539,8 @@ def noise_settings():
                 "surface": noise(mc("surface"), 4.0, 2.0),
                 "corridors": REF_FLOODED_CORRIDORS,
                 "dry_paths": REF_DRY_PATHS,
+                "level": REF_BASIN_LEVEL,
+                "floor": REF_BASIN_FLOOR,
             },
             "lava": noise(mc("aquifer_lava"), 1.0, 1.0),
             "surface_level": mc("overworld/preliminary_surface_level"),
@@ -584,6 +603,7 @@ def material_rule(surface_rule):
 # octave_count, amplitude_modifiers and a base_amplitude that gives the same values (NormalNoise.createParity).
 NOISES = {
     "high_river": (-7, [1.0, 2.0, 1.0]),
+    "cave_basins": (-10, [1.0, 1.0]),
     "sand_beach": (-7, [1.0] * 10 + [40.0, 20.0] + [10.0] * 17),
     "gravel_beach": (-7, [1.0] * 10 + [40.0, 20.0] + [10.0] * 17),
 }

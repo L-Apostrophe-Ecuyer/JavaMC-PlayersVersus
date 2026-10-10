@@ -80,6 +80,35 @@ public final class PvWorldgenConstants {
     public static final int BASIN_BARRIER_RAMP_Y = 12;
     public static final double BASIN_BARRIER_RAMP_PER_BLOCK = 0.06;
 
+    /**
+     * Basin water also needs S above this. S is 0 away from the basins' caves, and from y 1 down the water threshold
+     * ramps below 0, which flooded every open block of y -3..1 and left a flat floor of barrier stone under it.
+     */
+    public static final double BASIN_WATER_MIN_SPREAD = 0.0;
+
+    /**
+     * The basins' level ({@code caves/basin_level}, by column from the broad noise {@code players-versus:cave_basins}):
+     * their water, barriers and flooded corridors only reach up to it. Where the noise is below
+     * {@link #BASIN_LEVEL_DRY_BELOW} (about half the world) it's this, the layers' bottom, so they have none and the
+     * caves there are dry from y 32 down; it rises with the noise...
+     */
+    public static final int BASIN_LEVEL_DRY = BASIN_MIN_Y;
+    public static final double BASIN_LEVEL_DRY_BELOW = 0.0;
+    /**
+     * ...to this where the noise reaches {@link #BASIN_LEVEL_FULL_ABOVE} (about a tenth of the world), so the lakes stand
+     * at different heights from place to place: about a block higher every 20 blocks between.
+     */
+    public static final int BASIN_LEVEL_FULL = BASIN_BARRIER_MAX_Y;
+    public static final double BASIN_LEVEL_FULL_ABOVE = 0.4;
+    /**
+     * The basins' floor ({@code caves/basin_floor}, by column): their water stays above it, so where a lake's cave goes
+     * on down, the stone that holds the lake is a rough floor. It's {@link #BASIN_FLOOR_MID} plus this many blocks per
+     * unit of the surface noise there, kept within {@link #BASIN_FLOOR_Y}..2 x {@link #BASIN_FLOOR_MID}.
+     */
+    public static final double BASIN_FLOOR_BUMPS = 12.0;
+    public static final int BASIN_FLOOR_Y = 0;
+    public static final int BASIN_FLOOR_MID = 4;
+
     // ------------------------------------------------------------------------------------------------------------
     // Aquifer: flooded corridors (the refactor plan, Section 10, question 7)
     // ------------------------------------------------------------------------------------------------------------
@@ -173,12 +202,16 @@ public final class PvWorldgenConstants {
     /** How much vanilla's depth falls per block up (1.5 to -1.5 over y -64..320): 0.01 is about 1.3 blocks. */
     public static final double DEPTH_PER_BLOCK = 3.0 / 384;
     /**
-     * Each layer's water runs where the depth at its surface's height is at least this, the ground's nominal surface
-     * about 4 blocks above its water, over whatever dips or cave mouths the terrain has there (its banks fill them,
-     * {@link #HIGH_RIVER_BANK_SLOPE}); below it only while the terrain at its surface is solid, to the ground's real
-     * edge, where it spills.
+     * Each layer only runs where the depth at its surface's height is above this: where the ground's nominal surface is
+     * above its water, so it's cut into the ground instead of running on it or over it. From there it widens...
      */
-    public static final double HIGH_RIVER_RUN_DEPTH = 0.03;
+    public static final double HIGH_RIVER_MIN_DEPTH = 0.0;
+    /**
+     * ...to its full width where that depth reaches this, the ground's nominal surface about 6 blocks above its water;
+     * nearer the ground's level it narrows to a tip. Where the terrain dips under it anyway, its banks fill the dip
+     * ({@link #HIGH_RIVER_BANK_SLOPE}).
+     */
+    public static final double HIGH_RIVER_WIDE_DEPTH = 0.05;
     /**
      * Each layer runs at full width where the depth at its surface's height is up to this, the ground's nominal surface
      * up to about 13 blocks above its water, so it cuts its valley well into higher ground.

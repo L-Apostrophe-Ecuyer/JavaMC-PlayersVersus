@@ -10,52 +10,11 @@
     "max_exclusive": 80.5,
     "when_in_range": {
       "type": "minecraft:range_choice",
-      "input": {
-        "type": "minecraft:interpolated",
-        "cell_size_xz": 4,
-        "cell_size_y": 8,
-        "input": {
-          "type": "minecraft:slice",
-          "axis": "y",
-          "coordinate": 80,
-          "input": "players-versus:overworld/depth"
-        }
-      },
+      "input": "players-versus:overworld/high_river/across",
       "min_inclusive": -1000000.0,
-      "max_exclusive": 0.03,
-      "when_in_range": {
-        "type": "minecraft:range_choice",
-        "input": {
-          "type": "minecraft:interpolated",
-          "cell_size_xz": 4,
-          "cell_size_y": 8,
-          "input": {
-            "type": "minecraft:slice",
-            "axis": "y",
-            "coordinate": 80,
-            "input": "players-versus:overworld/terrain"
-          }
-        },
-        "min_inclusive": -1000000.0,
-        "max_exclusive": 1.4e-45,
-        "when_in_range": 64.0,
-        "when_out_of_range": {
-          "type": "minecraft:range_choice",
-          "input": "players-versus:overworld/high_river/across",
-          "min_inclusive": -1000000.0,
-          "max_exclusive": 0.0,
-          "when_in_range": "players-versus:overworld/high_river/across",
-          "when_out_of_range": 64.0
-        }
-      },
-      "when_out_of_range": {
-        "type": "minecraft:range_choice",
-        "input": "players-versus:overworld/high_river/across",
-        "min_inclusive": -1000000.0,
-        "max_exclusive": 0.0,
-        "when_in_range": "players-versus:overworld/high_river/across",
-        "when_out_of_range": 64.0
-      }
+      "max_exclusive": 0.0,
+      "when_in_range": "players-versus:overworld/high_river/across",
+      "when_out_of_range": 64.0
     },
     "when_out_of_range": {
       "type": "minecraft:range_choice",
