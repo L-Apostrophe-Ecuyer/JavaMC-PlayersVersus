@@ -409,6 +409,15 @@ public class MainHotbarGroup extends SortingGroup {
         return itemsToRemove;
     }
 
+    /**
+     * Gives back misc stacks, least important first, until the hotbar holds at most {@code maxSize} stacks.
+     */
+    public List<ItemSlot> trimTo(int maxSize) {
+        List<ItemSlot> removed = new ArrayList<>();
+        while(this.size() > maxSize && this.miscItems.size() > 0) removed.add(this.miscItems.removeLast());
+        return removed;
+    }
+
     @Override
     public int size() {
         int currentSize = 0;

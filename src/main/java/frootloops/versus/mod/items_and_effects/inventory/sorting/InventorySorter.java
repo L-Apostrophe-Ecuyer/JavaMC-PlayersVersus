@@ -7,11 +7,16 @@ import frootloops.versus.mod.items_and_effects.inventory.sorting.groups.SortingG
 import frootloops.versus.mod.items_and_effects.inventory.sorting.groups.ToolSortingGroup;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.lists.SortingLists;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.ItemStack;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -36,12 +41,38 @@ public final class InventorySorter {
         this.situation = situation;
     }
 
+    /** Equal stacks in a fixed order, so the layout depends on which stacks there are, not on where they were. */
+    private static final Comparator<ItemSlot> STACK_ORDER = Comparator
+            .comparing((ItemSlot slot) -> BuiltInRegistries.ITEM.getKey(slot.stack().getItem()).toString())
+            .thenComparingInt(slot -> slot.stack().getCount())
+            .thenComparingInt(slot -> ItemStack.hashItemAndComponents(slot.stack()))
+            .thenComparingInt(ItemSlot::slotId);
+
     /**
      * Lays the slots out in {@code numRows} rows: index {@code row * 9 + column}, {@code null} for an empty slot, row 0
-     * being a player's hotbar. Empty when the layout gives up.
+     * being a player's hotbar. Sorting a sorted inventory again lays it out the same way. Empty when the layout gives
+     * up, or doesn't hold every slot exactly once.
      */
     public static Optional<ItemSlot[]> sort(List<ItemSlot> slots, int numRows, Situation situation) {
-        return Optional.ofNullable(new InventorySorter(situation).layOut(slots, numRows));
+        List<ItemSlot> ordered = new ArrayList<>(slots);
+        ordered.sort(STACK_ORDER);
+        ItemSlot[] layout;
+        try {
+            layout = new InventorySorter(situation).layOut(ordered, numRows);
+        } catch (RuntimeException e) {
+            VersusMod.MOD_LOGGER.error("[ INVENTORY SORTING ] The sort failed, leaving the inventory as it is", e);
+            return Optional.empty();
+        }
+        if (layout == null || !holdsEachSlotOnce(layout, slots)) return Optional.empty();
+        return Optional.of(layout);
+    }
+
+    private static boolean holdsEachSlotOnce(ItemSlot[] layout, List<ItemSlot> slots) {
+        Set<Integer> laidOut = new HashSet<>();
+        for (ItemSlot slot : layout) if (slot != null && !laidOut.add(slot.slotId())) return false;
+        if (laidOut.size() == slots.size()) return true;
+        VersusMod.MOD_LOGGER.error("[ INVENTORY SORTING ] The layout holds {} of {} stacks, leaving the inventory as it is", laidOut.size(), slots.size());
+        return false;
     }
 
     private void printGroups(String debugMsg) {
@@ -77,6 +108,7 @@ public final class InventorySorter {
             this.cleanUpHotbar();
             for (ItemSlot slot : hotbar.keepOnlyEssentials()) this.insertItemIntoGroup(slot);
             this.avoidAWeakHotbar();
+            for (ItemSlot slot : hotbar.trimTo(9)) this.insertItemIntoGroup(slot);
             this.printGroups("[ INVENTORY SORTING ] ---- AFTER HOTBAR CLEAN UP -----\n");
         }
         this.cleanUpGroups();
@@ -354,6 +386,8 @@ public final class InventorySorter {
     }
 
     private static boolean tryCombiningTwoGroups(SortingGroup groupThatReceives, SortingGroup groupThatGives) {
+        // A full hotbar would look empty here (9 % 9), and take a whole extra row.
+        if(groupThatReceives instanceof MainHotbarGroup && groupThatReceives.size() >= 9) return false;
         int sizeBottom = groupThatReceives.size() % 9;
         int sizeTop = groupThatGives.size();
         if(sizeTop + sizeBottom == 9) {

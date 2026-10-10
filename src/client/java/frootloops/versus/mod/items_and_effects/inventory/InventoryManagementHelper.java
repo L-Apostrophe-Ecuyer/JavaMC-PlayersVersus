@@ -14,8 +14,8 @@ import java.util.OptionalInt;
 public class InventoryManagementHelper {
 
     /**
-     * Puts the carried stack back in the inventory's first {@code numSlots} slots, onto equal stacks first, or drops it
-     * when there's no room.
+     * Puts the carried stack back in the inventory's first {@code numSlots} slots, onto equal stacks first. Without room,
+     * it stays on the cursor.
      */
     protected static void placeOrDropCursorStack(AbstractContainerMenu menu, Minecraft client, Container inventory, int numSlots) {
         ItemStack cursorStack = menu.getCarried();
@@ -41,9 +41,6 @@ public class InventoryManagementHelper {
                 return;
             }
         }
-
-        // Drop the cursor stack, by clicking outside the menu:
-        client.gameMode.handleContainerInput(menu.containerId, AbstractContainerMenu.SLOT_CLICKED_OUTSIDE, 0, ContainerInput.PICKUP, client.player);
     }
 
     /**
