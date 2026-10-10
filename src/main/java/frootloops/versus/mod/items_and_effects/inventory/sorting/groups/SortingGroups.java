@@ -40,7 +40,7 @@ public class SortingGroups {
         this.combat = new ToolSortingGroup(lists.WEAPONS, lists.COMBAT_ITEMS, "GROUP: COMBAT");
         this.redstone = new SimpleSortingGroup(lists.REDSTONE_ITEMS, "GROUP: REDSTONE");
         this.goodies = new SimpleSortingGroup(lists.MISC_GOODIES, "GROUP: GOODIES");
-        this.containers = new SimpleSortingGroup(lists.MISC_GONTAINERS, "GROUP: CONTAINERS");
+        this.containers = new SimpleSortingGroup(lists.MISC_CONTAINERS, "GROUP: CONTAINERS");
         this.rareMinerals = new SimpleSortingGroup(lists.MINERAL_RESSOURCE_ITEMS, "GROUP: RARE MINERALS");
         this.commonMinerals = new SimpleSortingGroup(lists.MINERAL_RESSOURCE_COMMON_ITEMS, "GROUP: COMMON MINERALS");
         this.brewing = new SimpleSortingGroup(lists.MISC_BREWING, "GROUP: BREWING");

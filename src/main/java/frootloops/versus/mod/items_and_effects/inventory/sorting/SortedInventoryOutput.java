@@ -206,7 +206,7 @@ public class SortedInventoryOutput {
         if(numItemsNewBatch > 0) return false;
 
         // Skip to next row logic:
-        int numEmptySlotsLeftPerRow = (this.numEmptySlots - this.numSlotsSkipped)/Math.min(1, this.numRows - this.currentRow);
+        int numEmptySlotsLeftPerRow = (this.numEmptySlots - this.numSlotsSkipped)/Math.max(1, this.numRows - this.currentRow);
         return numEmptySlotsLeftPerRow >= (9 - numEmptySlotsInRow);
     }
 

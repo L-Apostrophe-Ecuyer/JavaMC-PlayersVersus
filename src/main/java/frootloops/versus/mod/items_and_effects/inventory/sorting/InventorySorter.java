@@ -214,6 +214,12 @@ public final class InventorySorter {
 
     private void insertItemIntoGroup(ItemSlot newSlot) {
 
+        // Containers sort together, before the pickaxe group takes shulker boxes as blocks:
+        if(newSlot.itemType() == ItemType.SHULKER_BOX || newSlot.itemType() == ItemType.BUNDLE || newSlot.itemType() == ItemType.ITEM_CONTAINER) {
+            groups.containers.addSlot(newSlot);
+            return;
+        }
+
         // Insert in the regular groups:
         for (SortingGroup group : groups.all()) {
             newSlot = group.tryInsertingSlot(newSlot);
@@ -421,8 +427,8 @@ public final class InventorySorter {
             if(hotbar.size() >= 9) return;
 
             if(groups.shears.getNumTools() > 0) {
-                this.giveExtraToolsFromAndTo(groups.shovels, hotbar);
-                if(tryCombiningTwoGroups(hotbar, groups.shovels)) return;
+                this.giveExtraToolsFromAndTo(groups.shears, hotbar);
+                if(tryCombiningTwoGroups(hotbar, groups.shears)) return;
             }
             if(hotbar.size() >= 9) return;
 

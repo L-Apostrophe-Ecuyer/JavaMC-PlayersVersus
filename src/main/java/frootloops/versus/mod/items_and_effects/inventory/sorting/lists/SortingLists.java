@@ -20,7 +20,7 @@ public class SortingLists {
     /** MISC - CONTAINERS ------------------------------------------------------------   */
     public final SortedTypedItemList SHULKER_BOXES = new SortedTypedItemList(new ItemType[]{ItemType.SHULKER_BOX});
     public final SortedTypedItemList BUNDLES = new SortedTypedItemList(new ItemType[]{ItemType.BUNDLE, ItemType.ITEM_CONTAINER});
-    public final SortedItemList[] MISC_GONTAINERS = {BUNDLES, SHULKER_BOXES};
+    public final SortedItemList[] MISC_CONTAINERS = {BUNDLES, SHULKER_BOXES};
 
 
     /** MINEABLE GOODIES ------------------------------------------------------------ */

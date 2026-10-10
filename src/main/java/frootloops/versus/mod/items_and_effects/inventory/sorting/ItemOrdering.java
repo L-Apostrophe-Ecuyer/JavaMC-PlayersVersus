@@ -82,12 +82,12 @@ public final class ItemOrdering {
             PotionContents potion = slot.stack().getComponents().getOrDefault(DataComponents.POTION_CONTENTS, null);
             if(potion == null || !potion.hasEffects()) return false;
             PotionContents otherPotion = slotToCompareTo.stack().getComponents().getOrDefault(DataComponents.POTION_CONTENTS, null);
-            if(otherPotion == null || !potion.hasEffects()) return true;
+            if(otherPotion == null || !otherPotion.hasEffects()) return true;
             return (potion.getColor() <= otherPotion.getColor());
         }
 
         // Blocks comparaison:
-        else if(slot.isBlock() && slot.stack().getItem() instanceof BlockItem blockItem && slot.stack().getItem() instanceof BlockItem otherBlockItem) {
+        else if(slot.isBlock() && slot.stack().getItem() instanceof BlockItem blockItem && slotToCompareTo.stack().getItem() instanceof BlockItem otherBlockItem) {
             if(skipBlocks) return false;
             if(blockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && blockItem.getBlock().defaultDestroyTime() >= 1.0f) {
                 if(otherBlockItem.getBlock().defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && otherBlockItem.getBlock().defaultDestroyTime() >= 1.0f) {

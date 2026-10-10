@@ -90,7 +90,7 @@ public class InventorySortingGameTest {
                 new ItemStack(Items.BUNDLE), new ItemStack(Items.DIRT, 64));
 
         int[] sorted = sort(helper, stacks, 3, false, false, false, false, "a chest");
-        assertConsecutive(helper, sorted, List.of(0, 2, 4, 7, 9), stacks, "the shulker boxes and bundles");
+        assertRowsHoldOnly(helper, sorted, List.of(0, 2, 4, 7, 9), stacks, "the shulker boxes and bundles");
         helper.succeed();
     }
 
@@ -129,6 +129,19 @@ public class InventorySortingGameTest {
         }
         if (sorted.isEmpty()) helper.fail(label + ": the sort gave up on " + TestInventories.describe(stacks));
         return sorted.get();
+    }
+
+    /** The rows that hold any of the given stacks hold nothing else. */
+    private static void assertRowsHoldOnly(GameTestHelper helper, int[] sorted, List<Integer> ids, List<ItemStack> stacks, String what) {
+        for (int row = 0; row < sorted.length / 9; row++) {
+            boolean holdsThem = false, holdsOthers = false;
+            for (int column = 0; column < 9; column++) {
+                int id = sorted[row * 9 + column];
+                if (ids.contains(id)) holdsThem = true;
+                else if (id >= 0) holdsOthers = true;
+            }
+            if (holdsThem && holdsOthers) helper.fail(what + " share row " + row + " with other stacks: " + Arrays.toString(sorted) + " for " + TestInventories.describe(stacks));
+        }
     }
 
     /** The given stacks sit next to each other, in one row, in any order. */
