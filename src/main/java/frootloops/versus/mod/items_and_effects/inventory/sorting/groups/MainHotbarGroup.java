@@ -70,6 +70,15 @@ public class MainHotbarGroup extends SortingGroup {
         return miscItems.size() > 0 && miscItems.containsItem(Items.END_CRYSTAL);
     }
 
+    /**
+     * Whether the hotbar holds a weapon or a tool to work with.
+     */
+    public boolean hasWeaponOrTool() {
+        if(this.mainWeaponSlot != null || this.extraWeaponSlot != null || this.pickaxeSlot != null || this.axeSlot != null) return true;
+        for(int i = 0; i < miscItems.size(); i++) if(miscItems.getSlot(i).isToolOrWeapon()) return true;
+        return false;
+    }
+
     public boolean hasPickaxe(){
         return (this.pickaxeSlot != null);
     }
@@ -375,12 +384,11 @@ public class MainHotbarGroup extends SortingGroup {
         List<ItemSlot> itemsToRemove = new ArrayList<>();
         boolean hasEnoughCombatItems = this.hasCombatItems();
         if(!hasEnoughCombatItems) {
+            // The main weapon stays: without food or a second weapon, it's still the one to hold.
             SortingDebug.log(() -> "              -> Hotbar: Not enough combat items!");
-            if(this.mainWeaponSlot != null) itemsToRemove.add(this.mainWeaponSlot);
             if(this.extraWeaponSlot != null) itemsToRemove.add(this.extraWeaponSlot);
             if(this.potionSlot != null) itemsToRemove.add(this.potionSlot);
             if(this.clutchItem != null) itemsToRemove.add(this.clutchItem);
-            this.mainWeaponSlot = null;
             this.extraWeaponSlot = null;
             this.potionSlot = null;
             this.clutchItem = null;

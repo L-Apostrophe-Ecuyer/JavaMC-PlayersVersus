@@ -76,6 +76,7 @@ public final class InventorySorter {
         if(isPlayerInventory) {
             this.cleanUpHotbar();
             for (ItemSlot slot : hotbar.keepOnlyEssentials()) this.insertItemIntoGroup(slot);
+            this.avoidAWeakHotbar();
             this.printGroups("[ INVENTORY SORTING ] ---- AFTER HOTBAR CLEAN UP -----\n");
         }
         this.cleanUpGroups();
@@ -374,7 +375,7 @@ public final class InventorySorter {
                 hotbar.addSlot(groups.axes.takeBestTool());
                 if(tryCombiningTwoGroups(hotbar, groups.axes)) return;
             }
-            else if(groups.axes.canGiveawayTools()) hotbar.addSlot(groups.axes.takeBestTool());
+            else if(groups.axes.canGiveawayTools() || groups.axes.size() % 9 != 0) hotbar.addSlot(groups.axes.takeBestTool());
         }
         if(hotbar.size() >= 9) return;
 
@@ -387,6 +388,8 @@ public final class InventorySorter {
             }
             else if(groups.pickaxes.canGiveawayTools()) hotbar.addSlot(groups.pickaxes.takeBestTool());
             else if(groups.pickaxes.size() + hotbar.size() < 9 && (hotbar.hasCombatItems() || groups.combat.size() == 0)) hotbar.mergeWithOtherGroup(groups.pickaxes);
+            // A lone pickaxe joins the hotbar, unless it and its blocks make whole rows, which hotbar cycling swaps in:
+            else if(groups.pickaxes.size() % 9 != 0) hotbar.addSlot(groups.pickaxes.takeBestTool());
         }
         if(hotbar.size() >= 9) return;
 
@@ -477,6 +480,30 @@ public final class InventorySorter {
             hotbar.addSlots(groups.consumables.takeFirstSlots(numConsumablesToGive, true));
         }
         SortingDebug.log(hotbar::toString);
+    }
+
+    /**
+     * A hotbar with no weapon and no tool takes the best whole tool row instead, and its items go back to their
+     * groups. Without a whole tool row, the best tool of the first tool group that has one joins the hotbar.
+     */
+    private void avoidAWeakHotbar() {
+        if(hotbar.hasWeaponOrTool()) return;
+        List<ToolSortingGroup> toolGroups = List.of(groups.pickaxes, groups.axes, groups.shovels, groups.hoes, groups.shears);
+        for(ToolSortingGroup group : toolGroups) {
+            if(group.getNumTools() > 0 && group.size() == 9) {
+                SortingDebug.log(() -> "              -> Hotbar: No weapon or tool, taking " + group.GROUP_NAME + "'s row instead");
+                List<ItemSlot> toolRow = group.takeAllItems();
+                for(ItemSlot slot : hotbar.takeAllItems()) this.insertItemIntoGroup(slot);
+                hotbar.addSlots(toolRow);
+                return;
+            }
+        }
+        for(ToolSortingGroup group : toolGroups) {
+            if(group.getNumTools() > 0) {
+                hotbar.addSlot(group.takeBestTool());
+                return;
+            }
+        }
     }
 
     private void cleanUpMisc() {
