@@ -30,11 +30,6 @@ public class InventorySortingGameTest {
         helper.succeed();
     }
 
-    @GameTest
-    public void harnessFailsLoudly(GameTestHelper helper) {
-        helper.fail("harness check");
-    }
-
     private static void assertEveryStackOnce(GameTestHelper helper, int[] sorted, int numStacks) {
         int[] timesLaid = new int[numStacks];
         for (int id : sorted) if (id >= 0) timesLaid[id]++;

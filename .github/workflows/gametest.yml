@@ -21,6 +21,9 @@ jobs:
         run: chmod +x ./gradlew
       - name: run the game tests
         run: ./gradlew runGameTest -Ppv.acceptEula=true
+      - name: print the game test report
+        if: ${{ always() }}
+        run: cat build/run/gameTest/report.xml || true
       - name: upload the game test log and report
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
