@@ -1,11 +1,48 @@
-# What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Pale zombie: which model layer the skeleton renderers bake, and with which textures, so the pale zombie's skeleton
-# (ModelLayers.SKELETON under the drowned's outer layer) gets the layout its 64x32 texture is drawn for.
-net.minecraft.client.renderer.entity.SkeletonRenderer
-net.minecraft.client.renderer.entity.WitherSkeletonRenderer
-net.minecraft.client.renderer.entity.AbstractSkeletonRenderer
-net.minecraft.client.model.geom.builders.LayerDefinition
-uses createSingleModelDualBodyLayer
-# The pale mobs' spawn rules and the warden's bats: whether these names exist in 26.3.
-uses getEffectiveSkyBrightness
-find ambient/Bat
+# What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
+# of line. 26.4-snapshot-3's ice caves, frostbite, freezing and ice balls, its slimes and leaves: for replacing the frosted
+# zombie and caves with vanilla's, the Ice Cube, the freezing concentrate and the leaves' rustling.
+find frostbite
+find freez
+find icicle
+find iceball
+find ice_ball
+find icecrystal
+find soundset
+find SoundType
+findsig frostbite
+findsig freezing
+findsig iceball
+findsig cubemob
+findsig SlimeRenderer
+findsig SlimeModel
+findsig SlimeOuterLayer
+findsig SlimeRenderState
+findsig LeavesBlock
+findcalls frostbite
+findcalls freezing
+findcalls cubemob/Slime
+member net.minecraft.world.effect.MobEffects FREEZ
+member net.minecraft.world.item.alchemy.Potions FREEZ|FIRE
+member net.minecraft.world.level.biome.Biomes ICE|FROZEN
+member net.minecraft.world.entity.EntityTypes FROST|SLIME|MAGMA|SULFUR
+member net.minecraft.world.item.Items ICE|FROST|SNOWBALL|SLIME_SPAWN
+member net.minecraft.world.level.block.Blocks ICICLE|CRYSTAL|_ICE
+member net.minecraft.tags.BiomeTags ICE|FROZEN|SNOW|COLD
+member net.minecraft.tags.EntityTypeTags FREEZ|ZOMBIE
+member net.minecraft.tags.BlockTags LEAVES|PATHFINDING
+member net.minecraft.core.particles.ParticleTypes LEAVES|FREEZ|SNOW|ITEM_
+member net.minecraft.sounds.SoundEvents LEAVES|LEAF_LITTER|AZALEA|GRASS_STEP|FROSTBITE|ICE_BALL|FREEZ
+member net.minecraft.client.model.geom.ModelLayers SLIME|FROSTBITE
+member net.minecraft.world.level.Level LeafTint|playLocalSound|addParticle
+member net.minecraft.client.multiplayer.ClientLevel LeafTint|playLocalSound|addParticle
+sig net.minecraft.util.ParticleUtils
+sig net.minecraft.world.level.block.SoundType
+assets textures/entity/slime
+assets textures/entity/zombie
+assets particles
+asset textures/entity/slime/slime.png
+asset textures/item/slime_spawn_egg.png
+data worldgen/biome/ice_caves.json
+data loot_table/entities/frostbite.json
+data loot_table/entities/slime.json
+data tags/entity_type/freeze_immune_entity_types.json

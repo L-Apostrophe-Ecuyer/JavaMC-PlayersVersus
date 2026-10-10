@@ -1,0 +1,175 @@
+# API diff for a port between two Minecraft versions: compares the client jars of OLD and NEW (unobfuscated since 26.1,
+# so these are Mojang's names) and prints into each job's log what changed for this mod. No code is printed: member
+# signatures, call summaries (api-calls.py) and the game's own data and asset files.
+# - classes: the classes, data files and asset files added and removed, and the data and asset files changed.
+# - mixins: what each method of the mixin targets (.github/api-calls.txt) calls, reads, writes and loads, OLD against NEW.
+#   An @Overwrite whose target's summary changed drops new vanilla behaviour without any error.
+# - signatures: the members (javap -p) of the classes the mod imports (.github/api-probe.txt), OLD against NEW.
+# - overrides: every vanilla file the mod replaces (src/main/resources/{data,assets}/minecraft), OLD against NEW: a
+#   changed one hides NEW's changes until it is merged.
+# - focus: what .github/api-focus.txt asks for, from NEW (see api-probe.yml for the kinds of line; here also
+#   "findsig <text>" and "findcalls <text>": the signatures or call summaries of the classes whose names contain the
+#   text, "member <class> <text>" a class's members containing the text, and "data <path>" a file under data/minecraft).
+#
+# Push a commit whose message contains [api-diff].
+
+name: api-diff
+on:
+  push:
+
+env:
+  OLD: "26.3"
+  NEW: "26.4-snapshot-3"
+  FABRIC_API: "0.162.2+26.4"
+
+jobs:
+  classes:
+    if: contains(github.event.head_commit.message, '[api-diff]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: download both client jars
+        run: bash .github/fetch-client.sh "$OLD" old && bash .github/fetch-client.sh "$NEW" new
+      - name: classes, data and assets
+        run: |
+          for v in old new; do
+            unzip -Z1 $v/client.jar | grep '\.class$' | sed 's/\.class$//' | grep -v '\$[0-9]' | sort > $v/classes.txt
+            unzip -Z1 $v/client.jar | grep -E '^(data|assets)/' | grep -v '/$' | sort > $v/files.txt
+            mkdir -p $v/jar && unzip -q -o $v/client.jar 'data/*' 'assets/*' -d $v/jar
+          done
+          wc -l old/classes.txt new/classes.txt old/files.txt new/files.txt
+          echo "-----BEGIN CLASSES-----"
+          echo "== classes only in $OLD"; comm -23 old/classes.txt new/classes.txt
+          echo "== classes only in $NEW"; comm -13 old/classes.txt new/classes.txt
+          echo "== files only in $OLD"; comm -23 old/files.txt new/files.txt
+          echo "== files only in $NEW"; comm -13 old/files.txt new/files.txt
+          echo "== files changed (structures and textures by name only)"
+          comm -12 old/files.txt new/files.txt | while read -r f; do cmp -s "old/jar/$f" "new/jar/$f" || echo "$f"; done
+          echo "-----END CLASSES-----"
+
+  mixins:
+    if: contains(github.event.head_commit.message, '[api-diff]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: 25
+          distribution: 'microsoft'
+      - name: download both client jars
+        run: bash .github/fetch-client.sh "$OLD" old && bash .github/fetch-client.sh "$NEW" new
+      - name: what the mixin targets' methods call, OLD against NEW
+        run: |
+          for v in old new; do
+            grep -v '^\s*#' .github/api-calls.txt | grep -v '^\s*$' | xargs -n 100 javap -c -p -cp $v/client.jar > $v/calls-raw.txt 2>&1 || true
+            # Lambdas are numbered by order in the class: drop the numbers so a new lambda doesn't renumber the rest.
+            python3 .github/api-calls.py $v/calls-raw.txt | sed -E 's/lambda\$([A-Za-z0-9_]+)\$[0-9]+/lambda$\1$N/g' > $v/calls.txt
+          done
+          wc -l old/calls.txt new/calls.txt
+          echo "-----BEGIN MIXINS-----"
+          grep -h 'class not found' old/calls-raw.txt new/calls-raw.txt | sort | uniq -c || true
+          diff -U2 old/calls.txt new/calls.txt || true
+          echo "-----END MIXINS-----"
+
+  signatures:
+    if: contains(github.event.head_commit.message, '[api-diff]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: 25
+          distribution: 'microsoft'
+      - name: download both client jars
+        run: bash .github/fetch-client.sh "$OLD" old && bash .github/fetch-client.sh "$NEW" new
+      - name: members of the classes the mod imports, OLD against NEW
+        run: |
+          for v in old new; do
+            grep -v '^\s*#' .github/api-probe.txt | grep -v '^\s*$' | grep '^net\.minecraft\.' | xargs -n 200 javap -p -cp $v/client.jar 2>&1 \
+              | grep -v '^Compiled from' > $v/members.txt || true
+          done
+          wc -l old/members.txt new/members.txt
+          echo "-----BEGIN SIGNATURES-----"
+          diff -U1 old/members.txt new/members.txt || true
+          echo "-----END SIGNATURES-----"
+
+  overrides:
+    if: contains(github.event.head_commit.message, '[api-diff]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: download both client jars
+        run: bash .github/fetch-client.sh "$OLD" old && bash .github/fetch-client.sh "$NEW" new
+      - name: the vanilla files the mod replaces, OLD against NEW
+        run: |
+          for v in old new; do mkdir -p $v/jar && unzip -q -o $v/client.jar 'data/*' 'assets/*' -d $v/jar; done
+          echo "-----BEGIN OVERRIDES-----"
+          git ls-files 'src/main/resources/data/minecraft/*' 'src/main/resources/assets/minecraft/*' | sed 's|^src/main/resources/||' | sort | while read -r f; do
+            if [ ! -f "old/jar/$f" ] && [ ! -f "new/jar/$f" ]; then continue; fi
+            if [ ! -f "new/jar/$f" ]; then echo "== $f: gone in $NEW"; continue; fi
+            if [ ! -f "old/jar/$f" ]; then echo "== $f: new in $NEW"; continue; fi
+            cmp -s "old/jar/$f" "new/jar/$f" && continue
+            case "$f" in
+              *.json|*.mcmeta|*.txt) echo "== $f"; diff -U1 "old/jar/$f" "new/jar/$f" | tail -n +3 | head -120 ;;
+              *) echo "== $f: changed (binary)" ;;
+            esac
+          done
+          echo "-----END OVERRIDES-----"
+
+  focus:
+    if: contains(github.event.head_commit.message, '[api-diff]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: 25
+          distribution: 'microsoft'
+      - name: download the new client jar, its libraries and Fabric API
+        run: |
+          bash .github/fetch-client.sh "$NEW" new libraries
+          curl -fsSL "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FABRIC_API/fabric-api-$FABRIC_API.jar" -o new/fabric-api.jar
+          mkdir -p new/fabric && (cd new/fabric && unzip -q -o ../fabric-api.jar 'META-INF/jars/*' || true)
+          unzip -Z1 new/client.jar | grep '\.class$' | sed 's/\.class$//' | sort > new/classes.txt
+          for jar in new/fabric/META-INF/jars/*.jar; do unzip -Z1 "$jar" | grep '\.class$' | sed "s|\.class$| $(basename "$jar")|"; done | sort > new/fabric-classes.txt
+          mkdir -p new/jar && unzip -q -o new/client.jar -d new/jar
+      - name: a few classes and files of NEW
+        run: |
+          cp="new/client.jar:$(ls new/libs/*.jar | tr '\n' ':')$(ls new/fabric/META-INF/jars/*.jar | tr '\n' ':')"
+          focus() { grep "^$1 " .github/api-focus.txt | cut -d' ' -f2- || true; }
+          # Classes (binary names) whose simple or package name contains the text, without anonymous classes.
+          matching() { grep -i -F -- "$1" new/classes.txt | grep -v '\$[0-9]' | sed 's|/|.|g'; }
+          classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|sig|member|uses|assets|asset|data) ' .github/api-focus.txt || true)
+          echo "-----BEGIN FOCUS-----"
+          focus find | while read -r text; do echo "== find $text"; grep -i -F -- "$text" new/classes.txt new/fabric-classes.txt || true; done
+          focus findsig | while read -r text; do echo "== findsig $text"; m=$(matching "$text"); [ -n "$m" ] && javap -p -constants -cp "$cp" $m 2>&1 | grep -v '^Compiled from'; done
+          focus findcalls | while read -r text; do
+            echo "== findcalls $text"; m=$(matching "$text")
+            if [ -n "$m" ]; then javap -c -p -cp "$cp" $m > new/findcalls-raw.txt 2>&1 || true; python3 .github/api-calls.py new/findcalls-raw.txt; fi
+          done
+          focus member | while read -r cls text; do echo "== member $cls $text"; javap -p -constants -cp "$cp" "$cls" 2>&1 | grep -i -E -- "$text" || true; done
+          focus uses | while read -r name; do echo "== uses $name"; (cd new/jar && grep -rlF --include='*.class' -- "$name" . | sed 's|^\./||; s|\.class$||' | sort) || true; done
+          focus assets | while read -r dir; do echo "== assets $dir"; (cd new/jar/assets/minecraft && find "$dir" -type f | sort) || true; done
+          focus asset | while read -r path; do echo "== asset $path"; base64 -w 0 "new/jar/assets/minecraft/$path" && echo || echo "missing"; done
+          focus data | while read -r path; do echo "== data $path"; cat "new/jar/data/minecraft/$path" 2>/dev/null && echo || echo "missing"; done
+          sigs=$(focus sig)
+          if [ -n "$sigs" ]; then javap -p -constants -cp "$cp" $sigs 2>&1 | grep -v '^Compiled from' || true; fi
+          if [ -n "$classes" ]; then
+            javap -p -cp "$cp" $classes 2>&1 | grep -v '^Compiled from' || true
+            javap -c -p -cp "$cp" $classes > new/focus-raw.txt 2>&1 || true
+            python3 .github/api-calls.py new/focus-raw.txt
+          fi
+          echo "-----END FOCUS-----"
