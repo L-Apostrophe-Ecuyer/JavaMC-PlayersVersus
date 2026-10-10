@@ -1,12 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "redstone",
   "group": "warped_misc",
   "key": {
     "#": "minecraft:warped_planks"
   },
   "pattern": [
-    "##", "##", "##"
+    "##",
+    "##",
+    "##"
   ],
   "result": {
     "count": 2,

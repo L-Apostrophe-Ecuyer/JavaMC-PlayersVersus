@@ -8,11 +8,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:dirt_path"
+            "block": "minecraft:dirt_path",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "players-versus:brown_mud"
+            "id": "players-versus:brown_mud"
           }
         },
         {
@@ -20,11 +20,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:lava"
+            "block": "minecraft:lava",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:obsidian"
+            "id": "minecraft:obsidian"
           }
         },
         {
@@ -32,12 +32,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:gravel",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:coarse_dirt"
+            "id": "minecraft:coarse_dirt"
           }
         },
         {
@@ -45,13 +45,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:gravel",
-            "probability": 0.3
+            "probability": 0.3,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:suspicious_gravel",
-            "Properties": {
+            "id": "minecraft:suspicious_gravel",
+            "properties": {
               "dusted": "0"
             }
           },
@@ -65,12 +65,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:cobblestone",
-            "probability": 0.6
+            "probability": 0.6,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:mossy_cobblestone"
+            "id": "minecraft:mossy_cobblestone"
           }
         },
         {
@@ -78,12 +78,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:mossy_cobblestone",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:moss_block"
+            "id": "minecraft:moss_block"
           }
         },
         {
@@ -91,12 +91,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:hay_block",
-            "probability": 0.3
+            "probability": 0.3,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:moss_block"
+            "id": "minecraft:moss_block"
           }
         },
         {
@@ -104,11 +104,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:hay_block"
+            "block": "minecraft:hay_block",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:mossy_cobblestone"
+            "id": "minecraft:mossy_cobblestone"
           }
         },
         {
@@ -116,11 +116,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:tag_match",
-            "tag": "minecraft:wool"
+            "tag": "minecraft:wool",
+            "predicate_type": "minecraft:tag_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -128,11 +128,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:tag_match",
-            "tag": "minecraft:beds"
+            "tag": "minecraft:beds",
+            "predicate_type": "minecraft:tag_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -140,11 +140,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:torch"
+            "block": "minecraft:torch",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -152,11 +152,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:wall_torch"
+            "block": "minecraft:wall_torch",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -164,12 +164,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:cobblestone",
-            "probability": 0.1
+            "probability": 0.1,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:stone"
+            "id": "minecraft:stone"
           }
         },
         {
@@ -177,12 +177,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:mossy_cobblestone",
-            "probability": 0.07
+            "probability": 0.07,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -190,12 +190,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:white_terracotta",
-            "probability": 0.05
+            "probability": 0.05,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
@@ -203,12 +203,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:white_terracotta",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:rooted_dirt"
+            "id": "minecraft:rooted_dirt"
           }
         },
         {
@@ -216,12 +216,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:oak_log",
-            "probability": 0.15
+            "probability": 0.15,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:stripped_oak_wood"
+            "id": "minecraft:stripped_oak_wood"
           }
         },
         {
@@ -229,12 +229,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:oak_planks",
-            "probability": 0.025
+            "probability": 0.025,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
@@ -242,12 +242,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:cobweb",
-            "probability": 0.05
+            "probability": 0.05,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -255,12 +255,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:oak_planks",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:dirt"
+            "id": "minecraft:dirt"
           }
         },
         {
@@ -268,12 +268,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:glass_pane",
-            "probability": 0.3
+            "probability": 0.3,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
@@ -281,12 +281,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:glass_pane",
-            "probability": 0.5
+            "probability": 0.5,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -294,21 +294,21 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:blockstate_match",
             "block_state": {
-              "Name": "minecraft:glass_pane",
-              "Properties": {
+              "id": "minecraft:glass_pane",
+              "properties": {
                 "east": "false",
                 "north": "true",
                 "south": "true",
                 "waterlogged": "false",
                 "west": "false"
               }
-            }
+            },
+            "predicate_type": "minecraft:blockstate_match"
           },
           "output_state": {
-            "Name": "minecraft:brown_stained_glass_pane",
-            "Properties": {
+            "id": "minecraft:brown_stained_glass_pane",
+            "properties": {
               "east": "false",
               "north": "true",
               "south": "true",
@@ -322,21 +322,21 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:blockstate_match",
             "block_state": {
-              "Name": "minecraft:glass_pane",
-              "Properties": {
+              "id": "minecraft:glass_pane",
+              "properties": {
                 "east": "true",
                 "north": "false",
                 "south": "false",
                 "waterlogged": "false",
                 "west": "true"
               }
-            }
+            },
+            "predicate_type": "minecraft:blockstate_match"
           },
           "output_state": {
-            "Name": "minecraft:brown_stained_glass_pane",
-            "Properties": {
+            "id": "minecraft:brown_stained_glass_pane",
+            "properties": {
               "east": "true",
               "north": "false",
               "south": "false",
@@ -350,13 +350,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:wheat",
-            "probability": 0.3
+            "probability": 0.3,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:carrots",
-            "Properties": {
+            "id": "minecraft:carrots",
+            "properties": {
               "age": "0"
             }
           }
@@ -366,13 +366,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:wheat",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:potatoes",
-            "Properties": {
+            "id": "minecraft:potatoes",
+            "properties": {
               "age": "0"
             }
           }
@@ -382,12 +382,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:wheat",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:dead_bush"
+            "id": "minecraft:dead_bush"
           }
         },
         {
@@ -395,12 +395,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:wheat",
-            "probability": 0.8
+            "probability": 0.8,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:short_grass"
+            "id": "minecraft:short_grass"
           }
         }
       ]

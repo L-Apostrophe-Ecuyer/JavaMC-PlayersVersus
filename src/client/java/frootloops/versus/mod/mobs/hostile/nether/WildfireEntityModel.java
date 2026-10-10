@@ -3,11 +3,11 @@ package frootloops.versus.mod.mobs.hostile.nether;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.entity.model.BlazeEntityModel;
+import net.minecraft.client.model.monster.blaze.BlazeModel;
+import net.minecraft.client.model.geom.ModelPart;
 
 @Environment(EnvType.CLIENT)
-public class WildfireEntityModel extends BlazeEntityModel {
+public class WildfireEntityModel extends BlazeModel {
 
     public WildfireEntityModel(ModelPart modelPart) {
         super(modelPart);

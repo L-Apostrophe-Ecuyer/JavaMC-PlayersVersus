@@ -1,29 +1,29 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.phys.Vec3;
 
 public class CreeperIgniteThroughBlocksGoal extends Goal {
-    private final CreeperEntity creeper;
+    private final Creeper creeper;
     @Nullable
     private LivingEntity target;
 
-    public CreeperIgniteThroughBlocksGoal(CreeperEntity creeper) {
+    public CreeperIgniteThroughBlocksGoal(Creeper creeper) {
         this.creeper = creeper;
-        this.setControls(EnumSet.of(Goal.Control.MOVE));
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
     @Override
-    public boolean canStart() {
+    public boolean canUse() {
         LivingEntity creeperTarget = this.creeper.getTarget();
 
         //Always continue when already exploding, but never when no target
-        if (this.creeper.getFuseSpeed() > 0)  return true;
+        if (this.creeper.getSwellDir() > 0)  return true;
         if (this.creeper.getTarget() == null) return false;
 
         //If method thinks creeper can start exploding, check if the player can see it
@@ -32,11 +32,11 @@ public class CreeperIgniteThroughBlocksGoal extends Goal {
         }
 
         //If method thinks creeper can't start exploding, check if the creeper can try breaching
-        if (this.creeper.age > 60 && !this.creeper.isNavigating() && this.creeper.squaredDistanceTo(creeperTarget) < 49) {
+        if (this.creeper.tickCount > 60 && !this.creeper.isPathFinding() && this.creeper.distanceToSqr(creeperTarget) < 49) {
             return true;
         }
 
-        return this.creeper.squaredDistanceTo(creeperTarget) < 9.0;
+        return this.creeper.distanceToSqr(creeperTarget) < 9.0;
     }
 
     @Override
@@ -51,37 +51,37 @@ public class CreeperIgniteThroughBlocksGoal extends Goal {
     }
 
     @Override
-    public boolean shouldRunEveryTick() {
+    public boolean requiresUpdateEveryTick() {
         return true;
     }
 
     @Override
     public void tick() {
         if (this.target == null) {
-            this.creeper.setFuseSpeed(-1);
+            this.creeper.setSwellDir(-1);
             return;
         }
-        if (this.creeper.squaredDistanceTo(this.target) > 49.0) {
-            this.creeper.setFuseSpeed(-1);
+        if (this.creeper.distanceToSqr(this.target) > 49.0) {
+            this.creeper.setSwellDir(-1);
             return;
         }
-        if(this.creeper.age > 60 && !this.creeper.isNavigating()) {
-            this.creeper.setFuseSpeed(1);
+        if(this.creeper.tickCount > 60 && !this.creeper.isPathFinding()) {
+            this.creeper.setSwellDir(1);
             return;
         }
-        if (!this.creeper.getVisibilityCache().canSee(this.target)) {
-            this.creeper.setFuseSpeed(-1);
+        if (!this.creeper.getSensing().hasLineOfSight(this.target)) {
+            this.creeper.setSwellDir(-1);
             return;
         }
-        this.creeper.setFuseSpeed(1);
+        this.creeper.setSwellDir(1);
     }
 
-    public static boolean canSee(LivingEntity seer, CreeperEntity peeper) {
-        Vec3d peeperPos = peeper.getEntityPos();
-        Vec3d vecLook = seer.getRotationVector();
-        Vec3d subtractedReverse = peeperPos.relativize(seer.getEntityPos()).normalize();
-        subtractedReverse = new Vec3d(subtractedReverse.x, 0, subtractedReverse.z);
-        double dot = subtractedReverse.dotProduct(vecLook);
+    public static boolean canSee(LivingEntity seer, Creeper peeper) {
+        Vec3 peeperPos = peeper.position();
+        Vec3 vecLook = seer.getLookAngle();
+        Vec3 subtractedReverse = peeperPos.vectorTo(seer.position()).normalize();
+        subtractedReverse = new Vec3(subtractedReverse.x, 0, subtractedReverse.z);
+        double dot = subtractedReverse.dot(vecLook);
         return dot < 0.0;
     }
 }

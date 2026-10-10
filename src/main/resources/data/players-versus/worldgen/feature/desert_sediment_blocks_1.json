@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:ore",
+  "size": 18,
+  "discard_chance_on_air_exposure": 0.1,
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:sandstone",
+        "predicate_type": "minecraft:block_match"
+      },
+      "state": {
+        "id": "minecraft:terracotta"
+      }
+    },
+    {
+      "target": {
+        "block_state": {
+          "id": "minecraft:sand"
+        },
+        "predicate_type": "minecraft:blockstate_match"
+      },
+      "state": {
+        "id": "players-versus:brown_clay"
+      }
+    }
+  ]
+}

@@ -4,7 +4,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:dark_oak_chest_boat"
+        "recipes": "minecraft:dark_oak_chest_boat"
       }
     },
     "has_chest": {
@@ -20,7 +20,7 @@
     "has_the_boat_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:dark_oak_boat"
+        "recipes": "minecraft:dark_oak_boat"
       }
     }
   },
@@ -40,6 +40,3 @@
     ]
   }
 }
-
-
-

@@ -1,18 +1,19 @@
 package frootloops.versus.mixin.client.players;
 
 import frootloops.versus.VersusMod;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(targets = "net.minecraft.client.gui.screen.DebugOptionsScreen$OptionsListWidget")
+@Mixin(targets = "net.minecraft.client.gui.screens.debug.DebugOptionsScreen$OptionList")
 public class DebugOptionsScreenMixin {
 
-    @Redirect(method = "fillEntries", at = @At(value = "INVOKE", target = "Ljava/lang/String;contains(Ljava/lang/CharSequence;)Z"))
+    @Redirect(method = "updateSearch", at = @At(value = "INVOKE", target = "Ljava/lang/String;contains(Ljava/lang/CharSequence;)Z"))
     private boolean redirectContains(String pathString, CharSequence searchString) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        boolean shouldRestrictDebug = !client.canSwitchGameMode() || (client.player.getGameMode() != null && client.player.getGameMode().isSurvivalLike() && !client.player.hasPermissionLevel(2));
+        Minecraft client = Minecraft.getInstance();
+        boolean shouldRestrictDebug = !client.canSwitchGameMode() || (client.player.gameMode() != null && client.player.gameMode().isSurvival() && !client.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
         if(shouldRestrictDebug) {
             switch (pathString) {
                 case "biome":

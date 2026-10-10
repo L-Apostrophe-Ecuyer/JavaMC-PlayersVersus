@@ -5,14 +5,14 @@
       "rules": [
         {
           "input_predicate": {
-            "predicate_type": "minecraft:tag_match",
-            "tag": "minecraft:doors"
+            "tag": "minecraft:doors",
+            "predicate_type": "minecraft:tag_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -24,7 +24,7 @@
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -36,118 +36,118 @@
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
           "input_predicate": {
             "block": "minecraft:acacia_planks",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
           "input_predicate": {
             "block": "minecraft:acacia_stairs",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
           "input_predicate": {
             "block": "minecraft:acacia_log",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.05
+            "probability": 0.05,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
           "input_predicate": {
             "block": "minecraft:acacia_wood",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.05
+            "probability": 0.05,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
           "input_predicate": {
             "block": "minecraft:orange_terracotta",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.05
+            "probability": 0.05,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
           "input_predicate": {
             "block": "minecraft:yellow_terracotta",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.05
+            "probability": 0.05,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
           "input_predicate": {
             "block": "minecraft:red_terracotta",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.05
+            "probability": 0.05,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
           "input_predicate": {
             "block": "minecraft:glass_pane",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.5
+            "probability": 0.5,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:cobweb"
+            "id": "minecraft:cobweb"
           }
         },
         {
           "input_predicate": {
             "block_state": {
-              "Name": "minecraft:glass_pane",
-              "Properties": {
+              "id": "minecraft:glass_pane",
+              "properties": {
                 "east": "false",
                 "north": "true",
                 "south": "true",
@@ -161,8 +161,8 @@
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:brown_stained_glass_pane",
-            "Properties": {
+            "id": "minecraft:brown_stained_glass_pane",
+            "properties": {
               "east": "false",
               "north": "true",
               "south": "true",
@@ -174,8 +174,8 @@
         {
           "input_predicate": {
             "block_state": {
-              "Name": "minecraft:glass_pane",
-              "Properties": {
+              "id": "minecraft:glass_pane",
+              "properties": {
                 "east": "true",
                 "north": "false",
                 "south": "false",
@@ -189,8 +189,8 @@
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:brown_stained_glass_pane",
-            "Properties": {
+            "id": "minecraft:brown_stained_glass_pane",
+            "properties": {
               "east": "true",
               "north": "false",
               "south": "false",
@@ -202,15 +202,15 @@
         {
           "input_predicate": {
             "block": "minecraft:wheat",
-            "predicate_type": "minecraft:random_block_match",
-            "probability": 0.1
+            "probability": 0.1,
+            "predicate_type": "minecraft:random_block_match"
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:melon_stem",
-            "Properties": {
+            "id": "minecraft:melon_stem",
+            "properties": {
               "age": "0"
             }
           }

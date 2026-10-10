@@ -3,119 +3,12 @@
   "downfall": 0.4,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 7115733,
-    "fog_color": 9018813,
-    "water_color": 5538249,
-    "water_fog_color": 724535,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 3000,
-      "block_search_extent": 8,
-      "offset": 2
-    },
-    "music": [
-      {
-        "data": {
-          "max_delay": 18000,
-          "min_delay": 10000,
-          "replace_current_music": false,
-          "sound": "minecraft:music.overworld.dripstone_caves"
-        },
-        "weight": 3
-      },
-      {
-        "data": {
-          "max_delay": 18000,
-          "min_delay": 10000,
-          "replace_current_music": false,
-          "sound": "players-versus:music.overworld.deep_caves"
-        },
-        "weight": 1
-      }
-    ]
-  },
-  "spawners": {
-    "ambient": [],
-    "axolotls": [],
-    "creature": [],
-    "misc": [],
-    "monster": [
-      {
-        "type": "minecraft:spider",
-        "weight": 100,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:zombie",
-        "weight": 95,
-        "minCount": 2,
-        "maxCount": 2
-      },
-      {
-        "type": "minecraft:skeleton",
-        "weight": 80,
-        "minCount": 2,
-        "maxCount": 2
-      },
-      {
-        "type": "minecraft:creeper",
-        "weight": 70,
-        "minCount": 2,
-        "maxCount": 2
-      },
-      {
-        "type": "minecraft:slime",
-        "weight": 100,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:enderman",
-        "weight": 20,
-        "minCount": 1,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:drowned",
-        "weight": 55,
-        "minCount": 4,
-        "maxCount": 4
-      },
-      {
-        "type": "players-versus:deeper_creeper",
-        "weight": 20,
-        "minCount": 1,
-        "maxCount": 1
-      },
-      {
-        "type": "players-versus:withered_zombie",
-        "weight": 10,
-        "minCount": 2,
-        "maxCount": 4
-      }
-    ],
-    "underground_water_creature": [
-      {
-        "type": "minecraft:glow_squid",
-        "weight": 10,
-        "minCount": 4,
-        "maxCount": 6
-      }
-    ],
-    "water_ambient": [],
-    "water_creature": []
-  },
-  "spawn_costs": {
-    "minecraft:zombie": {
-      "energy_budget": 0.12,
-      "charge": 0.6
-    }
+    "water_color": "#5481c9"
   },
   "carvers": [
-    "minecraft:cave",
-    "minecraft:cave_extra_underground",
-    "minecraft:canyon"
+    "players-versus:cave",
+    "players-versus:cave_extra_underground",
+    "players-versus:canyon"
   ],
   "features": [
     [],
@@ -177,5 +70,111 @@
     [
       "minecraft:freeze_top_layer"
     ]
-  ]
+  ],
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [
+            {
+              "type": "minecraft:spider",
+              "weight": 100,
+              "count": 4
+            },
+            {
+              "type": "minecraft:zombie",
+              "weight": 95,
+              "count": 2
+            },
+            {
+              "type": "minecraft:skeleton",
+              "weight": 80,
+              "count": 2
+            },
+            {
+              "type": "minecraft:creeper",
+              "weight": 70,
+              "count": 2
+            },
+            {
+              "type": "minecraft:slime",
+              "weight": 100,
+              "count": 4
+            },
+            {
+              "type": "minecraft:enderman",
+              "weight": 20,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 1,
+                "max_inclusive": 4
+              }
+            },
+            {
+              "type": "minecraft:drowned",
+              "weight": 55,
+              "count": 4
+            },
+            {
+              "type": "players-versus:pale_creeper",
+              "weight": 20,
+              "count": 1
+            },
+            {
+              "type": "players-versus:pale_zombie",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 2,
+                "max_inclusive": 4
+              }
+            }
+          ],
+          "underground_water_creature": [
+            {
+              "type": "minecraft:glow_squid",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 4,
+                "max_inclusive": 6
+              }
+            }
+          ],
+          "water_ambient": [],
+          "water_creature": []
+        },
+        "spawn_costs": {
+          "minecraft:zombie": {
+            "energy_budget": 0.12,
+            "charge": 0.6
+          }
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/sky_color": "#6c93d5",
+    "minecraft:visual/fog_color": "#899dbd",
+    "minecraft:visual/water_fog_color": "#0b0e37",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 3000,
+        "block_search_extent": 8,
+        "offset": 2
+      }
+    },
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 18000,
+        "min_delay": 10000,
+        "replace_current_music": false,
+        "sound": "minecraft:music.overworld.dripstone_caves"
+      }
+    }
+  }
 }

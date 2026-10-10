@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "copper_tools",
+  "key": {
+    "#": "minecraft:stick",
+    "X": "minecraft:copper_ingot"
+  },
+  "pattern": [
+    "  X",
+    " # ",
+    "#  "
+  ],
+  "result": {
+    "id": "minecraft:copper_spear"
+  }
+}

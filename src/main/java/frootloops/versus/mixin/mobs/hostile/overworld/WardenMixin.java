@@ -1,31 +1,49 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.VersusMod;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.WardenAngerManager;
-import net.minecraft.entity.ai.brain.MemoryModuleType;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffectUtil;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.Angriness;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.WardenBrain;
-import net.minecraft.entity.mob.WardenEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.entity.projectile.TridentEntity;
-import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.world.ServerWorld;
+import frootloops.versus.mod.mobs.hostile.overworld.warden.Trail;
+import frootloops.versus.mod.mobs.hostile.overworld.warden.WardenRelocation;
+import frootloops.versus.mod.mobs.hostile.overworld.warden.WardenSenses;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.warden.AngerLevel;
+import net.minecraft.world.entity.monster.warden.AngerManagement;
+import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.monster.warden.WardenAi;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,30 +54,53 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Optional;
 
 
-@Mixin(WardenEntity.class)
-public class WardenMixin extends HostileEntity {
+@Mixin(Warden.class)
+public class WardenMixin extends Monster {
 
     private static final int BOOM_COOLDOWN_AFTER_ATTACK = 240;
     private static final double SNIFF_RANGE_SQUARED = 36.0d, SNIFF_RANGE_VERTICAL = 8.0d;
     private static final double BOOM_RANGE_HORIZONTAL = 8.0d, BOOM_RANGE_VERTICAL = 10.0d,
             BOOM_RANGE_HORIZONTAL_SQUARED = BOOM_RANGE_HORIZONTAL * BOOM_RANGE_HORIZONTAL;
+    /** How long a warden must have had no path to its target before it may sonic boom it. */
+    @Unique
+    private static final int BOOM_WITHOUT_PATH_TICKS = 20;
+    /** A warden chasing a player out of its smell range heads where they were this many ticks ago. */
+    @Unique
+    private static final int TRAIL_TICKS = 40;
+    @Unique
+    private static final float CHASE_SPEED = 1.2F;
+    /** With no player this close for this long, a warden digs down and leaves. */
+    @Unique
+    private static final double FAR_DESPAWN_RANGE = 64.0d;
+    @Unique
+    private static final int FAR_DESPAWN_TICKS = 100;
 
-    protected WardenMixin(EntityType<? extends HostileEntity> entityType, World world) {
+    @Unique
+    private final Trail playersVersus$trail = new Trail(TRAIL_TICKS);
+    @Unique
+    private int playersVersus$ticksWithoutPath;
+    @Unique
+    private int playersVersus$farTicks;
+    @Unique
+    @Nullable
+    private WardenRelocation playersVersus$relocation;
+
+    protected WardenMixin(EntityType<? extends Monster> entityType, Level world) {
         super(entityType, world);
     }
 
 
     @Shadow
     @Contract("null->false")
-    public boolean isValidTarget(@Nullable Entity entity) {
+    public boolean canTargetEntity(@Nullable Entity entity) {
         if (entity instanceof LivingEntity livingEntity
-                && this.getEntityWorld() == entity.getEntityWorld()
-                && EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(entity)
-                && !this.isTeammate(entity)
-                && livingEntity.getType() != EntityType.ARMOR_STAND
-                && livingEntity.getType() != EntityType.WARDEN
+                && this.level() == entity.level()
+                && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity)
+                && !this.isAlliedTo(entity)
+                && livingEntity.getType() != EntityTypes.ARMOR_STAND
+                && livingEntity.getType() != EntityTypes.WARDEN
                 && !livingEntity.isInvulnerable()
-                && !livingEntity.isDead()) {
+                && !livingEntity.isDeadOrDying()) {
             return true;
         }
         return false;
@@ -69,7 +110,7 @@ public class WardenMixin extends HostileEntity {
     private boolean isDiggingOrEmerging() {return false;}
 
     @Shadow
-    public void updateAttackTarget(LivingEntity target) {}
+    public void setAttackTarget(LivingEntity target) {}
 
 
     /**
@@ -83,63 +124,116 @@ public class WardenMixin extends HostileEntity {
      * will start walking in their direction.
      */
     @Shadow
-    private WardenAngerManager angerManager;
+    private AngerManagement angerManagement;
 
     @Shadow
-    public Angriness getAngriness() {
-        return Angriness.getForAnger(this.getAngerAtTarget());
+    public AngerLevel getAngerLevel() {
+        return AngerLevel.byAnger(this.getActiveAnger());
     }
 
     @Shadow
-    private int getAngerAtTarget() {
-        return this.angerManager.getAngerFor(this.getTarget());
+    private int getActiveAnger() {
+        return this.angerManagement.getActiveAnger(this.getTarget());
     }
 
     /**
      * Darkness' fog amount depends on how close the player is
      */
     @Overwrite
-    public static void addDarknessToClosePlayers(ServerWorld world, Vec3d pos, @Nullable Entity entity, int range) {
-        if(entity instanceof WardenEntity warden && warden.getTarget() instanceof PlayerEntity player && player.squaredDistanceTo(warden) < 256.0) {
-            StatusEffectInstance intenseDarkness = new StatusEffectInstance(StatusEffects.DARKNESS, 120, 2, false, false);
-            StatusEffectUtil.addEffectToPlayersWithinDistance(world, entity, pos, 16.0, intenseDarkness, 200);
+    public static void applyDarknessAround(ServerLevel world, Vec3 pos, @Nullable Entity entity, int range) {
+        if(entity instanceof Warden warden && warden.getTarget() instanceof Player player && player.distanceToSqr(warden) < 256.0) {
+            MobEffectInstance intenseDarkness = new MobEffectInstance(MobEffects.DARKNESS, 120, 2, false, false);
+            MobEffectUtil.addEffectToPlayersAround(world, entity, pos, 16.0, intenseDarkness, 200);
         }
-        StatusEffectInstance mildDarkness = new StatusEffectInstance(StatusEffects.DARKNESS, 260, 0, false, false);
-        StatusEffectUtil.addEffectToPlayersWithinDistance(world, entity, pos, 32.0, mildDarkness, 200);
+        MobEffectInstance mildDarkness = new MobEffectInstance(MobEffects.DARKNESS, 260, 0, false, false);
+        MobEffectUtil.addEffectToPlayersAround(world, entity, pos, 32.0, mildDarkness, 200);
     }
 
     /**
-    This allows players to sneak away from Wardens, and Wardens to lose their scent, making for tense encounters.
+    This allows players to slip away from Wardens, and Wardens to lose their scent, making for tense encounters: walking
+    (not sprinting) out of smell range is enough, and it's heard no more than sneaking (WardenVibrationListenerMixin).
      */
-    @Inject(method = "mobTick", at = @At("HEAD"))
+    @Inject(method = "customServerAiStep", at = @At("HEAD"))
     private void reduceAngerTowardsSneakyPlayers(CallbackInfo ci){
-        if(this.getAngriness() == Angriness.ANGRY && this.age > 200 && this.age % 3 == 0) {
+        if(this.getAngerLevel() == AngerLevel.ANGRY && this.tickCount > 200 && this.tickCount % 2 == 0) {
             Entity target = this.getTarget();
-            if(target != null && (target.isSneaky() || target.squaredDistanceTo(this.getEntityPos()) > 400)) {
-                this.angerManager.increaseAngerAt(target, -1);
+            if(target != null && (WardenSenses.losesTrackOf(this, target) || target.distanceToSqr(this.position()) > 400)) {
+                this.angerManagement.increaseAnger(target, -1);
             }
         }
     }
 
-    @Inject(method = "initialize", at = @At("TAIL"))
-    private void dontDespawnWhenSummonedByCheats(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, CallbackInfoReturnable cir){
-        if (spawnReason != SpawnReason.TRIGGERED && spawnReason != SpawnReason.SPAWNER) {
-            this.setHealth(300.0f); // Bit easier to kill compared to regular shrieker Wardens
-            this.setPersistent();
+    /**
+     *  - WARDENS RISING FAR AWAY COME TO YOU
+     * While a warden sniffs and digs its way to the player it rose far from (WardenRelocation), its brain waits.
+     */
+    @Inject(method = "customServerAiStep", at = @At("HEAD"), cancellable = true)
+    private void playersVersus$searchForTheNearestPlayer(ServerLevel level, CallbackInfo ci) {
+        if (this.playersVersus$relocation == null) return;
+        if (this.playersVersus$relocation.tick(level, (Warden) ((Object) this))) ci.cancel();
+        if (this.playersVersus$relocation.isDone()) this.playersVersus$relocation = null;
+    }
+
+    /**
+     *  - WARDENS GUESS WHERE YOU ARE
+     * Chasing a player out of smell range, a warden heads (and looks) where they were 40 ticks ago rather than where they
+     * are. It keeps count of how long it's had no path to its target, for its sonic boom. And with no player within
+     * 64 blocks for a few seconds, a warden that may despawn digs down and leaves.
+     */
+    @Inject(method = "customServerAiStep", at = @At("TAIL"))
+    private void playersVersus$huntByGuesswork(ServerLevel level, CallbackInfo ci) {
+        Brain<?> brain = this.getBrain();
+        LivingEntity target = brain.getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+        if (target instanceof Player player) {
+            this.playersVersus$trail.record(player, player.position());
+            Vec3 guess = this.playersVersus$trail.oldest();
+            if (guess != null && !WardenSenses.inSmellRange(this, player)) {
+                brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(guess, CHASE_SPEED, 0));
+                brain.setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(guess.add(0.0d, player.getEyeHeight(), 0.0d)));
+            }
+        } else {
+            this.playersVersus$trail.clear();
         }
-        else if(spawnReason == SpawnReason.TRIGGERED) {
-            PlayerEntity closestPlayer = this.getEntityWorld().getClosestPlayer(this, 64.0d);
-            if(closestPlayer != null && !this.isInRange(closestPlayer, 16.0)) {
-                WardenBrain.lookAtDisturbance((WardenEntity) ((Object)this), closestPlayer.getBlockPos());
-                this.angerManager.increaseAngerAt(closestPlayer, closestPlayer.isSprinting() ? 70 : 50);
+
+        if (target != null && !this.isWithinMeleeAttackRange(target) && !this.playersVersus$hasPathToFollow()) this.playersVersus$ticksWithoutPath++;
+        else this.playersVersus$ticksWithoutPath = 0;
+
+        if (!this.isPersistenceRequired() && this.tickCount % 20 == 0) {
+            if (level.getNearestPlayer(this, FAR_DESPAWN_RANGE) != null) this.playersVersus$farTicks = 0;
+            else if ((this.playersVersus$farTicks += 20) >= FAR_DESPAWN_TICKS) brain.eraseMemory(MemoryModuleType.DIG_COOLDOWN);
+        }
+    }
+
+    @Unique
+    private boolean playersVersus$hasPathToFollow() {
+        Path path = this.getNavigation().getPath();
+        return path != null && !path.isDone() && path.canReach();
+    }
+
+    @Inject(method = "finalizeSpawn", at = @At("TAIL"))
+    private void playersVersus$goFindTheNearestPlayer(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData, CallbackInfoReturnable<SpawnGroupData> cir) {
+        this.playersVersus$relocation = WardenRelocation.forSpawn((Warden) ((Object) this));
+    }
+
+    @Inject(method = "finalizeSpawn", at = @At("TAIL"))
+    private void dontDespawnWhenSummonedByCheats(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData, CallbackInfoReturnable cir){
+        if (spawnReason != EntitySpawnReason.TRIGGERED && spawnReason != EntitySpawnReason.SPAWNER) {
+            this.setHealth(300.0f); // Bit easier to kill compared to regular shrieker Wardens
+            this.setPersistenceRequired();
+        }
+        else if(spawnReason == EntitySpawnReason.TRIGGERED) {
+            Player closestPlayer = this.level().getNearestPlayer(this, 64.0d);
+            if(closestPlayer != null && !this.closerThan(closestPlayer, 16.0)) {
+                WardenAi.setDisturbanceLocation((Warden) ((Object)this), closestPlayer.blockPosition());
+                this.angerManagement.increaseAnger(closestPlayer, closestPlayer.isSprinting() ? 70 : 50);
             }
         }
     }
 
     @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason != SpawnReason.TRIGGERED && this.getBlockPos().getY() > -32) return false;
-        else return super.canSpawn(world, spawnReason);
+    public boolean checkSpawnRules(LevelAccessor world, EntitySpawnReason spawnReason) {
+        if(spawnReason != EntitySpawnReason.TRIGGERED && this.blockPosition().getY() > -32) return false;
+        else return super.checkSpawnRules(world, spawnReason);
     }
 
     /**
@@ -150,26 +244,26 @@ public class WardenMixin extends HostileEntity {
     @Overwrite
     public void increaseAngerAt(@Nullable Entity entity, int amount, boolean listening) {
         if(amount < 1) return;
-        if (!this.isAiDisabled() && this.isValidTarget(entity)) {
-            boolean isPlayer = entity instanceof PlayerEntity;
+        if (!this.isNoAi() && this.canTargetEntity(entity)) {
+            boolean isPlayer = entity instanceof Player;
 
             // Reset dig cooldown:
-            if (this.getBrain().hasMemoryModule(MemoryModuleType.DIG_COOLDOWN)) {
-                this.getBrain().remember(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, isPlayer ? 1200L : 600L);
+            if (this.getBrain().hasMemoryValue(MemoryModuleType.DIG_COOLDOWN)) {
+                this.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, isPlayer ? 1200L : 600L);
             }
 
             // If Player:
             if(isPlayer) {
 
                 // If current target isnt a player, but new one is, forget them and prioritize player:
-                if(this.getTarget() != null && this.getTarget().isAlive() && !(this.getTarget() instanceof PlayerEntity)) {
-                    this.getBrain().forget(MemoryModuleType.ATTACK_TARGET);
-                    this.getBrain().forget(MemoryModuleType.ANGRY_AT);
-                    Optional<LivingEntity> suspect = this.angerManager.getPrimeSuspect();
+                if(this.getTarget() != null && this.getTarget().isAlive() && !(this.getTarget() instanceof Player)) {
+                    this.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+                    this.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
+                    Optional<LivingEntity> suspect = this.angerManagement.getActiveEntity();
                     while(suspect.isPresent()) {
-                        if(suspect.get() instanceof PlayerEntity) break;
-                        else angerManager.removeSuspect(suspect.get());
-                        suspect = this.angerManager.getPrimeSuspect();
+                        if(suspect.get() instanceof Player) break;
+                        else angerManagement.clearAnger(suspect.get());
+                        suspect = this.angerManagement.getActiveEntity();
                     }
                 }
 
@@ -178,7 +272,7 @@ public class WardenMixin extends HostileEntity {
                     if(entity.isSprinting()) amount = 40;
                     else if(!listening) amount = 5;
                     else {
-                        double squaredDistance = this.squaredDistanceTo(entity);
+                        double squaredDistance = this.distanceToSqr(entity);
                         if(squaredDistance > 24.0) amount /= 5;
                         else if (squaredDistance > 16.0) amount /= 2;
                         else if (squaredDistance < 4.0) amount = 3 + amount/2;
@@ -187,17 +281,17 @@ public class WardenMixin extends HostileEntity {
             }
             else {
                 // If current target IS a player, but new one isn't, ignore them:
-                if(this.getTarget() != null && this.getTarget().isAlive() && (this.getTarget() instanceof PlayerEntity player) && player.squaredDistanceTo(this) < 1024.0) {
+                if(this.getTarget() != null && this.getTarget().isAlive() && (this.getTarget() instanceof Player player) && player.distanceToSqr(this) < 1024.0) {
                     return;
                 }
             }
 
             // Increase anger:
-            this.angerManager.increaseAngerAt(entity, amount);
+            this.angerManagement.increaseAnger(entity, amount);
 
             // Play sound:
-            if (listening && !this.isInPose(EntityPose.ROARING)) {
-                this.playSound(this.getAngriness().getListeningSound(), 10.0F, this.getSoundPitch());
+            if (listening && !this.hasPose(Pose.ROARING)) {
+                this.playSound(this.getAngerLevel().getListeningSound(), 10.0F, this.getVoicePitch());
             }
         }
     }
@@ -212,28 +306,31 @@ public class WardenMixin extends HostileEntity {
      * booms are simply too punishing.
      */
     @Override
-    public boolean isInRange(Entity entity, double horizontalRadius, double verticalRadius) {
+    public boolean closerThan(Entity entity, double horizontalRadius, double verticalRadius) {
         double deltaX = entity.getX() - this.getX();
         double deltaY = entity.getY() - this.getY();
         double deltaZ = entity.getZ() - this.getZ();
 
         // Sniffing:
         if(horizontalRadius == 6.0d && verticalRadius == 20.0d)
-            return MathHelper.squaredHypot(deltaX, deltaZ) < SNIFF_RANGE_SQUARED && deltaY < SNIFF_RANGE_VERTICAL;
+            return Mth.lengthSquared(deltaX, deltaZ) < SNIFF_RANGE_SQUARED && deltaY < SNIFF_RANGE_VERTICAL;
 
         // Immediate retaliation:
         if(horizontalRadius == 5.0d && verticalRadius == 5.0d)
-            return MathHelper.squaredHypot(deltaX, deltaZ) < (4.0d) && deltaY < 2.0d;
+            return Mth.lengthSquared(deltaX, deltaZ) < (4.0d) && deltaY < 2.0d;
 
         // Sonic booms:
-        if(horizontalRadius == 15.0d && verticalRadius == 20.0d && entity instanceof PlayerEntity) {
-            if(this.getLastAttackTime() < this.age - BOOM_COOLDOWN_AFTER_ATTACK) return false;
-            if(this.getMoveControl().isMoving() && entity.getEntityPos().y < this.getY() + 4.0) return false;
-            return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
+        if(horizontalRadius == 15.0d && verticalRadius == 20.0d) {
+            if(entity instanceof Bat) return true;
+            if(entity instanceof Player) {
+                if(this.getLastHurtMobTimestamp() < this.tickCount - BOOM_COOLDOWN_AFTER_ATTACK) return false;
+                if(this.playersVersus$ticksWithoutPath < BOOM_WITHOUT_PATH_TICKS) return false; // Chasing with a path to follow: run or hide instead.
+                return Mth.lengthSquared(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
+            }
         }
 
         // Anything else:
-        return MathHelper.squaredHypot(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
+        return Mth.lengthSquared(deltaX, deltaZ) < (horizontalRadius * horizontalRadius) && deltaY < verticalRadius;
     }
 
     /**
@@ -242,27 +339,27 @@ public class WardenMixin extends HostileEntity {
      *  more dangerous and interesting to fight one of these things.
      */
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
         boolean hasReceivedDamage = false, mightReceiveDamage = true;
-        Entity attacker = source.getAttacker();
-        if (source.getSource() instanceof PersistentProjectileEntity && !(source.getSource() instanceof TridentEntity)) {
-            if(attacker == null || !(attacker instanceof PlayerEntity)) {
+        Entity attacker = source.getEntity();
+        if (source.getDirectEntity() instanceof AbstractArrow && !(source.getDirectEntity() instanceof ThrownTrident)) {
+            if(attacker == null || !(attacker instanceof Player)) {
                 mightReceiveDamage = false;
             }
             else {
-                double distanceSquared = attacker.getEntityPos().squaredDistanceTo(this.getEntityPos());
+                double distanceSquared = attacker.position().distanceToSqr(this.position());
                 if(distanceSquared > 256.0d) mightReceiveDamage = false;
-                else amount = (amount * (256.0f - (float)attacker.getEntityPos().squaredDistanceTo(this.getEntityPos())))/256.0f;
+                else amount = (amount * (256.0f - (float)attacker.position().distanceToSqr(this.position())))/256.0f;
             }
             if(amount < 3.0f) mightReceiveDamage = false;
         }
-        if(mightReceiveDamage) hasReceivedDamage = super.damage(world, source, amount);
+        if(mightReceiveDamage) hasReceivedDamage = super.hurtServer(world, source, amount);
 
-        if (!(this.getEntityWorld().isClient() || this.isAiDisabled() || this.isDiggingOrEmerging())) {
-            this.increaseAngerAt(attacker, Angriness.ANGRY.getThreshold() + 20, false);
-            if (this.brain.getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity livingEntity) {
-                if (source.isDirect() || this.isInRange(livingEntity, 5.0)) {
-                    this.updateAttackTarget(livingEntity);
+        if (!(this.level().isClientSide() || this.isNoAi() || this.isDiggingOrEmerging())) {
+            this.increaseAngerAt(attacker, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
+            if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity livingEntity) {
+                if (source.isDirect() || this.closerThan(livingEntity, 5.0)) {
+                    this.setAttackTarget(livingEntity);
                 }
             }
         }

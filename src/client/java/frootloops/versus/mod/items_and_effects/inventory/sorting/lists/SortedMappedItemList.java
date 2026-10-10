@@ -2,9 +2,8 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import net.minecraft.item.Item;
-
 import java.util.Map;
+import net.minecraft.world.item.Item;
 
 public class SortedMappedItemList extends SortedItemList {
     protected final Map<Item, Integer> itemIndexMap;

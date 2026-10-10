@@ -8,31 +8,27 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:rotten_flesh",
-          "functions": [
-            {
-              "function": "minecraft:enchanted_count_increase",
-              "enchantment": "minecraft:looting",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 0,
-                "max": 1
-              }
-            }
-          ]
+          "modifier": {
+            "enchantment": "minecraft:looting",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 0,
+              "max": 1
+            },
+            "type": "minecraft:enchanted_count_increase"
+          }
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance_with_enchanted_bonus",
-          "enchanted_chance": {
-            "type": "minecraft:linear",
-            "base": 0.1,
-            "per_level_above_first": 0.05
-          },
-          "enchantment": "minecraft:looting",
-          "unenchanted_chance": 0.2
-        }
-      ]
+      "condition": {
+        "enchanted_chance": {
+          "type": "minecraft:linear",
+          "base": 0.1,
+          "per_level_above_first": 0.05
+        },
+        "enchantment": "minecraft:looting",
+        "unenchanted_chance": 0.2,
+        "type": "minecraft:random_chance_with_enchanted_bonus"
+      }
     },
     {
       "rolls": 1,
@@ -53,32 +49,34 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:ice",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 4
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "min": 1,
+              "max": 4,
+              "type": "minecraft:uniform"
+            },
+            "type": "minecraft:set_count"
+          }
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        },
-        {
-          "condition": "minecraft:random_chance_with_enchanted_bonus",
-          "enchanted_chance": {
-            "type": "minecraft:linear",
-            "base": 0.07,
-            "per_level_above_first": 0.01
+      "condition": {
+        "terms": [
+          {
+            "type": "minecraft:killed_by_player"
           },
-          "enchantment": "minecraft:looting",
-          "unenchanted_chance": 0.05
-        }
-      ]
+          {
+            "enchanted_chance": {
+              "type": "minecraft:linear",
+              "base": 0.07,
+              "per_level_above_first": 0.01
+            },
+            "enchantment": "minecraft:looting",
+            "unenchanted_chance": 0.05,
+            "type": "minecraft:random_chance_with_enchanted_bonus"
+          }
+        ],
+        "type": "minecraft:all_of"
+      }
     }
   ]
 }

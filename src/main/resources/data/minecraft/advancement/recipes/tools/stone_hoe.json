@@ -14,7 +14,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:stone_hoe"
+        "recipes": "minecraft:stone_hoe"
       }
     },
     "has_cobblestone": {

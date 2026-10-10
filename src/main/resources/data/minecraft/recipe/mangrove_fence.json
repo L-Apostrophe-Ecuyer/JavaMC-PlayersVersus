@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "group": "mangrove_misc",
   "key": {
     "#": "minecraft:stick",

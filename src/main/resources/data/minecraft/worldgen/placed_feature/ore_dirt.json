@@ -1,15 +1,5 @@
 {
-  "feature": {
-    "type": "players-versus:mud_patch",
-    "config": {
-      "is_brown_mud": true,
-      "size": {
-        "type": "minecraft:uniform",
-        "min_inclusive": 3,
-        "max_inclusive": 12
-      }
-    }
-  },
+  "feature": "minecraft:ore_dirt",
   "placement": [
     {
       "type": "minecraft:in_square"

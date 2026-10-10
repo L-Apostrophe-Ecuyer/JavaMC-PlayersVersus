@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "building",
   "group": "quartz_block",
   "ingredients": [
     "minecraft:quartz_block"

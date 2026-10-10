@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:ore",
+  "size": 5,
+  "discard_chance_on_air_exposure": 0.925,
+  "targets": [
+    {
+      "target": {
+        "tag": "minecraft:stone_ore_replaceables",
+        "predicate_type": "minecraft:tag_match"
+      },
+      "state": {
+        "id": "minecraft:lapis_ore"
+      }
+    },
+    {
+      "target": {
+        "tag": "minecraft:deepslate_ore_replaceables",
+        "predicate_type": "minecraft:tag_match"
+      },
+      "state": {
+        "id": "minecraft:deepslate_lapis_ore"
+      }
+    }
+  ]
+}

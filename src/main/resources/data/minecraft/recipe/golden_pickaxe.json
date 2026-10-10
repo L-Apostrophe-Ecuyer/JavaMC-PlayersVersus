@@ -1,10 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "equipment",
   "group": "golden_tools",
   "key": {
-    "#" : "minecraft:stick",
-    "X" : "minecraft:gold_ingot"
+    "#": "minecraft:stick",
+    "X": "minecraft:gold_ingot"
   },
   "pattern": [
     "XXX",

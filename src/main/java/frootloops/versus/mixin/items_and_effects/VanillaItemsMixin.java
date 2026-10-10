@@ -1,18 +1,18 @@
 package frootloops.versus.mixin.items_and_effects;
 
 import frootloops.versus.mod.items_and_effects.VanillaItems;
-import net.minecraft.item.*;
-import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.resource.featuretoggle.ToggleableFeature;
+import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.Item;
 import org.spongepowered.asm.mixin.Mixin;
 
 
 @Mixin(Item.class)
-public abstract class VanillaItemsMixin implements ToggleableFeature {
+public abstract class VanillaItemsMixin implements FeatureElement {
 
         @Override
-        public boolean isEnabled(FeatureSet enabledFeatures) {
+        public boolean isEnabled(FeatureFlagSet enabledFeatures) {
                 if(VanillaItems.hasReplacementItem((Item)((Object)this))) return false;
-                return this.getRequiredFeatures().isSubsetOf(enabledFeatures);
+                return this.requiredFeatures().isSubsetOf(enabledFeatures);
         }
 }

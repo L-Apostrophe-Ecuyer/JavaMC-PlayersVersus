@@ -1,10 +1,9 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "building",
   "group": "copper_waxing",
   "ingredients": [
-      "minecraft:oxidized_copper",
-      "minecraft:honeycomb"
+    "minecraft:oxidized_copper",
+    "minecraft:honeycomb"
   ],
   "result": {
     "count": 1,

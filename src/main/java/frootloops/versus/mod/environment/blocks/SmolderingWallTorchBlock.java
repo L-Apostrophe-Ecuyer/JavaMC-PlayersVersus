@@ -1,42 +1,43 @@
 package frootloops.versus.mod.environment.blocks;
 
 import frootloops.versus.mod.environment.CustomBlocks;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallTorchBlock;
-import net.minecraft.particle.SimpleParticleType;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
+import frootloops.versus.mod.environment.WorldTime;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.WallTorchBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class SmolderingWallTorchBlock extends WallTorchBlock {
 
-    public SmolderingWallTorchBlock(SimpleParticleType defaultParticleType, Settings settings) {
+    public SmolderingWallTorchBlock(SimpleParticleType defaultParticleType, Properties settings) {
         super(defaultParticleType, settings);
     }
 
-    public void tickSmolderingTorchDegradation(BlockState state, ServerWorld world, BlockPos pos) {
-        if(world.getDimension().ultrawarm()) return;
-        world.setBlockState(pos, CustomBlocks.EXTINGUISHED_WALL_TORCH.getStateWithProperties(state));
-        world.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 8, 0.1, 0.2, 0.1, 0.03);
-        world.playSoundAtBlockCenterClient(pos, SoundEvents.BLOCK_CANDLE_EXTINGUISH, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
+    public void tickSmolderingTorchDegradation(BlockState state, ServerLevel world, BlockPos pos) {
+        if(WorldTime.ultraWarm(world)) return;
+        world.setBlockAndUpdate(pos, CustomBlocks.EXTINGUISHED_WALL_TORCH.withPropertiesOf(state));
+        world.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 8, 0.1, 0.2, 0.1, 0.03);
+        world.playLocalSound(pos, SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, 0.8f, 0.8f, true);
     }
 
 
     @Override
-    public boolean hasRandomTicks(BlockState state) {
+    public boolean isRandomlyTicking(BlockState state) {
         return true;
     }
 
     @Override
-    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         int y = pos.getY();
         if(y > 8) return;
-        if(!world.isClient()) {
+        if(!world.isClientSide()) {
             if (random.nextInt(200) > y + 165) {
                 this.tickSmolderingTorchDegradation(state, world, pos);
             }
@@ -44,8 +45,8 @@ public class SmolderingWallTorchBlock extends WallTorchBlock {
     }
 
     @Override
-    public void precipitationTick(BlockState state, World world, BlockPos pos, Biome.Precipitation precipitation) {
-        if(!world.isClient()) this.tickSmolderingTorchDegradation(state, (ServerWorld)world, pos);
-        world.playSoundAtBlockCenterClient(pos, SoundEvents.BLOCK_CANDLE_EXTINGUISH, SoundCategory.BLOCKS, 0.8f, 0.8f, true);
+    public void handlePrecipitation(BlockState state, Level world, BlockPos pos, Biome.Precipitation precipitation) {
+        if(!world.isClientSide()) this.tickSmolderingTorchDegradation(state, (ServerLevel)world, pos);
+        world.playLocalSound(pos, SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, 0.8f, 0.8f, true);
     }
 }

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "diamond_tools",
+  "key": {
+    "#": "minecraft:stick",
+    "X": "minecraft:diamond"
+  },
+  "pattern": [
+    "  X",
+    " # ",
+    "#  "
+  ],
+  "result": {
+    "id": "minecraft:diamond_spear"
+  }
+}

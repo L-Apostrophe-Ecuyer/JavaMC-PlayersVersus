@@ -1,75 +1,70 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.entity.mob.ZombieVillagerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.UUID;
 
-@Mixin(ZombieVillagerEntity.class)
-public abstract class ZombieVillagerMixin extends ZombieEntity {
+@Mixin(ZombieVillager.class)
+public abstract class ZombieVillagerMixin extends Zombie {
 
-    public ZombieVillagerMixin(EntityType<? extends ZombieEntity> entityType, World world) {
+    public ZombieVillagerMixin(EntityType<? extends Zombie> entityType, Level world) {
         super(entityType, world);
     }
 
-    @Shadow private int conversionTimer;
+    @Shadow private int villagerConversionTime;
 
     @Shadow
-    private void setConverting(@Nullable UUID uuid, int delay) {}
+    private void startConverting(@Nullable UUID uuid, int delay) {}
 
     @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        if(spawnReason != SpawnReason.NATURAL) return super.canSpawn(world, spawnReason);
-        BlockPos pos = this.getBlockPos();
+    public boolean checkSpawnRules(LevelAccessor world, EntitySpawnReason spawnReason) {
+        if(spawnReason != EntitySpawnReason.NATURAL) return super.checkSpawnRules(world, spawnReason);
+        BlockPos pos = this.blockPosition();
         if(pos.getY() < 56) return false;
-        if(this.getPathfindingFavor(pos, world) >= 0.0F) {
-            BlockState downState = world.getBlockState(pos.down());
-            return downState.isIn(BlockTags.WOLVES_SPAWNABLE_ON) || downState.isIn(BlockTags.SAND);
+        if(this.getWalkTargetValue(pos, world) >= 0.0F) {
+            BlockState downState = world.getBlockState(pos.below());
+            return downState.is(BlockTags.WOLVES_SPAWNABLE_ON) || downState.is(BlockTags.SAND);
         }
         return false;
     }
 
     @Override
-    public ActionResult interactMob(PlayerEntity player, Hand hand) {
-        ItemStack itemStack = player.getStackInHand(hand);
-        if (itemStack.isOf(Items.GOLDEN_APPLE)) {
-            if(conversionTimer < 1200 && !((ZombieVillagerEntity)((Object)this)).isConverting()) return ActionResult.FAIL;
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+        if (itemStack.is(Items.GOLDEN_APPLE)) {
+            if(villagerConversionTime < 1200 && !((ZombieVillager)((Object)this)).isConverting()) return InteractionResult.FAIL;
 
-            itemStack.decrementUnlessCreative(1, player);
-            if (!this.getEntityWorld().isClient()) {
-                int conversionTime = (conversionTimer > 0) ? (conversionTimer - 600 - this.random.nextInt(200)) : this.random.nextInt(2400) + 1200;
-                this.setConverting(player.getUuid(), conversionTime);
+            itemStack.consume(1, player);
+            if (!this.level().isClientSide()) {
+                int conversionTime = (villagerConversionTime > 0) ? (villagerConversionTime - 600 - this.random.nextInt(200)) : this.random.nextInt(2400) + 1200;
+                this.startConverting(player.getUUID(), conversionTime);
             }
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
-        return super.interactMob(player, hand);
+        return super.mobInteract(player, hand);
     }
 
     @Override
-    public void initEquipment(Random random, LocalDifficulty localDifficulty) {
+    public void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance localDifficulty) {
         return;
     }
 }

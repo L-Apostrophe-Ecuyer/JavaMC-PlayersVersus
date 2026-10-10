@@ -1,15 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "equipment",
   "pattern": [
     " G#",
     " CG",
     " C "
   ],
   "key": {
-    "#" : "minecraft:glass_pane",
-    "G" : "minecraft:gold_ingot",
-    "C" : "minecraft:copper_ingot"
+    "#": "minecraft:glass_pane",
+    "G": "minecraft:gold_ingot",
+    "C": "minecraft:copper_ingot"
   },
   "result": {
     "id": "minecraft:spyglass"

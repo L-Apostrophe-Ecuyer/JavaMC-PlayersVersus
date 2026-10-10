@@ -1,5 +1,6 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	// Minecraft 26.x ships unobfuscated with Mojang's names: this Loom doesn't remap.
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -20,6 +21,7 @@ repositories {
 
 loom {
 	splitEnvironmentSourceSets()
+	accessWidenerPath = file("src/main/resources/players-versus.accesswidener")
 
 	mods {
 		"modid" {
@@ -28,17 +30,81 @@ loom {
 		}
 	}
 
+	runs {
+		client {
+			// Avoid the JDK 25 tiered-JIT native crash seen during client startup.
+			vmArg "-XX:-TieredCompilation"
+		}
+
+		// Headless worldgen benchmark: starts a dedicated server on a fresh world, generates a square of chunks
+		// stage by stage, writes timings, metrics and map images to run/worldgen-smoke/pvwg/, then stops.
+		// Options: -Ppv.levelType=<world preset> -Ppv.seed=<seed> -Ppv.benchRadius=<chunks> -Ppv.benchCenter=<x,z>
+		// -Ppv.keepWorld=true reopens the existing world instead of starting a fresh one.
+		// -Ppv.vanillaTypes=false keeps the Java final density next to C2ME's compiler (DensityCompilerCompat).
+		// The server only starts with -Ppv.acceptEula=true (you accept https://aka.ms/MinecraftEULA).
+		worldgenSmoke {
+			server()
+			configName = "Worldgen smoke test"
+			runDir = "run/worldgen-smoke"
+			programArg "--nogui"
+			vmArg "-Dpv.worldgen.bench=${providers.gradleProperty('pv.benchRadius').getOrElse('12')}"
+			vmArg "-Dpv.worldgen.bench.center=${providers.gradleProperty('pv.benchCenter').getOrElse('100,100')}"
+			vmArg "-Dpv.worldgen.vanillaTypes=${providers.gradleProperty('pv.vanillaTypes').getOrElse('true')}"
+		}
+	}
+
+}
+
+def worldgenSmokeDir = file("run/worldgen-smoke")
+def worldgenSmokeAcceptEula = providers.gradleProperty("pv.acceptEula").getOrElse("false") == "true"
+def worldgenSmokeKeepWorld = providers.gradleProperty("pv.keepWorld").getOrElse("false") == "true"
+def worldgenSmokeLevelType = providers.gradleProperty("pv.levelType").getOrElse("players-versus:better_world")
+def worldgenSmokeProperties = [
+		"level-seed"         : providers.gradleProperty("pv.seed").getOrElse("8675309"),
+		"max-tick-time"      : "-1",
+		"online-mode"        : "false",
+		"spawn-protection"   : "0",
+		"sync-chunk-writes"  : "false",
+		"view-distance"      : "4",
+		"simulation-distance": "4",
+]
+// "server-default" leaves level-type out, to test the preset a server picks when server.properties doesn't name one.
+if (worldgenSmokeLevelType != "server-default") {
+	worldgenSmokeProperties["level-type"] = worldgenSmokeLevelType
+}
+tasks.matching { it.name == "runWorldgenSmoke" }.configureEach {
+	doFirst {
+		worldgenSmokeDir.mkdirs()
+		if (!worldgenSmokeKeepWorld) {
+			new File(worldgenSmokeDir, "world").deleteDir()
+		}
+		new File(worldgenSmokeDir, "server.properties").text = worldgenSmokeProperties.collect { key, value -> "${key}=${value}" }.join("\n") + "\n"
+		if (worldgenSmokeAcceptEula) {
+			new File(worldgenSmokeDir, "eula.txt").text = "eula=true\n"
+		}
+	}
 }
 
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+}
+
+test {
+	useJUnitPlatform()
+	// Tests run the game's common code only; the client side would look for client classes that aren't on the test classpath.
+	systemProperty "fabric.side", "server"
+	testLogging {
+		events "passed", "skipped", "failed"
+		exceptionFormat "full"
+		showStandardStreams = true
+	}
 }
 
 processResources {
@@ -50,7 +116,9 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = 25
+	// Every error in one build, for fixing them from CI's log.
+	it.options.compilerArgs += ["-Xmaxerrs", "10000"]
 }
 
 java {
@@ -59,8 +127,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {

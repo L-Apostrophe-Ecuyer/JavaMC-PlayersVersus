@@ -1,12 +1,12 @@
 package frootloops.versus.mod.environment.blocks.clays;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class MoistBlock extends Block implements MoistureConvertableBlock {
 
@@ -14,15 +14,15 @@ public class MoistBlock extends Block implements MoistureConvertableBlock {
     private final Block cookedVersion;
     public Block wetterVersion;
 
-    public MoistBlock(Settings settings, Block dryVersion) {
+    public MoistBlock(Properties settings, Block dryVersion) {
         this(settings, dryVersion, dryVersion);
     }
 
-    public MoistBlock(Settings settings, Block dryVersion, Block cookedVersion) {
+    public MoistBlock(Properties settings, Block dryVersion, Block cookedVersion) {
         this(settings, dryVersion, cookedVersion, null);
     }
 
-    public MoistBlock(Settings settings, Block dryVersion, Block cookedVersion, Block wetterVersion) {
+    public MoistBlock(Properties settings, Block dryVersion, Block cookedVersion, Block wetterVersion) {
         super(settings);
         this.dryVersion = dryVersion;
         this.cookedVersion = cookedVersion;
@@ -30,24 +30,24 @@ public class MoistBlock extends Block implements MoistureConvertableBlock {
     }
 
     @Override
-    public boolean hasRandomTicks(BlockState state) {
+    public boolean isRandomlyTicking(BlockState state) {
         return true;
     }
 
     @Override
-    protected void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         MoistureConvertableBlock.scheduledTick(state, world, pos, dryVersion, cookedVersion, wetterVersion);
     }
 
     @Override
-    protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         MoistureConvertableBlock.scheduledTick(state, world, pos, dryVersion, cookedVersion, wetterVersion);
     }
 
     @Override
-    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
+    public void fallOn(Level world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
         MoistureConvertableBlock.onLandedUpon(world, state, pos, entity, fallDistance, dryVersion);
-        super.onLandedUpon(world, state, pos, entity, fallDistance * 0.5F);
+        super.fallOn(world, state, pos, entity, fallDistance * 0.5F);
     }
 
     @Override

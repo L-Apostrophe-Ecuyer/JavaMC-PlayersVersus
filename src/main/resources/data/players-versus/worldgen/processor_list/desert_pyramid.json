@@ -8,12 +8,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:gold_block",
-            "probability": 0.5
+            "probability": 0.5,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -21,12 +21,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:terracotta",
-            "probability": 0.9
+            "probability": 0.9,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:orange_terracotta"
+            "id": "minecraft:orange_terracotta"
           }
         },
         {
@@ -34,13 +34,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:sand",
-            "probability": 0.25
+            "probability": 0.25,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:suspicious_sand",
-            "Properties": {
+            "id": "minecraft:suspicious_sand",
+            "properties": {
               "dusted": "0"
             }
           },
@@ -54,13 +54,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:sand",
-            "probability": 0.1
+            "probability": 0.1,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:suspicious_sand",
-            "Properties": {
+            "id": "minecraft:suspicious_sand",
+            "properties": {
               "dusted": "0"
             }
           },
@@ -74,12 +74,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:decorated_pot"
+            "block": "minecraft:decorated_pot",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:decorated_pot",
-            "Properties": {
+            "id": "minecraft:decorated_pot",
+            "properties": {
               "cracked": "false",
               "facing": "north",
               "waterlogged": "false"

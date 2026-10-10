@@ -3,76 +3,8 @@
   "downfall": 0.4,
   "has_precipitation": true,
   "effects": {
-    "sky_color": 3885411,
-    "fog_color": 2304825,
-    "water_color": 3629753,
-    "water_fog_color": 329011,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 2000,
-      "block_search_extent": 8,
-      "offset": 2
-    },
-    "music": [
-      {
-        "data": {
-          "max_delay": 16000,
-          "min_delay": 8000,
-          "replace_current_music": true,
-          "sound": "players-versus:music.overworld.deep_caves"
-        },
-        "weight": 5
-      }
-    ]
+    "water_color": "#3762b9"
   },
-  "spawners": {
-    "ambient": [],
-    "axolotls": [],
-    "creature": [],
-    "misc": [],
-    "monster": [
-      {
-        "type": "players-versus:deeper_creeper",
-        "weight": 80,
-        "minCount": 1,
-        "maxCount": 1
-      },
-      {
-        "type": "minecraft:wither_skeleton",
-        "weight": 20,
-        "minCount": 1,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:skeleton",
-        "weight": 50,
-        "minCount": 1,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:zombie",
-        "weight": 20,
-        "minCount": 1,
-        "maxCount": 2
-      },
-      {
-        "type": "players-versus:withered_zombie",
-        "weight": 100,
-        "minCount": 2,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:enderman",
-        "weight": 10,
-        "minCount": 1,
-        "maxCount": 4
-      }
-    ],
-    "underground_water_creature": [],
-    "water_ambient": [],
-    "water_creature": []
-  },
-  "spawn_costs": {},
   "carvers": [
     "players-versus:deep_caves_extra_underground",
     "players-versus:deep_caves_canyons"
@@ -121,5 +53,93 @@
     [
       "minecraft:freeze_top_layer"
     ]
-  ]
+  ],
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [
+            {
+              "type": "players-versus:pale_creeper",
+              "weight": 80,
+              "count": 1
+            },
+            {
+              "type": "minecraft:wither_skeleton",
+              "weight": 20,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 1,
+                "max_inclusive": 4
+              }
+            },
+            {
+              "type": "minecraft:skeleton",
+              "weight": 50,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 1,
+                "max_inclusive": 4
+              }
+            },
+            {
+              "type": "minecraft:zombie",
+              "weight": 20,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 1,
+                "max_inclusive": 2
+              }
+            },
+            {
+              "type": "players-versus:pale_zombie",
+              "weight": 100,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 2,
+                "max_inclusive": 4
+              }
+            },
+            {
+              "type": "minecraft:enderman",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 1,
+                "max_inclusive": 4
+              }
+            }
+          ],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        },
+        "spawn_costs": {}
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/sky_color": "#3b4963",
+    "minecraft:visual/fog_color": "#232b39",
+    "minecraft:visual/water_fog_color": "#050533",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 2000,
+        "block_search_extent": 8,
+        "offset": 2
+      }
+    },
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 16000,
+        "min_delay": 8000,
+        "replace_current_music": true,
+        "sound": "players-versus:music.overworld.deep_caves"
+      }
+    }
+  }
 }

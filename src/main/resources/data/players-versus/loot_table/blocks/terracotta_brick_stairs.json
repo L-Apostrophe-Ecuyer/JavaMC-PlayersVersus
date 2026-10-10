@@ -10,11 +10,9 @@
           "name": "players-versus:terracotta_brick_stairs"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ],
   "random_sequence": "minecraft:blocks/acacia_stairs"

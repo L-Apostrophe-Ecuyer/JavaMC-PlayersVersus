@@ -1,60 +1,62 @@
 package frootloops.versus.mod.players;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Pair;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 // Implemented from: https://github.com/CloudG360/BridgingMod/tree/1.19/src/main/java/me/cg360/mod/placement/raytrace
 // By CloudG360 and Team Abnormals
 
 public class RayTraceHandler {
 
-    public static HitResult rayTrace(Entity entity, World world, PlayerEntity player, RaycastContext.ShapeType blockMode, RaycastContext.FluidHandling fluidMode) {
-        return rayTrace(entity, world, player, blockMode, fluidMode, player.getBlockInteractionRange());
+    public static HitResult rayTrace(Entity entity, Level world, Player player, ClipContext.Block blockMode, ClipContext.Fluid fluidMode) {
+        return rayTrace(entity, world, player, blockMode, fluidMode, player.blockInteractionRange());
     }
 
-    public static HitResult rayTrace(Entity entity, World world, Entity player, RaycastContext.ShapeType blockMode, RaycastContext.FluidHandling fluidMode, double range) {
-        Pair<Vec3d, Vec3d> params = getEntityParams(player);
-        return rayTrace(entity, world, params.getLeft(), params.getRight(), blockMode, fluidMode, range);
+    public static HitResult rayTrace(Entity entity, Level world, Entity player, ClipContext.Block blockMode, ClipContext.Fluid fluidMode, double range) {
+        Params params = getEntityParams(player);
+        return rayTrace(entity, world, params.start(), params.direction(), blockMode, fluidMode, range);
     }
 
-    public static HitResult rayTrace(Entity entity, World world, Vec3d startPos, Vec3d ray, RaycastContext.ShapeType blockMode, RaycastContext.FluidHandling fluidMode, double range) {
-        return rayTrace(entity, world, startPos, startPos.add(ray.multiply(range)), blockMode, fluidMode);
+    public static HitResult rayTrace(Entity entity, Level world, Vec3 startPos, Vec3 ray, ClipContext.Block blockMode, ClipContext.Fluid fluidMode, double range) {
+        return rayTrace(entity, world, startPos, startPos.add(ray.scale(range)), blockMode, fluidMode);
     }
 
-    public static HitResult rayTrace(Entity entity, World world, Vec3d startPos, Vec3d endPos, RaycastContext.ShapeType blockMode, RaycastContext.FluidHandling fluidMode) {
-        RaycastContext context = new RaycastContext(startPos, endPos, blockMode, fluidMode, entity);
+    public static HitResult rayTrace(Entity entity, Level world, Vec3 startPos, Vec3 endPos, ClipContext.Block blockMode, ClipContext.Fluid fluidMode) {
+        ClipContext context = new ClipContext(startPos, endPos, blockMode, fluidMode, entity);
 
-        return world.raycast(context);
+        return world.clip(context);
     }
+
+    /** Where a ray starts and which way it points. */
+    public record Params(Vec3 start, Vec3 direction) {}
 
     /**
      * @param player - the player entity using the raycast guide.
-     * @return Pair | Left = Starting position, Right = Direction
+     * @return the ray's starting position and its direction
      */
-    public static Pair<Vec3d, Vec3d> getEntityParams(Entity player) {
-        float pitch = player.lastPitch + (player.getPitch() - player.lastPitch);
-        float yaw = player.lastYaw + (player.getYaw() - player.lastYaw);
-        Vec3d pos = player.getEntityPos();
-        double posX = player.lastX + (pos.x - player.lastX);
-        double posY = player.lastY + (pos.y - player.lastY);
-        if (player instanceof PlayerEntity) posY += player.getEyeHeight(player.getPose());
-        double posZ = player.lastZ + (pos.z - player.lastZ);
-        Vec3d rayPos = new Vec3d(posX, posY, posZ);
+    public static Params getEntityParams(Entity player) {
+        float pitch = player.xRotO + (player.getXRot() - player.xRotO);
+        float yaw = player.yRotO + (player.getYRot() - player.yRotO);
+        Vec3 pos = player.position();
+        double posX = player.xo + (pos.x - player.xo);
+        double posY = player.yo + (pos.y - player.yo);
+        if (player instanceof Player) posY += player.getEyeHeight(player.getPose());
+        double posZ = player.zo + (pos.z - player.zo);
+        Vec3 rayPos = new Vec3(posX, posY, posZ);
 
-        float zYaw = -MathHelper.cos(yaw * (float) Math.PI / 180);
-        float xYaw = MathHelper.sin(yaw * (float) Math.PI / 180);
-        float pitchMod = -MathHelper.cos(pitch * (float) Math.PI / 180);
-        float azimuth = -MathHelper.sin(pitch * (float) Math.PI / 180);
+        float zYaw = -Mth.cos(yaw * (float) Math.PI / 180);
+        float xYaw = Mth.sin(yaw * (float) Math.PI / 180);
+        float pitchMod = -Mth.cos(pitch * (float) Math.PI / 180);
+        float azimuth = -Mth.sin(pitch * (float) Math.PI / 180);
         float xLen = xYaw * pitchMod;
         float yLen = zYaw * pitchMod;
-        Vec3d ray = new Vec3d(xLen, azimuth, yLen);
+        Vec3 ray = new Vec3(xLen, azimuth, yLen);
 
-        return new Pair<>(rayPos, ray);
+        return new Params(rayPos, ray);
     }
 }

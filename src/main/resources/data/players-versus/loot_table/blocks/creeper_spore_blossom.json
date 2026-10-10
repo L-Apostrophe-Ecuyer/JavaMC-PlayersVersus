@@ -10,11 +10,9 @@
           "name": "players-versus:creeper_spore_blossom"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ],
   "random_sequence": "minecraft:blocks/spore_blossom"

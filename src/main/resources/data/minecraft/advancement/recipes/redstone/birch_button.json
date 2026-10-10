@@ -36,7 +36,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:birch_button"
+        "recipes": "minecraft:birch_button"
       }
     },
     "knows_what_buttons_are": {
@@ -68,11 +68,3 @@
     ]
   }
 }
-
-
-
-
-
-
-
-

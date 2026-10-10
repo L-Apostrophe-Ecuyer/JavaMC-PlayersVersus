@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "mud",
   "key": {
     "#": "players-versus:brown_clay_bricks"

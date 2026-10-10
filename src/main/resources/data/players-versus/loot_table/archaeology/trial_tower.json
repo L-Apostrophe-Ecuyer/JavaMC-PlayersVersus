@@ -7,76 +7,72 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:golden_pickaxe",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:enchant_with_levels",
               "levels": {
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 15
               },
-              "options": "#minecraft:on_random_loot"
+              "options": "#minecraft:on_random_loot",
+              "type": "minecraft:enchant_with_levels"
             },
             {
-              "function": "minecraft:set_damage",
               "damage": {
                 "type": "minecraft:uniform",
                 "min": 0.1,
                 "max": 0.6
-              }
+              },
+              "type": "minecraft:set_damage"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:golden_pickaxe",
-          "functions": [
-            {
-              "function": "minecraft:set_damage",
-              "damage": {
-                "type": "minecraft:uniform",
-                "min": 0.2,
-                "max": 0.8
-              }
-            }
-          ]
+          "modifier": {
+            "damage": {
+              "type": "minecraft:uniform",
+              "min": 0.2,
+              "max": 0.8
+            },
+            "type": "minecraft:set_damage"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:golden_axe",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:enchant_with_levels",
               "levels": {
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 15
               },
-              "options": "#minecraft:on_random_loot"
+              "options": "#minecraft:on_random_loot",
+              "type": "minecraft:enchant_with_levels"
             },
             {
-              "function": "minecraft:set_damage",
               "damage": {
                 "type": "minecraft:uniform",
                 "min": 0.1,
                 "max": 0.6
-              }
+              },
+              "type": "minecraft:set_damage"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:golden_axe",
-          "functions": [
-            {
-              "function": "minecraft:set_damage",
-              "damage": {
-                "type": "minecraft:uniform",
-                "min": 0.2,
-                "max": 0.8
-              }
-            }
-          ]
+          "modifier": {
+            "damage": {
+              "type": "minecraft:uniform",
+              "min": 0.2,
+              "max": 0.8
+            },
+            "type": "minecraft:set_damage"
+          }
         },
         {
           "type": "minecraft:item",

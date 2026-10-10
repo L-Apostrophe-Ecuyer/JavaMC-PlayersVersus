@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "copper",
   "key": {
     "#": "minecraft:weathered_cut_copper"
@@ -9,7 +8,7 @@
     "##"
   ],
   "result": {
-    "count":  4,
+    "count": 4,
     "id": "minecraft:weathered_cut_copper_slab"
   }
 }
