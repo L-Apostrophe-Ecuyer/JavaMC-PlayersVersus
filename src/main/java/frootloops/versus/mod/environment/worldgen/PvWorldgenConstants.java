@@ -87,27 +87,27 @@ public final class PvWorldgenConstants {
     public static final double BASIN_WATER_MIN_SPREAD = 0.0;
 
     /**
-     * The basins' level ({@code caves/basin_level}, by column from the broad noise {@code players-versus:cave_basins}):
-     * their water, barriers and flooded corridors only reach up to it. Where the noise is below
-     * {@link #BASIN_LEVEL_DRY_BELOW} (about half the world) it's this, the layers' bottom, so they have none and the
-     * caves there are dry from y 32 down; it rises with the noise...
+     * The basins' level ({@code caves/basin_level}, by column from the noise {@code players-versus:cave_basins}): their
+     * water, barriers and flooded corridors only reach up to it. It stands on flat steps, so a lake has one level and the
+     * lakes around it can stand higher or lower, in patches about 100 to 250 blocks across: this, the layers' bottom, so
+     * no lakes and caves dry from y 32 down, where the noise is below {@link #BASIN_LEVEL_LOW_FROM} (about a quarter of
+     * the world)...
      */
     public static final int BASIN_LEVEL_DRY = BASIN_MIN_Y;
-    public static final double BASIN_LEVEL_DRY_BELOW = 0.0;
-    /**
-     * ...to this where the noise reaches {@link #BASIN_LEVEL_FULL_ABOVE} (about a tenth of the world), so the lakes stand
-     * at different heights from place to place: about a block higher every 20 blocks between.
-     */
+    /** ...then lakes up to this from {@link #BASIN_LEVEL_LOW_FROM} (about an eighth)... */
+    public static final int BASIN_LEVEL_LOW = 9;
+    public static final double BASIN_LEVEL_LOW_FROM = -0.2;
+    /** ...up to this from {@link #BASIN_LEVEL_MID_FROM} (about an eighth)... */
+    public static final int BASIN_LEVEL_MID = 16;
+    public static final double BASIN_LEVEL_MID_FROM = -0.05;
+    /** ...and up to the basins' top from {@link #BASIN_LEVEL_FULL_FROM} (about a third). */
     public static final int BASIN_LEVEL_FULL = BASIN_BARRIER_MAX_Y;
-    public static final double BASIN_LEVEL_FULL_ABOVE = 0.4;
+    public static final double BASIN_LEVEL_FULL_FROM = 0.1;
     /**
-     * The basins' floor ({@code caves/basin_floor}, by column): their water stays above it, so where a lake's cave goes
-     * on down, the stone that holds the lake is a rough floor. It's {@link #BASIN_FLOOR_MID} plus this many blocks per
-     * unit of the surface noise there, kept within {@link #BASIN_FLOOR_Y}..2 x {@link #BASIN_FLOOR_MID}.
+     * How far the noise goes while the level climbs from one step to the next: about 35 blocks, where a lake's surface
+     * steps up a block at a time over lips of barrier stone (about a fifth of the world is on these slopes).
      */
-    public static final double BASIN_FLOOR_BUMPS = 12.0;
-    public static final int BASIN_FLOOR_Y = 0;
-    public static final int BASIN_FLOOR_MID = 4;
+    public static final double BASIN_LEVEL_STEP_WIDTH = 0.05;
 
     // ------------------------------------------------------------------------------------------------------------
     // Aquifer: flooded corridors (the refactor plan, Section 10, question 7)

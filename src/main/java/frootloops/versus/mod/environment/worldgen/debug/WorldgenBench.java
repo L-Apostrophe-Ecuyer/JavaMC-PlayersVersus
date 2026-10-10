@@ -238,8 +238,8 @@ public final class WorldgenBench {
 
     /**
      * The basins' level over the region (the refactor plan, Section 6.2, 2d revised again), every
-     * {@link #BASIN_LEVEL_STEP} blocks: the share of columns with no basins (their level at the layers' bottom), with
-     * them up to their top, and between; {@code null} without a Players Versus aquifer.
+     * {@link #BASIN_LEVEL_STEP} blocks: the share of columns on each of its steps (no basins, then lakes up to each of
+     * the step levels) and between them; {@code null} without a Players Versus aquifer.
      */
     private static String basinLevels(ServerLevel world, Region region) {
         if (!(world.getChunkSource().getGenerator() instanceof NoiseBasedChunkGenerator noiseGenerator)) return null;
@@ -247,19 +247,24 @@ public final class WorldgenBench {
         if (!PvWorldgen.isPvGenerator(settings) || settings.aquifers().isEmpty()) return null;
         if (!(PvWorldgen.unwrap(settings.aquifers().get().fluidLevelSpreadNoise()) instanceof AquiferSpread spread)) return null;
         RandomState noise = world.getChunkSource().randomState();
-        long none = 0, full = 0, all = 0;
-        double sum = 0.0;
+        int[] steps = {PvWorldgenConstants.BASIN_LEVEL_DRY, PvWorldgenConstants.BASIN_LEVEL_LOW, PvWorldgenConstants.BASIN_LEVEL_MID,
+                PvWorldgenConstants.BASIN_LEVEL_FULL};
+        long[] onStep = new long[steps.length];
+        long all = 0;
         for (int dx = 0; dx < region.size; dx += BASIN_LEVEL_STEP) {
             for (int dz = 0; dz < region.size; dz += BASIN_LEVEL_STEP) {
                 double level = noise.sampleBlockValueUncached(spread.level(), region.minX + dx, 0, region.minZ + dz);
                 all++;
-                sum += level;
-                if (level <= PvWorldgenConstants.BASIN_LEVEL_DRY + 0.5) none++;
-                else if (level >= PvWorldgenConstants.BASIN_LEVEL_FULL - 0.5) full++;
+                for (int i = 0; i < steps.length; i++) {
+                    if (Math.abs(level - steps[i]) < 0.5) onStep[i]++;
+                }
             }
         }
-        return String.format(Locale.ROOT, "metric basin_level_columns no basins %.1f%%, up to y %d %.1f%%, between %.1f%%; mean level %.1f",
-                100.0 * none / all, PvWorldgenConstants.BASIN_LEVEL_FULL, 100.0 * full / all, 100.0 * (all - none - full) / all, sum / all);
+        long between = all;
+        for (long count : onStep) between -= count;
+        return String.format(Locale.ROOT, "metric basin_level_columns no basins %.1f%%, lakes up to y %d %.1f%%, y %d %.1f%%, y %d %.1f%%;"
+                        + " between steps %.1f%%", 100.0 * onStep[0] / all, steps[1], 100.0 * onStep[1] / all, steps[2],
+                100.0 * onStep[2] / all, steps[3], 100.0 * onStep[3] / all, 100.0 * between / all);
     }
 
     private static ChunkPos parseCenter(String value) {

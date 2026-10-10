@@ -156,7 +156,7 @@ REF_ACROSS = pv("overworld/high_river/across")
 REF_UPPER_VALLEY, REF_UPPER_ACROSS = pv("overworld/high_river/upper_valley"), pv("overworld/high_river/upper_across")
 REF_BANK, REF_UPPER_BANK = pv("overworld/high_river/bank"), pv("overworld/high_river/upper_bank")
 REF_DRY_PATHS = pv("overworld/caves/dry_paths")
-REF_BASIN_LEVEL, REF_BASIN_FLOOR = pv("overworld/caves/basin_level"), pv("overworld/caves/basin_floor")
+REF_BASIN_LEVEL = pv("overworld/caves/basin_level")
 
 
 def depth():
@@ -281,20 +281,17 @@ def dry_paths():
 
 def basin_level():
     """The basins' level by column (PvAquiferRules): their water, barriers and flooded corridors only reach up to it.
-    BASIN_LEVEL_DRY, the basin layers' bottom, where the broad noise players-versus:cave_basins is below
-    BASIN_LEVEL_DRY_BELOW, so the caves there are dry from y 32 down; rising to BASIN_LEVEL_FULL where it reaches
-    BASIN_LEVEL_FULL_ABOVE, so between them the lakes stand at different heights."""
-    lo, hi = C["BASIN_LEVEL_DRY_BELOW"], C["BASIN_LEVEL_FULL_ABOVE"]
-    share = clamp(div(sub(noise(pv("cave_basins"), 1.0, 0.0), lo), hi - lo), 0.0, 1.0)
-    return add(float(C["BASIN_LEVEL_DRY"]), mul(share, float(C["BASIN_LEVEL_FULL"] - C["BASIN_LEVEL_DRY"])))
-
-
-def basin_floor():
-    """The basins' floor by column (PvAquiferRules): their water stays above it, so the stone that holds a lake where
-    its cave goes on down is rough: BASIN_FLOOR_MID plus BASIN_FLOOR_BUMPS blocks per unit of the surface noise (flat in
-    y), within BASIN_FLOOR_Y..2 x BASIN_FLOOR_MID."""
-    bumps = add(float(C["BASIN_FLOOR_MID"]), mul(noise(mc("surface"), 2.0, 0.0), C["BASIN_FLOOR_BUMPS"]))
-    return clamp(bumps, float(C["BASIN_FLOOR_Y"]), 2.0 * C["BASIN_FLOOR_MID"])
+    Flat steps by the noise players-versus:cave_basins: BASIN_LEVEL_DRY, the basin layers' bottom, so no lakes and dry
+    caves from y 32 down, below BASIN_LEVEL_LOW_FROM; then BASIN_LEVEL_LOW, BASIN_LEVEL_MID and BASIN_LEVEL_FULL from
+    their thresholds, each step climbing over BASIN_LEVEL_STEP_WIDTH of the noise."""
+    steps = [(C["BASIN_LEVEL_LOW_FROM"], C["BASIN_LEVEL_LOW"] - C["BASIN_LEVEL_DRY"]),
+             (C["BASIN_LEVEL_MID_FROM"], C["BASIN_LEVEL_MID"] - C["BASIN_LEVEL_LOW"]),
+             (C["BASIN_LEVEL_FULL_FROM"], C["BASIN_LEVEL_FULL"] - C["BASIN_LEVEL_MID"])]
+    basins = noise(pv("cave_basins"), 1.0, 0.0)
+    level = float(C["BASIN_LEVEL_DRY"])
+    for start, rise in steps:
+        level = add(level, mul(clamp(div(sub(basins, start), C["BASIN_LEVEL_STEP_WIDTH"]), 0.0, 1.0), float(rise)))
+    return level
 
 
 def flooded_corridors():
@@ -498,7 +495,6 @@ FUNCTIONS = {
     "overworld/caves/flooded_corridors": flooded_corridors,
     "overworld/caves/dry_paths": dry_paths,
     "overworld/caves/basin_level": basin_level,
-    "overworld/caves/basin_floor": basin_floor,
     "overworld/high_river": lambda: noise(pv("high_river"), 0.25, 0.0),
     "overworld/high_river/across": lambda: high_river_across(HIGH_RIVER),
     "overworld/high_river/valley": lambda: high_river_valley(HIGH_RIVER, REF_ACROSS),
@@ -540,7 +536,6 @@ def noise_settings():
                 "corridors": REF_FLOODED_CORRIDORS,
                 "dry_paths": REF_DRY_PATHS,
                 "level": REF_BASIN_LEVEL,
-                "floor": REF_BASIN_FLOOR,
             },
             "lava": noise(mc("aquifer_lava"), 1.0, 1.0),
             "surface_level": mc("overworld/preliminary_surface_level"),
@@ -603,7 +598,7 @@ def material_rule(surface_rule):
 # octave_count, amplitude_modifiers and a base_amplitude that gives the same values (NormalNoise.createParity).
 NOISES = {
     "high_river": (-7, [1.0, 2.0, 1.0]),
-    "cave_basins": (-10, [1.0, 1.0]),
+    "cave_basins": (-9, [1.0, 1.0]),
     "sand_beach": (-7, [1.0] * 10 + [40.0, 20.0] + [10.0] * 17),
     "gravel_beach": (-7, [1.0] * 10 + [40.0, 20.0] + [10.0] * 17),
 }

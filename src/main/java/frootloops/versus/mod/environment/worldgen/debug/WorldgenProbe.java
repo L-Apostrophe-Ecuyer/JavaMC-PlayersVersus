@@ -124,8 +124,8 @@ public final class WorldgenProbe {
                     noiseConfig.sampleBlockValueUncached(floodedness.highRiver(), x, y, z),
                     noiseConfig.sampleBlockValueUncached(floodedness.upperHighRiver(), x, y, z), aquifer.corridor(x, y, z),
                     aquifer.dryPath(x, y, z)));
-            // the basins' water, barriers and flooded corridors stand above the floor and up to the level
-            lines.add(String.format(Locale.ROOT, "basins' level %.1f, floor %.1f", aquifer.basinLevel(x, z), aquifer.basinFloor(x, z)));
+            // the basins' water, barriers and flooded corridors stand up to it
+            lines.add(String.format(Locale.ROOT, "basins' level %.1f", aquifer.basinLevel(x, z)));
         }
         return lines;
     }

@@ -28,12 +28,9 @@ import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
  *                  of S.
  * @param level     the basins' level ({@code players-versus:overworld/caves/basin_level}): by column, the highest y their
  *                  water, barriers and flooded corridors reach; the layers' bottom where they have none. Not part of S.
- * @param floor     the basins' floor ({@code players-versus:overworld/caves/basin_floor}): by column, the height their
- *                  water stays above. Not part of S.
  */
 public record AquiferSpread(DensityFunction entrances, DensityFunction noodle, DensityFunction surface,
-                            DensityFunction corridors, DensityFunction dryPaths, DensityFunction level,
-                            DensityFunction floor) implements DensityFunction {
+                            DensityFunction corridors, DensityFunction dryPaths, DensityFunction level) implements DensityFunction {
 
     public static final MapCodec<AquiferSpread> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             DensityFunction.CODEC.fieldOf("entrances").forGetter(AquiferSpread::entrances),
@@ -41,8 +38,7 @@ public record AquiferSpread(DensityFunction entrances, DensityFunction noodle, D
             DensityFunction.CODEC.fieldOf("surface").forGetter(AquiferSpread::surface),
             DensityFunction.CODEC.fieldOf("corridors").forGetter(AquiferSpread::corridors),
             DensityFunction.CODEC.fieldOf("dry_paths").forGetter(AquiferSpread::dryPaths),
-            DensityFunction.CODEC.fieldOf("level").forGetter(AquiferSpread::level),
-            DensityFunction.CODEC.fieldOf("floor").forGetter(AquiferSpread::floor)
+            DensityFunction.CODEC.fieldOf("level").forGetter(AquiferSpread::level)
     ).apply(instance, AquiferSpread::new));
 
     @Override
@@ -65,12 +61,12 @@ public record AquiferSpread(DensityFunction entrances, DensityFunction noodle, D
     public DensityFunction rewriteChildren(DfRewriteRule rule) {
         DensityFunction entrances = rule.rewrite(this.entrances), noodle = rule.rewrite(this.noodle);
         DensityFunction surface = rule.rewrite(this.surface), corridors = rule.rewrite(this.corridors);
-        DensityFunction dryPaths = rule.rewrite(this.dryPaths), level = rule.rewrite(this.level), floor = rule.rewrite(this.floor);
+        DensityFunction dryPaths = rule.rewrite(this.dryPaths), level = rule.rewrite(this.level);
         if (entrances == this.entrances && noodle == this.noodle && surface == this.surface && corridors == this.corridors
-                && dryPaths == this.dryPaths && level == this.level && floor == this.floor) {
+                && dryPaths == this.dryPaths && level == this.level) {
             return this;
         }
-        return new AquiferSpread(entrances, noodle, surface, corridors, dryPaths, level, floor);
+        return new AquiferSpread(entrances, noodle, surface, corridors, dryPaths, level);
     }
 
     @Override

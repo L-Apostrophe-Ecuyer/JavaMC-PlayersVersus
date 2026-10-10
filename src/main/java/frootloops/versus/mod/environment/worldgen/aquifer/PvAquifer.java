@@ -91,9 +91,9 @@ public final class PvAquifer implements Aquifer {
     /** Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled. */
     @Nullable
     private double[] ridge;
-    /** The basins' level and floor, by column. */
+    /** The basins' level, by column. */
     @Nullable
-    private Columns basinLevel, basinFloor;
+    private Columns basinLevel;
     /** Each block's own decision, by column and then height from {@link #MIN_Y}: its ordinal plus one, 0 until computed. */
     @Nullable
     private byte[][] positions;
@@ -102,7 +102,6 @@ public final class PvAquifer implements Aquifer {
     private final PvAquiferRules.Field corridorField = this::corridor;
     private final PvAquiferRules.Field dryPathField = this::dryPath;
     private final PvAquiferRules.Field levelField = (x, y, z) -> this.basinLevel(x, z);
-    private final PvAquiferRules.Field floorField = (x, y, z) -> this.basinFloor(x, z);
     private final PvAquiferRules.Positions atPosition = this::atPosition;
     /** Blocks whose own decision was computed, for tests and the benchmark. */
     private int computedPositions;
@@ -171,7 +170,7 @@ public final class PvAquifer implements Aquifer {
         int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
         if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
             return PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField, this.dryPathField,
-                    this.levelField, this.floorField);
+                    this.levelField);
         }
         int column = localX * SIDE + localZ;
         if (this.positions == null) this.positions = new byte[SIDE * SIDE][];
@@ -184,7 +183,7 @@ public final class PvAquifer implements Aquifer {
         int stored = levels[level];
         if (stored != 0) return DECISIONS[stored - 1];
         PvAquiferDecision decision = PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField,
-                this.dryPathField, this.levelField, this.floorField);
+                this.dryPathField, this.levelField);
         levels[level] = (byte) (decision.ordinal() + 1);
         this.computedPositions++;
         return decision;
@@ -231,12 +230,6 @@ public final class PvAquifer implements Aquifer {
     public double basinLevel(int x, int z) {
         if (this.basinLevel == null) this.basinLevel = new Columns(this.spreadConfig.level());
         return this.basinLevel.at(x, z);
-    }
-
-    /** The basins' floor at a column: their water stays above it. */
-    public double basinFloor(int x, int z) {
-        if (this.basinFloor == null) this.basinFloor = new Columns(this.spreadConfig.floor());
-        return this.basinFloor.at(x, z);
     }
 
     /**
