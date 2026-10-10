@@ -17,9 +17,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 /**
- * The Ice Cube: a blue slime of the ice caves. It hops, splits and drops like a slime (ice balls instead of slime balls,
- * from the smallest), and what it hits freezes: the cube mobs' attack ({@code SlimeMixin}) calls {@link #freeze}. Its
- * own frost doesn't bother it (it's in {@code freeze_immune_entity_types} too).
+ * The Ice Cube: a blue slime of the ice caves. It hops and splits like a slime, drops Frigid Concentrate the way a magma
+ * cube drops magma cream (the Concentrate of Fire): sometimes, from all but the smallest (its loot table). What it hits
+ * freezes: the cube mobs' attack ({@code SlimeMixin}) calls {@link #freeze}. Its own frost doesn't bother it (it's in
+ * {@code freeze_immune_entity_types} too).
  */
 public class IceCubeEntity extends Slime {
 

@@ -114,7 +114,7 @@ All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans a
 4. **frozen**: temperature −0.55..−0.375;
 5. **humid**: humidity 0.275..0.35.
 
-The original biome keeps the remaining pieces, all at depth 0. The depth-1 copies are dropped, so the underground belongs to the cave biomes. Each remaining piece also gets its surface-cave biome at depth 0.1–0.25 (frosted, desert-creeper or badlands cave). Vanilla's lush and dripstone entries are replaced as before, and the 13 Players Versus cave entries are appended. The result has 6,293 entries, 5,400 of them at the surface. Unit tests check that the pieces of each slice don't overlap and add up to the slice.
+The original biome keeps the remaining pieces, all at depth 0. The depth-1 copies are dropped, so the underground belongs to the cave biomes. Each remaining piece also gets its surface-cave biome at depth 0.1–0.25 (vanilla's ice caves since 26.4, which replaced the frosted caves; desert-creeper or badlands cave). Vanilla's lush and dripstone entries are replaced as before, and the 13 Players Versus cave entries are appended. The result has 6,293 entries, 5,400 of them at the surface. Unit tests check that the pieces of each slice don't overlap and add up to the slice.
 
 The deleted mixin emitted the same rules, but built each transition from the whole slice and narrowed the original along one axis at most, so its boxes overlapped in places and left holes in others (Q4), and results depended on the search tree's tie-breaking. A test-only copy of it (`OldBiomeLayout`) lets the tests measure what changed: 98.5% of random climate points at the surface keep their biome, and 100% (up to ties) from depth 0.3 down.
 
@@ -208,7 +208,7 @@ The default-preset mixins now chain with other mods (`@ModifyExpressionValue` in
   - dry upper caves, and water basins in caves below about y 32;
   - ramen and noodle caves;
   - mountainside, cold and humid transition biomes;
-  - the PV cave layers and the frosted, badlands and desert-creeper surface caves;
+  - the PV cave layers and the ice (vanilla's since 26.4, formerly frosted), badlands and desert-creeper surface caves;
   - sand and gravel beaches;
   - copper veins in terracotta and iron veins in tuff.
 - **Performance:** PV pregeneration is no slower than the vanilla Default preset (stretch goal: faster), and no status costs more than 1.2× vanilla.
@@ -520,7 +520,7 @@ static void emitSurface(Slice slice, List<...> out) {
 | `DEEP` | point 0.9 | 0.05 for generic deep caves |
 | lush and dripstone replacements | 0.15–0.5 | 0.01 for lush |
 
-Q3: the dripstone and frosted replacements keep depth 0.8–1.0, now written as a named constant instead of reusing the continentalness range (revision 3 proposed 0.15–0.5, which would have added dripstone to shallow caves). Every row keeps its current climate ranges. `SURFACE_CAVES` keeps its current mapping: frozen peaks/snowy slopes → frosted caves, desert → desert creeper caves, badlands family → badlands cave.
+Q3: the dripstone and frosted (since 26.4: vanilla's ice caves) replacements keep depth 0.8–1.0, now written as a named constant instead of reusing the continentalness range (revision 3 proposed 0.15–0.5, which would have added dripstone to shallow caves). Every row keeps its current climate ranges. `SURFACE_CAVES` keeps its current mapping: frozen peaks/snowy slopes → frosted caves (vanilla's ice caves since 26.4), desert → desert creeper caves, badlands family → badlands cave.
 
 **Checks done:** unit tests (Section 1.4 lists them) and the smoke runs. In the benchmark region, which is temperate forest, ocean and plains with no transition rule in play, the Improved world's biome histograms and maps are identical to the baseline; the Default world now has only vanilla biomes.
 

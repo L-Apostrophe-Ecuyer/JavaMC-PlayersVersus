@@ -3,11 +3,14 @@
   "pools": [
     {
       "condition": {
-        "type": "minecraft:entity_properties",
-        "entity": "this",
-        "predicate": {
-          "minecraft:type_specific/cube_mob": {
-            "size": 1
+        "type": "minecraft:inverted",
+        "term": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:type_specific/cube_mob": {
+              "size": 1
+            }
           }
         }
       },
@@ -20,7 +23,7 @@
               "count": {
                 "type": "minecraft:uniform",
                 "max": 1,
-                "min": 0
+                "min": -2
               }
             },
             {
@@ -33,7 +36,7 @@
               "enchantment": "minecraft:looting"
             }
           ],
-          "name": "minecraft:ice_ball"
+          "name": "players-versus:concentrate_of_freezing"
         }
       ],
       "rolls": 1

@@ -26,8 +26,8 @@ import org.spongepowered.asm.mixin.injection.*;
 @Environment(EnvType.CLIENT)
 @Mixin(ClientLevel.class)
 public abstract class ClientWorldSkyMixin extends Level {
-    protected ClientWorldSkyMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates) {
-        super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
+    protected ClientWorldSkyMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, int maxChainedNeighborUpdates) {
+        super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, maxChainedNeighborUpdates);
     }
 
     // 26.3 moved the weather ticking (rain particles and sounds, tickWeatherEffects) and the precipitation check

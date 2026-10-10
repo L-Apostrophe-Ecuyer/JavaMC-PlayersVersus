@@ -1,14 +1,7 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Port to 26.4-snapshot-3, round 3.
-# MeleeAttackMixin wraps calls in one of MeleeAttack.create's lambdas, by name.
-calls net.minecraft.world.entity.ai.behavior.MeleeAttack lambda
-# The leaves' rustling ticks with Fabric's client tick event.
-sig net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-# A dye colour's map colours are ColorCollections since 26.4.
-sig net.minecraft.world.level.block.ColorCollection
-# The ice caves' material rules, for the Players Versus material rule.
-data worldgen/material_rule/overworld.json
-data worldgen/material_rule/overworld/ice_cave_bands.json
-data worldgen/material_rule/overworld/biome_surface/ice_caves.json
-data worldgen/material_rule/overworld/surface.json
+# Port to 26.4-snapshot-3, round 4.
+# The Ice Cube drops Frigid Concentrate the way the magma cube drops magma cream (the Concentrate of Fire).
+data loot_table/entities/magma_cube.json
+# MeleeAttackGoal's attack interval is a field since 26.4 (MeleeAttackGoalMixin times the swings itself).
+sig net.minecraft.world.entity.ai.goal.MeleeAttackGoal
