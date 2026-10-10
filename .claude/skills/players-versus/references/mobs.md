@@ -62,7 +62,9 @@ assuming full overlap).
   and 20000 = midnight; `getMoonPhase() == 7` = new moon (vanilla's darkest phase index).
 - `addCustomSpawns()`: Deeper Creeper in Deep Caves/Regular Cave biomes (weight 100, group 1-1);
   Wither Skeleton (60) and Zombified Piglin (3, group 1-4) also added to Deep Caves; Breeze added to
-  Frozen Peaks (100); Frosted Zombie wherever vanilla spawns snow foxes (140, group 2-4); extra
+  Frozen Peaks (100); vanilla's Frostbite wherever vanilla spawns snow foxes (140, group 2-4; it took
+  over from the mod's Frosted Zombie in the 26.4 port); the Ice Cube in vanilla's Ice Caves (100,
+  group 1-2); extra
   desert fauna (cave spider, husk, camel, cat); Phantom spawn weight raised overworld-wide (80,
   group 1-2 — vanilla Phantoms normally only spawn via the sleep-deprivation mechanic, this is an
   **additional**, ordinary biome-based spawn on top of that); Blaze added to Nether Wastes (15).
@@ -75,9 +77,8 @@ assuming full overlap).
   weight: Deeper Creeper needs light ≤1, `#pale_creeper_spawnable_on`, and y<32; Pale Zombie needs
   light 0, `#undead_overworld_spawnable_on`, auto-allowed in Deep Caves biome, otherwise y-gated
   (never above y64, midnight-during-new-moon only between y24-64, unconditional below y24) — a
-  three-tier depth/rarity curve; Frosted Zombie walks up through any stacked powder snow first, then
-  requires vanilla's own `canSpawnInDark` **passed through this mod's override above** plus either
-  open sky or the Frosted Cave biome.
+  three-tier depth/rarity curve; the Ice Cube (`IceCubeEntity.checkIceCubeSpawnRules`) needs a dark
+  enough spot (vanilla's monster light check) unless a spawner made it.
 
 ## Custom hostile entities
 
@@ -105,10 +106,17 @@ assuming full overlap).
   peppering it with a bow from max range.
 - **`WardenVibrationListenerMixin`** — not re-read this pass; likely tunes the sniff/vibration
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
-- **Frosted Zombie / Pale Zombie** (`mod/mobs/hostile/overworld/{FrostedZombieEntity,PaleZombieEntity}.java`,
-  renderers under `src/client/.../mobs/hostile/overworld/`) — snow-biome and deep-cave zombie
-  variants respectively (spawn conditions above); not re-read in this pass for their own
-  attribute/behavior overrides beyond spawn placement — check those files directly.
+- **Pale Zombie** (`mod/mobs/hostile/overworld/PaleZombieEntity.java`, renderer under
+  `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above);
+  not re-read in this pass beyond spawn placement — check the file directly. The snow-biome Frosted
+  Zombie was removed in the 26.4 port: vanilla's Frostbite takes its spawns, and vanilla turns
+  freezing zombies into frostbites (`Zombie#convertsToWhenFreezing`), which `ZombieMixin` did before.
+- **Ice Cube** (`mod/mobs/hostile/overworld/IceCubeEntity.java`, `IceCubeRenderer` in the client set)
+  — a `Slime` subclass in blue (the slime model with its own texture) that spawns in vanilla's Ice
+  Caves. Its hit freezes (`SlimeMixin.dealDamage` calls `IceCubeEntity.freeze`: vanilla's Freezing
+  effect, 30 ticks per size); it is freeze-immune (`freeze_immune_entity_types`, `canFreeze`,
+  `canBeAffected`). Its loot is the magma cube's: Frigid Concentrate from cubes of size 2 or more
+  (`loot_table/entities/ice_cube.json`), as magma cubes drop magma cream (→ Concentrate of Fire).
 - **Skeleton/Spider/Slime/Silverfish/Drowned/Phantom/Enderman/Zombie(+Horde/EventListener/Villager)**
   (`mixin/mobs/hostile/overworld/{SkeletonMixin,SpiderMixin,SlimeMixin,SilverfishMixin,DrownedMixin,
   PhantomMixin,PhantomAccessor,ZombieMixin,ZombieHordeMixin,ZombieEventListenerMixin,ZombieVillagerMixin}.java`,
@@ -157,7 +165,7 @@ assuming full overlap).
 
 ## Entity registration (`ModEntities`)
 Central registry for every custom entity type: `SlimeballEntity` (misc group, tiny 0.25×0.25 hitbox
-— see `items-and-equipment.md`), `PaleCreeperEntity`, `FrostedZombieEntity`, `PaleZombieEntity`,
+— see `items-and-equipment.md`), `PaleCreeperEntity`, `IceCubeEntity`, `PaleZombieEntity`,
 `WildfireEntity` (all monster group, tracking ranges 4-8 blocks — short compared to vanilla hostiles,
 worth checking if intentional for a "you need to be close to notice these" cave-mob design or just
 unconsidered). Each gets a `FabricDefaultAttributeRegistry.register` call plus (except Slimeball) a

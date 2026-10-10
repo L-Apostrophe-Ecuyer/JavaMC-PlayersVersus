@@ -1,7 +1,8 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Port to 26.4-snapshot-3, round 4.
-# The Ice Cube drops Frigid Concentrate the way the magma cube drops magma cream (the Concentrate of Fire).
-data loot_table/entities/magma_cube.json
-# MeleeAttackGoal's attack interval is a field since 26.4 (MeleeAttackGoalMixin times the swings itself).
-sig net.minecraft.world.entity.ai.goal.MeleeAttackGoal
+# Port to 26.4-snapshot-3, round 5.
+# What a chunk's getBiome takes since 26.4 (it replaced getNoiseBiome, which took quart coordinates), for the bench.
+calls net.minecraft.world.level.chunk.ChunkAccess getBiome
+calls net.minecraft.world.level.chunk.ProtoChunk getBiome
+calls net.minecraft.world.level.chunk.LevelChunkSection getBiome
+sig net.minecraft.world.level.biome.NoiseBiomeChunk
