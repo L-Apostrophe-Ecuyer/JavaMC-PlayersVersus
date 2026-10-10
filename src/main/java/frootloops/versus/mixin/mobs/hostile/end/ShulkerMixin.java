@@ -39,7 +39,7 @@ public abstract class ShulkerMixin extends AbstractGolem implements Enemy {
 
     @Inject(method = "setAttachFace", at = @At("HEAD"))
     private void matchSurfaceColor(final Direction attachmentDirection, CallbackInfo ci) {
-        VersusMod.MOD_LOGGER.debug("Shulker ATTACHING");
+        VersusMod.MOD_LOGGER.warn("Shulker ATTACHING");
 
 
         BlockPos pos = this.blockPosition().relative(attachmentDirection);
@@ -59,8 +59,8 @@ public abstract class ShulkerMixin extends AbstractGolem implements Enemy {
                 DYE_COLOR_BY_MAP_COLOR.putIfAbsent(dyeColor.getTextureDiffuseColor(), dyeColor);
             }
         }
-        DyeColor shulkerVariant = DYE_COLOR_BY_MAP_COLOR.get(color);
-        VersusMod.MOD_LOGGER.debug("Shulker set to color " + (shulkerVariant == null ? "default" : color.toString()));
+        DyeColor shulkerVariant = DYE_COLOR_BY_MAP_COLOR.get(color.col);
+        VersusMod.MOD_LOGGER.warn("Shulker set to color " + (shulkerVariant == null ? "default" : color.toString()));
         this.versus$setVariant(shulkerVariant == null ? Optional.empty() : Optional.of(shulkerVariant));
     }
 

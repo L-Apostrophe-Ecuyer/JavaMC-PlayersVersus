@@ -44,7 +44,7 @@ public final class PvBiomeLayout {
      */
     static final Parameter DEEP_DRIPSTONE_DEPTH = Parameter.span(0.8F, 1.0F);
 
-    private static final long MOUNTAIN_EROSION_MAX = Climate.quantizeCoord(-0.475F);
+    private static final long MOUNTAIN_EROSION_MAX = Climate.quantizeCoord(-0.385F);
     private static final long MOUNTAIN_CONTINENTALNESS_MIN = Climate.quantizeCoord(0.03F);
     private static final long RIVER_VALLEY_WEIRDNESS = Climate.quantizeCoord(0.3F);
     private static final long WARM_MOUNTAINSIDE_FOREST_TEMPERATURE = Climate.quantizeCoord(0.1998F);
@@ -55,7 +55,6 @@ public final class PvBiomeLayout {
      */
     static final float DAPPLED_WEIRDNESS = 0.0F;
     static final float DAPPLED_COOL = 0.0F;
-    /** Below this temperature, next to the taigas, birch forests become dappled taiga instead of sparse dappled forest. */
     static final float DAPPLED_COLD = -0.075F;
 
     private record Rule(String name, Box region, BiFunction<Box, ResourceKey<Biome>, ResourceKey<Biome>> target) {
