@@ -1,0 +1,47 @@
+{
+  "type": "minecraft:sequence",
+  "sequence": [
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:noise_threshold",
+        "noise": "players-versus:cave_bands",
+        "min_threshold": 0.38,
+        "max_threshold": 0.45,
+        "is_3d": true
+      },
+      "then_run": {
+        "type": "minecraft:block",
+        "result_state": "minecraft:cyan_terracotta"
+      }
+    },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:noise_threshold",
+        "noise": "players-versus:cave_bands",
+        "min_threshold": 0.45,
+        "max_threshold": 0.52,
+        "is_3d": true
+      },
+      "then_run": {
+        "type": "minecraft:block",
+        "result_state": "minecraft:andesite"
+      }
+    },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:noise_threshold",
+        "noise": "players-versus:cave_bands",
+        "min_threshold": 0.52,
+        "max_threshold": 1.7976931348623157e+308,
+        "is_3d": true
+      },
+      "then_run": {
+        "type": "minecraft:block",
+        "result_state": "players-versus:gray_clay"
+      }
+    }
+  ]
+}
