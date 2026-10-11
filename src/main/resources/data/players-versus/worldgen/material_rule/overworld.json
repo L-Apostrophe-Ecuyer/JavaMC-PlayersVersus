@@ -2423,8 +2423,8 @@
                               "if_true": {
                                 "type": "minecraft:noise_threshold",
                                 "noise": "players-versus:surface_bands",
-                                "min_threshold": -1.7976931348623157e+308,
-                                "max_threshold": -0.6
+                                "min_threshold": -0.42,
+                                "max_threshold": -0.1
                               },
                               "then_run": {
                                 "type": "minecraft:block",
@@ -2451,8 +2451,8 @@
                               "if_true": {
                                 "type": "minecraft:noise_threshold",
                                 "noise": "players-versus:surface_bands",
-                                "min_threshold": 0.58,
-                                "max_threshold": 1.7976931348623157e+308
+                                "min_threshold": 0.22,
+                                "max_threshold": 0.52
                               },
                               "then_run": {
                                 "type": "minecraft:block",

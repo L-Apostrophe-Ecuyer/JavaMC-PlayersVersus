@@ -621,22 +621,26 @@ def sequence(*rules):
 # the floors their caves have near the surface, in vanilla's order.
 CAVE_BIOME_BANDS = [("sulfur_caves", "overworld/sulfur_cave_bands"), ("ice_caves", "overworld/ice_cave_bands")]
 
-# Bands of the Players Versus noise surface_bands (2D, about 32 blocks across) on the ground: where it's low, brown mud
-# ringed by 0 to 2 blocks of coarse dirt, then 0 to 3 of brown clay; where it's high, gray clay ringed by andesite, then
-# cyan terracotta, so walking in, the ground goes cyan terracotta, andesite, gray clay. The snowy plains have both ends
-# of the one noise, the whole spectrum from brown mud through grass to gray clay; the savannas the mud, the snowy taiga
-# the clay. The rings' widths come from how fast the noise changes at their thresholds (0.05 a block on average).
+# Bands of the Players Versus noise surface_bands (2D, about 32 blocks across) on the ground, as stripes in the middle of
+# the noise with grass between them and on both sides: grass, a stripe of clay, grass, a stripe of mud, grass. A mud
+# stripe is brown mud (the core) ringed on either side by 0 to 2 blocks of coarse dirt, then 0 to 3 of brown clay; a
+# clay stripe goes cyan terracotta, andesite, gray clay (the core), andesite, cyan terracotta. The snowy plains take
+# both stripes of the one noise, the whole spectrum from brown mud through grass to gray clay; the savannas the mud,
+# the snowy taiga the clay. The rings' widths come from how fast the noise changes at their thresholds (0.05 a block
+# on average). Outside a stripe the rule falls through to the grass.
 SURFACE_BANDS = pv("surface_bands")
 MAX = sys.float_info.max
-MUD_BANDS = [(pv("brown_mud"), -MAX, -0.60), (mc("coarse_dirt"), -0.60, -0.55), (pv("brown_clay"), -0.55, -0.47)]
-CLAY_BANDS = [(mc("cyan_terracotta"), 0.44, 0.51), (mc("andesite"), 0.51, 0.58), (pv("gray_clay"), 0.58, MAX)]
+MUD_BANDS = [(pv("brown_clay"), -0.42, -0.36), (mc("coarse_dirt"), -0.36, -0.32), (pv("brown_mud"), -0.32, -0.20),
+             (mc("coarse_dirt"), -0.20, -0.16), (pv("brown_clay"), -0.16, -0.10)]
+CLAY_BANDS = [(mc("cyan_terracotta"), 0.22, 0.27), (mc("andesite"), 0.27, 0.32), (pv("gray_clay"), 0.32, 0.42),
+              (mc("andesite"), 0.42, 0.47), (mc("cyan_terracotta"), 0.47, 0.52)]
 MUD_BIOMES = [mc("snowy_plains"), mc("savanna"), mc("savanna_plateau")]
 CLAY_BIOMES = [mc("snowy_plains"), mc("snowy_taiga")]
-# The same bands in the regular caves' stone, on the 3D noise cave_bands (as vanilla's cave biomes' bands are), where
-# it's high: gray clay in shells of andesite and cyan terracotta, in about a tenth of the stone.
+# The same clay stripe in the regular caves' stone, on the 3D noise cave_bands (as vanilla's cave biomes' bands are):
+# gray clay in shells of andesite and cyan terracotta, where the noise is in the stripe.
 REGULAR_CAVE = pv("caves/regular_cave")
 CAVE_BANDS = pv("cave_bands")
-REGULAR_CAVE_BANDS = [(mc("cyan_terracotta"), 0.38, 0.45), (mc("andesite"), 0.45, 0.52), (pv("gray_clay"), 0.52, MAX)]
+REGULAR_CAVE_BANDS = CLAY_BANDS
 
 
 def noise_threshold(noise_id, low, high, is_3d=False):
@@ -707,8 +711,8 @@ def add_surface_bands(rule):
     under = unders[0]["sequence"]
     at = next(i for i, r in enumerate(under) if is_dirt_by_water(r))
     under[at:at] = [
-        condition(biome_is(*MUD_BIOMES), bands(SURFACE_BANDS, [(pv("brown_clay"), -MAX, MUD_BANDS[0][2])])),
-        condition(biome_is(*CLAY_BIOMES), bands(SURFACE_BANDS, [(pv("gray_clay"), CLAY_BANDS[-1][1], MAX)])),
+        condition(biome_is(*MUD_BIOMES), bands(SURFACE_BANDS, [(pv("brown_clay"), MUD_BANDS[0][1], MUD_BANDS[-1][2])])),
+        condition(biome_is(*CLAY_BIOMES), bands(SURFACE_BANDS, [(pv("gray_clay"), CLAY_BANDS[0][1], CLAY_BANDS[-1][2])])),
     ]
 
 
