@@ -70,7 +70,11 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             }
 
             InteractionResult actionResult = null;
-            InteractionHand[] hands = this.shouldPrioritizeOffhand() ? OFFHAND_FIRST : MAINHAND_FIRST;
+            // While an item is in use (a shield held up, a bow drawn), only its hand is tried: starting the other hand's
+            // item would cut the use short, and starting the same one again would restart it (the draw, the block)
+            boolean usingItem = this.player.isUsingItem();
+            InteractionHand[] hands = usingItem ? new InteractionHand[] {this.player.getUsedItemHand()}
+                    : this.shouldPrioritizeOffhand() ? OFFHAND_FIRST : MAINHAND_FIRST;
             for (InteractionHand hand : hands) {
                 ItemStack itemStack = this.player.getItemInHand(hand);
                 if (!itemStack.isItemEnabled(this.level.enabledFeatures())) continue;
@@ -130,7 +134,7 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                     }
                 }
 
-                if (!itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
+                if (!usingItem && !itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
                     if (success3.swingSource() == InteractionResult.SwingSource.PREDICTED) {
                         this.player.swing(hand, itemStack.getInteractAnimation(), false);
                     }
