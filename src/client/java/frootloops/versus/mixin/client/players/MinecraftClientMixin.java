@@ -57,8 +57,13 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
 
     @Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
     private void doItemUse(CallbackInfo info) {
+        // As vanilla: no delay while a block is being mined, so that the use starts as soon as the mining stops
+        if (this.gameMode.isDestroying()) {
+            info.cancel();
+            return;
+        }
         this.rightClickDelay = 4;
-        if (!this.gameMode.isDestroying() && !this.player.isHandsBusy()) {
+        if (!this.player.isHandsBusy()) {
 
             if (this.hitResult == null) {
                 VersusMod.MOD_LOGGER.error("Null returned as 'hitResult', this shouldn't happen!");
@@ -78,11 +83,9 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                                 info.cancel();
                                 return;
                             }
-                            // 26.3 also checks the reach: an entity can be picked from further than it can be interacted with
-                            if (!this.player.isWithinEntityInteractionRange(entity, 0.0)) {
-                                info.cancel();
-                                return;
-                            }
+                            // 26.3 also checks the reach: an entity can be picked from further than it can be interacted
+                            // with, and then the held item is used, as when nothing is picked
+                            if (!this.player.isWithinEntityInteractionRange(entity, 0.0)) break;
 
                             // Use chest if item frame clicked on accident
                             if(!this.player.isShiftKeyDown() && entity instanceof ItemFrame itemFrameEntity) {

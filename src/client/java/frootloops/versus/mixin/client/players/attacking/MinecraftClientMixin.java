@@ -57,6 +57,14 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
     private void holdToAttack(boolean bl, CallbackInfo ci) {
         if(VersusSettings.Combat.CAN_HOLD_TO_ATTACK == false) return;
 
+        // Vanilla neither attacks nor mines while an item is in use (handleKeybinds drops the attack key's clicks and
+        // continueAttack does nothing): an attack would cut the use short, a raised shield first (PlayerEntityMixin),
+        // and the use key held would raise it again. The attack key held through a use counts from the use's end.
+        if(player.isUsingItem()) {
+            ticksAttackKeyPressed = 0;
+            return;
+        }
+
         boolean tryAttacking = false;
         float attackChargeProgress = player.getAttackStrengthScale(0.0f);
         if(attackChargeProgress > Combat.MIN_COOLDOWN_TO_SWING) {
