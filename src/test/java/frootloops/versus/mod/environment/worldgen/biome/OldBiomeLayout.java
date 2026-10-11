@@ -18,7 +18,7 @@ import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 /**
  * The layout the deleted {@code VanillaBiomeParametersOverworldMixin} produced (at commit 37efc29), replayed over
  * vanilla's entries, so tests can measure what {@link PvBiomeLayout} changed. The logic is copied as-is, quirks
- * included; do not fix it here.
+ * included; do not fix it here. Its frosted caves are vanilla's ice caves now (26.4), as in the new layout.
  */
 final class OldBiomeLayout {
 
@@ -80,11 +80,11 @@ final class OldBiomeLayout {
         if (biome == Biomes.LUSH_CAVES) {
             parameters.accept(Pair.of(Climate.parameters(Parameter.span(-0.4F, 0.8F), humidity, continentalness, erosion, Parameter.span(0.15F, 0.5F), weirdness, offset + 0.01f), biome));
             parameters.accept(Pair.of(Climate.parameters(Parameter.span(-0.3F, 0.8F), Parameter.span(-0.6F, -0.4F), continentalness, erosion, Parameter.span(0.2F, 0.5F), weirdness, offset + 0.01f), biome));
-            parameters.accept(Pair.of(Climate.parameters(Parameter.span(-1.0F, -0.8F), humidity, continentalness, erosion, Parameter.span(0.15F, 0.5F), weirdness, offset), CustomOverworldBiomes.FROSTED_CAVE));
-            parameters.accept(Pair.of(Climate.parameters(Parameter.span(-1.0F, -0.5F), Parameter.span(-0.6F, -0.4F), continentalness, Parameter.span(-1.0F, -0.6F), Parameter.span(0.2F, 0.5F), weirdness, offset), CustomOverworldBiomes.FROSTED_CAVE));
+            parameters.accept(Pair.of(Climate.parameters(Parameter.span(-1.0F, -0.8F), humidity, continentalness, erosion, Parameter.span(0.15F, 0.5F), weirdness, offset), Biomes.ICE_CAVES));
+            parameters.accept(Pair.of(Climate.parameters(Parameter.span(-1.0F, -0.5F), Parameter.span(-0.6F, -0.4F), continentalness, Parameter.span(-1.0F, -0.6F), Parameter.span(0.2F, 0.5F), weirdness, offset), Biomes.ICE_CAVES));
         } else if (biome == Biomes.DRIPSTONE_CAVES) {
             parameters.accept(Pair.of(Climate.parameters(Parameter.span(-0.6F, 1.0F), humidity, continentalness, erosion, continentalness, weirdness, offset), biome));
-            parameters.accept(Pair.of(Climate.parameters(Parameter.span(-1.0F, -0.7F), humidity, continentalness, erosion, continentalness, weirdness, offset), CustomOverworldBiomes.FROSTED_CAVE));
+            parameters.accept(Pair.of(Climate.parameters(Parameter.span(-1.0F, -0.7F), humidity, continentalness, erosion, continentalness, weirdness, offset), Biomes.ICE_CAVES));
         }
     }
 

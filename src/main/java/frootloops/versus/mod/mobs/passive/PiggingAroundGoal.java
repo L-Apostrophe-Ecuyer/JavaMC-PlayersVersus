@@ -119,7 +119,7 @@ public class PiggingAroundGoal extends Goal {
         }
 
         if (this.timer % 4 == 0) {
-            this.mob.playSound(blockState.getSoundType().getHitSound(), 0.5F, 0.5F);
+            blockState.getSounds(this.mob.level()).hitSound().ifPresent(sound -> this.mob.playSound(sound.value(), 0.5F, 0.5F));
         }
     }
 }

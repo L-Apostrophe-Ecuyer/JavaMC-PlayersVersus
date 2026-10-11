@@ -25,10 +25,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CraftingTableBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.WallBlock;
+import frootloops.versus.mod.environment.blocks.BlockSounds;
+import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 public abstract class ItemComparaisonHelper {
 
@@ -211,7 +212,7 @@ public abstract class ItemComparaisonHelper {
             else if(block instanceof StairBlock) return ItemType.BLOCK_STAIRS;
             else if(block instanceof WallBlock) return ItemType.BLOCK_WALL;
             else if(block instanceof FenceBlock) return ItemType.BLOCK_FENCE;
-            else if(block instanceof VegetationBlock || (block.defaultDestroyTime() < 1F && block.defaultBlockState().getSoundType() == SoundType.GRASS)) return ItemType.PLANTS_AND_FLOWERS;
+            else if(block instanceof VegetationBlock || (block.defaultDestroyTime() < 1F && BlockSounds.is(block.defaultBlockState(), BlockSoundSets.GRASS))) return ItemType.PLANTS_AND_FLOWERS;
             else return ItemType.BLOCK_OTHER;
         }
         else if(stack.getOrDefault(DataComponents.BANNER_PATTERNS, null) != null) return ItemType.BANNER_PATTERNS;

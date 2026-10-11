@@ -2,7 +2,6 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.mod.mobs.MobSpawning;
 import frootloops.versus.mod.mobs.ModEntities;
-import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
@@ -79,16 +78,11 @@ public abstract class ZombieMixin extends Monster {
                         .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE));
     }
 
+    // Freezing zombies turn into frostbites on their own since 26.4 (Zombie#convertsToWhenFreezing), as they turned
+    // into the mod's frosted zombies before.
     @Inject(method = "hurtServer", at = @At("TAIL"), cancellable = true)
     private void damage(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if(source.is(DamageTypes.FREEZE)) {
-            this.convertTo(ModEntities.FROSTED_ZOMBIE, ConversionParams.single(this, true, true), zombie -> {
-                if (!this.isSilent()) {
-                    this.level().levelEvent(null, LevelEvent.SOUND_ZOMBIE_TO_DROWNED, this.blockPosition(), 0);
-                }
-            });
-        }
-        else if(source.is(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
+        if(source.is(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
             this.convertTo(ModEntities.PALE_ZOMBIE, ConversionParams.single(this, true, true), zombie -> {
                 if (!this.isSilent()) {
                     this.level().levelEvent(null, LevelEvent.SOUND_ZOMBIE_TO_DROWNED, this.blockPosition(), 0);

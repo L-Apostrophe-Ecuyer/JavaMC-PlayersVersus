@@ -75,7 +75,7 @@ public abstract class CustomEnchants {
                 double f = user.getZ();
                 for (int i = 0; i < 16; ++i) {
                     double g = user.getX() + (user.getRandom().nextDouble() - 0.5) * 16.0;
-                    double h = Mth.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), user.level().getMinY(), user.level().getMinY() + ((ServerLevel)user.level()).getLogicalHeight() - 1);
+                    double h = Math.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), user.level().getMinY(), user.level().getMinY() + ((ServerLevel)user.level()).getLogicalHeight() - 1);
                     double j = user.getZ() + (user.getRandom().nextDouble() - 0.5) * 16.0;
                     if (user.isPassenger()) {
                         user.stopRiding();

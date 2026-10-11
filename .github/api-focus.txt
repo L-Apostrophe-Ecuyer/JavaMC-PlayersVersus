@@ -1,11 +1,8 @@
-# What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Pale zombie: which model layer the skeleton renderers bake, and with which textures, so the pale zombie's skeleton
-# (ModelLayers.SKELETON under the drowned's outer layer) gets the layout its 64x32 texture is drawn for.
-net.minecraft.client.renderer.entity.SkeletonRenderer
-net.minecraft.client.renderer.entity.WitherSkeletonRenderer
-net.minecraft.client.renderer.entity.AbstractSkeletonRenderer
-net.minecraft.client.model.geom.builders.LayerDefinition
-uses createSingleModelDualBodyLayer
-# The pale mobs' spawn rules and the warden's bats: whether these names exist in 26.3.
-uses getEffectiveSkyBrightness
-find ambient/Bat
+# What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
+# of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
+# Port to 26.4-snapshot-3, round 5.
+# What a chunk's getBiome takes since 26.4 (it replaced getNoiseBiome, which took quart coordinates), for the bench.
+calls net.minecraft.world.level.chunk.ChunkAccess getBiome
+calls net.minecraft.world.level.chunk.ProtoChunk getBiome
+calls net.minecraft.world.level.chunk.LevelChunkSection getBiome
+sig net.minecraft.world.level.biome.NoiseBiomeChunk

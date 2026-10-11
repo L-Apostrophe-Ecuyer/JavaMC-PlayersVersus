@@ -31,6 +31,13 @@ a punchier, riskier, no-brewing-required version of the same effect.
   passing the vanilla `Item` constant actually register the recipe against the **already-swapped**
   concentrate item at runtime, so there's no duplication; just don't be confused reading the source
   literally as "vanilla item brews this."
+- **Freezing (26.4 port)**: vanilla's 26.4 Freezing potion and Fire Resistance are each other's
+  inverse in `BrewingSystem` (`RelatedPotions`), and the Frigid Concentrate
+  (`CustomBrewingItems.CONCENTRATE_OF_FREEZING`: Freezing, 120 ticks eaten or thrown; bile block
+  `freezing_bile`) is its ingredient in the graph. Like the Concentrate of Fire, which magma cubes drop
+  as magma cream, it comes from a cube mob: Ice Cubes of size 2 or more (see `mobs.md`); there is no
+  crafting recipe. Since the 26.3 port the graph only feeds `isIngredient` (sorting, tooltips): no
+  code turns it into brewing recipes, while `RecipeMapMixin` hides vanilla's, so nothing brews yet.
 - Vanilla-untouched: Thick/Awkward from glowstone/sugar, splash/lingering conversion via
   gunpowder/redstone (unchanged from vanilla).
 - **New potion effects not in vanilla combos**: Haste/Mining Fatigue/Vulnerability/Darkness/

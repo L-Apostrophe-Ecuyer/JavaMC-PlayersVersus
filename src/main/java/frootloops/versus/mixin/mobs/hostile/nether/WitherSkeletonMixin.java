@@ -16,12 +16,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import frootloops.versus.mod.environment.blocks.BlockSounds;
+import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 @Mixin(WitherSkeleton.class)
 public class WitherSkeletonMixin extends Monster {
@@ -49,7 +50,7 @@ public class WitherSkeletonMixin extends Monster {
     @Override
     public boolean checkSpawnRules(LevelAccessor world, EntitySpawnReason spawnReason) {
         boolean result = this.getWalkTargetValue(this.blockPosition(), world) >= 0.0F;
-        if(result && spawnReason != EntitySpawnReason.MOB_SUMMONED && WorldTime.ultraWarm(world) && world.getBlockState(this.blockPosition().below()).getSoundType() == SoundType.NETHER_BRICKS) {
+        if(result && spawnReason != EntitySpawnReason.MOB_SUMMONED && WorldTime.ultraWarm(world) && BlockSounds.is(world.getBlockState(this.blockPosition().below()), BlockSoundSets.NETHER_BRICKS)) {
 
             // Rarely spawn a Wildfire:
             // By key: a Holder never equalled a ResourceKey, so this was always false before 26.3.

@@ -15,6 +15,8 @@ public class CustomSpecialEffects {
     public static SoundEvent RAIL_TURNING_SOUND;
     public static SoundEvent FOG_WIND_SOUND;
     public static SoundEvent DEEP_CAVES_MUSIC;
+    /** Leaves pushed through: vanilla's leafy sounds, by sounds.json, under a subtitle of their own. */
+    public static SoundEvent LEAVES_RUSTLE;
     public static Holder.Reference<SoundEvent> SWORD_BLOCKING_WOOD, SWORD_BLOCKING_STONE, SWORD_BLOCKING_METAL, SWORD_BLOCKING_DIAMOND;
     public static final SimpleParticleType SPARKS_PARTICLE = FabricParticleTypes.simple();
     public static final SimpleParticleType BUYANCY_EFFECT_PARTICLE = FabricParticleTypes.simple();
@@ -25,6 +27,7 @@ public class CustomSpecialEffects {
         RAIL_TURNING_SOUND = registerSoundEvent("rail_turning_sound");
         FOG_WIND_SOUND = registerSoundEvent("fog_wind_sound");
         DEEP_CAVES_MUSIC = registerSoundEvent("music.overworld.deep_caves");
+        LEAVES_RUSTLE = registerSoundEvent("block.leaves.rustle");
         SWORD_BLOCKING_WOOD = registerSoundEventReference("sword_blocking_wood");
         SWORD_BLOCKING_STONE = registerSoundEventReference("sword_blocking_stone");
         SWORD_BLOCKING_METAL = registerSoundEventReference("sword_blocking_metal");

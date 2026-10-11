@@ -31,8 +31,8 @@ import static frootloops.versus.VersusSettings.Gameplay.isFastForwardingTime;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerSleepingMixin extends Level {
-    protected ServerSleepingMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates, List<ServerPlayer> players, SleepStatus sleepManager, MinecraftServer server, SleepStatus sleepManager1) {
-        super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
+    protected ServerSleepingMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, int maxChainedNeighborUpdates, List<ServerPlayer> players, SleepStatus sleepManager, MinecraftServer server, SleepStatus sleepManager1) {
+        super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, maxChainedNeighborUpdates);
         this.server = server;
         this.sleepStatus = sleepManager1;
     }

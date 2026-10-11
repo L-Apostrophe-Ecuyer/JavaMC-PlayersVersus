@@ -1,4 +1,12 @@
 {
+    "block.leaves.rustle" : {
+        "subtitle": "subtitles.players-versus.block.leaves.rustle",
+        "sounds" : [
+            { "name": "minecraft:block.azalea_leaves.step", "type": "event", "volume": 0.9 },
+            { "name": "minecraft:block.azalea_leaves.hit", "type": "event", "volume": 0.8, "pitch": 0.9 },
+            { "name": "minecraft:block.azalea_leaves.place", "type": "event", "volume": 0.7, "pitch": 1.1 }
+        ]
+    },
     "rail_turning_sound" : {
         "subtitle": "subtitles.players-versus.rail_turning_sound",
         "sounds" : [

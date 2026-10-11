@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     env:
-      VERSION: "26.3"
-      FABRIC_API: "0.161.0+26.3"
+      VERSION: "26.4-snapshot-3"
+      FABRIC_API: "0.162.2+26.4"
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -89,7 +89,7 @@ jobs:
         run: |
           cp="probe/client.jar:$(ls probe/libs/*.jar | tr '\n' ':')$(ls probe/fabric/META-INF/jars/*.jar | tr '\n' ':')"
           focus() { grep "^$1 " .github/api-focus.txt | cut -d' ' -f2- || true; }
-          classes=$(grep -v -E '^\s*(#|$)|^(find|sig|uses|assets|asset) ' .github/api-focus.txt || true)
+          classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|sig|member|uses|assets|asset|data) ' .github/api-focus.txt || true)
           sigs=$(focus sig)
           mkdir -p probe/jar && unzip -q -o probe/client.jar -d probe/jar
           echo "-----BEGIN FOCUS-----"

@@ -114,7 +114,7 @@ All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans a
 4. **frozen**: temperature −0.55..−0.375;
 5. **humid**: humidity 0.275..0.35.
 
-The original biome keeps the remaining pieces, all at depth 0. The depth-1 copies are dropped, so the underground belongs to the cave biomes. Each remaining piece also gets its surface-cave biome at depth 0.1–0.25 (frosted, desert-creeper or badlands cave). Vanilla's lush and dripstone entries are replaced as before, and the 13 Players Versus cave entries are appended. The result has 6,293 entries, 5,400 of them at the surface. Unit tests check that the pieces of each slice don't overlap and add up to the slice.
+The original biome keeps the remaining pieces, all at depth 0. The depth-1 copies are dropped, so the underground belongs to the cave biomes. Each remaining piece also gets its surface-cave biome at depth 0.1–0.25 (vanilla's ice caves since 26.4, which replaced the frosted caves; desert-creeper or badlands cave). Vanilla's lush and dripstone entries are replaced as before, and the 13 Players Versus cave entries are appended. The result has 6,293 entries, 5,400 of them at the surface. Unit tests check that the pieces of each slice don't overlap and add up to the slice.
 
 The deleted mixin emitted the same rules, but built each transition from the whole slice and narrowed the original along one axis at most, so its boxes overlapped in places and left holes in others (Q4), and results depended on the search tree's tie-breaking. A test-only copy of it (`OldBiomeLayout`) lets the tests measure what changed: 98.5% of random climate points at the surface keep their biome, and 100% (up to ties) from depth 0.3 down.
 
@@ -208,7 +208,7 @@ The default-preset mixins now chain with other mods (`@ModifyExpressionValue` in
   - dry upper caves, and water basins in caves below about y 32;
   - ramen and noodle caves;
   - mountainside, cold and humid transition biomes;
-  - the PV cave layers and the frosted, badlands and desert-creeper surface caves;
+  - the PV cave layers and the ice (vanilla's since 26.4, formerly frosted), badlands and desert-creeper surface caves;
   - sand and gravel beaches;
   - copper veins in terracotta and iron veins in tuff.
 - **Performance:** PV pregeneration is no slower than the vanilla Default preset (stretch goal: faster), and no status costs more than 1.2× vanilla.
@@ -520,7 +520,7 @@ static void emitSurface(Slice slice, List<...> out) {
 | `DEEP` | point 0.9 | 0.05 for generic deep caves |
 | lush and dripstone replacements | 0.15–0.5 | 0.01 for lush |
 
-Q3: the dripstone and frosted replacements keep depth 0.8–1.0, now written as a named constant instead of reusing the continentalness range (revision 3 proposed 0.15–0.5, which would have added dripstone to shallow caves). Every row keeps its current climate ranges. `SURFACE_CAVES` keeps its current mapping: frozen peaks/snowy slopes → frosted caves, desert → desert creeper caves, badlands family → badlands cave.
+Q3: the dripstone and frosted (since 26.4: vanilla's ice caves) replacements keep depth 0.8–1.0, now written as a named constant instead of reusing the continentalness range (revision 3 proposed 0.15–0.5, which would have added dripstone to shallow caves). Every row keeps its current climate ranges. `SURFACE_CAVES` keeps its current mapping: frozen peaks/snowy slopes → frosted caves (vanilla's ice caves since 26.4), desert → desert creeper caves, badlands family → badlands cave.
 
 **Checks done:** unit tests (Section 1.4 lists them) and the smoke runs. In the benchmark region, which is temperate forest, ocean and plains with no transition rule in play, the Improved world's biome histograms and maps are identical to the baseline; the Default world now has only vanilla biomes.
 
@@ -824,6 +824,24 @@ Distant Horizons lets a mod register its own generator for a level (`DhApi` worl
   - Unchanged: template pools, structure sets, most structures (26 of 34), most tags (renamed structure map tags: `on_swamp_explorer_maps` → `on_swamp_hut_maps`, `on_jungle_explorer_maps` → `on_jungle_pyramid_maps`, `on_ocean_explorer_maps` → `on_ocean_monument_maps`, `on_woodland_explorer_maps` → `on_woodland_mansion_maps`, `on_trial_chambers_maps` → `on_buried_trial_chambers_maps`).
   - **Method.** Run the converter with `--check` to detect unapplied changes or `--apply` to write them. Keep correcting codecs reported by the forced-Vulkan client registry load until registries and resource reload succeed; a dedicated-server/world-generation smoke run is still needed.
 - **Still outstanding.** The lightmap and fog tweaks (client mixins keep 1.21.10's logic where 26.x computes the lightmap on the GPU), the tests that need the game (`TestGame`), the behaviours that changed around the mod's overrides (a spear's piercing attack goes through vanilla because `MinecraftClientMixin` only knows the melee attack), and a real world on 26.3.
+
+## 14. The port to Minecraft 26.4-snapshot-3
+
+**Target.** 26.4-snapshot-3 with Fabric Loader 0.19.5, Fabric API 0.162.2+26.4 (the newest 26.4 build on Fabric's Maven when this was written), Loom 1.17.1, Gradle 9.7.1 and Java 25; `fabric.mod.json` asks for `~26.4-`.
+
+**How.** As for 26.3, nothing is compiled in the agent environment. `api-diff` (commits tagged `[api-diff]`) compares the 26.3 and 26.4-snapshot-3 client jars and prints, by job: the classes, data and asset files added, removed and changed; for every mixin (`.github/mixin-check.py`), its targets, selectors, `@Shadow`, `@Accessor` and `@Invoker` members and `@At` targets that 26.4 lacks, and the target methods whose calls changed; the members of every class the mod imports; every vanilla file the mod overrides, 26.3's against 26.4's; and what `.github/api-focus.txt` asks for. No mixin target is missing on 26.4.
+
+**What 26.4 changed for the mod.**
+
+- **Block sounds are a registry.** `SoundType` became `BlockSoundSet`: `BlockSoundSets.X` are resource keys, `BlockState#getSounds()` returns the key and `getSounds(level)` the set, whose sounds are optional holders. `BlockSounds` holds the two helpers the mod needs (is a state's set this one; play one of its sounds).
+- **Renames and signatures.** `Mth.clamp` → `Math.clamp`; `Level`'s constructor lost the seed; `BiomeSource#createResolver`/`createResolverForChunk` return a `NoiseBiomeResolver` and `addDebugInfo` takes a `BiConsumer<String, String>`; `StructureStart#isValid` is gone; a dye colour's map colours are `ColorCollection`s on `MapColor`; `Block#getDrops` and `spawnAfterBreak` take the entity that broke the block; the debug screen is built from columns, so `DebugHudMixin` draws its lines itself; snowballs and ice balls share `ThrowableBallProjectile`, which knocks players back on its own.
+- **Biomes in chunks.** A new chunk status, `NOISE_BIOMES`, samples the climate into a chunk's noise biomes before `BIOMES` stores them, and `ChunkAccess#getBiome` (formerly `getNoiseBiome`) takes block coordinates. The bench times `NOISE_BIOMES` on its own and reads the stored biomes by block (`074cc97`; before it, the reports sampled each height at a quarter of it).
+- **Mixin targets that changed.** `Block#dropResources`'s shorter overloads now call the six-argument one the mod overwrites, with no entity, which `dropStackTowardsPlayer` handles. `MeleeAttackGoal` keeps its attack interval in a field a constructor can set; `MeleeAttackGoalMixin` times the swings itself, as before. `NoiseChunk`'s constructor takes the `Aquifer$Config` and still calls `create`, which the aquifer hook wraps.
+- **World generation data.** The noise settings lost `default_block` (the material rule ends with stone); the underground material rule gained `biome_is minecraft:ice_caves` → `minecraft:overworld/ice_cave_bands` (bands of packed ice and calcite); six biomes dropped `ore_gravel`; `red_mushroom_taiga` gained the mushrooms' light predicate. `pv_density.py` writes the first two; the overrides follow vanilla.
+
+**Vanilla's ice caves and frostbite replace the frosted caves and the frosted zombie.** Where the layout placed `players-versus:caves/frosted_caves` (the cold side of the lush and dripstone replacements, and the surface caves under frozen peaks and snowy slopes), it places `minecraft:ice_caves`; vanilla's own ice caves entry passes through as before. Frostbites spawn where frosted zombies did on the surface (`#spawns_snow_foxes`, weight 140, groups of 2 to 4), and zombies that freeze turn into frostbites on their own (`Zombie#convertsToWhenFreezing`). In worlds made before the port, chunks generated with the frosted caves still name that biome, which no longer exists, and frosted zombies are dropped when their chunks load.
+
+**Where the port stands.** Main, client and the tests compile and pass in CI (`d2bb143` on). The smoke runs of `074cc97` start a dedicated 26.4-snapshot-3 server with the mod, without a mixin, registry or data error in its log, and generate the vanilla, Players Versus and server-default regions. At the surface, both Players Versus regions have 26.3's biomes to within 0.3% of the columns. Below it, shares move where two biomes meet: in the river region the deep caves at y −40 go from 71% to 76%, and in the main region, at y 32 where the ocean floor meets the underground, ocean falls from 19% to 10% and the regular cave takes the rest. Vanilla's own histograms move as much at its cave boundaries (forest at y 0: 49% → 56%), which points to the biomes now stored by block rather than to the layout. The runs next to C2ME and Lithium are skipped until Modrinth has builds for 26.4. A world made by the 1.21.10 build reopens and grows on 26.4 (the upgrade job). The client is not run in CI: its mixins are only checked against the jar, and the leaves' rustling, the Ice Cube's renderer and the debug screen want a look in game.
 
 ## Appendix A: The current density functions as formulas
 
