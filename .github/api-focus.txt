@@ -1,8 +1,16 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Port to 26.4-snapshot-3, round 5.
-# What a chunk's getBiome takes since 26.4 (it replaced getNoiseBiome, which took quart coordinates), for the bench.
-calls net.minecraft.world.level.chunk.ChunkAccess getBiome
-calls net.minecraft.world.level.chunk.ProtoChunk getBiome
-calls net.minecraft.world.level.chunk.LevelChunkSection getBiome
-sig net.minecraft.world.level.biome.NoiseBiomeChunk
+# 26.4 fixes, round 1: what starts, holds and stops an item's use on the client (MinecraftClientMixin reimplements
+# startUseItem and hooks continueAttack and startAttack), and vanilla's sugar cane block.
+calls net.minecraft.client.Minecraft ^startUseItem$|^handleKeybinds$|^continueAttack$|^startAttack$|^tick$
+member net.minecraft.client.Minecraft rightClickDelay|missTime|UseItem|Attack|Keybind
+calls net.minecraft.client.multiplayer.MultiPlayerGameMode ^useItem$|^releaseUsingItem$|^useItemOn$|^interact$|^isDestroying$|^ensureHasSentCarriedItem$|^tick$|^startPrediction$
+calls net.minecraft.client.player.LocalPlayer ^startUsingItem$|^stopUsingItem$|^isUsingItem$|^onSyncedDataUpdated$|^itemUsed$|^getUsedItemHand$|^aiStep$|^tick$|^isHandsBusy$|^swing$
+calls net.minecraft.world.entity.LivingEntity ^updatingUsingItem$|^updateUsingItem$|^startUsingItem$|^stopUsingItem$|^releaseUsingItem$|^completeUsingItem$|^onSyncedDataUpdated$|^swing$
+calls net.minecraft.world.entity.player.Player ^tick$|^attack$|^canEat$
+calls net.minecraft.server.network.ServerGamePacketListenerImpl ^handleUseItem$|^handleUseItemOn$|^handlePlayerAction$|^handleInteract$
+calls net.minecraft.server.level.ServerPlayerGameMode ^useItem$|^useItemOn$
+sig net.minecraft.world.InteractionResult$SwingSource
+sig net.minecraft.world.InteractionResult$Success
+sig net.minecraft.world.level.block.SugarCaneBlock
+calls net.minecraft.world.level.block.SugarCaneBlock .
