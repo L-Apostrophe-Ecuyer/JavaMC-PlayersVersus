@@ -2,7 +2,7 @@ package frootloops.versus.mixin.client.players;
 
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.players.HandSelection;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -12,17 +12,12 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
-import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -47,8 +42,6 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
     @Shadow @Nullable public final GameRenderer gameRenderer;
     @Shadow public final Options options;
 
-    private static final InteractionHand[] OFFHAND_FIRST =  new InteractionHand[] {InteractionHand.OFF_HAND, InteractionHand.MAIN_HAND}, MAINHAND_FIRST = new InteractionHand[] {InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND};
-
     public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, Options options) { super(string, true);
         this.gameRenderer = gameRenderer;
         this.options = options;
@@ -70,15 +63,16 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             }
 
             InteractionResult actionResult = null;
-            // While an item is in use (a shield held up, a bow drawn), only its hand is tried: starting the other hand's
-            // item would cut the use short, and starting the same one again would restart it (the draw, the block)
-            boolean usingItem = this.player.isUsingItem();
-            InteractionHand[] hands = usingItem ? new InteractionHand[] {this.player.getUsedItemHand()}
-                    : this.shouldPrioritizeOffhand() ? OFFHAND_FIRST : MAINHAND_FIRST;
-            for (InteractionHand hand : hands) {
+            // Which hand goes first, and whether the world or the item comes into it, is HandSelection's: it guesses what
+            // the player means (blocking an attack, landing in water, opening the table in front of them) by fixed rules
+            HandSelection.Plan plan = HandSelection.plan(this.player, this.level, this.hitResult);
+            for (InteractionHand hand : plan.hands()) {
                 ItemStack itemStack = this.player.getItemInHand(hand);
                 if (!itemStack.isItemEnabled(this.level.enabledFeatures())) continue;
-                if (this.hitResult != null) {
+                // An item on cooldown leaves the block or entity to the other hand, which can use it without the item
+                // the server would refuse
+                boolean onCooldown = HandSelection.onCooldown(this.player, hand);
+                if (plan.world() && !onCooldown && this.hitResult != null) {
                     switch (this.hitResult.getType()) {
                         case ENTITY:
                             EntityHitResult entityHitResult = (EntityHitResult)this.hitResult;
@@ -134,7 +128,7 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                     }
                 }
 
-                if (!usingItem && !itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
+                if (plan.items() && !onCooldown && !itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
                     if (success3.swingSource() == InteractionResult.SwingSource.PREDICTED) {
                         this.player.swing(hand, itemStack.getInteractAnimation(), false);
                     }
@@ -147,52 +141,5 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             }
         }
         info.cancel();
-    }
-
-    private boolean shouldPrioritizeOffhand(){
-        ItemStack offhandStack = player.getOffhandItem();
-        ItemStack mainhandStack = player.getMainHandItem();
-        if(offhandStack.isEmpty() || mainhandStack.isEmpty() || player.getCooldowns().isOnCooldown(offhandStack)) return false;
-        if(offhandStack.getItem() instanceof ShieldItem && hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) return false;
-        if(offhandStack.getUseAnimation() == ItemUseAnimation.BLOCK){
-            if (hitResult.getType() == HitResult.Type.ENTITY) {
-                if(player.isUsingItem()) {
-                    return player.getUseItem() == offhandStack;
-                } else {
-                    Entity target = ((EntityHitResult) this.hitResult).getEntity();
-                    return (target instanceof Monster || target instanceof Player || target == player.getLastHurtByMob());
-                }
-            }
-            else if (mainhandStack.getUseAnimation() == ItemUseAnimation.BLOCK) {
-                return true;
-            }
-            else if (player.getLastHurtByMob() != null && player.getLastHurtByMob().isAlive()) {
-                return (Combat.isLookingTowards(player,player.getLastHurtByMob().position()));
-            }
-        }
-        else if(mainhandStack.getUseAnimation() == ItemUseAnimation.BLOCK){
-            if(player.isShiftKeyDown()) {
-                return !(mainhandStack.getItem() instanceof ShieldItem);
-            }
-            else if (hitResult.getType() == HitResult.Type.ENTITY) {
-                if(player.isUsingItem()) {
-                    return player.getUseItem() == offhandStack;
-                } else {
-                    Entity target = ((EntityHitResult) this.hitResult).getEntity();
-                    return !(target instanceof Monster || target instanceof Player || target == player.getLastHurtByMob());
-                }
-            }
-            else if (player.getLastHurtByMob() != null && player.getLastHurtByMob().isAlive()) {
-                return (Combat.isLookingTowards(player,player.getLastHurtByMob().position()));
-            }
-            else if(offhandStack.getUseAnimation() == ItemUseAnimation.EAT || offhandStack.getUseAnimation() == ItemUseAnimation.DRINK) {
-                if(offhandStack.getComponents().has(DataComponents.FOOD)) {
-                    if(offhandStack.getItem().components().get(DataComponents.FOOD).canAlwaysEat()) return true;
-                    return player.getFoodData().needsFood();
-                }
-                else return true;
-            }
-        }
-        return false;
     }
 }
