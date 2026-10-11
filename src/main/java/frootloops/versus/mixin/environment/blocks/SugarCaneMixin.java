@@ -19,6 +19,13 @@ import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 
+/**
+ * Sugar cane grows a block at a time, and each block looks like its growth stage, its age
+ * ({@code assets/minecraft/blockstates/sugar_cane.json}): a young shoot (0-2), a growing top (3-10), a grown top
+ * (11-14), and at 15 a mature stalk, the only cane another can stand on. A mature block alone sprouts a new top if the
+ * sky is bright enough; a top on a stalk stops at its grown stage, so cane stands two blocks tall. The generated cane
+ * ({@code data/minecraft/worldgen/feature/sugar_cane.json}) is the same: a mature stalk or none, under a top at a stage.
+ */
 @Mixin(SugarCaneBlock.class)
 public abstract class SugarCaneMixin extends Block {
 
