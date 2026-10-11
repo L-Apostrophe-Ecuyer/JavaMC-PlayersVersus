@@ -306,10 +306,12 @@ def flooded_corridors():
 # at and falls into.
 HIGH_RIVER = {"y": C["HIGH_RIVER_Y"], "bed": C["HIGH_RIVER_BED"], "half_width": C["HIGH_RIVER_HALF_WIDTH"],
               "widening": C["HIGH_RIVER_WIDENING"], "flare": C["HIGH_RIVER_FLARE_WIDENING"], "closed": C["HIGH_RIVER_CLOSED"],
-              "gorge": C["HIGH_RIVER_GORGE_WIDTH"], "bank_bottom": C["HIGH_RIVER_BANK_MIN_Y"]}
+              "gorge": C["HIGH_RIVER_GORGE_WIDTH"], "bank_bottom": C["HIGH_RIVER_BANK_MIN_Y"],
+              "bank_taper": C["HIGH_RIVER_BANK_TAPER"]}
 HIGH_RIVER_UPPER = {"y": C["HIGH_RIVER_UPPER_Y"], "bed": C["HIGH_RIVER_UPPER_BED"], "half_width": C["HIGH_RIVER_UPPER_HALF_WIDTH"],
                     "widening": C["HIGH_RIVER_UPPER_WIDENING"], "flare": C["HIGH_RIVER_UPPER_FLARE_WIDENING"],
-                    "closed": C["HIGH_RIVER_UPPER_CLOSED"], "bank_bottom": C["HIGH_RIVER_UPPER_BANK_MIN_Y"]}
+                    "closed": C["HIGH_RIVER_UPPER_CLOSED"], "bank_bottom": C["HIGH_RIVER_UPPER_BANK_MIN_Y"],
+                    "bank_taper": C["HIGH_RIVER_UPPER_BANK_TAPER"]}
 # The banks' value where they make ground, and where they don't (the final density takes the maximum with them).
 BANK_SOLID, NO_FILL = 1.0, -64.0
 
@@ -353,11 +355,15 @@ def high_river_full_half_width(layer):
     the depth at its surface and the height above it, the depth at each height), as far as it reaches past the flare at
     the water: so the walls rise steeply from the water where the ground stands high and open out at the rim."""
     y_surface, bed, top = layer["y"], layer["bed"], C["HIGH_RIVER_VALLEY_MAX_Y"]
+    rim, per_block = C["HIGH_RIVER_RIM_HEIGHT"], C["DEPTH_PER_BLOCK"]
     depth_at_surface = interpolated(slice_y(y_surface, REF_DEPTH))
-    depth_here = sub(depth_at_surface, gradient(y_surface, top, 0.0, (top - y_surface) * C["DEPTH_PER_BLOCK"]))
+    # The depth at each height, no lower than the rim's: from HIGH_RIVER_RIM_HEIGHT over the ground's nominal surface
+    # up, the walls stop leaning out and rise straight, through whatever ground stands there, to the terrain's top.
+    depth_here = max_(sub(depth_at_surface, gradient(y_surface, top, 0.0, (top - y_surface) * per_block)), -rim)
     flare = max_(0.0, sub(high_river_flare(layer, depth_here), high_river_flare(layer, depth_at_surface)))
-    return add(add(gradient(y_surface - bed - 1, y_surface, 0.0, layer["half_width"]),
-                   gradient(y_surface, top, 0.0, (top - y_surface) * layer["widening"])), flare)
+    widening = min_(gradient(y_surface, top, 0.0, (top - y_surface) * layer["widening"]),
+                    max_(0.0, mul(add(depth_at_surface, rim), layer["widening"] / per_block)))
+    return add(add(gradient(y_surface - bed - 1, y_surface, 0.0, layer["half_width"]), widening), flare)
 
 
 def high_river_across(layer):
@@ -379,17 +385,29 @@ def high_river_bank(layer, below=None):
     reaches, the further it slopes out; the margin and the slope shrink with a river under half its full width, so a
     narrowing river's tip has no more bank than water. Only where its water runs (its activity above 0), and for a layer
     over another not inside the lower one's valley; NO_FILL elsewhere. The valleys' cut comes after it in the final
-    density, so the river's own channel stays open."""
-    y_surface, bottom = layer["y"], layer["bank_bottom"]
+    density, so the river's own channel stays open.
+
+    Where a cave or a drop leaves it hanging, the bank is rock, not a cast: its slopes are more or less wide by the noise
+    players-versus:high_river_bank (HIGH_RIVER_BANK_ROUGHNESS), not at all at its surface, so the water keeps its
+    walls, and the full roughness at its bottom; and under its bottom it narrows to nothing over its taper, by the same
+    noise, so it ends in a ragged keel instead of a flat ceiling."""
+    y_surface, bottom, taper = layer["y"], layer["bank_bottom"], layer["bank_taper"]
+    tip = bottom - taper
     margin, slope = C["HIGH_RIVER_BANK_MARGIN"], C["HIGH_RIVER_BANK_SLOPE"]
+    roughness = C["HIGH_RIVER_BANK_ROUGHNESS"]
+    rough = mul(interpolated(noise(pv("high_river_bank"), 1.0, 1.0)), roughness)
     activity = high_river_activity(layer)
     reach = mul(clamp(mul(activity, 2.0), 0.0, 1.0), gradient(y_surface, bottom, margin, margin + (y_surface - bottom) * slope))
-    half_width = add(mul(activity, layer["half_width"]), reach)
+    water = mul(activity, layer["half_width"])
+    slopes = add(water, mul(reach, add(1.0, mul(rough, gradient(y_surface, bottom, 0.0, 1.0)))))
+    # From a whole bank at its bottom to less than nothing at the tip, so the noise never leaves a flat end there.
+    keel = mul(add(water, reach), add(gradient(tip, bottom, -roughness, 1.0), rough))
+    half_width = range_choice(mc("y"), tip - 0.5, bottom - 0.5, keel, slopes)
     inside = range_choice(sub(half_width, abs_(high_river_channel())), MIN_POSITIVE, 1000000.0, BANK_SOLID, NO_FILL)
     bank = range_choice(activity, MIN_POSITIVE, 1000000.0, inside, NO_FILL)
     if below is not None:
         bank = range_choice(below_layer_at_surface(layer, below), -1000000.0, 0.0, NO_FILL, bank)
-    return range_choice(mc("y"), bottom - 0.5, y_surface + 0.5, bank, NO_FILL)
+    return range_choice(mc("y"), tip - 0.5, y_surface + 0.5, bank, NO_FILL)
 
 
 def high_river_valley(layer, across, below=None):
@@ -737,6 +755,8 @@ NOISES = {
     # octave for ragged edges, the caves' like vanilla's own cave bands (sulfur_cave_gradient).
     "surface_bands": (-5, [1.0, 1.0, 1.0, 1.0]),
     "cave_bands": (-5, [1.0, 0.0, 1.0]),
+    # The high river's banks' ragged undersides (HIGH_RIVER_BANK_ROUGHNESS): lumps about 8 blocks across.
+    "high_river_bank": (-4, [1.0, 1.0]),
 }
 
 
