@@ -113,17 +113,18 @@ class PvBiomeLayoutTest {
     }
 
     /**
-     * A surface point of the biome that is inland, so the pale grotto's continentalness (0 to 1) reaches it. The vanilla
-     * entry's middle can sit in the coast's range, below the pale grotto's; the point then moves inland within the entry.
+     * A surface point of the biome inside the pale grotto's continentalness (0 to 1) and erosion (-0.4 to 1). The vanilla
+     * entry's middle can sit on the coast or in eroded ground outside them; the point then moves in within the entry.
      */
     private static Climate.TargetPoint inlandSurfacePoint(Climate.ParameterList<ResourceKey<Biome>> layout, ResourceKey<Biome> biome) {
         for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
             ParameterPoint h = entry.getFirst();
             if (entry.getSecond() != biome || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
             long continentalness = Math.max(mid(h.continentalness()), Climate.quantizeCoord(INLAND));
-            if (continentalness > h.continentalness().max()) continue;
+            long erosion = Math.max(mid(h.erosion()), Climate.quantizeCoord(-0.4F));
+            if (continentalness > h.continentalness().max() || erosion > h.erosion().max()) continue;
             Climate.TargetPoint point = point(mid(h.temperature()), mid(h.humidity()), continentalness,
-                    mid(h.erosion()), mid(h.weirdness()));
+                    erosion, mid(h.weirdness()));
             if (layout.findValue(point) == biome) return point;
         }
         throw new AssertionError("no inland surface climate point for " + biome);
