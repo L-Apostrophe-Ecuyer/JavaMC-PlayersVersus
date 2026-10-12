@@ -6,7 +6,6 @@ import frootloops.versus.mod.items_and_effects.inventory.recipe_book.RecipeBookS
 import frootloops.versus.mod.items_and_effects.recipes.RecipeGroupHover;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.recipebook.OverlayRecipeComponent;
@@ -73,7 +72,7 @@ public abstract class RecipeBookPageMixin {
         if (hovered != null && hovered.isOnlyOption()) hovered = null;
         boolean open = this.overlay.isVisible();
         boolean overOpenGroup = open && (((PopupBounds) (Object) this.overlay).playersVersus$popupContains(mouseX, mouseY) || this.playersVersus$isOverOpenGroupsButton(mouseX, mouseY));
-        switch (this.playersVersus$hover.update(hovered, open, overOpenGroup, Util.getMillis())) {
+        switch (this.playersVersus$hover.update(hovered, open, overOpenGroup, System.nanoTime() / 1_000_000L)) {
             case CLOSE -> this.overlay.setVisible(false);
             case OPEN -> this.overlay.init(hovered.getCollection(), SlotDisplayContext.fromLevel(this.minecraft.level), this.isFiltering,
                     hovered.getX(), hovered.getY(), x + RecipeBookComponent.IMAGE_WIDTH / 2, y + ANCHOR_DOWN + RecipeBookComponent.IMAGE_HEIGHT / 2, (float) hovered.getWidth());
