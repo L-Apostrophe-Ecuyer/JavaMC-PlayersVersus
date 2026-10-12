@@ -39,6 +39,7 @@
 		"items_and_effects.inventory.recipe_book.AnimatedResultButtonMixin",
 		"items_and_effects.inventory.recipe_book.OverlayRecipeComponentMixin",
 		"items_and_effects.inventory.recipe_book.RecipeBookPageMixin",
+		"items_and_effects.inventory.recipe_book.RecipeBookComponentMixin",
 
 		"players.attacking.CrosshairTargetMixin",
 		"players.attacking.CrosshairRendererMixin",

@@ -21,6 +21,10 @@ public abstract class VersusSettings {
         public static boolean DO_RECIPE_BOOK_HOVER_GROUPS = true;
         // The recipe book lists what can be crafted first, then the rest, each ordered like the inventory sort (RecipeBookOrdering)
         public static boolean DO_SMART_RECIPE_ORDER = true;
+        // Double-click a recipe in the book to place the most crafts, double-click again for one (RecipeBookComponentMixin)
+        public static boolean DO_RECIPE_DOUBLE_CLICK_MAX = true;
+        // A stack in the hand that runs out is refilled from the largest matching stack in the inventory (HotbarRefill)
+        public static boolean DO_HOTBAR_REFILL = true;
     }
 
     public static class Combat {

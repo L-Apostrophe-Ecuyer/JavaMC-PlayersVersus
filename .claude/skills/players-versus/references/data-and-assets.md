@@ -90,6 +90,9 @@ tells where the popup is (vanilla's `isMouseOver` is always false). The order in
 (`RecipeBookSorting` → `ItemComparaisonHelper`, through `RecipeBookOrdering`, whose merge sort never throws on the
 sort's not-quite-consistent "goes before" test); the common-code pieces have unit tests, the mixins only a look in game.
 Settings: `VersusSettings.QOL.DO_RECIPE_BOOK_CLICK_THROUGH`, `DO_RECIPE_BOOK_HOVER_GROUPS`, `DO_SMART_RECIPE_ORDER`.
+`RecipeBookComponentMixin` wraps `tryPlaceRecipe` in the book's `mouseClicked`: the second click of a double-click places the
+most crafts (as shift-click does), or one again if the recipe was already placed for the most before the first click
+(`DO_RECIPE_DOUBLE_CLICK_MAX`).
 - Tests: `src/test/.../mod/items_and_effects/recipes/RecipeRulesTest`.
 
 ## Extension recipe: adding/changing a recipe, loot table, or advancement
