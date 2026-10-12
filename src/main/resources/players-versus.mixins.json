@@ -122,7 +122,8 @@
     "mobs.passive.WanderingTraderEntityMixin",
     "mobs.passive.SheepMixin",
     "mobs.passive.PigMixin",
-    "mobs.passive.PolarBearMixin"
+    "mobs.passive.PolarBearMixin",
+    "mobs.passive.TransportItemsBetweenContainersMixin"
   ],
   "injectors": {
     "defaultRequire": 1

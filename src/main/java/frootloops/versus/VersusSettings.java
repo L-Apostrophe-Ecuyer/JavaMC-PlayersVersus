@@ -50,6 +50,9 @@ public abstract class VersusSettings {
         public static boolean DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES = true;
         public static boolean DO_RAIDS_OUTSIDE_VILLAGES = true;
         public static int BRUSHING_TICKS_PER_STAGE = 2; // Vanilla is 5
+
+        // Copper golems carry a whole stack (vanilla: 16) to the chest that already holds the most of it
+        public static boolean DO_SMARTER_COPPER_GOLEMS = true;
     }
 
     public static class Items {
