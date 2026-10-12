@@ -34,7 +34,7 @@ public final class HotbarRefill {
 
     private static void tick(Minecraft minecraft) {
         LocalPlayer player = minecraft.player;
-        if (!VersusSettings.QOL.DO_HOTBAR_REFILL || player == null || minecraft.gameMode == null || minecraft.screen != null
+        if (!VersusSettings.QOL.DO_HOTBAR_REFILL || player == null || minecraft.gameMode == null || minecraft.gui.screen() != null
                 || player.isSpectator() || player.getAbilities().instabuild) {
             forget();
             return;
