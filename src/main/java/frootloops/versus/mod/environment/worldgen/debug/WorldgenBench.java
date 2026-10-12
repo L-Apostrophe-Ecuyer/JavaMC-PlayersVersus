@@ -142,7 +142,7 @@ public final class WorldgenBench {
     /** Headless mode for {@code runWorldgenSmoke}: run once when the server has started, then stop it. */
     public static void registerHeadlessRun() {
         String radiusProperty = System.getProperty("pv.worldgen.bench");
-        if (radiusProperty == null || radiusProperty.isBlank()) return;
+        if (radiusProperty == null || radiusProperty.isBlank() || WorldgenCensus.isRequested()) return;
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             try {
                 int radius = Math.clamp(Integer.parseInt(radiusProperty.trim()), 1, MAX_RADIUS);

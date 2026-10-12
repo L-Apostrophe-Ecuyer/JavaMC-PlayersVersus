@@ -50,6 +50,12 @@ loom {
 			vmArg "-Dpv.worldgen.bench=${providers.gradleProperty('pv.benchRadius').getOrElse('12')}"
 			vmArg "-Dpv.worldgen.bench.center=${providers.gradleProperty('pv.benchCenter').getOrElse('100,100')}"
 			vmArg "-Dpv.worldgen.vanillaTypes=${providers.gradleProperty('pv.vanillaTypes').getOrElse('true')}"
+			// -Ppv.census=<biome ids> counts what the nearest patches of those biomes are made of and grow, instead of the bench
+			// (WorldgenCensus); -Ppv.censusRadius=<chunks around the patch's middle>
+			if (providers.gradleProperty('pv.census').isPresent()) {
+				vmArg "-Dpv.worldgen.census=${providers.gradleProperty('pv.census').get()}"
+				vmArg "-Dpv.worldgen.census.radius=${providers.gradleProperty('pv.censusRadius').getOrElse('4')}"
+			}
 		}
 	}
 
