@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class BlockBehaviourMixin {
     @Inject(method = "getDestroyProgress", at = @At("RETURN"), cancellable = true)
     private void playersVersus$takeBackPlaced(BlockState state, Player player, BlockGetter level, BlockPos pos, CallbackInfoReturnable<Float> cir) {
-        if (!VersusSettings.QOL.DO_FAST_UNDO_PLACING) return;
+        if (!VersusSettings.QOL.DO_FAST_UNDO_PLACING || player == null) return;
         float progress = cir.getReturnValue();
         // Only with the tool it drops with: a misplaced block is to be taken back, not lost
         if (progress <= 0.0F || progress >= 1.0F || !player.hasCorrectToolForDrops(state)) return;
