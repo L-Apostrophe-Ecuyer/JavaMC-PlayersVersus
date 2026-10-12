@@ -196,7 +196,7 @@ public final class WorldgenCensus {
                 for (int x = chunkX * 16; x < chunkX * 16 + 16; x++) {
                     for (int z = chunkZ * 16; z < chunkZ * 16 + 16; z++) {
                         int top = world.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z);
-                        // The ground is the first block under the trees (their roots, logs, leaves and what hangs from them) that stops motion
+                        // The ground is the first block under the trees (their roots, logs, leaves and what hangs from them) that has a collision shape
                         BlockPos ground = new BlockPos(x, top - 1, z);
                         while (ground.getY() > world.getMinY() && !isGround(world, ground)) ground = ground.below();
                         String name = world.getBiome(ground).getRegisteredName();
