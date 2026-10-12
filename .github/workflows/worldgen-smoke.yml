@@ -423,7 +423,8 @@ jobs:
       - name: artifact name
         id: name
         if: always()
-        run: echo "value=worldgen-census-$(echo '${{ matrix.level_type }}' | tr ': ' '-_')" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "value=worldgen-census-$(echo '${{ matrix.level_type }}' | tr ': ' '-_')" >> "$GITHUB_OUTPUT"
       - name: upload results
         if: always()
         uses: actions/upload-artifact@v4
