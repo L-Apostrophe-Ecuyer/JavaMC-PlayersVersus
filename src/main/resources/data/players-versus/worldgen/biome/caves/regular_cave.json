@@ -120,12 +120,12 @@
               "count": 4
             },
             {
-              "type": "players-versus:deeper_creeper",
+              "type": "players-versus:pale_creeper",
               "weight": 20,
               "count": 1
             },
             {
-              "type": "players-versus:withered_zombie",
+              "type": "players-versus:pale_zombie",
               "weight": 10,
               "count": {
                 "type": "minecraft:uniform",

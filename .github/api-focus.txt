@@ -1,45 +1,8 @@
-# What api-probe prints straight into its log with [api-focus] (the workflow lists the kinds of line).
-# Spiders that climb any surface, scarier creakings, blinder wardens: 26.3's pathfinding (node evaluators, navigation,
-# move control), the spider's renderer and model, the creaking's brain, the enderman's teleport, and the warden's
-# brain and its sniffing, digging, emerging and sonic boom.
-find SpiderModel
-find SpiderRenderer
-find EnderMan
-find Sniffing
-find Digging
-find Emerging
-find SonicBoom
-find NodeEvaluator
-uses net/minecraft/world/entity/ai/navigation/WallClimberNavigation
-sig net.minecraft.world.level.pathfinder.NodeEvaluator
-sig net.minecraft.world.level.pathfinder.WalkNodeEvaluator
-sig net.minecraft.world.level.pathfinder.PathfindingContext
-sig net.minecraft.world.level.pathfinder.Node
-sig net.minecraft.world.level.pathfinder.PathType
-sig net.minecraft.world.level.pathfinder.Path
-sig net.minecraft.world.level.pathfinder.PathFinder
-sig net.minecraft.network.syncher.EntityDataSerializers
-sig com.mojang.blaze3d.vertex.PoseStack
-sig net.minecraft.world.entity.ai.memory.WalkTarget
-sig net.minecraft.world.entity.ai.behavior.BlockPosTracker
-sig net.minecraft.world.entity.monster.warden.AngerManagement
-sig net.minecraft.world.entity.ai.Brain
-sig net.minecraft.world.entity.monster.creaking.Creaking$CreakingPathNavigation
-sig net.minecraft.world.entity.monster.creaking.Creaking$HomeNodeEvaluator
-net.minecraft.world.level.pathfinder.FlyNodeEvaluator
-net.minecraft.world.entity.ai.navigation.PathNavigation
-net.minecraft.world.entity.ai.navigation.FlyingPathNavigation
-net.minecraft.world.entity.ai.navigation.WallClimberNavigation
-net.minecraft.world.entity.ai.control.MoveControl
-net.minecraft.world.entity.monster.spider.Spider
-net.minecraft.client.renderer.entity.SpiderRenderer
-net.minecraft.world.entity.monster.creaking.CreakingAi
-net.minecraft.world.entity.monster.EnderMan
-net.minecraft.world.entity.monster.enderman.EnderMan
-net.minecraft.world.entity.monster.warden.Warden
-net.minecraft.world.entity.monster.warden.WardenAi
-net.minecraft.world.entity.ai.behavior.warden.Sniffing
-net.minecraft.world.entity.ai.behavior.warden.Digging
-net.minecraft.world.entity.ai.behavior.warden.Emerging
-net.minecraft.world.entity.ai.behavior.warden.SonicBoom
-net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach
+# What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
+# of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
+# Port to 26.4-snapshot-3, round 5.
+# What a chunk's getBiome takes since 26.4 (it replaced getNoiseBiome, which took quart coordinates), for the bench.
+calls net.minecraft.world.level.chunk.ChunkAccess getBiome
+calls net.minecraft.world.level.chunk.ProtoChunk getBiome
+calls net.minecraft.world.level.chunk.LevelChunkSection getBiome
+sig net.minecraft.world.level.biome.NoiseBiomeChunk

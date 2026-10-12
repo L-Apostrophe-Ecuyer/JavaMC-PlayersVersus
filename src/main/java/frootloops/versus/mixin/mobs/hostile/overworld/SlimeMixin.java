@@ -2,6 +2,7 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 
 
 import frootloops.versus.mod.mobs.ModEntities;
+import frootloops.versus.mod.mobs.hostile.overworld.IceCubeEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -23,7 +24,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 // Since 26.2 slimes and magma cubes are both AbstractCubeMobs (a magma cube was a slime before), which holds the
-// attack. The class checks below keep each change to the mob it was for; sulfur cubes deal no damage.
+// attack. The class checks below keep each change to the mob it was for (ice cubes are slimes, but their own kind);
+// sulfur cubes deal no damage.
 @Mixin(AbstractCubeMob.class)
 public abstract class SlimeMixin extends Mob {
     protected SlimeMixin(EntityType<? extends Monster> entityType, Level world) {
@@ -51,6 +53,11 @@ public abstract class SlimeMixin extends Mob {
                 // MAGMA: Some fire damage:
                 else if(this.getClass().equals(MagmaCube.class)) {
                     target.igniteForTicks(10);
+                }
+
+                // ICE CUBES: Their touch freezes:
+                else if((Object) this instanceof IceCubeEntity iceCube) {
+                    iceCube.freeze(target);
                 }
             }
         }

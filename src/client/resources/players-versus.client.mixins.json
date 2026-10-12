@@ -11,6 +11,7 @@
 		"environment.visuals.DarknessFogRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",
+		"environment.visuals.UntintedParticleLeavesAccessor",
 
 		"environment.worldgen.DefaultWorldPresetMixin",
 
@@ -21,9 +22,9 @@
 		"mobs.hostile.HumanoidModelMeleeMixin",
 		"mobs.hostile.LivingEntityRendererMeleeMixin",
 		"mobs.hostile.LivingEntityRenderStateMeleeMixin",
-		"mobs.hostile.LivingEntityRenderStateClimbMixin",
-		"mobs.hostile.LivingEntityRendererClimbMixin",
-		"mobs.hostile.SpiderRendererClimbMixin",
+		"mobs.hostile.LivingEntityRenderStateGripMixin",
+		"mobs.hostile.LivingEntityRendererTiltMixin",
+		"mobs.hostile.SpiderRendererGripMixin",
 		"mobs.passive.BabyVillagerEarModelMixin",
 		"mobs.passive.VillagerRessemblingModelMixin",
 		"mobs.passive.VillagerTradingScreenMixin",

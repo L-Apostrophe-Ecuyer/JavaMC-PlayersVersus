@@ -11,14 +11,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.block.sounds.BlockSoundSet;
+import frootloops.versus.mod.environment.blocks.BlockSounds;
 
 
 
 public class SortedBlockItemList extends SortedItemList {
 
     protected final TagKey<Block> blockTagKey;
-    protected final SoundType blockSoundGroup;
+    protected final ResourceKey<BlockSoundSet> blockSoundGroup;
     protected final Map<Item, Integer> blockIndexMap;
 
     private final float minHardness, maxHardness;
@@ -39,11 +41,11 @@ public class SortedBlockItemList extends SortedItemList {
         this(blockTagKey, null, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
-    public SortedBlockItemList(TagKey<Block> blockTagKey, SoundType blockSoundGroup, Map<Item, Integer> blockIndexMap) {
+    public SortedBlockItemList(TagKey<Block> blockTagKey, ResourceKey<BlockSoundSet> blockSoundGroup, Map<Item, Integer> blockIndexMap) {
         this(blockTagKey, blockSoundGroup, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
-    public SortedBlockItemList(SoundType blockSoundGroup, Map<Item, Integer> blockIndexMap) {
+    public SortedBlockItemList(ResourceKey<BlockSoundSet> blockSoundGroup, Map<Item, Integer> blockIndexMap) {
         this(null, blockSoundGroup, blockIndexMap, -1.0f, 128.0f, ItemType.BLOCK_FULL);
     }
 
@@ -51,7 +53,7 @@ public class SortedBlockItemList extends SortedItemList {
         this(blockTagKey, null, null, minHardness, maxHardness, ItemType.BLOCK_FULL);
     }
 
-    public SortedBlockItemList(TagKey<Block> blockTagKey, SoundType blockSoundGroup, Map<Item, Integer> blockIndexMap, float minHardness, float maxHardness, ItemType type) {
+    public SortedBlockItemList(TagKey<Block> blockTagKey, ResourceKey<BlockSoundSet> blockSoundGroup, Map<Item, Integer> blockIndexMap, float minHardness, float maxHardness, ItemType type) {
         this.blockTagKey = blockTagKey;
         this.blockSoundGroup = blockSoundGroup;
         this.blockIndexMap = blockIndexMap;
@@ -89,7 +91,7 @@ public class SortedBlockItemList extends SortedItemList {
 
             // Check if block is valid for this group:
             boolean isInBlockTag = (this.blockTagKey != null && block.defaultBlockState().is(this.blockTagKey));
-            boolean isInSoundGroup = (this.blockSoundGroup != null && block.defaultBlockState().getSoundType() == this.blockSoundGroup);
+            boolean isInSoundGroup = (this.blockSoundGroup != null && BlockSounds.is(block.defaultBlockState(), this.blockSoundGroup));
             if(!isInBlockTag && !isInSoundGroup && indexInMap == -1) return -1;
 
             // Special case: Gravel is both pickaxe mineable and shovel mineable. Privilege should go to shovels:
@@ -108,7 +110,7 @@ public class SortedBlockItemList extends SortedItemList {
 
                 // If the item currently in the list somehow isn't in the block tag, then insert before:
                 Item otherItem = slots.get(i).stack().getItem();
-                if(!(otherItem instanceof BlockItem otherBlockItem) || ((this.blockTagKey == null || !otherBlockItem.getBlock().defaultBlockState().is(this.blockTagKey)) && otherBlockItem.getBlock().defaultBlockState().getSoundType() != this.blockSoundGroup)) {
+                if(!(otherItem instanceof BlockItem otherBlockItem) || ((this.blockTagKey == null || !otherBlockItem.getBlock().defaultBlockState().is(this.blockTagKey)) && !(this.blockSoundGroup != null && BlockSounds.is(otherBlockItem.getBlock().defaultBlockState(), this.blockSoundGroup)))) {
                     this.addBetween(newSlot, indexMapEnd, i);
                     return i;
                 }

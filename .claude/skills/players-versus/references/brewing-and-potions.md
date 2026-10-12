@@ -42,6 +42,13 @@ vanilla items are disabled and swapped on every stack).
   (`VanillaItems.ITEM_REPLACEMENT_MAP`: Concentrate of Strength, Concentrate of Fire, Corrupted Wart Powder) and
   disabled. `describeRecipes` resolves them to their replacements, so the recipes use the items players actually have.
   Recipes naming the vanilla items could never brew (the 26.3 JSON recipes did, and lost all three).
+- **Freezing (26.4 port)**: vanilla's 26.4 Freezing potion and Fire Resistance are each other's
+  inverse in `BrewingSystem` (`RelatedPotions`), and the Frigid Concentrate
+  (`CustomBrewingItems.CONCENTRATE_OF_FREEZING`: Freezing, 120 ticks eaten or thrown; bile block
+  `freezing_bile`) is its ingredient in the graph. Like the Concentrate of Fire, which magma cubes drop
+  as magma cream, it comes from a cube mob: Ice Cubes of size 2 or more (see `mobs.md`); there is no
+  crafting recipe. Like every potion in the graph it brews through `BrewingSystem`'s recipes (`RecipeManagerMixin`), from
+  the item players actually hold.
 - Vanilla-untouched: Thick/Awkward from glowstone/sugar, splash/lingering conversion via
   gunpowder/redstone (unchanged from vanilla).
 - **New potion effects not in vanilla combos**: Haste/Mining Fatigue/Vulnerability/Darkness/

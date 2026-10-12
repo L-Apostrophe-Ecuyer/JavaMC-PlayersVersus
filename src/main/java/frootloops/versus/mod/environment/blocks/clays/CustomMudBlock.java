@@ -19,7 +19,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -29,6 +28,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import frootloops.versus.mod.environment.blocks.BlockSounds;
+import net.minecraft.world.level.block.sounds.BlockSoundSet;
+import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 public class CustomMudBlock extends MoistBlock {
 
@@ -57,15 +59,15 @@ public class CustomMudBlock extends MoistBlock {
                 Vec3 velocity = entity.getDeltaMovement();
                 if(entity.isInLiquid()) {
                     entity.makeStuckInBlock(state, new Vec3(1.1, 1.0, 1.1));
-                    if(world.getGameTime() % 20L == 0) entity.playSound(this.soundType.getStepSound(), this.soundType.getVolume() * 0.5F, this.soundType.getPitch() * 0.75F);
+                    if(world.getGameTime() % 20L == 0) BlockSounds.play(entity, state, BlockSoundSet::stepSound, 0.5F, 0.75F);
                 }
                 else if(entityRelativeY < 0.95 || blockOnTop.defaultDestroyTime() > 0.0) {
                     entity.setDeltaMovement(velocity.x, 0.03, velocity.z);
-                    if(world.getGameTime() % 20L == 0) entity.playSound(this.soundType.getStepSound(), this.soundType.getVolume() * 0.5F, this.soundType.getPitch() * 0.75F);
+                    if(world.getGameTime() % 20L == 0) BlockSounds.play(entity, state, BlockSoundSet::stepSound, 0.5F, 0.75F);
                 }
                 else if(velocity.y < 0.12){
                     entity.setDeltaMovement(velocity.x, 0.3, velocity.z);
-                    entity.playSound(this.soundType.getFallSound(), this.soundType.getVolume() * 0.5F, this.soundType.getPitch() * 0.75F);
+                    BlockSounds.play(entity, state, BlockSoundSet::fallSound, 0.5F, 0.75F);
                 }
             }
             else if(entityRelativeY > 0.95 && entity.getDeltaMovement().y >= 0.0) {
@@ -76,9 +78,9 @@ public class CustomMudBlock extends MoistBlock {
             else if(hasEntityMoved(entity) || entity.isDiscrete()) {
                 if(canEntityBeDamaged && world.getGameTime() % 20L == 0 && !world.isClientSide()) {
                     entity.hurtServer((ServerLevel) world, CustomDamageSources.getMudSuffocation(world), 1); // Damage every second while moving
-                    entity.playSound(this.soundType.getHitSound(), this.soundType.getVolume() * 0.5F, this.soundType.getPitch() * 0.75F);
+                    BlockSounds.play(entity, state, BlockSoundSet::hitSound, 0.5F, 0.75F);
                 }
-                else if(world.getGameTime() % 10L == 0) entity.playSound(this.soundType.getHitSound(), this.soundType.getVolume() * 0.5F, this.soundType.getPitch() * 0.75F);
+                else if(world.getGameTime() % 10L == 0) BlockSounds.play(entity, state, BlockSoundSet::hitSound, 0.5F, 0.75F);
                 entity.makeStuckInBlock(state, new Vec3(0.995, 0.45, 0.995));
                 return; // To avoid dealing damage twice
             }
@@ -96,7 +98,7 @@ public class CustomMudBlock extends MoistBlock {
     @Override
     public void fallOn(Level world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
         if(entity instanceof FallingBlockEntity fallingBlock) {
-            if(fallDistance < MIN_FALL_DISTANCE_TO_DRY && fallingBlock.getBlockState().getSoundType() != SoundType.ANVIL) return;
+            if(fallDistance < MIN_FALL_DISTANCE_TO_DRY && !BlockSounds.is(fallingBlock.getBlockState(), BlockSoundSets.ANVIL)) return;
             world.setBlockAndUpdate(pos, this.getDryVersion().defaultBlockState());
             world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(entity, this.getDryVersion().defaultBlockState()));
             super.fallOn(world, state, pos, entity, fallDistance);

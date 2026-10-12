@@ -22,10 +22,10 @@ import java.util.LinkedList;
 @Environment(EnvType.CLIENT)
 public class InventorySorting {
 
-    public static final boolean DEBUG_SORTING_GROUPS = true;
-    public static final boolean DEBUG_SORTING_MERGE = true;
-    public static final boolean DEBUG_SORTING_OUTPUT = true;
-    private static final boolean DEBUG_ITEM_SWITICHING = true;
+    public static final boolean DEBUG_SORTING_GROUPS = false;
+    public static final boolean DEBUG_SORTING_MERGE = false;
+    public static final boolean DEBUG_SORTING_OUTPUT = false;
+    private static final boolean DEBUG_ITEM_SWITICHING = false;
 
     public static final WidgetSprites TEXTURE_HOTBAR_SWAP_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/hotbar_swap_down"), Identifier.fromNamespaceAndPath("players-versus", "container/hotbar_swap_down_highlighted"));
     public static final WidgetSprites TEXTURE_INVENTORY_SORT_BUTTON = new WidgetSprites(Identifier.fromNamespaceAndPath("players-versus", "container/sort_inventory"), Identifier.fromNamespaceAndPath("players-versus", "container/sort_inventory_highlighted"));

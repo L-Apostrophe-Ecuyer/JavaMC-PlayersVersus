@@ -43,8 +43,11 @@ public final class PvAquiferRules {
         double at(int x, int y, int z);
     }
 
-    /** For {@link #atPosition} without the flooded corridors: no corridor anywhere. */
+    /** For {@link #atPosition} without the flooded corridors or the dry paths: none anywhere. */
     public static final Field NO_CORRIDORS = (x, y, z) -> Double.POSITIVE_INFINITY;
+    public static final Field NO_DRY_PATHS = NO_CORRIDORS;
+    /** For {@link #atPosition} without the basins' level: the basins reach every height of their layers. */
+    public static final Field NO_LEVEL = NO_CORRIDORS;
 
     /** What {@link #atPosition} says at a block, for the neighbours {@link #decide} looks at. */
     @FunctionalInterface
@@ -74,6 +77,30 @@ public final class PvAquiferRules {
      *                  final density's noodle inside the corridors' zone, at most 0 where it opens the block there
      */
     public static PvAquiferDecision atPosition(int x, int y, int z, Field floodedness, Field spread, Field corridors) {
+        return atPosition(x, y, z, floodedness, spread, corridors, NO_DRY_PATHS);
+    }
+
+    /**
+     * {@link #atPosition}, with the flooded corridors and the dry paths: in the basin layers, a block within
+     * {@link frootloops.versus.mod.environment.worldgen.PvWorldgenConstants#DRY_PATH_SHELL} of what the dry noodles open
+     * is dry, whatever S says, so they lead down through the basins' water; the sea's water and band still come first.
+     *
+     * @param dryPaths the dry noodles at a block ({@code players-versus:overworld/caves/dry_paths}): the final density's
+     *                 noodle outside the corridors' zone, at most 0 where it opens the block
+     */
+    public static PvAquiferDecision atPosition(int x, int y, int z, Field floodedness, Field spread, Field corridors, Field dryPaths) {
+        return atPosition(x, y, z, floodedness, spread, corridors, dryPaths, NO_LEVEL);
+    }
+
+    /**
+     * {@link #atPosition}, with the basins' level: in the basin layers, a block above it is dry, so the basins' water,
+     * barriers and flooded corridors only stand up to it, and where it's the layers' bottom, the caves are dry all the
+     * way down.
+     *
+     * @param level the basins' level at the block's column ({@code players-versus:overworld/caves/basin_level})
+     */
+    public static PvAquiferDecision atPosition(int x, int y, int z, Field floodedness, Field spread, Field corridors, Field dryPaths,
+                                               Field level) {
         if (y >= SEA_LEVEL) return PvAquiferDecision.AIR;
 
         if (y > SEA_BAND_MIN_Y) {
@@ -87,6 +114,8 @@ public final class PvAquiferRules {
         }
 
         if (y > BASIN_MIN_Y && y < BASIN_MAX_Y) {
+            if (dryPaths.at(x, y, z) <= DRY_PATH_SHELL) return PvAquiferDecision.AIR;
+            if (y > level.at(x, y, z)) return PvAquiferDecision.AIR;
             double basinFloodedness = spread.at(x, y, z);
             double waterThreshold = basinWaterThreshold(y);
             if (basinFloodedness > waterThreshold) {
@@ -179,9 +208,10 @@ public final class PvAquiferRules {
         return SEA_BARRIER_THRESHOLD + (y < SEA_BARRIER_RAMP_START_Y ? 0.0 : (double) (y - SEA_BARRIER_RAMP_START_Y) * SEA_BARRIER_RAMP_PER_BLOCK);
     }
 
-    /** Basins flood more easily near the bottom of the band. */
+    /** Basins flood more easily near the bottom of the band, but never where S is 0 ({@code BASIN_WATER_MIN_SPREAD}). */
     public static double basinWaterThreshold(int y) {
-        return y > BASIN_WATER_RAMP_Y ? BASIN_WATER_THRESHOLD : BASIN_WATER_THRESHOLD - (double) (BASIN_WATER_RAMP_Y - y) * BASIN_WATER_RAMP_PER_BLOCK;
+        double ramped = y > BASIN_WATER_RAMP_Y ? BASIN_WATER_THRESHOLD : BASIN_WATER_THRESHOLD - (double) (BASIN_WATER_RAMP_Y - y) * BASIN_WATER_RAMP_PER_BLOCK;
+        return Math.max(BASIN_WATER_MIN_SPREAD, ramped);
     }
 
     /** Basin barriers get rarer higher up in the band. */
