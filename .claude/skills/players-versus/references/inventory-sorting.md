@@ -36,7 +36,9 @@ Stages, in `InventorySorter.layOut`:
    shulker boxes / bundles / item containers straight to the containers group, else the first group
    that takes it, else the random group.
 2. **Hotbar** (player inventory): `cleanUpHotbar`'s ladder, then `MainHotbarGroup.keepOnlyEssentials`
-   (dropped stacks go back to their groups), then `avoidAWeakHotbar`. Rules:
+   (dropped stacks go back to their groups), then `avoidAWeakHotbar`. An inventory of two rows or less
+   (`InventorySorter.SMALL_INVENTORY`, 18 stacks) skips all of that and keeps its hotbar as it is, apart from
+   the nine-stack limit (Winter-Drop's "Tweak for hotbar sorting"). Rules:
    - The main weapon (best sword; a hoe in the Deep Dark) always stays, even without food or a second weapon.
    - The best pickaxe and axe join the hotbar unless their group makes whole rows (size a multiple of
      9, e.g. 1 axe + 8 wool): such rows stay together, for hotbar cycling to swap in.
