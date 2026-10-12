@@ -1,6 +1,7 @@
 package frootloops.versus.mod.environment.worldgen.debug;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.blocks.BlockTagAudit;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -90,6 +91,7 @@ public final class WorldgenCensus {
     public static void run(ServerLevel world, List<String> biomes, int radius, int range, Consumer<String> log) {
         log.accept("[pvwg] census: generator " + WorldgenBench.describeGenerator(world.getChunkSource().getGenerator()));
         survival(world, log);
+        log.accept("[pvwg] census: solid blocks of the mod outside #blocks_motion_no_leaves: " + BlockTagAudit.solidBlocksNotBlockingMotion());
         for (String biome : biomes) {
             String id = biome.contains(":") ? biome : "minecraft:" + biome;
             BlockPos middle = find(world, id, range, log);

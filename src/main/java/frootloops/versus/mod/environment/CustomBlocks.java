@@ -77,6 +77,7 @@ public class CustomBlocks {
 
 
     public static void onInitialize() {
+        BlockTagAudit.onInitialize();
 
         SMOLDERING_TORCH = registerBlock("smoldering_torch", new SmolderingTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(BlockSoundSets.WOOD).pushReaction(PushReaction.POPPED)));
         SMOLDERING_WALL_TORCH = registerBlock("smoldering_wall_torch", new SmolderingWallTorchBlock(ParticleTypes.SMALL_FLAME, getSettings("smoldering_wall_torch").noCollision().instabreak().lightLevel((state) -> 12).sound(BlockSoundSets.WOOD).pushReaction(PushReaction.POPPED)));
