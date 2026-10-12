@@ -152,8 +152,9 @@ public class InventorySortingGameTest {
     @GameTest
     public void aLonePickaxeJoinsTheHotbar(GameTestHelper helper) {
         List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.BREAD, 16), new ItemStack(Items.IRON_PICKAXE)));
-        // Enough to fill more than two rows: a smaller inventory keeps its hotbar as it is
-        addCopies(stacks, Items.COBBLESTONE, 17);
+        addCopies(stacks, Items.COBBLESTONE, 12);
+        // Enough stacks to need more than two rows: a smaller inventory keeps its hotbar as it is
+        addCopies(stacks, Items.DIRT, 4);
 
         int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
         assertInRow(helper, sorted, 0, List.of(0, 1, 2), stacks, "the sword, bread and pickaxe");
