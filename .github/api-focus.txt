@@ -1,16 +1,34 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# 26.4 fixes, round 1: what starts, holds and stops an item's use on the client (MinecraftClientMixin reimplements
-# startUseItem and hooks continueAttack and startAttack), and vanilla's sugar cane block.
-calls net.minecraft.client.Minecraft ^startUseItem$|^handleKeybinds$|^continueAttack$|^startAttack$|^tick$
-member net.minecraft.client.Minecraft rightClickDelay|missTime|UseItem|Attack|Keybind
-calls net.minecraft.client.multiplayer.MultiPlayerGameMode ^useItem$|^releaseUsingItem$|^useItemOn$|^interact$|^isDestroying$|^ensureHasSentCarriedItem$|^tick$|^startPrediction$
-calls net.minecraft.client.player.LocalPlayer ^startUsingItem$|^stopUsingItem$|^isUsingItem$|^onSyncedDataUpdated$|^itemUsed$|^getUsedItemHand$|^aiStep$|^tick$|^isHandsBusy$|^swing$
-calls net.minecraft.world.entity.LivingEntity ^updatingUsingItem$|^updateUsingItem$|^startUsingItem$|^stopUsingItem$|^releaseUsingItem$|^completeUsingItem$|^onSyncedDataUpdated$|^swing$
-calls net.minecraft.world.entity.player.Player ^tick$|^attack$|^canEat$
-calls net.minecraft.server.network.ServerGamePacketListenerImpl ^handleUseItem$|^handleUseItemOn$|^handlePlayerAction$|^handleInteract$
-calls net.minecraft.server.level.ServerPlayerGameMode ^useItem$|^useItemOn$
-sig net.minecraft.world.InteractionResult$SwingSource
-sig net.minecraft.world.InteractionResult$Success
-sig net.minecraft.world.level.block.SugarCaneBlock
-calls net.minecraft.world.level.block.SugarCaneBlock .
+# Block placement, round 1: what each kind of block's getStateForPlacement reads (the clicked face, the click's height,
+# the player's yaw or look), the placement context's API, the item's placement path, the client's use-on call, who else
+# places through BlockItem#place (a dispenser's shulker box: no player), and the render events a preview could use.
+calls net.minecraft.world.item.BlockItem ^place$|^getPlacementState$|^updatePlacementContext$|^canPlace$|^placeBlock$|^useOn$
+sig net.minecraft.world.item.context.BlockPlaceContext
+sig net.minecraft.world.item.context.UseOnContext
+sig net.minecraft.world.item.context.DirectionalPlaceContext
+calls net.minecraft.core.dispenser.ShulkerBoxDispenseBehavior .
+calls net.minecraft.world.level.block.RotatedPillarBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.StairBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.SlabBlock ^getStateForPlacement$|^canBeReplaced$
+calls net.minecraft.world.level.block.TrapDoorBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.DoorBlock ^getStateForPlacement$|^getHinge$
+calls net.minecraft.world.level.block.FenceGateBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.ChestBlock ^getStateForPlacement$|^candidatePartnerFacing$
+calls net.minecraft.world.level.block.AbstractFurnaceBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.BarrelBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.DirectionalBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.ObserverBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.piston.PistonBaseBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.HopperBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.StandingSignBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.SkullBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.GlazedTerracottaBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.LanternBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock ^getStateForPlacement$
+calls net.minecraft.world.level.block.Block ^updateFromNeighbourShapes$
+calls net.minecraft.client.multiplayer.MultiPlayerGameMode ^useItemOn$|^performUseItemOn$
+member net.minecraft.client.Minecraft rightClickDelay
+find RenderEvents
+find BlockOutline
+find SelectionOverlay
