@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "redstone",
   "group": "jungle_misc",
   "key": {
     "#": "minecraft:jungle_planks"

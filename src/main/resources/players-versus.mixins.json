@@ -13,6 +13,8 @@
     "players.building.BlockBehaviourMixin",
     "players.building.BlockItemMixin",
 
+    "items_and_effects.recipes.RecipeFileMixin",
+
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",
     "enchantments.EnchantmentHelperMixin",

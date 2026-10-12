@@ -39,6 +39,10 @@ public abstract class VersusSettings {
     }
 
     public static class Items {
+        // Recipe book groups by family (oak, deepslate, copper), tools and armor by material (RecipeRules)
+        public static boolean DO_FAMILY_RECIPE_GROUPS = true;
+        // Stairs from three blocks (four stairs), slabs from two (four slabs), pressure plates from three (two plates)
+        public static boolean DO_CHEAPER_STAIRS_AND_SLABS = true;
         public static int MAX_STACK_SIZE_COUNT = 64;
         public static int MAX_COUNT_FOOD = 64;
         public static int MAX_COUNT_STEWS = 16;

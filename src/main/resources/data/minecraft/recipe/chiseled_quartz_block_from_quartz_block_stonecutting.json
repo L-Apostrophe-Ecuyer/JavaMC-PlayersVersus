@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:stonecutting",
-  "group": "chiseled_quartz",
-  "ingredient": "minecraft:quartz_block",
-  "result": {
-    "count": 1,
-    "id": "minecraft:chiseled_quartz_block"
-  }
-}

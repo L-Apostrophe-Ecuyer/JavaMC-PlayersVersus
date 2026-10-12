@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "equipment",
   "group": "leather_armor",
   "pattern": [
     "XXX",

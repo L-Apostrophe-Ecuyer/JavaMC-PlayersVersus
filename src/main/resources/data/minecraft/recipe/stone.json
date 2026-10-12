@@ -1,5 +1,6 @@
 {
   "type": "minecraft:smelting",
+  "category": "blocks",
   "ingredient": "minecraft:cobblestone",
   "result": {
     "id": "minecraft:stone"

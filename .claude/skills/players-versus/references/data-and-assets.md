@@ -5,8 +5,8 @@ enumerate individual recipe/loot-table/advancement changes (~679 recipes, ~150 a
 too many to usefully transcribe) or individual asset files.
 
 ## Layout
-- `data/minecraft/**` — **vanilla-namespace overrides**: recipes (679, the largest single JSON
-  folder in the repo), advancements (organized by vanilla category:
+- `data/minecraft/**` — **vanilla-namespace overrides**: recipes (183 since 26.4 — only real recipe
+  changes; see "Recipe rules" below), advancements (organized by vanilla category:
   `recipes/{brewing,building_blocks,combat,decorations,misc,redstone,tools,transportation}`, plus
   `story/`), loot tables (`blocks`, `entities`(+`sheep`), `chests`(+`trial_chambers`,`village`),
   `shearing/sheep`, `spawners`(+`ominous/trial_chamber`)), `archaeology` loot, `enchantment`,
@@ -63,6 +63,24 @@ using the project's own `Gson` dependency, or a set of shell+`jq`-equivalent scr
 Windows dev machine has no `python`/`node`/`jq` on PATH per `architecture.md`, so lean on Java or
 PowerShell's native JSON cmdlets if scripting outside the Gradle build) rather than assuming they
 already exist.
+
+## Recipe rules (no file per stairs/slab/group)
+`mod/items_and_effects/recipes/RecipeRules` changes every recipe file by rule as it loads
+(`mixin/items_and_effects/recipes/RecipeFileMixin`, a `@WrapOperation` on the decode in 26.4's
+`RegistryLoadTask$PendingRegistration.loadFromResource`, limited to `Registries.RECIPE`), so the rules reach
+mods' and data packs' recipes too:
+- groups: a block's family = its id without shape/finish words (`_stairs`, `_slab`, `_planks`, `_bricks`,
+  `waxed_`, `polished_`, `cut_`…; lists in the class): `oak`, `deepslate`, `tuff`, `copper`…; tools
+  `<material>_tools`, armor `<material>_armor`. Vanilla's recipe book still separates tabs (categories), so a
+  family has one button per tab.
+- stairs (`StairBlock` result, vanilla's 6-cell staircase) → `# `/`##`, same count (4); slabs (`SlabBlock`,
+  row of 3) → `##`, two thirds of the count (6 → 4); pressure plates (`BasePressurePlateBlock`, row of 2) →
+  `###`, twice the count (1 → 2). Any other shape is left alone.
+- So **write stairs and slab recipes in vanilla's shape** (the mod's own and kept overrides are), and don't
+  add overrides just to regroup or reshape. Kept `data/minecraft/recipe` files are real changes (doors 2,
+  trapdoors 6, cut copper 8, nuggets, the mod's copper tools/armor and clay, terracotta…), with vanilla's
+  category kept. Settings: `VersusSettings.Items.DO_FAMILY_RECIPE_GROUPS`, `DO_CHEAPER_STAIRS_AND_SLABS`.
+- Tests: `src/test/.../mod/items_and_effects/recipes/RecipeRulesTest`.
 
 ## Extension recipe: adding/changing a recipe, loot table, or advancement
 - New content → `data/players-versus/**`, mirroring the existing subfolder taxonomy above (don't
