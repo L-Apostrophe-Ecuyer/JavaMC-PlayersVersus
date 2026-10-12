@@ -9,11 +9,12 @@ sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$AfterTra
 sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$EndMain
 sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents
 sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents$AfterBlockOutlineExtraction
-findsig LevelRenderContext
-findsig LevelExtractionContext
+sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
+sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext
 sig net.minecraft.client.renderer.state.level.BlockOutlineRenderState
-find ShapeRenderer
-findsig ShapeRenderer
+find Gizmo
+find ShapeRender
+find OutlineRender
 find RenderTypes
 member net.minecraft.client.renderer.rendertype.RenderTypes lines|Lines|outline|Outline
 calls net.minecraft.client.renderer.LevelRenderer ^renderHitOutline$|^renderBlockOutline$|^extractBlockOutline$
@@ -26,3 +27,7 @@ member net.minecraft.world.level.block.state.properties.BlockStateProperties AXI
 member net.minecraft.world.entity.player.Player blockInteractionRange|BlockInteractionRange|canInteractWithBlock
 member net.minecraft.client.KeyMapping isDown|consumeClick
 find ClientTickEvents
+sig net.minecraft.gizmos.Gizmos
+sig net.minecraft.gizmos.CuboidGizmo
+sig net.minecraft.gizmos.GizmoStyle
+sig net.minecraft.gizmos.GizmoProperties
