@@ -110,15 +110,19 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                             }
                             break;
                         case BLOCK:
-                            if (this.playersVersus$useOnBlock(hand, itemStack, (BlockHitResult)this.hitResult)) {
+                            actionResult = this.playersVersus$useOnBlock(hand, itemStack, (BlockHitResult)this.hitResult);
+                            if (actionResult instanceof InteractionResult.Success || actionResult instanceof InteractionResult.Fail) {
                                 info.cancel();
                                 return;
                             }
                             break;
                         case MISS:
-                            // Reach-around: nothing under the crosshair, looking down past the edge of the block below
+                            // Reach-around: nothing under the crosshair, looking down past the edge of the block below.
+                            // If the block can't go there, the item is used as with nothing under the crosshair (a lily
+                            // pad still goes on the water below)
                             BlockHitResult around = ClientPlacement.INSTANCE.reachAround(this.player, hand);
-                            if (around != null && this.playersVersus$useOnBlock(hand, itemStack, around)) {
+                            if (around != null && (ClientPlacement.INSTANCE.refuses(this.player, hand, around)
+                                    || this.playersVersus$useOnBlock(hand, itemStack, around) instanceof InteractionResult.Success)) {
                                 info.cancel();
                                 return;
                             }
@@ -141,24 +145,23 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
         info.cancel();
     }
 
-    /** The item in hand used on a block, as vanilla's right-click does; whether that ends the click. */
+    /**
+     * The item in hand used on a block, as vanilla's right-click does: a success or a failure ends the click. A repeat
+     * of right-click held that the stroke refuses is a failure, and nothing happens at all.
+     */
     @Unique
-    private boolean playersVersus$useOnBlock(InteractionHand hand, ItemStack itemStack, BlockHitResult hit) {
-        // Right-click held places only where the stroke goes; elsewhere it does nothing at all
-        if (ClientPlacement.INSTANCE.refuses(this.player, hand, hit)) return true;
+    private InteractionResult playersVersus$useOnBlock(InteractionHand hand, ItemStack itemStack, BlockHitResult hit) {
+        if (ClientPlacement.INSTANCE.refuses(this.player, hand, hit)) return InteractionResult.FAIL;
         ClientPlacement.INSTANCE.tried(this.player, hand, hit);
         int i = itemStack.getCount();
         InteractionResult actionResult = this.gameMode.useItemOn(this.player, hand, hit);
-        if (actionResult instanceof InteractionResult.Success success) {
-            if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
-                this.player.swing(hand, itemStack.getInteractAnimation(), false);
-                if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {
-                    this.player.itemUsed(hand);
-                }
+        if (actionResult instanceof InteractionResult.Success success && success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+            this.player.swing(hand, itemStack.getInteractAnimation(), false);
+            if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {
+                this.player.itemUsed(hand);
             }
-            return true;
         }
-        return actionResult instanceof InteractionResult.Fail;
+        return actionResult;
     }
 
     /** Right-click held in a stroke places as soon as the crosshair reaches a new spot for it, not every fourth tick. */

@@ -45,6 +45,8 @@
 		"players.death.DeathScreenMixin",
 
 		"players.BlockItemInvoker",
+		"players.GameRendererInvoker",
+		"players.LevelRendererAccessor",
 		"players.DebugHudMixin",
 		"players.DebugOptionsScreenMixin",
 		"players.HungerBarRendererMixin",

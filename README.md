@@ -31,5 +31,5 @@ Takes inspiration from old school MC, and from Better Than Adventure, to take th
   - The anvil's level cost has been flattened for enchanted tools and removed for unenchanted tools.
   - In deep caves only, or while exposed to rain, regular torches can burn out. In return, mobs can hold treasures in hand when spawning deep down.
   - Crops and sugar cane have gotten a few quality of life improvements. Added wheat grass, too!
-  - Placing some blocks (like stairs) made easier when uncrouched.
+  - Placing blocks made easier when uncrouched: they turn to match what you're building and what you just placed, holding right-click lays a clean floor, wall or bridge, you can reach around the edge you stand on, and a block you just misplaced breaks quickly.
   - Archeology and the brush made into an actual game mechanic, rather than just point and click. Bonus: lots more structures have suspicious blocks.

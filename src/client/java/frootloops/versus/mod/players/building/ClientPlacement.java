@@ -4,6 +4,7 @@ import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.client.players.BlockItemInvoker;
 import frootloops.versus.mod.environment.blocks.LadderBlockItem;
 import frootloops.versus.mod.players.HandSelection;
+import frootloops.versus.mod.players.RayTraceHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -17,7 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.ScaffoldingBlockItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.ClipContext;
@@ -37,8 +37,9 @@ import java.util.Map;
  * The client's part of placing blocks: what it remembers of the player's placements, for the rules that turn them
  * ({@link PlacementRules}), and how a right-click held down places them.
  * <p>
- * A stroke is right-click held since the first block it placed. Within it, a block goes down as soon as the crosshair
- * reaches a new spot for it rather than every fourth tick, but only where the stroke means it to go:
+ * A stroke is right-click held since the first block it placed. Within it, once held as long as vanilla waits before
+ * repeating, a block goes down as soon as the crosshair reaches a new spot for it rather than every fourth tick, but
+ * only where the stroke means it to go:
  * <ul>
  * <li>On the face the stroke began on: a floor stays a floor, a wall a wall, a bridge a bridge.</li>
  * <li>Not out of a block of the stroke itself, unless the player moved that way by half a block since placing it: a
@@ -60,18 +61,25 @@ public final class ClientPlacement implements PlacementRules.ClientSide {
     private static final int RECENT = 30;
     /** How far back the eyes are moved to find the block a reach-around goes in front of. */
     private static final double REACH_AROUND = 0.5;
+    /**
+     * How long (in ticks) right-click is held after a stroke's first block before blocks go down on arrival: vanilla's
+     * delay before it repeats, so that a click held a moment while the mouse moves still places one block.
+     */
+    private static final int FIRST_REPEAT = 4;
 
     private static final class Stroke {
         final Item item;
         final BlockState first;
         final Direction face;
+        final long start;
         /** Each block of the stroke, with where the player stood when placing it. */
         final Map<Long, Vec3> placed = new HashMap<>();
 
-        Stroke(Item item, BlockState first, Direction face) {
+        Stroke(Item item, BlockState first, Direction face, long start) {
             this.item = item;
             this.first = first;
             this.face = face;
+            this.start = start;
         }
     }
 
@@ -88,11 +96,12 @@ public final class ClientPlacement implements PlacementRules.ClientSide {
 
     /** Set while the preview asks what a placement would be, so that nothing is sent or remembered. */
     private boolean previewing;
-    @Nullable private BlockState previewVanilla, previewChosen;
+    @Nullable private BlockState previewVanilla;
 
     public static void register() {
         PlacementRules.client = INSTANCE;
         ClientTickEvents.START_CLIENT_TICK.register(INSTANCE::startTick);
+        PlacementPreview.register();
     }
 
     /** Before the keys are handled: a release or a new press of right-click ends the stroke. */
@@ -124,7 +133,6 @@ public final class ClientPlacement implements PlacementRules.ClientSide {
     public void chosen(BlockPlaceContext context, BlockState vanilla, BlockState chosen) {
         if (previewing) {
             previewVanilla = vanilla;
-            previewChosen = chosen;
             return;
         }
         if (chosen != vanilla) ClientPlayNetworking.send(new PlacementHintPayload(context.getClickedPos(), Block.getId(chosen)));
@@ -137,7 +145,7 @@ public final class ClientPlacement implements PlacementRules.ClientSide {
         BlockPos pos = context.getClickedPos();
         Item item = context.getItemInHand().getItem();
         if (held && strokes(item)) {
-            if (stroke == null || stroke.item != item) stroke = new Stroke(item, state, context.getClickedFace());
+            if (stroke == null || stroke.item != item) stroke = new Stroke(item, state, context.getClickedFace(), context.getLevel().getGameTime());
             stroke.placed.put(pos.asLong(), player.position());
         }
         lastPos = pos.asLong();
@@ -195,6 +203,7 @@ public final class ClientPlacement implements PlacementRules.ClientSide {
     public boolean arrived(Minecraft minecraft) {
         LocalPlayer player = minecraft.player;
         if (stroke == null || !held || player == null || player.isUsingItem() || minecraft.level == null) return false;
+        if (minecraft.level.getGameTime() - stroke.start < FIRST_REPEAT) return false;
         InteractionHand hand = player.getMainHandItem().getItem() == stroke.item ? InteractionHand.MAIN_HAND
                 : player.getOffhandItem().getItem() == stroke.item ? InteractionHand.OFF_HAND : null;
         if (hand == null || !strokes(stroke.item) || HandSelection.onCooldown(player, hand)) return false;
@@ -229,15 +238,15 @@ public final class ClientPlacement implements PlacementRules.ClientSide {
     public BlockHitResult reachAround(LocalPlayer player, InteractionHand hand) {
         if (!VersusSettings.QOL.DO_BEDROCK_BRIDGING || player.getXRot() < 0.0F || player.isSpectator()) return null;
         Item item = player.getItemInHand(hand).getItem();
-        if (!(item instanceof BlockItem) || item instanceof PlaceOnWaterBlockItem || item instanceof ScaffoldingBlockItem) return null;
+        if (!(item instanceof BlockItem) || item instanceof ScaffoldingBlockItem) return null;
 
         Direction facing = player.getDirection();
         Vec3 eyes = player.getEyePosition().subtract(facing.getStepX() * REACH_AROUND, 0.0, facing.getStepZ() * REACH_AROUND);
-        Vec3 end = eyes.add(player.getViewVector(1.0F).scale(player.blockInteractionRange()));
-        BlockHitResult hit = player.level().clip(new ClipContext(eyes, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
-        if (hit.getType() != HitResult.Type.BLOCK) return null;
+        HitResult hit = RayTraceHandler.rayTrace(player, player.level(), eyes, player.getViewVector(1.0F), ClipContext.Block.OUTLINE,
+                ClipContext.Fluid.NONE, player.blockInteractionRange());
+        if (!(hit instanceof BlockHitResult blockHit) || hit.getType() != HitResult.Type.BLOCK) return null;
 
-        BlockPos against = hit.getBlockPos();
+        BlockPos against = blockHit.getBlockPos();
         // The block under the player's feet or beside it at that height: standing on it, on a slab beside it, or
         // jumping off it; not one further down
         double above = player.getY() - (against.getY() + 1);
@@ -250,19 +259,22 @@ public final class ClientPlacement implements PlacementRules.ClientSide {
 
     // Preview
 
-    /** What a placement of the block in hand on hit would put down: vanilla's state and the one chosen, or null. */
+    /** A placement the preview asks about: where, vanilla's state there and the one chosen. */
+    public record Placement(BlockPos pos, BlockState vanilla, BlockState chosen) {}
+
+    /** What a placement of the block in hand on hit would put down, or null if nothing. Sends and remembers nothing. */
     @Nullable
-    public BlockState[] wouldPlace(LocalPlayer player, InteractionHand hand, BlockHitResult hit) {
+    public Placement wouldPlace(LocalPlayer player, InteractionHand hand, BlockHitResult hit) {
         ItemStack stack = player.getItemInHand(hand);
         if (!(stack.getItem() instanceof BlockItem item)) return null;
         BlockPlaceContext context = item.updatePlacementContext(new BlockPlaceContext(player, hand, stack, hit));
-        if (context == null) return null;
+        if (context == null || !context.canPlace()) return null;
         previewing = true;
-        previewVanilla = previewChosen = null;
+        previewVanilla = null;
         try {
             BlockState state = ((BlockItemInvoker) item).playersVersus$getPlacementState(context);
             if (state == null) return null;
-            return new BlockState[] {previewVanilla != null ? previewVanilla : state, state};
+            return new Placement(context.getClickedPos(), previewVanilla != null ? previewVanilla : state, state);
         } finally {
             previewing = false;
         }
