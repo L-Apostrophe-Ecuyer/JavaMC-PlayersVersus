@@ -23,15 +23,22 @@ import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
  * @param corridors the flooded corridors ({@code players-versus:overworld/caves/flooded_corridors}): the final density's
  *                  noodle inside the corridors' zone, near the flooded caves, and nothing outside it, so the dry noodles
  *                  stay dry. The aquifer floods the basin layers where it's at most 0. Not part of S.
+ * @param dryPaths  the dry noodles ({@code players-versus:overworld/caves/dry_paths}): the final density's noodle outside
+ *                  the corridors' zone. The aquifer keeps the basin layers dry close to where it opens a block. Not part
+ *                  of S.
+ * @param level     the basins' level ({@code players-versus:overworld/caves/basin_level}): by column, the highest y their
+ *                  water, barriers and flooded corridors reach; the layers' bottom where they have none. Not part of S.
  */
 public record AquiferSpread(DensityFunction entrances, DensityFunction noodle, DensityFunction surface,
-                            DensityFunction corridors) implements DensityFunction {
+                            DensityFunction corridors, DensityFunction dryPaths, DensityFunction level) implements DensityFunction {
 
     public static final MapCodec<AquiferSpread> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             DensityFunction.CODEC.fieldOf("entrances").forGetter(AquiferSpread::entrances),
             DensityFunction.CODEC.fieldOf("noodle").forGetter(AquiferSpread::noodle),
             DensityFunction.CODEC.fieldOf("surface").forGetter(AquiferSpread::surface),
-            DensityFunction.CODEC.fieldOf("corridors").forGetter(AquiferSpread::corridors)
+            DensityFunction.CODEC.fieldOf("corridors").forGetter(AquiferSpread::corridors),
+            DensityFunction.CODEC.fieldOf("dry_paths").forGetter(AquiferSpread::dryPaths),
+            DensityFunction.CODEC.fieldOf("level").forGetter(AquiferSpread::level)
     ).apply(instance, AquiferSpread::new));
 
     @Override
@@ -54,10 +61,12 @@ public record AquiferSpread(DensityFunction entrances, DensityFunction noodle, D
     public DensityFunction rewriteChildren(DfRewriteRule rule) {
         DensityFunction entrances = rule.rewrite(this.entrances), noodle = rule.rewrite(this.noodle);
         DensityFunction surface = rule.rewrite(this.surface), corridors = rule.rewrite(this.corridors);
-        if (entrances == this.entrances && noodle == this.noodle && surface == this.surface && corridors == this.corridors) {
+        DensityFunction dryPaths = rule.rewrite(this.dryPaths), level = rule.rewrite(this.level);
+        if (entrances == this.entrances && noodle == this.noodle && surface == this.surface && corridors == this.corridors
+                && dryPaths == this.dryPaths && level == this.level) {
             return this;
         }
-        return new AquiferSpread(entrances, noodle, surface, corridors);
+        return new AquiferSpread(entrances, noodle, surface, corridors, dryPaths, level);
     }
 
     @Override

@@ -18,8 +18,8 @@ import net.minecraft.world.entity.EntityTypes;
 /**
  * Angry brows over a mob's face while it winds up a swing and just after ({@link MeleeAnimation}): the mob's model drawn
  * again with a texture that is clear but for a few dark pixels above the eyes. One texture fits every skin laid out like
- * the mob's own (texture packs included); faces under an outer layer (drowned, strays, bogged) or drawn their own way
- * (the frosted zombie) go without.
+ * the mob's own (texture packs included); faces under an outer layer (drowned, frostbites, strays, bogged) go
+ * without.
  */
 @Environment(EnvType.CLIENT)
 public class AngryBrowsLayer<S extends LivingEntityRenderState, M extends EntityModel<S>> extends RenderLayer<S, M> {
@@ -46,9 +46,9 @@ public class AngryBrowsLayer<S extends LivingEntityRenderState, M extends Entity
     /** Adds the brows to the mobs whose faces they fit; baby zombies' faces put the eyes on the same pixels. */
     static void register() {
         LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
-            if (type == EntityTypes.ZOMBIE || type == EntityTypes.HUSK || type == EntityTypes.PARCHED || type == ModEntities.WITHERED_ZOMBIE) {
+            if (type == EntityTypes.ZOMBIE || type == EntityTypes.HUSK || type == EntityTypes.PARCHED) {
                 add(helper, renderer, HUMANOID, HUMANOID);
-            } else if (type == EntityTypes.SKELETON || type == EntityTypes.WITHER_SKELETON) {
+            } else if (type == EntityTypes.SKELETON || type == EntityTypes.WITHER_SKELETON || type == ModEntities.PALE_ZOMBIE) {
                 add(helper, renderer, HUMANOID_64X32, HUMANOID_64X32);
             } else if (type == EntityTypes.PIGLIN || type == EntityTypes.PIGLIN_BRUTE || type == EntityTypes.ZOMBIFIED_PIGLIN) {
                 add(helper, renderer, PIGLIN, PIGLIN_BABY);

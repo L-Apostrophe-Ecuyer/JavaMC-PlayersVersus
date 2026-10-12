@@ -84,6 +84,7 @@
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",
     "mobs.hostile.end.dragon.StrafePlayerPhaseMixin",
     "mobs.hostile.end.EndermanMixin",
+    "mobs.hostile.end.ShulkerMixin",
 
     "mobs.hostile.illager.MoveToRaidCenterGoalMixin",
     "mobs.hostile.illager.PillagerMixin",

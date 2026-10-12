@@ -87,16 +87,21 @@ public final class PvAquifer implements Aquifer {
     @Nullable
     private SpreadInputs spread;
     @Nullable
-    private Region corridors, valley, upperValley;
+    private Region corridors, dryPaths, valley, upperValley;
     /** Ridge noise by column (it doesn't depend on y), {@code NaN} until sampled. */
     @Nullable
     private double[] ridge;
+    /** The basins' level, by column. */
+    @Nullable
+    private Columns basinLevel;
     /** Each block's own decision, by column and then height from {@link #MIN_Y}: its ordinal plus one, 0 until computed. */
     @Nullable
     private byte[][] positions;
     private final PvAquiferRules.Field floodednessField = this::floodedness;
     private final PvAquiferRules.Field spreadField = this::spread;
     private final PvAquiferRules.Field corridorField = this::corridor;
+    private final PvAquiferRules.Field dryPathField = this::dryPath;
+    private final PvAquiferRules.Field levelField = (x, y, z) -> this.basinLevel(x, z);
     private final PvAquiferRules.Positions atPosition = this::atPosition;
     /** Blocks whose own decision was computed, for tests and the benchmark. */
     private int computedPositions;
@@ -164,7 +169,8 @@ public final class PvAquifer implements Aquifer {
         if (y < MIN_Y) return PvAquiferDecision.AIR;
         int localX = x - this.originX + REACH, localZ = z - this.originZ + REACH;
         if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) {
-            return PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField);
+            return PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField, this.dryPathField,
+                    this.levelField);
         }
         int column = localX * SIDE + localZ;
         if (this.positions == null) this.positions = new byte[SIDE * SIDE][];
@@ -176,7 +182,8 @@ public final class PvAquifer implements Aquifer {
         int level = y - MIN_Y;
         int stored = levels[level];
         if (stored != 0) return DECISIONS[stored - 1];
-        PvAquiferDecision decision = PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField);
+        PvAquiferDecision decision = PvAquiferRules.atPosition(x, y, z, this.floodednessField, this.spreadField, this.corridorField,
+                this.dryPathField, this.levelField);
         levels[level] = (byte) (decision.ordinal() + 1);
         this.computedPositions++;
         return decision;
@@ -206,6 +213,23 @@ public final class PvAquifer implements Aquifer {
             this.corridors = this.region(this.spreadConfig.corridors(), BASIN_MIN_Y + 1, CORRIDOR_MAX_Y - 1);
         }
         return this.corridors.at(x, y, z);
+    }
+
+    /**
+     * The dry noodles at a block of the basin layers: the final density's noodle outside the corridors' zone, at most 0
+     * where it opens the block. The basins leave its surroundings dry.
+     */
+    public double dryPath(int x, int y, int z) {
+        if (this.dryPaths == null) {
+            this.dryPaths = this.region(this.spreadConfig.dryPaths(), BASIN_MIN_Y + 1, BASIN_MAX_Y - 1);
+        }
+        return this.dryPaths.at(x, y, z);
+    }
+
+    /** The basins' level at a column: the highest y their water, barriers and flooded corridors reach. */
+    public double basinLevel(int x, int z) {
+        if (this.basinLevel == null) this.basinLevel = new Columns(this.spreadConfig.level());
+        return this.basinLevel.at(x, z);
     }
 
     /**
@@ -317,6 +341,29 @@ public final class PvAquifer implements Aquifer {
      * like the terrain pass's volume, so {@code interpolated} parts give the terrain pass's floats), and per block
      * outside it. The values are copied into a buffer of its own, which the pooled ones can't be kept as.
      */
+    /** A function that doesn't depend on y, kept by column for the chunk and {@code REACH} around it. */
+    private final class Columns {
+        private final DensitySampler.Bound sampler;
+        private final double[] values = new double[SIDE * SIDE];
+
+        Columns(DensityFunction function) {
+            this.sampler = PvAquifer.this.samplers.get(function);
+            Arrays.fill(this.values, Double.NaN);
+        }
+
+        double at(int x, int z) {
+            int localX = x - PvAquifer.this.originX + REACH, localZ = z - PvAquifer.this.originZ + REACH;
+            if (localX < 0 || localX >= SIDE || localZ < 0 || localZ >= SIDE) return this.sampler.sampleValue(x, 0, z);
+            int index = localX * SIDE + localZ;
+            double value = this.values[index];
+            if (Double.isNaN(value)) {
+                value = this.sampler.sampleValue(x, 0, z);
+                this.values[index] = value;
+            }
+            return value;
+        }
+    }
+
     private static final class Region {
         private final DensitySampler.Bound sampler;
         private final int minX, minY, minZ, sizeX, sizeY, sizeZ;

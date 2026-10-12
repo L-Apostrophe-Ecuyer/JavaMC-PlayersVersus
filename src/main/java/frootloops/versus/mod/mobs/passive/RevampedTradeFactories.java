@@ -482,7 +482,7 @@ public class RevampedTradeFactories {
             ItemCost tradedItem = new ItemCost(Items.EMERALD, this.price);
             Set<ResourceKey<Potion>> brewable = brewablePotions(world);
             List<Holder<Potion>> list = BuiltInRegistries.POTION.listElements()
-                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && brewable.contains(entry.key()) && !entry.value().getEffects().getFirst().getEffect().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
+                    .filter(entry -> !(entry.value()).getEffects().isEmpty() && (brewable.isEmpty() || brewable.contains(entry.key())) && !entry.value().getEffects().getFirst().getEffect().value().isBeneficial() && entry.value() != CustomPotions.HAUNTING.value())
                     .collect(Collectors.toList());
             if (list.isEmpty()) return null;
             Holder<Potion> registryEntry = Util.getRandom(list, random);
@@ -495,7 +495,8 @@ public class RevampedTradeFactories {
 
         /**
          * The potions the brewing stand's recipes make: what 1.21's {@code isBrewable} checked, before brewing became
-         * recipes, so tipped arrows only carry potions players can brew.
+         * recipes, so tipped arrows only carry potions players can brew. Empty when no recipe brews anything (a world with
+         * no brewing recipes at all), which restricts nothing rather than sells nothing.
          */
         private static Set<ResourceKey<Potion>> brewablePotions(ServerLevel world) {
             return world.recipeAccess().getRecipes().stream()

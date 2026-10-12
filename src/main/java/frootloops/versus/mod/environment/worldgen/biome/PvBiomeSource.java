@@ -14,10 +14,11 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import java.util.function.BiConsumer;
+import net.minecraft.world.level.biome.NoiseBiomeResolver;
 
 /**
  * Biome source type {@code players-versus:overworld}: multi-noise biome selection over {@link PvBiomeLayout}. The
@@ -59,12 +60,12 @@ public final class PvBiomeSource extends BiomeSource {
     }
 
     @Override
-    public BiomeResolver createResolver(Climate.Sampler sampler) {
+    public NoiseBiomeResolver createResolver(Climate.Sampler sampler) {
         return this.biomes.createResolver(sampler);
     }
 
     @Override
-    public BiomeResolver createResolverForChunk(Climate.Sampler sampler, int a, int b, int c, int d, int e, int f) {
+    public NoiseBiomeResolver createResolverForChunk(Climate.Sampler sampler, int a, int b, int c, int d, int e, int f) {
         return this.biomes.createResolverForChunk(sampler, a, b, c, d, e, f);
     }
 
@@ -74,10 +75,10 @@ public final class PvBiomeSource extends BiomeSource {
     }
 
     @Override
-    public void addDebugInfo(List<String> info, BlockPos pos, Climate.Sampler noise) {
+    public void addDebugInfo(BiConsumer<String, String> info, BlockPos pos, Climate.Sampler noise) {
         Climate.TargetPoint point = noise.sample(
                 QuartPos.fromBlock(pos.getX()), QuartPos.fromBlock(pos.getY()), QuartPos.fromBlock(pos.getZ()));
-        info.add(String.format(Locale.ROOT, "PV biome rule: %s  T %.3f H %.3f C %.3f E %.3f D %.3f W %.3f",
+        info.accept("PV biome rule", String.format(Locale.ROOT, "%s  T %.3f H %.3f C %.3f E %.3f D %.3f W %.3f",
                 ruleAt(point),
                 Climate.unquantizeCoord(point.temperature()),
                 Climate.unquantizeCoord(point.humidity()),

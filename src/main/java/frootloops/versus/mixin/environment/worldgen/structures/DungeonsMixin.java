@@ -57,7 +57,7 @@ public abstract class DungeonsMixin implements Feature {
         if(spawnerPos == null) return;
         if (structureWorldAccess.getBlockEntity(spawnerPos) instanceof SpawnerBlockEntity mobSpawnerBlockEntity) {
 
-            if(DEEP_MOB_SPAWNER_ENTITIES == null) DEEP_MOB_SPAWNER_ENTITIES =  new EntityType[]{EntityTypes.SKELETON, EntityTypes.SKELETON, EntityTypes.ZOMBIE, ModEntities.WITHERED_ZOMBIE, EntityTypes.CAVE_SPIDER, EntityTypes.WITHER_SKELETON};
+            if(DEEP_MOB_SPAWNER_ENTITIES == null) DEEP_MOB_SPAWNER_ENTITIES =  new EntityType[]{EntityTypes.SKELETON, EntityTypes.SKELETON, EntityTypes.ZOMBIE, ModEntities.PALE_ZOMBIE, EntityTypes.CAVE_SPIDER, EntityTypes.WITHER_SKELETON};
             EntityType<?> entityType = DEEP_MOB_SPAWNER_ENTITIES[random.nextInt(DEEP_MOB_SPAWNER_ENTITIES.length)];
             mobSpawnerBlockEntity.setEntityId(entityType, random);
 

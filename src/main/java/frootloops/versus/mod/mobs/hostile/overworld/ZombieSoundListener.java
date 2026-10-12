@@ -1,6 +1,6 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
-import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -68,9 +68,9 @@ public class ZombieSoundListener {
         AABB boundingBox = new AABB(x - range, y - 12d, z - range, x + range, y + 10d, z + range);
 
         // For every zombie inside the bounds, make them walk towards the sound:
-        List<WitheredZombieEntity> witheredNearby = serverWorld.getEntitiesOfClass(WitheredZombieEntity.class, boundingBox, EntitySelector.LIVING_ENTITY_STILL_ALIVE);
+        List<PaleZombieEntity> witheredNearby = serverWorld.getEntitiesOfClass(PaleZombieEntity.class, boundingBox, EntitySelector.LIVING_ENTITY_STILL_ALIVE);
         boolean shouldMoveZombie;
-        for (WitheredZombieEntity zombie : witheredNearby) {
+        for (PaleZombieEntity zombie : witheredNearby) {
             //if(zombie instanceof ZombifiedPiglinEntity) continue;
             if(zombie.getTarget() == null && zombie.getNavigation().isDone()) {
 

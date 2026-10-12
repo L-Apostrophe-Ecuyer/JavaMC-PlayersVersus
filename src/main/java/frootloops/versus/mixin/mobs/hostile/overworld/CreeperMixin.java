@@ -22,7 +22,7 @@ public class CreeperMixin extends Monster {
     public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
         if(super.hurtServer(world, source, amount)) {
             if (source.is(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
-                this.convertTo(ModEntities.DEEPER_CREEPER, ConversionParams.single(this, false, false), stray -> {});
+                this.convertTo(ModEntities.PALE_CREEPER, ConversionParams.single(this, false, false), stray -> {});
             }
             return true;
         }

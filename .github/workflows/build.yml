@@ -30,7 +30,7 @@ jobs:
       - name: list the Fabric API builds for this Minecraft version
         # Informational: the newest builds first, to pick a Fabric API whose mixins match the game jar (see gradle.properties).
         run: |
-          curl -fsSL https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o '<version>[^<]*+26\.3[^<]*</version>' | sed 's/<[^>]*>//g' | tail -12 || true
+          curl -fsSL https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o '<version>[^<]*+26\.4[^<]*</version>' | sed 's/<[^>]*>//g' | tail -12 || true
       - name: build
         # --continue: a failing test still leaves the jar to try; the build stays red
         run: ./gradlew build --continue

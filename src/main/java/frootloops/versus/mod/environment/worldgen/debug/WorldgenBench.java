@@ -5,12 +5,13 @@ import com.mojang.serialization.JsonOps;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.PvWorldgen;
 import frootloops.versus.mod.environment.worldgen.PvWorldgenConstants;
+import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -29,6 +30,8 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -77,19 +80,23 @@ import java.util.function.Consumer;
  *   water until something updates it. Split by height, and by whether the water has a fluid tick queued;</li>
  *   <li>water by height, per chunk: below y -31, where the aquifer places none; y -31..-9, which should stay dry
  *   (Section 10, question 7 of the refactor plan); y -8..-1, 0..23, 24..47 and 48..63;</li>
- *   <li>the high river's water and where it spills, for each of its layers.</li>
+ *   <li>the high river's water and where it spills, for each of its layers; its water over a hollow (air a few blocks
+ *   under it) and its bed's walls one block thick, which is how it looks where it runs over open ground;</li>
+ *   <li>the air of the dry caves' heights (y -16..32), and the bodies of air that connect their top to their bottom: the
+ *   ways down they're meant to give.</li>
  * </ul>
  * The report also holds text maps (one character per 8x8 blocks, north up) of the surface and its biomes, so results
- * can be compared without the images; hashes of every block after {@code TERRAIN}, by 16-block layer and by chunk, so
- * two runs that should agree can be checked block for block and their differences located; and the structure starts
- * in the region.
+ * can be compared without the images; cross sections of the high river, where the region has it; hashes of every block
+ * after {@code TERRAIN}, by 16-block layer and by chunk, so two runs that should agree can be checked block for block and
+ * their differences located; and the structure starts in the region.
  */
 public final class WorldgenBench {
 
     public static final int MAX_RADIUS = 32;
 
+    /** Since 26.4 {@code NOISE_BIOMES} samples the climate into a chunk's noise biomes, and {@code BIOMES} stores them. */
     private static final List<ChunkStatus> STAGES = List.of(
-            ChunkStatus.BIOMES, ChunkStatus.TERRAIN, ChunkStatus.FEATURES, ChunkStatus.FULL);
+            ChunkStatus.NOISE_BIOMES, ChunkStatus.BIOMES, ChunkStatus.TERRAIN, ChunkStatus.FEATURES, ChunkStatus.FULL);
     private static final int[] SLICE_YS = {-40, -20, 0, 16, 28, 40, 56, 62};
     private static final int[] BIOME_LAYER_YS = {-40, 0, 32};
     private static final int BASIN_SEAM_MIN_Y = 0;
@@ -112,6 +119,21 @@ public final class WorldgenBench {
             {PvWorldgenConstants.HIGH_RIVER_Y, PvWorldgenConstants.HIGH_RIVER_MIN_Y},
             {PvWorldgenConstants.HIGH_RIVER_UPPER_Y, PvWorldgenConstants.HIGH_RIVER_UPPER_MIN_Y}};
     private static final String[] HIGH_RIVER_METRICS = {"high_river_per_chunk", "high_river_upper_per_chunk"};
+    /** River water this close above air sits over a hollow: on a floor too thin to be the ground. */
+    private static final int RIVER_HOLLOW_REACH = 6;
+    /** The high river's cross sections in the report: their heights, how far they reach either side of the water, how many. */
+    private static final int SECTION_MIN_Y = 60, SECTION_MAX_Y = 112, SECTION_REACH = 40, SECTIONS_PER_AXIS = 3, SECTION_SPACING = 64;
+    /** Regions wider than this get no cross sections: their blocks would take too much memory. */
+    private static final int SECTION_MAX_SIZE = 33 * 16;
+    /** The dry caves' heights (the refactor plan, Section 6.2, 2d revised): their air is counted by y -16..-1, 0..15 and 16..32. */
+    private static final int DESCENT_BOTTOM_Y = PvWorldgenConstants.DRY_NOODLE_MIN_Y, DESCENT_TOP_Y = PvWorldgenConstants.DRY_NOODLE_MAX_Y;
+    private static final int DESCENT_LAYERS = DESCENT_TOP_Y - DESCENT_BOTTOM_Y + 1;
+    private static final int[] DESCENT_BAND_TOPS = {0, 16, DESCENT_TOP_Y + 1};
+    /** The caves' cross sections in the report: their heights, and how far they reach either side of their column. */
+    private static final int CAVE_SECTION_MIN_Y = DESCENT_BOTTOM_Y - 4, CAVE_SECTION_MAX_Y = DESCENT_TOP_Y + 4, CAVE_SECTION_REACH = 60;
+    private static final int CAVE_SECTION_LAYERS = CAVE_SECTION_MAX_Y - CAVE_SECTION_MIN_Y + 1;
+    /** The basins' level is sampled every this many blocks over the region. */
+    private static final int BASIN_LEVEL_STEP = 4;
     private static final int MAP_CELL = 8;
 
     private WorldgenBench() {
@@ -192,6 +214,7 @@ public final class WorldgenBench {
                 .resolve("bench-" + timestamp + "-" + settings.replaceAll("[^A-Za-z0-9_.-]", "_"));
         Files.createDirectories(dir);
         region.writeImages(dir);
+        region.basinLevelMetric = basinLevels(world, region);
         List<String> report = region.report(settings, generator, gate, world.getSeed(), center, radius, stageNanos, chunkCount);
         Files.write(dir.resolve("report.txt"), report);
         for (String line : report) {
@@ -211,6 +234,37 @@ public final class WorldgenBench {
             return noiseGenerator.generatorSettings().unwrapKey().map(key -> key.identifier().toString()).orElse("inline-settings");
         }
         return generator.getClass().getSimpleName();
+    }
+
+    /**
+     * The basins' level over the region (the refactor plan, Section 6.2, 2d revised again), every
+     * {@link #BASIN_LEVEL_STEP} blocks: the share of columns on each of its steps (no basins, then lakes up to each of
+     * the step levels) and between them; {@code null} without a Players Versus aquifer.
+     */
+    private static String basinLevels(ServerLevel world, Region region) {
+        if (!(world.getChunkSource().getGenerator() instanceof NoiseBasedChunkGenerator noiseGenerator)) return null;
+        NoiseGeneratorSettings settings = noiseGenerator.generatorSettings().value();
+        if (!PvWorldgen.isPvGenerator(settings) || settings.aquifers().isEmpty()) return null;
+        if (!(PvWorldgen.unwrap(settings.aquifers().get().fluidLevelSpreadNoise()) instanceof AquiferSpread spread)) return null;
+        RandomState noise = world.getChunkSource().randomState();
+        int[] steps = {PvWorldgenConstants.BASIN_LEVEL_DRY, PvWorldgenConstants.BASIN_LEVEL_LOW, PvWorldgenConstants.BASIN_LEVEL_MID,
+                PvWorldgenConstants.BASIN_LEVEL_FULL};
+        long[] onStep = new long[steps.length];
+        long all = 0;
+        for (int dx = 0; dx < region.size; dx += BASIN_LEVEL_STEP) {
+            for (int dz = 0; dz < region.size; dz += BASIN_LEVEL_STEP) {
+                double level = noise.sampleBlockValueUncached(spread.level(), region.minX + dx, 0, region.minZ + dz);
+                all++;
+                for (int i = 0; i < steps.length; i++) {
+                    if (Math.abs(level - steps[i]) < 0.5) onStep[i]++;
+                }
+            }
+        }
+        long between = all;
+        for (long count : onStep) between -= count;
+        return String.format(Locale.ROOT, "metric basin_level_columns no basins %.1f%%, lakes up to y %d %.1f%%, y %d %.1f%%, y %d %.1f%%;"
+                        + " between steps %.1f%%", 100.0 * onStep[0] / all, steps[1], 100.0 * onStep[1] / all, steps[2],
+                100.0 * onStep[2] / all, steps[3], 100.0 * onStep[3] / all, 100.0 * between / all);
     }
 
     private static ChunkPos parseCenter(String value) {
@@ -249,6 +303,21 @@ public final class WorldgenBench {
         private final long[] riverSurfaceWater = new long[HIGH_RIVER_LAYERS.length], riverBedWater = new long[HIGH_RIVER_LAYERS.length],
                 riverSpillFaces = new long[HIGH_RIVER_LAYERS.length], riverSpillColumns = new long[HIGH_RIVER_LAYERS.length],
                 riverSurfaceOverAir = new long[HIGH_RIVER_LAYERS.length], riverBedBesideAir = new long[HIGH_RIVER_LAYERS.length];
+        /**
+         * Columns of the high river's water within {@link #RIVER_HOLLOW_REACH} blocks above air, and its bed water's
+         * walls one block thick with air behind them, by layer: where it runs over open ground instead of in it.
+         */
+        private final long[] riverOverHollow = new long[HIGH_RIVER_LAYERS.length], riverThinWalls = new long[HIGH_RIVER_LAYERS.length];
+        /** Blocks of y SECTION_MIN_Y..SECTION_MAX_Y ({@link #AIR}, {@link #WATER}, or {@link #STONE} for any other), by {@link #sectionIndex}. */
+        private final byte[] sectionBlocks;
+        /** Blocks of y CAVE_SECTION_MIN_Y..CAVE_SECTION_MAX_Y, like {@link #sectionBlocks}, by {@link #caveIndex}. */
+        private final byte[] caveBlocks;
+        /** The column with the most water in the basin layers, and the top column of the biggest dry way down; -1 if none. */
+        private int lakeColumn = -1, lakeColumnWater, largestDescentColumn = -1;
+        private String basinLevelMetric;
+        /** Air in the dry caves' heights, by {@link #descentIndex}, and by {@link #DESCENT_BAND_TOPS} and by y. */
+        private final BitSet descentAir;
+        private final long[] descentAirByBand = new long[DESCENT_BAND_TOPS.length], descentAirByY = new long[DESCENT_LAYERS];
         /** Block hashes by status: [chunk, by {@link #chunkIndex}][16-block section from the bottom]. */
         private final Map<String, long[][]> sectionHashes = new LinkedHashMap<>();
         private final Registry<Structure> structures;
@@ -270,6 +339,9 @@ public final class WorldgenBench {
             for (int i = 0; i < BIOME_LAYER_YS.length; i++) this.layerBiome[i] = new int[columns];
             for (int i = 0; i < SLICE_YS.length; i++) this.slices[i] = new byte[columns];
             this.basinWater = new BitSet(columns * (BASIN_SEAM_MAX_Y - BASIN_SEAM_MIN_Y));
+            this.sectionBlocks = size <= SECTION_MAX_SIZE ? new byte[columns * (SECTION_MAX_Y - SECTION_MIN_Y + 1)] : null;
+            this.descentAir = new BitSet(columns * DESCENT_LAYERS);
+            this.caveBlocks = size <= SECTION_MAX_SIZE ? new byte[columns * CAVE_SECTION_LAYERS] : null;
             this.structures = world.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         }
 
@@ -303,6 +375,18 @@ public final class WorldgenBench {
 
         private int column(int x, int z) {
             return (x - this.minX) + (z - this.minZ) * this.size;
+        }
+
+        private static int sectionIndex(int column, int y) {
+            return column * (SECTION_MAX_Y - SECTION_MIN_Y + 1) + (y - SECTION_MIN_Y);
+        }
+
+        private static int descentIndex(int column, int y) {
+            return column * DESCENT_LAYERS + (y - DESCENT_BOTTOM_Y);
+        }
+
+        private static int caveIndex(int column, int y) {
+            return column * CAVE_SECTION_LAYERS + (y - CAVE_SECTION_MIN_Y);
         }
 
         void capture(ChunkAccess chunk) {
@@ -340,6 +424,33 @@ public final class WorldgenBench {
                     for (int y = WATER_CEILING_Y; y <= surface; y++) {
                         if (chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) this.waterAtOrAboveCeiling++;
                     }
+                    for (int y = DESCENT_BOTTOM_Y; y <= DESCENT_TOP_Y; y++) {
+                        if (!chunk.getBlockState(pos.set(x, y, z)).isAir()) continue;
+                        this.descentAir.set(descentIndex(column, y));
+                        this.descentAirByY[y - DESCENT_BOTTOM_Y]++;
+                        int band = 0;
+                        while (y >= DESCENT_BAND_TOPS[band]) band++;
+                        this.descentAirByBand[band]++;
+                    }
+                    if (this.caveBlocks != null) {
+                        int basinWater = 0;
+                        for (int y = CAVE_SECTION_MIN_Y; y <= CAVE_SECTION_MAX_Y; y++) {
+                            BlockState state = chunk.getBlockState(pos.set(x, y, z));
+                            boolean water = state.is(Blocks.WATER);
+                            this.caveBlocks[caveIndex(column, y)] = state.isAir() ? AIR : water ? WATER : STONE;
+                            if (water && y > PvWorldgenConstants.BASIN_MIN_Y && y < PvWorldgenConstants.CORRIDOR_MAX_Y) basinWater++;
+                        }
+                        if (basinWater > this.lakeColumnWater) {
+                            this.lakeColumnWater = basinWater;
+                            this.lakeColumn = column;
+                        }
+                    }
+                    if (this.sectionBlocks != null) {
+                        for (int y = SECTION_MIN_Y; y <= SECTION_MAX_Y; y++) {
+                            BlockState state = chunk.getBlockState(pos.set(x, y, z));
+                            this.sectionBlocks[sectionIndex(column, y)] = state.isAir() ? AIR : state.is(Blocks.WATER) ? WATER : STONE;
+                        }
+                    }
                 }
             }
             BitSet ticking = proto != null ? countQueuedFluidTicks(proto) : new BitSet();
@@ -347,7 +458,7 @@ public final class WorldgenBench {
             countHighRiver(chunk);
             for (Map.Entry<Structure, StructureStart> entry : chunk.getAllStarts().entrySet()) {
                 StructureStart start = entry.getValue();
-                if (!start.isValid()) continue;
+                if (start.getPieces().isEmpty()) continue; // 26.3's isValid()
                 BoundingBox box = start.getBoundingBox();
                 this.structureStarts.add(String.format(Locale.ROOT, "structure %s start chunk %d,%d box %d,%d,%d..%d,%d,%d",
                         this.structures.getKey(entry.getKey()), start.getChunkPos().x(), start.getChunkPos().z(), box.minX(), box.minY(),
@@ -364,9 +475,12 @@ public final class WorldgenBench {
                 for (int localX = 0; localX < 16; localX++) {
                     for (int localZ = 0; localZ < 16; localZ++) {
                         int x = chunkPos.getMinBlockX() + localX, z = chunkPos.getMinBlockZ() + localZ;
+                        int lowest = Integer.MAX_VALUE;
                         for (int y = minY; y <= surfaceY; y++) {
                             if (!chunk.getBlockState(pos.set(x, y, z)).is(Blocks.WATER)) continue;
+                            lowest = Math.min(lowest, y);
                             boolean surface = y == surfaceY;
+                            if (!surface) this.countThinWalls(chunk, layer, localX, y, localZ);
                             if (surface) this.riverSurfaceWater[layer]++;
                             else this.riverBedWater[layer]++;
                             boolean spilling = false;
@@ -383,7 +497,30 @@ public final class WorldgenBench {
                             }
                             if (spilling) this.riverSpillColumns[layer]++;
                         }
+                        if (lowest == Integer.MAX_VALUE) continue;
+                        for (int y = lowest - 1; y >= lowest - RIVER_HOLLOW_REACH; y--) {
+                            if (chunk.getBlockState(pos.set(x, y, z)).isAir()) {
+                                this.riverOverHollow[layer]++;
+                                break;
+                            }
+                        }
                     }
+                }
+            }
+        }
+
+        /** Bed water's sides where the block beside it is solid and the one past that is air: a wall one block thick. */
+        private void countThinWalls(ChunkAccess chunk, int layer, int localX, int y, int localZ) {
+            ChunkPos chunkPos = chunk.getPos();
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            for (int[] offset : SIDES_AND_BELOW) {
+                if (offset[1] != 0) continue;
+                int wallX = localX + offset[0], wallZ = localZ + offset[2], pastX = wallX + offset[0], pastZ = wallZ + offset[2];
+                if (pastX < 0 || pastX > 15 || pastZ < 0 || pastZ > 15) continue;
+                BlockState wall = chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + wallX, y, chunkPos.getMinBlockZ() + wallZ));
+                if (wall.isAir() || wall.is(Blocks.WATER)) continue;
+                if (chunk.getBlockState(pos.set(chunkPos.getMinBlockX() + pastX, y, chunkPos.getMinBlockZ() + pastZ)).isAir()) {
+                    this.riverThinWalls[layer]++;
                 }
             }
         }
@@ -456,7 +593,8 @@ public final class WorldgenBench {
         }
 
         private int biomeIndex(ChunkAccess chunk, int x, int y, int z) {
-            String id = chunk.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)).getRegisteredName();
+            // Block coordinates: 26.4's getBiome replaced getNoiseBiome, which took quart coordinates.
+            String id = chunk.getBiome(x, y, z).getRegisteredName();
             return this.biomeIndex.computeIfAbsent(id, key -> {
                 this.biomeIds.add(key);
                 return this.biomeIds.size() - 1;
@@ -620,7 +758,12 @@ public final class WorldgenBench {
                         HIGH_RIVER_METRICS[layer], HIGH_RIVER_LAYERS[layer][0], this.riverSurfaceWater[layer] / chunks,
                         this.riverBedWater[layer] / chunks, this.riverSpillFaces[layer] / chunks, this.riverSpillColumns[layer] / chunks,
                         this.riverSurfaceOverAir[layer] / chunks, this.riverBedBesideAir[layer] / chunks));
+                lines.add(String.format(Locale.ROOT, "metric %s columns of water within %d blocks above air %.2f; bed walls one block"
+                                + " thick with air behind %.2f", HIGH_RIVER_METRICS[layer].replace("_per_chunk", "_over_open_ground_per_chunk"),
+                        RIVER_HOLLOW_REACH, this.riverOverHollow[layer] / chunks, this.riverThinWalls[layer] / chunks));
             }
+            appendDescents(lines);
+            if (this.basinLevelMetric != null) lines.add(this.basinLevelMetric);
             lines.add("biomes at surface:");
             appendHistogram(lines, this.surfaceBiome);
             for (int i = 0; i < BIOME_LAYER_YS.length; i++) {
@@ -636,9 +779,149 @@ public final class WorldgenBench {
             appendMap(lines, column -> biomeChar(this.surfaceBiome[column]));
             for (int i = 0; i < this.biomeIds.size(); i++) biomeLegend.add(biomeChar(i) + " " + this.biomeIds.get(i));
             lines.add("legend " + String.join(", ", biomeLegend));
+            appendRiverSections(lines);
+            appendCaveSections(lines);
             appendHashes(lines);
             this.structureStarts.stream().sorted().forEach(lines::add);
             return lines;
+        }
+
+        /**
+         * The air of the dry caves' heights, by band and by y, and the bodies of air (blocks joined through their sides)
+         * that reach from the top of those heights to the bottom: how many, their size, and their columns at the top, the
+         * ways in from above.
+         */
+        private void appendDescents(List<String> lines) {
+            double chunks = this.size * this.size / 256.0;
+            int columns = this.size * this.size, top = DESCENT_LAYERS - 1, zStep = DESCENT_LAYERS * this.size;
+            BitSet seen = new BitSet(columns * DESCENT_LAYERS);
+            IntArrayList body = new IntArrayList();
+            long descents = 0, descentBlocks = 0, descentTops = 0, bodiesFromTop = 0;
+            int largest = 0;
+            for (int column = 0; column < columns; column++) {
+                int start = column * DESCENT_LAYERS + top;
+                if (!this.descentAir.get(start) || seen.get(start)) continue;
+                bodiesFromTop++;
+                body.clear();
+                body.add(start);
+                seen.set(start);
+                boolean reachesBottom = false;
+                long tops = 0;
+                for (int next = 0; next < body.size(); next++) {
+                    int index = body.getInt(next), level = index % DESCENT_LAYERS, at = index / DESCENT_LAYERS;
+                    int localX = at % this.size, localZ = at / this.size;
+                    if (level == 0) reachesBottom = true;
+                    if (level == top) tops++;
+                    if (level > 0) visit(index - 1, seen, body);
+                    if (level < top) visit(index + 1, seen, body);
+                    if (localX > 0) visit(index - DESCENT_LAYERS, seen, body);
+                    if (localX < this.size - 1) visit(index + DESCENT_LAYERS, seen, body);
+                    if (localZ > 0) visit(index - zStep, seen, body);
+                    if (localZ < this.size - 1) visit(index + zStep, seen, body);
+                }
+                if (!reachesBottom) continue;
+                if (body.size() > largest) {
+                    largest = body.size();
+                    this.largestDescentColumn = column;
+                }
+                descents++;
+                descentBlocks += body.size();
+                descentTops += tops;
+            }
+            lines.add(String.format(Locale.ROOT, "metric dry_caves_air_per_chunk y %d..%d %.1f, %d..%d %.1f, %d..%d %.1f",
+                    DESCENT_BOTTOM_Y, DESCENT_BAND_TOPS[0] - 1, this.descentAirByBand[0] / chunks, DESCENT_BAND_TOPS[0], DESCENT_BAND_TOPS[1] - 1,
+                    this.descentAirByBand[1] / chunks, DESCENT_BAND_TOPS[1], DESCENT_BAND_TOPS[2] - 1, this.descentAirByBand[2] / chunks));
+            StringBuilder byY = new StringBuilder("metric dry_caves_air_by_y_per_chunk from y " + DESCENT_BOTTOM_Y + ":");
+            for (long count : this.descentAirByY) byY.append(String.format(Locale.ROOT, " %.1f", count / chunks));
+            lines.add(byY.toString());
+            lines.add(String.format(Locale.ROOT, "metric dry_caves_descents from y %d to y %d: %d bodies of air (of %d open at y %d),"
+                            + " %.1f blocks per chunk, %.2f of their columns at y %d per chunk",
+                    DESCENT_TOP_Y, DESCENT_BOTTOM_Y, descents, bodiesFromTop, DESCENT_TOP_Y, descentBlocks / chunks, descentTops / chunks, DESCENT_TOP_Y));
+        }
+
+        /** Adds air not yet seen to the body. */
+        private void visit(int index, BitSet seen, IntArrayList body) {
+            if (seen.get(index) || !this.descentAir.get(index)) return;
+            seen.set(index);
+            body.add(index);
+        }
+
+        /**
+         * Cross sections of the high river, y {@link #SECTION_MAX_Y} down to {@link #SECTION_MIN_Y}: up to
+         * {@link #SECTIONS_PER_AXIS} along x and as many along z, each through the middle of the first stretch of the
+         * river's surface water (3 blocks or more) on its row, rows at least {@link #SECTION_SPACING} blocks apart.
+         */
+        private void appendRiverSections(List<String> lines) {
+            if (this.sectionBlocks == null) return;
+            for (boolean alongX : new boolean[]{true, false}) {
+                int found = 0, lastRow = -SECTION_SPACING;
+                for (int row = 0; row < this.size && found < SECTIONS_PER_AXIS; row++) {
+                    if (row - lastRow < SECTION_SPACING) continue;
+                    int runStart = -1, first = -1, last = -1;
+                    for (int i = 0; i <= this.size && first < 0; i++) {
+                        boolean water = i < this.size && this.sectionBlock(alongX, row, i, PvWorldgenConstants.HIGH_RIVER_Y) == WATER;
+                        if (water && runStart < 0) runStart = i;
+                        if (!water && runStart >= 0) {
+                            if (i - runStart >= 3) {
+                                first = runStart;
+                                last = i - 1;
+                            }
+                            runStart = -1;
+                        }
+                    }
+                    if (first < 0) continue;
+                    found++;
+                    lastRow = row;
+                    int middle = (first + last) / 2, from = Math.max(0, middle - SECTION_REACH), to = Math.min(this.size - 1, middle + SECTION_REACH);
+                    int rowBase = alongX ? this.minZ : this.minX, base = alongX ? this.minX : this.minZ;
+                    lines.add(String.format(Locale.ROOT, "section along %s at %s %d, %s %d..%d, river surface %d..%d (# ground, ~ water, . air):",
+                            alongX ? "x" : "z", alongX ? "z" : "x", rowBase + row, alongX ? "x" : "z", base + from, base + to, base + first, base + last));
+                    for (int y = SECTION_MAX_Y; y >= SECTION_MIN_Y; y--) {
+                        StringBuilder line = new StringBuilder(String.format(Locale.ROOT, "  %4d ", y));
+                        for (int i = from; i <= to; i++) {
+                            byte block = this.sectionBlock(alongX, row, i, y);
+                            line.append(block == AIR ? '.' : block == WATER ? '~' : '#');
+                        }
+                        lines.add(line.toString());
+                    }
+                }
+            }
+        }
+
+        /**
+         * Cross sections of the caves, y {@link #CAVE_SECTION_MAX_Y} down to {@link #CAVE_SECTION_MIN_Y}: along x and z
+         * through the top of the biggest body of air that reaches from the dry caves' top to their bottom, and along x
+         * through the column with the most water in the basin layers.
+         */
+        private void appendCaveSections(List<String> lines) {
+            if (this.caveBlocks == null) return;
+            if (this.largestDescentColumn >= 0) {
+                appendCaveSection(lines, this.largestDescentColumn, true, "through the top of the biggest dry way down");
+                appendCaveSection(lines, this.largestDescentColumn, false, "through the top of the biggest dry way down");
+            }
+            if (this.lakeColumn >= 0) appendCaveSection(lines, this.lakeColumn, true, "through the most basin water");
+        }
+
+        private void appendCaveSection(List<String> lines, int column, boolean alongX, String what) {
+            int localX = column % this.size, localZ = column / this.size, at = alongX ? localX : localZ;
+            int from = Math.max(0, at - CAVE_SECTION_REACH), to = Math.min(this.size - 1, at + CAVE_SECTION_REACH);
+            lines.add(String.format(Locale.ROOT, "cave section %s, along %s at %s %d, %s %d..%d (# ground, ~ water, . air):", what,
+                    alongX ? "x" : "z", alongX ? "z" : "x", alongX ? this.minZ + localZ : this.minX + localX, alongX ? "x" : "z",
+                    (alongX ? this.minX : this.minZ) + from, (alongX ? this.minX : this.minZ) + to));
+            for (int y = CAVE_SECTION_MAX_Y; y >= CAVE_SECTION_MIN_Y; y--) {
+                StringBuilder line = new StringBuilder(String.format(Locale.ROOT, "  %4d ", y));
+                for (int i = from; i <= to; i++) {
+                    int c = alongX ? i + localZ * this.size : localX + i * this.size;
+                    byte block = this.caveBlocks[caveIndex(c, y)];
+                    line.append(block == AIR ? '.' : block == WATER ? '~' : '#');
+                }
+                lines.add(line.toString());
+            }
+        }
+
+        private byte sectionBlock(boolean alongX, int row, int i, int y) {
+            int column = alongX ? i + row * this.size : row + i * this.size;
+            return this.sectionBlocks[sectionIndex(column, y)];
         }
 
         private static final String HASH_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
