@@ -1,17 +1,11 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Block placement, round 4: placing turned blocks from the client alone, with clicks a vanilla server takes as they are:
-# the rotation packet sent around the click, the player's rotation, the connection events, and the shapes the preview
-# marks a block's turn with.
-sig net.minecraft.network.protocol.game.ServerboundMovePlayerPacket$Rot
-member net.minecraft.world.entity.Entity setYRot|setXRot|horizontalCollision|onGround\(
-member net.minecraft.client.player.LocalPlayer yRotLast|xRotLast|sendPosition
-calls net.minecraft.server.network.ServerGamePacketListenerImpl ^handleUseItemOn$
-sig net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents$Join
-sig net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents$Disconnect
-member net.minecraft.core.Direction toYRot
-member net.minecraft.util.Mth wrapDegrees
-member net.minecraft.world.level.block.Block isShapeFullBlock
-member net.minecraft.world.phys.shapes.Shapes box\(
-member net.minecraft.world.item.context.BlockPlaceContext replacingClickedOnBlock
-member net.minecraft.world.level.block.Blocks IRON_CHAIN
+# Recipes: where 26.4 reads recipe files, to change them by rule as they load (families for groups, cheaper stairs,
+# slabs and pressure plates) instead of replacing vanilla's files.
+calls net.minecraft.world.item.crafting.RecipeManager ^prepare$|^apply$|^<init>$
+member net.minecraft.world.item.crafting.RecipeManager .
+calls net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener ^scanDirectory$
+member net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener scanDirectory
+member net.minecraft.world.item.crafting.Recipe CODEC
+find BasePressurePlateBlock
+member net.minecraft.core.registries.Registries RECIPE
