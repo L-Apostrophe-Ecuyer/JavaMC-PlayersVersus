@@ -7,8 +7,15 @@ import frootloops.versus.mod.environment.worldgen.TestGame;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -105,9 +112,12 @@ class RecipeRulesTest {
         // A family's plain block, named after it
         assertEquals("andesite", RecipeRules.group("andesite"));
         assertEquals("sandstone", RecipeRules.group("sandstone"));
+        // The mod's wool stairs and slabs make wool a family too
+        assertEquals("white_wool", RecipeRules.group("white_wool_slab"));
+        assertEquals("white_wool", RecipeRules.group("white_wool"));
         // Not a family's: the recipe keeps its own group
-        assertNull(RecipeRules.group("white_wool"));
         assertNull(RecipeRules.group("torch"));
+        assertNull(RecipeRules.group("bookshelf"));
     }
 
     @Test
@@ -125,6 +135,36 @@ class RecipeRulesTest {
                 {"type": "minecraft:crafting_shaped", "category": "misc", "key": {"#": "minecraft:stick", "X": "minecraft:coal"},
                  "pattern": ["X", "#"], "result": {"count": 4, "id": "minecraft:torch"}}""");
         assertSame(torch, RecipeRules.apply(torch));
+    }
+
+    /**
+     * A recipe's category is read by its type: crafting recipes know building, redstone, equipment and misc; cooking ones
+     * food, blocks and misc. Another one fails to load, and with it the whole recipe registry (a server won't start).
+     */
+    @Test
+    void everyRecipeFileHasACategoryItsTypeKnows() throws IOException {
+        Set<String> crafting = Set.of("building", "redstone", "equipment", "misc");
+        Set<String> cooking = Set.of("food", "blocks", "misc");
+        Set<String> cookingTypes = Set.of("minecraft:smelting", "minecraft:blasting", "minecraft:smoking", "minecraft:campfire_cooking");
+        List<String> wrong = new ArrayList<>();
+        int checked = 0;
+        for (String root : List.of("src/main/resources/data/minecraft/recipe", "src/main/resources/data/players-versus/recipe")) {
+            Path directory = Path.of(root);
+            if (!Files.isDirectory(directory)) continue;
+            try (Stream<Path> files = Files.walk(directory)) {
+                for (Path file : files.filter(path -> path.toString().endsWith(".json")).toList()) {
+                    JsonObject recipe = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
+                    checked++;
+                    if (!recipe.has("category")) continue;
+                    String type = recipe.get("type").getAsString();
+                    String category = recipe.get("category").getAsString();
+                    Set<String> known = cookingTypes.contains(type) ? cooking : type.startsWith("minecraft:crafting") ? crafting : null;
+                    if (known != null && !known.contains(category)) wrong.add(file + ": " + category + " in a " + type);
+                }
+            }
+        }
+        assertTrue(checked > 100, "the recipe files were found (" + checked + ")");
+        assertEquals(List.of(), wrong);
     }
 
     /** The recipe file mixin applies on 26.4: its handler is in the class that reads registry files. */
