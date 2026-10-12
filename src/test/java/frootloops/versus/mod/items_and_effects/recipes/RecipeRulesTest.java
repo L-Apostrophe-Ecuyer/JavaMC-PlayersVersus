@@ -117,7 +117,8 @@ class RecipeRulesTest {
         assertEquals("white_wool", RecipeRules.group("white_wool"));
         // Not a family's: the recipe keeps its own group
         assertNull(RecipeRules.group("torch"));
-        assertNull(RecipeRules.group("bookshelf"));
+        // A finish word makes the plain block a family: chiseled bookshelves go with bookshelves
+        assertEquals("bookshelf", RecipeRules.group("chiseled_bookshelf"));
     }
 
     @Test
