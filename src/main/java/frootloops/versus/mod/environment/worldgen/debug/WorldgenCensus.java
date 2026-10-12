@@ -198,7 +198,7 @@ public final class WorldgenCensus {
                         int top = world.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z);
                         // The ground is the first block under the trees (their roots, logs, leaves and what hangs from them) that stops motion
                         BlockPos ground = new BlockPos(x, top - 1, z);
-                        while (ground.getY() > world.getMinY() && !isGround(world.getBlockState(ground))) ground = ground.below();
+                        while (ground.getY() > world.getMinY() && !isGround(world, ground)) ground = ground.below();
                         String name = world.getBiome(ground).getRegisteredName();
                         Tally tally = tallies.computeIfAbsent(name, key -> new Tally());
                         tally.columns++;
@@ -230,8 +230,9 @@ public final class WorldgenCensus {
     private static void column(ServerLevel world, BlockPos top, Consumer<String> log) {
         StringBuilder blocks = new StringBuilder();
         for (int y = top.getY() + 3; y >= top.getY() - 6; y--) {
-            BlockState state = world.getBlockState(new BlockPos(top.getX(), y, top.getZ()));
-            blocks.append(String.format(Locale.ROOT, " %d:%s%s", y, path(state), state.blocksMotion() ? "" : "~"));
+            BlockPos pos = new BlockPos(top.getX(), y, top.getZ());
+            BlockState state = world.getBlockState(pos);
+            blocks.append(String.format(Locale.ROOT, " %d:%s%s", y, path(state), state.getCollisionShape(world, pos).isEmpty() ? "~" : ""));
         }
         log.accept(String.format(Locale.ROOT, "[pvwg] census column %d,%d: ocean floor %d, world surface %d, motion blocking %d, without leaves %d;%s",
                 top.getX(), top.getZ(), world.getHeight(Heightmap.Types.OCEAN_FLOOR, top.getX(), top.getZ()),
@@ -239,9 +240,10 @@ public final class WorldgenCensus {
                 world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, top.getX(), top.getZ()), blocks));
     }
 
-    /** Ground, as opposed to a tree and what is above or around it: a block that stops motion and isn't a tree's. */
-    private static boolean isGround(BlockState state) {
-        return state.blocksMotion() && !isTree(path(state));
+    /** Ground, as opposed to a tree and what is above or around it: a block with a collision shape that isn't a tree's. */
+    private static boolean isGround(ServerLevel world, BlockPos pos) {
+        BlockState state = world.getBlockState(pos);
+        return !state.getCollisionShape(world, pos).isEmpty() && !isTree(path(state));
     }
 
     private static String path(BlockState state) {
