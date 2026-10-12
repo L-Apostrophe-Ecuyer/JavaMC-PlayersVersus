@@ -20,6 +20,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.densityfunction.DensityBufferPool;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,8 @@ import java.util.function.Consumer;
  * {@code -Ppv.census=...}) to run it once the server has started, instead of the bench, then stop the server. It logs lines
  * starting with {@code [pvwg] census}:
  * <ul>
- *   <li>whether a mangrove propagule survives on each of a few floor blocks, with the tags it depends on;</li>
+ *   <li>whether a few plants (a mangrove propagule, grass, a sapling) survive on each of a few floor blocks, with the tags the
+ *   block is in;</li>
  *   <li>for each biome: the nearest patch of it (searched in {@code pv.worldgen.census.range} blocks, default 8000), then
  *   the full chunks {@code pv.worldgen.census.radius} chunks around its middle (default 4): per biome found there, its
  *   columns, how many a propagule could be planted on, the blocks under them, and the trees' blocks above them.</li>
@@ -49,9 +51,12 @@ public final class WorldgenCensus {
     /** How far past the first sample of a biome its patch is looked at, in steps, to find the patch's middle. */
     private static final int PATCH_REACH = 6;
     private static final int TREE_HEIGHT = 40;
-    private static final List<String> FLOORS = List.of("minecraft:grass_block", "minecraft:dirt", "minecraft:mud", "minecraft:clay",
-            "minecraft:moss_block", "minecraft:sand", "minecraft:muddy_mangrove_roots",
+    private static final List<String> FLOORS = List.of("minecraft:grass_block", "minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol",
+            "minecraft:farmland", "minecraft:mud", "minecraft:clay", "minecraft:moss_block", "minecraft:sand", "minecraft:muddy_mangrove_roots",
             "players-versus:gray_mud", "players-versus:brown_mud", "players-versus:gray_clay", "players-versus:brown_clay");
+    /** Plants whose survival on a floor block is tried; the mod's own ones too. */
+    private static final List<String> PLANTS = List.of("minecraft:mangrove_propagule", "minecraft:oak_sapling", "minecraft:short_grass", "minecraft:fern",
+            "minecraft:dandelion", "players-versus:wheat_grass", "players-versus:clovers");
     private static final List<String> TAGS = List.of("supports_mangrove_propagule", "supports_vegetation", "substrate_overworld", "dirt", "mud");
 
     private WorldgenCensus() {
@@ -92,27 +97,35 @@ public final class WorldgenCensus {
 
     // Survival
 
-    /** Whether a mangrove propagule survives on a block, set in the sky over the spawn chunk, and which tags the block is in. */
+    /** Whether plants survive on a block, set in the sky over the spawn chunk, and which tags the block is in. */
     private static void survival(ServerLevel world, Consumer<String> log) {
         world.getChunk(0, 0);
         BlockPos floor = new BlockPos(8, 200, 8);
-        BlockState propagule = Blocks.MANGROVE_PROPAGULE.defaultBlockState();
         for (String name : FLOORS) {
-            Identifier id = Identifier.tryParse(name);
-            Block block = id == null ? null : BuiltInRegistries.BLOCK.getOptional(id).orElse(null);
+            Block block = block(name);
             if (block == null) {
                 log.accept("[pvwg] census survival: " + name + " is not a block");
                 continue;
             }
             world.setBlock(floor, block.defaultBlockState(), 2);
-            boolean survives = propagule.canSurvive(world, floor.above());
-            StringBuilder tags = new StringBuilder();
+            StringBuilder plants = new StringBuilder(), tags = new StringBuilder();
+            for (String plant : PLANTS) {
+                Block planted = block(plant);
+                if (planted == null) continue;
+                plants.append(' ').append(planted.defaultBlockState().canSurvive(world, floor.above()) ? '+' : '-').append(plant.substring(plant.indexOf(':') + 1));
+            }
             for (String tag : TAGS) {
                 if (block.defaultBlockState().is(TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("minecraft", tag)))) tags.append(" #").append(tag);
             }
-            log.accept(String.format(Locale.ROOT, "[pvwg] census survival: a propagule on %-32s %s  in:%s", name, survives ? "SURVIVES" : "does not survive", tags));
+            log.accept(String.format(Locale.ROOT, "[pvwg] census survival: on %-32s%s  in:%s", name, plants, tags));
         }
         world.setBlock(floor, Blocks.AIR.defaultBlockState(), 2);
+    }
+
+    @Nullable
+    private static Block block(String name) {
+        Identifier id = Identifier.tryParse(name);
+        return id == null ? null : BuiltInRegistries.BLOCK.getOptional(id).orElse(null);
     }
 
     // Finding a biome
@@ -165,7 +178,7 @@ public final class WorldgenCensus {
 
     private static final class Tally {
         int columns, plantable;
-        final Map<String, Integer> floors = new TreeMap<>(), blocks = new TreeMap<>();
+        final Map<String, Integer> floors = new TreeMap<>(), blocks = new TreeMap<>(), onGround = new TreeMap<>();
     }
 
     private static void count(ServerLevel world, String biome, BlockPos middle, int radius, Consumer<String> log) {
@@ -186,6 +199,8 @@ public final class WorldgenCensus {
                         tally.columns++;
                         tally.floors.merge(path(world.getBlockState(ground)), 1, Integer::sum);
                         if (propagule.canSurvive(world, ground.above())) tally.plantable++;
+                        String plant = path(world.getBlockState(ground.above()));
+                        if (!isTree(plant)) tally.onGround.merge(plant, 1, Integer::sum);
                         for (int y = ground.getY() + 1; y <= ground.getY() + TREE_HEIGHT; y++) {
                             String block = path(world.getBlockState(new BlockPos(x, y, z)));
                             if (isTree(block)) tally.blocks.merge(block, 1, Integer::sum);
@@ -199,6 +214,7 @@ public final class WorldgenCensus {
             log.accept(String.format(Locale.ROOT, "[pvwg] census   %s%s: %d columns, a propagule survives on %d (%.0f%%)",
                     name, name.equals(biome) ? " (the biome asked for)" : "", tally.columns, tally.plantable, 100.0 * tally.plantable / tally.columns));
             log.accept("[pvwg] census     ground: " + tally.floors);
+            log.accept("[pvwg] census     on the ground: " + tally.onGround);
             log.accept("[pvwg] census     trees: " + tally.blocks);
         });
     }

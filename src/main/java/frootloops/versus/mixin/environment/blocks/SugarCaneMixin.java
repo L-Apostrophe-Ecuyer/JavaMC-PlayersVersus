@@ -76,10 +76,10 @@ public abstract class SugarCaneMixin extends Block {
         if(blockState.is(Blocks.SUGAR_CANE)) {
             return blockState.getValue(BlockStateProperties.AGE_15) == 15;
         }
-        if (blockState.is(Blocks.MUD) || blockState.is(Blocks.CLAY) || blockState.is(CustomBlocks.BROWN_MUD)) {
+        if (blockState.is(Blocks.MUD) || blockState.is(Blocks.CLAY) || blockState.is(CustomBlocks.GRAY_MUD) || blockState.is(CustomBlocks.BROWN_MUD)) {
             return true;
         } else {
-            if (blockState.is(BlockTags.DIRT) || blockState.is(BlockTags.SAND)) {
+            if (blockState.is(BlockTags.SUPPORTS_SUGAR_CANE)) {
                 FluidState fluidState;
                 BlockState blockStateDown;
                 for (Direction direction : Direction.Plane.HORIZONTAL) {
