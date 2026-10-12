@@ -3,10 +3,7 @@ package frootloops.versus.mod.players.building;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.BarrelBlock;
@@ -43,7 +40,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiPredicate;
 
 /**
  * How a placed block is turned. Vanilla's state is the default; only what vanilla takes from noisy input changes: the
@@ -56,33 +52,27 @@ import java.util.function.BiPredicate;
  * <li>Sneaking: vanilla's (the client doesn't ask).</li>
  * <li>The stroke: a block placed while right-click is still held since the first of the stroke was placed takes that
  * first block's turn, half and rotation, so a row or a floor placed in one go stays one way.</li>
- * <li>The last placement: a slab, stair or trapdoor placed on the side of a full block, where the height clicked is a
- * guess, takes the half of the same kind of block placed just before right next to it.</li>
+ * <li>The last placement: the same block placed just before keeps its direction for the next one placed beside it in
+ * the same line. A log, pillar or chain keeps its axis next to it on any side; stairs keep their facing and half
+ * along their row or up and down their slope (not back to back, where a roof turns); a slab keeps its half beside it
+ * on its level; a trapdoor its facing and half along its row.</li>
  * <li>The neighbours: a block extending a line of its own kind takes the line's turn (logs, stairs, furnaces and the
- * like); a slab, stair or trapdoor placed on the side of a full block takes the half of the ones beside it; a fence gate
- * faces across its fence; a sign or head turns like the ones beside it when they're within two steps.</li>
+ * like); a slab, stair or trapdoor placed on the side of a full block, where the height clicked is a guess, takes the
+ * half of the ones beside it; a fence gate faces across its fence; a sign or head turns like the ones beside it when
+ * they're within two steps.</li>
  * <li>Vanilla's.</li>
  * </ol>
  * Pistons, observers, dispensers, droppers, crafters, hoppers, repeaters and comparators only follow a stroke: their
  * turn is what they do.
  * <p>
- * The client decides, since only it knows the stroke, and tells the server ({@link PlacementHints}), which takes the
- * state if {@link #acceptable} and the block can stand there.
+ * Everything here is the client's: it decides, then clicks so that vanilla places the state chosen (the face and the
+ * height clicked, and which way the player looks), which any server takes as an ordinary placement.
  */
 public final class PlacementRules {
     private PlacementRules() {}
 
-    /** What the client adds to the placements it predicts; set by the client, null on a dedicated server. */
-    public interface ClientSide {
-        /** The state to place instead of vanilla's (see the class); vanilla's if none applies. */
-        BlockState choose(BlockPlaceContext context, BlockState vanilla);
-        /** The state the client predicts for a placement, which it tells the server so that the server places the same. */
-        void chosen(BlockPlaceContext context, BlockState vanilla, BlockState chosen);
-        /** A block the client placed. */
-        void placed(BlockPlaceContext context, BlockState state);
-    }
-
-    @Nullable public static ClientSide client;
+    /** A block placed, and where. */
+    public record Placed(BlockPos pos, BlockState state) {}
 
     /** The blocks around a placement. */
     public interface View {
@@ -104,58 +94,61 @@ public final class PlacementRules {
             BlockStateProperties.STAIRS_SHAPE, BlockStateProperties.IN_WALL);
 
     /**
-     * What a block item places instead of vanilla's state: on the client, the state {@link #client} chooses; on the
-     * server, the one the client asked for, if it's acceptable. Either way only if the item can place it (canPlace).
-     */
-    public static BlockState adjust(BlockPlaceContext context, BlockState vanilla, BiPredicate<BlockPlaceContext, BlockState> canPlace) {
-        Player player = context.getPlayer();
-        if (player == null) return vanilla; // Dispensers place shulker boxes with no player
-        Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        if (level.isClientSide()) {
-            ClientSide side = client;
-            if (side == null) return vanilla;
-            BlockState chosen = valid(context, vanilla, side.choose(context, vanilla), canPlace);
-            side.chosen(context, vanilla, chosen);
-            return chosen;
-        }
-        BlockState hint = PlacementHints.take(player, pos, vanilla.getBlock());
-        return hint == null ? vanilla : valid(context, vanilla, hint, canPlace);
-    }
-
-    private static BlockState valid(BlockPlaceContext context, BlockState vanilla, BlockState chosen, BiPredicate<BlockPlaceContext, BlockState> canPlace) {
-        if (chosen == vanilla) return vanilla;
-        // A turned stair has another shape, a turned gate may sit in a wall
-        if (chosen.getBlock() instanceof StairBlock || chosen.getBlock() instanceof FenceGateBlock) {
-            chosen = Block.updateFromNeighbourShapes(chosen, context.getLevel(), context.getClickedPos());
-        }
-        return chosen != vanilla && acceptable(vanilla, chosen) && canPlace.test(context, chosen) ? chosen : vanilla;
-    }
-
-    /**
      * The state for a placement at pos, clicked on clickedFace, whose vanilla state is vanilla; stroke is the first
-     * block of the stroke, recent the block placed just before next to pos, if any (see the class); viewer the
-     * player's eyes.
+     * block of the stroke, recent the block placed just before, if any (see the class); viewer the player's eyes.
      */
     public static BlockState resolve(BlockState vanilla, BlockPos pos, Direction clickedFace, @Nullable BlockState stroke,
-                                     @Nullable BlockState recent, @Nullable Vec3 viewer, View view) {
+                                     @Nullable Placed recent, @Nullable Vec3 viewer, View view) {
         Block block = vanilla.getBlock();
         if (stroke != null && stroke.getBlock() == block && isTurnable(vanilla)) return copy(vanilla, stroke);
+        BlockState followed = follow(vanilla, pos, recent);
+        if (followed != null) return followed;
         if (isFunction(block)) return vanilla;
 
         if (vanilla.hasProperty(BlockStateProperties.AXIS)) return pillar(vanilla, pos, view);
-        if (block instanceof StairBlock) return half(stairs(vanilla, pos, view), pos, clickedFace, recent, view, StairBlock.class);
-        if (block instanceof SlabBlock) return slab(vanilla, pos, clickedFace, recent, view);
-        if (block instanceof TrapDoorBlock) return half(vanilla, pos, clickedFace, recent, view, TrapDoorBlock.class);
+        if (block instanceof StairBlock) return half(stairs(vanilla, pos, view), pos, clickedFace, view, StairBlock.class);
+        if (block instanceof SlabBlock) return slab(vanilla, pos, clickedFace, view);
+        if (block instanceof TrapDoorBlock) return half(vanilla, pos, clickedFace, view, TrapDoorBlock.class);
         if (block instanceof FenceGateBlock) return gate(vanilla, pos, viewer, view);
         if (isFront(block)) return front(vanilla, pos, view);
         if (vanilla.hasProperty(BlockStateProperties.ROTATION_16)) return rotation(vanilla, pos, view);
         return vanilla;
     }
 
+    /** The state that keeps the direction of the same block placed just before beside it in a line, or null. */
+    @Nullable
+    private static BlockState follow(BlockState state, BlockPos pos, @Nullable Placed recent) {
+        if (recent == null || recent.state.getBlock() != state.getBlock()) return null;
+        BlockState last = recent.state;
+        int dx = pos.getX() - recent.pos.getX(), dy = pos.getY() - recent.pos.getY(), dz = pos.getZ() - recent.pos.getZ();
+        int steps = Math.abs(dx) + Math.abs(dy) + Math.abs(dz);
+        boolean beside = steps == 1 && dy == 0;
+
+        // Logs, pillars, chains: next to it on any side, a wall, a floor or a line of them
+        if (state.hasProperty(BlockStateProperties.AXIS)) return steps == 1 ? copyValue(state, last, BlockStateProperties.AXIS) : null;
+        if (state.getBlock() instanceof StairBlock) {
+            Direction facing = last.getValue(BlockStateProperties.HORIZONTAL_FACING);
+            boolean row = beside && (dx != 0 ? Direction.Axis.X : Direction.Axis.Z) != facing.getAxis();
+            // A step up the way it climbs, or down the other way: the next row of a roof
+            boolean slope = Math.abs(dy) == 1 && dx == facing.getStepX() * dy && dz == facing.getStepZ() * dy;
+            return row || slope ? copy(state, last) : null;
+        }
+        if (state.getBlock() instanceof SlabBlock) {
+            SlabType type = last.getValue(BlockStateProperties.SLAB_TYPE);
+            if (!beside || type == SlabType.DOUBLE || state.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE) return null;
+            return state.setValue(BlockStateProperties.SLAB_TYPE, type);
+        }
+        if (state.getBlock() instanceof TrapDoorBlock) {
+            Direction facing = last.getValue(BlockStateProperties.HORIZONTAL_FACING);
+            boolean row = beside && (dx != 0 ? Direction.Axis.X : Direction.Axis.Z) != facing.getAxis();
+            return row ? copy(state, last) : null;
+        }
+        return null;
+    }
+
     /**
      * Whether a state chosen for a placement may replace vanilla's: the same block, and only its turn, half or rotation
-     * changed (never a double slab either way). Anything else a client sends is ignored.
+     * changed (never a double slab either way).
      */
     public static boolean acceptable(BlockState vanilla, BlockState chosen) {
         if (chosen.getBlock() != vanilla.getBlock()) return false;
@@ -165,6 +158,19 @@ public final class PlacementRules {
         }
         if (vanilla.hasProperty(BlockStateProperties.SLAB_TYPE) && vanilla.getValue(BlockStateProperties.SLAB_TYPE) != chosen.getValue(BlockStateProperties.SLAB_TYPE)) {
             return vanilla.getValue(BlockStateProperties.SLAB_TYPE) != SlabType.DOUBLE && chosen.getValue(BlockStateProperties.SLAB_TYPE) != SlabType.DOUBLE;
+        }
+        return true;
+    }
+
+    /** The properties that make a block's turn: what a placement chooses. */
+    private static final Set<Property<?>> TURN = Set.of(BlockStateProperties.AXIS, BlockStateProperties.HORIZONTAL_FACING,
+            BlockStateProperties.FACING, BlockStateProperties.HALF, BlockStateProperties.SLAB_TYPE, BlockStateProperties.ROTATION_16);
+
+    /** Whether two states are the same block turned the same way (whatever their shape from the neighbours). */
+    public static boolean sameTurn(BlockState a, BlockState b) {
+        if (a.getBlock() != b.getBlock()) return false;
+        for (Property<?> property : TURN) {
+            if (a.hasProperty(property) && !a.getValue(property).equals(b.getValue(property))) return false;
         }
         return true;
     }
@@ -316,12 +322,9 @@ public final class PlacementRules {
     // trapdoor takes the half most of the ones of its kind beside it have. On the side of its own kind (or a slab or
     // stair), the height clicked is exact, and so is a click on a top or bottom face.
 
-    private static BlockState slab(BlockState state, BlockPos pos, Direction clickedFace, @Nullable BlockState recent, View view) {
+    private static BlockState slab(BlockState state, BlockPos pos, Direction clickedFace, View view) {
         SlabType type = state.getValue(BlockStateProperties.SLAB_TYPE);
         if (type == SlabType.DOUBLE || !guessedHeight(pos, clickedFace, view)) return state;
-        if (recent != null && recent.getBlock() instanceof SlabBlock && recent.getValue(BlockStateProperties.SLAB_TYPE) != SlabType.DOUBLE) {
-            return state.setValue(BlockStateProperties.SLAB_TYPE, recent.getValue(BlockStateProperties.SLAB_TYPE));
-        }
         int top = 0, bottom = 0;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockState neighbor = view.state(pos.relative(direction));
@@ -335,10 +338,8 @@ public final class PlacementRules {
         return state;
     }
 
-    private static BlockState half(BlockState state, BlockPos pos, Direction clickedFace, @Nullable BlockState recent, View view,
-                                   Class<? extends Block> kind) {
+    private static BlockState half(BlockState state, BlockPos pos, Direction clickedFace, View view, Class<? extends Block> kind) {
         if (!guessedHeight(pos, clickedFace, view)) return state;
-        if (recent != null && kind.isInstance(recent.getBlock())) return state.setValue(BlockStateProperties.HALF, recent.getValue(BlockStateProperties.HALF));
         int top = 0, bottom = 0;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockState neighbor = view.state(pos.relative(direction));

@@ -1,22 +1,17 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Block placement, round 3: how vanilla submits the block outline (for a preview of where a block will go and how it
-# will turn), the collector and Fabric's submit events it would use, and names the placement code uses that rounds 1 and 2
-# didn't print.
-calls net.minecraft.client.renderer.LevelRenderer ^submitBlockOutline$|^submitHitOutline$
-member net.minecraft.client.renderer.LevelRenderer levelRenderState|LevelRenderState|submit
-sig net.minecraft.client.renderer.SubmitNodeCollector
-sig net.minecraft.client.renderer.OrderedSubmitNodeCollector
-sig net.minecraft.client.renderer.state.level.BlockOutlineRenderState
-sig net.minecraft.client.renderer.state.level.LevelRenderState
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$CollectSubmits
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$BeforeGizmos
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
-calls net.minecraft.world.item.StandingAndWallBlockItem ^getPlacementState$
-member net.minecraft.world.level.block.Block stateById|getId\(
-sig net.minecraft.world.level.ClipContext
-member net.minecraft.world.entity.player.Player blockInteractionRange|isWithinBlockInteractionRange|hasCorrectToolForDrops
-member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase canBeReplaced|isFaceSturdy
-member net.minecraft.world.entity.Entity getDirection\(|getViewVector|getEyePosition\(
-member net.minecraft.world.item.context.BlockPlaceContext BlockPlaceContext\(
-member net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking canSend|send\(
+# Block placement, round 4: placing turned blocks from the client alone, with clicks a vanilla server takes as they are:
+# the rotation packet sent around the click, the player's rotation, the connection events, and the shapes the preview
+# marks a block's turn with.
+sig net.minecraft.network.protocol.game.ServerboundMovePlayerPacket$Rot
+member net.minecraft.world.entity.Entity setYRot|setXRot|horizontalCollision|onGround\(
+member net.minecraft.client.player.LocalPlayer yRotLast|xRotLast|sendPosition
+calls net.minecraft.server.network.ServerGamePacketListenerImpl ^handleUseItemOn$
+sig net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents$Join
+sig net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents$Disconnect
+member net.minecraft.core.Direction toYRot
+member net.minecraft.util.Mth wrapDegrees
+member net.minecraft.world.level.block.Block isShapeFullBlock
+member net.minecraft.world.phys.shapes.Shapes box\(
+member net.minecraft.world.item.context.BlockPlaceContext replacingClickedOnBlock
+member net.minecraft.world.level.block.Blocks IRON_CHAIN

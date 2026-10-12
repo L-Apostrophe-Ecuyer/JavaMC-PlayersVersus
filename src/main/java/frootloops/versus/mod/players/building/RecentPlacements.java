@@ -16,7 +16,8 @@ import java.util.UUID;
 /**
  * The last blocks each player placed, which they break much faster for a moment, though never at once: a misplaced
  * block is quick to take back, with the tool it needs to drop. The server keeps them a little longer than the client, so
- * that it doesn't refuse a break the client already finished.
+ * that it doesn't refuse a break the client already finished. The one part of placing that needs the mod on the server
+ * (the server decides how fast a block breaks): a client on a server without it mines as vanilla does.
  */
 public final class RecentPlacements {
     private RecentPlacements() {}
@@ -28,6 +29,14 @@ public final class RecentPlacements {
     // One for each side (the client's and, in single player, the server's thread), so neither needs a lock
     private static final Map<UUID, Deque<Placement>> CLIENT = new HashMap<>(), SERVER = new HashMap<>();
 
+    /** Whether the server the client plays on runs the mod, so that it breaks a block just placed as fast. */
+    private static volatile boolean serverAgrees;
+
+    public static void serverAgrees(boolean agrees) {
+        serverAgrees = agrees;
+        CLIENT.clear();
+    }
+
     public static void record(Player player, BlockPos pos, BlockState state) {
         Level level = player.level();
         Deque<Placement> placements = side(level).computeIfAbsent(player.getUUID(), uuid -> new ArrayDeque<>());
@@ -38,6 +47,7 @@ public final class RecentPlacements {
     /** Whether the player placed the block at pos just now. */
     public static boolean recent(Player player, BlockPos pos, BlockState state) {
         Level level = player.level();
+        if (level.isClientSide() && !serverAgrees) return false;
         Deque<Placement> placements = side(level).get(player.getUUID());
         if (placements == null) return false;
         long now = level.getGameTime(), lifetime = level.isClientSide() ? CLIENT_TICKS : SERVER_TICKS;

@@ -4,7 +4,6 @@ import frootloops.versus.mod.environment.worldgen.TestGame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -92,15 +91,54 @@ class PlacementRulesTest {
         assertSame(bottom, resolve(bottom, Direction.NORTH, world));
     }
 
+    private static BlockState follow(BlockState vanilla, Direction clickedFace, BlockPos lastPos, BlockState last, World world) {
+        return PlacementRules.resolve(vanilla, POS, clickedFace, null, new PlacementRules.Placed(lastPos, last), null, world);
+    }
+
     @Test
-    void theLastPlacementSettlesAGuessedHalf() {
+    void aLogKeepsTheAxisOfTheOneJustPlacedNextToIt() {
+        BlockState log = Blocks.OAK_LOG.defaultBlockState();
+        BlockState lying = log.setValue(BlockStateProperties.AXIS, Direction.Axis.X);
+        BlockState standing = log.setValue(BlockStateProperties.AXIS, Direction.Axis.Y);
+        // Stacked on one lying down, clicked on its top: still lying down
+        assertEquals(Direction.Axis.X, follow(standing, Direction.UP, POS.below(), lying, new World().with(POS.below(), lying)).getValue(BlockStateProperties.AXIS));
+        // Beside one standing, clicked on its side: still standing
+        BlockState sideways = log.setValue(BlockStateProperties.AXIS, Direction.Axis.Z);
+        assertEquals(Direction.Axis.Y, follow(sideways, Direction.SOUTH, POS.north(), standing, new World().with(POS.north(), standing)).getValue(BlockStateProperties.AXIS));
+        // Not from another kind of log, nor from one further off
+        BlockState birch = Blocks.BIRCH_LOG.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.X);
+        assertSame(standing, follow(standing, Direction.UP, POS.below(), birch, new World()));
+        assertSame(standing, follow(standing, Direction.UP, POS.below().east(), lying, new World()));
+        // Chains too
+        BlockState chain = Blocks.IRON_CHAIN.defaultBlockState();
+        assertEquals(Direction.Axis.X, follow(chain.setValue(BlockStateProperties.AXIS, Direction.Axis.Y), Direction.UP, POS.east(),
+                chain.setValue(BlockStateProperties.AXIS, Direction.Axis.X), new World()).getValue(BlockStateProperties.AXIS));
+    }
+
+    @Test
+    void stairsKeepTheTurnOfTheOnesJustPlacedAlongTheirRowAndSlope() {
+        BlockState stairs = Blocks.OAK_STAIRS.defaultBlockState();
+        BlockState north = stairs.setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH).setValue(BlockStateProperties.HALF, Half.TOP);
+        BlockState vanilla = stairs.setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST);
+        // Beside it in its row (east of a north-facing stair), and the next step up its slope (north and up)
+        assertTrue(PlacementRules.sameTurn(north, follow(vanilla, Direction.UP, POS.west(), north, new World())));
+        assertTrue(PlacementRules.sameTurn(north, follow(vanilla, Direction.UP, POS.south().below(), north, new World())));
+        // Back to back, where a roof turns: not kept
+        BlockState placed = follow(vanilla, Direction.UP, POS.south(), north, new World());
+        assertEquals(Direction.EAST, placed.getValue(BlockStateProperties.HORIZONTAL_FACING));
+    }
+
+    @Test
+    void slabsAndTrapdoorsKeepTheHalfOfTheOneJustPlacedBeside() {
         BlockState slab = Blocks.STONE_SLAB.defaultBlockState();
-        World world = new World().with(POS.south(), Blocks.STONE.defaultBlockState());
-        BlockState bottom = slab.setValue(BlockStateProperties.SLAB_TYPE, SlabType.BOTTOM);
         BlockState top = slab.setValue(BlockStateProperties.SLAB_TYPE, SlabType.TOP);
-        assertEquals(SlabType.TOP, PlacementRules.resolve(bottom, POS, Direction.NORTH, null, top, null, world).getValue(BlockStateProperties.SLAB_TYPE));
-        BlockState trapdoor = Blocks.OAK_TRAPDOOR.defaultBlockState().setValue(BlockStateProperties.HALF, Half.TOP);
-        assertEquals(Half.BOTTOM, PlacementRules.resolve(trapdoor, POS, Direction.NORTH, null, trapdoor.setValue(BlockStateProperties.HALF, Half.BOTTOM), null, world)
+        BlockState bottom = slab.setValue(BlockStateProperties.SLAB_TYPE, SlabType.BOTTOM);
+        assertEquals(SlabType.TOP, follow(bottom, Direction.UP, POS.east(), top, new World()).getValue(BlockStateProperties.SLAB_TYPE));
+        // Not above it: a slab staircase goes bottom, top, bottom
+        assertSame(bottom, follow(bottom, Direction.UP, POS.below().east(), top, new World()));
+        BlockState trapdoor = Blocks.OAK_TRAPDOOR.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH);
+        BlockState last = trapdoor.setValue(BlockStateProperties.HALF, Half.TOP);
+        assertEquals(Half.TOP, follow(trapdoor.setValue(BlockStateProperties.HALF, Half.BOTTOM), Direction.UP, POS.east(), last, new World())
                 .getValue(BlockStateProperties.HALF));
     }
 
@@ -178,9 +216,7 @@ class PlacementRulesTest {
     /** The placement mixins apply on 26.4: their handlers are in the classes. */
     @Test
     void thePlacementMixinsApply() {
-        assertTrue(hasHandler(BlockItem.class, "playersVersus$turnToMatch"), "block items: the state placed");
         assertTrue(hasHandler(BlockItem.class, "playersVersus$rememberPlaced"), "block items: the blocks placed");
-        assertTrue(hasHandler(StandingAndWallBlockItem.class, "playersVersus$turnToMatch"), "signs, banners, heads and torches");
         assertTrue(hasHandler(BlockBehaviour.class, "playersVersus$takeBackPlaced"), "mining a block just placed");
     }
 

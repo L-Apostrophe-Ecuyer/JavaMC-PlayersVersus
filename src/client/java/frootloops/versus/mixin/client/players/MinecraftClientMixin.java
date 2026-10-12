@@ -154,7 +154,8 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
         if (ClientPlacement.INSTANCE.refuses(this.player, hand, hit)) return InteractionResult.FAIL;
         ClientPlacement.INSTANCE.tried(this.player, hand, hit);
         int i = itemStack.getCount();
-        InteractionResult actionResult = this.gameMode.useItemOn(this.player, hand, hit);
+        // A block is placed turned to match what's being built, clicked so that vanilla places it that way
+        InteractionResult actionResult = ClientPlacement.INSTANCE.use(this.gameMode, this.player, hand, hit);
         if (actionResult instanceof InteractionResult.Success success && success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
             this.player.swing(hand, itemStack.getInteractAnimation(), false);
             if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {

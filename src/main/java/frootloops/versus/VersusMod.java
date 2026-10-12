@@ -10,7 +10,6 @@ import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.melee.MobMeleePayload;
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.players.building.PlacementHintPayload;
 import frootloops.versus.mod.players.death.RespawnNearbyPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.Event;
@@ -58,7 +57,6 @@ public class VersusMod implements ModInitializer {
 
 		MOD_LOGGER.info("Registering networking packets...");
 		PayloadTypeRegistry.serverboundPlay().register(RespawnNearbyPayload.ID, RespawnNearbyPayload.CODEC);
-		PayloadTypeRegistry.serverboundPlay().register(PlacementHintPayload.TYPE, PlacementHintPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(MobMeleePayload.TYPE, MobMeleePayload.CODEC);
 		VersusModServer.addPacketRecievers();
 

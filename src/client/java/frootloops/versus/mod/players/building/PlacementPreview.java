@@ -11,22 +11,28 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * The outline of the block a right-click would place, where it would go, when that's not what vanilla would place
- * there (turned to match a stroke or its neighbours: {@link PlacementRules}) or when it's reached around to (nothing
- * under the crosshair): the cases where the player couldn't otherwise tell what they'll get.
+ * there (turned to match a stroke, the last placement or its neighbours: {@link PlacementRules}) or when it's reached
+ * around to (nothing under the crosshair): the cases where the player couldn't otherwise tell what they'll get. A full
+ * block shows which way it turns: a rod along a log's axis, a plate on the front of a furnace, an observer, a piston.
  */
 @Environment(EnvType.CLIENT)
 public final class PlacementPreview {
@@ -35,11 +41,16 @@ public final class PlacementPreview {
     /** White, a little see-through: unlike vanilla's dark outline of the block under the crosshair. */
     private static final int COLOR = 0xB0FFFFFF;
 
+    private static final VoxelShape[] ROD = {
+            Shapes.box(0.0, 0.4375, 0.4375, 1.0, 0.5625, 0.5625),
+            Shapes.box(0.4375, 0.0, 0.4375, 0.5625, 1.0, 0.5625),
+            Shapes.box(0.4375, 0.4375, 0.0, 0.5625, 0.5625, 1.0)};
+
     public static void register() {
         LevelRenderEvents.COLLECT_SUBMITS.register(PlacementPreview::submit);
     }
 
-    private record Preview(BlockPos pos, VoxelShape shape) {}
+    private record Preview(BlockPos pos, BlockState state, VoxelShape shape) {}
 
     private static void submit(LevelRenderContext context) {
         if (!VersusSettings.QOL.DO_PLACEMENT_PREVIEW) return;
@@ -49,11 +60,35 @@ public final class PlacementPreview {
         Vec3 camera = ((LevelRendererAccessor) minecraft.levelRenderer).playersVersus$levelRenderState().cameraRenderState.pos;
         float width = ((GameRendererInvoker) minecraft.gameRenderer).playersVersus$gameRenderState().windowRenderState.appropriateLineWidth;
         PoseStack poseStack = context.poseStack();
+        SubmitNodeCollector collector = context.submitNodeCollector();
         poseStack.pushPose();
         // As vanilla's outline: the shape is drawn from the block's corner, relative to the camera
         poseStack.translate(preview.pos.getX() - camera.x, preview.pos.getY() - camera.y, preview.pos.getZ() - camera.z);
-        context.submitNodeCollector().submitShapeOutline(poseStack, preview.shape, RenderTypes.linesTranslucent(), COLOR, width, false);
+        collector.submitShapeOutline(poseStack, preview.shape, RenderTypes.linesTranslucent(), COLOR, width, false);
+        VoxelShape mark = mark(preview.state, preview.shape);
+        if (mark != null) collector.submitShapeOutline(poseStack, mark, RenderTypes.linesTranslucent(), COLOR, width, false);
         poseStack.popPose();
+    }
+
+    /** What shows the turn of a full block, which its outline alone doesn't; null for any other. */
+    @Nullable
+    private static VoxelShape mark(BlockState state, VoxelShape shape) {
+        if (!Block.isShapeFullBlock(shape)) return null;
+        if (state.hasProperty(BlockStateProperties.AXIS)) return ROD[state.getValue(BlockStateProperties.AXIS).ordinal()];
+        Direction front = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING) ? state.getValue(BlockStateProperties.HORIZONTAL_FACING)
+                : state.hasProperty(BlockStateProperties.FACING) ? state.getValue(BlockStateProperties.FACING) : null;
+        if (front == null) return null;
+        // A plate just out of the front face
+        double minX = 0.3125, minY = 0.3125, minZ = 0.3125, maxX = 0.6875, maxY = 0.6875, maxZ = 0.6875;
+        switch (front) {
+            case NORTH -> { minZ = -0.0625; maxZ = 0.0; }
+            case SOUTH -> { minZ = 1.0; maxZ = 1.0625; }
+            case WEST -> { minX = -0.0625; maxX = 0.0; }
+            case EAST -> { minX = 1.0; maxX = 1.0625; }
+            case DOWN -> { minY = -0.0625; maxY = 0.0; }
+            case UP -> { minY = 1.0; maxY = 1.0625; }
+        }
+        return Shapes.box(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     /** What to outline this frame, if anything. */
@@ -73,10 +108,10 @@ public final class PlacementPreview {
             BlockHitResult blockHit = around ? ClientPlacement.INSTANCE.reachAround(player, hand) : (BlockHitResult) hit;
             if (blockHit == null) continue; // Nothing to reach around to: the next hand's turn, as for a right-click
             if (ClientPlacement.INSTANCE.refuses(player, hand, blockHit)) return null;
-            ClientPlacement.Placement placement = ClientPlacement.INSTANCE.wouldPlace(player, hand, blockHit);
-            if (placement == null || (!around && placement.chosen() == placement.vanilla())) return null;
-            BlockState state = placement.chosen();
-            return new Preview(placement.pos(), state.getShape(minecraft.level, placement.pos()));
+            ClientPlacement.Choice choice = ClientPlacement.INSTANCE.preview(player, hand, blockHit);
+            if (choice == null || (!around && choice.chosen() == choice.vanilla())) return null;
+            BlockState state = choice.chosen();
+            return new Preview(choice.pos(), state, state.getShape(minecraft.level, choice.pos()));
         }
         return null;
     }

@@ -12,7 +12,6 @@
     "players.SpecialMovementMixin",
     "players.building.BlockBehaviourMixin",
     "players.building.BlockItemMixin",
-    "players.building.StandingAndWallBlockItemMixin",
 
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",

@@ -119,41 +119,46 @@ placement (`data/*/worldgen/placed_feature/suspicious_sand.json`, structure proc
 
 ## Building QoL (placement rules, strokes, reach-around, quick undo)
 Rewritten on 26.4 (branch `claude/26-4-worldgen-client-fixes-vz8an5`). Read the classes' javadoc before
-changing anything; the split is deliberate:
-- `mod/players/building/PlacementRules` (common) — pure rules that turn a placed block: vanilla's state unless a
-  rule applies; only noisy-input properties (`AXIS`, facings, `HALF`, `SLAB_TYPE` top/bottom, `ROTATION_16`; plus
-  `STAIRS_SHAPE`/`IN_WALL` recomputed) may change, never attachment, waterlogging, double slabs, door/bed halves.
-  Order: sneaking → vanilla; stroke's first block (copied, for "turnable" blocks only — not wall-attached ones);
-  last placement settles a *guessed* half (slab/stair/trapdoor clicked on the side of a full block); neighbours
-  (pillars/stairs rows — the old `BlockItemMixin` scoring, ported — guessed halves, fence gates across fences,
-  furnace-like fronts in rows, `ROTATION_16` within two steps); vanilla. Redstone parts (`isFunction`) only follow
-  a stroke. `adjust()` is the single entry both mixins call; `acceptable()` is the server's validation.
-- `PlacementHintPayload`/`PlacementHints` — the client sends its chosen state (only when not vanilla's) just before
-  the use-on packet; the server stores it at once in the receiver (no `execute`, so it precedes the use) and every
-  player placement consumes it. A server without the mod → client's `choose()` returns vanilla (`canSend` check).
-- Mixins: `players/building/BlockItemMixin` (`getPlacementState` RETURN → `adjust`; `placeBlock` RETURN → recent
-  placements + client stroke memory), `StandingAndWallBlockItemMixin` (signs/banners/heads/torches override
-  `getPlacementState` without super), `BlockBehaviourMixin` (`getDestroyProgress` RETURN: `RecentPlacements`, a
-  block the same player placed ≤40 ticks ago (client) / 60 (server) mines ×4, 5 ticks at slowest, 2 at fastest,
-  only with the tool it drops with). Player-null placements (dispensed shulker boxes) stay vanilla — the old mixin
-  crashed there.
-- Client (`src/client/.../mod/players/building/ClientPlacement`): strokes = right-click held since the stroke's
-  first block. Within one: place-on-arrival (`MinecraftClientMixin.handleKeybinds` HEAD zeroes `rightClickDelay`
-  when the crosshair reaches a new spot), face lock (only the face the stroke began on), no growth out of the
-  stroke's own blocks unless the player moved ≥0.5 along that face since, never the same spot twice; a refused
-  repeat does nothing at all (`playersVersus$useOnBlock` in `players/MinecraftClientMixin`). Ladders and
-  scaffolding aren't stroked. Reach-around (`DO_BEDROCK_BRIDGING`): on a MISS while looking down, eyes moved 0.5
-  back along the facing, ray must hit the block at about feet level; synthetic `BlockHitResult` on its facing side.
-  Arrival waits for vanilla's first repeat delay (4 ticks) after the stroke's first block, so a click held a
-  moment while the mouse moves still places one block.
-- Preview (`PlacementPreview`, client): Fabric `LevelRenderEvents.COLLECT_SUBMITS`; outlines the block a
-  right-click would place (white, `RenderTypes.linesTranslucent()`), only when it's turned unlike vanilla or
-  reached around to. Draws like vanilla's `LevelRenderer.submitBlockOutline`: translate by block pos − camera
-  (`LevelRenderState.cameraRenderState.pos`, via `LevelRendererAccessor`), then
-  `SubmitNodeCollector.submitShapeOutline(pose, shape, type, color, width, false)` with vanilla's width
-  (`GameRenderState.windowRenderState.appropriateLineWidth`, via `GameRendererInvoker`). What would be placed
-  comes from the item's own `getPlacementState` (`BlockItemInvoker`) with `ClientPlacement.previewing` set, so
-  nothing is sent or remembered.
+changing anything; the split is deliberate. **All of it is client-side except the quick undo**: it works on a
+vanilla server, because the client sends only ordinary clicks.
+- `mod/players/building/PlacementRules` (common, pure, unit-tested) — which state a placement should have:
+  vanilla's unless a rule applies; only noisy-input properties (`AXIS`, facings, `HALF`, `SLAB_TYPE` top/bottom,
+  `ROTATION_16`; `STAIRS_SHAPE`/`IN_WALL` follow) may change, never attachment, waterlogging, double slabs, door/bed
+  halves. Order: sneaking → vanilla; stroke's first block (copied, for "turnable" blocks only — not wall-attached
+  ones); **the last placement** (`follow`: same block, within 3 s — pillars/chains keep their axis next to it on any
+  side; stairs keep facing+half along their row or one step up/down their slope, not back to back (a roof's ridge);
+  slabs keep their half beside on the same level; trapdoors facing+half along their row); neighbours (pillar/stair
+  rows — the old `BlockItemMixin` scoring, ported — guessed halves, fence gates across fences, furnace-like fronts,
+  `ROTATION_16` within two steps); vanilla. Redstone parts (`isFunction`) only follow a stroke. `sameTurn()`
+  compares turns ignoring neighbour-made shape.
+- Client (`src/client/.../mod/players/building/ClientPlacement`) chooses the state, then **clicks so that vanilla
+  places it**: tries ways of clicking (the same face at another height, then any face of the target spot itself —
+  `replaceClicked` makes the block go there with that face — and fake yaw/pitch: cardinal, ±90 pitch, 16 sign
+  steps) in a capped search (`MOST_TRIES`), checking each with the item's own `getPlacementState`
+  (`BlockItemInvoker`) with the player's rotation set for it; if none gives the chosen state, the click is vanilla's.
+  A fake rotation is sent as `ServerboundMovePlayerPacket.Rot` just before the use and the real one just after (and
+  set on the client player around the predicted use, so both sides compute the same). Clicking the spot itself is
+  only done when the block under the crosshair is "plain" (no `useWithoutItem`/`useItemOn` of its own, found by
+  reflection and cached per class), so a click that would open a chest or flip a lever still does; and only within
+  the reach less a margin (`REACH_MARGIN`; the server allows reach + 1). No server mixin turns anything any more
+  (the earlier hint packet and `StandingAndWallBlockItemMixin` are gone).
+- Strokes = right-click held since the stroke's first block. Within one: place-on-arrival
+  (`MinecraftClientMixin.handleKeybinds` HEAD zeroes `rightClickDelay` when the crosshair reaches a new spot, after
+  vanilla's first-repeat delay), face lock (only the face the stroke began on, the face the player aimed at, not the
+  one clicked for the turn), no growth out of the stroke's own blocks unless the player moved ≥0.5 along that face,
+  never the same spot twice; a refused repeat does nothing at all. Ladders and scaffolding aren't stroked.
+  Reach-around (`DO_BEDROCK_BRIDGING`): on a MISS while looking down, eyes moved 0.5 back along the facing,
+  `RayTraceHandler` ray must hit the block at about feet level; synthetic `BlockHitResult` on its facing side.
+- Preview (`PlacementPreview`, Fabric `LevelRenderEvents.COLLECT_SUBMITS`): white outline of what a right-click
+  would place, only when it's turned unlike vanilla (and a click can place it) or reached around to; full blocks
+  get a mark of their turn (a rod along the axis, a plate on the facing side). Drawn as vanilla's
+  `LevelRenderer.submitBlockOutline` does: translate by block pos − camera (`LevelRendererAccessor`), then
+  `SubmitNodeCollector.submitShapeOutline` with vanilla's line width (`GameRendererInvoker`).
+- Quick undo (the server-side part): `players/building/BlockItemMixin` (`placeBlock` RETURN →
+  `RecentPlacements`) and `BlockBehaviourMixin` (`getDestroyProgress` RETURN): a block the same player placed ≤40
+  ticks ago (client) / 60 (server) mines ×4, 5 ticks at slowest, 2 at fastest, only with the tool it drops with.
+  The client does it only when the server runs the mod (`RecentPlacements.serverAgrees`, from
+  `ClientPlayNetworking.canSend(RespawnNearbyPayload.ID)` on join).
 - Settings: `VersusSettings.QOL.DO_SMARTER_BLOCK_PLACING`, `DO_BEDROCK_BRIDGING`, `DO_PLACING_STROKES`,
   `DO_PLACEMENT_PREVIEW`, `DO_FAST_UNDO_PLACING`.
 - Tests: `src/test/.../mod/players/building/PlacementRulesTest` (rules on a map-backed `View`, mixin handlers
