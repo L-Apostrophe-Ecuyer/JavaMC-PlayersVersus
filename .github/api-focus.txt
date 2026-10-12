@@ -1,13 +1,2 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Copper golem, round 1: the entity, its brain and the behavior that carries items between containers.
-find CopperGolem
-find TransportItems
-find ContainerInteraction
-findsig CopperGolem
-findsig TransportItemsBetweenContainers
-findcalls CopperGolem
-findcalls TransportItemsBetweenContainers
-uses net/minecraft/world/entity/ai/behavior/TransportItemsBetweenContainers
-data tags/block/copper_golem_statues.json
-data tags/item/copper_golem_transportable.json
