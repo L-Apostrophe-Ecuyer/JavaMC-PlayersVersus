@@ -3,6 +3,7 @@ package frootloops.versus.mixin.client.players;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.players.HandSelection;
+import frootloops.versus.mod.players.building.ClientPlacement;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -26,6 +27,7 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -108,23 +110,19 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                             }
                             break;
                         case BLOCK:
-                            BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
-                            int i = itemStack.getCount();
-                            actionResult = this.gameMode.useItemOn(this.player, hand, blockHitResult);
-                            if (actionResult instanceof InteractionResult.Success success) {
-                                if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
-                                    this.player.swing(hand, itemStack.getInteractAnimation(), false);
-                                    if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {
-                                        this.player.itemUsed(hand);
-                                    }
-                                }
+                            if (this.playersVersus$useOnBlock(hand, itemStack, (BlockHitResult)this.hitResult)) {
                                 info.cancel();
                                 return;
                             }
-                            if (actionResult instanceof InteractionResult.Fail) {
+                            break;
+                        case MISS:
+                            // Reach-around: nothing under the crosshair, looking down past the edge of the block below
+                            BlockHitResult around = ClientPlacement.INSTANCE.reachAround(this.player, hand);
+                            if (around != null && this.playersVersus$useOnBlock(hand, itemStack, around)) {
                                 info.cancel();
                                 return;
                             }
+                            break;
                     }
                 }
 
@@ -141,5 +139,33 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             }
         }
         info.cancel();
+    }
+
+    /** The item in hand used on a block, as vanilla's right-click does; whether that ends the click. */
+    @Unique
+    private boolean playersVersus$useOnBlock(InteractionHand hand, ItemStack itemStack, BlockHitResult hit) {
+        // Right-click held places only where the stroke goes; elsewhere it does nothing at all
+        if (ClientPlacement.INSTANCE.refuses(this.player, hand, hit)) return true;
+        ClientPlacement.INSTANCE.tried(this.player, hand, hit);
+        int i = itemStack.getCount();
+        InteractionResult actionResult = this.gameMode.useItemOn(this.player, hand, hit);
+        if (actionResult instanceof InteractionResult.Success success) {
+            if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                this.player.swing(hand, itemStack.getInteractAnimation(), false);
+                if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {
+                    this.player.itemUsed(hand);
+                }
+            }
+            return true;
+        }
+        return actionResult instanceof InteractionResult.Fail;
+    }
+
+    /** Right-click held in a stroke places as soon as the crosshair reaches a new spot for it, not every fourth tick. */
+    @Inject(method = "handleKeybinds", at = @At("HEAD"))
+    private void playersVersus$placeOnArrival(CallbackInfo info) {
+        if (this.rightClickDelay > 0 && this.gameMode != null && !this.gameMode.isDestroying() && ClientPlacement.INSTANCE.arrived((Minecraft)(Object)this)) {
+            this.rightClickDelay = 0;
+        }
     }
 }

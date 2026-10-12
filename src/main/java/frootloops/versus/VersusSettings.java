@@ -4,8 +4,17 @@ public abstract class VersusSettings {
 
     public static class QOL {
         public static boolean DO_HOTBAR_SWAPPING_ON_PICK_KEY = true;
+        // Placed blocks turn to match the stroke they're placed in and their neighbours (PlacementRules)
         public static boolean DO_SMARTER_BLOCK_PLACING = true;
+        // Looking past the edge of the block below you places in front of it, as Bedrock's reach-around does
         public static boolean DO_BEDROCK_BRIDGING = true;
+        // Right-click held places as soon as the crosshair reaches a new spot, but only on the face the stroke began on
+        // and not growing out of its own blocks unless you move that way (ClientPlacement)
+        public static boolean DO_PLACING_STROKES = true;
+        // A block shows its outline where it will go when it's turned unlike vanilla, or reached around to
+        public static boolean DO_PLACEMENT_PREVIEW = true;
+        // A block just placed breaks much faster (RecentPlacements)
+        public static boolean DO_FAST_UNDO_PLACING = true;
     }
 
     public static class Combat {

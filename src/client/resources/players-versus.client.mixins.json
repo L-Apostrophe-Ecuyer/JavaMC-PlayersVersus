@@ -44,6 +44,7 @@
 		"players.attacking.MinecraftClientMixin",
 		"players.death.DeathScreenMixin",
 
+		"players.BlockItemInvoker",
 		"players.DebugHudMixin",
 		"players.DebugOptionsScreenMixin",
 		"players.HungerBarRendererMixin",

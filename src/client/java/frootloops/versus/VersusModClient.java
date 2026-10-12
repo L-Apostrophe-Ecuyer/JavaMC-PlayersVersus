@@ -4,6 +4,7 @@ import frootloops.versus.mod.environment.CustomSpecialEffects;
 import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
+import frootloops.versus.mod.players.building.ClientPlacement;
 import frootloops.versus.mod.environment.CustomBlocksClient;
 import frootloops.versus.mod.environment.LeavesRustling;
 import net.fabricmc.api.ClientModInitializer;
@@ -33,6 +34,7 @@ public class VersusModClient implements ClientModInitializer {
 		MeleeAnimation.register();
 		CustomBlocksClient.onInitialize();
 		LeavesRustling.register();
+		ClientPlacement.register();
 
 		ParticleProviderRegistry.getInstance().register(CustomSpecialEffects.SPARKS_PARTICLE, SparksParticle.Factory::new);
 	}

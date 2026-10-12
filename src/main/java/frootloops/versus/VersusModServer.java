@@ -1,5 +1,7 @@
 package frootloops.versus;
 
+import frootloops.versus.mod.players.building.PlacementHintPayload;
+import frootloops.versus.mod.players.building.PlacementHints;
 import frootloops.versus.mod.players.death.RespawnNearLastDeath;
 import frootloops.versus.mod.players.death.RespawnNearbyPayload;
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -24,6 +26,8 @@ public class VersusModServer implements DedicatedServerModInitializer {
                 RespawnNearLastDeath.respawnPlayerNearTheirDeath(context.player(), context.player().level().getServer(), payload.playerUUID());
             });
         });
+        // Kept at once, not on the server's next task: the use it goes with comes right after it
+        ServerPlayNetworking.registerGlobalReceiver(PlacementHintPayload.TYPE, (payload, context) -> PlacementHints.store(context.player(), payload.pos(), payload.state()));
     }
 
     public static ServerLevel getServerWorld(Level world) {

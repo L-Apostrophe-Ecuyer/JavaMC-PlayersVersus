@@ -1,33 +1,22 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Block placement, round 2: what a placement preview could draw with (Fabric's level render and extraction events, the
-# outline render state, the shape renderer), how mining progress is computed and checked (for faster breaking of a
-# block just placed), and the property and block getter names the placement rules use.
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$BeforeBlockOutline
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$AfterTranslucentFeatures
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$EndMain
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents$AfterBlockOutlineExtraction
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
-sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext
+# Block placement, round 3: how vanilla submits the block outline (for a preview of where a block will go and how it
+# will turn), the collector and Fabric's submit events it would use, and names the placement code uses that rounds 1 and 2
+# didn't print.
+calls net.minecraft.client.renderer.LevelRenderer ^submitBlockOutline$|^submitHitOutline$
+member net.minecraft.client.renderer.LevelRenderer levelRenderState|LevelRenderState|submit
+sig net.minecraft.client.renderer.SubmitNodeCollector
+sig net.minecraft.client.renderer.OrderedSubmitNodeCollector
 sig net.minecraft.client.renderer.state.level.BlockOutlineRenderState
-find Gizmo
-find ShapeRender
-find OutlineRender
-find RenderTypes
-member net.minecraft.client.renderer.rendertype.RenderTypes lines|Lines|outline|Outline
-calls net.minecraft.client.renderer.LevelRenderer ^renderHitOutline$|^renderBlockOutline$|^extractBlockOutline$
-member net.minecraft.client.renderer.LevelRenderer Outline|outline
-calls net.minecraft.world.level.block.state.BlockBehaviour ^getDestroyProgress$
-member net.minecraft.world.level.block.state.BlockBehaviour getDestroyProgress
-calls net.minecraft.server.level.ServerPlayerGameMode ^handleBlockBreakAction$|^incrementDestroyProgress$
-sig net.minecraft.world.level.EmptyBlockGetter
-member net.minecraft.world.level.block.state.properties.BlockStateProperties AXIS|FACING|HALF|SLAB_TYPE|ROTATION_16|STAIRS_SHAPE
-member net.minecraft.world.entity.player.Player blockInteractionRange|BlockInteractionRange|canInteractWithBlock
-member net.minecraft.client.KeyMapping isDown|consumeClick
-find ClientTickEvents
-sig net.minecraft.gizmos.Gizmos
-sig net.minecraft.gizmos.CuboidGizmo
-sig net.minecraft.gizmos.GizmoStyle
-sig net.minecraft.gizmos.GizmoProperties
+sig net.minecraft.client.renderer.state.level.LevelRenderState
+sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$CollectSubmits
+sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents$BeforeGizmos
+sig net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
+calls net.minecraft.world.item.StandingAndWallBlockItem ^getPlacementState$
+member net.minecraft.world.level.block.Block stateById|getId\(
+sig net.minecraft.world.level.ClipContext
+member net.minecraft.world.entity.player.Player blockInteractionRange|isWithinBlockInteractionRange|hasCorrectToolForDrops
+member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase canBeReplaced|isFaceSturdy
+member net.minecraft.world.entity.Entity getDirection\(|getViewVector|getEyePosition\(
+member net.minecraft.world.item.context.BlockPlaceContext BlockPlaceContext\(
+member net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking canSend|send\(
