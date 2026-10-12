@@ -119,7 +119,9 @@ public final class WorldgenCensus {
             for (String tag : TAGS) {
                 if (block.defaultBlockState().is(TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("minecraft", tag)))) tags.append(" #").append(tag);
             }
-            log.accept(String.format(Locale.ROOT, "[pvwg] census survival: on %-32s%s  in:%s", name, plants, tags));
+            BlockState state = block.defaultBlockState();
+            log.accept(String.format(Locale.ROOT, "[pvwg] census survival: on %-32s%s  in:%s  heightmaps: ocean floor %b, motion blocking %b, world surface %b", name, plants, tags,
+                    Heightmap.Types.OCEAN_FLOOR.isOpaque().test(state), Heightmap.Types.MOTION_BLOCKING.isOpaque().test(state), Heightmap.Types.WORLD_SURFACE.isOpaque().test(state)));
         }
         world.setBlock(floor, Blocks.AIR.defaultBlockState(), 2);
     }
