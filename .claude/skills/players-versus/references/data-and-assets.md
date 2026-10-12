@@ -80,6 +80,16 @@ mods' and data packs' recipes too:
   add overrides just to regroup or reshape. Kept `data/minecraft/recipe` files are real changes (doors 2,
   trapdoors 6, cut copper 8, nuggets, the mod's copper tools/armor and clay, terracotta…), with vanilla's
   category kept. Settings: `VersusSettings.Items.DO_FAMILY_RECIPE_GROUPS`, `DO_CHEAPER_STAIRS_AND_SLABS`.
+
+Recipe book screen (client; `mixin/client/items_and_effects/inventory/recipe_book/`): `RecipeBookPageMixin` closes an
+open group's popup on a click outside it and lets the click through (vanilla swallowed it), opens a group's popup when
+the mouse stays on its button for `RecipeGroupHover.DWELL_MILLIS` (150 ms, three ticks) and closes it when the mouse is
+outside the button and the popup (left-click still places the shown recipe, right-click still opens at once), and lists
+the groups craftable first, then the rest. `OverlayRecipeComponentMixin` orders each of the popup's two sections and
+tells where the popup is (vanilla's `isMouseOver` is always false). The order inside a section is the inventory sort's
+(`RecipeBookSorting` → `ItemComparaisonHelper`, through `RecipeBookOrdering`, whose merge sort never throws on the
+sort's not-quite-consistent "goes before" test); the common-code pieces have unit tests, the mixins only a look in game.
+Settings: `VersusSettings.QOL.DO_RECIPE_BOOK_CLICK_THROUGH`, `DO_RECIPE_BOOK_HOVER_GROUPS`, `DO_SMART_RECIPE_ORDER`.
 - Tests: `src/test/.../mod/items_and_effects/recipes/RecipeRulesTest`.
 
 ## Extension recipe: adding/changing a recipe, loot table, or advancement

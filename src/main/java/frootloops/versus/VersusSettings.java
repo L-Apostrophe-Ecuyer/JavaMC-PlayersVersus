@@ -15,6 +15,12 @@ public abstract class VersusSettings {
         public static boolean DO_PLACEMENT_PREVIEW = true;
         // A block just placed breaks much faster (RecentPlacements)
         public static boolean DO_FAST_UNDO_PLACING = true;
+        // The recipe book: a click outside an open group's popup closes it and goes through (RecipeBookPageMixin)
+        public static boolean DO_RECIPE_BOOK_CLICK_THROUGH = true;
+        // A group's popup opens when the mouse stays on it and closes when the mouse leaves it and its popup
+        public static boolean DO_RECIPE_BOOK_HOVER_GROUPS = true;
+        // The recipe book lists what can be crafted first, then the rest, each ordered like the inventory sort (RecipeBookOrdering)
+        public static boolean DO_SMART_RECIPE_ORDER = true;
     }
 
     public static class Combat {
