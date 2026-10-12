@@ -37,6 +37,11 @@ the specific constructor override collision/luminance/piston-behavior). Families
   `#substrate_overworld` → `#supports_vegetation` / `#supports_sugar_cane` / `#supports_mangrove_propagule`. Check those,
   not `#dirt`, when a block needs "ground". The mod's soils join them in data: Gray Mud in `#mud`, Brown Mud in `#dirt`,
   the clays in `#supports_mangrove_propagule` and `#supports_small_dripleaf` (the old `small_dripleaf_placeable`).
+  The clays also sit in every tag vanilla clay is in (axolotl spawning, azalea, lush ground, sculk, enderman), the muds
+  in `#frogs_spawnable_on`, and `needs_stone_tool.json` (it replaces vanilla's: iron, lapis and the crafter only, the
+  copper family is mined from the start; the file was named `needs_stone_tools` and did nothing until 26.4's pass).
+  Stairs, slabs and walls of the mod belong in `#stairs`/`#slabs`/`#walls` and every stone block in `mineable/pickaxe`
+  (clays and muds in `mineable/shovel`); a block missing from one is easy to miss, so check when adding blocks.
   `-Ppv.census=<biomes>` (`WorldgenCensus`, CI job `census`) counts ground and trees in a world's nearest patches of those
   biomes, which plants survive on each floor block, what the heightmaps count, and writes some columns out as they are.
 - **Farming/nature**: `WheatGrassBlock` (+ `WILD_WHEAT`, `CLOVERS` via `CloverBlock`) — README:

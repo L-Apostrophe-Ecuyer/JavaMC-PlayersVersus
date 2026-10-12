@@ -24,7 +24,6 @@
     "players-versus:terracotta_brick_stairs",
     "players-versus:terracotta_brick_wall",
     "players-versus:chiseled_terracotta",
-
     "minecraft:tinted_glass",
     "minecraft:glass",
     "minecraft:white_stained_glass",
@@ -44,7 +43,6 @@
     "minecraft:magenta_stained_glass",
     "minecraft:pink_stained_glass",
     "minecraft:tinted_glass",
-
     "minecraft:glass_pane",
     "minecraft:white_stained_glass_pane",
     "minecraft:light_gray_stained_glass_pane",
@@ -61,6 +59,12 @@
     "minecraft:blue_stained_glass_pane",
     "minecraft:purple_stained_glass_pane",
     "minecraft:magenta_stained_glass_pane",
-    "minecraft:pink_stained_glass_pane"
+    "minecraft:pink_stained_glass_pane",
+    "players-versus:terracotta_tiles",
+    "players-versus:terracotta_tile_slab",
+    "players-versus:terracotta_tile_stairs",
+    "players-versus:terracotta_tile_wall",
+    "players-versus:polished_dripstone_wall",
+    "players-versus:dripstone_pillar"
   ]
 }
