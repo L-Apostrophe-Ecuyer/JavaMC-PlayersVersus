@@ -65,7 +65,7 @@ public record ItemSlot(int slotId, ItemStack stack, ItemType itemType, String na
             if(this.isBlock()) {
                 BlockState thisState = ((BlockItem)this.stack.getItem()).getBlock().defaultBlockState();
                 BlockState otherState = ((BlockItem)other.stack.getItem()).getBlock().defaultBlockState();
-                if(thisState.getSoundType() == otherState.getSoundType()) {
+                if(thisState.getSounds().equals(otherState.getSounds())) {
                     if(strict) return true;
                     else return thisState.getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col == otherState.getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col;
                 }

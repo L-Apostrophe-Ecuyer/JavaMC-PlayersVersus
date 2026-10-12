@@ -11,6 +11,7 @@
 		"environment.visuals.DarknessFogRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",
+		"environment.visuals.UntintedParticleLeavesAccessor",
 
 		"environment.worldgen.DefaultWorldPresetMixin",
 

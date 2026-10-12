@@ -38,7 +38,8 @@ jobs:
       fail-fast: false
       matrix:
         level_type: ["minecraft:normal", "players-versus:better_world"]
-        # Other mods (Modrinth projects) to run alongside, for compatibility: the newest release for 26.3.
+        # Other mods (Modrinth projects) to run alongside, for compatibility: the newest release for the game version in
+        # gradle.properties. A run whose mods have no release for it yet (as for most snapshots) is skipped.
         mods: ["", "c2me-fabric lithium"]
         # "java-kernel": the Players Versus final density stays a Java kernel next to C2ME's compiler.
         variant: [""]
@@ -84,18 +85,30 @@ jobs:
       - name: download compatibility mods
         env:
           UA: "L-Apostrophe-Ecuyer/JavaMC-PlayersVersus worldgen-smoke"
+          # The newest version's number, file url and file name, or nothing when Modrinth lists none.
+          NEWEST: >-
+            import json, sys; vs = json.load(sys.stdin);
+            f = vs and next(f for f in vs[0]["files"] if f["primary"]);
+            print(vs[0]["version_number"], f["url"], f["filename"]) if vs else None
         run: |
           mkdir -p run/worldgen-smoke/mods
+          mc=$(sed -n 's/^minecraft_version=//p' gradle.properties)
           for slug in ${{ matrix.mods }}; do
+            url=""
             read -r version url filename < <(curl -fsSL -A "$UA" \
-              "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%2226.3%22%5D" \
-              | python3 -c 'import json, sys; v = json.load(sys.stdin)[0]; f = next(f for f in v["files"] if f["primary"]); print(v["version_number"], f["url"], f["filename"])')
-            test -n "$url"
+              "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$mc%22%5D" \
+              | python3 -c "$NEWEST") || true
+            if [ -z "$url" ]; then
+              echo "::warning::No $slug release for Minecraft $mc on Modrinth: the run next to it is skipped."
+              echo "SKIP_RUN=1" >> "$GITHUB_ENV"
+              continue
+            fi
             echo "$slug $version"
             curl -fsSL -A "$UA" -o "run/worldgen-smoke/mods/$filename" "$url"
           done
           ls -la run/worldgen-smoke/mods
       - name: run worldgen smoke test
+        if: env.SKIP_RUN != '1'
         run: >
           ./gradlew runWorldgenSmoke
           -Ppv.acceptEula=true
@@ -109,6 +122,7 @@ jobs:
         run: cat run/worldgen-smoke/pvwg/*/report.txt || true
       # The bench logs its own failures and still stops the server cleanly, so the run above can succeed without a report.
       - name: check that the bench wrote a report
+        if: env.SKIP_RUN != '1'
         run: |
           ls run/worldgen-smoke/pvwg/*/report.txt
           if ls run/worldgen-smoke/crash-reports/* >/dev/null 2>&1; then echo "crash report written"; exit 1; fi
@@ -264,13 +278,24 @@ jobs:
       - name: download C2ME and Lithium
         env:
           UA: "L-Apostrophe-Ecuyer/JavaMC-PlayersVersus worldgen-smoke"
+          # The newest version's number, file url and file name, or nothing when Modrinth lists none.
+          NEWEST: >-
+            import json, sys; vs = json.load(sys.stdin);
+            f = vs and next(f for f in vs[0]["files"] if f["primary"]);
+            print(vs[0]["version_number"], f["url"], f["filename"]) if vs else None
         run: |
           mkdir -p perf-mods
+          mc=$(sed -n 's/^minecraft_version=//p' gradle.properties)
           for slug in c2me-fabric lithium; do
+            url=""
             read -r version url filename < <(curl -fsSL -A "$UA" \
-              "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%2226.3%22%5D" \
-              | python3 -c 'import json, sys; v = json.load(sys.stdin)[0]; f = next(f for f in v["files"] if f["primary"]); print(v["version_number"], f["url"], f["filename"])')
-            test -n "$url"
+              "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$mc%22%5D" \
+              | python3 -c "$NEWEST") || true
+            if [ -z "$url" ]; then
+              echo "::warning::No $slug release for Minecraft $mc on Modrinth: the runs next to C2ME and Lithium are skipped."
+              echo "SKIP_C2ME=1" >> "$GITHUB_ENV"
+              continue
+            fi
             echo "$slug $version"
             curl -fsSL -A "$UA" -o "perf-mods/$filename" "$url"
           done
@@ -278,6 +303,7 @@ jobs:
       # change can speed up one setup and slow down the other. Two more time this commit with the Java final density
       # (-Ppv.vanillaTypes=false), which doesn't depend on how C2ME compiles vanilla's types.
       - name: previous, this, kernel, vanilla, vanilla, kernel, this, previous, next to C2ME and Lithium
+        if: env.SKIP_C2ME != '1'
         run: |
           mkdir -p run/worldgen-smoke/mods && cp perf-mods/*.jar run/worldgen-smoke/mods/
           bench() {  # $1 report name, $2 commit, $3 level type, $4 vanilla-type final density (default true)

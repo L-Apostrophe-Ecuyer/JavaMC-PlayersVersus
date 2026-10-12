@@ -45,7 +45,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -55,6 +54,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.UUID;
+import frootloops.versus.mod.environment.blocks.BlockSounds;
+import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
@@ -136,7 +137,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "hasCorrectToolForDrops", at = @At("RETURN"), cancellable = true)
     public void canMineCopperWithWood(BlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if(!cir.getReturnValue() && this.getMainHandItem().is(Items.WOODEN_PICKAXE) && (state.getSoundType() == SoundType.COPPER || state.is(Blocks.COPPER_ORE) || state.is(Blocks.RAW_COPPER_BLOCK))) cir.setReturnValue(true);
+        if(!cir.getReturnValue() && this.getMainHandItem().is(Items.WOODEN_PICKAXE) && (BlockSounds.is(state, BlockSoundSets.COPPER) || state.is(Blocks.COPPER_ORE) || state.is(Blocks.RAW_COPPER_BLOCK))) cir.setReturnValue(true);
     }
 
     @Inject(method = "getDestroySpeed", at = @At("RETURN"), cancellable = true)
@@ -151,7 +152,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             return;
         }
 
-        if(blockState.getSoundType() == SoundType.DEEPSLATE) {
+        if(BlockSounds.is(blockState, BlockSoundSets.DEEPSLATE)) {
             Tool toolComponent = this.getMainHandItem().getOrDefault(DataComponents.TOOL, null);
             if(toolComponent == null) return;
             else if(this.getMainHandItem().is(Items.GOLDEN_PICKAXE)) cir.setReturnValue(breakingSpeed + 0.5F);
@@ -162,7 +163,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             return;
         }
 
-        if(blockState.ignitedByLava() && blockState.getSoundType() == SoundType.WOOD) {
+        if(blockState.ignitedByLava() && BlockSounds.is(blockState, BlockSoundSets.WOOD)) {
             cir.setReturnValue(breakingSpeed + 2f);
             return;
         }

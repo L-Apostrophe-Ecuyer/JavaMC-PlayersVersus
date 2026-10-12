@@ -152,7 +152,8 @@ public class InventorySortingGameTest {
     @GameTest
     public void aLonePickaxeJoinsTheHotbar(GameTestHelper helper) {
         List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.BREAD, 16), new ItemStack(Items.IRON_PICKAXE)));
-        addCopies(stacks, Items.COBBLESTONE, 12);
+        // Enough to fill more than two rows: a smaller inventory keeps its hotbar as it is
+        addCopies(stacks, Items.COBBLESTONE, 17);
 
         int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
         assertInRow(helper, sorted, 0, List.of(0, 1, 2), stacks, "the sword, bread and pickaxe");
@@ -163,7 +164,7 @@ public class InventorySortingGameTest {
     public void theSwordStaysWithoutFood(GameTestHelper helper) {
         // The pickaxe, torches and cobblestone keep the hotbar busy, so a sword dropped from it would sort further down.
         List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.TORCH, 32)));
-        addCopies(stacks, Items.COBBLESTONE, 6);
+        addCopies(stacks, Items.COBBLESTONE, 8);
         addCopies(stacks, Items.DIRT, 5);
         addCopies(stacks, Items.OAK_PLANKS, 4);
 
@@ -176,7 +177,7 @@ public class InventorySortingGameTest {
     public void aShovelAvoidsAWeakHotbar(GameTestHelper helper) {
         // Too many dirt stacks for the shovel's group to fit in the hotbar along with them.
         List<ItemStack> stacks = new ArrayList<>(List.of(new ItemStack(Items.BREAD, 16), new ItemStack(Items.TORCH, 32), new ItemStack(Items.IRON_SHOVEL)));
-        addCopies(stacks, Items.DIRT, 10);
+        addCopies(stacks, Items.DIRT, 17);
 
         int[] sorted = sort(helper, stacks, 4, true, false, false, false, "the player's inventory");
         assertInRow(helper, sorted, 0, List.of(2), stacks, "the shovel");

@@ -34,7 +34,6 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> DESERT_CREEPER_CAVE = keyOf("caves/creeper_caves_desert");
     public static final ResourceKey<Biome> BADLANDS_CAVE = keyOf("caves/badlands_cave");
     public static final ResourceKey<Biome> CREEPER_CAVE = keyOf("caves/creeper_caves");
-    public static final ResourceKey<Biome> FROSTED_CAVE = keyOf("caves/frosted_caves");
     public static final ResourceKey<Biome> REGULAR_CAVE = keyOf("caves/regular_cave");
     public static final ResourceKey<Biome> DEEP_CAVES = keyOf("caves/deep_caves");
     public static final ResourceKey<Biome> PALE_GROTTO = keyOf("caves/pale_grotto");
@@ -49,9 +48,10 @@ public class CustomOverworldBiomes {
 
     public static PlacedBiome[] caveBiomesToPlaceInOverorld = new PlacedBiome[]{
             // Add here new cave biomes
-            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.4f), defaultParameter, Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-1.0f, -0.65f), Climate.Parameter.span(-1.0f, -0.2f)),
-            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.4f), defaultParameter, Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-1.0f, -0.65f), Climate.Parameter.span(0.2f, 1.0f)),
-            new PlacedBiome(FROSTED_CAVE, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.6f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
+            // Vanilla's ice caves (26.4) where the frosted caves were, under the coldest land.
+            new PlacedBiome(Biomes.ICE_CAVES, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.4f), defaultParameter, Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-1.0f, -0.65f), Climate.Parameter.span(-1.0f, -0.2f)),
+            new PlacedBiome(Biomes.ICE_CAVES, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.4f), defaultParameter, Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-1.0f, -0.65f), Climate.Parameter.span(0.2f, 1.0f)),
+            new PlacedBiome(Biomes.ICE_CAVES, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.6f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(BADLANDS_CAVE, PlacedBiomeType.SURFACE_CAVE, true, Climate.Parameter.span(0.8f, 1.0f), Climate.Parameter.span(-1.0f, -0.0f), defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DESERT_CREEPER_CAVE, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.8f, 1.0f), Climate.Parameter.span(-1.0f, -0.5f), Climate.Parameter.span(0.0f, 0.5f), Climate.Parameter.span(0.1f, 1.0f), Climate.Parameter.span(-1.0f, -0.3f)),
             new PlacedBiome(DESERT_CREEPER_CAVE, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.8f, 1.0f), Climate.Parameter.span(-1.0f, -0.5f), Climate.Parameter.span(0.0f, 0.5f), Climate.Parameter.span(0.1f, 1.0f), Climate.Parameter.span(0.2f, 1.0f)),
@@ -60,9 +60,8 @@ public class CustomOverworldBiomes {
             new PlacedBiome(Biomes.LUSH_CAVES, PlacedBiomeType.SURFACE_CAVE, true, Climate.Parameter.span(-0.3f, 0.7f), Climate.Parameter.span(-0.4f, 1.1f), Climate.Parameter.span(0.35f, 0.5f), Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-0.4f, -0.2f)),
             new PlacedBiome(Biomes.DRIPSTONE_CAVES, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.0f, 0.7f), defaultParameter, Climate.Parameter.span(0.4f, 1.0f), Climate.Parameter.span(-0.8f, 0.0f), Climate.Parameter.span(-0.75f, 0.3f)),
             new PlacedBiome(Biomes.DEEP_DARK, PlacedBiomeType.DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, Climate.Parameter.span(-1.0f, -0.8f), defaultParameter),
+            new PlacedBiome(PALE_GROTTO, PlacedBiomeType.CAVE, true, Climate.Parameter.span(-0.45f, 0.2f), Climate.Parameter.span(0.275f, 1.0f), Climate.Parameter.span(0.0f, 1.0f), Climate.Parameter.span(-0.4f, 1.0f), defaultParameter),
 
-            // Shares the humid, temperate climate ranges of Dark Forest, Dark Birch, and Pale Garden surface biomes.
-            new PlacedBiome(PALE_GROTTO, PlacedBiomeType.CAVE, false, Climate.Parameter.span(-0.45f, 0.2f), Climate.Parameter.span(0.275f, 1.0f), defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, Climate.Parameter.span(-0.7f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter)
     };
@@ -102,8 +101,8 @@ public class CustomOverworldBiomes {
             Map.entry(Biomes.BADLANDS, Biomes.DESERT));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> SURFACE_CAVE_BIOME_REPLACEMENTS = Map.ofEntries(
-            Map.entry(Biomes.FROZEN_PEAKS, FROSTED_CAVE),
-            Map.entry(Biomes.SNOWY_SLOPES, FROSTED_CAVE),
+            Map.entry(Biomes.FROZEN_PEAKS, Biomes.ICE_CAVES),
+            Map.entry(Biomes.SNOWY_SLOPES, Biomes.ICE_CAVES),
             Map.entry(Biomes.DESERT, DESERT_CREEPER_CAVE),
             Map.entry(Biomes.BADLANDS, BADLANDS_CAVE),
             Map.entry(Biomes.ERODED_BADLANDS, BADLANDS_CAVE),

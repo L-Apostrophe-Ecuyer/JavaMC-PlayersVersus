@@ -24,6 +24,9 @@ import java.util.stream.Collectors;
  * them, then lays them out in rows. Each sort works on its own lists and groups, so nothing carries over to the next.
  */
 public final class InventorySorter {
+    /** Items an inventory of two rows holds: at most this many, and the hotbar is left alone. */
+    private static final int SMALL_INVENTORY = 18;
+
 
     /**
      * Where the sort happens: a player's inventory, with the biome they're in, or a container.
@@ -105,9 +108,12 @@ public final class InventorySorter {
 
         // Step 2: Try forming rows withing a group, and combining similar groups
         if(isPlayerInventory) {
-            this.cleanUpHotbar();
-            for (ItemSlot slot : hotbar.keepOnlyEssentials()) this.insertItemIntoGroup(slot);
-            this.avoidAWeakHotbar();
+            // A small inventory (two rows or less) keeps its hotbar as it is, but for the nine stacks it holds
+            if(numItems > SMALL_INVENTORY) {
+                this.cleanUpHotbar();
+                for (ItemSlot slot : hotbar.keepOnlyEssentials()) this.insertItemIntoGroup(slot);
+                this.avoidAWeakHotbar();
+            }
             for (ItemSlot slot : hotbar.trimTo(9)) this.insertItemIntoGroup(slot);
             this.printGroups("[ INVENTORY SORTING ] ---- AFTER HOTBAR CLEAN UP -----\n");
         }

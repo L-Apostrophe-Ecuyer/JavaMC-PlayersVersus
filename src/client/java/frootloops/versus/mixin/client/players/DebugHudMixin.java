@@ -2,6 +2,7 @@ package frootloops.versus.mixin.client.players;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
@@ -31,16 +32,28 @@ public abstract class DebugHudMixin {
 
     @Shadow private final Minecraft minecraft;
 
+    @Shadow private final Font font;
+
     @Shadow private boolean renderProfilerChart, renderFpsCharts, renderNetworkCharts;
 
     protected DebugHudMixin(Minecraft client) {
         this.minecraft = client;
+        this.font = client.font;
     }
 
-    // 26.x renamed it extractLines and added the width that right-aligned lines are placed against (vanilla passes
-    // the scaled GUI width; it doesn't read it from the extractor itself).
-    @Shadow
-    private void extractLines(GuiGraphicsExtractor context, List<String> text, boolean left, int width) {}
+    /**
+     * The lines down the left side, the way the debug screen drew them before 26.4 rebuilt it into columns of groups:
+     * a dark backdrop behind each line and light grey text; empty lines leave a gap.
+     */
+    private void versus$extractLines(GuiGraphicsExtractor context, List<String> lines) {
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            if (line.isEmpty()) continue;
+            int y = 2 + this.font.lineHeight * i;
+            context.fill(1, y - 1, 2 + this.font.width(line) + 1, y + this.font.lineHeight - 1, 0x90505050);
+            context.text(this.font, Component.literal(line), 2, y, 0xFFE0E0E0, false);
+        }
+    }
 
 
     @Inject(method = "extractRenderState", at = @At("HEAD"), cancellable = true)
@@ -92,7 +105,7 @@ public abstract class DebugHudMixin {
                 }
 
                 // And that's it!
-                this.extractLines(context, list, true, context.guiWidth());
+                this.versus$extractLines(context, list);
                 info.cancel();
             }
         }

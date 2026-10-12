@@ -37,8 +37,8 @@ public abstract class ServerWorldWeatherMixin extends Level {
     @Shadow
     public abstract GameRules getGameRules();
 
-    protected ServerWorldWeatherMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates, MinecraftServer server) {
-        super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
+    protected ServerWorldWeatherMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, int maxChainedNeighborUpdates, MinecraftServer server) {
+        super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, maxChainedNeighborUpdates);
         this.server = server;
     }
 
@@ -98,12 +98,12 @@ public abstract class ServerWorldWeatherMixin extends Level {
             this.oThunderLevel = this.thunderLevel;
             if (weather.isThundering()) this.thunderLevel += 0.0025F;
             else this.thunderLevel -= 0.0025F;
-            this.thunderLevel = Mth.clamp(this.thunderLevel, 0.0F, 1.0F);
+            this.thunderLevel = Math.clamp(this.thunderLevel, 0.0F, 1.0F);
 
             this.oRainLevel = this.rainLevel;
             if (weather.isRaining()) this.rainLevel += 0.0025F;
             else this.rainLevel -= 0.0025F;
-            this.rainLevel = Mth.clamp(this.rainLevel, 0.0F, 1.0F);
+            this.rainLevel = Math.clamp(this.rainLevel, 0.0F, 1.0F);
         }
 
         if (this.oRainLevel != this.rainLevel) {

@@ -1,0 +1,79 @@
+{
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:add",
+    "left": {
+      "type": "minecraft:add",
+      "left": -4.0,
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:div",
+            "left": {
+              "type": "minecraft:sub",
+              "left": {
+                "type": "minecraft:noise",
+                "noise": "players-versus:cave_basins",
+                "xz_scale": 1.0,
+                "y_scale": 0.0
+              },
+              "right": -0.2
+            },
+            "right": 0.05
+          },
+          "min": 0.0,
+          "max": 1.0
+        },
+        "right": 13.0
+      }
+    },
+    "right": {
+      "type": "minecraft:mul",
+      "left": {
+        "type": "minecraft:clamp",
+        "input": {
+          "type": "minecraft:div",
+          "left": {
+            "type": "minecraft:sub",
+            "left": {
+              "type": "minecraft:noise",
+              "noise": "players-versus:cave_basins",
+              "xz_scale": 1.0,
+              "y_scale": 0.0
+            },
+            "right": -0.05
+          },
+          "right": 0.05
+        },
+        "min": 0.0,
+        "max": 1.0
+      },
+      "right": 7.0
+    }
+  },
+  "right": {
+    "type": "minecraft:mul",
+    "left": {
+      "type": "minecraft:clamp",
+      "input": {
+        "type": "minecraft:div",
+        "left": {
+          "type": "minecraft:sub",
+          "left": {
+            "type": "minecraft:noise",
+            "noise": "players-versus:cave_basins",
+            "xz_scale": 1.0,
+            "y_scale": 0.0
+          },
+          "right": 0.1
+        },
+        "right": 0.05
+      },
+      "min": 0.0,
+      "max": 1.0
+    },
+    "right": 7.0
+  }
+}

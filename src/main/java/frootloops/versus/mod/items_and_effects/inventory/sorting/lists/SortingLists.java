@@ -4,7 +4,7 @@ import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSortingMaps
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 /**
  * The sorted lists of one sort, which the groups share out. Each sort makes its own.
@@ -29,7 +29,7 @@ public class SortingLists {
     public final SortedMappedItemList REDSTONE_RAW = new SortedMappedItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_REDSTONE, ItemType.MISC);
     public final SortedBlockItemList GOLD_ITEMS_AND_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_GOLD, ItemType.MISC);
     public final SortedBlockItemList IRON_ITEMS_AND_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_IRON, ItemType.MISC);
-    public final SortedBlockItemList COPPER_ITEMS_AND_BLOCKS = new SortedBlockItemList(SoundType.COPPER, ItemSortingMaps.ITEMS_AND_BLOCKS_OF_COPPER);
+    public final SortedBlockItemList COPPER_ITEMS_AND_BLOCKS = new SortedBlockItemList(BlockSoundSets.COPPER, ItemSortingMaps.ITEMS_AND_BLOCKS_OF_COPPER);
     public final SortedItemList[] MINERAL_RESSOURCE_ITEMS = {ORE_BLOCKS, REFINED_MINERALS, REDSTONE_RAW, GOLD_ITEMS_AND_BLOCKS, IRON_ITEMS_AND_BLOCKS, COPPER_ITEMS_AND_BLOCKS};
     public final SortedItemList[] MINERAL_RESSOURCE_COMMON_ITEMS = {new SortedMappedItemList(ItemSortingMaps.ITEMS_REFINED_MINERALS, ItemType.MISC)};
 
@@ -83,7 +83,7 @@ public class SortingLists {
     public final SortedBlockItemList FLOWERS = new SortedBlockItemList(BlockTags.FLOWERS, ItemSortingMaps.ITEMS_FLOWERS);
     public final SortedBlockItemList SAPLINGS = new SortedBlockItemList(BlockTags.SAPLINGS);
     public final SortedBlockItemList LEAVES = new SortedBlockItemList(BlockTags.LEAVES);
-    public final SortedBlockItemList SHEARS_SHRUBBERY = new SortedBlockItemList(null, SoundType.GRASS, ItemSortingMaps.ITEMS_SHEARS_SHRUBBERY, 0.0F, 0.1F, ItemType.BLOCK_OTHER);
+    public final SortedBlockItemList SHEARS_SHRUBBERY = new SortedBlockItemList(null, BlockSoundSets.GRASS, ItemSortingMaps.ITEMS_SHEARS_SHRUBBERY, 0.0F, 0.1F, ItemType.BLOCK_OTHER);
     public final SortedMappedItemList SHEARS_AQUATIC = new SortedMappedItemList(ItemSortingMaps.ITEMS_FLOWERS, ItemType.BLOCK_OTHER);
     public final SortedItemList[] SHEAR_MINEABLES = {SHEARS_ANIMAL_HANDLING, WOOL_BLOCKS, DYES, FLOWERS, SAPLINGS, LEAVES, SHEARS_SHRUBBERY, SHEARS_AQUATIC};
 
@@ -97,7 +97,7 @@ public class SortingLists {
     public final SortedTypedItemList HOES = new SortedTypedItemList(new ItemType[]{ItemType.HOE});
     public final SortedMappedItemList HOE_SPECIAL = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_SPECIAL, ItemType.BLOCK_OTHER);
     public final SortedMappedItemList HOE_MINEABLE_FARMING = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_FARMING, ItemType.MISC);
-    public final SortedBlockItemList ITEMS_HOE_MOSS = new SortedBlockItemList(SoundType.MOSS, ItemSortingMaps.ITEMS_HOE_MOSS);
+    public final SortedBlockItemList ITEMS_HOE_MOSS = new SortedBlockItemList(BlockSoundSets.MOSS, ItemSortingMaps.ITEMS_HOE_MOSS);
     public final SortedMappedItemList HOE_MINEABLE_SCULK = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_SCULK, ItemType.MISC);
     public final SortedMappedItemList HOE_MINEABLE_NETHER = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_NETHER_BLOCKS, ItemType.BLOCK_OTHER);
     public final SortedItemList[] HOES_MINEABLE = {HOE_MINEABLE_FARMING, HOE_SPECIAL, ITEMS_HOE_MOSS, HOE_MINEABLE_SCULK, HOE_MINEABLE_NETHER};
