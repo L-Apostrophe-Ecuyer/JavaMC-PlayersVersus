@@ -26,14 +26,19 @@ the specific constructor override collision/luminance/piston-behavior). Families
   vanilla Clay/Mud/Packed Mud/Mud Bricks(+slab/stairs)/Mud Brick Wall via the item-replacement
   pattern (`items-and-equipment.md`) — **the vanilla mud/clay block types themselves are hidden**,
   every gameplay path funnels through this mod's versions.
-- **Soil tags (26.4)**: `#minecraft:dirt` is only dirt, coarse dirt and rooted dirt now; grass blocks, mud
-  and moss blocks have their own tags, gathered by `#substrate_overworld` → `#supports_vegetation` /
-  `#supports_sugar_cane` / `#supports_mangrove_propagule`. Check those, not `#dirt`, when a block needs
-  "ground". The mod's soils join them in data (`data/minecraft/tags/block/`): Gray Mud in `#mud`, Brown Mud
-  in `#dirt`, the clays in `#supports_mangrove_propagule`. A mangrove propagule on Gray Mud (the mangrove
-  swamp's surface) failed its `would_survive` check before that, which is what stopped mangrove trees.
-  `-Ppv.census=<biomes>` (`WorldgenCensus`, CI job `census`) counts ground and trees in a world's nearest
-  patches of those biomes, and which plants survive on each floor block.
+- **Block tags decide what blocks are (26.4)**: the game no longer works out "blocks motion" from a block's collision
+  shape; `#minecraft:blocks_motion_no_leaves` (and the tags built on it) lists the blocks, and the heightmaps, suffocation,
+  fluid flow, dolphin jumps, teleporting and lava fires ask it. **Every solid block of the mod goes in
+  `data/minecraft/tags/block/blocks_motion_no_leaves.json`**; `BlockTagAudit` lists the ones missing (a warning when a
+  server starts, and the `census` line). Gray Mud and the clays were missing: the ocean floor heightmap skipped the
+  mangrove swamp's whole mud and clay layer, so a mangrove tree placed by it stood over the stone beneath and its
+  `would_survive` check failed (the cause of "mangrove trees no longer spawn"). Also from 26.4: `#minecraft:dirt` is only
+  dirt, coarse dirt and rooted dirt; grass blocks, mud and moss blocks have their own tags, gathered by
+  `#substrate_overworld` → `#supports_vegetation` / `#supports_sugar_cane` / `#supports_mangrove_propagule`. Check those,
+  not `#dirt`, when a block needs "ground". The mod's soils join them in data: Gray Mud in `#mud`, Brown Mud in `#dirt`,
+  the clays in `#supports_mangrove_propagule` and `#supports_small_dripleaf` (the old `small_dripleaf_placeable`).
+  `-Ppv.census=<biomes>` (`WorldgenCensus`, CI job `census`) counts ground and trees in a world's nearest patches of those
+  biomes, which plants survive on each floor block, what the heightmaps count, and writes some columns out as they are.
 - **Farming/nature**: `WheatGrassBlock` (+ `WILD_WHEAT`, `CLOVERS` via `CloverBlock`) — README:
   "Crops and sugar cane have gotten a few quality of life improvements. Added wheat grass, too!"
 - **`CreeperSporeBlock`** (`CREEPER_SPORE_BLOSSOM`) — tied to Creeper Caves biome per README
