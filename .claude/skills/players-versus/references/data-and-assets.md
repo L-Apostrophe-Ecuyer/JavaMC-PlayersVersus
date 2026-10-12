@@ -93,6 +93,11 @@ Settings: `VersusSettings.QOL.DO_RECIPE_BOOK_CLICK_THROUGH`, `DO_RECIPE_BOOK_HOV
 `RecipeBookComponentMixin` wraps `tryPlaceRecipe` in the book's `mouseClicked`: the second click of a double-click places the
 most crafts (as shift-click does), or one again if the recipe was already placed for the most before the first click
 (`DO_RECIPE_DOUBLE_CLICK_MAX`).
+`RecipeButtonMixin` lists a group's recipes craftable first (so its icon, and the recipe a click places, cycle through the
+craftable ones when any can be crafted; the button still counts every recipe, so the popup lists them all;
+`DO_RECIPE_ICONS_CYCLE_CRAFTABLE`). Right-click pins (`DO_RECIPE_BOOK_PINS`): on the page the group, in the popup the recipe;
+pinned come first in their section and carry a pin sprite (`recipe_book/pin`). `RecipePins` (common, tested) keeps them in
+`config/players-versus/pinned_recipes.json` by what the recipes make (`r:<item>`, or `g:<first item>` for a group of several).
 - Tests: `src/test/.../mod/items_and_effects/recipes/RecipeRulesTest`.
 
 ## Extension recipe: adding/changing a recipe, loot table, or advancement

@@ -25,6 +25,10 @@ public abstract class VersusSettings {
         public static boolean DO_RECIPE_DOUBLE_CLICK_MAX = true;
         // A stack in the hand that runs out is refilled from the largest matching stack in the inventory (HotbarRefill)
         public static boolean DO_HOTBAR_REFILL = true;
+        // A recipe group's icon cycles through what can be crafted now, when anything can (RecipeButtonMixin)
+        public static boolean DO_RECIPE_ICONS_CYCLE_CRAFTABLE = true;
+        // Right-click pins a recipe group, or a recipe in its popup, to the top of its section (RecipePins)
+        public static boolean DO_RECIPE_BOOK_PINS = true;
     }
 
     public static class Combat {

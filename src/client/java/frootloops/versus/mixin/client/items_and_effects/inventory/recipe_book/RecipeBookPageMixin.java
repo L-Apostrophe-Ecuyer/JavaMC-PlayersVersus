@@ -3,6 +3,7 @@ package frootloops.versus.mixin.client.items_and_effects.inventory.recipe_book;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.items_and_effects.inventory.recipe_book.PopupBounds;
 import frootloops.versus.mod.items_and_effects.inventory.recipe_book.RecipeBookSorting;
+import frootloops.versus.mod.items_and_effects.inventory.recipe_book.RecipePinStore;
 import frootloops.versus.mod.items_and_effects.recipes.RecipeGroupHover;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,6 +15,8 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
 import net.minecraft.client.gui.screens.recipebook.RecipeButton;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.context.ContextMap;
+import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -34,7 +37,8 @@ import java.util.List;
  * <li>a click outside an open group's popup closes it and goes through (vanilla closes it and swallows the click);</li>
  * <li>a group opens when the mouse stays on its button (RecipeGroupHover) and closes when the mouse is outside the button
  * and the popup; left-click still places the recipe it shows, right-click still opens the popup at once;</li>
- * <li>the groups are listed craftable first, then the rest, each ordered like the inventory sort.</li>
+ * <li>the groups are listed craftable first, then the rest, each ordered like the inventory sort;</li>
+ * <li>right-click pins the group under the mouse, or the recipe in the popup (RecipePins): first in their section.</li>
  * </ul>
  */
 @Environment(EnvType.CLIENT)
@@ -47,6 +51,9 @@ public abstract class RecipeBookPageMixin {
     @Shadow @Final private List<RecipeButton> buttons;
     @Shadow private Minecraft minecraft;
     @Shadow private boolean isFiltering;
+    @Shadow private List<RecipeCollection> recipeCollections;
+
+    @Shadow public abstract void updateCollections(List<RecipeCollection> collections, boolean resetPage, boolean filtering);
 
     @Unique private final RecipeGroupHover<RecipeButton> playersVersus$hover = new RecipeGroupHover<>();
 
@@ -54,6 +61,27 @@ public abstract class RecipeBookPageMixin {
     private List<RecipeCollection> playersVersus$orderGroups(List<RecipeCollection> collections) {
         if (!VersusSettings.QOL.DO_SMART_RECIPE_ORDER || this.minecraft == null || this.minecraft.level == null) return collections;
         return RecipeBookSorting.sortCollections(collections, SlotDisplayContext.fromLevel(this.minecraft.level));
+    }
+
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    private void playersVersus$pin(MouseButtonEvent event, int x, int y, int width, int height, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
+        if (!VersusSettings.QOL.DO_RECIPE_BOOK_PINS || event.button() != 1 || this.minecraft == null || this.minecraft.level == null) return;
+        ContextMap context = SlotDisplayContext.fromLevel(this.minecraft.level);
+        PopupBounds popup = (PopupBounds) (Object) this.overlay;
+        if (this.overlay.isVisible() && popup.playersVersus$popupContains(event.x(), event.y())) {
+            // In the popup, a right-click pins the recipe under it
+            RecipeDisplayEntry entry = popup.playersVersus$entryAt(event.x(), event.y());
+            String key = entry == null ? null : RecipeBookSorting.recipeKey(entry, context);
+            if (key != null) RecipePinStore.get().toggle(key);
+            cir.setReturnValue(true);
+            return;
+        }
+        RecipeButton button = this.playersVersus$buttonAt(event.x(), event.y());
+        if (button == null) return;
+        // On the page, it pins the group (right-click used to open its popup, which hovering does now)
+        RecipePinStore.get().toggle(RecipeBookSorting.groupKey(button.getCollection(), context));
+        this.updateCollections(this.recipeCollections, false, this.isFiltering);
+        cir.setReturnValue(true);
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"))
