@@ -51,6 +51,8 @@ public final class WorldgenCensus {
     /** How far past the first sample of a biome its patch is looked at, in steps, to find the patch's middle. */
     private static final int PATCH_REACH = 6;
     private static final int TREE_HEIGHT = 40;
+    /** Every this many columns of the biome asked for, one is written out as it is. */
+    private static final int COLUMN_SAMPLE_SPACING = 1500;
     private static final List<String> FLOORS = List.of("minecraft:grass_block", "minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol",
             "minecraft:farmland", "minecraft:mud", "minecraft:clay", "minecraft:moss_block", "minecraft:sand", "minecraft:muddy_mangrove_roots",
             "players-versus:gray_mud", "players-versus:brown_mud", "players-versus:gray_clay", "players-versus:brown_clay");
@@ -186,19 +188,23 @@ public final class WorldgenCensus {
         ChunkPos center = ChunkPos.containing(middle);
         BlockState propagule = Blocks.MANGROVE_PROPAGULE.defaultBlockState();
         Map<String, Tally> tallies = new TreeMap<>();
+        List<BlockPos> samples = new ArrayList<>();
+        int inBiome = 0;
         for (int chunkX = center.x() - radius; chunkX <= center.x() + radius; chunkX++) {
             for (int chunkZ = center.z() - radius; chunkZ <= center.z() + radius; chunkZ++) {
                 chunks.getChunk(chunkX, chunkZ, ChunkStatus.FULL, true);
                 for (int x = chunkX * 16; x < chunkX * 16 + 16; x++) {
                     for (int z = chunkZ * 16; z < chunkZ * 16 + 16; z++) {
                         int top = world.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z);
-                        // The ground is under the trees: roots, logs, leaves and what hangs from them don't count
+                        // The ground is the first block under the trees (their roots, logs, leaves and what hangs from them) that stops motion
                         BlockPos ground = new BlockPos(x, top - 1, z);
-                        while (ground.getY() > world.getMinY() && isTree(path(world.getBlockState(ground)))) ground = ground.below();
-                        Tally tally = tallies.computeIfAbsent(world.getBiome(ground).getRegisteredName(), key -> new Tally());
+                        while (ground.getY() > world.getMinY() && !isGround(world.getBlockState(ground))) ground = ground.below();
+                        String name = world.getBiome(ground).getRegisteredName();
+                        Tally tally = tallies.computeIfAbsent(name, key -> new Tally());
                         tally.columns++;
                         tally.floors.merge(path(world.getBlockState(ground)), 1, Integer::sum);
                         if (propagule.canSurvive(world, ground.above())) tally.plantable++;
+                        if (name.equals(biome) && inBiome++ % COLUMN_SAMPLE_SPACING == 0) samples.add(new BlockPos(x, top, z));
                         String plant = path(world.getBlockState(ground.above()));
                         if (!isTree(plant)) tally.onGround.merge(plant, 1, Integer::sum);
                         for (int y = ground.getY() + 1; y <= ground.getY() + TREE_HEIGHT; y++) {
@@ -217,6 +223,25 @@ public final class WorldgenCensus {
             log.accept("[pvwg] census     on the ground: " + tally.onGround);
             log.accept("[pvwg] census     trees: " + tally.blocks);
         });
+        for (BlockPos sample : samples) column(world, sample, log);
+    }
+
+    /** A column as it is: the heightmaps' heights, and the blocks from three above the ocean floor's down to six under it. */
+    private static void column(ServerLevel world, BlockPos top, Consumer<String> log) {
+        StringBuilder blocks = new StringBuilder();
+        for (int y = top.getY() + 3; y >= top.getY() - 6; y--) {
+            BlockState state = world.getBlockState(new BlockPos(top.getX(), y, top.getZ()));
+            blocks.append(String.format(Locale.ROOT, " %d:%s%s", y, path(state), state.blocksMotion() ? "" : "~"));
+        }
+        log.accept(String.format(Locale.ROOT, "[pvwg] census column %d,%d: ocean floor %d, world surface %d, motion blocking %d, without leaves %d;%s",
+                top.getX(), top.getZ(), world.getHeight(Heightmap.Types.OCEAN_FLOOR, top.getX(), top.getZ()),
+                world.getHeight(Heightmap.Types.WORLD_SURFACE, top.getX(), top.getZ()), world.getHeight(Heightmap.Types.MOTION_BLOCKING, top.getX(), top.getZ()),
+                world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, top.getX(), top.getZ()), blocks));
+    }
+
+    /** Ground, as opposed to a tree and what is above or around it: a block that stops motion and isn't a tree's. */
+    private static boolean isGround(BlockState state) {
+        return state.blocksMotion() && !isTree(path(state));
     }
 
     private static String path(BlockState state) {
