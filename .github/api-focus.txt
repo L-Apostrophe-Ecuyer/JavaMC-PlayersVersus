@@ -1,21 +1,13 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Quick stack to nearby chests, round 1: key mappings (the client's and Fabric's), and the player, chest and screen calls.
-find KeyMapping
-find KeyBinding
-member net.minecraft.client.KeyMapping (<init>|Category|isDown|consumeClick|getName)
-member net.minecraft.client.KeyMapping$Category .
-member net.minecraft.world.entity.player.Player (canInteractWithBlock|blockInteractionRange|displayClientMessage|sendOverlayMessage|closeContainer|isShiftKeyDown|isSecondaryUseActive)
-member net.minecraft.client.player.LocalPlayer (closeContainer|displayClientMessage|sendOverlayMessage|isShiftKeyDown)
-member net.minecraft.client.multiplayer.MultiPlayerGameMode (useItemOn|handleContainerInput)
-member net.minecraft.world.level.block.ChestBlock (getConnectedDirection|isChestBlockedAt|TYPE|FACING|getContainer)
-member net.minecraft.world.level.block.BarrelBlock (OPEN|FACING)
-member net.minecraft.client.gui.Gui (setOverlayMessage|screen|overlayMessage)
-member net.minecraft.client.gui.Hud (setOverlayMessage|overlayMessage)
-member net.minecraft.client.Minecraft (setScreen|getOverlay|gui)
-member net.minecraft.world.inventory.Slot (container|getContainerSlot|index|hasItem|getItem)
-member net.minecraft.world.inventory.AbstractContainerMenu (slots|containerId|getSlot)
-member net.minecraft.world.level.ClipContext (<init>)
-member net.minecraft.world.level.BlockGetter clip
-member net.minecraft.world.entity.player.Player (getEyePosition|getEyeHeight)
-member net.minecraft.client.gui.components.ImageButton <init>
+# Copper golem, round 1: the entity, its brain and the behavior that carries items between containers.
+find CopperGolem
+find TransportItems
+find ContainerInteraction
+findsig CopperGolem
+findsig TransportItemsBetweenContainers
+findcalls CopperGolem
+findcalls TransportItemsBetweenContainers
+uses net/minecraft/world/entity/ai/behavior/TransportItemsBetweenContainers
+data tags/block/copper_golem_statues.json
+data tags/item/copper_golem_transportable.json
