@@ -2,7 +2,6 @@ package frootloops.versus.mod.mobs.passive;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GolemChestRankingTest {
@@ -10,9 +9,10 @@ class GolemChestRankingTest {
     private static final double FAR = 32 * 32 * 3;
 
     @Test
-    void aChestWithNoRoomIsNeverChosen() {
-        assertEquals(Double.POSITIVE_INFINITY, GolemChestRanking.cost(0, 500, false, 1));
-        assertEquals(Double.POSITIVE_INFINITY, GolemChestRanking.cost(0, 0, true, 1));
+    void aChestHoldingTheItemButFullIsNotOneItFitsIn() {
+        double full = GolemChestRanking.cost(0, 500, false, 1);
+        assertTrue(full > GolemChestRanking.cost(1728, 0, true, FAR), "an empty chest comes first");
+        assertTrue(full < Double.POSITIVE_INFINITY, "but it is still somewhere to go to");
     }
 
     @Test
@@ -36,17 +36,14 @@ class GolemChestRankingTest {
     }
 
     @Test
-    void aChestHoldingOnlyOtherThingsIsTheLastResortAndNeverBeatsAnEmptyOne() {
-        double other = GolemChestRanking.cost(40, 0, false, 0);
-        assertTrue(other < Double.POSITIVE_INFINITY, "better than holding the item for good");
-        assertTrue(other > GolemChestRanking.cost(1728, 0, true, FAR), "an empty chest at the edge of range still comes first");
-        assertTrue(other > GolemChestRanking.cost(1, Integer.MAX_VALUE, false, FAR));
-    }
-
-    @Test
-    void theLastResortIsTheFurthestChestWithRoom() {
-        assertTrue(GolemChestRanking.cost(40, 0, false, FAR) < GolemChestRanking.cost(40, 0, false, 4));
-        assertEquals(Double.POSITIVE_INFINITY, GolemChestRanking.cost(0, 0, false, FAR), "but not one that is full");
+    void whenNothingFitsAndNothingIsEmptyTheLastResortIsTheFurthestChest() {
+        double nearOther = GolemChestRanking.cost(40, 0, false, 4);
+        double farOther = GolemChestRanking.cost(40, 0, false, FAR);
+        double farFull = GolemChestRanking.cost(0, 0, false, FAR + 1);
+        assertTrue(farOther < nearOther);
+        assertTrue(farFull < farOther, "full chests are in the running too");
+        assertTrue(nearOther > GolemChestRanking.cost(1728, 0, true, FAR), "an empty chest at the edge of range still comes first");
+        assertTrue(nearOther > GolemChestRanking.cost(1, Integer.MAX_VALUE, false, FAR));
     }
 
     @Test
