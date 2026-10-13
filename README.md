@@ -34,5 +34,5 @@ Takes inspiration from old school MC, and from Better Than Adventure, to take th
   - Placing blocks made easier when uncrouched: they turn to match what you're building and what you just placed, holding right-click lays a clean floor, wall or bridge, you can reach around the edge you stand on, and a block you just misplaced breaks quickly.
   - The recipe book is easier to use: a group's recipes pop up when you hover it, a click outside closes the popup and still counts, and recipes are listed craftable first, then the rest, sorted like your inventory. Right-click a group (or a recipe in its popup) to pin it to the top.
   - The stack in your hand refills from your inventory when it runs out, and double-clicking a recipe in the book places the most crafts it can (again to go back to one).
-  - Copper golems carry a whole stack at a time, and take it to the chest that already holds the most of that item (an empty chest only if none does, and never a full one).
+  - Copper golems carry a whole stack at a time, and take it to the chest that already holds the most of that item (an empty chest if none does, and if there's no empty chest either, the furthest one with room; never a full one).
   - Archeology and the brush made into an actual game mechanic, rather than just point and click. Bonus: lots more structures have suspicious blocks.
