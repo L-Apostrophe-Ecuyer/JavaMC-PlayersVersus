@@ -1,0 +1,32 @@
+{
+  "feature": "players-versus:sparse_dappled_vegetation",
+  "placement": [
+    {
+      "type": "minecraft:noise_based_count",
+      "noise_to_count_ratio": 20,
+      "noise_factor": 8,
+      "noise_offset": 0.05
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:surface_water_depth_filter",
+      "max_water_depth": 0
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:would_survive",
+        "state": "minecraft:poplar_sapling"
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

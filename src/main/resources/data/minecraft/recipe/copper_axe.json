@@ -1,10 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "equipment",
   "group": "copper_tools",
   "key": {
-    "#" : "minecraft:stick",
-    "X" : "minecraft:copper_ingot"
+    "#": "minecraft:stick",
+    "X": "minecraft:copper_ingot"
   },
   "pattern": [
     "XX",

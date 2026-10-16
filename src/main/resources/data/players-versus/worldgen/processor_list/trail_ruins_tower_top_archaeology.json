@@ -11,12 +11,12 @@
               "predicate_type": "minecraft:always_true"
             },
             "input_predicate": {
-              "predicate_type": "minecraft:tag_match",
-              "tag": "minecraft:trail_ruins_replaceable"
+              "tag": "minecraft:trail_ruins_replaceable",
+              "predicate_type": "minecraft:tag_match"
             },
             "output_state": {
-              "Name": "minecraft:suspicious_gravel",
-              "Properties": {
+              "id": "minecraft:suspicious_gravel",
+              "properties": {
                 "dusted": "0"
               }
             },

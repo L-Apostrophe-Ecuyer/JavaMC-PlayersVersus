@@ -44,7 +44,7 @@ public class SimpleSortingGroup extends SortingGroup {
             if (insertPos != -1) {
                 this.numItems++;
                 if(DEBUG_SORTING_GROUPS) {
-                    VersusMod.MOD_LOGGER.warn("                   -> " + this.GROUP_NAME + ": Inserting " + slot.stack().getName().getString() + " of type " + slot.itemType() + " into list: " + sortedList);
+                    VersusMod.MOD_LOGGER.warn("                   -> " + this.GROUP_NAME + ": Inserting " + slot.stack().getHoverName().getString() + " of type " + slot.itemType() + " into list: " + sortedList);
                 }
                 return null; // Inserted!
             }
@@ -85,7 +85,7 @@ public class SimpleSortingGroup extends SortingGroup {
             if(slot.isToolOrWeapon()) sortedItemLists[0].add(slot);
             else this.miscItems.add(slot);
             this.numItems++;
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "");
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "");
             if(DEBUG_SORTING_GROUPS) this.debugCalculateActualSize();
         }
     }
@@ -169,7 +169,7 @@ public class SimpleSortingGroup extends SortingGroup {
             VersusMod.MOD_LOGGER.warn("                 " + this.GROUP_NAME + "   takeFirstSlots(" + numSlotsToTake + ", " + splitUpSubgroups + ") - Took " + numItemsTaken + " items, including possibly misc (actual list is of size " + slotList.size() + ")");
             if(this.debugCalculateActualSize() != this.numItems) {
                 String namesItemsTaken = "";
-                for (ItemSlot slot:slotList) namesItemsTaken += slot.stack().getName().getString() + ", ";
+                for (ItemSlot slot:slotList) namesItemsTaken += slot.stack().getHoverName().getString() + ", ";
                 VersusMod.MOD_LOGGER.error("                                     slotList: " + namesItemsTaken);
             }
         }

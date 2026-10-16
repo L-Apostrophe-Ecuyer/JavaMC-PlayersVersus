@@ -2,9 +2,9 @@ package frootloops.versus.mod.items_and_effects.inventory.sorting.lists;
 
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSortingMaps;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemType;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.level.block.SoundType;
 
 public class SortedItemLists {
 
@@ -26,7 +26,7 @@ public class SortedItemLists {
     public static final SortedMappedItemList REDSTONE_RAW = new SortedMappedItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_REDSTONE, ItemType.MISC);
     public static final SortedBlockItemList GOLD_ITEMS_AND_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_GOLD, ItemType.MISC);
     public static final SortedBlockItemList IRON_ITEMS_AND_BLOCKS = new SortedBlockItemList(ItemSortingMaps.ITEMS_AND_BLOCKS_OF_IRON, ItemType.MISC);
-    public static final SortedBlockItemList COPPER_ITEMS_AND_BLOCKS = new SortedBlockItemList(BlockSoundGroup.COPPER, ItemSortingMaps.ITEMS_AND_BLOCKS_OF_COPPER);
+    public static final SortedBlockItemList COPPER_ITEMS_AND_BLOCKS = new SortedBlockItemList(SoundType.COPPER, ItemSortingMaps.ITEMS_AND_BLOCKS_OF_COPPER);
     public static final SortedItemList[] MINERAL_RESSOURCE_ITEMS = {ORE_BLOCKS, REFINED_MINERALS, REDSTONE_RAW, GOLD_ITEMS_AND_BLOCKS, IRON_ITEMS_AND_BLOCKS, COPPER_ITEMS_AND_BLOCKS};
     public static final SortedItemList[] MINERAL_RESSOURCE_COMMON_ITEMS = {new SortedMappedItemList(ItemSortingMaps.ITEMS_REFINED_MINERALS, ItemType.MISC)};
 
@@ -80,21 +80,21 @@ public class SortedItemLists {
     public static final SortedBlockItemList FLOWERS = new SortedBlockItemList(BlockTags.FLOWERS, ItemSortingMaps.ITEMS_FLOWERS);
     public static final SortedBlockItemList SAPLINGS = new SortedBlockItemList(BlockTags.SAPLINGS);
     public static final SortedBlockItemList LEAVES = new SortedBlockItemList(BlockTags.LEAVES);
-    public static final SortedBlockItemList SHEARS_SHRUBBERY = new SortedBlockItemList(null, BlockSoundGroup.GRASS, ItemSortingMaps.ITEMS_SHEARS_SHRUBBERY, 0.0F, 0.1F, ItemType.BLOCK_OTHER);
+    public static final SortedBlockItemList SHEARS_SHRUBBERY = new SortedBlockItemList(null, SoundType.GRASS, ItemSortingMaps.ITEMS_SHEARS_SHRUBBERY, 0.0F, 0.1F, ItemType.BLOCK_OTHER);
     public static final SortedMappedItemList SHEARS_AQUATIC = new SortedMappedItemList(ItemSortingMaps.ITEMS_FLOWERS, ItemType.BLOCK_OTHER);
     public static final SortedItemList[] SHEAR_MINEABLES = {SHEARS_ANIMAL_HANDLING, WOOL_BLOCKS, DYES, FLOWERS, SAPLINGS, LEAVES, SHEARS_SHRUBBERY, SHEARS_AQUATIC};
 
 
     /** SHOVELS ------------------------------------------------------------   */
     public static final SortedTypedItemList SHOVELS = new SortedTypedItemList(new ItemType[]{ItemType.SHOVEL});
-    public static final SortedItemList[] SHOVEL_MINEABLES = {new SortedBlockItemList(BlockTags.SHOVEL_MINEABLE, null, ItemSortingMaps.ITEMS_SHOVEL_MINEABLE, 0.2f, 16.0f, ItemType.BLOCK_FULL)};
+    public static final SortedItemList[] SHOVEL_MINEABLES = {new SortedBlockItemList(BlockTags.MINEABLE_WITH_SHOVEL, null, ItemSortingMaps.ITEMS_SHOVEL_MINEABLE, 0.2f, 16.0f, ItemType.BLOCK_FULL)};
 
 
     /** HOES -------------------------------------------------------------   */
     public static final SortedTypedItemList HOES = new SortedTypedItemList(new ItemType[]{ItemType.HOE});
     public static final SortedMappedItemList HOE_SPECIAL = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_SPECIAL, ItemType.BLOCK_OTHER);
     public static final SortedMappedItemList HOE_MINEABLE_FARMING = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_FARMING, ItemType.MISC);
-    public static final SortedBlockItemList ITEMS_HOE_MOSS = new SortedBlockItemList(BlockSoundGroup.MOSS_BLOCK, ItemSortingMaps.ITEMS_HOE_MOSS);
+    public static final SortedBlockItemList ITEMS_HOE_MOSS = new SortedBlockItemList(SoundType.MOSS, ItemSortingMaps.ITEMS_HOE_MOSS);
     public static final SortedMappedItemList HOE_MINEABLE_SCULK = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_SCULK, ItemType.MISC);
     public static final SortedMappedItemList HOE_MINEABLE_NETHER = new SortedMappedItemList(ItemSortingMaps.ITEMS_HOE_NETHER_BLOCKS, ItemType.BLOCK_OTHER);
     public static final SortedItemList[] HOES_MINEABLE = {HOE_MINEABLE_FARMING, HOE_SPECIAL, ITEMS_HOE_MOSS, HOE_MINEABLE_SCULK, HOE_MINEABLE_NETHER};
@@ -113,7 +113,7 @@ public class SortedItemLists {
     public static final SortedMappedItemList PICKAXE_MINEABLE_BLUES = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_BLUE_BLOCKS, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_WARM = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_WARM_BLOCKS, ItemType.BLOCK_FULL);
     public static final SortedMappedItemList PICKAXE_MINEABLE_TERRACOTTA = new SortedMappedItemList(ItemSortingMaps.ITEMS_PICKAXE_TERRACOTTA_BLOCKS, ItemType.BLOCK_FULL);
-    public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.PICKAXE_MINEABLE, 0.5f, 51.0f);
+    public static final SortedBlockItemList PICKAXE_MINEABLE_GENERIC = new SortedBlockItemList(BlockTags.MINEABLE_WITH_PICKAXE, 0.5f, 51.0f);
     public static final SortedItemList[] PICKAXE_MINEABLES = {PICKAXE_MINEABLE_ICE, PICKAXE_MINEABLE_NETHER, PICKAXE_MINEABLE_BLACKSTONE, PICKAXE_MINEABLE_GRAYS_BRICKS, PICKAXE_MINEABLE_GRAYS_NATURAL, PICKAXE_MINEABLE_GRAYS_COBBLED, PICKAXE_MINEABLE_CORAL, PICKAXE_MINEABLE_PALE, PICKAXE_MINEABLE_BLUES, PICKAXE_MINEABLE_WARM, PICKAXE_MINEABLE_TERRACOTTA, PICKAXE_MINEABLE_GENERIC};
 
 
@@ -126,7 +126,7 @@ public class SortedItemLists {
     public static final SortedTaggedItemList AXE_MINEABLE_DOORS = new SortedTaggedItemList(ItemTags.WOODEN_DOORS, ItemType.BLOCK_OTHER);
     public static final SortedTaggedItemList AXE_MINEABLE_TRAPDOORS = new SortedTaggedItemList(ItemTags.WOODEN_TRAPDOORS, ItemType.BLOCK_OTHER);
     public static final SortedTaggedItemList AXE_MINEABLE_BUTTONS = new SortedTaggedItemList(ItemTags.WOODEN_BUTTONS, ItemType.BLOCK_OTHER);
-    public static final SortedBlockItemList AXE_MINEABLE_OTHER = new SortedBlockItemList(BlockTags.AXE_MINEABLE, 1.01f, 32.0f);
+    public static final SortedBlockItemList AXE_MINEABLE_OTHER = new SortedBlockItemList(BlockTags.MINEABLE_WITH_AXE, 1.01f, 32.0f);
     public static final SortedItemList[] AXE_MINEABLES = {AXE_MINEABLE_PLANKS, AXE_MINEABLE_LOGS, AXE_MINEABLE_SLABS, AXE_MINEABLE_STAIRS, AXE_MINEABLE_DOORS, AXE_MINEABLE_TRAPDOORS, AXE_MINEABLE_BUTTONS, AXE_MINEABLE_OTHER};
 
 }

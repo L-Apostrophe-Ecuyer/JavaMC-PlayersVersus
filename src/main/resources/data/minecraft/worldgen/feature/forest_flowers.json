@@ -1,0 +1,126 @@
+{
+  "type": "minecraft:simple_random_selector",
+  "features": [
+    {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:weighted",
+          "entries": [
+            {
+              "data": {
+                "id": "minecraft:rose_bush",
+                "properties": {
+                  "half": "lower"
+                }
+              },
+              "weight": 4
+            },
+            {
+              "data": {
+                "id": "minecraft:poppy"
+              },
+              "weight": 1
+            }
+          ]
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:count",
+          "count": 96
+        },
+        {
+          "type": "minecraft:offset",
+          "x": {
+            "type": "minecraft:uniform",
+            "min_inclusive": -7,
+            "max_inclusive": 7
+          },
+          "y": {
+            "type": "minecraft:uniform",
+            "min_inclusive": -3,
+            "max_inclusive": 3
+          },
+          "z": {
+            "type": "minecraft:uniform",
+            "min_inclusive": -7,
+            "max_inclusive": 7
+          }
+        },
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:air"
+          }
+        }
+      ]
+    },
+    {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:weighted",
+          "entries": [
+            {
+              "data": {
+                "id": "minecraft:short_grass"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "id": "minecraft:dandelion"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "id": "minecraft:oxeye_daisy"
+              },
+              "weight": 2
+            },
+            {
+              "data": {
+                "id": "minecraft:azure_bluet"
+              },
+              "weight": 6
+            }
+          ]
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:count",
+          "count": 96
+        },
+        {
+          "type": "minecraft:offset",
+          "x": {
+            "type": "minecraft:uniform",
+            "min_inclusive": -8,
+            "max_inclusive": 8
+          },
+          "y": {
+            "type": "minecraft:uniform",
+            "min_inclusive": -3,
+            "max_inclusive": 3
+          },
+          "z": {
+            "type": "minecraft:uniform",
+            "min_inclusive": -8,
+            "max_inclusive": 8
+          }
+        },
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:air"
+          }
+        }
+      ]
+    }
+  ]
+}

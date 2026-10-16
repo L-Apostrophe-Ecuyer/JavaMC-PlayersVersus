@@ -1,19 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "lapis",
-  "category": "building",
   "pattern": [
     "##",
     "##"
   ],
   "key": {
-    "#" : "minecraft:lapis_block"
+    "#": "minecraft:lapis_block"
   },
   "result": {
     "id": "players-versus:cut_lapis",
     "count": 8
   }
 }
-
-
-

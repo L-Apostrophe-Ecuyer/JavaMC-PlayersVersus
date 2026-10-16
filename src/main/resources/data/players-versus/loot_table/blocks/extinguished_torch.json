@@ -11,32 +11,28 @@
             {
               "type": "minecraft:item",
               "name": "players-versus:extinguished_torch",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "predicates": {
-                      "minecraft:enchantments": [
-                        {
-                          "enchantments": "minecraft:silk_touch",
-                          "levels": {
-                            "min": 1
-                          }
+              "condition": {
+                "predicate": {
+                  "predicates": {
+                    "minecraft:enchantments": [
+                      {
+                        "enchantments": "minecraft:silk_touch",
+                        "levels": {
+                          "min": 1
                         }
-                      ]
-                    }
+                      }
+                    ]
                   }
-                }
-              ]
+                },
+                "type": "minecraft:match_tool"
+              }
             },
             {
               "type": "minecraft:item",
               "name": "minecraft:stick",
-              "conditions": [
-                {
-                  "condition": "minecraft:survives_explosion"
-                }
-              ]
+              "condition": {
+                "type": "minecraft:survives_explosion"
+              }
             }
           ]
         }
@@ -45,4 +41,3 @@
   ],
   "random_sequence": "minecraft:blocks/stone"
 }
-

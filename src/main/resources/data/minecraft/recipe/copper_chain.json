@@ -1,13 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "pattern": [
     "N",
     "N",
     "N"
   ],
   "key": {
-    "N" : "minecraft:copper_nugget"
+    "N": "minecraft:copper_nugget"
   },
   "result": {
     "id": "minecraft:copper_chain"

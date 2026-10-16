@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "acacia",
   "key": {
     "#": "minecraft:acacia_planks"
@@ -9,7 +8,7 @@
     "##"
   ],
   "result": {
-    "count":  4,
+    "count": 4,
     "id": "minecraft:acacia_slab"
   }
 }

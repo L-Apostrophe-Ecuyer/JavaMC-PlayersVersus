@@ -14,11 +14,9 @@
           "name": "minecraft:ender_eye"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:killed_by_player"
+      }
     },
     {
       "rolls": 1,
@@ -28,41 +26,42 @@
           "type": "minecraft:item",
           "name": "minecraft:vex_armor_trim_smithing_template",
           "weight": 99,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 0,
-                "max": 1
-              }
-            }
-          ],
-          "conditions": [
-            {
-              "condition": "minecraft:location_check",
-              "predicate": {}
+          "modifier": {
+            "count": {
+              "min": 0,
+              "max": 1,
+              "type": "minecraft:uniform"
             },
-            {
-              "condition": "minecraft:killed_by_player"
-            }
-          ]
+            "type": "minecraft:set_count"
+          },
+          "condition": {
+            "terms": [
+              {
+                "predicate": {},
+                "type": "minecraft:location_check"
+              },
+              {
+                "type": "minecraft:killed_by_player"
+              }
+            ],
+            "type": "minecraft:all_of"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:filled_map",
           "weight": 1,
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:exploration_map",
-              "destination": "minecraft:eye_of_ender_located",
-              "decoration": "banner_black",
+              "destination": "minecraft:mansion",
               "zoom": 3,
               "search_radius": 50,
-              "skip_existing_chunks": true
+              "skip_existing_chunks": true,
+              "type": "minecraft:exploration_map"
             },
             {
-              "function": "minecraft:set_name",
-              "name": "Forbidden Map"
+              "name": "Forbidden Map",
+              "type": "minecraft:set_name"
             }
           ]
         },
@@ -70,18 +69,17 @@
           "type": "minecraft:item",
           "name": "minecraft:enchanted_book",
           "weight": 2,
-          "functions": [
-            {
-              "function": "minecraft:enchant_randomly"
-            }
-          ]
+          "modifier": {
+            "type": "minecraft:enchant_randomly"
+          }
         }
       ]
     },
     {
       "rolls": {
         "min": 3,
-        "max": 5
+        "max": 5,
+        "type": "minecraft:uniform"
       },
       "bonus_rolls": 0,
       "entries": [
@@ -89,15 +87,14 @@
           "type": "minecraft:item",
           "name": "minecraft:gold_ingot",
           "weight": 5,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 2
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "min": 1,
+              "max": 2,
+              "type": "minecraft:uniform"
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",

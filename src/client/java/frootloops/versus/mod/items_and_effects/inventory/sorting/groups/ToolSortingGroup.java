@@ -30,7 +30,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
 
     public ItemSlot tryInsertingSlot(ItemSlot slot) {
         if(sortedToolList.trySortedInsert(slot) != -1) {
-            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Inserting " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s tools");
+            if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Inserting " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "'s tools");
             this.numTools++;
             return null; // Inserted!
         }
@@ -41,7 +41,7 @@ public class ToolSortingGroup extends SimpleSortingGroup {
         slot = this.tryInsertingSlot(slot);
         if(slot != null) {
             if(slot.isToolOrWeapon()) {
-                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getName().getString() + " into " + this.GROUP_NAME + "'s tools");
+                if(DEBUG_SORTING_GROUPS) VersusMod.MOD_LOGGER.warn("                   -> Forcibly adding " + slot.stack().getHoverName().getString() + " into " + this.GROUP_NAME + "'s tools");
                 sortedToolList.add(slot);
                 this.numTools++;
             }

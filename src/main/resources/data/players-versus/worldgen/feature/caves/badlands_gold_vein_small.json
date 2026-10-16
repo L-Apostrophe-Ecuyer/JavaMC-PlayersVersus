@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:ore",
+  "size": 16,
+  "discard_chance_on_air_exposure": 0.1,
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.5,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:stone"
+      }
+    },
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.4,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:yellow_terracotta"
+      }
+    },
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.2,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:gold_ore"
+      }
+    }
+  ]
+}

@@ -4,13 +4,13 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:pale_oak_boat"
+        "recipes": "minecraft:pale_oak_boat"
       }
     },
     "in_water": {
       "trigger": "minecraft:enter_block",
       "conditions": {
-        "block": "minecraft:water"
+        "blocks": "minecraft:water"
       }
     },
     "has_planks": {
@@ -40,7 +40,3 @@
     ]
   }
 }
-
-
-
-

@@ -1,8 +1,6 @@
 {
   "type": "minecraft:smelting",
-  "category": "food",
-
-  "ingredient":"minecraft:golden_apple",
+  "ingredient": "minecraft:golden_apple",
   "result": {
     "id": "players-versus:concentrate_of_mining_speed"
   },

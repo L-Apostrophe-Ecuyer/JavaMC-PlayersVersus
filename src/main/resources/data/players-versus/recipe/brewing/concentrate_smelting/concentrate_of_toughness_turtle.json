@@ -1,9 +1,7 @@
 {
   "type": "minecraft:smelting",
   "group": "concentrate_of_toughness",
-  "category": "food",
-
-  "ingredient":"minecraft:turtle_scute",
+  "ingredient": "minecraft:turtle_scute",
   "result": {
     "id": "players-versus:concentrate_of_toughness"
   },

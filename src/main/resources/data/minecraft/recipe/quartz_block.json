@@ -1,13 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "quartz_block",
   "pattern": [
     "##",
     "##"
   ],
   "key": {
-    "#" : "minecraft:quartz"
+    "#": "minecraft:quartz"
   },
   "result": {
     "id": "minecraft:quartz_block",

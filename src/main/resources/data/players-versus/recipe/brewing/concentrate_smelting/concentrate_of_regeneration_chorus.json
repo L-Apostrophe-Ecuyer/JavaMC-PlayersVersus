@@ -1,13 +1,10 @@
 {
   "type": "minecraft:smelting",
   "group": "concentrate_of_regeneration",
-  "category": "food",
-
-  "ingredient":"minecraft:popped_chorus_fruit",
+  "ingredient": "minecraft:popped_chorus_fruit",
   "result": {
     "id": "players-versus:concentrate_of_regeneration"
   },
   "experience": 5,
   "cookingtime": 200
 }
-

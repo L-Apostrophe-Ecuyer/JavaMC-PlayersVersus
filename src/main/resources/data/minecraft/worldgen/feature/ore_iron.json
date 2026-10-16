@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:ore",
+  "size": 32,
+  "discard_chance_on_air_exposure": 0.4,
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.05,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:iron_ore"
+      }
+    },
+    {
+      "target": {
+        "block": "minecraft:deepslate",
+        "probability": 0.1,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:deepslate_iron_ore"
+      }
+    },
+    {
+      "target": {
+        "tag": "minecraft:base_stone_overworld",
+        "predicate_type": "minecraft:tag_match"
+      },
+      "state": {
+        "id": "minecraft:tuff"
+      }
+    }
+  ]
+}

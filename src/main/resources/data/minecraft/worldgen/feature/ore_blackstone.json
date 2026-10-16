@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:ore",
+  "size": 12,
+  "discard_chance_on_air_exposure": 0.2,
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:netherrack",
+        "predicate_type": "minecraft:block_match"
+      },
+      "state": {
+        "id": "minecraft:blackstone"
+      }
+    }
+  ]
+}

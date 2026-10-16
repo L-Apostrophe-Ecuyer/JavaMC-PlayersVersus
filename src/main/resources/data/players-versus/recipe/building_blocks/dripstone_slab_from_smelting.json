@@ -1,11 +1,10 @@
 {
   "type": "minecraft:smelting",
   "group": "dripstone",
-  "category": "blocks",
   "ingredient": "players-versus:brown_clay_brick_slab",
   "result": {
     "id": "players-versus:dripstone_slab"
   },
-  "experience": 0.0,
+  "experience": 0,
   "cookingtime": 100
 }

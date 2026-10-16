@@ -4,7 +4,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "players-versus:building_blocks/terracotta_bricks"
+        "recipes": "players-versus:building_blocks/terracotta_bricks"
       }
     },
     "has_ingredient": {

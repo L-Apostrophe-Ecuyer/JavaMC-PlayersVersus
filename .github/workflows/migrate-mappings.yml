@@ -1,0 +1,61 @@
+# Mapping migration for the port to Minecraft 26.x: rewrites the mod's sources from Yarn names to Mojang's official
+# names, on the Minecraft version the build uses now (1.21.10), with Loom's migrateMappings (which remaps mixins too,
+# since Loom 1.14) and migrateClassTweakerMappings (the access widener).
+#
+# Push a commit whose message contains [migrate]. The job prints the migrated sources, as a base64 tar.xz between
+# BEGIN/END markers, into its log; nothing is committed by the job. They are the mod's own sources, renamed.
+
+name: migrate-mappings
+on:
+  push:
+
+jobs:
+  migrate:
+    if: contains(github.event.head_commit.message, '[migrate]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'microsoft'
+      - name: use Loom 1.17 with remapping
+        run: |
+          chmod +x ./gradlew
+          sed -i 's/^loom_version=.*/loom_version=1.17.1/' gradle.properties
+          sed -i "s/id 'fabric-loom' version/id 'net.fabricmc.fabric-loom-remap' version/" build.gradle
+          grep -n "loom" build.gradle gradle.properties | head
+      - name: put the source sets together
+        # One input directory, so the migration resolves every reference to the mod's own classes across sets.
+        run: |
+          mkdir -p migrate/in
+          for set in main client test; do
+            cp -r src/$set/java/. migrate/in/
+            (cd src/$set/java && find . -name '*.java' | sed "s|^\./|$set |") >> migrate/sets.txt
+          done
+          wc -l migrate/sets.txt
+      - name: migrate the sources
+        run: ./gradlew migrateMappings --mappings "net.minecraft:mappings:1.21.10" --input migrate/in --output migrate/out --stacktrace
+      - name: migrate the access widener
+        run: ./gradlew migrateClassTweakerMappings --mappings "net.minecraft:mappings:1.21.10" --output migrate/players-versus.accesswidener --stacktrace
+      - name: print the result
+        run: |
+          mkdir -p migrate/result
+          while read -r set path; do
+            mkdir -p "migrate/result/$set/$(dirname "$path")"
+            cp "migrate/out/$path" "migrate/result/$set/$path"
+          done < migrate/sets.txt
+          cp migrate/players-versus.accesswidener migrate/result/
+          echo "files: $(find migrate/result -type f | wc -l)"
+          for set in main client test; do
+            echo "$set: $(diff -rq src/$set/java migrate/result/$set | wc -l) files changed"
+          done
+          cat migrate/result/players-versus.accesswidener
+          tar -C migrate/result -cJf migrate/result.tar.xz .
+          sha256sum migrate/result.tar.xz
+          echo "-----BEGIN MIGRATED-----"
+          base64 -w 76 migrate/result.tar.xz
+          echo "-----END MIGRATED-----"

@@ -1,0 +1,71 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:dual_noise",
+    "seed": 2345,
+    "noise": {
+      "base_amplitude": 1,
+      "base_octave": -4
+    },
+    "scale": 1,
+    "variety": {
+      "min_inclusive": 1,
+      "max_inclusive": 1
+    },
+    "slow_noise": {
+      "base_amplitude": 1,
+      "base_octave": -12
+    },
+    "slow_scale": 1,
+    "states": [
+      {
+        "id": "minecraft:dandelion"
+      },
+      {
+        "id": "minecraft:dandelion"
+      },
+      {
+        "id": "minecraft:dandelion"
+      },
+      {
+        "id": "minecraft:dandelion"
+      },
+      {
+        "id": "minecraft:cornflower"
+      },
+      {
+        "id": "minecraft:oxeye_daisy"
+      },
+      {
+        "id": "minecraft:bush"
+      },
+      {
+        "id": "minecraft:tall_grass"
+      },
+      {
+        "id": "players-versus:wild_wheat"
+      },
+      {
+        "id": "minecraft:short_dry_grass"
+      },
+      {
+        "id": "minecraft:tall_dry_grass"
+      },
+      {
+        "id": "minecraft:tall_dry_grass"
+      },
+      {
+        "id": "minecraft:tall_dry_grass"
+      },
+      {
+        "id": "minecraft:tall_grass"
+      },
+      {
+        "id": "minecraft:tall_grass"
+      },
+      {
+        "id": "minecraft:tall_grass"
+      }
+    ]
+  }
+}

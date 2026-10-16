@@ -1,14 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "pattern": [
     "###",
     "#E#",
     "###"
   ],
   "key": {
-    "#" : "minecraft:obsidian",
-    "E" : "minecraft:ender_pearl"
+    "#": "minecraft:obsidian",
+    "E": "minecraft:ender_pearl"
   },
   "result": {
     "id": "minecraft:ender_chest",

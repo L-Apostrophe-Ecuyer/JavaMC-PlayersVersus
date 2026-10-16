@@ -1,7 +1,7 @@
 {
 	"required": true,
 	"package": "frootloops.versus.mixin.client",
-	"compatibilityLevel": "JAVA_21",
+	"compatibilityLevel": "JAVA_25",
 	"client": [
 
 		"enchantments.AnvilScreenMixin",
@@ -9,7 +9,6 @@
 
 		"environment.visuals.ClientWorldSkyMixin",
 		"environment.visuals.DarknessFogRendererMixin",
-		"environment.visuals.NetherFogRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",
 
@@ -19,6 +18,13 @@
 		"mobs.hostile.ZombieModelMixin",
 		"mobs.hostile.PiglinModelMixin",
 		"mobs.hostile.IllagerModelMixin",
+		"mobs.hostile.HumanoidModelMeleeMixin",
+		"mobs.hostile.LivingEntityRendererMeleeMixin",
+		"mobs.hostile.LivingEntityRenderStateMeleeMixin",
+		"mobs.hostile.LivingEntityRenderStateGripMixin",
+		"mobs.hostile.LivingEntityRendererTiltMixin",
+		"mobs.hostile.SpiderRendererGripMixin",
+		"mobs.passive.BabyVillagerEarModelMixin",
 		"mobs.passive.VillagerRessemblingModelMixin",
 		"mobs.passive.VillagerTradingScreenMixin",
 

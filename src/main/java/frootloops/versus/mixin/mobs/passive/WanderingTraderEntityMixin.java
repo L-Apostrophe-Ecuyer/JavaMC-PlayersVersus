@@ -1,53 +1,60 @@
 package frootloops.versus.mixin.mobs.passive;
 
 import com.google.common.collect.Lists;
+import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.mobs.passive.RevampedTradeFactories;
 import frootloops.versus.mod.mobs.passive.RevampedVillagerOffers;
 import frootloops.versus.mod.mobs.passive.RevampedWandererOffers;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.conversion.EntityConversionContext;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.passive.MerchantEntity;
-import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.entity.passive.WanderingTraderEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.BiomeTags;
-import net.minecraft.registry.tag.PointOfInterestTypeTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.village.*;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.poi.PointOfInterestStorage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.PoiTypeTags;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ConversionParams;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerData;
+import net.minecraft.world.entity.npc.villager.VillagerDataHolder;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerType;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.ArrayList;
 
 
-@Mixin(WanderingTraderEntity.class)
-public abstract class WanderingTraderEntityMixin extends MerchantEntity implements VillagerDataContainer {
-    public WanderingTraderEntityMixin(EntityType<? extends MerchantEntity> entityType, World world) {
+@Mixin(WanderingTrader.class)
+public abstract class WanderingTraderEntityMixin extends AbstractVillager implements VillagerDataHolder {
+    public WanderingTraderEntityMixin(EntityType<? extends AbstractVillager> entityType, Level world) {
         super(entityType, world);
     }
 
     private int experience = 0;
 
     @Override
-    public void fillRecipes() {
-        TradeOfferList tradeOfferList = this.getOffers();
+    protected void updateTrades(ServerLevel level) {
+        MerchantOffers tradeOfferList = this.getOffers();
         for (Pair<RevampedTradeFactories.Factory[], Integer> pair : RevampedWandererOffers.WANDERING_TRADER_TRADES) {
 
             ArrayList<RevampedTradeFactories.Factory> offersList = Lists.newArrayList(pair.getLeft());
-            int count = pair.getRight() - 1 + this.random.nextBetweenExclusive(0, 3);
+            int count = pair.getRight() - 1 + this.random.nextInt(0, 3);
 
             int i = 0;
             while (i < count && !offersList.isEmpty()) {
-                TradeOffer tradeOffer = offersList.remove(this.random.nextInt(offersList.size())).create(this, this.random);
+                MerchantOffer tradeOffer = offersList.remove(this.random.nextInt(offersList.size())).create(this, this.random);
                 if (tradeOffer == null) continue;
                 tradeOfferList.add(tradeOffer);
                 ++i;
@@ -56,40 +63,40 @@ public abstract class WanderingTraderEntityMixin extends MerchantEntity implemen
     }
 
     @Override
-    public void trade(TradeOffer offer) {
-        super.trade(offer);
-        if (offer.shouldRewardPlayerExperience()) {
+    public void notifyTrade(MerchantOffer offer) {
+        super.notifyTrade(offer);
+        if (offer.shouldRewardExp()) {
             experience += 1 + this.random.nextInt(2);
-            if(experience > 0 && this.getCustomer() instanceof ServerPlayerEntity serverPlayer) {
+            if(experience > 0 && this.getTradingPlayer() instanceof ServerPlayer serverPlayer) {
                 experience = 0;
-                ServerWorld serverWorld = serverPlayer.getEntityWorld();
-                if(!serverWorld.getDimension().hasRaids() || !serverWorld.getDimension().hasSkyLight() || serverWorld.getTimeOfDay() > 12000L) return;
+                ServerLevel serverWorld = serverPlayer.level();
+                if(!WorldTime.hasRaids(serverWorld) || !serverWorld.dimensionType().hasSkyLight() || WorldTime.dayTime(serverWorld) > 12000L) return;
 
-                boolean doesTraderWantToSettleDown = serverWorld.isNearOccupiedPointOfInterest(this.getBlockPos());
+                boolean doesTraderWantToSettleDown = serverWorld.isVillage(this.blockPosition());
                 if(!doesTraderWantToSettleDown) {
-                    BlockPos spawnPos = serverPlayer.getRespawn().respawnData().getPos();
-                    if(spawnPos != null) doesTraderWantToSettleDown = (spawnPos.isWithinDistance(this.getBlockPos(), 32)) && !serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 24, PointOfInterestStorage.OccupationStatus.ANY).toList().isEmpty();
-                    else doesTraderWantToSettleDown = serverWorld.getPointOfInterestStorage().getInCircle(poiType -> poiType.isIn(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.getBlockPos(), 16, PointOfInterestStorage.OccupationStatus.ANY).toList().size() > 1;
+                    BlockPos spawnPos = serverPlayer.getRespawnConfig().respawnData().pos();
+                    if(spawnPos != null) doesTraderWantToSettleDown = (spawnPos.closerThan(this.blockPosition(), 32)) && !serverWorld.getPoiManager().getInRange(poiType -> poiType.is(PoiTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.blockPosition(), 24, PoiManager.Occupancy.ANY).toList().isEmpty();
+                    else doesTraderWantToSettleDown = serverWorld.getPoiManager().getInRange(poiType -> poiType.is(PoiTypeTags.ACQUIRABLE_JOB_SITE), serverPlayer.blockPosition(), 16, PoiManager.Occupancy.ANY).toList().size() > 1;
                 }
 
                 if (doesTraderWantToSettleDown) {
-                    VillagerEntity villagerEntity = this.convertTo(EntityType.VILLAGER, EntityConversionContext.create(this, true, true), stray -> {});
+                    Villager villagerEntity = this.convertTo(EntityTypes.VILLAGER, ConversionParams.single(this, true, true), stray -> {});
 
                     int randomProfessionIndex = this.random.nextInt(10);
-                    RegistryKey<VillagerProfession> profession = (randomProfessionIndex < 6) ? VillagerProfession.NONE : (randomProfessionIndex < 8) ? VillagerProfession.CARTOGRAPHER : (randomProfessionIndex < 9) ? VillagerProfession.FISHERMAN : VillagerProfession.FARMER;
+                    ResourceKey<VillagerProfession> profession = (randomProfessionIndex < 6) ? VillagerProfession.NONE : (randomProfessionIndex < 8) ? VillagerProfession.CARTOGRAPHER : (randomProfessionIndex < 9) ? VillagerProfession.FISHERMAN : VillagerProfession.FARMER;
 
                     int randomBiomeIndex = this.random.nextInt(10);
-                    RegistryEntry<Biome> currentBiome = serverWorld.getBiome(this.getBlockPos());
+                    Holder<Biome> currentBiome = serverWorld.getBiome(this.blockPosition());
 
-                    float currentBiomeTemperature = currentBiome.value().getTemperature();
-                    RegistryKey<VillagerType> exoticVillagerType = currentBiome.isIn(BiomeTags.SPAWNS_WARM_VARIANT_FROGS) ? (randomBiomeIndex < 6 ? VillagerType.JUNGLE : VillagerType.SAVANNA) : currentBiomeTemperature > 0.7f ? (randomBiomeIndex < 6 ? VillagerType.JUNGLE : VillagerType.DESERT) : currentBiomeTemperature > 0.4f ? (randomBiomeIndex < 6 ? VillagerType.SWAMP : VillagerType.PLAINS) : VillagerType.TAIGA;
-                    RegistryKey<VillagerType> villagerType = this.random.nextInt(10) < 4 ? VillagerType.forBiome(currentBiome) : exoticVillagerType;
+                    float currentBiomeTemperature = currentBiome.value().getBaseTemperature();
+                    ResourceKey<VillagerType> exoticVillagerType = currentBiome.is(BiomeTags.SPAWNS_WARM_VARIANT_FROGS) ? (randomBiomeIndex < 6 ? VillagerType.JUNGLE : VillagerType.SAVANNA) : currentBiomeTemperature > 0.7f ? (randomBiomeIndex < 6 ? VillagerType.JUNGLE : VillagerType.DESERT) : currentBiomeTemperature > 0.4f ? (randomBiomeIndex < 6 ? VillagerType.SWAMP : VillagerType.PLAINS) : VillagerType.TAIGA;
+                    ResourceKey<VillagerType> villagerType = this.random.nextInt(10) < 4 ? VillagerType.byBiome(currentBiome) : exoticVillagerType;
 
-                    RegistryEntry<VillagerType> typeEntry = Registries.VILLAGER_TYPE.getEntry(Registries.VILLAGER_TYPE.get(villagerType));
-                    RegistryEntry<VillagerProfession> jobEntry = Registries.VILLAGER_PROFESSION.getEntry(Registries.VILLAGER_PROFESSION.get(profession));
+                    Holder<VillagerType> typeEntry = BuiltInRegistries.VILLAGER_TYPE.wrapAsHolder(BuiltInRegistries.VILLAGER_TYPE.getValue(villagerType));
+                    Holder<VillagerProfession> jobEntry = BuiltInRegistries.VILLAGER_PROFESSION.wrapAsHolder(BuiltInRegistries.VILLAGER_PROFESSION.getValue(profession));
 
                     villagerEntity.setVillagerData(new VillagerData(typeEntry, jobEntry, 0));
-                    villagerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 120));
+                    villagerEntity.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 120));
                 }
             }
         }

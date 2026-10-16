@@ -1,12 +1,6 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_the_recipe": {
-      "trigger": "minecraft:recipe_unlocked",
-      "conditions": {
-        "recipe": "players-versus:building_blocks/brown_mud"
-      }
-    },
     "has_mud": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
@@ -23,16 +17,11 @@
   },
   "requirements": [
     [
-      "has_the_recipe",
       "has_mud"
     ],
     [
       "has_used_a_bucket"
     ]
   ],
-  "rewards": {
-    "recipes": [
-      "players-versus:building_blocks/brown_mud"
-    ]
-  }
+  "rewards": {}
 }

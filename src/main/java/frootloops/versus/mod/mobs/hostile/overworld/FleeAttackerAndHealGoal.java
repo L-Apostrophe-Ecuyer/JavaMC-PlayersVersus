@@ -1,26 +1,24 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.NoPenaltyTargeting;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.pathing.EntityNavigation;
-import net.minecraft.entity.ai.pathing.Path;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.mob.WitchEntity;
-import net.minecraft.entity.raid.RaiderEntity;
-import net.minecraft.item.PotionItem;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.monster.Witch;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 
 public class FleeAttackerAndHealGoal<T extends LivingEntity> extends Goal {
-    protected final PathAwareEntity mob;
+    protected final PathfinderMob mob;
     private final double speed;
     @Nullable
     protected Path fleePath;
-    protected final EntityNavigation fleeingEntityNavigation;
+    protected final PathNavigation fleeingEntityNavigation;
     @Nullable
     protected LivingEntity targetEntity;
 
@@ -29,46 +27,46 @@ public class FleeAttackerAndHealGoal<T extends LivingEntity> extends Goal {
     private boolean isDrinkingPotion = false;
     private boolean canDrinkPotion = false;
 
-    public FleeAttackerAndHealGoal(PathAwareEntity mob, double speed) {
+    public FleeAttackerAndHealGoal(PathfinderMob mob, double speed) {
         this.mob = mob;
         this.speed = speed;
         this.fleeingEntityNavigation = mob.getNavigation();
-        this.setControls(EnumSet.of(Goal.Control.MOVE));
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
 
     @Override
-    public boolean canStart() {
+    public boolean canUse() {
         if (mob.hurtTime == 0) return false;
         if (mob.getHealth()/mob.getMaxHealth() > 0.5f) return false;
-        if (mob.getRecentDamageSource() == null) return false;
+        if (mob.getLastDamageSource() == null) return false;
 
-        targetEntity = (LivingEntity) mob.getRecentDamageSource().getAttacker();
+        targetEntity = (LivingEntity) mob.getLastDamageSource().getEntity();
         if (targetEntity == null || !(targetEntity instanceof LivingEntity)) return false;
 
-        Vec3d vec3d = NoPenaltyTargeting.findFrom(mob, 16, 7, targetEntity.getEntityPos());
+        Vec3 vec3d = DefaultRandomPos.getPosAway(mob, 16, 7, targetEntity.position());
         if (vec3d == null) return false;
-        if (targetEntity.squaredDistanceTo(vec3d.x, vec3d.y, vec3d.z) < targetEntity.squaredDistanceTo(this.mob)) {
+        if (targetEntity.distanceToSqr(vec3d.x, vec3d.y, vec3d.z) < targetEntity.distanceToSqr(this.mob)) {
             return false;
         }
-        fleePath = fleeingEntityNavigation.findPathTo(vec3d.x, vec3d.y, vec3d.z, 0);
+        fleePath = fleeingEntityNavigation.createPath(vec3d.x, vec3d.y, vec3d.z, 0);
         return fleePath != null;
     }
 
     @Override
     public void start() {
-        canDrinkPotion = (mob instanceof WitchEntity || mob.getOffHandStack().getItem() instanceof PotionItem);
-        mob.getNavigation().setSpeed(speed);
-        fleeingEntityNavigation.startMovingAlong(fleePath, speed);
+        canDrinkPotion = (mob instanceof Witch || mob.getOffhandItem().getItem() instanceof PotionItem);
+        mob.getNavigation().setSpeedModifier(speed);
+        fleeingEntityNavigation.moveTo(fleePath, speed);
     }
 
     @Override
-    public boolean shouldContinue() {
-        if(fleeingEntityNavigation.isIdle() || targetEntity.squaredDistanceTo(this.mob) > 64.0) {
+    public boolean canContinueToUse() {
+        if(fleeingEntityNavigation.isDone() || targetEntity.distanceToSqr(this.mob) > 64.0) {
             if (!isDrinkingPotion && canDrinkPotion) {
                 isDrinkingPotion = true;
                 drinkTimeLeft = 32;
-                if (!mob.isSilent()) mob.getEntityWorld().playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENTITY_WITCH_DRINK, mob.getSoundCategory(), 1.0f, 1.0f);
+                if (!mob.isSilent()) mob.level().playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WITCH_DRINK, mob.getSoundSource(), 1.0f, 1.0f);
             }
             else if (isDrinkingPotion && --this.drinkTimeLeft <= 0) {
                 isDrinkingPotion = false;

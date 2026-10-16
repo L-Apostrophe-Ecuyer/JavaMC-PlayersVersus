@@ -1,69 +1,68 @@
 package frootloops.versus.mod.enchantments;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.world.World;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.Level;
 
 
 public abstract class EnchantRegistryHelper {
 
-    private static RegistryEntryLookup enchRegistryLookup = null;
+    private static HolderGetter enchRegistryLookup = null;
 
-    public static RegistryEntry<Enchantment> getRegistryEntry(World world, RegistryKey<Enchantment> enchantment) {
-        if(enchRegistryLookup == null) enchRegistryLookup = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+    public static Holder<Enchantment> getRegistryEntry(Level world, ResourceKey<Enchantment> enchantment) {
+        if(enchRegistryLookup == null) enchRegistryLookup = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
-        Optional<RegistryEntry.Reference<Enchantment>> enchantmentEntry = enchRegistryLookup.getOptional(enchantment);
+        Optional<Holder.Reference<Enchantment>> enchantmentEntry = enchRegistryLookup.get(enchantment);
         if(enchantmentEntry.isPresent()) return enchantmentEntry.get();
         else {
-            enchRegistryLookup = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+            enchRegistryLookup = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
             return enchRegistryLookup.getOrThrow(enchantment);
         }
     }
 
-    public static int getLevel(World world, ItemStack stack, RegistryKey<Enchantment> enchantment) {
-        if(!stack.hasEnchantments()) return 0;
-        return EnchantmentHelper.getLevel(getRegistryEntry(world, enchantment), stack);
+    public static int getLevel(Level world, ItemStack stack, ResourceKey<Enchantment> enchantment) {
+        if(!stack.isEnchanted()) return 0;
+        return EnchantmentHelper.getItemEnchantmentLevel(getRegistryEntry(world, enchantment), stack);
     }
 
-    public static int getLevel(ItemStack stack, RegistryEntry<Enchantment> enchantmentRegistryEntry) {
-        ItemEnchantmentsComponent itemEnchantmentsComponent = stack.get(DataComponentTypes.ENCHANTMENTS);
+    public static int getLevel(ItemStack stack, Holder<Enchantment> enchantmentRegistryEntry) {
+        ItemEnchantments itemEnchantmentsComponent = stack.get(DataComponents.ENCHANTMENTS);
         if(itemEnchantmentsComponent == null || itemEnchantmentsComponent.isEmpty()) return 0;
         return itemEnchantmentsComponent.getLevel(enchantmentRegistryEntry);
     }
 
-    public static boolean hasEnchantment(ItemStack stack, RegistryKey<Enchantment> enchantment) {
-        if(!stack.hasEnchantments()) return false;
-        Iterator<RegistryEntry<Enchantment>> iterator = stack.getEnchantments().getEnchantments().iterator();
+    public static boolean hasEnchantment(ItemStack stack, ResourceKey<Enchantment> enchantment) {
+        if(!stack.isEnchanted()) return false;
+        Iterator<Holder<Enchantment>> iterator = stack.getEnchantments().keySet().iterator();
         while (iterator.hasNext()) {
-            RegistryEntry<Enchantment> enchant = iterator.next();
-            if (enchant.getKey().get() == enchantment) return true;
+            Holder<Enchantment> enchant = iterator.next();
+            if (enchant.unwrapKey().get() == enchantment) return true;
         }
         return false;
     }
 
-    public static int getEquipmentLevel(World world, LivingEntity user, RegistryKey<Enchantment> enchantment) {
-        return EnchantmentHelper.getEquipmentLevel(getRegistryEntry(world, enchantment), user);
+    public static int getEquipmentLevel(Level world, LivingEntity user, ResourceKey<Enchantment> enchantment) {
+        return EnchantmentHelper.getEnchantmentLevel(getRegistryEntry(world, enchantment), user);
     }
 
-    public static EnchantmentLevelEntry getMostImportantEnchant(List<EnchantmentLevelEntry> list) {
+    public static EnchantmentInstance getMostImportantEnchant(List<EnchantmentInstance> list) {
         if(list == null || list.size() < 1) return null;
         if(list.size() == 1) return list.getFirst();
-        EnchantmentLevelEntry maxEnchant = null;
+        EnchantmentInstance maxEnchant = null;
         int maxPower = Integer.MIN_VALUE;
-        for(EnchantmentLevelEntry e : list) {
+        for(EnchantmentInstance e : list) {
             int power = getValueOfEnchantment(e);
             if(power > maxPower) {
                 maxEnchant = e;
@@ -72,10 +71,10 @@ public abstract class EnchantRegistryHelper {
         }
         return maxEnchant;
     }
-    public static int getValueOfEnchantment(EnchantmentLevelEntry e) {
+    public static int getValueOfEnchantment(EnchantmentInstance e) {
         Enchantment enchant = e.enchantment().value();
         int exclusiveEnchantBonus = enchant.exclusiveSet().size() * 8;
-        int avgPower = (enchant.getMinPower(e.level()) + enchant.getMaxPower(e.level()))/2;
+        int avgPower = (enchant.getMinCost(e.level()) + enchant.getMaxCost(e.level()))/2;
         int anvilCost = enchant.getAnvilCost();
         return avgPower + anvilCost + exclusiveEnchantBonus;
     }

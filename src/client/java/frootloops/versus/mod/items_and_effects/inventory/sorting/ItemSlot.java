@@ -1,10 +1,10 @@
 package frootloops.versus.mod.items_and_effects.inventory.sorting;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
@@ -41,8 +41,8 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
     public boolean isSameItem(ItemSlot other) {
         if(other == null) return false;
-        if(other.stack.getMaxCount() == 1) return other.stack.getItem() == this.stack.getItem();
-        return ItemStack.areItemsAndComponentsEqual(this.stack, other.stack);
+        if(other.stack.getMaxStackSize() == 1) return other.stack.getItem() == this.stack.getItem();
+        return ItemStack.isSameItemSameComponents(this.stack, other.stack);
     }
 
     public boolean hasSameType(ItemSlot other, boolean compareBlockTypes) {
@@ -56,11 +56,11 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
         if(this.isSameItem(other)) return true;
         if(this.hasSameType(other, true)) {
             if(this.isBlock()) {
-                BlockState thisState = ((BlockItem)this.stack.getItem()).getBlock().getDefaultState();
-                BlockState otherState = ((BlockItem)other.stack.getItem()).getBlock().getDefaultState();
-                if(thisState.getSoundGroup() == otherState.getSoundGroup()) {
+                BlockState thisState = ((BlockItem)this.stack.getItem()).getBlock().defaultBlockState();
+                BlockState otherState = ((BlockItem)other.stack.getItem()).getBlock().defaultBlockState();
+                if(thisState.getSoundType() == otherState.getSoundType()) {
                     if(strict) return true;
-                    else return thisState.getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color == otherState.getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color;
+                    else return thisState.getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col == otherState.getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col;
                 }
             }
             else return true;
@@ -106,6 +106,6 @@ public record ItemSlot(int slodId, ItemStack stack, ItemType itemType) {
 
     @Override
     public String toString() {
-        return this.stack.getName().getString() + (this.stack.getCount() != stack.getMaxCount() ? "(" + stack.getCount() + ")" : "");
+        return this.stack.getHoverName().getString() + (this.stack.getCount() != stack.getMaxStackSize() ? "(" + stack.getCount() + ")" : "");
     }
 }

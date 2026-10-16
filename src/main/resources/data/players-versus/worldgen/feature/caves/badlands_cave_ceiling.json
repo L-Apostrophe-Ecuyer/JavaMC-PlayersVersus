@@ -1,0 +1,78 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "surface": "ceiling",
+  "depth": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 2,
+    "max_inclusive": 6
+  },
+  "vertical_range": 5,
+  "extra_bottom_block_chance": 0,
+  "extra_edge_column_chance": 0.3,
+  "vegetation_chance": 0.001,
+  "xz_radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 4,
+    "max_inclusive": 7
+  },
+  "replaceable": "#minecraft:moss_replaceable",
+  "ground_state": {
+    "type": "minecraft:noise_threshold",
+    "default_state": {
+      "id": "minecraft:gray_terracotta"
+    },
+    "high_chance": 0.5,
+    "high_states": [
+      {
+        "id": "minecraft:terracotta"
+      },
+      {
+        "id": "minecraft:light_gray_terracotta"
+      },
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:stone"
+      }
+    ],
+    "low_states": [
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:light_gray_terracotta"
+      },
+      {
+        "id": "minecraft:terracotta"
+      }
+    ],
+    "noise": {
+      "base_amplitude": 1,
+      "base_octave": -4
+    },
+    "scale": 1,
+    "seed": 0,
+    "threshold": 0
+  },
+  "vegetation_feature": {
+    "feature": "players-versus:caves/badlands_cave_ceiling_vegetation",
+    "placement": [
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:matching_blocks",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "blocks": "#minecraft:air"
+        }
+      }
+    ]
+  }
+}

@@ -30,15 +30,15 @@
           }
         },
         "requirements": {
-          "condition": "minecraft:damage_source_properties",
           "predicate": {
             "tags": [
               {
-                "id": "players-versus:is_protected_by_magic_enchant",
+                "id": "#players-versus:is_protected_by_magic_enchant",
                 "expected": true
               }
             ]
-          }
+          },
+          "type": "minecraft:damage_source_properties"
         }
       }
     ]

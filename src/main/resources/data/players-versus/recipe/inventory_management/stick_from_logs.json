@@ -1,13 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "sticks",
-  "category": "misc",
   "pattern": [
     "#",
     "#"
   ],
   "key": {
-    "#" : "#minecraft:logs"
+    "#": "#minecraft:logs"
   },
   "result": {
     "id": "minecraft:stick",

@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:waterlogged_vegetation_patch",
+  "surface": "floor",
+  "depth": 3,
+  "vertical_range": 5,
+  "extra_bottom_block_chance": 0.8,
+  "extra_edge_column_chance": 0.7,
+  "vegetation_chance": 0.08,
+  "xz_radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 3,
+    "max_inclusive": 6
+  },
+  "replaceable": "#minecraft:moss_replaceable",
+  "ground_state": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": {
+          "id": "players-versus:brown_clay"
+        },
+        "weight": 2
+      },
+      {
+        "data": {
+          "id": "players-versus:brown_mud"
+        },
+        "weight": 2
+      },
+      {
+        "data": {
+          "id": "minecraft:grass_block",
+          "properties": {
+            "snowy": "false"
+          }
+        },
+        "weight": 3
+      }
+    ]
+  },
+  "vegetation_feature": {
+    "feature": "players-versus:swamp_bush",
+    "placement": []
+  }
+}

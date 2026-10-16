@@ -1,0 +1,97 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "chance": 0.8,
+      "feature": {
+        "feature": {
+          "type": "minecraft:simple_block",
+          "to_place": {
+            "type": "minecraft:weighted",
+            "entries": [
+              {
+                "data": {
+                  "id": "minecraft:short_grass"
+                },
+                "weight": 16
+              },
+              {
+                "data": {
+                  "id": "players-versus:wheat_grass"
+                },
+                "weight": 14
+              },
+              {
+                "data": {
+                  "id": "players-versus:wild_wheat"
+                },
+                "weight": 3
+              },
+              {
+                "data": {
+                  "id": "minecraft:dandelion"
+                },
+                "weight": 4
+              }
+            ]
+          }
+        },
+        "placement": [
+          {
+            "type": "minecraft:block_predicate_filter",
+            "predicate": {
+              "type": "minecraft:matching_blocks",
+              "blocks": "minecraft:air"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "default": {
+    "feature": {
+      "type": "minecraft:simple_block",
+      "to_place": {
+        "type": "minecraft:weighted",
+        "entries": [
+          {
+            "data": {
+              "id": "minecraft:short_dry_grass"
+            },
+            "weight": 3
+          },
+          {
+            "data": {
+              "id": "minecraft:tall_dry_grass"
+            },
+            "weight": 2
+          }
+        ]
+      },
+      "schedule_tick": false
+    },
+    "placement": [
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:all_of",
+          "predicates": [
+            {
+              "type": "minecraft:matching_blocks",
+              "blocks": "minecraft:air"
+            },
+            {
+              "type": "minecraft:matching_block_tag",
+              "offset": [
+                0,
+                -1,
+                0
+              ],
+              "tag": "minecraft:dry_vegetation_may_place_on"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

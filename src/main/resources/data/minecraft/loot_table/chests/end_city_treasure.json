@@ -7,40 +7,34 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:end_rod",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 8
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 8
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:popped_chorus_fruit",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 3
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "players-versus:concentrate_of_levitation",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 6
-            }
-          ]
+          "modifier": {
+            "count": 6,
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
@@ -53,32 +47,26 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:pearlescent_froglight",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 12
-            }
-          ]
+          "modifier": {
+            "count": 12,
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "players-versus:levitation"
-            }
-          ]
+          "modifier": {
+            "id": "players-versus:levitation",
+            "type": "minecraft:set_potion"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "players-versus:levitation_strong"
-            }
-          ]
+          "modifier": {
+            "id": "players-versus:levitation_strong",
+            "type": "minecraft:set_potion"
+          }
         }
       ]
     },
@@ -88,161 +76,141 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond",
-          "functions": [
-            {
-              "add": false,
-              "count": {
-                "type": "minecraft:uniform",
-                "max": 1,
-                "min": 3
-              },
-              "function": "minecraft:set_count"
-            }
-          ],
-          "weight": 5
+          "weight": 5,
+          "modifier": {
+            "add": false,
+            "count": {
+              "type": "minecraft:uniform",
+              "max": 1,
+              "min": 3
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:experience_bottle",
           "weight": 10,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 8
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 8
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "add": false,
-              "count": {
-                "type": "minecraft:uniform",
-                "max": 12,
-                "min": 3
-              },
-              "function": "minecraft:set_count"
-            }
-          ],
           "name": "minecraft:emerald",
-          "weight": 3
+          "weight": 3,
+          "modifier": {
+            "add": false,
+            "count": {
+              "type": "minecraft:uniform",
+              "max": 12,
+              "min": 3
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:enchant_with_levels",
-              "levels": {
-                "type": "minecraft:uniform",
-                "max": 39,
-                "min": 20
-              },
-              "options": "#minecraft:on_random_loot"
-            }
-          ],
           "name": "minecraft:diamond_sword",
-          "weight": 1
+          "weight": 1,
+          "modifier": {
+            "levels": {
+              "type": "minecraft:uniform",
+              "max": 39,
+              "min": 20
+            },
+            "options": "#minecraft:on_random_loot",
+            "type": "minecraft:enchant_with_levels"
+          }
         },
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:enchant_with_levels",
-              "levels": {
-                "type": "minecraft:uniform",
-                "max": 39,
-                "min": 20
-              },
-              "options": "#minecraft:on_random_loot"
-            }
-          ],
           "name": "minecraft:diamond_boots",
-          "weight": 1
+          "weight": 1,
+          "modifier": {
+            "levels": {
+              "type": "minecraft:uniform",
+              "max": 39,
+              "min": 20
+            },
+            "options": "#minecraft:on_random_loot",
+            "type": "minecraft:enchant_with_levels"
+          }
         },
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:enchant_with_levels",
-              "levels": {
-                "type": "minecraft:uniform",
-                "max": 39,
-                "min": 20
-              },
-              "options": "#minecraft:on_random_loot"
-            }
-          ],
           "name": "minecraft:diamond_chestplate",
-          "weight": 1
+          "weight": 1,
+          "modifier": {
+            "levels": {
+              "type": "minecraft:uniform",
+              "max": 39,
+              "min": 20
+            },
+            "options": "#minecraft:on_random_loot",
+            "type": "minecraft:enchant_with_levels"
+          }
         },
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:enchant_with_levels",
-              "levels": {
-                "type": "minecraft:uniform",
-                "max": 39,
-                "min": 20
-              },
-              "options": "#minecraft:on_random_loot"
-            }
-          ],
           "name": "minecraft:diamond_leggings",
-          "weight": 1
+          "weight": 1,
+          "modifier": {
+            "levels": {
+              "type": "minecraft:uniform",
+              "max": 39,
+              "min": 20
+            },
+            "options": "#minecraft:on_random_loot",
+            "type": "minecraft:enchant_with_levels"
+          }
         },
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:enchant_with_levels",
-              "levels": {
-                "type": "minecraft:uniform",
-                "max": 39,
-                "min": 20
-              },
-              "options": "#minecraft:on_random_loot"
-            }
-          ],
           "name": "minecraft:diamond_helmet",
-          "weight": 1
+          "weight": 1,
+          "modifier": {
+            "levels": {
+              "type": "minecraft:uniform",
+              "max": 39,
+              "min": 20
+            },
+            "options": "#minecraft:on_random_loot",
+            "type": "minecraft:enchant_with_levels"
+          }
         },
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:enchant_with_levels",
-              "levels": {
-                "type": "minecraft:uniform",
-                "max": 50,
-                "min": 20
-              },
-              "options": "#minecraft:on_random_loot"
-            }
-          ],
           "name": "minecraft:diamond_pickaxe",
-          "weight": 2
+          "weight": 2,
+          "modifier": {
+            "levels": {
+              "type": "minecraft:uniform",
+              "max": 50,
+              "min": 20
+            },
+            "options": "#minecraft:on_random_loot",
+            "type": "minecraft:enchant_with_levels"
+          }
         },
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:enchant_with_levels",
-              "levels": {
-                "type": "minecraft:uniform",
-                "max": 39,
-                "min": 20
-              },
-              "options": "#minecraft:on_random_loot"
-            }
-          ],
           "name": "minecraft:diamond_shovel",
-          "weight": 1
+          "weight": 1,
+          "modifier": {
+            "levels": {
+              "type": "minecraft:uniform",
+              "max": 39,
+              "min": 20
+            },
+            "options": "#minecraft:on_random_loot",
+            "type": "minecraft:enchant_with_levels"
+          }
         }
       ],
       "rolls": {

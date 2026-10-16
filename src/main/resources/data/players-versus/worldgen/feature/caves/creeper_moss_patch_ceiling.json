@@ -1,0 +1,77 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "surface": "ceiling",
+  "depth": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 2,
+    "max_inclusive": 5
+  },
+  "vertical_range": 5,
+  "extra_bottom_block_chance": 0,
+  "extra_edge_column_chance": 0.3,
+  "vegetation_chance": 0.1,
+  "xz_radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 4,
+    "max_inclusive": 7
+  },
+  "replaceable": "#minecraft:moss_replaceable",
+  "ground_state": {
+    "type": "minecraft:noise_threshold",
+    "default_state": {
+      "id": "minecraft:moss_block"
+    },
+    "high_chance": 0.46153846153846156,
+    "high_states": [
+      {
+        "id": "minecraft:moss_block"
+      },
+      {
+        "id": "minecraft:pale_moss_block"
+      },
+      {
+        "id": "minecraft:pale_moss_block"
+      },
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:stone"
+      }
+    ],
+    "low_states": [
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:andesite"
+      },
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:pale_moss_block"
+      },
+      {
+        "id": "minecraft:moss_block"
+      },
+      {
+        "id": "minecraft:lime_terracotta"
+      }
+    ],
+    "noise": {
+      "base_amplitude": 1,
+      "base_octave": -4
+    },
+    "scale": 1,
+    "seed": 0,
+    "threshold": 0
+  },
+  "vegetation_feature": "players-versus:caves/creeper_caves_ceiling_vegetation"
+}

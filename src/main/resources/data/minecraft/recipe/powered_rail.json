@@ -1,10 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
-    "#" : "minecraft:stick",
-    "R" : "minecraft:redstone",
-    "X" : "minecraft:gold_nugget"
+    "#": "minecraft:stick",
+    "R": "minecraft:redstone",
+    "X": "minecraft:gold_nugget"
   },
   "pattern": [
     "X X",

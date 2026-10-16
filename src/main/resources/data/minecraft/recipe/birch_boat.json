@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "group": "birch_misc",
   "key": {
     "#": "minecraft:birch_planks"

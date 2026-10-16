@@ -33,19 +33,17 @@
     },
     {
       "bonus_rolls": 0,
-      "conditions": [
-        {
-          "chance": 0.05,
-          "condition": "minecraft:random_chance"
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:loot_table",
           "value": "minecraft:chests/trial_chambers/reward_unique"
         }
       ],
-      "rolls": 1
+      "rolls": 1,
+      "condition": {
+        "chance": 0.05,
+        "type": "minecraft:random_chance"
+      }
     }
   ],
   "random_sequence": "minecraft:chests/trial_chambers/reward"

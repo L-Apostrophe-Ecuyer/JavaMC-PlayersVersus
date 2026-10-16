@@ -1,14 +1,11 @@
 {
-    "type": "minecraft:smelting",
-    "category": "food",
-  
-    "ingredient": [
-      "minecraft:breeze_rod"
-    ],
-    "result": {
-      "id": "players-versus:concentrate_of_wind"
-    },
-    "experience": 5,
-    "cookingtime": 200
-  }
-  
+  "type": "minecraft:smelting",
+  "ingredient": [
+    "minecraft:breeze_rod"
+  ],
+  "result": {
+    "id": "players-versus:concentrate_of_wind"
+  },
+  "experience": 5,
+  "cookingtime": 200
+}

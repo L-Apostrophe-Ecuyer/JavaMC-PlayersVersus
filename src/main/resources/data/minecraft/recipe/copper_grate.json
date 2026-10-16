@@ -1,7 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "copper_grates",
-  "category": "building",
   "key": {
     "M": "minecraft:copper_block"
   },

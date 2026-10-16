@@ -1,15 +1,14 @@
 package frootloops.versus.mixin.enchantments;
 
-import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownExperienceBottle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-@Mixin(ExperienceBottleEntity.class)
+@Mixin(ThrownExperienceBottle.class)
 public class EnchantmentBottleMixin {
 
-    @ModifyVariable(method = "onCollision", ordinal = 0, at = @At("STORE"))
+    @ModifyVariable(method = "onHit", ordinal = 0, at = @At("STORE"))
     private int moreExperiencePerBottle(int amount) {
         return amount * 4;
     }

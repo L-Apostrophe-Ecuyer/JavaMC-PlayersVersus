@@ -1,0 +1,51 @@
+{
+  "type": "minecraft:range_choice",
+  "input": "minecraft:y",
+  "min_inclusive": 31.5,
+  "max_exclusive": 96.5,
+  "when_in_range": {
+    "type": "minecraft:range_choice",
+    "input": "players-versus:overworld/ore_vein/mask",
+    "min_inclusive": 1.4e-45,
+    "max_exclusive": 1000000.0,
+    "when_in_range": {
+      "type": "minecraft:range_choice",
+      "input": {
+        "type": "minecraft:add",
+        "left": "players-versus:overworld/ore_vein/toggle",
+        "right": {
+          "type": "minecraft:add",
+          "left": {
+            "type": "minecraft:mul",
+            "left": {
+              "type": "minecraft:clamp",
+              "input": {
+                "type": "minecraft:min",
+                "left": {
+                  "type": "minecraft:sub",
+                  "left": 96.0,
+                  "right": "minecraft:y"
+                },
+                "right": {
+                  "type": "minecraft:sub",
+                  "left": "minecraft:y",
+                  "right": 32.0
+                }
+              },
+              "min": 0.0,
+              "max": 20.0
+            },
+            "right": 0.01
+          },
+          "right": -0.2
+        }
+      },
+      "min_inclusive": 0.3,
+      "max_exclusive": 1000000.0,
+      "when_in_range": 0.85,
+      "when_out_of_range": -1.0
+    },
+    "when_out_of_range": -1.0
+  },
+  "when_out_of_range": -1.0
+}

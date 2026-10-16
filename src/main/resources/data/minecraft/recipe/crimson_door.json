@@ -1,12 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "redstone",
   "group": "crimson_misc",
   "key": {
     "#": "minecraft:crimson_planks"
   },
   "pattern": [
-    "##", "##", "##"
+    "##",
+    "##",
+    "##"
   ],
   "result": {
     "count": 2,

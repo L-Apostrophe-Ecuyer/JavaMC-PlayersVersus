@@ -1,12 +1,9 @@
 {
-    "type": "minecraft:smelting",
-    "category": "food",
-  
-    "ingredient": "minecraft:warped_fungus",
-    "result": {
-      "id": "players-versus:concentrate_of_smallness"
-    },
-    "experience": 5,
-    "cookingtime": 200
+  "type": "minecraft:smelting",
+  "ingredient": "minecraft:warped_fungus",
+  "result": {
+    "id": "players-versus:concentrate_of_smallness"
+  },
+  "experience": 5,
+  "cookingtime": 200
 }
-  

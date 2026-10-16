@@ -1,15 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "crimson",
   "key": {
     "#": "minecraft:crimson_planks"
   },
   "pattern": [
-    "# ", "##"
+    "# ",
+    "##"
   ],
   "result": {
-    "count":  3,
+    "count": 3,
     "id": "minecraft:crimson_stairs"
   }
 }

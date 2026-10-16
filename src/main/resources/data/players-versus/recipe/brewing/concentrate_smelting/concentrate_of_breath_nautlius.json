@@ -1,8 +1,7 @@
 {
   "type": "minecraft:smelting",
-  "category": "food",
   "group": "concentrate_of_breath",
-  "ingredient":"minecraft:nautilus_shell",
+  "ingredient": "minecraft:nautilus_shell",
   "result": {
     "id": "players-versus:concentrate_of_breath"
   },

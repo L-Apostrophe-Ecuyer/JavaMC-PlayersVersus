@@ -1,8 +1,6 @@
 {
   "type": "minecraft:smelting",
-  "category": "food",
-
-  "ingredient":"minecraft:golden_carrot",
+  "ingredient": "minecraft:golden_carrot",
   "result": {
     "id": "players-versus:concentrate_of_vision"
   },

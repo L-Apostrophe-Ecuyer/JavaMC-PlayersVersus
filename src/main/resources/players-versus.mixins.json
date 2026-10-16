@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "frootloops.versus.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "mixins": [
 
     "LivingEntityMixin",
@@ -17,11 +17,9 @@
     "enchantments.EnchantmentHelperMixin",
     "enchantments.EnchantmentBottleMixin",
 
-    "environment.worldgen.AquifersMixin",
-    "environment.worldgen.OreVeinMixin",
+    "environment.worldgen.ChunkNoiseSamplerMixin",
     "environment.worldgen.WorldPresetsMixin",
     "environment.worldgen.WorldPresetServerDefaultMixin",
-    "environment.worldgen.VanillaBiomeParametersOverworldMixin",
 
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",
@@ -31,6 +29,8 @@
     "environment.sleeping.ServerSleepingMixin",
     "environment.blocks.BlockMixin",
     "environment.blocks.CropMixin",
+    "environment.blocks.CreakingHeartBlockMixin",
+    "environment.blocks.CreakingHeartBlockEntityMixin",
     "environment.blocks.SugarCaneMixin",
     "environment.blocks.LadderMixin",
     "environment.blocks.LeavesMixin",
@@ -47,10 +47,10 @@
     "environment.ServerWorldWeatherMixin",
 
     "items_and_effects.brewing.BadOmenEffectInstanceMixin",
-    "items_and_effects.brewing.BrewingRecipeRegistryMixin",
     "items_and_effects.brewing.BrewingStandScreenHandlerMixin",
     "items_and_effects.brewing.BrewingStandBlockEntityAccessor",
     "items_and_effects.brewing.BrewingStandBlockEntityMixin",
+    "items_and_effects.brewing.RecipeMapMixin",
     "items_and_effects.brewing.VanillaStatusEffectsMixin",
 
     "items_and_effects.equipment.ArmorProtectionMixin",
@@ -84,6 +84,7 @@
     "mobs.hostile.end.dragon.HoldingPatternPhaseMixin",
     "mobs.hostile.end.dragon.StrafePlayerPhaseMixin",
     "mobs.hostile.end.EndermanMixin",
+    "mobs.hostile.end.ShulkerMixin",
 
     "mobs.hostile.illager.MoveToRaidCenterGoalMixin",
     "mobs.hostile.illager.PillagerMixin",
@@ -93,6 +94,7 @@
     "mobs.hostile.illager.WitchMixin",
     "mobs.hostile.illager.RaidMixin",
 
+    "mobs.hostile.overworld.CreakingMixin",
     "mobs.hostile.overworld.CreeperMixin",
     "mobs.hostile.overworld.DrownedMixin",
     "mobs.hostile.overworld.PhantomAccessor",
@@ -111,6 +113,8 @@
 
     "mobs.hostile.MobEntityMixin",
     "mobs.hostile.MeleeAttackGoalMixin",
+    "mobs.hostile.MeleeAttackMixin",
+    "mobs.hostile.MobMeleeMixin",
     "mobs.passive.VillagerEntityMixin",
     "mobs.passive.WanderingTraderEntityMixin",
     "mobs.passive.SheepMixin",

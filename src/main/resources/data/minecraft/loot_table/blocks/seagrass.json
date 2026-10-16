@@ -10,14 +10,12 @@
           "name": "minecraft:seagrass"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:match_tool",
-          "predicate": {
-            "items": "minecraft:shears"
-          }
-        }
-      ]
+      "condition": {
+        "predicate": {
+          "items": "minecraft:shears"
+        },
+        "type": "minecraft:match_tool"
+      }
     },
     {
       "rolls": 1,
@@ -28,14 +26,12 @@
           "name": "minecraft:seagrass"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:match_tool",
-          "predicate": {
-            "items": "#minecraft:hoes"
-          }
-        }
-      ]
+      "condition": {
+        "predicate": {
+          "items": "#minecraft:hoes"
+        },
+        "type": "minecraft:match_tool"
+      }
     }
   ]
 }

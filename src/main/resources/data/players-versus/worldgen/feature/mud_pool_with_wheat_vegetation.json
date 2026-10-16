@@ -1,0 +1,112 @@
+{
+  "type": "minecraft:simple_random_selector",
+  "features": [
+    {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:weighted",
+          "entries": [
+            {
+              "data": {
+                "id": "players-versus:wheat_grass",
+                "properties": {
+                  "is_muddy": "true"
+                }
+              },
+              "weight": 32
+            },
+            {
+              "data": {
+                "id": "players-versus:wild_wheat",
+                "properties": {
+                  "is_muddy": "true"
+                }
+              },
+              "weight": 20
+            },
+            {
+              "data": {
+                "id": "minecraft:short_grass"
+              },
+              "weight": 12
+            },
+            {
+              "data": {
+                "id": "minecraft:wheat",
+                "properties": {
+                  "age": "5"
+                }
+              },
+              "weight": 4
+            },
+            {
+              "data": {
+                "id": "minecraft:wheat",
+                "properties": {
+                  "age": "4"
+                }
+              },
+              "weight": 2
+            },
+            {
+              "data": {
+                "id": "minecraft:sugar_cane",
+                "properties": {
+                  "age": "0"
+                }
+              },
+              "weight": 32
+            }
+          ]
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:all_of",
+            "predicates": [
+              {
+                "type": "minecraft:matching_blocks",
+                "offset": [
+                  0,
+                  0,
+                  0
+                ],
+                "blocks": "#minecraft:air"
+              },
+              {
+                "type": "minecraft:matching_blocks",
+                "offset": [
+                  0,
+                  -1,
+                  0
+                ],
+                "blocks": "players-versus:brown_mud"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "feature": {
+        "type": "minecraft:spring_feature",
+        "state": {
+          "id": "minecraft:water",
+          "properties": {
+            "falling": "true"
+          }
+        },
+        "rock_count": 3,
+        "hole_count": 1,
+        "requires_block_below": true,
+        "valid_blocks": [
+          "players-versus:brown_mud"
+        ]
+      },
+      "placement": []
+    }
+  ]
+}

@@ -7,27 +7,27 @@ import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.clays.CustomMudBlock;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.brewing.effects.HauntingStatusEffect;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageSources;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
@@ -40,136 +40,143 @@ import java.util.Map;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
     @Shadow
-    private final Map<StatusEffect, StatusEffectInstance> activeStatusEffects = Maps.newHashMap();
+    private final Map<MobEffect, MobEffectInstance> activeEffects = Maps.newHashMap();
 
-    @Shadow public final boolean addStatusEffect(StatusEffectInstance effect) {return false;}
+    @Shadow public final boolean addEffect(MobEffectInstance effect) {return false;}
 
-    public LivingEntityMixin(EntityType<?> type, World world) {
+    public LivingEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
-    @ModifyVariable(method = "travelInFluid", at = @At("STORE"), ordinal = 2)
+    // 26.3 split travelInFluid into travelInWater and travelInLava; the water movement efficiency is the third float
+    // local of travelInWater, as it was of travelInFluid.
+    @ModifyVariable(method = "travelInWater", at = @At("STORE"), ordinal = 2)
     private float fasterWaterMovement(float h) {
-        return isPlayer() && isSwimming() ? h : h + 0.3f;
+        return isAlwaysTicking() && isSwimming() ? h : h + 0.3f;
     }
 
-    @Inject(method = "applyMovementInput", at = @At("RETURN"), cancellable = true)
-    private void applyMovementInput(Vec3d movementInput, float slipperiness, CallbackInfoReturnable<Vec3d> cir) {
-        if (this.getBlockStateAtPos().isOf(CustomBlocks.BROWN_MUD) && CustomMudBlock.canWalkOnWetMud(this)) {
-            Vec3d vec3d = this.getVelocity();
-            cir.setReturnValue(new Vec3d(vec3d.x, 0.2, vec3d.z));
+    @Inject(method = "handleRelativeFrictionAndCalculateMovement", at = @At("RETURN"), cancellable = true)
+    private void applyMovementInput(Vec3 movementInput, float slipperiness, CallbackInfoReturnable<Vec3> cir) {
+        if (this.getInBlockState().is(CustomBlocks.BROWN_MUD) && CustomMudBlock.canWalkOnWetMud(this)) {
+            Vec3 vec3d = this.getDeltaMovement();
+            cir.setReturnValue(new Vec3(vec3d.x, 0.2, vec3d.z));
         }
     }
 
-    @ModifyConstant(method = "travelInFluid", constant = @Constant(floatValue = 0.02f))
+    // The 0.02 of moveRelative, in water and in lava as when both were in travelInFluid.
+    @ModifyConstant(method = {"travelInWater", "travelInLava"}, constant = @Constant(floatValue = 0.02f))
     private float applyBuoyancyEffect(float thisMixinIsOnlyCalledWhenInWater) {
-        if(((LivingEntity)((Object)this)).hasStatusEffect(CustomStatusEffects.BUOYANCY)) {
-            double amplifier = this.isInSwimmingPose() ? 1.5 : this.isSneaking() ? 0.8 : 1.0 + ((LivingEntity)((Object)this)).getStatusEffect(CustomStatusEffects.BUOYANCY).getAmplifier();
-            this.setVelocity(this.getVelocity().add(0.0, this.getVelocity().getY() * 0.03 + 0.05 * amplifier, 0.0));
+        if(((LivingEntity)((Object)this)).hasEffect(CustomStatusEffects.BUOYANCY)) {
+            double amplifier = this.isVisuallySwimming() ? 1.5 : this.isShiftKeyDown() ? 0.8 : 1.0 + ((LivingEntity)((Object)this)).getEffect(CustomStatusEffects.BUOYANCY).getAmplifier();
+            this.setDeltaMovement(this.getDeltaMovement().add(0.0, this.getDeltaMovement().y() * 0.03 + 0.05 * amplifier, 0.0));
         }
         return 0.02f;
     }
 
-    @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0)
+    // The overload every knockback goes through since 26.3: the other one, without the boolean, calls it.
+    @ModifyVariable(method = "knockback(DDDLnet/minecraft/world/damagesource/DamageSource;FZ)V", at = @At("HEAD"), ordinal = 0)
     private double takeMoreKnockback(double strength) {
         return strength * 1.2;
     }
 
-    @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)
+    // 26.3: the swing's length comes from the item's SwingAnimation, which getModifiedSwingDuration adjusts
+    // (getCurrentSwingDuration before). Axes, hoes and shovels are item tags since their classes are gone.
+    @Inject(method = "getModifiedSwingDuration", at = @At("HEAD"), cancellable = true)
     private void getHandSwingDuration(CallbackInfoReturnable<Integer> cir) {
-        ItemStack mainHand = ((LivingEntity)((Object)this)).getMainHandStack();
-        if(((LivingEntity)((Object)this)) instanceof PathAwareEntity && mainHand != null){
-            if(mainHand.getItem() instanceof AxeItem) cir.setReturnValue(24);
-            else if(mainHand.getItem() instanceof HoeItem) cir.setReturnValue(10);
+        ItemStack mainHand = ((LivingEntity)((Object)this)).getMainHandItem();
+        if(((LivingEntity)((Object)this)) instanceof PathfinderMob && mainHand != null){
+            if(mainHand.is(ItemTags.AXES)) cir.setReturnValue(24);
+            else if(mainHand.is(ItemTags.HOES)) cir.setReturnValue(10);
             else cir.setReturnValue(16);
         }
     }
 
-    @Inject(method = "tryAttack", at = @At("TAIL"))
-    public void attackEnchantmentEffects(ServerWorld world, Entity target, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "doHurtTarget", at = @At("TAIL"))
+    public void attackEnchantmentEffects(ServerLevel world, Entity target, CallbackInfoReturnable<Boolean> cir) {
         if(cir.getReturnValue()) {
             LivingEntity self = ((LivingEntity) (Object) this);
-            ItemStack mainhandStack = self.getMainHandStack();
+            ItemStack mainhandStack = self.getMainHandItem();
             if (mainhandStack.isEmpty()) return;
 
             // Shovel attack and Tossing Enchantment:
-            if (!this.isSneaking() && this.isOnGround() && mainhandStack.getItem() instanceof ShovelItem) {
+            if (!this.isShiftKeyDown() && this.onGround() && mainhandStack.is(ItemTags.SHOVELS)) {
                 int tossLevel = EnchantRegistryHelper.getLevel(world, mainhandStack, CustomEnchants.TOSSING);
                 CustomEnchants.performTossAttack(world, self, target, 0.2 + 0.1 * (double)tossLevel);
             }
 
             // Other enchantments: Frost Aspect, Impaling
-            if (!mainhandStack.hasEnchantments()) return;
+            if (!mainhandStack.isEnchanted()) return;
             int frostLevel = EnchantRegistryHelper.getLevel(world, mainhandStack, CustomEnchants.FROST_ASPECT);
             if (frostLevel > 0) CustomEnchants.performFrostAttack(world, self, target, frostLevel);
 
-            if (!mainhandStack.hasEnchantments()) return;
+            if (!mainhandStack.isEnchanted()) return;
             int impaleLevel = EnchantRegistryHelper.getLevel(world, mainhandStack, Enchantments.IMPALING);
             if (impaleLevel > 0) CustomEnchants.performImpalingAttack(world, self, target, frostLevel);
         }
     }
 
 
-    @ModifyVariable(method = "damage", ordinal = 0, at = @At("HEAD"))
-    private float rebalancedDamage(float amount2, ServerWorld world, DamageSource source, float amount) {
+    @ModifyVariable(method = "hurtServer", ordinal = 0, at = @At("HEAD"))
+    private float rebalancedDamage(float amount2, ServerLevel world, DamageSource source, float amount) {
 
         // Fire resistance is only partial at level one!
-        if (source.isIn(DamageTypeTags.IS_FIRE)) {
-            StatusEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getStatusEffect(StatusEffects.FIRE_RESISTANCE);
+        if (source.is(DamageTypeTags.IS_FIRE)) {
+            MobEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getEffect(MobEffects.FIRE_RESISTANCE);
             if(fireResistanceEffect != null) return (fireResistanceEffect.getAmplifier() > 0) ? 0.0f : 0.6f;
         }
 
         // Random Drowning & Suffocation should no longer slowly kill pets:
-        else if(amount > 0f && !this.isPlayer() && (source.isOf(DamageTypes.DROWN) || source.isOf(DamageTypes.IN_WALL)) && (((LivingEntity)((Object)this)) instanceof PassiveEntity)) {
-            this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 160, 0, true, false));
+        else if(amount > 0f && !this.isAlwaysTicking() && (source.is(DamageTypes.DROWN) || source.is(DamageTypes.IN_WALL)) && (((LivingEntity)((Object)this)) instanceof AgeableMob)) {
+            this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 160, 0, true, false));
             return amount;
         }
 
         // Explosions don't hurt as much, or at least, the damage is more consistent:
-        else if (source.isIn(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
+        else if (source.is(DamageTypeTags.IS_EXPLOSION) && amount > 4.0f) {
             return (amount + amount + 16.0f) / 4.0f;
         }
         return amount;
     }
 
-    @ModifyArg(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/registry/entry/RegistryEntry;)Z"), index = 0)
-    private RegistryEntry<StatusEffect> rebalancedFireResistance(RegistryEntry<StatusEffect> effect) {
-        if(effect == StatusEffects.FIRE_RESISTANCE) {
-            StatusEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getStatusEffect(StatusEffects.FIRE_RESISTANCE);
-            if(fireResistanceEffect != null && fireResistanceEffect.getAmplifier() == 0) return StatusEffects.LUCK;
+    @ModifyArg(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hasEffect(Lnet/minecraft/core/Holder;)Z"), index = 0)
+    private Holder<MobEffect> rebalancedFireResistance(Holder<MobEffect> effect) {
+        if(effect == MobEffects.FIRE_RESISTANCE) {
+            MobEffectInstance fireResistanceEffect = ((LivingEntity)((Object)this)).getEffect(MobEffects.FIRE_RESISTANCE);
+            if(fireResistanceEffect != null && fireResistanceEffect.getAmplifier() == 0) return MobEffects.LUCK;
         }
         return effect;
     }
 
-    @Inject(method = "damage", at = @At("TAIL"))
-    private void modifyInvincibilityFrames(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if(source.getAttacker() instanceof HostileEntity || source.getAttacker() instanceof PlayerEntity) {
+    @Inject(method = "hurtServer", at = @At("TAIL"))
+    private void modifyInvincibilityFrames(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if(source.getEntity() instanceof Monster || source.getEntity() instanceof Player) {
 
             // Modify Invincibility Frames:
-            if (timeUntilRegen > 10) {
-                if (source.isOf(DamageTypes.ARROW)) {
+            int invulnerableTime = this.getInvulnerableTime();
+            if (invulnerableTime > 10) {
+                if (source.is(DamageTypes.ARROW)) {
                     // Crossbow arrows don't trigger invincibility frames, allowing for multishot shotguns:
-                    if(((LivingEntity)source.getAttacker()).getMainHandStack().isOf(Items.CROSSBOW)) timeUntilRegen = 9;
+                    if(((LivingEntity)source.getEntity()).getMainHandItem().is(Items.CROSSBOW)) this.setInvulnerableTime(9);
                     // Regular bow shots give only 4 ticks of invincibility
-                    else timeUntilRegen = 14;
+                    else this.setInvulnerableTime(14);
                 }
                 // Anything else gives 8 ticks of invincibility
-                else if (timeUntilRegen > 18 && !source.isIn(DamageTypeTags.BYPASSES_ARMOR)) timeUntilRegen = 18;
+                else if (invulnerableTime > 18 && !source.is(DamageTypeTags.BYPASSES_ARMOR)) this.setInvulnerableTime(18);
             }
 
             // Curse of Ender Enchantment:
-            if(EnchantRegistryHelper.getEquipmentLevel(this.getEntityWorld(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
-                CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), source.getAttacker());
+            if(EnchantRegistryHelper.getEquipmentLevel(this.level(), ((LivingEntity)(Object)this), CustomEnchants.CURSE_OF_ENDER) > 0) {
+                CustomEnchants.onCurseOfEnderUserDamaged(world, ((LivingEntity)(Object)this), source.getEntity());
             }
         }
-        else if (timeUntilRegen > 10 && source.isOf(DamageTypes.ARROW)) timeUntilRegen = 12;
+        else if (this.getInvulnerableTime() > 10 && source.is(DamageTypes.ARROW)) this.setInvulnerableTime(12);
     }
 
-    @Inject(method = "onStatusEffectsRemoved", at = @At("HEAD"))
-    private void onStatusEffectsRemoved(Collection<StatusEffectInstance> effects, CallbackInfo info) {
-        if(this.getEntityWorld().isClient()) return;
-        for(StatusEffectInstance statusEffectInstance : effects) {
-            if (statusEffectInstance.getEffectType() == CustomStatusEffects.HAUNTING) {
+    @Inject(method = "onEffectsRemoved", at = @At("HEAD"))
+    private void onStatusEffectsRemoved(Collection<MobEffectInstance> effects, CallbackInfo info) {
+        if(this.level().isClientSide()) return;
+        for(MobEffectInstance statusEffectInstance : effects) {
+            if (statusEffectInstance.getEffect() == CustomStatusEffects.HAUNTING) {
                 HauntingStatusEffect.removeEffect(((LivingEntity) (Object) this));
                 return;
             }

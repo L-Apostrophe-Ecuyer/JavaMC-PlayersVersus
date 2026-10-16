@@ -36,7 +36,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:mangrove_button"
+        "recipes": "minecraft:mangrove_button"
       }
     },
     "knows_what_fences_are": {
@@ -68,6 +68,3 @@
     ]
   }
 }
-
-
-

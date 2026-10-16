@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "group": "fire_charge",
   "ingredients": [
     "minecraft:blaze_rod"

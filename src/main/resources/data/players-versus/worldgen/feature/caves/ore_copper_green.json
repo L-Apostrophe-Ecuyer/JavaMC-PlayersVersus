@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:ore",
+  "size": 14,
+  "discard_chance_on_air_exposure": 0.2,
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.3,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:stone"
+      }
+    },
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.6,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:green_terracotta"
+      }
+    },
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "predicate_type": "minecraft:block_match"
+      },
+      "state": {
+        "id": "minecraft:copper_ore"
+      }
+    }
+  ]
+}

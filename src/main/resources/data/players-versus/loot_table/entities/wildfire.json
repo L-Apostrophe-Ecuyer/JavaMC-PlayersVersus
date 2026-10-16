@@ -8,33 +8,31 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:blaze_rod",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 3
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:killed_by_player"
+      }
     },
     {
       "rolls": 1,
@@ -43,33 +41,31 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:blaze_powder",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:killed_by_player"
+      }
     },
     {
       "rolls": 1,
@@ -78,33 +74,31 @@
         {
           "type": "minecraft:item",
           "name": "players-versus:living_flame",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:killed_by_player"
+      }
     }
   ],
   "random_sequence": "minecraft:entities/blaze"

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:ore",
+  "discard_chance_on_air_exposure": 0,
+  "size": 33,
+  "targets": [
+    {
+      "state": {
+        "id": "players-versus:gray_clay"
+      },
+      "target": {
+        "tag": "minecraft:base_stone_overworld",
+        "predicate_type": "minecraft:tag_match"
+      }
+    }
+  ]
+}

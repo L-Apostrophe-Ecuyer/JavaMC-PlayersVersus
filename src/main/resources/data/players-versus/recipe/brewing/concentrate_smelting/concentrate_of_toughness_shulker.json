@@ -1,9 +1,7 @@
 {
   "type": "minecraft:smelting",
   "group": "concentrate_of_toughness",
-  "category": "food",
-
-  "ingredient":"minecraft:shulker_shell",
+  "ingredient": "minecraft:shulker_shell",
   "result": {
     "id": "players-versus:concentrate_of_toughness"
   },

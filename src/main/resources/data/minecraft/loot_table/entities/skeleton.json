@@ -9,24 +9,24 @@
           "type": "minecraft:item",
           "weight": 3,
           "name": "minecraft:gold_nugget",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": -1,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         },
@@ -43,12 +43,10 @@
           "name": "minecraft:gold_ingot"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance",
-          "chance": 0.1
-        }
-      ]
+      "condition": {
+        "chance": 0.1,
+        "type": "minecraft:random_chance"
+      }
     },
     {
       "rolls": 1,
@@ -57,24 +55,24 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:bone",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 2
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         }
@@ -88,43 +86,41 @@
           "type": "minecraft:item",
           "weight": 5,
           "name": "minecraft:arrow",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 3
               },
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:enchanted_count_increase",
               "enchantment": "minecraft:looting",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
+              },
+              "type": "minecraft:enchanted_count_increase"
             }
           ]
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:entity_properties",
-          "entity": "this",
-          "predicate": {
-            "equipment": {
-              "mainhand": {
-                "items": [
-                  "minecraft:bow"
-                ]
-              }
+      "condition": {
+        "entity": "this",
+        "predicate": {
+          "equipment": {
+            "mainhand": {
+              "items": [
+                "minecraft:bow"
+              ]
             }
           }
-        }
-      ]
+        },
+        "type": "minecraft:entity_properties"
+      }
     },
     {
       "rolls": 1,
@@ -135,21 +131,24 @@
           "name": "minecraft:skeleton_skull"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        },
-        {
-          "condition": "minecraft:random_chance_with_enchanted_bonus",
-          "enchanted_chance": {
-            "type": "minecraft:linear",
-            "base": 0.035,
-            "per_level_above_first": 0.01
+      "condition": {
+        "terms": [
+          {
+            "type": "minecraft:killed_by_player"
           },
-          "enchantment": "minecraft:looting",
-          "unenchanted_chance": 0.025
-        }
-      ]
+          {
+            "enchanted_chance": {
+              "type": "minecraft:linear",
+              "base": 0.035,
+              "per_level_above_first": 0.01
+            },
+            "enchantment": "minecraft:looting",
+            "unenchanted_chance": 0.025,
+            "type": "minecraft:random_chance_with_enchanted_bonus"
+          }
+        ],
+        "type": "minecraft:all_of"
+      }
     }
   ]
 }

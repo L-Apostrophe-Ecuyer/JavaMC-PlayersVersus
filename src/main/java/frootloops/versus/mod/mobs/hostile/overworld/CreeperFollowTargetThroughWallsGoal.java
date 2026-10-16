@@ -1,12 +1,12 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 
-public class CreeperFollowTargetThroughWallsGoal<T extends LivingEntity> extends ActiveTargetGoal<T> {
-    public CreeperFollowTargetThroughWallsGoal(MobEntity mob, Class<T> targetClass, boolean checkVisibility) {
+public class CreeperFollowTargetThroughWallsGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
+    public CreeperFollowTargetThroughWallsGoal(Mob mob, Class<T> targetClass, boolean checkVisibility) {
         super(mob, targetClass, checkVisibility);
-        this.targetPredicate.ignoreVisibility();
+        this.targetConditions.ignoreLineOfSight();
     }
 }

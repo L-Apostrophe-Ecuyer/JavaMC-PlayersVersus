@@ -11,58 +11,56 @@
             {
               "type": "minecraft:item",
               "name": "players-versus:brown_mud",
-              "conditions": [
-                {
-                  "condition": "minecraft:any_of",
-                  "terms": [
-                    {
-                      "condition": "minecraft:all_of",
-                      "terms": [
-                        {
-                          "condition": "minecraft:match_tool",
-                          "predicate": {
-                            "items": "#minecraft:shovels"
-                          }
+              "condition": {
+                "terms": [
+                  {
+                    "terms": [
+                      {
+                        "predicate": {
+                          "items": "#minecraft:shovels"
                         },
-                        {
-                          "condition": "minecraft:inverted",
-                          "term": {
-                            "condition": "minecraft:match_tool",
-                            "predicate": {
-                              "items": "minecraft:wooden_shovel"
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "condition": "minecraft:match_tool",
-                      "predicate": {
-                        "predicates": {
-                          "minecraft:enchantments": [
-                            {
-                              "enchantments": "minecraft:silk_touch",
-                              "levels": 1
-                            }
-                          ]
-                        }
+                        "type": "minecraft:match_tool"
+                      },
+                      {
+                        "term": {
+                          "predicate": {
+                            "items": "minecraft:wooden_shovel"
+                          },
+                          "type": "minecraft:match_tool"
+                        },
+                        "type": "minecraft:inverted"
                       }
-                    }
-                  ]
-                }
-              ]
+                    ],
+                    "type": "minecraft:all_of"
+                  },
+                  {
+                    "predicate": {
+                      "predicates": {
+                        "minecraft:enchantments": [
+                          {
+                            "enchantments": "minecraft:silk_touch",
+                            "levels": 1
+                          }
+                        ]
+                      }
+                    },
+                    "type": "minecraft:match_tool"
+                  }
+                ],
+                "type": "minecraft:any_of"
+              }
             },
             {
               "type": "minecraft:item",
               "name": "players-versus:brown_clay_ball",
-              "functions": [
+              "modifier": [
                 {
-                  "function": "minecraft:set_count",
                   "count": 9,
-                  "add": false
+                  "add": false,
+                  "type": "minecraft:set_count"
                 },
                 {
-                  "function": "minecraft:explosion_decay"
+                  "type": "minecraft:explosion_decay"
                 }
               ]
             }

@@ -1,20 +1,5 @@
 {
-  "feature": {
-    "type": "minecraft:sculk_patch",
-    "config": {
-      "charge_count": 15,
-      "amount_per_charge": 48,
-      "spread_attempts": 48,
-      "growth_rounds": 1,
-      "spread_rounds": 1,
-      "extra_rare_growths": {
-        "type": "minecraft:uniform",
-        "min_inclusive": 0,
-        "max_inclusive": 2
-      },
-      "catalyst_chance": 0.5
-    }
-  },
+  "feature": "players-versus:caves/deep_rare_sculk_patch",
   "placement": [
     {
       "type": "minecraft:count",

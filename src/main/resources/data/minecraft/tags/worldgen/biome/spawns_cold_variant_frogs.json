@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "players-versus:birch_taiga_forest",
+    "players-versus:dappled_taiga",
+    "players-versus:sparse_dappled_forest",
     "players-versus:dark_taiga_forest",
     "players-versus:dark_birch_forest",
     "players-versus:cold_beach",

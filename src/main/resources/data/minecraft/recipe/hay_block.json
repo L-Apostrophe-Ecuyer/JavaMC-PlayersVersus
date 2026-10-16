@@ -1,12 +1,11 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "pattern": [
     "##",
     "##"
   ],
   "key": {
-    "#" : "minecraft:wheat"
+    "#": "minecraft:wheat"
   },
   "result": {
     "id": "minecraft:hay_block"

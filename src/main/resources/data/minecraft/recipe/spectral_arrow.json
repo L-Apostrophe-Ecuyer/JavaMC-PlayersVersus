@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "equipment",
   "group": "tipped_arrows",
   "pattern": [
     "AAA",
@@ -8,8 +7,8 @@
     "AAA"
   ],
   "key": {
-    "C" : "players-versus:concentrate_of_glowing",
-    "A" : "minecraft:arrow"
+    "C": "players-versus:concentrate_of_glowing",
+    "A": "minecraft:arrow"
   },
   "result": {
     "id": "minecraft:spectral_arrow",

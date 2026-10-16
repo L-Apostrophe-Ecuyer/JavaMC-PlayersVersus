@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "players-versus:birch_taiga_forest",
+    "players-versus:dappled_taiga",
+    "players-versus:sparse_dappled_forest",
     "players-versus:dark_taiga_forest",
     "players-versus:dark_birch_forest",
     "players-versus:cold_beach",
@@ -15,6 +17,7 @@
     "players-versus:caves/badlands_cave",
     "players-versus:caves/creeper_caves",
     "players-versus:caves/frosted_caves",
-    "players-versus:caves/regular_cave"
+    "players-versus:caves/regular_cave",
+    "players-versus:caves/pale_grotto"
   ]
 }

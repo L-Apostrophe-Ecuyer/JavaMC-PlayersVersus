@@ -11,61 +11,55 @@
             {
               "type": "minecraft:item",
               "name": "minecraft:snow_block",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "predicates": {
-                      "minecraft:enchantments": [
-                        {
-                          "enchantment": "minecraft:silk_touch",
-                          "levels": {
-                            "min": 1
-                          }
+              "condition": {
+                "predicate": {
+                  "predicates": {
+                    "minecraft:enchantments": [
+                      {
+                        "enchantment": "minecraft:silk_touch",
+                        "levels": {
+                          "min": 1
                         }
-                      ]
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "type": "minecraft:item",
-              "name": "minecraft:snow_block",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "items": [
-                      "players-versus:copper_shovel"
+                      }
                     ]
                   }
-                }
-              ]
+                },
+                "type": "minecraft:match_tool"
+              }
             },
             {
               "type": "minecraft:item",
               "name": "minecraft:snow_block",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "tag": "minecraft:shovels"
-                  }
-                }
-              ]
+              "condition": {
+                "predicate": {
+                  "items": [
+                    "players-versus:copper_shovel"
+                  ]
+                },
+                "type": "minecraft:match_tool"
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "minecraft:snow_block",
+              "condition": {
+                "predicate": {
+                  "tag": "minecraft:shovels"
+                },
+                "type": "minecraft:match_tool"
+              }
             },
             {
               "type": "minecraft:item",
               "name": "minecraft:snowball",
-              "functions": [
+              "modifier": [
                 {
-                  "function": "minecraft:set_count",
                   "count": 4,
-                  "add": false
+                  "add": false,
+                  "type": "minecraft:set_count"
                 },
                 {
-                  "function": "minecraft:explosion_decay"
+                  "type": "minecraft:explosion_decay"
                 }
               ]
             }

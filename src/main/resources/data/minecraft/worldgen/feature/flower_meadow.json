@@ -1,0 +1,50 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:dual_noise",
+    "seed": 2345,
+    "noise": {
+      "base_amplitude": 1,
+      "base_octave": -3
+    },
+    "scale": 1,
+    "variety": {
+      "min_inclusive": 1,
+      "max_inclusive": 1
+    },
+    "slow_noise": {
+      "base_amplitude": 1,
+      "base_octave": -10
+    },
+    "slow_scale": 1,
+    "states": [
+      {
+        "id": "minecraft:tall_grass",
+        "properties": {
+          "half": "lower"
+        }
+      },
+      {
+        "id": "players-versus:clovers"
+      },
+      {
+        "id": "minecraft:azure_bluet"
+      },
+      {
+        "id": "minecraft:dandelion"
+      },
+      {
+        "id": "minecraft:oxeye_daisy"
+      },
+      {
+        "id": "minecraft:short_grass"
+      },
+      {
+        "id": "players-versus:clovers"
+      },
+      {
+        "id": "players-versus:clovers"
+      }
+    ]
+  }
+}

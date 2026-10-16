@@ -1,39 +1,39 @@
 package frootloops.versus.mod.environment.blocks;
 
 import frootloops.versus.VersusMod;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LadderBlock;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class LadderBlockItem extends BlockItem {
-    public LadderBlockItem(LadderBlock block, Settings settings) {
+    public LadderBlockItem(LadderBlock block, Properties settings) {
         super(block, settings);
     }
 
-    private BlockPos.Mutable searchForLadderPlacement(World world, BlockPos startPos, Direction ladderFacing, boolean searchUpwardsFirst) {
+    private BlockPos.MutableBlockPos searchForLadderPlacement(Level world, BlockPos startPos, Direction ladderFacing, boolean searchUpwardsFirst) {
         for(int iter = 0; iter < 2; iter++) {
 
-            BlockPos.Mutable currentPos = startPos.mutableCopy();
+            BlockPos.MutableBlockPos currentPos = startPos.mutable();
             for(int y = 1; y < 6; y++) {
                 currentPos = currentPos.move(searchUpwardsFirst ? Direction.UP : Direction.DOWN);
-                if(!world.isInBuildLimit(currentPos)) break;
+                if(!world.isInWorldBounds(currentPos)) break;
 
                 BlockState state = world.getBlockState(currentPos);
-                if(state.isOf(this.getBlock())) {
-                    if(state.get(LadderBlock.FACING) == ladderFacing) continue;
+                if(state.is(this.getBlock())) {
+                    if(state.getValue(LadderBlock.FACING) == ladderFacing) continue;
                     else break;
                 }
                 else {
-                    if(state.isReplaceable()) {
+                    if(state.canBeReplaced()) {
                         if(!searchUpwardsFirst) return currentPos; // If we were looking downwards, that guarantees the ladder will have support
-                        BlockPos supportingBlockPos = currentPos.offset(ladderFacing.getOpposite()); // Otherwise, only accept pos if solid block behind it
+                        BlockPos supportingBlockPos = currentPos.relative(ladderFacing.getOpposite()); // Otherwise, only accept pos if solid block behind it
                         BlockState supportingBlock = world.getBlockState(supportingBlockPos);
-                        if(supportingBlock.isSideSolidFullSquare(world, currentPos.offset(ladderFacing), ladderFacing.getOpposite())) return currentPos;
+                        if(supportingBlock.isFaceSturdy(world, currentPos.relative(ladderFacing), ladderFacing.getOpposite())) return currentPos;
                         else break;
                     }
                     else break;
@@ -46,16 +46,16 @@ public class LadderBlockItem extends BlockItem {
 
     @Nullable
     @Override
-    public ItemPlacementContext getPlacementContext(ItemPlacementContext context) {
-        World world = context.getWorld();
-        BlockPos blockPos = context.getBlockPos().offset(context.getSide().getOpposite());
+    public BlockPlaceContext updatePlacementContext(BlockPlaceContext context) {
+        Level world = context.getLevel();
+        BlockPos blockPos = context.getClickedPos().relative(context.getClickedFace().getOpposite());
         BlockState blockState = world.getBlockState(blockPos);
-        if (!blockState.isOf(this.getBlock())) return context;
+        if (!blockState.is(this.getBlock())) return context;
 
-        BlockPos.Mutable newPos = searchForLadderPlacement(world, blockPos, blockState.get(LadderBlock.FACING), context.getVerticalPlayerLookDirection() == Direction.UP);
+        BlockPos.MutableBlockPos newPos = searchForLadderPlacement(world, blockPos, blockState.getValue(LadderBlock.FACING), context.getNearestLookingVerticalDirection() == Direction.UP);
         if(newPos == null) return context;
 
         Direction directionNewPos = newPos.getY() <= blockPos.getY() ? Direction.DOWN : Direction.UP;
-        return ItemPlacementContext.offset(context, newPos, directionNewPos);
+        return BlockPlaceContext.at(context, newPos, directionNewPos);
     }
 }

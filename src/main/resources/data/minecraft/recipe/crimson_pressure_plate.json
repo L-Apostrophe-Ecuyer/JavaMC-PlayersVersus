@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "redstone",
   "group": "crimson_misc",
   "key": {
     "#": "minecraft:crimson_planks"
@@ -9,7 +8,7 @@
     "###"
   ],
   "result": {
-    "count":  2,
+    "count": 2,
     "id": "minecraft:crimson_pressure_plate"
   }
 }

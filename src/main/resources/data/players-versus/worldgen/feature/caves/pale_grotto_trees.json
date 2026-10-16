@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "chance": 0.95,
+      "feature": {
+        "feature": "players-versus:pale_grotto_heart_tree",
+        "placement": []
+      }
+    }
+  ],
+  "default": {
+    "feature": "players-versus:pale_grotto_stump",
+    "placement": []
+  }
+}

@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "redstone",
   "group": "warped_misc",
   "key": {
     "#": "minecraft:stick",

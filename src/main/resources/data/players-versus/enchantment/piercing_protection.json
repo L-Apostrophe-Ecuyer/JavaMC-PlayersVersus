@@ -30,15 +30,15 @@
           }
         },
         "requirements": {
-          "condition": "minecraft:damage_source_properties",
           "predicate": {
             "tags": [
               {
-                "id": "players-versus:is_protected_by_piercing_enchant",
+                "id": "#players-versus:is_protected_by_piercing_enchant",
                 "expected": true
               }
             ]
-          }
+          },
+          "type": "minecraft:damage_source_properties"
         }
       },
       {
@@ -51,11 +51,10 @@
           }
         },
         "requirements": {
-          "condition": "minecraft:damage_source_properties",
           "predicate": {
             "tags": [
               {
-                "id": "players-versus:is_melee_attack",
+                "id": "#players-versus:is_melee_attack",
                 "expected": true
               }
             ],
@@ -67,7 +66,8 @@
               }
             },
             "is_direct": true
-          }
+          },
+          "type": "minecraft:damage_source_properties"
         }
       }
     ]

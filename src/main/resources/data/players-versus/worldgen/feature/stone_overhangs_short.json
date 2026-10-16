@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "surface": "ceiling",
+  "depth": 3,
+  "vertical_range": 2,
+  "extra_bottom_block_chance": 0,
+  "extra_edge_column_chance": 0,
+  "vegetation_chance": 0.1,
+  "xz_radius": 2,
+  "replaceable": "#minecraft:dirt",
+  "ground_state": {
+    "id": "minecraft:stone"
+  },
+  "vegetation_feature": {
+    "feature": "players-versus:stone_overhangs_short_vegetation",
+    "placement": []
+  }
+}

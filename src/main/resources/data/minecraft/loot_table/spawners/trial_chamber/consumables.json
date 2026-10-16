@@ -4,21 +4,21 @@
     {
       "rolls": {
         "min": 0,
-        "max": 1
+        "max": 1,
+        "type": "minecraft:uniform"
       },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "minecraft:experience_bottle",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 0,
-                "max": 1
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "min": 0,
+              "max": 1,
+              "type": "minecraft:uniform"
+            },
+            "type": "minecraft:set_count"
+          }
         }
       ]
     },
@@ -29,86 +29,82 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:honey_bottle",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 2
-              },
-              "add": false
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 2
+            },
+            "add": false,
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:beetroot",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 2,
-                "max": 5
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "min": 2,
+              "max": 5,
+              "type": "minecraft:uniform"
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:golden_carrot",
-          "functions": [
+          "modifier": {
+            "count": {
+              "min": 1,
+              "max": 2,
+              "type": "minecraft:uniform"
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "modifier": [
             {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 2
-              }
+              "count": 1,
+              "add": false,
+              "type": "minecraft:set_count"
+            },
+            {
+              "id": "minecraft:healing",
+              "type": "minecraft:set_potion"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": 1,
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:healing"
+              "id": "minecraft:regeneration",
+              "type": "minecraft:set_potion"
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
               "count": 1,
-              "add": false
+              "add": false,
+              "type": "minecraft:set_count"
             },
             {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:regeneration"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:potion",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 1,
-              "add": false
-            },
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:swiftness"
+              "id": "minecraft:swiftness",
+              "type": "minecraft:set_potion"
             }
           ]
         }

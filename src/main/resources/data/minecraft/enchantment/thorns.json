@@ -34,12 +34,11 @@
             },
             {
               "type": "minecraft:change_item_damage",
-              "amount": 2.0
+              "amount": 2
             }
           ]
         },
         "requirements": {
-          "condition": "minecraft:random_chance",
           "chance": {
             "type": "minecraft:enchantment_level",
             "amount": {
@@ -47,7 +46,8 @@
               "base": 0.15,
               "per_level_above_first": 0.15
             }
-          }
+          },
+          "type": "minecraft:random_chance"
         }
       }
     ]

@@ -1,16 +1,14 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "group": "leather_armor",
-    "category": "equipment",
-    "pattern": [
-      "XXX",
-      "X X"
-    ],
-    "key": {
-      "X": "minecraft:rabbit_hide"
-    },
-    "result": {
-      "id": "minecraft:leather_helmet"
-    }
+  "type": "minecraft:crafting_shaped",
+  "group": "leather_armor",
+  "pattern": [
+    "XXX",
+    "X X"
+  ],
+  "key": {
+    "X": "minecraft:rabbit_hide"
+  },
+  "result": {
+    "id": "minecraft:leather_helmet"
   }
-  
+}

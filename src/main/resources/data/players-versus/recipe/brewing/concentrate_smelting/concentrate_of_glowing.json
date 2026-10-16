@@ -1,8 +1,6 @@
 {
   "type": "minecraft:smelting",
-  "category": "food",
-
-  "ingredient":"minecraft:glow_berries",
+  "ingredient": "minecraft:glow_berries",
   "result": {
     "id": "players-versus:concentrate_of_glowing"
   },

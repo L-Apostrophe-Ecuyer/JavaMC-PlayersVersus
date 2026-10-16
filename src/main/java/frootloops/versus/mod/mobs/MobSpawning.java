@@ -1,27 +1,36 @@
 package frootloops.versus.mod.mobs;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
-import frootloops.versus.mod.mobs.hostile.overworld.DeeperCreeperEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
-import frootloops.versus.mod.mobs.hostile.overworld.WitheredZombieEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.WitherSkeletonEntity;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BiomeTags;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
-import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 public class MobSpawning {
 
@@ -30,9 +39,9 @@ public class MobSpawning {
 
     public static final TagKey<Block> UNDEAD_OVERWORLD_SPAWNABLE = blockTagOf("undead_overworld_spawnable_on");
     public static final TagKey<Block> CREEPER_SPAWNABLE = blockTagOf("creeper_spawnable_on");
-    public static final TagKey<Block> DEEPER_CREEPER_SPAWNABLE = blockTagOf("stalker_spawnable_on");
+    public static final TagKey<Block> PALE_MOBS_SPAWNABLE = blockTagOf("pale_mobs_spawnable_on");
     private static TagKey<Block> blockTagOf(String id) {
-        return TagKey.of(RegistryKeys.BLOCK, Identifier.of(VersusMod.MOD_ID, id));
+        return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, id));
     }
 
 
@@ -40,59 +49,74 @@ public class MobSpawning {
 
         // Deep caves:
         // BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, VanillaEntities.WITHER_SKELETON, 50, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.REGULAR_CAVE), SpawnGroup.MONSTER, ModEntities.DEEPER_CREEPER, 100, 1, 1);
-        SpawnRestriction.register(ModEntities.DEEPER_CREEPER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnDeeperCreeper);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.PALE_CREEPER, 100, 1, 1);
+        SpawnPlacements.register(ModEntities.PALE_CREEPER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleCreeper);
 
-        //BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.WITHERED_ZOMBIE, 100, 4, 4);
-        SpawnRestriction.register(ModEntities.WITHERED_ZOMBIE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWitheredZombie);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), SpawnGroup.MONSTER, EntityType.WITHER_SKELETON, 60, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), SpawnGroup.MONSTER, EntityType.ZOMBIFIED_PIGLIN, 3, 1, 4);
+        //BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.PALE_ZOMBIE, 100, 4, 4);
+        SpawnPlacements.register(ModEntities.PALE_ZOMBIE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleZombie);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), MobCategory.MONSTER, EntityTypes.WITHER_SKELETON, 60, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES), MobCategory.MONSTER, EntityTypes.ZOMBIFIED_PIGLIN, 3, 1, 4);
 
         // Surface:
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.FROZEN_PEAKS), SpawnGroup.MONSTER, EntityType.BREEZE, 100, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.SPAWNS_SNOW_FOXES), SpawnGroup.MONSTER, ModEntities.FROSTED_ZOMBIE, 140, 2, 4);
-        SpawnRestriction.register(ModEntities.FROSTED_ZOMBIE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnFrostedZombie);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.FROZEN_PEAKS), MobCategory.MONSTER, EntityTypes.BREEZE, 100, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.SPAWNS_SNOW_FOXES), MobCategory.MONSTER, ModEntities.FROSTED_ZOMBIE, 140, 2, 4);
+        SpawnPlacements.register(ModEntities.FROSTED_ZOMBIE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnFrostedZombie);
+
+        // Pale Garden: its own pale spiders, zombies and pale_creepers (the pale_creepers also come up in the Pale Grotto, by its biome file).
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_SPIDER, 80, 1, 3);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_ZOMBIE, 100, 1, 3);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_CREEPER, 10, 1, 1);
+        SpawnPlacements.register(ModEntities.PALE_SPIDER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleSpider);
 
         // Desert:
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAVE_SPIDER, 60, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.HUSK, 120, 4, 4);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAMEL, 40, 3, 4);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.DESERT), SpawnGroup.CREATURE, EntityType.CAT, 40, 1, 3);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAVE_SPIDER, 60, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.HUSK, 120, 4, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAMEL, 40, 3, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAT, 40, 1, 3);
 
         // Air:
-        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, EntityType.PHANTOM, 80, 1, 2);
+        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, EntityTypes.PHANTOM, 80, 1, 2);
 
         // Nether:
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(BiomeKeys.NETHER_WASTES), SpawnGroup.MONSTER, EntityType.BLAZE, 15, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.NETHER_WASTES), MobCategory.MONSTER, EntityTypes.BLAZE, 15, 1, 1);
 
     }
 
-    public static boolean isMidnightDuringNewMoon(WorldAccess world) {
+    public static boolean isMidnightDuringNewMoon(LevelAccessor world) {
         return isNewMoon(world) && isMidnight(world);
     }
 
-    public static boolean isNewMoon(WorldAccess world) {
-        return world.getMoonPhase() == 7;
+    public static boolean isNewMoon(LevelAccessor world) {
+        return WorldTime.moonPhase(world) == 7;
     }
 
-    public static boolean isMidnight(WorldAccess world) {
-        long dayTime = world.getLunarTime() % 24000l;
+    public static boolean isMidnight(LevelAccessor world) {
+        long dayTime = WorldTime.dayTime(world) % 24000l;
         return !(dayTime < 18000l || dayTime > 20000l);
     }
 
 
-    public static boolean canSpawnDeeperCreeper(EntityType<DeeperCreeperEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
-        if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
-        if(spawnReason != SpawnReason.NATURAL) return true;
-        if(world.getLightLevel(blockPos) > 1 || !world.getBlockState(blockPos.down()).isIn(DEEPER_CREEPER_SPAWNABLE)) return false;
+    public static boolean canSpawnPaleCreeper(EntityType<PaleCreeperEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
+        if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
+        if(spawnReason != EntitySpawnReason.NATURAL) return true;
+        if(world.getMaxLocalRawBrightness(blockPos) > 1 || !world.getBlockState(blockPos.below()).is(PALE_MOBS_SPAWNABLE)) return false;
         return blockPos.getY() < 32;
     }
 
-    public static boolean canSpawnWitheredZombie(EntityType<WitheredZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
-        if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
-        if(spawnReason != SpawnReason.NATURAL) return true;
-        if(world.getLightLevel(blockPos) > 0 || !world.getBlockState(blockPos.down()).isIn(UNDEAD_OVERWORLD_SPAWNABLE)) return false;
-        if(world.getBiome(blockPos).getKey().get() == CustomOverworldBiomes.DEEP_CAVES) return true;
+    public static boolean canSpawnPaleSpider(EntityType<PaleSpiderEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
+        if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
+        if(spawnReason != EntitySpawnReason.NATURAL) return true;
+        if(world.getEffectiveSkyBrightness(blockPos) > 2 || !world.getBlockState(blockPos.below()).is(PALE_MOBS_SPAWNABLE)) return false;
+        return blockPos.getY() < 64;
+    }
+
+    public static boolean canSpawnPaleZombie(EntityType<PaleZombieEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
+        if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
+        if(spawnReason != EntitySpawnReason.NATURAL) return true;
+
+        ResourceKey<Biome> biomeKey = world.getBiome(blockPos).unwrapKey().get();
+        if(biomeKey == CustomOverworldBiomes.DEEP_CAVES || biomeKey == CustomOverworldBiomes.PALE_GROTTO || biomeKey == Biomes.PALE_GARDEN) return true;
+        if(world.getMaxLocalRawBrightness(blockPos) > 0 || !world.getBlockState(blockPos.below()).is(PALE_MOBS_SPAWNABLE)) return false;
 
         int y = blockPos.getY();
         if(y > 64) return false;
@@ -100,10 +124,10 @@ public class MobSpawning {
         return true;
     }
 
-    public static boolean canSpawnFrostedZombie(EntityType<FrostedZombieEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos blockPos, Random random) {
-        if(world.getDifficulty() == Difficulty.PEACEFUL || !HostileEntity.canMobSpawn(type, world, spawnReason, blockPos, random)) return false;
-        if(spawnReason != SpawnReason.NATURAL ) return true;
-        while (world.getBlockState(blockPos = blockPos.up()).isOf(Blocks.POWDER_SNOW)) {}
-        return HostileEntity.canSpawnInDark(type, world, spawnReason, blockPos, random) && (world.isSkyVisible(blockPos.down()) || (world.getBiome(blockPos).getKey().get() == CustomOverworldBiomes.FROSTED_CAVE));
+    public static boolean canSpawnFrostedZombie(EntityType<FrostedZombieEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
+        if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
+        if(spawnReason != EntitySpawnReason.NATURAL ) return true;
+        while (world.getBlockState(blockPos = blockPos.above()).is(Blocks.POWDER_SNOW)) {}
+        return Monster.checkMonsterSpawnRules(type, world, spawnReason, blockPos, random) && (world.canSeeSky(blockPos.below()) || (world.getBiome(blockPos).unwrapKey().get() == CustomOverworldBiomes.FROSTED_CAVE));
     }
 }

@@ -1,100 +1,100 @@
 package frootloops.versus.mixin.mobs.hostile.end.dragon;
 
 import frootloops.versus.mod.mobs.hostile.end.DragonManager;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.pathing.Path;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.boss.dragon.phase.AbstractPhase;
-import net.minecraft.entity.boss.dragon.phase.Phase;
-import net.minecraft.entity.boss.dragon.phase.PhaseType;
-import net.minecraft.entity.boss.dragon.phase.StrafePlayerPhase;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.enderdragon.phases.AbstractDragonPhaseInstance;
+import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
+import net.minecraft.world.entity.boss.enderdragon.phases.DragonStrafePlayerPhase;
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(StrafePlayerPhase.class)
-public abstract class StrafePlayerPhaseMixin extends AbstractPhase {
+@Mixin(DragonStrafePlayerPhase.class)
+public abstract class StrafePlayerPhaseMixin extends AbstractDragonPhaseInstance {
 	@Shadow
-	private int seenTargetTimes;
+	private int fireballCharge;
 	@Shadow
-	private Path path;
+	private Path currentPath;
 	@Shadow
-	private Vec3d pathTarget;
+	private Vec3 targetLocation;
 	@Shadow
-	private LivingEntity target;
+	private LivingEntity attackTarget;
 
-	public StrafePlayerPhaseMixin(EnderDragonEntity dragonIn) {
+	public StrafePlayerPhaseMixin(EnderDragon dragonIn) {
 		super(dragonIn);
 	}
 
 	@Override
-	public void serverTick(ServerWorld world) {
-		if (this.target == null) {
-			this.dragon.getPhaseManager().setPhase(PhaseType.HOLDING_PATTERN);
+	public void doServerTick(ServerLevel world) {
+		if (this.attackTarget == null) {
+			this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
 		}
-		else if (this.target.squaredDistanceTo(this.dragon) < 256d) {
-			this.dragon.getPhaseManager().setPhase(PhaseType.HOLDING_PATTERN);
+		else if (this.attackTarget.distanceToSqr(this.dragon) < 256d) {
+			this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
 		}
 		else {
-			if (this.path != null && this.path.isFinished()) {
-				double d0 = this.target.getX();
-				double d1 = this.target.getZ();
+			if (this.currentPath != null && this.currentPath.isDone()) {
+				double d0 = this.attackTarget.getX();
+				double d1 = this.attackTarget.getZ();
 				double d2 = d0 - this.dragon.getX();
 				double d3 = d1 - this.dragon.getZ();
-				double d4 = MathHelper.sqrt((float) (d2 * d2 + d3 * d3));
+				double d4 = Mth.sqrt((float) (d2 * d2 + d3 * d3));
 				double d5 = Math.min((double)0.4F + d4 / 80.0D - 1.0D, 10.0D);
-				this.pathTarget = new Vec3d(d0, this.target.getY() + d5, d1);
+				this.targetLocation = new Vec3(d0, this.attackTarget.getY() + d5, d1);
 			}
 
-			double d12 = this.pathTarget == null ? 0.0D : this.pathTarget.squaredDistanceTo(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
+			double d12 = this.targetLocation == null ? 0.0D : this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 			if (d12 < 100.0D || d12 > 22500.0D) {
-				this.updatePath();
+				this.findNewTarget();
 			}
 
-			if (this.target.squaredDistanceTo(this.dragon) < 9216d) {
-				if (this.dragon.canSee(this.target)) {
-					++this.seenTargetTimes;
-					Vec3d vector3d1 = (new Vec3d(this.target.getX() - this.dragon.getX(), 0.0D, this.target.getZ() - this.dragon.getZ())).normalize();
-					Vec3d vector3d = (new Vec3d(MathHelper.sin(this.dragon.getRotationClient().y * ((float)Math.PI / 180F)), 0.0D, -MathHelper.cos(this.dragon.getRotationClient().y * ((float)Math.PI / 180F)))).normalize();
-					float f1 = (float)vector3d.dotProduct(vector3d1);
+			if (this.attackTarget.distanceToSqr(this.dragon) < 9216d) {
+				if (this.dragon.hasLineOfSight(this.attackTarget)) {
+					++this.fireballCharge;
+					Vec3 vector3d1 = (new Vec3(this.attackTarget.getX() - this.dragon.getX(), 0.0D, this.attackTarget.getZ() - this.dragon.getZ())).normalize();
+					Vec3 vector3d = (new Vec3(Mth.sin(this.dragon.getRotationVector().y * ((float)Math.PI / 180F)), 0.0D, -Mth.cos(this.dragon.getRotationVector().y * ((float)Math.PI / 180F)))).normalize();
+					float f1 = (float)vector3d.dot(vector3d1);
 					float f = (float)(Math.acos(f1) * (double)(180F / (float)Math.PI));
 					f = f + 0.5F;
-					if (this.seenTargetTimes >= 5 && f >= 0.0F && f < 10.0F) {
-						DragonManager.fireFireball(this.dragon, this.target);
-						this.seenTargetTimes = 0;
-						if (this.path != null) {
-							while(!this.path.isFinished()) {
-								this.path.next();
+					if (this.fireballCharge >= 5 && f >= 0.0F && f < 10.0F) {
+						DragonManager.fireFireball(this.dragon, this.attackTarget);
+						this.fireballCharge = 0;
+						if (this.currentPath != null) {
+							while(!this.currentPath.isDone()) {
+								this.currentPath.advance();
 							}
 						}
 
 						//If must not charge or fireball then go back to holding pattern
 						if (!DragonManager.onPhaseEnd(this.dragon))
-							this.dragon.getPhaseManager().setPhase(PhaseType.HOLDING_PATTERN);
+							this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
 						//Otherwise reset the phase, in case she fireballs again
 						else
 							//Can't use initPhase() otherwise the target is reset. Also making the dragon fire slower when chaining fireballs
-							this.seenTargetTimes = -10;
+							this.fireballCharge = -10;
 					}
 				}
-				else if (this.seenTargetTimes > 0) {
-					--this.seenTargetTimes;
+				else if (this.fireballCharge > 0) {
+					--this.fireballCharge;
 				}
 			}
-			else if (this.seenTargetTimes > 0) {
-				--this.seenTargetTimes;
+			else if (this.fireballCharge > 0) {
+				--this.fireballCharge;
 			}
 
 		}
 	}
 
 	@Shadow
-	private void updatePath() {}
+	private void findNewTarget() {}
 
-	@Shadow public abstract void beginPhase();
+	@Shadow public abstract void begin();
 
 	@Override
-	public PhaseType<? extends Phase> getType() { return PhaseType.STRAFE_PLAYER; }
+	public EnderDragonPhase<? extends DragonPhaseInstance> getPhase() { return EnderDragonPhase.STRAFE_PLAYER; }
 }

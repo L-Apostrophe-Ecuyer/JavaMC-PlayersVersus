@@ -1,52 +1,52 @@
 package frootloops.versus.mod.items_and_effects.brewing.effects;
 
 import frootloops.versus.VersusMod;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public class LargenessStatusEffect extends StatusEffect  {
-    private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
+public class LargenessStatusEffect extends MobEffect  {
+    private static final MobEffectCategory category = MobEffectCategory.NEUTRAL;
     public static final int COLOR = 10359374;
 
     public LargenessStatusEffect(String id) {
         super(category, COLOR);
 
         this.addAttributeModifier(
-                EntityAttributes.SCALE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                0.3, EntityAttributeModifier.Operation.ADD_VALUE
+                Attributes.SCALE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "effect." + id),
+                0.3, AttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.STEP_HEIGHT, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                0.25, EntityAttributeModifier.Operation.ADD_VALUE
+                Attributes.STEP_HEIGHT, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "effect." + id),
+                0.25, AttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.ATTACK_DAMAGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                2.0, EntityAttributeModifier.Operation.ADD_VALUE
+                Attributes.ATTACK_DAMAGE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "effect." + id),
+                2.0, AttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.ATTACK_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                -0.2, EntityAttributeModifier.Operation.ADD_VALUE
+                Attributes.ATTACK_SPEED, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "effect." + id),
+                -0.2, AttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.MOVEMENT_SPEED, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                -0.005, EntityAttributeModifier.Operation.ADD_VALUE
+                Attributes.MOVEMENT_SPEED, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "effect." + id),
+                -0.005, AttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.ENTITY_INTERACTION_RANGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                1.0, EntityAttributeModifier.Operation.ADD_VALUE
+                Attributes.ENTITY_INTERACTION_RANGE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "effect." + id),
+                1.0, AttributeModifier.Operation.ADD_VALUE
         );
 
         this.addAttributeModifier(
-                EntityAttributes.BLOCK_INTERACTION_RANGE, Identifier.of(VersusMod.MOD_ID, "effect." + id),
-                1.0, EntityAttributeModifier.Operation.ADD_VALUE
+                Attributes.BLOCK_INTERACTION_RANGE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "effect." + id),
+                1.0, AttributeModifier.Operation.ADD_VALUE
         );
     }
 

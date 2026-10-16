@@ -2,61 +2,56 @@ package frootloops.versus.mod.environment;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.particle.SimpleParticleType;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 
-public class SparksParticle extends AnimatedParticle {
+public class SparksParticle extends SimpleAnimatedParticle {
 
-    protected SparksParticle(ClientWorld world, double x, double y, double z, double vx,  double vy, double vz, SpriteProvider spriteProvider) {
+    protected SparksParticle(ClientLevel world, double x, double y, double z, double vx,  double vy, double vz, SpriteSet spriteProvider) {
         super(world, x, y, z, spriteProvider, 0.165F);
-        this.gravityStrength = 0.75F;
-        this.velocityX = vx * 2.0;
-        this.velocityZ = vz * 2.0;
-        this.velocityY = Math.abs(vy)/2.0;
-        this.scale *= 0.75F;
-        this.maxAge = 12 + this.random.nextInt(18);
-        this.updateSprite(spriteProvider);
+        this.gravity = 0.75F;
+        this.xd = vx * 2.0;
+        this.zd = vz * 2.0;
+        this.yd = Math.abs(vy)/2.0;
+        this.quadSize *= 0.75F;
+        this.lifetime = 12 + this.random.nextInt(18);
+        this.setSpriteFromAge(spriteProvider);
     }
 
-    protected SparksParticle(ClientWorld world, double x, double y, double z, SpriteProvider spriteProvider, float upwardsAcceleration) {
+    protected SparksParticle(ClientLevel world, double x, double y, double z, SpriteSet spriteProvider, float upwardsAcceleration) {
         super(world, x, y, z, spriteProvider, 0.165F);
-        this.gravityStrength = 0.75F;
-        this.scale *= 0.75F;
-        this.maxAge = 12 + this.random.nextInt(18);
-        this.updateSprite(spriteProvider);
+        this.gravity = 0.75F;
+        this.quadSize *= 0.75F;
+        this.lifetime = 12 + this.random.nextInt(18);
+        this.setSpriteFromAge(spriteProvider);
     }
 
     @Override
     public void tick() {
         super.tick();
         if(this.onGround) {
-            if(this.gravityStrength != 0f) {
-                this.gravityStrength = 0f;
+            if(this.gravity != 0f) {
+                this.gravity = 0f;
                 this.y += 0.1;
             }
-            this.velocityY = 0f;
+            this.yd = 0f;
         }
     }
 
     @Environment(EnvType.CLIENT)
-    public static class Factory implements ParticleFactory<SimpleParticleType> {
-        private final SpriteProvider spriteProvider;
+    public static class Factory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
 
-        public Factory(SpriteProvider spriteProvider) {
+        public Factory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
 
         @Nullable
         @Override
-        public Particle createParticle(SimpleParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, Random random) {
+        public Particle createParticle(SimpleParticleType parameters, ClientLevel world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, RandomSource random) {
             return new SparksParticle(world, x, y, z, velocityX, velocityY, velocityZ, this.spriteProvider);
         }
     }

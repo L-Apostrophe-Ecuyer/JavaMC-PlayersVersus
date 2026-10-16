@@ -1,0 +1,40 @@
+{
+  "type": "minecraft:lake",
+  "fluid": {
+    "id": "players-versus:brown_mud"
+  },
+  "barrier": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": {
+          "id": "minecraft:stone"
+        },
+        "weight": 2
+      },
+      {
+        "data": {
+          "id": "players-versus:brown_clay"
+        },
+        "weight": 5
+      }
+    ]
+  },
+  "can_place_feature": {
+    "type": "minecraft:true"
+  },
+  "can_replace_with_air_or_fluid": {
+    "type": "minecraft:not",
+    "predicate": {
+      "type": "minecraft:matching_block_tag",
+      "tag": "minecraft:features_cannot_replace"
+    }
+  },
+  "can_replace_with_barrier": {
+    "type": "minecraft:not",
+    "predicate": {
+      "type": "minecraft:matching_block_tag",
+      "tag": "minecraft:lava_pool_stone_cannot_replace"
+    }
+  }
+}

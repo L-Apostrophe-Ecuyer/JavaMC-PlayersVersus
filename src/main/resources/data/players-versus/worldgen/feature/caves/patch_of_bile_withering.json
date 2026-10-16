@@ -1,0 +1,91 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "surface": "floor",
+  "depth": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 1,
+    "max_inclusive": 2
+  },
+  "vertical_range": 3,
+  "extra_bottom_block_chance": 0,
+  "extra_edge_column_chance": 0.3,
+  "vegetation_chance": 0.2,
+  "xz_radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 4,
+    "max_inclusive": 7
+  },
+  "replaceable": "#minecraft:deepslate_ore_replaceables",
+  "ground_state": {
+    "type": "minecraft:noise_threshold",
+    "default_state": {
+      "id": "minecraft:cobbled_deepslate"
+    },
+    "high_chance": 0.5,
+    "high_states": [
+      {
+        "id": "minecraft:deepslate"
+      }
+    ],
+    "low_states": [
+      {
+        "id": "minecraft:deepslate"
+      }
+    ],
+    "noise": {
+      "base_amplitude": 1,
+      "base_octave": -6
+    },
+    "scale": 1,
+    "seed": 0,
+    "threshold": 0
+  },
+  "vegetation_feature": {
+    "feature": "players-versus:caves/patch_of_bile_withering_vegetation",
+    "placement": [
+      {
+        "type": "minecraft:count",
+        "count": 8
+      },
+      {
+        "type": "minecraft:offset",
+        "x": {
+          "type": "minecraft:uniform",
+          "min_inclusive": -3,
+          "max_inclusive": 3
+        },
+        "y": {
+          "type": "minecraft:uniform",
+          "min_inclusive": -1,
+          "max_inclusive": 1
+        },
+        "z": {
+          "type": "minecraft:uniform",
+          "min_inclusive": -3,
+          "max_inclusive": 3
+        }
+      },
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:all_of",
+          "predicates": [
+            {
+              "type": "minecraft:matching_blocks",
+              "blocks": "minecraft:air"
+            },
+            {
+              "type": "minecraft:matching_blocks",
+              "offset": [
+                0,
+                -1,
+                0
+              ],
+              "blocks": "minecraft:cobbled_deepslate"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

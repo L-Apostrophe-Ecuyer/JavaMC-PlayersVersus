@@ -1,22 +1,22 @@
 package frootloops.versus.mod.items_and_effects.brewing.effects;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.world.GameMode;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
-public class HauntingStatusEffect extends StatusEffect  {
-    private static final StatusEffectCategory category = StatusEffectCategory.NEUTRAL;
+public class HauntingStatusEffect extends MobEffect  {
+    private static final MobEffectCategory category = MobEffectCategory.NEUTRAL;
     private static final int color = 0;
 
     public HauntingStatusEffect() {
@@ -24,69 +24,69 @@ public class HauntingStatusEffect extends StatusEffect  {
     }
 
     @Override
-    public void applyInstantEffect(
-            ServerWorld world, @Nullable Entity effectEntity, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity
+    public void applyInstantaneousEffect(
+            ServerLevel world, @Nullable Entity effectEntity, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity
     ) {
-        target.damage(world, target.getDamageSources().outOfWorld(), 2.0f);
+        target.hurtServer(world, target.damageSources().fellOutOfWorld(), 2.0f);
     }
 
     @Override
-    public void onApplied(LivingEntity entity, int amplifier) {
+    public void onEffectStarted(LivingEntity entity, int amplifier) {
         if(!entity.isAlive()) return;
 
-        entity.getEntityWorld().emitGameEvent(entity, GameEvent.ENTITY_DIE, entity.getEntityPos());
-        entity.getEntityWorld().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENTITY_WARDEN_SONIC_CHARGE, entity.getSoundCategory(), 1.0f, 0.2f);
-        entity.getEntityWorld().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENTITY_PLAYER_BREATH, entity.getSoundCategory(), 0.2f, 0.4f);
+        entity.level().gameEvent(entity, GameEvent.ENTITY_DIE, entity.position());
+        entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, entity.getSoundSource(), 1.0f, 0.2f);
+        entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_BREATH, entity.getSoundSource(), 0.2f, 0.4f);
 
-        if(entity.isPlayer()) {
-            if(entity instanceof ServerPlayerEntity player && !player.isSpectator()) {
-                player.changeGameMode(GameMode.SPECTATOR);
+        if(entity.isAlwaysTicking()) {
+            if(entity instanceof ServerPlayer player && !player.isSpectator()) {
+                player.setGameMode(GameType.SPECTATOR);
                 int xpToDrop = (player.totalExperience * 2)/5;
-                if(xpToDrop > 0 && !player.isExperienceDroppingDisabled()) {
+                if(xpToDrop > 0 && !player.wasExperienceConsumed()) {
                     player.setExperiencePoints(0);
-                    player.setExperienceLevel(0);
+                    player.setExperienceLevels(0);
                     player.totalExperience = 0;
-                    ExperienceOrbEntity.spawn(player.getEntityWorld(), player.getEntityPos(), xpToDrop);
+                    ExperienceOrb.award(player.level(), player.position(), xpToDrop);
                 }
-                entity.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, -1, 5));
-                entity.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 300, 0));
+                entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, -1, 5));
+                entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300, 0));
             }
         }
         else {
             entity.setInvisible(true);
             entity.setNoGravity(true);
-            if(entity.getEntityWorld() instanceof ServerWorld serverWorld) {
-                int xpToDrop = (entity.getExperienceToDrop(serverWorld, null) * 3) / 5;
-                if (xpToDrop > 0 && !entity.isExperienceDroppingDisabled()) {
-                    ExperienceOrbEntity.spawn(serverWorld, entity.getEntityPos(), xpToDrop);
+            if(entity.level() instanceof ServerLevel serverWorld) {
+                int xpToDrop = (entity.getExperienceReward(serverWorld, null) * 3) / 5;
+                if (xpToDrop > 0 && !entity.wasExperienceConsumed()) {
+                    ExperienceOrb.award(serverWorld, entity.position(), xpToDrop);
                 }
-                entity.disableExperienceDropping();
+                entity.skipDropExperience();
             }
         }
     }
 
     @Override
-    public void onEntityRemoval(ServerWorld world, LivingEntity entity, int amplifier, Entity.RemovalReason reason) {
+    public void onMobRemoved(ServerLevel world, LivingEntity entity, int amplifier, Entity.RemovalReason reason) {
         removeEffect(entity);
     }
 
     public static void removeEffect(LivingEntity entity) {
-        if(entity.isPlayer()) {
-            if(entity instanceof ServerPlayerEntity player) player.changeGameMode(GameMode.SURVIVAL);
-            entity.setStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 20, 4), null);
+        if(entity.isAlwaysTicking()) {
+            if(entity instanceof ServerPlayer player) player.setGameMode(GameType.SURVIVAL);
+            entity.forceAddEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20, 4), null);
         }
         else {
             entity.setInvisible(false);
             entity.setNoGravity(false);
         }
-        entity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 50, 0));
-        entity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 50, 0));
-        entity.getEntityWorld().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENTITY_ENDER_EYE_DEATH, entity.getSoundCategory(), 1.0f, 1.0f);
+        entity.addEffect(new MobEffectInstance(MobEffects.WITHER, 50, 0));
+        entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 50, 0));
+        entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENDER_EYE_DEATH, entity.getSoundSource(), 1.0f, 1.0f);
     }
 
 
     @Override
-    public void playApplySound(LivingEntity entity, int amplifier) {
-        entity.getEntityWorld().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.BLOCK_SCULK_CATALYST_BLOOM, entity.getSoundCategory(), 1.0f, 1.0f);
+    public void onEffectAdded(LivingEntity entity, int amplifier) {
+        entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.SCULK_CATALYST_BLOOM, entity.getSoundSource(), 1.0f, 1.0f);
     }
 }

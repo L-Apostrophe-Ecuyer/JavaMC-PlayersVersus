@@ -1,144 +1,81 @@
 {
+  "type": "minecraft:add",
+  "left": {
     "type": "minecraft:add",
-    "argument1": {
-      "type": "minecraft:add",
-      "argument1": {
-        "type": "minecraft:y_clamped_gradient",
-        "from_y": 96,
-        "to_y": 56,
-        "from_value": -0.05,
-        "to_value": 0.08
-      },
-      "argument2": {
-        "type": "minecraft:add",
-        "argument1": {
-          "type": "minecraft:y_clamped_gradient",
-          "from_y": 56,
-          "to_y": 40,
-          "from_value": 0,
-          "to_value": -0.1
-        },
-        "argument2": {
-          "type": "minecraft:add",
-          "argument1": {
-            "type": "minecraft:y_clamped_gradient",
-            "from_y": 32,
-            "to_y": 20,
-            "from_value": 0,
-            "to_value": 0.1
-          },
-          "argument2": {
-            "type": "minecraft:add",
-            "argument1": {
-              "type": "minecraft:y_clamped_gradient",
-              "from_y": -8,
-              "to_y": -32,
-              "from_value": 0,
-              "to_value": -0.3
-            },
-            "argument2": {
-              "type": "minecraft:y_clamped_gradient",
-              "from_y": -52,
-              "to_y": -64,
-              "from_value": 0,
-              "to_value": 0.35
-            }
-          }
-        }
-      }
+    "left": {
+      "type": "minecraft:gradient",
+      "axis": "y",
+      "from_coordinate": 96,
+      "from_value": -0.05,
+      "to_coordinate": 56,
+      "to_value": 0.08
     },
-    "argument2": {
-      "type": "minecraft:range_choice",
-      "input": {
-        "type": "minecraft:interpolated",
-        "argument": {
-          "type": "minecraft:range_choice",
-          "input": "minecraft:y",
-          "min_inclusive": -60,
-          "max_exclusive": 321,
-          "when_in_range": {
-            "type": "minecraft:noise",
-            "noise": "minecraft:noodle",
-            "xz_scale": 1,
-            "y_scale": 1
-          },
-          "when_out_of_range": -1
-        }
+    "right": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:gradient",
+        "axis": "y",
+        "from_coordinate": 56,
+        "from_value": 0.0,
+        "to_coordinate": 40,
+        "to_value": -0.1
       },
-      "min_inclusive": -1000000,
-      "max_exclusive": -0.2,
-      "when_in_range": 64,
-      "when_out_of_range": {
+      "right": {
         "type": "minecraft:add",
-        "argument1": {
-          "type": "minecraft:interpolated",
-          "argument": {
-            "type": "minecraft:range_choice",
-            "input": "minecraft:y",
-            "min_inclusive": -60,
-            "max_exclusive": 321,
-            "when_in_range": {
-              "type": "minecraft:add",
-              "argument1": -0.07500000000000001,
-              "argument2": {
-                "type": "minecraft:mul",
-                "argument1": -0.025,
-                "argument2": {
-                  "type": "minecraft:noise",
-                  "noise": "minecraft:noodle_thickness",
-                  "xz_scale": 1,
-                  "y_scale": 1
-                }
-              }
-            },
-            "when_out_of_range": 0
-          }
+        "left": {
+          "type": "minecraft:gradient",
+          "axis": "y",
+          "from_coordinate": 32,
+          "from_value": 0.0,
+          "to_coordinate": 20,
+          "to_value": 0.1
         },
-        "argument2": {
-          "type": "minecraft:mul",
-          "argument1": 1.5,
-          "argument2": {
-            "type": "minecraft:max",
-            "argument1": {
-              "type": "minecraft:abs",
-              "argument": {
-                "type": "minecraft:interpolated",
-                "argument": {
-                  "type": "minecraft:range_choice",
-                  "input": "minecraft:y",
-                  "min_inclusive": -60,
-                  "max_exclusive": 321,
-                  "when_in_range": {
-                    "type": "minecraft:noise",
-                    "noise": "minecraft:noodle_ridge_a",
-                    "xz_scale": 2.6666666666666665,
-                    "y_scale": 2.6666666666666665
-                  },
-                  "when_out_of_range": 0
-                }
-              }
-            },
-            "argument2": {
-              "type": "minecraft:abs",
-              "argument": {
-                "type": "minecraft:interpolated",
-                "argument": {
-                  "type": "minecraft:range_choice",
-                  "input": "minecraft:y",
-                  "min_inclusive": -60,
-                  "max_exclusive": 321,
-                  "when_in_range": {
-                    "type": "minecraft:noise",
-                    "noise": "minecraft:noodle_ridge_b",
-                    "xz_scale": 2.6666666666666665,
-                    "y_scale": 2.6666666666666665
-                  },
-                  "when_out_of_range": 0
-                }
-              }
-            }
+        "right": {
+          "type": "minecraft:add",
+          "left": {
+            "type": "minecraft:gradient",
+            "axis": "y",
+            "from_coordinate": -8,
+            "from_value": 0.0,
+            "to_coordinate": -32,
+            "to_value": -0.3
+          },
+          "right": {
+            "type": "minecraft:gradient",
+            "axis": "y",
+            "from_coordinate": -52,
+            "from_value": 0.0,
+            "to_coordinate": -64,
+            "to_value": 0.35
           }
         }
       }
     }
+  },
+  "right": {
+    "type": "minecraft:range_choice",
+    "input": "players-versus:overworld/caves/noodle_toggle",
+    "min_inclusive": -1000000.0,
+    "max_exclusive": -0.2,
+    "when_in_range": 64.0,
+    "when_out_of_range": {
+      "type": "minecraft:add",
+      "left": "players-versus:overworld/caves/noodle_thickness",
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:max",
+          "left": {
+            "type": "minecraft:abs",
+            "input": "players-versus:overworld/caves/noodle_ridge_a"
+          },
+          "right": {
+            "type": "minecraft:abs",
+            "input": "players-versus:overworld/caves/noodle_ridge_b"
+          }
+        },
+        "right": 1.5
+      }
+    }
+  }
 }

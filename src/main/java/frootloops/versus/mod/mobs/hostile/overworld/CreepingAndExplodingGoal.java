@@ -1,30 +1,29 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
 import frootloops.versus.mod.Combat;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.predicate.entity.EntityPredicates;
-
 import java.util.EnumSet;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.player.Player;
 
 public class CreepingAndExplodingGoal extends Goal {
 
-    protected final CreeperEntity creeper;
+    protected final Creeper creeper;
     protected final double speed;
     private long lastUpdateTime;
     private boolean wasCoverBlown;
 
-    public CreepingAndExplodingGoal(CreeperEntity creeper, double speed) {
+    public CreepingAndExplodingGoal(Creeper creeper, double speed) {
         this.creeper = creeper;
         this.speed = speed;
-        this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
     @Override
-    public boolean canStart() {
-        long l = this.creeper.getEntityWorld().getTime();
+    public boolean canUse() {
+        long l = this.creeper.level().getGameTime();
         if (l - this.lastUpdateTime < 40L) {
             return false;
         }
@@ -36,30 +35,30 @@ public class CreepingAndExplodingGoal extends Goal {
     }
 
     @Override
-    public boolean shouldContinue() {
+    public boolean canContinueToUse() {
         LivingEntity livingEntity = this.creeper.getTarget();
         if (livingEntity == null || !livingEntity.isAlive()) return false;
-        if (!this.creeper.isInPositionTargetRange(livingEntity.getBlockPos())) return false;
-        return !(livingEntity instanceof PlayerEntity) || !livingEntity.isSpectator() && !((PlayerEntity)livingEntity).isCreative();
+        if (!this.creeper.isWithinHome(livingEntity.blockPosition())) return false;
+        return !(livingEntity instanceof Player) || !livingEntity.isSpectator() && !((Player)livingEntity).isCreative();
     }
 
     @Override
     public void start() {
-        this.creeper.setAttacking(true);
+        this.creeper.setAggressive(true);
     }
 
     @Override
     public void stop() {
         LivingEntity livingEntity = this.creeper.getTarget();
-        if (!EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(livingEntity)) {
+        if (!EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(livingEntity)) {
             this.creeper.setTarget(null);
         }
-        this.creeper.setAttacking(false);
+        this.creeper.setAggressive(false);
         this.creeper.getNavigation().stop();
     }
 
     @Override
-    public boolean shouldRunEveryTick() {
+    public boolean requiresUpdateEveryTick() {
         return true;
     }
 
@@ -69,12 +68,12 @@ public class CreepingAndExplodingGoal extends Goal {
         if (targetEntity == null) return;
 
         // If the creeper was attacked, drop all pretenses and rush them:
-        if (this.creeper.getAttacker() != null) this.wasCoverBlown = true;
-        if (this.creeper.getFuseSpeed() > 0 || this.creeper.isInFluid()) this.wasCoverBlown = true;
+        if (this.creeper.getLastHurtByMob() != null) this.wasCoverBlown = true;
+        if (this.creeper.getSwellDir() > 0 || this.creeper.isInLiquid()) this.wasCoverBlown = true;
 
-        double squaredDistance = this.creeper.squaredDistanceTo(targetEntity);
-        boolean isPlayerLooking = Combat.isLookingTowards(targetEntity, this.creeper.getEntityPos());
-        boolean canPlayerSeeCreeper = targetEntity.canSee(this.creeper);
+        double squaredDistance = this.creeper.distanceToSqr(targetEntity);
+        boolean isPlayerLooking = Combat.isLookingTowards(targetEntity, this.creeper.position());
+        boolean canPlayerSeeCreeper = targetEntity.hasLineOfSight(this.creeper);
 
         // When far enough away from target, only move when not looking (unless cover was blown):
         if (squaredDistance > 16.0) {
@@ -85,29 +84,29 @@ public class CreepingAndExplodingGoal extends Goal {
             }
             // If the player can't see the creeper, creep up on them:
             else {
-                if(this.creeper.getNavigation().isIdle()) {
-                    this.creeper.getNavigation().startMovingTo(targetEntity, this.wasCoverBlown ? this.speed * 1.05 : this.speed * 0.9);
-                    this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
+                if(this.creeper.getNavigation().isDone()) {
+                    this.creeper.getNavigation().moveTo(targetEntity, this.wasCoverBlown ? this.speed * 1.05 : this.speed * 0.9);
+                    this.creeper.getLookControl().setLookAt(targetEntity, 30.0f, 30.0f);
                 }
             }
         }
 
         // If the player is looking, but the creeper is close enough, start charging:
         else {
-            if (targetEntity.handSwinging && isPlayerLooking && canPlayerSeeCreeper) this.wasCoverBlown = true;
+            if (targetEntity.isSwinging() && isPlayerLooking && canPlayerSeeCreeper) this.wasCoverBlown = true;
             if(this.wasCoverBlown && !canPlayerSeeCreeper) this.wasCoverBlown = false;
-            if(this.wasCoverBlown || !(isPlayerLooking && canPlayerSeeCreeper) || this.creeper.getNavigation().isIdle()) {
-                this.creeper.getNavigation().startMovingTo(targetEntity, this.speed * (this.creeper.getFuseSpeed() > 0 ? 0.5 : 1.0));
-                this.creeper.getLookControl().lookAt(targetEntity, 30.0f, 30.0f);
+            if(this.wasCoverBlown || !(isPlayerLooking && canPlayerSeeCreeper) || this.creeper.getNavigation().isDone()) {
+                this.creeper.getNavigation().moveTo(targetEntity, this.speed * (this.creeper.getSwellDir() > 0 ? 0.5 : 1.0));
+                this.creeper.getLookControl().setLookAt(targetEntity, 30.0f, 30.0f);
             }
         }
 
         // Explode when within 2.5 blocks:
-        boolean shouldStartExploding = (squaredDistance < 6.25 && isPlayerLooking && this.creeper.getVisibilityCache().canSee(targetEntity));
-        boolean shouldKeepExploding = (this.creeper.getFuseSpeed() > 0);
+        boolean shouldStartExploding = (squaredDistance < 6.25 && isPlayerLooking && this.creeper.getSensing().hasLineOfSight(targetEntity));
+        boolean shouldKeepExploding = (this.creeper.getSwellDir() > 0);
         if(shouldStartExploding || shouldKeepExploding) {
-            this.creeper.setFuseSpeed(1);
+            this.creeper.setSwellDir(1);
         }
-        else this.creeper.setFuseSpeed(-1);
+        else this.creeper.setSwellDir(-1);
     }
 }

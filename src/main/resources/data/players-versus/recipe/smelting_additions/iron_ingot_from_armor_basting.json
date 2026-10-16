@@ -1,6 +1,5 @@
 {
   "type": "minecraft:blasting",
-  "category": "equipment",
   "ingredient": [
     "minecraft:iron_helmet",
     "minecraft:iron_leggings",

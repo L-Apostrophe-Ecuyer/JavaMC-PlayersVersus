@@ -11,26 +11,24 @@
             {
               "type": "minecraft:item",
               "name": "minecraft:ender_chest",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "items": "#minecraft:pickaxes"
-                  }
-                }
-              ]
+              "condition": {
+                "predicate": {
+                  "items": "#minecraft:pickaxes"
+                },
+                "type": "minecraft:match_tool"
+              }
             },
             {
               "type": "minecraft:item",
               "name": "minecraft:obsidian",
-              "functions": [
+              "modifier": [
                 {
-                  "function": "minecraft:set_count",
                   "count": 8,
-                  "add": false
+                  "add": false,
+                  "type": "minecraft:set_count"
                 },
                 {
-                  "function": "minecraft:explosion_decay"
+                  "type": "minecraft:explosion_decay"
                 }
               ]
             }

@@ -7,20 +7,16 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:sentry_armor_trim_smithing_template",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 2
-            }
-          ]
+          "modifier": {
+            "count": 2,
+            "type": "minecraft:set_count"
+          }
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance",
-          "chance": 0.25
-        }
-      ]
+      "condition": {
+        "chance": 0.25,
+        "type": "minecraft:random_chance"
+      }
     },
     {
       "rolls": {
@@ -37,25 +33,20 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:crossbow",
-          "functions": [
-            {
-              "function": "minecraft:enchant_randomly"
-            }
-          ]
+          "modifier": {
+            "type": "minecraft:enchant_randomly"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:filled_map",
-          "functions": [
-            {
-              "function": "minecraft:exploration_map",
-              "destination": "minecraft:on_woodland_explorer_maps",
-              "decoration": "mansion",
-              "zoom": 4,
-              "search_radius": 16,
-              "skip_existing_chunks": false
-            }
-          ]
+          "modifier": {
+            "destination": "minecraft:mansion",
+            "zoom": 4,
+            "search_radius": 16,
+            "skip_existing_chunks": false,
+            "type": "minecraft:exploration_map"
+          }
         }
       ]
     },
@@ -70,43 +61,39 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:dark_oak_log",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 48
-              },
-              "add": false
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 48
+            },
+            "add": false,
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:dark_oak_planks",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 4,
-                "max": 72
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "min": 4,
+              "max": 72,
+              "type": "minecraft:uniform"
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:birch_planks",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 4,
-                "max": 48
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "min": 4,
+              "max": 48,
+              "type": "minecraft:uniform"
+            },
+            "type": "minecraft:set_count"
+          }
         }
       ]
     },
@@ -122,46 +109,40 @@
           "type": "minecraft:item",
           "weight": 7,
           "name": "minecraft:wheat",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 3,
-                "max": 5
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 3,
+              "max": 5
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "weight": 5,
           "name": "minecraft:potato",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 5
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "weight": 5,
           "name": "minecraft:carrot",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 3,
-                "max": 5
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 3,
+              "max": 5
+            },
+            "type": "minecraft:set_count"
+          }
         }
       ]
     },
@@ -187,34 +168,32 @@
           "type": "minecraft:item",
           "weight": 15,
           "name": "minecraft:iron_axe",
-          "functions": [
-            {
-              "function": "minecraft:set_damage",
-              "damage": {
-                "type": "minecraft:uniform",
-                "min": 0.1,
-                "max": 0.7
-              }
-            }
-          ]
+          "modifier": {
+            "damage": {
+              "type": "minecraft:uniform",
+              "min": 0.1,
+              "max": 0.7
+            },
+            "type": "minecraft:set_damage"
+          }
         },
         {
           "type": "minecraft:item",
           "weight": 10,
           "name": "minecraft:iron_axe",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:enchant_with_levels",
               "levels": 15,
-              "treasure": true
+              "treasure": true,
+              "type": "minecraft:enchant_with_levels"
             },
             {
-              "function": "minecraft:set_damage",
               "damage": {
                 "type": "minecraft:uniform",
                 "min": 0.3,
                 "max": 0.7
-              }
+              },
+              "type": "minecraft:set_damage"
             }
           ]
         },
@@ -222,23 +201,19 @@
           "type": "minecraft:item",
           "weight": 12,
           "name": "minecraft:book",
-          "functions": [
-            {
-              "function": "minecraft:enchant_with_levels",
-              "levels": 20,
-              "treasure": false
-            }
-          ]
+          "modifier": {
+            "levels": 20,
+            "treasure": false,
+            "type": "minecraft:enchant_with_levels"
+          }
         },
         {
           "type": "minecraft:item",
           "weight": 5,
           "name": "minecraft:book",
-          "functions": [
-            {
-              "function": "minecraft:enchant_randomly"
-            }
-          ]
+          "modifier": {
+            "type": "minecraft:enchant_randomly"
+          }
         }
       ]
     },
@@ -254,16 +229,14 @@
           "type": "minecraft:item",
           "weight": 7,
           "name": "minecraft:experience_bottle",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 9
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 9
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
@@ -274,55 +247,47 @@
           "type": "minecraft:item",
           "weight": 8,
           "name": "minecraft:arrow",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 7
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 7
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "weight": 3,
           "name": "minecraft:tripwire_hook",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 3
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "weight": 3,
           "name": "minecraft:iron_ingot",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 3
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:book",
-          "functions": [
-            {
-              "function": "minecraft:enchant_randomly"
-            }
-          ]
+          "modifier": {
+            "type": "minecraft:enchant_randomly"
+          }
         }
       ]
     }

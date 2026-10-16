@@ -13,18 +13,18 @@
           "type": "minecraft:item",
           "weight": 3,
           "name": "minecraft:tipped_arrow",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:strong_harming"
+              "id": "minecraft:strong_harming",
+              "type": "minecraft:set_potion"
             },
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 3
-              }
+              },
+              "type": "minecraft:set_count"
             }
           ]
         },
@@ -32,18 +32,18 @@
           "type": "minecraft:item",
           "weight": 3,
           "name": "minecraft:tipped_arrow",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:long_weakness"
+              "id": "minecraft:long_weakness",
+              "type": "minecraft:set_potion"
             },
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 2,
                 "max": 4
-              }
+              },
+              "type": "minecraft:set_count"
             }
           ]
         },
@@ -51,18 +51,18 @@
           "type": "minecraft:item",
           "weight": 6,
           "name": "minecraft:tipped_arrow",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:long_poison"
+              "id": "minecraft:long_poison",
+              "type": "minecraft:set_potion"
             },
             {
-              "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 2,
                 "max": 4
-              }
+              },
+              "type": "minecraft:set_count"
             }
           ]
         },
@@ -70,16 +70,14 @@
           "type": "minecraft:item",
           "weight": 6,
           "name": "minecraft:arrow",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 4,
-                "max": 16
-              }
-            }
-          ]
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 4,
+              "max": 16
+            },
+            "type": "minecraft:set_count"
+          }
         }
       ]
     }

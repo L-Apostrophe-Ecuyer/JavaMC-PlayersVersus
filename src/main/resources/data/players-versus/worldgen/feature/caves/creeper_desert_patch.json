@@ -1,0 +1,88 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "surface": "floor",
+  "depth": 4,
+  "vertical_range": 5,
+  "extra_bottom_block_chance": 0,
+  "extra_edge_column_chance": 0.3,
+  "vegetation_chance": 0.005,
+  "xz_radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 4,
+    "max_inclusive": 7
+  },
+  "replaceable": "#minecraft:moss_replaceable",
+  "ground_state": {
+    "type": "minecraft:noise_threshold",
+    "default_state": {
+      "id": "minecraft:light_gray_terracotta"
+    },
+    "high_chance": 0.42857142857142855,
+    "high_states": [
+      {
+        "id": "minecraft:sand"
+      },
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:stone"
+      }
+    ],
+    "low_states": [
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:stone"
+      },
+      {
+        "id": "minecraft:sand"
+      },
+      {
+        "id": "minecraft:sand"
+      }
+    ],
+    "noise": {
+      "base_amplitude": 1,
+      "base_octave": -4
+    },
+    "scale": 1,
+    "seed": 0,
+    "threshold": 0
+  },
+  "vegetation_feature": {
+    "feature": "players-versus:caves/creeper_desert_patch_vegetation",
+    "placement": [
+      {
+        "type": "minecraft:count",
+        "count": 16
+      },
+      {
+        "type": "minecraft:offset",
+        "x": {
+          "type": "minecraft:uniform",
+          "min_inclusive": -5,
+          "max_inclusive": 5
+        },
+        "y": {
+          "type": "minecraft:uniform",
+          "min_inclusive": -1,
+          "max_inclusive": 1
+        },
+        "z": {
+          "type": "minecraft:uniform",
+          "min_inclusive": -5,
+          "max_inclusive": 5
+        }
+      },
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:matching_blocks",
+          "blocks": "minecraft:air"
+        }
+      }
+    ]
+  }
+}

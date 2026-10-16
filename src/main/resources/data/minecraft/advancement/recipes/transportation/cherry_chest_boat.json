@@ -4,7 +4,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:cherry_chest_raft"
+        "recipes": "minecraft:cherry_chest_boat"
       }
     },
     "has_chest": {
@@ -20,7 +20,7 @@
     "has_the_raft_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:cherry_raft"
+        "recipes": "minecraft:cherry_boat"
       }
     }
   },
@@ -36,19 +36,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:cherry_raft"
+      "minecraft:cherry_boat"
     ]
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-

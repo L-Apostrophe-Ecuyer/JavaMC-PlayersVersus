@@ -2,24 +2,65 @@ package frootloops.versus.mod.items_and_effects.brewing;
 
 
 import frootloops.versus.mod.items_and_effects.CustomBrewingItems;
-import net.minecraft.item.*;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.Potions;
-import net.minecraft.recipe.BrewingRecipeRegistry;
-import net.minecraft.registry.entry.RegistryEntry;
-
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.Potions;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * The brewing recipe graph of Players Versus: which ingredient turns which potion into which (strong, long, inverted and
+ * decayed variants, one concentrate per effect), and the vanilla container recipes.
+ *
+ * <p>Since 26.3 brewing is data (recipes of type {@code minecraft:brewing}) instead of a registry that mods add mixes
+ * to, so this class no longer registers anything by itself: it describes the graph to a {@link Recipes} sink, which the
+ * data step turns into recipes. The potions themselves are registered by {@link CustomPotions#registerCustomPotions}.
+ */
 public abstract class BrewingSystem {
 
-    private record RelatedPotions(RegistryEntry<Potion> strongPotion, RegistryEntry<Potion> longPotion,  RegistryEntry<Potion> invertedPotion) {}
-    public static void setBrewingRecipeRegistry(BrewingRecipeRegistry.Builder builder) {
+    /** What {@link #describeRecipes} tells about the graph: the mixes and container recipes, in vanilla's terms. */
+    public interface Recipes {
+        void addContainer(Item container);
+        void addMix(Holder<Potion> from, Item ingredient, Holder<Potion> to);
+        void addContainerRecipe(Item from, Item ingredient, Item to);
+    }
 
-        // Register potions:
-        CustomPotions.registerCustomPotions();
+    private record RelatedPotions(Holder<Potion> strongPotion, Holder<Potion> longPotion,  Holder<Potion> invertedPotion) {}
+
+    private static volatile Set<Item> ingredients;
+
+    /** Whether an item is the ingredient of some mix or container recipe of the graph (for sorting and tooltips). */
+    public static boolean isIngredient(Item item) {
+        Set<Item> known = ingredients;
+        if (known == null) {
+            Set<Item> found = new HashSet<>();
+            describeRecipes(new Recipes() {
+                @Override
+                public void addContainer(Item container) {
+                }
+
+                @Override
+                public void addMix(Holder<Potion> from, Item ingredient, Holder<Potion> to) {
+                    found.add(ingredient);
+                }
+
+                @Override
+                public void addContainerRecipe(Item from, Item ingredient, Item to) {
+                    found.add(ingredient);
+                }
+            });
+            ingredients = known = Set.copyOf(found);
+        }
+        return known.contains(item);
+    }
+
+    public static void describeRecipes(Recipes builder) {
 
         // Generate recipes:
-        HashMap<RegistryEntry<Potion>, RelatedPotions> brewablePotionTypes = new HashMap<>() {{
+        HashMap<Holder<Potion>, RelatedPotions> brewablePotionTypes = new HashMap<>() {{
 
             put(Potions.HEALING, new RelatedPotions(Potions.STRONG_HEALING, Potions.REGENERATION, Potions.HARMING));
             put(Potions.HARMING, new RelatedPotions(Potions.STRONG_HARMING, CustomPotions.DECAY,  Potions.HEALING));
@@ -68,17 +109,17 @@ public abstract class BrewingSystem {
             put(CustomPotions.UNLUCK,  new RelatedPotions(CustomPotions.UNLUCK, CustomPotions.UNLUCK, Potions.LUCK));
         }};
 
-        builder.registerPotionType(Items.POTION);
-        builder.registerPotionType(Items.SPLASH_POTION);
-        builder.registerPotionType(Items.LINGERING_POTION);
+        builder.addContainer(Items.POTION);
+        builder.addContainer(Items.SPLASH_POTION);
+        builder.addContainer(Items.LINGERING_POTION);
 
-        builder.registerPotionRecipe(Potions.WATER, Items.GLOWSTONE_DUST, Potions.THICK);
-        builder.registerPotionRecipe(Potions.WATER, Items.SUGAR, Potions.AWKWARD);
+        builder.addMix(Potions.WATER, Items.GLOWSTONE_DUST, Potions.THICK);
+        builder.addMix(Potions.WATER, Items.SUGAR, Potions.AWKWARD);
 
-        builder.registerItemRecipe(Items.POTION, Items.GUNPOWDER, Items.SPLASH_POTION);
-        builder.registerItemRecipe(Items.POTION, Items.REDSTONE, Items.LINGERING_POTION);
-        builder.registerItemRecipe(Items.LINGERING_POTION, Items.GUNPOWDER, Items.SPLASH_POTION);
-        builder.registerItemRecipe(Items.SPLASH_POTION, Items.REDSTONE, Items.LINGERING_POTION);
+        builder.addContainerRecipe(Items.POTION, Items.GUNPOWDER, Items.SPLASH_POTION);
+        builder.addContainerRecipe(Items.POTION, Items.REDSTONE, Items.LINGERING_POTION);
+        builder.addContainerRecipe(Items.LINGERING_POTION, Items.GUNPOWDER, Items.SPLASH_POTION);
+        builder.addContainerRecipe(Items.SPLASH_POTION, Items.REDSTONE, Items.LINGERING_POTION);
 
         registerConcentrateRecipe(builder, brewablePotionTypes, CustomBrewingItems.CONCENTRATE_OF_DEATH, CustomPotions.HAUNTING);
 
@@ -131,9 +172,9 @@ public abstract class BrewingSystem {
         brewablePotionTypes.clear();
     }
 
-    private static void  registerConcentrateRecipe(BrewingRecipeRegistry.Builder builder, HashMap<RegistryEntry<Potion>, RelatedPotions> brewablePotionTypes, Item ingredient, RegistryEntry<Potion> potion) {
-        builder.registerPotionRecipe(Potions.WATER, ingredient, potion);
-        builder.registerPotionRecipe(potion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY);
+    private static void  registerConcentrateRecipe(Recipes builder, HashMap<Holder<Potion>, RelatedPotions> brewablePotionTypes, Item ingredient, Holder<Potion> potion) {
+        builder.addMix(Potions.WATER, ingredient, potion);
+        builder.addMix(potion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY);
         if(brewablePotionTypes.containsKey(potion)) {
 
             RelatedPotions current = brewablePotionTypes.get(potion);
@@ -141,27 +182,27 @@ public abstract class BrewingSystem {
             boolean hasStrongPotion = (current.strongPotion != null && current.strongPotion != potion);
 
             if (hasLongPotion) {
-                builder.registerPotionRecipe(potion, Items.SUGAR, current.longPotion);
-                builder.registerPotionRecipe(Potions.THICK, ingredient, current.longPotion);
-                builder.registerPotionRecipe(current.longPotion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_LONG);
+                builder.addMix(potion, Items.SUGAR, current.longPotion);
+                builder.addMix(Potions.THICK, ingredient, current.longPotion);
+                builder.addMix(current.longPotion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_LONG);
             }
             if (hasStrongPotion) {
-                builder.registerPotionRecipe(potion, Items.GLOWSTONE_DUST, current.strongPotion);
-                builder.registerPotionRecipe(Potions.AWKWARD, ingredient, current.strongPotion);
-                builder.registerPotionRecipe(current.strongPotion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_STRONG);
+                builder.addMix(potion, Items.GLOWSTONE_DUST, current.strongPotion);
+                builder.addMix(Potions.AWKWARD, ingredient, current.strongPotion);
+                builder.addMix(current.strongPotion, CustomBrewingItems.CONCENTRATE_OF_DECAY, CustomPotions.DECAY_STRONG);
             }
 
             if (current.invertedPotion != null && current.invertedPotion != potion) {
-                builder.registerPotionRecipe(potion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
+                builder.addMix(potion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
                 if(brewablePotionTypes.containsKey(current.invertedPotion)) {
                     RelatedPotions inverted = brewablePotionTypes.get(current.invertedPotion);
                     if (hasLongPotion) {
-                        if(inverted.longPotion != null) builder.registerPotionRecipe(current.longPotion, Items.FERMENTED_SPIDER_EYE, inverted.longPotion);
-                        else builder.registerPotionRecipe(current.longPotion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
+                        if(inverted.longPotion != null) builder.addMix(current.longPotion, Items.FERMENTED_SPIDER_EYE, inverted.longPotion);
+                        else builder.addMix(current.longPotion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
                     }
                     if (hasStrongPotion) {
-                        if(inverted.strongPotion != null) builder.registerPotionRecipe(current.strongPotion, Items.FERMENTED_SPIDER_EYE, inverted.strongPotion);
-                        else builder.registerPotionRecipe(current.strongPotion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
+                        if(inverted.strongPotion != null) builder.addMix(current.strongPotion, Items.FERMENTED_SPIDER_EYE, inverted.strongPotion);
+                        else builder.addMix(current.strongPotion, Items.FERMENTED_SPIDER_EYE, current.invertedPotion);
                     }
                 }
             }

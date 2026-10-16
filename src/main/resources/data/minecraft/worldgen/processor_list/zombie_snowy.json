@@ -8,11 +8,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:tag_match",
-            "tag": "minecraft:doors"
+            "tag": "minecraft:doors",
+            "predicate_type": "minecraft:tag_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -20,11 +20,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:torch"
+            "block": "minecraft:torch",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -32,11 +32,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:wall_torch"
+            "block": "minecraft:wall_torch",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -44,11 +44,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:lantern"
+            "block": "minecraft:lantern",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -56,12 +56,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:spruce_planks",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:snow_block"
+            "id": "minecraft:snow_block"
           }
         },
         {
@@ -69,12 +69,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:spruce_planks",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:oak_planks"
+            "id": "minecraft:oak_planks"
           }
         },
         {
@@ -82,12 +82,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:spruce_slab",
-            "probability": 0.3
+            "probability": 0.3,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -95,12 +95,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:stripped_spruce_log",
-            "probability": 0.08
+            "probability": 0.08,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:snow_block"
+            "id": "minecraft:snow_block"
           }
         },
         {
@@ -108,13 +108,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:stripped_spruce_log",
-            "probability": 0.15
+            "probability": 0.15,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:stripped_oak_log",
-            "Properties": {
+            "id": "minecraft:stripped_oak_log",
+            "properties": {
               "axis": "y"
             }
           }
@@ -124,13 +124,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:stripped_spruce_wood",
-            "probability": 0.15
+            "probability": 0.15,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:stripped_oak_wood",
-            "Properties": {
+            "id": "minecraft:stripped_oak_wood",
+            "properties": {
               "axis": "y"
             }
           }
@@ -140,12 +140,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:glass_pane",
-            "probability": 0.4
+            "probability": 0.4,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:snow_block"
+            "id": "minecraft:snow_block"
           }
         },
         {
@@ -153,11 +153,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:block_match",
-            "block": "minecraft:glass_pane"
+            "block": "minecraft:glass_pane",
+            "predicate_type": "minecraft:block_match"
           },
           "output_state": {
-            "Name": "minecraft:air"
+            "id": "minecraft:air"
           }
         },
         {
@@ -165,13 +165,13 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:wheat",
-            "probability": 0
+            "probability": 0,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:snow",
-            "Properties": {
+            "id": "minecraft:snow",
+            "properties": {
               "layers": "1"
             }
           }

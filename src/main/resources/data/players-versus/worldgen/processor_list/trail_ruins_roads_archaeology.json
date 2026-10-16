@@ -8,12 +8,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:gravel",
-            "probability": 0.2
+            "probability": 0.2,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:dirt"
+            "id": "minecraft:dirt"
           }
         },
         {
@@ -21,12 +21,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "minecraft:gravel",
-            "probability": 0.1
+            "probability": 0.1,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "minecraft:coarse_dirt"
+            "id": "minecraft:coarse_dirt"
           }
         },
         {
@@ -34,12 +34,12 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
             "block": "players-versus:brown_clay_bricks",
-            "probability": 0.1
+            "probability": 0.1,
+            "predicate_type": "minecraft:random_block_match"
           },
           "output_state": {
-            "Name": "players-versus:brown_clay"
+            "id": "players-versus:brown_clay"
           }
         }
       ]
@@ -55,12 +55,12 @@
               "predicate_type": "minecraft:always_true"
             },
             "input_predicate": {
-              "predicate_type": "minecraft:tag_match",
-              "tag": "minecraft:trail_ruins_replaceable"
+              "tag": "minecraft:trail_ruins_replaceable",
+              "predicate_type": "minecraft:tag_match"
             },
             "output_state": {
-              "Name": "minecraft:suspicious_gravel",
-              "Properties": {
+              "id": "minecraft:suspicious_gravel",
+              "properties": {
                 "dusted": "0"
               }
             },

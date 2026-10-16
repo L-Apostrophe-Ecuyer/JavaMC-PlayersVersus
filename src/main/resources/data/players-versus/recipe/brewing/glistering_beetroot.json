@@ -1,14 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "pattern": [
     "###",
     "#X#",
     "###"
   ],
   "key": {
-    "#" : "minecraft:gold_nugget",
-    "X" : "minecraft:beetroot"
+    "#": "minecraft:gold_nugget",
+    "X": "minecraft:beetroot"
   },
   "result": {
     "id": "players-versus:glistering_beetroot",

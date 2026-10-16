@@ -7,25 +7,37 @@ import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.environment.CustomSpecialEffects;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.*;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.*;
-import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
-import net.minecraft.item.consume.ConsumeEffect;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.item.equipment.EquipmentType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ArmorStandItem;
+import net.minecraft.world.item.BoatItem;
+import net.minecraft.world.item.EndCrystalItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MinecartItem;
+import net.minecraft.world.item.component.BlocksAttacks;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.UseRemainder;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.ConsumeEffect;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.Equippable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +52,7 @@ public class VanillaItems {
         setUpTransformVanillaItemsToModded(); // This is to replace vanilla items with modded ones, when components don't do the job
 
         // Modify default components:
-        DefaultItemComponentEvents.MODIFY.addPhaseOrdering(Event.DEFAULT_PHASE, Identifier.of(VersusMod.MOD_ID, "late"));
+        DefaultItemComponentEvents.MODIFY.addPhaseOrdering(Event.DEFAULT_PHASE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "late"));
 
         // Modify tools:
         modifyVanillaToolsAndWeapons();
@@ -56,25 +68,25 @@ public class VanillaItems {
 
             // Add food component to glistering melon slices:
             context.modify(Items.GLISTERING_MELON_SLICE, builder -> {builder
-                    .add(DataComponentTypes.FOOD, new FoodComponent.Builder().nutrition(4).saturationModifier(1.0F).build())
-                    .add(DataComponentTypes.CONSUMABLE, createFoodConsumptionComponent(1.4F, true, new ApplyEffectsConsumeEffect(
-                            List.of(new StatusEffectInstance(StatusEffects.REGENERATION, 10, 2))
+                    .set(DataComponents.FOOD, new FoodProperties.Builder().nutrition(4).saturationModifier(1.0F).build())
+                    .set(DataComponents.CONSUMABLE, createFoodConsumptionComponent(1.4F, true, new ApplyStatusEffectsConsumeEffect(
+                            List.of(new MobEffectInstance(MobEffects.REGENERATION, 10, 2))
                     )));
             });
 
             // Give leather armor some knockback resistance:
-            context.modify(Items.LEATHER_CHESTPLATE, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.CHESTPLATE, 2.0, 0.0, 0.1));});
-            context.modify(Items.LEATHER_LEGGINGS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.LEGGINGS, 2.0, 0.0, 0.05));});
-            context.modify(Items.LEATHER_BOOTS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.BOOTS, 1.0, 0.0, 0.0, -0.2));});
+            context.modify(Items.LEATHER_CHESTPLATE, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createArmorAttributes(ArmorType.CHESTPLATE, 2.0, 0.0, 0.1));});
+            context.modify(Items.LEATHER_LEGGINGS, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createArmorAttributes(ArmorType.LEGGINGS, 2.0, 0.0, 0.05));});
+            context.modify(Items.LEATHER_BOOTS, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createArmorAttributes(ArmorType.BOOTS, 1.0, 0.0, 0.0, -0.2));});
 
             // Give chainmail armor some toughness:
-            context.modify(Items.CHAINMAIL_CHESTPLATE, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.CHESTPLATE, 5.0, 3.0, 0.0));});
-            context.modify(Items.CHAINMAIL_LEGGINGS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.LEGGINGS, 4.0, 2.0, 0.0));});
-            context.modify(Items.CHAINMAIL_BOOTS, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.BOOTS, 2.0, 2.0, 0.0));});
-            context.modify(Items.CHAINMAIL_HELMET, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createArmorAttributes(EquipmentType.HELMET, 2.0, 2.0, 0.0));});
+            context.modify(Items.CHAINMAIL_CHESTPLATE, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createArmorAttributes(ArmorType.CHESTPLATE, 5.0, 3.0, 0.0));});
+            context.modify(Items.CHAINMAIL_LEGGINGS, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createArmorAttributes(ArmorType.LEGGINGS, 4.0, 2.0, 0.0));});
+            context.modify(Items.CHAINMAIL_BOOTS, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createArmorAttributes(ArmorType.BOOTS, 2.0, 2.0, 0.0));});
+            context.modify(Items.CHAINMAIL_HELMET, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createArmorAttributes(ArmorType.HELMET, 2.0, 2.0, 0.0));});
 
             // Give turtle helmets more buffs:
-            context.modify(Items.TURTLE_HELMET, builder -> {builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createTurtleArmorAttributes(EquipmentType.HELMET, 2.0));});
+            context.modify(Items.TURTLE_HELMET, builder -> {builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createTurtleArmorAttributes(ArmorType.HELMET, 2.0));});
         });
     }
 
@@ -163,10 +175,10 @@ public class VanillaItems {
             modifyVanillaStackSizeOf(context, Items.RECOVERY_COMPASS, 1);
 
             // Misc
-            for (Item item : Registries.ITEM) {
-                if(item.getMaxCount() == 1) {
-                    if (item.getDefaultStack().getComponents().contains(DataComponentTypes.MAX_DAMAGE)) return;
-                    EquippableComponent equipComponent = item.getDefaultStack().getComponents().getOrDefault(DataComponentTypes.EQUIPPABLE, null);
+            for (Item item : BuiltInRegistries.ITEM) {
+                if(item.getDefaultMaxStackSize() == 1) {
+                    if (item.getDefaultInstance().getComponents().has(DataComponents.MAX_DAMAGE)) return;
+                    Equippable equipComponent = item.getDefaultInstance().getComponents().getOrDefault(DataComponents.EQUIPPABLE, null);
                     if (equipComponent != null && (equipComponent.slot() == EquipmentSlot.SADDLE || equipComponent.slot() == EquipmentSlot.BODY))
                         modifyVanillaStackSizeOf(context, item, VersusSettings.Items.MAX_COUNT_PLACEABLE_ENTITIES);
                     else if (item instanceof BoatItem || item instanceof MinecartItem || item instanceof ArmorStandItem || item instanceof EndCrystalItem)
@@ -221,33 +233,33 @@ public class VanillaItems {
     }
 
     private static void modifyVanillaStackSizeOf(DefaultItemComponentEvents.ModifyContext context, Item item, int newStackSize) {
-        if(item.getDefaultStack().getMaxCount() == newStackSize) return;
-        context.modify(item, builder -> {builder.add(DataComponentTypes.MAX_STACK_SIZE, newStackSize + 0);});
+        if(item.getDefaultInstance().getMaxStackSize() == newStackSize) return;
+        context.modify(item, builder -> {builder.set(DataComponents.MAX_STACK_SIZE, newStackSize + 0);});
     }
 
     private static void modifyVanillaFoodItem(final Item item, final float eatTime) {
-        UseRemainderComponent remainderComponent = item.getDefaultStack().getOrDefault(DataComponentTypes.USE_REMAINDER, null);
-        boolean isHoneyBottle = item == Items.HONEY_BOTTLE;
-        boolean isBottled = !isHoneyBottle && (remainderComponent != null && remainderComponent.convertInto().isOf(Items.GLASS_BOTTLE));
-        boolean isBucket = !isBottled && remainderComponent != null && remainderComponent.convertInto().isOf(Items.BUCKET);
-        boolean isStew = !isBucket && !isBottled && remainderComponent != null && remainderComponent.convertInto().isOf(Items.BOWL);
-
-        ConsumableComponent consumeComponent = item.getDefaultStack().getOrDefault(DataComponentTypes.CONSUMABLE, null);
-        boolean isDrink = isHoneyBottle || isStew || isBucket || isBottled || consumeComponent.sound() == SoundEvents.ENTITY_GENERIC_DRINK;
-        boolean hasParticles = !isDrink && remainderComponent == null;
-
-        ConsumableComponent newConsumeComponent = isDrink ?
-                createDrinkConsumptionComponent(eatTime, consumeComponent.onConsumeEffects(), isHoneyBottle) :
-                createFoodConsumptionComponent(eatTime, hasParticles, consumeComponent.onConsumeEffects());
-
-        final int maxCount;
-        if(isBottled) maxCount = VersusSettings.Items.MAX_COUNT_BOTTLED;
-        else if(isStew) maxCount = VersusSettings.Items.MAX_COUNT_STEWS;
-        else if(isBucket) maxCount = VersusSettings.Items.MAX_COUNT_BUCKETS;
-        else maxCount = VersusSettings.Items.MAX_COUNT_FOOD;
         DefaultItemComponentEvents.MODIFY.register(context -> {
-            if(maxCount != item.getDefaultStack().getMaxCount()) modifyVanillaStackSizeOf(context, item, maxCount);
-            context.modify(item, builder -> {builder.add(DataComponentTypes.CONSUMABLE, newConsumeComponent);});
+            UseRemainder remainderComponent = item.getDefaultInstance().getOrDefault(DataComponents.USE_REMAINDER, null);
+            boolean isHoneyBottle = item == Items.HONEY_BOTTLE;
+            boolean isBottled = !isHoneyBottle && (remainderComponent != null && remainderComponent.convertInto().is(Items.GLASS_BOTTLE));
+            boolean isBucket = !isBottled && remainderComponent != null && remainderComponent.convertInto().is(Items.BUCKET);
+            boolean isStew = !isBucket && !isBottled && remainderComponent != null && remainderComponent.convertInto().is(Items.BOWL);
+
+            Consumable consumeComponent = item.getDefaultInstance().getOrDefault(DataComponents.CONSUMABLE, null);
+            boolean isDrink = isHoneyBottle || isStew || isBucket || isBottled || consumeComponent.sound() == SoundEvents.GENERIC_DRINK;
+            boolean hasParticles = !isDrink && remainderComponent == null;
+
+            Consumable newConsumeComponent = isDrink ?
+                    createDrinkConsumptionComponent(eatTime, consumeComponent.onConsumeEffects(), isHoneyBottle) :
+                    createFoodConsumptionComponent(eatTime, hasParticles, consumeComponent.onConsumeEffects());
+
+            int maxCount;
+            if(isBottled) maxCount = VersusSettings.Items.MAX_COUNT_BOTTLED;
+            else if(isStew) maxCount = VersusSettings.Items.MAX_COUNT_STEWS;
+            else if(isBucket) maxCount = VersusSettings.Items.MAX_COUNT_BUCKETS;
+            else maxCount = VersusSettings.Items.MAX_COUNT_FOOD;
+            if(maxCount != item.getDefaultInstance().getMaxStackSize()) modifyVanillaStackSizeOf(context, item, maxCount);
+            context.modify(item, builder -> {builder.set(DataComponents.CONSUMABLE, newConsumeComponent);});
         });
     }
 
@@ -257,8 +269,8 @@ public class VanillaItems {
             modifyToolComponents(context, Items.TRIDENT, TRIDENT_DAMAGE, TRIDENT_SPEED, TRIDENT_REACH);
 
             // Shields are instant:
-            context.modify(Items.SHIELD, builder -> {
-                builder.add(DataComponentTypes.BLOCKS_ATTACKS, createDamageBlockingComponent(0.0625F, 1.0F, 5.0F, 0.8F, SoundEvents.ITEM_SHIELD_BLOCK, SoundEvents.ITEM_SHIELD_BREAK));
+            context.modify(Items.SHIELD, (builder, registries, shield) -> {
+                builder.set(DataComponents.BLOCKS_ATTACKS, createDamageBlockingComponent(registries, 0.0625F, 1.0F, 5.0F, 0.8F, SoundEvents.SHIELD_BLOCK, SoundEvents.SHIELD_BREAK));
             });
 
             double extra = 0.0;
@@ -304,10 +316,10 @@ public class VanillaItems {
         });
     }
 
-    private static void modifySwordComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount, RegistryEntry.Reference<SoundEvent> blockingSound) {
-        context.modify(item, builder -> {builder
-                .add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange, 0.0))
-                .add(DataComponentTypes.BLOCKS_ATTACKS, getSwordBlockingComponent(baseBlockingAmount, blockingSound, blockingSound));
+    private static void modifySwordComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, float baseBlockingAmount, Holder.Reference<SoundEvent> blockingSound) {
+        context.modify(item, (builder, registries, sword) -> {builder
+                .set(DataComponents.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange, 0.0))
+                .set(DataComponents.BLOCKS_ATTACKS, getSwordBlockingComponent(registries, baseBlockingAmount, blockingSound, blockingSound));
         });
     }
 
@@ -317,99 +329,100 @@ public class VanillaItems {
 
     private static void modifyToolComponents(final DefaultItemComponentEvents.ModifyContext context, Item item, double attackDamage, double attackSpeed, double extraAttackRange, double extraAttackKnockback) {
         context.modify(item, builder -> {
-            builder.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange, extraAttackKnockback));
+            builder.set(DataComponents.ATTRIBUTE_MODIFIERS, createToolAttributeModifiers(attackDamage, attackSpeed, extraAttackRange, extraAttackKnockback));
         });
     }
 
-    public static ConsumableComponent createDrinkConsumptionComponent(float consumeSeconds, List<ConsumeEffect> consumeEffects, boolean usHoneySound) {
-        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().consumeSeconds(consumeSeconds).useAction(UseAction.DRINK).sound(usHoneySound ? SoundEvents.ITEM_HONEY_BOTTLE_DRINK : SoundEvents.ENTITY_GENERIC_DRINK).consumeParticles(false);
-        for(ConsumeEffect effect : consumeEffects) consumeComponent.consumeEffect(effect);
+    public static Consumable createDrinkConsumptionComponent(float consumeSeconds, List<ConsumeEffect> consumeEffects, boolean usHoneySound) {
+        Consumable.Builder consumeComponent = Consumable.builder().consumeSeconds(consumeSeconds).animation(ItemUseAnimation.DRINK).sound(usHoneySound ? SoundEvents.HONEY_DRINK : SoundEvents.GENERIC_DRINK).hasConsumeParticles(false);
+        for(ConsumeEffect effect : consumeEffects) consumeComponent.onConsume(effect);
         return consumeComponent.build();
     }
 
-    public static ConsumableComponent createFoodConsumptionComponent(float consumeSeconds, boolean doParticles, ApplyEffectsConsumeEffect applyEffectsConsumeEffect) {
-        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().consumeSeconds(consumeSeconds).useAction(UseAction.EAT).sound(SoundEvents.ENTITY_GENERIC_EAT).consumeParticles(doParticles);
-        if(applyEffectsConsumeEffect != null) consumeComponent.consumeEffect(applyEffectsConsumeEffect);
+    public static Consumable createFoodConsumptionComponent(float consumeSeconds, boolean doParticles, ApplyStatusEffectsConsumeEffect applyEffectsConsumeEffect) {
+        Consumable.Builder consumeComponent = Consumable.builder().consumeSeconds(consumeSeconds).animation(ItemUseAnimation.EAT).sound(SoundEvents.GENERIC_EAT).hasConsumeParticles(doParticles);
+        if(applyEffectsConsumeEffect != null) consumeComponent.onConsume(applyEffectsConsumeEffect);
         return consumeComponent.build();
     }
-    public static ConsumableComponent createFoodConsumptionComponent(float consumeSeconds, boolean doParticles, List<ConsumeEffect> consumeEffects) {
-        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().consumeSeconds(consumeSeconds).useAction(UseAction.EAT).sound(SoundEvents.ENTITY_GENERIC_EAT).consumeParticles(doParticles);
-        for(ConsumeEffect effect : consumeEffects) consumeComponent.consumeEffect(effect);
-        return consumeComponent.build();
-    }
-
-    public static ConsumableComponent createUseActionComponent(UseAction useAction, float consumeSeconds, RegistryEntry<SoundEvent> sound, RegistryEntry<SoundEvent> finishSound, boolean consumeParticles, ConsumeEffect consumeEffect) {
-        ConsumableComponent.Builder consumeComponent = ConsumableComponent.builder().useAction(useAction).consumeSeconds(consumeSeconds).sound(sound).finishSound(finishSound).consumeParticles(consumeParticles).consumeEffect(consumeEffect);
+    public static Consumable createFoodConsumptionComponent(float consumeSeconds, boolean doParticles, List<ConsumeEffect> consumeEffects) {
+        Consumable.Builder consumeComponent = Consumable.builder().consumeSeconds(consumeSeconds).animation(ItemUseAnimation.EAT).sound(SoundEvents.GENERIC_EAT).hasConsumeParticles(doParticles);
+        for(ConsumeEffect effect : consumeEffects) consumeComponent.onConsume(effect);
         return consumeComponent.build();
     }
 
-    public static BlocksAttacksComponent getSwordBlockingComponent(float baseBlockingAmount, RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking) {
-        return createDamageBlockingComponent(0.0625F, 0.5F, Math.max(0F, baseBlockingAmount), 0.5F, soundBlocking, soundBreaking);
+    public static Consumable createUseActionComponent(ItemUseAnimation useAction, float consumeSeconds, Holder<SoundEvent> sound, Holder<SoundEvent> finishSound, boolean consumeParticles, ConsumeEffect consumeEffect) {
+        Consumable.Builder consumeComponent = Consumable.builder().animation(useAction).consumeSeconds(consumeSeconds).sound(sound).soundAfterConsume(finishSound).hasConsumeParticles(consumeParticles).onConsume(consumeEffect);
+        return consumeComponent.build();
+    }
+
+    public static BlocksAttacks getSwordBlockingComponent(HolderLookup.Provider registries, float baseBlockingAmount, Holder.Reference<SoundEvent> soundBlocking, Holder.Reference<SoundEvent> soundBreaking) {
+        return createDamageBlockingComponent(registries, 0.0625F, 0.5F, Math.max(0F, baseBlockingAmount), 0.5F, soundBlocking, soundBreaking);
     }
 
 
-    public static BlocksAttacksComponent createDamageBlockingComponent(
+    public static BlocksAttacks createDamageBlockingComponent(
+            HolderLookup.Provider registries,
             float blockDelaySeconds,    // The amount of time (in seconds) that use must be held before successfully blocking attacks
             float disableCooldownScale, // The multiplier applied to the cooldown time for the item when attacked by a disabling attack
             float amountBlockedBase,    // The constant amount of damage to be blocked
             float amountBlockedFactor,  // The fraction of the dealt damage to be blocked
-            RegistryEntry.Reference<SoundEvent> soundBlocking, RegistryEntry.Reference<SoundEvent> soundBreaking
+            Holder.Reference<SoundEvent> soundBlocking, Holder.Reference<SoundEvent> soundBreaking
     ) {
         float horizontalBlockingAngle = 90F;
         float itemDamageThreshold = 3.0F;
         float itemDamageBase = 1.0F;
         float itemDamageFactor = 1.0F;
-        return new BlocksAttacksComponent(
+        return new BlocksAttacks(
                 blockDelaySeconds,
                 disableCooldownScale,
-                List.of(new BlocksAttacksComponent.DamageReduction(horizontalBlockingAngle, Optional.empty(), amountBlockedBase, amountBlockedFactor)),
-                new BlocksAttacksComponent.ItemDamage(itemDamageThreshold, itemDamageBase, itemDamageFactor),
-                Optional.of(DamageTypeTags.BYPASSES_SHIELD),
+                List.of(new BlocksAttacks.DamageReduction(horizontalBlockingAngle, Optional.empty(), amountBlockedBase, amountBlockedFactor)),
+                new BlocksAttacks.ItemDamageFunction(itemDamageThreshold, itemDamageBase, itemDamageFactor),
+                Optional.of(registries.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypeTags.BYPASSES_SHIELD)),
                 Optional.of(soundBlocking),
                 Optional.of(soundBreaking)
         );
     }
 
-    public static AttributeModifiersComponent createToolAttributeModifiers(double attackDamage, double attackSpeed, double extraAttackRange, double extraAttackKnockback) {
-        AttributeModifiersComponent.Builder attributeBuilder = AttributeModifiersComponent.builder()
-                .add(EntityAttributes.ATTACK_DAMAGE, new EntityAttributeModifier(Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, attackDamage - Combat.PLAYER_BASE_ATTACK_DAMAGE, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND)
-                .add(EntityAttributes.ATTACK_SPEED, new EntityAttributeModifier(Item.BASE_ATTACK_SPEED_MODIFIER_ID, attackSpeed - Combat.PLAYER_BASE_ATTACK_SPEED, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND);
+    public static ItemAttributeModifiers createToolAttributeModifiers(double attackDamage, double attackSpeed, double extraAttackRange, double extraAttackKnockback) {
+        ItemAttributeModifiers.Builder attributeBuilder = ItemAttributeModifiers.builder()
+                .add(Attributes.ATTACK_DAMAGE, new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, attackDamage - Combat.PLAYER_BASE_ATTACK_DAMAGE, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
+                .add(Attributes.ATTACK_SPEED, new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, attackSpeed - Combat.PLAYER_BASE_ATTACK_SPEED, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND);
 
         if(extraAttackRange != 0.0)
-            attributeBuilder.add(EntityAttributes.ENTITY_INTERACTION_RANGE, new EntityAttributeModifier(ATTACK_REACH_MODIFIER_ID, extraAttackRange, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND);
+            attributeBuilder.add(Attributes.ENTITY_INTERACTION_RANGE, new AttributeModifier(ATTACK_REACH_MODIFIER_ID, extraAttackRange, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND);
 
         if(extraAttackKnockback != 0.0)
-            attributeBuilder.add(EntityAttributes.ATTACK_KNOCKBACK, new EntityAttributeModifier(ATTACK_KNOCKBACK_MODIFIER_ID, extraAttackRange, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND);
+            attributeBuilder.add(Attributes.ATTACK_KNOCKBACK, new AttributeModifier(ATTACK_KNOCKBACK_MODIFIER_ID, extraAttackRange, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND);
 
         return attributeBuilder.build();
     }
 
 
-    public static AttributeModifiersComponent createArmorAttributes(EquipmentType type, double armor, double toughness, double kbResistance) {
+    public static ItemAttributeModifiers createArmorAttributes(ArmorType type, double armor, double toughness, double kbResistance) {
         return createArmorAttributes(type, armor, toughness, kbResistance, 0.0);
     }
-    public static AttributeModifiersComponent createArmorAttributes(EquipmentType type, double armor, double toughness, double kbResistance, double fallDmgMultiplier) {
-        AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
-        AttributeModifierSlot attributeModifierSlot = AttributeModifierSlot.forEquipmentSlot(type.getEquipmentSlot());
-        Identifier identifier = Identifier.ofVanilla("armor." + type.getName());
+    public static ItemAttributeModifiers createArmorAttributes(ArmorType type, double armor, double toughness, double kbResistance, double fallDmgMultiplier) {
+        ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+        EquipmentSlotGroup attributeModifierSlot = EquipmentSlotGroup.bySlot(type.getSlot());
+        Identifier identifier = Identifier.withDefaultNamespace("armor." + type.getName());
 
-        builder.add(EntityAttributes.ARMOR, new EntityAttributeModifier(identifier, armor, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
-        if (toughness != 0.0) builder.add(EntityAttributes.ARMOR_TOUGHNESS, new EntityAttributeModifier(identifier, toughness, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
-        if (kbResistance > 0.0) builder.add(EntityAttributes.KNOCKBACK_RESISTANCE, new EntityAttributeModifier(identifier, kbResistance, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
-        if (fallDmgMultiplier != 0.0) builder.add(EntityAttributes.FALL_DAMAGE_MULTIPLIER, new EntityAttributeModifier(identifier, fallDmgMultiplier, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        builder.add(Attributes.ARMOR, new AttributeModifier(identifier, armor, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        if (toughness != 0.0) builder.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(identifier, toughness, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        if (kbResistance > 0.0) builder.add(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(identifier, kbResistance, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        if (fallDmgMultiplier != 0.0) builder.add(Attributes.FALL_DAMAGE_MULTIPLIER, new AttributeModifier(identifier, fallDmgMultiplier, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
 
         return builder.build();
     }
 
-    private static AttributeModifiersComponent createTurtleArmorAttributes(EquipmentType type, double armor) {
-        AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
-        AttributeModifierSlot attributeModifierSlot = AttributeModifierSlot.forEquipmentSlot(type.getEquipmentSlot());
-        Identifier identifier = Identifier.ofVanilla("armor." + type.getName());
+    private static ItemAttributeModifiers createTurtleArmorAttributes(ArmorType type, double armor) {
+        ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+        EquipmentSlotGroup attributeModifierSlot = EquipmentSlotGroup.bySlot(type.getSlot());
+        Identifier identifier = Identifier.withDefaultNamespace("armor." + type.getName());
 
-        builder.add(EntityAttributes.ARMOR, new EntityAttributeModifier(identifier, armor, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
-        builder.add(EntityAttributes.ARMOR_TOUGHNESS, new EntityAttributeModifier(identifier, 0.5, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
-        builder.add(EntityAttributes.WATER_MOVEMENT_EFFICIENCY, new EntityAttributeModifier(identifier, 0.5, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
-        builder.add(EntityAttributes.ATTACK_DAMAGE, new EntityAttributeModifier(identifier, 1.0, EntityAttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        builder.add(Attributes.ARMOR, new AttributeModifier(identifier, armor, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        builder.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(identifier, 0.5, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        builder.add(Attributes.WATER_MOVEMENT_EFFICIENCY, new AttributeModifier(identifier, 0.5, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
+        builder.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(identifier, 1.0, AttributeModifier.Operation.ADD_VALUE), attributeModifierSlot);
         return builder.build();
     }
 }

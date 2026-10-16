@@ -1,7 +1,5 @@
 {
   "type": "minecraft:smelting",
-  "category": "food",
-
   "ingredient": [
     "minecraft:ink_sac"
   ],

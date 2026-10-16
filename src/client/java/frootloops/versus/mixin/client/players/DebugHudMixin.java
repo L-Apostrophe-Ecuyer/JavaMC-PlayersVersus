@@ -1,22 +1,21 @@
 package frootloops.versus.mixin.client.players;
 
 import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.DebugHud;
-import net.minecraft.client.gui.hud.debug.DebugHudEntries;
-import net.minecraft.client.gui.hud.debug.DebugHudEntryVisibility;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Language;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.profiler.Profilers;
-import net.minecraft.world.LightType;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
+import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,60 +26,62 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Mixin(DebugHud.class)
+@Mixin(DebugScreenOverlay.class)
 public abstract class DebugHudMixin {
 
-    @Shadow private final MinecraftClient client;
+    @Shadow private final Minecraft minecraft;
 
-    @Shadow private boolean renderingChartVisible, renderingAndTickChartsVisible, packetSizeAndPingChartsVisible;
+    @Shadow private boolean renderProfilerChart, renderFpsCharts, renderNetworkCharts;
 
-    protected DebugHudMixin(MinecraftClient client) {
-        this.client = client;
+    protected DebugHudMixin(Minecraft client) {
+        this.minecraft = client;
     }
 
+    // 26.x renamed it extractLines and added the width that right-aligned lines are placed against (vanilla passes
+    // the scaled GUI width; it doesn't read it from the extractor itself).
     @Shadow
-    private void drawText(DrawContext context, List<String> text, boolean left) {}
+    private void extractLines(GuiGraphicsExtractor context, List<String> text, boolean left, int width) {}
 
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void limitDebugWhenInSurvival(DrawContext context, CallbackInfo info) {
-        if (this.client.getCameraEntity() != null && this.client.world != null) {
-            boolean shouldRestrictDebug = this.client.player.getGameMode() == null || this.client.player.getGameMode().isSurvivalLike();
+    @Inject(method = "extractRenderState", at = @At("HEAD"), cancellable = true)
+    private void limitDebugWhenInSurvival(GuiGraphicsExtractor context, CallbackInfo info) {
+        if (this.minecraft.getCameraEntity() != null && this.minecraft.level != null) {
+            boolean shouldRestrictDebug = this.minecraft.player.gameMode() == null || this.minecraft.player.gameMode().isSurvival();
             if (shouldRestrictDebug) {
 
-                renderingChartVisible = false;
-                renderingAndTickChartsVisible = false;
-                packetSizeAndPingChartsVisible = false;
+                renderProfilerChart = false;
+                renderFpsCharts = false;
+                renderNetworkCharts = false;
 
-                context.createNewRootLayer();
-                Profiler profiler = Profilers.get();
+                context.nextStratum();
+                ProfilerFiller profiler = Profiler.get();
                 profiler.push("debug");
 
                 final List<String> list = new ArrayList();
-                boolean isDebugReduced = this.client.hasReducedDebugInfo();
-                boolean isF3Enabled = this.client.debugHudEntryList.isF3Enabled();
+                boolean isDebugReduced = this.minecraft.showOnlyReducedInfo();
+                boolean isF3Enabled = this.minecraft.debugEntries.isOverlayVisible();
 
                 // Show player position if enabled:
-                BlockPos blockPos = client.player.getBlockPos();
-                if(!isDebugReduced && (isF3Enabled || client.debugHudEntryList.getVisibility(DebugHudEntries.PLAYER_POSITION) != DebugHudEntryVisibility.NEVER)) {
+                BlockPos blockPos = minecraft.player.blockPosition();
+                if(!isDebugReduced && (isF3Enabled || minecraft.debugEntries.getStatus(DebugScreenEntries.PLAYER_POSITION) != DebugScreenEntryStatus.NEVER)) {
                     list.add(String.format(Locale.ROOT, " %d %d %d ", blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                 }
 
                 // Show player FPS if enabled:
-                if(client.debugHudEntryList.isEntryVisible(DebugHudEntries.FPS)) {
-                    list.add( String.format(Locale.ROOT, " %d FPS ", client.getCurrentFps()));
+                if(minecraft.debugEntries.isCurrentlyEnabled(DebugScreenEntries.FPS)) {
+                    list.add( String.format(Locale.ROOT, " %d FPS ", minecraft.getFps()));
                 }
 
                 // Show light level if enabled:
-                if(client.debugHudEntryList.isEntryVisible(DebugHudEntries.LIGHT_LEVELS)) {
-                    list.add( String.format(Locale.ROOT, " %d Block Light ", client.world.getLightLevel(LightType.BLOCK, blockPos)));
-                    list.add( String.format(Locale.ROOT, " %d Sky Light ", client.world.getLightLevel(LightType.SKY, blockPos)));
+                if(minecraft.debugEntries.isCurrentlyEnabled(DebugScreenEntries.LIGHT_LEVELS)) {
+                    list.add( String.format(Locale.ROOT, " %d Block Light ", minecraft.level.getBrightness(LightLayer.BLOCK, blockPos)));
+                    list.add( String.format(Locale.ROOT, " %d Sky Light ", minecraft.level.getBrightness(LightLayer.SKY, blockPos)));
                 }
 
                 // Show biome if enabled:
-                if(client.debugHudEntryList.isEntryVisible(DebugHudEntries.BIOME)) {
-                    MutableText text = Text.literal("Biome: ").append("subtitles.players-versus.sword_blocking").append(" ");
-                    list.add(" Biome: " + getBiomeName(client.world.getBiome(blockPos)) + " ");
+                if(minecraft.debugEntries.isCurrentlyEnabled(DebugScreenEntries.BIOME)) {
+                    MutableComponent text = Component.literal("Biome: ").append("subtitles.players-versus.sword_blocking").append(" ");
+                    list.add(" Biome: " + getBiomeName(minecraft.level.getBiome(blockPos)) + " ");
                 }
 
                 // If F3 is currently enabled, then show how to configure the screen;
@@ -91,15 +92,15 @@ public abstract class DebugHudMixin {
                 }
 
                 // And that's it!
-                this.drawText(context, list, true);
+                this.extractLines(context, list, true, context.guiWidth());
                 info.cancel();
             }
         }
     }
 
-    private static String getBiomeName(RegistryEntry<Biome> biome) {
-        Optional<RegistryKey<Biome>> biomeKey = biome.getKey();
+    private static String getBiomeName(Holder<Biome> biome) {
+        Optional<ResourceKey<Biome>> biomeKey = biome.unwrapKey();
         if(biomeKey.isEmpty()) return "[Unregistered]";
-        return Language.getInstance().get(biomeKey.get().getValue().toTranslationKey("biome"));
+        return Language.getInstance().getOrDefault(biomeKey.get().identifier().toLanguageKey("biome"));
     }
 }

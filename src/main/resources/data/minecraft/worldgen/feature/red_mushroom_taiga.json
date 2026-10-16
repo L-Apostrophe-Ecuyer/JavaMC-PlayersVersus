@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": {
+          "id": "minecraft:short_grass"
+        },
+        "weight": 8
+      },
+      {
+        "data": {
+          "id": "minecraft:fern"
+        },
+        "weight": 6
+      },
+      {
+        "data": {
+          "id": "minecraft:red_mushroom"
+        },
+        "weight": 1
+      },
+      {
+        "data": {
+          "id": "players-versus:clovers"
+        },
+        "weight": 24
+      }
+    ]
+  }
+}

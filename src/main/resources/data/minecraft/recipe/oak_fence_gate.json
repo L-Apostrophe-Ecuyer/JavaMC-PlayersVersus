@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "redstone",
   "group": "oak_misc",
   "key": {
     "#": "minecraft:stick",

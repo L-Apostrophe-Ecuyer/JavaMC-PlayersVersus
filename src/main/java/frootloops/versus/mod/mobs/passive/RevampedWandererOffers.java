@@ -1,12 +1,16 @@
 package frootloops.versus.mod.mobs.passive;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Items;
-import net.minecraft.potion.Potions;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.BuyItemFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.Factory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellEnchantedToolFactory;
+import frootloops.versus.mod.mobs.passive.RevampedTradeFactories.SellItemFactory;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.block.Blocks;
 
 import static frootloops.versus.mod.mobs.passive.RevampedTradeFactories.*;
 
@@ -88,22 +92,22 @@ public class RevampedWandererOffers {
                                     new SellItemFactory(Items.CHERRY_SAPLING, 5, 1, 8, 1),
                                     new SellItemFactory(Items.PALE_OAK_SAPLING, 5, 1, 8, 1),
                                     new SellItemFactory(Items.MANGROVE_PROPAGULE, 5, 1, 8, 1),
-                                    new SellItemFactory(Items.RED_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.WHITE_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.BLUE_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.PINK_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.BLACK_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.GREEN_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.LIGHT_GRAY_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.MAGENTA_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.YELLOW_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.GRAY_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.PURPLE_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.LIGHT_BLUE_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.LIME_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.ORANGE_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.BROWN_DYE, 1, 3, 12, 1),
-                                    new SellItemFactory(Items.CYAN_DYE, 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.red(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.white(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.blue(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.pink(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.black(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.green(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.lightGray(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.magenta(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.yellow(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.gray(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.purple(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.lightBlue(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.lime(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.orange(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.brown(), 1, 3, 12, 1),
+                                    new SellItemFactory(Items.DYE.cyan(), 1, 3, 12, 1),
                                     new SellItemFactory(Items.BRAIN_CORAL_BLOCK, 3, 1, 8, 1),
                                     new SellItemFactory(Items.BUBBLE_CORAL_BLOCK, 3, 1, 8, 1),
                                     new SellItemFactory(Items.FIRE_CORAL_BLOCK, 3, 1, 8, 1),
@@ -122,7 +126,7 @@ public class RevampedWandererOffers {
                                     new SellItemFactory(Items.MOSS_BLOCK, 1, 2, 5, 1),
                                     new SellItemFactory(Items.PALE_MOSS_BLOCK, 1, 2, 5, 1),
                                     new SellItemFactory(Items.WILDFLOWERS, 1, 1, 12, 1),
-                                    new SellItemFactory(Items.TALL_DRY_GRASS, 1, 1, 12, 1),
+                                    new SellItemFactory(Items.DRY_TALL_GRASS, 1, 1, 12, 1),
                                     new SellItemFactory(Items.FIREFLY_BUSH, 3, 1, 12, 1)
                             },
                             5

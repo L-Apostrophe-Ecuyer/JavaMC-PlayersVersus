@@ -1,15 +1,15 @@
 package frootloops.versus.mixin.mobs.hostile;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.MobVisibilityCache;
-import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.sensing.Sensing;
+import net.minecraft.world.entity.vehicle.boat.Boat;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,33 +18,33 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(MobEntity.class)
+@Mixin(Mob.class)
 public abstract class MobEntityMixin extends LivingEntity {
 
     @Shadow @Nullable private LivingEntity target;
-    @Shadow private MobVisibilityCache visibilityCache;
+    @Shadow private Sensing sensing;
 
-    protected MobEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
+    protected MobEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
     }
 
     @Inject(method = "startRiding", at = @At("HEAD"), cancellable = true)
     public void startRiding(Entity entity, boolean force, boolean emitEvent, CallbackInfoReturnable<Boolean> cir) {
         if(this.hurtTime > 0) cir.setReturnValue(force);
-        else if(entity instanceof BoatEntity && target != null && visibilityCache.canSee(target)) cir.setReturnValue(false);
+        else if(entity instanceof Boat && target != null && sensing.hasLineOfSight(target)) cir.setReturnValue(false);
     }
 
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
-        if (this.hasVehicle() && !(this.getVehicle() instanceof LivingEntity)) this.stopRiding();
-        return super.damage(world, source, amount);
+    public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
+        if (this.isPassenger() && !(this.getVehicle() instanceof LivingEntity)) this.stopRiding();
+        return super.hurtServer(world, source, amount);
     }
 
-    @Redirect(at=@At(value = "INVOKE", target="Lnet/minecraft/world/LocalDifficulty;getClampedLocalDifficulty()F"), method= "Lnet/minecraft/entity/mob/MobEntity;initEquipment(Lnet/minecraft/util/math/random/Random;Lnet/minecraft/world/LocalDifficulty;)V")
-    private float harderFartherAndDeeper(LocalDifficulty localDifficulty) {
-        float distanceMultiplier = ((float)(this.getBlockPos().getX() - this.getEntityWorld().getSpawnPoint().getPos().getX()))/512f + ((float)(this.getBlockPos().getZ() - this.getEntityWorld().getSpawnPoint().getPos().getZ()))/512f;
-        float depthBonus = 160.0f/Math.abs((float)this.getEntityPos().y - 64f);
-        return (localDifficulty.getClampedLocalDifficulty() + depthBonus) * distanceMultiplier;
+    @Redirect(at=@At(value = "INVOKE", target="Lnet/minecraft/world/DifficultyInstance;getSpecialMultiplier()F"), method= "populateDefaultEquipmentSlots(Lnet/minecraft/util/RandomSource;Lnet/minecraft/world/DifficultyInstance;)V")
+    private float harderFartherAndDeeper(DifficultyInstance localDifficulty) {
+        float distanceMultiplier = ((float)(this.blockPosition().getX() - this.level().getRespawnData().pos().getX()))/512f + ((float)(this.blockPosition().getZ() - this.level().getRespawnData().pos().getZ()))/512f;
+        float depthBonus = 160.0f/Math.abs((float)this.position().y - 64f);
+        return (localDifficulty.getSpecialMultiplier() + depthBonus) * distanceMultiplier;
     }
 
 }

@@ -8,11 +8,9 @@
         {
           "type": "minecraft:item",
           "name": "players-versus:chiseled_terracotta",
-          "conditions": [
-            {
-              "condition": "minecraft:survives_explosion"
-            }
-          ]
+          "condition": {
+            "type": "minecraft:survives_explosion"
+          }
         }
       ]
     }

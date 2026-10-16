@@ -6,105 +6,95 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "functions": [
+          "name": "minecraft:leaf_litter",
+          "modifier": [
             {
               "add": false,
-              "conditions": [
-                {
-                  "block": "minecraft:leaf_litter",
-                  "condition": "minecraft:block_state_property",
-                  "properties": {
-                    "segment_amount": "1"
-                  }
-                }
-              ],
               "count": 1,
-              "function": "minecraft:set_count"
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "minecraft:leaf_litter",
+                "state": {
+                  "segment_amount": "1"
+                }
+              },
+              "type": "minecraft:set_count"
             },
             {
               "add": false,
-              "conditions": [
-                {
-                  "block": "minecraft:leaf_litter",
-                  "condition": "minecraft:block_state_property",
-                  "properties": {
-                    "segment_amount": "2"
-                  }
-                }
-              ],
               "count": 2,
-              "function": "minecraft:set_count"
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "minecraft:leaf_litter",
+                "state": {
+                  "segment_amount": "2"
+                }
+              },
+              "type": "minecraft:set_count"
             },
             {
               "add": false,
-              "conditions": [
-                {
-                  "block": "minecraft:leaf_litter",
-                  "condition": "minecraft:block_state_property",
-                  "properties": {
-                    "segment_amount": "3"
-                  }
-                }
-              ],
               "count": 3,
-              "function": "minecraft:set_count"
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "minecraft:leaf_litter",
+                "state": {
+                  "segment_amount": "3"
+                }
+              },
+              "type": "minecraft:set_count"
             },
             {
               "add": false,
-              "conditions": [
-                {
-                  "block": "minecraft:leaf_litter",
-                  "condition": "minecraft:block_state_property",
-                  "properties": {
-                    "segment_amount": "4"
-                  }
-                }
-              ],
               "count": 4,
-              "function": "minecraft:set_count"
-            },
-            {
-              "function": "minecraft:explosion_decay"
-            }
-          ],
-          "name": "minecraft:leaf_litter"
-        }
-      ],
-      "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:any_of",
-          "terms": [
-            {
-              "condition": "minecraft:match_tool",
-              "predicate": {
-                "items": "#minecraft:hoes"
-              }
-            },
-            {
-              "condition": "minecraft:match_tool",
-              "predicate": {
-                "items": "minecraft:shears"
-              }
-            },
-            {
-              "condition": "minecraft:match_tool",
-              "predicate": {
-                "predicates": {
-                  "minecraft:enchantments": [
-                    {
-                      "enchantments": "minecraft:silk_touch",
-                      "levels": {
-                        "min": 1
-                      }
-                    }
-                  ]
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "minecraft:leaf_litter",
+                "state": {
+                  "segment_amount": "4"
                 }
-              }
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "type": "minecraft:explosion_decay"
             }
           ]
         }
-      ]
+      ],
+      "rolls": 1,
+      "condition": {
+        "terms": [
+          {
+            "predicate": {
+              "items": "#minecraft:hoes"
+            },
+            "type": "minecraft:match_tool"
+          },
+          {
+            "predicate": {
+              "items": "minecraft:shears"
+            },
+            "type": "minecraft:match_tool"
+          },
+          {
+            "predicate": {
+              "predicates": {
+                "minecraft:enchantments": [
+                  {
+                    "enchantments": "minecraft:silk_touch",
+                    "levels": {
+                      "min": 1
+                    }
+                  }
+                ]
+              }
+            },
+            "type": "minecraft:match_tool"
+          }
+        ],
+        "type": "minecraft:any_of"
+      }
     }
   ],
   "random_sequence": "minecraft:blocks/leaf_litter"

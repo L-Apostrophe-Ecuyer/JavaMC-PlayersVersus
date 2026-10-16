@@ -16,7 +16,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "minecraft:tripwire_hook"
+        "recipes": "minecraft:tripwire_hook"
       }
     },
     "shot_crossbow": {

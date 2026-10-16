@@ -1,11 +1,9 @@
 {
-    "type": "minecraft:smelting",
-    "category": "food",
-  
-    "ingredient": "minecraft:blaze_rod",
-    "result": {
-      "id": "minecraft:blaze_powder"
-    },
-    "experience": 5,
-    "cookingtime": 200
+  "type": "minecraft:smelting",
+  "ingredient": "minecraft:blaze_rod",
+  "result": {
+    "id": "minecraft:blaze_powder"
+  },
+  "experience": 5,
+  "cookingtime": 200
 }

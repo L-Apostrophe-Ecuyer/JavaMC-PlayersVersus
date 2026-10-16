@@ -1,15 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "pattern": [
     "GGG",
     "GEG",
     "GTG"
   ],
   "key": {
-    "E" : "players-versus:concentrate_of_health",
-    "G" : "minecraft:amethyst_shard",
-    "T" : "minecraft:ghast_tear"
+    "E": "players-versus:concentrate_of_health",
+    "G": "minecraft:amethyst_shard",
+    "T": "minecraft:ghast_tear"
   },
   "result": {
     "id": "minecraft:end_crystal",

@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:ore",
+  "size": 40,
+  "discard_chance_on_air_exposure": 0,
+  "targets": [
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.3,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:stone"
+      }
+    },
+    {
+      "target": {
+        "block": "minecraft:stone",
+        "probability": 0.1,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:calcite"
+      }
+    },
+    {
+      "target": {
+        "tag": "minecraft:base_stone_overworld",
+        "predicate_type": "minecraft:tag_match"
+      },
+      "state": {
+        "id": "minecraft:diorite"
+      }
+    }
+  ]
+}
