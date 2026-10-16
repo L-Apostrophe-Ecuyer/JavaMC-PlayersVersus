@@ -37,6 +37,10 @@
 		"items_and_effects.inventory.InventoryScreenShulkerAccessor",
 		"items_and_effects.inventory.ItemMergingMixin",
 		"items_and_effects.inventory.recipe_book.AnimatedResultButtonMixin",
+		"items_and_effects.inventory.recipe_book.OverlayRecipeComponentMixin",
+		"items_and_effects.inventory.recipe_book.RecipeBookPageMixin",
+		"items_and_effects.inventory.recipe_book.RecipeBookComponentMixin",
+		"items_and_effects.inventory.recipe_book.RecipeButtonMixin",
 
 		"players.attacking.CrosshairTargetMixin",
 		"players.attacking.CrosshairRendererMixin",
@@ -44,6 +48,9 @@
 		"players.attacking.MinecraftClientMixin",
 		"players.death.DeathScreenMixin",
 
+		"players.BlockItemInvoker",
+		"players.GameRendererInvoker",
+		"players.LevelRendererAccessor",
 		"players.DebugHudMixin",
 		"players.DebugOptionsScreenMixin",
 		"players.HungerBarRendererMixin",

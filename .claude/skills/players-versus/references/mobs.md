@@ -155,6 +155,19 @@ assuming full overlap).
   assuming a connection. Check these directly for current passive-mob behavior changes.
 - **Villagers/Wandering Trader** are covered in `villagers-and-trading.md`, not here.
 
+### Copper golem transport (`TransportItemsBetweenContainersMixin`, setting `Gameplay.DO_SMARTER_COPPER_GOLEMS`)
+Two `@WrapOperation`s on vanilla's `TransportItemsBetweenContainers` (only the copper golem runs it):
+- `getTransportTarget` keeps the chest with the smallest `distToCenterSqr`. While the golem carries something, that value
+  is replaced with `GolemChestRanking.cost` (`mod/mobs/passive/`): chest the item fits in because it already holds some
+  (most of it first, then nearest), else the nearest empty chest, else the last one looked into (the *furthest* chest,
+  full or not). Empty-handed (picking up) stays vanilla's nearest. Nothing is refused here: whatever is chosen, vanilla's
+  arrival check decides ("holds the item, or empty? no: mark visited, search again"), so there is no
+  `matchesLeavingItemsRequirement` override. Reach, locks, queuing and the visited/unreachable memories are vanilla's.
+- `pickupItemFromContainer` takes `min(stack, 16)`; the 16 is dropped, so a golem lifts the whole stack. A chest that
+  can't take all of it fills first, then the golem goes on to the next best (the filled one is now "visited").
+Pure ranking is unit-tested (`GolemChestRankingTest`); the mixin itself only gets exercised by the `[smoke]` server boot
+(applying) and in-game.
+
 ## Land pathfinding & mob spawn caps
 - **`LandPathfindingMixin`** (`mixin/mobs/`) — not read; likely affects path costs/water-avoidance
   for land mobs. Check directly before touching pathing behavior.

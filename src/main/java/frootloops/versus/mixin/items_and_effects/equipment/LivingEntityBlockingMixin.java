@@ -128,7 +128,7 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                             // For player, disable shield:
                             if(this.isAlwaysTicking() && (LivingEntity) (Object) this instanceof Player player) {
                                 player.resetAttackStrengthTicker();
-                                if(!wasAttackParried) player.getCooldowns().addCooldown(blockingItem, 2 + (int)(20f * weaponDisableForBlocking));
+                                if(!wasAttackParried) disableBlocking(player, 2 + (int)(20f * weaponDisableForBlocking));
                             }
 
                             // Check if mob was blocking shield and the shield is now disabled:
@@ -154,6 +154,22 @@ public abstract class LivingEntityBlockingMixin extends Entity {
                 } else {
                     return 0.0F;
                 }
+            }
+        }
+    }
+
+    /**
+     * Puts every item that blocks attacks the player carries on cooldown, not only the one that blocked: a disabled
+     * shield can't be swapped for a sword, another shield or anything else with a blocking component to block again.
+     * Cooldowns are kept per item, so one stack of each item is enough.
+     */
+    private static void disableBlocking(Player player, int ticks) {
+        java.util.Set<net.minecraft.world.item.Item> done = new java.util.HashSet<>();
+        net.minecraft.world.entity.player.Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.isEmpty() && stack.has(DataComponents.BLOCKS_ATTACKS) && done.add(stack.getItem())) {
+                player.getCooldowns().addCooldown(stack, ticks);
             }
         }
     }

@@ -26,6 +26,24 @@ the specific constructor override collision/luminance/piston-behavior). Families
   vanilla Clay/Mud/Packed Mud/Mud Bricks(+slab/stairs)/Mud Brick Wall via the item-replacement
   pattern (`items-and-equipment.md`) — **the vanilla mud/clay block types themselves are hidden**,
   every gameplay path funnels through this mod's versions.
+- **Block tags decide what blocks are (26.4)**: the game no longer works out "blocks motion" from a block's collision
+  shape; `#minecraft:blocks_motion_no_leaves` (and the tags built on it) lists the blocks, and the heightmaps, suffocation,
+  fluid flow, dolphin jumps, teleporting and lava fires ask it. **Every solid block of the mod goes in
+  `data/minecraft/tags/block/blocks_motion_no_leaves.json`**; `BlockTagAudit` lists the ones missing (a warning when a
+  server starts, and the `census` line). Gray Mud and the clays were missing: the ocean floor heightmap skipped the
+  mangrove swamp's whole mud and clay layer, so a mangrove tree placed by it stood over the stone beneath and its
+  `would_survive` check failed (the cause of "mangrove trees no longer spawn"). Also from 26.4: `#minecraft:dirt` is only
+  dirt, coarse dirt and rooted dirt; grass blocks, mud and moss blocks have their own tags, gathered by
+  `#substrate_overworld` → `#supports_vegetation` / `#supports_sugar_cane` / `#supports_mangrove_propagule`. Check those,
+  not `#dirt`, when a block needs "ground". The mod's soils join them in data: Gray Mud in `#mud`, Brown Mud in `#dirt`,
+  the clays in `#supports_mangrove_propagule` and `#supports_small_dripleaf` (the old `small_dripleaf_placeable`).
+  The clays also sit in every tag vanilla clay is in (axolotl spawning, azalea, lush ground, sculk, enderman), the muds
+  in `#frogs_spawnable_on`, and `needs_stone_tool.json` (it replaces vanilla's: iron, lapis and the crafter only, the
+  copper family is mined from the start; the file was named `needs_stone_tools` and did nothing until 26.4's pass).
+  Stairs, slabs and walls of the mod belong in `#stairs`/`#slabs`/`#walls` and every stone block in `mineable/pickaxe`
+  (clays and muds in `mineable/shovel`); a block missing from one is easy to miss, so check when adding blocks.
+  `-Ppv.census=<biomes>` (`WorldgenCensus`, CI job `census`) counts ground and trees in a world's nearest patches of those
+  biomes, which plants survive on each floor block, what the heightmaps count, and writes some columns out as they are.
 - **Farming/nature**: `WheatGrassBlock` (+ `WILD_WHEAT`, `CLOVERS` via `CloverBlock`) — README:
   "Crops and sugar cane have gotten a few quality of life improvements. Added wheat grass, too!"
 - **`CreeperSporeBlock`** (`CREEPER_SPORE_BLOSSOM`) — tied to Creeper Caves biome per README
@@ -117,12 +135,53 @@ per stage) is read in both `BrushItemMixin` and `SuspiciousBlockEntityMixin`. `B
 suspicious blocks" content claim — cross-check against `data-and-assets.md` for the structure-level
 placement (`data/*/worldgen/placed_feature/suspicious_sand.json`, structure processor lists).
 
-## Building QoL (`BlockItemMixin`, `RayTraceHandler`)
-`mixin/players/building/BlockItemMixin.java` (gated by `VersusSettings.QOL.DO_SMARTER_BLOCK_PLACING`
-and `DO_BEDROCK_BRIDGING`, per `architecture.md`'s settings grep) — not read this pass; likely uses
-`RayTraceHandler` (see `combat-and-players.md`) to let stairs/etc. auto-orient when uncrouched
-(README: "Placing some blocks (like stairs) made easier when uncrouched") and to let players bridge
-off bedrock/void edges. Check directly before changing block-placement prediction.
+## Building QoL (placement rules, strokes, reach-around, quick undo)
+Rewritten on 26.4 (branch `claude/26-4-worldgen-client-fixes-vz8an5`). Read the classes' javadoc before
+changing anything; the split is deliberate. **All of it is client-side except the quick undo**: it works on a
+vanilla server, because the client sends only ordinary clicks.
+- `mod/players/building/PlacementRules` (common, pure, unit-tested) — which state a placement should have:
+  vanilla's unless a rule applies; only noisy-input properties (`AXIS`, facings, `HALF`, `SLAB_TYPE` top/bottom,
+  `ROTATION_16`; `STAIRS_SHAPE`/`IN_WALL` follow) may change, never attachment, waterlogging, double slabs, door/bed
+  halves. Order: sneaking → vanilla; stroke's first block (copied, for "turnable" blocks only — not wall-attached
+  ones); **the last placement** (`follow`: same block, within 3 s — pillars/chains keep their axis next to it on any
+  side; stairs keep facing+half along their row or one step up/down their slope, not back to back (a roof's ridge);
+  slabs keep their half beside on the same level; trapdoors facing+half along their row); neighbours (pillar/stair
+  rows — the old `BlockItemMixin` scoring, ported — guessed halves, fence gates across fences, furnace-like fronts,
+  `ROTATION_16` within two steps); vanilla. Redstone parts (`isFunction`) only follow a stroke. `sameTurn()`
+  compares turns ignoring neighbour-made shape.
+- Client (`src/client/.../mod/players/building/ClientPlacement`) chooses the state, then **clicks so that vanilla
+  places it**: tries ways of clicking (the same face at another height, then any face of the target spot itself —
+  `replaceClicked` makes the block go there with that face — and fake yaw/pitch: cardinal, ±90 pitch, 16 sign
+  steps) in a capped search (`MOST_TRIES`), checking each with the item's own `getPlacementState`
+  (`BlockItemInvoker`) with the player's rotation set for it; if none gives the chosen state, the click is vanilla's.
+  A fake rotation is sent as `ServerboundMovePlayerPacket.Rot` just before the use and the real one just after (and
+  set on the client player around the predicted use, so both sides compute the same). Clicking the spot itself is
+  only done when the block under the crosshair is "plain" (no `useWithoutItem`/`useItemOn` of its own, found by
+  reflection and cached per class), so a click that would open a chest or flip a lever still does; and only within
+  the reach less a margin (`REACH_MARGIN`; the server allows reach + 1). No server mixin turns anything any more
+  (the earlier hint packet and `StandingAndWallBlockItemMixin` are gone).
+- Strokes = right-click held since the stroke's first block. Within one: place-on-arrival
+  (`MinecraftClientMixin.handleKeybinds` HEAD zeroes `rightClickDelay` when the crosshair reaches a new spot, after
+  vanilla's first-repeat delay), face lock (only the face the stroke began on, the face the player aimed at, not the
+  one clicked for the turn), no growth out of the stroke's own blocks unless the player moved ≥0.5 along that face,
+  never the same spot twice; a refused repeat does nothing at all. Ladders and scaffolding aren't stroked.
+  Reach-around (`DO_BEDROCK_BRIDGING`): on a MISS while looking down, eyes moved 0.5 back along the facing,
+  `RayTraceHandler` ray must hit the block at about feet level; synthetic `BlockHitResult` on its facing side.
+- Preview (`PlacementPreview`, Fabric `LevelRenderEvents.COLLECT_SUBMITS`): white outline of what a right-click
+  would place, only when it's turned unlike vanilla (and a click can place it) or reached around to; full blocks
+  get a mark of their turn (a rod along the axis, a plate on the facing side). Drawn as vanilla's
+  `LevelRenderer.submitBlockOutline` does: translate by block pos − camera (`LevelRendererAccessor`), then
+  `SubmitNodeCollector.submitShapeOutline` with vanilla's line width (`GameRendererInvoker`).
+- Quick undo (the server-side part): `players/building/BlockItemMixin` (`placeBlock` RETURN →
+  `RecentPlacements`) and `BlockBehaviourMixin` (`getDestroyProgress` RETURN): a block the same player placed ≤40
+  ticks ago (client) / 60 (server) mines ×4, 5 ticks at slowest, 2 at fastest, only with the tool it drops with.
+  The client does it only when the server runs the mod (`RecentPlacements.serverAgrees`, from
+  `ClientPlayNetworking.canSend(RespawnNearbyPayload.ID)` on join).
+- Settings: `VersusSettings.QOL.DO_SMARTER_BLOCK_PLACING`, `DO_BEDROCK_BRIDGING`, `DO_PLACING_STROKES`,
+  `DO_PLACEMENT_PREVIEW`, `DO_FAST_UNDO_PLACING`.
+- Tests: `src/test/.../mod/players/building/PlacementRulesTest` (rules on a map-backed `View`, mixin handlers
+  present). The client logic has no tests — CI doesn't run a client; check in game.
+`RayTraceHandler` (`mod/players/`, from CloudG360's BridgingMod) casts the reach-around's shifted ray.
 
 ## Other blocks not read this pass
 `LadderBlockItem`/`LadderMixin` (README: implies ladder placement changes — replaces vanilla Ladder

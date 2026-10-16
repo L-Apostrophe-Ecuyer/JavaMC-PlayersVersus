@@ -10,7 +10,10 @@
     "players.HungerManagerMixin",
     "players.PlayerEntityMixin",
     "players.SpecialMovementMixin",
+    "players.building.BlockBehaviourMixin",
     "players.building.BlockItemMixin",
+
+    "items_and_effects.recipes.RecipeFileMixin",
 
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",
@@ -119,7 +122,8 @@
     "mobs.passive.WanderingTraderEntityMixin",
     "mobs.passive.SheepMixin",
     "mobs.passive.PigMixin",
-    "mobs.passive.PolarBearMixin"
+    "mobs.passive.PolarBearMixin",
+    "mobs.passive.TransportItemsBetweenContainersMixin"
   ],
   "injectors": {
     "defaultRequire": 1

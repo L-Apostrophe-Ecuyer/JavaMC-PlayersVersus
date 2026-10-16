@@ -2,7 +2,7 @@
   "type": "minecraft:range_choice",
   "input": "minecraft:y",
   "min_inclusive": 76.5,
-  "max_exclusive": 127.5,
+  "max_exclusive": 255.5,
   "when_in_range": {
     "type": "minecraft:range_choice",
     "input": "minecraft:y",

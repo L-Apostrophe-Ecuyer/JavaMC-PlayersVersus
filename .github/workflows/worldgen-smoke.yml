@@ -380,3 +380,57 @@ jobs:
             reports/
             run/worldgen-smoke/crash-reports/
           if-no-files-found: warn
+
+  # What the nearest swamp and mangrove swamp are made of and grow (WorldgenCensus), in the vanilla Default world type and
+  # the Players Versus one: whether a mangrove propagule can survive on each of their floor blocks, how many columns it
+  # could be planted on, and the trees' blocks found. Where the two differ is where mangrove trees stop generating.
+  census:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.accept_eula) ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[smoke]'))
+    strategy:
+      fail-fast: false
+      matrix:
+        level_type: ["minecraft:normal", "players-versus:better_world"]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    env:
+      SEED: ${{ inputs.seed || '8675309' }}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: setup jdk 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: 25
+          distribution: 'microsoft'
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: count the swamps' blocks
+        run: >
+          ./gradlew runWorldgenSmoke
+          -Ppv.acceptEula=true
+          "-Ppv.levelType=${{ matrix.level_type }}"
+          "-Ppv.seed=$SEED"
+          "-Ppv.census=swamp,mangrove_swamp"
+          "-Ppv.censusRadius=4"
+      - name: show the census
+        if: always()
+        run: |
+          grep -h "\[pvwg\] census" run/worldgen-smoke/logs/latest.log || true
+          if grep -n "\[pvwg\] census failed" run/worldgen-smoke/logs/latest.log; then exit 1; fi
+          if ls run/worldgen-smoke/crash-reports/* >/dev/null 2>&1; then echo "crash report written"; exit 1; fi
+      - name: artifact name
+        id: name
+        if: always()
+        run: |
+          echo "value=worldgen-census-$(echo '${{ matrix.level_type }}' | tr ': ' '-_')" >> "$GITHUB_OUTPUT"
+      - name: upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.value }}
+          path: |
+            run/worldgen-smoke/logs/latest.log
+            run/worldgen-smoke/crash-reports/
+          if-no-files-found: warn

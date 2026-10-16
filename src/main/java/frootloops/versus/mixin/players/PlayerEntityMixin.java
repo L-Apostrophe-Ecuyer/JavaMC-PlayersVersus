@@ -35,7 +35,6 @@ import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -208,8 +207,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void attackTypes(Entity target, CallbackInfo ci) {
         if(this.level().isClientSide()) return;
 
-        // After attacking, the shield is interrupted:
-        if(this.getOffhandItem().getItem() instanceof ShieldItem) {
+        // After attacking, the item in the off hand that blocks (a shield, or anything with a blocking component) is
+        // interrupted:
+        if(this.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS)) {
             this.stopUsingItem();
             cooldowns.addCooldown(this.getOffhandItem(), 6);
         }

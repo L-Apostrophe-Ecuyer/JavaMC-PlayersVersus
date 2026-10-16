@@ -12,6 +12,7 @@ public class ScaffoldingItemMixin {
 
     @ModifyVariable(method = "updatePlacementContext", at = @At("STORE"), ordinal = 0)
     private Direction placeWhereverYouLook(Direction originalDirection, BlockPlaceContext context) {
+        if(context.getPlayer() == null) return originalDirection; // Placed without a player, as dispensers place
         float pitch = context.getPlayer().getXRot();
         if(Math.abs(pitch) > 60.0f) {
             if(context.getClickedFace() == Direction.UP || pitch > 80f) return Direction.UP;

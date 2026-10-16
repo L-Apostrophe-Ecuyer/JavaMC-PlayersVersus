@@ -36,6 +36,8 @@ class PvBiomeLayoutTest {
      * is a tie; and the mountainsides' limit can be as close as 0.01 to vanilla's slice edge at -0.375.
      */
     private static final long EDGE = 50;
+    /** Continentalness from which a point is inland: the pale grotto is only placed there. */
+    private static final float INLAND = 0.05F;
     /** Erosion just above the mountainsides' limit. */
     private static final long ABOVE_MOUNTAINS = PvBiomeLayout.MOUNTAIN_EROSION_MAX + EDGE;
 
@@ -91,9 +93,9 @@ class PvBiomeLayoutTest {
     @Test
     void paleGrottoFollowsDarkAndPaleForestClimateRanges() {
         Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
-        Climate.TargetPoint darkForest = surfacePoint(layout, Biomes.DARK_FOREST);
+        Climate.TargetPoint darkForest = inlandSurfacePoint(layout, Biomes.DARK_FOREST);
         Climate.TargetPoint darkBirch = darkBirchPoint(layout);
-        Climate.TargetPoint paleGarden = surfacePoint(layout, Biomes.PALE_GARDEN);
+        Climate.TargetPoint paleGarden = inlandSurfacePoint(layout, Biomes.PALE_GARDEN);
         assertEquals(CustomOverworldBiomes.PALE_GROTTO, layout.findValue(withDepth(darkForest, 0.3F)), "dark forest at " + darkForest);
         assertEquals(CustomOverworldBiomes.PALE_GROTTO, layout.findValue(withDepth(darkBirch, 0.3F)), "dark birch at " + darkBirch);
         assertEquals(CustomOverworldBiomes.PALE_GROTTO, layout.findValue(withDepth(paleGarden, 0.3F)), "pale garden at " + paleGarden);
@@ -110,6 +112,24 @@ class PvBiomeLayoutTest {
         throw new AssertionError("no surface climate point for " + biome);
     }
 
+    /**
+     * A surface point of the biome inside the pale grotto's continentalness (0 to 1) and erosion (-0.4 to 1). The vanilla
+     * entry's middle can sit on the coast or in eroded ground outside them; the point then moves in within the entry.
+     */
+    private static Climate.TargetPoint inlandSurfacePoint(Climate.ParameterList<ResourceKey<Biome>> layout, ResourceKey<Biome> biome) {
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != biome || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            long continentalness = Math.max(mid(h.continentalness()), Climate.quantizeCoord(INLAND));
+            long erosion = Math.max(mid(h.erosion()), Climate.quantizeCoord(-0.4F));
+            if (continentalness > h.continentalness().max() || erosion > h.erosion().max()) continue;
+            Climate.TargetPoint point = point(mid(h.temperature()), mid(h.humidity()), continentalness,
+                    erosion, mid(h.weirdness()));
+            if (layout.findValue(point) == biome) return point;
+        }
+        throw new AssertionError("no inland surface climate point for " + biome);
+    }
+
     private static Climate.TargetPoint darkBirchPoint(Climate.ParameterList<ResourceKey<Biome>> layout) {
         long humidity = Climate.quantizeCoord(0.29F);
         for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
@@ -119,7 +139,9 @@ class PvBiomeLayoutTest {
                     || humidity < h.humidity().min() || humidity > h.humidity().max()) continue;
             long temperature = mid(h.temperature());
             long erosion = Math.max(mid(h.erosion()), Climate.quantizeCoord(-0.4F));
-            Climate.TargetPoint point = point(temperature, humidity, mid(h.continentalness()), erosion, mid(h.weirdness()));
+            long continentalness = Math.max(mid(h.continentalness()), Climate.quantizeCoord(INLAND));
+            if (continentalness > h.continentalness().max()) continue;
+            Climate.TargetPoint point = point(temperature, humidity, continentalness, erosion, mid(h.weirdness()));
             if (layout.findValue(point) == CustomOverworldBiomes.DARK_BIRCH_FOREST) return point;
         }
         throw new AssertionError("no Dark Birch Forest climate point");

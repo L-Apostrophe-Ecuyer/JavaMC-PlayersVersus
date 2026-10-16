@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "redstone",
   "group": "mangrove_misc",
   "key": {
     "#": "minecraft:mangrove_planks"

@@ -4,6 +4,8 @@ import frootloops.versus.mod.environment.CustomSpecialEffects;
 import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
+import frootloops.versus.mod.items_and_effects.inventory.HotbarRefill;
+import frootloops.versus.mod.players.building.ClientPlacement;
 import frootloops.versus.mod.environment.CustomBlocksClient;
 import frootloops.versus.mod.environment.LeavesRustling;
 import net.fabricmc.api.ClientModInitializer;
@@ -20,6 +22,8 @@ public class VersusModClient implements ClientModInitializer {
 	public static final Identifier RECIPE_BOOK_UNCRAFTABLE_GROUP_OVERLAY = Identifier.withDefaultNamespace("recipe_book/many_uncraftable_overlay");
 	public static final Identifier RECIPE_BOOK_CRAFTABLE_SINGLE_OVERLAY = Identifier.withDefaultNamespace("recipe_book/single_uncraftable_overlay");
 
+	public static final Identifier RECIPE_BOOK_PIN = Identifier.fromNamespaceAndPath(MOD_ID, "recipe_book/pin");
+
 	public static final Identifier HUD_TEXTURE_DISABLED_FOOD = Identifier.fromNamespaceAndPath(MOD_ID, "hud/disabled_food_empty");
 	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HALF = Identifier.fromNamespaceAndPath(MOD_ID, "hud/disabled_food_empty_half");
 	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HUNGER = Identifier.fromNamespaceAndPath(MOD_ID, "hud/disabled_food_empty_hunger");
@@ -33,6 +37,8 @@ public class VersusModClient implements ClientModInitializer {
 		MeleeAnimation.register();
 		CustomBlocksClient.onInitialize();
 		LeavesRustling.register();
+		ClientPlacement.register();
+		HotbarRefill.register();
 
 		ParticleProviderRegistry.getInstance().register(CustomSpecialEffects.SPARKS_PARTICLE, SparksParticle.Factory::new);
 	}

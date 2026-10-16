@@ -2,7 +2,8 @@ package frootloops.versus.mixin.client.players;
 
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import frootloops.versus.VersusMod;
-import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.players.HandSelection;
+import frootloops.versus.mod.players.building.ClientPlacement;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -12,17 +13,12 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
-import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -31,6 +27,7 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -47,8 +44,6 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
     @Shadow @Nullable public final GameRenderer gameRenderer;
     @Shadow public final Options options;
 
-    private static final InteractionHand[] OFFHAND_FIRST =  new InteractionHand[] {InteractionHand.OFF_HAND, InteractionHand.MAIN_HAND}, MAINHAND_FIRST = new InteractionHand[] {InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND};
-
     public MinecraftClientMixin(String string, @Nullable GameRenderer gameRenderer, Options options) { super(string, true);
         this.gameRenderer = gameRenderer;
         this.options = options;
@@ -57,19 +52,29 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
 
     @Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
     private void doItemUse(CallbackInfo info) {
+        // As vanilla: no delay while a block is being mined, so that the use starts as soon as the mining stops
+        if (this.gameMode.isDestroying()) {
+            info.cancel();
+            return;
+        }
         this.rightClickDelay = 4;
-        if (!this.gameMode.isDestroying() && !this.player.isHandsBusy()) {
+        if (!this.player.isHandsBusy()) {
 
             if (this.hitResult == null) {
                 VersusMod.MOD_LOGGER.error("Null returned as 'hitResult', this shouldn't happen!");
             }
 
             InteractionResult actionResult = null;
-            InteractionHand[] hands = this.shouldPrioritizeOffhand() ? OFFHAND_FIRST : MAINHAND_FIRST;
-            for (InteractionHand hand : hands) {
+            // Which hand goes first, and whether the world or the item comes into it, is HandSelection's: it guesses what
+            // the player means (blocking an attack, landing in water, opening the table in front of them) by fixed rules
+            HandSelection.Plan plan = HandSelection.plan(this.player, this.level, this.hitResult);
+            for (InteractionHand hand : plan.hands()) {
                 ItemStack itemStack = this.player.getItemInHand(hand);
                 if (!itemStack.isItemEnabled(this.level.enabledFeatures())) continue;
-                if (this.hitResult != null) {
+                // An item on cooldown leaves the block or entity to the other hand, which can use it without the item
+                // the server would refuse
+                boolean onCooldown = HandSelection.onCooldown(this.player, hand);
+                if (plan.world() && !onCooldown && this.hitResult != null) {
                     switch (this.hitResult.getType()) {
                         case ENTITY:
                             EntityHitResult entityHitResult = (EntityHitResult)this.hitResult;
@@ -78,11 +83,9 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                                 info.cancel();
                                 return;
                             }
-                            // 26.3 also checks the reach: an entity can be picked from further than it can be interacted with
-                            if (!this.player.isWithinEntityInteractionRange(entity, 0.0)) {
-                                info.cancel();
-                                return;
-                            }
+                            // 26.3 also checks the reach: an entity can be picked from further than it can be interacted
+                            // with, and then the held item is used, as when nothing is picked
+                            if (!this.player.isWithinEntityInteractionRange(entity, 0.0)) break;
 
                             // Use chest if item frame clicked on accident
                             if(!this.player.isShiftKeyDown() && entity instanceof ItemFrame itemFrameEntity) {
@@ -107,27 +110,27 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                             }
                             break;
                         case BLOCK:
-                            BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
-                            int i = itemStack.getCount();
-                            actionResult = this.gameMode.useItemOn(this.player, hand, blockHitResult);
-                            if (actionResult instanceof InteractionResult.Success success) {
-                                if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
-                                    this.player.swing(hand, itemStack.getInteractAnimation(), false);
-                                    if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {
-                                        this.player.itemUsed(hand);
-                                    }
-                                }
+                            actionResult = this.playersVersus$useOnBlock(hand, itemStack, (BlockHitResult)this.hitResult);
+                            if (actionResult instanceof InteractionResult.Success || actionResult instanceof InteractionResult.Fail) {
                                 info.cancel();
                                 return;
                             }
-                            if (actionResult instanceof InteractionResult.Fail) {
+                            break;
+                        case MISS:
+                            // Reach-around: nothing under the crosshair, looking down past the edge of the block below.
+                            // If the block can't go there, the item is used as with nothing under the crosshair (a lily
+                            // pad still goes on the water below)
+                            BlockHitResult around = ClientPlacement.INSTANCE.reachAround(this.player, hand);
+                            if (around != null && (ClientPlacement.INSTANCE.refuses(this.player, hand, around)
+                                    || this.playersVersus$useOnBlock(hand, itemStack, around) instanceof InteractionResult.Success)) {
                                 info.cancel();
                                 return;
                             }
+                            break;
                     }
                 }
 
-                if (!itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
+                if (plan.items() && !onCooldown && !itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
                     if (success3.swingSource() == InteractionResult.SwingSource.PREDICTED) {
                         this.player.swing(hand, itemStack.getInteractAnimation(), false);
                     }
@@ -142,50 +145,31 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
         info.cancel();
     }
 
-    private boolean shouldPrioritizeOffhand(){
-        ItemStack offhandStack = player.getOffhandItem();
-        ItemStack mainhandStack = player.getMainHandItem();
-        if(offhandStack.isEmpty() || mainhandStack.isEmpty() || player.getCooldowns().isOnCooldown(offhandStack)) return false;
-        if(offhandStack.getItem() instanceof ShieldItem && hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) return false;
-        if(offhandStack.getUseAnimation() == ItemUseAnimation.BLOCK){
-            if (hitResult.getType() == HitResult.Type.ENTITY) {
-                if(player.isUsingItem()) {
-                    return player.getUseItem() == offhandStack;
-                } else {
-                    Entity target = ((EntityHitResult) this.hitResult).getEntity();
-                    return (target instanceof Monster || target instanceof Player || target == player.getLastHurtByMob());
-                }
-            }
-            else if (mainhandStack.getUseAnimation() == ItemUseAnimation.BLOCK) {
-                return true;
-            }
-            else if (player.getLastHurtByMob() != null && player.getLastHurtByMob().isAlive()) {
-                return (Combat.isLookingTowards(player,player.getLastHurtByMob().position()));
+    /**
+     * The item in hand used on a block, as vanilla's right-click does: a success or a failure ends the click. A repeat
+     * of right-click held that the stroke refuses is a failure, and nothing happens at all.
+     */
+    @Unique
+    private InteractionResult playersVersus$useOnBlock(InteractionHand hand, ItemStack itemStack, BlockHitResult hit) {
+        if (ClientPlacement.INSTANCE.refuses(this.player, hand, hit)) return InteractionResult.FAIL;
+        ClientPlacement.INSTANCE.tried(this.player, hand, hit);
+        int i = itemStack.getCount();
+        // A block is placed turned to match what's being built, clicked so that vanilla places it that way
+        InteractionResult actionResult = ClientPlacement.INSTANCE.use(this.gameMode, this.player, hand, hit);
+        if (actionResult instanceof InteractionResult.Success success && success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+            this.player.swing(hand, itemStack.getInteractAnimation(), false);
+            if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.player.hasInfiniteMaterials())) {
+                this.player.itemUsed(hand);
             }
         }
-        else if(mainhandStack.getUseAnimation() == ItemUseAnimation.BLOCK){
-            if(player.isShiftKeyDown()) {
-                return !(mainhandStack.getItem() instanceof ShieldItem);
-            }
-            else if (hitResult.getType() == HitResult.Type.ENTITY) {
-                if(player.isUsingItem()) {
-                    return player.getUseItem() == offhandStack;
-                } else {
-                    Entity target = ((EntityHitResult) this.hitResult).getEntity();
-                    return !(target instanceof Monster || target instanceof Player || target == player.getLastHurtByMob());
-                }
-            }
-            else if (player.getLastHurtByMob() != null && player.getLastHurtByMob().isAlive()) {
-                return (Combat.isLookingTowards(player,player.getLastHurtByMob().position()));
-            }
-            else if(offhandStack.getUseAnimation() == ItemUseAnimation.EAT || offhandStack.getUseAnimation() == ItemUseAnimation.DRINK) {
-                if(offhandStack.getComponents().has(DataComponents.FOOD)) {
-                    if(offhandStack.getItem().components().get(DataComponents.FOOD).canAlwaysEat()) return true;
-                    return player.getFoodData().needsFood();
-                }
-                else return true;
-            }
+        return actionResult;
+    }
+
+    /** Right-click held in a stroke places as soon as the crosshair reaches a new spot for it, not every fourth tick. */
+    @Inject(method = "handleKeybinds", at = @At("HEAD"))
+    private void playersVersus$placeOnArrival(CallbackInfo info) {
+        if (this.rightClickDelay > 0 && this.gameMode != null && !this.gameMode.isDestroying() && ClientPlacement.INSTANCE.arrived((Minecraft)(Object)this)) {
+            this.rightClickDelay = 0;
         }
-        return false;
     }
 }

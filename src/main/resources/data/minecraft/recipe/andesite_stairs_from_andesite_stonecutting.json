@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:stonecutting",
-  "group": "andesite",
-  "ingredient": "minecraft:andesite",
-  "result": {
-    "count": 1,
-    "id": "minecraft:andesite_stairs"
-  }
-}
