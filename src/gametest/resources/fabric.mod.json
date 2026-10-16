@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "players-versus-gametest",
+  "version": "1.0.0",
+  "name": "Players Versus game tests",
+  "description": "Game tests for Players Versus, run on Fabric's game test server.",
+  "license": "CC0-1.0",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-gametest": [
+      "frootloops.versus.gametest.InventorySortingGameTest"
+    ]
+  },
+  "depends": {
+    "players-versus": "*",
+    "fabric-gametest-api-v1": "*"
+  }
+}

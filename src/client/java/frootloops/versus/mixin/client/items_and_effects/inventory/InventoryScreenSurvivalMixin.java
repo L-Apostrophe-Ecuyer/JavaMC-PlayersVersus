@@ -51,15 +51,7 @@ public abstract class InventoryScreenSurvivalMixin<T extends RecipeBookMenu> ext
         });
 
         this.buttonSortInventory = new ImageButton(buttonHotbarSwap.getX() + 22, buttonHotbarSwap.getY(), 20, 18, InventorySorting.TEXTURE_INVENTORY_SORT_BUTTON, button -> {
-            if (minecraft.player != null) {
-                int numSlots = 36;
-                int indexFirstRow = this.menu.findSlot(minecraft.player.getInventory(), 9).getAsInt();
-                int indexHotbar = this.menu.findSlot(minecraft.player.getInventory(), 0).getAsInt();
-                int indexStart = Math.min(indexFirstRow, indexHotbar);
-                VersusMod.MOD_LOGGER.warn("Start of player inventory is " + indexStart);
-                InventorySorting.InventoryToSort type = indexHotbar == 0 ? InventorySorting.InventoryToSort.SURVIVAL_INVENTORY : InventorySorting.InventoryToSort.INVENTORY_WHITH_SLOTS_ABOVE;
-                InventorySorting.sortInventory(this.menu, minecraft, minecraft.player.getInventory(), type, indexStart, numSlots);
-            }
+            if (minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft, minecraft.player.getInventory(), InventorySorting.InventoryToSort.PLAYER_INVENTORY);
             if (buttonSortInventory != null) buttonSortInventory.setFocused(false);
         });
 

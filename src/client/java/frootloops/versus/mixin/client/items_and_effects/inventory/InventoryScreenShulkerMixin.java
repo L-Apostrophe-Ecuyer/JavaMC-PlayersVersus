@@ -31,12 +31,12 @@ public abstract class InventoryScreenShulkerMixin extends AbstractContainerScree
         super.init();
 
         this.buttonSortShulker = new ImageButton(this.leftPos + 155, this.topPos + 5, 13, 11, InventorySorting.TEXTURE_SHULKER_SORT_BUTTON, button -> {
-            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft,  ((InventoryScreenShulkerAccessor)this.menu).getContainer(), InventorySorting.InventoryToSort.CONTAINER_INVENTORY, 0, 27);
+            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft,  ((InventoryScreenShulkerAccessor)this.menu).getContainer(), InventorySorting.InventoryToSort.CONTAINER_INVENTORY);
             if(buttonSortShulker != null) buttonSortShulker.setFocused(false);
         });
 
         this.buttonSortInventory = new ImageButton(this.leftPos + 155, this.topPos + 20 + (17 * 3), 13, 11, InventorySorting.TEXTURE_SMALL_INVENTORY_SORT_BUTTON, button -> {
-            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft, minecraft.player.getInventory(), InventorySorting.InventoryToSort.INVENTORY_WHITH_SLOTS_ABOVE, 27, 36);
+            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft, minecraft.player.getInventory(), InventorySorting.InventoryToSort.PLAYER_INVENTORY);
             if(buttonSortInventory != null) buttonSortInventory.setFocused(false);
         });
 

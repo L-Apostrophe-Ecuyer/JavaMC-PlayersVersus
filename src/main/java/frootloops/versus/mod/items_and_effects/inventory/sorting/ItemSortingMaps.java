@@ -46,11 +46,11 @@ public abstract class ItemSortingMaps {
     public static final Map<Item, Integer> ITEMS_MINECARTS = new HashMap<>();
     static {
         int index = 1;
-        ITEMS_REDSTONE_COMPONENTS.put(Items.MINECART, index++);
-        ITEMS_REDSTONE_COMPONENTS.put(Items.HOPPER_MINECART, index++);
-        ITEMS_REDSTONE_COMPONENTS.put(Items.CHEST_MINECART, index++);
-        ITEMS_REDSTONE_COMPONENTS.put(Items.FURNACE_MINECART, index++);
-        ITEMS_REDSTONE_COMPONENTS.put(Items.TNT_MINECART, index++);
+        ITEMS_MINECARTS.put(Items.MINECART, index++);
+        ITEMS_MINECARTS.put(Items.HOPPER_MINECART, index++);
+        ITEMS_MINECARTS.put(Items.CHEST_MINECART, index++);
+        ITEMS_MINECARTS.put(Items.FURNACE_MINECART, index++);
+        ITEMS_MINECARTS.put(Items.TNT_MINECART, index++);
     }
 
     public static final Map<Item, Integer> ITEMS_TREASURE = new HashMap<>();

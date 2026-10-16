@@ -33,12 +33,12 @@ public abstract class InventoryScreenChestMixin extends AbstractContainerScreen<
         super.init();
 
         this.buttonSortChest = new ImageButton(this.leftPos + 155, this.topPos + 5, 13, 11, InventorySorting.TEXTURE_CHEST_SORT_BUTTON, button -> {
-            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft,  this.menu.getContainer(), InventorySorting.InventoryToSort.CONTAINER_INVENTORY, 0, menu.getRowCount() * 9);
+            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft,  this.menu.getContainer(), InventorySorting.InventoryToSort.CONTAINER_INVENTORY);
             if(buttonSortChest != null) buttonSortChest.setFocused(false);
         });
 
         this.buttonSortInventory = new ImageButton(this.leftPos + 155, this.topPos + 21 + (17 * menu.getRowCount()) + (menu.getRowCount() > 4 ? 3 : 0), 13, 11, InventorySorting.TEXTURE_SMALL_INVENTORY_SORT_BUTTON, button -> {
-            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft, minecraft.player.getInventory(), InventorySorting.InventoryToSort.INVENTORY_WHITH_SLOTS_ABOVE, menu.getRowCount() * 9, 36);
+            if(minecraft.player != null) InventorySorting.sortInventory(this.menu, minecraft, minecraft.player.getInventory(), InventorySorting.InventoryToSort.PLAYER_INVENTORY);
             if(buttonSortInventory != null) buttonSortInventory.setFocused(false);
         });
 
