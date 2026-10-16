@@ -62,9 +62,7 @@ assuming full overlap).
   and 20000 = midnight; `getMoonPhase() == 7` = new moon (vanilla's darkest phase index).
 - `addCustomSpawns()`: Deeper Creeper in Deep Caves/Regular Cave biomes (weight 100, group 1-1);
   Wither Skeleton (60) and Zombified Piglin (3, group 1-4) also added to Deep Caves; Breeze added to
-  Frozen Peaks (100); vanilla's Frostbite wherever vanilla spawns snow foxes (140, group 2-4; it took
-  over from the mod's Frosted Zombie in the 26.4 port); the Ice Cube in vanilla's Ice Caves (100,
-  group 1-2); extra
+  Frozen Peaks (100); Frosted Zombie wherever vanilla spawns snow foxes (140, group 2-4); extra
   desert fauna (cave spider, husk, camel, cat); Phantom spawn weight raised overworld-wide (80,
   group 1-2 — vanilla Phantoms normally only spawn via the sleep-deprivation mechanic, this is an
   **additional**, ordinary biome-based spawn on top of that); Blaze added to Nether Wastes (15).
@@ -77,8 +75,9 @@ assuming full overlap).
   weight: Deeper Creeper needs light ≤1, `#pale_creeper_spawnable_on`, and y<32; Pale Zombie needs
   light 0, `#undead_overworld_spawnable_on`, auto-allowed in Deep Caves biome, otherwise y-gated
   (never above y64, midnight-during-new-moon only between y24-64, unconditional below y24) — a
-  three-tier depth/rarity curve; the Ice Cube (`IceCubeEntity.checkIceCubeSpawnRules`) needs a dark
-  enough spot (vanilla's monster light check) unless a spawner made it.
+  three-tier depth/rarity curve; Frosted Zombie walks up through any stacked powder snow first, then
+  requires vanilla's own `canSpawnInDark` **passed through this mod's override above** plus either
+  open sky or the Frosted Cave biome.
 
 ## Custom hostile entities
 
@@ -106,17 +105,10 @@ assuming full overlap).
   peppering it with a bow from max range.
 - **`WardenVibrationListenerMixin`** — not re-read this pass; likely tunes the sniff/vibration
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
-- **Pale Zombie** (`mod/mobs/hostile/overworld/PaleZombieEntity.java`, renderer under
-  `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above);
-  not re-read in this pass beyond spawn placement — check the file directly. The snow-biome Frosted
-  Zombie was removed in the 26.4 port: vanilla's Frostbite takes its spawns, and vanilla turns
-  freezing zombies into frostbites (`Zombie#convertsToWhenFreezing`), which `ZombieMixin` did before.
-- **Ice Cube** (`mod/mobs/hostile/overworld/IceCubeEntity.java`, `IceCubeRenderer` in the client set)
-  — a `Slime` subclass in blue (the slime model with its own texture) that spawns in vanilla's Ice
-  Caves. Its hit freezes (`SlimeMixin.dealDamage` calls `IceCubeEntity.freeze`: vanilla's Freezing
-  effect, 30 ticks per size); it is freeze-immune (`freeze_immune_entity_types`, `canFreeze`,
-  `canBeAffected`). Its loot is the magma cube's: Frigid Concentrate from cubes of size 2 or more
-  (`loot_table/entities/ice_cube.json`), as magma cubes drop magma cream (→ Concentrate of Fire).
+- **Frosted Zombie / Pale Zombie** (`mod/mobs/hostile/overworld/{FrostedZombieEntity,PaleZombieEntity}.java`,
+  renderers under `src/client/.../mobs/hostile/overworld/`) — snow-biome and deep-cave zombie
+  variants respectively (spawn conditions above); not re-read in this pass for their own
+  attribute/behavior overrides beyond spawn placement — check those files directly.
 - **Skeleton/Spider/Slime/Silverfish/Drowned/Phantom/Enderman/Zombie(+Horde/EventListener/Villager)**
   (`mixin/mobs/hostile/overworld/{SkeletonMixin,SpiderMixin,SlimeMixin,SilverfishMixin,DrownedMixin,
   PhantomMixin,PhantomAccessor,ZombieMixin,ZombieHordeMixin,ZombieEventListenerMixin,ZombieVillagerMixin}.java`,
@@ -155,19 +147,6 @@ assuming full overlap).
   assuming a connection. Check these directly for current passive-mob behavior changes.
 - **Villagers/Wandering Trader** are covered in `villagers-and-trading.md`, not here.
 
-### Copper golem transport (`TransportItemsBetweenContainersMixin`, setting `Gameplay.DO_SMARTER_COPPER_GOLEMS`)
-Two `@WrapOperation`s on vanilla's `TransportItemsBetweenContainers` (only the copper golem runs it):
-- `getTransportTarget` keeps the chest with the smallest `distToCenterSqr`. While the golem carries something, that value
-  is replaced with `GolemChestRanking.cost` (`mod/mobs/passive/`): chest the item fits in because it already holds some
-  (most of it first, then nearest), else the nearest empty chest, else the last one looked into (the *furthest* chest,
-  full or not). Empty-handed (picking up) stays vanilla's nearest. Nothing is refused here: whatever is chosen, vanilla's
-  arrival check decides ("holds the item, or empty? no: mark visited, search again"), so there is no
-  `matchesLeavingItemsRequirement` override. Reach, locks, queuing and the visited/unreachable memories are vanilla's.
-- `pickupItemFromContainer` takes `min(stack, 16)`; the 16 is dropped, so a golem lifts the whole stack. A chest that
-  can't take all of it fills first, then the golem goes on to the next best (the filled one is now "visited").
-Pure ranking is unit-tested (`GolemChestRankingTest`); the mixin itself only gets exercised by the `[smoke]` server boot
-(applying) and in-game.
-
 ## Land pathfinding & mob spawn caps
 - **`LandPathfindingMixin`** (`mixin/mobs/`) — not read; likely affects path costs/water-avoidance
   for land mobs. Check directly before touching pathing behavior.
@@ -178,7 +157,7 @@ Pure ranking is unit-tested (`GolemChestRankingTest`); the mixin itself only get
 
 ## Entity registration (`ModEntities`)
 Central registry for every custom entity type: `SlimeballEntity` (misc group, tiny 0.25×0.25 hitbox
-— see `items-and-equipment.md`), `PaleCreeperEntity`, `IceCubeEntity`, `PaleZombieEntity`,
+— see `items-and-equipment.md`), `PaleCreeperEntity`, `FrostedZombieEntity`, `PaleZombieEntity`,
 `WildfireEntity` (all monster group, tracking ranges 4-8 blocks — short compared to vanilla hostiles,
 worth checking if intentional for a "you need to be close to notice these" cave-mob design or just
 unconsidered). Each gets a `FabricDefaultAttributeRegistry.register` call plus (except Slimeball) a

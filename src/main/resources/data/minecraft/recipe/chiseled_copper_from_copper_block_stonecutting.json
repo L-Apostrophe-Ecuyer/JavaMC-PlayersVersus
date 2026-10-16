@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "chiseled_copper",
+  "ingredient": "minecraft:copper_block",
+  "result": {
+    "count": 4,
+    "id": "minecraft:chiseled_copper"
+  }
+}

@@ -26,6 +26,6 @@ public class CloverBlock extends TallGrassBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState floor, BlockGetter world, BlockPos pos) {
-        return floor.is(BlockTags.SUPPORTS_VEGETATION) || floor.is(Blocks.MOSSY_COBBLESTONE) || floor.is(Blocks.MOSSY_STONE_BRICKS);
+        return floor.is(BlockTags.DIRT) || floor.is(Blocks.MOSS_BLOCK) || floor.is(Blocks.MOSSY_COBBLESTONE) || floor.is(Blocks.MOSSY_STONE_BRICKS);
     }
 }

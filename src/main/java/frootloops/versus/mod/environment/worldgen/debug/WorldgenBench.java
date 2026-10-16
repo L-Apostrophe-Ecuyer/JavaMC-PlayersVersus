@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -94,9 +95,8 @@ public final class WorldgenBench {
 
     public static final int MAX_RADIUS = 32;
 
-    /** Since 26.4 {@code NOISE_BIOMES} samples the climate into a chunk's noise biomes, and {@code BIOMES} stores them. */
     private static final List<ChunkStatus> STAGES = List.of(
-            ChunkStatus.NOISE_BIOMES, ChunkStatus.BIOMES, ChunkStatus.TERRAIN, ChunkStatus.FEATURES, ChunkStatus.FULL);
+            ChunkStatus.BIOMES, ChunkStatus.TERRAIN, ChunkStatus.FEATURES, ChunkStatus.FULL);
     private static final int[] SLICE_YS = {-40, -20, 0, 16, 28, 40, 56, 62};
     private static final int[] BIOME_LAYER_YS = {-40, 0, 32};
     private static final int BASIN_SEAM_MIN_Y = 0;
@@ -142,7 +142,7 @@ public final class WorldgenBench {
     /** Headless mode for {@code runWorldgenSmoke}: run once when the server has started, then stop it. */
     public static void registerHeadlessRun() {
         String radiusProperty = System.getProperty("pv.worldgen.bench");
-        if (radiusProperty == null || radiusProperty.isBlank() || WorldgenCensus.isRequested()) return;
+        if (radiusProperty == null || radiusProperty.isBlank()) return;
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             try {
                 int radius = Math.clamp(Integer.parseInt(radiusProperty.trim()), 1, MAX_RADIUS);
@@ -458,7 +458,7 @@ public final class WorldgenBench {
             countHighRiver(chunk);
             for (Map.Entry<Structure, StructureStart> entry : chunk.getAllStarts().entrySet()) {
                 StructureStart start = entry.getValue();
-                if (start.getPieces().isEmpty()) continue; // 26.3's isValid()
+                if (!start.isValid()) continue;
                 BoundingBox box = start.getBoundingBox();
                 this.structureStarts.add(String.format(Locale.ROOT, "structure %s start chunk %d,%d box %d,%d,%d..%d,%d,%d",
                         this.structures.getKey(entry.getKey()), start.getChunkPos().x(), start.getChunkPos().z(), box.minX(), box.minY(),
@@ -593,8 +593,7 @@ public final class WorldgenBench {
         }
 
         private int biomeIndex(ChunkAccess chunk, int x, int y, int z) {
-            // Block coordinates: 26.4's getBiome replaced getNoiseBiome, which took quart coordinates.
-            String id = chunk.getBiome(x, y, z).getRegisteredName();
+            String id = chunk.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)).getRegisteredName();
             return this.biomeIndex.computeIfAbsent(id, key -> {
                 this.biomeIds.add(key);
                 return this.biomeIds.size() - 1;

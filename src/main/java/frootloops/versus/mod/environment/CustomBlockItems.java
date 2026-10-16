@@ -51,7 +51,7 @@ public abstract class CustomBlockItems {
 
 
     public static final BlockItem GRAY_CLAY = new BlockItem(CustomBlocks.GRAY_CLAY, getBlockSettings("gray_clay"));
-    public static final BlockItem GRAY_MUD = new BlockItem(CustomBlocks.GRAY_MUD, getBlockSettings("gray_mud"));
+    public static final BlockItem GRAY_MUD = new BlockItem(CustomBlocks.BROWN_MUD, getBlockSettings("gray_mud"));
 
     public static final Item BROWN_CLAY_BALL =  new Item(getItemSettings("brown_clay_ball"));
     public static final BlockItem BROWN_CLAY = new BlockItem(CustomBlocks.BROWN_CLAY, getBlockSettings("brown_clay"));

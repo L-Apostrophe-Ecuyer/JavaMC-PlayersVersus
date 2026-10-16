@@ -2,15 +2,19 @@
   "feature": "minecraft:sugar_cane",
   "placement": [
     {
+      "type": "minecraft:in_square"
+    },
+    {
       "type": "minecraft:rarity_filter",
       "chance": 8
     },
     {
-      "type": "minecraft:in_square"
+      "type": "minecraft:surface_water_depth_filter",
+      "max_water_depth": 3
     },
     {
       "type": "minecraft:heightmap",
-      "heightmap": "MOTION_BLOCKING"
+      "heightmap": "OCEAN_FLOOR"
     },
     {
       "type": "minecraft:biome"
@@ -22,22 +26,19 @@
     {
       "type": "minecraft:offset",
       "x": {
-        "type": "minecraft:trapezoid",
-        "max": 4,
-        "min": -4,
-        "plateau": 0
+        "type": "minecraft:uniform",
+        "min_inclusive": -4,
+        "max_inclusive": 4
       },
       "y": {
-        "type": "minecraft:trapezoid",
-        "max": 0,
-        "min": 0,
-        "plateau": 0
+        "type": "minecraft:uniform",
+        "min_inclusive": 0,
+        "max_inclusive": 0
       },
       "z": {
-        "type": "minecraft:trapezoid",
-        "max": 4,
-        "min": -4,
-        "plateau": 0
+        "type": "minecraft:uniform",
+        "min_inclusive": -4,
+        "max_inclusive": 4
       }
     },
     {
@@ -46,78 +47,17 @@
         "type": "minecraft:all_of",
         "predicates": [
           {
-            "type": "minecraft:matching_block_tag",
-            "tag": "minecraft:air"
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:air"
           },
           {
             "type": "minecraft:would_survive",
-            "state": "minecraft:sugar_cane"
-          },
-          {
-            "type": "minecraft:any_of",
-            "predicates": [
-              {
-                "type": "minecraft:matching_fluids",
-                "fluids": [
-                  "minecraft:water",
-                  "minecraft:flowing_water"
-                ],
-                "offset": [
-                  1,
-                  -1,
-                  0
-                ]
-              },
-              {
-                "type": "minecraft:matching_fluids",
-                "fluids": [
-                  "minecraft:water",
-                  "minecraft:flowing_water"
-                ],
-                "offset": [
-                  -1,
-                  -1,
-                  0
-                ]
-              },
-              {
-                "type": "minecraft:matching_fluids",
-                "fluids": [
-                  "minecraft:water",
-                  "minecraft:flowing_water"
-                ],
-                "offset": [
-                  0,
-                  -1,
-                  1
-                ]
-              },
-              {
-                "type": "minecraft:matching_fluids",
-                "fluids": [
-                  "minecraft:water",
-                  "minecraft:flowing_water"
-                ],
-                "offset": [
-                  0,
-                  -1,
-                  -1
-                ]
-              },
-              {
-                "type": "minecraft:matching_blocks",
-                "blocks": [
-                  "players-versus:brown_mud",
-                  "minecraft:mud",
-                  "minecraft:clay"
-                ],
-                "offset": [
-                  0,
-                  -1,
-                  0
-                ]
+            "state": {
+              "id": "minecraft:sugar_cane",
+              "properties": {
+                "age": "0"
               }
-            ]
+            }
           }
         ]
       }

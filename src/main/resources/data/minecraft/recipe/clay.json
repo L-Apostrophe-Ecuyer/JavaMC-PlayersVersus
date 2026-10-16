@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "clay",
   "key": {
     "#": "minecraft:clay_ball"

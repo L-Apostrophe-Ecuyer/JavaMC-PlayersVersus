@@ -53,28 +53,10 @@
               "data": {
                 "id": "minecraft:sugar_cane",
                 "properties": {
-                  "age": "14"
+                  "age": "0"
                 }
               },
-              "weight": 14
-            },
-            {
-              "data": {
-                "id": "minecraft:sugar_cane",
-                "properties": {
-                  "age": "8"
-                }
-              },
-              "weight": 10
-            },
-            {
-              "data": {
-                "id": "minecraft:sugar_cane",
-                "properties": {
-                  "age": "2"
-                }
-              },
-              "weight": 8
+              "weight": 32
             }
           ]
         }

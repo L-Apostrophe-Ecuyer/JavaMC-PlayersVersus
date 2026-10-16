@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "acacia_misc",
+  "ingredients": [
+    "minecraft:chest",
+    "minecraft:acacia_boat"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:acacia_chest_boat"
+  }
+}

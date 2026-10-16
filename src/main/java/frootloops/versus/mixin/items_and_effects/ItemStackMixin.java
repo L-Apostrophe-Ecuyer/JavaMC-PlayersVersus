@@ -14,6 +14,7 @@ import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,8 +22,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import frootloops.versus.mod.environment.blocks.BlockSounds;
-import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements DataComponentHolder {
@@ -81,7 +80,7 @@ public abstract class ItemStackMixin implements DataComponentHolder {
     @Inject(method = "getDestroySpeed", at = @At("RETURN"), cancellable = true)
     public void getMiningSpeedMultiplier(BlockState state, CallbackInfoReturnable<Float> cir) {
         float miningSpeed = cir.getReturnValue();
-        if(BlockSounds.is(state, BlockSoundSets.DEEPSLATE)) {
+        if(state.getSoundType() == SoundType.DEEPSLATE) {
             if(this.getItem() == Items.NETHERITE_PICKAXE) miningSpeed *= 1.3f;
             else if(this.getItem() == Items.DIAMOND_PICKAXE) miningSpeed *= 1.1f;
             else if(this.getItem() == Items.IRON_PICKAXE) return;

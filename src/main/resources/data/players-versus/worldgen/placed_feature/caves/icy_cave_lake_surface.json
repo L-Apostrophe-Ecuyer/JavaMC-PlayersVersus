@@ -1,0 +1,21 @@
+{
+  "feature": "players-versus:caves/ice_disk",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 3
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "absolute": 23
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,10 +19,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import java.util.Optional;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.block.sounds.BlockSoundSet;
-import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 @Mixin(Block.class)
 public abstract class BlockMixin extends BlockBehaviour {
@@ -38,18 +35,18 @@ public abstract class BlockMixin extends BlockBehaviour {
     // protected method there can't be called from BlockStateBase's package (block.state), which 1.21.10's
     // intermediary and Yarn packages hid, and 26.x's unobfuscated ones don't (IllegalAccessError).
     @Override
-    public Optional<ResourceKey<BlockSoundSet>> getSounds(BlockState state) {
-        if(this.blockSoundSet.filter(BlockSoundSets.STONE::equals).isPresent() && this.defaultMapColor() == MapColor.QUARTZ) {
-            return Optional.of(BlockSoundSets.CALCITE);
+    public SoundType getSoundType(BlockState state) {
+        if(this.soundType == SoundType.STONE && this.defaultMapColor() == MapColor.QUARTZ) {
+            return SoundType.CALCITE;
         }
-        return this.blockSoundSet;
+        return this.soundType;
     }
 
     @Overwrite
     public static void dropResources(BlockState state, Level world, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity entity, ItemStack tool) {
-        if (world instanceof ServerLevel serverWorld) {
-            Block.getDrops(state, serverWorld, pos, blockEntity, entity, tool).forEach(stack -> dropStackTowardsPlayer(world, pos, stack, entity));
-            state.spawnAfterBreak(serverWorld, pos, tool, true, entity);
+        if (world instanceof ServerLevel) {
+            Block.getDrops(state, (ServerLevel)world, pos, blockEntity, entity, tool).forEach(stack -> dropStackTowardsPlayer(world, pos, stack, entity));
+            state.spawnAfterBreak((ServerLevel)world, pos, tool, true);
         }
     }
 

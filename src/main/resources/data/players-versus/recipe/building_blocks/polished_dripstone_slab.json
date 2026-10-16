@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "group": "dripstone",
   "pattern": [
-    "###"
+    "##"
   ],
   "key": {
     "#": "players-versus:polished_dripstone"
   },
   "result": {
     "id": "players-versus:polished_dripstone_slab",
-    "count": 6
+    "count": 4
   }
 }

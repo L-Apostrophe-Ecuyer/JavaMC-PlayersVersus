@@ -1,15 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
   "group": "brown",
   "key": {
     "#": "players-versus:brown_clay_bricks"
   },
   "pattern": [
-    "###"
+    "##"
   ],
   "result": {
-    "count": 6,
+    "count": 4,
     "id": "players-versus:brown_clay_brick_slab"
   }
 }

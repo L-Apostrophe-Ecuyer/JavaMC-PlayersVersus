@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "oxidized_copper_grate",
+  "ingredient": "minecraft:oxidized_copper",
+  "result": {
+    "count": 4,
+    "id": "minecraft:oxidized_copper_grate"
+  }
+}
