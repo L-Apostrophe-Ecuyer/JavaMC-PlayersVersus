@@ -18,8 +18,8 @@ import net.minecraft.world.entity.EntityTypes;
 /**
  * Angry brows over a mob's face while it winds up a swing and just after ({@link MeleeAnimation}): the mob's model drawn
  * again with a texture that is clear but for a few dark pixels above the eyes. One texture fits every skin laid out like
- * the mob's own (texture packs included); faces under an outer layer (drowned, strays, bogged) or drawn their own way
- * (the frosted zombie) go without.
+ * the mob's own (texture packs included); faces under an outer layer (drowned, frostbites, strays, bogged) go
+ * without.
  */
 @Environment(EnvType.CLIENT)
 public class AngryBrowsLayer<S extends LivingEntityRenderState, M extends EntityModel<S>> extends RenderLayer<S, M> {

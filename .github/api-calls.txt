@@ -430,3 +430,17 @@ net.minecraft.world.level.levelgen.synth.NormalNoise$Parameters
 net.minecraft.world.level.levelgen.synth.PerlinNoise
 net.minecraft.world.level.levelgen.synth.SimplexNoise
 net.minecraft.world.level.levelgen.synth.SmearedPerlinNoise
+# Mixin targets added since this list was written.
+net.minecraft.client.model.HumanoidModel
+net.minecraft.client.model.npc.BabyVillagerModel
+net.minecraft.client.multiplayer.MultiPlayerGameMode
+net.minecraft.client.renderer.entity.LivingEntityRenderer
+net.minecraft.client.renderer.entity.SpiderRenderer
+net.minecraft.client.renderer.entity.state.LivingEntityRenderState
+net.minecraft.world.entity.ai.behavior.MeleeAttack
+net.minecraft.world.entity.monster.Shulker
+net.minecraft.world.entity.monster.creaking.Creaking
+net.minecraft.world.entity.monster.cubemob.AbstractCubeMob
+net.minecraft.world.entity.monster.zombie.ZombifiedPiglin
+net.minecraft.world.item.crafting.RecipeMap
+net.minecraft.world.level.block.TallGrassBlock

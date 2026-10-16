@@ -4,7 +4,7 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
-import frootloops.versus.mod.mobs.hostile.overworld.FrostedZombieEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.IceCubeEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
@@ -29,7 +29,6 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class MobSpawning {
@@ -59,8 +58,12 @@ public class MobSpawning {
 
         // Surface:
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.FROZEN_PEAKS), MobCategory.MONSTER, EntityTypes.BREEZE, 100, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.SPAWNS_SNOW_FOXES), MobCategory.MONSTER, ModEntities.FROSTED_ZOMBIE, 140, 2, 4);
-        SpawnPlacements.register(ModEntities.FROSTED_ZOMBIE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnFrostedZombie);
+        // Vanilla's frostbites (26.4) took over from the frosted zombie, in the snowy biomes it roamed as well as in the ice caves.
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.SPAWNS_SNOW_FOXES), MobCategory.MONSTER, EntityTypes.FROSTBITE, 140, 2, 4);
+
+        // Ice caves: ice cubes, the blue slimes that freeze what they touch.
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.ICE_CAVES), MobCategory.MONSTER, ModEntities.ICE_CUBE, 100, 1, 2);
+        SpawnPlacements.register(ModEntities.ICE_CUBE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, IceCubeEntity::checkIceCubeSpawnRules);
 
         // Pale Garden: its own pale spiders, zombies and pale_creepers (the pale_creepers also come up in the Pale Grotto, by its biome file).
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_SPIDER, 80, 1, 3);
@@ -122,12 +125,5 @@ public class MobSpawning {
         if(y > 64) return false;
         if(y > 24) return isMidnightDuringNewMoon(world);
         return true;
-    }
-
-    public static boolean canSpawnFrostedZombie(EntityType<FrostedZombieEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
-        if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
-        if(spawnReason != EntitySpawnReason.NATURAL ) return true;
-        while (world.getBlockState(blockPos = blockPos.above()).is(Blocks.POWDER_SNOW)) {}
-        return Monster.checkMonsterSpawnRules(type, world, spawnReason, blockPos, random) && (world.canSeeSky(blockPos.below()) || (world.getBiome(blockPos).unwrapKey().get() == CustomOverworldBiomes.FROSTED_CAVE));
     }
 }

@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:cut_lapis",
+    "players-versus:cut_lapis_slab",
+    "players-versus:cut_lapis_stairs",
+    "players-versus:polished_stone",
+    "players-versus:terracotta_bricks",
+    "players-versus:terracotta_tiles",
+    "players-versus:terracotta_tile_slab",
+    "players-versus:terracotta_tile_stairs",
+    "players-versus:terracotta_tile_wall",
+    "players-versus:chiseled_terracotta",
+    "players-versus:polished_dripstone",
+    "players-versus:polished_dripstone_wall",
+    "players-versus:dripstone_pillar",
+    "players-versus:dripstone_bricks",
+    "players-versus:gray_clay",
+    "players-versus:gray_mud",
+    "players-versus:brown_clay",
+    "players-versus:brown_clay_bricks",
+    "players-versus:brown_mud_bricks"
+  ]
+}

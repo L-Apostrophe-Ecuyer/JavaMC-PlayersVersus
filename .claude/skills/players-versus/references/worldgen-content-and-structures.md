@@ -14,8 +14,9 @@ Two groups:
   rules (see `worldgen-engine.md` §"Biome layout"); each is a normal biome file (climate/effects/
   spawners/carvers/features) but is only ever *reached* through the PV biome-source layout logic,
   never placed directly by a parameter box of its own outside that Java-side derivation.
-- **`caves/` (7 biomes)**: `badlands_cave`, `creeper_caves`(+`_desert`), `deep_caves`, `frosted_caves`,
-  `pale_hollow`, `regular_cave` — the README's "new cave biomes; frozen caves, deep caves, badland
+- **`caves/` (6 biomes)**: `badlands_cave`, `creeper_caves`(+`_desert`), `deep_caves`,
+  `pale_hollow`, `regular_cave` (`frosted_caves` was removed in the 26.4 port: vanilla's Ice Caves
+  take its places in the layout) — the README's "new cave biomes; frozen caves, deep caves, badland
   caves, desert caves, & creeper caves." Spot-checked `deep_caves.json` (above table shows the
   pattern all cave biomes likely follow): heavy monster-spawner weighting toward the mod's own mobs
   (`players-versus:pale_creeper` weight 80, `players-versus:pale_zombie` weight 100 vs.

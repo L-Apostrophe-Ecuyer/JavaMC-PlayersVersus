@@ -17,6 +17,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
@@ -96,9 +97,9 @@ public record MudPatchFeature(boolean isBrownMud, IntProvider size) implements F
             // Next, if were in the middle of the pool:
             if(isNearCenter && (toPlace == wetBlock || toPlace.is(Blocks.WATER))) {
 
-                // Random chance of placing sugar cane, if sunlit:
+                // Random chance of placing sugar cane, if sunlit, at any of its growth stages short of mature:
                 if(toPlace == BROWN_MUD && world.getBlockState(blockPos.above()).isAir() && world.getBrightness(LightLayer.SKY, blockPos.above()) > 14 && random.nextInt(4) == 0) {
-                    world.setBlock(blockPos.above(), Blocks.SUGAR_CANE.defaultBlockState(), Block.UPDATE_CLIENTS);
+                    world.setBlock(blockPos.above(), Blocks.SUGAR_CANE.defaultBlockState().setValue(BlockStateProperties.AGE_15, random.nextInt(15)), Block.UPDATE_CLIENTS);
                 }
 
                 // Try placing a block below as well:

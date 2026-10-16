@@ -102,7 +102,7 @@ public abstract class MinecartMixin extends VehicleEntity {
         if(d == 8.0) d = 32.0;
 
         Vec3 velocity = this.getDeltaMovement();
-        this.setDeltaMovement(Mth.clamp(velocity.x, -d, d), velocity.y, Mth.clamp(velocity.z, -d, d));
+        this.setDeltaMovement(Math.clamp(velocity.x, -d, d), velocity.y, Math.clamp(velocity.z, -d, d));
 
         if (this.onGround()) this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
         this.move(MoverType.SELF, this.getDeltaMovement());

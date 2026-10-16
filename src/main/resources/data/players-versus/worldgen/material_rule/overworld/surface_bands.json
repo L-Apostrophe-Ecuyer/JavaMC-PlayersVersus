@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:sequence",
+  "sequence": [
+    "players-versus:overworld/mud_bands",
+    "players-versus:overworld/clay_bands"
+  ]
+}

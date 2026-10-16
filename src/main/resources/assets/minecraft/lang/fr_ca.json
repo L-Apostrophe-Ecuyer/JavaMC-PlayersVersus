@@ -1,6 +1,7 @@
 {
 
   "subtitles.players-versus.rail_turning_sound": "Wagonnet tourne à toute vitesse",
+  "subtitles.players-versus.block.leaves.rustle": "Les feuilles bruissent",
 
   "death.attack.mud_suffocation": "%1$s s'est noyé dans un bain de boue",
   "death.attack.mud_suffocation.item": "%1$s s'est noyé dans un bain de boue",
@@ -267,6 +268,7 @@
   "item.players-versus.concentrate_of_strength": "Concentré ardent",
   "item.players-versus.concentrate_of_weakness" : "Concentré faible",
   "item.players-versus.concentrate_of_fire" : "Concentré brûlant",
+  "item.players-versus.concentrate_of_freezing" : "Concentré glacial",
   "item.players-versus.concentrate_of_wind" : "Concentré aérien",
   "item.players-versus.concentrate_of_ooze" : "Concentré visqueux",
   "item.players-versus.concentrate_of_infestation" : "Concentré terrifiant",
@@ -286,13 +288,13 @@
   "enchantment.players-versus.magic_protection": "Protection contre la magie",
   "enchantment.players-versus.impact_protection": "Protection contre les coups",
   "enchantment.players-versus.piercing_protection": "Protection contre les perforations",
-  "entity.players-versus.frosted_zombie": "Surgelé",
   "entity.players-versus.pale_creeper": "Creeper pâle",
   "entity.players-versus.pale_zombie": "Zombie pâle",
+  "entity.players-versus.ice_cube": "Cube de glace",
   "entity.players-versus.pale_spider": "Araignée pâle",
-  "item.players-versus.frosted_zombie_spawn_egg": "Oeuf d'apparition de Surgelé",
   "item.players-versus.pale_creeper_spawn_egg": "Oeuf d'apparition de Creeper pâle",
   "item.players-versus.pale_zombie_spawn_egg": "Oeuf d'apparition de Zombie pâle",
+  "item.players-versus.ice_cube_spawn_egg": "Oeuf d'apparition de Cube de glace",
   "item.players-versus.pale_spider_spawn_egg": "Oeuf d'apparition d'Araignée pâle",
   "players-versus.deathScreen.spectateNearby": "Devenir spectateur (près d'ici)",
   "players-versus.deathScreen.spectateHome": "Devenir spectateur",

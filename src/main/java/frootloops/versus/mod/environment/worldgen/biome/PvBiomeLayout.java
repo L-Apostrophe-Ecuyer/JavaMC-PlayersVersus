@@ -38,7 +38,7 @@ public final class PvBiomeLayout {
     static final Parameter SURFACE_CAVE_DEPTH = Parameter.span(0.1F, 0.25F);
     private static final float SURFACE_CAVE_OFFSET = 0.075F;
     /**
-     * Depth of the dripstone and frosted caves that replace vanilla's dripstone entry. The old biome mixin passed the
+     * Depth of the dripstone and ice caves that replace vanilla's dripstone entry. The old biome mixin passed the
      * continentalness range (0.8..1.0) as depth by mistake; this keeps that placement, because the dripstone rarity
      * was tuned in game with it.
      */
@@ -179,16 +179,16 @@ public final class PvBiomeLayout {
 
     private static void emitLushReplacement(ParameterPoint lush, List<Entry> out) {
         float offset = Climate.unquantizeCoord(lush.offset());
-        Parameter frostedHumidity = Parameter.span(-0.6F, -0.4F);
+        Parameter coldHumidity = Parameter.span(-0.6F, -0.4F);
         out.add(new Entry(Climate.parameters(Parameter.span(-0.4F, 0.8F), lush.humidity(), lush.continentalness(),
                 lush.erosion(), Parameter.span(0.15F, 0.5F), lush.weirdness(), offset + 0.01F), Biomes.LUSH_CAVES, "lush"));
-        out.add(new Entry(Climate.parameters(Parameter.span(-0.3F, 0.8F), frostedHumidity, lush.continentalness(),
+        out.add(new Entry(Climate.parameters(Parameter.span(-0.3F, 0.8F), coldHumidity, lush.continentalness(),
                 lush.erosion(), Parameter.span(0.2F, 0.5F), lush.weirdness(), offset + 0.01F), Biomes.LUSH_CAVES, "lush"));
         out.add(new Entry(Climate.parameters(Parameter.span(-1.0F, -0.8F), lush.humidity(), lush.continentalness(),
-                lush.erosion(), Parameter.span(0.15F, 0.5F), lush.weirdness(), offset), CustomOverworldBiomes.FROSTED_CAVE, "lush-frosted"));
-        out.add(new Entry(Climate.parameters(Parameter.span(-1.0F, -0.5F), frostedHumidity, lush.continentalness(),
+                lush.erosion(), Parameter.span(0.15F, 0.5F), lush.weirdness(), offset), Biomes.ICE_CAVES, "lush-ice"));
+        out.add(new Entry(Climate.parameters(Parameter.span(-1.0F, -0.5F), coldHumidity, lush.continentalness(),
                 Parameter.span(-1.0F, -0.6F), Parameter.span(0.2F, 0.5F), lush.weirdness(), offset),
-                CustomOverworldBiomes.FROSTED_CAVE, "lush-frosted"));
+                Biomes.ICE_CAVES, "lush-ice"));
     }
 
     private static void emitDripstoneReplacement(ParameterPoint dripstone, List<Entry> out) {
@@ -196,7 +196,7 @@ public final class PvBiomeLayout {
         out.add(new Entry(Climate.parameters(Parameter.span(-0.6F, 1.0F), dripstone.humidity(), dripstone.continentalness(),
                 dripstone.erosion(), DEEP_DRIPSTONE_DEPTH, dripstone.weirdness(), offset), Biomes.DRIPSTONE_CAVES, "dripstone"));
         out.add(new Entry(Climate.parameters(Parameter.span(-1.0F, -0.7F), dripstone.humidity(), dripstone.continentalness(),
-                dripstone.erosion(), DEEP_DRIPSTONE_DEPTH, dripstone.weirdness(), offset), CustomOverworldBiomes.FROSTED_CAVE, "dripstone-frosted"));
+                dripstone.erosion(), DEEP_DRIPSTONE_DEPTH, dripstone.weirdness(), offset), Biomes.ICE_CAVES, "dripstone-ice"));
     }
 
     private static Parameter caveDepth(PlacedBiomeType type) {

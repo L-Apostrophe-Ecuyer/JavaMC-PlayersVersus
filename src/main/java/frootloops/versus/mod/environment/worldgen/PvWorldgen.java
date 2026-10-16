@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment.worldgen;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.biome.PvBiomeSource;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenBench;
+import frootloops.versus.mod.environment.worldgen.debug.WorldgenCensus;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenDebugCommands;
 import frootloops.versus.mod.environment.worldgen.density.AquiferFloodedness;
 import frootloops.versus.mod.environment.worldgen.density.AquiferSpread;
@@ -38,6 +39,7 @@ public final class PvWorldgen {
         Registry.register(BuiltInRegistries.CHUNK_GENERATOR, CHUNK_GENERATOR_ID, PvChunkGenerator.CODEC);
         WorldgenDebugCommands.register();
         WorldgenBench.registerHeadlessRun();
+        WorldgenCensus.registerHeadlessRun();
     }
 
     /**

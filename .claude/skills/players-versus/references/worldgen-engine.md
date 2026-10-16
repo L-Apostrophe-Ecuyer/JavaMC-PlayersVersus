@@ -112,8 +112,9 @@ wrapping a `MultiNoiseUtil.Entries` built once from `PvBiomeLayout.build()`). `P
    this is the Q4 fix from the plan (mountain-transition overlap bug) already implemented.
 3. Drops vanilla's `depth == 1` (underground) copy of every surface slice entirely — the PV
    underground belongs to cave biomes, not to a duplicate of the surface biome.
-4. Replaces vanilla's Lush Caves and Dripstone Caves entries with PV variants (frosted-cave
-   splits, etc.) and appends `CustomOverworldBiomes.caveBiomesToPlaceInOverorld` (frosted, badlands,
+4. Replaces vanilla's Lush Caves and Dripstone Caves entries with PV variants (ice-cave splits —
+   vanilla's Ice Caves since 26.4, where the frosted caves were — etc.) and appends
+   `CustomOverworldBiomes.caveBiomesToPlaceInOverorld` (vanilla's ice caves, badlands,
    creeper caves regular/desert, regular cave, deep caves — climate-parameter boxes hand-tuned per
    entry) plus any `landBiomesToPlaceInOverorld` (currently empty — the extension point for adding
    a new *surface* biome).

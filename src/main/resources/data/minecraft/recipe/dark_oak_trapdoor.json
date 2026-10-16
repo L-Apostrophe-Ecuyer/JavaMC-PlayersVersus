@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "redstone",
   "group": "dark_misc",
   "key": {
     "#": "minecraft:dark_oak_planks"

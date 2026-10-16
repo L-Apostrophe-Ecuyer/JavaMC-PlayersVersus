@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "redstone",
   "group": "spruce_misc",
   "key": {
     "#": "minecraft:spruce_planks"
