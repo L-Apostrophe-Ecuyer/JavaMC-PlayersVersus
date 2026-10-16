@@ -2,7 +2,7 @@ package frootloops.versus.mod.items_and_effects.inventory.recipe_book;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
-import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemComparaisonHelper;
+import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemOrdering;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.recipes.RecipeBookOrdering;
 import frootloops.versus.mod.items_and_effects.recipes.RecipePins;
@@ -28,7 +28,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * The recipe book's order, by what the recipes make, the way the inventory sort orders items (ItemComparaisonHelper: its
+ * The recipe book's order, by what the recipes make, the way the inventory sort orders items (ItemOrdering: its
  * types, then rarity, tool and armor value, food value, block kind and color). The two sections, craftable first, are
  * RecipeBookOrdering's, with what the player pinned first in its section (RecipePins). A sort that fails (some item the
  * comparison can't handle) leaves the list as it was.
@@ -154,7 +154,7 @@ public final class RecipeBookSorting {
     /** The inventory sort's comparison of stacks, as an order: its "goes before" test, then the registry's order for the ties. */
     private static final class Ordering {
         private final Map<ItemStack, ItemSlot> slots = new IdentityHashMap<>();
-        private final Comparator<ItemStack> byInventorySort = RecipeBookOrdering.fromBefore((a, b) -> ItemComparaisonHelper.shouldGoBefore(slot(a), slot(b)));
+        private final Comparator<ItemStack> byInventorySort = RecipeBookOrdering.fromBefore((a, b) -> ItemOrdering.shouldGoBefore(slot(a), slot(b)));
 
         int compare(ItemStack a, ItemStack b) {
             if (a.isEmpty() != b.isEmpty()) return a.isEmpty() ? 1 : -1;
@@ -175,7 +175,7 @@ public final class RecipeBookSorting {
         }
 
         private ItemSlot slot(ItemStack stack) {
-            return slots.computeIfAbsent(stack, key -> new ItemSlot(-1, key, ItemComparaisonHelper.getItemTypeOf(key)));
+            return slots.computeIfAbsent(stack, key -> ItemSlot.of(-1, key));
         }
     }
 }
