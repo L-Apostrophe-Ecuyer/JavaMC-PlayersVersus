@@ -77,38 +77,12 @@
             "to_value": 0.015
           },
           "right": {
-            "type": "minecraft:min",
-            "left": {
-              "type": "minecraft:gradient",
-              "axis": "y",
-              "from_coordinate": 96,
-              "from_value": 0.0,
-              "to_coordinate": 256,
-              "to_value": 0.32
-            },
-            "right": {
-              "type": "minecraft:max",
-              "left": 0.0,
-              "right": {
-                "type": "minecraft:mul",
-                "left": {
-                  "type": "minecraft:add",
-                  "left": {
-                    "type": "minecraft:interpolated",
-                    "cell_size_xz": 4,
-                    "cell_size_y": 8,
-                    "input": {
-                      "type": "minecraft:slice",
-                      "axis": "y",
-                      "coordinate": 96,
-                      "input": "players-versus:overworld/depth"
-                    }
-                  },
-                  "right": 0.0625
-                },
-                "right": 0.256
-              }
-            }
+            "type": "minecraft:gradient",
+            "axis": "y",
+            "from_coordinate": 96,
+            "from_value": 0.0,
+            "to_coordinate": 128,
+            "to_value": 0.064
           }
         },
         "right": {
@@ -128,48 +102,6 @@
                       "type": "minecraft:sub",
                       "left": 0.0625,
                       "right": {
-                        "type": "minecraft:max",
-                        "left": {
-                          "type": "minecraft:sub",
-                          "left": {
-                            "type": "minecraft:interpolated",
-                            "cell_size_xz": 4,
-                            "cell_size_y": 8,
-                            "input": {
-                              "type": "minecraft:slice",
-                              "axis": "y",
-                              "coordinate": 96,
-                              "input": "players-versus:overworld/depth"
-                            }
-                          },
-                          "right": {
-                            "type": "minecraft:gradient",
-                            "axis": "y",
-                            "from_coordinate": 96,
-                            "from_value": 0.0,
-                            "to_coordinate": 256,
-                            "to_value": 1.25
-                          }
-                        },
-                        "right": -0.0625
-                      }
-                    },
-                    "min": 0.0,
-                    "max": 0.0625
-                  }
-                },
-                "right": 3.072
-              },
-              "right": {
-                "type": "minecraft:mul",
-                "left": {
-                  "type": "minecraft:max",
-                  "left": 0.0,
-                  "right": {
-                    "type": "minecraft:mul",
-                    "left": {
-                      "type": "minecraft:max",
-                      "left": {
                         "type": "minecraft:sub",
                         "left": {
                           "type": "minecraft:interpolated",
@@ -187,11 +119,45 @@
                           "axis": "y",
                           "from_coordinate": 96,
                           "from_value": 0.0,
-                          "to_coordinate": 256,
-                          "to_value": 1.25
+                          "to_coordinate": 128,
+                          "to_value": 0.25
+                        }
+                      }
+                    },
+                    "min": 0.0,
+                    "max": 0.0625
+                  }
+                },
+                "right": 3.072
+              },
+              "right": {
+                "type": "minecraft:mul",
+                "left": {
+                  "type": "minecraft:max",
+                  "left": 0.0,
+                  "right": {
+                    "type": "minecraft:mul",
+                    "left": {
+                      "type": "minecraft:sub",
+                      "left": {
+                        "type": "minecraft:interpolated",
+                        "cell_size_xz": 4,
+                        "cell_size_y": 8,
+                        "input": {
+                          "type": "minecraft:slice",
+                          "axis": "y",
+                          "coordinate": 96,
+                          "input": "players-versus:overworld/depth"
                         }
                       },
-                      "right": -0.0625
+                      "right": {
+                        "type": "minecraft:gradient",
+                        "axis": "y",
+                        "from_coordinate": 96,
+                        "from_value": 0.0,
+                        "to_coordinate": 128,
+                        "to_value": 0.25
+                      }
                     },
                     "right": -1.0
                   }

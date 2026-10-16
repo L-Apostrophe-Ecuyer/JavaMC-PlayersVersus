@@ -4,31 +4,8 @@ public abstract class VersusSettings {
 
     public static class QOL {
         public static boolean DO_HOTBAR_SWAPPING_ON_PICK_KEY = true;
-        // Placed blocks turn to match the stroke they're placed in and their neighbours (PlacementRules)
         public static boolean DO_SMARTER_BLOCK_PLACING = true;
-        // Looking past the edge of the block below you places in front of it, as Bedrock's reach-around does
         public static boolean DO_BEDROCK_BRIDGING = true;
-        // Right-click held places as soon as the crosshair reaches a new spot, but only on the face the stroke began on
-        // and not growing out of its own blocks unless you move that way (ClientPlacement)
-        public static boolean DO_PLACING_STROKES = true;
-        // A block shows its outline where it will go when it's turned unlike vanilla, or reached around to
-        public static boolean DO_PLACEMENT_PREVIEW = true;
-        // A block just placed breaks much faster (RecentPlacements)
-        public static boolean DO_FAST_UNDO_PLACING = true;
-        // The recipe book: a click outside an open group's popup closes it and goes through (RecipeBookPageMixin)
-        public static boolean DO_RECIPE_BOOK_CLICK_THROUGH = true;
-        // A group's popup opens when the mouse stays on it and closes when the mouse leaves it and its popup
-        public static boolean DO_RECIPE_BOOK_HOVER_GROUPS = true;
-        // The recipe book lists what can be crafted first, then the rest, each ordered like the inventory sort (RecipeBookOrdering)
-        public static boolean DO_SMART_RECIPE_ORDER = true;
-        // Double-click a recipe in the book to place the most crafts, double-click again for one (RecipeBookComponentMixin)
-        public static boolean DO_RECIPE_DOUBLE_CLICK_MAX = true;
-        // A stack in the hand that runs out is refilled from the largest matching stack in the inventory (HotbarRefill)
-        public static boolean DO_HOTBAR_REFILL = true;
-        // A recipe group's icon cycles through what can be crafted now, when anything can (RecipeButtonMixin)
-        public static boolean DO_RECIPE_ICONS_CYCLE_CRAFTABLE = true;
-        // Right-click pins a recipe group, or a recipe in its popup, to the top of its section (RecipePins)
-        public static boolean DO_RECIPE_BOOK_PINS = true;
     }
 
     public static class Combat {
@@ -50,16 +27,9 @@ public abstract class VersusSettings {
         public static boolean DO_ZOMBIE_SEIGES_OUTSIDE_VILLAGES = true;
         public static boolean DO_RAIDS_OUTSIDE_VILLAGES = true;
         public static int BRUSHING_TICKS_PER_STAGE = 2; // Vanilla is 5
-
-        // Copper golems carry a whole stack (vanilla: 16) to the chest that already holds the most of it
-        public static boolean DO_SMARTER_COPPER_GOLEMS = true;
     }
 
     public static class Items {
-        // Recipe book groups by family (oak, deepslate, copper), tools and armor by material (RecipeRules)
-        public static boolean DO_FAMILY_RECIPE_GROUPS = true;
-        // Stairs from three blocks (four stairs), slabs from two (four slabs), pressure plates from three (two plates)
-        public static boolean DO_CHEAPER_STAIRS_AND_SLABS = true;
         public static int MAX_STACK_SIZE_COUNT = 64;
         public static int MAX_COUNT_FOOD = 64;
         public static int MAX_COUNT_STEWS = 16;

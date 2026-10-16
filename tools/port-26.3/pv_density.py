@@ -306,12 +306,10 @@ def flooded_corridors():
 # at and falls into.
 HIGH_RIVER = {"y": C["HIGH_RIVER_Y"], "bed": C["HIGH_RIVER_BED"], "half_width": C["HIGH_RIVER_HALF_WIDTH"],
               "widening": C["HIGH_RIVER_WIDENING"], "flare": C["HIGH_RIVER_FLARE_WIDENING"], "closed": C["HIGH_RIVER_CLOSED"],
-              "gorge": C["HIGH_RIVER_GORGE_WIDTH"], "bank_bottom": C["HIGH_RIVER_BANK_MIN_Y"],
-              "bank_taper": C["HIGH_RIVER_BANK_TAPER"]}
+              "gorge": C["HIGH_RIVER_GORGE_WIDTH"], "bank_bottom": C["HIGH_RIVER_BANK_MIN_Y"]}
 HIGH_RIVER_UPPER = {"y": C["HIGH_RIVER_UPPER_Y"], "bed": C["HIGH_RIVER_UPPER_BED"], "half_width": C["HIGH_RIVER_UPPER_HALF_WIDTH"],
                     "widening": C["HIGH_RIVER_UPPER_WIDENING"], "flare": C["HIGH_RIVER_UPPER_FLARE_WIDENING"],
-                    "closed": C["HIGH_RIVER_UPPER_CLOSED"], "bank_bottom": C["HIGH_RIVER_UPPER_BANK_MIN_Y"],
-                    "bank_taper": C["HIGH_RIVER_UPPER_BANK_TAPER"]}
+                    "closed": C["HIGH_RIVER_UPPER_CLOSED"], "bank_bottom": C["HIGH_RIVER_UPPER_BANK_MIN_Y"]}
 # The banks' value where they make ground, and where they don't (the final density takes the maximum with them).
 BANK_SOLID, NO_FILL = 1.0, -64.0
 
@@ -355,15 +353,11 @@ def high_river_full_half_width(layer):
     the depth at its surface and the height above it, the depth at each height), as far as it reaches past the flare at
     the water: so the walls rise steeply from the water where the ground stands high and open out at the rim."""
     y_surface, bed, top = layer["y"], layer["bed"], C["HIGH_RIVER_VALLEY_MAX_Y"]
-    rim, per_block = C["HIGH_RIVER_RIM_HEIGHT"], C["DEPTH_PER_BLOCK"]
     depth_at_surface = interpolated(slice_y(y_surface, REF_DEPTH))
-    # The depth at each height, no lower than the rim's: from HIGH_RIVER_RIM_HEIGHT over the ground's nominal surface
-    # up, the walls stop leaning out and rise straight, through whatever ground stands there, to the terrain's top.
-    depth_here = max_(sub(depth_at_surface, gradient(y_surface, top, 0.0, (top - y_surface) * per_block)), -rim)
+    depth_here = sub(depth_at_surface, gradient(y_surface, top, 0.0, (top - y_surface) * C["DEPTH_PER_BLOCK"]))
     flare = max_(0.0, sub(high_river_flare(layer, depth_here), high_river_flare(layer, depth_at_surface)))
-    widening = min_(gradient(y_surface, top, 0.0, (top - y_surface) * layer["widening"]),
-                    max_(0.0, mul(add(depth_at_surface, rim), layer["widening"] / per_block)))
-    return add(add(gradient(y_surface - bed - 1, y_surface, 0.0, layer["half_width"]), widening), flare)
+    return add(add(gradient(y_surface - bed - 1, y_surface, 0.0, layer["half_width"]),
+                   gradient(y_surface, top, 0.0, (top - y_surface) * layer["widening"])), flare)
 
 
 def high_river_across(layer):
@@ -385,29 +379,17 @@ def high_river_bank(layer, below=None):
     reaches, the further it slopes out; the margin and the slope shrink with a river under half its full width, so a
     narrowing river's tip has no more bank than water. Only where its water runs (its activity above 0), and for a layer
     over another not inside the lower one's valley; NO_FILL elsewhere. The valleys' cut comes after it in the final
-    density, so the river's own channel stays open.
-
-    Where a cave or a drop leaves it hanging, the bank is rock, not a cast: its slopes are more or less wide by the noise
-    players-versus:high_river_bank (HIGH_RIVER_BANK_ROUGHNESS), not at all at its surface, so the water keeps its
-    walls, and the full roughness at its bottom; and under its bottom it narrows to nothing over its taper, by the same
-    noise, so it ends in a ragged keel instead of a flat ceiling."""
-    y_surface, bottom, taper = layer["y"], layer["bank_bottom"], layer["bank_taper"]
-    tip = bottom - taper
+    density, so the river's own channel stays open."""
+    y_surface, bottom = layer["y"], layer["bank_bottom"]
     margin, slope = C["HIGH_RIVER_BANK_MARGIN"], C["HIGH_RIVER_BANK_SLOPE"]
-    roughness = C["HIGH_RIVER_BANK_ROUGHNESS"]
-    rough = mul(interpolated(noise(pv("high_river_bank"), 1.0, 1.0)), roughness)
     activity = high_river_activity(layer)
     reach = mul(clamp(mul(activity, 2.0), 0.0, 1.0), gradient(y_surface, bottom, margin, margin + (y_surface - bottom) * slope))
-    water = mul(activity, layer["half_width"])
-    slopes = add(water, mul(reach, add(1.0, mul(rough, gradient(y_surface, bottom, 0.0, 1.0)))))
-    # From a whole bank at its bottom to less than nothing at the tip, so the noise never leaves a flat end there.
-    keel = mul(add(water, reach), add(gradient(tip, bottom, -roughness, 1.0), rough))
-    half_width = range_choice(mc("y"), tip - 0.5, bottom - 0.5, keel, slopes)
+    half_width = add(mul(activity, layer["half_width"]), reach)
     inside = range_choice(sub(half_width, abs_(high_river_channel())), MIN_POSITIVE, 1000000.0, BANK_SOLID, NO_FILL)
     bank = range_choice(activity, MIN_POSITIVE, 1000000.0, inside, NO_FILL)
     if below is not None:
         bank = range_choice(below_layer_at_surface(layer, below), -1000000.0, 0.0, NO_FILL, bank)
-    return range_choice(mc("y"), tip - 0.5, y_surface + 0.5, bank, NO_FILL)
+    return range_choice(mc("y"), bottom - 0.5, y_surface + 0.5, bank, NO_FILL)
 
 
 def high_river_valley(layer, across, below=None):
@@ -558,6 +540,7 @@ def noise_settings():
             "lava": noise(mc("aquifer_lava"), 1.0, 1.0),
             "surface_level": mc("overworld/preliminary_surface_level"),
         },
+        "default_block": mc("stone"),
         "default_fluid": mc("water"),
         "disable_mob_generation": False,
         "legacy_random_source": False,
@@ -601,148 +584,11 @@ def material(rule):
     return {k: block_state(v) if k == "result_state" else material(v) for k, v in rule.items()}
 
 
-def condition(if_true, then_run):
-    return {"type": mc("condition"), "if_true": if_true, "then_run": then_run}
-
-
-def biome_is(*biomes):
-    return {"type": mc("biome"), "biome_is": list(biomes)}
-
-
-def block(state):
-    return {"type": mc("block"), "result_state": state}
-
-
-def sequence(*rules):
-    return {"type": mc("sequence"), "sequence": list(rules)}
-
-
-# The cave biomes vanilla gives bands of their own blocks (26.3's sulfur caves, 26.4's ice caves): underground, and on
-# the floors their caves have near the surface, in vanilla's order.
-CAVE_BIOME_BANDS = [("sulfur_caves", "overworld/sulfur_cave_bands"), ("ice_caves", "overworld/ice_cave_bands")]
-
-# Bands of the Players Versus noise surface_bands (2D, about 32 blocks across) on the ground, as stripes in the middle of
-# the noise with grass between them and on both sides: grass, a stripe of clay, grass, a stripe of mud, grass. A mud
-# stripe is brown mud (the core) ringed on either side by 0 to 2 blocks of coarse dirt, then 0 to 3 of brown clay; a
-# clay stripe goes cyan terracotta, andesite, gray clay (the core), andesite, cyan terracotta. The snowy plains take
-# both stripes of the one noise, the whole spectrum from brown mud through grass to gray clay; the savannas the mud,
-# the snowy taiga the clay. The rings' widths come from how fast the noise changes at their thresholds (0.05 a block
-# on average). Outside a stripe the rule falls through to the grass.
-SURFACE_BANDS = pv("surface_bands")
-MAX = sys.float_info.max
-MUD_BANDS = [(pv("brown_clay"), -0.42, -0.36), (mc("coarse_dirt"), -0.36, -0.32), (pv("brown_mud"), -0.32, -0.20),
-             (mc("coarse_dirt"), -0.20, -0.16), (pv("brown_clay"), -0.16, -0.10)]
-CLAY_BANDS = [(mc("cyan_terracotta"), 0.22, 0.27), (mc("andesite"), 0.27, 0.32), (pv("gray_clay"), 0.32, 0.42),
-              (mc("andesite"), 0.42, 0.47), (mc("cyan_terracotta"), 0.47, 0.52)]
-MUD_BIOMES = [mc("snowy_plains"), mc("savanna"), mc("savanna_plateau")]
-CLAY_BIOMES = [mc("snowy_plains"), mc("snowy_taiga")]
-# The same clay stripe in the regular caves' stone, on the 3D noise cave_bands (as vanilla's cave biomes' bands are):
-# gray clay in shells of andesite and cyan terracotta, where the noise is in the stripe.
-REGULAR_CAVE = pv("caves/regular_cave")
-CAVE_BANDS = pv("cave_bands")
-REGULAR_CAVE_BANDS = CLAY_BANDS
-
-
-def noise_threshold(noise_id, low, high, is_3d=False):
-    out = {"type": mc("noise_threshold"), "noise": noise_id, "min_threshold": low, "max_threshold": high}
-    if is_3d:
-        out["is_3d"] = True
-    return out
-
-
-def bands(noise_id, ranges, is_3d=False):
-    """A block for each range of a noise."""
-    return sequence(*[condition(noise_threshold(noise_id, low, high, is_3d), block(state)) for state, low, high in ranges])
-
-
-def find_sequences(rule, test):
-    """The sequences in a rule that contain an entry the test accepts, outermost first."""
-    found = []
-
-    def walk(node):
-        if isinstance(node, dict):
-            if node.get("type") == mc("sequence") and any(test(r) for r in node["sequence"]):
-                found.append(node)
-            for value in node.values():
-                walk(value)
-        elif isinstance(node, list):
-            for value in node:
-                walk(value)
-
-    walk(rule)
-    return found
-
-
-def is_biome_condition(rule, biome):
-    if not isinstance(rule, dict) or rule.get("type") != mc("condition") or not isinstance(rule["if_true"], dict):
-        return False
-    return rule["if_true"].get("type") == mc("biome") and mc(biome) in rule["if_true"]["biome_is"]
-
-
-def is_dirt_by_water(rule):
-    """The under floor's default: dirt where water is at most a block above."""
-    return (isinstance(rule, dict) and rule.get("type") == mc("condition") and rule["if_true"].get("type") == mc("water")
-            and rule["if_true"].get("offset") == -1 and rule["then_run"] == block(mc("dirt")))
-
-
-def add_cave_biome_surfaces(rule):
-    """The cave biomes' bands on the floors near the surface, after the dripstone caves' stone (on the floor, and under
-    it), as vanilla's biome_surface and under_biome_surface name them."""
-    sequences = find_sequences(rule, lambda r: is_biome_condition(r, "dripstone_caves"))
-    assert len(sequences) == 2, len(sequences)
-    for seq in sequences:
-        after = next(i for i, r in enumerate(seq["sequence"]) if is_biome_condition(r, "dripstone_caves")) + 1
-        seq["sequence"][after:after] = [condition(biome_is(mc(b)), mc("overworld/biome_surface/" + b)) for b, _ in CAVE_BIOME_BANDS]
-
-
-def add_surface_bands(rule):
-    """The surface bands, before the default grass on the floor, and under them the mud's brown clay and the gray
-    clay's own, before the default dirt."""
-    floors = find_sequences(rule, lambda r: is_biome_condition(r, "mushroom_fields"))
-    assert len(floors) == 1, len(floors)
-    floor = floors[0]["sequence"]
-    floor[-1:-1] = [
-        condition(biome_is(mc("snowy_plains")), pv("overworld/surface_bands")),
-        condition(biome_is(*[b for b in MUD_BIOMES if b not in CLAY_BIOMES]), pv("overworld/mud_bands")),
-        condition(biome_is(*[b for b in CLAY_BIOMES if b not in MUD_BIOMES]), pv("overworld/clay_bands")),
-    ]
-    unders = find_sequences(rule, is_dirt_by_water)
-    assert len(unders) == 1, len(unders)
-    under = unders[0]["sequence"]
-    at = next(i for i, r in enumerate(under) if is_dirt_by_water(r))
-    under[at:at] = [
-        condition(biome_is(*MUD_BIOMES), bands(SURFACE_BANDS, [(pv("brown_clay"), MUD_BANDS[0][1], MUD_BANDS[-1][2])])),
-        condition(biome_is(*CLAY_BIOMES), bands(SURFACE_BANDS, [(pv("gray_clay"), CLAY_BANDS[0][1], CLAY_BANDS[-1][2])])),
-    ]
-
-
-def band_rules():
-    """The named material rules the bands are: players-versus:overworld/... ."""
-    return {
-        "overworld/mud_bands": bands(SURFACE_BANDS, MUD_BANDS),
-        "overworld/clay_bands": bands(SURFACE_BANDS, CLAY_BANDS),
-        "overworld/surface_bands": sequence(pv("overworld/mud_bands"), pv("overworld/clay_bands")),
-        "overworld/regular_cave_bands": bands(CAVE_BANDS, REGULAR_CAVE_BANDS, is_3d=True),
-    }
-
-
 def material_rule(surface_rule):
-    """The surface rule with the ore veins after the bedrock floor, where vanilla 26.3 puts its own; the cave biomes'
-    bands (26.3's sulfur caves, 26.4's ice caves) underground, as vanilla's underground rule starts with them, and on
-    their floors near the surface; the surface bands of brown mud and gray clay; the regular caves' bands in the stone
-    above the deepslate; and stone wherever nothing else applies, which 26.4 moved from the noise settings' default
-    block into the material rules' last entry."""
+    """The surface rule with the ore veins after the bedrock floor, where vanilla 26.3 puts its own."""
     rule = material(surface_rule)
     assert rule["type"] == mc("sequence") and rule["sequence"][0]["if_true"].get("random_name") == mc("bedrock_floor")
     rule["sequence"][1:1] = [vein_rule("copper"), vein_rule("iron")]
-    add_cave_biome_surfaces(rule)
-    add_surface_bands(rule)
-    underground = next(i for i, r in enumerate(rule["sequence"]) if is_biome_condition(r, "deep_dark"))
-    rule["sequence"][underground:underground] = [condition(biome_is(mc(b)), mc(bands_rule)) for b, bands_rule in CAVE_BIOME_BANDS]
-    deepslate = next(i for i, r in enumerate(rule["sequence"])
-                     if r.get("if_true", {}).get("type") == mc("vertical_gradient") and r["if_true"]["random_name"] == mc("deepslate"))
-    rule["sequence"].insert(deepslate + 1, condition(biome_is(REGULAR_CAVE), pv("overworld/regular_cave_bands")))
-    rule["sequence"].append(block(mc("stone")))
     return rule
 
 
@@ -755,12 +601,6 @@ NOISES = {
     "cave_basins": (-9, [1.0, 1.0]),
     "sand_beach": (-7, [1.0] * 10 + [40.0, 20.0] + [10.0] * 17),
     "gravel_beach": (-7, [1.0] * 10 + [40.0, 20.0] + [10.0] * 17),
-    # The material rule's bands (SURFACE_BANDS, CAVE_BANDS): about 32 blocks across, the surface's with a fourth
-    # octave for ragged edges, the caves' like vanilla's own cave bands (sulfur_cave_gradient).
-    "surface_bands": (-5, [1.0, 1.0, 1.0, 1.0]),
-    "cave_bands": (-5, [1.0, 0.0, 1.0]),
-    # The high river's banks' ragged undersides (HIGH_RIVER_BANK_ROUGHNESS): lumps about 8 blocks across.
-    "high_river_bank": (-4, [1.0, 1.0]),
 }
 
 
@@ -810,8 +650,6 @@ def outputs(sources):
     files = {DATA / "density_function" / (name + ".json"): build() for name, build in FUNCTIONS.items()}
     files[DATA / "noise_settings/overworld.json"] = noise_settings()
     files[DATA / "material_rule/overworld.json"] = material_rule(sources["surface_rule"])
-    for name, rule in band_rules().items():
-        files[DATA / "material_rule" / (name + ".json")] = rule
     for name, (first, amplitudes) in NOISES.items():
         files[DATA / "noise" / (name + ".json")] = noise_parameters(first, amplitudes)
     for name, old in sources["carvers"].items():

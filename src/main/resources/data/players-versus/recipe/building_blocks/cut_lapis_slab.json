@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "group": "lapis",
   "pattern": [
-    "###"
+    "##"
   ],
   "key": {
     "#": "players-versus:cut_lapis"
   },
   "result": {
     "id": "players-versus:cut_lapis_slab",
-    "count": 6
+    "count": 4
   }
 }

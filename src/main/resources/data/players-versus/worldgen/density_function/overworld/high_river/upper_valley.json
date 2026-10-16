@@ -2,7 +2,7 @@
   "type": "minecraft:range_choice",
   "input": "minecraft:y",
   "min_inclusive": 93.5,
-  "max_exclusive": 255.5,
+  "max_exclusive": 127.5,
   "when_in_range": {
     "type": "minecraft:range_choice",
     "input": "minecraft:y",
@@ -112,38 +112,12 @@
                   "to_value": 0.03
                 },
                 "right": {
-                  "type": "minecraft:min",
-                  "left": {
-                    "type": "minecraft:gradient",
-                    "axis": "y",
-                    "from_coordinate": 80,
-                    "from_value": 0.0,
-                    "to_coordinate": 256,
-                    "to_value": 0.704
-                  },
-                  "right": {
-                    "type": "minecraft:max",
-                    "left": 0.0,
-                    "right": {
-                      "type": "minecraft:mul",
-                      "left": {
-                        "type": "minecraft:add",
-                        "left": {
-                          "type": "minecraft:interpolated",
-                          "cell_size_xz": 4,
-                          "cell_size_y": 8,
-                          "input": {
-                            "type": "minecraft:slice",
-                            "axis": "y",
-                            "coordinate": 80,
-                            "input": "players-versus:overworld/depth"
-                          }
-                        },
-                        "right": 0.0625
-                      },
-                      "right": 0.512
-                    }
-                  }
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": 80,
+                  "from_value": 0.0,
+                  "to_coordinate": 128,
+                  "to_value": 0.192
                 }
               },
               "right": {
@@ -163,48 +137,6 @@
                             "type": "minecraft:sub",
                             "left": 0.0625,
                             "right": {
-                              "type": "minecraft:max",
-                              "left": {
-                                "type": "minecraft:sub",
-                                "left": {
-                                  "type": "minecraft:interpolated",
-                                  "cell_size_xz": 4,
-                                  "cell_size_y": 8,
-                                  "input": {
-                                    "type": "minecraft:slice",
-                                    "axis": "y",
-                                    "coordinate": 80,
-                                    "input": "players-versus:overworld/depth"
-                                  }
-                                },
-                                "right": {
-                                  "type": "minecraft:gradient",
-                                  "axis": "y",
-                                  "from_coordinate": 80,
-                                  "from_value": 0.0,
-                                  "to_coordinate": 256,
-                                  "to_value": 1.375
-                                }
-                              },
-                              "right": -0.0625
-                            }
-                          },
-                          "min": 0.0,
-                          "max": 0.0625
-                        }
-                      },
-                      "right": 6.144
-                    },
-                    "right": {
-                      "type": "minecraft:mul",
-                      "left": {
-                        "type": "minecraft:max",
-                        "left": 0.0,
-                        "right": {
-                          "type": "minecraft:mul",
-                          "left": {
-                            "type": "minecraft:max",
-                            "left": {
                               "type": "minecraft:sub",
                               "left": {
                                 "type": "minecraft:interpolated",
@@ -222,11 +154,45 @@
                                 "axis": "y",
                                 "from_coordinate": 80,
                                 "from_value": 0.0,
-                                "to_coordinate": 256,
-                                "to_value": 1.375
+                                "to_coordinate": 128,
+                                "to_value": 0.375
+                              }
+                            }
+                          },
+                          "min": 0.0,
+                          "max": 0.0625
+                        }
+                      },
+                      "right": 6.144
+                    },
+                    "right": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:max",
+                        "left": 0.0,
+                        "right": {
+                          "type": "minecraft:mul",
+                          "left": {
+                            "type": "minecraft:sub",
+                            "left": {
+                              "type": "minecraft:interpolated",
+                              "cell_size_xz": 4,
+                              "cell_size_y": 8,
+                              "input": {
+                                "type": "minecraft:slice",
+                                "axis": "y",
+                                "coordinate": 80,
+                                "input": "players-versus:overworld/depth"
                               }
                             },
-                            "right": -0.0625
+                            "right": {
+                              "type": "minecraft:gradient",
+                              "axis": "y",
+                              "from_coordinate": 80,
+                              "from_value": 0.0,
+                              "to_coordinate": 128,
+                              "to_value": 0.375
+                            }
                           },
                           "right": -1.0
                         }

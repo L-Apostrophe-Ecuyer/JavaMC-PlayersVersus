@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:stonecutting",
+  "group": "polished_blackstone",
+  "ingredient": "minecraft:blackstone",
+  "result": {
+    "count": 1,
+    "id": "minecraft:polished_blackstone_stairs"
+  }
+}

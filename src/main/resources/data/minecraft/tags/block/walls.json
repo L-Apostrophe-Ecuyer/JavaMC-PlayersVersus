@@ -5,8 +5,6 @@
     "players-versus:dripstone_brick_wall",
     "players-versus:brown_mud_brick_wall",
     "players-versus:brown_clay_brick_wall",
-    "players-versus:terracotta_brick_wall",
-    "players-versus:terracotta_tile_wall",
-    "players-versus:polished_dripstone_wall"
+    "players-versus:terracotta_brick_wall"
   ]
 }

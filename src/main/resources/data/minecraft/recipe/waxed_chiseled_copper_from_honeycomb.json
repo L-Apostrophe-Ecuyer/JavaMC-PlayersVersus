@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "copper_waxing",
+  "ingredients": [
+    "minecraft:chiseled_copper",
+    "minecraft:honeycomb"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:waxed_chiseled_copper"
+  }
+}

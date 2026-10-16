@@ -95,11 +95,6 @@ public abstract class AnimatedResultButtonMixin extends AbstractWidget {
             if(!isCraftable) context.blitSprite(RenderPipelines.GUI_TEXTURED, RECIPE_BOOK_CRAFTABLE_SINGLE_OVERLAY, this.getX(), this.getY(), this.width, this.height);
         }
 
-        // A pinned group has a pin in its corner
-        if (this.collection != null && frootloops.versus.mod.items_and_effects.inventory.recipe_book.RecipeBookSorting.isPinned(this.collection)) {
-            context.blitSprite(RenderPipelines.GUI_TEXTURED, RECIPE_BOOK_PIN, this.getX() + this.width - 7, this.getY() + 1, 7, 9);
-        }
-
         if (hasBounce) context.pose().popMatrix();
     }
 }

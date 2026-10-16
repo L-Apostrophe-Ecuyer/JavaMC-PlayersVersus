@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "jungle_misc",
+  "key": {
+    "#": "minecraft:jungle_planks"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "count": 2,
+    "id": "minecraft:jungle_pressure_plate"
+  }
+}

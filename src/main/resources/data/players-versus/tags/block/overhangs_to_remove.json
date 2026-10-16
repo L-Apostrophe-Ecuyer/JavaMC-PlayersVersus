@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:substrate_overworld",
+    "#minecraft:dirt",
     "minecraft:sand",
     "minecraft:gravel",
     "minecraft:short_grass",

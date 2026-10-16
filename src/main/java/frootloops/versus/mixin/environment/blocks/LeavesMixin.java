@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
@@ -36,8 +37,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.HashMap;
-import frootloops.versus.mod.environment.blocks.BlockSounds;
-import net.minecraft.world.level.block.sounds.BlockSoundSets;
 
 @Mixin(LeavesBlock.class)
 public abstract class LeavesMixin extends Block implements SimpleWaterloggedBlock {
@@ -81,7 +80,7 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
     @Override
     public void fallOn(Level world, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
         if(entity instanceof FallingBlockEntity fallingBlock) {
-            if(!BlockSounds.is(fallingBlock.getBlockState(), BlockSoundSets.ANVIL)) return;
+            if(fallingBlock.getBlockState().getSoundType() != SoundType.ANVIL) return;
             Block.dropResources(state, world, pos);
             world.removeBlock(pos, false);
         }

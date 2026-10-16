@@ -237,32 +237,11 @@ public final class PvWorldgenConstants {
     public static final double HIGH_RIVER_BANK_MARGIN = 0.0056;
     /** ...and wider by this per block down (about 1.25 blocks), so the deeper a bank reaches, the further it slopes out. */
     public static final double HIGH_RIVER_BANK_SLOPE = 0.0035;
-    /** The banks' bottoms: the high river's reach the sea's surface, the upper layer's the high river's... */
+    /** The banks' bottoms: the high river's reach the sea's surface, the upper layer's the high river's. */
     public static final int HIGH_RIVER_BANK_MIN_Y = SEA_LEVEL;
     public static final int HIGH_RIVER_UPPER_BANK_MIN_Y = HIGH_RIVER_Y;
-    /**
-     * ...and where a cave or a drop leaves a bank hanging there, it narrows to nothing over this many blocks below its
-     * bottom, so it ends in a keel under the river instead of a flat ceiling...
-     */
-    public static final int HIGH_RIVER_BANK_TAPER = 16;
-    public static final int HIGH_RIVER_UPPER_BANK_TAPER = 8;
-    /**
-     * ...more or less by the noise {@code players-versus:high_river_bank}, times this: about a fifth of the bank's width
-     * either way, so the keel's underside is ragged.
-     */
-    public static final double HIGH_RIVER_BANK_ROUGHNESS = 0.6;
-    /**
-     * The valleys' walls stop leaning out this far (in depth) above the ground's nominal surface, about 8 blocks, and
-     * rise straight from there: a valley cuts its rim, and through any ground higher up (a hill, the overhangs and
-     * floating ground of the 3D noise where the erosion is high) a gorge as wide as its rim, instead of a bowl that
-     * kept widening to its top.
-     */
-    public static final double HIGH_RIVER_RIM_HEIGHT = HIGH_RIVER_FLARE_DEPTH;
-    /**
-     * The valleys' top, exclusive: the final density only looks for the river from a bed's bottom up to here, the
-     * terrain's own top (it fades to air from y 240), so no ground is left standing over a valley with a flat underside.
-     */
-    public static final int HIGH_RIVER_VALLEY_MAX_Y = 256;
+    /** The valleys' top, exclusive: the final density only looks for the river from a bed's bottom up to here. */
+    public static final int HIGH_RIVER_VALLEY_MAX_Y = 128;
 
     // ------------------------------------------------------------------------------------------------------------
     // Aquifer: walls
