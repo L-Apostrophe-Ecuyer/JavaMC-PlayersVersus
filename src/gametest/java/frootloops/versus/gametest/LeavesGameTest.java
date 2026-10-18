@@ -1,5 +1,6 @@
 package frootloops.versus.gametest;
 
+import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import frootloops.versus.mod.environment.blocks.leaves.LeafMovement;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -72,6 +73,7 @@ public class LeavesGameTest {
         helper.runAfterDelay(40, () -> {
             double walkedOpen = helper.relativeVec(open.position()).x - startX;
             double walkedHedged = helper.relativeVec(hedged.position()).x - startX;
+            VersusMod.MOD_LOGGER.info("Leaves: in 40 ticks a husk walked {} in the open, {} through a hedge (highest {})", walkedOpen, walkedHedged, highest[0]);
             helper.assertTrue(walkedOpen > 5.0, "the husk on open ground walked " + walkedOpen);
             helper.assertTrue(walkedHedged < 0.85 * walkedOpen, "through the hedge " + walkedHedged + ", in the open " + walkedOpen);
             helper.assertTrue(walkedHedged > 0.3 * walkedOpen, "the hedge nearly stopped it: " + walkedHedged + " against " + walkedOpen);
@@ -94,6 +96,7 @@ public class LeavesGameTest {
             highestUnder[0] = Math.max(highestUnder[0], relativeY(helper, under));
         });
         helper.runAfterDelay(90, () -> {
+            VersusMod.MOD_LOGGER.info("Leaves: climbing got a husk to {}, jumping under leaves to {}", relativeY(helper, climber), highestUnder[0]);
             helper.assertTrue(relativeY(helper, climber) > 4.5, "climbing the leaves it stood in, it got to " + relativeY(helper, climber));
             helper.assertTrue(highestUnder[0] < 2.6, "jumping under leaves above its head, it got to " + highestUnder[0]);
             helper.succeed();
@@ -108,6 +111,7 @@ public class LeavesGameTest {
         Mob canopy = husk(helper, 2.5, 16.0, 2.5), bare = husk(helper, 8.5, 16.0, 2.5);
         helper.runAfterDelay(70, () -> {
             double hurtBare = damageTaken(bare), hurtCanopy = damageTaken(canopy);
+            VersusMod.MOD_LOGGER.info("Leaves: a 15-block fall hurt a husk {} onto stone, {} through three layers", hurtBare, hurtCanopy);
             helper.assertTrue(hurtBare >= 9.0, "a 15-block fall onto stone did only " + hurtBare);
             helper.assertTrue(hurtCanopy <= 3.0 && hurtCanopy < hurtBare / 2.0, "through the canopy " + hurtCanopy + ", onto stone " + hurtBare);
             helper.succeed();
@@ -122,6 +126,7 @@ public class LeavesGameTest {
         Mob layer = husk(helper, 2.5, 16.0, 2.5), bare = husk(helper, 8.5, 16.0, 2.5);
         helper.runAfterDelay(70, () -> {
             double hurtBare = damageTaken(bare), hurtLayer = damageTaken(layer);
+            VersusMod.MOD_LOGGER.info("Leaves: a 15-block fall hurt a husk {} onto stone, {} through one layer", hurtBare, hurtLayer);
             helper.assertTrue(hurtLayer < hurtBare, "one layer of leaves didn't soften the fall: " + hurtLayer + " against " + hurtBare);
             helper.assertTrue(hurtLayer >= 0.25 * hurtBare, "one layer of leaves took almost all of the fall: " + hurtLayer + " against " + hurtBare);
             helper.succeed();
@@ -148,7 +153,7 @@ public class LeavesGameTest {
     public void animalsStandOnLeaves(GameTestHelper helper) {
         floor(helper, 12, 6);
         fill(helper, 1, 1, 1, 3, 1, 3, leaves(Blocks.OAK_LEAVES));
-        LivingEntity cow = helper.spawn(EntityTypes.COW, new Vec3(2.5, 7.0, 2.5));
+        LivingEntity cow = helper.spawnWithNoFreeWill(EntityTypes.COW, new Vec3(2.5, 7.0, 2.5));
         helper.runAfterDelay(50, () -> {
             helper.assertTrue(relativeY(helper, cow) > 1.99, "the cow went into the leaves, down to " + relativeY(helper, cow));
             helper.succeed();
@@ -167,6 +172,7 @@ public class LeavesGameTest {
             fastest[0] = Math.max(fastest[0], husk.yo - husk.getY());
         });
         helper.runAfterDelay(70, () -> {
+            VersusMod.MOD_LOGGER.info("Leaves: sneaking sank a husk to {}, at most {} a tick", relativeY(helper, husk), fastest[0]);
             helper.assertTrue(relativeY(helper, husk) < 1.5, "sneaking, it only sank to " + relativeY(helper, husk));
             helper.assertTrue(fastest[0] < 0.2, "it sank as fast as " + fastest[0] + " blocks a tick");
             helper.assertTrue(damageTaken(husk) == 0.0, "sinking through leaves hurt it");
@@ -237,6 +243,7 @@ public class LeavesGameTest {
                 if (ground.is(Blocks.LEAF_LITTER)) segments += ground.getValue(SegmentableBlock.AMOUNT);
             }
         }
+        VersusMod.MOD_LOGGER.info("Leaves: 40 decaying leaves left {} segments of litter", segments);
         helper.assertTrue(segments > 0, "40 decaying leaves left no litter");
         helper.assertTrue(segments < 40, "every decaying leaf left litter");
         helper.succeed();
@@ -251,6 +258,7 @@ public class LeavesGameTest {
         Mob onLitter = husk(helper, 2.5, 13.0, 2.5), onGrass = husk(helper, 8.5, 13.0, 2.5);
         helper.runAfterDelay(70, () -> {
             double hurtLitter = damageTaken(onLitter), hurtGrass = damageTaken(onGrass);
+            VersusMod.MOD_LOGGER.info("Leaves: an 11-block fall hurt a husk {} onto grass, {} onto four segments of litter", hurtGrass, hurtLitter);
             helper.assertTrue(hurtGrass >= 6.0, "an 11-block fall onto grass did only " + hurtGrass);
             helper.assertTrue(hurtLitter <= hurtGrass - 3.0, "onto a pile of litter " + hurtLitter + ", onto grass " + hurtGrass);
             helper.succeed();

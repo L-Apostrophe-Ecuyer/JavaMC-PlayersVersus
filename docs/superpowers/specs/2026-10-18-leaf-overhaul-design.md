@@ -63,14 +63,19 @@ anything under the cap (sneaking) isn't slowed at all.
 | waist-high bush | 0.78 | 0.164 | −24% | −41% |
 | fully inside | 1.0 | 0.12 | −44% | −57% |
 
-**Vertical.**
-- *Climb*: foothold and jump held. You rise at 0.1 blocks/tick (a ladder is about 0.12); faster upward motion, like the
-  jump that started it, is dragged down to that. Fall distance resets while climbing.
-- *Descend*: foothold and sneak held. The leaves under you open (you're descending), and you sink at no more than 0.15
-  blocks/tick (scaffolding's speed).
-- *Otherwise* vertical speed, up or down, loses 30% × immersion per tick.
+**Vertical.** Vertical speed, up or down, loses 30% × immersion per tick. Then, with a foothold and a fall no faster
+than 0.3 blocks/tick (the *catch speed*):
+- *Climb*: jump held. You rise at least 0.1 blocks/tick (a ladder is about 0.12); faster upward motion, like the jump
+  that started it, is only dragged. Fall distance resets while climbing.
+- *Descend*: sneak held. The leaves under you open (you're descending), and you sink at no more than 0.15 blocks/tick
+  (scaffolding's speed).
+- A faster fall isn't grabbed at once, holding jump or sneak or not: the drag slows it to the catch speed first.
 - *Resting*: with no input you settle onto the leaf top below you (it's solid, you're above it), so you can stand on any
   layer of a canopy, as in scaffolding.
+- *Walking mobs* don't hop through leaves. Vanilla's `MoveControl` jumps a mob whose feet are inside a block shorter
+  than its step, asking the block's shape with no entity, which for leaves is a full block. It asks for the mob's own
+  shape instead. No-context queries otherwise still see leaves as full blocks (block state caches, falling-leaf
+  particles, pathfinding).
 
 **Falling.**
 - From 2.5 blocks or less, you land on top of leaves. Leaves take the fall distance down to a third, as before.
@@ -108,7 +113,9 @@ and deeper you go, and rustles every 0.9 blocks moved. Sneaking halves it all.
 
 - **Knocked-about leaves shed.** On the server, every natural (not player-placed) leaf a passer moves through has a
   chance per tick of dropping a segment of litter below it, `0.1 × (speed − 0.1)²` and at most 25%. Walking through a
-  hedge drops one every 15 seconds or so; crashing through a canopy drops a handful.
+  hedge drops one every 15 seconds or so; crashing through a canopy drops a handful. A player's speed is how far it
+  moved that tick (the last movement its client sent stays while it stands still), anything else's its velocity, as
+  vanilla's sweet berry bush measures it.
 - **Dying leaves leave litter.** A decaying leaf has a 25% chance to drop a segment as it goes, so a felled tree leaves
   a carpet under it.
 - **Where it lands.** Straight down through the canopy, to the first air with ground the litter can stay on (vanilla's
@@ -128,7 +135,9 @@ and deeper you go, and rustles every 0.9 blocks moved. Sneaking halves it all.
   `entityInside`, decay litter in `randomTick`. Distance and decay rules unchanged.
 - `mixin/environment/blocks/LeafMovementMixin` (on `LivingEntity`): `handleOnClimbable`'s result (the motion vanilla
   is about to move with, after input) through `LeafMovement.adjust`; `updateFallFlyingMovement`'s result through the
-  glide drag; `checkFallDamage` at its head through the fall cushion.
+  glide drag; `checkFallDamage` at its head through the fall cushion. The server counts a player's fall through
+  `Entity.doCheckFallDamage` → `checkFallDamage` with the movement its client sent, so the cushion covers players there.
+- `mixin/environment/blocks/LeavesMoveControlMixin`: the mob's own leaf shape in `MoveControl.tick`'s jump check.
 - `client/.../LeavesRustling`: on top of `LeafMovement`.
 - `VersusSettings.Leaves`: the tunables. Data: the two tags; leaves out of `#fall_damage_resetting`.
 

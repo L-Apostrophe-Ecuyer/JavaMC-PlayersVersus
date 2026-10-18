@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.SegmentableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Leaf litter comes from the leaves above it: natural leaves something pushes through shed a segment now and then, the
@@ -52,10 +53,15 @@ public final class LeafLitter {
         return Math.min(VersusSettings.Leaves.MOST_SHED_CHANCE, VersusSettings.Leaves.SHED_RATE * over * over);
     }
 
-    /** A leaf something passes through, on the server: natural leaves shed by chance, the more the faster it goes. */
+    /**
+     * A leaf something passes through, on the server: natural leaves shed by chance, the more the faster it goes. A
+     * player's speed is how far it moved this tick (its client moves it; the movement it last sent stays while it stands
+     * still), anything else's its velocity, as vanilla's sweet berry bush does.
+     */
     public static void disturb(ServerLevel level, BlockPos pos, BlockState leaves, Entity entity) {
         if (!VersusSettings.Leaves.DO_LEAF_LITTER_SHEDDING || leaves.getValue(LeavesBlock.PERSISTENT)) return;
-        double chance = shedChance(entity.getKnownMovement().length());
+        Vec3 movement = entity.isClientAuthoritative() ? entity.position().subtract(entity.oldPosition()) : entity.getKnownMovement();
+        double chance = shedChance(movement.length());
         if (chance > 0.0 && level.getRandom().nextDouble() < chance) shed(level, pos, leaves, level.getRandom());
     }
 
