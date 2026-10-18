@@ -201,6 +201,10 @@ Design and numbers: `docs/superpowers/specs/2026-10-18-leaf-overhaul-design.md`.
   `LeavesMoveControlMixin` gives it the mob's own leaf shape there. Without it, mobs hop through hedges and climb them.
 - **Litter**: `entityInside` (server) sheds by speed², `randomTick` sheds while decaying. Litter lands straight down
   through leaves on ground it can survive on. Tags `players-versus:sheds_leaf_litter` and `sheds_pink_petals`.
+  Speed is measured as vanilla's sweet berry bush does: `getKnownMovement()` for a client-authoritative player (zeroed
+  by `handleClientTickEnd` on a client tick without movement), `position() - oldPosition()` for anything else. Never
+  the old position for a player: `commonTick` catches it up in the level tick, and a player's block effects run later,
+  in its connection tick (`tickPlayer` → `doTick`), so it always reads nothing.
 - **Tests**: `LeafMovementTest` (math); `LeavesGameTest` (husks walking, climbing, falling, sneaking; litter), with the
   taller rooms `leaves_room` and `leaves_tower` as SNBT in `src/gametest/resources/.../gametest/structure/`.
 - **Client**: `LeavesRustling` uses `LeafMovement.measure` for every passer within 32 blocks.
