@@ -1,27 +1,15 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Leaves, round 2: how the server takes a player's movement and fall; fall reductions; the player's Avatar; game tests.
-calls net.minecraft.server.network.ServerGamePacketListenerImpl ^(handlePlayerPositionChange|isPlayerCollidingWithAnythingNew|teleport|resetPosition|tick)$
-member net.minecraft.server.level.ServerPlayer (Fall|fall|Movement|movement|Known|known|Climb|Ground|Authoritative)
-calls net.minecraft.server.level.ServerPlayer ^(getKnownMovement|isClientAuthoritative|onClimbable|resetFallDistance|trackStartFallingPosition|checkMovementStatistics)$
-calls net.minecraft.world.entity.Entity ^(applyEffectsFromBlocksForLastMovements|recordMovement|getKnownMovement|checkFallDistanceAccumulation|restituteMovementAfterCollisions|oldPosition|isClientAuthoritative|getMoveSimulationType|getMaxFallDistance|checkSupportingBlock|removeLatestMovementRecording|clearMovementThisTick|isStateClimbable|onInsideBlock|getGravity|applyGravity)$
-calls net.minecraft.world.entity.LivingEntity ^(computeModifiedFriction|omnidirectionalAirMover|getComfortableFallDistance|calculateFallPower|getMaxFallDistance|applyInput|updateFallFlying|canGlide|isJumping|handleFallFlyingCollisions|updateFallFlyingMovement|trapdoorUsableAsLadder|onChangedBlock|getFallDamageSound|setIgnoreFallDamageFromCurrentImpulse|isIgnoringFallDamageFromCurrentImpulse|shouldTravelInFluid|getFlyingSpeed|getSpeed|moveRelative)$
-member net.minecraft.world.level.block.Block (Fall|fall|Friction|friction|SpeedFactor|JumpFactor)
-calls net.minecraft.world.level.block.Block ^(getFallDistanceReduction|updateEntityMovementAfterFallOn)$
-member net.minecraft.world.level.block.state.BlockBehaviour$Properties (fall|Fall|noCollision|dynamicShape|isSuffocating|isViewBlocking|forceSolid|speedFactor|jumpFactor|friction)
-calls net.minecraft.world.level.block.Blocks ^(leavesProperties)$
-findsig Avatar
-calls net.minecraft.world.entity.Avatar .
-net.minecraft.world.entity.MoveSimulationType
-member net.minecraft.world.level.block.Blocks (PETALS|WILDFLOWERS|LEAF_LITTER|POPLAR_LOG|POPLAR_WOOD)
-find FlowerBed
-findsig FlowerBedBlock
-sig net.minecraft.gametest.framework.GameTestHelper
-sig net.fabricmc.fabric.api.gametest.v1.GameTest
-member net.minecraft.world.entity.Mob (setNoAi|isNoAi|getMoveControl|getNavigation|setZza|setXxa|setSpeed)
-member net.minecraft.world.entity.LivingEntity (setZza|setXxa|setSpeed|getSpeed|zza|xxa)
-member net.minecraft.world.entity.ai.control.MoveControl (setWantedPosition|strafe|Operation)
-data tags/block/prevents_nearby_leaf_decay.json
-data tags/block/logs.json
-data tags/block/dirt.json
-data tags/entity_type/fall_damage_immune.json
+# Leaves, round 3: what makes a mob jump while walking, where a player's server-side fall is counted, game test spawning.
+calls net.minecraft.world.entity.ai.control.MoveControl ^(tick|setWantedPosition)$
+calls net.minecraft.world.entity.ai.control.JumpControl .
+calls net.minecraft.world.entity.Mob ^(removeFreeWill|getJumpControl|checkDespawn|setNoAi)$
+calls net.minecraft.gametest.framework.GameTestHelper ^(spawn|spawnWithNoFreeWill|moveTo|walkTo|randomTick|onEachTick|runAfterDelay|succeedWhen)$
+findcalls doCheckFallDamage
+member net.minecraft.world.entity.player.Player (doCheckFallDamage|checkFallDamage)
+member net.minecraft.world.entity.Entity (doCheckFallDamage)
+member net.minecraft.world.entity.LivingEntity (doCheckFallDamage)
+calls net.minecraft.world.entity.player.Player ^(doCheckFallDamage|checkFallDamage)$
+calls net.minecraft.world.entity.Entity ^(doCheckFallDamage)$
+calls net.minecraft.world.entity.LivingEntity ^(doCheckFallDamage)$
+calls net.minecraft.gametest.framework.GameTestServer ^(initServer|tickServer)$

@@ -36,6 +36,7 @@
     "environment.blocks.CreakingHeartBlockEntityMixin",
     "environment.blocks.SugarCaneMixin",
     "environment.blocks.LadderMixin",
+    "environment.blocks.LeafMovementMixin",
     "environment.blocks.LeavesMixin",
     "environment.blocks.MossMixin",
     "environment.blocks.NetherWartMixin",

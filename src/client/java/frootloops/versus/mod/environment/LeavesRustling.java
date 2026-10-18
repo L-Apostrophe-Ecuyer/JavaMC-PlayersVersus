@@ -1,11 +1,11 @@
 package frootloops.versus.mod.environment;
 
 import frootloops.versus.mixin.client.environment.visuals.UntintedParticleLeavesAccessor;
+import frootloops.versus.mod.environment.blocks.leaves.LeafMovement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -18,39 +18,49 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.TintedParticleLeavesBlock;
 import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 /**
- * Leaves rustle and shed when a player pushes through them (leaves let living things through, {@code LeavesMixin}): a
- * burst of leaves on the way in, then leaves falling all around and a rustle every so often while they move, more and
- * louder the faster they go, half as much sneaking. The particles are the leaves' own falling leaves (tinted by the
- * biome where vanilla tints them), or bits of the block for leaves that shed none.
+ * Leaves rustle and shed when something pushes through them ({@link LeafMovement}: living things other than animals and
+ * spiders): a burst of leaves on the way in, the bigger and louder the faster it comes (a fall crashing into a canopy
+ * most of all), then leaves falling around it and a rustle every so often while it moves, more the faster it goes and
+ * the deeper it is, half as much sneaking. The particles are the leaves' own falling leaves (tinted by the biome where
+ * vanilla tints them), or bits of the block for leaves that shed none.
  *
- * <p>Client side only, for every player the client sees, so everyone nearby sees and hears the others too.
+ * <p>Client side only, for everything within {@code RANGE} of the player, so you hear what moves through the bushes
+ * around you and others see and hear you.
  */
 @Environment(EnvType.CLIENT)
 public final class LeavesRustling {
 
-    /** How far a player moves inside leaves between two rustles, in blocks. */
+    /** How far from the player leaves rustle, in blocks. */
+    private static final double RANGE = 32.0;
+    /** How much of the body must be in leaves to count as in them. */
+    private static final double IN_LEAVES = 0.05;
+    /** How far something moves inside leaves between two rustles, in blocks. */
     private static final double RUSTLE_DISTANCE = 0.9;
-    /** Below this speed, in blocks per tick, a player standing in leaves stays quiet. */
+    /** Below this speed, in blocks per tick, something standing in leaves stays quiet. */
     private static final double MIN_SPEED = 0.03;
-    /** Leaves per tick per block-per-tick of speed while moving, and the most per tick. */
+    /** Leaves per tick per block-per-tick of speed while moving fully inside, and the most per tick. */
     private static final double LEAVES_PER_SPEED = 30.0;
     private static final int MAX_LEAVES_PER_TICK = 10;
-    /** The shower on the way into the leaves. */
+    /** The shower on the way in at walking speed, and how much bigger a fast entry makes it, at most. */
     private static final int BURST_LEAVES = 24;
+    private static final double MOST_BURST_SCALE = 3.0;
+    /** Falling faster than this into leaves crashes into them: the burst's rustle is louder and deeper. */
+    private static final double CRASH_SPEED = 0.5;
 
-    private static final Map<UUID, Rustle> PLAYERS = new HashMap<>();
+    private static final Map<Integer, Rustle> MOVERS = new HashMap<>();
 
     private LeavesRustling() {
     }
 
-    /** What the rustling remembers of a player between ticks. */
+    /** What the rustling remembers of something between ticks. */
     private static final class Rustle {
         boolean inside;
         double distance;
@@ -62,76 +72,70 @@ public final class LeavesRustling {
 
     private static void tick(Minecraft minecraft) {
         ClientLevel level = minecraft.level;
-        if (level == null || minecraft.isPaused()) {
-            PLAYERS.clear();
+        Player viewer = minecraft.player;
+        if (level == null || viewer == null || minecraft.isPaused()) {
+            MOVERS.clear();
             return;
         }
-        Set<UUID> seen = new HashSet<>();
-        for (Player player : level.players()) {
-            if (player.isSpectator()) continue;
-            seen.add(player.getUUID());
-            rustle(level, player, PLAYERS.computeIfAbsent(player.getUUID(), uuid -> new Rustle()));
+        Set<Integer> seen = new HashSet<>();
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, viewer.getBoundingBox().inflate(RANGE),
+                entity -> entity.isAlive() && !entity.isSpectator() && LeafMovement.passes(entity))) {
+            seen.add(entity.getId());
+            rustle(level, entity, MOVERS.computeIfAbsent(entity.getId(), id -> new Rustle()));
         }
-        PLAYERS.keySet().retainAll(seen);
+        MOVERS.keySet().retainAll(seen);
     }
 
-    private static void rustle(ClientLevel level, Player player, Rustle rustle) {
-        BlockPos leavesPos = leavesAround(level, player);
-        if (leavesPos == null) {
+    private static void rustle(ClientLevel level, LivingEntity entity, Rustle rustle) {
+        LeafMovement.Immersion immersion = LeafMovement.measure(entity, Vec3.ZERO);
+        if (immersion.body() < IN_LEAVES || immersion.densest() == null) {
             rustle.inside = false;
             rustle.distance = 0.0;
             return;
         }
+        BlockPos leavesPos = immersion.densest();
         BlockState leaves = level.getBlockState(leavesPos);
-        double dx = player.getX() - player.xo, dy = player.getY() - player.yo, dz = player.getZ() - player.zo;
+        double dx = entity.getX() - entity.xo, dy = entity.getY() - entity.yo, dz = entity.getZ() - entity.zo;
         double speed = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        float quiet = player.isShiftKeyDown() ? 0.5F : 1.0F;
+        float quiet = entity.isShiftKeyDown() ? 0.5F : 1.0F;
         RandomSource random = level.getRandom();
 
         if (!rustle.inside) {
             rustle.inside = true;
             rustle.distance = 0.0;
             if (speed >= MIN_SPEED) {
-                shed(level, player, leavesPos, leaves, Math.round(BURST_LEAVES * quiet), speed);
-                playRustle(level, player, speed, quiet * 1.2F, random);
+                double scale = Math.clamp(speed / 0.25, 0.5, MOST_BURST_SCALE);
+                shed(level, entity, leavesPos, leaves, (int) Math.round(BURST_LEAVES * scale * quiet), speed);
+                boolean crash = -dy > CRASH_SPEED;
+                playRustle(level, entity, speed, quiet * (crash ? 1.6F : 1.2F), crash ? 0.75F : 1.0F, random);
             }
             return;
         }
         if (speed < MIN_SPEED) return;
 
         // A fraction left over becomes a leaf now and then, so slow movement still sheds a few.
-        double leavesNow = Math.min(MAX_LEAVES_PER_TICK, speed * LEAVES_PER_SPEED) * quiet;
+        double leavesNow = Math.min(MAX_LEAVES_PER_TICK, speed * LEAVES_PER_SPEED * immersion.body()) * quiet;
         int count = (int) leavesNow + (random.nextDouble() < leavesNow - Math.floor(leavesNow) ? 1 : 0);
-        shed(level, player, leavesPos, leaves, count, speed);
+        shed(level, entity, leavesPos, leaves, count, speed);
 
         rustle.distance += speed;
         if (rustle.distance >= RUSTLE_DISTANCE) {
             rustle.distance = 0.0;
-            playRustle(level, player, speed, quiet, random);
+            playRustle(level, entity, speed, quiet * (float) (0.5 + 0.5 * immersion.body()), 1.0F, random);
         }
     }
 
-    /** The leaves the player is in, from the head down (the head is in them first when falling into a tree). */
-    private static BlockPos leavesAround(ClientLevel level, Player player) {
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        int x = (int) Math.floor(player.getX()), z = (int) Math.floor(player.getZ());
-        for (int y = (int) Math.floor(player.getY() + player.getBbHeight() - 0.01); y >= (int) Math.floor(player.getY()); y--) {
-            if (level.getBlockState(pos.set(x, y, z)).getBlock() instanceof LeavesBlock) return pos.immutable();
-        }
-        return null;
-    }
-
-    private static void shed(ClientLevel level, Player player, BlockPos pos, BlockState leaves, int count, double speed) {
+    private static void shed(ClientLevel level, LivingEntity entity, BlockPos pos, BlockState leaves, int count, double speed) {
         if (count <= 0) return;
         ParticleOptions particle = leafParticle(level, pos, leaves);
         RandomSource random = level.getRandom();
-        // Around the player, a little wider than they are.
-        double width = player.getBbWidth() + 0.7, height = player.getBbHeight() + 0.2;
+        // Around the entity, a little wider than it is.
+        double width = entity.getBbWidth() + 0.7, height = entity.getBbHeight() + 0.2;
         double spread = 0.04 + speed * 0.25;
         for (int i = 0; i < count; i++) {
-            double x = player.getX() + (random.nextDouble() - 0.5) * width;
-            double y = player.getY() - 0.1 + random.nextDouble() * height;
-            double z = player.getZ() + (random.nextDouble() - 0.5) * width;
+            double x = entity.getX() + (random.nextDouble() - 0.5) * width;
+            double y = entity.getY() - 0.1 + random.nextDouble() * height;
+            double z = entity.getZ() + (random.nextDouble() - 0.5) * width;
             level.addParticle(particle, x, y, z,
                     (random.nextDouble() - 0.5) * spread, random.nextDouble() * spread * 0.5, (random.nextDouble() - 0.5) * spread);
         }
@@ -147,10 +151,10 @@ public final class LeavesRustling {
         return new BlockParticleOption(ParticleTypes.BLOCK, leaves);
     }
 
-    private static void playRustle(ClientLevel level, Player player, double speed, float loudness, RandomSource random) {
+    private static void playRustle(ClientLevel level, LivingEntity entity, double speed, float loudness, float pitchScale, RandomSource random) {
         float volume = (float) Math.min(1.0, 0.35 + speed * 1.5) * loudness;
-        float pitch = 0.9F + random.nextFloat() * 0.25F;
-        level.playLocalSound(player.getX(), player.getY() + player.getBbHeight() * 0.5, player.getZ(),
+        float pitch = (0.9F + random.nextFloat() * 0.25F) * pitchScale;
+        level.playLocalSound(entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(),
                 CustomSpecialEffects.LEAVES_RUSTLE, SoundSource.BLOCKS, volume, pitch, false);
     }
 }
