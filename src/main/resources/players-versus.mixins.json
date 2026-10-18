@@ -38,6 +38,7 @@
     "environment.blocks.LadderMixin",
     "environment.blocks.LeafMovementMixin",
     "environment.blocks.LeavesMixin",
+    "environment.blocks.LeavesMoveControlMixin",
     "environment.blocks.MossMixin",
     "environment.blocks.NetherWartMixin",
     "environment.blocks.PointedDripstoneMixin",

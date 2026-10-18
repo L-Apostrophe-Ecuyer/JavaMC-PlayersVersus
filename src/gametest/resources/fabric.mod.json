@@ -8,7 +8,8 @@
   "environment": "*",
   "entrypoints": {
     "fabric-gametest": [
-      "frootloops.versus.gametest.InventorySortingGameTest"
+      "frootloops.versus.gametest.InventorySortingGameTest",
+      "frootloops.versus.gametest.LeavesGameTest"
     ]
   },
   "depends": {
