@@ -113,9 +113,10 @@ and deeper you go, and rustles every 0.9 blocks moved. Sneaking halves it all.
 
 - **Knocked-about leaves shed.** On the server, every natural (not player-placed) leaf a passer moves through has a
   chance per tick of dropping a segment of litter below it, `0.1 × (speed − 0.1)²` and at most 25%. Walking through a
-  hedge drops one every 15 seconds or so; crashing through a canopy drops a handful. A player's speed is how far it
-  moved that tick (the last movement its client sent stays while it stands still), anything else's its velocity, as
-  vanilla's sweet berry bush measures it.
+  hedge drops one every 15 seconds or so; crashing through a canopy drops a handful. Speed is measured as vanilla's
+  sweet berry bush measures it: a player's is the movement its client sent, anything else's how far it moved that tick.
+  (The server applies a player's block effects during the player's own tick, after its old position has caught up with
+  it, so how far it moved would always be nothing.)
 - **Dying leaves leave litter.** A decaying leaf has a 25% chance to drop a segment as it goes, so a felled tree leaves
   a carpet under it.
 - **Where it lands.** Straight down through the canopy, to the first air with ground the litter can stay on (vanilla's
@@ -148,6 +149,8 @@ and deeper you go, and rustles every 0.9 blocks moved. Sneaking halves it all.
 - Game tests `LeavesGameTest` (server, husks so nothing burns): a hedge slows a walk but doesn't stop it; leaves at the
   feet climb, leaves just above the head don't; a fall onto a canopy hurts much less than onto stone, and one layer
   only a bit less; a small drop lands on top; a cow stands on leaves; a sneaking husk sinks into them; litter falls
-  through the canopy to the ground and stacks; decaying leaves shed litter.
+  through the canopy to the ground and stacks; decaying leaves shed litter; moving fast through natural leaves knocks
+  litter loose and keeping still doesn't, for a mob and for a player (a Fabric fake player with the movement its client
+  would have sent); landing on a pile of litter hurts less.
 - Not testable headless: the rustling (client) and the player's own client-side feel. These follow the same rules as
   the server-simulated mobs the game tests cover.

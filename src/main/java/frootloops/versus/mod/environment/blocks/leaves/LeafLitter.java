@@ -54,13 +54,14 @@ public final class LeafLitter {
     }
 
     /**
-     * A leaf something passes through, on the server: natural leaves shed by chance, the more the faster it goes. A
-     * player's speed is how far it moved this tick (its client moves it; the movement it last sent stays while it stands
-     * still), anything else's its velocity, as vanilla's sweet berry bush does.
+     * A leaf something passes through, on the server: natural leaves shed by chance, the more the faster it goes. Its
+     * speed is measured as vanilla's sweet berry bush measures it: a player's is the movement its client sent, anything
+     * else's how far it moved this tick. (A player is inside blocks during its own tick, after the server has caught its
+     * old position up with where its client put it, so how far it moved would always be nothing.)
      */
     public static void disturb(ServerLevel level, BlockPos pos, BlockState leaves, Entity entity) {
         if (!VersusSettings.Leaves.DO_LEAF_LITTER_SHEDDING || leaves.getValue(LeavesBlock.PERSISTENT)) return;
-        Vec3 movement = entity.isClientAuthoritative() ? entity.position().subtract(entity.oldPosition()) : entity.getKnownMovement();
+        Vec3 movement = entity.isClientAuthoritative() ? entity.getKnownMovement() : entity.position().subtract(entity.oldPosition());
         double chance = shedChance(movement.length());
         if (chance > 0.0 && level.getRandom().nextDouble() < chance) shed(level, pos, leaves, level.getRandom());
     }

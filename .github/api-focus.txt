@@ -1,15 +1,12 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-# Leaves, round 3: what makes a mob jump while walking, where a player's server-side fall is counted, game test spawning.
-calls net.minecraft.world.entity.ai.control.MoveControl ^(tick|setWantedPosition)$
-calls net.minecraft.world.entity.ai.control.JumpControl .
-calls net.minecraft.world.entity.Mob ^(removeFreeWill|getJumpControl|checkDespawn|setNoAi)$
-calls net.minecraft.gametest.framework.GameTestHelper ^(spawn|spawnWithNoFreeWill|moveTo|walkTo|randomTick|onEachTick|runAfterDelay|succeedWhen)$
-findcalls doCheckFallDamage
-member net.minecraft.world.entity.player.Player (doCheckFallDamage|checkFallDamage)
-member net.minecraft.world.entity.Entity (doCheckFallDamage)
-member net.minecraft.world.entity.LivingEntity (doCheckFallDamage)
-calls net.minecraft.world.entity.player.Player ^(doCheckFallDamage|checkFallDamage)$
-calls net.minecraft.world.entity.Entity ^(doCheckFallDamage)$
-calls net.minecraft.world.entity.LivingEntity ^(doCheckFallDamage)$
-calls net.minecraft.gametest.framework.GameTestServer ^(initServer|tickServer)$
+calls net.minecraft.server.network.ServerGamePacketListenerImpl ^(handleClientTickEnd|tickPlayer|handlePlayerKnownMovement)$
+calls net.minecraft.world.entity.player.Player ^(isClientAuthoritative|getKnownMovement)$
+calls net.minecraft.world.entity.LivingEntity ^(isClientAuthoritative)$
+calls net.minecraft.server.level.ServerLevel ^(tickNonPassenger)$
+calls net.minecraft.server.MinecraftServer ^(tickChildren|tickConnection)$
+member net.minecraft.world.entity.Entity (setOldPos|oldPosition|KnownMovement)
+member net.minecraft.server.level.ServerPlayer (KnownMovement)
+member net.minecraft.gametest.framework.GameTestHelper (makeMock|Player)
+member net.fabricmc.fabric.api.entity.FakePlayer (FakePlayer|get\(|ClientAuthoritative|KnownMovement)
+calls net.fabricmc.fabric.api.entity.FakePlayer ^(get|isClientAuthoritative)$

@@ -3,10 +3,13 @@ package frootloops.versus.gametest;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import frootloops.versus.mod.environment.blocks.leaves.LeafMovement;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -247,6 +250,46 @@ public class LeavesGameTest {
         helper.assertTrue(segments > 0, "40 decaying leaves left no litter");
         helper.assertTrue(segments < 40, "every decaying leaf left litter");
         helper.succeed();
+    }
+
+    /**
+     * Pushing fast through natural leaves knocks litter loose; keeping still in them doesn't. As the server measures it:
+     * a mob by how far it moved this tick, a player by the movement its client sent, its old position having already
+     * caught up with it.
+     */
+    @GameTest(structure = TOWER)
+    public void movingThroughLeavesKnocksLitterLoose(GameTestHelper helper) {
+        floor(helper, 12, 6);
+        fill(helper, 1, 1, 1, 10, 1, 4, Blocks.GRASS_BLOCK.defaultBlockState());
+
+        Mob husk = husk(helper, 2.5, 6.0, 2.5);
+        husk.setOldPosAndRot();
+        int stillHusk = litterAfterAWhileIn(helper, 2, husk);
+        husk.setPos(husk.getX(), husk.getY() - 1.5, husk.getZ());
+        int fallingHusk = litterAfterAWhileIn(helper, 4, husk);
+
+        ServerPlayer player = FakePlayer.get(helper.getLevel());
+        player.setOldPosAndRot();
+        player.setKnownMovement(Vec3.ZERO);
+        int stillPlayer = litterAfterAWhileIn(helper, 6, player);
+        player.setKnownMovement(new Vec3(0.0, -1.5, 0.0));
+        int fallingPlayer = litterAfterAWhileIn(helper, 8, player);
+        player.setKnownMovement(Vec3.ZERO);
+
+        helper.assertTrue(stillHusk == 0, "a still husk knocked down " + stillHusk + " segments of litter");
+        helper.assertTrue(fallingHusk > 0, "a husk falling through leaves knocked down no litter");
+        helper.assertTrue(stillPlayer == 0, "a still player knocked down " + stillPlayer + " segments of litter");
+        helper.assertTrue(fallingPlayer > 0, "a player falling through leaves knocked down no litter");
+        helper.succeed();
+    }
+
+    /** The segments of litter under natural oak leaves at (x, 6, 2) after a hundred ticks of this entity inside them. */
+    private static int litterAfterAWhileIn(GameTestHelper helper, int x, Entity entity) {
+        BlockState natural = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false);
+        BlockPos leaves = helper.absolutePos(new BlockPos(x, 6, 2));
+        for (int i = 0; i < 100; i++) LeafLitter.disturb(helper.getLevel(), leaves, natural, entity);
+        BlockState ground = helper.getBlockState(new BlockPos(x, 2, 2));
+        return ground.is(Blocks.LEAF_LITTER) ? ground.getValue(SegmentableBlock.AMOUNT) : 0;
     }
 
     /** A pile of leaf litter softens a landing a little. */
