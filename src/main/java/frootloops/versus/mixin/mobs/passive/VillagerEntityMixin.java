@@ -22,6 +22,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
@@ -46,8 +48,8 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Vi
     @Shadow private long lastRestockGameTime;
     @Shadow abstract public void restock();
     @Shadow abstract boolean needsToRestock();
-    @Nullable
-    private Player customer, lastCustomer;
+    @Shadow @Nullable private Player lastTradedPlayer;
+    @Shadow private void updateSpecialPrices(Player player) {}
 
     // 26.3 levels a villager up right away (1.21.10 waited 40 ticks, with updateMerchantTimer and
     // increaseProfessionLevelOnUpdate), with the same regeneration.
@@ -106,16 +108,18 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Vi
                     findOffersToAdd: while (n < maxNumOffers && !availableOffers.isEmpty()) {
                         MerchantOffer newOffer = (availableOffers.remove(this.random.nextInt(availableOffers.size()))).create(this, this.random);
                         if (newOffer != null) {
-                            boolean isEnchantedBook = newOffer.getResult().is(Items.ENCHANTED_BOOK) && newOffer.getResult().isEnchanted();
+                            // A book's enchantment is a stored one, which isEnchanted and getEnchantments don't read:
+                            ItemEnchantments bookEnchantments = newOffer.getResult().is(Items.ENCHANTED_BOOK) ? EnchantmentHelper.getEnchantmentsForCrafting(newOffer.getResult()) : ItemEnchantments.EMPTY;
+                            boolean isEnchantedBook = !bookEnchantments.isEmpty();
                             Holder<Enchantment> enchant = null;
                             if(isEnchantedBook) {
-                                enchant = (Holder<Enchantment>) newOffer.getResult().getEnchantments().keySet().toArray()[0];
+                                enchant = bookEnchantments.keySet().iterator().next();
                             }
 
-                            // Make sure the offer isn't already being sold:
+                            // Make sure the offer isn't already being sold (for a book, its enchantment at any level):
                             for (MerchantOffer currentOffer:tradeOfferList) {
                                 if(isEnchantedBook && enchant != null) {
-                                    if(newOffer.getResult().is(Items.ENCHANTED_BOOK) && newOffer.getResult().isEnchanted() && newOffer.getResult().getEnchantments().getLevel(enchant) > 0)
+                                    if(currentOffer.getResult().is(Items.ENCHANTED_BOOK) && EnchantmentHelper.getEnchantmentsForCrafting(currentOffer.getResult()).getLevel(enchant) > 0)
                                         continue findOffersToAdd;
                                 }
                                 else if (ItemStack.isSameItemSameComponents(currentOffer.getResult(), newOffer.getResult())
@@ -137,6 +141,11 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Vi
                 }
             }
         }
+
+        // A trade levels a villager up there and then on 26.3: as vanilla's updateTrades does, price the new offers for
+        // the player still trading, which also sends them the new list (else they'd pick from the old one, by index).
+        Player tradingPlayer = this.getTradingPlayer();
+        if (tradingPlayer != null) this.updateSpecialPrices(tradingPlayer);
     }
 
     @Inject(method = "gossip", at = @At("TAIL"))
@@ -182,7 +191,8 @@ public abstract class VillagerEntityMixin extends AbstractVillager implements Vi
     public void rewardTradeXp(MerchantOffer offer) {
         int experienceFromOffer = offer.getXp();
         this.villagerXp = this.villagerXp + experienceFromOffer;
-        this.lastCustomer = customer;
+        // As vanilla's: the villager's next tick turns the trade into reputation with this player, with happy particles.
+        this.lastTradedPlayer = this.getTradingPlayer();
         if (this.shouldIncreaseLevel()) {
             if (this.level() instanceof ServerLevel serverLevel) this.increaseMerchantCareer(serverLevel);
             this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 0));
