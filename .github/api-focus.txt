@@ -1,2 +1,62 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
+# Leaves, round 1: how an entity moves, climbs, falls and is slowed inside blocks; leaves, scaffolding and leaf litter.
+find Leaves
+find Litter
+find Scaffolding
+find InsideBlockEffect
+find TreeDecorator
+findsig LeavesBlock
+findsig LeafLitter
+findsig SegmentableBlock
+findsig PlaceOnGroundDecorator
+findcalls LeavesBlock
+findcalls LeafLitter
+uses net/minecraft/world/level/block/LeafLitterBlock
+uses net/minecraft/world/level/block/LeavesBlock
+calls net.minecraft.world.entity.Entity ^(move|makeStuckInBlock|checkInsideBlocks|applyEffectsFromBlocks|checkFallDamage|resetFallDistance|getBlockSpeedFactor|getBlockJumpFactor|isAffectedByBlocks|setOnGroundWithMovement|onInsideBlock|getInBlockState|isSteppingCarefully|isDiscrete|isSuppressingBounce|isDescending|getOnPos|getOnPosLegacy|getBlockPosBelowThatAffectsMyMovement|recordMovementThroughBlocks|addMovementThisTick|applyMovementEmissionAndPlaySound|playStepSound|playMuffledStepSound|playCombinationStepSounds|vibrationAndSoundEffectsFromBlock|maybeBackOffFromEdge|isLocalInstanceAuthoritative|canSimulateMovement|isLocalClientAuthoritative|collidedWithShapeMovingFrom|isInWall|causeFallDamage|setDeltaMovement|lerpPositionAndRotationStep|baseTick|tick)$
+calls net.minecraft.world.entity.LivingEntity ^(travel|travelInAir|travelInFluid|travelFallFlying|handleRelativeFrictionAndCalculateMovement|handleOnClimbable|onClimbable|aiStep|jumpFromGround|getJumpPower|causeFallDamage|calculateFallDamage|checkFallDamage|tick|baseTick|getFrictionInfluencedSpeed|setJumping|isSuppressingSlidingDownLadder|makeStuckInBlock|getLastClimbablePos|getEffectiveGravity|canSimulateMovement|isAffectedByFluids|travelRidden|isImmobile|isEffectiveAi|playBlockFallSound|getFallSounds|shouldDiscardFriction)$
+calls net.minecraft.world.entity.Mob ^(aiStep|serverAiStep|isEffectiveAi|isImmobile|tick)$
+calls net.minecraft.world.entity.player.Player ^(makeStuckInBlock|travel|aiStep|tick|causeFallDamage|isSuppressingSlidingDownLadder|isStayingOnGroundSurface|maybeBackOffFromEdge|checkMovementStatistics|jumpFromGround|onClimbable|canSimulateMovement|isAlwaysTicking|isLocalPlayer)$
+calls net.minecraft.client.player.LocalPlayer ^(aiStep|tick|serverAiStep|isShiftKeyDown|isMovingSlowly|isCrouching|move|canStartSprinting|isLocalPlayer|isControlledCamera|sendPosition)$
+calls net.minecraft.server.network.ServerGamePacketListenerImpl ^(handleMovePlayer|handlePlayerInput|isEntityCollidingWithAnythingNew|noBlocksAround)$
+calls net.minecraft.server.level.ServerPlayer ^(doCheckFallDamage|checkMovementStatistics|tick|doTick|checkFallDamage|setOnGroundWithMovement|setKnownMovement)$
+calls net.minecraft.world.level.block.Block ^(fallOn|updateEntityMovementAfterFallOn|stepOn|getFriction|getSpeedFactor|getJumpFactor)$
+calls net.minecraft.world.level.block.state.BlockBehaviour ^(entityInside|getEntityInsideCollisionShape|getCollisionShape|isRandomlyTicking|randomTick)$
+calls net.minecraft.world.level.pathfinder.WalkNodeEvaluator ^(getPathTypeFromState|getPathTypeStatic|checkNeighbourBlocks)$
+calls net.minecraft.world.damagesource.CombatTracker ^(getFallMessage|getFallLocation)$
+member net.minecraft.world.level.block.state.BlockBehaviour (Inside|CollisionShape|fallOn|stepOn|updateEntityMovementAfterFallOn|isPathfindable|getVisualShape|getBlockSupportShape|randomTick|isRandomlyTicking)
+member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase (Inside|CollisionShape|isSuffocating|blocksMotion|isViewBlocking|entityInside)
+member net.minecraft.world.entity.Entity (stuck|fallDistance|Movement|movementThisTick|inside|wasInPowderSnow|isInPowderSnow|onGround|verticalCollision|horizontalCollision|minorHorizontal|Climb|descend|Descend)
+member net.minecraft.world.entity.LivingEntity (jumping|Climb|noJumpDelay|fall|Fall)
+member net.minecraft.world.level.block.sounds.BlockSoundSets (LEAF|LEAVES|LITTER|GRASS|AZALEA|SCAFFOLD)
+member net.minecraft.sounds.SoundEvents (LEAF|LEAVES|LITTER)
+member net.minecraft.core.particles.ParticleTypes (LEAF|LEAVES)
+member net.minecraft.world.level.block.Blocks (LEAVES|LITTER)
+member net.minecraft.world.item.Items (LITTER)
+member net.minecraft.world.level.gameevent.GameEvent (STEP|HIT_GROUND|SPLASH|RESONATE|ENTITY_ACTION|BLOCK_CHANGE)
+member net.minecraft.world.entity.InsideBlockEffectType (.)
+member net.minecraft.world.level.pathfinder.PathType (LEAVES|DANGER|OPEN|WALKABLE)
+net.minecraft.world.level.block.ScaffoldingBlock
+net.minecraft.world.level.block.PowderSnowBlock
+net.minecraft.world.level.block.WebBlock
+net.minecraft.world.level.block.SweetBerryBushBlock
+net.minecraft.world.level.block.HayBlock
+net.minecraft.world.level.block.PinkPetalsBlock
+net.minecraft.world.phys.shapes.EntityCollisionContext
+net.minecraft.world.phys.shapes.CollisionContext
+net.minecraft.world.entity.InsideBlockEffectApplier
+net.minecraft.world.entity.InsideBlockEffectApplier$StepBasedCollector
+data tags/block/climbable.json
+data tags/block/leaves.json
+data tags/block/fall_damage_resetting.json
+data tags/block/blocks_motion_no_leaves.json
+data tags/block/mineable/hoe.json
+data tags/block/sword_efficient.json
+data tags/block/replaceable.json
+data tags/block/replaceable_by_trees.json
+data tags/item/leaves.json
+data loot_table/blocks/leaf_litter.json
+data loot_table/blocks/oak_leaves.json
+data worldgen/feature/oak_leaf_litter.json
+data worldgen/feature/patch_leaf_litter.json
