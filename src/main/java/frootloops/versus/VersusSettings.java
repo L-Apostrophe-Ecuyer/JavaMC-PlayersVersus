@@ -78,7 +78,7 @@ public abstract class VersusSettings {
         // Gliders go through leaves, losing this much of their speed per tick fully inside them
         public static double GLIDE_DRAG = 0.3;
         // Swimmers lose this much of their speed per tick fully inside underwater leaves; it stays in their speed for water
-        // to slow further, so fully inside they settle at about half (a third sprint-swimming)
+        // to slow further, so fully inside they keep about half to two thirds of it (a third sprint-swimming)
         public static double SWIM_DRAG = 0.15;
 
         // Natural leaves pushed through drop leaf litter to the ground below (cherry: pink petals), each leaf block a
@@ -95,6 +95,8 @@ public abstract class VersusSettings {
         // A natural leaf cut off from its tree decays as soon as it knows (its scheduled tick), not on a random tick
         // minutes later, so a felled tree's crown comes down at once
         public static boolean DO_INSTANT_LEAF_DECAY = true;
+        // With the camera inside leaves, their texture, tinted as they are there, frames the view (client, LeavesView)
+        public static boolean DO_LEAVES_VIEW = true;
     }
 
     public static class Items {
