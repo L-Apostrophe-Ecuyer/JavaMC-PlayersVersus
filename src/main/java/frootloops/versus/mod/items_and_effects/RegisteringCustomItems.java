@@ -12,6 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 import static frootloops.versus.VersusMod.MOD_ID;
 
@@ -144,6 +145,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT, CreativeModeTabs.NATURAL_BLOCKS);
         registerCustomItem("clovers", CustomBlockItems.CLOVERS, CreativeModeTabs.NATURAL_BLOCKS);
         registerCustomItem("fallen_leaves", CustomBlockItems.FALLEN_LEAVES);
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.LEAF_LITTER, CustomBlockItems.FALLEN_LEAVES));
 
         registerCustomItem("creeper_spore_blossom", CustomBlockItems.CREEPER_SPORE_BLOSSOM, CreativeModeTabs.FUNCTIONAL_BLOCKS);
     }

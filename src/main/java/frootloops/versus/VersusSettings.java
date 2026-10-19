@@ -86,6 +86,9 @@ public abstract class VersusSettings {
         public static double DECAY_LITTER_CHANCE = 0.25;
         // How far below the leaves litter can land
         public static int LITTER_DROP_RANGE = 24;
+        // Natural fallen leaves brown into leaf litter at this chance per random tick (about an in-game day at the
+        // default random tick speed, which reaches a block about every 68 seconds)
+        public static double FALLEN_LEAVES_BROWNING_CHANCE = 0.057;
     }
 
     public static class Items {
