@@ -77,6 +77,7 @@ public abstract class CustomBlockItems {
     public static final BlockItem WHEAT_GRASS = new BlockItem(CustomBlocks.WHEAT_GRASS, getBlockSettings("wheat_grass"));
     public static final BlockItem WILD_WHEAT = new BlockItem(CustomBlocks.WILD_WHEAT, getBlockSettings("wild_wheat"));
     public static final BlockItem CLOVERS = new BlockItem(CustomBlocks.CLOVERS, getBlockSettings("clovers"));
+    public static final BlockItem FALLEN_LEAVES = new BlockItem(CustomBlocks.FALLEN_LEAVES, getBlockSettings("fallen_leaves"));
 
     public static final BlockItem CREEPER_SPORE_BLOSSOM = new BlockItem(CustomBlocks.CREEPER_SPORE_BLOSSOM, getBlockSettings("creeper_spore_blossom"));
 

@@ -1,25 +1,41 @@
 package frootloops.versus.gametest;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
+import frootloops.versus.mod.environment.CustomBlockItems;
+import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.blocks.leaves.FallenLeavesBlock;
 import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import frootloops.versus.mod.environment.blocks.leaves.LeafMovement;
+import java.util.List;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.Compostable;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeafLitterBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SegmentableBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
@@ -290,6 +306,73 @@ public class LeavesGameTest {
         for (int i = 0; i < 100; i++) LeafLitter.disturb(helper.getLevel(), leaves, natural, entity);
         BlockState ground = helper.getBlockState(new BlockPos(x, 2, 2));
         return ground.is(Blocks.LEAF_LITTER) ? ground.getValue(SegmentableBlock.AMOUNT) : 0;
+    }
+
+    /** A pile of fallen leaves facing east: natural ones brown, a player's never do. */
+    private static BlockState fallenLeaves(int segments, boolean persistent) {
+        return CustomBlocks.FALLEN_LEAVES.defaultBlockState().setValue(SegmentableBlock.AMOUNT, segments)
+                .setValue(LeafLitterBlock.FACING, Direction.EAST).setValue(FallenLeavesBlock.PERSISTENT, persistent);
+    }
+
+    /** Natural fallen leaves brown into leaf litter, keeping their segments and facing; placed ones never do. */
+    @GameTest(structure = TOWER)
+    public void fallenLeavesBrownWithTime(GameTestHelper helper) {
+        floor(helper, 12, 6);
+        fill(helper, 1, 1, 1, 10, 1, 4, Blocks.GRASS_BLOCK.defaultBlockState());
+        BlockPos natural = new BlockPos(2, 2, 2), placed = new BlockPos(4, 2, 2);
+        helper.setBlock(natural, fallenLeaves(3, false));
+        helper.setBlock(placed, fallenLeaves(3, true));
+        for (int i = 0; i < 300; i++) {
+            helper.randomTick(natural);
+            helper.randomTick(placed);
+        }
+        helper.assertBlockPresent(Blocks.LEAF_LITTER, natural);
+        helper.assertBlockProperty(natural, SegmentableBlock.AMOUNT, 3);
+        helper.assertBlockProperty(natural, LeafLitterBlock.FACING, Direction.EAST);
+        helper.assertBlockPresent(CustomBlocks.FALLEN_LEAVES, placed);
+        helper.assertBlockProperty(placed, SegmentableBlock.AMOUNT, 3);
+        helper.succeed();
+    }
+
+    /** Shears and Silk Touch keep fallen leaves; anything else gives leaf litter, a pile's worth either way. */
+    @GameTest(structure = TOWER)
+    public void fallenLeavesDropThemselvesOnlyToShearsAndSilkTouch(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
+        ItemStack silkTouch = new ItemStack(Items.DIAMOND_PICKAXE);
+        silkTouch.enchant(EnchantRegistryHelper.getRegistryEntry(level, Enchantments.SILK_TOUCH), 1);
+        assertDrops(helper, Block.getDrops(fallenLeaves(3, false), level, pos, null, null, new ItemStack(Items.SHEARS)), CustomBlockItems.FALLEN_LEAVES, "shears");
+        assertDrops(helper, Block.getDrops(fallenLeaves(3, false), level, pos, null, null, silkTouch), CustomBlockItems.FALLEN_LEAVES, "Silk Touch");
+        assertDrops(helper, Block.getDrops(fallenLeaves(3, false), level, pos, null, null, ItemStack.EMPTY), Items.LEAF_LITTER, "a bare hand");
+        assertDrops(helper, Block.getDrops(fallenLeaves(3, true), level, pos, null, null, ItemStack.EMPTY), Items.LEAF_LITTER, "a bare hand on a placed pile");
+        helper.succeed();
+    }
+
+    /** Three segments of fallen leaves broken with this tool dropped three of this item and nothing else. */
+    private static void assertDrops(GameTestHelper helper, List<ItemStack> drops, Item item, String tool) {
+        helper.assertTrue(drops.size() == 1 && drops.getFirst().is(item) && drops.getFirst().getCount() == 3,
+                "three segments of fallen leaves broken with " + tool + " dropped " + drops);
+    }
+
+    /** Fallen leaves a player places are theirs: they never brown. */
+    @GameTest(structure = TOWER)
+    public void placedFallenLeavesArePersistent(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        BlockPos ground = helper.absolutePos(new BlockPos(2, 1, 2));
+        BlockPlaceContext context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, new ItemStack(CustomBlockItems.FALLEN_LEAVES),
+                new BlockHitResult(Vec3.atCenterOf(ground), Direction.UP, ground, false));
+        BlockState placed = CustomBlocks.FALLEN_LEAVES.getStateForPlacement(context);
+        helper.assertTrue(placed != null && placed.getValue(FallenLeavesBlock.PERSISTENT), "placed fallen leaves aren't persistent: " + placed);
+        helper.succeed();
+    }
+
+    /** Fallen leaves compost as leaf litter does. */
+    @GameTest(structure = TOWER)
+    public void fallenLeavesCompostLikeLeafLitter(GameTestHelper helper) {
+        Compostable litter = Items.LEAF_LITTER.components().get(DataComponents.COMPOSTABLE);
+        Compostable fallen = CustomBlockItems.FALLEN_LEAVES.components().get(DataComponents.COMPOSTABLE);
+        helper.assertTrue(litter != null && litter.equals(fallen), "fallen leaves compost as " + fallen + ", leaf litter as " + litter);
+        helper.succeed();
     }
 
     /** A pile of leaf litter is ground cover, not a cushion: landing on it hurts as much as landing on grass. */

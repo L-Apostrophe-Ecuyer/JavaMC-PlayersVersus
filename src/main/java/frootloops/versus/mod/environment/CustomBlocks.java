@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.*;
 import frootloops.versus.mod.environment.blocks.clays.*;
+import frootloops.versus.mod.environment.blocks.leaves.FallenLeavesBlock;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.brewing.effects.BuoyancyStatusEffect;
 import frootloops.versus.mod.items_and_effects.brewing.effects.LargenessStatusEffect;
@@ -68,6 +69,7 @@ public class CustomBlocks {
     public static Block WHEAT_GRASS;
     public static Block WILD_WHEAT;
     public static Block CLOVERS;
+    public static FallenLeavesBlock FALLEN_LEAVES;
 
     public static CreeperSporeBlock CREEPER_SPORE_BLOSSOM;
 
@@ -144,6 +146,7 @@ public class CustomBlocks {
         WHEAT_GRASS = registerBlock("wheat_grass", new WheatGrassBlock(getSettings("wheat_grass", Blocks.SHORT_GRASS)));
         WILD_WHEAT = registerBlock("wild_wheat", new WheatGrassBlock(getSettings("wild_wheat", Blocks.SHORT_GRASS)));
         CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
+        FALLEN_LEAVES = (FallenLeavesBlock) registerBlock("fallen_leaves", new FallenLeavesBlock(getSettings("fallen_leaves", Blocks.LEAF_LITTER).mapColor(MapColor.PLANT)));
 
         CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM).lightLevel((state) -> 3 + state.getValue(BlockStateProperties.AGE_2) * 3)));
 
