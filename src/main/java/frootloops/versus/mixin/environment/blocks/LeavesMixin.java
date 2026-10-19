@@ -129,17 +129,27 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
     }
 
     /**
-     * A natural leaf works out how far it is from its tree's logs: one that was by a log and no longer is, or is now seven
-     * from them, is cut off, and decays at once.
+     * A natural leaf works out how far it is from its tree's logs, from what its neighbours remember. When that says its
+     * hold on the tree got weaker, it searches for the tree itself ({@link LeafReach#searchDistance}) and, cut off, decays
+     * at once; a felled tree's crown falls a block a tick. Without instant decay, a leaf that was by a log and no longer
+     * is goes straight to 7, to decay on a random tick.
      */
     @Overwrite
     public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if (state.getValue(LeavesBlock.PERSISTENT)) return;
         int currentDistance = state.getValue(LeavesBlock.DISTANCE);
         int newDistance = getUpdatedDistance(state, world, pos);
-        if (currentDistance == 1 && newDistance > 1) newDistance = 7;
-        if (newDistance == 7 && VersusSettings.Leaves.DO_INSTANT_LEAF_DECAY) playersVersus$decayNow(state, world, pos, random);
-        else if (currentDistance != newDistance) world.setBlock(pos, state.setValue(LeavesBlock.DISTANCE, newDistance), Block.UPDATE_ALL);
+        if (VersusSettings.Leaves.DO_INSTANT_LEAF_DECAY) {
+            if (newDistance > currentDistance || newDistance == 7) {
+                int searched = LeafReach.searchDistance(world, pos, this);
+                if (searched == 7) {
+                    playersVersus$decayNow(state, world, pos, random);
+                    return;
+                }
+                if (searched != LeafReach.UNKNOWN) newDistance = searched;
+            }
+        } else if (currentDistance == 1 && newDistance > 1) newDistance = 7;
+        if (currentDistance != newDistance) world.setBlock(pos, state.setValue(LeavesBlock.DISTANCE, newDistance), Block.UPDATE_ALL);
     }
 
     /** A leaf cut off from its tree goes: vanilla's drops, by chance a segment of litter, and a puff of leaf, no sound. */

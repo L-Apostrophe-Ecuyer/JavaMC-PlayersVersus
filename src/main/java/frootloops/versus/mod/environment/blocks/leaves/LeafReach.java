@@ -1,10 +1,17 @@
 package frootloops.versus.mod.environment.blocks.leaves;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,6 +26,8 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public final class LeafReach {
 
+    /** What a search finds when it reaches chunks that aren't loaded. */
+    public static final int UNKNOWN = -1;
     private static final Map<Block, TagKey<Block>> OWN_LOGS = Map.of(
             Blocks.OAK_LEAVES, logs("oak_logs"),
             Blocks.SPRUCE_LEAVES, logs("spruce_logs"),
@@ -41,6 +50,33 @@ public final class LeafReach {
     /** Whether a log's reach passes from this neighbour on to these leaves: leaves of their own kind. */
     public static boolean isOwnKind(Block leaves, BlockState neighbour) {
         return neighbour.is(leaves) || isAzalea(leaves) && isAzalea(neighbour.getBlock());
+    }
+
+    /**
+     * How far these leaves at this spot are from one of their tree's logs, searching out through leaves of their own
+     * kind: 1 to 6, 7 when none is that near, or {@link #UNKNOWN} when the search reaches chunks that aren't loaded. A
+     * search, not the distances the leaves around remember, which can be out of date: vanilla grows some trees with a
+     * leaf remembering a step more than it is, and a cut-off crown's leaves would otherwise count up a step a tick.
+     */
+    public static int searchDistance(LevelReader level, BlockPos start, Block leaves) {
+        Set<BlockPos> seen = new HashSet<>();
+        seen.add(start);
+        List<BlockPos> ring = List.of(start);
+        for (int distance = 1; distance <= 6 && !ring.isEmpty(); distance++) {
+            List<BlockPos> next = new ArrayList<>();
+            for (BlockPos pos : ring) {
+                for (Direction direction : Direction.values()) {
+                    BlockPos neighbour = pos.relative(direction);
+                    if (!seen.add(neighbour)) continue;
+                    if (!level.hasChunkAt(neighbour)) return UNKNOWN;
+                    BlockState state = level.getBlockState(neighbour);
+                    if (isOwnLog(leaves, state)) return distance;
+                    if (isOwnKind(leaves, state)) next.add(neighbour);
+                }
+            }
+            ring = next;
+        }
+        return 7;
     }
 
     /** A vanilla tag of one wood's logs, stripped or not, which 26.4 keeps as data but no longer names in BlockTags. */
