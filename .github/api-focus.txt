@@ -1,15 +1,14 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-member net.minecraft.world.level.levelgen.feature.Feature (place|class)
-member net.minecraft.core.registries.Registries (FEATURE|CONFIGURED)
-find Compost
-member net.minecraft.world.level.block.ComposterBlock (COMPOSTABLES|add)
-member net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTabOutput (insert|accept)
-member net.minecraft.client.resources.model.ModelManager (.)
-find BlockStateModel
-member net.minecraft.client.renderer.block.model.BlockStateModel (particle|Sprite|sprite)
-member net.minecraft.client.color.block.BlockTintSource (.)
-member net.minecraft.client.renderer.RenderPipelines (GUI)
-member net.minecraft.world.level.block.state.BlockBehaviour$Properties (ofFullCopy|ofLegacyCopy|mapColor|randomTicks)
-member net.minecraft.world.level.block.state.properties.BlockStateProperties (PERSISTENT)
-data worldgen/feature/jungle_bush.json
+member net.minecraft.world.item.component.Compostable (.)
+member net.minecraft.core.component.DataComponents (COMPOST)
+member net.minecraft.client.renderer.block.BlockStateModelSet (.)
+member net.minecraft.client.renderer.block.dispatch.BlockStateModel (particle|sprite|Sprite)
+member net.minecraft.client.resources.model.sprite.AtlasManager (get|Atlas)
+member net.minecraft.client.renderer.texture.TextureAtlas (getSprite)
+data tags/block/replaceable.json
+data tags/block/replaceable_by_trees.json
+data tags/block/inside_step_sound_blocks.json
+data tags/block/combination_step_sound_blocks.json
+data tags/block/sword_efficient.json
+data tags/block/mineable/hoe.json

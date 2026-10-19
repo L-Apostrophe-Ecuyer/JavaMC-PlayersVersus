@@ -292,9 +292,9 @@ public class LeavesGameTest {
         return ground.is(Blocks.LEAF_LITTER) ? ground.getValue(SegmentableBlock.AMOUNT) : 0;
     }
 
-    /** A pile of leaf litter softens a landing a little. */
+    /** A pile of leaf litter is ground cover, not a cushion: landing on it hurts as much as landing on grass. */
     @GameTest(structure = TOWER, maxTicks = 100)
-    public void aPileOfLitterSoftensALanding(GameTestHelper helper) {
+    public void aPileOfLitterDoesNotSoftenALanding(GameTestHelper helper) {
         floor(helper, 12, 6);
         fill(helper, 1, 1, 1, 10, 1, 4, Blocks.GRASS_BLOCK.defaultBlockState());
         fill(helper, 1, 2, 1, 3, 2, 3, Blocks.LEAF_LITTER.defaultBlockState().setValue(SegmentableBlock.AMOUNT, 4));
@@ -303,7 +303,7 @@ public class LeavesGameTest {
             double hurtLitter = damageTaken(onLitter), hurtGrass = damageTaken(onGrass);
             VersusMod.MOD_LOGGER.info("Leaves: an 11-block fall hurt a husk {} onto grass, {} onto four segments of litter", hurtGrass, hurtLitter);
             helper.assertTrue(hurtGrass >= 6.0, "an 11-block fall onto grass did only " + hurtGrass);
-            helper.assertTrue(hurtLitter <= hurtGrass - 3.0, "onto a pile of litter " + hurtLitter + ", onto grass " + hurtGrass);
+            helper.assertTrue(hurtLitter == hurtGrass, "onto a pile of litter " + hurtLitter + ", onto grass " + hurtGrass);
             helper.succeed();
         });
     }
