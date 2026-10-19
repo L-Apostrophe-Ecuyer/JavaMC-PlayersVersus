@@ -86,8 +86,6 @@ public abstract class VersusSettings {
         public static double DECAY_LITTER_CHANCE = 0.25;
         // How far below the leaves litter can land
         public static int LITTER_DROP_RANGE = 24;
-        // Landing in leaf litter takes this much off the fall per segment (four segments: 40%)
-        public static double LITTER_CUSHION_PER_SEGMENT = 0.1;
     }
 
     public static class Items {

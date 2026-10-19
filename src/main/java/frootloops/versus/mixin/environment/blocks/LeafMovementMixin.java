@@ -1,7 +1,6 @@
 package frootloops.versus.mixin.environment.blocks;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import frootloops.versus.mod.environment.blocks.leaves.LeafMovement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Moving through leaves ({@link LeafMovement}), where vanilla moves a living thing: walking, climbing, falling and
- * gliding through them, and how far a fall through them, or into leaf litter, counts.
+ * gliding through them, and how far a fall through them counts.
  */
 @Mixin(LivingEntity.class)
 public abstract class LeafMovementMixin {
@@ -36,13 +35,11 @@ public abstract class LeafMovementMixin {
     }
 
     /**
-     * Before vanilla counts this tick's fall: in leaves a fall counts only as far as the speed it still has, and landing in
-     * leaf litter takes some of it off. On both sides; the server counts a player's fall from the movement its client sends.
+     * Before vanilla counts this tick's fall: in leaves a fall counts only as far as the speed it still has. On both
+     * sides; the server counts a player's fall from the movement its client sends.
      */
     @Inject(method = "checkFallDamage", at = @At("HEAD"))
     private void playersVersus$cushionFallInLeaves(double dy, boolean onGround, BlockState state, BlockPos pos, CallbackInfo ci) {
-        LivingEntity self = (LivingEntity) (Object) this;
-        LeafMovement.cushionFall(self, dy, onGround);
-        LeafLitter.cushionLanding(self, onGround);
+        LeafMovement.cushionFall((LivingEntity) (Object) this, dy, onGround);
     }
 }

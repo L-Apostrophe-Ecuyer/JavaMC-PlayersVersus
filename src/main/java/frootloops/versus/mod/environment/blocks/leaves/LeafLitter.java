@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -24,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
  * Leaf litter comes from the leaves above it: natural leaves something pushes through shed a segment now and then, the
  * more the faster it goes (a crash through a canopy knocks a handful down), and dying leaves leave one by chance, so a
  * felled tree carpets the ground under it. Cherry leaves shed pink petals. The litter falls straight down through the
- * canopy to the first ground it can stay on, and a pile of it softens a landing.
+ * canopy to the first ground it can stay on.
  */
 public final class LeafLitter {
 
@@ -107,14 +106,5 @@ public final class LeafLitter {
         if (segments >= SegmentableBlock.MAX_SEGMENT) return false;
         level.setBlockAndUpdate(pos, state.setValue(amount, segments + 1));
         return true;
-    }
-
-    /** Landing in leaf litter takes {@code LITTER_CUSHION_PER_SEGMENT} off the fall per segment; at the head of checkFallDamage. */
-    public static void cushionLanding(LivingEntity entity, boolean onGround) {
-        if (!onGround || entity.fallDistance <= 0.0) return;
-        BlockState feet = entity.level().getBlockState(entity.blockPosition());
-        if (!feet.is(Blocks.LEAF_LITTER) || !(feet.getBlock() instanceof SegmentableBlock segmentable)) return;
-        int segments = feet.getValue(segmentable.getSegmentAmountProperty());
-        entity.fallDistance *= Math.clamp(1.0 - VersusSettings.Leaves.LITTER_CUSHION_PER_SEGMENT * segments, 0.0, 1.0);
     }
 }
