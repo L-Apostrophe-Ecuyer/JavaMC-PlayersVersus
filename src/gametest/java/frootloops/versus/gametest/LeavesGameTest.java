@@ -115,6 +115,34 @@ public class LeavesGameTest {
         });
     }
 
+    /**
+     * Leaves underwater hold back a swimmer as leaves hold back a walker: a husk wading along a flooded tunnel goes about
+     * half as far where the tunnel is full of waterlogged leaves.
+     */
+    @GameTest(structure = ROOM, maxTicks = 100)
+    public void leavesUnderwaterHoldBackASwimmer(GameTestHelper helper) {
+        fill(helper, 0, 0, 0, 13, 3, 7, Blocks.STONE.defaultBlockState());
+        fill(helper, 1, 1, 1, 12, 2, 2, Blocks.WATER.defaultBlockState());
+        fill(helper, 1, 1, 5, 12, 2, 6, leaves(Blocks.OAK_LEAVES).setValue(LeavesBlock.WATERLOGGED, true));
+        Mob open = husk(helper, 1.5, 1.0, 1.5), leafy = husk(helper, 1.5, 1.0, 5.5);
+        double startX = helper.relativeVec(open.position()).x;
+        helper.onEachTick(() -> {
+            for (Mob husk : new Mob[]{open, leafy}) {
+                Vec3 target = helper.absoluteVec(new Vec3(12.5, 1.0, helper.relativeVec(husk.position()).z));
+                husk.getMoveControl().setWantedPosition(target.x, target.y, target.z, 1.5);
+            }
+        });
+        helper.runAfterDelay(80, () -> {
+            double swamOpen = helper.relativeVec(open.position()).x - startX;
+            double swamLeafy = helper.relativeVec(leafy.position()).x - startX;
+            VersusMod.MOD_LOGGER.info("Leaves: in 80 ticks underwater a husk went {} in open water, {} through leaves", swamOpen, swamLeafy);
+            helper.assertTrue(swamOpen > 1.0, "the husk in open water went only " + swamOpen);
+            helper.assertTrue(swamLeafy < 0.85 * swamOpen, "through the leaves " + swamLeafy + ", in open water " + swamOpen);
+            helper.assertTrue(swamLeafy > 0.2 * swamOpen, "the leaves nearly stopped it: " + swamLeafy + " against " + swamOpen);
+            helper.succeed();
+        });
+    }
+
     /** Holding jump with leaves at its feet climbs to the top of them; leaves just above its head can't be climbed. */
     @GameTest(structure = ROOM, maxTicks = 120)
     public void leavesAtTheFeetClimbLeavesAboveTheHeadDont(GameTestHelper helper) {
