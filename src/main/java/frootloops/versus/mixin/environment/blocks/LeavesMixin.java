@@ -42,8 +42,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Leaves you can push through, like scaffolding ({@link LeafMovement}): this decides when a leaf is solid, what landing on
  * one does, and when leaves shed litter ({@link LeafLitter}); the movement through them is {@code LeafMovementMixin}'s.
- * Leaves also only stay alive near their own tree's logs, and some trees' leaves reach less far from them ({@link
- * LeafReach}); a natural leaf cut off from them decays as soon as it knows.
+ * Leaves also only stay alive near their own tree's logs ({@link LeafReach}), and a natural leaf cut off from them decays
+ * as soon as it knows.
  */
 @Mixin(LeavesBlock.class)
 public abstract class LeavesMixin extends Block implements SimpleWaterloggedBlock {
@@ -120,7 +120,7 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
             else if (LeafReach.isOwnKind(this, neighborState)) i = Math.min(i, neighborState.getValue(LeavesBlock.DISTANCE) + 1);
             if (i == 1) break;
         }
-        return i > LeafReach.reach(this) ? 7 : i;
+        return i;
     }
 
     /** Whether this block is a log that keeps these leaves alive ({@link LeafReach}). */
@@ -129,8 +129,8 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
     }
 
     /**
-     * A natural leaf works out how far it is from its tree's logs: one that was by a log and no longer is, or is now out
-     * of reach, is cut off, and decays at once.
+     * A natural leaf works out how far it is from its tree's logs: one that was by a log and no longer is, or is now seven
+     * from them, is cut off, and decays at once.
      */
     @Overwrite
     public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
