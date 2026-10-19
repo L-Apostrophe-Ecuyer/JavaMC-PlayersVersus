@@ -119,7 +119,7 @@ public class LeavesGameTest {
      * Leaves underwater hold back a swimmer as leaves hold back a walker: a husk wading along a flooded tunnel goes about
      * half as far where the tunnel is full of waterlogged leaves.
      */
-    @GameTest(structure = ROOM, maxTicks = 100)
+    @GameTest(structure = ROOM, maxTicks = 60)
     public void leavesUnderwaterHoldBackASwimmer(GameTestHelper helper) {
         fill(helper, 0, 0, 0, 13, 3, 7, Blocks.STONE.defaultBlockState());
         fill(helper, 1, 1, 1, 12, 2, 2, Blocks.WATER.defaultBlockState());
@@ -132,10 +132,10 @@ public class LeavesGameTest {
                 husk.getMoveControl().setWantedPosition(target.x, target.y, target.z, 1.5);
             }
         });
-        helper.runAfterDelay(80, () -> {
+        helper.runAfterDelay(40, () -> {
             double swamOpen = helper.relativeVec(open.position()).x - startX;
             double swamLeafy = helper.relativeVec(leafy.position()).x - startX;
-            VersusMod.MOD_LOGGER.info("Leaves: in 80 ticks underwater a husk went {} in open water, {} through leaves", swamOpen, swamLeafy);
+            VersusMod.MOD_LOGGER.info("Leaves: in 40 ticks underwater a husk went {} in open water, {} through leaves", swamOpen, swamLeafy);
             helper.assertTrue(swamOpen > 1.0, "the husk in open water went only " + swamOpen);
             helper.assertTrue(swamLeafy < 0.85 * swamOpen, "through the leaves " + swamLeafy + ", in open water " + swamOpen);
             helper.assertTrue(swamLeafy > 0.2 * swamOpen, "the leaves nearly stopped it: " + swamLeafy + " against " + swamOpen);

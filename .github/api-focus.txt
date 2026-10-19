@@ -8,3 +8,4 @@ member net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry (attac
 member net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements (MISC|OVERLAY)
 member net.minecraft.client.Minecraft (getModelManager|getBlockColors|levelRenderer)
 member net.minecraft.client.renderer.state.level.LevelRenderState (camera)
+member net.minecraft.client.multiplayer.ClientLevel (class|implements)

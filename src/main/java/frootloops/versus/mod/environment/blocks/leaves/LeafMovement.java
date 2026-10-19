@@ -128,8 +128,7 @@ public final class LeafMovement {
      * scaffolding. A faster fall isn't caught at once, holding jump or not: the drag slows it first.
      */
     public static Vec3 adjust(LivingEntity entity, Vec3 motion) {
-        if (!VersusSettings.Leaves.DO_LEAF_MOVEMENT || !passes(entity) || entity.isSpectator() || entity.noPhysics
-                || entity.isPassenger() || entity instanceof Player player && player.getAbilities().flying) return motion;
+        if (!movesThroughLeaves(entity)) return motion;
         Immersion immersion = measure(entity, motion);
         if (!immersion.any()) return motion;
         double keep = horizontalKeep(Math.sqrt(motion.x * motion.x + motion.z * motion.z), immersion.body());
@@ -143,6 +142,25 @@ public final class LeafMovement {
             }
         }
         return new Vec3(motion.x * keep, y, motion.z * keep);
+    }
+
+    /**
+     * A swimmer's motion this tick, before it moves: leaves underwater drag it, across the more of its body is in them,
+     * up and down the more of its path is. The drag stays in its speed, as water's own does, so a swimmer fully in
+     * leaves settles at about half its speed, as a walker does.
+     */
+    public static Vec3 swim(LivingEntity entity, Vec3 motion) {
+        if (!movesThroughLeaves(entity)) return motion;
+        Immersion immersion = measure(entity, motion);
+        if (!immersion.any()) return motion;
+        double across = 1.0 - VersusSettings.Leaves.SWIM_DRAG * immersion.body();
+        return new Vec3(motion.x * across, motion.y * (1.0 - VersusSettings.Leaves.SWIM_DRAG * immersion.swept()), motion.z * across);
+    }
+
+    /** Whether leaves move this entity now: it passes them, and isn't a spectator, flying, riding or clipping through. */
+    private static boolean movesThroughLeaves(LivingEntity entity) {
+        return VersusSettings.Leaves.DO_LEAF_MOVEMENT && passes(entity) && !entity.isSpectator() && !entity.noPhysics
+                && !entity.isPassenger() && !(entity instanceof Player player && player.getAbilities().flying);
     }
 
     /** A glider through leaves loses some of its speed on every axis, the more the deeper it is in them. */

@@ -80,9 +80,12 @@ neighbour's log of the same type. Knowing which tree a leaf belongs to is for th
 screen: large tiles along the edges, fading to clear toward the centre. It eases in and out over a few ticks, and isn't
 drawn in spectator mode. Client only (`LeavesView`, a HUD element drawn before vanilla's camera overlays).
 
-**Swimming.** Swimming through leaves caps horizontal speed and drags vertical speed as walking through them does
-(`LeafMovement` with the same immersion), in vanilla's fluid travel, before the move. No climbing or sinking help:
-swimming already goes up and down.
+**Swimming.** Leaves underwater drag a swimmer (`LeafMovement.swim`, with the same immersion as walking), in vanilla's
+water travel, before the move: `SWIM_DRAG` (0.15) of its speed a tick fully inside, across by how much of its body is
+in them, up and down by how much of its path. The drag stays in its speed for water to slow further, so a swimmer fully
+in leaves settles at about half its speed (a third sprint-swimming), near the two thirds a hedge leaves a walker. Not
+walking's speed cap: a swimmer goes about 0.1 to 0.2 blocks a tick, around the cap, so it would barely slow one. No
+climbing or sinking help: swimming already goes up and down.
 
 ## Removed
 
@@ -92,8 +95,8 @@ docs.
 
 ## Settings (`VersusSettings.Leaves`)
 
-`FALLEN_LEAVES_BROWNING_CHANCE` (0.057), `DO_INSTANT_LEAF_DECAY` (true), `DO_LEAVES_VIEW` (true, client),
-`DECAY_LITTER_CHANCE` (0.25, as before).
+`FALLEN_LEAVES_BROWNING_CHANCE` (0.057), `DO_INSTANT_LEAF_DECAY` (true), `SWIM_DRAG` (0.15), `DO_LEAVES_VIEW` (true,
+client), `DECAY_LITTER_CHANCE` (0.25, as before).
 
 ## Testing
 

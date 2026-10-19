@@ -77,6 +77,9 @@ public abstract class VersusSettings {
         public static double LANDING_FALL_DIVISOR = 3.0;
         // Gliders go through leaves, losing this much of their speed per tick fully inside them
         public static double GLIDE_DRAG = 0.3;
+        // Swimmers lose this much of their speed per tick fully inside underwater leaves; it stays in their speed for water
+        // to slow further, so fully inside they settle at about half (a third sprint-swimming)
+        public static double SWIM_DRAG = 0.15;
 
         // Natural leaves pushed through drop leaf litter to the ground below (cherry: pink petals), each leaf block a
         // tick by chance SHED_RATE * (speed - 0.1)^2, at most MOST_SHED_CHANCE; decaying leaves by DECAY_LITTER_CHANCE (LeafLitter)
