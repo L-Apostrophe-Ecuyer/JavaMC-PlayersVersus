@@ -7,15 +7,20 @@ import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.leaves.FallenLeavesBlock;
 import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import frootloops.versus.mod.environment.blocks.leaves.LeafMovement;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
@@ -35,6 +40,7 @@ import net.minecraft.world.level.block.LeafLitterBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SegmentableBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -48,6 +54,7 @@ public class LeavesGameTest {
 
     private static final String ROOM = "players-versus-gametest:leaves_room";   // 14 x 8 x 8
     private static final String TOWER = "players-versus-gametest:leaves_tower"; // 12 x 24 x 6
+    private static final String GROVE = "players-versus-gametest:leaves_grove"; // 48 x 40 x 48, a grass floor
 
     /** Persistent, so they don't decay while the test runs. */
     private static BlockState leaves(Block block) {
@@ -281,6 +288,93 @@ public class LeavesGameTest {
         helper.assertTrue(segments > 0, "40 decaying leaves left no fallen leaves");
         helper.assertTrue(segments < 40, "every decaying leaf left fallen leaves");
         helper.succeed();
+    }
+
+    /**
+     * Cutting a tree's trunk drops its natural crown at once, not leaf by leaf over minutes as vanilla; a placed leaf
+     * stays, and a waterlogged one leaves its water.
+     */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aFelledTreeDropsItsCrownAtOnce(GameTestHelper helper) {
+        floor(helper, 14, 8);
+        fill(helper, 3, 1, 3, 3, 4, 3, Blocks.OAK_LOG.defaultBlockState());
+        for (int x = 2; x <= 4; x++) {
+            for (int y = 3; y <= 5; y++) {
+                for (int z = 2; z <= 4; z++) {
+                    if (x == 3 && z == 3 && y <= 4) continue;
+                    int distance = Math.abs(x - 3) + Math.abs(z - 3) + (y == 5 ? 1 : 0);
+                    helper.setBlock(x, y, z, Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, distance));
+                }
+            }
+        }
+        helper.setBlock(4, 4, 4, leaves(Blocks.OAK_LEAVES));
+        helper.setBlock(2, 3, 3, helper.getBlockState(new BlockPos(2, 3, 3)).setValue(LeavesBlock.WATERLOGGED, true));
+        fill(helper, 3, 1, 3, 3, 4, 3, Blocks.AIR.defaultBlockState());
+        helper.succeedWhen(() -> {
+            for (BlockPos pos : BlockPos.betweenClosed(2, 3, 2, 4, 5, 4)) {
+                BlockState state = helper.getBlockState(pos);
+                helper.assertFalse(state.is(Blocks.OAK_LEAVES) && !state.getValue(LeavesBlock.PERSISTENT), "a natural leaf stayed at " + pos.toShortString());
+            }
+            helper.assertBlockPresent(Blocks.OAK_LEAVES, new BlockPos(4, 4, 4));
+            helper.assertBlockPresent(Blocks.WATER, new BlockPos(2, 3, 3));
+            VersusMod.MOD_LOGGER.info("Leaves: a felled oak's crown was gone within {} ticks", helper.getTick());
+        });
+    }
+
+    /** Every tree keeps all its leaves through an update of each: the reach rules never doom a natural tree's own leaves. */
+    @GameTest(structure = GROVE, maxTicks = 40)
+    public void everyTreeKeepsItsLeaves(GameTestHelper helper) {
+        treesKeepTheirLeaves(helper, List.of(TreeFeatures.OAK, TreeFeatures.FANCY_OAK, TreeFeatures.BIRCH, TreeFeatures.SPRUCE, TreeFeatures.PINE,
+                TreeFeatures.ACACIA, TreeFeatures.DARK_OAK, TreeFeatures.SWAMP_OAK, TreeFeatures.JUNGLE_BUSH));
+    }
+
+    /** The rest of the trees, as everyTreeKeepsItsLeaves. */
+    @GameTest(structure = GROVE, maxTicks = 40)
+    public void everyOtherTreeKeepsItsLeaves(GameTestHelper helper) {
+        treesKeepTheirLeaves(helper, List.of(TreeFeatures.JUNGLE_TREE, TreeFeatures.MEGA_SPRUCE, TreeFeatures.AZALEA_TREE, TreeFeatures.MANGROVE,
+                TreeFeatures.CHERRY, TreeFeatures.PALE_OAK, TreeFeatures.RED_POPLAR, TreeFeatures.ORANGE_POPLAR, TreeFeatures.YELLOW_POPLAR));
+    }
+
+    /**
+     * Grows these nine trees in a 3 x 3 grid 16 apart, gives every natural leaf of theirs that vanilla would keep a tick,
+     * and checks a few ticks later that each tree still has them all.
+     */
+    private static void treesKeepTheirLeaves(GameTestHelper helper, List<ResourceKey<Feature>> trees) {
+        ServerLevel level = helper.getLevel();
+        int[] before = new int[trees.size()];
+        for (int t = 0; t < trees.size(); t++) {
+            Feature tree = level.registryAccess().lookupOrThrow(Registries.FEATURE).getOrThrow(trees.get(t)).value();
+            BlockPos origin = helper.absolutePos(new BlockPos(8 + 16 * (t % 3), 1, 8 + 16 * (t / 3)));
+            helper.assertTrue(tree.place(level, level.getChunkSource().getGenerator(), RandomSource.create(42), origin), trees.get(t).identifier() + " didn't grow");
+        }
+        for (int t = 0; t < trees.size(); t++) {
+            before[t] = livingLeaves(helper, t, true);
+            helper.assertTrue(before[t] > 0, trees.get(t).identifier() + " grew no leaves");
+        }
+        helper.runAfterDelay(5, () -> {
+            List<String> lost = new ArrayList<>(), kept = new ArrayList<>();
+            for (int t = 0; t < trees.size(); t++) {
+                int after = livingLeaves(helper, t, false);
+                String tree = trees.get(t).identifier().getPath();
+                if (after == before[t]) kept.add(tree + " " + after);
+                else lost.add(tree + " lost " + (before[t] - after) + " of its " + before[t] + " leaves");
+            }
+            helper.assertTrue(lost.isEmpty(), String.join(", ", lost));
+            VersusMod.MOD_LOGGER.info("Leaves: every tree kept its leaves ({})", String.join(", ", kept));
+            helper.succeed();
+        });
+    }
+
+    /** The natural leaves in this tree's 16 x 16 cell that vanilla would keep (closer than 7 to a log), giving each a tick if asked. */
+    private static int livingLeaves(GameTestHelper helper, int tree, boolean update) {
+        int x0 = 16 * (tree % 3), z0 = 16 * (tree / 3), count = 0;
+        for (BlockPos pos : BlockPos.betweenClosed(x0, 1, z0, x0 + 15, 39, z0 + 15)) {
+            BlockState state = helper.getBlockState(pos);
+            if (!(state.getBlock() instanceof LeavesBlock) || state.getValue(LeavesBlock.PERSISTENT) || state.getValue(LeavesBlock.DISTANCE) >= 7) continue;
+            count++;
+            if (update) helper.getLevel().scheduleTick(helper.absolutePos(pos), state.getBlock(), 1);
+        }
+        return count;
     }
 
     /**
