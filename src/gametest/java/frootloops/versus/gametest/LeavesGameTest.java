@@ -214,39 +214,54 @@ public class LeavesGameTest {
         helper.succeed();
     }
 
-    /** Litter falls through the leaves below to the ground, piles up to four, never onto water or into a plant. */
+    /**
+     * Shed leaves fall through the leaves below to the ground and pile up to four: fallen leaves from oak, leaf litter
+     * from poplars, petals from cherry, nothing from spruce. A falling leaf joins any leaf pile it lands on, never onto
+     * water or into a plant.
+     */
     @GameTest(structure = TOWER)
-    public void litterFallsThroughTheCanopyAndPilesUp(GameTestHelper helper) {
-        ServerLevel level = helper.getLevel();
+    public void shedLeavesFallThroughTheCanopyAndPileUp(GameTestHelper helper) {
         floor(helper, 12, 6);
-        fill(helper, 1, 1, 1, 10, 1, 1, Blocks.GRASS_BLOCK.defaultBlockState());
+        fill(helper, 1, 1, 1, 10, 1, 3, Blocks.GRASS_BLOCK.defaultBlockState());
         helper.setBlock(1, 6, 1, leaves(Blocks.OAK_LEAVES));
         helper.setBlock(1, 7, 1, leaves(Blocks.OAK_LEAVES));
-        for (int i = 0; i < 4; i++) {
-            helper.assertTrue(LeafLitter.shed(level, helper.absolutePos(new BlockPos(1, 7, 1)), leaves(Blocks.OAK_LEAVES), level.getRandom()),
-                    "segment " + (i + 1) + " didn't land");
-        }
-        helper.assertFalse(LeafLitter.shed(level, helper.absolutePos(new BlockPos(1, 7, 1)), leaves(Blocks.OAK_LEAVES), level.getRandom()),
-                "a fifth segment landed on a full pile");
-        helper.assertBlockPresent(Blocks.LEAF_LITTER, new BlockPos(1, 2, 1));
+        for (int i = 0; i < 4; i++) helper.assertTrue(shedFrom(helper, 1, 7, 1, Blocks.OAK_LEAVES), "segment " + (i + 1) + " didn't land");
+        helper.assertFalse(shedFrom(helper, 1, 7, 1, Blocks.OAK_LEAVES), "a fifth segment landed on a full pile");
+        helper.assertBlockPresent(CustomBlocks.FALLEN_LEAVES, new BlockPos(1, 2, 1));
         helper.assertBlockProperty(new BlockPos(1, 2, 1), SegmentableBlock.AMOUNT, 4);
 
-        helper.assertTrue(LeafLitter.shed(level, helper.absolutePos(new BlockPos(3, 6, 1)), leaves(Blocks.CHERRY_LEAVES), level.getRandom()),
-                "cherry leaves shed nothing");
-        helper.assertBlockPresent(Blocks.PINK_PETALS, new BlockPos(3, 2, 1));
-        helper.assertFalse(LeafLitter.shed(level, helper.absolutePos(new BlockPos(5, 6, 1)), leaves(Blocks.SPRUCE_LEAVES), level.getRandom()),
-                "spruce leaves shed litter");
+        helper.assertTrue(shedFrom(helper, 3, 6, 1, Blocks.RED_POPLAR_LEAVES), "poplar leaves shed nothing");
+        helper.assertBlockPresent(Blocks.LEAF_LITTER, new BlockPos(3, 2, 1));
+        helper.assertTrue(shedFrom(helper, 5, 6, 1, Blocks.CHERRY_LEAVES), "cherry leaves shed nothing");
+        helper.assertBlockPresent(Blocks.PINK_PETALS, new BlockPos(5, 2, 1));
+        helper.assertFalse(shedFrom(helper, 6, 6, 1, Blocks.SPRUCE_LEAVES), "spruce leaves shed something");
+        helper.assertBlockPresent(Blocks.AIR, new BlockPos(6, 2, 1));
 
-        helper.setBlock(7, 1, 1, Blocks.WATER.defaultBlockState());
-        helper.assertFalse(LeafLitter.shed(level, helper.absolutePos(new BlockPos(7, 6, 1)), leaves(Blocks.OAK_LEAVES), level.getRandom()),
-                "litter landed on water");
-        helper.setBlock(9, 2, 1, Blocks.SHORT_GRASS.defaultBlockState());
-        helper.assertFalse(LeafLitter.shed(level, helper.absolutePos(new BlockPos(9, 6, 1)), leaves(Blocks.OAK_LEAVES), level.getRandom()),
-                "litter replaced short grass");
+        helper.setBlock(8, 2, 1, Blocks.LEAF_LITTER.defaultBlockState().setValue(SegmentableBlock.AMOUNT, 2));
+        helper.assertTrue(shedFrom(helper, 8, 6, 1, Blocks.OAK_LEAVES), "an oak leaf didn't join the leaf litter");
+        helper.assertBlockPresent(Blocks.LEAF_LITTER, new BlockPos(8, 2, 1));
+        helper.assertBlockProperty(new BlockPos(8, 2, 1), SegmentableBlock.AMOUNT, 3);
+        helper.setBlock(9, 2, 1, fallenLeaves(1, true));
+        helper.assertTrue(shedFrom(helper, 9, 6, 1, Blocks.OAK_LEAVES), "an oak leaf didn't join a placed pile of fallen leaves");
+        helper.assertBlockProperty(new BlockPos(9, 2, 1), SegmentableBlock.AMOUNT, 2);
+        helper.assertBlockProperty(new BlockPos(9, 2, 1), FallenLeavesBlock.PERSISTENT, true);
+        helper.setBlock(10, 2, 1, Blocks.LEAF_LITTER.defaultBlockState().setValue(SegmentableBlock.AMOUNT, 4));
+        helper.assertFalse(shedFrom(helper, 10, 6, 1, Blocks.OAK_LEAVES), "an oak leaf landed on a full pile of leaf litter");
+
+        helper.setBlock(7, 1, 3, Blocks.WATER.defaultBlockState());
+        helper.assertFalse(shedFrom(helper, 7, 6, 3, Blocks.OAK_LEAVES), "a leaf landed on water");
+        helper.setBlock(9, 2, 3, Blocks.SHORT_GRASS.defaultBlockState());
+        helper.assertFalse(shedFrom(helper, 9, 6, 3, Blocks.OAK_LEAVES), "a leaf replaced short grass");
         helper.succeed();
     }
 
-    /** Dying leaves leave litter under them by chance: a whole layer of them leaves some. */
+    /** One segment shed from natural leaves of this kind at (x, y, z). */
+    private static boolean shedFrom(GameTestHelper helper, int x, int y, int z, Block kind) {
+        ServerLevel level = helper.getLevel();
+        return LeafLitter.shed(level, helper.absolutePos(new BlockPos(x, y, z)), leaves(kind), level.getRandom());
+    }
+
+    /** Dying leaves leave fallen leaves under them by chance: a whole layer of them leaves some. */
     @GameTest(structure = TOWER)
     public void decayingLeavesLeaveLitter(GameTestHelper helper) {
         floor(helper, 12, 6);
@@ -259,12 +274,12 @@ public class LeavesGameTest {
             for (int z = 1; z <= 4; z++) {
                 helper.assertBlockNotPresent(Blocks.OAK_LEAVES, new BlockPos(x, 6, z));
                 BlockState ground = helper.getBlockState(new BlockPos(x, 2, z));
-                if (ground.is(Blocks.LEAF_LITTER)) segments += ground.getValue(SegmentableBlock.AMOUNT);
+                if (ground.is(CustomBlocks.FALLEN_LEAVES)) segments += ground.getValue(SegmentableBlock.AMOUNT);
             }
         }
-        VersusMod.MOD_LOGGER.info("Leaves: 40 decaying leaves left {} segments of litter", segments);
-        helper.assertTrue(segments > 0, "40 decaying leaves left no litter");
-        helper.assertTrue(segments < 40, "every decaying leaf left litter");
+        VersusMod.MOD_LOGGER.info("Leaves: 40 decaying leaves left {} segments of fallen leaves", segments);
+        helper.assertTrue(segments > 0, "40 decaying leaves left no fallen leaves");
+        helper.assertTrue(segments < 40, "every decaying leaf left fallen leaves");
         helper.succeed();
     }
 
@@ -299,13 +314,13 @@ public class LeavesGameTest {
         helper.succeed();
     }
 
-    /** The segments of litter under natural oak leaves at (x, 6, 2) after a hundred ticks of this entity inside them. */
+    /** The segments of fallen leaves under natural oak leaves at (x, 6, 2) after a hundred ticks of this entity inside them. */
     private static int litterAfterAWhileIn(GameTestHelper helper, int x, Entity entity) {
         BlockState natural = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false);
         BlockPos leaves = helper.absolutePos(new BlockPos(x, 6, 2));
         for (int i = 0; i < 100; i++) LeafLitter.disturb(helper.getLevel(), leaves, natural, entity);
         BlockState ground = helper.getBlockState(new BlockPos(x, 2, 2));
-        return ground.is(Blocks.LEAF_LITTER) ? ground.getValue(SegmentableBlock.AMOUNT) : 0;
+        return ground.is(CustomBlocks.FALLEN_LEAVES) ? ground.getValue(SegmentableBlock.AMOUNT) : 0;
     }
 
     /** A pile of fallen leaves facing east: natural ones brown, a player's never do. */
