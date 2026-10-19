@@ -61,6 +61,11 @@ public class LeavesGameTest {
         return block.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
     }
 
+    /** A tree's own leaves, this far from its logs. */
+    private static BlockState natural(Block block, int distance) {
+        return block.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, distance);
+    }
+
     private static void fill(GameTestHelper helper, int x0, int y0, int z0, int x1, int y1, int z1, BlockState state) {
         for (int x = x0; x <= x1; x++) for (int y = y0; y <= y1; y++) for (int z = z0; z <= z1; z++) helper.setBlock(x, y, z, state);
     }
@@ -302,8 +307,7 @@ public class LeavesGameTest {
             for (int y = 3; y <= 5; y++) {
                 for (int z = 2; z <= 4; z++) {
                     if (x == 3 && z == 3 && y <= 4) continue;
-                    int distance = Math.abs(x - 3) + Math.abs(z - 3) + (y == 5 ? 1 : 0);
-                    helper.setBlock(x, y, z, Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, distance));
+                    helper.setBlock(x, y, z, natural(Blocks.OAK_LEAVES, Math.abs(x - 3) + Math.abs(z - 3) + (y == 5 ? 1 : 0)));
                 }
             }
         }
@@ -318,6 +322,41 @@ public class LeavesGameTest {
             helper.assertBlockPresent(Blocks.OAK_LEAVES, new BlockPos(4, 4, 4));
             helper.assertBlockPresent(Blocks.WATER, new BlockPos(2, 3, 3));
             VersusMod.MOD_LOGGER.info("Leaves: a felled oak's crown was gone within {} ticks", helper.getTick());
+        });
+    }
+
+    /**
+     * A leaf lives only by its own tree's logs: an oak leaf by a birch log falls, one by its own log stripped stays, and
+     * so does one by a jungle log, which is what a jungle bush grows oak leaves on.
+     */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void leavesLiveOnlyByTheirOwnTreesLogs(GameTestHelper helper) {
+        floor(helper, 14, 8);
+        List<Block> logs = List.of(Blocks.BIRCH_LOG, Blocks.STRIPPED_OAK_LOG, Blocks.JUNGLE_LOG);
+        for (int i = 0; i < logs.size(); i++) {
+            helper.setBlock(2 + 4 * i, 1, 2, logs.get(i).defaultBlockState());
+            helper.setBlock(2 + 4 * i, 2, 2, natural(Blocks.OAK_LEAVES, 1));
+            helper.getLevel().scheduleTick(helper.absolutePos(new BlockPos(2 + 4 * i, 2, 2)), Blocks.OAK_LEAVES, 1);
+        }
+        helper.runAfterDelay(5, () -> {
+            helper.assertBlockNotPresent(Blocks.OAK_LEAVES, new BlockPos(2, 2, 2));
+            helper.assertBlockPresent(Blocks.OAK_LEAVES, new BlockPos(6, 2, 2));
+            helper.assertBlockPresent(Blocks.OAK_LEAVES, new BlockPos(10, 2, 2));
+            helper.succeed();
+        });
+    }
+
+    /** Most trees' leaves reach five blocks from their logs, a block short of vanilla's six. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void mostLeavesReachFiveBlocks(GameTestHelper helper) {
+        floor(helper, 14, 8);
+        helper.setBlock(1, 1, 2, Blocks.BIRCH_LOG.defaultBlockState());
+        for (int distance = 1; distance <= 6; distance++) helper.setBlock(1 + distance, 1, 2, natural(Blocks.BIRCH_LEAVES, distance));
+        helper.getLevel().scheduleTick(helper.absolutePos(new BlockPos(7, 1, 2)), Blocks.BIRCH_LEAVES, 1);
+        helper.runAfterDelay(5, () -> {
+            for (int distance = 1; distance <= 5; distance++) helper.assertBlockPresent(Blocks.BIRCH_LEAVES, new BlockPos(1 + distance, 1, 2));
+            helper.assertBlockNotPresent(Blocks.BIRCH_LEAVES, new BlockPos(7, 1, 2));
+            helper.succeed();
         });
     }
 
