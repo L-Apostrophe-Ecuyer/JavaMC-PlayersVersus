@@ -1,6 +1,8 @@
 package frootloops.versus.mod.environment.blocks.leaves;
 
 import java.util.Map;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -20,13 +22,13 @@ public final class LeafReach {
 
     private static final int VANILLA_REACH = 6;
     private static final Map<Block, TagKey<Block>> OWN_LOGS = Map.of(
-            Blocks.OAK_LEAVES, BlockTags.OAK_LOGS,
-            Blocks.SPRUCE_LEAVES, BlockTags.SPRUCE_LOGS,
-            Blocks.BIRCH_LEAVES, BlockTags.BIRCH_LOGS,
-            Blocks.DARK_OAK_LEAVES, BlockTags.DARK_OAK_LOGS,
+            Blocks.OAK_LEAVES, logs("oak_logs"),
+            Blocks.SPRUCE_LEAVES, logs("spruce_logs"),
+            Blocks.BIRCH_LEAVES, logs("birch_logs"),
+            Blocks.DARK_OAK_LEAVES, logs("dark_oak_logs"),
             Blocks.JUNGLE_LEAVES, BlockTags.JUNGLE_LOGS,
-            Blocks.ACACIA_LEAVES, BlockTags.ACACIA_LOGS,
-            Blocks.CHERRY_LEAVES, BlockTags.CHERRY_LOGS);
+            Blocks.ACACIA_LEAVES, logs("acacia_logs"),
+            Blocks.CHERRY_LEAVES, logs("cherry_logs"));
     private static final Map<Block, Integer> REACH = Map.of(
             Blocks.OAK_LEAVES, 5,
             Blocks.SPRUCE_LEAVES, 5,
@@ -54,6 +56,11 @@ public final class LeafReach {
     /** How far from their logs these leaves live. */
     public static int reach(Block leaves) {
         return REACH.getOrDefault(leaves, VANILLA_REACH);
+    }
+
+    /** A vanilla tag of one wood's logs, stripped or not, which 26.4 keeps as data but no longer names in BlockTags. */
+    private static TagKey<Block> logs(String name) {
+        return TagKey.create(Registries.BLOCK, Identifier.withDefaultNamespace(name));
     }
 
     private static boolean isAzalea(Block leaves) {
