@@ -48,18 +48,31 @@ pile stays what it is), petals join only petals. Anything else stops it, as befo
 
 ## Leaf decay
 
-**Instant.** When a natural leaf's distance becomes 7 in its scheduled tick (cut off from its tree's logs, by the
-mod's rules: its own log type, 5 blocks for most trees), it decays right then: vanilla's drops, a quarter of the time a
-segment of fallen leaves, and a small puff of its leaf particles (no sound; a crown falls in a ripple, a block a tick).
-Leaves that never get a scheduled tick still decay on a random tick, as vanilla.
+**Instant.** When a natural leaf learns in its scheduled tick that its hold on its tree got weaker (its neighbours
+remember a longer way to a log than it did, or it's at 7), it searches out through natural leaves of its own kind for
+one of its tree's logs, six steps at most. Finding none, it decays right then: vanilla's drops, a quarter of the time a
+segment of fallen leaves, and a small puff of its leaf particles (no sound). A felled crown falls in a ripple, a block a
+tick: a small oak's is gone in three. Leaves that never get a scheduled tick still decay on a random tick, as vanilla,
+and so does a leaf whose search would reach unloaded chunks.
 
-Going at once makes the reach rules show: a natural tree must keep its own leaves after any update. A game test grows
-every vanilla tree, updates every one of its leaves, and checks none falls. Vanilla's jungle bushes are oak leaves
-around a jungle log, so oak leaves also count jungle logs as theirs; any other tree the test catches gets its pairing
-or reach fixed the same way, and listed here.
+**The rules.** A leaf lives within six blocks of one of its own tree's logs, stripped or not, counting through natural
+leaves of its own kind; leaves whose tree has no logs of its own here (mangrove, azalea, pale oak, poplars) take any log.
+Placed leaves remember no distance and hold up no tree's reach. The mod had these rules as static maps on the leaves
+block, filled while the game was still making its blocks, so every leaves key was null and they never ran; `LeafReach`
+holds them now, built on first use.
+
+Going at once makes the rules show: a natural tree must keep its own leaves after any update. A game test grows every
+vanilla tree, updates every one of its leaves, and checks none falls. What it caught:
+- jungle bushes are oak leaves around a jungle log: oak leaves also take jungle logs;
+- azalea trees mix azalea and flowering azalea leaves: the two are one kind;
+- pines, swamp oaks, mega spruces, cherries, acacias and dark and pale oaks grow leaves six blocks out: no tree reaches
+  less than vanilla's six (the mod's five for most trees is gone);
+- vanilla grows some leaves remembering a step more than they are, so a leaf six out could see no neighbour at five
+  for a tick: a weakened hold searches before it decays.
 
 **Not solved here.** A leaf is kept by any log of its type within its reach, so a felled tree's leaves can stay on a
-neighbour's log of the same type. Knowing which tree a leaf belongs to is for the tree log block (research, separate).
+neighbour's log of the same type. Knowing which tree a leaf belongs to is for the tree log block
+(`2026-10-19-trees-research.md`).
 
 ## Being in leaves
 
@@ -89,7 +102,9 @@ Game tests (server):
   and a shed onto a brown pile adds a segment to it;
 - natural fallen leaves brown after enough random ticks, keeping segments and facing; placed ones never do;
 - drops: Silk Touch and shears give fallen leaves per segment, a bare hand gives leaf litter per segment;
-- cutting a tree's log drops its crown within a few ticks; persistent leaves stay;
+- cutting a tree's log drops its crown within a few ticks; persistent leaves stay, waterlogged ones leave water;
+- a leaf lives only by its own tree's logs (an oak leaf by a birch log falls; by a stripped oak log or a jungle log it
+  stays); a placed leaf holds up no natural one;
 - every vanilla tree keeps all its leaves through an update of each;
 - a husk crossing waterlogged leaves goes slower than one crossing open water.
 
