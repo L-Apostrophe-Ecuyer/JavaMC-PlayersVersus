@@ -111,9 +111,9 @@ and deeper you go, and rustles every 0.9 blocks moved. Sneaking halves it all.
 
 ## Leaf litter
 
-Since [fallen leaves](2026-10-19-fallen-leaves-design.md): leaves shed fallen leaves of their own colour (cherry still
-sheds petals), which brown into this litter; spruce and pale oak shed too; leaves cut off from their tree fall at once;
-and litter no longer softens a landing. The rest of this section still holds.
+Since [fallen leaves](2026-10-19-fallen-leaves-design.md): green-leaved trees shed fallen leaves, tinted like their
+leaves, which brown into this litter; the poplars still shed this litter, cherry petals, spruce and pale oak nothing;
+leaves cut off from their tree fall at once; and litter no longer softens a landing. The rest of this section holds.
 
 - **Knocked-about leaves shed.** On the server, every natural (not player-placed) leaf a passer moves through has a
   chance per tick of dropping a segment of litter below it, `0.1 × (speed − 0.1)²` and at most 25%. Walking through a
@@ -126,7 +126,7 @@ and litter no longer softens a landing. The rest of this section still holds.
 - **Where it lands.** Straight down through the canopy, to the first air with ground the litter can stay on (vanilla's
   survival check), within 24 blocks. It adds a segment to litter already there (up to 4), and never replaces a plant,
   lands in water or rests on leaves.
-- **Which leaves.** (Superseded: every leaf type, see fallen leaves.) Tag `players-versus:sheds_leaf_litter`: oak,
+- **Which leaves.** (Superseded: the green-leaved trees shed fallen leaves, see there.) Tag `players-versus:sheds_leaf_litter`: oak,
   birch, dark oak, jungle, acacia, mangrove, azaleas, the poplars. Cherry leaves drop pink petals instead
   (`players-versus:sheds_pink_petals`). Spruce and pale oak shed nothing.
 - **Softer landings.** (Removed.) Landing in litter took 10% off the fall distance per segment.
