@@ -96,18 +96,25 @@ Players Versus wants "less frustration, more fear, more fun". The recommendation
 - **Instant felling, Vintage Story style,** is the fallback if animation proves too costly: the same cut, the same
   crown capture, the logs dropped at the stump.
 
-## Open questions
+## Open questions, answered
 
 1. Should a cut face stay cut once uncovered (the mushroom's way, showing the wound), or go back to bark?
+   **It stays cut.** Unlike a mushroom's, faces are set only when the tree grows: placing a block next to a trunk
+   doesn't take its bark.
 2. Only new trees (new chunks and saplings), or also convert old ones (a natural log with natural leaves becomes a tree
-   block when touched)? Old worlds would otherwise keep vanilla logs.
+   block when touched)? Old worlds would otherwise keep vanilla logs. **Only new trees.**
 3. Should anyone ever hold a tree block (creative, Silk Touch on an axe)? Holding one lets builders make "trees" that
-   fell.
-4. Notch and fall, chops that add up, or instant?
-5. Does a felled trunk stay in the world as a fallen log, or drop straight to items?
-6. How hard should a falling tree hit?
+   fell. **Only in creative;** survival players have vanilla logs.
+4. Notch and fall, chops that add up, or instant? **Chop it down and it falls as falling blocks that hurt, as
+   FallingTree's fall-blocks mode;** some pieces end as items, others as blocks. The cut takes longer the bigger the
+   tree, and the crown falls with it.
+5. Does a felled trunk stay in the world as a fallen log, or drop straight to items? **Some stay, in balance:** the
+   trunk lands as a fallen log, the branches break into items.
+6. How hard should a falling tree hit? **Enough to hurt but not to kill:** about an anvil's, never the last half heart
+   of a player or a pet.
 
 ## Next
 
-A spec for the tree block alone (faces, worldgen swap, drops, leaves bound to tree blocks), then felling as its own spec
-once the questions above are answered.
+The design, both steps (the tree block, then felling): [2026-10-19-trees-design.md](2026-10-19-trees-design.md). Where
+it and this research differ (faces set once at growth rather than turning, leaves living by logs as well as tree
+blocks since old trees keep their logs), the design holds.
