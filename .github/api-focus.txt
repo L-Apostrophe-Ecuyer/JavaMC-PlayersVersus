@@ -1,2 +1,33 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
+findsig LeafLitterBlock
+calls net.minecraft.world.level.block.LeafLitterBlock ^(.*)$
+member net.minecraft.world.level.block.SegmentableBlock (.)
+member net.minecraft.client.color.block.BlockTintSources (.)
+member net.minecraft.world.level.FoliageColor (.)
+calls net.minecraft.client.color.block.BlockColors ^(createDefault)$
+member net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry (.)
+member net.minecraft.world.level.pathfinder.PathType (LEAVES|OPEN|WALKABLE|BLOCKED)
+calls net.minecraft.world.level.pathfinder.WalkNodeEvaluator ^(getPathTypeFromState|isBurningBlock|getPathTypeStatic|checkNeighbourBlocks)$
+asset blockstates/leaf_litter.json
+asset models/block/leaf_litter_1.json
+asset models/block/leaf_litter_4.json
+asset models/block/template_leaf_litter_1.json
+asset models/block/template_leaf_litter_4.json
+asset items/leaf_litter.json
+asset items/oak_leaves.json
+asset items/birch_leaves.json
+asset items/spruce_leaves.json
+asset items/mangrove_leaves.json
+asset textures/block/leaf_litter.png
+asset textures/item/leaf_litter.png
+asset textures/block/oak_leaves.png
+asset textures/block/azalea_leaves.png
+asset textures/block/flowering_azalea_leaves.png
+asset textures/block/pale_oak_leaves.png
+asset textures/block/red_poplar_leaves.png
+asset textures/block/orange_poplar_leaves.png
+asset textures/block/yellow_poplar_leaves.png
+asset textures/colormap/dry_foliage.png
+data loot_table/blocks/leaf_litter.json
+data loot_table/blocks/pink_petals.json
