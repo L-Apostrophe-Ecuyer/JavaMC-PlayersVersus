@@ -1,11 +1,2 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-member net.minecraft.client.gui.GuiGraphicsExtractor (guiWidth|guiHeight)
-member net.minecraft.util.Mth (approach)
-member net.minecraft.client.color.block.BlockTintSource (.)
-member net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement (.)
-member net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry (attach)
-member net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements (MISC|OVERLAY)
-member net.minecraft.client.Minecraft (getModelManager|getBlockColors|levelRenderer)
-member net.minecraft.client.renderer.state.level.LevelRenderState (camera)
-member net.minecraft.client.multiplayer.ClientLevel (class|implements)

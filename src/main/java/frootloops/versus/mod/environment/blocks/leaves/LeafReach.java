@@ -56,9 +56,9 @@ public final class LeafReach {
     /**
      * How far these leaves at this spot are from one of their tree's logs, searching out through natural leaves of their
      * own kind (placed leaves hold no tree's reach, as they remember none): 1 to 6, 7 when none is that near, or
-     * {@link #UNKNOWN} when the search reaches chunks that aren't loaded. A
-     * search, not the distances the leaves around remember, which can be out of date: vanilla grows some trees with a
-     * leaf remembering a step more than it is, and a cut-off crown's leaves would otherwise count up a step a tick.
+     * {@link #UNKNOWN} when the search reaches chunks that aren't loaded. A search, not the distances the leaves around
+     * remember, which can be out of date: vanilla grows some trees with a leaf remembering a step more than it is, and a
+     * cut-off crown's leaves would otherwise count up a step a tick.
      */
     public static int searchDistance(LevelReader level, BlockPos start, Block leaves) {
         Set<BlockPos> seen = new HashSet<>();

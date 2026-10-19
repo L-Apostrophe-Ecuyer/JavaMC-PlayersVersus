@@ -56,10 +56,10 @@ tick: a small oak's is gone in three. Leaves that never get a scheduled tick sti
 and so does a leaf whose search would reach unloaded chunks.
 
 **The rules.** A leaf lives within six blocks of one of its own tree's logs, stripped or not, counting through natural
-leaves of its own kind; leaves whose tree has no logs of its own here (mangrove, azalea, pale oak, poplars) take any log.
-Placed leaves remember no distance and hold up no tree's reach. The mod had these rules as static maps on the leaves
-block, filled while the game was still making its blocks, so every leaves key was null and they never ran; `LeafReach`
-holds them now, built on first use.
+leaves of its own kind; leaves whose tree has no logs of its own here (mangrove, azalea, pale oak, poplars) take any
+log. Placed leaves remember no distance and hold up no tree's reach. The mod had these rules as static maps on the
+leaves block, filled while the game was still making its blocks, so every leaves key was null and they never ran;
+`LeafReach` holds them now, built on first use.
 
 Going at once makes the rules show: a natural tree must keep its own leaves after any update. A game test grows every
 vanilla tree, updates every one of its leaves, and checks none falls. What it caught:
@@ -81,9 +81,9 @@ screen: large tiles along the edges, fading to clear toward the centre. It eases
 drawn in spectator mode. Client only (`LeavesView`, a HUD element drawn before vanilla's camera overlays).
 
 **Swimming.** Leaves underwater drag a swimmer (`LeafMovement.swim`, with the same immersion as walking), in vanilla's
-water travel, before the move: `SWIM_DRAG` (0.15) of its speed a tick fully inside, across by how much of its body is
-in them, up and down by how much of its path. The drag stays in its speed for water to slow further, so a swimmer fully
-in leaves settles at about half its speed (a third sprint-swimming), near the two thirds a hedge leaves a walker. Not
+water travel, before the move: `SWIM_DRAG` (0.15) of its speed a tick fully inside, across by how much of its body is in
+them, up and down by how much of its path. The drag stays in its speed for water to slow further, so a swimmer fully in
+leaves keeps about half to two thirds of its speed (a third sprint-swimming), as a hedge leaves a walker two thirds. Not
 walking's speed cap: a swimmer goes about 0.1 to 0.2 blocks a tick, around the cap, so it would barely slow one. No
 climbing or sinking help: swimming already goes up and down.
 
