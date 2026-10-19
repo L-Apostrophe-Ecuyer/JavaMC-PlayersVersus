@@ -2,6 +2,7 @@ package frootloops.versus.mod.environment.blocks.leaves;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
+import frootloops.versus.mod.environment.CustomBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -22,12 +23,15 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Leaf litter comes from the leaves above it: natural leaves something pushes through shed a segment now and then, the
  * more the faster it goes (a crash through a canopy knocks a handful down), and dying leaves leave one by chance, so a
- * felled tree carpets the ground under it. Cherry leaves shed pink petals. The litter falls straight down through the
- * canopy to the first ground it can stay on.
+ * felled tree carpets the ground under it. The green broad-leaved trees shed fallen leaves (which brown into leaf litter
+ * with time), poplars leaf litter itself and cherry pink petals. It falls straight down through the canopy to the first
+ * ground it can stay on.
  */
 public final class LeafLitter {
 
-    /** Leaves that shed leaf litter: the broad-leaved trees. */
+    /** Leaves that shed fallen leaves: the green broad-leaved trees. */
+    public static final TagKey<Block> SHEDS_FALLEN_LEAVES = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "sheds_fallen_leaves"));
+    /** Leaves that shed leaf litter itself: the poplars, already turned. */
     public static final TagKey<Block> SHEDS_LEAF_LITTER = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "sheds_leaf_litter"));
     /** Leaves that shed pink petals instead. */
     public static final TagKey<Block> SHEDS_PINK_PETALS = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "sheds_pink_petals"));
@@ -41,6 +45,7 @@ public final class LeafLitter {
 
     /** What these leaves shed, as one segment, or null for leaves that shed nothing (spruce, pale oak). */
     public static BlockState shedState(BlockState leaves) {
+        if (leaves.is(SHEDS_FALLEN_LEAVES)) return CustomBlocks.FALLEN_LEAVES.defaultBlockState();
         if (leaves.is(SHEDS_LEAF_LITTER)) return Blocks.LEAF_LITTER.defaultBlockState();
         if (leaves.is(SHEDS_PINK_PETALS)) return Blocks.PINK_PETALS.defaultBlockState();
         return null;
@@ -73,8 +78,9 @@ public final class LeafLitter {
 
     /**
      * Drops one segment of what the leaves shed straight down, through any leaves below, to the first air above ground
-     * it can stay on, within {@code LITTER_DROP_RANGE} blocks: a new segment there, or one more on the same litter (up to
-     * four). It stops at anything else, so it never replaces a plant, lands in water or rests on leaves.
+     * it can stay on, within {@code LITTER_DROP_RANGE} blocks: a new segment there, or one more on a pile it joins (up to
+     * four). A leaf joins any pile of leaves, fallen or browned, a petal only petals. It stops at anything else, so it
+     * never replaces a plant, lands in water or rests on leaves.
      *
      * @return whether a segment landed
      */
@@ -85,7 +91,7 @@ public final class LeafLitter {
         for (int i = 0; i < VersusSettings.Leaves.LITTER_DROP_RANGE; i++) {
             pos.move(Direction.DOWN);
             BlockState here = level.getBlockState(pos);
-            if (here.is(litter.getBlock())) return addSegment(level, pos, here);
+            if (joins(litter, here)) return addSegment(level, pos, here);
             if (here.getBlock() instanceof LeavesBlock) continue;
             if (!here.isAir()) return false;
             if (litter.canSurvive(level, pos)) {
@@ -99,6 +105,12 @@ public final class LeafLitter {
         return false;
     }
 
+    private static boolean joins(BlockState litter, BlockState pile) {
+        if (litter.is(Blocks.PINK_PETALS)) return pile.is(Blocks.PINK_PETALS);
+        return pile.is(Blocks.LEAF_LITTER) || pile.getBlock() instanceof FallenLeavesBlock;
+    }
+
+    /** One more segment on this pile, keeping the rest of its state (its facing, a placed pile's persistence). */
     private static boolean addSegment(ServerLevel level, BlockPos pos, BlockState state) {
         if (!(state.getBlock() instanceof SegmentableBlock segmentable)) return false;
         IntegerProperty amount = segmentable.getSegmentAmountProperty();
