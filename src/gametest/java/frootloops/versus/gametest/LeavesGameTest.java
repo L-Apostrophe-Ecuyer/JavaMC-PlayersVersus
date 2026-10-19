@@ -348,6 +348,21 @@ public class LeavesGameTest {
         });
     }
 
+    /** A placed leaf holds no tree's reach: a natural leaf joined to its log only through one is cut off. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aPlacedLeafHoldsUpNoNaturalOne(GameTestHelper helper) {
+        floor(helper, 14, 8);
+        helper.setBlock(2, 1, 2, Blocks.OAK_LOG.defaultBlockState());
+        helper.setBlock(3, 1, 2, leaves(Blocks.OAK_LEAVES));
+        helper.setBlock(4, 1, 2, natural(Blocks.OAK_LEAVES, 2));
+        helper.getLevel().scheduleTick(helper.absolutePos(new BlockPos(4, 1, 2)), Blocks.OAK_LEAVES, 1);
+        helper.runAfterDelay(5, () -> {
+            helper.assertBlockPresent(Blocks.OAK_LEAVES, new BlockPos(3, 1, 2));
+            helper.assertBlockNotPresent(Blocks.OAK_LEAVES, new BlockPos(4, 1, 2));
+            helper.succeed();
+        });
+    }
+
     /** Every tree keeps all its leaves through an update of each: the mod's rules never doom a natural tree's own leaves. */
     @GameTest(structure = GROVE, maxTicks = 40)
     public void everyTreeKeepsItsLeaves(GameTestHelper helper) {
