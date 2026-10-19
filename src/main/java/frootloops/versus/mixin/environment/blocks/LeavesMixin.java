@@ -5,10 +5,12 @@ import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import frootloops.versus.mod.environment.blocks.BlockSounds;
 import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import frootloops.versus.mod.environment.blocks.leaves.LeafMovement;
+import frootloops.versus.mod.environment.blocks.leaves.LeafReach;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -37,12 +39,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
-
 /**
  * Leaves you can push through, like scaffolding ({@link LeafMovement}): this decides when a leaf is solid, what landing on
  * one does, and when leaves shed litter ({@link LeafLitter}); the movement through them is {@code LeafMovementMixin}'s.
- * Leaves also only stay alive near their own tree's logs, and some trees' leaves reach less far from them.
+ * Leaves also only stay alive near their own tree's logs, and some trees' leaves reach less far from them ({@link
+ * LeafReach}); a natural leaf cut off from them decays as soon as it knows.
  */
 @Mixin(LeavesBlock.class)
 public abstract class LeavesMixin extends Block implements SimpleWaterloggedBlock {
@@ -98,10 +99,8 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
 
     @Redirect(method = "updateShape", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LeavesBlock;getDistanceAt(Lnet/minecraft/world/level/block/state/BlockState;)I"))
     private int getDistanceFromLog_OnUpdate(BlockState state) {
-        boolean hasMatchingLog = LEAVES_WITH_MATCHING_LOG.getOrDefault(this, false);
-        if(hasMatchingLog && LOG_MAP.get(state.getBlock()) == this) return 0;
-        else if(!hasMatchingLog && state.is(BlockTags.LOGS)) return 0;
-        else if(state.getBlock() == this) return state.getValue(LeavesBlock.DISTANCE);
+        if (playersVersus$isOwnLog(state)) return 0;
+        if (LeafReach.isOwnKind(this, state)) return state.getValue(LeavesBlock.DISTANCE);
         return 7;
     }
 
@@ -113,70 +112,41 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
 
     private int getUpdatedDistance(BlockState state, LevelAccessor world, BlockPos pos) {
         int i = 7;
-        boolean hasMatchingLog = LEAVES_WITH_MATCHING_LOG.getOrDefault(this, false);
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {
             mutable.setWithOffset(pos, direction);
             BlockState neighborState = world.getBlockState(mutable);
-            if(hasMatchingLog && LOG_MAP.get(neighborState.getBlock()) == this) i = 1;
-            else if(!hasMatchingLog && neighborState.is(BlockTags.LOGS)) i = 1;
-            else if(neighborState.is(state.getBlock())){
-                int d = getDistanceFromLog_OnUpdate(world.getBlockState(mutable));
-                i = Math.min(i, d + 1);
-            }
+            if (playersVersus$isOwnLog(neighborState)) i = 1;
+            else if (LeafReach.isOwnKind(this, neighborState)) i = Math.min(i, neighborState.getValue(LeavesBlock.DISTANCE) + 1);
             if (i == 1) break;
         }
-        if(i > LEAVES_WITH_MAX_DISTANCE.getOrDefault(this, 7)) return 7;
-        return i;
+        return i > LeafReach.reach(this) ? 7 : i;
     }
 
+    /** Whether this block is a log that keeps these leaves alive ({@link LeafReach}). */
+    private boolean playersVersus$isOwnLog(BlockState log) {
+        return LeafReach.isOwnLog(this, log);
+    }
+
+    /**
+     * A natural leaf works out how far it is from its tree's logs: one that was by a log and no longer is, or is now out
+     * of reach, is cut off, and decays at once.
+     */
     @Overwrite
     public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
-        if(!(Boolean)state.getValue(LeavesBlock.PERSISTENT)) {
-            int currentDistance = state.getValue(LeavesBlock.DISTANCE);
-            int newDistance = getUpdatedDistance(state, world, pos);
-            if(currentDistance == 1 && newDistance > 1) newDistance = 7;
-            if(currentDistance != newDistance) world.setBlock(pos, state.setValue(LeavesBlock.DISTANCE, newDistance), Block.UPDATE_ALL);
-        }
+        if (state.getValue(LeavesBlock.PERSISTENT)) return;
+        int currentDistance = state.getValue(LeavesBlock.DISTANCE);
+        int newDistance = getUpdatedDistance(state, world, pos);
+        if (currentDistance == 1 && newDistance > 1) newDistance = 7;
+        if (newDistance == 7 && VersusSettings.Leaves.DO_INSTANT_LEAF_DECAY) playersVersus$decayNow(state, world, pos, random);
+        else if (currentDistance != newDistance) world.setBlock(pos, state.setValue(LeavesBlock.DISTANCE, newDistance), Block.UPDATE_ALL);
     }
 
-    private static final HashMap<Block, Integer> LEAVES_WITH_MAX_DISTANCE = new HashMap<>();
-    static {
-        LEAVES_WITH_MAX_DISTANCE.put(Blocks.OAK_LEAVES, 5);
-        LEAVES_WITH_MAX_DISTANCE.put(Blocks.SPRUCE_LEAVES, 5);
-        LEAVES_WITH_MAX_DISTANCE.put(Blocks.BIRCH_LEAVES, 5);
-        LEAVES_WITH_MAX_DISTANCE.put(Blocks.DARK_OAK_LEAVES, 5);
-        LEAVES_WITH_MAX_DISTANCE.put(Blocks.PALE_OAK_LEAVES, 5);
-        LEAVES_WITH_MAX_DISTANCE.put(Blocks.ACACIA_LEAVES, 5);
-        LEAVES_WITH_MAX_DISTANCE.put(Blocks.CHERRY_LEAVES, 5);
-    }
-
-    private static final HashMap<Block, Boolean> LEAVES_WITH_MATCHING_LOG = new HashMap<>();
-    static {
-        LEAVES_WITH_MATCHING_LOG.put(Blocks.OAK_LEAVES, true);
-        LEAVES_WITH_MATCHING_LOG.put(Blocks.SPRUCE_LEAVES, true);
-        LEAVES_WITH_MATCHING_LOG.put(Blocks.BIRCH_LEAVES, true);
-        LEAVES_WITH_MATCHING_LOG.put(Blocks.DARK_OAK_LEAVES, true);
-        LEAVES_WITH_MATCHING_LOG.put(Blocks.JUNGLE_LEAVES, true);
-        LEAVES_WITH_MATCHING_LOG.put(Blocks.ACACIA_LEAVES, true);
-        LEAVES_WITH_MATCHING_LOG.put(Blocks.CHERRY_LEAVES, true);
-    }
-
-    private static final HashMap<Block, Block> LOG_MAP = new HashMap<>();
-    static {
-        LOG_MAP.put(Blocks.OAK_LOG, Blocks.OAK_LEAVES);
-        LOG_MAP.put(Blocks.OAK_WOOD, Blocks.OAK_LEAVES);
-        LOG_MAP.put(Blocks.SPRUCE_LOG, Blocks.SPRUCE_LEAVES);
-        LOG_MAP.put(Blocks.SPRUCE_WOOD, Blocks.SPRUCE_LEAVES);
-        LOG_MAP.put(Blocks.BIRCH_LOG, Blocks.BIRCH_LEAVES);
-        LOG_MAP.put(Blocks.BIRCH_WOOD, Blocks.BIRCH_LEAVES);
-        LOG_MAP.put(Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
-        LOG_MAP.put(Blocks.DARK_OAK_WOOD, Blocks.DARK_OAK_LEAVES);
-        LOG_MAP.put(Blocks.JUNGLE_LOG, Blocks.JUNGLE_LEAVES);
-        LOG_MAP.put(Blocks.JUNGLE_WOOD, Blocks.JUNGLE_LEAVES);
-        LOG_MAP.put(Blocks.ACACIA_LOG, Blocks.ACACIA_LEAVES);
-        LOG_MAP.put(Blocks.ACACIA_WOOD, Blocks.ACACIA_LEAVES);
-        LOG_MAP.put(Blocks.CHERRY_LOG, Blocks.CHERRY_LEAVES);
-        LOG_MAP.put(Blocks.CHERRY_WOOD, Blocks.CHERRY_LEAVES);
+    /** A leaf cut off from its tree goes: vanilla's drops, by chance a segment of litter, and a puff of leaf, no sound. */
+    private void playersVersus$decayNow(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        LeafLitter.decay(world, pos, state, random);
+        Block.dropResources(state, world, pos);
+        world.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.25, 0.25, 0.25, 0.0);
+        world.removeBlock(pos, false);
     }
 }

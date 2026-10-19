@@ -89,6 +89,9 @@ public abstract class VersusSettings {
         // Natural fallen leaves brown into leaf litter at this chance per random tick (about an in-game day at the
         // default random tick speed, which reaches a block about every 68 seconds)
         public static double FALLEN_LEAVES_BROWNING_CHANCE = 0.057;
+        // A natural leaf cut off from its tree decays as soon as it knows (its scheduled tick), not on a random tick
+        // minutes later, so a felled tree's crown comes down at once
+        public static boolean DO_INSTANT_LEAF_DECAY = true;
     }
 
     public static class Items {
