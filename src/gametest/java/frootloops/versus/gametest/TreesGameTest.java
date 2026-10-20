@@ -2,6 +2,7 @@ package frootloops.versus.gametest;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
+import frootloops.versus.mod.environment.blocks.BlockTagAudit;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -61,6 +62,11 @@ public class TreesGameTest {
         return BuiltInRegistries.BLOCK.getValue(id);
     }
 
+    /** A vanilla block tag 26.4 keeps as data but no longer names in BlockTags. */
+    private static TagKey<Block> blockTag(String name) {
+        return TagKey.create(Registries.BLOCK, Identifier.withDefaultNamespace(name));
+    }
+
     private static boolean isTreeBlock(BlockState state) {
         Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         return id.getNamespace().equals(VersusMod.MOD_ID) && id.getPath().endsWith("_tree");
@@ -71,11 +77,12 @@ public class TreesGameTest {
         return state.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side));
     }
 
-    /** The rule a face is set by: cut against a tree block, a log or a sturdy face, bark against anything else. */
+    /** The rule a face is set by: cut against a tree block, a log or a sturdy face (not leaves), bark against anything else. */
     private static boolean shouldBeBark(ServerLevel level, BlockPos pos, Direction side) {
         BlockPos next = pos.relative(side);
         BlockState neighbour = level.getBlockState(next);
-        return !(isTreeBlock(neighbour) || neighbour.is(BlockTags.LOGS) || neighbour.isFaceSturdy(level, next, side.getOpposite()));
+        if (isTreeBlock(neighbour) || neighbour.is(BlockTags.LOGS)) return false;
+        return neighbour.is(BlockTags.LEAVES) || !neighbour.isFaceSturdy(level, next, side.getOpposite());
     }
 
     private static String faces(BlockState state) {
@@ -138,7 +145,7 @@ public class TreesGameTest {
         helper.succeed();
     }
 
-    /** An oak's trunk, as it grows: cut where it meets the ground and the trunk above, bark all round. */
+    /** An oak's trunk, as it grows: cut where it meets the ground and the trunk above, bark all round, its leaves included. */
     @GameTest(structure = GROVE, maxTicks = 20)
     public void anOaksTrunkShowsBarkAllRound(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
@@ -149,6 +156,12 @@ public class TreesGameTest {
         helper.assertTrue(base.is(oakTree) && base.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y, "the oak's trunk starts with " + base);
         helper.assertTrue(!bark(base, Direction.DOWN) && !bark(base, Direction.UP), "the base of the trunk isn't cut where it meets the ground and the trunk: " + faces(base));
         for (Direction side : Direction.Plane.HORIZONTAL) helper.assertTrue(bark(base, side), "the base of the trunk isn't bark all round: " + faces(base));
+        BlockPos top = new BlockPos(8, 1, 8);
+        while (helper.getBlockState(top.above()).is(oakTree)) top = top.above();
+        BlockState inCrown = helper.getBlockState(top);
+        for (Direction side : Direction.Plane.HORIZONTAL) {
+            if (helper.getBlockState(top.relative(side)).is(BlockTags.LEAVES)) helper.assertTrue(bark(inCrown, side), "the trunk shows the cut against its leaves: " + faces(inCrown));
+        }
         helper.succeed();
     }
 
@@ -221,17 +234,21 @@ public class TreesGameTest {
 
     /**
      * To the game a tree block is its wood's log: in its wood's tag and so in the logs that burn and all logs, mined
-     * with an axe, with an item for creative, and a cocoa pod stays on a jungle one.
+     * with an axe, solid to the heightmaps and to whatever moves, keeping leaves alive, a natural log, with an item for
+     * creative, and a cocoa pod stays on a jungle one.
      */
     @GameTest(structure = ROOM)
     public void treeBlocksAreLogsToTheGame(GameTestHelper helper) {
         for (Wood wood : WOODS) {
             Block tree = treeBlock(helper, wood.name());
             BlockState state = tree.defaultBlockState();
-            TagKey<Block> own = TagKey.create(Registries.BLOCK, Identifier.withDefaultNamespace(wood.name() + "_logs"));
+            TagKey<Block> own = blockTag(wood.name() + "_logs");
             helper.assertTrue(state.is(own), wood.name() + " tree isn't in " + own);
-            helper.assertTrue(state.is(BlockTags.LOGS_THAT_BURN) && state.is(BlockTags.LOGS), wood.name() + " tree isn't a log that burns");
+            helper.assertTrue(state.is(blockTag("logs_that_burn")) && state.is(BlockTags.LOGS), wood.name() + " tree isn't a log that burns");
             helper.assertTrue(state.is(BlockTags.MINEABLE_WITH_AXE), wood.name() + " tree isn't mined with an axe");
+            helper.assertTrue(state.is(BlockTagAudit.BLOCKS_MOTION), wood.name() + " tree doesn't block motion");
+            helper.assertTrue(state.is(BlockTags.PREVENTS_NEARBY_LEAF_DECAY), wood.name() + " tree doesn't keep leaves alive");
+            helper.assertTrue(state.is(blockTag("overworld_natural_logs")), wood.name() + " tree isn't a natural log");
             Item item = tree.asItem();
             helper.assertTrue(item instanceof BlockItem, wood.name() + " tree has no item");
         }
