@@ -134,8 +134,8 @@ cut is also what the block above it rested on) are one cut; when the tree comes 
 is what nothing holds up then, as the world stands, so a cut filled in meanwhile (stone, a log) holds the tree up. What
 a felled tree held up (another tree's branch resting on it) is checked once it's down.
 
-**Rooted dirt.** Once a tree has grown, the ground under the foot of its trunk (dirt, grass, podzol, moss: `#dirt`, but
-not mud) turns to rooted dirt (`ROOTED_DIRT_UNDER_TREES`), as azaleas already stand on: dug into, the ground under a
+**Rooted dirt.** Once a tree has grown, the soil under the foot of its trunk (dirt, grass, podzol, mycelium or moss; not
+mud or sand) turns to rooted dirt (`ROOTED_DIRT_UNDER_TREES`), as azaleas already stand on: dug into, the ground under a
 tree shows it holds one. (26.4 leaves grass under a trunk, so this is done after the tree grows, not through vanilla's
 below-trunk block.)
 

@@ -76,16 +76,16 @@ public final class TreeBlocks {
         setFaces(level, grown);
     }
 
-    /** The dirt, grass and the like under the foot of a tree's trunk (its lowest tree blocks) turned to rooted dirt; mud stays mud. */
+    /** The soil under the foot of a tree's trunk (its lowest tree blocks) turned to rooted dirt: dirt, grass, podzol, mycelium or moss, not mud or sand. */
     private static void rootedDirt(WorldGenLevel level, Set<BlockPos> grown) {
         int bottom = Integer.MAX_VALUE;
         for (BlockPos pos : grown) bottom = Math.min(bottom, pos.getY());
         for (BlockPos pos : grown) {
             if (pos.getY() != bottom || !(level.getBlockState(pos).getBlock() instanceof TreeBlock)) continue;
             BlockState ground = level.getBlockState(pos.below());
-            if (ground.is(BlockTags.DIRT) && !ground.is(Blocks.MUD) && !ground.is(Blocks.ROOTED_DIRT)) {
-                level.setBlock(pos.below(), Blocks.ROOTED_DIRT.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
-            }
+            if (ground.is(Blocks.ROOTED_DIRT) || !(ground.is(BlockTags.DIRT) || ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.PODZOL)
+                    || ground.is(Blocks.MYCELIUM) || ground.is(BlockTags.MOSS_BLOCKS))) continue;
+            level.setBlock(pos.below(), Blocks.ROOTED_DIRT.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
         }
     }
 

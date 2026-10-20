@@ -121,7 +121,7 @@ public abstract class VersusSettings {
         public static float LOG_DAMAGE_PER_BLOCK = 2.0f;
         public static int MOST_LOG_DAMAGE = 10;
         public static int MOST_FALLING_BLOCKS = 512;
-        // A growing tree puts rooted dirt under its trunk, not dirt (TreeBlocks)
+        // Once a tree has grown, the soil under its trunk (dirt, grass, podzol, mycelium, moss) turns to rooted dirt (TreeBlocks)
         public static boolean ROOTED_DIRT_UNDER_TREES = true;
         // A pale oak's trunk goes on down into the ground as roots, ROOT_DEPTH_MIN to ROOT_DEPTH_MAX blocks, and its
         // creaking heart moves down into them HEART_IN_ROOTS of the time (TreeRoots)

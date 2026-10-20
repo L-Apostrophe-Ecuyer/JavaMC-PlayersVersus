@@ -248,8 +248,18 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   face, bark otherwise (`TreeBlock.withFaces`). `rotate`/`mirror` turn the faces as a huge mushroom block's.
 - **Growing trees**: `TreeFeatureMixin` wraps `doPlace`'s trunk setter and foliage setter (a poplar's crown,
   `PoplarFoliagePlacer`, grows a ring of logs round its trunk) with `TreeBlocks.growing`, so each log with a tree block
-  of its own goes down as it, axis kept, and `@Share`s the positions with a `RETURN` inject that sets the faces.
-  `VersusSettings.Trees.DO_TREE_BLOCKS` turns it off. Fallen-tree features, structures and placed logs stay vanilla.
+  of its own goes down as it, axis kept, and `@Share`s the positions with a `RETURN` inject (`TreeBlocks.finish`) that
+  turns the soil under the trunk's lowest tree blocks into rooted dirt (`ROOTED_DIRT_UNDER_TREES`; 26.4's
+  `soil_beneath_tree` leaves grass under a trunk, and `#dirt` no longer holds grass), grows a pale oak's roots and sets
+  the faces. `FallenTreeFeatureMixin` makes fallen trees of tree blocks too (`placeLogBlock`'s `setBlockAndUpdate`,
+  positions in a `ThreadLocal`, faces set at `place`'s `RETURN`). `VersusSettings.Trees.DO_TREE_BLOCKS` turns it off.
+  Structures and placed logs stay vanilla; huge fungi and mushrooms aren't trees.
+- **Roots** (`TreeRoots`, pale oak only): each trunk column goes 3-5 (`ROOT_DEPTH_MIN`/`MAX`) blocks down through
+  `#dirt`, `#base_stone_overworld`, `#substrate_overworld` (grass), gravel or clay, side roots near the top; the creaking
+  heart the decorator set in the trunk moves into a root `HEART_IN_ROOTS` of the time, in a knot of roots giving it pale
+  oak logs on all six sides (it keeps its creaking; `CreakingHearts.inCave` samples straight up through the trunk, so a
+  buried heart isn't always on). Roots' faces use `withFaces(..., false)`: cut only against the tree, bark against the
+  ground.
 - **Drops** the vanilla log (loot tables). Creative only: an item per wood after its log in the natural blocks tab.
 - **Tags**: in its wood's `#minecraft:<wood>_logs` (so `logs_that_burn`, `logs`, mineable with axe, creaking hearts),
   and listed by name in `overworld_natural_logs`, `prevents_nearby_leaf_decay`, `supports_cocoa` (jungle),
