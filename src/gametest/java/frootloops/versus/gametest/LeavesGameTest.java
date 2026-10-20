@@ -198,17 +198,19 @@ public class LeavesGameTest {
         });
     }
 
-    /** A short drop lands on top of leaves; a longer one breaks through them to the ground. */
+    /** A drop of up to four blocks lands on top of leaves; a longer one breaks through them to the ground. */
     @GameTest(structure = TOWER, maxTicks = 80)
     public void aShortDropLandsOnTopALongOneBreaksThrough(GameTestHelper helper) {
         floor(helper, 12, 6);
-        fill(helper, 1, 1, 1, 3, 1, 3, leaves(Blocks.OAK_LEAVES));
-        fill(helper, 7, 1, 1, 9, 1, 3, leaves(Blocks.OAK_LEAVES));
-        Mob dropped = husk(helper, 2.5, 3.5, 2.5), thrown = husk(helper, 8.5, 7.0, 2.5);
+        fill(helper, 0, 1, 1, 2, 1, 3, leaves(Blocks.OAK_LEAVES));
+        fill(helper, 4, 1, 1, 6, 1, 3, leaves(Blocks.OAK_LEAVES));
+        fill(helper, 8, 1, 1, 10, 1, 3, leaves(Blocks.OAK_LEAVES));
+        Mob dropped = husk(helper, 1.5, 3.5, 2.5), fourBlocks = husk(helper, 5.5, 6.0, 2.5), thrown = husk(helper, 9.5, 8.0, 2.5);
         helper.runAfterDelay(50, () -> {
             helper.assertTrue(relativeY(helper, dropped) > 1.99, "a 1.5-block drop sank to " + relativeY(helper, dropped));
             helper.assertTrue(dropped.onGround(), "a 1.5-block drop isn't standing on the leaf");
-            helper.assertTrue(relativeY(helper, thrown) < 1.5, "a 5-block drop stayed at " + relativeY(helper, thrown));
+            helper.assertTrue(relativeY(helper, fourBlocks) > 1.99, "a 4-block drop sank to " + relativeY(helper, fourBlocks));
+            helper.assertTrue(relativeY(helper, thrown) < 1.5, "a 6-block drop stayed at " + relativeY(helper, thrown));
             helper.succeed();
         });
     }

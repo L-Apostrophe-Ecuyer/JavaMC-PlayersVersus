@@ -130,10 +130,7 @@ public final class LeafMovement {
     public static Vec3 adjust(LivingEntity entity, Vec3 motion) {
         if (!movesThroughLeaves(entity)) return motion;
         Immersion immersion = measure(entity, motion);
-        if (!immersion.any()) {
-            if (LeafDebug.on(entity)) LeafDebug.moved(entity, motion, motion, immersion);
-            return motion;
-        }
+        if (!immersion.any()) return motion;
         double keep = horizontalKeep(Math.sqrt(motion.x * motion.x + motion.z * motion.z), immersion.body());
         double y = motion.y * (1.0 - VersusSettings.Leaves.VERTICAL_DRAG * immersion.swept());
         if (immersion.foothold() && y >= -VersusSettings.Leaves.CATCH_SPEED) {
@@ -144,9 +141,7 @@ public final class LeafMovement {
                 y = Math.max(y, -VersusSettings.Leaves.DESCEND_SPEED);
             }
         }
-        Vec3 adjusted = new Vec3(motion.x * keep, y, motion.z * keep);
-        if (LeafDebug.on(entity)) LeafDebug.moved(entity, motion, adjusted, immersion);
-        return adjusted;
+        return new Vec3(motion.x * keep, y, motion.z * keep);
     }
 
     /**
@@ -186,9 +181,7 @@ public final class LeafMovement {
         // The box swept back up to where it was before this tick's fall.
         if (measure(entity, new Vec3(0.0, -dy, 0.0)).swept() <= 0.0) return;
         double fall = -dy;
-        double before = entity.fallDistance;
         entity.fallDistance = Math.min(entity.fallDistance, Math.max(0.0, equivalentFallHeight(fall) - fall));
-        if (LeafDebug.on(entity) && entity.fallDistance != before) LeafDebug.cushioned(entity, dy, before, entity.fallDistance);
     }
 
     /**

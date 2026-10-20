@@ -97,15 +97,18 @@ public abstract class VersusSettings {
         public static boolean DO_INSTANT_LEAF_DECAY = true;
         // With the camera inside leaves, their texture, tinted as they are there, frames the view (client, LeavesView)
         public static boolean DO_LEAVES_VIEW = true;
-        // Warnings in the log (logger players-versus/leaves) following players through leaves on both sides, and every
-        // time the server pulls a player back or finds nothing under them (LeafDebug); for debugging, off when done
-        public static boolean LOG_LEAVES = true;
     }
 
     public static class Trees {
         // Growing trees (TreeFeature: new chunks, saplings, bone meal) are made of tree blocks, one per wood (TreeBlock):
         // their wood's log with a face for each side, bark or cut, set once as the tree grows; they drop the vanilla log
         public static boolean DO_TREE_BLOCKS = true;
+        // Felling (Felling): cutting a tree block takes its usual time x (1 + CUT_TIME_SCALE x sqrt(n)), n the tree blocks
+        // that would fall; a tree falls toward the side its weight sits more than LEAN blocks off the cut, else away from
+        // whoever cut it; a group of more than MOST_TREE_BLOCKS connected tree blocks counts as standing
+        public static double CUT_TIME_SCALE = 0.5;
+        public static double LEAN = 1.5;
+        public static int MOST_TREE_BLOCKS = 1024;
     }
 
     public static class Items {

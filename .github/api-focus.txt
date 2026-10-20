@@ -1,2 +1,9 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
+member net.minecraft.client.gui.GuiGraphicsExtractor blit
+calls net.minecraft.client.gui.Gui .*[Oo]verlay.*|.*[Ff]roz.*|.*[Ss]now.*|.*[Vv]ignette.*
+member net.minecraft.client.renderer.texture.SpriteContents .
+member com.mojang.blaze3d.platform.NativeImage getPixel|read\(|getWidth|getHeight|close|getLuminanceOrAlpha
+member net.minecraft.server.packs.resources.ResourceProvider getResource|open
+member net.minecraft.server.packs.resources.Resource open
+asset textures/misc/powder_snow_outline.png

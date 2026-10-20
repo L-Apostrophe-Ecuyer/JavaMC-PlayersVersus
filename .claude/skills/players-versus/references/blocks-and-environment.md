@@ -195,9 +195,6 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   block placing and the server's check of each move a player's client already made (`getPreMoveCollisions`, through
   `CollisionContext.withPosition`), and a solid leaf there pulls the player back out of every leaf they step into. Never
   read velocity or change the entity there: shapes are asked many times a tick, on both sides.
-- **Debugging in game**: `VersusSettings.Leaves.LOG_LEAVES` logs warnings (logger `players-versus/leaves`, `LeafDebug`)
-  for each player move in or on leaves, fall cushions and landings, and every server pull-back or "standing on air"
-  (`LeafPlayerChecksMixin`).
 - **Movement** goes through `handleOnClimbable`'s return (`LeafMovement.adjust`), the motion after input and before
   `move`. It applies a horizontal speed cap by weighted immersion (legs ×3), vertical drag on the swept box, and
   climbing and descending with a foothold (leaves at the feet). It runs only where the entity is simulated (the client
