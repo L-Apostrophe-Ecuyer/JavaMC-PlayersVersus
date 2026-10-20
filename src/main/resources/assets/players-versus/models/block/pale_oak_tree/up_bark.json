@@ -1,0 +1,7 @@
+{
+  "parent": "players-versus:block/tree_face/up",
+  "textures": {
+    "texture": "minecraft:block/pale_oak_log_top",
+    "particle": "minecraft:block/pale_oak_log"
+  }
+}

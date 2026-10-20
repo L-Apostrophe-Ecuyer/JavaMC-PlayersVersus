@@ -23,6 +23,7 @@
     "environment.worldgen.ChunkNoiseSamplerMixin",
     "environment.worldgen.WorldPresetsMixin",
     "environment.worldgen.WorldPresetServerDefaultMixin",
+    "environment.worldgen.TreeFeatureMixin",
 
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",

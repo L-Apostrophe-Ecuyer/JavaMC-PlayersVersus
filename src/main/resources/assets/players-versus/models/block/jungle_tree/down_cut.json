@@ -1,0 +1,7 @@
+{
+  "parent": "players-versus:block/tree_face/down",
+  "textures": {
+    "texture": "minecraft:block/stripped_jungle_log_top",
+    "particle": "minecraft:block/jungle_log"
+  }
+}

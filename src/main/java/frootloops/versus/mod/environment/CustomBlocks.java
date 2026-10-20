@@ -4,6 +4,7 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.*;
 import frootloops.versus.mod.environment.blocks.clays.*;
 import frootloops.versus.mod.environment.blocks.leaves.FallenLeavesBlock;
+import frootloops.versus.mod.environment.blocks.trees.TreeBlock;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.brewing.effects.BuoyancyStatusEffect;
 import frootloops.versus.mod.items_and_effects.brewing.effects.LargenessStatusEffect;
@@ -34,6 +35,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.block.sounds.BlockSoundSets;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class CustomBlocks {
@@ -71,6 +76,8 @@ public class CustomBlocks {
     public static Block WILD_WHEAT;
     public static Block CLOVERS;
     public static FallenLeavesBlock FALLEN_LEAVES;
+    // What growing trees are made of (TreeBlock), one per wood, by the vanilla log each stands for
+    public static final Map<Block, TreeBlock> TREE_BLOCKS = new LinkedHashMap<>();
 
     public static CreeperSporeBlock CREEPER_SPORE_BLOSSOM;
 
@@ -149,6 +156,14 @@ public class CustomBlocks {
         CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
         FALLEN_LEAVES = (FallenLeavesBlock) registerBlock("fallen_leaves", new FallenLeavesBlock(getSettings("fallen_leaves", Blocks.LEAF_LITTER).mapColor(MapColor.PLANT)));
         FlammableBlockRegistry.getDefaultInstance().add(FALLEN_LEAVES, 60, 100);
+
+        for (Block log : List.of(Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.CHERRY_LOG,
+                Blocks.DARK_OAK_LOG, Blocks.PALE_OAK_LOG, Blocks.MANGROVE_LOG, Blocks.POPLAR_LOG)) {
+            String name = BuiltInRegistries.BLOCK.getKey(log).getPath().replace("_log", "_tree");
+            TreeBlock tree = (TreeBlock) registerBlock(name, new TreeBlock(log, getSettings(name, log)));
+            FlammableBlockRegistry.getDefaultInstance().add(tree, 5, 5); // as logs
+            TREE_BLOCKS.put(log, tree);
+        }
 
         CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM).lightLevel((state) -> 3 + state.getValue(BlockStateProperties.AGE_2) * 3)));
 

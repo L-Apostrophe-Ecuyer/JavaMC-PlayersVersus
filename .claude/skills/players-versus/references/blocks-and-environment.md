@@ -239,6 +239,28 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
 - **Client**: `LeavesRustling` uses `LeafMovement.measure` for every passer within 32 blocks; `LeavesView` (a HUD
   element after `MISC_OVERLAYS`) frames the screen with the leaf's tinted texture while the camera is in leaves.
 
+## Tree blocks (`TreeBlock`, `TreeBlocks`, `TreeFeatureMixin`; spec `docs/superpowers/specs/2026-10-19-trees-design.md`)
+
+- **What**: `players-versus:<wood>_tree` for oak, spruce, birch, jungle, acacia, cherry, dark oak, pale oak, mangrove and
+  poplar (`CustomBlocks.TREE_BLOCKS`, keyed by the vanilla log). A `RotatedPillarBlock` copied from its log, with six
+  booleans `north`..`down` (`PipeBlock.PROPERTY_BY_DIRECTION`): true shows bark, false the cut (the stripped log).
+- **Faces are set once**, never in `updateShape`: as a tree grows (`TreeBlocks.setFaces` at the end of
+  `TreeFeature.place`) or in creative placement (`getStateForPlacement`). Cut against a `TreeBlock`, `#logs` or a sturdy
+  face, bark otherwise (`TreeBlock.withFaces`). `rotate`/`mirror` turn the faces as a huge mushroom block's.
+- **Growing trees**: `TreeFeatureMixin` wraps `doPlace`'s trunk setter (`TreeBlocks.growing`) so each log with a tree
+  block of its own goes down as it, axis kept, and `@Share`s the positions with a `RETURN` inject that sets the faces.
+  `VersusSettings.Trees.DO_TREE_BLOCKS` turns it off. Fallen-tree features, structures and placed logs stay vanilla.
+- **Drops** the vanilla log (loot tables). Creative only: an item per wood after its log in the natural blocks tab.
+- **Tags**: in its wood's `#minecraft:<wood>_logs` (so `logs_that_burn`, `logs`, mineable with axe, creaking hearts),
+  and listed by name in `overworld_natural_logs`, `prevents_nearby_leaf_decay`, `supports_cocoa` (jungle),
+  `blocks_motion_no_leaves` and `mangrove_logs_can_grow_through`.
+- **Assets and data are generated** by `tools/tree-blocks.py` (run from the repository root): per wood a 36-part
+  multipart blockstate of one-face models (`models/block/tree_face/*`, vanilla's `cube_column` faces plus the lying
+  log's half-turned up face), turned as vanilla's log blockstate turns them, so an uncut tree looks exactly vanilla;
+  the item model (the vanilla log's), the loot table and the tags. Edit the script, not its output.
+- **Tests**: `TreesGameTest` (both groves grow tree blocks and no vanilla logs, every face by the rule; faces stay as
+  set; creative placement; drops; tags and cocoa). `LeavesGameTest`'s groves check the leaves still live by them.
+
 ## Other blocks not read this pass
 `LadderBlockItem`/`LadderMixin` (README: implies ladder placement changes — replaces vanilla Ladder
 per the item-replacement pattern), `ScaffoldingItemMixin`, `CropMixin`/`SugarCaneMixin`/`ShortPlantMixin`

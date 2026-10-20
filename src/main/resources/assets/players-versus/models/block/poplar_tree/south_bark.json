@@ -1,0 +1,7 @@
+{
+  "parent": "players-versus:block/tree_face/south",
+  "textures": {
+    "texture": "minecraft:block/poplar_log",
+    "particle": "minecraft:block/poplar_log"
+  }
+}

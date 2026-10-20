@@ -102,6 +102,12 @@ public abstract class VersusSettings {
         public static boolean LOG_LEAVES = true;
     }
 
+    public static class Trees {
+        // Growing trees (TreeFeature: new chunks, saplings, bone meal) are made of tree blocks, one per wood (TreeBlock):
+        // their wood's log with a face for each side, bark or cut, set once as the tree grows; they drop the vanilla log
+        public static boolean DO_TREE_BLOCKS = true;
+    }
+
     public static class Items {
         // Recipe book groups by family (oak, deepslate, copper), tools and armor by material (RecipeRules)
         public static boolean DO_FAMILY_RECIPE_GROUPS = true;

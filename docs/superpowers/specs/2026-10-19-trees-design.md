@@ -3,7 +3,7 @@
 Minecraft 26.4-snapshot-3 (Mojang names), `26.4---Winter-Drop`. Builds on
 [fallen leaves and instant decay](2026-10-19-fallen-leaves-design.md) and settles the open questions of
 [the trees research](2026-10-19-trees-research.md). Ships in two steps, each a working build: the tree block, then
-felling.
+felling. Step 1 is built (`TreeBlock`, `TreeBlocks`, `TreeFeatureMixin`, `tools/tree-blocks.py`, `TreesGameTest`).
 
 ## What it should feel like
 
@@ -15,8 +15,7 @@ player or a pet. Logs you build with never fall, and the trees of chunks generat
 ## Step 1: the tree block
 
 **Blocks.** One per wood, `players-versus:<wood>_tree` ("Oak Tree"): oak, spruce, birch, jungle, acacia, dark oak,
-mangrove, cherry and pale oak, and the poplars' wood if 26.4 gives poplars a log of their own (the plan checks which log
-their tree feature places; a poplar grown on another wood's log gets that wood's tree block). Each is a log (axis,
+mangrove, cherry, pale oak and poplar (26.4 gives poplars a log of their own, `poplar_log`, in `#poplar_logs`). Each is a log (axis,
 strength, sound, flammable as logs are) with six boolean faces, `north` to `down`, true for bark and false for cut, as a
 huge mushroom block's are true for skin and false for pores: 3 axes x 64 = 192 states a wood.
 
