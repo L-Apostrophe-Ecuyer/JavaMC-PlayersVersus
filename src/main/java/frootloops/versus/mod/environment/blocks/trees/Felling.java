@@ -106,7 +106,7 @@ public final class Felling {
     }
 
     /** A tree block, or a creaking heart in a trunk of them. */
-    private static boolean isPart(BlockState state) {
+    static boolean isPart(BlockState state) {
         return state.getBlock() instanceof TreeBlock || state.is(Blocks.CREAKING_HEART);
     }
 

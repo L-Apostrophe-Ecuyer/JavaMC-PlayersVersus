@@ -71,11 +71,14 @@ public final class TreeFelling {
         cutting = new Cutting(level, pos.immutable(), player);
     }
 
-    /** A tree block went from this spot: if that leaves anything with nothing holding it up, it creaks, and comes down soon. */
+    /**
+     * A tree block went from this spot: if that leaves anything with nothing holding it up, it creaks, and comes down
+     * soon. Not when what took its place is part of a tree itself (a creaking heart set in a trunk): that's no cut.
+     */
     public static void removed(ServerLevel level, BlockPos pos) {
         Player cutter = cutting != null && cutting.level() == level && cutting.pos().equals(pos) ? cutting.player() : null;
         cutting = null;
-        if (felling || !VersusSettings.Trees.DO_FELLING) return;
+        if (felling || !VersusSettings.Trees.DO_FELLING || Felling.isPart(level.getBlockState(pos))) return;
         Vec3 from = cutter == null ? null : cutter.position();
         if (Felling.afterCut(level, pos, from, level.getRandom()).isEmpty()) return;
         level.playSound(null, pos, SoundEvents.CREAKING_HEART_HURT, SoundSource.BLOCKS, 1.0f, 0.5f);
@@ -89,8 +92,8 @@ public final class TreeFelling {
         List<Pending> due = new ArrayList<>();
         pending.removeIf(cut -> cut.due() <= level.getGameTime() && due.add(cut));
         for (Pending cut : due) {
-            // Put back in the meantime, the cut holds the tree up again
-            if (level.getBlockState(cut.cut()).getBlock() instanceof TreeBlock) continue;
+            // Filled in the meantime with part of a tree, the cut holds it up again
+            if (Felling.isPart(level.getBlockState(cut.cut()))) continue;
             for (Felling.Fall fall : Felling.afterCut(level, cut.cut(), cut.from(), level.getRandom())) fell(level, fall, cut);
         }
     }
