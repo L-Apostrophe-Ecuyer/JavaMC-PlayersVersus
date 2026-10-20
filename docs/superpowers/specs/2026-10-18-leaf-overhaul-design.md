@@ -37,7 +37,7 @@ spiders, items, projectiles, falling blocks, vehicles) leaves stay solid blocks,
 something uses its mount's rule.
 
 **When a leaf is solid for a passer.** When its feet are above the leaf's top, it isn't sneaking, it isn't gliding, and
-its fall distance is at most 2.5 (vanilla powder snow's threshold). Otherwise the leaf is empty. The server sees leaves
+its fall distance is at most 4 (a block and a half more than vanilla powder snow's 2.5). Otherwise the leaf is empty. The server sees leaves
 as the player's client does, so it finds the leaf a player stands on. A context asked as from elsewhere is open: placing
 a block, and 26.4's server check of each move a client already made (both flagged as placement), which would otherwise
 pull the player back out of every leaf they step into. All of this depends only on state both sides share (position,
@@ -78,11 +78,11 @@ than 0.3 blocks/tick (the *catch speed*):
   particles, pathfinding).
 
 **Falling.**
-- From 2.5 blocks or less, you land on top of leaves. Leaves take the fall distance down to a third, as before.
+- From 4 blocks or less, you land on top of leaves. Leaves take the fall distance down to a third, as before.
 - From higher you break in. The drag bleeds your speed, and while you're in leaves and still falling, your fall
   distance can't exceed the free-fall height that gives your current speed, h(v) for v_n = 3.92 (1 − 0.98^n). Landing
-  damage then follows how fast you were going, not where you started. Once you're slow enough (about 0.5 blocks/tick,
-  2.5 blocks' worth), the next leaf top below you holds and catches you.
+  damage then follows how fast you were going, not where you started. Once you're slow enough (about 0.7 blocks/tick,
+  4 blocks' worth), the next leaf top below you holds and catches you.
 - The cap runs where vanilla counts the fall, `LivingEntity.checkFallDamage`, with the tick's vertical movement. It
   runs on both sides: the server checks a player's fall with the movement its client reports, so the damage it deals
   matches what the client simulated. The landing tick itself isn't capped, since that movement is cut short by the

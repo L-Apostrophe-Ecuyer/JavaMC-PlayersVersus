@@ -3,7 +3,8 @@
 Minecraft 26.4-snapshot-3 (Mojang names), `26.4---Winter-Drop`. Builds on
 [fallen leaves and instant decay](2026-10-19-fallen-leaves-design.md) and settles the open questions of
 [the trees research](2026-10-19-trees-research.md). Ships in two steps, each a working build: the tree block, then
-felling. Step 1 is built (`TreeBlock`, `TreeBlocks`, `TreeFeatureMixin`, `tools/tree-blocks.py`, `TreesGameTest`).
+felling. Step 1 is built (`TreeBlock`, `TreeBlocks`, `TreeFeatureMixin`, `tools/tree-blocks.py`, `TreesGameTest`). Step 2 has
+its model (`Felling`, `FellingGameTest`); the rest is planned in `docs/superpowers/plans/2026-10-20-tree-felling.md`.
 
 ## What it should feel like
 

@@ -71,8 +71,9 @@ public abstract class VersusSettings {
         public static double CATCH_SPEED = 0.3;
         public static double CLIMB_SPEED = 0.1;
         public static double DESCEND_SPEED = 0.15; // scaffolding's
-        // Falling farther than this breaks through the top of leaves instead of landing on it (vanilla powder snow's)
-        public static double BREAK_THROUGH_FALL_DISTANCE = 2.5;
+        // Falling farther than this breaks through the top of leaves instead of landing on it (a block and a half more
+        // than vanilla powder snow's 2.5: a drop of about four and a half blocks still lands on top)
+        public static double BREAK_THROUGH_FALL_DISTANCE = 4.0;
         // Landing on top of leaves divides the fall
         public static double LANDING_FALL_DIVISOR = 3.0;
         // Gliders go through leaves, losing this much of their speed per tick fully inside them

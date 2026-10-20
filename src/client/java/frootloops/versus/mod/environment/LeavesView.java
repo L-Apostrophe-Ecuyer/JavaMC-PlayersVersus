@@ -1,8 +1,13 @@
 package frootloops.versus.mod.environment;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.client.players.LevelRendererAccessor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -23,17 +28,22 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * With the camera inside a leaf block, that leaf's texture, tinted as it is there, frames the view: tiles a quarter of
- * the screen high, two rings deep along every edge, the outer ring the thicker. It eases in and out over a few ticks and
- * isn't drawn for spectators. A HUD element after vanilla's camera overlays (a carved pumpkin, powder snow).
+ * With the camera inside a leaf block, leaves frame the view, as frost does in powder snow: a texture of our own
+ * ({@code textures/misc/leaves_outline.png}, drawn by tools/leaves-outline.py) stretched over the screen, thick in the
+ * corners and along the edges, clear in the middle, in the colour of the leaves the camera is in: their tint there, or
+ * for leaves with none (cherry, azalea, pale oak) the average colour of their texture. It eases in and out over a few
+ * ticks and isn't drawn for spectators. A HUD element after vanilla's camera overlays (a carved pumpkin, powder snow).
  */
 @Environment(EnvType.CLIENT)
 public final class LeavesView implements HudElement {
 
+    private static final Identifier OUTLINE = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "textures/misc/leaves_outline.png");
     /** How far the frame eases toward shown or hidden each tick. */
     private static final float EASE_PER_TICK = 0.25f;
-    private static final float OUTER_ALPHA = 0.85f;
-    private static final float INNER_ALPHA = 0.45f;
+    private static final float ALPHA = 0.95f;
+
+    /** The average colour of each untinted leaf's texture, by its sprite: a resource reload makes new sprites. */
+    private final Map<TextureAtlasSprite, Integer> averages = new WeakHashMap<>();
 
     private float strength;
     private BlockState leaves;
@@ -66,23 +76,32 @@ public final class LeavesView implements HudElement {
     public void extractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
         Minecraft minecraft = Minecraft.getInstance();
         if (this.strength <= 0.0f || this.leaves == null || minecraft.level == null) return;
-        TextureAtlasSprite sprite = minecraft.getModelManager().getBlockStateModelSet().getParticleMaterial(this.leaves).sprite();
         BlockTintSource tint = minecraft.getBlockColors().getTintSource(this.leaves, 0);
-        int colour = tint == null ? 0xFFFFFF : tint.colorInWorld(this.leaves, minecraft.level, this.at);
-        int width = graphics.guiWidth(), height = graphics.guiHeight(), size = Math.max(1, height / 4);
-        ring(graphics, sprite, width, height, size, 0, ARGB.color(OUTER_ALPHA * this.strength, colour));
-        ring(graphics, sprite, width, height, size, size, ARGB.color(INNER_ALPHA * this.strength, colour));
+        int colour = tint != null ? tint.colorInWorld(this.leaves, minecraft.level, this.at)
+                : this.averages.computeIfAbsent(minecraft.getModelManager().getBlockStateModelSet().getParticleMaterial(this.leaves).sprite(), LeavesView::average);
+        int width = graphics.guiWidth(), height = graphics.guiHeight();
+        graphics.blit(RenderPipelines.GUI_TEXTURED, OUTLINE, 0, 0, 0.0f, 0.0f, width, height, width, height, ARGB.color(ALPHA * this.strength, colour));
     }
 
-    /** One ring of tiles along the edges, this far in from them. */
-    private static void ring(GuiGraphicsExtractor graphics, TextureAtlasSprite sprite, int width, int height, int size, int inset, int colour) {
-        for (int x = inset; x < width - inset; x += size) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, inset, size, size, colour);
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, height - inset - size, size, size, colour);
-        }
-        for (int y = inset + size; y < height - inset - size; y += size) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, inset, y, size, size, colour);
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, width - inset - size, y, size, size, colour);
+    /** The average colour of a sprite's texture, its see-through pixels left out; white when it can't be read. */
+    private static int average(TextureAtlasSprite sprite) {
+        Identifier name = sprite.contents().name();
+        Identifier file = Identifier.fromNamespaceAndPath(name.getNamespace(), "textures/" + name.getPath() + ".png");
+        try (InputStream in = Minecraft.getInstance().getResourceManager().open(file); NativeImage image = NativeImage.read(in)) {
+            long red = 0, green = 0, blue = 0, count = 0;
+            for (int y = 0; y < image.getHeight(); y++) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    int pixel = image.getPixel(x, y);
+                    if (ARGB.alpha(pixel) == 0) continue;
+                    red += ARGB.red(pixel);
+                    green += ARGB.green(pixel);
+                    blue += ARGB.blue(pixel);
+                    count++;
+                }
+            }
+            return count == 0 ? 0xFFFFFF : ARGB.color((int) (red / count), (int) (green / count), (int) (blue / count));
+        } catch (IOException e) {
+            return 0xFFFFFF;
         }
     }
 }

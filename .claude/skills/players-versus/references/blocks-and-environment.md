@@ -190,7 +190,7 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
 - **Who passes**: living things except `Animal`s and `Spider`s (`LeafMovement.passes`). Everything else, and every
   no-context query, sees a full block.
 - **When a leaf is solid** (`LeafMovement.isSolid`, the collision shape): the passer is above it, not sneaking, not
-  gliding, fall distance ≤ 2.5, the same rule on the server as on the client (the server looks for the block holding a
+  gliding, fall distance ≤ 4 (`BREAK_THROUGH_FALL_DISTANCE`), the same rule on the server as on the client (the server looks for the block holding a
   player up, and logs "standing on air" when it finds none). A placement context is open: 26.4 flags as placement both
   block placing and the server's check of each move a player's client already made (`getPreMoveCollisions`, through
   `CollisionContext.withPosition`), and a solid leaf there pulls the player back out of every leaf they step into. Never
@@ -234,7 +234,9 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   `leaves_room`, `leaves_tower` and `leaves_grove` (48 x 40 x 48, its grass floor only) as SNBT in
   `src/gametest/resources/.../gametest/structure/`.
 - **Client**: `LeavesRustling` uses `LeafMovement.measure` for every passer within 32 blocks; `LeavesView` (a HUD
-  element after `MISC_OVERLAYS`) frames the screen with the leaf's tinted texture while the camera is in leaves.
+  element after `MISC_OVERLAYS`) frames the screen while the camera is in leaves, as powder snow's frost does: our own
+  `textures/misc/leaves_outline.png` (grey, drawn by `tools/leaves-outline.py`) stretched over the screen, in the leaf's
+  tint, or the average colour of its texture for untinted leaves.
 
 ## Tree blocks (`TreeBlock`, `TreeBlocks`, `TreeFeatureMixin`; spec `docs/superpowers/specs/2026-10-19-trees-design.md`)
 
@@ -258,6 +260,12 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   the item model (the vanilla log's), the loot table and the tags. Edit the script, not its output.
 - **Tests**: `TreesGameTest` (both groves grow tree blocks and no vanilla logs, every face by the rule; faces stay as
   set; creative placement; drops; tags and cocoa). `LeavesGameTest`'s groves check the leaves still live by them.
+- **Felling (in progress, plan `docs/superpowers/plans/2026-10-20-tree-felling.md`)**: `Felling` decides from the blocks
+  alone, changing nothing: `afterCut` gives each group of tree blocks (joined by faces, edges or corners, creaking hearts
+  included) a cut leaves standing on nothing but leaves or air, with its crown (each leaf nearer it than any log left
+  standing, through leaves of its kind, six steps) and which way it falls (its heavy side past `LEAN`, else away from
+  the cutter); `cutTimeFactor` is 1 + `CUT_TIME_SCALE` x sqrt(what would fall). Nothing calls it in game yet: the cut's
+  time, the creak, the falling blocks, landing and damage are the plan's next tasks. Tests: `FellingGameTest`.
 
 ## Other blocks not read this pass
 `LadderBlockItem`/`LadderMixin` (README: implies ladder placement changes — replaces vanilla Ladder
