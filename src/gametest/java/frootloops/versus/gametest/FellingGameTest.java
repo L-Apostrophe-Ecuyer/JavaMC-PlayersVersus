@@ -378,6 +378,19 @@ public class FellingGameTest {
         });
     }
 
+    /** A second cut into a tree already creaking brings down what it cuts off too: nothing is left hanging in the air. */
+    @GameTest(structure = ROOM, maxTicks = 120)
+    public void aSecondCutBeforeTheFallLeavesNothingHanging(GameTestHelper helper) {
+        floor(helper);
+        fill(helper, 3, 1, 3, 3, 6, 3, oakTree());
+        cutAsAPlayer(helper, 3, 1, 3, new Vec3(0.5, 1.0, 3.5));
+        cutAsAPlayer(helper, 3, 4, 3, new Vec3(0.5, 1.0, 3.5));
+        helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 80, () -> {
+            helper.assertTrue(count(helper, 0, 1, 0, 13, 7, 7, state -> state.getBlock() instanceof TreeBlock) == 0, "a tree cut twice left tree blocks standing");
+            helper.succeed();
+        });
+    }
+
     /** A cut filled in before the tree comes down holds it up: it creaks, and stays. */
     @GameTest(structure = ROOM, maxTicks = 80)
     public void aCutFilledInTimeHoldsTheTreeUp(GameTestHelper helper) {

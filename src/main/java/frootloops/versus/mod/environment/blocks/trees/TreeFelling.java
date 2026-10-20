@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
@@ -71,8 +73,11 @@ public final class TreeFelling {
     /** How far from a felled hive its bees look for whoever to go after, when nobody cut the tree, in blocks. */
     private static final double BEE_REACH = 16.0;
 
-    /** A cut waiting to bring its tree down: where, when, and who made it (if anyone). */
-    private record Pending(BlockPos cut, long due, @Nullable Player cutter, @Nullable Vec3 from) {}
+    /**
+     * A cut waiting to bring its tree down: where (more spots, when later cuts would bring down only what this one will),
+     * when, who made it (if anyone), and the tree blocks it would bring down when it was made.
+     */
+    private record Pending(List<BlockPos> cuts, long due, @Nullable Player cutter, @Nullable Vec3 from, Set<BlockPos> blocks) {}
 
     /** The player breaking a tree block, or what one rests on, right now: who made the cut that follows. */
     private record Cutting(ServerLevel level, BlockPos pos, Player player) {}
@@ -90,6 +95,8 @@ public final class TreeFelling {
         final List<Piece> pieces;
         final @Nullable Player cutter;
         final Set<LivingEntity> hit = new HashSet<>();
+        /** The players told it started, who are told when it stops. */
+        final Set<ServerPlayer> told = new HashSet<>();
         int ticks;
 
         Swing(int id, Topple topple, List<Piece> pieces, @Nullable Player cutter) {
@@ -116,6 +123,12 @@ public final class TreeFelling {
 
     public static void register() {
         ServerTickEvents.END_LEVEL_TICK.register(TreeFelling::tick);
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> forgetAll());
+        // A player who starts seeing a turning tree's blocks partway through is told how it's turning by then
+        EntityTrackingEvents.START_TRACKING.register((entity, player) -> {
+            Swing swing = entity instanceof FallingBlockEntity block ? SWINGING.get(block) : null;
+            if (swing != null) tell(swing, player);
+        });
         PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
             if (level instanceof ServerLevel server && (Felling.isPart(state) || Felling.isPart(level.getBlockState(pos.above())))) cutBy(server, pos, player);
             return true;
@@ -153,16 +166,35 @@ public final class TreeFelling {
             return;
         }
         Vec3 from = cutter == null ? null : cutter.position();
-        if (Felling.unheld(level, cut, from, level.getRandom()).isEmpty()) return;
+        List<Felling.Fall> falls = Felling.unheld(level, cut, from, level.getRandom());
+        if (falls.isEmpty()) return;
+        Set<BlockPos> blocks = new HashSet<>();
+        for (Felling.Fall fall : falls) blocks.addAll(fall.blocks());
+        BlockPos at = cut.immutable();
+        // A cut already waiting that brings all this down takes this spot too, and this cutter if it had none: one creak
         List<Pending> pending = PENDING.computeIfAbsent(level, key -> new ArrayList<>());
         for (int i = 0; i < pending.size(); i++) {
             Pending other = pending.get(i);
-            if (!other.cut().equals(cut)) continue;
-            if (other.cutter() == null && cutter != null) pending.set(i, new Pending(other.cut(), other.due(), cutter, from));
+            if (!other.cuts().contains(at) && !other.blocks().containsAll(blocks)) continue;
+            List<BlockPos> cuts = new ArrayList<>(other.cuts());
+            if (!cuts.contains(at)) cuts.add(at);
+            boolean cutBy = other.cutter() == null && cutter != null;
+            pending.set(i, new Pending(cuts, other.due(), cutBy ? cutter : other.cutter(), cutBy ? from : other.from(), other.blocks()));
             return;
         }
-        level.playSound(null, cut, SoundEvents.CREAKING_HEART_HURT, SoundSource.BLOCKS, 1.0f, 0.5f);
-        pending.add(new Pending(cut.immutable(), level.getGameTime() + VersusSettings.Trees.FELLING_DELAY, cutter, from));
+        level.playSound(null, at, SoundEvents.CREAKING_HEART_HURT, SoundSource.BLOCKS, 1.0f, 0.5f);
+        pending.add(new Pending(List.of(at), level.getGameTime() + VersusSettings.Trees.FELLING_DELAY, cutter, from, blocks));
+    }
+
+    /** A world closing: nothing it was waiting on or turning over is kept, so nothing holds on to it. */
+    private static void forgetAll() {
+        PENDING.clear();
+        SWINGS.clear();
+        LANDED.clear();
+        SWINGING.clear();
+        HIVE_CUTTERS.clear();
+        CHECK_AFTER.clear();
+        cutting = null;
     }
 
     private static void tick(ServerLevel level) {
@@ -177,23 +209,26 @@ public final class TreeFelling {
         pending.removeIf(cut -> cut.due() <= level.getGameTime() && due.add(cut));
         // What comes down is what nothing holds up now: a cut filled in the meantime holds its tree up again
         for (Pending cut : due) {
-            for (Felling.Fall fall : Felling.unheld(level, cut.cut(), cut.from(), level.getRandom())) fell(level, fall, cut);
+            for (BlockPos at : cut.cuts()) {
+                for (Felling.Fall fall : Felling.unheld(level, at, cut.from(), level.getRandom())) fell(level, fall, at, cut.cutter());
+            }
         }
     }
 
-    private static void fell(ServerLevel level, Felling.Fall fall, Pending cut) {
+    private static void fell(ServerLevel level, Felling.Fall fall, BlockPos at, @Nullable Player cutter) {
         Direction way = fall.direction();
-        BlockPos at = cut.cut(), below = at.below();
+        BlockPos below = at.below();
         Set<BlockPos> trunk = trunk(fall.blocks(), at);
         // A tree standing over its cut turns over on it; anything else (a branch cut off) just drops
         boolean topples = fall.blocks().contains(at.above()) && Felling.holds(level, below, level.getBlockState(below));
         List<Piece> pieces = new ArrayList<>();
+        List<BlockPos> after;
         felling = true;
         try {
             for (BlockPos pos : fall.blocks()) {
-                if (level.getBlockState(pos).is(Blocks.CREAKING_HEART)) level.destroyBlock(pos, true, cut.cutter());
+                if (level.getBlockState(pos).is(Blocks.CREAKING_HEART)) level.destroyBlock(pos, true, cutter);
             }
-            for (BlockPos pos : hives(level, fall)) pieces.add(new Piece(launchHive(level, pos, cut.cutter()), Vec3.atCenterOf(pos), true));
+            for (BlockPos pos : hives(level, fall)) pieces.add(new Piece(launchHive(level, pos, cutter), Vec3.atCenterOf(pos), true));
             int flying = 0;
             List<BlockPos> blocks = new ArrayList<>(fall.blocks());
             blocks.sort(Comparator.comparingInt(BlockPos::getY));
@@ -220,11 +255,11 @@ public final class TreeFelling {
             }
         } finally {
             felling = false;
+            after = new ArrayList<>(CHECK_AFTER);
+            CHECK_AFTER.clear();
         }
-        if (topples && !pieces.isEmpty()) swing(level, hinge(fall.blocks(), at, way), way, pieces, cut.cutter());
+        if (topples && !pieces.isEmpty()) swing(level, hinge(fall.blocks(), at, way), way, pieces, cutter);
         // What the fallen tree held up may come down too: another tree's branch resting on it
-        List<BlockPos> after = new ArrayList<>(CHECK_AFTER);
-        CHECK_AFTER.clear();
         for (BlockPos pos : after) check(level, pos);
     }
 
@@ -262,7 +297,7 @@ public final class TreeFelling {
             for (BlockPos pos : part) {
                 for (Direction side : Direction.values()) {
                     BlockPos next = pos.relative(side);
-                    if (level.getBlockState(next).is(BlockTags.BEEHIVES)) hives.add(next.immutable());
+                    if (level.hasChunkAt(next) && level.getBlockState(next).is(BlockTags.BEEHIVES)) hives.add(next.immutable());
                 }
             }
         }
@@ -292,15 +327,21 @@ public final class TreeFelling {
         for (Piece piece : pieces) masses.add(new Topple.Mass(piece.start(), piece.solid() ? 1.0 : Felling.LEAF_WEIGHT));
         Swing swing = new Swing(swings++, Topple.of(hinge, way, masses), new ArrayList<>(pieces), cutter);
         SWINGS.computeIfAbsent(level, key -> new ArrayList<>()).add(swing);
-        int[] blocks = new int[pieces.size()];
-        long[] starts = new long[pieces.size()];
-        for (int i = 0; i < pieces.size(); i++) {
-            Piece piece = pieces.get(i);
-            SWINGING.put(piece.block(), swing);
+        for (Piece piece : pieces) SWINGING.put(piece.block(), swing);
+        for (ServerPlayer player : PlayerLookup.tracking(level, BlockPos.containing(hinge))) tell(swing, player);
+    }
+
+    /** Tells this player how this felled group is turning, as it is now, once. */
+    private static void tell(Swing swing, ServerPlayer player) {
+        if (!swing.told.add(player) || !ServerPlayNetworking.canSend(player, TopplePayload.TYPE.id())) return;
+        int[] blocks = new int[swing.pieces.size()];
+        long[] starts = new long[swing.pieces.size()];
+        for (int i = 0; i < swing.pieces.size(); i++) {
+            Piece piece = swing.pieces.get(i);
             blocks[i] = piece.block().getId();
             starts[i] = BlockPos.containing(piece.start()).asLong();
         }
-        send(level, hinge, TopplePayload.start(swing.id, swing.topple, blocks, starts));
+        ServerPlayNetworking.send(player, TopplePayload.start(swing.id, swing.topple, blocks, starts));
     }
 
     /**
@@ -313,13 +354,15 @@ public final class TreeFelling {
         swing.pieces.removeIf(piece -> !piece.block().isAlive());
         Topple topple = swing.topple;
         if (swing.pieces.isEmpty()) {
-            send(level, topple.hinge(), TopplePayload.release(swing.id, topple.angle()));
+            stop(level, swing);
             return true;
         }
         topple.step();
+        // Its wood running into anything solid, or any of it into a chunk that isn't loaded, stops it where it was
         boolean blocked = false;
         for (Piece piece : swing.pieces) {
-            if (piece.solid() && obstructed(level, topple.centre(piece.start()))) {
+            Vec3 centre = topple.centre(piece.start());
+            if (!level.hasChunkAt(BlockPos.containing(centre)) || piece.solid() && obstructed(level, centre)) {
                 blocked = true;
                 break;
             }
@@ -341,6 +384,7 @@ public final class TreeFelling {
     private static boolean obstructed(ServerLevel level, Vec3 centre) {
         AABB box = AABB.ofSize(centre, 0.9, 0.9, 0.9);
         for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+            if (!level.hasChunkAt(pos)) return true;
             BlockState state = level.getBlockState(pos);
             if (state.isAir() || state.is(BlockTags.LEAVES)) continue;
             VoxelShape shape = state.getCollisionShape(level, pos);
@@ -390,12 +434,16 @@ public final class TreeFelling {
             piece.block().needsSync = true;
             if (turned != null) piece.block().addTag(turned);
         }
-        send(level, topple.hinge(), TopplePayload.release(swing.id, topple.angle()));
+        stop(level, swing);
     }
 
-    private static void send(ServerLevel level, Vec3 near, TopplePayload payload) {
-        for (ServerPlayer player : PlayerLookup.tracking(level, BlockPos.containing(near))) {
-            if (ServerPlayNetworking.canSend(player, TopplePayload.TYPE.id())) ServerPlayNetworking.send(player, payload);
+    /** Tells every player told it started, and any now watching it, that a felled group stopped turning. */
+    private static void stop(ServerLevel level, Swing swing) {
+        Set<ServerPlayer> players = new HashSet<>(swing.told);
+        players.addAll(PlayerLookup.tracking(level, BlockPos.containing(swing.topple.hinge())));
+        TopplePayload payload = TopplePayload.release(swing.id, swing.topple.angle());
+        for (ServerPlayer player : players) {
+            if (!player.hasDisconnected() && ServerPlayNetworking.canSend(player, TopplePayload.TYPE.id())) ServerPlayNetworking.send(player, payload);
         }
     }
 

@@ -10,11 +10,13 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.entity.state.FallingBlockRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 /**
@@ -28,12 +30,14 @@ public final class ClientTopples {
 
     /** How long a let-go topple is remembered, for its blocks' turn, in ticks. */
     private static final int REMEMBERED = 200;
+    /** How long a topple the server never says it let go of is turned before it's dropped, in ticks (out of sight, say). */
+    private static final int LONGEST = 400;
 
-    /** A felled tree turning over: how, whether the server has let go of it, and for how long. */
+    /** A felled tree turning over: how, whether the server has let go of it, and for how long it has turned and been let go. */
     private static final class Swing {
         final Topple topple;
         boolean released;
-        int ticksReleased;
+        int ticks, ticksReleased;
 
         Swing(Topple topple) {
             this.topple = topple;
@@ -45,6 +49,8 @@ public final class ClientTopples {
 
     private static final Map<Integer, Swing> SWINGS = new HashMap<>();
     private static final Map<Integer, Piece> PIECES = new HashMap<>();
+    /** The world they turn in: another one (a new dimension, a new server) forgets them all. */
+    private static @Nullable ClientLevel level;
 
     private ClientTopples() {
     }
@@ -62,24 +68,30 @@ public final class ClientTopples {
             swing.topple.stopAt(payload.angle());
             return;
         }
-        Swing swing = new Swing(payload.topple());
-        SWINGS.put(payload.swing(), swing);
+        // Told again (seen afresh partway through), it turns on from the server's angle now
+        Swing swing = new Swing(payload.topple()), was = SWINGS.put(payload.swing(), swing);
+        if (was != null) PIECES.values().removeIf(piece -> piece.swing() == was);
         for (int i = 0; i < payload.blocks().length; i++) PIECES.put(payload.blocks()[i], new Piece(swing, payload.start(i)));
     }
 
     private static void tick(Minecraft client) {
-        if (client.level == null) {
+        if (client.level != level) {
+            level = client.level;
             SWINGS.clear();
             PIECES.clear();
-            return;
         }
-        if (client.isPaused()) return;
+        if (level == null || client.isPaused()) return;
         for (Swing swing : SWINGS.values()) {
             if (!swing.released) swing.topple.step();
             else swing.ticksReleased++;
+            swing.ticks++;
         }
-        SWINGS.values().removeIf(swing -> swing.ticksReleased > REMEMBERED);
-        PIECES.values().removeIf(piece -> piece.swing().ticksReleased > REMEMBERED);
+        SWINGS.values().removeIf(ClientTopples::forgotten);
+        PIECES.values().removeIf(piece -> forgotten(piece.swing()));
+    }
+
+    private static boolean forgotten(Swing swing) {
+        return swing.ticksReleased > REMEMBERED || swing.ticks > LONGEST;
     }
 
     /**
