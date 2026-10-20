@@ -1,8 +1,3 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-find Poplar
-member net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter .
-calls net.minecraft.world.level.levelgen.feature.TreeFeature$1 .*
-data worldgen/configured_feature/red_poplar.json
-data worldgen/feature/red_poplar.json
-data worldgen/placed_feature/red_poplar.json
+calls net.minecraft.world.level.levelgen.feature.foliageplacers.PoplarFoliagePlacer .*
