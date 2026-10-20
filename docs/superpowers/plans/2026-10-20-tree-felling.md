@@ -45,60 +45,71 @@ branches and heart included; vanilla logs never fall; a branch cut at its join f
 under it; a felled tree takes only the leaves nearer to it; the cut factor is 1 + 0.5 sqrt(n); a balanced tree falls
 away from its cutter, a leaning one to its heavy side; a group past MOST_TREE_BLOCKS stands.
 
-### Task 2: The cut takes longer
+### Task 2: The cut takes longer (done)
 
 **Files:** `TreeBlock.java` (override `getDestroyProgress`); test in `FellingGameTest`.
 
-- [ ] Test `cuttingUnderATreeIsSlowerThanAStump`: a mock survival player with an iron axe; `getDestroyProgress` at the
+- [x] Test `cuttingUnderATreeIsSlowerThanAStump`: a mock survival player with an iron axe; `getDestroyProgress` at the
   base of a six-high trunk is the stump's divided by 1 + 0.5 sqrt(5), within 1e-6.
-- [ ] Implement: `super.getDestroyProgress(...) / Felling.cutTimeFactor(level, pos)` when `DO_FELLING` and the getter is a
+- [x] Implement: `super.getDestroyProgress(...) / Felling.cutTimeFactor(level, pos)` when `DO_FELLING` and the getter is a
   `LevelReader` (the client's level and the server's both are), so both sides break the block on the same tick.
 
-### Task 3: The creak and the check
+### Task 3: The creak and the check (done)
 
 **Files:** `TreeBlock.java` (`affectNeighborsAfterRemoval`, or whatever 26.4 calls on removal: probe first),
 `TreeFelling.java` (server: pending checks per level), `VersusSettings.Trees` (`DO_FELLING`, `FELLING_DELAY`).
 
-- [ ] Test `aCutTreeCreaksThenFalls`: break a trunk's foot with a mock player; the tree blocks above are still there
+- [x] Test `aCutTreeCreaksThenFalls`: break a trunk's foot with a mock player; the tree blocks above are still there
   after 5 ticks and gone after `FELLING_DELAY` + 2.
-- [ ] Implement: on removal, when `Felling.afterCut` finds anything, play a creak (`SoundEvents.CREAKING_HEART_HURT`-ish,
+- [x] Implement: on removal, when `Felling.afterCut` finds anything, play a creak (`SoundEvents.CREAKING_HEART_HURT`-ish,
   pitch low) and schedule a check `FELLING_DELAY` ticks later that calls `afterCut` again (the world may have changed)
   and hands each `Fall` to Task 4. The cutter is the breaking player, else null.
 
-### Task 4: The flight
+### Task 4: The flight (done)
 
 **Files:** `TreeFelling.java`; test in `FellingGameTest`.
 
-- [ ] Test `anOakCutFromTheWestFallsEast`: a grown oak (`TreeFeatures.OAK`, seed 42) cut at its foot by a player west
+- [x] Test `anOakCutFromTheWestFallsEast`: a grown oak (`TreeFeatures.OAK`, seed 42) cut at its foot by a player west
   of it: after 60 ticks no tree block is left above the stump, and every log lies east of it, along x.
-- [ ] Implement: each block of the fall, tree blocks first, then crown leaves, up to `MOST_FALLING_BLOCKS`, becomes a
+- [x] Implement: each block of the fall, tree blocks first, then crown leaves, up to `MOST_FALLING_BLOCKS`, becomes a
   `FallingBlockEntity` where it stands: tree blocks as their vanilla log turned to lie along the fall, leaves as
   themselves; given horizontal speed in the fall's direction growing with height so a block h above the cut lands
   about h out (tune in the test). The rest break where they stand, a leaf as if it decayed (`LeafLitter.decay`).
 
-### Task 5: The landing
+### Task 5: The landing (done)
 
 **Files:** `TreeFelling.java`, a mixin on `FallingBlockEntity` landing (probe the 26.4 method), `LeafLitter`.
 
-- [ ] Tests: `aFallenTrunkLiesOneBlockThick` (the oak's trunk lands as one row of logs along x; its other blocks are log
+- [x] Tests: `aFallenTrunkLiesOneBlockThick` (the oak's trunk lands as one row of logs along x; its other blocks are log
   items), `aFelledCrownBurstsIntoFallenLeaves` (fallen leaves and saplings or sticks lie past the log's end).
-- [ ] Implement: falling blocks from a felled tree carry a mark (an entity tag or attachment). A trunk block lands as its
+- [x] Implement: falling blocks from a felled tree carry a mark (an entity tag or attachment). A trunk block lands as its
   log; on another fallen log or with no room, it drops as an item. Every other tree block drops as an item. A leaf
   bursts as if it decayed there: its shed settles below (`LeafLitter`), its drops fall.
 
-### Task 6: The damage
+### Task 6: The damage (done)
 
 **Files:** the landing mixin; test in `FellingGameTest`.
 
-- [ ] Tests: `aFallingTreeHurtsWhatItLandsOn` (a husk where the oak lands loses health), `aFallingTreeNeverKillsAPlayerOrAPet`
+- [x] Tests: `aFallingTreeHurtsWhatItLandsOn` (a husk where the oak lands loses health), `aFallingTreeNeverKillsAPlayerOrAPet`
   (a mock player and a tamed wolf at 1 health where it lands live).
-- [ ] Implement: a falling log hurts as an anvil, `LOG_DAMAGE_PER_BLOCK` per block fallen after the first, at most
+- [x] Implement: a falling log hurts as an anvil, `LOG_DAMAGE_PER_BLOCK` per block fallen after the first, at most
   `MOST_LOG_DAMAGE`, as falling-block damage (helmets soften it); clamp so players and owned animals keep half a heart.
 
-### Task 7: What a tree carries
+### Task 7: What a tree carries (done)
 
 **Files:** `TreeFelling.java`; test in `FellingGameTest`.
 
-- [ ] Test `aFelledTreesBeeNestBreaksAndItsBeesComeOut`.
-- [ ] Implement: a creaking heart in the trunk and a bee nest on it break as if mined, the bees angry at the cutter; vines,
+- [x] Test `aFelledTreesBeeNestBreaksAndItsBeesComeOut`.
+- [x] Implement: a creaking heart in the trunk and a bee nest on it break as if mined, the bees angry at the cutter; vines,
   cocoa and hanging moss drop as vanilla's do when their support goes.
+
+## As built
+
+Tasks 2 to 7 are in `TreeBlock` (`getDestroyProgress`, `playerWillDestroy`, `affectNeighborsAfterRemoval`),
+`TreeFelling` (the pending cuts, ticked by `ServerTickEvents.END_LEVEL_TICK`; the fall; landing; `spare`),
+`FelledTreeLandingMixin` (`FallingBlockEntity.tick`'s `setBlockAndUpdate` and `spawnAtLocation`) and
+`FelledTreeDamageMixin` (`LivingEntity.hurtServer`'s amount). Falling blocks carry their role as an entity tag
+(`players-versus.felled_trunk`, `_branch`, `_leaf`). Tests in `FellingGameTest`: `cuttingUnderATreeIsSlowerThanAtItsTop`,
+`aCutTreeCreaksThenFallsAwayFromItsCutter`, `aGrownOakFallsAwayFromWhoeverCutIt` (two grown oaks, east and south),
+`aFallingTreeHurtsWhatItLandsOnButSparesPets`, `aFelledTreesBeeNestAndHeartBreak`. A trunk log landing where a creature
+stands drops as its item rather than burying it.

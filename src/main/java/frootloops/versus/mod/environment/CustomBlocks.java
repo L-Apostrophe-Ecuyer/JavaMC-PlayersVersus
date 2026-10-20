@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.blocks.*;
 import frootloops.versus.mod.environment.blocks.clays.*;
 import frootloops.versus.mod.environment.blocks.leaves.FallenLeavesBlock;
 import frootloops.versus.mod.environment.blocks.trees.TreeBlock;
+import frootloops.versus.mod.environment.blocks.trees.TreeFelling;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.brewing.effects.BuoyancyStatusEffect;
 import frootloops.versus.mod.items_and_effects.brewing.effects.LargenessStatusEffect;
@@ -164,6 +165,7 @@ public class CustomBlocks {
             FlammableBlockRegistry.getDefaultInstance().add(tree, 5, 5); // as logs
             TREE_BLOCKS.put(log, tree);
         }
+        TreeFelling.register();
 
         CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM).lightLevel((state) -> 3 + state.getValue(BlockStateProperties.AGE_2) * 3)));
 

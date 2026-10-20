@@ -1,10 +1,15 @@
 package frootloops.versus.mod.environment.blocks.trees;
 
+import frootloops.versus.VersusSettings;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -45,6 +50,28 @@ public class TreeBlock extends RotatedPillarBlock {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(FACES.values().toArray(BooleanProperty[]::new));
+    }
+
+    /** Cutting one takes longer the more of the tree would fall (Felling), worked out alike on the client and the server. */
+    @Override
+    protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+        float progress = super.getDestroyProgress(state, player, level, pos);
+        if (!VersusSettings.Trees.DO_FELLING || !(level instanceof LevelReader reader)) return progress;
+        return (float) (progress / Felling.cutTimeFactor(reader, pos));
+    }
+
+    /** Whoever breaks one made the cut, for which way the tree falls (TreeFelling). */
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (level instanceof ServerLevel server) TreeFelling.cutBy(server, pos, player);
+        return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    /** Gone, whatever took it: what it held up may come down (TreeFelling). */
+    @Override
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+        TreeFelling.removed(level, pos);
     }
 
     /** Placed in creative: turned as a log is, by the face clicked, its faces set by what is next to it. */

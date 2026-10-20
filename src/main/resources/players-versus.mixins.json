@@ -39,6 +39,8 @@
     "environment.blocks.LadderMixin",
     "environment.blocks.LeafMovementMixin",
     "environment.blocks.LeavesMixin",
+    "environment.blocks.FelledTreeDamageMixin",
+    "environment.blocks.FelledTreeLandingMixin",
     "environment.blocks.LeavesMoveControlMixin",
     "environment.blocks.MossMixin",
     "environment.blocks.NetherWartMixin",

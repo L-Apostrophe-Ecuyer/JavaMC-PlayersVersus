@@ -260,12 +260,20 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   the item model (the vanilla log's), the loot table and the tags. Edit the script, not its output.
 - **Tests**: `TreesGameTest` (both groves grow tree blocks and no vanilla logs, every face by the rule; faces stay as
   set; creative placement; drops; tags and cocoa). `LeavesGameTest`'s groves check the leaves still live by them.
-- **Felling (in progress, plan `docs/superpowers/plans/2026-10-20-tree-felling.md`)**: `Felling` decides from the blocks
-  alone, changing nothing: `afterCut` gives each group of tree blocks (joined by faces, edges or corners, creaking hearts
-  included) a cut leaves standing on nothing but leaves or air, with its crown (each leaf nearer it than any log left
-  standing, through leaves of its kind, six steps) and which way it falls (its heavy side past `LEAN`, else away from
-  the cutter); `cutTimeFactor` is 1 + `CUT_TIME_SCALE` x sqrt(what would fall). Nothing calls it in game yet: the cut's
-  time, the creak, the falling blocks, landing and damage are the plan's next tasks. Tests: `FellingGameTest`.
+- **Felling** (plan `docs/superpowers/plans/2026-10-20-tree-felling.md`): `Felling` decides from the blocks alone:
+  `afterCut` gives each group of tree blocks (joined by faces, edges or corners, creaking hearts included) a cut leaves
+  standing on nothing but leaves or air, with its crown (each leaf nearer it than any log left standing, through leaves
+  of its kind, six steps) and which way it falls (its heavy side past `LEAN`, else away from the cutter);
+  `cutTimeFactor` is 1 + `CUT_TIME_SCALE` x sqrt(what would fall), which `TreeBlock.getDestroyProgress` divides by on
+  both sides. `TreeFelling` acts on it: `TreeBlock.playerWillDestroy` notes the cutter, `affectNeighborsAfterRemoval`
+  calls `removed` (a creak, a check `FELLING_DELAY` ticks later on `END_LEVEL_TICK`), and the fall turns every block
+  into a vanilla `FallingBlockEntity` thrown along the fall (`throwSpeed`: from h above the cut, about h out), logs as
+  their wood's vanilla log turned to lie along it with anvil damage (`setHurtsEntities`), tagged `felled_trunk`,
+  `felled_branch` or `felled_leaf`. `FelledTreeLandingMixin` lands them (trunk as a block unless on a log or a creature
+  is there, else items; leaves burst: drops plus `LeafLitter.decay`); `FelledTreeDamageMixin` clamps a felled log's
+  damage to players and owned animals to leave half a heart. The creaking heart and bee nests break first, bees out at
+  the cutter. A guard (`TreeFelling.isFelling`) keeps the fall's own removals from counting as cuts. Tests:
+  `FellingGameTest`.
 
 ## Other blocks not read this pass
 `LadderBlockItem`/`LadderMixin` (README: implies ladder placement changes — replaces vanilla Ladder
