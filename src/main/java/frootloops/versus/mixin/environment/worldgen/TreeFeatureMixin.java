@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,8 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Every tree the tree feature grows (in new chunks, from saplings, from bone meal) is made of tree blocks (TreeBlocks):
- * its trunk goes down through a setter that puts each log's tree block in its place, and once the tree and its
- * decorations are in, the faces of those tree blocks are set.
+ * its trunk, and whatever logs its decorators add, go down through a setter that puts each log's tree block in its
+ * place, and once the tree and its decorations are in, the faces of those tree blocks are set.
  */
 @Mixin(TreeFeature.class)
 public abstract class TreeFeatureMixin {
@@ -38,6 +39,16 @@ public abstract class TreeFeatureMixin {
         Set<BlockPos> grown = new HashSet<>();
         treeBlocks.set(grown);
         return original.call(self, level, random, origin, rootSetter, TreeBlocks.growing(trunkSetter, grown), foliageSetter);
+    }
+
+    /** Decorators put logs down too (the poplars' ring of stubs): through the same setter, so those are tree blocks as well. */
+    @WrapOperation(method = "place", at = @At(value = "NEW", target = "(Lnet/minecraft/world/level/WorldGenLevel;Ljava/util/function/BiConsumer;Lnet/minecraft/util/RandomSource;Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;)Lnet/minecraft/world/level/levelgen/feature/treedecorators/TreeDecorator$Context;"))
+    private TreeDecorator.Context playersVersus$decorateWithTreeBlocks(WorldGenLevel level, BiConsumer<BlockPos, BlockState> decorationSetter, RandomSource random,
+                                                                     Set<BlockPos> first, Set<BlockPos> second, Set<BlockPos> third,
+                                                                     Operation<TreeDecorator.Context> original,
+                                                                     @Share("treeBlocks") LocalRef<Set<BlockPos>> treeBlocks) {
+        BiConsumer<BlockPos, BlockState> setter = treeBlocks.get() == null ? decorationSetter : TreeBlocks.growing(decorationSetter, treeBlocks.get());
+        return original.call(level, setter, random, first, second, third);
     }
 
     @Inject(method = "place", at = @At("RETURN"))

@@ -247,8 +247,9 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
 - **Faces are set once**, never in `updateShape`: as a tree grows (`TreeBlocks.setFaces` at the end of
   `TreeFeature.place`) or in creative placement (`getStateForPlacement`). Cut against a `TreeBlock`, `#logs` or a sturdy
   face, bark otherwise (`TreeBlock.withFaces`). `rotate`/`mirror` turn the faces as a huge mushroom block's.
-- **Growing trees**: `TreeFeatureMixin` wraps `doPlace`'s trunk setter (`TreeBlocks.growing`) so each log with a tree
-  block of its own goes down as it, axis kept, and `@Share`s the positions with a `RETURN` inject that sets the faces.
+- **Growing trees**: `TreeFeatureMixin` wraps `doPlace`'s trunk setter and the decorators' setter (the `NEW` of
+  `TreeDecorator.Context`: poplars' decorators add logs) with `TreeBlocks.growing`, so each log with a tree block of its
+  own goes down as it, axis kept, and `@Share`s the positions with a `RETURN` inject that sets the faces.
   `VersusSettings.Trees.DO_TREE_BLOCKS` turns it off. Fallen-tree features, structures and placed logs stay vanilla.
 - **Drops** the vanilla log (loot tables). Creative only: an item per wood after its log in the natural blocks tab.
 - **Tags**: in its wood's `#minecraft:<wood>_logs` (so `logs_that_burn`, `logs`, mineable with axe, creaking hearts),
