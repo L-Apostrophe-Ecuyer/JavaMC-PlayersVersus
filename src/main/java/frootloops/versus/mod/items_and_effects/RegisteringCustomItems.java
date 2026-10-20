@@ -146,6 +146,10 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("clovers", CustomBlockItems.CLOVERS, CreativeModeTabs.NATURAL_BLOCKS);
         registerCustomItem("fallen_leaves", CustomBlockItems.FALLEN_LEAVES);
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.LEAF_LITTER, CustomBlockItems.FALLEN_LEAVES));
+        CustomBlockItems.TREE_BLOCKS.forEach((log, tree) -> {
+            registerCustomItem(BuiltInRegistries.BLOCK.getKey(tree.getBlock()).getPath(), tree);
+            CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(log.asItem(), tree));
+        });
 
         registerCustomItem("creeper_spore_blossom", CustomBlockItems.CREEPER_SPORE_BLOSSOM, CreativeModeTabs.FUNCTIONAL_BLOCKS);
     }

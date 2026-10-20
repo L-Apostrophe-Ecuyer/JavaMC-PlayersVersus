@@ -19,6 +19,16 @@
     "players-versus:gray_mud",
     "players-versus:brown_clay",
     "players-versus:brown_clay_bricks",
-    "players-versus:brown_mud_bricks"
+    "players-versus:brown_mud_bricks",
+    "players-versus:oak_tree",
+    "players-versus:spruce_tree",
+    "players-versus:birch_tree",
+    "players-versus:jungle_tree",
+    "players-versus:acacia_tree",
+    "players-versus:cherry_tree",
+    "players-versus:dark_oak_tree",
+    "players-versus:pale_oak_tree",
+    "players-versus:mangrove_tree",
+    "players-versus:poplar_tree"
   ]
 }

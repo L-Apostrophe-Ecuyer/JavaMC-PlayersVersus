@@ -188,10 +188,13 @@ Design and numbers: `docs/superpowers/specs/2026-10-18-leaf-overhaul-design.md`,
 `docs/superpowers/specs/2026-10-19-fallen-leaves-design.md` (fallen leaves, instant decay, swimming, the view; it
 supersedes the first spec's litter and soft landings). Tunables: `VersusSettings.Leaves`.
 - **Who passes**: living things except `Animal`s and `Spider`s (`LeafMovement.passes`). Everything else, and every
-  no-context or placement query, sees a full block.
+  no-context query, sees a full block.
 - **When a leaf is solid** (`LeafMovement.isSolid`, the collision shape): the passer is above it, not sneaking, not
-  gliding, fall distance ≤ 2.5. On the server a `Player`'s leaves are always open, because its client simulates its
-  movement. Never read velocity or change the entity there: shapes are asked many times a tick, on both sides.
+  gliding, fall distance ≤ 4 (`BREAK_THROUGH_FALL_DISTANCE`), the same rule on the server as on the client (the server looks for the block holding a
+  player up, and logs "standing on air" when it finds none). A placement context is open: 26.4 flags as placement both
+  block placing and the server's check of each move a player's client already made (`getPreMoveCollisions`, through
+  `CollisionContext.withPosition`), and a solid leaf there pulls the player back out of every leaf they step into. Never
+  read velocity or change the entity there: shapes are asked many times a tick, on both sides.
 - **Movement** goes through `handleOnClimbable`'s return (`LeafMovement.adjust`), the motion after input and before
   `move`. It applies a horizontal speed cap by weighted immersion (legs ×3), vertical drag on the swept box, and
   climbing and descending with a foothold (leaves at the feet). It runs only where the entity is simulated (the client
@@ -231,7 +234,69 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   `leaves_room`, `leaves_tower` and `leaves_grove` (48 x 40 x 48, its grass floor only) as SNBT in
   `src/gametest/resources/.../gametest/structure/`.
 - **Client**: `LeavesRustling` uses `LeafMovement.measure` for every passer within 32 blocks; `LeavesView` (a HUD
-  element after `MISC_OVERLAYS`) frames the screen with the leaf's tinted texture while the camera is in leaves.
+  element after `MISC_OVERLAYS`) frames the screen while the camera is in leaves, as powder snow's frost does: our own
+  `textures/misc/leaves_outline.png` (grey, drawn by `tools/leaves-outline.py`) stretched over the screen, in the leaf's
+  tint, or the average colour of its texture for untinted leaves.
+
+## Tree blocks (`TreeBlock`, `TreeBlocks`, `TreeRoots`, `TreeFeatureMixin`, `FallenTreeFeatureMixin`; spec `docs/superpowers/specs/2026-10-19-trees-design.md`)
+
+- **What**: `players-versus:<wood>_tree` for oak, spruce, birch, jungle, acacia, cherry, dark oak, pale oak, mangrove and
+  poplar (`CustomBlocks.TREE_BLOCKS`, keyed by the vanilla log). A `RotatedPillarBlock` copied from its log, with six
+  booleans `north`..`down` (`PipeBlock.PROPERTY_BY_DIRECTION`): true shows bark, false the cut (the stripped log).
+- **Faces are set once**, never in `updateShape`: as a tree grows (`TreeBlocks.setFaces` at the end of
+  `TreeFeature.place`) or in creative placement (`getStateForPlacement`). Cut against a `TreeBlock`, `#logs` or a sturdy
+  face, bark otherwise (`TreeBlock.withFaces`). `rotate`/`mirror` turn the faces as a huge mushroom block's.
+- **Growing trees**: `TreeFeatureMixin` wraps `doPlace`'s trunk setter and foliage setter (a poplar's crown,
+  `PoplarFoliagePlacer`, grows a ring of logs round its trunk) with `TreeBlocks.growing`, so each log with a tree block
+  of its own goes down as it, axis kept, and `@Share`s the positions with a `RETURN` inject (`TreeBlocks.finish`) that
+  turns the soil under the trunk's lowest tree blocks into rooted dirt (`ROOTED_DIRT_UNDER_TREES`; 26.4's
+  `soil_beneath_tree` leaves grass under a trunk, and `#dirt` no longer holds grass), grows a pale oak's roots and sets
+  the faces. `FallenTreeFeatureMixin` makes fallen trees of tree blocks too (`placeLogBlock`'s `setBlockAndUpdate`,
+  positions in a `ThreadLocal`, faces set at `place`'s `RETURN`). `VersusSettings.Trees.DO_TREE_BLOCKS` turns it off.
+  Structures and placed logs stay vanilla; huge fungi and mushrooms aren't trees.
+- **Roots** (`TreeRoots`, pale oak only): each trunk column goes 3-5 (`ROOT_DEPTH_MIN`/`MAX`) blocks down through
+  `#dirt`, `#base_stone_overworld`, `#substrate_overworld` (grass), gravel or clay, side roots near the top; the creaking
+  heart the decorator set in the trunk moves into a root `HEART_IN_ROOTS` of the time, in a knot of roots giving it pale
+  oak logs on all six sides (it keeps its creaking; `CreakingHearts.inCave` samples straight up through the trunk, so a
+  buried heart isn't always on). Roots' faces use `withFaces(..., false)`: cut only against the tree, bark against the
+  ground.
+- **Drops** the vanilla log (loot tables). Creative only: an item per wood after its log in the natural blocks tab.
+- **Tags**: in its wood's `#minecraft:<wood>_logs` (so `logs_that_burn`, `logs`, mineable with axe, creaking hearts),
+  and listed by name in `overworld_natural_logs`, `prevents_nearby_leaf_decay`, `supports_cocoa` (jungle),
+  `blocks_motion_no_leaves` and `mangrove_logs_can_grow_through`.
+- **Assets and data are generated** by `tools/tree-blocks.py` (run from the repository root): per wood a 36-part
+  multipart blockstate of one-face models (`models/block/tree_face/*`, vanilla's `cube_column` faces plus the lying
+  log's half-turned up face), turned as vanilla's log blockstate turns them, so an uncut tree looks exactly vanilla;
+  the item model (the vanilla log's), the loot table and the tags. Edit the script, not its output.
+- **Tests**: `TreesGameTest` (both groves grow tree blocks and no vanilla logs, every face by the rule; faces stay as
+  set; creative placement; drops; tags and cocoa). `LeavesGameTest`'s groves check the leaves still live by them.
+- **Felling** (plan `docs/superpowers/plans/2026-10-20-tree-felling.md`, step 3 in the spec): `Felling` decides from the
+  blocks alone: `afterCut` (the cut taken as gone, for the cut's time) and `unheld` (the world as it is, for the check)
+  give each group of tree blocks (joined by faces, edges or corners, creaking hearts included) left standing on nothing
+  that `holds` it (a part of a tree, or a sturdy top face that isn't leaves), with its crown (each leaf nearer it than
+  any log left standing, through leaves of its kind, six steps) and which way it falls (its heavy side past `LEAN`,
+  else away from the cutter). A cut is a tree block going (`TreeBlock.affectNeighborsAfterRemoval` -> `removed`) or the
+  block under one going or no longer holding it (`TreeBlock.updateShape` DOWN, `ServerLevel` only -> `unheld`).
+  `digTimeFactor` (1 + `CUT_TIME_SCALE` x sqrt(what would fall), for parts of trees and the blocks under them) slows
+  every block state's `getDestroyProgress` (`TreeDigMixin`, `@ModifyReturnValue` on `BlockStateBase`), alike on both
+  sides. `TreeFelling` acts: Fabric's `PlayerBlockBreakEvents.BEFORE` notes the cutter, checks at one spot merge, a
+  creak, a check `FELLING_DELAY` ticks later on `END_LEVEL_TICK` against the world as it is; what a felled tree held
+  up is checked once it's down (`CHECK_AFTER`). The fall: creaking hearts break; hives (`#beehives` next to the group
+  or crown) launch with their block entity in `blockData`; tree blocks launch as themselves (`felled_trunk` or
+  `felled_branch`, anvil damage), crown leaves as themselves (`felled_leaf`). A group standing over its cut (the block
+  above the cut in it, the block under it holding) turns over on its hinge as one: `Topple` (rigid body, gravity 0.04,
+  pushed past its tipping point), stepped on `END_LEVEL_TICK`; its falling blocks' own `tick` is cancelled while they
+  swing (`FelledTreeLandingMixin`, server; `FallingBlockEntityToppleMixin`, client); logs sweep creatures once for
+  `sweepDamage(speed)`; leaves burst against the ground; let go lying down, on a solid block in the way (step undone),
+  or tipping back, with `needsSync` and each block's speed, a trunk turned half way or more tagged `felled_turned_x/z`.
+  Clients get `TopplePayload` (start: hinge, way, the sums, angle, speed, entity ids and start spots; release: the
+  angle) and step the same `Topple` (`ClientTopples`, `START_CLIENT_TICK`), moving the blocks and drawing them turned
+  (`FallingBlockRendererToppleMixin` sets the render state's position and rotates about the block's centre before
+  `submit`'s translate; `FallingBlockRenderStateToppleMixin` carries the turn). `FelledTreeLandingMixin` lands them
+  (`TreeFelling.landing`: a trunk block as its wood's log, turned, unless on a log or a creature is there; a hive whole,
+  its bees out angry at the cutter at the level tick's end; anything else `breakOnLanding`: log items, burst leaves, a
+  broken hive's bees out from `Occupant.LIST_CODEC`). `FelledTreeDamageMixin` clamps a felled block's damage to
+  players and owned animals to leave half a heart. Tests: `FellingGameTest`, `TreeGrowthGameTest`, `ToppleTest` (JUnit).
 
 ## Other blocks not read this pass
 `LadderBlockItem`/`LadderMixin` (README: implies ladder placement changes — replaces vanilla Ladder

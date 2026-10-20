@@ -1,0 +1,364 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "axis": "y",
+        "down": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/down_bark"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "down": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/down_cut"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "up": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/up_bark"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "up": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/up_cut"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "north": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/north_bark"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "north": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/north_cut"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "south": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/south_bark"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "south": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/south_cut"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "west": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/west_bark"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "west": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/west_cut"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "east": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/east_bark"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "east": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/east_cut"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "down": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/north_bark",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "down": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/north_cut",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "up": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/south_bark",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "up": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/south_cut",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "north": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/up_horizontal_bark",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "north": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/up_horizontal_cut",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "south": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/down_bark",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "south": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/down_cut",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "west": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/west_bark",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "west": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/west_cut",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "east": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/east_bark",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "east": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/east_cut",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "down": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/north_bark",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "down": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/north_cut",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "up": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/south_bark",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "up": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/south_cut",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "north": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/west_bark",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "north": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/west_cut",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "south": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/east_bark",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "south": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/east_cut",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "west": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/down_bark",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "west": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/down_cut",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "east": "true"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/up_horizontal_bark",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "east": "false"
+      },
+      "apply": {
+        "model": "players-versus:block/dark_oak_tree/up_horizontal_cut",
+        "x": 90,
+        "y": 90
+      }
+    }
+  ]
+}

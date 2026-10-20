@@ -9,7 +9,10 @@
   "entrypoints": {
     "fabric-gametest": [
       "frootloops.versus.gametest.InventorySortingGameTest",
-      "frootloops.versus.gametest.LeavesGameTest"
+      "frootloops.versus.gametest.LeavesGameTest",
+      "frootloops.versus.gametest.TreesGameTest",
+      "frootloops.versus.gametest.FellingGameTest",
+      "frootloops.versus.gametest.TreeGrowthGameTest"
     ]
   },
   "depends": {

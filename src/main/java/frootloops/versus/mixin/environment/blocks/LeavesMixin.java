@@ -79,7 +79,9 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
                 world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(entity, Blocks.FROSTED_ICE.defaultBlockState()));
                 super.fallOn(world, state, pos, livingEntity, fallDistance);
             }
-            else super.fallOn(world, state, pos, livingEntity, fallDistance / VersusSettings.Leaves.LANDING_FALL_DIVISOR);
+            else {
+                super.fallOn(world, state, pos, livingEntity, fallDistance / VersusSettings.Leaves.LANDING_FALL_DIVISOR);
+            }
         }
     }
 

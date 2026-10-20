@@ -1,0 +1,7 @@
+{
+  "parent": "players-versus:block/tree_face/up",
+  "textures": {
+    "texture": "minecraft:block/stripped_acacia_log_top",
+    "particle": "minecraft:block/acacia_log"
+  }
+}

@@ -76,8 +76,10 @@ neighbour's log of the same type. Knowing which tree a leaf belongs to is for th
 
 ## Being in leaves
 
-**The view.** While the camera is inside a leaf block, its leaf texture, tinted as the leaf at that spot, frames the
-screen: large tiles along the edges, fading to clear toward the centre. It eases in and out over a few ticks, and isn't
+**The view.** While the camera is inside a leaf block, leaves frame the screen as frost does in powder snow: a
+pixel-art frame of leaves of our own (`textures/misc/leaves_outline.png`, grey, drawn by `tools/leaves-outline.py`),
+thick in the corners and along the edges and clear in the middle, stretched over the screen in the colour of the leaf at
+that spot (its tint, or the average colour of its texture for leaves with no tint). It eases in and out over a few ticks, and isn't
 drawn in spectator mode. Client only (`LeavesView`, a HUD element drawn before vanilla's camera overlays).
 
 **Swimming.** Leaves underwater drag a swimmer (`LeafMovement.swim`, with the same immersion as walking), in vanilla's

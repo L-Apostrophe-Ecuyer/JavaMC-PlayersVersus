@@ -43,9 +43,13 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SegmentableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Leaves as husks (which don't burn) find them on the game test server: pushing through, climbing, sinking, falling onto
@@ -194,17 +198,19 @@ public class LeavesGameTest {
         });
     }
 
-    /** A short drop lands on top of leaves; a longer one breaks through them to the ground. */
+    /** A drop of up to four blocks lands on top of leaves; a longer one breaks through them to the ground. */
     @GameTest(structure = TOWER, maxTicks = 80)
     public void aShortDropLandsOnTopALongOneBreaksThrough(GameTestHelper helper) {
         floor(helper, 12, 6);
-        fill(helper, 1, 1, 1, 3, 1, 3, leaves(Blocks.OAK_LEAVES));
-        fill(helper, 7, 1, 1, 9, 1, 3, leaves(Blocks.OAK_LEAVES));
-        Mob dropped = husk(helper, 2.5, 3.5, 2.5), thrown = husk(helper, 8.5, 7.0, 2.5);
+        fill(helper, 0, 1, 1, 2, 1, 3, leaves(Blocks.OAK_LEAVES));
+        fill(helper, 4, 1, 1, 6, 1, 3, leaves(Blocks.OAK_LEAVES));
+        fill(helper, 8, 1, 1, 10, 1, 3, leaves(Blocks.OAK_LEAVES));
+        Mob dropped = husk(helper, 1.5, 3.5, 2.5), fourBlocks = husk(helper, 5.5, 6.0, 2.5), thrown = husk(helper, 9.5, 8.0, 2.5);
         helper.runAfterDelay(50, () -> {
             helper.assertTrue(relativeY(helper, dropped) > 1.99, "a 1.5-block drop sank to " + relativeY(helper, dropped));
             helper.assertTrue(dropped.onGround(), "a 1.5-block drop isn't standing on the leaf");
-            helper.assertTrue(relativeY(helper, thrown) < 1.5, "a 5-block drop stayed at " + relativeY(helper, thrown));
+            helper.assertTrue(relativeY(helper, fourBlocks) > 1.99, "a 4-block drop sank to " + relativeY(helper, fourBlocks));
+            helper.assertTrue(relativeY(helper, thrown) < 1.5, "a 6-block drop stayed at " + relativeY(helper, thrown));
             helper.succeed();
         });
     }
@@ -241,9 +247,48 @@ public class LeavesGameTest {
         });
     }
 
-    /** On the server a player's leaves are always open (its client decides); a mob above them stands on them. */
+    /**
+     * The server checks every move a player's client reports: it snaps the player back if the move ran into anything
+     * new (26.4's pre-move collisions, asked as from where the player was), and looks for the block holding a player up
+     * who says they're on the ground ("standing on air" when there's none). Both must see leaves as the player does.
+     */
     @GameTest(structure = ROOM)
-    public void theServerLetsPlayersThrough(GameTestHelper helper) {
+    public void theServersMoveCheckSeesLeavesAsThePlayerDoes(GameTestHelper helper) {
+        floor(helper, 14, 8);
+        helper.setBlock(3, 1, 2, leaves(Blocks.OAK_LEAVES));
+        helper.setBlock(3, 2, 2, leaves(Blocks.OAK_LEAVES));
+        helper.setBlock(6, 1, 2, leaves(Blocks.OAK_LEAVES));
+        ServerLevel level = helper.getLevel();
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+        // Walking into a hedge: the server snaps a player back if the move ran into anything new
+        Vec3 beside = helper.absoluteVec(new Vec3(2.5, 1.0, 2.5));
+        player.setPos(beside.x, beside.y, beside.z);
+        AABB before = player.getBoundingBox();
+        AABB into = before.move(0.6, 0.0, 0.0).deflate(1.0E-5);
+        int hit = 0;
+        for (VoxelShape shape : level.getPreMoveCollisions(player, into, before.getBottomCenter())) {
+            if (Shapes.joinIsNotEmpty(shape, Shapes.create(into), BooleanOp.AND)) hit++;
+        }
+        CollisionContext moveCheck = CollisionContext.withPosition(player, before.minY);
+        helper.assertTrue(hit == 0, "the server's move check ran into " + hit + " leaf shapes (its context: placement "
+                + moveCheck.isPlacement() + ")");
+
+        // Standing on a leaf: the server looks for the block holding the player up
+        Vec3 onTop = helper.absoluteVec(new Vec3(6.5, 2.0, 2.5));
+        player.setPos(onTop.x, onTop.y, onTop.z);
+        AABB feet = player.getBoundingBox();
+        boolean held = level.findSupportingBlock(player, new AABB(feet.minX, feet.minY - 1.0E-6, feet.minZ, feet.maxX, feet.minY, feet.maxZ)).isPresent();
+        helper.assertTrue(held, "the server found nothing under a player standing on a leaf");
+        helper.succeed();
+    }
+
+    /**
+     * The server holds a player up on a leaf as their client does, and as it holds a mob; placing a block isn't held
+     * back by leaves, which anything that passes through them could be standing in.
+     */
+    @GameTest(structure = ROOM)
+    public void theServerHoldsPlayersUpAsTheirClientDoes(GameTestHelper helper) {
         floor(helper, 14, 8);
         helper.setBlock(2, 1, 2, leaves(Blocks.OAK_LEAVES));
         BlockPos leaf = helper.absolutePos(new BlockPos(2, 1, 2));
@@ -251,8 +296,9 @@ public class LeavesGameTest {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setPos(onTop.x, onTop.y, onTop.z);
         Mob husk = husk(helper, 2.5, 2.0, 2.5);
-        helper.assertFalse(LeafMovement.isSolid(leaf, CollisionContext.of(player)), "the server held a player up on a leaf");
+        helper.assertTrue(LeafMovement.isSolid(leaf, CollisionContext.of(player)), "the server didn't hold a player up on a leaf");
         helper.assertTrue(LeafMovement.isSolid(leaf, CollisionContext.of(husk)), "a husk above a leaf isn't held up");
+        helper.assertFalse(LeafMovement.isSolid(leaf, CollisionContext.placementContext(player)), "placing a block was held back by a leaf");
         helper.succeed();
     }
 

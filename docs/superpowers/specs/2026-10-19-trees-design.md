@@ -2,8 +2,13 @@
 
 Minecraft 26.4-snapshot-3 (Mojang names), `26.4---Winter-Drop`. Builds on
 [fallen leaves and instant decay](2026-10-19-fallen-leaves-design.md) and settles the open questions of
-[the trees research](2026-10-19-trees-research.md). Ships in two steps, each a working build: the tree block, then
-felling.
+[the trees research](2026-10-19-trees-research.md). Ships in steps, each a working build: the tree block, then
+felling, then the pass that makes both as good as they can be. Step 1 is built (`TreeBlock`, `TreeBlocks`,
+`TreeFeatureMixin`, `tools/tree-blocks.py`, `TreesGameTest`). Step 2 is built too (`Felling`, `TreeFelling`,
+`FelledTreeLandingMixin`, `FelledTreeDamageMixin`, `FellingGameTest`; plan
+`docs/superpowers/plans/2026-10-20-tree-felling.md`). Step 3 is built (`Topple`, `TopplePayload`, `TreeRoots`,
+`TreeDigMixin`, `FallenTreeFeatureMixin`, `ClientTopples` and its render mixins, `ToppleTest`, `TreeGrowthGameTest`);
+where it changes step 2, step 3 is what holds.
 
 ## What it should feel like
 
@@ -15,8 +20,7 @@ player or a pet. Logs you build with never fall, and the trees of chunks generat
 ## Step 1: the tree block
 
 **Blocks.** One per wood, `players-versus:<wood>_tree` ("Oak Tree"): oak, spruce, birch, jungle, acacia, dark oak,
-mangrove, cherry and pale oak, and the poplars' wood if 26.4 gives poplars a log of their own (the plan checks which log
-their tree feature places; a poplar grown on another wood's log gets that wood's tree block). Each is a log (axis,
+mangrove, cherry, pale oak and poplar (26.4 gives poplars a log of their own, `poplar_log`, in `#poplar_logs`). Each is a log (axis,
 strength, sound, flammable as logs are) with six boolean faces, `north` to `down`, true for bark and false for cut, as a
 huge mushroom block's are true for skin and false for pores: 3 axes x 64 = 192 states a wood.
 
@@ -116,10 +120,71 @@ the first, at most `MOST_LOG_DAMAGE` (10, five hearts), counted as a falling blo
 hurt. It never takes the last half heart from a player or from an animal with an owner (a tamed wolf, cat, parrot or
 horse); anything else can die.
 
+## Step 3: as good as it can be
+
+**What holds a tree up.** A block holds up a tree resting on it when it's part of a tree (a tree block, a creaking
+heart) or has a sturdy top face that isn't leaves (`Felling.holds`). A cut is any block a tree needs going: one of its
+tree blocks, or the block its foot rests on. A tree block notices the block under it going, or turning into something
+that doesn't hold it (`TreeBlock.updateShape`, in a running world only), whatever did it: dug out, blown up, burnt,
+pushed by a piston, turned to falling sand. Breaking the block a tree rests on takes as long as cutting the trunk there
+would (`TreeDigMixin`, on every block state's break time, for parts of trees and the blocks under them), so digging a
+tree out from under is no shortcut; it comes down the same way, away from whoever dug. A player's break of either is
+recorded through Fabric's `PlayerBlockBreakEvents` for which way the tree falls. Two checks at one spot (a trunk block
+cut is also what the block above it rested on) are one cut; when the tree comes down `FELLING_DELAY` later, what falls
+is what nothing holds up then, as the world stands, so a cut filled in meanwhile (stone, a log) holds the tree up. What
+a felled tree held up (another tree's branch resting on it) is checked once it's down.
+
+**Rooted dirt.** Once a tree has grown, the soil under the foot of its trunk (dirt, grass, podzol, mycelium or moss; not
+mud or sand) turns to rooted dirt (`ROOTED_DIRT_UNDER_TREES`), as azaleas already stand on: dug into, the ground under a
+tree shows it holds one. (26.4 leaves grass under a trunk, so this is done after the tree grows, not through vanilla's
+below-trunk block.)
+
+**Toppling.** The rigid swing step 2 set aside, built: a group standing over its cut (the block above the cut is in it
+and the block under the cut holds) turns over as one body on a hinge, the level line across the fall at the front edge
+of its lowest layer, level with that layer's bottom (`Topple`). Gravity (0.04, a falling block's) pulls its weight round
+the hinge as a rigid body's: angle'' = g (up sin angle + along cos angle) / inertia, along and up the weighted sums of
+where each block's centre sits from the hinge (1 a tree block or a hive, 1/4 a leaf), inertia their moment round it.
+The cut pushes it at 0.02 radians a tick at least, or enough to lift weight sitting behind the hinge over it with a
+quarter to spare. A six-block trunk comes down in about two seconds, its top hitting the ground at about 0.7 blocks a
+tick. It's let go lying down (a right angle), on any solid block that isn't leaves getting in the way of its wood
+(the step undone), or if it ever tips back; each block then flies on as a vanilla falling block with the speed it had,
+so it lands where its momentum takes it. Anything not standing over its cut (a branch cut off) just drops.
+- Tree blocks fly as themselves, their faces as they were; leaves as themselves; hives with their bees inside.
+- A turning log hurts each creature it sweeps through once, as hard as a falling log landing from as high as it would
+  fall to reach its speed (`LOG_DAMAGE_PER_BLOCK` a block after the first, at most `MOST_LOG_DAMAGE`), sparing the last
+  half heart of a player or a pet as before. A turning leaf about to go into the ground bursts there.
+- The server and its clients step the same topple alike: the server sends the hinge, the way, the three sums, the
+  angle, the speed and the falling blocks with where they started (`TopplePayload`) when it starts, and the angle when
+  it lets go; in between each client turns it itself (`ClientTopples`), moving each block round the hinge each tick and
+  drawing it between ticks where the tree has turned it, turned over with it about its own centre (render mixins on the
+  falling block renderer), so the tree swings smoothly and looks one body. Let go, a block keeps its turn until it
+  lands.
+- Landing: a trunk block lands as its wood's log, turned as its tree turned over when that was half way or more
+  (`TURNED_X`/`TURNED_Z` tags), unless there's a log under it or a creature where it lands; anything else as before.
+
+**Hives.** A bee nest or beehive next to a felled tree's blocks or crown falls with it, its bees and honey inside, and
+lands whole; its bees then come out angry at whoever cut the tree (the nearest player within 16 blocks when nobody
+did). A hive that can't land whole breaks, its bees out angry, dropping what its loot table gives.
+
+**Creaking heart trees go deep.** A pale oak's trunk goes on down into the ground as roots (`TreeRoots`): each of its
+columns `ROOT_DEPTH_MIN` (3) to `ROOT_DEPTH_MAX` (5) blocks, through dirt, rock, gravel or clay, as far as the ground
+lets it; a root branches out sideways from a column, away from the trunk, one or two blocks down and one or two long,
+six times in ten, some of them showing at the surface. The creaking heart its decorator set in the trunk moves down
+into a root `HEART_IN_ROOTS` (3/4) of the time, standing up, with a root above and below it and a knot of roots round
+it on every other side, so it has pale oak logs all round (it keeps its creaking, and its idle sound); a tree block
+takes its old place. Felling the tree leaves its roots, and the heart in them, until someone digs it out. Roots show
+bark where they meet the ground (they're set by a root's rule: cut only against the tree), as they would dug out.
+
+**Every tree.** Every tree feature (`minecraft:tree`, vanilla's and the mod's, through `TreeFeature`) and every fallen
+tree (`minecraft:fallen_tree`: a stump and a log lying beside it, through `FallenTreeFeature`) grows its wood's tree
+blocks; a game test grows each one the game has in turn and finds no vanilla log of a wood that has a tree block. Huge
+fungi and huge mushrooms are not trees here.
+
 ## Settings (`VersusSettings.Trees`)
 
 `DO_TREE_BLOCKS` (true), `DO_FELLING` (true), `CUT_TIME_SCALE` (0.5), `LEAN` (1.5), `FELLING_DELAY` (10 ticks),
-`LOG_DAMAGE_PER_BLOCK` (2), `MOST_LOG_DAMAGE` (10), `MOST_FALLING_BLOCKS` (512), `MOST_TREE_BLOCKS` (1024).
+`LOG_DAMAGE_PER_BLOCK` (2), `MOST_LOG_DAMAGE` (10), `MOST_FALLING_BLOCKS` (512), `MOST_TREE_BLOCKS` (1024),
+`ROOTED_DIRT_UNDER_TREES` (true), `DO_ROOTS` (true), `ROOT_DEPTH_MIN` (3), `ROOT_DEPTH_MAX` (5), `HEART_IN_ROOTS` (0.75).
 
 ## Testing
 
@@ -140,11 +205,28 @@ Step 2:
 - the cut: a tree block with a tree above it breaks slower than a stump, by 1 + 0.5 sqrt(n);
 - a column of vanilla logs with its bottom broken stays up;
 - a husk where the tree lands is hurt; a test player and a tamed wolf at 1 health where it lands live;
-- a tree with a bee nest, felled: the nest is gone and its bees are out.
+- a tree with a bee nest, felled: the nest is gone and its bees are out (step 3: the nest lands whole beyond the stump
+  and its bees come out angry).
 
-Not testable headless: the faces' textures and how the fall looks.
+Step 3:
+- the topple (JUnit, `ToppleTest`): it starts where the tree stood; a six-block trunk comes down in 20 to 80 ticks,
+  never stopping, and lies along its way on the ground beyond its foot, its top coming down fast; a block moves each
+  tick as far as its speed says; a tree leaning back a little still goes over; a client's topple turns exactly as the
+  server's; a sweep hits as an anvil falling to its speed would;
+- digging out the dirt under a six-block trunk takes 1 + 0.5 sqrt(6) times as long as bare dirt, and fells it east of
+  the hole, lying along x on the ground, when dug from the west;
+- a cut filled with cobblestone before the tree comes down holds it up;
+- partway down, a felled trunk's falling blocks are as far apart as they stood, its top leaning out the way it falls;
+- a felled tree's heart breaks, and its bee nest with two bees lands whole beyond the stump, both bees out and angry;
+- a grown oak stands on rooted dirt (grown on grass);
+- a grown pale oak's four trunk columns go at least `ROOT_DEPTH_MIN` deep; a creaking heart in a pale oak's trunk goes
+  down into a knot of roots with pale oak logs on all six sides, a tree block back in its place, the roots showing bark
+  against the ground;
+- every tree and fallen tree feature the game has grows tree blocks and no vanilla log of their woods.
+
+Not testable headless: the faces' textures and how the fall looks (the client's turning and drawing).
 
 ## Later
 
-Converting old trees; huge fungi stems and huge mushrooms as trees; a rigid falling animation; stripping a tree block
-in place with an axe.
+Converting old trees; huge fungi stems and huge mushrooms as trees; stripping a tree block in place with an axe (26.4
+moved stripping into axes' item components, `BlockTransformers`).

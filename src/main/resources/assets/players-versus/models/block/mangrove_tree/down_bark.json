@@ -1,0 +1,7 @@
+{
+  "parent": "players-versus:block/tree_face/down",
+  "textures": {
+    "texture": "minecraft:block/mangrove_log_top",
+    "particle": "minecraft:block/mangrove_log"
+  }
+}

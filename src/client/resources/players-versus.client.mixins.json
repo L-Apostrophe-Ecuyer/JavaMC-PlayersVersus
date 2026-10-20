@@ -12,6 +12,9 @@
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",
 		"environment.visuals.UntintedParticleLeavesAccessor",
+		"environment.visuals.FallingBlockEntityToppleMixin",
+		"environment.visuals.FallingBlockRendererToppleMixin",
+		"environment.visuals.FallingBlockRenderStateToppleMixin",
 
 		"environment.worldgen.DefaultWorldPresetMixin",
 

@@ -1,0 +1,7 @@
+{
+  "parent": "players-versus:block/tree_face/up_horizontal",
+  "textures": {
+    "texture": "minecraft:block/poplar_log_top",
+    "particle": "minecraft:block/poplar_log"
+  }
+}

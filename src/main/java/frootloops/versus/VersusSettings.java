@@ -71,8 +71,9 @@ public abstract class VersusSettings {
         public static double CATCH_SPEED = 0.3;
         public static double CLIMB_SPEED = 0.1;
         public static double DESCEND_SPEED = 0.15; // scaffolding's
-        // Falling farther than this breaks through the top of leaves instead of landing on it (vanilla powder snow's)
-        public static double BREAK_THROUGH_FALL_DISTANCE = 2.5;
+        // Falling farther than this breaks through the top of leaves instead of landing on it (a block and a half more
+        // than vanilla powder snow's 2.5: a drop of about four and a half blocks still lands on top)
+        public static double BREAK_THROUGH_FALL_DISTANCE = 4.0;
         // Landing on top of leaves divides the fall
         public static double LANDING_FALL_DIVISOR = 3.0;
         // Gliders go through leaves, losing this much of their speed per tick fully inside them
@@ -97,6 +98,37 @@ public abstract class VersusSettings {
         public static boolean DO_INSTANT_LEAF_DECAY = true;
         // With the camera inside leaves, their texture, tinted as they are there, frames the view (client, LeavesView)
         public static boolean DO_LEAVES_VIEW = true;
+    }
+
+    public static class Trees {
+        // Growing trees (TreeFeature: new chunks, saplings, bone meal) are made of tree blocks, one per wood (TreeBlock):
+        // their wood's log with a face for each side, bark or cut, set once as the tree grows; they drop the vanilla log
+        public static boolean DO_TREE_BLOCKS = true;
+        // Felling (Felling): cutting a tree block takes its usual time x (1 + CUT_TIME_SCALE x sqrt(n)), n the tree blocks
+        // that would fall; a tree falls toward the side its weight sits more than LEAN blocks off the cut, else away from
+        // whoever cut it; a group of more than MOST_TREE_BLOCKS connected tree blocks counts as standing
+        public static double CUT_TIME_SCALE = 0.5;
+        public static double LEAN = 1.5;
+        public static int MOST_TREE_BLOCKS = 1024;
+        // A cut (a tree block, or the block a tree rests on, breaking, which takes as long as cutting there would) that
+        // fells anything creaks, and the tree comes down this many ticks later if nothing holds it up by then
+        // (TreeFelling): as falling blocks, at most MOST_FALLING_BLOCKS (tree blocks first, the rest break where they
+        // stand), a tree standing over its cut turning over on its hinge as one (Topple); a log hurts what it hits as
+        // an anvil does, LOG_DAMAGE_PER_BLOCK for each block it fell (or would have fallen, to go as fast) after the
+        // first, at most MOST_LOG_DAMAGE, never taking the last half heart from a player or an owned animal
+        public static boolean DO_FELLING = true;
+        public static int FELLING_DELAY = 10;
+        public static float LOG_DAMAGE_PER_BLOCK = 2.0f;
+        public static int MOST_LOG_DAMAGE = 10;
+        public static int MOST_FALLING_BLOCKS = 512;
+        // Once a tree has grown, the soil under its trunk (dirt, grass, podzol, mycelium, moss) turns to rooted dirt (TreeBlocks)
+        public static boolean ROOTED_DIRT_UNDER_TREES = true;
+        // A pale oak's trunk goes on down into the ground as roots, ROOT_DEPTH_MIN to ROOT_DEPTH_MAX blocks, and its
+        // creaking heart moves down into them HEART_IN_ROOTS of the time (TreeRoots)
+        public static boolean DO_ROOTS = true;
+        public static int ROOT_DEPTH_MIN = 3;
+        public static int ROOT_DEPTH_MAX = 5;
+        public static float HEART_IN_ROOTS = 0.75f;
     }
 
     public static class Items {

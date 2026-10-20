@@ -1,0 +1,7 @@
+{
+  "parent": "players-versus:block/tree_face/west",
+  "textures": {
+    "texture": "minecraft:block/cherry_log",
+    "particle": "minecraft:block/cherry_log"
+  }
+}

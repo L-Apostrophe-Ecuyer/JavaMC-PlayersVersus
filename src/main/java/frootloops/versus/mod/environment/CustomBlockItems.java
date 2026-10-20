@@ -4,6 +4,7 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.LadderBlockItem;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -11,9 +12,13 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.item.component.Compostable;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getItemSettings;
 
@@ -85,5 +90,14 @@ public abstract class CustomBlockItems {
                     Identifier.withDefaultNamespace("context_int_provider")), Identifier.withDefaultNamespace("compostable/low")))));
 
     public static final BlockItem CREEPER_SPORE_BLOSSOM = new BlockItem(CustomBlocks.CREEPER_SPORE_BLOSSOM, getBlockSettings("creeper_spore_blossom"));
+
+    // Creative only, after each wood's log: survival players only ever hold the log a tree block drops
+    public static final Map<Block, BlockItem> TREE_BLOCKS = treeBlocks();
+
+    private static Map<Block, BlockItem> treeBlocks() {
+        Map<Block, BlockItem> items = new LinkedHashMap<>();
+        CustomBlocks.TREE_BLOCKS.forEach((log, tree) -> items.put(log, new BlockItem(tree, getBlockSettings(BuiltInRegistries.BLOCK.getKey(tree).getPath()))));
+        return items;
+    }
 
 }

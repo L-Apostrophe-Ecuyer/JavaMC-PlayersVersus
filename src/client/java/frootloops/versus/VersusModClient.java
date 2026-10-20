@@ -6,6 +6,7 @@ import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
 import frootloops.versus.mod.items_and_effects.inventory.HotbarRefill;
 import frootloops.versus.mod.players.building.ClientPlacement;
+import frootloops.versus.mod.environment.ClientTopples;
 import frootloops.versus.mod.environment.CustomBlocksClient;
 import frootloops.versus.mod.environment.LeavesRustling;
 import frootloops.versus.mod.environment.LeavesView;
@@ -39,6 +40,7 @@ public class VersusModClient implements ClientModInitializer {
 		CustomBlocksClient.onInitialize();
 		LeavesRustling.register();
 		LeavesView.register();
+		ClientTopples.register();
 		ClientPlacement.register();
 		HotbarRefill.register();
 
