@@ -13,6 +13,8 @@ public class CustomBlocksClient {
     public static void onInitialize() {
         // The clovers take the grass tint, as they did (26.3 models say which layer they draw in, from their textures' transparency)
         BlockColorRegistry.register(List.of(BlockTintSources.grass()), CustomBlocks.CLOVERS);
+        // Fallen leaves take the biome's leaf colour, where vanilla's leaf litter takes its dry foliage colour
+        BlockColorRegistry.register(List.of(BlockTintSources.foliage()), CustomBlocks.FALLEN_LEAVES);
     }
 
 }

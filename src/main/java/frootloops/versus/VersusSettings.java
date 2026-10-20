@@ -55,6 +55,50 @@ public abstract class VersusSettings {
         public static boolean DO_SMARTER_COPPER_GOLEMS = true;
     }
 
+    // Speeds in blocks per tick: walking is about 0.22, sprinting 0.28, a ladder climbs at about 0.12.
+    public static class Leaves {
+        // Living things other than animals and spiders push through leaves, slowed the deeper they're in, climb them
+        // holding jump and sink holding sneak, and stand on a leaf they're above unless they fall onto it hard (LeafMovement)
+        public static boolean DO_LEAF_MOVEMENT = true;
+        // The cap on horizontal speed barely touching leaves (above sprinting: none) and fully inside them
+        public static double SPEED_CAP_BRUSHING = 0.32;
+        public static double SPEED_CAP_INSIDE = 0.12;
+        // Above the cap, the most of the speed lost in one tick, so pushing into leaves slows over a few ticks
+        public static double MOST_SPEED_LOST_PER_TICK = 0.35;
+        // Vertical speed lost per tick fully inside leaves, less the less of the body is in them (a fall into a canopy)
+        public static double VERTICAL_DRAG = 0.3;
+        // With leaves at the feet and falling no faster than this, holding jump climbs and holding sneak sinks
+        public static double CATCH_SPEED = 0.3;
+        public static double CLIMB_SPEED = 0.1;
+        public static double DESCEND_SPEED = 0.15; // scaffolding's
+        // Falling farther than this breaks through the top of leaves instead of landing on it (vanilla powder snow's)
+        public static double BREAK_THROUGH_FALL_DISTANCE = 2.5;
+        // Landing on top of leaves divides the fall
+        public static double LANDING_FALL_DIVISOR = 3.0;
+        // Gliders go through leaves, losing this much of their speed per tick fully inside them
+        public static double GLIDE_DRAG = 0.3;
+        // Swimmers lose this much of their speed per tick fully inside underwater leaves; it stays in their speed for water
+        // to slow further, so fully inside they keep about half to two thirds of it (a third sprint-swimming)
+        public static double SWIM_DRAG = 0.15;
+
+        // Natural leaves pushed through drop leaf litter to the ground below (cherry: pink petals), each leaf block a
+        // tick by chance SHED_RATE * (speed - 0.1)^2, at most MOST_SHED_CHANCE; decaying leaves by DECAY_LITTER_CHANCE (LeafLitter)
+        public static boolean DO_LEAF_LITTER_SHEDDING = true;
+        public static double SHED_RATE = 0.1;
+        public static double MOST_SHED_CHANCE = 0.25;
+        public static double DECAY_LITTER_CHANCE = 0.25;
+        // How far below the leaves litter can land
+        public static int LITTER_DROP_RANGE = 24;
+        // Natural fallen leaves brown into leaf litter at this chance per random tick (about an in-game day at the
+        // default random tick speed, which reaches a block about every 68 seconds)
+        public static double FALLEN_LEAVES_BROWNING_CHANCE = 0.057;
+        // A natural leaf cut off from its tree decays as soon as it knows (its scheduled tick), not on a random tick
+        // minutes later, so a felled tree's crown comes down at once
+        public static boolean DO_INSTANT_LEAF_DECAY = true;
+        // With the camera inside leaves, their texture, tinted as they are there, frames the view (client, LeavesView)
+        public static boolean DO_LEAVES_VIEW = true;
+    }
+
     public static class Items {
         // Recipe book groups by family (oak, deepslate, copper), tools and armor by material (RecipeRules)
         public static boolean DO_FAMILY_RECIPE_GROUPS = true;

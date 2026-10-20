@@ -183,11 +183,60 @@ vanilla server, because the client sends only ordinary clicks.
   present). The client logic has no tests — CI doesn't run a client; check in game.
 `RayTraceHandler` (`mod/players/`, from CloudG360's BridgingMod) casts the reach-around's shifted ray.
 
+## Leaves you push through (`LeafMovement`, `LeafLitter`, `LeafReach`, `FallenLeavesBlock`, `LeavesMixin`, `LeafMovementMixin`, `LeavesMoveControlMixin`, client `LeavesView`)
+Design and numbers: `docs/superpowers/specs/2026-10-18-leaf-overhaul-design.md`, then
+`docs/superpowers/specs/2026-10-19-fallen-leaves-design.md` (fallen leaves, instant decay, swimming, the view; it
+supersedes the first spec's litter and soft landings). Tunables: `VersusSettings.Leaves`.
+- **Who passes**: living things except `Animal`s and `Spider`s (`LeafMovement.passes`). Everything else, and every
+  no-context or placement query, sees a full block.
+- **When a leaf is solid** (`LeafMovement.isSolid`, the collision shape): the passer is above it, not sneaking, not
+  gliding, fall distance ≤ 2.5. On the server a `Player`'s leaves are always open, because its client simulates its
+  movement. Never read velocity or change the entity there: shapes are asked many times a tick, on both sides.
+- **Movement** goes through `handleOnClimbable`'s return (`LeafMovement.adjust`), the motion after input and before
+  `move`. It applies a horizontal speed cap by weighted immersion (legs ×3), vertical drag on the swept box, and
+  climbing and descending with a foothold (leaves at the feet). It runs only where the entity is simulated (the client
+  for its player, the server for mobs).
+- **Falls**: `checkFallDamage` at its head caps the fall distance at the free-fall height of the tick's speed while in
+  leaves (`cushionFall`). The server counts a player's fall via `Entity.doCheckFallDamage` → `checkFallDamage`, so this
+  covers players. Leaves are deliberately not in `#fall_damage_resetting`.
+- **Mob jumping**: `MoveControl.tick` jumps a mob whose feet are inside a no-context-solid block, so
+  `LeavesMoveControlMixin` gives it the mob's own leaf shape there. Without it, mobs hop through hedges and climb them.
+- **Swimming**: a `@WrapOperation` on `travelInWater`'s `move` drags a swimmer in leaves (`LeafMovement.swim`,
+  `SWIM_DRAG`) and keeps the drag in its speed. `handleOnClimbable` isn't on the water path, so walking's cap never
+  reached swimmers.
+- **Litter**: `entityInside` (server) sheds by speed², `randomTick` sheds while decaying. A segment lands straight
+  down through leaves on ground it can survive on, joining any leaf pile (fallen leaves or leaf litter, up to four;
+  petals only petals). Tags `players-versus:sheds_fallen_leaves` (the green broad-leaved trees),
+  `sheds_leaf_litter` (the poplars) and `sheds_pink_petals` (cherry); spruce and pale oak shed nothing. Litter doesn't
+  soften a landing.
+- **Fallen leaves** (`players-versus:fallen_leaves`, `FallenLeavesBlock extends LeafLitterBlock` + `PERSISTENT`):
+  vanilla's leaf litter models tinted with `BlockTintSources.foliage()`. Natural piles brown into `LEAF_LITTER` on a
+  random tick (`FALLEN_LEAVES_BROWNING_CHANCE`); placed ones are persistent. Shears or Silk Touch drop them, anything
+  else leaf litter (loot table). The item's `COMPOSTABLE` is built directly (`minecraft:compostable/low`): item
+  components bind late, so copying leaf litter's at class load reads nothing.
+  Speed is measured as vanilla's sweet berry bush does: `getKnownMovement()` for a client-authoritative player (zeroed
+  by `handleClientTickEnd` on a client tick without movement), `position() - oldPosition()` for anything else. Never
+  the old position for a player: `commonTick` catches it up in the level tick, and a player's block effects run later,
+  in its connection tick (`tickPlayer` → `doTick`), so it always reads nothing.
+- **Decay** (`LeavesMixin.tick`, an `@Overwrite`): a natural leaf whose neighbours say its hold weakened searches for
+  an own log (`LeafReach.searchDistance`, six steps through natural leaves of its kind) and, finding none, decays at
+  once (drops, a litter chance, a particle puff); a felled crown falls a block a tick. Don't trust remembered
+  distances for instant decay: vanilla grows some leaves a step too far, and a leaf would die before its neighbour
+  corrects. `LeafReach` holds the rules (`LeavesMixin.playersVersus$isOwnLog` and both distance methods ask it) — own log tags (built by id: 26.4's `BlockTags` names only `JUNGLE_LOGS`,
+  `PALE_OAK_LOGS` and `LOGS`), oak leaves also take jungle logs (jungle bushes), azalea's two leaves are one kind,
+  vanilla's six-block reach. **Never key static maps by `Blocks.*` in a mixin of a block class**: its static init runs
+  while `Blocks` is still being built, so the keys are null (the old reach maps silently never worked).
+- **Tests**: `LeafMovementTest` (math); `LeavesGameTest` (husks walking, climbing, falling, sneaking, swimming;
+  litter and fallen leaves; decay, with two groves growing all 18 vanilla trees and checking none loses a leaf), in
+  `leaves_room`, `leaves_tower` and `leaves_grove` (48 x 40 x 48, its grass floor only) as SNBT in
+  `src/gametest/resources/.../gametest/structure/`.
+- **Client**: `LeavesRustling` uses `LeafMovement.measure` for every passer within 32 blocks; `LeavesView` (a HUD
+  element after `MISC_OVERLAYS`) frames the screen with the leaf's tinted texture while the camera is in leaves.
+
 ## Other blocks not read this pass
 `LadderBlockItem`/`LadderMixin` (README: implies ladder placement changes — replaces vanilla Ladder
 per the item-replacement pattern), `ScaffoldingItemMixin`, `CropMixin`/`SugarCaneMixin`/`ShortPlantMixin`
-(unregistered — see `architecture.md`)/`TallFlowerMixin`/`MossMixin`/`LeavesMixin` (leaf-and-flying
-behavior, README-called-out), `PointedDripstoneMixin` (rarity tweak per git log "Tweaked dripstone
+(unregistered — see `architecture.md`)/`TallFlowerMixin`/`MossMixin`, `PointedDripstoneMixin` (rarity tweak per git log "Tweaked dripstone
 to be a biiiit more rare"), `TntMixin`, `BlockMixin` (likely a grab-bag of small generic block
 tweaks — check first if a change doesn't obviously belong elsewhere). All under
 `mixin/environment/blocks/` — read the specific file before changing any one of these; this doc

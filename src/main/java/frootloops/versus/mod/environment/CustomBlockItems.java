@@ -3,14 +3,17 @@ package frootloops.versus.mod.environment;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.LadderBlockItem;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.item.component.Compostable;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider;
 
 import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getItemSettings;
 
@@ -77,6 +80,9 @@ public abstract class CustomBlockItems {
     public static final BlockItem WHEAT_GRASS = new BlockItem(CustomBlocks.WHEAT_GRASS, getBlockSettings("wheat_grass"));
     public static final BlockItem WILD_WHEAT = new BlockItem(CustomBlocks.WILD_WHEAT, getBlockSettings("wild_wheat"));
     public static final BlockItem CLOVERS = new BlockItem(CustomBlocks.CLOVERS, getBlockSettings("clovers"));
+    public static final BlockItem FALLEN_LEAVES = new BlockItem(CustomBlocks.FALLEN_LEAVES, getBlockSettings("fallen_leaves")
+            .component(DataComponents.COMPOSTABLE, new Compostable(ResourceKey.create(ResourceKey.<ContextIntProvider>createRegistryKey(
+                    Identifier.withDefaultNamespace("context_int_provider")), Identifier.withDefaultNamespace("compostable/low")))));
 
     public static final BlockItem CREEPER_SPORE_BLOSSOM = new BlockItem(CustomBlocks.CREEPER_SPORE_BLOSSOM, getBlockSettings("creeper_spore_blossom"));
 
