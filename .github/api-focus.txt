@@ -1,11 +1,6 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-member net.minecraft.world.item.AxeItem .
-calls net.minecraft.world.item.AxeItem getStripped|evaluateNewBlockState|useOn
-calls net.minecraft.client.multiplayer.ClientPacketListener handleMoveEntity|handleEntityPositionSync|handleTeleportEntity|handleSetEntityMotion|handleMovementPacket.*|handleRotateMob
-calls net.minecraft.world.entity.Entity moveOrInterpolateTo|lerpMotion|snapTo
-calls net.minecraft.client.renderer.entity.EntityRenderDispatcher submit|extractEntity
-calls net.minecraft.client.renderer.entity.EntityRenderer extractRenderState
-find StrippableBlock
-find registry/Strip
-member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase canBeReplaced|isSolid|blocksMotion|getCollisionShape
+find Strip
+find Axe
+uses STRIPPED_OAK_LOG
+uses stripped_oak_log
