@@ -2,6 +2,7 @@ package frootloops.versus;
 
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.CustomSpecialEffects;
+import frootloops.versus.mod.environment.blocks.trees.TopplePayload;
 import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
 import frootloops.versus.mod.items_and_effects.RegisteringCustomItems;
 import frootloops.versus.mod.items_and_effects.VanillaItems;
@@ -58,6 +59,7 @@ public class VersusMod implements ModInitializer {
 		MOD_LOGGER.info("Registering networking packets...");
 		PayloadTypeRegistry.serverboundPlay().register(RespawnNearbyPayload.ID, RespawnNearbyPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(MobMeleePayload.TYPE, MobMeleePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(TopplePayload.TYPE, TopplePayload.CODEC);
 		VersusModServer.addPacketRecievers();
 
 		MOD_LOGGER.info("Done! This mod is ready to party.");

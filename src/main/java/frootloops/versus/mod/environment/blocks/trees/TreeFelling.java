@@ -5,20 +5,29 @@ import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
@@ -26,98 +35,178 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Trees coming down, on the server, as Felling works them out. A tree block going (cut by a player, blown up, burnt,
- * pushed) that leaves anything with nothing holding it up creaks, and FELLING_DELAY ticks later, if nothing holds it up
- * by then, it falls away from whoever cut it: each tree block a falling block of its wood's vanilla log turned to lie
- * along the fall, each leaf of its crown a falling leaf, thrown so that a block h above the cut lands about h out. The
- * trunk lands as a fallen log one block thick, the rest of its wood as log items, the leaves burst as if they had
- * decayed where they land; a falling log hurts what it lands on as an anvil does, but never kills a player or a pet.
- * What the tree carries breaks as if mined: the creaking heart in its trunk, the bee nest on it, its bees coming out
- * angry at whoever cut it; vines and cocoa drop off as vanilla's do when their support goes.
+ * Trees coming down, on the server, as Felling works them out. A cut (a tree block going, or what its foot rests on:
+ * broken by a player, blown up, burnt, pushed, dug out) that leaves anything with nothing holding it up creaks, and
+ * FELLING_DELAY ticks later, if nothing holds it up by then, it comes down away from whoever cut it. Each of its blocks
+ * becomes a falling block: its tree blocks as themselves, the hives on it with their bees inside, the leaves of its
+ * crown. A tree standing over its cut turns over on its hinge as one body (Topple), faster as it goes, its clients
+ * turning it alike (TopplePayload); what it sweeps through it hurts by how fast it moves, and it is let go lying down,
+ * or where it hits something, each block flying on with the speed it had. Anything else drops. The trunk lands as a
+ * fallen log one block thick, the rest of its wood as log items, the leaves burst as if they had decayed where they
+ * land, a hive lands whole and its bees come out angry at whoever cut the tree; nothing a felled tree does kills a
+ * player or a pet. The creaking heart in the trunk breaks as if mined; vines and cocoa drop off as vanilla's do when
+ * their support goes.
  */
 public final class TreeFelling {
 
-    /** How a felled tree's falling blocks land (entity tags, so they keep through a save): as a fallen log, as an item, as a burst leaf. */
+    /** How a felled tree's falling blocks land (entity tags, so they keep through a save): as a fallen log, as an item, as a burst leaf, as a hive. */
     public static final String TRUNK = "players-versus.felled_trunk";
     public static final String BRANCH = "players-versus.felled_branch";
     public static final String LEAF = "players-versus.felled_leaf";
+    public static final String HIVE = "players-versus.felled_hive";
+    /** A felled tree's block that turned over far enough along x, or z, to land lying that way. */
+    public static final String TURNED_X = "players-versus.felled_turned_x";
+    public static final String TURNED_Z = "players-versus.felled_turned_z";
+
+    /** How long a tree may take turning over before it's let go, in ticks. */
+    private static final int MOST_SWING_TICKS = 200;
+    /** How far from a felled hive its bees look for whoever to go after, when nobody cut the tree, in blocks. */
+    private static final double BEE_REACH = 16.0;
 
     /** A cut waiting to bring its tree down: where, when, and who made it (if anyone). */
     private record Pending(BlockPos cut, long due, @Nullable Player cutter, @Nullable Vec3 from) {}
 
-    /** The player breaking a tree block right now: who made the cut that follows. */
+    /** The player breaking a tree block, or what one rests on, right now: who made the cut that follows. */
     private record Cutting(ServerLevel level, BlockPos pos, Player player) {}
 
+    /** A falling block of a felled tree turning over with it, where its centre started, and whether it's wood or a hive (not a leaf). */
+    private record Piece(FallingBlockEntity block, Vec3 start, boolean solid) {}
+
+    /** A felled tree's hive that landed whole, its bees to come out once it's in place. */
+    private record Landed(BlockPos pos, @Nullable Player cutter) {}
+
+    /** A felled group turning over as one: its pieces, the creatures it has hit, and who cut it. */
+    private static final class Swing {
+        final int id;
+        final Topple topple;
+        final List<Piece> pieces;
+        final @Nullable Player cutter;
+        final Set<LivingEntity> hit = new HashSet<>();
+        int ticks;
+
+        Swing(int id, Topple topple, List<Piece> pieces, @Nullable Player cutter) {
+            this.id = id;
+            this.topple = topple;
+            this.pieces = pieces;
+            this.cutter = cutter;
+        }
+    }
+
     private static final Map<ServerLevel, List<Pending>> PENDING = new WeakHashMap<>();
+    private static final Map<ServerLevel, List<Swing>> SWINGS = new WeakHashMap<>();
+    private static final Map<ServerLevel, List<Landed>> LANDED = new WeakHashMap<>();
+    private static final Map<FallingBlockEntity, Swing> SWINGING = new WeakHashMap<>();
+    private static final Map<FallingBlockEntity, Player> HIVE_CUTTERS = new WeakHashMap<>();
     private static @Nullable Cutting cutting;
-    /** While a tree comes down, its own blocks going are not cuts. */
+    /** While a tree comes down, its own blocks going are not cuts: the spots are checked once it's down. */
     private static boolean felling;
+    private static final Set<BlockPos> CHECK_AFTER = new LinkedHashSet<>();
+    private static int swings;
 
     private TreeFelling() {
     }
 
     public static void register() {
         ServerTickEvents.END_LEVEL_TICK.register(TreeFelling::tick);
+        PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
+            if (level instanceof ServerLevel server && (Felling.isPart(state) || Felling.isPart(level.getBlockState(pos.above())))) cutBy(server, pos, player);
+            return true;
+        });
     }
 
-    /** A player is about to break this tree block: they are the one cutting it. */
+    /** A player is about to break this tree block, or the block a tree rests on: they are the one cutting it. */
     public static void cutBy(ServerLevel level, BlockPos pos, Player player) {
         cutting = new Cutting(level, pos.immutable(), player);
     }
 
-    /**
-     * A tree block went from this spot: if that leaves anything with nothing holding it up, it creaks, and comes down
-     * soon. Not when what took its place is part of a tree itself (a creaking heart set in a trunk): that's no cut.
-     */
+    /** A tree block went from this spot, whatever took it: what it held up may come down. */
     public static void removed(ServerLevel level, BlockPos pos) {
-        Player cutter = cutting != null && cutting.level() == level && cutting.pos().equals(pos) ? cutting.player() : null;
-        cutting = null;
-        if (felling || !VersusSettings.Trees.DO_FELLING || Felling.isPart(level.getBlockState(pos))) return;
+        check(level, pos);
+    }
+
+    /** What a tree block rested on at this spot is gone or no longer holds it (TreeBlock.updateShape): what it held up may come down. */
+    public static void unheld(ServerLevel level, BlockPos pos) {
+        check(level, pos);
+    }
+
+    /**
+     * A cut at this spot: if that leaves anything with nothing holding it up, it creaks, and comes down soon. Twice at
+     * one spot (a tree block cut is also what the block above it rested on) is one cut, whoever made it.
+     */
+    private static void check(ServerLevel level, BlockPos cut) {
+        Player cutter = null;
+        if (cutting != null && cutting.level() == level && cutting.pos().equals(cut)) {
+            cutter = cutting.player();
+            cutting = null;
+        }
+        if (!VersusSettings.Trees.DO_FELLING) return;
+        if (felling) {
+            CHECK_AFTER.add(cut.immutable());
+            return;
+        }
         Vec3 from = cutter == null ? null : cutter.position();
-        if (Felling.afterCut(level, pos, from, level.getRandom()).isEmpty()) return;
-        level.playSound(null, pos, SoundEvents.CREAKING_HEART_HURT, SoundSource.BLOCKS, 1.0f, 0.5f);
-        PENDING.computeIfAbsent(level, key -> new ArrayList<>())
-                .add(new Pending(pos.immutable(), level.getGameTime() + VersusSettings.Trees.FELLING_DELAY, cutter, from));
+        if (Felling.unheld(level, cut, from, level.getRandom()).isEmpty()) return;
+        List<Pending> pending = PENDING.computeIfAbsent(level, key -> new ArrayList<>());
+        for (int i = 0; i < pending.size(); i++) {
+            Pending other = pending.get(i);
+            if (!other.cut().equals(cut)) continue;
+            if (other.cutter() == null && cutter != null) pending.set(i, new Pending(other.cut(), other.due(), cutter, from));
+            return;
+        }
+        level.playSound(null, cut, SoundEvents.CREAKING_HEART_HURT, SoundSource.BLOCKS, 1.0f, 0.5f);
+        pending.add(new Pending(cut.immutable(), level.getGameTime() + VersusSettings.Trees.FELLING_DELAY, cutter, from));
     }
 
     private static void tick(ServerLevel level) {
+        cutting = null;
+        List<Landed> landed = LANDED.remove(level);
+        if (landed != null) for (Landed hive : landed) beesOut(level, hive);
+        List<Swing> swinging = SWINGS.get(level);
+        if (swinging != null) swinging.removeIf(swing -> swing(level, swing));
         List<Pending> pending = PENDING.get(level);
         if (pending == null || pending.isEmpty()) return;
         List<Pending> due = new ArrayList<>();
         pending.removeIf(cut -> cut.due() <= level.getGameTime() && due.add(cut));
+        // What comes down is what nothing holds up now: a cut filled in the meantime holds its tree up again
         for (Pending cut : due) {
-            // Filled in the meantime with part of a tree, the cut holds it up again
-            if (Felling.isPart(level.getBlockState(cut.cut()))) continue;
-            for (Felling.Fall fall : Felling.afterCut(level, cut.cut(), cut.from(), level.getRandom())) fell(level, fall, cut);
+            for (Felling.Fall fall : Felling.unheld(level, cut.cut(), cut.from(), level.getRandom())) fell(level, fall, cut);
         }
     }
 
     private static void fell(ServerLevel level, Felling.Fall fall, Pending cut) {
         Direction way = fall.direction();
-        Set<BlockPos> trunk = trunk(fall.blocks(), cut.cut());
+        BlockPos at = cut.cut(), below = at.below();
+        Set<BlockPos> trunk = trunk(fall.blocks(), at);
+        // A tree standing over its cut turns over on it; anything else (a branch cut off) just drops
+        boolean topples = fall.blocks().contains(at.above()) && Felling.holds(level, below, level.getBlockState(below));
+        List<Piece> pieces = new ArrayList<>();
         felling = true;
         try {
-            carried(level, fall, cut.cutter());
+            for (BlockPos pos : fall.blocks()) {
+                if (level.getBlockState(pos).is(Blocks.CREAKING_HEART)) level.destroyBlock(pos, true, cut.cutter());
+            }
+            for (BlockPos pos : hives(level, fall)) pieces.add(new Piece(launchHive(level, pos, cut.cutter()), Vec3.atCenterOf(pos), true));
             int flying = 0;
             List<BlockPos> blocks = new ArrayList<>(fall.blocks());
             blocks.sort(Comparator.comparingInt(BlockPos::getY));
             for (BlockPos pos : blocks) {
                 BlockState state = level.getBlockState(pos);
-                if (!(state.getBlock() instanceof TreeBlock tree)) continue;
+                if (!(state.getBlock() instanceof TreeBlock)) continue;
                 if (flying++ >= VersusSettings.Trees.MOST_FALLING_BLOCKS) {
                     level.destroyBlock(pos, true);
                     continue;
                 }
-                Direction.Axis axis = turned(state.getValue(RotatedPillarBlock.AXIS), way.getAxis());
-                FallingBlockEntity log = launch(level, pos, tree.log().defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis), cut.cut(), way,
-                        trunk.contains(pos) ? TRUNK : BRANCH);
+                FallingBlockEntity log = launch(level, pos, state, trunk.contains(pos) ? TRUNK : BRANCH);
                 log.setHurtsEntities(VersusSettings.Trees.LOG_DAMAGE_PER_BLOCK, VersusSettings.Trees.MOST_LOG_DAMAGE);
+                pieces.add(new Piece(log, Vec3.atCenterOf(pos), true));
             }
             for (BlockPos pos : fall.crown()) {
                 BlockState leaf = level.getBlockState(pos);
@@ -127,11 +216,16 @@ public final class TreeFelling {
                     level.removeBlock(pos, false);
                     continue;
                 }
-                launch(level, pos, leaf, cut.cut(), way, LEAF);
+                pieces.add(new Piece(launch(level, pos, leaf, LEAF), Vec3.atCenterOf(pos), false));
             }
         } finally {
             felling = false;
         }
+        if (topples && !pieces.isEmpty()) swing(level, hinge(fall.blocks(), at, way), way, pieces, cut.cutter());
+        // What the fallen tree held up may come down too: another tree's branch resting on it
+        List<BlockPos> after = new ArrayList<>(CHECK_AFTER);
+        CHECK_AFTER.clear();
+        for (BlockPos pos : after) check(level, pos);
     }
 
     /** The trunk: each column of the group going straight up from just above the cut, within a block of it (a mega tree's four). */
@@ -149,55 +243,166 @@ public final class TreeFelling {
         return trunk;
     }
 
-    /** A log's axis once its tree has fallen over along this axis: standing up, it lies along the fall; lying along the fall, it stands. */
-    private static Direction.Axis turned(Direction.Axis axis, Direction.Axis fall) {
-        if (axis == Direction.Axis.Y) return fall;
-        return axis == fall ? Direction.Axis.Y : axis;
+    /** Where a group falling this way turns over: the front edge of its lowest layer, level with that layer's bottom. */
+    private static Vec3 hinge(Set<BlockPos> group, BlockPos cut, Direction way) {
+        int bottom = Integer.MAX_VALUE;
+        for (BlockPos pos : group) bottom = Math.min(bottom, pos.getY());
+        double front = Double.NEGATIVE_INFINITY;
+        for (BlockPos pos : group) {
+            if (pos.getY() == bottom) front = Math.max(front, (pos.getX() - cut.getX()) * way.getStepX() + (pos.getZ() - cut.getZ()) * way.getStepZ());
+        }
+        double reach = front + 0.5;
+        return new Vec3(cut.getX() + 0.5 + way.getStepX() * reach, bottom, cut.getZ() + 0.5 + way.getStepZ() * reach);
     }
 
-    /** This block of a falling tree, as a falling block thrown that way, fast enough that from h above the cut it lands about h out. */
-    private static FallingBlockEntity launch(ServerLevel level, BlockPos pos, BlockState state, BlockPos cut, Direction way, String role) {
+    /** The hives on the felled tree: any next to one of its tree blocks or the leaves going with it. */
+    private static Set<BlockPos> hives(ServerLevel level, Felling.Fall fall) {
+        Set<BlockPos> hives = new LinkedHashSet<>();
+        for (Set<BlockPos> part : List.of(fall.blocks(), fall.crown())) {
+            for (BlockPos pos : part) {
+                for (Direction side : Direction.values()) {
+                    BlockPos next = pos.relative(side);
+                    if (level.getBlockState(next).is(BlockTags.BEEHIVES)) hives.add(next.immutable());
+                }
+            }
+        }
+        return hives;
+    }
+
+    /** This block of a felled tree as a falling block, marked with how it lands. */
+    private static FallingBlockEntity launch(ServerLevel level, BlockPos pos, BlockState state, String role) {
         FallingBlockEntity block = FallingBlockEntity.fall(level, pos, state);
-        double speed = throwSpeed(pos.getY() - cut.getY());
-        block.setDeltaMovement(way.getStepX() * speed, 0.0, way.getStepZ() * speed);
         block.addTag(role);
         return block;
     }
 
-    /**
-     * How fast across to throw a block h above the cut so it lands about h out, falling as vanilla's falling blocks do:
-     * 0.04 a tick faster down, and both ways 2% slower, each tick.
-     */
-    static double throwSpeed(double height) {
-        if (height <= 0.0) return 0.0;
-        // A tick of a falling block: gravity, then the move, then both speeds lose 2%
-        double y = height, down = 0.0, across = 0.0, keep = 1.0;
-        for (int tick = 0; tick < 200 && y > 0.0; tick++) {
-            down -= 0.04;
-            y += down;
-            across += keep;
-            down *= 0.98;
-            keep *= 0.98;
-        }
-        return height / across;
+    /** A felled tree's hive as a falling block, its bees and honey inside it. */
+    private static FallingBlockEntity launchHive(ServerLevel level, BlockPos pos, @Nullable Player cutter) {
+        BlockEntity hive = level.getBlockEntity(pos);
+        CompoundTag data = hive == null ? null : hive.saveWithoutMetadata(level.registryAccess());
+        FallingBlockEntity block = launch(level, pos, level.getBlockState(pos), HIVE);
+        block.blockData = data;
+        if (cutter != null) HIVE_CUTTERS.put(block, cutter);
+        return block;
     }
 
-    /** What the felled tree carries breaks as if mined: the creaking heart in its trunk, the bee nests on it (their bees out after the cutter). */
-    private static void carried(ServerLevel level, Felling.Fall fall, @Nullable Player cutter) {
-        Set<BlockPos> nests = new HashSet<>();
-        for (BlockPos pos : fall.blocks()) {
-            if (level.getBlockState(pos).is(Blocks.CREAKING_HEART)) level.destroyBlock(pos, true, cutter);
-            for (Direction side : Direction.values()) {
-                BlockPos next = pos.relative(side);
-                if (level.getBlockState(next).is(Blocks.BEE_NEST)) nests.add(next.immutable());
+    /** This felled group starting to turn over on its hinge, its clients told so they turn it alike. */
+    private static void swing(ServerLevel level, Vec3 hinge, Direction way, List<Piece> pieces, @Nullable Player cutter) {
+        List<Topple.Mass> masses = new ArrayList<>();
+        for (Piece piece : pieces) masses.add(new Topple.Mass(piece.start(), piece.solid() ? 1.0 : Felling.LEAF_WEIGHT));
+        Swing swing = new Swing(swings++, Topple.of(hinge, way, masses), new ArrayList<>(pieces), cutter);
+        SWINGS.computeIfAbsent(level, key -> new ArrayList<>()).add(swing);
+        int[] blocks = new int[pieces.size()];
+        long[] starts = new long[pieces.size()];
+        for (int i = 0; i < pieces.size(); i++) {
+            Piece piece = pieces.get(i);
+            SWINGING.put(piece.block(), swing);
+            blocks[i] = piece.block().getId();
+            starts[i] = BlockPos.containing(piece.start()).asLong();
+        }
+        send(level, hinge, TopplePayload.start(swing.id, swing.topple, blocks, starts));
+    }
+
+    /**
+     * A tick of a felled group turning over: its blocks move round the hinge, its leaves burst against the ground, its
+     * wood hurts what it sweeps through. Lying down, hitting something solid on the way, or tipping back, it's let go.
+     *
+     * @return whether it's done
+     */
+    private static boolean swing(ServerLevel level, Swing swing) {
+        swing.pieces.removeIf(piece -> !piece.block().isAlive());
+        Topple topple = swing.topple;
+        if (swing.pieces.isEmpty()) {
+            send(level, topple.hinge(), TopplePayload.release(swing.id, topple.angle()));
+            return true;
+        }
+        topple.step();
+        boolean blocked = false;
+        for (Piece piece : swing.pieces) {
+            if (piece.solid() && obstructed(level, topple.centre(piece.start()))) {
+                blocked = true;
+                break;
             }
         }
-        for (BlockPos nest : nests) {
-            if (cutter != null && level.getBlockEntity(nest) instanceof BeehiveBlockEntity bees) {
-                bees.emptyAllLivingFromHive(cutter, level.getBlockState(nest), BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
-            }
-            level.destroyBlock(nest, true, cutter);
+        if (blocked) topple.undo();
+        swing.pieces.removeIf(piece -> !piece.solid() && burstAgainst(level, piece, topple.centre(piece.start())));
+        for (Piece piece : swing.pieces) {
+            Vec3 centre = topple.centre(piece.start());
+            piece.block().setPos(centre.x, centre.y - 0.5, centre.z);
+            piece.block().setDeltaMovement(topple.velocity(piece.start()));
+            if (piece.solid()) sweep(level, swing, piece, centre);
         }
+        if (!blocked && !topple.isDown() && topple.speed() > 0.0 && ++swing.ticks < MOST_SWING_TICKS) return false;
+        release(level, swing);
+        return true;
+    }
+
+    /** Whether a block's room round this centre runs into anything solid that isn't leaves. */
+    private static boolean obstructed(ServerLevel level, Vec3 centre) {
+        AABB box = AABB.ofSize(centre, 0.9, 0.9, 0.9);
+        for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir() || state.is(BlockTags.LEAVES)) continue;
+            VoxelShape shape = state.getCollisionShape(level, pos);
+            for (AABB part : shape.toAabbs()) if (part.move(pos).intersects(box)) return true;
+        }
+        return false;
+    }
+
+    /** A turning leaf about to go into the ground bursts where it is. */
+    private static boolean burstAgainst(ServerLevel level, Piece leaf, Vec3 centre) {
+        BlockPos next = BlockPos.containing(centre);
+        BlockState there = level.getBlockState(next);
+        if (there.is(BlockTags.LEAVES) || there.getCollisionShape(level, next).isEmpty()) return false;
+        burst(level, leaf.block().blockPosition(), leaf.block().getBlockState());
+        leaf.block().discard();
+        return true;
+    }
+
+    /** A turning log hits each creature in its way once, as hard as an anvil reaching its speed would. */
+    private static void sweep(ServerLevel level, Swing swing, Piece piece, Vec3 centre) {
+        double speed = swing.topple.velocity(piece.start()).length();
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, AABB.ofSize(centre, 1.0, 1.0, 1.0),
+                target -> target.isAlive() && !target.isSpectator() && !swing.hit.contains(target))) {
+            swing.hit.add(target);
+            float damage = sweepDamage(speed);
+            if (damage > 0.0f) target.hurtServer(level, level.damageSources().fallingBlock(piece.block()), damage);
+        }
+    }
+
+    /**
+     * What a felled tree's log hits a creature with at this speed (blocks a tick): what a falling log does landing from
+     * as high as it would fall to reach that speed, LOG_DAMAGE_PER_BLOCK a block after the first, at most MOST_LOG_DAMAGE.
+     */
+    public static float sweepDamage(double speed) {
+        double height = speed * speed / (2.0 * Topple.GRAVITY);
+        int blocks = Math.max(0, (int) Math.ceil(height - 1.0));
+        return Math.min(VersusSettings.Trees.MOST_LOG_DAMAGE, VersusSettings.Trees.LOG_DAMAGE_PER_BLOCK * blocks);
+    }
+
+    /** A felled group let go: each block flies on as fast as it moved, a trunk turned far enough over to lie along the way it fell. */
+    private static void release(ServerLevel level, Swing swing) {
+        Topple topple = swing.topple;
+        String turned = topple.angle() < Topple.DOWN / 2.0 ? null : topple.way().getAxis() == Direction.Axis.X ? TURNED_X : TURNED_Z;
+        for (Piece piece : swing.pieces) {
+            SWINGING.remove(piece.block());
+            piece.block().setDeltaMovement(topple.velocity(piece.start()));
+            piece.block().needsSync = true;
+            if (turned != null) piece.block().addTag(turned);
+        }
+        send(level, topple.hinge(), TopplePayload.release(swing.id, topple.angle()));
+    }
+
+    private static void send(ServerLevel level, Vec3 near, TopplePayload payload) {
+        for (ServerPlayer player : PlayerLookup.tracking(level, BlockPos.containing(near))) {
+            if (ServerPlayNetworking.canSend(player, TopplePayload.TYPE.id())) ServerPlayNetworking.send(player, payload);
+        }
+    }
+
+    /** A log's axis once its tree has turned over along this axis: standing up, it lies along the fall; lying along the fall, it stands. */
+    private static Direction.Axis turned(Direction.Axis axis, Direction.Axis fall) {
+        if (axis == Direction.Axis.Y) return fall;
+        return axis == fall ? Direction.Axis.Y : axis;
     }
 
     /** A leaf bursting as if it decayed here: its drops fall, and its shed settles on the ground below by chance. */
@@ -209,39 +414,87 @@ public final class TreeFelling {
     /** Whether this falling block is part of a felled tree. */
     public static boolean isFelled(FallingBlockEntity block) {
         Set<String> tags = block.entityTags();
-        return tags.contains(TRUNK) || tags.contains(BRANCH) || tags.contains(LEAF);
+        return tags.contains(TRUNK) || tags.contains(BRANCH) || tags.contains(LEAF) || tags.contains(HIVE);
+    }
+
+    /** Whether this falling block is turning over with its tree, moved by it and not by its own fall. */
+    public static boolean isSwinging(FallingBlockEntity block) {
+        return SWINGING.containsKey(block);
     }
 
     /**
-     * A felled tree's falling block landing at this spot: a trunk log lands as a block, unless it would lie on another
-     * log (the fallen log is one block thick) or a creature is there; else it breaks: a log into its item, a leaf as if it
-     * decayed there.
-     *
-     * @return whether to place it as vanilla would
+     * What a felled tree's falling block lands as at this spot, or null when it breaks there instead (breakOnLanding): a
+     * trunk block as its wood's log, lying along the way its tree turned over if it did, unless it would lie on another
+     * log (the fallen log is one block thick) or a creature is there; a hive as itself.
      */
-    public static boolean land(ServerLevel level, FallingBlockEntity block, BlockPos pos) {
+    public static @Nullable BlockState landing(ServerLevel level, FallingBlockEntity block, BlockPos pos, BlockState state) {
         Set<String> tags = block.entityTags();
+        if (tags.contains(HIVE)) return state;
         if (tags.contains(TRUNK) && !level.getBlockState(pos.below()).is(BlockTags.LOGS)
-                && level.getEntitiesOfClass(LivingEntity.class, new AABB(pos)).isEmpty()) return true;
+                && level.getEntitiesOfClass(LivingEntity.class, new AABB(pos)).isEmpty()) return lying(state, tags);
         breakOnLanding(level, block, pos);
-        return false;
+        return null;
     }
 
-    /** A felled tree's falling block that can't land whole: a log drops as its item, a leaf bursts. */
+    /** A trunk's block landed: its wood's log, turned as its tree turned over. */
+    private static BlockState lying(BlockState state, Set<String> tags) {
+        BlockState log = state.getBlock() instanceof TreeBlock tree ? tree.log().defaultBlockState() : state;
+        if (!state.hasProperty(RotatedPillarBlock.AXIS) || !log.hasProperty(RotatedPillarBlock.AXIS)) return log;
+        Direction.Axis axis = state.getValue(RotatedPillarBlock.AXIS);
+        if (tags.contains(TURNED_X)) axis = turned(axis, Direction.Axis.X);
+        else if (tags.contains(TURNED_Z)) axis = turned(axis, Direction.Axis.Z);
+        return log.setValue(RotatedPillarBlock.AXIS, axis);
+    }
+
+    /** A felled tree's falling block landed whole here: a hive's bees come out once its block is in place. */
+    public static void landed(ServerLevel level, FallingBlockEntity block, BlockPos pos) {
+        if (block.entityTags().contains(HIVE)) LANDED.computeIfAbsent(level, key -> new ArrayList<>()).add(new Landed(pos.immutable(), HIVE_CUTTERS.get(block)));
+    }
+
+    /** A felled tree's falling block that can't land whole: a log drops as its wood's log, a leaf bursts, a hive breaks and lets its bees out. */
     public static void breakOnLanding(ServerLevel level, FallingBlockEntity block, BlockPos pos) {
-        if (block.entityTags().contains(LEAF)) burst(level, pos, block.getBlockState());
-        else block.spawnAtLocation(level, block.getBlockState().getBlock());
+        Set<String> tags = block.entityTags();
+        BlockState state = block.getBlockState();
+        if (tags.contains(LEAF)) burst(level, pos, state);
+        else if (tags.contains(HIVE)) {
+            releaseBees(level, block, Vec3.atCenterOf(pos));
+            Block.dropResources(state, level, pos);
+        } else block.spawnAtLocation(level, state.getBlock() instanceof TreeBlock tree ? tree.log() : state.getBlock());
     }
 
-    /** What a falling tree's log does to this creature: as an anvil would, but never its last half heart, a player's or a pet's. */
+    /** A landed hive's bees come out, angry. */
+    private static void beesOut(ServerLevel level, Landed hive) {
+        BlockState state = level.getBlockState(hive.pos());
+        if (level.getBlockEntity(hive.pos()) instanceof BeehiveBlockEntity bees) bees.emptyAllLivingFromHive(null, state, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+        anger(level, Vec3.atCenterOf(hive.pos()), hive.cutter());
+    }
+
+    /** The bees a broken felled hive carried come out where it broke, angry. */
+    private static void releaseBees(ServerLevel level, FallingBlockEntity hive, Vec3 at) {
+        if (hive.blockData != null && hive.blockData.get("bees") != null) {
+            List<BeehiveBlockEntity.Occupant> bees = BeehiveBlockEntity.Occupant.LIST_CODEC
+                    .parse(level.registryAccess().createSerializationContext(NbtOps.INSTANCE), hive.blockData.get("bees")).result().orElse(List.of());
+            for (BeehiveBlockEntity.Occupant occupant : bees) {
+                Entity bee = occupant.createEntity(level, BlockPos.containing(at));
+                if (bee == null) continue;
+                bee.snapTo(at.x, at.y, at.z, level.getRandom().nextFloat() * 360.0f, 0.0f);
+                level.addFreshEntity(bee);
+            }
+        }
+        anger(level, at, HIVE_CUTTERS.get(hive));
+    }
+
+    /** The bees round a felled hive go after whoever cut its tree, or the nearest player when nobody did. */
+    private static void anger(ServerLevel level, Vec3 at, @Nullable Player cutter) {
+        Player target = cutter != null && cutter.isAlive() && cutter.level() == level ? cutter : level.getNearestPlayer(at.x, at.y, at.z, BEE_REACH, false);
+        if (target == null) return;
+        for (Bee bee : level.getEntitiesOfClass(Bee.class, AABB.ofSize(at, 16.0, 12.0, 16.0), bee -> bee.getTarget() == null)) bee.setTarget(target);
+    }
+
+    /** What a felled tree does to this creature: as much as ever, but never its last half heart, a player's or a pet's. */
     public static float spare(LivingEntity entity, DamageSource source, float amount) {
         if (!(source.getDirectEntity() instanceof FallingBlockEntity block) || !isFelled(block)) return amount;
         if (!(entity instanceof Player) && !(entity instanceof OwnableEntity owned && owned.getOwnerReference() != null)) return amount;
         return Math.min(amount, Math.max(0.0f, entity.getHealth() - 1.0f));
-    }
-
-    /** While a felled tree's own blocks go, so no removal of them counts as a cut. */
-    public static boolean isFelling() {
-        return felling;
     }
 }

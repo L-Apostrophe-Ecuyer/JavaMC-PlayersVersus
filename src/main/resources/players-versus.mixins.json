@@ -24,6 +24,7 @@
     "environment.worldgen.WorldPresetsMixin",
     "environment.worldgen.WorldPresetServerDefaultMixin",
     "environment.worldgen.TreeFeatureMixin",
+    "environment.worldgen.FallenTreeFeatureMixin",
 
     "environment.worldgen.structures.DungeonsMixin",
     "environment.worldgen.structures.StructurePieceMixin",
@@ -41,6 +42,7 @@
     "environment.blocks.LeavesMixin",
     "environment.blocks.FelledTreeDamageMixin",
     "environment.blocks.FelledTreeLandingMixin",
+    "environment.blocks.TreeDigMixin",
     "environment.blocks.LeavesMoveControlMixin",
     "environment.blocks.MossMixin",
     "environment.blocks.NetherWartMixin",

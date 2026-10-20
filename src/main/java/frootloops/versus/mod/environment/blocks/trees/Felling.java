@@ -25,8 +25,9 @@ import org.jetbrains.annotations.Nullable;
 /**
  * How a tree falls (step 2 of docs/superpowers/specs/2026-10-19-trees-design.md), worked out from the blocks alone, so
  * the server and a client asking the same blocks agree: what a cut leaves with nothing holding it up, which way each
- * group of it goes, which leaves go with it, and how much longer the cut takes. Nothing here changes the world; what
- * brings a tree down builds on it.
+ * group of it goes, which leaves go with it, and how much longer the cut takes. A cut is any block going that a tree
+ * needed: one of its tree blocks, or what its foot rests on (the ground under its trunk). Nothing here changes the
+ * world; what brings a tree down builds on it.
  */
 public final class Felling {
 
@@ -36,8 +37,8 @@ public final class Felling {
     /** Tree blocks connected to each other, and whether that's all of them (not when there were too many, or unloaded chunks). */
     private record Group(Set<BlockPos> blocks, boolean complete) {}
 
-    /** What a leaf going with a tree weighs, against one of its tree blocks, for which way the tree leans. */
-    private static final double LEAF_WEIGHT = 0.25;
+    /** What a leaf going with a tree weighs, against one of its tree blocks, for which way the tree leans and how it turns over. */
+    public static final double LEAF_WEIGHT = 0.25;
     /** How far a tree's leaves reach from it through leaves: vanilla's six steps. */
     private static final int CROWN_REACH = 6;
 
@@ -46,8 +47,20 @@ public final class Felling {
 
     /** What falls were the block at this spot cut (whether or not it's gone yet), by a cutter standing here or nobody. */
     public static List<Fall> afterCut(LevelReader level, BlockPos cut, @Nullable Vec3 cutter, RandomSource random) {
-        Set<BlockPos> gone = Set.of(cut.immutable());
-        List<Set<BlockPos>> groups = falling(level, gone);
+        BlockPos at = cut.immutable();
+        return falls(level, at, Set.of(at), cutter, random);
+    }
+
+    /**
+     * What falls from round this spot as the world stands now, the spot itself as it is: what a cut brings down once
+     * it's made, unless the spot has been filled again with something that holds the tree up.
+     */
+    public static List<Fall> unheld(LevelReader level, BlockPos cut, @Nullable Vec3 cutter, RandomSource random) {
+        return falls(level, cut.immutable(), Set.of(), cutter, random);
+    }
+
+    private static List<Fall> falls(LevelReader level, BlockPos cut, Set<BlockPos> gone, @Nullable Vec3 cutter, RandomSource random) {
+        List<Set<BlockPos>> groups = falling(level, cut, gone);
         if (groups.isEmpty()) return List.of();
         Set<BlockPos> leaving = new HashSet<>(gone);
         groups.forEach(leaving::addAll);
@@ -62,24 +75,31 @@ public final class Felling {
     /** How many times as long as a log's cutting the tree block at this spot takes: 1 + CUT_TIME_SCALE x sqrt(what would fall). */
     public static double cutTimeFactor(LevelReader level, BlockPos pos) {
         int falling = 0;
-        for (Set<BlockPos> group : falling(level, Set.of(pos.immutable()))) falling += group.size();
+        for (Set<BlockPos> group : falling(level, pos.immutable(), Set.of(pos.immutable()))) falling += group.size();
         return 1.0 + VersusSettings.Trees.CUT_TIME_SCALE * Math.sqrt(falling);
     }
 
     /**
-     * The groups of tree blocks next to these spots (by faces, edges or corners) that nothing would hold up were the
-     * blocks there gone. A group too big to follow, or reaching chunks that aren't loaded, counts as standing.
+     * How many times as long as usual breaking this block takes: part of a tree, or the block a tree rests on, as long
+     * as cutting it would (cutTimeFactor); anything else, as long as ever.
      */
-    private static List<Set<BlockPos>> falling(LevelReader level, Set<BlockPos> gone) {
+    public static double digTimeFactor(LevelReader level, BlockPos pos, BlockState state) {
+        if (!isPart(state) && !isPart(level.getBlockState(pos.above()))) return 1.0;
+        return cutTimeFactor(level, pos);
+    }
+
+    /**
+     * The groups of tree blocks round this spot (by faces, edges or corners) that nothing would hold up, taking the
+     * blocks in gone as gone. A group too big to follow, or reaching chunks that aren't loaded, counts as standing.
+     */
+    private static List<Set<BlockPos>> falling(LevelReader level, BlockPos around, Set<BlockPos> gone) {
         List<Set<BlockPos>> falling = new ArrayList<>();
         Set<BlockPos> seen = new HashSet<>(gone);
-        for (BlockPos removed : gone) {
-            for (BlockPos next : BlockPos.betweenClosed(removed.offset(-1, -1, -1), removed.offset(1, 1, 1))) {
-                if (seen.contains(next) || !level.hasChunkAt(next) || !(level.getBlockState(next).getBlock() instanceof TreeBlock)) continue;
-                Group group = group(level, next.immutable(), gone);
-                seen.addAll(group.blocks());
-                if (group.complete() && !standing(level, group.blocks(), gone)) falling.add(group.blocks());
-            }
+        for (BlockPos next : BlockPos.betweenClosed(around.offset(-1, -1, -1), around.offset(1, 1, 1))) {
+            if (seen.contains(next) || !level.hasChunkAt(next) || !(level.getBlockState(next).getBlock() instanceof TreeBlock)) continue;
+            Group group = group(level, next.immutable(), gone);
+            seen.addAll(group.blocks());
+            if (group.complete() && !standing(level, group.blocks(), gone)) falling.add(group.blocks());
         }
         return falling;
     }
@@ -106,17 +126,21 @@ public final class Felling {
     }
 
     /** A tree block, or a creaking heart in a trunk of them. */
-    static boolean isPart(BlockState state) {
+    public static boolean isPart(BlockState state) {
         return state.getBlock() instanceof TreeBlock || state.is(Blocks.CREAKING_HEART);
     }
 
-    /** Whether something outside the group holds it up: one of its blocks resting on a sturdy top face below it, never leaves. */
+    /** Whether this block, at this spot, holds up a tree resting on it: part of a tree, or a sturdy top face that isn't leaves. */
+    public static boolean holds(LevelReader level, BlockPos pos, BlockState state) {
+        return isPart(state) || !state.is(BlockTags.LEAVES) && state.isFaceSturdy(level, pos, Direction.UP);
+    }
+
+    /** Whether something outside the group holds it up: one of its blocks resting on a block that holds it (holds). */
     private static boolean standing(LevelReader level, Set<BlockPos> group, Set<BlockPos> gone) {
         for (BlockPos pos : group) {
             BlockPos below = pos.below();
             if (group.contains(below) || gone.contains(below)) continue;
-            BlockState state = level.getBlockState(below);
-            if (!state.is(BlockTags.LEAVES) && state.isFaceSturdy(level, below, Direction.UP)) return true;
+            if (holds(level, below, level.getBlockState(below))) return true;
         }
         return false;
     }

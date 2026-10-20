@@ -110,15 +110,25 @@ public abstract class VersusSettings {
         public static double CUT_TIME_SCALE = 0.5;
         public static double LEAN = 1.5;
         public static int MOST_TREE_BLOCKS = 1024;
-        // A cut that fells anything creaks, and the tree comes down this many ticks later if nothing holds it up by then
+        // A cut (a tree block, or the block a tree rests on, breaking, which takes as long as cutting there would) that
+        // fells anything creaks, and the tree comes down this many ticks later if nothing holds it up by then
         // (TreeFelling): as falling blocks, at most MOST_FALLING_BLOCKS (tree blocks first, the rest break where they
-        // stand); a falling log hurts what it lands on as an anvil does, LOG_DAMAGE_PER_BLOCK for each block it fell
-        // after the first, at most MOST_LOG_DAMAGE, never taking the last half heart from a player or an owned animal
+        // stand), a tree standing over its cut turning over on its hinge as one (Topple); a log hurts what it hits as
+        // an anvil does, LOG_DAMAGE_PER_BLOCK for each block it fell (or would have fallen, to go as fast) after the
+        // first, at most MOST_LOG_DAMAGE, never taking the last half heart from a player or an owned animal
         public static boolean DO_FELLING = true;
         public static int FELLING_DELAY = 10;
         public static float LOG_DAMAGE_PER_BLOCK = 2.0f;
         public static int MOST_LOG_DAMAGE = 10;
         public static int MOST_FALLING_BLOCKS = 512;
+        // A growing tree puts rooted dirt under its trunk, not dirt (TreeBlocks)
+        public static boolean ROOTED_DIRT_UNDER_TREES = true;
+        // A pale oak's trunk goes on down into the ground as roots, ROOT_DEPTH_MIN to ROOT_DEPTH_MAX blocks, and its
+        // creaking heart moves down into them HEART_IN_ROOTS of the time (TreeRoots)
+        public static boolean DO_ROOTS = true;
+        public static int ROOT_DEPTH_MIN = 3;
+        public static int ROOT_DEPTH_MAX = 5;
+        public static float HEART_IN_ROOTS = 0.75f;
     }
 
     public static class Items {

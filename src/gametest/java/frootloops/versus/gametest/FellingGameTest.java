@@ -4,8 +4,10 @@ import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.trees.Felling;
 import frootloops.versus.mod.environment.blocks.trees.TreeBlock;
+import frootloops.versus.mod.environment.blocks.trees.TreeFelling;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,11 +27,15 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.animal.bee.Bee;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -201,6 +207,11 @@ public class FellingGameTest {
         return count;
     }
 
+    /** The room's space, in the world. */
+    private static AABB room(GameTestHelper helper) {
+        return AABB.encapsulatingFullBlocks(helper.absolutePos(new BlockPos(0, 0, 0)), helper.absolutePos(new BlockPos(13, 7, 7)));
+    }
+
     /** A player standing here breaks the block at this spot, as they would in survival. */
     private static void cutAsAPlayer(GameTestHelper helper, int x, int y, int z, Vec3 standing) {
         ServerPlayer player = FakePlayer.get(helper.getLevel());
@@ -309,17 +320,100 @@ public class FellingGameTest {
         });
     }
 
-    /** What a felled tree carries breaks as if mined: the bee nest on it and the creaking heart in its trunk. */
-    @GameTest(structure = ROOM, maxTicks = 120)
-    public void aFelledTreesBeeNestAndHeartBreak(GameTestHelper helper) {
+    /**
+     * The creaking heart in a felled tree's trunk breaks as if mined; the bee nest on it falls with it, lands whole, and
+     * lets its bees out angry.
+     */
+    @GameTest(structure = ROOM, maxTicks = 140)
+    public void aFelledTreesHeartBreaksAndItsHiveFallsWithItsBeesAngry(GameTestHelper helper) {
         floor(helper);
         fill(helper, 3, 1, 3, 3, 6, 3, oakTree());
         helper.setBlock(3, 4, 3, Blocks.CREAKING_HEART.defaultBlockState());
         helper.setBlock(3, 5, 4, Blocks.BEE_NEST.defaultBlockState());
+        BeehiveBlockEntity nest = (BeehiveBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(new BlockPos(3, 5, 4)));
+        for (int i = 0; i < 2; i++) nest.addOccupant(helper.spawn(EntityTypes.BEE, new BlockPos(5, 2, 6)));
+        helper.assertTrue(nest.getOccupantCount() == 2, "the nest holds " + nest.getOccupantCount() + " bees, not two");
         cutAsAPlayer(helper, 3, 1, 3, new Vec3(0.5, 1.0, 3.5));
-        helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 60, () -> {
-            helper.assertTrue(count(helper, 0, 1, 0, 13, 7, 7, state -> state.is(Blocks.BEE_NEST)) == 0, "the felled tree's bee nest is still there");
+        helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 90, () -> {
             helper.assertTrue(count(helper, 0, 1, 0, 13, 7, 7, state -> state.is(Blocks.CREAKING_HEART)) == 0, "the felled tree's creaking heart is still there");
+            helper.assertTrue(count(helper, 4, 1, 0, 13, 1, 7, state -> state.is(Blocks.BEE_NEST)) == 1, "the felled tree's bee nest didn't land on the ground beyond the stump");
+            List<Bee> bees = helper.getLevel().getEntitiesOfClass(Bee.class, room(helper).inflate(8.0));
+            helper.assertTrue(bees.size() == 2, bees.size() + " bees came out of the felled nest, not two");
+            helper.assertTrue(bees.stream().allMatch(bee -> bee.getPersistentAngerTarget() != null), "the felled nest's bees aren't angry");
+            helper.succeed();
+        });
+    }
+
+    /**
+     * Digging out the block a tree stands on takes as long as cutting its trunk there would, and brings it down the
+     * same way, away from whoever dug: it turns over on the edge of the hole and lies on the ground beyond it.
+     */
+    @GameTest(structure = ROOM, maxTicks = 140)
+    public void diggingUnderATreeIsSlowAndBringsItDown(GameTestHelper helper) {
+        floor(helper);
+        helper.setBlock(3, 0, 3, Blocks.DIRT.defaultBlockState());
+        helper.setBlock(9, 0, 3, Blocks.DIRT.defaultBlockState());
+        fill(helper, 3, 1, 3, 3, 6, 3, oakTree());
+        ServerPlayer player = FakePlayer.get(helper.getLevel());
+        BlockPos under = new BlockPos(3, 0, 3), bare = new BlockPos(9, 0, 3);
+        float underTree = helper.getBlockState(under).getDestroyProgress(player, helper.getLevel(), helper.absolutePos(under));
+        float alone = helper.getBlockState(bare).getDestroyProgress(player, helper.getLevel(), helper.absolutePos(bare));
+        double slower = alone / underTree;
+        helper.assertTrue(Math.abs(slower - (1.0 + 0.5 * Math.sqrt(6.0))) < 1.0E-3, "the dirt under a six-block trunk digs " + slower + " times slower than bare dirt");
+        cutAsAPlayer(helper, 3, 0, 3, new Vec3(0.5, 1.0, 3.5));
+        helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 80, () -> {
+            helper.assertTrue(count(helper, 0, 1, 0, 13, 7, 7, state -> state.getBlock() instanceof TreeBlock) == 0, "the tree dug out from under is still standing");
+            List<String> wrong = new ArrayList<>();
+            int logs = 0;
+            for (BlockPos pos : BlockPos.betweenClosed(0, 1, 0, 13, 7, 7)) {
+                BlockState state = helper.getBlockState(pos);
+                if (!state.is(Blocks.OAK_LOG)) continue;
+                logs++;
+                if (state.getValue(RotatedPillarBlock.AXIS) != Direction.Axis.X || pos.getX() <= 3 || pos.getY() != 1) wrong.add(pos.toShortString());
+            }
+            helper.assertTrue(logs >= 3, "the tree dug out from under left " + logs + " logs on the ground");
+            helper.assertTrue(wrong.isEmpty(), "logs that don't lie east of the hole along x, on the ground: " + wrong);
+            helper.succeed();
+        });
+    }
+
+    /** A cut filled in before the tree comes down holds it up: it creaks, and stays. */
+    @GameTest(structure = ROOM, maxTicks = 80)
+    public void aCutFilledInTimeHoldsTheTreeUp(GameTestHelper helper) {
+        floor(helper);
+        fill(helper, 3, 1, 3, 3, 6, 3, oakTree());
+        cutAsAPlayer(helper, 3, 1, 3, new Vec3(0.5, 1.0, 3.5));
+        helper.runAfterDelay(3, () -> helper.setBlock(3, 1, 3, Blocks.COBBLESTONE.defaultBlockState()));
+        helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 20, () -> {
+            helper.assertTrue(count(helper, 3, 2, 3, 3, 6, 3, state -> state.getBlock() instanceof TreeBlock) == 5, "the tree came down though its cut was filled in");
+            helper.succeed();
+        });
+    }
+
+    /**
+     * A felled tree turns over as one body: partway down, its trunk's falling blocks are as far from each other as they
+     * were standing, its top already leaning out the way it falls.
+     */
+    @GameTest(structure = ROOM, maxTicks = 80)
+    public void aFellingTreeTurnsOverAsOne(GameTestHelper helper) {
+        floor(helper);
+        fill(helper, 3, 1, 3, 3, 6, 3, oakTree());
+        cutAsAPlayer(helper, 3, 1, 3, new Vec3(0.5, 1.0, 3.5));
+        helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 14, () -> {
+            List<FallingBlockEntity> trunk = helper.getLevel().getEntitiesOfClass(FallingBlockEntity.class, room(helper),
+                    block -> block.entityTags().contains(TreeFelling.TRUNK));
+            helper.assertTrue(trunk.size() == 5, "the turning trunk has " + trunk.size() + " falling blocks, not five");
+            List<String> bent = new ArrayList<>();
+            for (FallingBlockEntity a : trunk) {
+                for (FallingBlockEntity b : trunk) {
+                    double apart = a.position().distanceTo(b.position()), were = Math.sqrt(a.getStartPos().distSqr(b.getStartPos()));
+                    if (Math.abs(apart - were) > 0.05) bent.add(a.getStartPos().toShortString() + "-" + b.getStartPos().toShortString() + " " + apart + " not " + were);
+                }
+            }
+            helper.assertTrue(bent.isEmpty(), "the turning trunk bends: " + bent);
+            trunk.sort(Comparator.comparingInt(block -> block.getStartPos().getY()));
+            double lean = trunk.getLast().getX() - trunk.getFirst().getX();
+            helper.assertTrue(lean > 0.3, "partway down, cut from the west, its top leans " + lean + " east of its foot");
             helper.succeed();
         });
     }
