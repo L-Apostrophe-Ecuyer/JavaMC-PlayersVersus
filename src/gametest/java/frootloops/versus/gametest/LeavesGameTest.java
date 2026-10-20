@@ -43,9 +43,13 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SegmentableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Leaves as husks (which don't burn) find them on the game test server: pushing through, climbing, sinking, falling onto
@@ -239,6 +243,42 @@ public class LeavesGameTest {
             helper.assertTrue(damageTaken(husk) == 0.0, "sinking through leaves hurt it");
             helper.succeed();
         });
+    }
+
+    /**
+     * The server checks every move a player's client reports: it snaps the player back if the move ran into anything
+     * new (26.4's pre-move collisions, asked as from where the player was), and looks for the block holding a player up
+     * who says they're on the ground ("standing on air" when there's none). Both must see leaves as the player does.
+     */
+    @GameTest(structure = ROOM)
+    public void theServersMoveCheckSeesLeavesAsThePlayerDoes(GameTestHelper helper) {
+        floor(helper, 14, 8);
+        helper.setBlock(3, 1, 2, leaves(Blocks.OAK_LEAVES));
+        helper.setBlock(3, 2, 2, leaves(Blocks.OAK_LEAVES));
+        helper.setBlock(6, 1, 2, leaves(Blocks.OAK_LEAVES));
+        ServerLevel level = helper.getLevel();
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+        // Walking into a hedge: the server snaps a player back if the move ran into anything new
+        Vec3 beside = helper.absoluteVec(new Vec3(2.5, 1.0, 2.5));
+        player.setPos(beside.x, beside.y, beside.z);
+        AABB before = player.getBoundingBox();
+        AABB into = before.move(0.6, 0.0, 0.0).deflate(1.0E-5);
+        int hit = 0;
+        for (VoxelShape shape : level.getPreMoveCollisions(player, into, before.getBottomCenter())) {
+            if (Shapes.joinIsNotEmpty(shape, Shapes.create(into), BooleanOp.AND)) hit++;
+        }
+        CollisionContext moveCheck = CollisionContext.withPosition(player, before.minY);
+        helper.assertTrue(hit == 0, "the server's move check ran into " + hit + " leaf shapes (its context: placement "
+                + moveCheck.isPlacement() + ")");
+
+        // Standing on a leaf: the server looks for the block holding the player up
+        Vec3 onTop = helper.absoluteVec(new Vec3(6.5, 2.0, 2.5));
+        player.setPos(onTop.x, onTop.y, onTop.z);
+        AABB feet = player.getBoundingBox();
+        boolean held = level.findSupportingBlock(player, new AABB(feet.minX, feet.minY - 1.0E-6, feet.minZ, feet.maxX, feet.minY, feet.maxZ)).isPresent();
+        helper.assertTrue(held, "the server found nothing under a player standing on a leaf");
+        helper.succeed();
     }
 
     /** On the server a player's leaves are always open (its client decides); a mob above them stands on them. */
