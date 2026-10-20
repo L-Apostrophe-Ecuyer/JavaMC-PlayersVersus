@@ -1,2 +1,11 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
+uses does not have OIT pipelines set up
+uses linesTranslucent
+calls net.minecraft.server.network.ServerGamePacketListenerImpl handleMovePlayer|isPlayerCollidingWithAnythingNew|teleport
+calls net.minecraft.world.phys.shapes.EntityCollisionContext .*
+calls net.minecraft.world.phys.shapes.CollisionContext .*
+calls net.minecraft.world.entity.LivingEntity aiStep|travel|canSimulateMovement|isEffectiveAi|handleOnClimbable
+calls net.minecraft.client.player.LocalPlayer aiStep|moveTowardsClosestSpace|suffocatesAt|tick
+calls net.minecraft.server.level.ServerPlayer tick|doTick|doCheckFallDamage|checkFallDamage|aiStep
+member net.minecraft.world.entity.Entity collide|isFree|canSimulateMovement|isControlledByLocalInstance
