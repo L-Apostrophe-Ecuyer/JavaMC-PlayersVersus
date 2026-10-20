@@ -68,6 +68,8 @@ public final class TreeFelling {
     public static final String TURNED_X = "players-versus.felled_turned_x";
     public static final String TURNED_Z = "players-versus.felled_turned_z";
 
+    /** A falling block's gravity, blocks a tick per tick: what a swept creature's damage is measured by, as a falling log's. */
+    private static final double FALLING_BLOCK_GRAVITY = 0.04;
     /** How long a tree may take turning over before it's let go, in ticks. */
     private static final int MOST_SWING_TICKS = 200;
     /** How far from a felled hive its bees look for whoever to go after, when nobody cut the tree, in blocks. */
@@ -97,6 +99,8 @@ public final class TreeFelling {
         final Set<LivingEntity> hit = new HashSet<>();
         /** The players told it started, who are told when it stops. */
         final Set<ServerPlayer> told = new HashSet<>();
+        /** How far from the hinge its furthest block is, for how far a step moves it. */
+        final double reach;
         int ticks;
 
         Swing(int id, Topple topple, List<Piece> pieces, @Nullable Player cutter) {
@@ -104,6 +108,7 @@ public final class TreeFelling {
             this.topple = topple;
             this.pieces = pieces;
             this.cutter = cutter;
+            this.reach = pieces.stream().mapToDouble(piece -> topple.reach(piece.start())).max().orElse(1.0);
         }
     }
 
@@ -221,6 +226,8 @@ public final class TreeFelling {
         Set<BlockPos> trunk = trunk(fall.blocks(), at);
         // A tree standing over its cut turns over on it; anything else (a branch cut off) just drops
         boolean topples = fall.blocks().contains(at.above()) && Felling.holds(level, below, level.getBlockState(below));
+        // Cut through its trunk with room in front, it drops onto what's under the cut as it tips, and lies on the ground
+        double drop = topples && settles(level, fall.blocks(), at, way) ? 1.0 : 0.0;
         List<Piece> pieces = new ArrayList<>();
         List<BlockPos> after;
         felling = true;
@@ -258,7 +265,7 @@ public final class TreeFelling {
             after = new ArrayList<>(CHECK_AFTER);
             CHECK_AFTER.clear();
         }
-        if (topples && !pieces.isEmpty()) swing(level, hinge(fall.blocks(), at, way), way, pieces, cutter);
+        if (topples && !pieces.isEmpty()) swing(level, hinge(fall.blocks(), at, way).subtract(0.0, drop, 0.0), way, pieces, drop, cutter);
         // What the fallen tree held up may come down too: another tree's branch resting on it
         for (BlockPos pos : after) check(level, pos);
     }
@@ -288,6 +295,20 @@ public final class TreeFelling {
         }
         double reach = front + 0.5;
         return new Vec3(cut.getX() + 0.5 + way.getStepX() * reach, bottom, cut.getZ() + 0.5 + way.getStepZ() * reach);
+    }
+
+    /**
+     * Whether a group cut right under its lowest layer drops onto what's under the cut as it tips: when the space in
+     * front of the cut, at the cut's level, is clear for it to lie in (not when it was dug out from under, the ground all
+     * round the hole, which it tips over the edge of instead).
+     */
+    private static boolean settles(ServerLevel level, Set<BlockPos> group, BlockPos cut, Direction way) {
+        int bottom = Integer.MAX_VALUE;
+        for (BlockPos pos : group) bottom = Math.min(bottom, pos.getY());
+        BlockPos front = cut.relative(way);
+        if (bottom != cut.getY() + 1 || !level.hasChunkAt(front)) return false;
+        BlockState state = level.getBlockState(front);
+        return state.is(BlockTags.LEAVES) || state.getCollisionShape(level, front).isEmpty();
     }
 
     /** The hives on the felled tree: any next to one of its tree blocks or the leaves going with it. */
@@ -321,11 +342,11 @@ public final class TreeFelling {
         return block;
     }
 
-    /** This felled group starting to turn over on its hinge, its clients told so they turn it alike. */
-    private static void swing(ServerLevel level, Vec3 hinge, Direction way, List<Piece> pieces, @Nullable Player cutter) {
+    /** This felled group starting to turn over on its hinge, settling this far, its clients told so they turn it alike. */
+    private static void swing(ServerLevel level, Vec3 hinge, Direction way, List<Piece> pieces, double drop, @Nullable Player cutter) {
         List<Topple.Mass> masses = new ArrayList<>();
         for (Piece piece : pieces) masses.add(new Topple.Mass(piece.start(), piece.solid() ? 1.0 : Felling.LEAF_WEIGHT));
-        Swing swing = new Swing(swings++, Topple.of(hinge, way, masses), new ArrayList<>(pieces), cutter);
+        Swing swing = new Swing(swings++, Topple.of(hinge, way, masses, drop), new ArrayList<>(pieces), cutter);
         SWINGS.computeIfAbsent(level, key -> new ArrayList<>()).add(swing);
         for (Piece piece : pieces) SWINGING.put(piece.block(), swing);
         for (ServerPlayer player : PlayerLookup.tracking(level, BlockPos.containing(hinge))) tell(swing, player);
@@ -358,16 +379,9 @@ public final class TreeFelling {
             return true;
         }
         topple.step();
-        // Its wood running into anything solid, or any of it into a chunk that isn't loaded, stops it where it was
-        boolean blocked = false;
-        for (Piece piece : swing.pieces) {
-            Vec3 centre = topple.centre(piece.start());
-            if (!level.hasChunkAt(BlockPos.containing(centre)) || piece.solid() && obstructed(level, centre)) {
-                blocked = true;
-                break;
-            }
-        }
-        if (blocked) topple.undo();
+        double free = freeThrough(level, swing);
+        boolean blocked = free < 1.0;
+        if (blocked) topple.backTo(free);
         swing.pieces.removeIf(piece -> !piece.solid() && burstAgainst(level, piece, topple.centre(piece.start())));
         for (Piece piece : swing.pieces) {
             Vec3 centre = topple.centre(piece.start());
@@ -378,6 +392,23 @@ public final class TreeFelling {
         if (!blocked && !topple.isDown() && topple.speed() > 0.0 && ++swing.ticks < MOST_SWING_TICKS) return false;
         release(level, swing);
         return true;
+    }
+
+    /**
+     * How far through its last step a felled group got before its wood ran into anything solid, or any of it into a
+     * chunk that isn't loaded (1 all the way): looked for along the step half a block at a time, so a fast top can't
+     * pass through a wall.
+     */
+    private static double freeThrough(ServerLevel level, Swing swing) {
+        int samples = Math.max(1, (int) Math.ceil(swing.topple.moved(swing.reach) / 0.5));
+        for (int k = 1; k <= samples; k++) {
+            double through = (double) k / samples;
+            for (Piece piece : swing.pieces) {
+                Vec3 centre = swing.topple.centreThrough(piece.start(), through);
+                if (!level.hasChunkAt(BlockPos.containing(centre)) || piece.solid() && obstructed(level, centre)) return (double) (k - 1) / samples;
+            }
+        }
+        return 1.0;
     }
 
     /** Whether a block's room round this centre runs into anything solid that isn't leaves. */
@@ -419,7 +450,7 @@ public final class TreeFelling {
      * as high as it would fall to reach that speed, LOG_DAMAGE_PER_BLOCK a block after the first, at most MOST_LOG_DAMAGE.
      */
     public static float sweepDamage(double speed) {
-        double height = speed * speed / (2.0 * Topple.GRAVITY);
+        double height = speed * speed / (2.0 * FALLING_BLOCK_GRAVITY);
         int blocks = Math.max(0, (int) Math.ceil(height - 1.0));
         return Math.min(VersusSettings.Trees.MOST_LOG_DAMAGE, VersusSettings.Trees.LOG_DAMAGE_PER_BLOCK * blocks);
     }
@@ -441,7 +472,7 @@ public final class TreeFelling {
     private static void stop(ServerLevel level, Swing swing) {
         Set<ServerPlayer> players = new HashSet<>(swing.told);
         players.addAll(PlayerLookup.tracking(level, BlockPos.containing(swing.topple.hinge())));
-        TopplePayload payload = TopplePayload.release(swing.id, swing.topple.angle());
+        TopplePayload payload = TopplePayload.release(swing.id, swing.topple.angle(), swing.topple.settled());
         for (ServerPlayer player : players) {
             if (!player.hasDisconnected() && ServerPlayNetworking.canSend(player, TopplePayload.TYPE.id())) ServerPlayNetworking.send(player, payload);
         }

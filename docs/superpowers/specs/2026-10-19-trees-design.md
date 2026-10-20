@@ -141,12 +141,16 @@ below-trunk block.)
 
 **Toppling.** The rigid swing step 2 set aside, built: a group standing over its cut (the block above the cut is in it
 and the block under the cut holds) turns over as one body on a hinge, the level line across the fall at the front edge
-of its lowest layer, level with that layer's bottom (`Topple`). Gravity (0.04, a falling block's) pulls its weight round
-the hinge as a rigid body's: angle'' = g (up sin angle + along cos angle) / inertia, along and up the weighted sums of
-where each block's centre sits from the hinge (1 a tree block or a hive, 1/4 a leaf), inertia their moment round it.
-The cut pushes it at 0.02 radians a tick at least, or enough to lift weight sitting behind the hinge over it with a
-quarter to spare. A six-block trunk comes down in about two seconds, its top hitting the ground at about 0.7 blocks a
-tick. It's let go lying down (a right angle), on any solid block that isn't leaves getting in the way of its wood
+of its lowest layer, level with that layer's bottom (`Topple`). Gravity (0.1, more than a falling block's 0.04, so it
+comes down briskly) pulls its weight round the hinge as a rigid body's: angle'' = g (up sin angle + along cos angle) /
+inertia, along and up the weighted sums of where each block's centre sits from the hinge (1 a tree block or a hive,
+1/4 a leaf), inertia their moment round it. The cut pushes it at 0.06 radians a tick at least, or enough to lift weight
+sitting behind the hinge over it with a quarter to spare. A six-block trunk comes down in under a second (18 ticks),
+its top hitting the ground at about 1.3 blocks a tick; a 25-block one in about a second. Cut through its trunk with
+room in front of the cut, a tree also drops onto what's under the cut as it starts to tip (by the cut's height, falling
+at the same gravity, in 4 ticks), turning on the front edge of the cut's floor, so it ends lying on the ground beside
+its stump, never a block over it; dug out from under (the ground all round the hole) it tips over the hole's edge
+instead. Its blocks' paths are checked half a block at a time, so a fast treetop can't pass through a wall. It's let go lying down (a right angle), on any solid block that isn't leaves getting in the way of its wood
 (the step undone), or if it ever tips back; each block then flies on as a vanilla falling block with the speed it had,
 so it lands where its momentum takes it. Anything not standing over its cut (a branch cut off) just drops.
 - Tree blocks fly as themselves, their faces as they were; leaves as themselves; hives with their bees inside.
@@ -209,10 +213,11 @@ Step 2:
   and its bees come out angry).
 
 Step 3:
-- the topple (JUnit, `ToppleTest`): it starts where the tree stood; a six-block trunk comes down in 20 to 80 ticks,
-  never stopping, and lies along its way on the ground beyond its foot, its top coming down fast; a block moves each
-  tick as far as its speed says; a tree leaning back a little still goes over; a client's topple turns exactly as the
-  server's; a sweep hits as an anvil falling to its speed would;
+- the topple (JUnit, `ToppleTest`): it starts where the tree stood; a six-block trunk comes down in 8 to 30 ticks,
+  never stopping, and lies along its way on the ground beyond its foot, its top coming down fast; a tree cut through its
+  trunk has settled onto its stump within 5 ticks and lies on the ground; a block moves each tick as far as its speed
+  says; a tree leaning back a little still goes over; a client's topple turns and settles exactly as the server's; a
+  sweep hits as an anvil falling to its speed would;
 - digging out the dirt under a six-block trunk takes 1 + 0.5 sqrt(6) times as long as bare dirt, and fells it east of
   the hole, lying along x on the ground, when dug from the west;
 - a cut filled with cobblestone before the tree comes down holds it up;

@@ -65,7 +65,7 @@ public final class ClientTopples {
             Swing swing = SWINGS.get(payload.swing());
             if (swing == null || swing.released) return;
             swing.released = true;
-            swing.topple.stopAt(payload.angle());
+            swing.topple.stopAt(payload.angle(), payload.settled());
             return;
         }
         // Told again (seen afresh partway through), it turns on from the server's angle now
@@ -103,7 +103,7 @@ public final class ClientTopples {
         Piece piece = PIECES.get(block.getId());
         if (piece == null || piece.swing().released) return false;
         Topple topple = piece.swing().topple;
-        Vec3 was = topple.centre(piece.start(), topple.angleBefore()), now = topple.centre(piece.start());
+        Vec3 was = topple.centreBefore(piece.start()), now = topple.centre(piece.start());
         block.setOldPosAndRot(was.subtract(0.0, 0.5, 0.0), block.getYRot(), block.getXRot());
         block.setPos(now.x, now.y - 0.5, now.z);
         block.setDeltaMovement(topple.velocity(piece.start()));
@@ -121,7 +121,7 @@ public final class ClientTopples {
         Topple topple = piece.swing().topple;
         double angle = piece.swing().released ? topple.angle() : Mth.lerp(partialTick, topple.angleBefore(), topple.angle());
         if (!piece.swing().released) {
-            Vec3 centre = topple.centre(piece.start(), angle);
+            Vec3 centre = topple.centreThrough(piece.start(), partialTick);
             state.x = centre.x;
             state.y = centre.y - 0.5;
             state.z = centre.z;

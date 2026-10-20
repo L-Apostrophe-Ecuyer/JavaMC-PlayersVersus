@@ -234,9 +234,9 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   `leaves_room`, `leaves_tower` and `leaves_grove` (48 x 40 x 48, its grass floor only) as SNBT in
   `src/gametest/resources/.../gametest/structure/`.
 - **Client**: `LeavesRustling` uses `LeafMovement.measure` for every passer within 32 blocks; `LeavesView` (a HUD
-  element after `MISC_OVERLAYS`) frames the screen while the camera is in leaves, as powder snow's frost does: our own
-  `textures/misc/leaves_outline.png` (grey, drawn by `tools/leaves-outline.py`) stretched over the screen, in the leaf's
-  tint, or the average colour of its texture for untinted leaves.
+  element after `MISC_OVERLAYS`) fills the screen's corners while the camera is in leaves, as powder snow's frost does:
+  each corner the matching 8 x 8 quarter of vanilla's `textures/block/leaf_litter.png`, a whole number of GUI pixels a
+  texel (45% of the shorter side), in the leaf's tint, or the average colour of its texture for untinted leaves.
 
 ## Tree blocks (`TreeBlock`, `TreeBlocks`, `TreeRoots`, `TreeFeatureMixin`, `FallenTreeFeatureMixin`; spec `docs/superpowers/specs/2026-10-19-trees-design.md`)
 

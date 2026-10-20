@@ -27,7 +27,7 @@ class ToppleTest {
 
     /** That column falling east on the east edge of its foot. */
     private static Topple fallingEast(List<Vec3> centres) {
-        return Topple.of(new Vec3(1.0, 1.0, 0.5), Direction.EAST, centres.stream().map(centre -> new Topple.Mass(centre, 1.0)).toList());
+        return Topple.of(new Vec3(1.0, 1.0, 0.5), Direction.EAST, centres.stream().map(centre -> new Topple.Mass(centre, 1.0)).toList(), 0.0);
     }
 
     private static int stepsDown(Topple topple) {
@@ -48,7 +48,7 @@ class ToppleTest {
     }
 
     /**
-     * A six-block trunk comes down in about two seconds, never stopping on the way and far faster at the end than the
+     * A six-block trunk comes down in about a second, never stopping on the way and far faster at the end than the
      * push it started with, and lies along the way it fell on the ground beyond its foot.
      */
     @Test
@@ -62,7 +62,7 @@ class ToppleTest {
             steps++;
             assertTrue(topple.speed() > 0.0, "it stopped at step " + steps);
         }
-        assertTrue(steps >= 20 && steps <= 80, "a six-block trunk took " + steps + " ticks to come down");
+        assertTrue(steps >= 8 && steps <= 30, "a six-block trunk took " + steps + " ticks to come down");
         assertTrue(topple.speed() > 3.0 * push, "it came down at " + topple.speed() + " a tick, pushed at " + push);
         for (int i = 0; i < column.size(); i++) {
             Vec3 lying = topple.centre(column.get(i));
@@ -79,7 +79,7 @@ class ToppleTest {
     void itsBlocksMoveAsFastAsTheirSpeedSays() {
         List<Vec3> column = column(8);
         Topple topple = fallingEast(column);
-        for (int i = 0; i < 15; i++) topple.step();
+        for (int i = 0; i < 6; i++) topple.step();
         Vec3 top = column.getLast(), before = topple.centre(top);
         topple.step();
         Vec3 moved = topple.centre(top).subtract(before), speed = topple.velocity(top);
@@ -93,7 +93,7 @@ class ToppleTest {
         for (Vec3 centre : column(6)) masses.add(new Topple.Mass(centre, 1.0));
         masses.add(new Topple.Mass(new Vec3(-0.5, 6.5, 0.5), 1.0));
         masses.add(new Topple.Mass(new Vec3(-1.5, 6.5, 0.5), 1.0));
-        Topple topple = Topple.of(new Vec3(1.0, 1.0, 0.5), Direction.EAST, masses);
+        Topple topple = Topple.of(new Vec3(1.0, 1.0, 0.5), Direction.EAST, masses, 0.0);
         int steps = 0;
         while (!topple.isDown() && steps < 400) {
             topple.step();
@@ -115,6 +115,29 @@ class ToppleTest {
         assertEquals(speed, topple.speed(), 0.0);
     }
 
+    /**
+     * A tree cut through its trunk (a block of it gone at the foot) drops onto its stump as it starts to tip, in a few
+     * ticks, and lies on the ground beside the stump, not a block over it.
+     */
+    @Test
+    void aTreeCutThroughItsTrunkDropsOntoItsStumpAndLiesOnTheGround() {
+        List<Vec3> trunk = new ArrayList<>();
+        for (int y = 2; y <= 7; y++) trunk.add(new Vec3(0.5, y + 0.5, 0.5));
+        Topple topple = Topple.of(new Vec3(1.0, 1.0, 0.5), Direction.EAST, trunk.stream().map(centre -> new Topple.Mass(centre, 1.0)).toList(), 1.0);
+        for (Vec3 centre : trunk) assertEquals(0.0, topple.centre(centre).distanceTo(centre), 1.0E-12, "it moved before its first step");
+        int steps = 0;
+        while (!topple.isDown() && steps < 1000) {
+            topple.step();
+            steps++;
+            if (steps == 5) assertEquals(1.0, topple.settled(), 0.0, "five ticks in it has settled " + topple.settled());
+        }
+        for (int i = 0; i < trunk.size(); i++) {
+            Vec3 lying = topple.centre(trunk.get(i));
+            assertEquals(1.5 + i, lying.x, 1.0E-9, "block " + i + " lies at x " + lying.x);
+            assertEquals(1.5, lying.y, 1.0E-9, "block " + i + " lies at y " + lying.y + ", not on the ground");
+        }
+    }
+
     /** A log sweeping into a creature hits as an anvil reaching its speed would: nothing slow, two a block after the first, ten at most. */
     @Test
     void aSweepHitsAsHardAsAFallToItsSpeed() {
@@ -126,12 +149,16 @@ class ToppleTest {
     /** Started from the numbers the server sends, a client's topple turns exactly as the server's. */
     @Test
     void aClientTurnsItExactlyAsTheServer() {
-        Topple server = fallingEast(column(7));
-        Topple client = new Topple(server.hinge(), server.way(), server.along(), server.up(), server.inertia(), server.angle(), server.speed());
+        List<Vec3> trunk = new ArrayList<>();
+        for (int y = 2; y <= 8; y++) trunk.add(new Vec3(0.5, y + 0.5, 0.5));
+        Topple server = Topple.of(new Vec3(1.0, 1.0, 0.5), Direction.EAST, trunk.stream().map(centre -> new Topple.Mass(centre, 1.0)).toList(), 1.0);
+        Topple client = new Topple(server.hinge(), server.way(), server.along(), server.up(), server.inertia(), server.drop(), server.angle(),
+                server.speed(), server.settled(), server.settling());
         while (!server.isDown()) {
             server.step();
             client.step();
             assertEquals(server.angle(), client.angle(), 0.0);
+            assertEquals(server.settled(), client.settled(), 0.0);
         }
     }
 }

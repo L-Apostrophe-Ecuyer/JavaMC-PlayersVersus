@@ -413,7 +413,7 @@ public class FellingGameTest {
         floor(helper);
         fill(helper, 3, 1, 3, 3, 6, 3, oakTree());
         cutAsAPlayer(helper, 3, 1, 3, new Vec3(0.5, 1.0, 3.5));
-        helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 14, () -> {
+        helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 6, () -> {
             List<FallingBlockEntity> trunk = helper.getLevel().getEntitiesOfClass(FallingBlockEntity.class, room(helper),
                     block -> block.entityTags().contains(TreeFelling.TRUNK));
             helper.assertTrue(trunk.size() == 5, "the turning trunk has " + trunk.size() + " falling blocks, not five");
