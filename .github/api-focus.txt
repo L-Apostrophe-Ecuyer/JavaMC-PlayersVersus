@@ -1,2 +1,45 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
+findsig MoveSimulationType
+calls net.minecraft.server.level.ServerEntity sendChanges
+calls net.minecraft.world.entity.item.FallingBlockEntity getMoveSimulationType|recreateFromPacket|getAddEntityPacket|<init>
+member net.minecraft.world.entity.Entity setOldPos|setPos\(|moveOrInterpolate|hasImpulse|needsSync|hurtMarked|getMoveSimulationType|xo;|setRequiresPrecisePosition|isControlledByLocalInstance|push\(|addDeltaMovement|setXRot|setYRot|xRotO
+net.minecraft.client.renderer.entity.FallingBlockRenderer
+sig net.minecraft.client.renderer.entity.state.FallingBlockRenderState
+member net.minecraft.client.renderer.entity.state.EntityRenderState .
+member com.mojang.blaze3d.vertex.PoseStack rotate|translate|mulPose
+member net.minecraft.client.renderer.SubmitNodeCollector Moving|Block
+find com/mojang/math/Axis
+calls net.minecraft.client.multiplayer.ClientLevel tickNonPassenger|tickEntities
+net.minecraft.world.level.block.CreakingHeartBlock
+member net.minecraft.world.level.block.entity.CreakingHeartBlockEntity .
+calls net.minecraft.world.level.block.entity.CreakingHeartBlockEntity serverTick|spawnProtector|.*[Ii]nCaves.*|isActive.*|.*[Ss]pawn.*
+find CreakingHeart
+uses CREAKING_ACTIVE
+calls net.minecraft.world.level.levelgen.feature.treedecorators.CreakingHeartDecorator place|lambda.*
+member net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context .
+member net.minecraft.world.level.block.entity.BeehiveBlockEntity .
+sig net.minecraft.world.level.block.entity.BeehiveBlockEntity$Occupant
+member net.minecraft.world.level.block.entity.BlockEntity save|load|registry|getLevel
+find FallenTree
+findcalls FallenTreeFeature
+member net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer .
+calls net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer placeBelowTrunkBlock|setDirtAt|placeLog.*|.*[Bb]elow.*
+datadir worldgen/feature
+data worldgen/feature/pale_oak_creaking.json
+data worldgen/feature/fallen_oak_tree.json
+data worldgen/block_state_provider/soil_beneath_tree.json
+member net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry .
+member net.fabricmc.fabric.api.networking.v1.PlayerLookup .
+find Strippable
+member net.fabricmc.fabric.api.registry.StrippableBlockRegistry .
+member net.minecraft.world.level.block.state.BlockBehaviour updateShape|tick\(|getDestroyProgress
+member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase getDestroyProgress|updateShape|isFaceSturdy
+member net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents .
+member net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents$Before .
+member net.minecraft.world.level.block.Blocks ROOTED_DIRT|HANGING_ROOTS|CREAKING_HEART|BEE_NEST|BEEHIVE
+member net.minecraft.tags.BlockTags BEEHIVES|DIRT|SUBSTRATE|BASE_STONE|ROOTS|MOSS|AZALEA|SUPPORTS|REPLACEABLE
+member net.minecraft.world.entity.animal.bee.Bee setTarget|[Aa]nger|hasStung|setStayOut
+member net.minecraft.world.level.ScheduledTickAccess .
+member net.minecraft.world.level.CollisionGetter noBlockCollision|getBlockCollisions|noCollision
+member net.minecraft.world.damagesource.DamageSources fallingBlock
