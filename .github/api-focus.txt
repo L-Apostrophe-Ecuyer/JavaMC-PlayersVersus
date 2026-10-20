@@ -1,8 +1,22 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-uses moveTowardsClosestSpace
-uses isCollisionShapeFullBlock
-calls net.minecraft.world.entity.player.Player tick|aiStep|.*[Cc]losest.*|.*[Ss]tuck.*|.*[Ww]all.*
-calls net.minecraft.world.entity.LivingEntity baseTick|tick|.*[Cc]losest.*|.*[Ww]all.*
-calls net.minecraft.world.entity.Entity baseTick|tick|.*[Ww]all.*|checkInsideBlocks
-calls net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase isCollisionShapeFullBlock|getCollisionShape
+calls net.minecraft.world.level.levelgen.feature.TreeFeature place|doPlace|lambda.*
+member net.minecraft.world.level.levelgen.feature.TreeFeature .
+member net.minecraft.world.level.block.Blocks _LOG;|_WOOD;|POPLAR
+member net.minecraft.world.level.block.RotatedPillarBlock .
+member net.minecraft.world.level.block.PipeBlock PROPERTY_BY_DIRECTION
+member net.minecraft.world.level.block.HugeMushroomBlock rotate|mirror|getStateForPlacement
+member net.minecraft.world.level.levelgen.feature.FeaturePlaceContext .
+data tags/block/oak_logs.json
+data tags/block/mangrove_logs.json
+data tags/block/pale_oak_logs.json
+data tags/block/logs_that_burn.json
+data tags/block/logs.json
+data tags/block/mineable/axe.json
+asset blockstates/oak_log.json
+asset models/block/oak_log.json
+asset models/block/oak_log_horizontal.json
+asset models/block/cube_column.json
+asset models/block/cube_column_horizontal.json
+asset items/oak_log.json
+assets textures/block/stripped_
