@@ -64,9 +64,11 @@ public final class PlacementPreview {
         poseStack.pushPose();
         // As vanilla's outline: the shape is drawn from the block's corner, relative to the camera
         poseStack.translate(preview.pos.getX() - camera.x, preview.pos.getY() - camera.y, preview.pos.getZ() - camera.z);
-        collector.submitShapeOutline(poseStack, preview.shape, RenderTypes.linesTranslucent(), COLOR, width, false);
+        // The see-through lines vanilla's translucent gizmos use: 26.4's linesTranslucent has no pipelines for improved
+        // transparency, and drawing it with that setting on crashes the game
+        collector.submitShapeOutline(poseStack, preview.shape, RenderTypes.linesTranslucentNoDepthWrite(), COLOR, width, false);
         VoxelShape mark = mark(preview.state, preview.shape);
-        if (mark != null) collector.submitShapeOutline(poseStack, mark, RenderTypes.linesTranslucent(), COLOR, width, false);
+        if (mark != null) collector.submitShapeOutline(poseStack, mark, RenderTypes.linesTranslucentNoDepthWrite(), COLOR, width, false);
         poseStack.popPose();
     }
 
