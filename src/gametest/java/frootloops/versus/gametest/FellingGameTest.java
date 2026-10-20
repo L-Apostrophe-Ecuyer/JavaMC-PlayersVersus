@@ -3,6 +3,8 @@ package frootloops.versus.gametest;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.trees.Felling;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,8 +49,9 @@ public class FellingGameTest {
         return Felling.afterCut(helper.getLevel(), helper.absolutePos(new BlockPos(x, y, z)), cutter == null ? null : helper.absoluteVec(cutter), RandomSource.create(1));
     }
 
-    private static Set<BlockPos> relative(GameTestHelper helper, Set<BlockPos> absolute) {
-        return absolute.stream().map(helper::relativePos).collect(Collectors.toSet());
+    /** These spots in the test's structure, where they are in the world: the falls are told in the world's. */
+    private static Set<BlockPos> absolute(GameTestHelper helper, BlockPos... relative) {
+        return Arrays.stream(relative).map(helper::absolutePos).collect(Collectors.toSet());
     }
 
     private static Felling.Fall onlyFall(GameTestHelper helper, List<Felling.Fall> falls) {
@@ -69,9 +72,9 @@ public class FellingGameTest {
         helper.setBlock(5, 5, 3, oakTree());
         helper.setBlock(2, 7, 2, oakTree());
         Felling.Fall fall = onlyFall(helper, cut(helper, 3, 1, 3, new Vec3(0.5, 1.0, 3.5)));
-        Set<BlockPos> expected = Set.of(new BlockPos(3, 2, 3), new BlockPos(3, 3, 3), new BlockPos(3, 4, 3), new BlockPos(3, 5, 3),
+        Set<BlockPos> expected = absolute(helper, new BlockPos(3, 2, 3), new BlockPos(3, 3, 3), new BlockPos(3, 4, 3), new BlockPos(3, 5, 3),
                 new BlockPos(3, 6, 3), new BlockPos(4, 5, 3), new BlockPos(5, 5, 3), new BlockPos(2, 7, 2));
-        helper.assertTrue(relative(helper, fall.blocks()).equals(expected), "a trunk cut at its foot fells " + relative(helper, fall.blocks()));
+        helper.assertTrue(fall.blocks().equals(expected), "a trunk cut at its foot fells " + fall.blocks() + ", not " + expected);
         helper.assertTrue(fall.direction() == Direction.EAST, "cut from the west, it falls " + fall.direction());
         helper.succeed();
     }
@@ -92,8 +95,8 @@ public class FellingGameTest {
         fill(helper, 3, 1, 3, 3, 6, 3, oakTree());
         fill(helper, 4, 4, 3, 6, 4, 3, oakTree());
         Felling.Fall fall = onlyFall(helper, cut(helper, 4, 4, 3, null));
-        helper.assertTrue(relative(helper, fall.blocks()).equals(Set.of(new BlockPos(5, 4, 3), new BlockPos(6, 4, 3))),
-                "a branch cut where it joins fells " + relative(helper, fall.blocks()));
+        Set<BlockPos> branch = absolute(helper, new BlockPos(5, 4, 3), new BlockPos(6, 4, 3));
+        helper.assertTrue(fall.blocks().equals(branch), "a branch cut where it joins fells " + fall.blocks() + ", not " + branch);
         helper.succeed();
     }
 
@@ -119,9 +122,11 @@ public class FellingGameTest {
         fill(helper, 2, 1, 3, 2, 4, 3, oakTree());
         fill(helper, 8, 1, 3, 8, 4, 3, oakTree());
         Felling.Fall fall = onlyFall(helper, cut(helper, 2, 1, 3, null));
-        Set<BlockPos> crown = relative(helper, fall.crown());
-        helper.assertTrue(crown.contains(new BlockPos(2, 5, 3)) && crown.contains(new BlockPos(4, 4, 3)), "the felled oak left its own leaves: " + crown);
-        helper.assertTrue(crown.stream().allMatch(leaf -> leaf.getX() < 5), "the felled oak took the other's leaves: " + crown);
+        Set<BlockPos> crown = fall.crown();
+        helper.assertTrue(crown.containsAll(absolute(helper, new BlockPos(2, 5, 3), new BlockPos(4, 4, 3))), "the felled oak left its own leaves: " + crown);
+        Set<BlockPos> others = new HashSet<>();
+        for (BlockPos leaf : BlockPos.betweenClosed(5, 4, 2, 9, 5, 4)) others.add(helper.absolutePos(leaf));
+        helper.assertTrue(crown.stream().noneMatch(others::contains), "the felled oak took leaves as near the other or nearer: " + crown);
         helper.succeed();
     }
 
