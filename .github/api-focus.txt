@@ -4,4 +4,5 @@ uses moveTowardsClosestSpace
 uses isCollisionShapeFullBlock
 calls net.minecraft.world.entity.player.Player tick|aiStep|.*[Cc]losest.*|.*[Ss]tuck.*|.*[Ww]all.*
 calls net.minecraft.world.entity.LivingEntity baseTick|tick|.*[Cc]losest.*|.*[Ww]all.*
+calls net.minecraft.world.entity.Entity baseTick|tick|.*[Ww]all.*|checkInsideBlocks
 calls net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase isCollisionShapeFullBlock|getCollisionShape
