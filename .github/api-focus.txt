@@ -1,10 +1,7 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-calls net.minecraft.client.renderer.rendertype.RenderTypes lines.*|secondaryBlockOutline|lambda.*
-calls net.minecraft.client.renderer.LevelRenderer submitHitOutline
-calls net.minecraft.client.renderer.feature.GizmoFeatureRenderer buildLines
-member net.minecraft.client.renderer.rendertype.RenderTypes [Ll]ine|[Oo]utline|OIT|Oit
-member net.minecraft.client.renderer.rendertype.RenderSetup [Oo]it|OIT|translucent|builder
-calls net.minecraft.client.renderer.rendertype.RenderSetup .*[Oo]it.*|.*[Tt]ranslucent.*|build
-uses getPreMoveCollisions
-calls net.minecraft.world.level.CollisionGetter getPreMoveCollisions|getBlockCollisions|getCollisions|noCollision
+member net.minecraft.client.renderer.RenderPipelines LINE|OIT
+member net.minecraft.gametest.framework.GameTestHelper [Mm]ock|[Pp]layer
+member net.minecraft.server.network.ServerGamePacketListenerImpl [Ll]oaded|awaiting|Teleport|lastGood|firstGood
+findsig ServerboundMovePlayerPacket
+member net.minecraft.world.level.CollisionGetter PreMove
