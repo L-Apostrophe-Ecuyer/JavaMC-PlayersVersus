@@ -351,25 +351,26 @@ public class FellingGameTest {
     @GameTest(structure = ROOM, maxTicks = 140)
     public void diggingUnderATreeIsSlowAndBringsItDown(GameTestHelper helper) {
         floor(helper);
-        helper.setBlock(3, 0, 3, Blocks.DIRT.defaultBlockState());
-        helper.setBlock(9, 0, 3, Blocks.DIRT.defaultBlockState());
-        fill(helper, 3, 1, 3, 3, 6, 3, oakTree());
+        fill(helper, 0, 1, 0, 13, 1, 7, Blocks.STONE.defaultBlockState());
+        helper.setBlock(3, 1, 3, Blocks.DIRT.defaultBlockState());
+        helper.setBlock(9, 1, 3, Blocks.DIRT.defaultBlockState());
+        fill(helper, 3, 2, 3, 3, 7, 3, oakTree());
         ServerPlayer player = FakePlayer.get(helper.getLevel());
-        BlockPos under = new BlockPos(3, 0, 3), bare = new BlockPos(9, 0, 3);
+        BlockPos under = new BlockPos(3, 1, 3), bare = new BlockPos(9, 1, 3);
         float underTree = helper.getBlockState(under).getDestroyProgress(player, helper.getLevel(), helper.absolutePos(under));
         float alone = helper.getBlockState(bare).getDestroyProgress(player, helper.getLevel(), helper.absolutePos(bare));
         double slower = alone / underTree;
         helper.assertTrue(Math.abs(slower - (1.0 + 0.5 * Math.sqrt(6.0))) < 1.0E-3, "the dirt under a six-block trunk digs " + slower + " times slower than bare dirt");
-        cutAsAPlayer(helper, 3, 0, 3, new Vec3(0.5, 1.0, 3.5));
+        cutAsAPlayer(helper, 3, 1, 3, new Vec3(0.5, 2.0, 3.5));
         helper.runAfterDelay(VersusSettings.Trees.FELLING_DELAY + 80, () -> {
-            helper.assertTrue(count(helper, 0, 1, 0, 13, 7, 7, state -> state.getBlock() instanceof TreeBlock) == 0, "the tree dug out from under is still standing");
+            helper.assertTrue(count(helper, 0, 2, 0, 13, 7, 7, state -> state.getBlock() instanceof TreeBlock) == 0, "the tree dug out from under is still standing");
             List<String> wrong = new ArrayList<>();
             int logs = 0;
-            for (BlockPos pos : BlockPos.betweenClosed(0, 1, 0, 13, 7, 7)) {
+            for (BlockPos pos : BlockPos.betweenClosed(0, 2, 0, 13, 7, 7)) {
                 BlockState state = helper.getBlockState(pos);
                 if (!state.is(Blocks.OAK_LOG)) continue;
                 logs++;
-                if (state.getValue(RotatedPillarBlock.AXIS) != Direction.Axis.X || pos.getX() <= 3 || pos.getY() != 1) wrong.add(pos.toShortString());
+                if (state.getValue(RotatedPillarBlock.AXIS) != Direction.Axis.X || pos.getX() <= 3 || pos.getY() != 2) wrong.add(pos.toShortString());
             }
             helper.assertTrue(logs >= 3, "the tree dug out from under left " + logs + " logs on the ground");
             helper.assertTrue(wrong.isEmpty(), "logs that don't lie east of the hole along x, on the ground: " + wrong);

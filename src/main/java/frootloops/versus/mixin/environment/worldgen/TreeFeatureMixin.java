@@ -24,8 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Every tree the tree feature grows (in new chunks, from saplings, from bone meal) is made of tree blocks (TreeBlocks):
  * its trunk, and the logs its crown grows round it (a poplar's), go down through setters that put each log's tree block
- * in its place (and rooted dirt under the trunk), and once the tree and its decorations are in, its roots grow (a pale
- * oak's) and the faces of its tree blocks are set.
+ * in its place, and once the tree and its decorations are in, the ground under its trunk turns to rooted dirt, its
+ * roots grow (a pale oak's) and the faces of its tree blocks are set.
  */
 @Mixin(TreeFeature.class)
 public abstract class TreeFeatureMixin {

@@ -113,3 +113,17 @@ Tasks 2 to 7 are in `TreeBlock` (`getDestroyProgress`, `playerWillDestroy`, `aff
 `aCutTreeCreaksThenFallsAwayFromItsCutter`, `aGrownOakFallsAwayFromWhoeverCutIt` (two grown oaks, east and south),
 `aFallingTreeHurtsWhatItLandsOnButSparesPets`, `aFelledTreesBeeNestAndHeartBreak`. A trunk log landing where a creature
 stands drops as its item rather than burying it.
+
+## Step 3 (after this plan)
+
+The spec's step 3 reworked the flight and widened what counts as a cut: a tree standing over its cut turns over on its
+hinge as one rigid body (`Topple`, stepped alike on the server and its clients through `TopplePayload`, drawn turned by
+`ClientTopples` and the falling block render mixins) instead of each block being thrown; tree blocks fly as themselves
+and a trunk lands as its wood's log turned as far as the tree turned; logs hurt what they sweep through by their speed.
+Digging out the block a tree rests on is a cut too (`TreeBlock.updateShape`), as slow as cutting the trunk there
+(`TreeDigMixin`, replacing `TreeBlock.getDestroyProgress`), the cutter noted through `PlayerBlockBreakEvents` (replacing
+`TreeBlock.playerWillDestroy`); the delayed check reads the world as it is. Hives fall with the tree and let their bees
+out angry when they land. Trees grow on rooted dirt, pale oaks grow roots with their creaking heart buried in them
+(`TreeRoots`), and fallen trees are tree blocks (`FallenTreeFeatureMixin`). Tests: `ToppleTest`, `TreeGrowthGameTest`,
+and `FellingGameTest`'s `diggingUnderATreeIsSlowAndBringsItDown`, `aCutFilledInTimeHoldsTheTreeUp`,
+`aFellingTreeTurnsOverAsOne`, `aFelledTreesHeartBreaksAndItsHiveFallsWithItsBeesAngry`.

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -16,9 +17,9 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 
 /**
  * Trees grow tree blocks (TreeFeatureMixin, FallenTreeFeatureMixin): every log a growing tree puts down, trunk or crown,
- * becomes its wood's tree block, turned as the log was, the dirt it puts under its trunk becomes rooted dirt, a pale oak
- * grows its roots (TreeRoots), and once the tree and its decorations are in place each tree block's faces are set from
- * what is next to it. A fallen tree's stump and log are tree blocks too. A log with no tree block of its own, such as
+ * becomes its wood's tree block, turned as the log was; once the tree and its decorations are in place the ground under
+ * its trunk turns to rooted dirt, a pale oak grows its roots (TreeRoots), and each tree block's faces are set from what
+ * is next to it. A fallen tree's stump and log are tree blocks too. A log with no tree block of its own, such as
  * another mod's, stays as it is.
  */
 public final class TreeBlocks {
@@ -54,19 +55,38 @@ public final class TreeBlocks {
         };
     }
 
-    /** The tree block for this log, turned as it is, noting where in grown; the dirt under the trunk as rooted dirt; anything else as it is. */
+    /** The tree block for this log, turned as it is, noting where in grown; anything else as it is. */
     private static BlockState grow(BlockPos pos, BlockState state, Set<BlockPos> grown) {
-        if (state.is(Blocks.DIRT) && VersusSettings.Trees.ROOTED_DIRT_UNDER_TREES) return Blocks.ROOTED_DIRT.defaultBlockState();
+        if (state == null) return null;
         TreeBlock tree = forLog(state.getBlock());
         if (tree == null || !state.hasProperty(RotatedPillarBlock.AXIS)) return state;
         grown.add(pos.immutable());
         return tree.defaultBlockState().setValue(RotatedPillarBlock.AXIS, state.getValue(RotatedPillarBlock.AXIS));
     }
 
-    /** A tree grew these tree blocks (when it grew at all): its roots grow, then every tree block's faces are set. */
+    /**
+     * A tree grew these tree blocks (when it grew at all): the ground under its trunk turns to rooted dirt, its roots
+     * grow, then every tree block's faces are set.
+     */
     public static void finish(WorldGenLevel level, RandomSource random, Set<BlockPos> grown, boolean placed) {
-        if (placed) TreeRoots.grow(level, random, grown);
+        if (placed) {
+            if (VersusSettings.Trees.ROOTED_DIRT_UNDER_TREES) rootedDirt(level, grown);
+            TreeRoots.grow(level, random, grown);
+        }
         setFaces(level, grown);
+    }
+
+    /** The dirt, grass and the like under the foot of a tree's trunk (its lowest tree blocks) turned to rooted dirt; mud stays mud. */
+    private static void rootedDirt(WorldGenLevel level, Set<BlockPos> grown) {
+        int bottom = Integer.MAX_VALUE;
+        for (BlockPos pos : grown) bottom = Math.min(bottom, pos.getY());
+        for (BlockPos pos : grown) {
+            if (pos.getY() != bottom || !(level.getBlockState(pos).getBlock() instanceof TreeBlock)) continue;
+            BlockState ground = level.getBlockState(pos.below());
+            if (ground.is(BlockTags.DIRT) && !ground.is(Blocks.MUD) && !ground.is(Blocks.ROOTED_DIRT)) {
+                level.setBlock(pos.below(), Blocks.ROOTED_DIRT.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+            }
+        }
     }
 
     /** A fallen tree starts being placed. */
