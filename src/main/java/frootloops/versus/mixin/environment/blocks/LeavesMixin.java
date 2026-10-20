@@ -3,6 +3,7 @@ package frootloops.versus.mixin.environment.blocks;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
 import frootloops.versus.mod.environment.blocks.BlockSounds;
+import frootloops.versus.mod.environment.blocks.leaves.LeafDebug;
 import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import frootloops.versus.mod.environment.blocks.leaves.LeafMovement;
 import frootloops.versus.mod.environment.blocks.leaves.LeafReach;
@@ -79,7 +80,10 @@ public abstract class LeavesMixin extends Block implements SimpleWaterloggedBloc
                 world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(entity, Blocks.FROSTED_ICE.defaultBlockState()));
                 super.fallOn(world, state, pos, livingEntity, fallDistance);
             }
-            else super.fallOn(world, state, pos, livingEntity, fallDistance / VersusSettings.Leaves.LANDING_FALL_DIVISOR);
+            else {
+                if (LeafDebug.on(livingEntity)) LeafDebug.landed(livingEntity, pos, fallDistance, fallDistance / VersusSettings.Leaves.LANDING_FALL_DIVISOR);
+                super.fallOn(world, state, pos, livingEntity, fallDistance / VersusSettings.Leaves.LANDING_FALL_DIVISOR);
+            }
         }
     }
 

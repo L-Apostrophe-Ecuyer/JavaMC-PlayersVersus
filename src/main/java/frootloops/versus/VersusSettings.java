@@ -97,6 +97,9 @@ public abstract class VersusSettings {
         public static boolean DO_INSTANT_LEAF_DECAY = true;
         // With the camera inside leaves, their texture, tinted as they are there, frames the view (client, LeavesView)
         public static boolean DO_LEAVES_VIEW = true;
+        // Warnings in the log (logger players-versus/leaves) following players through leaves on both sides, and every
+        // time the server pulls a player back or finds nothing under them (LeafDebug); for debugging, off when done
+        public static boolean LOG_LEAVES = true;
     }
 
     public static class Items {

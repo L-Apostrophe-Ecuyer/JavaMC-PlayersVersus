@@ -24,7 +24,8 @@ import net.minecraft.world.phys.shapes.Shapes;
  * still has.
  *
  * <p>Whether a leaf is solid only reads what client and server both know of the entity (its position, sneaking, gliding,
- * fall distance), never its velocity, and changes nothing: collision shapes are asked many times a tick, on both sides.
+ * fall distance), never its velocity, and changes nothing: collision shapes are asked many times a tick, on both sides,
+ * and the server replays a player's moves with them.
  * The movement itself ({@link #adjust}) runs where the entity is simulated, the client for its player and the server for
  * mobs; the fall cushion ({@link #cushionFall}) runs where vanilla counts the fall, on both.
  */
@@ -45,18 +46,17 @@ public final class LeafMovement {
     }
 
     /**
-     * Whether a leaf at this position is solid for this collision context: always for placing blocks (leaves can't be
-     * placed into anyone) and for things that don't pass. For one that passes, only while its feet are above the leaf
-     * and it isn't sneaking, gliding or falling hard. On the server a player's leaves are always open: its client
-     * simulates its movement and decides, and the server mustn't pull it back for going through.
+     * Whether a leaf at this position is solid for this collision context: always for things that don't pass. For one
+     * that passes, only while its feet are above the leaf and it isn't sneaking, gliding or falling hard, on the server
+     * as on the client, so the server finds the leaf a player stands on. Open in a context asked as from elsewhere
+     * (26.4 flags these as placement): placing a block, and the server checking a move the player's client already
+     * made, which would otherwise pull a player back out of every leaf they step into.
      */
     public static boolean isSolid(BlockPos pos, CollisionContext context) {
-        if (context.isPlacement()) return true;
         if (!(context instanceof EntityCollisionContext entityContext) || !passes(entityContext.getEntity())) return true;
         if (!VersusSettings.Leaves.DO_LEAF_MOVEMENT) return true;
         LivingEntity entity = (LivingEntity) entityContext.getEntity();
-        if (entity.isFallFlying()) return false;
-        if (entity instanceof Player && !entity.level().isClientSide()) return false;
+        if (entity.isFallFlying() || context.isPlacement()) return false;
         return context.isAbove(Shapes.block(), pos, true) && !context.isDescending()
                 && entity.fallDistance <= VersusSettings.Leaves.BREAK_THROUGH_FALL_DISTANCE;
     }
@@ -130,7 +130,10 @@ public final class LeafMovement {
     public static Vec3 adjust(LivingEntity entity, Vec3 motion) {
         if (!movesThroughLeaves(entity)) return motion;
         Immersion immersion = measure(entity, motion);
-        if (!immersion.any()) return motion;
+        if (!immersion.any()) {
+            if (LeafDebug.on(entity)) LeafDebug.moved(entity, motion, motion, immersion);
+            return motion;
+        }
         double keep = horizontalKeep(Math.sqrt(motion.x * motion.x + motion.z * motion.z), immersion.body());
         double y = motion.y * (1.0 - VersusSettings.Leaves.VERTICAL_DRAG * immersion.swept());
         if (immersion.foothold() && y >= -VersusSettings.Leaves.CATCH_SPEED) {
@@ -141,7 +144,9 @@ public final class LeafMovement {
                 y = Math.max(y, -VersusSettings.Leaves.DESCEND_SPEED);
             }
         }
-        return new Vec3(motion.x * keep, y, motion.z * keep);
+        Vec3 adjusted = new Vec3(motion.x * keep, y, motion.z * keep);
+        if (LeafDebug.on(entity)) LeafDebug.moved(entity, motion, adjusted, immersion);
+        return adjusted;
     }
 
     /**
@@ -181,7 +186,9 @@ public final class LeafMovement {
         // The box swept back up to where it was before this tick's fall.
         if (measure(entity, new Vec3(0.0, -dy, 0.0)).swept() <= 0.0) return;
         double fall = -dy;
+        double before = entity.fallDistance;
         entity.fallDistance = Math.min(entity.fallDistance, Math.max(0.0, equivalentFallHeight(fall) - fall));
+        if (LeafDebug.on(entity) && entity.fallDistance != before) LeafDebug.cushioned(entity, dy, before, entity.fallDistance);
     }
 
     /**

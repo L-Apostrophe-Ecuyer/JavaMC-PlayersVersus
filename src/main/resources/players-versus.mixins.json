@@ -37,6 +37,7 @@
     "environment.blocks.SugarCaneMixin",
     "environment.blocks.LadderMixin",
     "environment.blocks.LeafMovementMixin",
+    "environment.blocks.LeafPlayerChecksMixin",
     "environment.blocks.LeavesMixin",
     "environment.blocks.LeavesMoveControlMixin",
     "environment.blocks.MossMixin",

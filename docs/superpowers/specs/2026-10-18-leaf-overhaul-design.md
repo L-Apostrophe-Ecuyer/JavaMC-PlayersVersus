@@ -37,11 +37,11 @@ spiders, items, projectiles, falling blocks, vehicles) leaves stay solid blocks,
 something uses its mount's rule.
 
 **When a leaf is solid for a passer.** When its feet are above the leaf's top, it isn't sneaking, it isn't gliding, and
-its fall distance is at most 2.5 (vanilla powder snow's threshold). Otherwise the leaf is empty. Block placement always
-sees leaves as solid, so leaves can't be placed into anyone. On the server, players see every leaf as empty: their own
-client simulates their movement, so the server never rejects or pulls back a move through leaves. All of this depends
-only on state both sides share (position, sneaking, gliding, fall distance), never on velocity, and asking it changes
-nothing.
+its fall distance is at most 2.5 (vanilla powder snow's threshold). Otherwise the leaf is empty. The server sees leaves
+as the player's client does, so it finds the leaf a player stands on. A context asked as from elsewhere is open: placing
+a block, and 26.4's server check of each move a client already made (both flagged as placement), which would otherwise
+pull the player back out of every leaf they step into. All of this depends only on state both sides share (position,
+sneaking, gliding, fall distance), never on velocity, and asking it changes nothing.
 
 **Immersion** is how much of the passer is inside leaves that are empty for it, from 0 to 1. Several leaf blocks
 don't add up separately: it is the share of the body in leaves, however many blocks that takes. It is measured two

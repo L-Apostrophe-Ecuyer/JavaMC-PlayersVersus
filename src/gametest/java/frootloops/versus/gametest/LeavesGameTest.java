@@ -281,9 +281,12 @@ public class LeavesGameTest {
         helper.succeed();
     }
 
-    /** On the server a player's leaves are always open (its client decides); a mob above them stands on them. */
+    /**
+     * The server holds a player up on a leaf as their client does, and as it holds a mob; placing a block isn't held
+     * back by leaves, which anything that passes through them could be standing in.
+     */
     @GameTest(structure = ROOM)
-    public void theServerLetsPlayersThrough(GameTestHelper helper) {
+    public void theServerHoldsPlayersUpAsTheirClientDoes(GameTestHelper helper) {
         floor(helper, 14, 8);
         helper.setBlock(2, 1, 2, leaves(Blocks.OAK_LEAVES));
         BlockPos leaf = helper.absolutePos(new BlockPos(2, 1, 2));
@@ -291,8 +294,9 @@ public class LeavesGameTest {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setPos(onTop.x, onTop.y, onTop.z);
         Mob husk = husk(helper, 2.5, 2.0, 2.5);
-        helper.assertFalse(LeafMovement.isSolid(leaf, CollisionContext.of(player)), "the server held a player up on a leaf");
+        helper.assertTrue(LeafMovement.isSolid(leaf, CollisionContext.of(player)), "the server didn't hold a player up on a leaf");
         helper.assertTrue(LeafMovement.isSolid(leaf, CollisionContext.of(husk)), "a husk above a leaf isn't held up");
+        helper.assertFalse(LeafMovement.isSolid(leaf, CollisionContext.placementContext(player)), "placing a block was held back by a leaf");
         helper.succeed();
     }
 

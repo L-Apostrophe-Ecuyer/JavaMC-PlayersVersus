@@ -188,10 +188,16 @@ Design and numbers: `docs/superpowers/specs/2026-10-18-leaf-overhaul-design.md`,
 `docs/superpowers/specs/2026-10-19-fallen-leaves-design.md` (fallen leaves, instant decay, swimming, the view; it
 supersedes the first spec's litter and soft landings). Tunables: `VersusSettings.Leaves`.
 - **Who passes**: living things except `Animal`s and `Spider`s (`LeafMovement.passes`). Everything else, and every
-  no-context or placement query, sees a full block.
+  no-context query, sees a full block.
 - **When a leaf is solid** (`LeafMovement.isSolid`, the collision shape): the passer is above it, not sneaking, not
-  gliding, fall distance ≤ 2.5. On the server a `Player`'s leaves are always open, because its client simulates its
-  movement. Never read velocity or change the entity there: shapes are asked many times a tick, on both sides.
+  gliding, fall distance ≤ 2.5, the same rule on the server as on the client (the server looks for the block holding a
+  player up, and logs "standing on air" when it finds none). A placement context is open: 26.4 flags as placement both
+  block placing and the server's check of each move a player's client already made (`getPreMoveCollisions`, through
+  `CollisionContext.withPosition`), and a solid leaf there pulls the player back out of every leaf they step into. Never
+  read velocity or change the entity there: shapes are asked many times a tick, on both sides.
+- **Debugging in game**: `VersusSettings.Leaves.LOG_LEAVES` logs warnings (logger `players-versus/leaves`, `LeafDebug`)
+  for each player move in or on leaves, fall cushions and landings, and every server pull-back or "standing on air"
+  (`LeafPlayerChecksMixin`).
 - **Movement** goes through `handleOnClimbable`'s return (`LeafMovement.adjust`), the motion after input and before
   `move`. It applies a horizontal speed cap by weighted immersion (legs ×3), vertical drag on the swept box, and
   climbing and descending with a foothold (leaves at the feet). It runs only where the entity is simulated (the client
