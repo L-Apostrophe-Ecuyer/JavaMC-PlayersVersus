@@ -1,2 +1,6 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
+find EntityRenderer
+find ClientRegistr
+sig net.minecraft.client.core.registries.BuiltInClientRegistries
+sig net.minecraft.client.renderer.entity.EntityRenderers
