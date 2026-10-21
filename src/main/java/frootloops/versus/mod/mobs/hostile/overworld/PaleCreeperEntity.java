@@ -1,6 +1,7 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
 
+import frootloops.versus.mod.environment.blocks.BlockSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
@@ -26,6 +27,8 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.sounds.BlockSoundSet;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.ValueInput;
@@ -143,14 +146,14 @@ public class PaleCreeperEntity extends Creeper {
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.STONE_STEP, 1.2f, 1.0f + 0.2f * random.nextFloat());
-        this.playSound(SoundEvents.MANGROVE_ROOTS_STEP, 0.2f, 0.8F);
+        BlockSounds.play(this, Blocks.STONE, BlockSoundSet::stepSound, 1.2f, 1.0f + 0.2f * random.nextFloat());
+        BlockSounds.play(this, Blocks.MANGROVE_ROOTS, BlockSoundSet::stepSound, 0.2f, 0.8F);
     }
 
     @Override
     protected void playHurtSound(DamageSource source) {
         this.playSound(SoundEvents.CREEPER_HURT, this.getSoundVolume(), this.getVoicePitch());
-        this.playSound(SoundEvents.MANGROVE_ROOTS_BREAK, 0.4f, 0.8F);
+        BlockSounds.play(this, Blocks.MANGROVE_ROOTS, BlockSoundSet::breakSound, 0.4f, 0.8F);
     }
 
     @Override

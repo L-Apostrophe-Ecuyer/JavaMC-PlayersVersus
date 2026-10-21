@@ -69,7 +69,7 @@ public interface MoistureConvertableBlock {
     }
 
     private static int getMoistureAmountOf(LevelReader world, BlockPos pos, BlockState state) {
-        if(state.getFluidState().is(Fluids.WATER)) return 4;
+        if(state.getFluidState().isSourceOfType(Fluids.WATER)) return 4;
         return getMoistureAmountAround(world,pos);
     }
 

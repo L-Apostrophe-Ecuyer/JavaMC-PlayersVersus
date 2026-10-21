@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -80,8 +81,9 @@ public abstract class PointedDripstoneMixin extends Block {
             fluid = Fluids.WATER;
         }
         else {
-            fluid = world.getFluidState(mutableBlockPos).getType();
-            if(fluid == Fluids.FLOWING_LAVA && isUltrawarm) fluid = Fluids.LAVA;
+            // Water and lava are one fluid each since 26.4-snapshot-4, flowing or not: only a source drips, or flowing lava where it's ultrawarm.
+            FluidState fluidState = world.getFluidState(mutableBlockPos);
+            fluid = fluidState.isSource() || (fluidState.getType() == Fluids.LAVA && isUltrawarm) ? fluidState.getType() : Fluids.EMPTY;
         }
 
 

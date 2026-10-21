@@ -20,7 +20,7 @@ on:
 env:
   OLD: "26.4-snapshot-3"
   NEW: "26.4-snapshot-4"
-  FABRIC_API: "0.162.2+26.4"
+  FABRIC_API: "0.164.1+26.4"
 
 jobs:
   classes:
@@ -150,6 +150,9 @@ jobs:
           unzip -Z1 new/client.jar | grep '\.class$' | sed 's/\.class$//' | sort > new/classes.txt
           for jar in new/fabric/META-INF/jars/*.jar; do unzip -Z1 "$jar" | grep '\.class$' | sed "s|\.class$| $(basename "$jar")|"; done | sort > new/fabric-classes.txt
           mkdir -p new/jar && unzip -q -o new/client.jar -d new/jar
+          # The Minecraft versions Fabric API asks for, and the newest versions out, to pick the build for NEW.
+          unzip -p new/fabric-api.jar fabric.mod.json | python3 -c 'import json, os, sys; print("Fabric API", os.environ["FABRIC_API"], "depends on", json.load(sys.stdin).get("depends"))'
+          curl -fsSL https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | python3 -c 'import json, sys; print("Newest versions:", [v["id"] for v in json.load(sys.stdin)["versions"][:5]])'
       - name: a few classes and files of NEW
         run: |
           cp="new/client.jar:$(ls new/libs/*.jar | tr '\n' ':')$(ls new/fabric/META-INF/jars/*.jar | tr '\n' ':')"

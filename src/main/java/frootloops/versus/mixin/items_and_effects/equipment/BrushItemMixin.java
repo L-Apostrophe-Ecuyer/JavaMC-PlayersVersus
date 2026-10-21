@@ -55,7 +55,7 @@ public abstract class BrushItemMixin extends Item {
                     stack.hurtAndBreak(8, user, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
                     chicken.knockback(0.4, user.getX() - chicken.getX(), user.getZ() - chicken.getZ(), user.damageSources().playerAttack(user), 0.0f);
                     // The hurt sound of the classic chicken, which SoundEvents.CHICKEN_HURT was before chickens had sound variants.
-                    chicken.playSound(SoundEvents.CHICKEN_SOUNDS.get(ChickenSoundVariants.SoundSet.CLASSIC).adultSounds().hurtSound().value());
+                    SoundEvents.CHICKEN_SOUNDS.get(ChickenSoundVariants.SoundSet.CLASSIC).adultSounds().hurtSound().ifPresent(sound -> chicken.playSound(sound.value()));
                     ParticleUtils.spawnParticleInBlock(user.level(), chicken.blockPosition(), 3, ParticleTypes.SMOKE);
                 }
             }
