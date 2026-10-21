@@ -20,7 +20,7 @@ on:
 env:
   OLD: "26.4-snapshot-3"
   NEW: "26.4-snapshot-4"
-  FABRIC_API: "0.164.1+26.4"
+  FABRIC_API: "0.164.0+26.4"
 
 jobs:
   classes:

@@ -1,24 +1,2 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
-# of line. "datadiff <path>" lines are printed by api-diff's overrides job, 26.3's file against 26.4's.
-sig net.minecraft.world.level.block.sounds.BlockSoundSet
-sig net.minecraft.world.level.block.sounds.BlockSoundCollection
-sig net.minecraft.world.level.material.FlowingFluid
-sig net.minecraft.world.level.material.FluidState
-sig net.minecraft.client.gui.components.debug.DebugScreenEntries
-sig net.minecraft.client.core.registries.BuiltInClientRegistries
-data block_sound_set/amethyst_block.json
-datadiff data/minecraft/worldgen/feature/spring_water.json
-datadiff data/minecraft/worldgen/feature/spring_lava_overworld.json
-datadiff data/minecraft/worldgen/feature/sulfur_pool.json
-datadiff data/minecraft/worldgen/feature/disk_grass.json
-datadiff data/minecraft/worldgen/placed_feature/disk_clay.json
-datadiff data/minecraft/worldgen/placed_feature/patch_firefly_bush_near_water.json
-datadiff data/minecraft/worldgen/noise_settings/overworld.json
-datadiff data/minecraft/worldgen/biome/plains.json
-datadiff data/minecraft/worldgen/biome/the_end.json
-datadiff data/minecraft/worldgen/biome/ice_caves.json
-datadiff data/minecraft/tags/fluid/water.json
-datadiff data/minecraft/tags/block/ice.json
-datadiff data/minecraft/tags/worldgen/biome/is_cave.json
-datadiff data/minecraft/enchantment/frost_walker.json
-datadiff data/minecraft/chicken_sound_variant/picky.json
+# of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
