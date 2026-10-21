@@ -858,6 +858,31 @@ Checked offline on the generated JSON with a small evaluator of its density-func
 
 Measured in generation (the smoke runs of `fa8acc0`, before the bands moved into stripes): the dedicated server loads the new rules, noises and features and generates every region without an error in its log. Around chunk −129,23 the y 80 river is what `40358b6` measured, to the hundredth: 1.94 blocks of water per chunk at y 80 and 2.68 in the bed, 0.03 spilling faces, 0.07 bed walls one block thick with air behind them, no column over open air; the keels and the rim change the ground around the river, not its water. The same region is 61% savanna: of its 1,526 cells on the bench's surface map (8 by 8 blocks each, drawn as the block most of the cell has), 56 are now mostly brown mud or brown clay (3.7%, none before) and 2 coarse dirt, as the 4% of mud and 5% of brown clay picked offline would make, with the rings too thin to win a cell. The main region (forest and ocean) has no ground that takes bands, and neither region has snowy plains, a snowy taiga or sulfur caves near the surface, so those want a look in game.
 
+## 16. The port to Minecraft 26.4-snapshot-4
+
+**Target.** 26.4-snapshot-4 with Fabric Loader 0.20.1 and Fabric API 0.164.0+26.4, the newest build for snapshot-4 (0.164.1 is snapshot-5's, which was out by then); Loom 1.17.1, Gradle 9.7.1 and Java 25 as before. `fabric.mod.json` asks for Loader 0.20.1 and Fabric API 0.164.0. Fabric API 0.162.2 does not start on snapshot-4: its `BuiltInRegistries` mixin finds no `freeze`.
+
+**How.** As for snapshot-3, with `api-diff` comparing snapshot-3's client jar against snapshot-4's. Its focus job also prints the Minecraft versions the pinned Fabric API asks for and the newest versions out, and `datadiff` lines in `.github/api-focus.txt` diff a vanilla data file that the mod does not override.
+
+**What snapshot-4 changed for the mod.**
+
+- **One fluid each for water and lava.** `Fluids.FLOWING_WATER` and `FLOWING_LAVA` are gone: a fluid state has `source` and `level`, and no `falling`. `FluidState#is(Fluids.WATER)` now matches flowing water too, so the checks that meant a source use `isSourceOfType`: the moisture of mud and clay, and the aquatic loot of suspicious sand. Dripstone drips from a source, or from any lava where it's ultrawarm, as before. In data, `matching_fluids` with `[water, flowing_water]` is now `"minecraft:water"`, and a predicate that means a source adds `"state": {"source": "true"}` (vanilla's `disk_clay`, `frost_walker`). The sugar cane patches follow vanilla's. The mud pools' springs place water at level 8 with `source` true, as vanilla's `spring_water` does.
+- **Block sounds left `SoundEvents`.** `SoundEvents.STONE_STEP` and the rest are gone: `SoundEvents.STONE` and so on are `BlockSoundCollection`s now. `BlockSounds.play(entity, block, BlockSoundSet::stepSound, volume, pitch)` plays a block's own sound the way those constants did; the pale creeper and bounding strides use it. A chicken sound variant's sounds are optional.
+- **Client registries.** Entity renderers, block entity renderers, particle providers, menu screens and debug screen entries are registries in `BuiltInClientRegistries`. Fabric API dropped `EntityRendererRegistry`, so `ModEntitiesRenderers` registers into `ENTITY_RENDERER` under the entity type's id. `DebugScreenEntries` are resource keys now, and the debug mixins compile against them unchanged.
+- **Mixin targets that changed.** No target is missing. These targets changed, but each mixin injects at the head, the return, or a call that is still there:
+  - the falling block's `tick`;
+  - the ladder's and the leaves' `getStateForPlacement`;
+  - `hurtServer`;
+  - the debug screen;
+  - the creative screen's and the recipe book's clicks;
+  - flint and steel's `useOn`.
+
+  The crosshair `@Overwrite` only sees the debug entry's key change type.
+- **`ore_gravel` moved.** Vanilla's biomes now list `ore_gravel` after `ore_granite_lower`, where it used to follow `ore_dirt`. The game builds one feature order from every biome, and the first Players Versus chunk failed ("Feature order cycle found", `deep_dark` against `players-versus:caves/regular_cave`) while 19 of the mod's biomes still had it after `ore_dirt`. The smoke runs then hung until their 45-minute timeout, the bench waiting on the chunk whose generation had thrown. They now list it after `ore_granite_lower` too, and so do the six overrides that lost it in snapshot-3, which have it back. `deep_caves` lists no granite and keeps its own place for it. `BiomeFeatureOrderTest` checks the order over vanilla's biomes from the game's jar plus the mod's, so the next port finds a cycle in the unit tests, not in a smoke run.
+- **Data the mod overrides.** The tags the mod adds to (`mineable/pickaxe`, `freeze_immune_entity_types`, `has_structure/mineshaft`) don't replace vanilla's, so they take snapshot-4's brittle ice, zombies, drowned, husks and ice caves without a change. Vanilla re-saved 43 of the ancient city and plains village structures the mod replaces. These are binary, so they aren't compared; the game's data fixers upgrade the mod's copies when they load.
+
+**Where the port stands.** Main, client and the tests compile, and all 67 game tests pass. 131 of the 132 unit tests pass; the 132nd, `PvBiomeLayoutTest.paleGrottoFollowsDarkAndPaleForestClimateRanges`, failed before the port too. SMOKE_RESULT The client is not run in CI: the entity renderers registering into the client registry, the leaves' view and the debug screen want a look in game.
+
 ## Appendix A: The current density functions as formulas
 
 Notation:
