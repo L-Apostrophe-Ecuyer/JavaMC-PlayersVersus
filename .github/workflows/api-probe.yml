@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     env:
-      VERSION: "26.4-snapshot-3"
+      VERSION: "26.4-snapshot-4"
       FABRIC_API: "0.162.2+26.4"
     steps:
       - name: checkout repository

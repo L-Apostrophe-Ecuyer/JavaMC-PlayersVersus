@@ -18,8 +18,8 @@ on:
   push:
 
 env:
-  OLD: "26.3"
-  NEW: "26.4-snapshot-3"
+  OLD: "26.4-snapshot-3"
+  NEW: "26.4-snapshot-4"
   FABRIC_API: "0.162.2+26.4"
 
 jobs:
