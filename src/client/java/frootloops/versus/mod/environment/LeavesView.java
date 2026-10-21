@@ -28,16 +28,20 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * With the camera inside a leaf block, leaves frame the view, as frost does in powder snow: a texture of our own
- * ({@code textures/misc/leaves_outline.png}, drawn by tools/leaves-outline.py) stretched over the screen, thick in the
- * corners and along the edges, clear in the middle, in the colour of the leaves the camera is in: their tint there, or
- * for leaves with none (cherry, azalea, pale oak) the average colour of their texture. It eases in and out over a few
- * ticks and isn't drawn for spectators. A HUD element after vanilla's camera overlays (a carved pumpkin, powder snow).
+ * With the camera inside a leaf block, leaves fill the corners of the view, as frost does in powder snow: in each corner
+ * of the screen the matching quarter of vanilla's leaf litter texture (the quarters its litter models are made of), so
+ * big its pixels show, in the colour of the leaves the camera is in: their tint there, or for leaves with none (cherry,
+ * azalea, pale oak) the average colour of their texture. It eases in and out over a few ticks and isn't drawn for
+ * spectators. A HUD element after vanilla's camera overlays (a carved pumpkin, powder snow).
  */
 @Environment(EnvType.CLIENT)
 public final class LeavesView implements HudElement {
 
-    private static final Identifier OUTLINE = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "textures/misc/leaves_outline.png");
+    /** Vanilla's leaf litter texture: grey leaves, 16 pixels square, each quarter one of its litter models' patches. */
+    private static final Identifier LITTER = Identifier.withDefaultNamespace("textures/block/leaf_litter.png");
+    private static final int LITTER_SIZE = 16, QUARTER = 8;
+    /** How much of the screen's shorter side each corner's quarter of litter covers. */
+    private static final float CORNER = 0.45f;
     /** How far the frame eases toward shown or hidden each tick. */
     private static final float EASE_PER_TICK = 0.25f;
     private static final float ALPHA = 0.95f;
@@ -80,7 +84,15 @@ public final class LeavesView implements HudElement {
         int colour = tint != null ? tint.colorInWorld(this.leaves, minecraft.level, this.at)
                 : this.averages.computeIfAbsent(minecraft.getModelManager().getBlockStateModelSet().getParticleMaterial(this.leaves).sprite(), LeavesView::average);
         int width = graphics.guiWidth(), height = graphics.guiHeight();
-        graphics.blit(RenderPipelines.GUI_TEXTURED, OUTLINE, 0, 0, 0.0f, 0.0f, width, height, width, height, ARGB.color(ALPHA * this.strength, colour));
+        // Whole screen pixels to a texture pixel, so every leaf pixel is the same size, square and sharp
+        int pixel = Math.max(1, Math.round(Math.min(width, height) * CORNER / QUARTER)), size = pixel * QUARTER;
+        int tinted = ARGB.color(ALPHA * this.strength, colour);
+        for (int right = 0; right <= 1; right++) {
+            for (int bottom = 0; bottom <= 1; bottom++) {
+                graphics.blit(RenderPipelines.GUI_TEXTURED, LITTER, right * (width - size), bottom * (height - size), right * QUARTER, bottom * QUARTER,
+                        size, size, QUARTER, QUARTER, LITTER_SIZE, LITTER_SIZE, tinted);
+            }
+        }
     }
 
     /** The average colour of a sprite's texture, its see-through pixels left out; white when it can't be read. */
