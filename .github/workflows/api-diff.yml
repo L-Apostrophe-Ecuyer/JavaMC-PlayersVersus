@@ -9,7 +9,8 @@
 #   changed one hides NEW's changes until it is merged.
 # - focus: what .github/api-focus.txt asks for, from NEW (see api-probe.yml for the kinds of line; here also
 #   "findsig <text>" and "findcalls <text>": the signatures or call summaries of the classes whose names contain the
-#   text, "member <class> <text>" a class's members containing the text, and "data <path>" a file under data/minecraft).
+#   text, "member <class> <text>" a class's members containing the text, "data <path>" a file under data/minecraft, and
+#   "datagrep <dir> <regex>" the lines of the files under data/minecraft/<dir> that match).
 #
 # Push a commit whose message contains [api-diff].
 
@@ -159,7 +160,7 @@ jobs:
           focus() { grep "^$1 " .github/api-focus.txt | cut -d' ' -f2- || true; }
           # Classes (binary names) whose simple or package name contains the text, without anonymous classes.
           matching() { grep -i -F -- "$1" new/classes.txt | grep -v '\$[0-9]' | sed 's|/|.|g'; }
-          classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|calls|sig|member|uses|assets|asset|data|datadir|datadiff) ' .github/api-focus.txt || true)
+          classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|calls|sig|member|uses|assets|asset|data|datadir|datadiff|datagrep) ' .github/api-focus.txt || true)
           echo "-----BEGIN FOCUS-----"
           focus find | while read -r text; do echo "== find $text"; grep -i -F -- "$text" new/classes.txt new/fabric-classes.txt || true; done
           focus findsig | while read -r text; do echo "== findsig $text"; m=$(matching "$text"); [ -n "$m" ] && javap -p -constants -cp "$cp" $m 2>&1 | grep -v '^Compiled from'; done
@@ -183,6 +184,8 @@ jobs:
           focus assets | while read -r dir; do echo "== assets $dir"; (cd new/jar/assets/minecraft && find "$dir" -type f | sort) || true; done
           focus asset | while read -r path; do echo "== asset $path"; base64 -w 0 "new/jar/assets/minecraft/$path" && echo || echo "missing"; done
           focus data | while read -r path; do echo "== data $path"; cat "new/jar/data/minecraft/$path" 2>/dev/null && echo || echo "missing"; done
+          # The lines matching a regex in the data files under a directory, with the file and line number.
+          focus datagrep | while read -r dir regex; do echo "== datagrep $dir $regex"; (cd new/jar/data/minecraft && grep -rnE -- "$regex" "$dir" | sort) || true; done
           # Each data file under the directory, with its first "type" and the logs, woods and stems it names.
           focus datadir | while read -r dir; do
             echo "== datadir $dir"
