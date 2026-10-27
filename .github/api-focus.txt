@@ -1,2 +1,27 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
+sig net.fabricmc.fabric.api.biome.v1.BiomeModificationContext$GenerationSettingsContext
+sig net.fabricmc.fabric.api.biome.v1.BiomeModification
+find GenerationStep
+find MoonPhase
+sig net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal
+sig net.minecraft.world.entity.ai.goal.LeapAtTargetGoal
+member net.minecraft.world.entity.ai.goal.MeleeAttackGoal MeleeAttackGoal(
+member net.minecraft.world.entity.ai.goal.AvoidEntityGoal AvoidEntityGoal(
+member net.minecraft.world.entity.Mob convertTo
+member net.minecraft.server.level.ServerLevel sendParticles
+member net.minecraft.core.particles.ParticleTypes SPORE
+member net.minecraft.core.particles.ParticleTypes MYCELIUM
+member net.minecraft.core.particles.ParticleTypes POOF
+member net.minecraft.sounds.SoundEvents PUFFER_FISH
+member net.minecraft.sounds.SoundEvents FUNGUS
+member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase isSolidRender
+member net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase isFaceSturdy
+sig net.minecraft.world.level.block.HugeMushroomBlock
+sig net.minecraft.client.renderer.entity.CreeperRenderer
+sig net.minecraft.client.renderer.entity.SpiderRenderer
+data worldgen/biome/mushroom_fields.json
+data worldgen/placed_feature/brown_mushroom_normal.json
+data worldgen/placed_feature/brown_mushroom_taiga.json
+data worldgen/placed_feature/brown_mushroom_old_growth.json
+datagrep worldgen/biome red_mushroom_nether|brown_mushroom_nether
