@@ -162,7 +162,7 @@ public final class PlacementRules {
     public static Direction travel(BlockPos from, BlockPos to) {
         int dx = to.getX() - from.getX(), dy = to.getY() - from.getY(), dz = to.getZ() - from.getZ();
         if (dy != 0 || Math.abs(dx) + Math.abs(dz) != 1) return null;
-        return Direction.fromDelta(dx, 0, dz);
+        return dx != 0 ? (dx > 0 ? Direction.EAST : Direction.WEST) : (dz > 0 ? Direction.SOUTH : Direction.NORTH);
     }
 
     /**
