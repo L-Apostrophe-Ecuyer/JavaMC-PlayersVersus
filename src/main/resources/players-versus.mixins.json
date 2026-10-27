@@ -106,6 +106,7 @@
     "mobs.hostile.overworld.DrownedMixin",
     "mobs.hostile.overworld.PhantomAccessor",
     "mobs.hostile.overworld.PhantomMixin",
+    "mobs.hostile.overworld.PhantomSpawnerMixin",
     "mobs.hostile.overworld.SkeletonMixin",
     "mobs.hostile.overworld.SpiderMixin",
     "mobs.hostile.overworld.SilverfishMixin",

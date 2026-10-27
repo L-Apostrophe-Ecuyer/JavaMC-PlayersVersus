@@ -77,8 +77,9 @@ public class MobSpawning {
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAMEL, 40, 3, 4);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAT, 40, 1, 3);
 
-        // Air:
-        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, EntityTypes.PHANTOM, 80, 1, 2);
+        // Air: phantoms at the new moon's midnight (PhantomMixin), anywhere but over the mushroom islands and in their caves
+        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld().and(BiomeSelectors.excludeByKey(Biomes.MUSHROOM_FIELDS, CustomOverworldBiomes.MUSHROOM_CAVES)),
+                MobCategory.MONSTER, EntityTypes.PHANTOM, 80, 1, 2);
 
         // Nether:
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.NETHER_WASTES), MobCategory.MONSTER, EntityTypes.BLAZE, 15, 1, 1);
@@ -89,8 +90,11 @@ public class MobSpawning {
         return isNewMoon(world) && isMidnight(world);
     }
 
+    /** The moon phase with no moon: vanilla's MoonPhase index 4 (0 is the full moon). */
+    public static final int NEW_MOON_PHASE = 4;
+
     public static boolean isNewMoon(LevelAccessor world) {
-        return WorldTime.moonPhase(world) == 7;
+        return WorldTime.moonPhase(world) == NEW_MOON_PHASE;
     }
 
     public static boolean isMidnight(LevelAccessor world) {
