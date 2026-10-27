@@ -1,12 +1,43 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
-datagrep worldgen/biome mushroom
-datagrep worldgen/configured_feature mushroom
-datagrep worldgen/feature mushroom
-data worldgen/placed_feature/brown_mushroom_normal.json
-data worldgen/placed_feature/red_mushroom_normal.json
-data worldgen/placed_feature/brown_mushroom_taiga.json
-data worldgen/placed_feature/brown_mushroom_old_growth.json
-data worldgen/feature/brown_mushroom_normal.json
-data worldgen/biome/mushroom_fields.json
-data worldgen/biome/lush_caves.json
+sig net.minecraft.world.level.levelgen.PhantomSpawner
+sig net.minecraft.world.entity.monster.Creeper
+sig net.minecraft.world.entity.monster.spider.Spider
+sig net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal
+sig net.minecraft.world.entity.ai.goal.SwellGoal
+sig net.minecraft.world.entity.ConversionParams
+find MushroomCow
+asset textures/entity/creeper/creeper.png
+asset textures/entity/spider/spider.png
+asset textures/item/creeper_spawn_egg.png
+asset textures/item/spider_spawn_egg.png
+asset textures/block/brown_mushroom_block.png
+asset textures/block/mushroom_stem.png
+asset textures/block/mushroom_block_inside.png
+assets textures/entity/creeper
+assets textures/entity/spider
+data loot_table/entities/creeper.json
+data loot_table/entities/spider.json
+data loot_table/blocks/leaf_litter.json
+data worldgen/placed_feature/red_mushroom_nether.json
+data worldgen/placed_feature/brown_mushroom_swamp.json
+data worldgen/placed_feature/red_mushroom_swamp.json
+data worldgen/placed_feature/red_mushroom_old_growth.json
+data worldgen/placed_feature/brown_mushroom_dappled_forest.json
+data worldgen/placed_feature/lush_caves_vegetation.json
+data worldgen/placed_feature/glow_lichen.json
+data worldgen/placed_feature/rooted_azalea_tree.json
+data worldgen/feature/moss_patch.json
+data worldgen/feature/huge_brown_mushroom.json
+data worldgen/feature/crimson_fungus.json
+data worldgen/feature/crimson_forest_vegetation.json
+data worldgen/feature/fallen_oak_tree.json
+data worldgen/feature/fallen_birch_tree.json
+data worldgen/feature/fallen_jungle_tree.json
+data worldgen/feature/fallen_spruce_tree.json
+data worldgen/feature/fallen_super_birch_tree.json
+data worldgen/feature/fallen_poplar_tree.json
+data worldgen/biome/nether_wastes.json
+data worldgen/biome/soul_sand_valley.json
+data tags/block/huge_brown_mushroom_can_place_on.json
+data tags/block/nylium.json
