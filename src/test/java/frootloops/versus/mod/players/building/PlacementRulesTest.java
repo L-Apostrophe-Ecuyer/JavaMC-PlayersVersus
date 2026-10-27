@@ -213,6 +213,25 @@ class PlacementRulesTest {
         assertEquals(0.0F, RecentPlacements.faster(0.0F), 1e-6);
     }
 
+    @Test
+    void aSlabThatWouldDoubleOneJustPlacedGoesOnBesideIt() {
+        // Out of the side clicked, whatever the row did
+        assertEquals(Direction.EAST, PlacementRules.slabStep(Direction.EAST, Direction.NORTH, Direction.SOUTH));
+        // On its open face: on the way the row goes, else the way the player faces
+        assertEquals(Direction.NORTH, PlacementRules.slabStep(Direction.UP, Direction.NORTH, Direction.SOUTH));
+        assertEquals(Direction.SOUTH, PlacementRules.slabStep(Direction.UP, null, Direction.SOUTH));
+        assertEquals(Direction.WEST, PlacementRules.slabStep(Direction.DOWN, Direction.WEST, Direction.SOUTH));
+    }
+
+    @Test
+    void aRowGoesTheWayItsLastTwoBlocksStep() {
+        assertEquals(Direction.NORTH, PlacementRules.travel(POS, POS.north()));
+        assertEquals(Direction.EAST, PlacementRules.travel(POS, POS.east()));
+        assertEquals(null, PlacementRules.travel(POS, POS.above()));
+        assertEquals(null, PlacementRules.travel(POS, POS.north(2)));
+        assertEquals(null, PlacementRules.travel(POS, POS.north().east()));
+    }
+
     /** The placement mixins apply on 26.4: their handlers are in the classes. */
     @Test
     void thePlacementMixinsApply() {

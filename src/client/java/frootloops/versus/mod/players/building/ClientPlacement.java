@@ -29,11 +29,13 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -69,6 +71,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * floor doesn't tower, a wall doesn't grow toward the player; a bridge walked along or a pillar jumped up does.</li>
  * <li>Never twice in the same spot (no slab doubled under the crosshair).</li>
  * </ul>
+ * A slab clicked where vanilla would double one the player just placed (the last placement, or any of the stroke's)
+ * goes beside it instead, in the same half: on along the row, or out of the side clicked ({@link #aim}). Sneak to
+ * double it.
  * A single click places as vanilla does. Reach-around: looking down past the edge of the block below you, where the
  * crosshair finds nothing, places in front of that block, as Bedrock does.
  */
@@ -113,8 +118,8 @@ public final class ClientPlacement {
     private boolean held;
     @Nullable private Stroke stroke;
 
-    @Nullable private PlacementRules.Placed last;
-    private long lastTime;
+    @Nullable private PlacementRules.Placed last, previous;
+    private long lastTime, previousTime;
 
     /** The spot a held right-click last tried, and whether the player was out of it. */
     private long triedPos = Long.MIN_VALUE;
@@ -140,8 +145,8 @@ public final class ClientPlacement {
 
     // Choosing the state
 
-    /** A placement of the block in hand: its context, vanilla's state, and the state the rules choose. */
-    public record Choice(BlockPlaceContext context, BlockState vanilla, BlockState chosen) {
+    /** A placement of the block in hand: the click, its context, vanilla's state, and the state the rules choose. */
+    public record Choice(BlockHitResult hit, BlockPlaceContext context, BlockState vanilla, BlockState chosen) {
         public BlockPos pos() {
             return context.getClickedPos();
         }
@@ -156,13 +161,13 @@ public final class ClientPlacement {
         if (context == null || !context.canPlace()) return null;
         BlockState vanilla = ((BlockItemInvoker) item).playersVersus$getPlacementState(context);
         if (vanilla == null) return null;
-        if (!VersusSettings.QOL.DO_SMARTER_BLOCK_PLACING || player.isShiftKeyDown()) return new Choice(context, vanilla, vanilla);
+        if (!VersusSettings.QOL.DO_SMARTER_BLOCK_PLACING || player.isShiftKeyDown()) return new Choice(hit, context, vanilla, vanilla);
         Level level = player.level();
         BlockPos pos = context.getClickedPos();
         BlockState first = stroke != null && held && stroke.item == item ? stroke.first : null;
         BlockState chosen = PlacementRules.resolve(vanilla, pos, context.getClickedFace(), first, recent(level, pos), player.getEyePosition(),
                 PlacementRules.View.of(level));
-        return new Choice(context, vanilla, chosen != vanilla && PlacementRules.acceptable(vanilla, chosen) ? chosen : vanilla);
+        return new Choice(hit, context, vanilla, chosen != vanilla && PlacementRules.acceptable(vanilla, chosen) ? chosen : vanilla);
     }
 
     /** The block placed just before, if it's recent and not at pos. */
@@ -179,12 +184,13 @@ public final class ClientPlacement {
     public record Click(BlockHitResult hit, float yRot, float xRot) {}
 
     /**
-     * The block in hand used on hit, as the right-click's use of it: placed in the state the rules choose, by clicking
-     * so that vanilla places it, and remembered.
+     * The block in hand used where the crosshair is, as the right-click's use of it: placed where {@link #aim} puts it,
+     * in the state the rules choose, by clicking so that vanilla places it, and remembered.
      */
-    public InteractionResult use(MultiPlayerGameMode gameMode, LocalPlayer player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult use(MultiPlayerGameMode gameMode, LocalPlayer player, InteractionHand hand, BlockHitResult crosshair) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!(stack.getItem() instanceof BlockItem)) return gameMode.useItemOn(player, hand, hit);
+        if (!(stack.getItem() instanceof BlockItem)) return gameMode.useItemOn(player, hand, crosshair);
+        BlockHitResult hit = aim(player, hand, crosshair);
         Item item = stack.getItem();
         Choice choice = choose(player, hand, hit);
         Click click = choice == null || choice.chosen == choice.vanilla ? null : clickFor(player, hand, hit, choice);
@@ -194,7 +200,7 @@ public final class ClientPlacement {
 
         if (choice != null && result instanceof InteractionResult.Success) {
             BlockState after = player.level().getBlockState(choice.pos());
-            if (after != before && !after.isAir()) placed(player, item, choice.pos(), after, hit.getDirection());
+            if (after != before && !after.isAir()) placed(player, item, choice.pos(), after, crosshair.getDirection());
         }
         return result;
     }
@@ -335,6 +341,42 @@ public final class ClientPlacement {
         });
     }
 
+    // Slabs going on beside the last
+
+    /**
+     * The click a slab in hand makes instead of doubling one the player just placed (the last placement, or any of the
+     * held stroke's): on the face of that slab the new one goes out of ({@link PlacementRules#slabStep}), at its height,
+     * so vanilla places it beside, in the same half. Sneaking, an older slab, or no room beside: the click as it is.
+     */
+    public BlockHitResult aim(LocalPlayer player, InteractionHand hand, BlockHitResult hit) {
+        if (!VersusSettings.QOL.DO_SMARTER_BLOCK_PLACING || player.isShiftKeyDown() || hit.getType() != HitResult.Type.BLOCK) return hit;
+        ItemStack stack = player.getItemInHand(hand);
+        if (!(stack.getItem() instanceof BlockItem item) || !(item.getBlock() instanceof SlabBlock)) return hit;
+        Level level = player.level();
+        BlockPos clicked = hit.getBlockPos();
+        BlockState slab = level.getBlockState(clicked);
+        if (!slab.is(item.getBlock()) || slab.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE || !justPlaced(level, clicked)) return hit;
+        if (!new BlockPlaceContext(player, hand, stack, hit).replacingClickedOnBlock()) return hit; // Vanilla wouldn't double it
+        Direction step = PlacementRules.slabStep(hit.getDirection(), travel(level), player.getDirection());
+        BlockHitResult beside = onFace(clicked, step, slab.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.TOP ? 0.75 : 0.25);
+        BlockPos target = target(player, hand, beside);
+        return target != null && target.equals(clicked.relative(step)) ? beside : hit;
+    }
+
+    /** Whether the block at pos is one the player just placed: the last placement, or one of the held stroke's. */
+    private boolean justPlaced(Level level, BlockPos pos) {
+        if (stroke != null && held && stroke.placed.containsKey(pos.asLong())) return true;
+        long age = level.getGameTime() - lastTime;
+        return last != null && last.pos().equals(pos) && age >= 0 && age <= RECENT;
+    }
+
+    /** The way the last two placements went, if they were placed beside each other on a level one after the other. */
+    @Nullable
+    private Direction travel(Level level) {
+        if (last == null || previous == null || lastTime - previousTime > RECENT || level.getGameTime() - lastTime > RECENT) return null;
+        return PlacementRules.travel(previous.pos(), last.pos());
+    }
+
     // Remembering
 
     private void placed(LocalPlayer player, Item item, BlockPos pos, BlockState state, Direction face) {
@@ -342,6 +384,8 @@ public final class ClientPlacement {
             if (stroke == null || stroke.item != item) stroke = new Stroke(item, state, face, player.level().getGameTime());
             stroke.placed.put(pos.asLong(), player.position());
         }
+        previous = last;
+        previousTime = lastTime;
         last = new PlacementRules.Placed(pos.immutable(), state);
         lastTime = player.level().getGameTime();
     }
@@ -360,9 +404,12 @@ public final class ClientPlacement {
         ItemStack stack = player.getItemInHand(hand);
         if (stack.getItem() != stroke.item || !strokes(stack.getItem())) return false;
         if (hit.getDirection() != stroke.face) return true;
-        BlockPos target = target(player, hand, hit);
+        BlockHitResult aimed = aim(player, hand, hit);
+        BlockPos target = target(player, hand, aimed);
         if (target == null) return false; // Nothing to place there; the click goes on as vanilla's
         if (stroke.placed.containsKey(target.asLong())) return true;
+        // A slab going on beside one of the stroke's grows the row, not out of that slab
+        if (aimed != hit) return false;
         Vec3 from = stroke.placed.get(hit.getBlockPos().asLong());
         if (from == null) return false;
         Vec3 moved = player.position().subtract(from);
@@ -373,7 +420,7 @@ public final class ClientPlacement {
     /** A block item's use on hit is about to be tried with right-click held. */
     public void tried(LocalPlayer player, InteractionHand hand, BlockHitResult hit) {
         if (!held || !strokes(player.getItemInHand(hand).getItem())) return;
-        BlockPos target = target(player, hand, hit);
+        BlockPos target = target(player, hand, aim(player, hand, hit));
         triedPos = target == null ? Long.MIN_VALUE : target.asLong();
         triedFree = target != null && free(player, target);
     }
@@ -392,7 +439,7 @@ public final class ClientPlacement {
         BlockHitResult hit = minecraft.hitResult instanceof BlockHitResult blockHit && blockHit.getType() == HitResult.Type.BLOCK ? blockHit
                 : minecraft.hitResult != null && minecraft.hitResult.getType() == HitResult.Type.MISS ? reachAround(player, hand) : null;
         if (hit == null || refuses(player, hand, hit)) return false;
-        BlockPos target = target(player, hand, hit);
+        BlockPos target = target(player, hand, aim(player, hand, hit));
         if (target == null || !free(player, target)) return false;
         return target.asLong() != triedPos || !triedFree;
     }
@@ -450,7 +497,8 @@ public final class ClientPlacement {
      * no click can place it (as the click then places vanilla's); null if nothing.
      */
     @Nullable
-    public Choice preview(LocalPlayer player, InteractionHand hand, BlockHitResult hit) {
+    public Choice preview(LocalPlayer player, InteractionHand hand, BlockHitResult crosshair) {
+        BlockHitResult hit = aim(player, hand, crosshair);
         Choice choice = choose(player, hand, hit);
         if (choice == null || choice.chosen == choice.vanilla) return choice;
         // Searching for the click again only when something changed
@@ -461,6 +509,6 @@ public final class ClientPlacement {
             previewChosen = choice.chosen;
             previewClickable = clickFor(player, hand, hit, choice) != null;
         }
-        return previewClickable ? choice : new Choice(choice.context, choice.vanilla, choice.vanilla);
+        return previewClickable ? choice : new Choice(choice.hit, choice.context, choice.vanilla, choice.vanilla);
     }
 }

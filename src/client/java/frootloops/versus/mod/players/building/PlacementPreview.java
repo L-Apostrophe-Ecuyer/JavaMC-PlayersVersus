@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.client.players.GameRendererInvoker;
 import frootloops.versus.mixin.client.players.LevelRendererAccessor;
+import frootloops.versus.mod.players.HandPlan;
 import frootloops.versus.mod.players.HandSelection;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -100,10 +101,10 @@ public final class PlacementPreview {
         if (player == null || minecraft.level == null || minecraft.gameMode == null || player.isSpectator() || player.isUsingItem()) return null;
         HitResult hit = minecraft.hitResult;
         if (hit == null || hit.getType() == HitResult.Type.ENTITY) return null;
-        HandSelection.Plan plan = HandSelection.plan(player, minecraft.level, hit);
-        if (!plan.world()) return null;
         // The hand that would place: the first, in the order a right-click tries them, holding a block
-        for (InteractionHand hand : plan.hands()) {
+        for (HandPlan.Step step : HandSelection.plan(player, minecraft.level, hit)) {
+            if (!step.world()) continue;
+            InteractionHand hand = step.hand();
             ItemStack stack = player.getItemInHand(hand);
             if (HandSelection.onCooldown(player, hand) || !(stack.getItem() instanceof BlockItem)) continue;
             boolean around = hit.getType() == HitResult.Type.MISS;
@@ -111,7 +112,8 @@ public final class PlacementPreview {
             if (blockHit == null) continue; // Nothing to reach around to: the next hand's turn, as for a right-click
             if (ClientPlacement.INSTANCE.refuses(player, hand, blockHit)) return null;
             ClientPlacement.Choice choice = ClientPlacement.INSTANCE.preview(player, hand, blockHit);
-            if (choice == null || (!around && choice.chosen() == choice.vanilla())) return null;
+            // Outlined when the rules turn it, it goes beside the slab clicked, or it reaches around
+            if (choice == null || (!around && choice.chosen() == choice.vanilla() && choice.hit() == blockHit)) return null;
             BlockState state = choice.chosen();
             return new Preview(choice.pos(), state, state.getShape(minecraft.level, choice.pos()));
         }
