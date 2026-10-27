@@ -484,10 +484,13 @@ public final class TreeFelling {
         return axis == fall ? Direction.Axis.Y : axis;
     }
 
-    /** A leaf bursting as if it decayed here: its drops fall, and its shed settles on the ground below by chance. */
+    /**
+     * A leaf bursting as if it decayed here: its drops fall, and its shed settles on the ground below, by a third of a
+     * decaying leaf's chance (a crown's worth of leaves would carpet the ground).
+     */
     private static void burst(ServerLevel level, BlockPos pos, BlockState leaf) {
         Block.dropResources(leaf, level, pos);
-        LeafLitter.decay(level, pos.above(), leaf, level.getRandom());
+        LeafLitter.felled(level, pos.above(), leaf, level.getRandom());
     }
 
     /** Whether this falling block is part of a felled tree. */

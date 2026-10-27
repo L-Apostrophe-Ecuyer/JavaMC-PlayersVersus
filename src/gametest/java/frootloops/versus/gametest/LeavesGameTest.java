@@ -542,37 +542,61 @@ public class LeavesGameTest {
                 .setValue(LeafLitterBlock.FACING, Direction.EAST).setValue(FallenLeavesBlock.PERSISTENT, persistent);
     }
 
-    /** Natural fallen leaves brown into leaf litter, keeping their segments and facing; placed ones never do. */
+    /**
+     * Natural fallen leaves fade with time, as many brown into leaf litter (keeping their segments and facing) as blow
+     * away; placed ones never do.
+     */
     @GameTest(structure = TOWER)
-    public void fallenLeavesBrownWithTime(GameTestHelper helper) {
+    public void fallenLeavesBrownOrBlowAwayWithTime(GameTestHelper helper) {
         floor(helper, 12, 6);
         fill(helper, 1, 1, 1, 10, 1, 4, Blocks.GRASS_BLOCK.defaultBlockState());
-        BlockPos natural = new BlockPos(2, 2, 2), placed = new BlockPos(4, 2, 2);
-        helper.setBlock(natural, fallenLeaves(3, false));
+        List<BlockPos> natural = new ArrayList<>();
+        for (int x = 1; x <= 8; x++) for (int z = 1; z <= 2; z++) natural.add(new BlockPos(x, 2, z));
+        BlockPos placed = new BlockPos(10, 2, 4);
+        for (BlockPos pos : natural) helper.setBlock(pos, fallenLeaves(3, false));
         helper.setBlock(placed, fallenLeaves(3, true));
         for (int i = 0; i < 300; i++) {
-            helper.randomTick(natural);
+            for (BlockPos pos : natural) helper.randomTick(pos);
             helper.randomTick(placed);
         }
-        helper.assertBlockPresent(Blocks.LEAF_LITTER, natural);
-        helper.assertBlockProperty(natural, SegmentableBlock.AMOUNT, 3);
-        helper.assertBlockProperty(natural, LeafLitterBlock.FACING, Direction.EAST);
+        int browned = 0, gone = 0;
+        for (BlockPos pos : natural) {
+            BlockState state = helper.getBlockState(pos);
+            if (state.isAir()) gone++;
+            else {
+                helper.assertBlockPresent(Blocks.LEAF_LITTER, pos);
+                helper.assertBlockProperty(pos, SegmentableBlock.AMOUNT, 3);
+                helper.assertBlockProperty(pos, LeafLitterBlock.FACING, Direction.EAST);
+                browned++;
+            }
+        }
+        // Each pile one way or the other at even odds: all sixteen alike comes about once in thirty thousand runs
+        helper.assertTrue(browned > 0 && gone > 0, browned + " of 16 natural piles browned and " + gone + " blew away");
         helper.assertBlockPresent(CustomBlocks.FALLEN_LEAVES, placed);
         helper.assertBlockProperty(placed, SegmentableBlock.AMOUNT, 3);
         helper.succeed();
     }
 
-    /** Shears and Silk Touch keep fallen leaves; anything else gives leaf litter, a pile's worth either way. */
+    /** Fallen leaves drop themselves to anything, a bare hand too, a pile's worth: green leaves can be gathered. */
     @GameTest(structure = TOWER)
-    public void fallenLeavesDropThemselvesOnlyToShearsAndSilkTouch(GameTestHelper helper) {
+    public void fallenLeavesDropThemselves(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
         ItemStack silkTouch = new ItemStack(Items.DIAMOND_PICKAXE);
         silkTouch.enchant(EnchantRegistryHelper.getRegistryEntry(level, Enchantments.SILK_TOUCH), 1);
         assertDrops(helper, Block.getDrops(fallenLeaves(3, false), level, pos, null, null, new ItemStack(Items.SHEARS)), CustomBlockItems.FALLEN_LEAVES, "shears");
         assertDrops(helper, Block.getDrops(fallenLeaves(3, false), level, pos, null, null, silkTouch), CustomBlockItems.FALLEN_LEAVES, "Silk Touch");
-        assertDrops(helper, Block.getDrops(fallenLeaves(3, false), level, pos, null, null, ItemStack.EMPTY), Items.LEAF_LITTER, "a bare hand");
-        assertDrops(helper, Block.getDrops(fallenLeaves(3, true), level, pos, null, null, ItemStack.EMPTY), Items.LEAF_LITTER, "a bare hand on a placed pile");
+        assertDrops(helper, Block.getDrops(fallenLeaves(3, false), level, pos, null, null, ItemStack.EMPTY), CustomBlockItems.FALLEN_LEAVES, "a bare hand");
+        assertDrops(helper, Block.getDrops(fallenLeaves(3, true), level, pos, null, null, ItemStack.EMPTY), CustomBlockItems.FALLEN_LEAVES, "a bare hand on a placed pile");
+        helper.succeed();
+    }
+
+    /** Leaf litter, brown or green, breaks without costing the attack: a pile after a pile with the attack key held. */
+    @GameTest(structure = TOWER, maxTicks = 20)
+    public void leafLitterBreaksWithoutCooldown(GameTestHelper helper) {
+        helper.assertTrue(Blocks.LEAF_LITTER.defaultBlockState().is(LeafLitter.BREAKS_WITHOUT_COOLDOWN), "leaf litter costs the attack to break");
+        helper.assertTrue(fallenLeaves(1, false).is(LeafLitter.BREAKS_WITHOUT_COOLDOWN), "fallen leaves cost the attack to break");
+        helper.assertTrue(!Blocks.SHORT_GRASS.defaultBlockState().is(LeafLitter.BREAKS_WITHOUT_COOLDOWN), "grass breaks without costing the attack");
         helper.succeed();
     }
 

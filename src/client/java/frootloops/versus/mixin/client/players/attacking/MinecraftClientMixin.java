@@ -3,6 +3,7 @@ package frootloops.versus.mixin.client.players.attacking;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.Combat;
+import frootloops.versus.mod.environment.blocks.leaves.LeafLitter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,7 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -50,6 +52,8 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
 
     private int ticksAttackKeyPressed = 0;
     private Entity prevTargettedEntity = null;
+    /** Whether the last attack only broke ground cover that costs it nothing (leaf litter): the charge stays. */
+    @Unique private boolean playersVersus$keptAttack = false;
 
     public MinecraftClientMixin(String string) { super(string, true); }
 
@@ -92,7 +96,7 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             }
             ticksAttackKeyPressed = 0;
             this.startAttack();
-            this.player.resetAttackStrengthTicker();
+            if (!this.playersVersus$keptAttack) this.player.resetAttackStrengthTicker();
             ci.cancel();
         }
     }
@@ -130,6 +134,7 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
 
         boolean breakingBlock = false;
         boolean missedSwing = true;
+        boolean brokeLitter = false;
         switch (this.hitResult.getType()) {
             case ENTITY: {
                 if(canAttackEntities && (attackRange * attackRange) > player.distanceToSqr(hitResult.getLocation())) {
@@ -144,11 +149,17 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             case BLOCK: {
                 BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
                 BlockPos pos = blockHitResult.getBlockPos();
+                // Leaf litter breaks at a touch and costs nothing: no miss, no recharge, the next pile at once
+                boolean litter = this.level.getBlockState(pos).is(LeafLitter.BREAKS_WITHOUT_COOLDOWN);
                 gameMode.startDestroyBlock(pos, blockHitResult.getDirection());
                 if(isMineableBlock(pos, this.level.getBlockState(pos))) {
                     missedSwing = false;
                     breakingBlock = true;
                     break;
+                }
+                else if (litter) {
+                    missedSwing = false;
+                    brokeLitter = true;
                 }
                 else ticksAttackKeyPressed++;
                 if(DEBUG_MODE && System.nanoTime() - timeStart > 200000) VersusMod.MOD_LOGGER.warn("PLAYERS - ATTACKING - Attacking a block took: " + ((double)(System.nanoTime() - timeStart)/1000000.0) + " ms");
@@ -166,7 +177,8 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             if(System.nanoTime() - timeStart > 1000000) VersusMod.MOD_LOGGER.warn("  *************** WARNING: EXCESSIVELY SLOW FUNCTION  *************** \n");
         }
 
-        if(canAttackEntities || breakingBlock) {
+        this.playersVersus$keptAttack = brokeLitter;
+        if(canAttackEntities || breakingBlock || brokeLitter) {
             this.player.swing(InteractionHand.MAIN_HAND, this.player.getMainHandItem().getAttackAnimation(), false);
             // 26.3's swing no longer tells the server by itself: the punch packet does (1.21.10's swing packet)
             this.player.connection.send(ServerboundPunchPacket.INSTANCE);

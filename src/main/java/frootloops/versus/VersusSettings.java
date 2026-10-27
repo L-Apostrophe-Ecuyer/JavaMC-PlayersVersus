@@ -88,11 +88,14 @@ public abstract class VersusSettings {
         public static double SHED_RATE = 0.1;
         public static double MOST_SHED_CHANCE = 0.25;
         public static double DECAY_LITTER_CHANCE = 0.25;
+        // A felled tree's leaves bursting against the ground, by a third of that
+        public static double FELLED_LITTER_CHANCE = 0.08;
         // How far below the leaves litter can land
         public static int LITTER_DROP_RANGE = 24;
-        // Natural fallen leaves brown into leaf litter at this chance per random tick (about an in-game day at the
-        // default random tick speed, which reaches a block about every 68 seconds)
-        public static double FALLEN_LEAVES_BROWNING_CHANCE = 0.057;
+        // Natural fallen leaves fade at this chance per random tick (about an in-game day at the default random tick
+        // speed, which reaches a block about every 68 seconds): browning into leaf litter at this share, else blowing away
+        public static double FALLEN_LEAVES_FADING_CHANCE = 0.057;
+        public static double FALLEN_LEAVES_BROWNING_SHARE = 0.5;
         // A natural leaf cut off from its tree decays as soon as it knows (its scheduled tick), not on a random tick
         // minutes later, so a felled tree's crown comes down at once
         public static boolean DO_INSTANT_LEAF_DECAY = true;
