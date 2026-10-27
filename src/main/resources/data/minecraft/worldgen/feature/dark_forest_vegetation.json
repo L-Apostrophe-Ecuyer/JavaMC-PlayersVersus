@@ -16,13 +16,6 @@
       }
     },
     {
-      "chance": 0.005,
-      "feature": {
-        "feature": "minecraft:huge_red_mushroom",
-        "placement": []
-      }
-    },
-    {
       "chance": 0.35,
       "feature": "minecraft:dark_oak_checked"
     },
@@ -33,13 +26,6 @@
     {
       "chance": 0.1,
       "feature": "minecraft:fancy_oak_checked"
-    },
-    {
-      "chance": 0.05,
-      "feature": {
-        "feature": "minecraft:huge_red_mushroom",
-        "placement": []
-      }
     },
     {
       "chance": 0.05,

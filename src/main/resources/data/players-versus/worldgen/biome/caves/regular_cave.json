@@ -64,8 +64,7 @@
     ],
     [
       "minecraft:glow_lichen",
-      "minecraft:brown_mushroom_normal",
-      "minecraft:red_mushroom_normal"
+      "players-versus:caves/brown_mushroom_clusters"
     ],
     [
       "minecraft:freeze_top_layer"
