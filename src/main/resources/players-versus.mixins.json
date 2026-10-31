@@ -14,6 +14,7 @@
     "players.building.BlockItemMixin",
 
     "items_and_effects.recipes.RecipeFileMixin",
+    "items_and_effects.conversion.LivingEntityConversionMixin",
 
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",
@@ -45,6 +46,7 @@
     "environment.blocks.TreeDigMixin",
     "environment.blocks.LeavesMoveControlMixin",
     "environment.blocks.MossMixin",
+    "environment.blocks.MushroomBlockMixin",
     "environment.blocks.NetherWartMixin",
     "environment.blocks.PointedDripstoneMixin",
     "environment.blocks.ScaffoldingItemMixin",

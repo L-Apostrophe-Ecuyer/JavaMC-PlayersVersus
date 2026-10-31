@@ -4,6 +4,8 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.blocks.*;
 import frootloops.versus.mod.environment.blocks.clays.*;
 import frootloops.versus.mod.environment.blocks.leaves.FallenLeavesBlock;
+import frootloops.versus.mod.environment.blocks.mushrooms.MushroomGrowth;
+import frootloops.versus.mod.environment.blocks.mushrooms.StagedMushroomBlock;
 import frootloops.versus.mod.environment.blocks.trees.TreeBlock;
 import frootloops.versus.mod.environment.blocks.trees.TreeFelling;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
@@ -81,6 +83,8 @@ public class CustomBlocks {
     public static final Map<Block, TreeBlock> TREE_BLOCKS = new LinkedHashMap<>();
 
     public static CreeperSporeBlock CREEPER_SPORE_BLOSSOM;
+    // Small mushrooms grown together: two or three brown or red ones (one is vanilla's), one to three pale shrooms
+    public static StagedMushroomBlock BROWN_MUSHROOMS, RED_MUSHROOMS, PALE_SHROOM;
 
     public static PotionEffectBileBlock DEATHLY_BILE, CORRUPTED_BILE, HARMFUL_BILE, HEALTHY_BILE, REGENERATION_BILE, WITHERING_BILE, MINING_SPEED_BILE, MINING_FATIGUE_BILE, TOUGHNESS_BILE, VISION_BILE, DARKNESS_BILE, LEAPING_BILE, SLOW_FALL_BILE, LEVITATION_BILE, SPEED_BILE, SLOWNESS_BILE, BREATH_BILE;
     public static PotionEffectBileBlock INVISIBILITY_BILE, GLOWING_BILE, WEAKNESS_BILE, STRENGTH_BILE, WIND_BILE, FIRE_BILE, FREEZING_BILE, OOZE_BILE, INFESTATION_BILE, POISON_BILE, WEAVING_BILE, LUCK_BILE, UNLUCK_BILE;
@@ -169,6 +173,10 @@ public class CustomBlocks {
 
         CREEPER_SPORE_BLOSSOM = (CreeperSporeBlock) registerBlock("creeper_spore_blossom", new CreeperSporeBlock(getSettings("creeper_spore_blossom", Blocks.SPORE_BLOSSOM).lightLevel((state) -> 3 + state.getValue(BlockStateProperties.AGE_2) * 3)));
 
+        BROWN_MUSHROOMS = registerStagedMushroom("brown_mushrooms", MushroomGrowth.Kind.BROWN, Blocks.BROWN_MUSHROOM);
+        RED_MUSHROOMS = registerStagedMushroom("red_mushrooms", MushroomGrowth.Kind.RED, Blocks.RED_MUSHROOM);
+        PALE_SHROOM = registerStagedMushroom("pale_shroom", MushroomGrowth.Kind.PALE, Blocks.BROWN_MUSHROOM);
+
         DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, MobEffects.WITHER, 210, 0, 4, 0.4f);
         CORRUPTED_BILE = registerBileBlock("corrupted_bile", MobEffects.HUNGER, 210, 1);
         HARMFUL_BILE = registerBileBlock("harmful_bile", MobEffects.INSTANT_DAMAGE);
@@ -216,6 +224,12 @@ public class CustomBlocks {
     private static Block registerBlock(String name, Block block) {
         Registry.register(BuiltInRegistries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, name), block);
         return block;
+    }
+
+    private static StagedMushroomBlock registerStagedMushroom(String name, MushroomGrowth.Kind kind, Block mushroom) {
+        BlockBehaviour.Properties settings = getSettings(name, mushroom).lightLevel(state -> MushroomGrowth.light(state.getValue(StagedMushroomBlock.MUSHROOMS)));
+        if (kind == MushroomGrowth.Kind.PALE) settings = settings.mapColor(MapColor.COLOR_LIGHT_GRAY);
+        return (StagedMushroomBlock) registerBlock(name, new StagedMushroomBlock(kind, settings));
     }
 
     private static PotionEffectBileBlock registerBileBlock(String name, Holder<MobEffect> statusEffect, int maxDuration, int amplifier) {

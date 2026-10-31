@@ -308,5 +308,11 @@
   "players-versus.deathScreen.spectateNearby": "Devenir spectateur (près d'ici)",
   "players-versus.deathScreen.spectateHome": "Devenir spectateur",
   "players-versus.deathScreen.respawnNearby": "Ressusciter près d'ici",
-  "players-versus.deathScreen.respawnHome": "Ressusciter chez soi"
+  "players-versus.deathScreen.respawnHome": "Ressusciter chez soi",
+  "block.players-versus.brown_mushrooms": "Champignons bruns",
+  "block.players-versus.red_mushrooms": "Champignons rouges",
+  "block.players-versus.pale_shroom": "Champignon blême",
+  "effect.players-versus.conversion": "Conversion",
+  "death.attack.shroomified": "%1$s a succombé aux champignons blêmes",
+  "death.attack.shroomified.player": "%1$s a succombé aux champignons blêmes en combattant %2$s"
 }

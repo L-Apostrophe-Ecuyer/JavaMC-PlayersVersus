@@ -90,6 +90,7 @@ public abstract class CustomBlockItems {
                     Identifier.withDefaultNamespace("context_int_provider")), Identifier.withDefaultNamespace("compostable/low")))));
 
     public static final BlockItem CREEPER_SPORE_BLOSSOM = new BlockItem(CustomBlocks.CREEPER_SPORE_BLOSSOM, getBlockSettings("creeper_spore_blossom"));
+    public static final BlockItem PALE_SHROOM = new BlockItem(CustomBlocks.PALE_SHROOM, getBlockSettings("pale_shroom"));
 
     // Creative only, after each wood's log: survival players only ever hold the log a tree block drops
     public static final Map<Block, BlockItem> TREE_BLOCKS = treeBlocks();

@@ -1,6 +1,9 @@
 package frootloops.versus.mixin.players;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import frootloops.versus.VersusSettings;
+import frootloops.versus.mod.items_and_effects.conversion.Shroomify;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodData;
@@ -62,6 +65,13 @@ public class HungerManagerMixin {
 
     }
 
+    // Without the food overhaul, vanilla's regeneration stops at Conversion's white hearts too
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;heal(F)V"))
+    private void playersVersus$noRegenIntoWhiteHearts(ServerPlayer player, float amount, Operation<Void> original) {
+        float room = Shroomify.regenCap(player) - player.getHealth();
+        if (room > 0.0F) original.call(player, Math.min(amount, room));
+    }
+
     private void doHungerExhaustion(ServerPlayer player, boolean hasHungerEffect) {
 
         // Starvation: When starving, activities deal damage.
@@ -99,8 +109,10 @@ public class HungerManagerMixin {
 
     private void doHealthRegeneration(ServerPlayer player, boolean hasHungerEffect) {
         float playerHealth = player.getHealth();
+        // Food doesn't regenerate health into Conversion's white hearts
+        float regenCap = Shroomify.regenCap(player);
         boolean isPlayerSlowlyDying = playerHealth < 20.0f && (player.hasEffect(MobEffects.WITHER) || (player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
-        boolean canPlayerRegenHealth = player.isHurt() && player.level().getGameRules().get(GameRules.NATURAL_HEALTH_REGENERATION);
+        boolean canPlayerRegenHealth = player.isHurt() && playerHealth < regenCap && player.level().getGameRules().get(GameRules.NATURAL_HEALTH_REGENERATION);
         boolean canPlayerFastHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect && isPlayerSlowlyDying;
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFastHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));
         boolean canPlayerFoodHeal = canPlayerFastHeal || canPlayerSlowHeal;
@@ -113,7 +125,7 @@ public class HungerManagerMixin {
 
         if(canPlayerFastHeal) {
             if (tickTimer > REGEN_TIME_FAST) {
-                player.setHealth((float) Math.ceil(playerHealth) + 1);
+                player.setHealth(Math.min(regenCap, (float) Math.ceil(playerHealth) + 1));
                 tickTimer = 0;
                 exhaustionLevel = (exhaustionLevel + 0.5F)/2.0f;
                 if(saturationLevel > 1.0F) saturationLevel = Math.max(1.0F, saturationLevel - 1.0F);
@@ -122,7 +134,7 @@ public class HungerManagerMixin {
         }
         else if(canPlayerSlowHeal) {
             if (tickTimer > REGEN_TIME_SLOW) {
-                player.setHealth((float) Math.ceil(playerHealth) + 1f);
+                player.setHealth(Math.min(regenCap, (float) Math.ceil(playerHealth) + 1f));
                 tickTimer = 0;
                 exhaustionLevel += 0.25F;
                 if(saturationLevel > 1.0F) saturationLevel = Math.max(1.0F, saturationLevel - 1.0F);

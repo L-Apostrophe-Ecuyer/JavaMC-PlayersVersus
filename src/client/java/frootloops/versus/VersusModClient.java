@@ -4,6 +4,7 @@ import frootloops.versus.mod.environment.CustomSpecialEffects;
 import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
+import frootloops.versus.mod.items_and_effects.conversion.ShroomShaking;
 import frootloops.versus.mod.items_and_effects.inventory.HotbarRefill;
 import frootloops.versus.mod.players.building.ClientPlacement;
 import frootloops.versus.mod.environment.ClientTopples;
@@ -36,6 +37,7 @@ public class VersusModClient implements ClientModInitializer {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
 		ModEntitiesRenderers.onInitialize();
 		MeleeAnimation.register();
+		ShroomShaking.register();
 		CustomBlocksClient.onInitialize();
 		LeavesRustling.register();
 		LeavesView.register();

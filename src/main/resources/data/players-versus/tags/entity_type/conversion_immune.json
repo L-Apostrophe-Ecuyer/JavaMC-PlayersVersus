@@ -1,0 +1,14 @@
+{
+  "values": [
+    "#minecraft:undead",
+    "minecraft:mooshroom",
+    "players-versus:mushroom_creeper",
+    "players-versus:mushroom_spider",
+    "players-versus:pale_zombie",
+    "minecraft:iron_golem",
+    "minecraft:snow_golem",
+    "minecraft:copper_golem",
+    "minecraft:ender_dragon",
+    "minecraft:warden"
+  ]
+}

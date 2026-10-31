@@ -154,6 +154,8 @@ public abstract class RegisteringCustomItems {
         });
 
         registerCustomItem("creeper_spore_blossom", CustomBlockItems.CREEPER_SPORE_BLOSSOM, CreativeModeTabs.FUNCTIONAL_BLOCKS);
+        registerCustomItem("pale_shroom", CustomBlockItems.PALE_SHROOM);
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.RED_MUSHROOM, CustomBlockItems.PALE_SHROOM));
     }
 
     public static Item.Properties getItemSettings(String name) {

@@ -135,6 +135,22 @@ public abstract class VersusSettings {
         public static float HEART_IN_ROOTS = 0.75f;
     }
 
+    public static class Mushrooms {
+        // Brown and red mushrooms grow by stages of one, two and three, and below y 0 into pale shrooms (MushroomGrowth)
+        public static boolean DO_STAGED_MUSHROOMS = true;
+        // A mushroom grows where the light is this or less, or on mycelium
+        public static int MAX_GROWING_LIGHT = 5;
+        // The chance a random tick that could grow a mushroom a stage, turn it pale or have three spread does so
+        public static float GROW_CHANCE = 0.25f;
+        // Three spread no more where this many blocks of their kind are within 4 blocks across, 1 up or down
+        public static int SPREAD_CAP = 8;
+        // Conversion: a dose for each DOSE_TICKS spent in pale shrooms, lasting EFFECT_TICKS (each dose refreshes it);
+        // all hearts white, SHROOMIFY_TICKS of shaking before shroomifying
+        public static int DOSE_TICKS = 100;
+        public static int EFFECT_TICKS = 2400;
+        public static int SHROOMIFY_TICKS = 100;
+    }
+
     public static class Items {
         // Stairs from three blocks (four stairs), slabs from two (four slabs), pressure plates from three (two plates)
         public static boolean DO_CHEAPER_STAIRS_AND_SLABS = true;

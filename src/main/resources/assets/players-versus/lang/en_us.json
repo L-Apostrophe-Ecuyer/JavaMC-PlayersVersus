@@ -465,5 +465,11 @@
   "block.players-versus.weaving_bile" : "Gooey Bile",
   "block.players-versus.luck_bile" : "Lucky Bile",
   "block.players-versus.unluck_bile" : "Unfortunate Bile",
-  "block.players-versus.withering_bile" : "Withering Bile"
+  "block.players-versus.withering_bile" : "Withering Bile",
+  "block.players-versus.brown_mushrooms": "Brown Mushrooms",
+  "block.players-versus.red_mushrooms": "Red Mushrooms",
+  "block.players-versus.pale_shroom": "Pale Shroom",
+  "effect.players-versus.conversion": "Conversion",
+  "death.attack.shroomified": "%1$s was shroomified",
+  "death.attack.shroomified.player": "%1$s was shroomified while fighting %2$s"
 }
