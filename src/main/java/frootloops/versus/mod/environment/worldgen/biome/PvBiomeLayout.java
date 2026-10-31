@@ -37,6 +37,8 @@ public final class PvBiomeLayout {
     static final Parameter SURFACE_DEPTH = Parameter.point(0.0F);
     static final Parameter SURFACE_CAVE_DEPTH = Parameter.span(0.1F, 0.25F);
     private static final float SURFACE_CAVE_OFFSET = 0.075F;
+    /** Where the mushroom islands' continentalness ends (vanilla's mushroom fields: -1.2 to -1.05). */
+    static final long ISLANDS_END = Climate.quantizeCoord(-1.05F);
     /**
      * Depth of the dripstone and ice caves that replace vanilla's dripstone entry. The old biome mixin passed the
      * continentalness range (0.8..1.0) as depth by mistake; this keeps that placement, because the dripstone rarity
@@ -107,6 +109,9 @@ public final class PvBiomeLayout {
             }
         });
 
+        // The mushroom islands' caves are theirs alone: no other cave reaches their continentalness (vanilla's ice caves do)
+        underground.replaceAll(PvBiomeLayout::offTheIslands);
+
         List<Entry> entries = new ArrayList<>(surface);
         for (PlacedBiome land : CustomOverworldBiomes.landBiomesToPlaceInOverorld) {
             if (land.type() != PlacedBiomeType.SURFACE) continue;
@@ -116,8 +121,9 @@ public final class PvBiomeLayout {
         entries.addAll(underground);
         for (PlacedBiome cave : CustomOverworldBiomes.caveBiomesToPlaceInOverorld) {
             if (cave.type() == PlacedBiomeType.SURFACE) continue;
-            entries.add(new Entry(Climate.parameters(cave.temperature(), cave.humidity(), cave.continentalness(),
-                    cave.erosion(), caveDepth(cave.type()), cave.weirdness(), caveOffset(cave)), cave.biome(), "cave"));
+            Entry entry = new Entry(Climate.parameters(cave.temperature(), cave.humidity(), cave.continentalness(),
+                    cave.erosion(), caveDepth(cave.type()), cave.weirdness(), caveOffset(cave)), cave.biome(), "cave");
+            entries.add(cave.biome() == CustomOverworldBiomes.MUSHROOM_CAVES ? entry : offTheIslands(entry));
         }
         return entries;
     }
@@ -197,6 +203,18 @@ public final class PvBiomeLayout {
                 dripstone.erosion(), DEEP_DRIPSTONE_DEPTH, dripstone.weirdness(), offset), Biomes.DRIPSTONE_CAVES, "dripstone"));
         out.add(new Entry(Climate.parameters(Parameter.span(-1.0F, -0.7F), dripstone.humidity(), dripstone.continentalness(),
                 dripstone.erosion(), DEEP_DRIPSTONE_DEPTH, dripstone.weirdness(), offset), Biomes.ICE_CAVES, "dripstone-ice"));
+    }
+
+    /**
+     * A cave entry kept off the mushroom islands' continentalness, so that under them the mushroom caves are nearest
+     * rather than tied: an entry reaching into it starts where it ends.
+     */
+    private static Entry offTheIslands(Entry entry) {
+        ParameterPoint p = entry.parameters();
+        Parameter continentalness = p.continentalness();
+        if (continentalness.min() >= ISLANDS_END || continentalness.max() <= ISLANDS_END) return entry;
+        return new Entry(new ParameterPoint(p.temperature(), p.humidity(), new Parameter(ISLANDS_END, continentalness.max()),
+                p.erosion(), p.depth(), p.weirdness(), p.offset()), entry.biome(), entry.rule());
     }
 
     private static Parameter caveDepth(PlacedBiomeType type) {
