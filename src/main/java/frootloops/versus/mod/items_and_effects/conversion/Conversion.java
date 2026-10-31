@@ -2,7 +2,7 @@ package frootloops.versus.mod.items_and_effects.conversion;
 
 /**
  * Conversion, pale shrooms' effect, by numbers: its hearts turn white, one per amplifier + 1, from the end of the health
- * bar down towards none. Each dose adds its amplifier + 1 to what was had. Food doesn't regenerate health into white
+ * bar down towards none. Each dose adds its amplifier + 1 to what was had, and refreshes it without shortening it. Food doesn't regenerate health into white
  * hearts; all hearts white, the entity shroomifies (Shroomify).
  */
 public final class Conversion {
@@ -16,6 +16,11 @@ public final class Conversion {
     /** The amplifier after a dose of this amplifier, on one had: the dose's hearts added to those had. */
     public static int stackedAmplifier(int had, int dose) {
         return had + dose + 1;
+    }
+
+    /** The duration after a dose on one had: the longer of the two (-1, endless, stays endless). */
+    public static int stackedDuration(int had, int dose) {
+        return had < 0 ? had : Math.max(had, dose);
     }
 
     /** The health food regenerates up to: what the white hearts leave of the bar. */

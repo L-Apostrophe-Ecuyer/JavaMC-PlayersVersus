@@ -2,6 +2,7 @@ package frootloops.versus.mixin.items_and_effects.conversion;
 
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.conversion.Conversion;
+import frootloops.versus.mod.items_and_effects.conversion.ConversionAttacks;
 import frootloops.versus.mod.items_and_effects.conversion.Shroomify;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -15,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Conversion stacks: a dose on one had adds its amplifier + 1 to it, with the dose's duration. And the immune (undead,
- * mushroom creatures, golems, bosses) never take it.
+ * Conversion stacks: a dose on one had adds its amplifier + 1 to it, refreshing it without shortening it. A hit that
+ * converted gives nothing else. And the immune (undead, mushroom creatures, golems, bosses) never take it.
  */
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityConversionMixin {
@@ -28,8 +29,15 @@ public abstract class LivingEntityConversionMixin {
         if (!dose.is(CustomStatusEffects.CONVERSION)) return dose;
         MobEffectInstance had = this.getEffect(CustomStatusEffects.CONVERSION);
         if (had == null) return dose;
-        return new MobEffectInstance(dose.getEffect(), dose.getDuration(), Conversion.stackedAmplifier(had.getAmplifier(), dose.getAmplifier()),
+        return new MobEffectInstance(dose.getEffect(), Conversion.stackedDuration(had.getDuration(), dose.getDuration()),
+                Conversion.stackedAmplifier(had.getAmplifier(), dose.getAmplifier()),
                 dose.isAmbient(), dose.isVisible(), dose.showIcon());
+    }
+
+    /** A hit that converted gives nothing else (ConversionAttacks): the mob's other effects on what it hit are dropped. */
+    @Inject(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), cancellable = true)
+    private void playersVersus$onlyConversion(MobEffectInstance effect, @Nullable Entity source, CallbackInfoReturnable<Boolean> info) {
+        if (ConversionAttacks.replaced(effect, source, (LivingEntity) (Object) this)) info.setReturnValue(false);
     }
 
     @Inject(method = "canBeAffected", at = @At("HEAD"), cancellable = true)

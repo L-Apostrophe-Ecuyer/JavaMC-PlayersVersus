@@ -80,9 +80,13 @@ being a `CustomStatusEffects` registration — likely helper logic for the *vani
 overhaul rather than a new effect; verify its role before assuming it's dead code).
 
 ### Conversion (`ConversionStatusEffect`, `mod/items_and_effects/conversion/*`; spec `docs/superpowers/specs/2026-10-31-staged-mushrooms-and-conversion-design.md`)
-No potion: pale shrooms dose it (`ConversionExposure`, every `VersusSettings.Mushrooms.DOSE_TICKS` in them, lasting
-`EFFECT_TICKS`). `LivingEntityConversionMixin` stacks doses (new amplifier = had + dose + 1) and keeps tag
-`players-versus:conversion_immune` from taking it. White hearts = amplifier + 1 from the bar's end (`Conversion`, pure,
+No potion. Doses (`ConversionAttacks.dose()`): pale shrooms (`ConversionExposure`, every
+`VersusSettings.Mushrooms.DOSE_TICKS` in them, lasting `EFFECT_TICKS`), pale zombies' and creakings' hits, zombies'
+by `ZOMBIE_CONVERSION_CHANCE` (`ConversionAttacks.afterHit`; a converting hit's other effects on its target that tick
+are dropped), a creaking vanishing when hit, the mushroom creeper's spore puff, the pale creeper's cloud, and rotten
+flesh (`VanillaItems`: `ROTTEN_FLESH_CONVERSION_CHANCE` 1/8 of a 1200-tick dose, besides its hunger).
+`LivingEntityConversionMixin` stacks doses (new amplifier = had + dose + 1, duration the longer of the two) and keeps
+tag `players-versus:conversion_immune` (pale creepers and creakings among them) from taking it. White hearts = amplifier + 1 from the bar's end (`Conversion`, pure,
 `ConversionTest`; client `ConversionHeartsMixin` draws `hud/heart/conversion_*`, access-widened `Hud$HeartType`).
 Food regeneration stops below them (`HungerManagerMixin`, both the overhaul's and vanilla's `heal`). All white:
 `Shroomify` shakes it `SHROOMIFY_TICKS` (`ShroomShakingPayload` -> client `ShroomShaking`, render state "fully frozen";

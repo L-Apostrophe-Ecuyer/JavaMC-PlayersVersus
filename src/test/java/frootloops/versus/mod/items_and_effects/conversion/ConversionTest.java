@@ -24,6 +24,15 @@ class ConversionTest {
     }
 
     @Test
+    void aDoseRefreshesTheEffectButNeverShortensIt() {
+        // A two-minute dose on a minute left: two minutes; rotten flesh's minute on a minute and a half: as it was
+        assertEquals(2400, Conversion.stackedDuration(1200, 2400));
+        assertEquals(1800, Conversion.stackedDuration(1800, 1200));
+        // An endless one stays endless
+        assertEquals(-1, Conversion.stackedDuration(-1, 2400));
+    }
+
+    @Test
     void foodRegeneratesOnlyUpToTheWhiteHearts() {
         assertEquals(20.0F, Conversion.regenCap(20.0F, 0));
         assertEquals(14.0F, Conversion.regenCap(20.0F, 3));

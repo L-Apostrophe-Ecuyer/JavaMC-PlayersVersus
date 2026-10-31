@@ -21,14 +21,24 @@ Asked for on 2026-10-31, after the recipe book. Builds on the feedback batch's m
   refreshes it and adds its amplifier + 1 to the amplifier had. Its hearts turn white, amplifier + 1 of them, from the
   end of the health bar down. Food doesn't regenerate health into white hearts (other healing does). It wears off, milk
   cures it, a totem of undying cures it; then the hearts are red again.
+- **What else converts** (asked for after the first round): every dose is one white heart more.
+  - A pale zombie's hit, every one, armed or not, instead of its wither. A creaking's hit; and a creaking that
+    vanishes when hit gives its attacker Conversion instead of blindness (the silverfish it otherwise lets out stays).
+  - Any other zombie's hit (husks, drowned, zombie villagers, zombified piglins), 1 in 25, and then nothing else:
+    a husk's converting hit gives no hunger.
+  - The mushroom creeper never explodes, lit or after a player: its spore puff turns the creepers within 3 blocks and
+    gives everything else living there a dose. The pale creeper still explodes, and its lingering cloud gives
+    Conversion instead of darkness and wither.
+  - Rotten flesh: besides its hunger, a 1-in-8 chance of a dose lasting 60 seconds.
+  - A dose refreshes the effect's time but never shortens it (rotten flesh's minute on two minutes left leaves two).
 - **Shroomifying.** All of its hearts white, a living thing shakes for 5 seconds (a player feels sick), then:
   - a player dies of it ("was shroomified") and a pale zombie rises where they fell, wearing their armour, which it
     always drops; a totem saves them, armour and all;
   - a villager turns into a zombie villager, piglins and piglin brutes into zombified piglins, a hoglin into a zoglin,
     illagers, witches and wandering traders into pale zombies;
   - anything else dies of it.
-  - The undead, mooshrooms, the mushroom creeper and spider, pale zombies, golems, the ender dragon and the warden never
-    take Conversion.
+  - The undead, mooshrooms, the mushroom creeper and spider, pale zombies, pale creepers, creakings, golems, the ender
+    dragon and the warden never take Conversion.
 
 ## How
 
@@ -52,6 +62,11 @@ Asked for on 2026-10-31, after the recipe book. Builds on the feedback batch's m
   `players-versus:shroomify_into_pale_zombies` lists the mobs that become pale zombies.
 - Assets from `tools/staged-mushrooms.py` (tall mushrooms, pale shrooms, white hearts, the cluster models).
 
+- `ConversionAttacks`: the dose, and what a mob's landed melee hit does (`MobConversionAttackMixin` at
+  `Mob#doHurtTarget`'s return); `LivingEntityConversionMixin` drops a converting hit's other effects on its target
+  that tick. `CreakingScares`, `MushroomCreeperEntity#puff` (with `CreeperMixin` putting out a lit one),
+  `PaleCreeperEntity`'s cloud and rotten flesh's consumable (`VanillaItems`) give the other doses.
+
 ## Rulings
 
 - "Stone" is the overworld's stones (`#minecraft:base_stone_overworld`), deepslate among them: below y 0 is mostly
@@ -64,3 +79,8 @@ Asked for on 2026-10-31, after the recipe book. Builds on the feedback batch's m
 - Stage 1 doesn't spread as vanilla's mushrooms do: only three spread.
 - A player's armour moves to their pale zombie (never copied, whatever keepInventory says).
 - "So goes the Absorption effect" read as a comparison: Absorption is unchanged.
+- "Spore creepers" are both the mushroom creeper and the pale creeper (the user's answer).
+- A pale zombie's every hit converts, armed or not (its wither came only from bare hands); the creaking's silverfish
+  stays: it isn't something inflicted.
+- "Very rarely" for other zombies: 1 in 25 hits (`ZOMBIE_CONVERSION_CHANCE`).
+- A lit mushroom creeper puffs and goes out, rather than puffing again every second and a half.

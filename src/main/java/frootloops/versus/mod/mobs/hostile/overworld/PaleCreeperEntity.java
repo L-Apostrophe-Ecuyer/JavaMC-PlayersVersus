@@ -1,5 +1,7 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
+import frootloops.versus.mod.items_and_effects.conversion.ConversionAttacks;
+
 
 import frootloops.versus.mod.environment.blocks.BlockSounds;
 import net.minecraft.core.BlockPos;
@@ -139,8 +141,8 @@ public class PaleCreeperEntity extends Creeper {
         areaEffectCloudEntity.setWaitTime(10);
         areaEffectCloudEntity.setDuration(300);
         areaEffectCloudEntity.setRadiusPerTick(-areaEffectCloudEntity.getRadius() / 300.0f);
-        areaEffectCloudEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 600, 0, false, false));
-        areaEffectCloudEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 600, 0, false, true));
+        // Conversion, in place of the darkness and wither it left: each time the cloud reaches something, a dose
+        areaEffectCloudEntity.addEffect(ConversionAttacks.dose());
         this.level().addFreshEntity(areaEffectCloudEntity);
     }
 

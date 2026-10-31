@@ -5,6 +5,14 @@ import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.mushrooms.StagedMushroomBlock;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.conversion.Conversion;
+import frootloops.versus.mod.mobs.ModEntities;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -26,8 +34,9 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 /**
- * Small mushrooms grow by stages and below y 0 turn pale; pale shrooms convert what stays in them, Conversion stacks,
- * keeps food from regenerating health into its white hearts, and all white, shroomifies.
+ * Small mushrooms grow by stages and below y 0 turn pale; pale shrooms convert what stays in them, and so do pale
+ * zombies', creakings' and (rarely) zombies' hits and rotten flesh; Conversion stacks, keeps food from regenerating
+ * health into its white hearts, and all white, shroomifies.
  */
 public class StagedMushroomsGameTest {
 
@@ -180,6 +189,63 @@ public class StagedMushroomsGameTest {
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
         pig.addEffect(allWhite(pig));
         helper.succeedWhen(() -> helper.assertTrue(pig.isDeadOrDying() || pig.isRemoved(), "the all-white pig lives"));
+    }
+
+    /** A pale zombie's hit and a creaking's convert, and give nothing else (the pale zombie's wither is gone). */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void paleZombiesAndCreakingsHitsConvert(GameTestHelper helper) {
+        floor(helper, Blocks.STONE.defaultBlockState());
+        Mob first = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
+        Mob second = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(10.5, 1.0, 3.5));
+        Mob paleZombie = helper.spawnWithNoFreeWill(ModEntities.PALE_ZOMBIE, new Vec3(3.5, 1.0, 5.5));
+        Mob creaking = helper.spawnWithNoFreeWill(EntityTypes.CREAKING, new Vec3(10.5, 1.0, 5.5));
+        helper.assertTrue(paleZombie.doHurtTarget(helper.getLevel(), first), "the pale zombie missed");
+        helper.assertTrue(first.hasEffect(CustomStatusEffects.CONVERSION), "the pale zombie's hit didn't convert");
+        helper.assertTrue(!first.hasEffect(MobEffects.WITHER), "the pale zombie's hit withered");
+        helper.assertTrue(creaking.doHurtTarget(helper.getLevel(), second), "the creaking missed");
+        helper.assertTrue(second.hasEffect(CustomStatusEffects.CONVERSION), "the creaking's hit didn't convert");
+        helper.succeed();
+    }
+
+    /** A zombie's hit converts only by chance, and then in place of its own effect: a husk's hunger. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aZombiesRareConvertingHitGivesNothingElse(GameTestHelper helper) {
+        floor(helper, Blocks.STONE.defaultBlockState());
+        Mob converted = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
+        Mob spared = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(10.5, 1.0, 3.5));
+        Mob husk = helper.spawnWithNoFreeWill(EntityTypes.HUSK, new Vec3(6.5, 1.0, 5.5));
+        float chance = VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE;
+        try {
+            VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE = 1.0F;
+            helper.assertTrue(husk.doHurtTarget(helper.getLevel(), converted), "the husk missed");
+            VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE = 0.0F;
+            helper.assertTrue(husk.doHurtTarget(helper.getLevel(), spared), "the husk missed its second");
+        } finally {
+            VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE = chance;
+        }
+        helper.assertTrue(converted.hasEffect(CustomStatusEffects.CONVERSION), "the husk's converting hit didn't convert");
+        helper.assertTrue(!converted.hasEffect(MobEffects.HUNGER), "the husk's converting hit also gave hunger");
+        helper.assertTrue(!spared.hasEffect(CustomStatusEffects.CONVERSION), "the husk's hit converted without the chance");
+        helper.succeed();
+    }
+
+    /** Rotten flesh keeps its hunger and can convert too: a 1-in-8 chance of a minute's dose. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void rottenFleshCanConvert(GameTestHelper helper) {
+        Consumable flesh = new ItemStack(Items.ROTTEN_FLESH).get(DataComponents.CONSUMABLE);
+        helper.assertTrue(flesh != null, "rotten flesh can't be eaten");
+        boolean converts = false, hungers = false;
+        for (ConsumeEffect effect : flesh.onConsumeEffects()) {
+            if (!(effect instanceof ApplyStatusEffectsConsumeEffect apply)) continue;
+            for (MobEffectInstance instance : apply.effects()) {
+                if (instance.is(CustomStatusEffects.CONVERSION) && instance.getAmplifier() == 0 && instance.getDuration() == 1200
+                        && apply.probability() == 0.125F) converts = true;
+                if (instance.is(MobEffects.HUNGER)) hungers = true;
+            }
+        }
+        helper.assertTrue(converts, "rotten flesh has no 1-in-8 chance of a minute's Conversion: " + flesh.onConsumeEffects());
+        helper.assertTrue(hungers, "rotten flesh lost its hunger");
+        helper.succeed();
     }
 
     /** Food regenerates a player's health up to their white hearts, and no further. */

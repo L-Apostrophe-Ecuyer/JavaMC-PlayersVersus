@@ -1,5 +1,6 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
+import frootloops.versus.mod.items_and_effects.conversion.ConversionAttacks;
 import frootloops.versus.mod.mobs.ModEntities;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -7,6 +8,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -21,10 +23,10 @@ import net.minecraft.world.level.Level;
 
 /**
  * A creeper overgrown with mushrooms, of the caves under the mushroom islands. It leaves players alone and seeks out
- * creepers instead: it swells and hisses beside one, then lets out a harmless puff of spores (CreeperMixin, in place of
- * the explosion) that turns every creeper within {@link #SPORE_REACH} blocks into one of its own, and can puff again
- * after {@link #PUFF_COOLDOWN} ticks. A player who hurts it is the exception: it goes after them and blows up for real,
- * as it does when lit.
+ * creepers instead: it swells and hisses beside one, then lets out a puff of spores (CreeperMixin, in place of the
+ * explosion: it never explodes, lit or not) that turns every creeper within {@link #SPORE_REACH} blocks into one of its
+ * own and gives everything else living there a dose of Conversion, and can puff again after {@link #PUFF_COOLDOWN}
+ * ticks. A player who hurts it is the exception it goes after.
  */
 public class MushroomCreeperEntity extends Creeper {
 
@@ -71,14 +73,9 @@ public class MushroomCreeperEntity extends Creeper {
         }
     }
 
-    /** Whether its swelling ends in spores rather than an explosion: unless it's lit, or after a player. */
-    public boolean puffsInsteadOfExploding() {
-        return !this.isIgnited() && !(this.getTarget() instanceof Player);
-    }
-
     /**
      * The spore puff, on the server, where vanilla's explosion would be: no damage, no blocks broken; the creepers
-     * near it turn, and it deflates to wait out its cooldown.
+     * near it turn, everything else living near it takes a dose of Conversion, and it deflates to wait out its cooldown.
      */
     public void puff(ServerLevel level) {
         this.setSwellDir(-1);
@@ -89,6 +86,10 @@ public class MushroomCreeperEntity extends Creeper {
         for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, this.getBoundingBox().inflate(SPORE_REACH),
                 creeper -> creeper.getType() == EntityTypes.CREEPER && creeper.isAlive())) {
             creeper.convertTo(ModEntities.MUSHROOM_CREEPER, ConversionParams.single(creeper, false, false), mushroom -> {});
+        }
+        for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(SPORE_REACH),
+                living -> living != this && living.isAlive() && !(living instanceof Creeper))) {
+            living.addEffect(ConversionAttacks.dose(), this);
         }
         this.setTarget(null);
     }

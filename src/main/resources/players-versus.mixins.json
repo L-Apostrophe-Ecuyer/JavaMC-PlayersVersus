@@ -15,6 +15,7 @@
 
     "items_and_effects.recipes.RecipeFileMixin",
     "items_and_effects.conversion.LivingEntityConversionMixin",
+    "items_and_effects.conversion.MobConversionAttackMixin",
 
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",

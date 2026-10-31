@@ -2,6 +2,7 @@ package frootloops.versus.mod.mobs.hostile.overworld;
 
 import frootloops.versus.mod.mobs.StandingSpots;
 import net.minecraft.core.BlockPos;
+import frootloops.versus.mod.items_and_effects.conversion.ConversionAttacks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -19,14 +20,14 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Scarier creakings. One stuck for a few seconds, chasing something it can't get to, teleports like an enderman once
  * nobody's looking at it: somewhere near its target that no player can see, within reach of its heart. Hitting one
- * is a gamble: {@link #VANISH_CHANCE} of the time the attacker goes blind and the creaking is gone; otherwise a
- * silverfish crawls out of it. And its own hits land twice as hard as vanilla's.
+ * is a gamble: {@link #VANISH_CHANCE} of the time the attacker takes a dose of Conversion and the creaking is gone;
+ * otherwise a silverfish crawls out of it. And its own hits land twice as hard as vanilla's, and convert
+ * (ConversionAttacks).
  */
 public final class CreakingScares {
     /** Twice vanilla's 3. */
     public static final double ATTACK_DAMAGE = 6.0;
     public static final float VANISH_CHANCE = 0.4F;
-    static final int BLINDNESS_TICKS = 80;
     /** Ticks without getting anywhere before a creaking counts as stuck, and before it may teleport again. */
     public static final int STUCK_TICKS = 60, TELEPORT_COOLDOWN = 100;
     /** Where a teleport lands: this far from the creaking's target (or anywhere this near itself), and this close to its heart. */
@@ -38,10 +39,10 @@ public final class CreakingScares {
     private CreakingScares() {
     }
 
-    /** A hit that went through: the attacker goes blind and the creaking vanishes, or a silverfish comes out of it. */
+    /** A hit that went through: the attacker takes a dose of Conversion and the creaking vanishes, or a silverfish comes out of it. */
     public static void onHit(ServerLevel level, Creaking creaking, LivingEntity attacker) {
         if (creaking.getRandom().nextFloat() < VANISH_CHANCE) {
-            attacker.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLINDNESS_TICKS), creaking);
+            attacker.addEffect(ConversionAttacks.dose(), creaking);
             creaking.discard();
             return;
         }

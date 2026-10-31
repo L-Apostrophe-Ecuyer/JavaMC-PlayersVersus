@@ -9,6 +9,8 @@
     "minecraft:snow_golem",
     "minecraft:copper_golem",
     "minecraft:ender_dragon",
-    "minecraft:warden"
+    "minecraft:warden",
+    "players-versus:pale_creeper",
+    "minecraft:creaking"
   ]
 }

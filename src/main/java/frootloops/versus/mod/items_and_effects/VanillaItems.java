@@ -2,6 +2,7 @@ package frootloops.versus.mod.items_and_effects;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.environment.CustomBlockItems;
 import frootloops.versus.mod.environment.CustomSpecialEffects;
@@ -41,6 +42,7 @@ import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.storage.loot.providers.number.floats.ResolvableFloat;
 import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -245,6 +247,12 @@ public class VanillaItems {
         context.modify(item, builder -> {builder.set(DataComponents.MAX_STACK_SIZE, newStackSize + 0);});
     }
 
+    private static List<ConsumeEffect> withEffect(List<ConsumeEffect> effects, ConsumeEffect more) {
+        List<ConsumeEffect> all = new ArrayList<>(effects);
+        all.add(more);
+        return all;
+    }
+
     private static void modifyVanillaFoodItem(final Item item, final float eatTime) {
         DefaultItemComponentEvents.MODIFY.register(context -> {
             UseRemainder remainderComponent = item.getDefaultInstance().getOrDefault(DataComponents.USE_REMAINDER, null);
@@ -257,9 +265,15 @@ public class VanillaItems {
             boolean isDrink = isHoneyBottle || isStew || isBucket || isBottled || consumeComponent.sound() == SoundEvents.GENERIC_DRINK;
             boolean hasParticles = !isDrink && remainderComponent == null;
 
+            List<ConsumeEffect> consumeEffects = consumeComponent.onConsumeEffects();
+            // Rotten flesh can also convert: one white heart, for a minute
+            if (item == Items.ROTTEN_FLESH) consumeEffects = withEffect(consumeEffects, new ApplyStatusEffectsConsumeEffect(
+                    List.of(new MobEffectInstance(CustomStatusEffects.CONVERSION, VersusSettings.Mushrooms.ROTTEN_FLESH_CONVERSION_TICKS, 0)),
+                    VersusSettings.Mushrooms.ROTTEN_FLESH_CONVERSION_CHANCE));
+
             Consumable newConsumeComponent = isDrink ?
-                    createDrinkConsumptionComponent(eatTime, consumeComponent.onConsumeEffects(), isHoneyBottle) :
-                    createFoodConsumptionComponent(eatTime, hasParticles, consumeComponent.onConsumeEffects());
+                    createDrinkConsumptionComponent(eatTime, consumeEffects, isHoneyBottle) :
+                    createFoodConsumptionComponent(eatTime, hasParticles, consumeEffects);
 
             int maxCount;
             if(isBottled) maxCount = VersusSettings.Items.MAX_COUNT_BOTTLED;

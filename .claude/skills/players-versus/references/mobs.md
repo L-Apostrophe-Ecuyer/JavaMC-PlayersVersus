@@ -88,8 +88,9 @@ assuming full overlap).
 
 - **`PaleCreeperEntity`** (extends `CreeperEntity`, spawn egg registered): faster (0.36 speed),
   longer follow range (40), armored (10/3.0 armor/toughness), immune to Wither damage (explicit
-  `damage()` override), explodes with a Darkness+Wither area-effect cloud on death (5-block radius,
-  300-tick duration, shrinking) instead of vanilla's plain explosion, and has bespoke footstep/hurt
+  `damage()` override), explodes with an area-effect cloud of Conversion on death (5-block radius,
+  300-tick duration, shrinking; Darkness+Wither until the staged mushrooms batch; each reach of the cloud is a dose)
+  after vanilla's plain explosion, and has bespoke footstep/hurt
   sounds (stone + mangrove-roots layered) plus a cave-ambience idle sound when it has no target —
   "blind creatures... that only move when looking away" per the README maps to `CreeperFollowTargetThroughWallsGoal`
   + `CreepingAndExplodingGoal` (not re-read this pass — check those two goal classes directly for the
@@ -99,10 +100,10 @@ assuming full overlap).
 - **Mushroom creeper and mushroom spider** (`MushroomCreeperEntity`, `MushroomSpiderEntity`; renderers and spawn
   eggs; textures from `tools/mushroom-mobs.py`) — of the mushroom caves. They ignore players (no player target
   goal) and hunt the plain kind (`EntityTypes.CREEPER`/`SPIDER` exactly); `HurtByTargetGoal` makes them fight back.
-  The creeper's swelling ends in a spore puff (`CreeperMixin` at `explodeCreeper`'s head, server side, when
-  `puffsInsteadOfExploding`: not lit, not after a player): no damage, every plain creeper within 3 blocks
-  `convertTo` a mushroom creeper, swell reset, 100-tick cooldown on its swell goal. After a player who hurt it, or
-  lit, it explodes as vanilla. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
+  The creeper's swelling ends in a spore puff, always (`CreeperMixin` at `explodeCreeper`'s head, server side; it
+  also puts out a lit one, which would puff for ever): no damage, every plain creeper within 3 blocks `convertTo` a
+  mushroom creeper, every other living thing there takes a dose of Conversion (`ConversionAttacks.dose`), swell
+  reset, 100-tick cooldown on its swell goal. It never explodes, after a player or lit. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
   `MushroomMobsGameTest`, assets `MushroomMobsTest`.
 - **Warden (`WardenMixin`)** — extensively rebalanced, all deliberate per inline doc-comments in the
   source itself (read them for full designer intent): anger toward a target **decays** over time if
@@ -119,8 +120,11 @@ assuming full overlap).
 - **`WardenVibrationListenerMixin`** — not re-read this pass; likely tunes the sniff/vibration
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
 - **Pale Zombie** (`mod/mobs/hostile/overworld/PaleZombieEntity.java`, renderer under
-  `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above);
-  not re-read in this pass beyond spawn placement — check the file directly. The snow-biome Frosted
+  `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above).
+  Its hits convert: a dose of Conversion each (`ConversionAttacks`, through `MobConversionAttackMixin` on
+  `Mob#doHurtTarget`), in place of the wither it gave. Creakings' hits do too, and their vanish-on-hit gives the
+  attacker Conversion instead of blindness (`CreakingScares`); other zombies' hits, 1 in 25
+  (`VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE`), in place of their own effect (a husk's hunger is dropped). The snow-biome Frosted
   Zombie was removed in the 26.4 port: vanilla's Frostbite takes its spawns, and vanilla turns
   freezing zombies into frostbites (`Zombie#convertsToWhenFreezing`), which `ZombieMixin` did before.
 - **Ice Cube** (`mod/mobs/hostile/overworld/IceCubeEntity.java`, `IceCubeRenderer` in the client set)

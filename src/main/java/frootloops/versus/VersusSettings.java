@@ -149,6 +149,11 @@ public abstract class VersusSettings {
         public static int DOSE_TICKS = 100;
         public static int EFFECT_TICKS = 2400;
         public static int SHROOMIFY_TICKS = 100;
+        // Pale zombies' and creakings' hits always convert, other zombies' this often (each in place of its own effect)
+        public static float ZOMBIE_CONVERSION_CHANCE = 0.04f;
+        // Rotten flesh: this chance of a dose lasting ROTTEN_FLESH_CONVERSION_TICKS
+        public static float ROTTEN_FLESH_CONVERSION_CHANCE = 0.125f;
+        public static int ROTTEN_FLESH_CONVERSION_TICKS = 1200;
     }
 
     public static class Items {

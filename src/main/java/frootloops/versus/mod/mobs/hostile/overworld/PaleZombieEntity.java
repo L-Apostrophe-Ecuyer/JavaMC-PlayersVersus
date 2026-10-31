@@ -51,14 +51,7 @@ public class PaleZombieEntity extends Zombie {
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
     }
 
-    @Override
-    public boolean doHurtTarget(ServerLevel world, Entity target) {
-        boolean hasAttacked = super.doHurtTarget(world, target);
-        if (hasAttacked && this.getMainHandItem().isEmpty() && target instanceof LivingEntity livingEntity) {
-            livingEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 60), this);
-        }
-        return hasAttacked;
-    }
+    // Its hits convert: a dose of Conversion each, armed or not (ConversionAttacks), in place of the wither they gave
 
     @Override
     public void addBehaviourGoals() {
