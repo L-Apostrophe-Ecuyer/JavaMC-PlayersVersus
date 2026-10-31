@@ -163,7 +163,7 @@ jobs:
           classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|calls|sig|member|uses|assets|asset|data|datadir|datadiff|datagrep) ' .github/api-focus.txt || true)
           echo "-----BEGIN FOCUS-----"
           focus find | while read -r text; do echo "== find $text"; grep -i -F -- "$text" new/classes.txt new/fabric-classes.txt || true; done
-          focus findsig | while read -r text; do echo "== findsig $text"; m=$(matching "$text"); [ -n "$m" ] && javap -p -constants -cp "$cp" $m 2>&1 | grep -v '^Compiled from'; done
+          focus findsig | while read -r text; do echo "== findsig $text"; m=$(matching "$text"); if [ -n "$m" ]; then javap -p -constants -cp "$cp" $m 2>&1 | grep -v '^Compiled from'; else echo "(no class matches)"; fi; done
           focus findcalls | while read -r text; do
             echo "== findcalls $text"; m=$(matching "$text")
             if [ -n "$m" ]; then javap -c -p -cp "$cp" $m > new/findcalls-raw.txt 2>&1 || true; python3 .github/api-calls.py new/findcalls-raw.txt; fi

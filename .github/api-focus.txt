@@ -14,7 +14,12 @@ sig net.minecraft.client.gui.Hud$HeartType
 member net.minecraft.client.renderer.entity.LivingEntityRenderer isShaking
 member net.minecraft.client.renderer.entity.state.LivingEntityRenderState Frozen
 find ZombieVillager
-findsig convertVillagerToZombieVillager
+member net.minecraft.world.entity.monster.zombie.Zombie illager
+member net.minecraft.world.entity.monster.zombie.ZombieVillager setVillager
+member net.minecraft.world.entity.monster.zombie.ZombieVillager setGossips
+member net.minecraft.world.entity.monster.zombie.ZombieVillager setTradeOffers
+member net.minecraft.world.entity.npc.villager.Villager getVillagerData
+find npc/villager/Villager
 member net.minecraft.world.damagesource.DamageSources source
 member net.minecraft.tags.EntityTypeTags UNDEAD
 member net.minecraft.world.entity.Mob setDropChance
