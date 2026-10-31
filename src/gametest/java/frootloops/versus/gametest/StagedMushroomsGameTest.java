@@ -4,6 +4,7 @@ import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.mushrooms.StagedMushroomBlock;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
+import frootloops.versus.mod.items_and_effects.conversion.Conversion;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -12,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.zombie.ZombieVillager;
@@ -150,13 +152,17 @@ public class StagedMushroomsGameTest {
         helper.succeedWhen(() -> helper.assertTrue(pig.hasEffect(CustomStatusEffects.CONVERSION), "the pig in the pale shrooms isn't converting"));
     }
 
+    /** Conversion enough to whiten all the entity's hearts (the mod changes some mobs' health: pigs have 16). */
+    private static MobEffectInstance allWhite(LivingEntity entity) {
+        return new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, Conversion.hearts(entity.getMaxHealth()) - 1);
+    }
+
     /** All white, a villager shakes, then turns into a zombie villager. */
     @GameTest(structure = ROOM, maxTicks = 200)
     public void anAllWhiteVillagerTurnsZombie(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
-        // Twenty health: ten hearts, all white at amplifier 9
-        villager.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 9));
+        villager.addEffect(allWhite(villager));
         helper.runAfterDelay(VersusSettings.Mushrooms.SHROOMIFY_TICKS - 20, () ->
                 helper.assertTrue(!villager.isRemoved(), "the villager turned before it was done shaking"));
         helper.succeedWhen(() -> {
@@ -172,8 +178,7 @@ public class StagedMushroomsGameTest {
     public void anAllWhitePigDies(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
-        // Ten health: five hearts, all white at amplifier 4
-        pig.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 4));
+        pig.addEffect(allWhite(pig));
         helper.succeedWhen(() -> helper.assertTrue(pig.isDeadOrDying() || pig.isRemoved(), "the all-white pig lives"));
     }
 
