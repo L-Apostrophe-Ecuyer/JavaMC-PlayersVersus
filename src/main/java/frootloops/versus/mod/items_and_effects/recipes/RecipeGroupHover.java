@@ -6,7 +6,8 @@ import org.jetbrains.annotations.Nullable;
  * When a recipe group's popup opens and closes under the mouse. A group opens once the mouse has stayed on its button for
  * the dwell (so sweeping across the page opens nothing), and its popup closes when the mouse is outside both the button
  * and the popup. A group that was clicked stays closed until the mouse has left it, so placing a recipe doesn't open the
- * popup again under the cursor. Called once a frame with what's under the mouse.
+ * popup again under the cursor. A pinned popup (one clicked open) stays open wherever the mouse goes, until it closes
+ * by other means (a click outside, Esc). Called once a frame with what's under the mouse.
  *
  * @param <B> what stands for a group's button (compared by identity, as the page reuses its buttons)
  */
@@ -19,6 +20,7 @@ public final class RecipeGroupHover<B> {
     @Nullable private B candidate;
     @Nullable private B suppressed;
     private long since;
+    private boolean pinned;
 
     /**
      * @param hovered the button of a group of several recipes under the mouse, or null
@@ -28,9 +30,10 @@ public final class RecipeGroupHover<B> {
      * @return OPEN: open the hovered group's popup; CLOSE: close the open popup; NONE: nothing
      */
     public Action update(@Nullable B hovered, boolean open, boolean overOpenGroup, long now) {
+        if (!open) pinned = false;
         if (open) {
             candidate = null;
-            return overOpenGroup ? Action.NONE : Action.CLOSE;
+            return overOpenGroup || pinned ? Action.NONE : Action.CLOSE;
         }
         if (suppressed != null) {
             if (hovered == suppressed) return Action.NONE;
@@ -46,6 +49,16 @@ public final class RecipeGroupHover<B> {
             return Action.OPEN;
         }
         return Action.NONE;
+    }
+
+    /** The popup now open stays open wherever the mouse goes, until it closes. */
+    public void pin() {
+        pinned = true;
+        candidate = null;
+    }
+
+    public boolean isPinned() {
+        return pinned;
     }
 
     /** The group was clicked (or closed under the mouse): its popup stays closed until the mouse leaves it. */

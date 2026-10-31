@@ -16,7 +16,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 /**
  * Green leaf litter: what the green-leaved trees shed (LeafLitter), tinted with the biome's foliage colour. Natural
- * piles brown into vanilla leaf litter over about a day; piles a player places are persistent and never do.
+ * piles fade over about a day, half browning into vanilla leaf litter and half blowing away; piles a player places are
+ * persistent and stay green. Broken, it drops itself, by hand too.
  */
 public class FallenLeavesBlock extends LeafLitterBlock {
 
@@ -45,10 +46,14 @@ public class FallenLeavesBlock extends LeafLitterBlock {
         return !state.getValue(PERSISTENT);
     }
 
-    /** Natural fallen leaves brown into vanilla leaf litter by chance, keeping their segments and facing. */
+    /** Natural fallen leaves fade by chance: brown into vanilla leaf litter, keeping their segments and facing, or blow away. */
     @Override
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        if (state.getValue(PERSISTENT) || random.nextDouble() >= VersusSettings.Leaves.FALLEN_LEAVES_BROWNING_CHANCE) return;
+        if (state.getValue(PERSISTENT) || random.nextDouble() >= VersusSettings.Leaves.FALLEN_LEAVES_FADING_CHANCE) return;
+        if (random.nextDouble() >= VersusSettings.Leaves.FALLEN_LEAVES_BROWNING_SHARE) {
+            level.removeBlock(pos, false);
+            return;
+        }
         level.setBlock(pos, Blocks.LEAF_LITTER.defaultBlockState()
                 .setValue(FACING, state.getValue(FACING))
                 .setValue(SegmentableBlock.AMOUNT, state.getValue(SegmentableBlock.AMOUNT)), Block.UPDATE_ALL);

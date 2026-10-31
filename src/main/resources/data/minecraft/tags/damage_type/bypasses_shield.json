@@ -18,6 +18,7 @@
     "minecraft:generic_kill",
     "minecraft:outside_border",
     "minecraft:falling_anvil",
-    "minecraft:falling_stalactite"
+    "minecraft:falling_stalactite",
+    "players-versus:shroomified"
   ]
 }

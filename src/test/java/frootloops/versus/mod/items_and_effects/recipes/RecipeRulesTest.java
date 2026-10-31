@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -88,46 +87,11 @@ class RecipeRulesTest {
         assertEquals("[\"#X#\"]", pattern(two));
     }
 
+    /** The files keep their groups: the recipe book gathers its collections itself (RecipeFamilies). */
     @Test
-    void blocksAreGroupedByFamily() {
-        assertEquals("oak", apply(OAK_STAIRS).get("group").getAsString());
-        assertEquals("oak", RecipeRules.group("oak_planks"));
-        assertEquals("oak", RecipeRules.group("oak_chest_boat"));
-        assertEquals("dark_oak", RecipeRules.group("dark_oak_door"));
-        assertEquals("bamboo", RecipeRules.group("bamboo_mosaic_slab"));
-        assertEquals("deepslate", RecipeRules.group("cobbled_deepslate_wall"));
-        assertEquals("deepslate", RecipeRules.group("deepslate_tile_stairs"));
-        assertEquals("deepslate", RecipeRules.group("chiseled_deepslate"));
-        assertEquals("tuff", RecipeRules.group("chiseled_tuff_bricks"));
-        assertEquals("tuff", RecipeRules.group("polished_tuff_slab"));
-        assertEquals("copper", RecipeRules.group("waxed_weathered_cut_copper_slab"));
-        assertEquals("copper", RecipeRules.group("waxed_oxidized_copper_grate"));
-        assertEquals("copper", RecipeRules.group("exposed_copper_bulb"));
-        assertEquals("copper", RecipeRules.group("copper_door"));
-        assertEquals("quartz", RecipeRules.group("chiseled_quartz_block"));
-        assertEquals("stone", RecipeRules.group("mossy_stone_brick_wall"));
-        assertEquals("cobblestone", RecipeRules.group("mossy_cobblestone_slab"));
-        assertEquals("iron", RecipeRules.group("heavy_weighted_pressure_plate"));
-        assertEquals("gold", RecipeRules.group("light_weighted_pressure_plate"));
-        // A family's plain block, named after it
-        assertEquals("andesite", RecipeRules.group("andesite"));
-        assertEquals("sandstone", RecipeRules.group("sandstone"));
-        // The mod's wool stairs and slabs make wool a family too
-        assertEquals("white_wool", RecipeRules.group("white_wool_slab"));
-        assertEquals("white_wool", RecipeRules.group("white_wool"));
-        // Not a family's: the recipe keeps its own group
-        assertNull(RecipeRules.group("torch"));
-        // A finish word makes the plain block a family: chiseled bookshelves go with bookshelves
-        assertEquals("bookshelf", RecipeRules.group("chiseled_bookshelf"));
-    }
-
-    @Test
-    void toolsAndArmorAreGroupedByMaterial() {
-        assertEquals("iron_tools", RecipeRules.group("iron_pickaxe"));
-        assertEquals("wooden_tools", RecipeRules.group("wooden_sword"));
-        assertEquals("golden_tools", RecipeRules.group("golden_spear"));
-        assertEquals("diamond_armor", RecipeRules.group("diamond_chestplate"));
-        assertEquals("leather_armor", RecipeRules.group("leather_boots"));
+    void recipesKeepTheirGroups() {
+        assertEquals("wooden_stairs", apply(OAK_STAIRS).get("group").getAsString());
+        assertEquals("wooden_slab", apply(OAK_SLAB).get("group").getAsString());
     }
 
     @Test

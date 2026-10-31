@@ -9,7 +9,8 @@
 #   changed one hides NEW's changes until it is merged.
 # - focus: what .github/api-focus.txt asks for, from NEW (see api-probe.yml for the kinds of line; here also
 #   "findsig <text>" and "findcalls <text>": the signatures or call summaries of the classes whose names contain the
-#   text, "member <class> <text>" a class's members containing the text, and "data <path>" a file under data/minecraft).
+#   text, "member <class> <text>" a class's members containing the text, "data <path>" a file under data/minecraft, and
+#   "datagrep <dir> <regex>" the lines of the files under data/minecraft/<dir> that match).
 #
 # Push a commit whose message contains [api-diff].
 
@@ -18,9 +19,9 @@ on:
   push:
 
 env:
-  OLD: "26.3"
-  NEW: "26.4-snapshot-3"
-  FABRIC_API: "0.162.2+26.4"
+  OLD: "26.4-snapshot-3"
+  NEW: "26.4-snapshot-4"
+  FABRIC_API: "0.164.0+26.4"
 
 jobs:
   classes:
@@ -150,16 +151,19 @@ jobs:
           unzip -Z1 new/client.jar | grep '\.class$' | sed 's/\.class$//' | sort > new/classes.txt
           for jar in new/fabric/META-INF/jars/*.jar; do unzip -Z1 "$jar" | grep '\.class$' | sed "s|\.class$| $(basename "$jar")|"; done | sort > new/fabric-classes.txt
           mkdir -p new/jar && unzip -q -o new/client.jar -d new/jar
+          # The Minecraft versions Fabric API asks for, and the newest versions out, to pick the build for NEW.
+          unzip -p new/fabric-api.jar fabric.mod.json | python3 -c 'import json, os, sys; print("Fabric API", os.environ["FABRIC_API"], "depends on", json.load(sys.stdin).get("depends"))'
+          curl -fsSL https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | python3 -c 'import json, sys; print("Newest versions:", [v["id"] for v in json.load(sys.stdin)["versions"][:5]])'
       - name: a few classes and files of NEW
         run: |
           cp="new/client.jar:$(ls new/libs/*.jar | tr '\n' ':')$(ls new/fabric/META-INF/jars/*.jar | tr '\n' ':')"
           focus() { grep "^$1 " .github/api-focus.txt | cut -d' ' -f2- || true; }
           # Classes (binary names) whose simple or package name contains the text, without anonymous classes.
           matching() { grep -i -F -- "$1" new/classes.txt | grep -v '\$[0-9]' | sed 's|/|.|g'; }
-          classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|calls|sig|member|uses|assets|asset|data|datadir|datadiff) ' .github/api-focus.txt || true)
+          classes=$(grep -v -E '^\s*(#|$)|^(find|findsig|findcalls|calls|sig|member|uses|assets|asset|data|datadir|datadiff|datagrep) ' .github/api-focus.txt || true)
           echo "-----BEGIN FOCUS-----"
           focus find | while read -r text; do echo "== find $text"; grep -i -F -- "$text" new/classes.txt new/fabric-classes.txt || true; done
-          focus findsig | while read -r text; do echo "== findsig $text"; m=$(matching "$text"); [ -n "$m" ] && javap -p -constants -cp "$cp" $m 2>&1 | grep -v '^Compiled from'; done
+          focus findsig | while read -r text; do echo "== findsig $text"; m=$(matching "$text"); if [ -n "$m" ]; then javap -p -constants -cp "$cp" $m 2>&1 | grep -v '^Compiled from'; else echo "(no class matches)"; fi; done
           focus findcalls | while read -r text; do
             echo "== findcalls $text"; m=$(matching "$text")
             if [ -n "$m" ]; then javap -c -p -cp "$cp" $m > new/findcalls-raw.txt 2>&1 || true; python3 .github/api-calls.py new/findcalls-raw.txt; fi
@@ -180,6 +184,8 @@ jobs:
           focus assets | while read -r dir; do echo "== assets $dir"; (cd new/jar/assets/minecraft && find "$dir" -type f | sort) || true; done
           focus asset | while read -r path; do echo "== asset $path"; base64 -w 0 "new/jar/assets/minecraft/$path" && echo || echo "missing"; done
           focus data | while read -r path; do echo "== data $path"; cat "new/jar/data/minecraft/$path" 2>/dev/null && echo || echo "missing"; done
+          # The lines matching a regex in the data files under a directory, with the file and line number.
+          focus datagrep | while read -r dir regex; do echo "== datagrep $dir $regex"; (cd new/jar/data/minecraft && grep -rnE -- "$regex" "$dir" | sort) || true; done
           # Each data file under the directory, with its first "type" and the logs, woods and stems it names.
           focus datadir | while read -r dir; do
             echo "== datadir $dir"

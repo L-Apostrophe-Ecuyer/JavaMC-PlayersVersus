@@ -58,16 +58,20 @@ new-moon darkness is covered in `environment-systems.md`, not re-verified here �
 assuming full overlap).
 
 ### `MobSpawning` (spawn helpers + custom spawn table)
-- `isMidnight`/`isNewMoon`/`isMidnightDuringNewMoon`: `world.getLunarTime() % 24000` between 18000
-  and 20000 = midnight; `getMoonPhase() == 7` = new moon (vanilla's darkest phase index).
+- `isMidnight`/`isNewMoon`/`isMidnightDuringNewMoon`: the overworld clock's day time `% 24000` between 18000
+  and 20000 = midnight; moon phase `NEW_MOON_PHASE` (4, vanilla's `MoonPhase` new moon; 0 is full) = new moon. It
+  was 7 (waxing gibbous) before the feedback batch of 2026-10; creepers' and pale zombies' new-moon rules use it.
 - `addCustomSpawns()`: Deeper Creeper in Deep Caves/Regular Cave biomes (weight 100, group 1-1);
   Wither Skeleton (60) and Zombified Piglin (3, group 1-4) also added to Deep Caves; Breeze added to
   Frozen Peaks (100); vanilla's Frostbite wherever vanilla spawns snow foxes (140, group 2-4; it took
   over from the mod's Frosted Zombie in the 26.4 port); the Ice Cube in vanilla's Ice Caves (100,
   group 1-2); extra
-  desert fauna (cave spider, husk, camel, cat); Phantom spawn weight raised overworld-wide (80,
-  group 1-2 — vanilla Phantoms normally only spawn via the sleep-deprivation mechanic, this is an
-  **additional**, ordinary biome-based spawn on top of that); Blaze added to Nether Wastes (15).
+  desert fauna (cave spider, husk, camel, cat); Phantoms as an ordinary overworld monster (80, group
+  1-2) everywhere but the mushroom fields and mushroom caves, at the new moon's midnight only
+  (`PhantomMixin.checkSpawnRules`); vanilla's insomnia spawner does nothing (`PhantomSpawnerMixin`);
+  Blaze added to Nether Wastes (15). Mushroom creepers and spiders: `SpawnPlacements` with
+  `Monster::checkMonsterSpawnRules`; they spawn by the mushroom caves' biome file (only they, at a spawn
+  cost, charge 0.8).
   A commented-out Wither Skeleton overworld-wide line and a commented-out Pale Zombie
   BiomeModifications call remain in source — both custom undead mobs currently spawn **only** via
   their `SpawnRestriction` predicate (below), not via `BiomeModifications.addSpawn`; if you want
@@ -84,14 +88,23 @@ assuming full overlap).
 
 - **`PaleCreeperEntity`** (extends `CreeperEntity`, spawn egg registered): faster (0.36 speed),
   longer follow range (40), armored (10/3.0 armor/toughness), immune to Wither damage (explicit
-  `damage()` override), explodes with a Darkness+Wither area-effect cloud on death (5-block radius,
-  300-tick duration, shrinking) instead of vanilla's plain explosion, and has bespoke footstep/hurt
+  `damage()` override), explodes with an area-effect cloud of Conversion on death (5-block radius,
+  300-tick duration, shrinking; Darkness+Wither until the staged mushrooms batch; each reach of the cloud is a dose)
+  after vanilla's plain explosion, and has bespoke footstep/hurt
   sounds (stone + mangrove-roots layered) plus a cave-ambience idle sound when it has no target —
   "blind creatures... that only move when looking away" per the README maps to `CreeperFollowTargetThroughWallsGoal`
   + `CreepingAndExplodingGoal` (not re-read this pass — check those two goal classes directly for the
   exact "only moves unobserved" state machine). `CreeperMixin` (on the *regular* `CreeperEntity`)
   converts a badly-Wither-damaged (< 8 HP, hit by Wither damage type) regular creeper **into** a
   Deeper Creeper — an in-fiction mutation path, not just a separate spawn pool.
+- **Mushroom creeper and mushroom spider** (`MushroomCreeperEntity`, `MushroomSpiderEntity`; renderers and spawn
+  eggs; textures from `tools/mushroom-mobs.py`) — of the mushroom caves. They ignore players (no player target
+  goal) and hunt the plain kind (`EntityTypes.CREEPER`/`SPIDER` exactly); `HurtByTargetGoal` makes them fight back.
+  The creeper's swelling ends in a spore puff, always (`CreeperMixin` at `explodeCreeper`'s head, server side; it
+  also puts out a lit one, which would puff for ever): no damage, every plain creeper within 3 blocks `convertTo` a
+  mushroom creeper, every other living thing there takes a dose of Conversion (`ConversionAttacks.dose`), swell
+  reset, 100-tick cooldown on its swell goal. It never explodes, after a player or lit. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
+  `MushroomMobsGameTest`, assets `MushroomMobsTest`.
 - **Warden (`WardenMixin`)** — extensively rebalanced, all deliberate per inline doc-comments in the
   source itself (read them for full designer intent): anger toward a target **decays** over time if
   they're sneaking or far away (README-adjacent: rewards "run and hide" play over "just outrun it");
@@ -107,8 +120,11 @@ assuming full overlap).
 - **`WardenVibrationListenerMixin`** — not re-read this pass; likely tunes the sniff/vibration
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
 - **Pale Zombie** (`mod/mobs/hostile/overworld/PaleZombieEntity.java`, renderer under
-  `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above);
-  not re-read in this pass beyond spawn placement — check the file directly. The snow-biome Frosted
+  `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above).
+  Its hits convert: a dose of Conversion each (`ConversionAttacks`, through `MobConversionAttackMixin` on
+  `Mob#doHurtTarget`), in place of the wither it gave. Creakings' hits do too, and their vanish-on-hit gives the
+  attacker Conversion instead of blindness (`CreakingScares`); other zombies' hits, 1 in 25
+  (`VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE`), in place of their own effect (a husk's hunger is dropped). The snow-biome Frosted
   Zombie was removed in the 26.4 port: vanilla's Frostbite takes its spawns, and vanilla turns
   freezing zombies into frostbites (`Zombie#convertsToWhenFreezing`), which `ZombieMixin` did before.
 - **Ice Cube** (`mod/mobs/hostile/overworld/IceCubeEntity.java`, `IceCubeRenderer` in the client set)

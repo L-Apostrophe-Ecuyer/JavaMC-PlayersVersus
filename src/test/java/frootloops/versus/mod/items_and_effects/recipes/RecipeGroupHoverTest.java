@@ -78,6 +78,22 @@ class RecipeGroupHoverTest {
     }
 
     @Test
+    void aPinnedPopupStaysWhereverTheMouseGoes() {
+        RecipeGroupHover<String> hover = new RecipeGroupHover<>();
+        hover.pin();
+        assertEquals(NONE, hover.update(null, true, false, 0));
+        assertEquals(NONE, hover.update("birch", true, false, DWELL * 10));
+    }
+
+    @Test
+    void aPinnedPopupOnceClosedIsPinnedNoMore() {
+        RecipeGroupHover<String> hover = new RecipeGroupHover<>();
+        hover.pin();
+        hover.update(null, false, false, 0);
+        assertEquals(CLOSE, hover.update(null, true, false, 1));
+    }
+
+    @Test
     void theDwellIsTwoToFourTicks() {
         assertEquals(true, RecipeGroupHover.DWELL_MILLIS >= 2 * 50 && RecipeGroupHover.DWELL_MILLIS <= 4 * 50);
     }

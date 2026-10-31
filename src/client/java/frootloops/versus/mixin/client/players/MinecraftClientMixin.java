@@ -2,6 +2,7 @@ package frootloops.versus.mixin.client.players;
 
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.players.HandPlan;
 import frootloops.versus.mod.players.HandSelection;
 import frootloops.versus.mod.players.building.ClientPlacement;
 import net.fabricmc.api.EnvType;
@@ -67,14 +68,14 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
             InteractionResult actionResult = null;
             // Which hand goes first, and whether the world or the item comes into it, is HandSelection's: it guesses what
             // the player means (blocking an attack, landing in water, opening the table in front of them) by fixed rules
-            HandSelection.Plan plan = HandSelection.plan(this.player, this.level, this.hitResult);
-            for (InteractionHand hand : plan.hands()) {
+            for (HandPlan.Step step : HandSelection.plan(this.player, this.level, this.hitResult)) {
+                InteractionHand hand = step.hand();
                 ItemStack itemStack = this.player.getItemInHand(hand);
                 if (!itemStack.isItemEnabled(this.level.enabledFeatures())) continue;
                 // An item on cooldown leaves the block or entity to the other hand, which can use it without the item
                 // the server would refuse
                 boolean onCooldown = HandSelection.onCooldown(this.player, hand);
-                if (plan.world() && !onCooldown && this.hitResult != null) {
+                if (step.world() && !onCooldown && this.hitResult != null) {
                     switch (this.hitResult.getType()) {
                         case ENTITY:
                             EntityHitResult entityHitResult = (EntityHitResult)this.hitResult;
@@ -130,7 +131,7 @@ public abstract class MinecraftClientMixin extends ReentrantBlockableEventLoop<R
                     }
                 }
 
-                if (plan.items() && !onCooldown && !itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
+                if (step.item() && !onCooldown && !itemStack.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success3) {
                     if (success3.swingSource() == InteractionResult.SwingSource.PREDICTED) {
                         this.player.swing(hand, itemStack.getInteractAnimation(), false);
                     }

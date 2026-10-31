@@ -8,18 +8,6 @@
           "id": "minecraft:short_grass"
         },
         "weight": 32
-      },
-      {
-        "data": {
-          "id": "minecraft:brown_mushroom"
-        },
-        "weight": 6
-      },
-      {
-        "data": {
-          "id": "minecraft:red_mushroom"
-        },
-        "weight": 1
       }
     ]
   }

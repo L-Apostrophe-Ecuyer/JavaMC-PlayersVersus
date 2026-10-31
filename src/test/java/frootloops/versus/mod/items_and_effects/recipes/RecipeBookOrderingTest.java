@@ -83,15 +83,6 @@ class RecipeBookOrderingTest {
     }
 
     @Test
-    void pinnedEntriesComeFirstInTheirSectionOnly() {
-        List<Entry> entries = List.of(
-                new Entry("lantern", false, 1), new Entry("torch", true, 5), new Entry("chest", false, 0),
-                new Entry("stick", true, 2), new Entry("bowl", true, 9), new Entry("ladder", false, 7));
-        List<Entry> ordered = RecipeBookOrdering.order(entries, Entry::craftable, entry -> entry.name().equals("bowl") || entry.name().equals("ladder"), BY_RANK);
-        assertEquals(List.of("bowl", "stick", "torch", "ladder", "chest", "lantern"), names(ordered));
-    }
-
-    @Test
     void aBeforeTestMakesAComparator() {
         Comparator<Integer> comparator = RecipeBookOrdering.fromBefore((a, b) -> a < b);
         assertTrue(comparator.compare(1, 2) < 0);

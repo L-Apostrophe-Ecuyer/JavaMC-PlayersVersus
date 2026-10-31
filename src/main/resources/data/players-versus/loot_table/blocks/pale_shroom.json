@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "players-versus:pale_shroom",
+                "state": {
+                  "mushrooms": "2"
+                }
+              },
+              "count": 2
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "players-versus:pale_shroom",
+                "state": {
+                  "mushrooms": "3"
+                }
+              },
+              "count": 3
+            },
+            {
+              "type": "minecraft:explosion_decay"
+            }
+          ],
+          "name": "players-versus:pale_shroom"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "players-versus:blocks/pale_shroom"
+}

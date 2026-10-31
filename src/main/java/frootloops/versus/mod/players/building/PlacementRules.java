@@ -147,6 +147,25 @@ public final class PlacementRules {
     }
 
     /**
+     * The way a slab goes from one the player just placed, when a click would double that one (vanilla merges a slab
+     * clicked on its open face, or on the open half of a side): out of the side clicked; clicked on the open face, on
+     * along the way the row has been going, else the way the player faces. Same half, beside it, as a row or a bridge
+     * goes on.
+     */
+    public static Direction slabStep(Direction clickedFace, @Nullable Direction travel, Direction facing) {
+        if (clickedFace.getAxis().isHorizontal()) return clickedFace;
+        return travel != null && travel.getAxis().isHorizontal() ? travel : facing;
+    }
+
+    /** The way a row went from one block to the next placed beside it on its level, or null if not beside. */
+    @Nullable
+    public static Direction travel(BlockPos from, BlockPos to) {
+        int dx = to.getX() - from.getX(), dy = to.getY() - from.getY(), dz = to.getZ() - from.getZ();
+        if (dy != 0 || Math.abs(dx) + Math.abs(dz) != 1) return null;
+        return dx != 0 ? (dx > 0 ? Direction.EAST : Direction.WEST) : (dz > 0 ? Direction.SOUTH : Direction.NORTH);
+    }
+
+    /**
      * Whether a state chosen for a placement may replace vanilla's: the same block, and only its turn, half or rotation
      * changed (never a double slab either way).
      */

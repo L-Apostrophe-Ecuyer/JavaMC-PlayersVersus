@@ -1,5 +1,7 @@
 package frootloops.versus.mixin.client.items_and_effects.inventory.recipe_book;
 
+import frootloops.versus.mod.items_and_effects.inventory.recipe_book.FamilyRecipes;
+import frootloops.versus.mod.items_and_effects.inventory.recipe_book.SelectedRecipes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -50,12 +52,15 @@ public abstract class AnimatedResultButtonMixin extends AbstractWidget {
         // FIRST STEP -----------------
         // Draw background:
         Identifier identifier;
-        boolean isGroupOfRecipes = this.hasMultipleRecipes();
+        boolean hasSeveralRecipes = this.hasMultipleRecipes();
+        // A collection of items is drawn stacked; a group of one item's recipes, as vanilla's, on the slot for several.
+        // Vanilla's own groups (collections off) mix items, so they're drawn stacked too.
+        boolean isGroupOfRecipes = this.collection instanceof FamilyRecipes || !(this.collection instanceof SelectedRecipes) && hasSeveralRecipes;
         boolean isCraftable = this.collection.hasCraftable();
         if (isCraftable) {
-            identifier = isGroupOfRecipes ? SLOT_MANY_CRAFTABLE_SPRITE : SLOT_CRAFTABLE_SPRITE;
+            identifier = hasSeveralRecipes ? SLOT_MANY_CRAFTABLE_SPRITE : SLOT_CRAFTABLE_SPRITE;
         } else {
-            identifier = isGroupOfRecipes ? SLOT_MANY_UNCRAFTABLE_SPRITE : SLOT_UNCRAFTABLE_SPRITE;
+            identifier = hasSeveralRecipes ? SLOT_MANY_UNCRAFTABLE_SPRITE : SLOT_UNCRAFTABLE_SPRITE;
         }
         context.blitSprite(RenderPipelines.GUI_TEXTURED, identifier, this.getX(), this.getY(), this.width, this.height);
 
@@ -93,11 +98,6 @@ public abstract class AnimatedResultButtonMixin extends AbstractWidget {
             ItemStack itemStack = ((RecipeButton)((Object)this)).getDisplayStack();
             context.fakeItem(itemStack, this.getX() + 4, this.getY() + 4);
             if(!isCraftable) context.blitSprite(RenderPipelines.GUI_TEXTURED, RECIPE_BOOK_CRAFTABLE_SINGLE_OVERLAY, this.getX(), this.getY(), this.width, this.height);
-        }
-
-        // A pinned group has a pin in its corner
-        if (this.collection != null && frootloops.versus.mod.items_and_effects.inventory.recipe_book.RecipeBookSorting.isPinned(this.collection)) {
-            context.blitSprite(RenderPipelines.GUI_TEXTURED, RECIPE_BOOK_PIN, this.getX() + this.width - 7, this.getY() + 1, 7, 9);
         }
 
         if (hasBounce) context.pose().popMatrix();

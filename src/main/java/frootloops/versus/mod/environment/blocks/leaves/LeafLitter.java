@@ -23,8 +23,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Leaf litter comes from the leaves above it: natural leaves something pushes through shed a segment now and then, the
  * more the faster it goes (a crash through a canopy knocks a handful down), and dying leaves leave one by chance, so a
- * felled tree carpets the ground under it. The green broad-leaved trees shed fallen leaves (which brown into leaf litter
- * with time), poplars leaf litter itself and cherry pink petals. It falls straight down through the canopy to the first
+ * felled tree strews some over the ground where its crown lands. The green broad-leaved trees shed fallen leaves (which
+ * brown into leaf litter or blow away with time), poplars leaf litter itself and cherry pink petals. It falls straight down through the canopy to the first
  * ground it can stay on.
  */
 public final class LeafLitter {
@@ -35,6 +35,11 @@ public final class LeafLitter {
     public static final TagKey<Block> SHEDS_LEAF_LITTER = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "sheds_leaf_litter"));
     /** Leaves that shed pink petals instead. */
     public static final TagKey<Block> SHEDS_PINK_PETALS = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "sheds_pink_petals"));
+    /**
+     * Ground cover that breaks at a touch without costing the attack (the player's client): leaf litter and fallen
+     * leaves, so a felled tree's mess clears as fast as the attack key held sweeps over it.
+     */
+    public static final TagKey<Block> BREAKS_WITHOUT_COOLDOWN = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "breaks_without_cooldown"));
 
     /** Below this speed (blocks per tick) moving through leaves sheds nothing: standing in them, or gravity's tug. */
     private static final double STILL_SPEED = 0.1;
@@ -72,8 +77,16 @@ public final class LeafLitter {
 
     /** A decaying leaf, just before it goes: it leaves a segment by chance. */
     public static void decay(ServerLevel level, BlockPos pos, BlockState leaves, RandomSource random) {
-        if (!VersusSettings.Leaves.DO_LEAF_LITTER_SHEDDING) return;
-        if (random.nextDouble() < VersusSettings.Leaves.DECAY_LITTER_CHANCE) shed(level, pos, leaves, random);
+        shedByChance(level, pos, leaves, random, VersusSettings.Leaves.DECAY_LITTER_CHANCE);
+    }
+
+    /** A felled tree's leaf bursting against the ground: it leaves a segment by a smaller chance than a decaying one. */
+    public static void felled(ServerLevel level, BlockPos pos, BlockState leaves, RandomSource random) {
+        shedByChance(level, pos, leaves, random, VersusSettings.Leaves.FELLED_LITTER_CHANCE);
+    }
+
+    private static void shedByChance(ServerLevel level, BlockPos pos, BlockState leaves, RandomSource random, double chance) {
+        if (VersusSettings.Leaves.DO_LEAF_LITTER_SHEDDING && random.nextDouble() < chance) shed(level, pos, leaves, random);
     }
 
     /**

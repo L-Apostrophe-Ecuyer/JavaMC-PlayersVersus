@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "mushrooms=1": {
+      "model": "minecraft:block/red_mushroom"
+    },
+    "mushrooms=2": {
+      "model": "players-versus:block/red_mushrooms_2"
+    },
+    "mushrooms=3": {
+      "model": "players-versus:block/red_mushrooms_3"
+    }
+  }
+}

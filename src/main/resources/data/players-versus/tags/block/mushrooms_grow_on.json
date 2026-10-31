@@ -1,0 +1,10 @@
+{
+  "values": [
+    "#minecraft:base_stone_overworld",
+    "#minecraft:logs",
+    "minecraft:mycelium",
+    "minecraft:brown_mushroom_block",
+    "minecraft:red_mushroom_block",
+    "minecraft:mushroom_stem"
+  ]
+}

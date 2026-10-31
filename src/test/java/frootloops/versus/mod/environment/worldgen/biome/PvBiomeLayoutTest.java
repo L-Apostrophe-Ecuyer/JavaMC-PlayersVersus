@@ -158,7 +158,8 @@ class PvBiomeLayoutTest {
         int surfaceEntries = 0;
         double vanillaVolume = 0, layoutVolume = 0;
         for (PvBiomeLayout.Entry entry : layout) {
-            if (PvBiomeLayout.isPoint(entry.parameters().depth(), 0.0F)) {
+            // The pieces of vanilla's slices; the mod's own surface entries (the wider mushroom fields) lie over them
+            if (PvBiomeLayout.isPoint(entry.parameters().depth(), 0.0F) && !entry.rule().equals("added-surface")) {
                 surfaceEntries++;
                 layoutVolume += volume(Box.of(entry.parameters()));
             }
@@ -336,7 +337,7 @@ class PvBiomeLayoutTest {
                         uniform(random), uniform(random), uniform(random), uniform(random), depth, uniform(random));
                 ResourceKey<Biome> before = oldLayout.findValue(point);
                 ResourceKey<Biome> after = newLayout.findValue(point);
-                if (after == CustomOverworldBiomes.PALE_GROTTO) continue;
+                if (after == CustomOverworldBiomes.PALE_GROTTO || after == CustomOverworldBiomes.MUSHROOM_CAVES) continue;
                 if (before == after) continue;
                 if (nearest(oldList, point).contains(after) || nearest(newList, point).contains(before)) {
                     ties++;
@@ -351,6 +352,38 @@ class PvBiomeLayoutTest {
             if (depth >= 0.3F) assertEquals(0, changed, "caves changed at depth " + depth + ": " + changes);
             else assertTrue(agreement > 0.8, "surface changed too much at depth " + depth);
         }
+    }
+
+    /**
+     * The mushroom caves lie under the mushroom fields from the surface caves down, whatever the rest of the climate,
+     * and nowhere else; the islands themselves stay mushroom fields.
+     */
+    @Test
+    void mushroomCavesLieUnderTheMushroomFields() {
+        List<PvBiomeLayout.Entry> built = PvBiomeLayout.build();
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(built));
+        Random random = new Random(20261027L);
+        for (int i = 0; i < 4_000; i++) {
+            float temperature = uniform(random), humidity = uniform(random), erosion = uniform(random), weirdness = uniform(random);
+            // Inland of the deep ocean: the caves near an island's shores can still be the islands' (vanilla's caves leave
+            // the coldest climates far from every cave entry)
+            float island = -1.19F + 0.13F * random.nextFloat(), inland = -0.5F + 1.5F * random.nextFloat();
+            float depth = 0.12F + 0.86F * random.nextFloat();
+            Climate.TargetPoint under = Climate.target(temperature, humidity, island, erosion, depth, weirdness);
+            assertEquals(CustomOverworldBiomes.MUSHROOM_CAVES, layout.findValue(under),
+                    () -> "under the mushroom fields at " + under + ", nearest " + nearestEntries(built, under));
+            assertEquals(Biomes.MUSHROOM_FIELDS, layout.findValue(Climate.target(temperature, humidity, island, erosion, 0.0F, weirdness)),
+                    "on the mushroom fields");
+            assertTrue(layout.findValue(Climate.target(temperature, humidity, inland, erosion, depth, weirdness)) != CustomOverworldBiomes.MUSHROOM_CAVES,
+                    "mushroom caves away from the islands, at continentalness " + inland);
+        }
+    }
+
+    /** The entries nearest to the point, with their rules and parameters, for a failure's message. */
+    private static List<String> nearestEntries(List<PvBiomeLayout.Entry> layout, Climate.TargetPoint point) {
+        long best = layout.stream().mapToLong(e -> squaredDistance(e.parameters(), point)).min().orElse(0L);
+        return layout.stream().filter(e -> squaredDistance(e.parameters(), point) == best)
+                .map(e -> e.biome().identifier().getPath() + " (" + e.rule() + ") " + e.parameters()).toList();
     }
 
     /** Every biome whose entry is nearest to the point, by the same squared distance the search tree minimizes. */

@@ -26,6 +26,32 @@ Two groups:
   features (`players-versus:deep_caves_extra_underground`/`_canyons` carvers,
   `players-versus:caves/ore_terracotta_and_copper_gray` etc. features) layered alongside vanilla ore
   features at the same generation step.
+- **`caves/mushroom_caves`** (feedback batch, 2026-10): under the mushroom fields at every cave depth
+  (`PlacedBiomeType.ALL_DEPTHS`: depth 0.1 to 1.0 at the islands' continentalness -1.2 to -1.05, which no other
+  cave entry reaches; `PvBiomeLayoutTest.mushroomCavesLieUnderTheMushroomFields`). Regular caves' ores and carvers;
+  step 9: glow lichen, `caves/mushroom_rings` (Java `MushroomRingFeature`, `players-versus:mushroom_ring`: a stem
+  core, brown cap, a ragged edge fading into the stone, on whatever stone surface the origin finds in a random
+  direction), mycelium patches with brown mushrooms, huge brown mushrooms on them, brown mushroom clusters. Only
+  the mushroom creeper and spider spawn there, at a spawn cost; no patrols, no phantoms.
+
+## Mushrooms (feedback batch, 2026-10; staged mushrooms, 2026-10-31)
+Since the staged mushrooms batch (spec `docs/superpowers/specs/2026-10-31-staged-mushrooms-and-conversion-design.md`):
+surface patches only on the mushroom fields (`brown_mushroom_normal` is count 0 too; `mushroom_fields`' biome file
+is overridden: its own `players-versus:mushroom_fields_{brown,red}_mushrooms`, no sugar cane, no firefly bushes),
+red mushrooms only there. Small mushrooms grow by stages and below y 0 into pale shrooms (`blocks-and-environment.md`).
+Before it, brown only, rare on the surface, mostly in caves; none red in the wild:
+- `minecraft:patch_grass_forest` is grass only (the mod's override had made it a sixth mushrooms); the mod's
+  `red_mushroom_taiga` grass patch lost its red mushroom.
+- Overridden placed features: `brown_mushroom_{taiga,dappled_forest}` 1 chunk in 32, `_old_growth` 16, `_swamp` 6,
+  each 24-32 tries within 4 blocks; `red_mushroom_{normal,swamp,old_growth}` count 0; `brown_mushroom_normal` stays
+  vanilla's (1/256). The fallen trees (`fallen_{oak,birch,jungle,spruce,super_birch}_tree`) grow brown mushrooms only;
+  dark forests' huge mushrooms are brown. The mushroom fields keep their huge red mushrooms.
+- Caves: `caves/brown_mushroom_clusters` (floors below y 48) in `regular_cave`, `badlands_cave` and `deep_caves`, right
+  after glow lichen (BiomeFeatureOrderTest).
+- Nether: `red_mushroom_nether` is a patch of crimson nylium with crimson fungus and roots on netherrack
+  (`players-versus:crimson_fungus_patch`, tag `crimson_patch_replaceable`); `brown_mushroom_nether` was already the
+  nether wart patch, whose vegetation is now nether wart alone (it fell back on `brown_mushroom_nether`, itself);
+  `CustomWorldgen` removes `brown_mushroom_normal`/`red_mushroom_normal` (roof mushrooms) from the nether's biomes.
 
 ## Configured/placed features (`data/players-versus/worldgen/{configured_feature,placed_feature}/`, `caves/` subdirs)
 ~30 configured features + ~30 caves-specific configured features; ~60 placed features overall (see

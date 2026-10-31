@@ -1,0 +1,8 @@
+{
+  "type": "players-versus:mushroom_ring",
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 3,
+    "max_inclusive": 6
+  }
+}

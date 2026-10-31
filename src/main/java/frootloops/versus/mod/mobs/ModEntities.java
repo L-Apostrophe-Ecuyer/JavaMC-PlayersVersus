@@ -4,6 +4,8 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.hostile.nether.WildfireEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.IceCubeEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.MushroomCreeperEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.MushroomSpiderEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import frootloops.versus.mod.items_and_effects.throwing.SlimeballEntity;
@@ -18,6 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
@@ -53,6 +56,17 @@ public class ModEntities {
             EntityType.Builder.of(PaleSpiderEntity::new, MobCategory.MONSTER).sized(1.4f, 0.9f).eyeHeight(0.65f).passengerAttachments(0.765f).clientTrackingRange(8)
     );
 
+    /** The mushroom caves' creeper and spider, sized and tracked as vanilla's. */
+    public static final EntityType<MushroomCreeperEntity> MUSHROOM_CREEPER = register(
+            "mushroom_creeper",
+            EntityType.Builder.of(MushroomCreeperEntity::new, MobCategory.MONSTER).sized(0.6f, 1.7f).clientTrackingRange(8)
+    );
+
+    public static final EntityType<MushroomSpiderEntity> MUSHROOM_SPIDER = register(
+            "mushroom_spider",
+            EntityType.Builder.of(MushroomSpiderEntity::new, MobCategory.MONSTER).sized(1.4f, 0.9f).eyeHeight(0.65f).passengerAttachments(0.765f).clientTrackingRange(8)
+    );
+
     public static final EntityType<WildfireEntity> WILDFIRE = register(
             "wildfire", EntityType.Builder.of(WildfireEntity::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.8F).clientTrackingRange(8)
     );
@@ -61,6 +75,8 @@ public class ModEntities {
     public static final Item PALE_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_creeper_spawn_egg").spawnEgg(PALE_CREEPER));
     public static final Item PALE_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_zombie_spawn_egg").spawnEgg(PALE_ZOMBIE));
     public static final Item PALE_SPIDER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_spider_spawn_egg").spawnEgg(PALE_SPIDER));
+    public static final Item MUSHROOM_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("mushroom_creeper_spawn_egg").spawnEgg(MUSHROOM_CREEPER));
+    public static final Item MUSHROOM_SPIDER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("mushroom_spider_spawn_egg").spawnEgg(MUSHROOM_SPIDER));
     public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("wildfire_spawn_egg").spawnEgg(WILDFIRE));
 
 
@@ -71,6 +87,8 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(PALE_CREEPER, PaleCreeperEntity.createPaleCreeperAttributes());
         FabricDefaultAttributeRegistry.register(PALE_ZOMBIE, PaleZombieEntity.createPaleZombieAttributes());
         FabricDefaultAttributeRegistry.register(PALE_SPIDER, Spider.createAttributes());
+        FabricDefaultAttributeRegistry.register(MUSHROOM_CREEPER, Creeper.createAttributes());
+        FabricDefaultAttributeRegistry.register(MUSHROOM_SPIDER, Spider.createAttributes());
         FabricDefaultAttributeRegistry.register(WILDFIRE, WildfireEntity.createWildfireAttributes());
 
         // Make them spawn in the world:

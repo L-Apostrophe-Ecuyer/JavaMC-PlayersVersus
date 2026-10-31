@@ -69,35 +69,50 @@ already exist.
 (`mixin/items_and_effects/recipes/RecipeFileMixin`, a `@WrapOperation` on the decode in 26.4's
 `RegistryLoadTask$PendingRegistration.loadFromResource`, limited to `Registries.RECIPE`), so the rules reach
 mods' and data packs' recipes too:
-- groups: a block's family = its id without shape/finish words (`_stairs`, `_slab`, `_planks`, `_bricks`,
-  `waxed_`, `polished_`, `cut_`…; lists in the class): `oak`, `deepslate`, `tuff`, `copper`…; tools
-  `<material>_tools`, armor `<material>_armor`. Vanilla's recipe book still separates tabs (categories), so a
-  family has one button per tab.
+- groups are left as the files have them: the recipe book gathers its own collections (below; until 2026-10-31
+  the rules rewrote the files' groups into families).
 - stairs (`StairBlock` result, vanilla's 6-cell staircase) → `# `/`##`, same count (4); slabs (`SlabBlock`,
   row of 3) → `##`, two thirds of the count (6 → 4); pressure plates (`BasePressurePlateBlock`, row of 2) →
   `###`, twice the count (1 → 2). Any other shape is left alone.
 - So **write stairs and slab recipes in vanilla's shape** (the mod's own and kept overrides are), and don't
   add overrides just to regroup or reshape. Kept `data/minecraft/recipe` files are real changes (doors 2,
   trapdoors 6, cut copper 8, nuggets, the mod's copper tools/armor and clay, terracotta…), with vanilla's
-  category kept. Settings: `VersusSettings.Items.DO_FAMILY_RECIPE_GROUPS`, `DO_CHEAPER_STAIRS_AND_SLABS`.
+  category kept. Setting: `VersusSettings.Items.DO_CHEAPER_STAIRS_AND_SLABS`.
 
-Recipe book screen (client; `mixin/client/items_and_effects/inventory/recipe_book/`): `RecipeBookPageMixin` closes an
-open group's popup on a click outside it and lets the click through (vanilla swallowed it), opens a group's popup when
-the mouse stays on its button for `RecipeGroupHover.DWELL_MILLIS` (150 ms, three ticks) and closes it when the mouse is
-outside the button and the popup (left-click still places the shown recipe, right-click still opens at once), and lists
-the groups craftable first, then the rest. `OverlayRecipeComponentMixin` orders each of the popup's two sections and
-tells where the popup is (vanilla's `isMouseOver` is always false). The order inside a section is the inventory sort's
-(`RecipeBookSorting` → `ItemOrdering`, through `RecipeBookOrdering`, whose merge sort never throws on the
-sort's not-quite-consistent "goes before" test); the common-code pieces have unit tests, the mixins only a look in game.
-Settings: `VersusSettings.QOL.DO_RECIPE_BOOK_CLICK_THROUGH`, `DO_RECIPE_BOOK_HOVER_GROUPS`, `DO_SMART_RECIPE_ORDER`.
-`RecipeBookComponentMixin` wraps `tryPlaceRecipe` in the book's `mouseClicked`: the second click of a double-click places the
-most crafts (as shift-click does), or one again if the recipe was already placed for the most before the first click
-(`DO_RECIPE_DOUBLE_CLICK_MAX`).
-`RecipeButtonMixin` lists a group's recipes craftable first (so its icon, and the recipe a click places, cycle through the
-craftable ones when any can be crafted; the button still counts every recipe, so the popup lists them all;
-`DO_RECIPE_ICONS_CYCLE_CRAFTABLE`). Right-click pins (`DO_RECIPE_BOOK_PINS`): on the page the group, in the popup the recipe;
-pinned come first in their section and carry a pin sprite (`recipe_book/pin`). `RecipePins` (common, tested) keeps them in
-`config/players-versus/pinned_recipes.json` by what the recipes make (`r:<item>`, or `g:<first item>` for a group of several).
+Recipe book screen (client; `mixin/client/items_and_effects/inventory/recipe_book/`, design in
+`docs/superpowers/specs/2026-10-31-recipe-book-collections-design.md`):
+- **Groups and collections.** At `RecipeBookPage.updateCollections`'s head, `RecipeBookCollections` splits vanilla's
+  collections (already filtered by tab, search, "craftable only", and selected for the grid) by result item into
+  groups (`ItemRecipes`: one item's recipes) and gathers groups into collections (`FamilyRecipes`) by
+  `RecipeFamilies.collection` (common, tested: tools/armor by material, dyed kinds where all 16 colours exist, else
+  the material family by shape/finish words) when two or more share one. Both extend `SelectedRecipes`, a
+  `RecipeCollection` answering selected/craftable from snapshots of vanilla's, so vanilla's buttons, popup and
+  `tryPlaceRecipe` take them. Search: vanilla kept a collection when any recipe matched, so split items are filtered
+  again by name or id.
+- **Group popup** (vanilla's overlay of recipe shapes): opens on a 150 ms dwell (`RecipeGroupHover.DWELL_MILLIS`),
+  closes when the mouse is outside button and popup; a left click places the shown recipe *and* opens it pinned
+  (`RecipeGroupHover.pin`), as does a right click or a click in it; a click outside closes it and goes through
+  (`DO_RECIPE_BOOK_CLICK_THROUGH`); Esc closes it. Refreshed in place after the book refreshes.
+- **Collection popup/window** (`FamilyWindow`, layout `RecipeWindowLayout`, common, tested): icons at 12 px in 14 px
+  cells, six to a row, under a title bar with a close box; peeks on hover beside the button, a click pins it; the
+  title bar drags it (the book's `mouseDragged`, ended by the next press); one at a time. An icon acts as a group
+  button (left click places, several recipes open their shapes beside it). Drawn by `RecipeBookComponentMixin` at the
+  end of the book's render in its own stratum, the group popup after it (the page's own overlay draw is skipped);
+  the book takes clicks on it first, `hasClickedOutside` and `AbstractRecipeBookScreenMixin.isHovering` keep the
+  slots under it from being clicked, hovered or tooltipped. Hooks: `RecipeBookPopups` (implemented by the page
+  mixin), `RecipeBookComponentAccessor`.
+- Order: craftable first, then the inventory sort (`RecipeBookSorting` → `ItemOrdering`, through
+  `RecipeBookOrdering`'s merge sort, which never throws on the sort's not-quite-consistent "goes before" test);
+  `OverlayRecipeComponentMixin` orders the group popup's sections and says where it is (vanilla's `isMouseOver` is
+  always false). `RecipeButtonMixin` lists a group's recipes craftable first (icon and click cycle through them,
+  `DO_RECIPE_ICONS_CYCLE_CRAFTABLE`). `AnimatedResultButtonMixin` draws collections stacked, groups on vanilla's
+  many-recipes slot.
+- `RecipeBookComponentMixin` also wraps `tryPlaceRecipe` in the book's `mouseClicked`: the second click of a
+  double-click places the most crafts, or one again if already placed for the most (`DO_RECIPE_DOUBLE_CLICK_MAX`).
+- Settings: `VersusSettings.QOL.DO_RECIPE_BOOK_COLLECTIONS` (off: vanilla's groups, sorted), `DO_RECIPE_BOOK_HOVER_GROUPS`,
+  `DO_RECIPE_BOOK_CLICK_THROUGH`, `DO_SMART_RECIPE_ORDER`. Pins were removed on 2026-10-31.
+- Tests: `RecipeFamiliesTest`, `RecipeWindowLayoutTest`, `RecipeGroupHoverTest`, `RecipeBookOrderingTest`; the mixins
+  only a look in game.
 - Tests: `src/test/.../mod/items_and_effects/recipes/RecipeRulesTest`.
 
 ## Extension recipe: adding/changing a recipe, loot table, or advancement

@@ -27,9 +27,9 @@
     [],
     [
       "minecraft:ore_dirt",
-      "minecraft:ore_gravel",
       "minecraft:ore_granite_upper",
       "minecraft:ore_granite_lower",
+      "minecraft:ore_gravel",
       "minecraft:ore_diorite_upper",
       "minecraft:ore_diorite_lower",
       "minecraft:ore_andesite_upper",
@@ -64,8 +64,7 @@
     ],
     [
       "minecraft:glow_lichen",
-      "minecraft:brown_mushroom_normal",
-      "minecraft:red_mushroom_normal"
+      "players-versus:caves/brown_mushroom_clusters"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -1,7 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.mod.Combat;
-import frootloops.versus.mod.environment.WorldTime;
+import frootloops.versus.mod.mobs.MobSpawning;
 import frootloops.versus.mod.mobs.hostile.overworld.PhantomMoveControlRevamp;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -58,18 +58,10 @@ public abstract class PhantomMixin extends Mob {
         return wasDamaged;
     }
 
+    /** Phantoms come out of the sky only around midnight at the new moon (and never for insomnia: PhantomSpawnerMixin). */
     @Override
     public boolean checkSpawnRules(LevelAccessor world, EntitySpawnReason spawnReason) {
-        if(spawnReason == EntitySpawnReason.NATURAL) {
-
-            long dayTime = WorldTime.dayTime(world) % 24000l;
-            if(dayTime < 18000l || dayTime > 20000l) return false;
-
-            int moonPhase = WorldTime.moonPhase(world);
-            if((moonPhase + 2) % 8 < 6) return false;
-            if(moonPhase == 7 && world.getRandom().nextFloat() > 0.2f) return false;
-
-        }
+        if(spawnReason == EntitySpawnReason.NATURAL && !MobSpawning.isMidnightDuringNewMoon(world)) return false;
         return super.checkSpawnRules(world, spawnReason);
     }
 

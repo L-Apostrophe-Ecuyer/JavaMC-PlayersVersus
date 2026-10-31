@@ -27,8 +27,9 @@ public abstract class VersusSettings {
         public static boolean DO_HOTBAR_REFILL = true;
         // A recipe group's icon cycles through what can be crafted now, when anything can (RecipeButtonMixin)
         public static boolean DO_RECIPE_ICONS_CYCLE_CRAFTABLE = true;
-        // Right-click pins a recipe group, or a recipe in its popup, to the top of its section (RecipePins)
-        public static boolean DO_RECIPE_BOOK_PINS = false;
+        // The recipe book's groups are an item's recipes; similar items gather in collections (RecipeFamilies), whose popup
+        // of icons a click keeps open as a window to drag and close (FamilyWindow)
+        public static boolean DO_RECIPE_BOOK_COLLECTIONS = true;
     }
 
     public static class Combat {
@@ -88,11 +89,14 @@ public abstract class VersusSettings {
         public static double SHED_RATE = 0.1;
         public static double MOST_SHED_CHANCE = 0.25;
         public static double DECAY_LITTER_CHANCE = 0.25;
+        // A felled tree's leaves bursting against the ground, by a third of that
+        public static double FELLED_LITTER_CHANCE = 0.08;
         // How far below the leaves litter can land
         public static int LITTER_DROP_RANGE = 24;
-        // Natural fallen leaves brown into leaf litter at this chance per random tick (about an in-game day at the
-        // default random tick speed, which reaches a block about every 68 seconds)
-        public static double FALLEN_LEAVES_BROWNING_CHANCE = 0.057;
+        // Natural fallen leaves fade at this chance per random tick (about an in-game day at the default random tick
+        // speed, which reaches a block about every 68 seconds): browning into leaf litter at this share, else blowing away
+        public static double FALLEN_LEAVES_FADING_CHANCE = 0.057;
+        public static double FALLEN_LEAVES_BROWNING_SHARE = 0.5;
         // A natural leaf cut off from its tree decays as soon as it knows (its scheduled tick), not on a random tick
         // minutes later, so a felled tree's crown comes down at once
         public static boolean DO_INSTANT_LEAF_DECAY = true;
@@ -131,9 +135,28 @@ public abstract class VersusSettings {
         public static float HEART_IN_ROOTS = 0.75f;
     }
 
+    public static class Mushrooms {
+        // Brown and red mushrooms grow by stages of one, two and three, and below y 0 into pale shrooms (MushroomGrowth)
+        public static boolean DO_STAGED_MUSHROOMS = true;
+        // A mushroom grows where the light is this or less, or on mycelium
+        public static int MAX_GROWING_LIGHT = 5;
+        // The chance a random tick that could grow a mushroom a stage, turn it pale or have three spread does so
+        public static float GROW_CHANCE = 0.25f;
+        // Three spread no more where this many blocks of their kind are within 4 blocks across, 1 up or down
+        public static int SPREAD_CAP = 8;
+        // Conversion: a dose for each DOSE_TICKS spent in pale shrooms, lasting EFFECT_TICKS (each dose refreshes it);
+        // all hearts white, SHROOMIFY_TICKS of shaking before shroomifying
+        public static int DOSE_TICKS = 100;
+        public static int EFFECT_TICKS = 2400;
+        public static int SHROOMIFY_TICKS = 100;
+        // Pale zombies' and creakings' hits always convert, other zombies' this often (each in place of its own effect)
+        public static float ZOMBIE_CONVERSION_CHANCE = 0.04f;
+        // Rotten flesh: this chance of a dose lasting ROTTEN_FLESH_CONVERSION_TICKS
+        public static float ROTTEN_FLESH_CONVERSION_CHANCE = 0.125f;
+        public static int ROTTEN_FLESH_CONVERSION_TICKS = 1200;
+    }
+
     public static class Items {
-        // Recipe book groups by family (oak, deepslate, copper), tools and armor by material (RecipeRules)
-        public static boolean DO_FAMILY_RECIPE_GROUPS = true;
         // Stairs from three blocks (four stairs), slabs from two (four slabs), pressure plates from three (two plates)
         public static boolean DO_CHEAPER_STAIRS_AND_SLABS = true;
         public static int MAX_STACK_SIZE_COUNT = 64;

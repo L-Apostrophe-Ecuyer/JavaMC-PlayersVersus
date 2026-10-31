@@ -72,7 +72,7 @@ public abstract class SuspiciousBlockEntityMixin extends BlockEntity {
     private void generateRandomLootIfNoneAppended(ServerLevel world, LivingEntity brusher, ItemInstance brush, CallbackInfo info) {
         if(item.isEmpty() && lootTable == null) {
             if(this.getBlockState().is(Blocks.SUSPICIOUS_SAND)) {
-                if(world.getFluidState(worldPosition.above()).is(Fluids.WATER)) this.setLootTable(LOOT_SAND_AQUATIC, this.getBlockPos().asLong());
+                if(world.getFluidState(worldPosition.above()).isSourceOfType(Fluids.WATER)) this.setLootTable(LOOT_SAND_AQUATIC, this.getBlockPos().asLong());
                 else {
                     Holder<Biome> biome = world.getBiome(this.worldPosition);
                     if(biome.is(BiomeTags.HAS_DESERT_PYRAMID)) this.setLootTable(LOOT_SAND_DESERT, this.getBlockPos().asLong());

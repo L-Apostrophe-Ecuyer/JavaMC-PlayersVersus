@@ -16,6 +16,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import frootloops.versus.mod.items_and_effects.conversion.ShroomShakingPayload;
+import frootloops.versus.mod.items_and_effects.conversion.Shroomify;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,7 @@ public class VersusMod implements ModInitializer {
 
 		MOD_LOGGER.info("Registering new status effects...");
 		CustomStatusEffects.registerCustomStatusEffects();
+		Shroomify.register();
 
 		MOD_LOGGER.info("Initializing custom blocks, sounds, and particles...");
 		CustomBlocks.onInitialize();
@@ -60,6 +63,7 @@ public class VersusMod implements ModInitializer {
 		PayloadTypeRegistry.serverboundPlay().register(RespawnNearbyPayload.ID, RespawnNearbyPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(MobMeleePayload.TYPE, MobMeleePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(TopplePayload.TYPE, TopplePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ShroomShakingPayload.TYPE, ShroomShakingPayload.CODEC);
 		VersusModServer.addPacketRecievers();
 
 		MOD_LOGGER.info("Done! This mod is ready to party.");

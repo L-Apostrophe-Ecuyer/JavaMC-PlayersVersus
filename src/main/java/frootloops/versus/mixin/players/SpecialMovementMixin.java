@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.players;
 
 import frootloops.versus.mod.enchantments.EnchantRegistryHelper;
+import frootloops.versus.mod.environment.blocks.BlockSounds;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
@@ -14,6 +15,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.sounds.BlockSoundSet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -79,7 +82,7 @@ public abstract class SpecialMovementMixin extends LivingEntity {
                 this.spawnSprintParticle();
                 this.addEffect(new MobEffectInstance(MobEffects.SPEED, 8, 0, true, false));
                 this.playBlockFallSound();
-                this.playSound(SoundEvents.AMETHYST_BLOCK_FALL, 1.0f, 1.0f);
+                BlockSounds.play(this, Blocks.AMETHYST_BLOCK, BlockSoundSet::fallSound, 1.0f, 1.0f);
                 this.playSound(SoundEvents.DISPENSER_LAUNCH, 1.0f, 1.0f);
                 for (int i = 0; i < 6; ++i) {
                     double d = this.random.nextGaussian() * 0.02 - velocityX;

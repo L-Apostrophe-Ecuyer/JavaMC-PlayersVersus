@@ -71,14 +71,19 @@ public class MobSpawning {
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_CREEPER, 10, 1, 1);
         SpawnPlacements.register(ModEntities.PALE_SPIDER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleSpider);
 
+        // Mushroom caves: their creepers and spiders, by the biome's file
+        SpawnPlacements.register(ModEntities.MUSHROOM_CREEPER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
+        SpawnPlacements.register(ModEntities.MUSHROOM_SPIDER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
+
         // Desert:
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAVE_SPIDER, 60, 1, 1);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.HUSK, 120, 4, 4);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAMEL, 40, 3, 4);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE, EntityTypes.CAT, 40, 1, 3);
 
-        // Air:
-        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, EntityTypes.PHANTOM, 80, 1, 2);
+        // Air: phantoms at the new moon's midnight (PhantomMixin), anywhere but over the mushroom islands and in their caves
+        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld().and(BiomeSelectors.excludeByKey(Biomes.MUSHROOM_FIELDS, CustomOverworldBiomes.MUSHROOM_CAVES)),
+                MobCategory.MONSTER, EntityTypes.PHANTOM, 80, 1, 2);
 
         // Nether:
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.NETHER_WASTES), MobCategory.MONSTER, EntityTypes.BLAZE, 15, 1, 1);
@@ -89,8 +94,11 @@ public class MobSpawning {
         return isNewMoon(world) && isMidnight(world);
     }
 
+    /** The moon phase with no moon: vanilla's MoonPhase index 4 (0 is the full moon). */
+    public static final int NEW_MOON_PHASE = 4;
+
     public static boolean isNewMoon(LevelAccessor world) {
-        return WorldTime.moonPhase(world) == 7;
+        return WorldTime.moonPhase(world) == NEW_MOON_PHASE;
     }
 
     public static boolean isMidnight(LevelAccessor world) {

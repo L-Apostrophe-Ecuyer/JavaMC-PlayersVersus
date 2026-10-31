@@ -48,7 +48,8 @@
     [],
     [
       "players-versus:caves/deep_rare_sculk_patch",
-      "minecraft:glow_lichen"
+      "minecraft:glow_lichen",
+      "players-versus:caves/brown_mushroom_clusters"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -1,0 +1,262 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "short": "minecraft:block/red_mushroom",
+    "tall": "players-versus:block/red_mushroom_tall",
+    "particle": "#short"
+  },
+  "elements": [
+    {
+      "from": [
+        5.5,
+        0,
+        6.0
+      ],
+      "to": [
+        13.5,
+        9,
+        6.0
+      ],
+      "rotation": {
+        "origin": [
+          9.5,
+          0,
+          6.0
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "shade_direction_override": "up",
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            7,
+            12,
+            16
+          ],
+          "texture": "#tall"
+        },
+        "south": {
+          "uv": [
+            4,
+            7,
+            12,
+            16
+          ],
+          "texture": "#tall"
+        }
+      }
+    },
+    {
+      "from": [
+        9.5,
+        0,
+        2.0
+      ],
+      "to": [
+        9.5,
+        9,
+        10.0
+      ],
+      "rotation": {
+        "origin": [
+          9.5,
+          0,
+          6.0
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "shade_direction_override": "up",
+      "faces": {
+        "west": {
+          "uv": [
+            4,
+            7,
+            12,
+            16
+          ],
+          "texture": "#tall"
+        },
+        "east": {
+          "uv": [
+            4,
+            7,
+            12,
+            16
+          ],
+          "texture": "#tall"
+        }
+      }
+    },
+    {
+      "from": [
+        1.0,
+        0,
+        10.5
+      ],
+      "to": [
+        9.0,
+        7,
+        10.5
+      ],
+      "rotation": {
+        "origin": [
+          5.0,
+          0,
+          10.5
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "shade_direction_override": "up",
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            9,
+            12,
+            16
+          ],
+          "texture": "#short"
+        },
+        "south": {
+          "uv": [
+            4,
+            9,
+            12,
+            16
+          ],
+          "texture": "#short"
+        }
+      }
+    },
+    {
+      "from": [
+        5.0,
+        0,
+        6.5
+      ],
+      "to": [
+        5.0,
+        7,
+        14.5
+      ],
+      "rotation": {
+        "origin": [
+          5.0,
+          0,
+          10.5
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "shade_direction_override": "up",
+      "faces": {
+        "west": {
+          "uv": [
+            4,
+            9,
+            12,
+            16
+          ],
+          "texture": "#short"
+        },
+        "east": {
+          "uv": [
+            4,
+            9,
+            12,
+            16
+          ],
+          "texture": "#short"
+        }
+      }
+    },
+    {
+      "from": [
+        9.0,
+        0,
+        12.0
+      ],
+      "to": [
+        15.0,
+        5.25,
+        12.0
+      ],
+      "rotation": {
+        "origin": [
+          12.0,
+          0,
+          12.0
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "shade_direction_override": "up",
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            9,
+            12,
+            16
+          ],
+          "texture": "#short"
+        },
+        "south": {
+          "uv": [
+            4,
+            9,
+            12,
+            16
+          ],
+          "texture": "#short"
+        }
+      }
+    },
+    {
+      "from": [
+        12.0,
+        0,
+        9.0
+      ],
+      "to": [
+        12.0,
+        5.25,
+        15.0
+      ],
+      "rotation": {
+        "origin": [
+          12.0,
+          0,
+          12.0
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "shade_direction_override": "up",
+      "faces": {
+        "west": {
+          "uv": [
+            4,
+            9,
+            12,
+            16
+          ],
+          "texture": "#short"
+        },
+        "east": {
+          "uv": [
+            4,
+            9,
+            12,
+            16
+          ],
+          "texture": "#short"
+        }
+      }
+    }
+  ]
+}

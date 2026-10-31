@@ -7,7 +7,9 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -19,58 +21,29 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
- * Which hand a right-click tries first, from what the player most likely means. Each hand, in the order chosen here,
- * first interacts with what the crosshair is on (a block's use, an entity's, placing what it holds) and then uses its
- * item, as vanilla's does; only the order of the hands changes, by these rules, the first that applies:
- * <ol>
- * <li>An item is in use (a shield held up, a bow drawn): only its hand, and its item isn't started again.</li>
- * <li>Falling onto a block with a water bucket in a hand: that hand, to land in the water.</li>
- * <li>Under threat (an enemy within reach in front of you, an enemy or a player at the crosshair, or something flying at
- * you) with an item that blocks attacks, unless sneaking: only the items that block, the off hand's first, and no
- * interaction with the world. Sneak to place or use what you hold instead.</li>
- * <li>Otherwise the hands that aren't blocking come first, the main hand's first (a bow first if an enemy is at the
- * crosshair), then the items that block, the off hand's first: a blocking item is what you want when something is
- * attacking, and the last thing when nothing is, so an offhand torch or ender pearl beats a sword in the main hand.</li>
- * </ol>
- * In all of them an item on cooldown goes last, and its item is never used: the server would refuse, and the client
- * would show a use that never happened.
+ * The client's half of {@link HandPlan}: what each hand holds, whether a water bucket can break a fall, and whether
+ * the player is under attack or facing an attacker (an enemy within reach in front of them, an enemy or a player at the
+ * crosshair, something flying at them, or a hit taken in the last two seconds from something still close).
  */
 @Environment(EnvType.CLIENT)
 public final class HandSelection {
     private HandSelection() {}
 
-    /** The hands in order; whether each interacts with the world first; whether each then uses its item. */
-    public record Plan(InteractionHand[] hands, boolean world, boolean items) {}
+    private static final double MELEE_RANGE = 4.5, TARGET_RANGE = 6.0, PROJECTILE_RANGE = 10.0, FALLING = 3.5, ATTACKER_RANGE = 8.0;
 
-    private static final double MELEE_RANGE = 4.5, TARGET_RANGE = 6.0, PROJECTILE_RANGE = 10.0, FALLING = 3.5;
-
-    public static Plan plan(LocalPlayer player, ClientLevel level, @Nullable HitResult hit) {
-        if (player.isUsingItem()) return new Plan(new InteractionHand[] {player.getUsedItemHand()}, true, false);
-
-        InteractionHand bucket = fallingBucket(player, hit);
-        if (bucket != null) return new Plan(new InteractionHand[] {bucket, other(bucket)}, true, true);
-
-        List<InteractionHand> blockers = new ArrayList<>();
-        for (InteractionHand hand : new InteractionHand[] {InteractionHand.OFF_HAND, InteractionHand.MAIN_HAND}) {
-            if (blocks(player.getItemInHand(hand)) && !onCooldown(player, hand)) blockers.add(hand);
-        }
-        if (!blockers.isEmpty() && !player.isShiftKeyDown() && threatened(player, level, hit)) {
-            return new Plan(blockers.toArray(new InteractionHand[0]), false, true);
-        }
-
+    public static List<HandPlan.Step> plan(LocalPlayer player, ClientLevel level, @Nullable HitResult hit) {
         boolean enemyAhead = hit instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof Monster;
-        List<InteractionHand> hands = new ArrayList<>(List.of(InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND));
-        // Stable: the main hand stays before the off hand among equals, and the off hand goes first among blockers
-        hands.sort(Comparator.<InteractionHand>comparingInt(h -> onCooldown(player, h) ? 1 : 0)
-                .thenComparingInt(h -> blocks(player.getItemInHand(h)) ? 1 : 0)
-                .thenComparingInt(h -> enemyAhead && ranged(player.getItemInHand(h)) ? 0 : 1)
-                .thenComparingInt(h -> blocks(player.getItemInHand(h)) && h == InteractionHand.OFF_HAND ? 0 : 1));
-        return new Plan(hands.toArray(new InteractionHand[0]), true, true);
+        return HandPlan.plan(hand(player, InteractionHand.MAIN_HAND), hand(player, InteractionHand.OFF_HAND),
+                player.isUsingItem() ? player.getUsedItemHand() : null, fallingBucket(player, hit), player.isShiftKeyDown(),
+                threatened(player, level, hit), enemyAhead);
+    }
+
+    private static HandPlan.Hand hand(LocalPlayer player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        return new HandPlan.Hand(blocks(stack), onCooldown(player, hand), ranged(stack));
     }
 
     public static boolean blocks(ItemStack stack) {
@@ -80,10 +53,6 @@ public final class HandSelection {
     public static boolean onCooldown(LocalPlayer player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         return !stack.isEmpty() && player.getCooldowns().isOnCooldown(stack);
-    }
-
-    private static InteractionHand other(InteractionHand hand) {
-        return hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
     }
 
     private static boolean ranged(ItemStack stack) {
@@ -103,6 +72,10 @@ public final class HandSelection {
     }
 
     private static boolean threatened(LocalPlayer player, ClientLevel level, @Nullable HitResult hit) {
+        // Under attack: hit in the last two seconds (the game forgets the source after that) by something still close
+        DamageSource lastHit = player.getLastDamageSource();
+        if (lastHit != null && lastHit.getEntity() instanceof LivingEntity attacker && attacker != player && attacker.isAlive()
+                && player.distanceTo(attacker) <= ATTACKER_RANGE) return true;
         if (hit instanceof EntityHitResult entityHit) {
             Entity target = entityHit.getEntity();
             if ((target instanceof Monster || target instanceof Player) && target.isAlive() && player.distanceTo(target) <= TARGET_RANGE) return true;
