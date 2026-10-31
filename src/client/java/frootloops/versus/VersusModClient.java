@@ -24,7 +24,6 @@ public class VersusModClient implements ClientModInitializer {
 	public static final Identifier RECIPE_BOOK_UNCRAFTABLE_GROUP_OVERLAY = Identifier.withDefaultNamespace("recipe_book/many_uncraftable_overlay");
 	public static final Identifier RECIPE_BOOK_CRAFTABLE_SINGLE_OVERLAY = Identifier.withDefaultNamespace("recipe_book/single_uncraftable_overlay");
 
-	public static final Identifier RECIPE_BOOK_PIN = Identifier.fromNamespaceAndPath(MOD_ID, "recipe_book/pin");
 
 	public static final Identifier HUD_TEXTURE_DISABLED_FOOD = Identifier.fromNamespaceAndPath(MOD_ID, "hud/disabled_food_empty");
 	public static final Identifier HUD_TEXTURE_DISABLED_FOOD_HALF = Identifier.fromNamespaceAndPath(MOD_ID, "hud/disabled_food_empty_half");

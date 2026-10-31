@@ -1,26 +1,2 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
-find recipebook/
-sig net.minecraft.client.gui.screens.recipebook.RecipeCollection
-sig net.minecraft.client.gui.screens.recipebook.RecipeBookPage
-sig net.minecraft.client.gui.screens.recipebook.RecipeButton
-sig net.minecraft.client.gui.screens.recipebook.OverlayRecipeComponent
-sig net.minecraft.client.gui.screens.recipebook.OverlayRecipeComponent$OverlayRecipeButton
-sig net.minecraft.client.gui.screens.recipebook.RecipeBookComponent
-sig net.minecraft.client.ClientRecipeBook
-sig net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen
-sig net.minecraft.world.item.crafting.display.RecipeDisplayEntry
-sig net.minecraft.world.item.crafting.display.RecipeDisplay
-calls net.minecraft.client.gui.screens.recipebook.RecipeBookPage
-calls net.minecraft.client.gui.screens.recipebook.RecipeBookComponent
-calls net.minecraft.client.gui.screens.recipebook.OverlayRecipeComponent
-calls net.minecraft.client.gui.screens.recipebook.RecipeButton
-calls net.minecraft.client.ClientRecipeBook
-calls net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen
-member net.minecraft.client.gui.GuiGraphicsExtractor item
-member net.minecraft.client.gui.GuiGraphicsExtractor fill
-member net.minecraft.client.gui.GuiGraphicsExtractor text
-member net.minecraft.client.gui.GuiGraphicsExtractor pose
-member net.minecraft.client.gui.GuiGraphicsExtractor tooltip
-member net.minecraft.client.gui.GuiGraphicsExtractor blitSprite
-member net.minecraft.client.gui.GuiGraphicsExtractor nextStratum

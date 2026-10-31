@@ -25,14 +25,6 @@ public final class RecipeBookOrdering {
         return ordered;
     }
 
-    /** As {@link #order(List, Predicate, Comparator)}, with the pinned items first in their section. */
-    public static <T> List<T> order(List<T> items, Predicate<? super T> craftable, Predicate<? super T> pinned, Comparator<? super T> within) {
-        return order(items, craftable, (a, b) -> {
-            boolean aPinned = pinned.test(a), bPinned = pinned.test(b);
-            return aPinned == bPinned ? within.compare(a, b) : aPinned ? -1 : 1;
-        });
-    }
-
     /**
      * A comparator from a "goes before" test, as the inventory sort has: before one way only decides, before both ways or
      * neither is a tie (the test isn't a consistent order, and says yes both ways for stacks it can't tell apart).

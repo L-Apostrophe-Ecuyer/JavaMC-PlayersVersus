@@ -27,8 +27,9 @@ public abstract class VersusSettings {
         public static boolean DO_HOTBAR_REFILL = true;
         // A recipe group's icon cycles through what can be crafted now, when anything can (RecipeButtonMixin)
         public static boolean DO_RECIPE_ICONS_CYCLE_CRAFTABLE = true;
-        // Right-click pins a recipe group, or a recipe in its popup, to the top of its section (RecipePins)
-        public static boolean DO_RECIPE_BOOK_PINS = true;
+        // The recipe book's groups are an item's recipes; similar items gather in collections (RecipeFamilies), whose popup
+        // of icons a click keeps open as a window to drag and close (FamilyWindow)
+        public static boolean DO_RECIPE_BOOK_COLLECTIONS = true;
     }
 
     public static class Combat {
@@ -135,8 +136,6 @@ public abstract class VersusSettings {
     }
 
     public static class Items {
-        // Recipe book groups by family (oak, deepslate, copper), tools and armor by material (RecipeRules)
-        public static boolean DO_FAMILY_RECIPE_GROUPS = true;
         // Stairs from three blocks (four stairs), slabs from two (four slabs), pressure plates from three (two plates)
         public static boolean DO_CHEAPER_STAIRS_AND_SLABS = true;
         public static int MAX_STACK_SIZE_COUNT = 64;

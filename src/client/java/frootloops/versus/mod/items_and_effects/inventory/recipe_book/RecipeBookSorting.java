@@ -5,40 +5,28 @@ import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemOrdering;
 import frootloops.versus.mod.items_and_effects.inventory.sorting.ItemSlot;
 import frootloops.versus.mod.items_and_effects.recipes.RecipeBookOrdering;
-import frootloops.versus.mod.items_and_effects.recipes.RecipePins;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
-import net.minecraft.world.item.crafting.display.SlotDisplayContext;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The recipe book's order, by what the recipes make, the way the inventory sort orders items (ItemOrdering: its
  * types, then rarity, tool and armor value, food value, block kind and color). The two sections, craftable first, are
- * RecipeBookOrdering's, with what the player pinned first in its section (RecipePins). A sort that fails (some item the
- * comparison can't handle) leaves the list as it was.
+ * RecipeBookOrdering's. A sort that fails (some item the comparison can't handle) leaves the list as it was.
  */
 @Environment(EnvType.CLIENT)
 public final class RecipeBookSorting {
     private static final AtomicBoolean WARNED = new AtomicBoolean();
-    /** The pin keys of groups and recipes, worked out once: they only depend on what the recipes make. */
-    private static final Map<RecipeCollection, String> GROUP_KEYS = Collections.synchronizedMap(new WeakHashMap<>());
-    private static final Map<RecipeDisplayEntry, String> RECIPE_KEYS = Collections.synchronizedMap(new WeakHashMap<>());
 
     private RecipeBookSorting() {}
 
@@ -49,7 +37,7 @@ public final class RecipeBookSorting {
             Map<RecipeCollection, ItemStack> representatives = new IdentityHashMap<>();
             for (RecipeCollection collection : collections) representatives.put(collection, ordering.best(entriesOf(collection), context));
             Comparator<RecipeCollection> byResult = (a, b) -> ordering.compare(representatives.get(a), representatives.get(b));
-            return RecipeBookOrdering.order(collections, RecipeCollection::hasCraftable, collection -> isPinned(collection, context), byResult);
+            return RecipeBookOrdering.order(collections, RecipeCollection::hasCraftable, byResult);
         } catch (RuntimeException exception) {
             warn(exception);
             return collections;
@@ -62,7 +50,7 @@ public final class RecipeBookSorting {
             Ordering ordering = new Ordering();
             Map<RecipeDisplayEntry, ItemStack> results = new IdentityHashMap<>();
             for (RecipeDisplayEntry entry : entries) results.put(entry, resultOf(entry, context));
-            return RecipeBookOrdering.order(entries, entry -> true, entry -> isPinned(entry, context), (a, b) -> ordering.compare(results.get(a), results.get(b)));
+            return RecipeBookOrdering.order(entries, entry -> true, (a, b) -> ordering.compare(results.get(a), results.get(b)));
         } catch (RuntimeException exception) {
             warn(exception);
             return entries;
@@ -79,61 +67,12 @@ public final class RecipeBookSorting {
             Map<RecipeDisplayEntry, ItemStack> results = new IdentityHashMap<>();
             for (RecipeDisplayEntry entry : entries) results.put(entry, resultOf(entry, context));
             boolean smart = VersusSettings.QOL.DO_SMART_RECIPE_ORDER;
-            return RecipeBookOrdering.order(entries, entry -> collection.isCraftable(entry.id()), entry -> isPinned(entry, context),
+            return RecipeBookOrdering.order(entries, entry -> collection.isCraftable(entry.id()),
                     (a, b) -> smart ? ordering.compare(results.get(a), results.get(b)) : 0);
         } catch (RuntimeException exception) {
             warn(exception);
             return entries;
         }
-    }
-
-    // Pins
-
-    /** Whether the group is pinned (a group of a single recipe is pinned as that recipe). */
-    public static boolean isPinned(RecipeCollection collection, ContextMap context) {
-        if (!VersusSettings.QOL.DO_RECIPE_BOOK_PINS) return false;
-        return RecipePinStore.get().isPinned(groupKey(collection, context));
-    }
-
-    /** As above, for drawing: the context comes from the level. */
-    public static boolean isPinned(RecipeCollection collection) {
-        if (!VersusSettings.QOL.DO_RECIPE_BOOK_PINS || Minecraft.getInstance().level == null) return false;
-        String key = GROUP_KEYS.get(collection);
-        if (key == null) key = groupKey(collection, SlotDisplayContext.fromLevel(Minecraft.getInstance().level));
-        return RecipePinStore.get().isPinned(key);
-    }
-
-    public static boolean isPinned(RecipeDisplayEntry entry, ContextMap context) {
-        if (!VersusSettings.QOL.DO_RECIPE_BOOK_PINS) return false;
-        String key = recipeKey(entry, context);
-        return key != null && RecipePinStore.get().isPinned(key);
-    }
-
-    /** The key a group is pinned by. */
-    public static String groupKey(RecipeCollection collection, ContextMap context) {
-        return GROUP_KEYS.computeIfAbsent(collection, key -> {
-            Set<String> ids = new HashSet<>();
-            for (RecipeDisplayEntry entry : collection.getRecipes()) {
-                String id = idOf(resultOf(entry, context));
-                if (id != null) ids.add(id);
-            }
-            return ids.isEmpty() ? "g:" : RecipePins.groupKey(ids);
-        });
-    }
-
-    /** The key a recipe is pinned by, or null for a recipe that makes nothing to pin it by. */
-    @Nullable
-    public static String recipeKey(RecipeDisplayEntry entry, ContextMap context) {
-        String key = RECIPE_KEYS.computeIfAbsent(entry, e -> {
-            String id = idOf(resultOf(e, context));
-            return id == null ? "" : RecipePins.recipeKey(id);
-        });
-        return key.isEmpty() ? null : key;
-    }
-
-    @Nullable
-    private static String idOf(ItemStack stack) {
-        return stack.isEmpty() ? null : BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
     }
 
     private static List<RecipeDisplayEntry> entriesOf(RecipeCollection collection) {
@@ -142,7 +81,8 @@ public final class RecipeBookSorting {
         return entries.isEmpty() ? collection.getRecipes() : entries;
     }
 
-    private static ItemStack resultOf(RecipeDisplayEntry entry, ContextMap context) {
+    /** The first thing the recipe makes, or nothing. */
+    public static ItemStack resultOf(RecipeDisplayEntry entry, ContextMap context) {
         List<ItemStack> results = entry.resultItems(context);
         return results.isEmpty() ? ItemStack.EMPTY : results.getFirst();
     }

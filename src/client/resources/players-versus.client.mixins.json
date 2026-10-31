@@ -39,9 +39,11 @@
 		"items_and_effects.inventory.InventoryScreenShulkerMixin",
 		"items_and_effects.inventory.InventoryScreenShulkerAccessor",
 		"items_and_effects.inventory.ItemMergingMixin",
+		"items_and_effects.inventory.recipe_book.AbstractRecipeBookScreenMixin",
 		"items_and_effects.inventory.recipe_book.AnimatedResultButtonMixin",
 		"items_and_effects.inventory.recipe_book.OverlayRecipeComponentMixin",
 		"items_and_effects.inventory.recipe_book.RecipeBookPageMixin",
+		"items_and_effects.inventory.recipe_book.RecipeBookComponentAccessor",
 		"items_and_effects.inventory.recipe_book.RecipeBookComponentMixin",
 		"items_and_effects.inventory.recipe_book.RecipeButtonMixin",
 

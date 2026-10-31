@@ -18,8 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.List;
 
 /**
- * A recipe group's button: its recipes are listed craftable first (pinned first among them, then in the inventory sort's
- * order), and its icon, and the recipe a click places, cycle through the craftable ones when any can be crafted. The
+ * A recipe group's button: its recipes are listed craftable first (then in the inventory sort's order), and its icon, and the recipe a click places, cycle through the craftable ones when any can be crafted. The
  * button still counts every recipe of the group, so its popup lists them all.
  */
 @Environment(EnvType.CLIENT)
@@ -32,7 +31,7 @@ public abstract class RecipeButtonMixin {
     private List<RecipeDisplayEntry> playersVersus$craftableFirst(RecipeCollection recipes, RecipeCollection.CraftableStatus status,
                                                                  Operation<List<RecipeDisplayEntry>> original, @Local(argsOnly = true) ContextMap context) {
         List<RecipeDisplayEntry> entries = original.call(recipes, status);
-        if (!VersusSettings.QOL.DO_RECIPE_ICONS_CYCLE_CRAFTABLE && !VersusSettings.QOL.DO_RECIPE_BOOK_PINS) return entries;
+        if (!VersusSettings.QOL.DO_RECIPE_ICONS_CYCLE_CRAFTABLE) return entries;
         return RecipeBookSorting.sortGroupEntries(recipes, entries, context);
     }
 

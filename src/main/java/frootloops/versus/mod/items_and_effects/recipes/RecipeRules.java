@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,18 +26,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * recipe of their kind, a mod's or a data pack's as well as vanilla's, and a recipe that isn't of their kind (a data
  * pack's own shape for stairs, say) is left as it is.
  * <ul>
- * <li>Groups (the recipe book's buttons): a block goes with its family, named by what's left of its name without the
- * words for its shape and its finish: oak planks, stairs, doors and boats in "oak"; cobbled, polished, brick and tile
- * deepslate in "deepslate"; every cut, waxed and weathered copper block, grate, door and bulb in "copper". Tools go by
- * material ("iron_tools"), armor too ("iron_armor"). The book still keeps its tabs apart, so a family has a button in
- * each tab it has recipes in.</li>
  * <li>Stairs take three blocks (an L of two by two) instead of six, for the same four stairs.</li>
  * <li>Slabs take two blocks in a row instead of three, for four slabs instead of six.</li>
  * <li>Pressure plates take three blocks in a row instead of two (the slabs' old shape, as slabs took theirs), for two
  * plates.</li>
  * </ul>
  * Only vanilla's shapes are changed: a stairs recipe whose pattern isn't the staircase of six, a slab's that isn't a row
- * of three, a plate's that isn't a row of two, keeps its own.
+ * of three, a plate's that isn't a row of two, keeps its own. (The recipe book gathers recipes in collections by
+ * itself, RecipeFamilies: the files keep their groups.)
  */
 public final class RecipeRules {
     private RecipeRules() {}
@@ -63,13 +58,6 @@ public final class RecipeRules {
         JsonObject changed = null;
         if (VersusSettings.Items.DO_CHEAPER_STAIRS_AND_SLABS && type.equals("minecraft:crafting_shaped")) {
             changed = reshape(recipe, result);
-        }
-        if (VersusSettings.Items.DO_FAMILY_RECIPE_GROUPS && GROUPED.contains(type)) {
-            String group = group(result.getPath());
-            if (group != null && !group.equals(string(recipe, "group"))) {
-                if (changed == null) changed = recipe.deepCopy();
-                changed.addProperty("group", group);
-            }
         }
         return changed == null ? json : changed;
     }
@@ -134,78 +122,6 @@ public final class RecipeRules {
             }
         }
         return cells;
-    }
-
-    // Groups
-
-    private static final Set<String> GROUPED = Set.of("minecraft:crafting_shaped", "minecraft:crafting_shapeless", "minecraft:crafting_transmute",
-            "minecraft:stonecutting", "minecraft:smelting", "minecraft:blasting", "minecraft:smoking", "minecraft:campfire_cooking");
-
-    /** The words for a block's finish, before its material: what's left is its family. */
-    private static final List<String> FINISHES = List.of("waxed_", "exposed_", "weathered_", "oxidized_", "polished_", "chiseled_", "cut_",
-            "cracked_", "smooth_", "mossy_", "cobbled_", "packed_", "stripped_");
-    /** The words for a block's shape or form, after its material. */
-    private static final List<String> SHAPES = List.of("_stairs", "_slab", "_wall", "_fence_gate", "_fence", "_trapdoor", "_door",
-            "_pressure_plate", "_button", "_hanging_sign", "_sign", "_shelf", "_chest_boat", "_chest_raft", "_boat", "_raft", "_grate", "_bulb",
-            "_planks", "_block", "_bricks", "_brick", "_tiles", "_tile", "_mosaic", "_pillar", "_wood", "_hyphae");
-    /** Families whose name doesn't say their material. */
-    private static final Map<String, String> ALIASES = Map.of("heavy_weighted", "iron", "light_weighted", "gold", "bricks", "brick");
-    private static final List<String> TOOLS = List.of("_pickaxe", "_axe", "_shovel", "_hoe", "_sword", "_spear");
-    private static final List<String> ARMOR = List.of("_helmet", "_chestplate", "_leggings", "_boots");
-
-    /** The group a recipe making the item at path goes in, or null to keep its own. */
-    @Nullable
-    public static String group(String path) {
-        for (String tool : TOOLS) if (path.endsWith(tool) && path.length() > tool.length()) return path.substring(0, path.length() - tool.length()) + "_tools";
-        for (String piece : ARMOR) if (path.endsWith(piece) && path.length() > piece.length()) return path.substring(0, path.length() - piece.length()) + "_armor";
-        String alias = ALIASES.get(path);
-        if (alias != null) return alias;
-        String family = family(path);
-        if (family != null) return ALIASES.getOrDefault(family, family);
-        // A family's plain block (sandstone, andesite, stone): its family is its name
-        return families().contains(path) ? path : null;
-    }
-
-    /** What's left of a name without its shape and finish words, or null if it has none (it isn't a family's). */
-    @Nullable
-    public static String family(String path) {
-        String name = path;
-        boolean stripped = false;
-        for (boolean changed = true; changed; ) {
-            changed = false;
-            for (String shape : SHAPES) {
-                if (name.endsWith(shape) && name.length() > shape.length()) {
-                    name = name.substring(0, name.length() - shape.length());
-                    changed = stripped = true;
-                    break;
-                }
-            }
-            if (changed) continue;
-            for (String finish : FINISHES) {
-                if (name.startsWith(finish) && name.length() > finish.length()) {
-                    name = name.substring(finish.length());
-                    changed = stripped = true;
-                    break;
-                }
-            }
-        }
-        return stripped ? name : null;
-    }
-
-    private static volatile Set<String> families;
-
-    /** Every family some item's name belongs to. */
-    private static Set<String> families() {
-        Set<String> known = families;
-        if (known == null) {
-            known = new HashSet<>();
-            for (Identifier id : BuiltInRegistries.ITEM.keySet()) {
-                String family = family(id.getPath());
-                if (family != null) known.add(family);
-            }
-            families = known;
-        }
-        return known;
     }
 
     // Reading
