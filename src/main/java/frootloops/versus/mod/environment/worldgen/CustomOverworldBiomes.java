@@ -37,9 +37,11 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> REGULAR_CAVE = keyOf("caves/regular_cave");
     public static final ResourceKey<Biome> DEEP_CAVES = keyOf("caves/deep_caves");
     public static final ResourceKey<Biome> PALE_GROTTO = keyOf("caves/pale_grotto");
+    public static final ResourceKey<Biome> MUSHROOM_CAVES = keyOf("caves/mushroom_caves");
 
+    /** Where a biome goes; ALL_DEPTHS is a cave biome from the surface caves down to the deep caves. */
     public enum PlacedBiomeType {
-        SKY, SURFACE, SURFACE_CAVE, CAVE, DEEP_CAVE, GENERIC_CAVE, GENERIC_DEEP_CAVE
+        SKY, SURFACE, SURFACE_CAVE, CAVE, DEEP_CAVE, GENERIC_CAVE, GENERIC_DEEP_CAVE, ALL_DEPTHS
     }
 
     public static PlacedBiome[] landBiomesToPlaceInOverorld = new PlacedBiome[]{
@@ -63,7 +65,10 @@ public class CustomOverworldBiomes {
             new PlacedBiome(PALE_GROTTO, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.0f, 0.3f), Climate.Parameter.span(0.2f, 0.6f), Climate.Parameter.span(0.2f, 1.0f), Climate.Parameter.span(-0.2f, 0.8f), Climate.Parameter.span(0.2f, 1.0f)),
 
             new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, Climate.Parameter.span(-0.7f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
-            new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter)
+            new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter),
+            // Under the mushroom islands, all the way down: their continentalness (vanilla's mushroom fields'), which no other
+            // cave entry reaches, so no other cave comes near
+            new PlacedBiome(MUSHROOM_CAVES, PlacedBiomeType.ALL_DEPTHS, false, defaultParameter, defaultParameter, Climate.Parameter.span(-1.2f, -1.05f), defaultParameter, defaultParameter)
     };
 
 

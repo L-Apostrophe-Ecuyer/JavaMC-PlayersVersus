@@ -204,6 +204,7 @@ public final class PvBiomeLayout {
             case SURFACE_CAVE -> Parameter.span(0.1F, 0.25F);
             case CAVE -> Parameter.span(0.2F, 0.4F);
             case GENERIC_CAVE -> Parameter.span(0.25F, 0.65F);
+            case ALL_DEPTHS -> Parameter.span(0.1F, 1.0F);
             default -> Parameter.point(0.9F);
         };
     }

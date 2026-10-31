@@ -2,6 +2,8 @@ package frootloops.versus.mod.mobs;
 
 import frootloops.versus.mod.mobs.hostile.nether.WildfireEntityRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.IceCubeRenderer;
+import frootloops.versus.mod.mobs.hostile.overworld.MushroomCreeperRenderer;
+import frootloops.versus.mod.mobs.hostile.overworld.MushroomSpiderRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieRenderer;
@@ -27,6 +29,8 @@ public class ModEntitiesRenderers {
         register(PALE_ZOMBIE, context -> new PaleZombieRenderer(context));
         register(PALE_CREEPER, context -> new PaleCreeperRenderer(context));
         register(PALE_SPIDER, context -> new PaleSpiderRenderer(context));
+        register(MUSHROOM_CREEPER, context -> new MushroomCreeperRenderer(context));
+        register(MUSHROOM_SPIDER, context -> new MushroomSpiderRenderer(context));
         register(WILDFIRE, context -> new WildfireEntityRenderer(context));
     }
 
