@@ -145,7 +145,10 @@ vanilla server, because the client sends only ordinary clicks.
   halves. Order: sneaking → vanilla; stroke's first block (copied, for "turnable" blocks only — not wall-attached
   ones); **the last placement** (`follow`: same block, within 3 s — pillars/chains keep their axis next to it on any
   side; stairs keep facing+half along their row or one step up/down their slope, not back to back (a roof's ridge);
-  slabs keep their half beside on the same level; trapdoors facing+half along their row); neighbours (pillar/stair
+  slabs keep their half beside on the same level; trapdoors facing+half along their row; a slab clicked where vanilla
+  would double one just placed — the last placement or one of the stroke's — goes beside it in the same half instead,
+  on along the row (`slabStep`/`travel`) or out of the side clicked: `ClientPlacement.aim`, sneak to double);
+  neighbours (pillar/stair
   rows — the old `BlockItemMixin` scoring, ported — guessed halves, fence gates across fences, furnace-like fronts,
   `ROTATION_16` within two steps); vanilla. Redstone parts (`isFunction`) only follow a stroke. `sameTurn()`
   compares turns ignoring neighbour-made shape.
@@ -213,9 +216,13 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   `sheds_leaf_litter` (the poplars) and `sheds_pink_petals` (cherry); spruce and pale oak shed nothing. Litter doesn't
   soften a landing.
 - **Fallen leaves** (`players-versus:fallen_leaves`, `FallenLeavesBlock extends LeafLitterBlock` + `PERSISTENT`):
-  vanilla's leaf litter models tinted with `BlockTintSources.foliage()`. Natural piles brown into `LEAF_LITTER` on a
-  random tick (`FALLEN_LEAVES_BROWNING_CHANCE`); placed ones are persistent. Shears or Silk Touch drop them, anything
-  else leaf litter (loot table). The item's `COMPOSTABLE` is built directly (`minecraft:compostable/low`): item
+  vanilla's leaf litter models tinted with `BlockTintSources.foliage()`. Natural piles fade on a random tick
+  (`FALLEN_LEAVES_FADING_CHANCE`): browning into `LEAF_LITTER` (`FALLEN_LEAVES_BROWNING_SHARE`, half) or blowing
+  away; placed ones are persistent and stay green. They drop themselves to anything, a bare hand too (loot table).
+  Leaf litter and fallen leaves (`#players-versus:breaks_without_cooldown`, `LeafLitter.BREAKS_WITHOUT_COOLDOWN`)
+  break without the client's missed-swing delay or the attack's recharge (`attacking/MinecraftClientMixin`), so the
+  attack key held sweeps a pile a tick. A felled crown's bursting leaves shed by `FELLED_LITTER_CHANCE` (0.08, a
+  third of a decaying leaf's `DECAY_LITTER_CHANCE`; `LeafLitter.felled`). The item's `COMPOSTABLE` is built directly (`minecraft:compostable/low`): item
   components bind late, so copying leaf litter's at class load reads nothing.
   Speed is measured as vanilla's sweet berry bush does: `getKnownMovement()` for a client-authoritative player (zeroed
   by `handleClientTickEnd` on a client tick without movement), `position() - oldPosition()` for anything else. Never

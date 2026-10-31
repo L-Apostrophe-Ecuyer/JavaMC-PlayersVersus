@@ -58,16 +58,20 @@ new-moon darkness is covered in `environment-systems.md`, not re-verified here �
 assuming full overlap).
 
 ### `MobSpawning` (spawn helpers + custom spawn table)
-- `isMidnight`/`isNewMoon`/`isMidnightDuringNewMoon`: `world.getLunarTime() % 24000` between 18000
-  and 20000 = midnight; `getMoonPhase() == 7` = new moon (vanilla's darkest phase index).
+- `isMidnight`/`isNewMoon`/`isMidnightDuringNewMoon`: the overworld clock's day time `% 24000` between 18000
+  and 20000 = midnight; moon phase `NEW_MOON_PHASE` (4, vanilla's `MoonPhase` new moon; 0 is full) = new moon. It
+  was 7 (waxing gibbous) before the feedback batch of 2026-10; creepers' and pale zombies' new-moon rules use it.
 - `addCustomSpawns()`: Deeper Creeper in Deep Caves/Regular Cave biomes (weight 100, group 1-1);
   Wither Skeleton (60) and Zombified Piglin (3, group 1-4) also added to Deep Caves; Breeze added to
   Frozen Peaks (100); vanilla's Frostbite wherever vanilla spawns snow foxes (140, group 2-4; it took
   over from the mod's Frosted Zombie in the 26.4 port); the Ice Cube in vanilla's Ice Caves (100,
   group 1-2); extra
-  desert fauna (cave spider, husk, camel, cat); Phantom spawn weight raised overworld-wide (80,
-  group 1-2 — vanilla Phantoms normally only spawn via the sleep-deprivation mechanic, this is an
-  **additional**, ordinary biome-based spawn on top of that); Blaze added to Nether Wastes (15).
+  desert fauna (cave spider, husk, camel, cat); Phantoms as an ordinary overworld monster (80, group
+  1-2) everywhere but the mushroom fields and mushroom caves, at the new moon's midnight only
+  (`PhantomMixin.checkSpawnRules`); vanilla's insomnia spawner does nothing (`PhantomSpawnerMixin`);
+  Blaze added to Nether Wastes (15). Mushroom creepers and spiders: `SpawnPlacements` with
+  `Monster::checkMonsterSpawnRules`; they spawn by the mushroom caves' biome file (only they, at a spawn
+  cost, charge 0.8).
   A commented-out Wither Skeleton overworld-wide line and a commented-out Pale Zombie
   BiomeModifications call remain in source — both custom undead mobs currently spawn **only** via
   their `SpawnRestriction` predicate (below), not via `BiomeModifications.addSpawn`; if you want
@@ -92,6 +96,14 @@ assuming full overlap).
   exact "only moves unobserved" state machine). `CreeperMixin` (on the *regular* `CreeperEntity`)
   converts a badly-Wither-damaged (< 8 HP, hit by Wither damage type) regular creeper **into** a
   Deeper Creeper — an in-fiction mutation path, not just a separate spawn pool.
+- **Mushroom creeper and mushroom spider** (`MushroomCreeperEntity`, `MushroomSpiderEntity`; renderers and spawn
+  eggs; textures from `tools/mushroom-mobs.py`) — of the mushroom caves. They ignore players (no player target
+  goal) and hunt the plain kind (`EntityTypes.CREEPER`/`SPIDER` exactly); `HurtByTargetGoal` makes them fight back.
+  The creeper's swelling ends in a spore puff (`CreeperMixin` at `explodeCreeper`'s head, server side, when
+  `puffsInsteadOfExploding`: not lit, not after a player): no damage, every plain creeper within 3 blocks
+  `convertTo` a mushroom creeper, swell reset, 100-tick cooldown on its swell goal. After a player who hurt it, or
+  lit, it explodes as vanilla. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
+  `MushroomMobsGameTest`, assets `MushroomMobsTest`.
 - **Warden (`WardenMixin`)** — extensively rebalanced, all deliberate per inline doc-comments in the
   source itself (read them for full designer intent): anger toward a target **decays** over time if
   they're sneaking or far away (README-adjacent: rewards "run and hide" play over "just outrun it");
