@@ -190,10 +190,13 @@ public abstract class RecipeBookPageMixin implements RecipeBookPopups {
         ItemRecipes cell = overWindow ? window.itemAt(mouseX, mouseY) : null;
         RecipeCollection hovered = cell != null ? cell : button != null ? button.getCollection() : null;
 
-        // Collections: their popup of icons, until it's kept
+        // Collections: their popup of icons, until it's kept. The recipe shapes of one of its icons count as part of it.
         if (!window.isPinned()) {
             FamilyRecipes family = hovered instanceof FamilyRecipes collection ? collection : null;
-            switch (this.playersVersus$familyHover.update(family, window.isVisible(), overWindow || window.shows(hovered), now)) {
+            FamilyRecipes shown = window.family();
+            boolean overItsGroupPopup = shown != null && this.overlay.isVisible() && this.playersVersus$popupContains(mouseX, mouseY)
+                    && shown.items().contains(this.overlay.getRecipeCollection());
+            switch (this.playersVersus$familyHover.update(family, window.isVisible(), overWindow || overItsGroupPopup || window.shows(hovered), now)) {
                 case OPEN -> window.peek(family, button.getX(), button.getY() + button.getHeight());
                 case CLOSE -> window.close();
                 case NONE -> {}

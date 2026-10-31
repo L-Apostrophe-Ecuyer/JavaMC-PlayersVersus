@@ -178,7 +178,7 @@ public final class FamilyWindow {
 
     /** Moves it there, kept on the screen. */
     private void moveTo(int x, int y) {
-        Screen screen = Minecraft.getInstance().screen;
+        Screen screen = Minecraft.getInstance().gui.screen();
         int width = screen == null ? Integer.MAX_VALUE : screen.width, height = screen == null ? Integer.MAX_VALUE : screen.height;
         int clampedX = Math.max(0, Math.min(x, width - this.layout.width()));
         int clampedY = Math.max(0, Math.min(y, height - this.layout.height()));
