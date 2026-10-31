@@ -14,6 +14,8 @@ import net.minecraft.world.level.biome.Climate;
 public class CustomOverworldBiomes {
 
     private static final Climate.Parameter defaultParameter = Climate.Parameter.span(-1.0F, 1.0F);
+    /** Every value the climate's noise can take, beyond the usual -1 to 1. */
+    private static final Climate.Parameter anyValue = Climate.Parameter.span(-2.0F, 2.0F);
     public static final ResourceKey<Biome> BIRCH_TAIGA_FOREST = keyOf("birch_taiga_forest");
     /** The birch taiga with dappled trees (26.3's poplars) where it has birch. */
     public static final ResourceKey<Biome> DAPPLED_TAIGA = keyOf("dappled_taiga");
@@ -66,9 +68,10 @@ public class CustomOverworldBiomes {
 
             new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, Climate.Parameter.span(-0.7f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter),
-            // Under the mushroom islands, all the way down: their continentalness (vanilla's mushroom fields'), which no other
-            // cave entry reaches, so no other cave comes near
-            new PlacedBiome(MUSHROOM_CAVES, PlacedBiomeType.ALL_DEPTHS, false, defaultParameter, defaultParameter, Climate.Parameter.span(-1.2f, -1.05f), defaultParameter, defaultParameter)
+            // Under the mushroom islands, all the way down: their continentalness (vanilla's mushroom fields' and below), which
+            // no other cave entry reaches (PvBiomeLayout keeps them off it), whatever the rest of the climate, past the usual
+            // -1 to 1 too (vanilla's ice caves reach a weirdness of 1.1), so no other cave comes near
+            new PlacedBiome(MUSHROOM_CAVES, PlacedBiomeType.ALL_DEPTHS, false, anyValue, anyValue, Climate.Parameter.span(-2.0f, -1.05f), anyValue, anyValue)
     };
 
 
