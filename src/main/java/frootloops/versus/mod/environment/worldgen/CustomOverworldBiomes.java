@@ -48,6 +48,9 @@ public class CustomOverworldBiomes {
 
     public static PlacedBiome[] landBiomesToPlaceInOverorld = new PlacedBiome[]{
             // Add here new biomes to spawn on the surface
+            // The mushroom fields over their caves, whatever the rest of the climate, as the caves below them (vanilla's
+            // entry stops at the usual -1 to 1, where the caves' would take the surface)
+            new PlacedBiome(Biomes.MUSHROOM_FIELDS, PlacedBiomeType.SURFACE, false, anyValue, anyValue, Climate.Parameter.span(-2.0f, -1.05f), anyValue, anyValue)
     };
 
     public static PlacedBiome[] caveBiomesToPlaceInOverorld = new PlacedBiome[]{
