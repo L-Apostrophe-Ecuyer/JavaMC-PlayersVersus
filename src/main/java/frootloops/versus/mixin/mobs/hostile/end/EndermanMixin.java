@@ -99,17 +99,18 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
             Vec3 directionVect = new Vec3(this.getX() - player.getX(), this.getY(0.6) - player.getEyeY(), this.getZ() - player.getZ());
             double distance = directionVect.length();
             double dotProduct = (playerRotationVect).dot(directionVect.scale(1.0/distance));
-            double dotProductThreshold = distance < 10.0 ? 0.95 : 1.0 - 0.05 / (distance - 9.0);
+            double dotProductThreshold = distance < 10.0 ? 0.95 : 1.0 - 0.05 / (distance/2 - 4.5);
             if (dotProduct > dotProductThreshold) {
-                if (squaredDistance > 256.0 && player.hasLineOfSight(this)) {
+                boolean hasLineOfSight = player.hasLineOfSight(this);
+                if(hasLineOfSight & angerTime == 0) this.lookAt(player, 200f, 200f);
+                if (squaredDistance > 256.0 && hasLineOfSight) {
                     angerTime = 0;
-                    Vec3 target = this.position().add(directionVect.scale(0.5));
+                    Vec3 target = this.position().add(directionVect.scale(-0.65));
                     teleport(target.x + (this.random.nextDouble() - 0.5) * 4.0, target.y + (double) this.random.nextInt(16) - 8.0, target.z + (this.random.nextDouble() - 0.5) * 4.0);
-                    this.lookAt(player, 100f, 100f);
                     this.playAmbientSound();
                     return false;
                 }
-                else if(!player.hasLineOfSight(this)) {
+                else if(!hasLineOfSight) {
                     angerTime = Math.max(0, angerTime - 8);
                 }
                 else {
