@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
@@ -111,6 +112,7 @@ public final class PvBiomeLayout {
 
         // The mushroom islands' caves are theirs alone: no other cave reaches their continentalness (vanilla's ice caves do)
         underground.replaceAll(PvBiomeLayout::offTheIslands);
+        underground.removeIf(Objects::isNull);
 
         List<Entry> entries = new ArrayList<>(surface);
         for (PlacedBiome land : CustomOverworldBiomes.landBiomesToPlaceInOverorld) {
@@ -123,7 +125,8 @@ public final class PvBiomeLayout {
             if (cave.type() == PlacedBiomeType.SURFACE) continue;
             Entry entry = new Entry(Climate.parameters(cave.temperature(), cave.humidity(), cave.continentalness(),
                     cave.erosion(), caveDepth(cave.type()), cave.weirdness(), caveOffset(cave)), cave.biome(), "cave");
-            entries.add(cave.biome() == CustomOverworldBiomes.MUSHROOM_CAVES ? entry : offTheIslands(entry));
+            if (cave.biome() != CustomOverworldBiomes.MUSHROOM_CAVES) entry = offTheIslands(entry);
+            if (entry != null) entries.add(entry);
         }
         return entries;
     }
@@ -207,13 +210,16 @@ public final class PvBiomeLayout {
 
     /**
      * A cave entry kept off the mushroom islands' continentalness, so that under them the mushroom caves are nearest
-     * rather than tied: an entry reaching into it starts where it ends.
+     * rather than tied (the search tree keeps its last answer on a tie): an entry reaching into it starts just past its
+     * end, one wholly inside it is dropped (null).
      */
+    @Nullable
     private static Entry offTheIslands(Entry entry) {
         ParameterPoint p = entry.parameters();
         Parameter continentalness = p.continentalness();
-        if (continentalness.min() >= ISLANDS_END || continentalness.max() <= ISLANDS_END) return entry;
-        return new Entry(new ParameterPoint(p.temperature(), p.humidity(), new Parameter(ISLANDS_END, continentalness.max()),
+        if (continentalness.min() > ISLANDS_END) return entry;
+        if (continentalness.max() <= ISLANDS_END) return null;
+        return new Entry(new ParameterPoint(p.temperature(), p.humidity(), new Parameter(ISLANDS_END + 1, continentalness.max()),
                 p.erosion(), p.depth(), p.weirdness(), p.offset()), entry.biome(), entry.rule());
     }
 

@@ -359,7 +359,8 @@ class PvBiomeLayoutTest {
      */
     @Test
     void mushroomCavesLieUnderTheMushroomFields() {
-        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        List<PvBiomeLayout.Entry> built = PvBiomeLayout.build();
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(built));
         Random random = new Random(20261027L);
         for (int i = 0; i < 4_000; i++) {
             float temperature = uniform(random), humidity = uniform(random), erosion = uniform(random), weirdness = uniform(random);
@@ -367,13 +368,21 @@ class PvBiomeLayoutTest {
             // the coldest climates far from every cave entry)
             float island = -1.19F + 0.13F * random.nextFloat(), inland = -0.5F + 1.5F * random.nextFloat();
             float depth = 0.12F + 0.86F * random.nextFloat();
-            assertEquals(CustomOverworldBiomes.MUSHROOM_CAVES, layout.findValue(Climate.target(temperature, humidity, island, erosion, depth, weirdness)),
-                    "under the mushroom fields at depth " + depth);
+            Climate.TargetPoint under = Climate.target(temperature, humidity, island, erosion, depth, weirdness);
+            assertEquals(CustomOverworldBiomes.MUSHROOM_CAVES, layout.findValue(under),
+                    () -> "under the mushroom fields at " + under + ", nearest " + nearestEntries(built, under));
             assertEquals(Biomes.MUSHROOM_FIELDS, layout.findValue(Climate.target(temperature, humidity, island, erosion, 0.0F, weirdness)),
                     "on the mushroom fields");
             assertTrue(layout.findValue(Climate.target(temperature, humidity, inland, erosion, depth, weirdness)) != CustomOverworldBiomes.MUSHROOM_CAVES,
                     "mushroom caves away from the islands, at continentalness " + inland);
         }
+    }
+
+    /** The entries nearest to the point, with their rules and parameters, for a failure's message. */
+    private static List<String> nearestEntries(List<PvBiomeLayout.Entry> layout, Climate.TargetPoint point) {
+        long best = layout.stream().mapToLong(e -> squaredDistance(e.parameters(), point)).min().orElse(0L);
+        return layout.stream().filter(e -> squaredDistance(e.parameters(), point) == best)
+                .map(e -> e.biome().identifier().getPath() + " (" + e.rule() + ") " + e.parameters()).toList();
     }
 
     /** Every biome whose entry is nearest to the point, by the same squared distance the search tree minimizes. */
