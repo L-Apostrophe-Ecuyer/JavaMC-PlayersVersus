@@ -35,11 +35,14 @@ Asked for on 2026-10-31, after the feedback batch. Supersedes the recipe book's 
   collections it came from), then gathered by `RecipeFamilies` into `FamilyRecipes` (a `RecipeCollection` over its
   items' recipes, keeping the items), when two or more share a family. Sorted craftable first, then by the inventory
   sort, as before.
-- `RecipeBookPageMixin`: clicks and hover as above; the group popup's hover/pin state in `RecipeGroupHover` (with a
-  pin: while pinned, an open popup stays whatever the mouse does).
+- `RecipeBookPageMixin`: clicks and hover as above; the group popup's and the collection popup's hover/pin state in
+  `RecipeGroupHover` (with a pin: while pinned, an open popup stays whatever the mouse does). Over a window icon's
+  recipe shapes counts as over the window. The page refreshes the open group popup and window after the book does.
+- Search: splitting by item happens after vanilla's search, which kept whole collections, so
+  the split items are matched against the search again (name or id).
 - `FamilyWindow` (client): the collection popup and window, drawn at the end of the book in a stratum of its own (the
-  group popup is drawn above it when open); input at the head of the book's `mouseClicked`, `keyPressed` (Esc); its
-  drag follows the mouse while the left button is held. `RecipeWindowLayout` (common, pure, tested): cells, title bar,
+  group popup is drawn above it when open); input at the head of the book's `mouseClicked`, `mouseDragged` (a press on
+  the title bar starts a drag, the next press ends it) and `keyPressed` (Esc). `RecipeWindowLayout` (common, pure, tested): cells, title bar,
   close box and size. A click on the window never reaches the slots or drops the carried item
   (`hasClickedOutside`, `isHovering`).
 - Removed: `RecipePins`, `RecipePinStore`, the pin sprite, `DO_RECIPE_BOOK_PINS`, `DO_FAMILY_RECIPE_GROUPS`.

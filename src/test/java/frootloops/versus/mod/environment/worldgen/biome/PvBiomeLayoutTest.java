@@ -158,7 +158,8 @@ class PvBiomeLayoutTest {
         int surfaceEntries = 0;
         double vanillaVolume = 0, layoutVolume = 0;
         for (PvBiomeLayout.Entry entry : layout) {
-            if (PvBiomeLayout.isPoint(entry.parameters().depth(), 0.0F)) {
+            // The pieces of vanilla's slices; the mod's own surface entries (the wider mushroom fields) lie over them
+            if (PvBiomeLayout.isPoint(entry.parameters().depth(), 0.0F) && !entry.rule().equals("added-surface")) {
                 surfaceEntries++;
                 layoutVolume += volume(Box.of(entry.parameters()));
             }
