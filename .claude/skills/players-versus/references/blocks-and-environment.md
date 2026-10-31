@@ -305,6 +305,18 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   broken hive's bees out from `Occupant.LIST_CODEC`). `FelledTreeDamageMixin` clamps a felled block's damage to
   players and owned animals to leave half a heart. Tests: `FellingGameTest`, `TreeGrowthGameTest`, `ToppleTest` (JUnit).
 
+## Staged mushrooms (`MushroomGrowth`, `StagedMushrooms`, `StagedMushroomBlock`, `MushroomBlockMixin`; spec `docs/superpowers/specs/2026-10-31-staged-mushrooms-and-conversion-design.md`)
+- Small mushrooms grow by stages: vanilla's brown/red mushroom is 1, `players-versus:{brown,red}_mushrooms`
+  (property `mushrooms`, 2-3; 1 looks like vanilla's and isn't used) 2 and 3, light 2 and 4. `pale_shroom` 1-3, below
+  y 0 only. `MushroomGrowth.next` (pure, `MushroomGrowthTest`) decides GROW/SHRINK/SPREAD/TURN_PALE/NONE from
+  `Conditions` (dark: raw light <= `VersusSettings.Mushrooms.MAX_GROWING_LIGHT` or on mycelium; ground: tag
+  `players-versus:mushrooms_grow_on`; a neighbour of its kind in the 26 round it, one grown for 2 -> 3; below y 0).
+  `StagedMushrooms` gathers them and acts (`GROW_CHANCE` for all but shrinking; spreading stops at `SPREAD_CAP` of the
+  kind within 4 blocks). `MushroomBlockMixin` replaces vanilla mushrooms' random tick (`DO_STAGED_MUSHROOMS`).
+- Brown/red clusters drop that many vanilla mushrooms and `asItem()` is vanilla's mushroom. Pale shrooms' `entityInside`
+  doses Conversion (`ConversionExposure`, see `brewing-and-potions.md`). Assets: `tools/staged-mushrooms.py`.
+  Game tests: `StagedMushroomsGameTest`.
+
 ## Other blocks not read this pass
 `LadderBlockItem`/`LadderMixin` (README: implies ladder placement changes — replaces vanilla Ladder
 per the item-replacement pattern), `ScaffoldingItemMixin`, `CropMixin`/`SugarCaneMixin`/`ShortPlantMixin`

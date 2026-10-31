@@ -67,7 +67,7 @@ public final class Shroomify {
 
     /** Whether the entity never takes Conversion. */
     public static boolean immune(LivingEntity entity) {
-        return entity.getType().is(IMMUNE);
+        return entity.is(IMMUNE);
     }
 
     /** The entity's white hearts. */
@@ -159,7 +159,7 @@ public final class Shroomify {
         EntityType<?> type = entity.getType();
         if (type == EntityTypes.PIGLIN || type == EntityTypes.PIGLIN_BRUTE) return EntityTypes.ZOMBIFIED_PIGLIN;
         if (type == EntityTypes.HOGLIN) return EntityTypes.ZOGLIN;
-        if (type.is(INTO_PALE_ZOMBIES)) return ModEntities.PALE_ZOMBIE;
+        if (entity.is(INTO_PALE_ZOMBIES)) return ModEntities.PALE_ZOMBIE;
         return null;
     }
 

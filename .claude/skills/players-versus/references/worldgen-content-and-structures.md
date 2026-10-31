@@ -34,8 +34,12 @@ Two groups:
   direction), mycelium patches with brown mushrooms, huge brown mushrooms on them, brown mushroom clusters. Only
   the mushroom creeper and spider spawn there, at a spawn cost; no patrols, no phantoms.
 
-## Mushrooms (feedback batch, 2026-10)
-Brown only, rare on the surface, mostly in caves; none red in the wild:
+## Mushrooms (feedback batch, 2026-10; staged mushrooms, 2026-10-31)
+Since the staged mushrooms batch (spec `docs/superpowers/specs/2026-10-31-staged-mushrooms-and-conversion-design.md`):
+surface patches only on the mushroom fields (`brown_mushroom_normal` is count 0 too; `mushroom_fields`' biome file
+is overridden: its own `players-versus:mushroom_fields_{brown,red}_mushrooms`, no sugar cane, no firefly bushes),
+red mushrooms only there. Small mushrooms grow by stages and below y 0 into pale shrooms (`blocks-and-environment.md`).
+Before it, brown only, rare on the surface, mostly in caves; none red in the wild:
 - `minecraft:patch_grass_forest` is grass only (the mod's override had made it a sixth mushrooms); the mod's
   `red_mushroom_taiga` grass patch lost its red mushroom.
 - Overridden placed features: `brown_mushroom_{taiga,dappled_forest}` 1 chunk in 32, `_old_growth` 16, `_swamp` 6,
