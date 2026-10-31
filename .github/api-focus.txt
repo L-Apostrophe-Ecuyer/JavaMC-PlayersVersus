@@ -1,2 +1,36 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
+sig net.minecraft.world.level.block.MushroomBlock
+calls net.minecraft.world.level.block.MushroomBlock
+sig net.minecraft.world.level.block.VegetationBlock
+sig net.minecraft.world.effect.MobEffect
+member net.minecraft.world.entity.LivingEntity addEffect
+member net.minecraft.world.entity.LivingEntity Frozen
+member net.minecraft.world.entity.LivingEntity heal
+calls net.minecraft.world.food.FoodData
+member net.minecraft.client.gui.Hud Heart
+member net.minecraft.client.gui.Hud heart
+sig net.minecraft.client.gui.Hud$HeartType
+member net.minecraft.client.renderer.entity.LivingEntityRenderer isShaking
+member net.minecraft.client.renderer.entity.state.LivingEntityRenderState Frozen
+find ZombieVillager
+findsig convertVillagerToZombieVillager
+member net.minecraft.world.damagesource.DamageSources source
+member net.minecraft.tags.EntityTypeTags UNDEAD
+member net.minecraft.world.entity.Mob setDropChance
+member net.minecraft.world.entity.LivingEntity getItemBySlot
+member net.minecraft.world.level.block.state.BlockBehaviour$Properties lightLevel
+member net.minecraft.world.level.block.Block simpleCodec
+data damage_type/freeze.json
+data loot_table/blocks/brown_mushroom.json
+assets textures/gui/sprites/hud/heart
+asset textures/gui/sprites/hud/heart/full.png
+asset textures/gui/sprites/hud/heart/half.png
+asset textures/gui/sprites/hud/heart/hardcore_full.png
+asset textures/gui/sprites/hud/heart/hardcore_half.png
+asset textures/block/brown_mushroom.png
+asset textures/block/red_mushroom.png
+data worldgen/feature/mushroom_island_vegetation.json
+data worldgen/feature/red_mushroom.json
+datagrep worldgen/biome huge_red_mushroom|red_mushroom|mushroom_island_vegetation
+datagrep worldgen/feature huge_red_mushroom|minecraft:red_mushroom
