@@ -156,6 +156,12 @@ public abstract class VersusSettings {
         // times as fast as a stare at KILL_RANGE blocks and nearer (and a stare adds to it): you die of it as of a stare
         public static double NEAR_RANGE = 10.0, KILL_RANGE = 3.0;
         public static float PROXIMITY_RATE = 2.0F;
+        // Hit, it stops haunting and fights as an enderman does: it teleports up to a target farther than
+        // FIGHT_TELEPORT_RANGE blocks off after FIGHT_TELEPORT_TICKS, and calms (and haunts again) after CALM_TICKS with
+        // no target alive. The static from looking at it still builds; being near it doesn't add to it
+        public static double FIGHT_TELEPORT_RANGE = 16.0;
+        public static int FIGHT_TELEPORT_TICKS = 30;
+        public static int CALM_TICKS = 200;
         // The view of whoever it hunts is pulled towards it now and then (client): within PULL_RANGE blocks, a pull every
         // PULL_GAP_MIN to PULL_GAP_MAX ticks (sooner the nearer), lasting PULL_MIN to PULL_MAX ticks, turning the view
         // PULL_DEGREES degrees a tick (more the nearer)

@@ -9,7 +9,7 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    watchlings and phantoms are always see-through, a faint shimmer at the edge of sight that fills in smoothly as the
    middle of the view turns onto them, whole when stared at; their glowing eyes fade with them, and what an enderman
    carries shows once it's mostly seen. Endermen hate a stare; creakings, pale spiders and pale
-   creepers move only unwatched; the watchling never moves, and kills those who watch it. Endermites and silverfish are
+   creepers move only unwatched; the watchling, left alone, never moves, and kills those who watch it (it fights if hit). Endermites and silverfish are
    the warp's bugs: silverfish come out of a hit creaking, and out of whoever looked at a watchling too long. A carved
    pumpkin over the eyes hides you from all of them that stare.
 2. **A blighted wound makes pale; the Wither is the Wither.** The Wither is as it was (the wither skeleton's and the
@@ -46,7 +46,7 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    into anything, and stays where it turned. **Golden apples cure**: fed one, a pale villager (or a zombie villager)
    starts its cure, 1 to 3 minutes, and more apples hasten it; eaten, a golden apple cures Blight.
 6. **Undead blight their own kind.** A pale zombie's, a pale villager's, a player zombie's and a creaking's hits blight anything living, every hit (a
-   watchling's would, but it never strikes). Other zombies' hits convert only people (players, villagers, wandering traders, illagers, witches; zombified
+   watchling's do too, when it fights). Other zombies' hits convert only people (players, villagers, wandering traders, illagers, witches; zombified
    piglins: piglins), 1 in 25, and then give nothing else.
 7. **The red mushroom takes flesh, never bone, and makes its hosts red and calm.** The mushroom creeper and spider are
    red and white with red mushrooms growing out of them, as the mooshroom's; they leave players alone, the creeper's
@@ -101,12 +101,12 @@ unseen; endermen, endermites and watchlings see-through by how much the crosshai
 An enderman the paleness took, with a creaking's yellow eyes.
 - **Spawning:** rare (weight 3-4, alone), in the dark where paleness holds: the pale garden, the deep caves, the pale
   grotto, regular caves below y 0.
-- **Haunting (sixth round):** it never walks and never strikes; it stands and watches whoever looked at it last. Looked
+- **Haunting (sixth round):** left alone it never walks and never strikes; it stands and watches whoever looked at it last. Looked
   at and then left, half a second to a second later it's gone and back *nearer*: to 55 to 80% of the distance it was
   at, never nearer than 3 blocks, where its watcher isn't looking (more than 75° to either side of the way they face,
   so mostly behind). Seen once, it hunts: unlooked at it still creeps nearer, in the same way, every 20 to 40 seconds,
   and it only gives up and vanishes (in a wisp of portal particles) after 90 seconds to 3 minutes unlooked at.
-  Hit, it slips behind whoever hit it.
+  Hit, it stops haunting and fights (eighth round, below).
 - **Too near:** within 10 blocks the static builds without a stare, faster the nearer, and at 3 blocks and nearer it
   builds twice as fast as a stare does (a stare adds to it): you die of it as of a stare. Backing away clears it.
 - **The pull:** while one hunts within 24 blocks, now and then (every 5 to 16 seconds, sooner the nearer) for a moment
@@ -119,7 +119,7 @@ An enderman the paleness took, with a creaking's yellow eyes.
   carved pumpkin on. The static is full after 6 seconds of
   looking and clears slowly: 20 seconds from full to nothing. Full, the player dies ("looked at the Watchling too long") and 4 to 7
   silverfish crawl out where they stood. A totem saves them. Creative and spectating players are spared.
-- It takes water damage and dodges arrows as an enderman, and drops 0-1 ender pearls.
+- **Hit, it fights (eighth round):** see below. It takes water damage and dodges arrows as an enderman, and drops 0-1 ender pearls.
 
 ## How
 
@@ -144,7 +144,7 @@ An enderman the paleness took, with a creaking's yellow eyes.
 - `MushroomCreeperEntity#puff` doses nothing. `RedMushroomsLayer` (client) draws the red mushroom's block model on a
   model part, resolved each frame by `MushroomCreeperRenderer` and `MushroomSpiderRenderer`; their skins come from
   `tools/mushroom-mobs.py`, now from the red mushroom block.
-- `WatchlingEntity` (extends `Enderman`, no goals; its haunting in `customServerAiStep`), `Gaze` (pure, `GazeTest`;
+- `WatchlingEntity` (extends `Enderman`; haunting in `customServerAiStep`, enderman-style goals that only run while it fights), `Gaze` (pure, `GazeTest`;
   `VersusSettings.Gaze`), client `GazeTranslucency` and `LivingEntityRendererGazeMixin` (a see-through render type and
   a faded tint for the warped, layers once mostly seen, shadows faded), `WatchlingStare` (server: who looks, the static, the death;
   `WatchedPayload`), client `WatchlingRenderer` (eyes layer swapped, as the pale spider's) and `WatchlingStatic` (a HUD
@@ -275,3 +275,25 @@ dying of the Wither be how one is converted.
   Blight, so a Healing potion drunk in time leaves the Wither to wear off but nothing to convert them; a totem saves a
   player and clears both.
 
+## It fights when it's hit (eighth round, 2026-11-01)
+
+Asked for: in Minecraft Dungeons the watchling is a melee mob with big arms; when attacked it should stop haunting and
+attack like an enderman, with the added difficulty that looking at it causes static.
+
+- **Enraged:** a watchling that is hit (by a player or any mob that isn't a watchling) or shot at (it still dodges the
+  arrow) stops haunting and fights whoever did it (`DATA_ENRAGED`, synced; `isEnraged`; `isHunting` is false while it
+  is). The haunting's pull, creeping and vanishing are off while it fights.
+- **Fighting as an enderman does:** an enderman's attributes (40 health, 7 damage, 0.3 speed, knockback as any enderman),
+  melee, a target that stays out of reach (over `FIGHT_TELEPORT_RANGE`, 16 blocks, for `FIGHT_TELEPORT_TICKS`, 1.5 s)
+  is teleported up to, and it can be pushed and strolls. Its hits blight (rule 6).
+- **Calming:** with no target alive for `CALM_TICKS` (10 s) it calms and haunts again, whoever it fought: seen, it
+  stalks and vanishes in the usual time.
+- **The static:** looking at a fighting watchling still builds it (a stare, 1; `WatchlingStare.rate(fighting, looking,
+  distance)`), but being near one doesn't: nearness was the haunting's, and a fight is up close. Not looking, the static
+  clears as ever, so one can fight it with the eyes averted, at some risk.
+- **Model:** big arms, as in Dungeons: 4 across and 30 long, flush to the body (the enderman's are 2 across). The texture
+  is 64 x 64 now, the arm's six faces from texel (0, 30), drawn by `tools/watchling-head.py` from the enderman's arm
+  doubled in width. The head stays closed (no "creepy" open mouth: its jaw layer is left out, and lifting the head would
+  float it). Client only: unseen in a running game.
+- **Tests:** `WatchlingStareTest` (the fighting rate), game tests `WatchlingGameTest` (left alone it doesn't fight; hit by
+  a player or a mob it fights them instead of haunting; with no one left it calms and haunts again).

@@ -111,13 +111,16 @@ assuming full overlap).
 - **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
   `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman with a creaking's yellow
   eyes (three of them, on a head 12 tall: `WatchlingModel`, built from `EndermanModel.createBodyLayer().apply(...)`,
-  `tools/watchling-head.py`) that haunts like Slender. No goals, speed 0, knockback-proof, not pushable: it never moves or
-  strikes. `customServerAiStep`: watched (`WatchlingStare.watcher`) it notes its watcher and `DATA_HUNTING` (synced,
+  `tools/watchling-head.py`, big arms from a 64x64 texture) that haunts like Slender. Left alone it never moves or
+  strikes (its enderman-style goals are gated on `isEnraged()`). `customServerAiStep`: watched (`WatchlingStare.watcher`) it notes its watcher and `DATA_HUNTING` (synced,
   `isHunting`); looked away from, it teleports after `TELEPORT_DELAY`-2x ticks to nearer
   (`WatchlingStare.approach`: `APPROACH_MIN`-`MAX` of the distance, not nearer than `CLOSEST`) at a bearing more than
   `ASIDE_DEGREES` off the watcher's facing; unlooked at it creeps nearer the same way every `STALK_MIN`-`MAX` ticks;
-  unlooked at for `VANISH_MIN`-`MAX` ticks (90 s to 3 min) after being seen it discards itself; hit by a player it
-  teleports behind them. `WatchlingStare` (server, each level tick): the pressure on a player is the fastest rate among
+  unlooked at for `VANISH_MIN`-`MAX` ticks (90 s to 3 min) after being seen it discards itself. Hit by any non-watchling
+  living attacker (or shot at) `hurtServer` -> `enrage`: `DATA_ENRAGED`, it targets the attacker, melee-fights with an
+  enderman's stats, `fight()` teleports up to a target beyond `FIGHT_TELEPORT_RANGE` and `calm()` returns it to haunting
+  after `CALM_TICKS` with no live target; `isHunting()` is false while enraged (no pull), and `WatchlingStare.rate(
+  fighting, looking, distance)` ignores nearness for a fighting one (a stare still builds static). `WatchlingStare` (server, each level tick): the pressure on a player is the fastest rate among
   the watchlings about them: 1 for looking at one (48 blocks, line of sight, at least half seen by `Gaze`, no
   `#gaze_disguise_equipment` on the head) plus `proximity(distance)` (0 beyond `NEAR_RANGE`, up to `PROXIMITY_RATE` at
   `KILL_RANGE`, looking or not); the static (`WatchedPayload` to the HUD) fills at rate/`STARE_TICKS` and clears over

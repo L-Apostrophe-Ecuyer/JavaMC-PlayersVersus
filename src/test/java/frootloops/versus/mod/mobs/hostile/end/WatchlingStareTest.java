@@ -53,6 +53,21 @@ class WatchlingStareTest {
     }
 
     @Test
+    void aFightingWatchlingBuildsStaticOnlyWhileLookedAt() {
+        double kill = VersusSettings.Watchlings.KILL_RANGE;
+        // Right at its feet, not looking: the haunting's nearness would build static, a fight's doesn't
+        assertTrue(WatchlingStare.rate(false, false, kill) > 0.0F);
+        assertEquals(0.0F, WatchlingStare.rate(true, false, kill));
+        assertEquals(0.0F, WatchlingStare.next(0.0F, WatchlingStare.rate(true, false, kill)));
+        // Looking, it's a stare as ever, at any distance
+        assertEquals(1.0F, WatchlingStare.rate(true, true, kill), 1.0E-6F);
+        assertEquals(1.0F, WatchlingStare.rate(true, true, 40.0), 1.0E-6F);
+        // And one that isn't fighting rates as it always did
+        assertEquals(WatchlingStare.rate(true, 4.0), WatchlingStare.rate(false, true, 4.0), 1.0E-6F);
+        assertEquals(WatchlingStare.rate(false, 4.0), WatchlingStare.rate(false, false, 4.0), 1.0E-6F);
+    }
+
+    @Test
     void tooCloseKillsFasterThanAStare() {
         float stare = 0.0F, close = 0.0F;
         int ticks = 0;

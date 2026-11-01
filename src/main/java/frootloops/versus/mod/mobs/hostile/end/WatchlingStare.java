@@ -27,7 +27,8 @@ import java.util.WeakHashMap;
  * A watchling's gaze. A player looking at one (in plain sight, near the middle of the view, a carved pumpkin not over
  * their eyes) has their screen fill with static; full, they die, and silverfish crawl out where they stood. So does one
  * too near them, looked at or not: within NEAR_RANGE blocks the static builds on its own, faster the nearer, and a stare
- * adds to it. Looking away, or backing off, it clears (slowly). Creative and spectating players don't see it.
+ * adds to it (not from one that fights, which is only looked at). Looking away, or backing off, it clears (slowly).
+ * Creative and spectating players don't see it.
  */
 public final class WatchlingStare {
     public static final ResourceKey<DamageType> WATCHED = ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "watched"));
@@ -75,6 +76,14 @@ public final class WatchlingStare {
         return (looking ? 1.0F : 0.0F) + proximity(distance);
     }
 
+    /**
+     * The same for a watchling that may be fighting: one that fights (it was attacked) puts static on the screen of
+     * whoever looks at it, but being near it adds nothing: nearness was the haunting's, and a fight is up close.
+     */
+    public static float rate(boolean fighting, boolean looking, double distance) {
+        return fighting ? (looking ? 1.0F : 0.0F) : rate(looking, distance);
+    }
+
     /** The static a stare builds up to after a tick: fuller while looking, clearing while not. */
     public static float next(float had, boolean looking) {
         return next(had, looking ? 1.0F : 0.0F);
@@ -105,7 +114,7 @@ public final class WatchlingStare {
         for (WatchlingEntity watchling : level.getEntitiesOfClass(WatchlingEntity.class, player.getBoundingBox().inflate(range))) {
             if (!watchling.isAlive()) continue;
             double distance = player.getEyePosition().distanceTo(watchling.getBoundingBox().getCenter());
-            float rate = rate(looksAt(player, watchling), distance);
+            float rate = rate(watchling.isEnraged(), looksAt(player, watchling), distance);
             if (rate > best) {
                 best = rate;
                 from = watchling;

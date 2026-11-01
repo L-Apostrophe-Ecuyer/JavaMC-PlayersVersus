@@ -13,8 +13,8 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
 /**
- * A watchling: an enderman's body with a taller head (WatchlingModel) bearing three eyes that glow a creaking's yellow
- * and orange rather than purple. It carries nothing and never opens its mouth, so it has no more than the body and eyes.
+ * A watchling: an enderman's body with a taller head and big arms (WatchlingModel), the head bearing three eyes that
+ * glow a creaking's yellow and orange rather than purple. It carries nothing and never opens its mouth, so it has no more than the body and eyes.
  */
 @Environment(EnvType.CLIENT)
 public class WatchlingRenderer extends MobRenderer<WatchlingEntity, EndermanRenderState, WatchlingModel> {
