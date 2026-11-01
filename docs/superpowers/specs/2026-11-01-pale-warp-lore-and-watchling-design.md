@@ -110,7 +110,7 @@ An enderman the paleness took, with a creaking's yellow eyes.
   builds twice as fast as a stare does (a stare adds to it): you die of it as of a stare. Backing away clears it.
 - **The pull:** while one hunts within 24 blocks, now and then (every 5 to 16 seconds, sooner the nearer) for a moment
   the view of the one it hunts turns towards it, as a hand on the mouse, up to 2° a tick (more the nearer); a hand on
-  the mouse can fight it. Not in menus, creative, spectator, nor behind a carved pumpkin.
+  the mouse can fight it. Not while paused, in creative, in spectator, nor behind a carved pumpkin.
 - **Seeing it:** it shows only to a stare (rule 1): fully within 1° of the middle of the view (from its edge), not at
   all 10° aside.
 - **The stare:** a player looking at it fills their screen with grey static, and the world under it breaks into big

@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The pull of a watchling that hunts: now and then, for a moment, the view of whoever it hunts turns towards it, as a
  * hand on the cursor, whether they mean to look or not (and looking is what it wants). Rarer far off, sooner and
- * stronger the nearer; never in a menu, nor with a carved pumpkin over the eyes, nor in creative or spectator. It turns
+ * stronger the nearer; never while paused, nor with a carved pumpkin over the eyes, nor in creative or spectator. It turns
  * the view as the mouse does, so a hand on the mouse can fight it.
  */
 @Environment(EnvType.CLIENT)
@@ -32,7 +32,7 @@ public final class WatchlingPull {
 
     /** How strong a pull is from this far (0 at PULL_RANGE and beyond, 1 at nothing). */
     public static float closeness(double distance) {
-        return (float) Mth.clamp(1.0 - distance / VersusSettings.Watchlings.PULL_RANGE, 0.0, 1.0);
+        return (float) Math.clamp(1.0 - distance / VersusSettings.Watchlings.PULL_RANGE, 0.0, 1.0);
     }
 
     /** The yaw and pitch (degrees) that face a point from an eye. */
@@ -50,7 +50,7 @@ public final class WatchlingPull {
 
     private static void tick(Minecraft minecraft) {
         LocalPlayer player = minecraft.player;
-        if (!VersusSettings.Watchlings.PULL_ENABLED || player == null || minecraft.level == null || minecraft.screen != null
+        if (!VersusSettings.Watchlings.PULL_ENABLED || player == null || minecraft.level == null
                 || minecraft.isPaused() || player.isCreative() || player.isSpectator() || !player.isAlive()
                 || player.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.GAZE_DISGUISE_EQUIPMENT)) {
             pulling = 0;
@@ -85,8 +85,8 @@ public final class WatchlingPull {
     private static void pull(LocalPlayer player, WatchlingEntity hunter, float closeness) {
         float[] want = facing(player.getEyePosition(), hunter.getBoundingBox().getCenter());
         float step = VersusSettings.Watchlings.PULL_DEGREES * (0.5F + closeness);
-        float yaw = Mth.clamp(Mth.wrapDegrees(want[0] - player.getYRot()), -step, step);
-        float pitch = Mth.clamp(want[1] - player.getXRot(), -step, step);
+        float yaw = Math.clamp(Mth.wrapDegrees(want[0] - player.getYRot()), -step, step);
+        float pitch = Math.clamp(want[1] - player.getXRot(), -step, step);
         // Entity#turn is what the mouse calls: it scales by 0.15 itself
         player.turn(yaw / 0.15, pitch / 0.15);
     }
