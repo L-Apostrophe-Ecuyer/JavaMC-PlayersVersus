@@ -294,7 +294,28 @@ attack like an enderman, with the added difficulty that looking at it causes sta
 - **Model:** big arms, as in Dungeons: 4 across and 30 long, flush to the body (the enderman's are 2 across). The texture
   is 64 x 64 now, the arm's six faces from texel (0, 30), drawn by `tools/watchling-head.py` from the enderman's arm
   doubled in width. The head stays closed (no "creepy" open mouth: its jaw layer is left out, and lifting the head would
-  float it). Client only: unseen in a running game.
+  float it; ninth round: it does now, off a jaw of its own). Client only: unseen in a running game.
 - **Tests:** `WatchlingStareTest` (the fighting rate), game tests `WatchlingGameTest` (left alone it doesn't fight; hit by
   a player it fights instead of haunting; hit by a mob it fights that mob; with no one left it calms and haunts again;
   the helper's mock player is creative, which a mob won't keep as a target, so a mob shows whom it fights).
+
+## It moves like one (ninth round, 2026-11-01)
+
+Asked for: lift its head, improve its animations. (And, aside: new moons had stopped being very dark.)
+
+- **Its maw:** fighting, its head lifts 5 off a jaw of its own, 8 x 6 x 8 inside the head as the enderman's jaw layer
+  is (texel (16, 32)): fangs above, small teeth below, dark between, the jaw itself below that and behind; the head's
+  underside is the dark roof of the mouth. It opens over 4 ticks and shuts as fast, eased. Shut, the teeth show
+  through the open bottom rows of the face, as the enderman's mouth does (the stretched head had left a see-through
+  slot there).
+- **Haunting, its head cocks** to one side as it watches (20°, swaying a little), easing in over a second and a half.
+- **Its strike is its own:** both arms sweep forward, the main one all the way and the other most of it, out fast and
+  back slower, the head lunging; the mod's wind-ups (MeleeAnimation) play before it, no longer clamped by the
+  enderman's model (WatchlingModel is a humanoid's now, not an enderman's). Before, its renderer never filled a
+  humanoid's swing, so it never swung at all.
+- **Walking,** its long arms and legs swing less than a humanoid's (40%, legs at most 0.4); fighting, the arms reach
+  forward while not winding up.
+- `WatchlingAnimation` (pure: the numbers, easing, smoothstep, the strike's curve; `WatchlingAnimationTest`),
+  `WatchlingRenderState` (jaw and tilt, eased on the client in `WatchlingEntity#tick`), `WatchlingModel`,
+  `WatchlingRenderer` (fills the humanoid state as the enderman's renderer does). All client only, unseen in a
+  running game.

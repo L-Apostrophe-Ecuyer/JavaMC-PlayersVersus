@@ -3,12 +3,3 @@
 # New-moon darkness: the 26.4 lightmap
 # The watchling's model and animation
 # The watchling renderer: where an ItemModelResolver comes from, and what the humanoid extraction fills
-member net.minecraft.client.renderer.entity.EntityRendererProvider$Context Item|item
-member net.minecraft.client.renderer.entity.LivingEntityRenderer itemModelResolver
-member net.minecraft.client.renderer.entity.EntityRenderer itemModelResolver
-sig net.minecraft.client.renderer.entity.state.ArmedEntityRenderState
-calls net.minecraft.client.renderer.entity.HumanoidMobRenderer extractHumanoidRenderState
-calls net.minecraft.client.renderer.entity.state.ArmedEntityRenderState extract
-calls net.minecraft.client.renderer.entity.LivingEntityRenderer extractRenderState
-member net.minecraft.world.entity.monster.Enderman isCreepy|DATA_CREEPY
-member net.minecraft.client.renderer.state.LightmapRenderState skyFactor

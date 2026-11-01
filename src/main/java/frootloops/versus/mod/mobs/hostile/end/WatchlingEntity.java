@@ -7,6 +7,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -54,6 +55,8 @@ public class WatchlingEntity extends Enderman {
     private int unseenTicks, vanishAfter, teleportIn = -1, stalkIn;
     /** Fighting: ticks without a target alive to fight, and ticks the target has been out of reach. */
     private int lostTicks, farTicks;
+    /** Client: how open its jaw is and how far its head is cocked, now and a tick ago (WatchlingAnimation). */
+    private float jaw, jawO, tilt, tiltO;
 
     public WatchlingEntity(EntityType<? extends Enderman> type, Level level) {
         super(type, level);
@@ -79,6 +82,28 @@ public class WatchlingEntity extends Enderman {
     /** Whether it fights: it was attacked, and has not yet lost or killed whom it fights. */
     public boolean isEnraged() {
         return this.entityData.get(DATA_ENRAGED);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.level().isClientSide()) {
+            // Its maw opens while it fights, and its head cocks while it haunts, easing in and out
+            this.jawO = this.jaw;
+            this.tiltO = this.tilt;
+            this.jaw = WatchlingAnimation.ease(this.jaw, this.isEnraged() ? 1.0F : 0.0F, 1.0F / WatchlingAnimation.JAW_TICKS);
+            this.tilt = WatchlingAnimation.ease(this.tilt, this.isHunting() ? 1.0F : 0.0F, 1.0F / WatchlingAnimation.HEAD_TILT_TICKS);
+        }
+    }
+
+    /** Client: how open its jaw is this frame, 0 to 1. */
+    public float jawOpen(float partialTick) {
+        return Mth.lerp(partialTick, this.jawO, this.jaw);
+    }
+
+    /** Client: how far its head is cocked this frame, 0 to 1. */
+    public float headTilt(float partialTick) {
+        return Mth.lerp(partialTick, this.tiltO, this.tilt);
     }
 
     /** Goals that only count while it fights: it walks, looks and strikes as an enderman does, but only then. */

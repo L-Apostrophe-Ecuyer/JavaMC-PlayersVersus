@@ -118,6 +118,17 @@ nether fog, and the weather/fog renderer referenced above. `mixin/client/players
 lightmap tuning is covered in `combat-and-players.md` only for hunger; the *visual* darkness/night
 mechanics live here instead.
 
+## Darker moonless nights (`mod/environment/LunarDarkness`, client `LightmapMixin`)
+26.x builds the lightmap on the GPU from `LightmapRenderState`, which `LightmapRenderStateExtractor#extract` fills once a
+tick: its `skyFactor` is vanilla's `visual/sky_light_factor` (the `minecraft:day` timeline: 1.0 by day, 0.24 by night).
+`LightmapMixin` injects at `extract`'s TAIL (only when `state.needsUpdate`, and only where the dimension has sky light)
+and takes off `LunarDarkness.skyFactor`'s moon darkening: 1.21.10's formula (`moonHeight * (m/24 + m²/96)`, scaled by
+0.95), with `m` the moon's phase measured smoothly on the overworld clock (-0.1 full to 3.9 new, as the `minecraft:moon`
+timeline turns it) and `moonHeight` 0-0.8, highest at tick 18750 of a day. A new moon's height leaves a sky factor of 0
+(only block light and the `#0a0a0a` ambient), a full moon's about vanilla's. Days are untouched. Tunables:
+`VersusSettings.Moon` (`DARKER_MOONLESS_NIGHTS`, `DARKENING`). Tests: `LunarDarknessTest`. Still unported from 1.21.10's
+lightmap: night-vision tints, weaker night vision, a lower ambient floor and "always some darkness".
+
 ## Minecarts (`mixin/environment/{MinecartMixin,MinecartExperimentalMixin}`, `SparksParticle`)
 Not read this pass. README: "Minecarts can be much faster and throw sparks when making high speed
 turns." `SparksParticle` (client) is the visual; `MinecartExperimentalMixin` likely gates behind a

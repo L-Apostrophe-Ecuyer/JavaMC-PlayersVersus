@@ -111,7 +111,8 @@ assuming full overlap).
 - **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
   `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman with a creaking's yellow
   eyes (three of them, on a head 12 tall: `WatchlingModel`, built from `EndermanModel.createBodyLayer().apply(...)`,
-  `tools/watchling-head.py`, big arms from a 64x64 texture) that haunts like Slender. Left alone it never moves or
+  `tools/watchling-head.py`, big arms and a jaw from a 64x64 texture; `WatchlingModel` is a `HumanoidModel`, animated per
+  `WatchlingAnimation`: maw opening while it fights, head cocked while it haunts, a two-armed strike) that haunts like Slender. Left alone it never moves or
   strikes (its enderman-style goals are gated on `isEnraged()`). `customServerAiStep`: watched (`WatchlingStare.watcher`) it notes its watcher and `DATA_HUNTING` (synced,
   `isHunting`); looked away from, it teleports after `TELEPORT_DELAY`-2x ticks to nearer
   (`WatchlingStare.approach`: `APPROACH_MIN`-`MAX` of the distance, not nearer than `CLOSEST`) at a bearing more than

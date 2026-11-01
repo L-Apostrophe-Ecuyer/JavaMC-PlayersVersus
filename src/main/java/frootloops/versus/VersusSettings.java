@@ -56,6 +56,13 @@ public abstract class VersusSettings {
         public static boolean DO_SMARTER_COPPER_GOLEMS = true;
     }
 
+    public static class Moon {
+        // Nights darken with the moon (client, LunarDarkness): full, a night is as vanilla's; new, the sky gives next to no
+        // light around midnight. DARKENING scales it: 1 is 1.21.10's, which the mod had before 26.x
+        public static boolean DARKER_MOONLESS_NIGHTS = true;
+        public static float DARKENING = 1.0F;
+    }
+
     // Speeds in blocks per tick: walking is about 0.22, sprinting 0.28, a ladder climbs at about 0.12.
     public static class Leaves {
         // Living things other than animals and spiders push through leaves, slowed the deeper they're in, climb them

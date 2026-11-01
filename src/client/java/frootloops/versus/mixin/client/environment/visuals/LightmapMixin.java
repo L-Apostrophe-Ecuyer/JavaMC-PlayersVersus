@@ -1,32 +1,46 @@
 package frootloops.versus.mixin.client.environment.visuals;
 
+import frootloops.versus.VersusSettings;
+import frootloops.versus.mod.environment.LunarDarkness;
+import frootloops.versus.mod.environment.WorldTime;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightmapRenderStateExtractor;
+import net.minecraft.client.renderer.state.LightmapRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import org.joml.Vector3f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-// 26.x computes the lightmap on the GPU from a LightmapRenderState that LightmapRenderStateExtractor fills; its
-// calculateDarknessScale is 1.21.10's (Lightmap/LightTexture), unchanged in signature and role.
-// Not ported yet (no one-to-one place in 26.x): the ordinal-based tweaks to 1.21.10's updateLightTexture locals:
-// night-vision sky tints, weaker night vision, lower ambient light, moon-phase night darkening through getSkyDarken,
-// and "always some darkness". They belong on LightmapRenderState's fields (skyFactor, nightVisionEffectIntensity,
-// ambientColor, brightness) after extract, to be tuned in game.
+// 26.x computes the lightmap on the GPU from a LightmapRenderState that LightmapRenderStateExtractor fills once a tick:
+// the sky's share of it is skyFactor, vanilla's visual/sky_light_factor (the minecraft:day timeline: 1 by day, 0.24 by
+// night). Nights darken with the moon on it (LunarDarkness), as 1.21.10's darkened getSkyDarken.
+// Not ported (no one-to-one place in 26.x): 1.21.10's night-vision sky tints, weaker night vision, lower ambient light
+// and "always some darkness". They belong on LightmapRenderState's other fields (nightVisionEffectIntensity,
+// nightVisionColor, ambientColor, brightness), to be tuned in game.
 @Mixin(LightmapRenderStateExtractor.class)
 public abstract class LightmapMixin {
+
+    @Shadow @Final private Minecraft minecraft;
+
+    /** The moon darkens the night: the sky factor vanilla just took from the timeline, less the moon's darkening. */
+    @Inject(method = "extract", at = @At("TAIL"))
+    private void playersVersus$moonlessNights(LightmapRenderState state, float partialTick, CallbackInfo info) {
+        ClientLevel level = this.minecraft.level;
+        // Only when the lightmap is redone this tick: the state is kept between, and would darken again and again
+        if (!state.needsUpdate || level == null || !VersusSettings.Moon.DARKER_MOONLESS_NIGHTS) return;
+        if (!level.dimensionType().hasSkyLight()) return;
+        state.skyFactor = LunarDarkness.skyFactor(state.skyFactor, WorldTime.dayTime(level));
+    }
 
     @Overwrite
     private float calculateDarknessScale(LivingEntity entity, float factor, float delta) {

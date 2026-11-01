@@ -3,12 +3,16 @@
 
 Usage: watchling-head.py <assets/players-versus dir>   (needs Pillow)
 
-The watchling's model (WatchlingModel) is the enderman's with a head 12 tall instead of 8 (and no jaw layer under it,
-which is never seen). Its head box is therefore 8 x 12 x 8 from texel (0, 0): the top and bottom at rows 0 to 8, the four
-sides at rows 8 to 20. This reshapes tools/watchling-source.png (the enderman layout, tools/watchling.py's output) to it:
+The watchling's model (WatchlingModel) is the enderman's with a head 12 tall instead of 8. Its head box is therefore
+8 x 12 x 8 from texel (0, 0): the top and bottom at rows 0 to 8, the four sides at rows 8 to 20. This reshapes
+tools/watchling-source.png (the enderman layout, tools/watchling.py's output) to it:
 
-- the head's sides (rows 8 to 16) are stretched down to rows 8 to 20 (nearest neighbour), and the old jaw layer below
-  is cleared;
+- the head's sides (rows 8 to 16) are stretched down to rows 8 to 20 (nearest neighbour), and the enderman's jaw layer
+  below them is cleared; the head's bottom face is the dark roof of its mouth;
+- the jaw is a box of its own inside the head, 8 x 6 x 8 from texel (16, 32), as the enderman's jaw layer is: it shows
+  through the open bottom rows of the face (the enderman's mouth), and when the head lifts as the watchling fights, it
+  stays where it was and its mouth gapes: two fangs above, a row of teeth below, dark between, the jaw itself below
+  that and at the back;
 - the arms are 4 x 30 x 4 (the enderman's 2 x 30 x 2) from texel (0, 30): the texture is 64 x 64 now, and the arm's
   faces are the enderman's arm faces drawn twice as wide;
 - the eyes the enderman's face has are painted out (the watchling's are the glowing ones), and the glowing texture gets
@@ -56,6 +60,48 @@ def arms(source: Image.Image, out: Image.Image) -> None:
                 out.putpixel((face * 4 + x, 34 + y), source.getpixel((56 + face * 2 + x // 2, 2 + y)))
 
 
+# The mouth: its dark inside and its teeth
+CAVITY, TOOTH = (10, 8, 12), (214, 206, 170)
+# The jaw box (8 x 6 x 8 from texel (16, 32)): its faces' corners, and its front's rows from the top (a row of the
+# front is 8 texels: c for the cavity, t for a tooth, s for the jaw's own skin)
+JAW_X, JAW_Y, JAW_W, JAW_H, JAW_D = 16, 32, 8, 6, 8
+JAW_FRONT = ["cccccccc", "ctcccctc", "ctcccctc", "tctcctct", "ssssssss", "ssssssss"]
+
+
+def skin(image: Image.Image) -> tuple:
+    """The colour most of the head's front face has: what the jaw is made of."""
+    counts = {}
+    for x in range(FACE_X, FACE_X + 8):
+        for y in range(FACE_Y, FACE_Y + 12):
+            p = image.getpixel((x, y))
+            if p[3]:
+                counts[p] = counts.get(p, 0) + 1
+    return max(counts, key=counts.get)
+
+
+def mouth(image: Image.Image) -> None:
+    """The head's bottom face (the roof of the mouth) and the jaw's six faces."""
+    colour = {"c": CAVITY + (255,), "t": TOOTH + (255,), "s": skin(image)}
+    for x in range(16, 24):
+        for y in range(0, 8):
+            image.putpixel((x, y), colour["c"])
+    top_x, bottom_x, sides_y = JAW_X + JAW_D, JAW_X + JAW_D + JAW_W, JAW_Y + JAW_D
+    for x in range(JAW_W):
+        for y in range(JAW_D):
+            image.putpixel((top_x + x, JAW_Y + y), colour["c"])
+            image.putpixel((bottom_x + x, JAW_Y + y), colour["s"])
+    # The sides from the jaw's right round to its back: dark above and the jaw below, but the back is all jaw
+    right, front, left, back = JAW_X, JAW_X + JAW_D, JAW_X + JAW_D + JAW_W, JAW_X + 2 * JAW_D + JAW_W
+    for y in range(JAW_H):
+        side = colour["s"] if JAW_FRONT[y][0] == "s" else colour["c"]
+        for x in range(JAW_D):
+            image.putpixel((right + x, sides_y + y), side)
+            image.putpixel((left + x, sides_y + y), side)
+        for x in range(JAW_W):
+            image.putpixel((front + x, sides_y + y), colour[JAW_FRONT[y][x]])
+            image.putpixel((back + x, sides_y + y), colour["s"])
+
+
 def dark(face: Image.Image) -> tuple:
     """The darkest colour on the front face: what its eyes are painted out with."""
     pixels = [face.getpixel((x, y)) for x in range(FACE_X, FACE_X + 8) for y in range(FACE_Y, FACE_Y + 12)]
@@ -88,6 +134,7 @@ def main() -> None:
     body = sides(source)
     arms(source, body)
     paint_out_eyes(body)
+    mouth(body)
     body.save(assets / "textures/entity/watchling.png")
     glow().save(assets / "textures/entity/watchling_eyes.png")
 
