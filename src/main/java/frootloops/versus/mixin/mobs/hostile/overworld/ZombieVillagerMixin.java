@@ -8,7 +8,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.trading.MerchantOffers;
-import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.sounds.SoundEvents;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -89,7 +89,7 @@ public abstract class ZombieVillagerMixin extends Zombie {
             if (offers != null) trader.overrideOffers(offers.copy());
             trader.setDespawnDelay(48000);
             trader.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
-            if (!this.isSilent()) level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_VILLAGER_CONVERTED, this.blockPosition(), 0);
+            if (!this.isSilent()) level.playSound(null, this.getX(), this.getEyeY(), this.getZ(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, this.getSoundSource(), 1.0F, 1.0F);
         });
     }
 

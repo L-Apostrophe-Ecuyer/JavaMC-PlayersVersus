@@ -6,7 +6,8 @@ Usage: pale-villager.py <vanilla dir> <assets/players-versus/textures dir>
 <vanilla dir> holds vanilla's villager.png and pillager.png, and when there villager_baby.png, villager_spawn_egg.png,
 wandering_trader.png and wandering_trader_spawn_egg.png (the api-diff workflow's "asset" focus lines print them).
 
-- The skin: the villager's warm browns go the illager's ashen grey, a little paler than an illager's, each shade kept.
+- The skin: the villager's skin tones go the illager's ashen grey, a little paler than an illager's, each shade kept;
+  the clothes' colours (a trader's red sash and gold trim, browns) are left alone.
 - The face, on the villager's head (the same layout as the illager's): the illager's scowling unibrow, its eyes (the
   whites kept, the irises a sickly green between the villager's and the pillager's) and its grim mouth, in the ashen
   palette. The villager's big nose stays, greyed.
@@ -33,14 +34,15 @@ def luminance(rgb):
 
 
 def ashen(rgb):
-    """A warm skin or brown pixel in the ashen palette, or None for anything else (clothes, eyes)."""
+    """A skin pixel (a warm, moderately coloured, not dark tone) in the ashen palette, or None for anything else: the
+    clothes (a trader's red sash and gold trim are too strongly coloured, browns too dark), eyes and brows."""
     r, g, b = rgb[:3]
-    if not (r > g >= b - 4 and r - b > 25):
+    if not (r > g > b and r > 0):
         return None
     lum = luminance(rgb)
-    if lum <= 0.3:
-        v = round(lum * 255 * 0.95)
-        return (v, v, v)
+    saturation = (r - b) / r
+    if lum <= 0.3 or saturation > 0.62 or not 0.5 <= g / r <= 0.8:
+        return None
     scale = lum / SKIN_LUMINANCE
     return tuple(max(0, min(255, round(c * scale))) for c in SKIN)
 
