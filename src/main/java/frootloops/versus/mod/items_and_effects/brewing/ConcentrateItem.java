@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items_and_effects.brewing;
 
+import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -98,7 +99,11 @@ public class ConcentrateItem extends BlockItem {
                         if(user.getRandom().nextInt(10) < 7) {
                             if (item.effect == MobEffects.INSTANT_DAMAGE)
                                 entity.hurtServer(serverWorld, serverWorld.damageSources().source(DamageTypes.MAGIC, user), 1.0F);
-                            else if (item.effect == MobEffects.INSTANT_DAMAGE) entity.heal(1.0F);
+                            else if (item.effect == MobEffects.INSTANT_HEALTH) {
+                                entity.heal(1.0F);
+                                // Healing pushes Blight back, a heart for the heart it heals
+                                Undeath.purge(entity, 1);
+                            }
                         }
                     }
                     else {

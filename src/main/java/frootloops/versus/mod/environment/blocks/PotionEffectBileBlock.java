@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment.blocks;
 import frootloops.versus.VersusMod;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ColorParticleOption;
@@ -80,7 +81,11 @@ public class PotionEffectBileBlock extends Block {
         // Blight stacks with every dose: standing in it, one every two seconds
         if (effect == CustomStatusEffects.BLIGHT && entity.hasEffect(effect) && entity.level().getGameTime() % 40L != 0) return;
         if(effect == MobEffects.INSTANT_DAMAGE && !entity.level().isClientSide()) entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().magic(), extraStrongEffect ? 2 : 1);
-        else if(effect == MobEffects.INSTANT_HEALTH) entity.heal(extraStrongEffect ? 2 : 1);
+        else if(effect == MobEffects.INSTANT_HEALTH) {
+            entity.heal(extraStrongEffect ? 2 : 1);
+            // Healing pushes Blight back, a heart for the heart it heals
+            Undeath.purge(entity, extraStrongEffect ? 2 : 1);
+        }
         else {
             int duration = 20 + (extraStrongEffect ? 40 : 0);
             if(entity.hasEffect(effect)) {

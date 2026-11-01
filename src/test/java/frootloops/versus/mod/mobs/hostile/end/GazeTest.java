@@ -31,9 +31,9 @@ class GazeTest {
 
     @Test
     void itFadesInGraduallyAsTheGazeNears() {
-        float far = Gaze.visibility(AHEAD, aside(30.0, 20.0), 1.0);
-        float middle = Gaze.visibility(AHEAD, aside(20.0, 20.0), 1.0);
-        float near = Gaze.visibility(AHEAD, aside(12.0, 20.0), 1.0);
+        float far = Gaze.visibility(AHEAD, aside(24.0, 20.0), 1.0);
+        float middle = Gaze.visibility(AHEAD, aside(16.0, 20.0), 1.0);
+        float near = Gaze.visibility(AHEAD, aside(8.0, 20.0), 1.0);
         assertTrue(0.0F < far && far < middle && middle < near && near < 1.0F, far + ", " + middle + ", " + near);
     }
 
@@ -49,6 +49,22 @@ class GazeTest {
         assertTrue(Gaze.opacity(0.0F) > 0.0F);
         assertEquals(1.0F, Gaze.opacity(1.0F), 1.0E-6F);
         assertTrue(Gaze.opacity(0.3F) < Gaze.opacity(0.6F));
+    }
+
+    @Test
+    void itStaysFaintUntilTheViewIsNearlyOnIt() {
+        // Halfway into the cone it's seen half: drawn a quarter opaque, not half
+        float half = Gaze.opacity(0.5F);
+        assertTrue(half < 0.3F, "half seen is drawn " + half + " opaque");
+        // A thing well off to the side is a shimmer at most
+        assertTrue(Gaze.opacity(Gaze.visibility(AHEAD, aside(25.0, 20.0), 1.0)) < 0.1F);
+        // And it fades in monotonically
+        float last = -1.0F;
+        for (int step = 0; step <= 10; step++) {
+            float opacity = Gaze.opacity(step / 10.0F);
+            assertTrue(opacity > last, "not rising at " + step);
+            last = opacity;
+        }
     }
 
     @Test

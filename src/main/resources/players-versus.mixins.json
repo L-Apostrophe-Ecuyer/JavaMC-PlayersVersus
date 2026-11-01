@@ -17,6 +17,7 @@
     "items_and_effects.blight.LivingEntityBlightMixin",
     "items_and_effects.blight.MobBlightAttackMixin",
     "items_and_effects.blight.ServerPlayerBlightedDeathMixin",
+    "items_and_effects.blight.HealOrHarmMobEffectMixin",
     "mobs.MobSunArmourMixin",
 
     "enchantments.AnvilCostMixin",

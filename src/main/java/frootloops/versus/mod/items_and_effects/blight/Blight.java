@@ -73,6 +73,24 @@ public final class Blight {
         return Math.max(0, Math.min(witherAmplifier, VersusSettings.Blight.WITHER_MAX_HEARTS - 1));
     }
 
+    /** The amplifier left after this many white hearts are purged: below nothing (-1 or less), none is left. */
+    public static int purgedAmplifier(int amplifier, int hearts) {
+        return amplifier - Math.max(0, hearts);
+    }
+
+    /**
+     * The white hearts a healing potion purges: the hearts it heals (2 for Healing I, 4 for II...), by the part of its
+     * strength that reaches (1 for a drunk one, less for a splash's edge), to the nearest heart.
+     */
+    public static int healingPurge(int amplifier, double scale) {
+        return (int) Math.round((2 << Math.max(0, Math.min(amplifier, 10))) * Math.max(0.0, Math.min(1.0, scale)));
+    }
+
+    /** The white hearts absorption purges: one for each heart of it gained (rounded up). */
+    public static int absorptionPurge(float gained) {
+        return gained <= 0.0F ? 0 : (int) Math.ceil(gained / 2.0F);
+    }
+
     /** Whether something blighted, hurt to this much health, turns pale. */
     public static boolean paleOnWound(float healthAfter) {
         return healthAfter < VersusSettings.Blight.PALE_BELOW_HEALTH;

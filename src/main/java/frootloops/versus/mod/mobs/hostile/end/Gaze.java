@@ -6,7 +6,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * How well a gaze sees a warped thing (endermen, endermites, watchlings, phantoms): they show only to a stare. Fully
  * when the middle of the view is on them, less and less (smoothly) as they're further aside, least SEEN_GONE_DEGREES
- * aside. The client draws them as opaque as that (GazeTranslucency), never less than a shimmer ({@link #opacity}); the
+ * aside (a narrow cone). The client draws them as opaque as that (GazeTranslucency), never less than a shimmer ({@link #opacity}); the
  * server counts a watchling watched when well seen (WatchlingStare), so its static and its sight agree.
  */
 public final class Gaze {
@@ -24,10 +24,15 @@ public final class Gaze {
         return 1.0F - smoothstep(VersusSettings.Gaze.SEEN_FULL_DEGREES, VersusSettings.Gaze.SEEN_GONE_DEGREES, aside);
     }
 
-    /** How opaque to draw a thing seen this well: from a shimmer (LEAST_OPACITY) unseen to whole when stared at. */
+    /**
+     * How opaque to draw a thing seen this well: from a shimmer (LEAST_OPACITY) unseen to whole when stared at. It rises
+     * with the square of how well it's seen, so it stays faint until the middle of the view is nearly on it: it has to
+     * be looked towards to be seen clearly.
+     */
     public static float opacity(float visibility) {
         float least = VersusSettings.Gaze.LEAST_OPACITY;
-        return least + (1.0F - least) * Math.max(0.0F, Math.min(1.0F, visibility));
+        float seen = Math.max(0.0F, Math.min(1.0F, visibility));
+        return least + (1.0F - least) * seen * seen;
     }
 
     /** Whether a thing seen this well is watched. */

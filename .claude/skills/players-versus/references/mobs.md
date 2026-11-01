@@ -110,15 +110,22 @@ assuming full overlap).
   `MushroomMobsGameTest`, assets `MushroomMobsTest`.
 - **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
   `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman with a creaking's yellow
-  eyes that haunts. No goals, speed 0, knockback-proof, not pushable: it never moves or strikes. `customServerAiStep`:
-  watched (`WatchlingStare.watcher`) it notes its watcher; looked away from, it teleports after `TELEPORT_DELAY`-2x
-  ticks, half the time behind them (`BEHIND_NEAR`-`FAR`), half far off (`AWAY_NEAR`-`FAR`); unlooked at for
-  `VANISH_MIN`-`MAX` ticks after being seen it discards itself; hit by a player it teleports behind them.
-  `WatchlingStare` (server, each level tick): a player looking at one (48 blocks, line of sight, at least half seen by
-  `Gaze`, no `#gaze_disguise_equipment` on the head) builds static (`WatchedPayload` to the HUD), full after 120 ticks:
-  they die of `players-versus:watched` and 4-7 silverfish spawn. Spawns rarely in the dark by the pale line.
+  eyes (three of them, on a head 12 tall: `WatchlingModel`, built from `EndermanModel.createBodyLayer().apply(...)`,
+  `tools/watchling-head.py`) that haunts like Slender. No goals, speed 0, knockback-proof, not pushable: it never moves or
+  strikes. `customServerAiStep`: watched (`WatchlingStare.watcher`) it notes its watcher and `DATA_HUNTING` (synced,
+  `isHunting`); looked away from, it teleports after `TELEPORT_DELAY`-2x ticks to nearer
+  (`WatchlingStare.approach`: `APPROACH_MIN`-`MAX` of the distance, not nearer than `CLOSEST`) at a bearing more than
+  `ASIDE_DEGREES` off the watcher's facing; unlooked at it creeps nearer the same way every `STALK_MIN`-`MAX` ticks;
+  unlooked at for `VANISH_MIN`-`MAX` ticks (90 s to 3 min) after being seen it discards itself; hit by a player it
+  teleports behind them. `WatchlingStare` (server, each level tick): the pressure on a player is the fastest rate among
+  the watchlings about them: 1 for looking at one (48 blocks, line of sight, at least half seen by `Gaze`, no
+  `#gaze_disguise_equipment` on the head) plus `proximity(distance)` (0 beyond `NEAR_RANGE`, up to `PROXIMITY_RATE` at
+  `KILL_RANGE`, looking or not); the static (`WatchedPayload` to the HUD) fills at rate/`STARE_TICKS` and clears over
+  `CLEAR_TICKS`; full, they die of `players-versus:watched` and 4-7 silverfish spawn. Client `WatchlingPull` turns the
+  local player's view towards a hunting one within `PULL_RANGE` now and then (`Entity#turn`, as the mouse does).
+  Spawns rarely in the dark by the pale line.
 - **The warped show only to a stare**: `Gaze` (pure, `GazeTest`, `VersusSettings.Gaze`) rates how well a view sees a
-  body (1 on it, smoothly down to 0 at 40° off its edge) and `Gaze.opacity` floors it at 12%. Client
+  body (1 on it, smoothly down to 0 at 30° off its edge) and `Gaze.opacity` floors it at 3% and rises with the square. Client
   `LivingEntityRendererGazeMixin` + `LivingEntityRenderStateGazeMixin` (`GazeRenderState`) draw endermen, endermites,
   watchlings and phantoms with `RenderTypes.entityTranslucent` at that alpha and fade their shadows;
   `EyesLayerGazeMixin` dims their eyes (the 9-argument `submitModel` with a tint); `CarriedBlockLayerGazeMixin` hides a

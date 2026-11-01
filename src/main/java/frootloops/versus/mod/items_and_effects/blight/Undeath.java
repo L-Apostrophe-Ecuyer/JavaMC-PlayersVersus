@@ -83,6 +83,27 @@ public final class Undeath {
         return blight == null ? 0 : Blight.whiteHearts(blight.getAmplifier());
     }
 
+    /**
+     * Purges white hearts: healing (a potion of Healing) and absorption push the Blight back, a heart for each heart
+     * they give. Whatever's left of it keeps its time; none left, it's gone. Does nothing on an entity not blighted.
+     */
+    public static void purge(LivingEntity entity, int hearts) {
+        MobEffectInstance blight = entity.getEffect(CustomStatusEffects.BLIGHT);
+        if (blight == null || hearts <= 0 || entity.level().isClientSide()) return;
+        int amplifier = Blight.purgedAmplifier(blight.getAmplifier(), hearts);
+        entity.removeEffect(CustomStatusEffects.BLIGHT);
+        if (amplifier >= 0) {
+            entity.forceAddEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, blight.getDuration(), amplifier, blight.isAmbient(), blight.isVisible(), blight.showIcon()), null);
+        }
+    }
+
+    /** What the Wither is now: the same time and strength (up to what a dose may whiten), as Blight. Other effects as they are. */
+    public static MobEffectInstance asBlight(MobEffectInstance effect) {
+        if (!VersusSettings.Blight.REPLACE_WITHER || !effect.is(MobEffects.WITHER)) return effect;
+        return new MobEffectInstance(CustomStatusEffects.BLIGHT, effect.getDuration(), Blight.fromWitherAmplifier(effect.getAmplifier()),
+                effect.isAmbient(), effect.isVisible(), effect.showIcon());
+    }
+
     /** The health food regenerates the entity up to. */
     public static float regenCap(LivingEntity entity) {
         return Blight.regenCap(entity.getMaxHealth(), whiteHearts(entity));
@@ -172,7 +193,13 @@ public final class Undeath {
             player.removeEffect(CustomStatusEffects.BLIGHT);
             return;
         }
-        player.hurtServer(level, source(level), Float.MAX_VALUE);
+        DamageSource source = source(level);
+        player.hurtServer(level, source, Float.MAX_VALUE);
+        // Spared by something that doesn't cure (no totem was used, the Blight is still on them): it takes them anyway
+        if (player.isAlive() && player.hasEffect(CustomStatusEffects.BLIGHT)) {
+            player.setHealth(0.0F);
+            player.die(source);
+        }
     }
 
     /**

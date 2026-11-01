@@ -143,4 +143,46 @@ public class BlightGameTest {
         helper.assertTrue(zombies.getFirst().getStash().isEmpty(), "the copy carries things");
         helper.succeed();
     }
+
+    /** A potion of Healing purges the white hearts it heals; a stronger one purges the lot. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void healingPurgesBlight(GameTestHelper helper) {
+        floor(helper);
+        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
+        pig.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 3));
+        MobEffects.INSTANT_HEALTH.value().applyInstantaneousEffect(helper.getLevel(), null, null, pig, 0, 1.0);
+        MobEffectInstance left = pig.getEffect(CustomStatusEffects.BLIGHT);
+        helper.assertTrue(left != null && left.getAmplifier() == 1, "Healing I left " + (left == null ? "none" : "amplifier " + left.getAmplifier()) + ", not two white hearts");
+        helper.assertTrue(left.getDuration() > 2000, "the Blight that's left lost its time");
+        MobEffects.INSTANT_HEALTH.value().applyInstantaneousEffect(helper.getLevel(), null, null, pig, 1, 1.0);
+        helper.assertTrue(!pig.hasEffect(CustomStatusEffects.BLIGHT), "Healing II left Blight");
+        helper.succeed();
+    }
+
+    /** Absorption gained purges a white heart for each heart of it; absorption lost purges nothing. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void absorptionPurgesBlight(GameTestHelper helper) {
+        floor(helper);
+        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
+        pig.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 4));
+        pig.setAbsorptionAmount(4.0F);
+        MobEffectInstance left = pig.getEffect(CustomStatusEffects.BLIGHT);
+        helper.assertTrue(left != null && left.getAmplifier() == 2, "4 absorption left " + (left == null ? "none" : "amplifier " + left.getAmplifier()));
+        pig.setAbsorptionAmount(0.0F);
+        helper.assertTrue(pig.getEffect(CustomStatusEffects.BLIGHT).getAmplifier() == 2, "losing absorption purged Blight");
+        pig.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 600, 0));
+        helper.assertTrue(pig.getEffect(CustomStatusEffects.BLIGHT).getAmplifier() == 0, "the Absorption effect didn't purge two hearts");
+        helper.succeed();
+    }
+
+    /** The Wither is Blight however it's put on, forced or not, and the Wither is never seen. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aForcedWitherIsBlightToo(GameTestHelper helper) {
+        floor(helper);
+        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
+        pig.forceAddEffect(new MobEffectInstance(MobEffects.WITHER, 200, 0), null);
+        helper.assertTrue(!pig.hasEffect(MobEffects.WITHER), "a forced Wither stayed the Wither");
+        helper.assertTrue(pig.hasEffect(CustomStatusEffects.BLIGHT), "a forced Wither didn't become Blight");
+        helper.succeed();
+    }
 }

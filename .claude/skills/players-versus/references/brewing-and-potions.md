@@ -110,6 +110,12 @@ HEAD, `PlayerZombieEntity#rise`: their things move to it; keepInventory or a cop
 health left under `PALE_BELOW_HEALTH`): villager -> pale villager (`turnPaleVillager`, keeps data, gossip, offers, xp),
 wandering trader -> pale wandering trader (`turnPaleTrader`, keeps offers), spiders -> pale spider, the rest of
 `rise_as_zombies` -> pale zombie; zombies and creepers by `paleKind`. Players aren't turned pale.
+**Purging:** `Undeath#purge(entity, hearts)` pushes white hearts back (what's left keeps its time): a potion of Healing
+(`HealOrHarmMobEffectMixin`, `Blight#healingPurge`: 2 hearts for I, 4 for II, by the splash scale), absorption gained
+(`LivingEntityBlightMixin` at `internalSetAbsorptionAmount`, `Blight#absorptionPurge`), the concentrate and bile of
+Healing. **No Wither:** `Undeath#asBlight` (in `addEffect`, `forceAddEffect` and a Wither found at tick); the name and
+icon of `minecraft:wither` are Blight's (`assets/minecraft/lang`, `textures/mob_effect/wither.png`). A player turning is
+taken even if the damage doesn't (`Undeath#turnPlayer`).
 Golden apples (both) cure Blight (`VanillaItems`: `RemoveStatusEffectsConsumeEffect`). Client `PaleSight` asks the
 game renderer for `players-versus:blight_1..20` (`Blight#greyStrength`: white hearts x time left, fading over
 `GREY_FADE_TICKS`; eased 0.01 a tick) and `watchling_1..16` (the HUD static's strength) each tick; `tools/post-effects.py` writes them from

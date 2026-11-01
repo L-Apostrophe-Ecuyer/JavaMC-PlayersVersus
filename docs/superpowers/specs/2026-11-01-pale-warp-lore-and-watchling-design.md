@@ -100,16 +100,23 @@ unseen; endermen, endermites and watchlings see-through by how much the crosshai
 An enderman the paleness took, with a creaking's yellow eyes.
 - **Spawning:** rare (weight 3-4, alone), in the dark where paleness holds: the pale garden, the deep caves, the pale
   grotto, regular caves below y 0.
-- **Haunting:** it never moves and never strikes; it stands and watches whoever looked at it last. Looked at and then
-  left, half a second to a second later it's gone: half the time 4 to 8 blocks behind its watcher, where they aren't
-  looking, half the time 18 to 32 blocks off. Seen, then left unlooked at for 15 to 30 seconds, it vanishes for good,
-  in a wisp of portal particles. Hit, it slips behind whoever hit it.
+- **Haunting (sixth round):** it never walks and never strikes; it stands and watches whoever looked at it last. Looked
+  at and then left, half a second to a second later it's gone and back *nearer*: to 55 to 80% of the distance it was
+  at, never nearer than 3 blocks, where its watcher isn't looking (more than 75° to either side of the way they face,
+  so mostly behind). Seen once, it hunts: unlooked at it still creeps nearer, in the same way, every 20 to 40 seconds,
+  and it only gives up and vanishes (in a wisp of portal particles) after 90 seconds to 3 minutes unlooked at.
+  Hit, it slips behind whoever hit it.
+- **Too near:** within 10 blocks the static builds without a stare, faster the nearer, and at 3 blocks and nearer it
+  builds twice as fast as a stare does (a stare adds to it): you die of it as of a stare. Backing away clears it.
+- **The pull:** while one hunts within 24 blocks, now and then (every 5 to 16 seconds, sooner the nearer) for a moment
+  the view of the one it hunts turns towards it, as a hand on the mouse, up to 2° a tick (more the nearer); a hand on
+  the mouse can fight it. Not in menus, creative, spectator, nor behind a carved pumpkin.
 - **Seeing it:** it shows only to a stare (rule 1): fully within 1° of the middle of the view (from its edge), not at
   all 10° aside.
 - **The stare:** a player looking at it fills their screen with grey static, and the world under it breaks into big
   drab pixels. Looking means in plain sight, within 48 blocks, at least half seen (about 5° from its edge), with no
   carved pumpkin on. The static is full after 6 seconds of
-  looking and clears in 3 seconds of looking away. Full, the player dies ("looked at the Watchling too long") and 4 to 7
+  looking and clears slowly: 20 seconds from full to nothing. Full, the player dies ("looked at the Watchling too long") and 4 to 7
   silverfish crawl out where they stood. A totem saves them. Creative and spectating players are spared.
 - It takes water damage and dodges arrows as an enderman, and drops 0-1 ender pearls.
 
@@ -211,3 +218,31 @@ replace the Wither.
 - `turned_undead` now bypasses invulnerability, so a freshly spawned player's turning isn't blocked.
 - Not verified in a running client (no client in CI): the camera sway, the skin and tint, the effect icon and egg art
   (`tools/blight-art.py`).
+
+## Blight and the watchling, again (sixth round, 2026-11-01)
+
+Asked for: fully blighted is converted; the Wither completely replaced (we only deal Blight); healing and absorption
+remove built-up Blight; the watchling should work as Slender does, die by closeness, pull the cursor, get closer each
+time it's seen, hunt up to 3 minutes, leave longer static, and have Minecraft Dungeons' model (a taller head, three
+eyes); and the warped more transparent.
+
+- **Converted:** all white for the 5 seconds still turns the entity (so there's time to cure it). A player's turning now
+  cannot be shrugged off: if the damage that should take them leaves them alive and still blighted (spawn protection
+  is bypassed by the damage type, but anything else), they die anyway. Mobs with no undead kind still die.
+- **No Wither:** besides `addEffect`, `forceAddEffect` turns a Wither into Blight; a Wither found on an entity at its
+  tick (an old save) is turned into Blight; the Wither's name (`effect.minecraft.wither`) and icon are Blight's in
+  every resource that still names it.
+- **Healing and absorption purge:** a potion of Healing (`HealOrHarmMobEffectMixin` at `applyInstantaneousEffect`)
+  purges the white hearts it heals (2 for I, 4 for II, by the share of its strength that reaches, so a splash's edge
+  less); absorption gained (`internalSetAbsorptionAmount`, so the Absorption effect and golden apples alike) purges a
+  white heart for each heart of it. Both leave what's left of the Blight its time (`Undeath#purge`). The concentrate
+  and bile of Healing do too (the concentrate's heal branch checked the damage effect twice and never ran: fixed).
+  Regeneration and food don't purge: regeneration heals only up to the white hearts, as food does.
+- **Transparency:** the warped fade to 3% (not 12%) opacity, the cone is 30° (not 40°), and opacity rises with the
+  square of how well they're seen, so they stay faint until the middle of the view is nearly on them. A watchling is
+  watched from 70% seen as before (about 11° off its edge now).
+- **Model:** the watchling's head is 12 tall (the enderman's 8) with three glowing eyes, two side by side and one above
+  and between; the jaw layer is left out, and the hitbox is 3.1 tall. Built from the enderman's layer in
+  `WatchlingModel`; textures from `tools/watchling-head.py` (its source: `tools/watchling-source.png`). Client only:
+  unseen in a running game.
+

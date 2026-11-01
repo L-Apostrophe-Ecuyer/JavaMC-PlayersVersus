@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
@@ -36,16 +37,38 @@ public abstract class LivingEntityBlightMixin {
 
     @ModifyVariable(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), argsOnly = true)
     private MobEffectInstance playersVersus$blightStacks(MobEffectInstance dose) {
-        if (VersusSettings.Blight.REPLACE_WITHER && dose.is(MobEffects.WITHER)) {
-            dose = new MobEffectInstance(CustomStatusEffects.BLIGHT, dose.getDuration(), Blight.fromWitherAmplifier(dose.getAmplifier()),
-                    dose.isAmbient(), dose.isVisible(), dose.showIcon());
-        }
+        dose = Undeath.asBlight(dose);
         if (!dose.is(CustomStatusEffects.BLIGHT)) return dose;
         MobEffectInstance had = this.getEffect(CustomStatusEffects.BLIGHT);
         if (had == null) return dose;
         return new MobEffectInstance(dose.getEffect(), Blight.stackedDuration(had.getDuration(), dose.getDuration()),
                 Blight.stackedAmplifier(had.getAmplifier(), dose.getAmplifier()),
                 dose.isAmbient(), dose.isVisible(), dose.showIcon());
+    }
+
+    /** Forced on, too: a Wither is Blight whichever way it's given (no stacking: forcing sets it as it is). */
+    @ModifyVariable(method = "forceAddEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)V", at = @At("HEAD"), argsOnly = true)
+    private MobEffectInstance playersVersus$forcedWitherIsBlight(MobEffectInstance effect) {
+        return Undeath.asBlight(effect);
+    }
+
+    /** A Wither already on (a world saved before, or put there some way unforeseen) is turned into Blight at the next tick. */
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void playersVersus$noWither(CallbackInfo info) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (!VersusSettings.Blight.REPLACE_WITHER || self.level().isClientSide()) return;
+        MobEffectInstance wither = self.getEffect(MobEffects.WITHER);
+        if (wither == null) return;
+        self.removeEffect(MobEffects.WITHER);
+        self.addEffect(wither);
+    }
+
+    /** Absorption gained pushes the Blight back, a white heart for each heart of it. */
+    @Inject(method = "internalSetAbsorptionAmount", at = @At("HEAD"))
+    private void playersVersus$absorptionPurgesBlight(float amount, CallbackInfo info) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        float gained = amount - self.getAbsorptionAmount();
+        if (gained > 0.0F && !self.level().isClientSide()) Undeath.purge(self, Blight.absorptionPurge(gained));
     }
 
     /** A hit that blighted gives nothing else (BlightAttacks): the mob's other effects on what it hit are dropped. */

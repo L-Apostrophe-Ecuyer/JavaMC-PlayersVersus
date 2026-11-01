@@ -140,15 +140,29 @@ public abstract class VersusSettings {
         // looking away, it clears in CLEAR_TICKS. Looking at one: within WATCH_RANGE blocks, in plain sight, and at
         // least half seen (Gaze)
         public static int STARE_TICKS = 120;
-        public static int CLEAR_TICKS = 60;
+        public static int CLEAR_TICKS = 400;
         public static double WATCH_RANGE = 48.0;
         public static int SILVERFISH_MIN = 4, SILVERFISH_MAX = 7;
-        // Looked at, then left: it teleports after this many ticks (and up to as many more), half the time up behind
-        // its watcher (BEHIND_NEAR to BEHIND_FAR blocks), half the time far off (AWAY_NEAR to AWAY_FAR)
+        // Looked at, then left: it teleports after this many ticks (and up to as many more), to where it isn't looked at
+        // (further than ASIDE_DEGREES either side of the way the watcher faces) and nearer: each time it's seen it comes
+        // back to between APPROACH_MIN and APPROACH_MAX of the distance it was at, never nearer than CLOSEST
         public static int TELEPORT_DELAY = 10;
-        public static double BEHIND_NEAR = 4.0, BEHIND_FAR = 8.0, AWAY_NEAR = 18.0, AWAY_FAR = 32.0;
-        // Seen once, then left unlooked at for VANISH_MIN to VANISH_MAX ticks, it vanishes and leaves you be
-        public static int VANISH_MIN = 300, VANISH_MAX = 600;
+        public static double APPROACH_MIN = 0.55, APPROACH_MAX = 0.8, CLOSEST = 3.0, ASIDE_DEGREES = 75.0;
+        // Seen once, it hunts: unlooked at, it still creeps nearer every STALK_MIN to STALK_MAX ticks, and when it has gone
+        // VANISH_MIN to VANISH_MAX ticks (90 seconds to 3 minutes) without being looked at it vanishes and leaves you be
+        public static int STALK_MIN = 400, STALK_MAX = 800;
+        public static int VANISH_MIN = 1800, VANISH_MAX = 3600;
+        // Too close: within NEAR_RANGE blocks the static builds without looking too, faster the nearer, PROXIMITY_RATE
+        // times as fast as a stare at KILL_RANGE blocks and nearer (and a stare adds to it): you die of it as of a stare
+        public static double NEAR_RANGE = 10.0, KILL_RANGE = 3.0;
+        public static float PROXIMITY_RATE = 2.0F;
+        // The view of whoever it hunts is pulled towards it now and then (client): within PULL_RANGE blocks, a pull every
+        // PULL_GAP_MIN to PULL_GAP_MAX ticks (sooner the nearer), lasting PULL_MIN to PULL_MAX ticks, turning the view
+        // PULL_DEGREES degrees a tick (more the nearer)
+        public static boolean PULL_ENABLED = true;
+        public static double PULL_RANGE = 24.0;
+        public static int PULL_GAP_MIN = 100, PULL_GAP_MAX = 320, PULL_MIN = 12, PULL_MAX = 30;
+        public static float PULL_DEGREES = 2.0F;
     }
 
     public static class Gaze {
@@ -157,8 +171,8 @@ public abstract class VersusSettings {
         // SEEN_GONE_DEGREES aside and beyond, where they're drawn LEAST_OPACITY opaque, a shimmer; a watchling is
         // watched when at least WATCHED_AT seen
         public static double SEEN_FULL_DEGREES = 0.0;
-        public static double SEEN_GONE_DEGREES = 40.0;
-        public static float LEAST_OPACITY = 0.12F;
+        public static double SEEN_GONE_DEGREES = 30.0;
+        public static float LEAST_OPACITY = 0.03F;
         public static float WATCHED_AT = 0.7F;
     }
 

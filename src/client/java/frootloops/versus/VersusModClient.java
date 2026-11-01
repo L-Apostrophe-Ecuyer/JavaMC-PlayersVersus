@@ -6,6 +6,7 @@ import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
 import frootloops.versus.mod.items_and_effects.blight.PaleSight;
+import frootloops.versus.mod.mobs.hostile.end.WatchlingPull;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingStatic;
 import frootloops.versus.mod.items_and_effects.inventory.HotbarRefill;
 import frootloops.versus.mod.players.building.ClientPlacement;
@@ -40,6 +41,7 @@ public class VersusModClient implements ClientModInitializer {
 		ModEntitiesRenderers.onInitialize();
 		MeleeAnimation.register();
 		WatchlingStatic.register();
+		WatchlingPull.register();
 		PaleSight.register();
 		CustomBlocksClient.onInitialize();
 		LeavesRustling.register();

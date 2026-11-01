@@ -75,10 +75,10 @@ public class ModEntities {
             EntityType.Builder.of(MushroomSpiderEntity::new, MobCategory.MONSTER).sized(1.4f, 0.9f).eyeHeight(0.65f).passengerAttachments(0.765f).clientTrackingRange(8)
     );
 
-    /** The watchling: an enderman with a creaking's eyes, sized and tracked as one. */
+    /** The watchling: an enderman with a taller head and a creaking's three eyes, sized (a little taller) and tracked as one. */
     public static final EntityType<WatchlingEntity> WATCHLING = register(
             "watchling",
-            EntityType.Builder.of(WatchlingEntity::new, MobCategory.MONSTER).sized(0.6f, 2.9f).eyeHeight(2.55f).passengerAttachments(2.80625f).clientTrackingRange(8)
+            EntityType.Builder.of(WatchlingEntity::new, MobCategory.MONSTER).sized(0.6f, 3.1f).eyeHeight(2.75f).passengerAttachments(3.0f).clientTrackingRange(8)
     );
 
     /** A villager the paleness took (withered), sized and tracked as a zombie villager. */

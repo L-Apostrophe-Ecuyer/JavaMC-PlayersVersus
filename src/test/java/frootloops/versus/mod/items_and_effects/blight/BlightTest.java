@@ -103,4 +103,25 @@ class BlightTest {
         assertFalse(Blight.paleOnWound(VersusSettings.Blight.PALE_BELOW_HEALTH + 0.5F));
         assertTrue(Blight.paleOnWound(VersusSettings.Blight.PALE_BELOW_HEALTH - 0.5F));
     }
+
+    @Test
+    void healingAndAbsorptionPushTheBlightBack() {
+        // Healing I heals two hearts, II four; a splash's edge less
+        assertEquals(2, Blight.healingPurge(0, 1.0));
+        assertEquals(4, Blight.healingPurge(1, 1.0));
+        assertEquals(1, Blight.healingPurge(0, 0.5));
+        assertEquals(0, Blight.healingPurge(0, 0.0));
+        // Absorption: a heart for each it gives (Absorption I is two hearts)
+        assertEquals(2, Blight.absorptionPurge(4.0F));
+        assertEquals(1, Blight.absorptionPurge(1.0F));
+        assertEquals(0, Blight.absorptionPurge(0.0F));
+        assertEquals(0, Blight.absorptionPurge(-3.0F));
+        // What's left: four white hearts less two are two
+        assertEquals(1, Blight.purgedAmplifier(3, 2));
+        assertEquals(Blight.whiteHearts(3) - 2, Blight.whiteHearts(Blight.purgedAmplifier(3, 2)));
+        // As many as there are leaves none (an amplifier below nothing)
+        assertTrue(Blight.purgedAmplifier(1, 2) < 0);
+        assertTrue(Blight.purgedAmplifier(1, 5) < 0);
+        assertEquals(2, Blight.purgedAmplifier(2, 0));
+    }
 }
