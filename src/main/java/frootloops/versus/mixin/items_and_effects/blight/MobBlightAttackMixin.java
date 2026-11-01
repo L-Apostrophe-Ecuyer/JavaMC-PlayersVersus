@@ -1,6 +1,6 @@
-package frootloops.versus.mixin.items_and_effects.conversion;
+package frootloops.versus.mixin.items_and_effects.blight;
 
-import frootloops.versus.mod.items_and_effects.conversion.ConversionAttacks;
+import frootloops.versus.mod.items_and_effects.blight.BlightAttacks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,12 +10,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Every mob's melee hit that lands goes by ConversionAttacks: pale zombies, creakings and (rarely) zombies convert. */
+/** Every mob's melee hit that lands goes by BlightAttacks: pale zombies, creakings and (rarely) zombies convert. */
 @Mixin(Mob.class)
-public abstract class MobConversionAttackMixin {
+public abstract class MobBlightAttackMixin {
 
     @Inject(method = "doHurtTarget", at = @At("RETURN"))
     private void playersVersus$convertingHit(ServerLevel level, Entity target, CallbackInfoReturnable<Boolean> info) {
-        if (info.getReturnValueZ() && target instanceof LivingEntity living) ConversionAttacks.afterHit(level, (Mob) (Object) this, living);
+        if (info.getReturnValueZ() && target instanceof LivingEntity living) BlightAttacks.afterHit(level, (Mob) (Object) this, living);
     }
 }

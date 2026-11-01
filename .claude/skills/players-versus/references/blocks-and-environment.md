@@ -315,7 +315,7 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   `StagedMushrooms` gathers them and acts (`GROW_CHANCE` for all but shrinking; spreading stops at `SPREAD_CAP` of the
   kind within 4 blocks). `MushroomBlockMixin` replaces vanilla mushrooms' random tick (`DO_STAGED_MUSHROOMS`).
 - Brown/red clusters drop that many vanilla mushrooms and `asItem()` is vanilla's mushroom. Pale shrooms' `entityInside`
-  doses Conversion (`ConversionExposure`, see `brewing-and-potions.md`). Assets: `tools/staged-mushrooms.py`.
+  doses Blight (`BlightExposure`, see `brewing-and-potions.md`). Assets: `tools/staged-mushrooms.py`.
   Game tests: `StagedMushroomsGameTest`.
 
 ## Other blocks not read this pass

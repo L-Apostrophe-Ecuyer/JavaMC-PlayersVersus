@@ -1,12 +1,12 @@
-package frootloops.versus.mod.items_and_effects.conversion;
+package frootloops.versus.mod.items_and_effects.blight;
 
 /**
- * Conversion, pale shrooms' effect, by numbers: its hearts turn white, one per amplifier + 1, from the end of the health
+ * Blight, pale shrooms' effect, by numbers: its hearts turn white, one per amplifier + 1, from the end of the health
  * bar down towards none. Each dose adds its amplifier + 1 to what was had, and refreshes it without shortening it. Food doesn't regenerate health into white
  * hearts; all hearts white, the entity turns undead (Undeath).
  */
-public final class Conversion {
-    private Conversion() {}
+public final class Blight {
+    private Blight() {}
 
     /** White hearts for an amplifier: one more than it. */
     public static int whiteHearts(int amplifier) {
@@ -43,12 +43,12 @@ public final class Conversion {
         return heart >= 0 && heart < hearts && heart >= hearts - whiteHearts;
     }
 
-    /** Ticks over which the world's grey fades as Conversion wears off. */
+    /** Ticks over which the world's grey fades as Blight wears off. */
     public static final int GREY_FADE_TICKS = 600;
 
     /**
      * How grey the world looks to someone converting, 0 (not at all) to 1 (all grey): as much as their hearts are white,
-     * fading in Conversion's last half minute. An amplifier of -1 means no Conversion.
+     * fading in Blight's last half minute. An amplifier of -1 means no Blight.
      */
     public static float greyStrength(int amplifier, float maxHealth, int duration) {
         if (amplifier < 0) return 0.0F;

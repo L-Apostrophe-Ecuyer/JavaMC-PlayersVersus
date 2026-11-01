@@ -2,7 +2,7 @@ package frootloops.versus.mod.mobs.hostile.overworld;
 
 import frootloops.versus.mod.mobs.StandingSpots;
 import net.minecraft.core.BlockPos;
-import frootloops.versus.mod.items_and_effects.conversion.ConversionAttacks;
+import frootloops.versus.mod.items_and_effects.blight.BlightAttacks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,9 +20,9 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Scarier creakings. One stuck for a few seconds, chasing something it can't get to, teleports like an enderman once
  * nobody's looking at it: somewhere near its target that no player can see, within reach of its heart. Hitting one
- * is a gamble: {@link #VANISH_CHANCE} of the time the attacker takes a dose of Conversion and the creaking is gone;
+ * is a gamble: {@link #VANISH_CHANCE} of the time the attacker takes a dose of Blight and the creaking is gone;
  * otherwise a silverfish crawls out of it. And its own hits land twice as hard as vanilla's, and convert
- * (ConversionAttacks).
+ * (BlightAttacks).
  */
 public final class CreakingScares {
     /** Twice vanilla's 3. */
@@ -39,10 +39,10 @@ public final class CreakingScares {
     private CreakingScares() {
     }
 
-    /** A hit that went through: the attacker takes a dose of Conversion and the creaking vanishes, or a silverfish comes out of it. */
+    /** A hit that went through: the attacker takes a dose of Blight and the creaking vanishes, or a silverfish comes out of it. */
     public static void onHit(ServerLevel level, Creaking creaking, LivingEntity attacker) {
         if (creaking.getRandom().nextFloat() < VANISH_CHANCE) {
-            attacker.addEffect(ConversionAttacks.dose(), creaking);
+            attacker.addEffect(BlightAttacks.dose(), creaking);
             creaking.discard();
             return;
         }

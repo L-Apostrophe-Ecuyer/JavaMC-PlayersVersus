@@ -1,6 +1,6 @@
 package frootloops.versus.mod.mobs.hostile.overworld;
 
-import frootloops.versus.mod.items_and_effects.conversion.Undeath;
+import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;

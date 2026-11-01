@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items_and_effects.conversion;
+package frootloops.versus.mod.items_and_effects.blight;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
@@ -51,14 +51,14 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * All of a living thing's hearts white with Conversion: it shakes for TURNING_TICKS (others see it shake, a player
+ * All of a living thing's hearts white with Blight: it shakes for TURNING_TICKS (others see it shake, a player
  * feels sick), then turns undead ({@link #turn}). A player dies of it and the zombie of the place rises where they
  * fell, wearing their armour (and dropping it). A totem of undying saves a player, and cures them. Skeletons, the
- * nether's undead, the pale, red mushroom creatures, warped things, golems and bosses don't take Conversion at all
+ * nether's undead, the pale, red mushroom creatures, warped things, golems and bosses don't take Blight at all
  * ({@link #immune}).
  */
 public final class Undeath {
-    public static final TagKey<EntityType<?>> IMMUNE = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "conversion_immune"));
+    public static final TagKey<EntityType<?>> IMMUNE = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "blight_immune"));
     /** What rises as the zombie of the place it turned in: illagers, witches, wandering traders (players do too). */
     public static final TagKey<EntityType<?>> RISE_AS_ZOMBIES = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rise_as_zombies"));
     public static final TagKey<Biome> HUSK_BIOMES = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "undead_rise_as_husks"));
@@ -78,29 +78,29 @@ public final class Undeath {
         ServerTickEvents.END_LEVEL_TICK.register(Undeath::tick);
     }
 
-    /** Whether the entity never takes Conversion. */
+    /** Whether the entity never takes Blight. */
     public static boolean immune(LivingEntity entity) {
         return entity.is(IMMUNE);
     }
 
     /** The entity's white hearts. */
     public static int whiteHearts(LivingEntity entity) {
-        MobEffectInstance conversion = entity.getEffect(CustomStatusEffects.CONVERSION);
-        return conversion == null ? 0 : Conversion.whiteHearts(conversion.getAmplifier());
+        MobEffectInstance blight = entity.getEffect(CustomStatusEffects.BLIGHT);
+        return blight == null ? 0 : Blight.whiteHearts(blight.getAmplifier());
     }
 
     /** The health food regenerates the entity up to. */
     public static float regenCap(LivingEntity entity) {
-        return Conversion.regenCap(entity.getMaxHealth(), whiteHearts(entity));
+        return Blight.regenCap(entity.getMaxHealth(), whiteHearts(entity));
     }
 
     /**
-     * Conversion's tick on an entity: it notes whether all its hearts are white. What follows happens at the end of the
-     * level's tick, out of the entity's effect ticking (which a conversion or a death mustn't change under it).
+     * Blight's tick on an entity: it notes whether all its hearts are white. What follows happens at the end of the
+     * level's tick, out of the entity's effect ticking (which a turning or a death mustn't change under it).
      */
     public static void whileConverting(ServerLevel level, LivingEntity entity, int amplifier) {
         boolean exempt = entity instanceof Player player && (player.isCreative() || player.isSpectator());
-        if (exempt || !Conversion.allWhite(entity.getMaxHealth(), Conversion.whiteHearts(amplifier))) return;
+        if (exempt || !Blight.allWhite(entity.getMaxHealth(), Blight.whiteHearts(amplifier))) return;
         long now = level.getGameTime();
         Shaking shaking = SHAKING.get(entity);
         SHAKING.put(entity, shaking == null || shaking.lastSeen < now - 1 ? new Shaking(now, now) : new Shaking(shaking.started, now));
@@ -147,7 +147,7 @@ public final class Undeath {
     }
 
     /**
-     * Turns the entity undead, or kills it. Conversion makes zombies of the living: a villager a zombie villager (as a
+     * Turns the entity undead, or kills it. Blight makes zombies of the living: a villager a zombie villager (as a
      * zombie's kill does), piglins zombified piglins, a hoglin a zoglin; animals with an undead kind of their own turn
      * into it, as calm as they were and their owner's still (a horse a zombie horse, a camel a camel husk, a nautilus a
      * zombie nautilus, a chicken a zombie chicken). A player, an illager, a witch or a wandering trader rises as the
@@ -161,8 +161,8 @@ public final class Undeath {
             turnPlayer(level, player);
             return;
         }
-        // What it turns into takes no Conversion along with the rest of its effects
-        entity.removeEffect(CustomStatusEffects.CONVERSION);
+        // What it turns into takes no Blight along with the rest of its effects
+        entity.removeEffect(CustomStatusEffects.BLIGHT);
         if (entity instanceof Villager villager) {
             // As a zombie's kill: Zombie#convertVillagerToZombieVillager
             Zombie zombie = new Zombie(EntityTypes.ZOMBIE, level);
@@ -225,7 +225,7 @@ public final class Undeath {
         return pale != null;
     }
 
-    /** What an animal turning undead keeps that its conversion doesn't carry: being tame and whose, being a jockey's mount. */
+    /** What an animal turning undead keeps that its turning doesn't carry: being tame and whose, being a jockey's mount. */
     private static void keepWhatWasKept(Mob from, Mob into) {
         if (from instanceof AbstractHorse horse && into instanceof AbstractHorse undead) {
             undead.setTamed(horse.isTamed());
@@ -259,7 +259,7 @@ public final class Undeath {
     /**
      * The zombie that rises where something turns: under water a drowned; in the desert (tag
      * {@code players-versus:undead_rise_as_husks}) a husk; elsewhere a zombie. (Pale zombies rise of withering, not of
-     * Conversion: {@link #wither}, {@link #risePale}.)
+     * Blight: {@link #wither}, {@link #risePale}.)
      */
     public static EntityType<? extends Mob> zombieOfThePlace(ServerLevel level, LivingEntity entity) {
         BlockPos pos = entity.blockPosition();
@@ -283,7 +283,7 @@ public final class Undeath {
 
     /**
      * A player withered to death (ServerPlayerWitheredMixin, as they die): a pale zombie rises where they fell, in their
-     * armour (which it always drops), as the zombie of the place rises of a player Conversion turned.
+     * armour (which it always drops), as the zombie of the place rises of a player Blight turned.
      */
     public static void risePale(ServerLevel level, ServerPlayer player) {
         rise(level, player, ModEntities.PALE_ZOMBIE, takeArmour(player));

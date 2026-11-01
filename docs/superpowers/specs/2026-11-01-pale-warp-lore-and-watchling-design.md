@@ -19,11 +19,11 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
 3. **Paleness holds below y 0 and in the pale biomes** (the pale line: the pale garden, the pale grotto and hollow, the
    deep caves). Brown and red mushrooms there grow into pale shrooms; pale zombies, pale creepers, pale spiders and
    watchlings spawn there in the dark at any hour, and above it (to y 64) only at midnight under a new moon.
-4. **Pale things convert the living; the converted rise undead (zombies); the undead turn pale.** Conversion's white
+4. **Pale things convert the living; the converted rise undead (zombies); the undead turn pale.** Blight's white
    hearts, all white:
    - a player, an illager, a witch or a wandering trader rises as **the zombie of the place**: a drowned under water, a
      husk in the desert, a zombie elsewhere (a player dies first; it rises in their armour). Pale zombies rise of
-     withering (rule 2), not of Conversion;
+     withering (rule 2), not of Blight;
    - a villager becomes a zombie villager, anywhere;
    - piglins become zombified piglins, a hoglin a zoglin;
    - **an animal with an undead kind of its own turns into it, and stays as calm as it was and its owner's**: a horse
@@ -42,7 +42,7 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    blue robe, keeping the trades it carried; cured, it's a wandering trader again. It shies from players and hunts villagers; its hits wither them, so the villagers
    it hunts turn pale in turn, and villagers flee it as they flee zombie villagers. It doesn't burn, drown or freeze
    into anything, and stays where it turned. **Golden apples cure**: fed one, a pale villager (or a zombie villager)
-   starts its cure, 1 to 3 minutes, and more apples hasten it; eaten, a golden apple cures Conversion.
+   starts its cure, 1 to 3 minutes, and more apples hasten it; eaten, a golden apple cures Blight.
 6. **Undead convert their own kind.** A pale zombie's and a creaking's hits convert anything living, every hit (a
    watchling's would, but it never strikes). Other zombies' hits convert only people (players, villagers, wandering traders, illagers, witches; zombified
    piglins: piglins), 1 in 25, and then give nothing else.
@@ -54,7 +54,7 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    wither spares them. Undead animals burn in daylight as vanilla's zombie horse does, except the desert's camel husk
    and any in body armour (horse armour, nautilus armour).
 9. **The pale take colour from sight.** Converting, the world greys for its sufferer, as much as their hearts are
-   white, easing in and out smoothly, fading as Conversion wears off; under a watchling's stare it breaks into ever
+   white, easing in and out smoothly, fading as Blight wears off; under a watchling's stare it breaks into ever
    bigger, drabber pixels beneath the static, and the static is heard, a hiss, crackle and low drone that swells and
    rises with it.
 
@@ -64,7 +64,7 @@ Asked for: "zombie chickens, converted villagers, pale villagers = illagers? Mak
 consistent throughout all relevant entities and systems. Exceptions: avoid passive zombie mobs becoming hostile
 (zombie horses, nautilus) that way they can be kept alongside healthy variants."
 
-- **The zombie chicken**: a chicken Conversion turned. Calm as a chicken, it follows seeds, but lays no eggs, eats
+- **The zombie chicken**: a chicken Blight turned. Calm as a chicken, it follows seeds, but lays no eggs, eats
   nothing, never breeds and is never a chick; always the temperate kind, its feathers the zombie's green, its voice
   lower. Undead, burns in daylight, never converted. Drops 0-2 feathers and 0-1 rotten flesh. Baby zombies' chicken
   jockeys ride zombie chickens (a new one, or one of those about; never a living chicken).
@@ -77,7 +77,7 @@ consistent throughout all relevant entities and systems. Exceptions: avoid passi
 Asked for: undead animals in armour don't burn; withered villagers (those that became illagers) become their own mob,
 keeping their trades, white skin and clothes, curable like zombie villagers, fleeing players and attacking villagers;
 curing by golden apple; players converted become zombies, withered become pale zombies; grown brown mushrooms the
-source of mining fatigue concentrates; a grey screen for Conversion and growing static or pixelation for a watchling's
+source of mining fatigue concentrates; a grey screen for Blight and growing static or pixelation for a watchling's
 stare; the watchling as a haunting, never-moving horror that teleports when looked away from and leaves after 15-30 s
 unseen; endermen, endermites and watchlings see-through by how much the crosshair is on them.
 
@@ -111,10 +111,10 @@ An enderman the paleness took, with a creaking's yellow eyes.
 - `Undeath` (was `Shroomify`): `turn` (what all-white things become), `zombieOfThePlace` (tag
   `players-versus:undead_rise_as_husks` for the desert), tag `players-versus:rise_as_zombies`. Damage type
   `players-versus:turned_undead` (was `shroomified`); `UndeathShakingPayload` (was `ShroomShakingPayload`).
-- `ConversionAttacks`: tag `players-versus:zombie_kin`; the watchling among the always-converting.
-- Tag `players-versus:conversion_immune` lists the never-converted (no longer all of `#minecraft:undead`).
+- `BlightAttacks`: tag `players-versus:zombie_kin`; the watchling among the always-converting.
+- Tag `players-versus:blight_immune` lists the never-converted (no longer all of `#minecraft:undead`).
 - `Undeath#turnIllager` and `PaleVillagers` (pure, `PaleVillagersTest`); `ZombieInfectionMixin` puts both on
-  `Zombie#convertVillagerToZombieVillager`'s head (Conversion's villagers go through it on a stand-in zombie) and gives
+  `Zombie#convertVillagerToZombieVillager`'s head (Blight's villagers go through it on a stand-in zombie) and gives
   `Zombie#finalizeSpawn` zombie chickens. `Undeath#keepWhatWasKept` (tame and owner: `AbstractHorseAccessor`,
   `TamableAnimal#setOwnerReference`). `ZombieChickenEntity` / client `ZombieChickenRenderer`, textures from
   `tools/undead-animals.py`. Vanilla tags extended: `#zombies` (pale zombie, zombie chicken), `#undead` (pale creeper,
@@ -123,7 +123,7 @@ An enderman the paleness took, with a creaking's yellow eyes.
   `VillagerProfessionLayer` over `tools/pale-villager.py`'s white skin), `Undeath#wither`/`turnPaleVillager`/`risePale`,
   `LivingEntityWitheringMixin`, `ServerPlayerWitheredMixin`, `VillagerHostilesSensorMixin`, `MobSunArmourMixin`,
   `CustomBrewingItems.BROWN_MUSHROOM_CLUSTER`, client `PaleSight` and `assets/players-versus/post_effect`
-  (`tools/post-effects.py`). Game tests in `UndeadFormsGameTest`; `GazeTest`, `ConversionTest`.
+  (`tools/post-effects.py`). Game tests in `UndeadFormsGameTest`; `GazeTest`, `BlightTest`.
 - `MushroomCreeperEntity#puff` doses nothing. `RedMushroomsLayer` (client) draws the red mushroom's block model on a
   model part, resolved each frame by `MushroomCreeperRenderer` and `MushroomSpiderRenderer`; their skins come from
   `tools/mushroom-mobs.py`, now from the red mushroom block.
@@ -138,7 +138,7 @@ An enderman the paleness took, with a creaking's yellow eyes.
 
 - Pale mobs don't turn back into regular ones near the surface (the user's call).
 - The undead form of the place goes by place only (depth, biome, water), not light: predictable at a glance.
-- Zombies converted to pale zombies wherever they are (Conversion is paleness), not by place.
+- Zombies converted to pale zombies wherever they are (Blight is paleness), not by place.
 - Spiders and cave spiders turn into pale spiders, horses into zombie horses: the pale and undead forms that exist.
 - Pale spiders now also spawn in caves below y 0, as pale zombies and creepers do.
 - The watchling's look cone is about 25°, wider than an enderman's stare: it's what's on your screen, as Slender's.
@@ -150,17 +150,17 @@ An enderman the paleness took, with a creaking's yellow eyes.
   Keep them under a roof (the camel husk, of the desert, doesn't burn).
 - The zombie chicken keeps the chicken's seed-following, so it can be led; it just won't eat or breed.
 - Third round: the pale-place illager turning is replaced by the pale villager. Paleness of place still decides where
-  mushrooms turn pale and the pale spawn; what a thing turns into decides by what took it: Conversion makes zombies,
+  mushrooms turn pale and the pale spawn; what a thing turns into decides by what took it: Blight makes zombies,
   withering makes the pale.
 - The pale villager is built on the zombie villager (it keeps the villager's data and trades and inherits the mod's
   golden apple cure, ZombieVillagerMixin) but looks, sounds and acts a villager gone wrong, not a zombie.
 - The zombie villager cure's check was inverted (no golden apple could start a cure); fixed, as the user asked for
   golden apple cures.
-- Golden apples cure Conversion when eaten; milk still clears it too, as it clears every effect.
+- Golden apples cure Blight when eaten; milk still clears it too, as it clears every effect.
 - The brown mushroom cluster is an item of its own, so only a grown cluster gives one; prismarine still smelts into
   the concentrate.
 - The watchling's screen effect uses vanilla's creeper-view shader (`post/bits`) at four strengths, drained of colour,
-  under the HUD static; the Conversion grey uses `post/color_convolve` at four strengths. Both are asked of the game
+  under the HUD static; the Blight grey uses `post/color_convolve` at four strengths. Both are asked of the game
   renderer's requested post effects each tick (client `PaleSight`); `tools/post-effects.py` writes them.
 - Translucency and screen effects are client-side only and couldn't be seen in CI (no client run): unverified in game.
 - Fourth round: the grey eases (5 seconds end to end) through 20 post effects, the watchling's view through 16; the

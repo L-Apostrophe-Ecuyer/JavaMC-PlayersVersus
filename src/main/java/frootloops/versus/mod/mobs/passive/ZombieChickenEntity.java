@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A chicken Conversion turned undead, as a horse turns into a zombie horse: still a chicken, as calm and as easily
+ * A chicken Blight turned undead, as a horse turns into a zombie horse: still a chicken, as calm and as easily
  * kept beside living ones, but dead. It lays no eggs, eats nothing, doesn't breed and is never a chick; it's always
  * the temperate kind (its skin is the temperate chicken's, gone the zombie's green), and its voice is lower. Baby
  * zombies ride them as chicken jockeys. It's undead (smite, healing harms it) and burns in daylight, as the zombie horse.

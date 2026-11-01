@@ -4,7 +4,7 @@ import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.mushrooms.StagedMushroomBlock;
 import frootloops.versus.mod.items_and_effects.CustomBrewingItems;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
-import frootloops.versus.mod.items_and_effects.conversion.Conversion;
+import frootloops.versus.mod.items_and_effects.blight.Blight;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
@@ -46,10 +46,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * What Conversion and withering make of villagers and animals: Conversion turns villagers into zombie villagers and
+ * What Blight and withering make of villagers and animals: Blight turns villagers into zombie villagers and
  * animals with an undead kind of their own into it, still their owner's; withering turns villagers into pale villagers,
  * cured by golden apples, and illagers into pale zombies. Zombie chickens lay nothing and breed with nothing; the pale
- * and the passive undead are undead. Golden apples cure Conversion; grown brown mushroom clusters make mining fatigue.
+ * and the passive undead are undead. Golden apples cure Blight; grown brown mushroom clusters make mining fatigue.
  */
 public class UndeadFormsGameTest {
 
@@ -63,9 +63,9 @@ public class UndeadFormsGameTest {
         return AABB.encapsulatingFullBlocks(helper.absolutePos(new BlockPos(0, 0, 0)), helper.absolutePos(new BlockPos(13, 7, 7)));
     }
 
-    /** Conversion enough to whiten all the entity's hearts. */
+    /** Blight enough to whiten all the entity's hearts. */
     private static MobEffectInstance allWhite(LivingEntity entity) {
-        return new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, Conversion.hearts(entity.getMaxHealth()) - 1);
+        return new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, Blight.hearts(entity.getMaxHealth()) - 1);
     }
 
     private static <T extends Mob> List<T> found(GameTestHelper helper, Class<T> type, EntityType<?> exactly) {
@@ -102,7 +102,7 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
-    /** Withered below 8 health, a pillager turns into a pale zombie; Conversion would have made it the zombie of the place. */
+    /** Withered below 8 health, a pillager turns into a pale zombie; Blight would have made it the zombie of the place. */
     @GameTest(structure = ROOM, maxTicks = 20)
     public void aWitheredIllagerTurnsPaleZombie(GameTestHelper helper) {
         floor(helper);
@@ -145,15 +145,15 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
-    /** Golden apples (both) cure Conversion when eaten. */
+    /** Golden apples (both) cure Blight when eaten. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void goldenApplesCureConversion(GameTestHelper helper) {
+    public void goldenApplesCureBlight(GameTestHelper helper) {
         for (Item apple : List.of(Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE)) {
             Consumable consumable = new ItemStack(apple).get(DataComponents.CONSUMABLE);
             helper.assertTrue(consumable != null, apple + " can't be eaten");
             boolean cures = consumable.onConsumeEffects().stream().anyMatch(effect -> effect instanceof RemoveStatusEffectsConsumeEffect remove
-                    && remove.effects().contains(CustomStatusEffects.CONVERSION));
-            helper.assertTrue(cures, apple + " doesn't cure Conversion: " + consumable.onConsumeEffects());
+                    && remove.effects().contains(CustomStatusEffects.BLIGHT));
+            helper.assertTrue(cures, apple + " doesn't cure Blight: " + consumable.onConsumeEffects());
         }
         helper.succeed();
     }
@@ -199,7 +199,7 @@ public class UndeadFormsGameTest {
             List<ZombieChickenEntity> undead = found(helper, ZombieChickenEntity.class, ModEntities.ZOMBIE_CHICKEN);
             helper.assertTrue(undead.size() == 1, undead.size() + " zombie chickens, not one");
             helper.assertTrue(!undead.getFirst().isBaby(), "the zombie chicken is a chick");
-            helper.assertTrue(!undead.getFirst().hasEffect(CustomStatusEffects.CONVERSION), "the zombie chicken carries Conversion");
+            helper.assertTrue(!undead.getFirst().hasEffect(CustomStatusEffects.BLIGHT), "the zombie chicken carries Blight");
         });
     }
 

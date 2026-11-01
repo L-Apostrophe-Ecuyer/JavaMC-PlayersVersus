@@ -29,10 +29,10 @@ public class BlightGameTest {
         cloud.setRadius(3.0F);
         cloud.setWaitTime(0);
         cloud.setDuration(400);
-        cloud.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 0));
+        cloud.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0));
         helper.getLevel().addFreshEntity(cloud);
         helper.succeedWhen(() -> {
-            MobEffectInstance had = pig.getEffect(CustomStatusEffects.CONVERSION);
+            MobEffectInstance had = pig.getEffect(CustomStatusEffects.BLIGHT);
             helper.assertTrue(had != null && had.getAmplifier() >= 2, "the pig in the cloud has amplifier " + (had == null ? "none" : had.getAmplifier()) + ", not stacking");
         });
     }

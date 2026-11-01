@@ -17,7 +17,7 @@ public abstract class CustomStatusEffects {
     public static Holder<MobEffect> VULNERABILITY;
     public static Holder<MobEffect> HAUNTING;
     public static Holder<MobEffect> BUOYANCY;
-    public static Holder<MobEffect> CONVERSION;
+    public static Holder<MobEffect> BLIGHT;
 
     public static void registerCustomStatusEffects() {
         VULNERABILITY = registerCustomEffect("vulnerability", new VulnerabilityStatusEffect("vulnerability"));
@@ -25,7 +25,7 @@ public abstract class CustomStatusEffects {
         SMALLNESS = registerCustomEffect("smallness", new SmallnessStatusEffect("smallness"));
         BUOYANCY = registerCustomEffect("buoyancy", new BuoyancyStatusEffect("buoyancy"));
         HAUNTING = registerCustomEffect("haunting", new HauntingStatusEffect());
-        CONVERSION = registerCustomEffect("conversion", new ConversionStatusEffect());
+        BLIGHT = registerCustomEffect("blight", new BlightStatusEffect());
     }
 
     private static Holder<MobEffect> registerCustomEffect(String name, MobEffect effect) {

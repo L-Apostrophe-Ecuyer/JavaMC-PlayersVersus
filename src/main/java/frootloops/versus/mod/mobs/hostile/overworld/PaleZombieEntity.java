@@ -51,7 +51,7 @@ public class PaleZombieEntity extends Zombie {
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
     }
 
-    // Its hits convert: a dose of Conversion each, armed or not (ConversionAttacks), in place of the wither they gave
+    // Its hits convert: a dose of Blight each, armed or not (BlightAttacks), in place of the wither they gave
 
     @Override
     public void addBehaviourGoals() {

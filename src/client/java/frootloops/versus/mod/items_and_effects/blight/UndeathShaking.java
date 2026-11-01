@@ -1,4 +1,4 @@
-package frootloops.versus.mod.items_and_effects.conversion;
+package frootloops.versus.mod.items_and_effects.blight;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

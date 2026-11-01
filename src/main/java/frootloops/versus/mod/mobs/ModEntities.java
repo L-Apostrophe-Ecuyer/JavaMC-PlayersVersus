@@ -91,7 +91,7 @@ public class ModEntities {
             EntityType.Builder.of(PaleWanderingTraderEntity::new, MobCategory.MONSTER).sized(0.6f, 1.95f).eyeHeight(1.62f).clientTrackingRange(10)
     );
 
-    /** A chicken Conversion turned undead: a chicken in all but its eggs, sized and tracked as one. */
+    /** A chicken Blight turned undead: a chicken in all but its eggs, sized and tracked as one. */
     public static final EntityType<ZombieChickenEntity> ZOMBIE_CHICKEN = register(
             "zombie_chicken",
             EntityType.Builder.of(ZombieChickenEntity::new, MobCategory.CREATURE).sized(0.4f, 0.7f).eyeHeight(0.644f).passengerAttachments(new Vec3(0.0, 0.7, -0.1)).clientTrackingRange(10)

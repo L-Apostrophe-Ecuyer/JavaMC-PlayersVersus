@@ -312,7 +312,7 @@
   "block.players-versus.brown_mushrooms": "Champignons bruns",
   "block.players-versus.red_mushrooms": "Champignons rouges",
   "block.players-versus.pale_shroom": "Champignon blême",
-  "effect.players-versus.conversion": "Conversion",
+  "effect.players-versus.blight": "Flétrissure",
   "death.attack.turned_undead": "%1$s est devenu mort-vivant",
   "death.attack.turned_undead.player": "%1$s est devenu mort-vivant en combattant %2$s",
   "entity.players-versus.watchling": "Veilleur",

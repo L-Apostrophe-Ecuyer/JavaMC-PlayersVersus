@@ -1,6 +1,6 @@
-package frootloops.versus.mixin.items_and_effects.conversion;
+package frootloops.versus.mixin.items_and_effects.blight;
 
-import frootloops.versus.mod.items_and_effects.conversion.Undeath;
+import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;

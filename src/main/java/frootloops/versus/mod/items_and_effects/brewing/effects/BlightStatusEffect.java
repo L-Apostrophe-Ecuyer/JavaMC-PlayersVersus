@@ -1,20 +1,20 @@
 package frootloops.versus.mod.items_and_effects.brewing.effects;
 
-import frootloops.versus.mod.items_and_effects.conversion.Undeath;
+import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * Conversion, from staying in pale shrooms: hearts turn white, one per amplifier + 1, and each dose adds to the last
- * (LivingEntityConversionMixin). Food doesn't regenerate health into white hearts; all white, the entity shakes and
+ * Blight, from staying in pale shrooms: hearts turn white, one per amplifier + 1, and each dose adds to the last
+ * (LivingEntityBlightMixin). Food doesn't regenerate health into white hearts; all white, the entity shakes and
  * turns undead (Undeath). It wears off, and milk cures it, as any effect.
  */
-public class ConversionStatusEffect extends MobEffect {
+public class BlightStatusEffect extends MobEffect {
     public static final int COLOR = 0xD4D4CA;
 
-    public ConversionStatusEffect() {
+    public BlightStatusEffect() {
         super(MobEffectCategory.HARMFUL, COLOR);
     }
 

@@ -88,7 +88,7 @@ assuming full overlap).
 
 - **`PaleCreeperEntity`** (extends `CreeperEntity`, spawn egg registered): faster (0.36 speed),
   longer follow range (40), armored (10/3.0 armor/toughness), immune to Wither damage (explicit
-  `damage()` override), explodes with an area-effect cloud of Conversion on death (5-block radius,
+  `damage()` override), explodes with an area-effect cloud of Blight on death (5-block radius,
   300-tick duration, shrinking; Darkness+Wither until the staged mushrooms batch; each reach of the cloud is a dose)
   after vanilla's plain explosion, and has bespoke footstep/hurt
   sounds (stone + mangrove-roots layered) plus a cave-ambience idle sound when it has no target —
@@ -134,7 +134,7 @@ assuming full overlap).
   golden apple cure (`ZombieVillagerMixin`). Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, hits wither
   (5 s), its kills turn pale (villagers and wandering traders); no reinforcements (`handleAttributes` empty, chance 0),
   no drowned/frostbite conversion, never despawns, villager sounds pitched low. `VillagerHostilesSensorMixin` makes
-  villagers flee it (8 blocks). Conversion-immune; excluded from `ZombieMixin`'s wither-to-pale and from zombies' rare
+  villagers flee it (8 blocks). Blight-immune; excluded from `ZombieMixin`'s wither-to-pale and from zombies' rare
   converting hits.
 - **Pale wandering trader** (`PaleWanderingTraderEntity`, extends `PaleVillagerEntity`; client
   `PaleWanderingTraderRenderer`, the wandering trader's model and the same skin treatment): a withered wandering trader
@@ -142,7 +142,7 @@ assuming full overlap).
   wandering trader again with them (`overrideOffers`) and 48000 ticks to wander.
 - **Undead animals in body armour don't burn** (`MobSunArmourMixin` at `Mob#burnUndead` HEAD).
 - **Zombie chicken** (`mod/mobs/passive/ZombieChickenEntity`, extends `Chicken`; client `ZombieChickenRenderer`;
-  textures from `tools/undead-animals.py`): what Conversion makes of a chicken, a passive undead animal as the zombie
+  textures from `tools/undead-animals.py`): what Blight makes of a chicken, a passive undead animal as the zombie
   horse. No eggs (`eggTime` held up), no food, no offspring, never a chick (`canBeABaby`, `setAge` clamped), always the
   temperate variant (`setVariant` ignored), lower voice. In `#minecraft:zombies` (so undead) and
   `#minecraft:burn_in_daylight` (vanilla's tag-driven `Mob#burnUndead`), never converted. Drops 0-2 feathers and 0-1
@@ -166,10 +166,10 @@ assuming full overlap).
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
 - **Pale Zombie** (`mod/mobs/hostile/overworld/PaleZombieEntity.java`, renderer under
   `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above).
-  Its hits convert: a dose of Conversion each (`ConversionAttacks`, through `MobConversionAttackMixin` on
+  Its hits convert: a dose of Blight each (`BlightAttacks`, through `MobBlightAttackMixin` on
   `Mob#doHurtTarget`), in place of the wither it gave. Creakings' hits do too, and their vanish-on-hit gives the
-  attacker Conversion instead of blindness (`CreakingScares`); other zombies' hits, 1 in 25
-  (`VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE`), in place of their own effect (a husk's hunger is dropped). The snow-biome Frosted
+  attacker Blight instead of blindness (`CreakingScares`); other zombies' hits, 1 in 25
+  (`VersusSettings.Mushrooms.ZOMBIE_BLIGHT_CHANCE`), in place of their own effect (a husk's hunger is dropped). The snow-biome Frosted
   Zombie was removed in the 26.4 port: vanilla's Frostbite takes its spawns, and vanilla turns
   freezing zombies into frostbites (`Zombie#convertsToWhenFreezing`), which `ZombieMixin` did before.
 - **Ice Cube** (`mod/mobs/hostile/overworld/IceCubeEntity.java`, `IceCubeRenderer` in the client set)
