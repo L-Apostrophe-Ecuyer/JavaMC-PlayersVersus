@@ -1,28 +1,14 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
 # New-moon darkness: the 26.4 lightmap
-sig net.minecraft.client.renderer.LightmapRenderStateExtractor
-findsig LightmapRenderState
-calls net.minecraft.client.renderer.LightmapRenderStateExtractor .
-member net.minecraft.client.multiplayer.ClientLevel SkyDarken|skyDarken|getSkyFlash|environmentAttributes
-member net.minecraft.world.level.dimension.DimensionType hasSkyLight|skylight
-calls net.minecraft.world.attribute.EnvironmentAttributes <clinit>
-datadir timeline
-data timeline/day.json
-data timeline/moon.json
-data dimension_type/overworld.json
-assets shaders/core
-asset shaders/core/lightmap.fsh
 # The watchling's model and animation
-calls net.minecraft.client.model.monster.enderman.EndermanModel .
-sig net.minecraft.client.model.HumanoidModel
-calls net.minecraft.client.model.HumanoidModel setupAnim|setupAttackAnimation|createMesh|poseRightArm|poseLeftArm|getArm|<init>
-calls net.minecraft.client.model.geom.builders.PartDefinition addOrReplaceChild
-sig net.minecraft.client.renderer.entity.state.HumanoidRenderState
-sig net.minecraft.client.renderer.entity.state.EndermanRenderState
-sig net.minecraft.client.renderer.entity.EndermanRenderer
-calls net.minecraft.client.renderer.entity.EndermanRenderer extractRenderState
-member net.minecraft.client.renderer.entity.HumanoidMobRenderer extractHumanoidRenderState
-member net.minecraft.client.model.geom.ModelPart resetPose|getInitialPose|PartPose
-member net.minecraft.world.entity.Mob setTarget|getTarget
-calls net.minecraft.world.entity.Mob setTarget
+# The watchling renderer: where an ItemModelResolver comes from, and what the humanoid extraction fills
+member net.minecraft.client.renderer.entity.EntityRendererProvider$Context Item|item
+member net.minecraft.client.renderer.entity.LivingEntityRenderer itemModelResolver
+member net.minecraft.client.renderer.entity.EntityRenderer itemModelResolver
+sig net.minecraft.client.renderer.entity.state.ArmedEntityRenderState
+calls net.minecraft.client.renderer.entity.HumanoidMobRenderer extractHumanoidRenderState
+calls net.minecraft.client.renderer.entity.state.ArmedEntityRenderState extract
+calls net.minecraft.client.renderer.entity.LivingEntityRenderer extractRenderState
+member net.minecraft.world.entity.monster.Enderman isCreepy|DATA_CREEPY
+member net.minecraft.client.renderer.state.LightmapRenderState skyFactor
