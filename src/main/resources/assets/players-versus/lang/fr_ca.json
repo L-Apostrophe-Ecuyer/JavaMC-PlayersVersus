@@ -313,6 +313,10 @@
   "block.players-versus.red_mushrooms": "Champignons rouges",
   "block.players-versus.pale_shroom": "Champignon blême",
   "effect.players-versus.conversion": "Conversion",
-  "death.attack.shroomified": "%1$s a succombé aux champignons blêmes",
-  "death.attack.shroomified.player": "%1$s a succombé aux champignons blêmes en combattant %2$s"
+  "death.attack.turned_undead": "%1$s est devenu mort-vivant",
+  "death.attack.turned_undead.player": "%1$s est devenu mort-vivant en combattant %2$s",
+  "entity.players-versus.watchling": "Veilleur",
+  "item.players-versus.watchling_spawn_egg": "Oeuf d'apparition de Veilleur",
+  "death.attack.watched": "%1$s a regardé trop longtemps",
+  "death.attack.watched.player": "%1$s a regardé %2$s trop longtemps"
 }

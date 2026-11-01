@@ -1,6 +1,5 @@
 package frootloops.versus.gametest;
 
-import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.MushroomCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.MushroomSpiderEntity;
@@ -19,8 +18,8 @@ import java.util.List;
 
 /**
  * The mushroom caves' creepers and spiders turn the plain ones: a mushroom creeper's swelling ends in a spore puff that
- * turns the creepers near it and converts what else lives there, never an explosion; a mushroom spider's bite turns a
- * spider, unharmed.
+ * turns the creepers near it and touches nothing else, never an explosion; a mushroom spider's bite turns a spider,
+ * unharmed.
  */
 public class MushroomMobsGameTest {
 
@@ -55,9 +54,9 @@ public class MushroomMobsGameTest {
         });
     }
 
-    /** Lit, a mushroom creeper still only puffs: the floor stays, it lives, a pig beside it converts, and it's lit no more. */
+    /** Lit, a mushroom creeper still only puffs: the floor stays, it lives, a pig beside it is untouched, and it's lit no more. */
     @GameTest(structure = ROOM, maxTicks = 80)
-    public void aLitMushroomCreeperPuffsConversion(GameTestHelper helper) {
+    public void aLitMushroomCreeperOnlyPuffs(GameTestHelper helper) {
         floor(helper);
         MushroomCreeperEntity mushroom = helper.spawnWithNoFreeWill(ModEntities.MUSHROOM_CREEPER, new Vec3(4.5, 1.0, 3.5));
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(6.0, 1.0, 3.5));
@@ -65,7 +64,7 @@ public class MushroomMobsGameTest {
         helper.runAfterDelay(50, () -> {
             helper.assertTrue(mushroom.isAlive(), "the lit mushroom creeper blew itself up");
             helper.assertTrue(helper.getBlockState(new BlockPos(4, 0, 3)).is(Blocks.STONE), "the puff broke the floor");
-            helper.assertTrue(pig.hasEffect(CustomStatusEffects.CONVERSION), "the pig beside the puff didn't convert");
+            helper.assertTrue(pig.getActiveEffects().isEmpty() && pig.getHealth() == pig.getMaxHealth(), "the puff touched the pig beside it");
             helper.assertTrue(!mushroom.isIgnited(), "it's still lit after its puff");
             helper.succeed();
         });

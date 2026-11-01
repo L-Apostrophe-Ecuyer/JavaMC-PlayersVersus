@@ -1,5 +1,6 @@
 package frootloops.versus.mod.mobs;
 
+import frootloops.versus.mod.mobs.hostile.end.WatchlingRenderer;
 import frootloops.versus.mod.mobs.hostile.nether.WildfireEntityRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.IceCubeRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.MushroomCreeperRenderer;
@@ -32,6 +33,7 @@ public class ModEntitiesRenderers {
         register(MUSHROOM_CREEPER, context -> new MushroomCreeperRenderer(context));
         register(MUSHROOM_SPIDER, context -> new MushroomSpiderRenderer(context));
         register(WILDFIRE, context -> new WildfireEntityRenderer(context));
+        register(WATCHLING, context -> new WatchlingRenderer(context));
     }
 
     /** Entity renderers are a client registry since 26.4-snapshot-4, keyed as their entity types are. */

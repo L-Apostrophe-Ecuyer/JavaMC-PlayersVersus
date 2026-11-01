@@ -86,14 +86,19 @@ by `ZOMBIE_CONVERSION_CHANCE` (`ConversionAttacks.afterHit`; a converting hit's 
 are dropped), a creaking vanishing when hit, the mushroom creeper's spore puff, the pale creeper's cloud, and rotten
 flesh (`VanillaItems`: `ROTTEN_FLESH_CONVERSION_CHANCE` 1/8 of a 1200-tick dose, besides its hunger).
 `LivingEntityConversionMixin` stacks doses (new amplifier = had + dose + 1, duration the longer of the two) and keeps
-tag `players-versus:conversion_immune` (pale creepers and creakings among them) from taking it. White hearts = amplifier + 1 from the bar's end (`Conversion`, pure,
+tag `players-versus:conversion_immune` from taking it (skeletons, the nether's undead, the pale, red mushroom hosts,
+endermen and their bugs, golems, bosses; zombies are no longer immune). Zombies' rare hits convert only their kin (tag
+`players-versus:zombie_kin`; piglins for zombified piglins). The mushroom creeper's puff no longer doses (lore spec
+`2026-11-01-pale-warp-lore-and-watchling-design.md`). White hearts = amplifier + 1 from the bar's end (`Conversion`, pure,
 `ConversionTest`; client `ConversionHeartsMixin` draws `hud/heart/conversion_*`, access-widened `Hud$HeartType`).
 Food regeneration stops below them (`HungerManagerMixin`, both the overhaul's and vanilla's `heal`). All white:
-`Shroomify` shakes it `SHROOMIFY_TICKS` (`ShroomShakingPayload` -> client `ShroomShaking`, render state "fully frozen";
-nausea for a player), then at the level tick's end converts it (villager -> zombie villager via a stand-in zombie's
-`convertVillagerToZombieVillager`; piglins -> zombified piglin, hoglin -> zoglin, tag
-`players-versus:shroomify_into_pale_zombies` -> pale zombie) or kills it (`players-versus:shroomified`); a player dies
-and a pale zombie rises wearing (and guaranteed to drop) their armour.
+`Undeath` (was `Shroomify`) shakes it `TURNING_TICKS` (`UndeathShakingPayload` -> client `UndeathShaking`, render state
+"fully frozen"; nausea for a player), then at the level tick's end `turn`s it: villager -> zombie villager via a
+stand-in zombie's `convertVillagerToZombieVillager`; zombies -> pale zombie, creeper -> pale creeper, spiders -> pale
+spider, horse -> zombie horse, piglins -> zombified piglin, hoglin -> zoglin; tag `players-versus:rise_as_zombies`
+(illagers, witch, wandering trader) -> `zombieOfThePlace` (drowned under water, pale zombie where `PaleLine` holds, husk
+in tag `players-versus:undead_rise_as_husks`, else zombie); else killed (`players-versus:turned_undead`). A player dies
+and the zombie of the place rises wearing (and guaranteed to drop) their armour.
 
 ## Concentrates (`CustomBrewingItems`, `ConcentrateItem`)
 ~30 `ConcentrateItem`s (`concentrate_of_<effect>`), each a placeable `BlockItem` (see

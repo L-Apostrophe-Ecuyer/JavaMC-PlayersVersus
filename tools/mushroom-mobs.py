@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""The mushroom creeper's and mushroom spider's textures and spawn eggs, recoloured from vanilla's.
+"""The mushroom creeper's and mushroom spider's textures and spawn eggs, recoloured from vanilla's: hosts of the red
+mushroom, red and white as it is (their renderers grow red mushrooms out of them too).
 
 Usage: mushroom-mobs.py <vanilla dir> <assets/players-versus/textures dir>
 
 <vanilla dir> holds vanilla's creeper.png, spider.png, creeper_spawn_egg.png, spider_spawn_egg.png,
-brown_mushroom_block.png and mushroom_stem.png (the api-diff workflow's "asset" focus lines print them). Each pixel
-keeps its shade among the texture's pixels and takes the colour of the brown mushroom cap or the stem: the creeper's head
-and body are cap, the lightest of their mottling stem-pale, its feet stem and its face a dark cap; the spider's body is
-cap likewise, its legs stem. The spider's eyes and the eggs' outlines keep vanilla's pixels.
+red_mushroom_block.png and mushroom_stem.png (the api-diff workflow's "asset" focus lines print them). Each pixel
+keeps its shade among the texture's pixels and takes the colour of the red mushroom cap (its red, not its white spots)
+or the stem: the creeper's head and body are cap, the lightest of their mottling stem-pale (the cap's spots), its feet
+stem and its face a dark cap; the spider's body is cap likewise, its legs stem. The spider's eyes and the eggs' outlines
+keep vanilla's pixels.
 """
 import sys
 from pathlib import Path
@@ -15,9 +17,9 @@ from pathlib import Path
 from PIL import Image
 
 
-def mean_colour(path):
-    """The texture's average colour."""
-    pixels = [p for p in Image.open(path).convert("RGBA").get_flattened_data() if p[3] > 0]
+def mean_colour(path, red_only=False):
+    """The texture's average colour (of its red pixels only, if asked: a red cap without its spots)."""
+    pixels = [p for p in Image.open(path).convert("RGBA").get_flattened_data() if p[3] > 0 and (not red_only or p[0] > p[1] + 40)]
     return tuple(sum(p[i] for p in pixels) / len(pixels) for i in range(3))
 
 
@@ -84,7 +86,7 @@ def spider_region(x, y, pixel):
 
 def main(vanilla, textures):
     vanilla, textures = Path(vanilla), Path(textures)
-    cap, stem = mean_colour(vanilla / "brown_mushroom_block.png"), mean_colour(vanilla / "mushroom_stem.png")
+    cap, stem = mean_colour(vanilla / "red_mushroom_block.png", red_only=True), mean_colour(vanilla / "mushroom_stem.png")
     colours = {"cap": (cap, CAP_SHADES), "stem": (stem, STEM_SHADES), "face": (cap, FACE_SHADES)}
     entity, item = textures / "entity", textures / "item"
     recolour(Image.open(vanilla / "creeper.png"), creeper_region, colours, dark).save(entity / "mushroom_creeper.png")

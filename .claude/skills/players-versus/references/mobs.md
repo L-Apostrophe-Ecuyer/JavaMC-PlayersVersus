@@ -102,9 +102,20 @@ assuming full overlap).
   goal) and hunt the plain kind (`EntityTypes.CREEPER`/`SPIDER` exactly); `HurtByTargetGoal` makes them fight back.
   The creeper's swelling ends in a spore puff, always (`CreeperMixin` at `explodeCreeper`'s head, server side; it
   also puts out a lit one, which would puff for ever): no damage, every plain creeper within 3 blocks `convertTo` a
-  mushroom creeper, every other living thing there takes a dose of Conversion (`ConversionAttacks.dose`), swell
-  reset, 100-tick cooldown on its swell goal. It never explodes, after a player or lit. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
+  mushroom creeper, nothing else touched, swell reset, 100-tick cooldown on its swell goal. It never explodes, after a
+  player or lit. Both are the red mushroom's hosts (lore spec `2026-11-01-pale-warp-lore-and-watchling-design.md`):
+  red and white skins (`tools/mushroom-mobs.py`, from the red mushroom block) and red mushrooms growing out of the
+  creeper's head and the spider's abdomen (client `RedMushroomsLayer`, the red mushroom's block model as the
+  mooshroom's, resolved each frame in their renderers' `extractRenderState`). Never converted. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
   `MushroomMobsGameTest`, assets `MushroomMobsTest`.
+- **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
+  `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman with a creaking's yellow
+  eyes. Its goals are replaced: it hunts players, freezes while watched (`FreezeWhenWatchedGoal`), teleports up behind
+  its prey when unwatched (`CreepBehindGoal`), and its hits convert. `WatchlingStare` (server, each level tick): a
+  player looking at one (`VersusSettings.Watchlings`: 48 blocks, a ~25° cone, line of sight, no
+  `#gaze_disguise_equipment` on the head) builds static (`WatchedPayload` to the client's HUD element), full after
+  120 ticks: they die of `players-versus:watched` and 4-7 silverfish spawn where they stood. Spawns rarely in the dark
+  by the pale line (`MobSpawning.canSpawnWatchling`).
 - **Warden (`WardenMixin`)** — extensively rebalanced, all deliberate per inline doc-comments in the
   source itself (read them for full designer intent): anger toward a target **decays** over time if
   they're sneaking or far away (README-adjacent: rewards "run and hide" play over "just outrun it");

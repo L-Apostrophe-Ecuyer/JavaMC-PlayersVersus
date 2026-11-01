@@ -51,7 +51,7 @@ class ConversionTest {
     }
 
     @Test
-    void allHeartsWhiteShroomifies() {
+    void allHeartsWhiteTurnsUndead() {
         assertFalse(Conversion.allWhite(20.0F, 9));
         assertTrue(Conversion.allWhite(20.0F, 10));
         assertTrue(Conversion.allWhite(20.0F, 14));

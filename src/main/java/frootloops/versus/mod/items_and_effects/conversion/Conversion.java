@@ -3,7 +3,7 @@ package frootloops.versus.mod.items_and_effects.conversion;
 /**
  * Conversion, pale shrooms' effect, by numbers: its hearts turn white, one per amplifier + 1, from the end of the health
  * bar down towards none. Each dose adds its amplifier + 1 to what was had, and refreshes it without shortening it. Food doesn't regenerate health into white
- * hearts; all hearts white, the entity shroomifies (Shroomify).
+ * hearts; all hearts white, the entity turns undead (Undeath).
  */
 public final class Conversion {
     private Conversion() {}

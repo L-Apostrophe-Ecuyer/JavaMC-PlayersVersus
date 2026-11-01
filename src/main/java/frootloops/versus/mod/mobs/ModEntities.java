@@ -1,5 +1,6 @@
 package frootloops.versus.mod.mobs;
 
+import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.mobs.hostile.nether.WildfireEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
@@ -67,6 +68,12 @@ public class ModEntities {
             EntityType.Builder.of(MushroomSpiderEntity::new, MobCategory.MONSTER).sized(1.4f, 0.9f).eyeHeight(0.65f).passengerAttachments(0.765f).clientTrackingRange(8)
     );
 
+    /** The watchling: an enderman with a creaking's eyes, sized and tracked as one. */
+    public static final EntityType<WatchlingEntity> WATCHLING = register(
+            "watchling",
+            EntityType.Builder.of(WatchlingEntity::new, MobCategory.MONSTER).sized(0.6f, 2.9f).eyeHeight(2.55f).passengerAttachments(2.80625f).clientTrackingRange(8)
+    );
+
     public static final EntityType<WildfireEntity> WILDFIRE = register(
             "wildfire", EntityType.Builder.of(WildfireEntity::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.8F).clientTrackingRange(8)
     );
@@ -77,6 +84,7 @@ public class ModEntities {
     public static final Item PALE_SPIDER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_spider_spawn_egg").spawnEgg(PALE_SPIDER));
     public static final Item MUSHROOM_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("mushroom_creeper_spawn_egg").spawnEgg(MUSHROOM_CREEPER));
     public static final Item MUSHROOM_SPIDER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("mushroom_spider_spawn_egg").spawnEgg(MUSHROOM_SPIDER));
+    public static final Item WATCHLING_SPAWN_EGG =  new SpawnEggItem(getItemSettings("watchling_spawn_egg").spawnEgg(WATCHLING));
     public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("wildfire_spawn_egg").spawnEgg(WILDFIRE));
 
 
@@ -90,6 +98,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(MUSHROOM_CREEPER, Creeper.createAttributes());
         FabricDefaultAttributeRegistry.register(MUSHROOM_SPIDER, Spider.createAttributes());
         FabricDefaultAttributeRegistry.register(WILDFIRE, WildfireEntity.createWildfireAttributes());
+        FabricDefaultAttributeRegistry.register(WATCHLING, WatchlingEntity.createWatchlingAttributes());
 
         // Make them spawn in the world:
         MobSpawning.addCustomSpawns();

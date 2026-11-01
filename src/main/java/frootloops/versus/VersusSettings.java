@@ -135,6 +135,17 @@ public abstract class VersusSettings {
         public static float HEART_IN_ROOTS = 0.75f;
     }
 
+    public static class Watchlings {
+        // Looking at a watchling fills the screen with static: full after STARE_TICKS, and you die into silverfish;
+        // looking away, it clears in CLEAR_TICKS. Looking at one: within WATCH_RANGE blocks, in plain sight, and no
+        // further off the middle of the view than this cone (the cosine of its half angle)
+        public static int STARE_TICKS = 120;
+        public static int CLEAR_TICKS = 60;
+        public static double WATCH_RANGE = 48.0;
+        public static double WATCH_CONE = 0.9;
+        public static int SILVERFISH_MIN = 4, SILVERFISH_MAX = 7;
+    }
+
     public static class Mushrooms {
         // Brown and red mushrooms grow by stages of one, two and three, and below y 0 into pale shrooms (MushroomGrowth)
         public static boolean DO_STAGED_MUSHROOMS = true;
@@ -145,10 +156,10 @@ public abstract class VersusSettings {
         // Three spread no more where this many blocks of their kind are within 4 blocks across, 1 up or down
         public static int SPREAD_CAP = 8;
         // Conversion: a dose for each DOSE_TICKS spent in pale shrooms, lasting EFFECT_TICKS (each dose refreshes it);
-        // all hearts white, SHROOMIFY_TICKS of shaking before shroomifying
+        // all hearts white, TURNING_TICKS of shaking before turning undead
         public static int DOSE_TICKS = 100;
         public static int EFFECT_TICKS = 2400;
-        public static int SHROOMIFY_TICKS = 100;
+        public static int TURNING_TICKS = 100;
         // Pale zombies' and creakings' hits always convert, other zombies' this often (each in place of its own effect)
         public static float ZOMBIE_CONVERSION_CHANCE = 0.04f;
         // Rotten flesh: this chance of a dose lasting ROTTEN_FLESH_CONVERSION_TICKS

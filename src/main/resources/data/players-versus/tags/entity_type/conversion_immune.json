@@ -1,16 +1,27 @@
 {
   "values": [
-    "#minecraft:undead",
+    "#minecraft:skeletons",
+    "minecraft:wither",
+    "minecraft:phantom",
+    "minecraft:zombified_piglin",
+    "minecraft:zoglin",
+    "minecraft:zombie_horse",
+    "minecraft:skeleton_horse",
+    "players-versus:pale_zombie",
+    "players-versus:pale_creeper",
+    "players-versus:pale_spider",
+    "minecraft:creaking",
     "minecraft:mooshroom",
     "players-versus:mushroom_creeper",
     "players-versus:mushroom_spider",
-    "players-versus:pale_zombie",
+    "minecraft:enderman",
+    "minecraft:endermite",
+    "minecraft:silverfish",
+    "players-versus:watchling",
     "minecraft:iron_golem",
     "minecraft:snow_golem",
     "minecraft:copper_golem",
     "minecraft:ender_dragon",
-    "minecraft:warden",
-    "players-versus:pale_creeper",
-    "minecraft:creaking"
+    "minecraft:warden"
   ]
 }

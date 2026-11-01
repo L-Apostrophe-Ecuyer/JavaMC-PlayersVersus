@@ -11,18 +11,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The entities shaking before they shroomify (Shroomify), as the server says: they shake as frozen ones do, until a
+ * The entities shaking before they turn undead (Undeath), as the server says: they shake as frozen ones do, until a
  * little after the server last said so.
  */
 @Environment(EnvType.CLIENT)
-public final class ShroomShaking {
+public final class UndeathShaking {
     /** Until when (the level's game time) each entity, by id, shakes. */
     private static final Map<Integer, Long> UNTIL = new HashMap<>();
 
-    private ShroomShaking() {}
+    private UndeathShaking() {}
 
     public static void register() {
-        ClientPlayNetworking.registerGlobalReceiver(ShroomShakingPayload.TYPE, (payload, context) -> {
+        ClientPlayNetworking.registerGlobalReceiver(UndeathShakingPayload.TYPE, (payload, context) -> {
             ClientLevel level = context.client().level;
             if (level == null) return;
             long now = level.getGameTime();
@@ -31,7 +31,7 @@ public final class ShroomShaking {
         });
     }
 
-    /** Fills a render state: the entity shakes if it's shroomifying. */
+    /** Fills a render state: the entity shakes if it's turning undead. */
     public static void extract(LivingEntity entity, LivingEntityRenderState state) {
         if (UNTIL.isEmpty()) return;
         Long until = UNTIL.get(entity.getId());

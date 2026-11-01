@@ -454,5 +454,7 @@
   "block.players-versus.weaving_bile" : "Gooey Bile",
   "block.players-versus.luck_bile" : "Lucky Bile",
   "block.players-versus.unluck_bile" : "Unfortunate Bile",
-  "block.players-versus.withering_bile" : "Withering Bile"
+  "block.players-versus.withering_bile" : "Withering Bile",
+  "entity.players-versus.watchling": "Watchling",
+  "item.players-versus.watchling_spawn_egg": "Watchling Spawn Egg"
 }

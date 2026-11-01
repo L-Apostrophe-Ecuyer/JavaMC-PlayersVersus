@@ -459,6 +459,10 @@
   "block.players-versus.red_mushrooms": "Red Mushrooms",
   "block.players-versus.pale_shroom": "Pale Shroom",
   "effect.players-versus.conversion": "Conversion",
-  "death.attack.shroomified": "%1$s was shroomified",
-  "death.attack.shroomified.player": "%1$s was shroomified while fighting %2$s"
+  "death.attack.turned_undead": "%1$s turned undead",
+  "death.attack.turned_undead.player": "%1$s turned undead while fighting %2$s",
+  "entity.players-versus.watchling": "Watchling",
+  "item.players-versus.watchling_spawn_egg": "Watchling Spawn Egg",
+  "death.attack.watched": "%1$s looked too long",
+  "death.attack.watched.player": "%1$s looked at %2$s too long"
 }
