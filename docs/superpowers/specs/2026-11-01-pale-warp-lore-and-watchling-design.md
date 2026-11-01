@@ -296,4 +296,5 @@ attack like an enderman, with the added difficulty that looking at it causes sta
   doubled in width. The head stays closed (no "creepy" open mouth: its jaw layer is left out, and lifting the head would
   float it). Client only: unseen in a running game.
 - **Tests:** `WatchlingStareTest` (the fighting rate), game tests `WatchlingGameTest` (left alone it doesn't fight; hit by
-  a player or a mob it fights them instead of haunting; with no one left it calms and haunts again).
+  a player it fights instead of haunting; hit by a mob it fights that mob; with no one left it calms and haunts again;
+  the helper's mock player is creative, which a mob won't keep as a target, so a mob shows whom it fights).
