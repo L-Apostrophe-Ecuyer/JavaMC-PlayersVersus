@@ -1,20 +1,11 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
-find EnderMan
-find MushroomLayer
-find EyesLayer
-findsig EnderMan
-findsig EnderEyesLayer
-findsig MushroomCowMushroomLayer
-findcalls MushroomCowMushroomLayer
-sig net.minecraft.client.renderer.entity.layers.EyesLayer
-member net.minecraft.world.entity.EntityTypes ENDERMITE|SILVERFISH|ENDERMAN|ZOMBIE_HORSE|DROWNED|CAVE_SPIDER|HORSE
-member net.minecraft.tags.ItemTags GAZE
-member net.minecraft.client.gui.GuiGraphicsExtractor blit\(|fill\(
-member net.minecraft.world.entity.Entity isUnderWater|isEyeInFluid
-assets textures/entity/enderman
-assets textures/entity/cow
-asset textures/entity/enderman/enderman.png
-asset textures/entity/enderman/enderman_eyes.png
-asset textures/block/red_mushroom_block.png
-asset textures/block/red_mushroom.png
+findsig MushroomCowRenderer
+findcalls MushroomCowRenderer
+calls net.minecraft.client.renderer.entity.EndermanRenderer extractRenderState|<init>
+findsig BlockModelResolver
+sig net.minecraft.client.renderer.block.BlockModelRenderState
+findsig CreeperRenderer
+findsig SpiderRenderer
+sig net.minecraft.client.model.monster.creeper.CreeperModel
+findsig SpiderModel
