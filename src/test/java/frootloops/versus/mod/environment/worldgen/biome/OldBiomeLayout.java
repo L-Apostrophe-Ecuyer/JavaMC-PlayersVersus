@@ -30,10 +30,16 @@ final class OldBiomeLayout {
     private static final long MIN_EROSION_FOR_MOUNTAIN_TRANSITION_LONG = Climate.quantizeCoord(MIN_EROSION_FOR_MOUNTAIN_TRANSITION);
     private static final float MIN_CONTINENTALNESS_FOR_MOUNTAIN_TRANSITION = 0.03f;
     private static final long MIN_CONTINENTALNESS_FOR_MOUNTAIN_TRANSITION_LONG = Climate.quantizeCoord(MIN_CONTINENTALNESS_FOR_MOUNTAIN_TRANSITION);
+
     private static final long MAX_WEIRDNESS_FOR_RIVERS_LONG = Climate.quantizeCoord(0.3F), MIN_WEIRDNESS_FOR_RIVERS_LONG = Climate.quantizeCoord(-0.3F);
     private static final float MIN_TEMPERATURE_FOR_FROZEN_TRANSITION = -0.55f, MAX_TEMPERATURE_FOR_FROZEN_TRANSITION = -0.375f;
     private static final long MIN_TEMPERATURE_FOR_FROZEN_TRANSITION_LONG = Climate.quantizeCoord(MIN_TEMPERATURE_FOR_FROZEN_TRANSITION),
             MAX_TEMPERATURE_FOR_FROZEN_TRANSITION_LONG = Climate.quantizeCoord(MAX_TEMPERATURE_FOR_FROZEN_TRANSITION);
+
+    private static final float MIN_TEMPERATURE_FOR_WARM_TRANSITION = 0.2f, MAX_TEMPERATURE_FOR_WARM_TRANSITION = 0.3f;
+    private static final long MIN_TEMPERATURE_FOR_WARM_TRANSITION_LONG = Climate.quantizeCoord(MIN_TEMPERATURE_FOR_WARM_TRANSITION),
+            MAX_TEMPERATURE_FOR_WARM_TRANSITION_LONG = Climate.quantizeCoord(MAX_TEMPERATURE_FOR_WARM_TRANSITION);
+
     private static final float MIN_HUMIDITY_FOR_FOREST_TRANSITION = 0.275f, MAX_HUMIDITY_FOR_FOREST_TRANSITION = 0.35f;
     private static final long MIN_HUMIDITY_FOR_FOREST_TRANSITION_LONG = Climate.quantizeCoord(MIN_HUMIDITY_FOR_FOREST_TRANSITION),
             MAX_HUMIDITY_FOR_FOREST_TRANSITION_LONG = Climate.quantizeCoord(MAX_HUMIDITY_FOR_FOREST_TRANSITION);
@@ -135,6 +141,25 @@ final class OldBiomeLayout {
                 newTemperature = Parameter.span(MAX_TEMPERATURE_FOR_FROZEN_TRANSITION, Climate.unquantizeCoord(temperature.max()));
             }
         }
+        else if (temperature.min() < MIN_TEMPERATURE_FOR_WARM_TRANSITION_LONG && temperature.max() > MIN_TEMPERATURE_FOR_WARM_TRANSITION_LONG) {
+            transitionBiome = CustomOverworldBiomes.getWarmTransitionBiome(biome);
+            if (transitionBiome != null) {
+                float minTemperature = Math.max(Climate.unquantizeCoord(temperature.min()), MIN_TEMPERATURE_FOR_WARM_TRANSITION);
+                float maxTemperature = Climate.unquantizeCoord(temperature.max());
+                parameters.accept(Pair.of(Climate.parameters(Parameter.span(minTemperature, maxTemperature), humidity, continentalness, erosion, DEPTH_ZERO, weirdness, offset), transitionBiome));
+                newTemperature = Parameter.span(Climate.unquantizeCoord(temperature.min()), MIN_TEMPERATURE_FOR_WARM_TRANSITION);
+            }
+        } else if (temperature.min() < MAX_TEMPERATURE_FOR_WARM_TRANSITION_LONG && temperature.max() > MAX_TEMPERATURE_FOR_WARM_TRANSITION_LONG) {
+            transitionBiome = CustomOverworldBiomes.getWarmTransitionBiome(biome);
+            if (transitionBiome != null) {
+                float minTemperature = Climate.unquantizeCoord(temperature.min());
+                float maxTemperature = Math.min(Climate.unquantizeCoord(temperature.max()), MAX_TEMPERATURE_FOR_WARM_TRANSITION);
+                parameters.accept(Pair.of(Climate.parameters(Parameter.span(minTemperature, maxTemperature), humidity, continentalness, erosion, DEPTH_ZERO, weirdness, offset), transitionBiome));
+                newTemperature = Parameter.span(MAX_TEMPERATURE_FOR_WARM_TRANSITION, Climate.unquantizeCoord(temperature.max()));
+            }
+        }
+
+
 
         if ((biome == Biomes.GROVE || biome == Biomes.SNOWY_SLOPES) && temperature.max() > Climate.quantizeCoord(0.145f)) {
             transitionBiome = biome == Biomes.GROVE ? Biomes.TAIGA : Biomes.WINDSWEPT_HILLS;

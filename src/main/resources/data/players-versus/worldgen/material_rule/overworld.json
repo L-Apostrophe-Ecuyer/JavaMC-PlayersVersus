@@ -1758,7 +1758,6 @@
                         "if_true": {
                           "type": "minecraft:biome",
                           "biome_is": [
-                            "minecraft:savanna",
                             "minecraft:savanna_plateau"
                           ]
                         },

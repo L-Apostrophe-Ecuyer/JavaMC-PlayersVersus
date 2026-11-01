@@ -59,6 +59,8 @@ public class CustomOverworldBiomes {
             new PlacedBiome(Biomes.ICE_CAVES, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.4f), defaultParameter, Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-1.0f, -0.65f), Climate.Parameter.span(-1.0f, -0.2f)),
             new PlacedBiome(Biomes.ICE_CAVES, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.4f), defaultParameter, Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-1.0f, -0.65f), Climate.Parameter.span(0.2f, 1.0f)),
             new PlacedBiome(Biomes.ICE_CAVES, PlacedBiomeType.SURFACE_CAVE, false, Climate.Parameter.span(-1.0f, -0.6f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
+            new PlacedBiome(PALE_GROTTO, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.0f, 0.3f), Climate.Parameter.span(0.2f, 0.6f), Climate.Parameter.span(0.2f, 1.0f), Climate.Parameter.span(-0.2f, 0.8f), Climate.Parameter.span(0.2f, 1.0f)),
+            new PlacedBiome(MUSHROOM_CAVES, PlacedBiomeType.ALL_DEPTHS, false, anyValue, anyValue, Climate.Parameter.span(-2.0f, -1.05f), anyValue, anyValue),
             new PlacedBiome(BADLANDS_CAVE, PlacedBiomeType.SURFACE_CAVE, true, Climate.Parameter.span(0.8f, 1.0f), Climate.Parameter.span(-1.0f, -0.0f), defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DESERT_CREEPER_CAVE, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.8f, 1.0f), Climate.Parameter.span(-1.0f, -0.5f), Climate.Parameter.span(0.0f, 0.5f), Climate.Parameter.span(0.1f, 1.0f), Climate.Parameter.span(-1.0f, -0.3f)),
             new PlacedBiome(DESERT_CREEPER_CAVE, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.8f, 1.0f), Climate.Parameter.span(-1.0f, -0.5f), Climate.Parameter.span(0.0f, 0.5f), Climate.Parameter.span(0.1f, 1.0f), Climate.Parameter.span(0.2f, 1.0f)),
@@ -67,14 +69,10 @@ public class CustomOverworldBiomes {
             new PlacedBiome(Biomes.LUSH_CAVES, PlacedBiomeType.SURFACE_CAVE, true, Climate.Parameter.span(-0.3f, 0.7f), Climate.Parameter.span(-0.4f, 1.1f), Climate.Parameter.span(0.35f, 0.5f), Climate.Parameter.span(-0.1f, 1.0f), Climate.Parameter.span(-0.4f, -0.2f)),
             new PlacedBiome(Biomes.DRIPSTONE_CAVES, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.0f, 0.7f), defaultParameter, Climate.Parameter.span(0.4f, 1.0f), Climate.Parameter.span(-0.8f, 0.0f), Climate.Parameter.span(-0.75f, 0.3f)),
             new PlacedBiome(Biomes.DEEP_DARK, PlacedBiomeType.DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, Climate.Parameter.span(-1.0f, -0.8f), defaultParameter),
-            new PlacedBiome(PALE_GROTTO, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.0f, 0.3f), Climate.Parameter.span(0.2f, 0.6f), Climate.Parameter.span(0.2f, 1.0f), Climate.Parameter.span(-0.2f, 0.8f), Climate.Parameter.span(0.2f, 1.0f)),
+
 
             new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, Climate.Parameter.span(-0.7f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
-            new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter),
-            // Under the mushroom islands, all the way down: their continentalness (vanilla's mushroom fields' and below), which
-            // no other cave entry reaches (PvBiomeLayout keeps them off it), whatever the rest of the climate, past the usual
-            // -1 to 1 too (vanilla's ice caves reach a weirdness of 1.1), so no other cave comes near
-            new PlacedBiome(MUSHROOM_CAVES, PlacedBiomeType.ALL_DEPTHS, false, anyValue, anyValue, Climate.Parameter.span(-2.0f, -1.05f), anyValue, anyValue)
+            new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter)
     };
 
 
@@ -91,7 +89,7 @@ public class CustomOverworldBiomes {
             Map.entry(Biomes.PLAINS, Biomes.MEADOW),
             Map.entry(Biomes.SNOWY_PLAINS, Biomes.SNOWY_SLOPES),
             Map.entry(Biomes.SAVANNA, MOUNTAINSIDE_FOREST_WARM),
-            Map.entry(Biomes.SAVANNA_PLATEAU, Biomes.WINDSWEPT_SAVANNA));
+            Map.entry(Biomes.SAVANNA_PLATEAU, Biomes.STONY_PEAKS));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> FROZEN_BIOME_REPLACEMENTS = Map.ofEntries(
             Map.entry(Biomes.SNOWY_BEACH, COLD_BEACH),
@@ -111,13 +109,23 @@ public class CustomOverworldBiomes {
             Map.entry(Biomes.DESERT, DESERT_OASIS),
             Map.entry(Biomes.BADLANDS, Biomes.DESERT));
 
+    private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> WARM_BIOME_REPLACEMENTS = Map.ofEntries(
+            Map.entry(Biomes.SAVANNA_PLATEAU, Biomes.PLAINS),
+            Map.entry(Biomes.SAVANNA, MOUNTAINSIDE_FOREST_WARM),
+            Map.entry(Biomes.DARK_FOREST, Biomes.FOREST),
+            Map.entry(Biomes.SPARSE_JUNGLE, MOUNTAINSIDE_JUNGLE),
+            Map.entry(Biomes.JUNGLE, Biomes.SPARSE_JUNGLE),
+            Map.entry(Biomes.BAMBOO_JUNGLE, Biomes.SPARSE_JUNGLE));
+
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> SURFACE_CAVE_BIOME_REPLACEMENTS = Map.ofEntries(
             Map.entry(Biomes.FROZEN_PEAKS, Biomes.ICE_CAVES),
             Map.entry(Biomes.SNOWY_SLOPES, Biomes.ICE_CAVES),
             Map.entry(Biomes.DESERT, DESERT_CREEPER_CAVE),
             Map.entry(Biomes.BADLANDS, BADLANDS_CAVE),
             Map.entry(Biomes.ERODED_BADLANDS, BADLANDS_CAVE),
-            Map.entry(Biomes.WOODED_BADLANDS, BADLANDS_CAVE));
+            Map.entry(Biomes.WOODED_BADLANDS, BADLANDS_CAVE),
+            Map.entry(Biomes.PALE_GARDEN, PALE_GROTTO),
+            Map.entry(Biomes.MUSHROOM_FIELDS, MUSHROOM_CAVES));
 
     @Nullable
     public static ResourceKey<Biome> getMountainTransitionBiome(ResourceKey<Biome> originalBiome) {
@@ -132,6 +140,11 @@ public class CustomOverworldBiomes {
     @Nullable
     public static ResourceKey<Biome> getHumidTransitionBiome(ResourceKey<Biome> originalBiome) {
         return HUMID_BIOME_REPLACEMENTS.get(originalBiome);
+    }
+
+    @Nullable
+    public static ResourceKey<Biome> getWarmTransitionBiome(ResourceKey<Biome> originalBiome) {
+        return WARM_BIOME_REPLACEMENTS.get(originalBiome);
     }
 
     @Nullable

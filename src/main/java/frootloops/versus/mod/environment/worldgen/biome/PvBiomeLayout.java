@@ -78,9 +78,9 @@ public final class PvBiomeLayout {
                     (slice, biome) -> CustomOverworldBiomes.getSnowyToTemperateTransitionBiome(biome)),
             new Rule("humid", Box.ALL.withMin(Box.H, Climate.quantizeCoord(0.275F)).withMax(Box.H, Climate.quantizeCoord(0.35F)),
                     (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)),
-            // Where the weirdness is positive and the temperature negative, after the transitions, so only in what they
-            // leave: dappled trees (26.3's poplars) for birch, dark taiga for dark forest (weirdTarget); vanilla's own
-            // dappled forests give way to flower forests.
+            new Rule("warm", Box.ALL.withMin(Box.W, Climate.quantizeCoord(0.2F)).withMax(Box.H, Climate.quantizeCoord(0.375F)),
+                    (slice, biome) -> CustomOverworldBiomes.getWarmTransitionBiome(biome)),
+
             new Rule("flower-forest", Box.ALL,
                     (slice, biome) -> CustomOverworldBiomes.DAPPLED_FOREST.equals(biome) ? Biomes.FLOWER_FOREST : null),
             new Rule("weird-cold", Box.ALL.withMin(Box.W, Climate.quantizeCoord(DAPPLED_WEIRDNESS)).withMax(Box.T, Climate.quantizeCoord(DAPPLED_COLD)),
