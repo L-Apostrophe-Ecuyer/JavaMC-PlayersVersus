@@ -86,16 +86,22 @@ by `ZOMBIE_CONVERSION_CHANCE` (`ConversionAttacks.afterHit`; a converting hit's 
 are dropped), a creaking vanishing when hit, the mushroom creeper's spore puff, the pale creeper's cloud, and rotten
 flesh (`VanillaItems`: `ROTTEN_FLESH_CONVERSION_CHANCE` 1/8 of a 1200-tick dose, besides its hunger).
 `LivingEntityConversionMixin` stacks doses (new amplifier = had + dose + 1, duration the longer of the two) and keeps
-tag `players-versus:conversion_immune` from taking it (skeletons, the nether's undead, the pale, red mushroom hosts,
-endermen and their bugs, golems, bosses; zombies are no longer immune). Zombies' rare hits convert only their kin (tag
+tag `players-versus:conversion_immune` from taking it (skeletons, the nether's undead, the passive undead animals,
+the pale, red mushroom hosts, endermen and their bugs, golems, bosses; zombies are no longer immune). Zombies' rare hits convert only their kin (tag
 `players-versus:zombie_kin`; piglins for zombified piglins). The mushroom creeper's puff no longer doses (lore spec
 `2026-11-01-pale-warp-lore-and-watchling-design.md`). White hearts = amplifier + 1 from the bar's end (`Conversion`, pure,
 `ConversionTest`; client `ConversionHeartsMixin` draws `hud/heart/conversion_*`, access-widened `Hud$HeartType`).
 Food regeneration stops below them (`HungerManagerMixin`, both the overhaul's and vanilla's `heal`). All white:
 `Undeath` (was `Shroomify`) shakes it `TURNING_TICKS` (`UndeathShakingPayload` -> client `UndeathShaking`, render state
-"fully frozen"; nausea for a player), then at the level tick's end `turn`s it: villager -> zombie villager via a
-stand-in zombie's `convertVillagerToZombieVillager`; zombies -> pale zombie, creeper -> pale creeper, spiders -> pale
-spider, horse -> zombie horse, piglins -> zombified piglin, hoglin -> zoglin; tag `players-versus:rise_as_zombies`
+"fully frozen"; nausea for a player), then at the level tick's end `turn`s it: villager -> as a zombie's kill, via a
+stand-in zombie's `convertVillagerToZombieVillager` (`ZombieInfectionMixin` at its head: where `PaleLine` holds an adult
+turns into the illager of its trade, `Undeath.turnIllager` / `PaleVillagers.illagerFor`, pure, `PaleVillagersTest`:
+smiths, butchers, masons, leatherworkers -> vindicator with an iron axe; clerics, librarians, cartographers -> illusioner
+with a bow; the rest -> pillager with a crossbow; kept, no captains; the same hook catches a zombie's villager kill);
+zombies -> pale zombie, creeper -> pale creeper, spiders -> pale spider, horse -> zombie horse, camel -> camel husk,
+nautilus -> zombie nautilus, chicken -> zombie chicken (`keepWhatWasKept`: tame, owner via `AbstractHorseAccessor` or
+`TamableAnimal#setOwnerReference`, chicken jockey), piglins -> zombified piglin, hoglin -> zoglin; tag
+`players-versus:rise_as_zombies`
 (illagers, witch, wandering trader) -> `zombieOfThePlace` (drowned under water, pale zombie where `PaleLine` holds, husk
 in tag `players-versus:undead_rise_as_husks`, else zombie); else killed (`players-versus:turned_undead`). A player dies
 and the zombie of the place rises wearing (and guaranteed to drop) their armour.

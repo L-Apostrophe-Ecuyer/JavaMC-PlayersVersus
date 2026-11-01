@@ -118,6 +118,7 @@
     "mobs.hostile.overworld.WardenVibrationListenerMixin",
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
+    "mobs.hostile.overworld.ZombieInfectionMixin",
     "mobs.hostile.overworld.ZombieVillagerMixin",
     "mobs.hostile.overworld.ZombieEventListenerMixin",
     "mobs.hostile.nether.WitherSkeletonMixin",
@@ -131,7 +132,8 @@
     "mobs.passive.SheepMixin",
     "mobs.passive.PigMixin",
     "mobs.passive.PolarBearMixin",
-    "mobs.passive.TransportItemsBetweenContainersMixin"
+    "mobs.passive.TransportItemsBetweenContainersMixin",
+    "mobs.passive.AbstractHorseAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

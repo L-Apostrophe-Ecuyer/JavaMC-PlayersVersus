@@ -456,5 +456,7 @@
   "block.players-versus.unluck_bile" : "Unfortunate Bile",
   "block.players-versus.withering_bile" : "Withering Bile",
   "entity.players-versus.watchling": "Watchling",
-  "item.players-versus.watchling_spawn_egg": "Watchling Spawn Egg"
+  "item.players-versus.watchling_spawn_egg": "Watchling Spawn Egg",
+  "entity.players-versus.zombie_chicken": "Zombie Chicken",
+  "item.players-versus.zombie_chicken_spawn_egg": "Zombie Chicken Spawn Egg"
 }

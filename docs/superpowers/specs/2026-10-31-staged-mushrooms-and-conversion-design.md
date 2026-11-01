@@ -38,9 +38,10 @@ turn into is that spec's.
   seconds (a player feels sick), then (as revised):
   - a player dies of it ("turned undead") and the zombie of the place rises where they fell, wearing their armour, which it
     always drops; a totem saves them, armour and all;
-  - a villager turns into a zombie villager, piglins and piglin brutes into zombified piglins, a hoglin into a zoglin,
-    illagers, witches and wandering traders into the zombie of the place; zombies turn pale, creepers into pale
-    creepers, spiders into pale spiders, a horse into a zombie horse;
+  - a villager turns into a zombie villager (where paleness holds, into the illager of its trade: lore spec), piglins
+    and piglin brutes into zombified piglins, a hoglin into a zoglin, illagers, witches and wandering traders into the
+    zombie of the place; zombies turn pale, creepers into pale creepers, spiders into pale spiders; a horse into a
+    zombie horse, a camel into a camel husk, a nautilus into a zombie nautilus, a chicken into a zombie chicken;
   - anything else dies of it.
   - The undead, mooshrooms, the mushroom creeper and spider, pale zombies, pale creepers, creakings, golems, the ender
     dragon and the warden never take Conversion.

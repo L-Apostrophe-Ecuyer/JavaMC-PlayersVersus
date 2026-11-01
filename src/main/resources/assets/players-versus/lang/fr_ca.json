@@ -318,5 +318,7 @@
   "entity.players-versus.watchling": "Veilleur",
   "item.players-versus.watchling_spawn_egg": "Oeuf d'apparition de Veilleur",
   "death.attack.watched": "%1$s a regardé trop longtemps",
-  "death.attack.watched.player": "%1$s a regardé %2$s trop longtemps"
+  "death.attack.watched.player": "%1$s a regardé %2$s trop longtemps",
+  "entity.players-versus.zombie_chicken": "Poulet zombie",
+  "item.players-versus.zombie_chicken_spawn_egg": "Oeuf d'apparition de Poulet zombie"
 }

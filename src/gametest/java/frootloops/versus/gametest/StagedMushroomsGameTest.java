@@ -28,7 +28,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.zombie.ZombieVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -171,9 +170,9 @@ public class StagedMushroomsGameTest {
         return new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, Conversion.hearts(entity.getMaxHealth()) - 1);
     }
 
-    /** All white, a villager shakes, then turns into a zombie villager. */
+    /** All white, a villager shakes before it turns (what it turns into: UndeadFormsGameTest). */
     @GameTest(structure = ROOM, maxTicks = 200)
-    public void anAllWhiteVillagerTurnsZombie(GameTestHelper helper) {
+    public void anAllWhiteVillagerShakesThenTurns(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
         villager.addEffect(allWhite(villager));
@@ -181,9 +180,9 @@ public class StagedMushroomsGameTest {
                 helper.assertTrue(!villager.isRemoved(), "the villager turned before it was done shaking"));
         helper.succeedWhen(() -> {
             helper.assertTrue(villager.isRemoved(), "the villager is still a villager");
-            List<ZombieVillager> zombies = helper.getLevel().getEntitiesOfClass(ZombieVillager.class, room(helper));
-            helper.assertTrue(zombies.size() == 1, zombies.size() + " zombie villagers, not one");
-            helper.assertTrue(!zombies.getFirst().hasEffect(CustomStatusEffects.CONVERSION), "the zombie villager carries Conversion");
+            List<Mob> turned = helper.getLevel().getEntitiesOfClass(Mob.class, room(helper));
+            helper.assertTrue(turned.size() == 1, turned.size() + " mobs came of the villager, not one");
+            helper.assertTrue(!turned.getFirst().hasEffect(CustomStatusEffects.CONVERSION), "what the villager turned into carries Conversion");
         });
     }
 

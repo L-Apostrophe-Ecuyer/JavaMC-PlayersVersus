@@ -116,6 +116,15 @@ assuming full overlap).
   `#gaze_disguise_equipment` on the head) builds static (`WatchedPayload` to the client's HUD element), full after
   120 ticks: they die of `players-versus:watched` and 4-7 silverfish spawn where they stood. Spawns rarely in the dark
   by the pale line (`MobSpawning.canSpawnWatchling`).
+- **Zombie chicken** (`mod/mobs/passive/ZombieChickenEntity`, extends `Chicken`; client `ZombieChickenRenderer`;
+  textures from `tools/undead-animals.py`): what Conversion makes of a chicken, a passive undead animal as the zombie
+  horse. No eggs (`eggTime` held up), no food, no offspring, never a chick (`canBeABaby`, `setAge` clamped), always the
+  temperate variant (`setVariant` ignored), lower voice. In `#minecraft:zombies` (so undead) and
+  `#minecraft:burn_in_daylight` (vanilla's tag-driven `Mob#burnUndead`), never converted. Drops 0-2 feathers and 0-1
+  rotten flesh. Baby zombies' chicken jockeys ride them (`ZombieInfectionMixin` wraps `Zombie#finalizeSpawn`'s
+  `EntityType#create` and keeps only zombie chickens among the nearby ones). Game tests `UndeadFormsGameTest`.
+- The pale zombie is in `#minecraft:zombies`, the pale creeper and spider in `#minecraft:undead` (smite, inverted
+  healing, the wither spares them); the mushroom spider joins the pale one in `#minecraft:arthropod`.
 - **Warden (`WardenMixin`)** — extensively rebalanced, all deliberate per inline doc-comments in the
   source itself (read them for full designer intent): anger toward a target **decays** over time if
   they're sneaking or far away (README-adjacent: rewards "run and hide" play over "just outrun it");

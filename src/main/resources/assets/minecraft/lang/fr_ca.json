@@ -306,5 +306,7 @@
   "players-versus.deathScreen.respawnNearby": "Ressusciter près d'ici",
   "players-versus.deathScreen.respawnHome": "Ressusciter chez soi",
   "entity.players-versus.watchling": "Veilleur",
-  "item.players-versus.watchling_spawn_egg": "Oeuf d'apparition de Veilleur"
+  "item.players-versus.watchling_spawn_egg": "Oeuf d'apparition de Veilleur",
+  "entity.players-versus.zombie_chicken": "Poulet zombie",
+  "item.players-versus.zombie_chicken_spawn_egg": "Oeuf d'apparition de Poulet zombie"
 }

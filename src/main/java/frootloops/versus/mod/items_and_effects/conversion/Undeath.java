@@ -2,6 +2,7 @@ package frootloops.versus.mod.items_and_effects.conversion;
 
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
+import frootloops.versus.mixin.mobs.passive.AbstractHorseAccessor;
 import frootloops.versus.mod.environment.PaleLine;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.ModEntities;
@@ -28,13 +29,18 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LevelEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -141,9 +147,12 @@ public final class Undeath {
 
     /**
      * Turns the entity undead, or kills it. The undead and their kin turn pale: zombies of every kind into pale
-     * zombies, a creeper into a pale creeper, spiders into pale spiders; a horse becomes a zombie horse, a villager a
-     * zombie villager, piglins zombified piglins, a hoglin a zoglin. A player, an illager, a witch or a wandering
-     * trader rises as the zombie of where it turned ({@link #zombieOfThePlace}). Anything else dies of it.
+     * zombies, a creeper into a pale creeper, spiders into pale spiders. A villager turns as a zombie's kill does: into
+     * a zombie villager, or where paleness holds into the illager of its trade ({@link #turnIllager}). Piglins become
+     * zombified piglins, a hoglin a zoglin. Animals with an undead kind of their own turn into it, as calm as they were
+     * and their owner's still: a horse a zombie horse, a camel a camel husk, a nautilus a zombie nautilus, a chicken a
+     * zombie chicken. A player, an illager, a witch or a wandering trader rises as the zombie of where it turned
+     * ({@link #zombieOfThePlace}). Anything else dies of it.
      */
     public static void turn(ServerLevel level, LivingEntity entity) {
         level.playSound((Player) null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ZOMBIE_INFECT, entity.getSoundSource(), 1.0F, 0.7F);
@@ -154,14 +163,55 @@ public final class Undeath {
         // What it turns into takes no Conversion along with the rest of its effects
         entity.removeEffect(CustomStatusEffects.CONVERSION);
         if (entity instanceof Villager villager) {
+            // As a zombie's kill: Zombie#convertVillagerToZombieVillager, where paleness holds turnIllager (ZombieInfectionMixin)
             Zombie zombie = new Zombie(EntityTypes.ZOMBIE, level);
             zombie.snapTo(villager.position());
             if (zombie.convertVillagerToZombieVillager(level, villager)) return;
         }
         EntityType<? extends Mob> into = undeadKind(level, entity);
-        if (into != null && entity instanceof Mob mob && mob.convertTo(into, ConversionParams.single(mob, true, true),
-                converted -> converted.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0))) != null) return;
+        if (into != null && entity instanceof Mob mob && mob.convertTo(into, ConversionParams.single(mob, true, true), converted -> {
+            keepWhatWasKept(mob, converted);
+            converted.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
+        }) != null) return;
         entity.hurtServer(level, source(level), Float.MAX_VALUE);
+    }
+
+    /**
+     * A villager turning where paleness holds (PaleLine) turns into the illager of its trade (PaleVillagers), armed as
+     * one and kept, as a zombie villager is; a child turns into a zombie villager anywhere. Whether it turned.
+     */
+    public static boolean turnIllager(ServerLevel level, Villager villager, boolean sound) {
+        if (villager.isBaby() || !PaleLine.isPale(level, villager.blockPosition())) return false;
+        String trade = villager.getVillagerData().profession().unwrapKey().map(key -> key.identifier().getPath()).orElse("none");
+        PaleVillagers.Illager kind = PaleVillagers.illagerFor(trade);
+        EntityType<? extends Mob> type = switch (kind) {
+            case PILLAGER -> EntityTypes.PILLAGER;
+            case VINDICATOR -> EntityTypes.VINDICATOR;
+            case ILLUSIONER -> EntityTypes.ILLUSIONER;
+        };
+        Mob illager = villager.convertTo(type, ConversionParams.single(villager, true, true), turned -> {
+            turned.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(switch (kind) {
+                case PILLAGER -> Items.CROSSBOW;
+                case VINDICATOR -> Items.IRON_AXE;
+                case ILLUSIONER -> Items.BOW;
+            }));
+            turned.setPersistenceRequired();
+            if (sound) level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_INFECTED, turned.blockPosition(), 0);
+        });
+        return illager != null;
+    }
+
+    /** What an animal turning undead keeps that its conversion doesn't carry: being tame and whose, being a jockey's mount. */
+    private static void keepWhatWasKept(Mob from, Mob into) {
+        if (from instanceof AbstractHorse horse && into instanceof AbstractHorse undead) {
+            undead.setTamed(horse.isTamed());
+            ((AbstractHorseAccessor) undead).setOwnerKept(horse.getOwnerReference());
+        }
+        if (from instanceof TamableAnimal tame && into instanceof TamableAnimal undead) {
+            undead.setTame(tame.isTame(), false);
+            undead.setOwnerReference(tame.getOwnerReference());
+        }
+        if (from instanceof Chicken chicken && into instanceof Chicken undead) undead.setChickenJockey(chicken.isChickenJockey());
     }
 
     /** What a mob turns into, or null if it dies of it. */
@@ -171,7 +221,11 @@ public final class Undeath {
         if (entity instanceof Zombie && !(entity instanceof ZombifiedPiglin)) return ModEntities.PALE_ZOMBIE;
         if (type == EntityTypes.CREEPER) return ModEntities.PALE_CREEPER;
         if (type == EntityTypes.SPIDER || type == EntityTypes.CAVE_SPIDER) return ModEntities.PALE_SPIDER;
+        // Animals with an undead kind of their own; donkeys, mules and the rest have none and die
         if (type == EntityTypes.HORSE) return EntityTypes.ZOMBIE_HORSE;
+        if (type == EntityTypes.CAMEL) return EntityTypes.CAMEL_HUSK;
+        if (type == EntityTypes.NAUTILUS) return EntityTypes.ZOMBIE_NAUTILUS;
+        if (type == EntityTypes.CHICKEN) return ModEntities.ZOMBIE_CHICKEN;
         if (type == EntityTypes.PIGLIN || type == EntityTypes.PIGLIN_BRUTE) return EntityTypes.ZOMBIFIED_PIGLIN;
         if (type == EntityTypes.HOGLIN) return EntityTypes.ZOGLIN;
         if (entity.is(RISE_AS_ZOMBIES)) return zombieOfThePlace(level, entity);

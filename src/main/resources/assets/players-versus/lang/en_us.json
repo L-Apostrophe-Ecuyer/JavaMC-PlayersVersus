@@ -475,5 +475,7 @@
   "entity.players-versus.watchling": "Watchling",
   "item.players-versus.watchling_spawn_egg": "Watchling Spawn Egg",
   "death.attack.watched": "%1$s looked too long",
-  "death.attack.watched.player": "%1$s looked at %2$s too long"
+  "death.attack.watched.player": "%1$s looked at %2$s too long",
+  "entity.players-versus.zombie_chicken": "Zombie Chicken",
+  "item.players-versus.zombie_chicken_spawn_egg": "Zombie Chicken Spawn Egg"
 }
