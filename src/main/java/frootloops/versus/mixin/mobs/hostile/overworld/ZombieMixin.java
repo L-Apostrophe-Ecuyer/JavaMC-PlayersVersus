@@ -2,6 +2,7 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import frootloops.versus.mod.mobs.MobSpawning;
 import frootloops.versus.mod.mobs.ModEntities;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
@@ -82,6 +83,8 @@ public abstract class ZombieMixin extends Monster {
     // into the mod's frosted zombies before.
     @Inject(method = "hurtServer", at = @At("TAIL"), cancellable = true)
     private void damage(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        // A pale villager is withered already (it turned pale as a villager): it stays as it is
+        if ((Object) this instanceof PaleVillagerEntity) return;
         if(source.is(DamageTypes.WITHER) && this.getHealth() < 8.0f) {
             this.convertTo(ModEntities.PALE_ZOMBIE, ConversionParams.single(this, true, true), zombie -> {
                 if (!this.isSilent()) {

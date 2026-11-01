@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment.blocks.mushrooms;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.PaleLine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -76,19 +77,19 @@ public final class StagedMushrooms {
         BlockState below = level.getBlockState(pos.below());
         boolean mycelium = below.is(Blocks.MYCELIUM);
         boolean dark = mycelium || level.getRawBrightness(pos, 0) <= VersusSettings.Mushrooms.MAX_GROWING_LIGHT;
-        boolean belowZero = pos.getY() < 0;
+        boolean pale = PaleLine.isPale(level, pos);
         boolean neighbour = false, grownNeighbour = false;
         for (BlockPos next : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
             if (next.equals(pos)) continue;
             BlockState state = level.getBlockState(next);
             MushroomGrowth.Kind other = kindOf(state);
-            // Below y 0, brown and red mushrooms turning pale count the pale shrooms beside them as their own
-            boolean same = other == kind || other == MushroomGrowth.Kind.PALE && belowZero;
+            // Where paleness holds, brown and red mushrooms turning pale count the pale shrooms beside them as their own
+            boolean same = other == kind || other == MushroomGrowth.Kind.PALE && pale;
             if (!same) continue;
             neighbour = true;
             if (stageOf(state) >= 2) grownNeighbour = true;
         }
-        return new MushroomGrowth.Conditions(dark, below.is(GROW_ON), neighbour, grownNeighbour, belowZero);
+        return new MushroomGrowth.Conditions(dark, below.is(GROW_ON), neighbour, grownNeighbour, pale);
     }
 
     /** Three spread one mushroom of their kind beside them, where it can stand and their kind isn't crowded. */

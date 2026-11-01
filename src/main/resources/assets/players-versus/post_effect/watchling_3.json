@@ -1,0 +1,74 @@
+{
+    "targets": {
+        "swap": {}
+    },
+    "passes": [
+        {
+            "vertex_shader": "minecraft:core/screentriangle",
+            "fragment_shader": "minecraft:post/color_convolve",
+            "inputs": [
+                {
+                    "sampler_name": "In",
+                    "target": "minecraft:main"
+                }
+            ],
+            "output": "swap",
+            "uniforms": {
+                "ColorConfig": [
+                    {
+                        "name": "RedMatrix",
+                        "type": "vec3",
+                        "value": [
+                            0.52037,
+                            0.40426,
+                            0.07537
+                        ]
+                    },
+                    {
+                        "name": "GreenMatrix",
+                        "type": "vec3",
+                        "value": [
+                            0.20556,
+                            0.71907,
+                            0.07537
+                        ]
+                    },
+                    {
+                        "name": "BlueMatrix",
+                        "type": "vec3",
+                        "value": [
+                            0.20556,
+                            0.40426,
+                            0.39019
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "vertex_shader": "minecraft:core/screentriangle",
+            "fragment_shader": "minecraft:post/bits",
+            "inputs": [
+                {
+                    "sampler_name": "In",
+                    "target": "swap"
+                }
+            ],
+            "output": "minecraft:main",
+            "uniforms": {
+                "BitsConfig": [
+                    {
+                        "name": "Resolution",
+                        "type": "float",
+                        "value": 41.06
+                    },
+                    {
+                        "name": "MosaicSize",
+                        "type": "float",
+                        "value": 1.568
+                    }
+                ]
+            }
+        }
+    ]
+}

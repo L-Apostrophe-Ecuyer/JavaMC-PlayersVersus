@@ -16,6 +16,9 @@
     "items_and_effects.recipes.RecipeFileMixin",
     "items_and_effects.conversion.LivingEntityConversionMixin",
     "items_and_effects.conversion.MobConversionAttackMixin",
+    "items_and_effects.conversion.LivingEntityWitheringMixin",
+    "items_and_effects.conversion.ServerPlayerWitheredMixin",
+    "mobs.MobSunArmourMixin",
 
     "enchantments.AnvilCostMixin",
     "enchantments.EnchantingTableMixin",
@@ -118,6 +121,7 @@
     "mobs.hostile.overworld.WardenVibrationListenerMixin",
     "mobs.hostile.overworld.ZombieHordeMixin",
     "mobs.hostile.overworld.ZombieMixin",
+    "mobs.hostile.overworld.ZombieInfectionMixin",
     "mobs.hostile.overworld.ZombieVillagerMixin",
     "mobs.hostile.overworld.ZombieEventListenerMixin",
     "mobs.hostile.nether.WitherSkeletonMixin",
@@ -131,7 +135,9 @@
     "mobs.passive.SheepMixin",
     "mobs.passive.PigMixin",
     "mobs.passive.PolarBearMixin",
-    "mobs.passive.TransportItemsBetweenContainersMixin"
+    "mobs.passive.TransportItemsBetweenContainersMixin",
+    "mobs.passive.AbstractHorseAccessor",
+    "mobs.passive.VillagerHostilesSensorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

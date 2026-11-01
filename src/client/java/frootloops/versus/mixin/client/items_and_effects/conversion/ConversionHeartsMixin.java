@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.items_and_effects.conversion.Conversion;
-import frootloops.versus.mod.items_and_effects.conversion.Shroomify;
+import frootloops.versus.mod.items_and_effects.conversion.Undeath;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -42,7 +42,7 @@ public abstract class ConversionHeartsMixin {
     private void playersVersus$countHearts(GuiGraphicsExtractor graphics, Player player, int x, int y, int rowHeight, int regenerating,
                                            float maxHealth, int health, int displayHealth, int absorption, boolean blinking, CallbackInfo info) {
         this.playersVersus$hearts = Conversion.hearts(maxHealth);
-        this.playersVersus$white = Shroomify.whiteHearts(player);
+        this.playersVersus$white = Undeath.whiteHearts(player);
         this.playersVersus$nextHeart = this.playersVersus$hearts + (int) Math.ceil(absorption / 2.0) - 1;
         this.playersVersus$heart = -1;
     }

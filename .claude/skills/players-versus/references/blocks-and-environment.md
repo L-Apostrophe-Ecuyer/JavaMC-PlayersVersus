@@ -310,7 +310,8 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   (property `mushrooms`, 2-3; 1 looks like vanilla's and isn't used) 2 and 3, light 2 and 4. `pale_shroom` 1-3, below
   y 0 only. `MushroomGrowth.next` (pure, `MushroomGrowthTest`) decides GROW/SHRINK/SPREAD/TURN_PALE/NONE from
   `Conditions` (dark: raw light <= `VersusSettings.Mushrooms.MAX_GROWING_LIGHT` or on mycelium; ground: tag
-  `players-versus:mushrooms_grow_on`; a neighbour of its kind in the 26 round it, one grown for 2 -> 3; below y 0).
+  `players-versus:mushrooms_grow_on`; a neighbour of its kind in the 26 round it, one grown for 2 -> 3; pale: where
+  `PaleLine` holds, below y 0 or a biome in tag `players-versus:pale`).
   `StagedMushrooms` gathers them and acts (`GROW_CHANCE` for all but shrinking; spreading stops at `SPREAD_CAP` of the
   kind within 4 blocks). `MushroomBlockMixin` replaces vanilla mushrooms' random tick (`DO_STAGED_MUSHROOMS`).
 - Brown/red clusters drop that many vanilla mushrooms and `asItem()` is vanilla's mushroom. Pale shrooms' `entityInside`

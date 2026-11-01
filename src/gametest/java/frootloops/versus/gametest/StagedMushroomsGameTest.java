@@ -2,9 +2,14 @@ package frootloops.versus.gametest;
 
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.PaleLine;
 import frootloops.versus.mod.environment.blocks.mushrooms.StagedMushroomBlock;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.conversion.Conversion;
+import frootloops.versus.mod.items_and_effects.conversion.ConversionAttacks;
+import frootloops.versus.mod.items_and_effects.conversion.Undeath;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import frootloops.versus.mod.mobs.ModEntities;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffects;
@@ -23,8 +28,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.zombie.Zombie;
-import net.minecraft.world.entity.monster.zombie.ZombieVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,7 +39,7 @@ import java.util.List;
 /**
  * Small mushrooms grow by stages and below y 0 turn pale; pale shrooms convert what stays in them, and so do pale
  * zombies', creakings' and (rarely) zombies' hits and rotten flesh; Conversion stacks, keeps food from regenerating
- * health into its white hearts, and all white, shroomifies.
+ * health into its white hearts, and all white, turns undead.
  */
 public class StagedMushroomsGameTest {
 
@@ -65,8 +68,8 @@ public class StagedMushroomsGameTest {
         }
     }
 
-    private static boolean belowZero(GameTestHelper helper, BlockPos pos) {
-        return helper.absolutePos(pos).getY() < 0;
+    private static boolean palePlace(GameTestHelper helper, BlockPos pos) {
+        return PaleLine.isPale(helper.getLevel(), helper.absolutePos(pos));
     }
 
     private static BlockState staged(StagedMushroomBlock block, int mushrooms) {
@@ -82,7 +85,7 @@ public class StagedMushroomsGameTest {
         helper.setBlock(new BlockPos(4, 1, 3), Blocks.BROWN_MUSHROOM);
         randomTick(helper, mushroom);
         BlockState grown = helper.getBlockState(mushroom);
-        BlockState expected = staged(belowZero(helper, mushroom) ? CustomBlocks.PALE_SHROOM : CustomBlocks.BROWN_MUSHROOMS, 2);
+        BlockState expected = staged(palePlace(helper, mushroom) ? CustomBlocks.PALE_SHROOM : CustomBlocks.BROWN_MUSHROOMS, 2);
         helper.assertTrue(grown.equals(expected), "the mushroom became " + grown + ", not " + expected);
         helper.succeed();
     }
@@ -103,7 +106,7 @@ public class StagedMushroomsGameTest {
     public void threeMushroomsSpread(GameTestHelper helper) {
         floor(helper, Blocks.MYCELIUM.defaultBlockState());
         BlockPos three = new BlockPos(6, 1, 4);
-        if (belowZero(helper, three)) {
+        if (palePlace(helper, three)) {
             helper.succeed();
             return;
         }
@@ -136,9 +139,9 @@ public class StagedMushroomsGameTest {
         helper.succeed();
     }
 
-    /** Each dose adds its amplifier + 1 to what was had; the undead never take it. */
+    /** Each dose adds its amplifier + 1 to what was had; skeletons never take it. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void conversionStacksAndSparesTheUndead(GameTestHelper helper) {
+    public void conversionStacksAndSparesSkeletons(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
         pig.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 0));
@@ -147,8 +150,9 @@ public class StagedMushroomsGameTest {
         helper.assertTrue(pig.getEffect(CustomStatusEffects.CONVERSION).getAmplifier() == 1, "a second dose didn't stack to 1");
         pig.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 1));
         helper.assertTrue(pig.getEffect(CustomStatusEffects.CONVERSION).getAmplifier() == 3, "a dose of 1 on 1 didn't stack to 3");
-        Zombie zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(6.5, 1.0, 3.5));
-        helper.assertTrue(!zombie.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 0)), "a zombie took Conversion");
+        // Skeletons have no flesh to convert (zombies do: they turn pale)
+        Mob skeleton = helper.spawnWithNoFreeWill(EntityTypes.SKELETON, new Vec3(6.5, 1.0, 3.5));
+        helper.assertTrue(!skeleton.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 0)), "a skeleton took Conversion");
         helper.succeed();
     }
 
@@ -166,19 +170,19 @@ public class StagedMushroomsGameTest {
         return new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, Conversion.hearts(entity.getMaxHealth()) - 1);
     }
 
-    /** All white, a villager shakes, then turns into a zombie villager. */
+    /** All white, a villager shakes before it turns (what it turns into: UndeadFormsGameTest). */
     @GameTest(structure = ROOM, maxTicks = 200)
-    public void anAllWhiteVillagerTurnsZombie(GameTestHelper helper) {
+    public void anAllWhiteVillagerShakesThenTurns(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
         villager.addEffect(allWhite(villager));
-        helper.runAfterDelay(VersusSettings.Mushrooms.SHROOMIFY_TICKS - 20, () ->
+        helper.runAfterDelay(VersusSettings.Mushrooms.TURNING_TICKS - 20, () ->
                 helper.assertTrue(!villager.isRemoved(), "the villager turned before it was done shaking"));
         helper.succeedWhen(() -> {
             helper.assertTrue(villager.isRemoved(), "the villager is still a villager");
-            List<ZombieVillager> zombies = helper.getLevel().getEntitiesOfClass(ZombieVillager.class, room(helper));
-            helper.assertTrue(zombies.size() == 1, zombies.size() + " zombie villagers, not one");
-            helper.assertTrue(!zombies.getFirst().hasEffect(CustomStatusEffects.CONVERSION), "the zombie villager carries Conversion");
+            List<Mob> turned = helper.getLevel().getEntitiesOfClass(Mob.class, room(helper));
+            helper.assertTrue(turned.size() == 1, turned.size() + " mobs came of the villager, not one");
+            helper.assertTrue(!turned.getFirst().hasEffect(CustomStatusEffects.CONVERSION), "what the villager turned into carries Conversion");
         });
     }
 
@@ -211,13 +215,15 @@ public class StagedMushroomsGameTest {
     @GameTest(structure = ROOM, maxTicks = 20)
     public void aZombiesRareConvertingHitGivesNothingElse(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
-        Mob converted = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
-        Mob spared = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(10.5, 1.0, 3.5));
+        Mob converted = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
+        Mob spared = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(10.5, 1.0, 3.5));
+        Mob notKin = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(6.5, 1.0, 1.5));
         Mob husk = helper.spawnWithNoFreeWill(EntityTypes.HUSK, new Vec3(6.5, 1.0, 5.5));
         float chance = VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE;
         try {
             VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE = 1.0F;
             helper.assertTrue(husk.doHurtTarget(helper.getLevel(), converted), "the husk missed");
+            helper.assertTrue(husk.doHurtTarget(helper.getLevel(), notKin), "the husk missed the pig");
             VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE = 0.0F;
             helper.assertTrue(husk.doHurtTarget(helper.getLevel(), spared), "the husk missed its second");
         } finally {
@@ -225,7 +231,49 @@ public class StagedMushroomsGameTest {
         }
         helper.assertTrue(converted.hasEffect(CustomStatusEffects.CONVERSION), "the husk's converting hit didn't convert");
         helper.assertTrue(!converted.hasEffect(MobEffects.HUNGER), "the husk's converting hit also gave hunger");
+        helper.assertTrue(!notKin.hasEffect(CustomStatusEffects.CONVERSION), "the husk converted a pig, not its own kind");
         helper.assertTrue(!spared.hasEffect(CustomStatusEffects.CONVERSION), "the husk's hit converted without the chance");
+        helper.succeed();
+    }
+
+    /** All white, a zombie turns pale, a creeper turns into a pale creeper: Conversion makes the undead and their kin pale. */
+    @GameTest(structure = ROOM, maxTicks = 200)
+    public void allWhiteZombiesAndCreepersTurnPale(GameTestHelper helper) {
+        floor(helper, Blocks.STONE.defaultBlockState());
+        Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(3.5, 1.0, 3.5));
+        Mob creeper = helper.spawnWithNoFreeWill(EntityTypes.CREEPER, new Vec3(10.5, 1.0, 3.5));
+        zombie.addEffect(allWhite(zombie));
+        creeper.addEffect(allWhite(creeper));
+        helper.succeedWhen(() -> {
+            helper.assertTrue(zombie.isRemoved() && creeper.isRemoved(), "the zombie or the creeper is still itself");
+            helper.assertTrue(helper.getLevel().getEntitiesOfClass(PaleZombieEntity.class, room(helper)).size() == 1, "no pale zombie rose from the zombie");
+            helper.assertTrue(helper.getLevel().getEntitiesOfClass(PaleCreeperEntity.class, room(helper)).size() == 1, "no pale creeper came of the creeper");
+        });
+    }
+
+    /** All white, a pillager rises as the zombie of the place it turned in. */
+    @GameTest(structure = ROOM, maxTicks = 200)
+    public void anAllWhitePillagerRisesAsTheZombieOfThePlace(GameTestHelper helper) {
+        floor(helper, Blocks.STONE.defaultBlockState());
+        Mob pillager = helper.spawnWithNoFreeWill(EntityTypes.PILLAGER, new Vec3(3.5, 1.0, 3.5));
+        var expected = Undeath.zombieOfThePlace(helper.getLevel(), pillager);
+        pillager.addEffect(allWhite(pillager));
+        helper.succeedWhen(() -> {
+            helper.assertTrue(pillager.isRemoved(), "the pillager is still a pillager");
+            List<Mob> risen = helper.getLevel().getEntitiesOfClass(Mob.class, room(helper), mob -> mob.getType() == expected);
+            helper.assertTrue(risen.size() == 1, risen.size() + " " + expected + " rose, not one");
+        });
+    }
+
+    /** A watchling's hit converts, as every pale thing's. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aWatchlingsHitConverts(GameTestHelper helper) {
+        floor(helper, Blocks.STONE.defaultBlockState());
+        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
+        Mob watchling = helper.spawnWithNoFreeWill(ModEntities.WATCHLING, new Vec3(5.5, 1.0, 3.5));
+        helper.assertTrue(watchling.doHurtTarget(helper.getLevel(), pig), "the watchling missed");
+        helper.assertTrue(pig.hasEffect(CustomStatusEffects.CONVERSION), "the watchling's hit didn't convert");
+        helper.assertTrue(!watchling.addEffect(ConversionAttacks.dose()), "a watchling took Conversion");
         helper.succeed();
     }
 

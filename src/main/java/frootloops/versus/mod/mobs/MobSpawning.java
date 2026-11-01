@@ -3,6 +3,8 @@ package frootloops.versus.mod.mobs;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.WorldTime;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
+import frootloops.versus.mod.environment.PaleLine;
+import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.IceCubeEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
@@ -49,6 +51,8 @@ public class MobSpawning {
         // Deep caves:
         // BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, VanillaEntities.WITHER_SKELETON, 50, 1, 1);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.PALE_CREEPER, 100, 1, 1);
+        // Pale spiders too, below the pale line (canSpawnPaleSpider), as pale zombies and creepers
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.PALE_SPIDER, 40, 1, 2);
         SpawnPlacements.register(ModEntities.PALE_CREEPER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleCreeper);
 
         //BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.PALE_ZOMBIE, 100, 4, 4);
@@ -70,6 +74,11 @@ public class MobSpawning {
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_ZOMBIE, 100, 1, 3);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_CREEPER, 10, 1, 1);
         SpawnPlacements.register(ModEntities.PALE_SPIDER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleSpider);
+
+        // Watchlings: rarely, where paleness holds, in the dark (canSpawnWatchling)
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.WATCHLING, 4, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.PALE_GROTTO, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.WATCHLING, 3, 1, 1);
+        SpawnPlacements.register(ModEntities.WATCHLING, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWatchling);
 
         // Mushroom caves: their creepers and spiders, by the biome's file
         SpawnPlacements.register(ModEntities.MUSHROOM_CREEPER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
@@ -107,31 +116,39 @@ public class MobSpawning {
     }
 
 
+    /**
+     * The pale mobs all spawn by the pale line (PaleLine): in the pale biomes at any hour; elsewhere in the dark, below
+     * y 0 at any hour, up to y 64 only at midnight under a new moon.
+     */
+    static boolean palePlace(ServerLevelAccessor world, BlockPos blockPos, int maxLight) {
+        if (PaleLine.isPaleBiome(world, blockPos)) return true;
+        if (world.getMaxLocalRawBrightness(blockPos) > maxLight || !world.getBlockState(blockPos.below()).is(PALE_MOBS_SPAWNABLE)) return false;
+        if (blockPos.getY() < PaleLine.Y) return true;
+        return blockPos.getY() <= 64 && isMidnightDuringNewMoon(world);
+    }
+
     public static boolean canSpawnPaleCreeper(EntityType<PaleCreeperEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != EntitySpawnReason.NATURAL) return true;
-        if(world.getMaxLocalRawBrightness(blockPos) > 1 || !world.getBlockState(blockPos.below()).is(PALE_MOBS_SPAWNABLE)) return false;
-        return blockPos.getY() < 32;
+        return palePlace(world, blockPos, 1);
     }
 
     public static boolean canSpawnPaleSpider(EntityType<PaleSpiderEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != EntitySpawnReason.NATURAL) return true;
-        if(world.getEffectiveSkyBrightness(blockPos) > 2 || !world.getBlockState(blockPos.below()).is(PALE_MOBS_SPAWNABLE)) return false;
-        return blockPos.getY() < 64;
+        return palePlace(world, blockPos, 1);
+    }
+
+    /** A monster's spawn (in the dark), by the pale line, in total darkness off the pale biomes. */
+    public static boolean canSpawnWatchling(EntityType<WatchlingEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
+        if (!Monster.checkMonsterSpawnRules(type, world, spawnReason, blockPos, random)) return false;
+        if (spawnReason != EntitySpawnReason.NATURAL) return true;
+        return palePlace(world, blockPos, 0);
     }
 
     public static boolean canSpawnPaleZombie(EntityType<PaleZombieEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != EntitySpawnReason.NATURAL) return true;
-
-        ResourceKey<Biome> biomeKey = world.getBiome(blockPos).unwrapKey().get();
-        if(biomeKey == CustomOverworldBiomes.DEEP_CAVES || biomeKey == CustomOverworldBiomes.PALE_GROTTO || biomeKey == Biomes.PALE_GARDEN) return true;
-        if(world.getMaxLocalRawBrightness(blockPos) > 0 || !world.getBlockState(blockPos.below()).is(PALE_MOBS_SPAWNABLE)) return false;
-
-        int y = blockPos.getY();
-        if(y > 64) return false;
-        if(y > 24) return isMidnightDuringNewMoon(world);
-        return true;
+        return palePlace(world, blockPos, 0);
     }
 }

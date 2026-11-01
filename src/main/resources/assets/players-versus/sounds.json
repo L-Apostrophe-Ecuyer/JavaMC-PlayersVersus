@@ -91,5 +91,11 @@
             { "name": "players-versus:music/caves/deep_dark_ambience_2", "stream": true},
             { "name": "players-versus:music/caves/deep_dark_ambience_3", "stream": true}
         ]
+    },
+    "entity.watchling.static" : {
+        "subtitle": "subtitles.players-versus.entity.watchling.static",
+        "sounds" : [
+            "players-versus:watchling/static"
+        ]
     }
 }

@@ -27,6 +27,10 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("pale_creeper_spawn_egg", ModEntities.PALE_CREEPER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("pale_spider_spawn_egg", ModEntities.PALE_SPIDER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("mushroom_creeper_spawn_egg", ModEntities.MUSHROOM_CREEPER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("watchling_spawn_egg", ModEntities.WATCHLING_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("zombie_chicken_spawn_egg", ModEntities.ZOMBIE_CHICKEN_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("pale_villager_spawn_egg", ModEntities.PALE_VILLAGER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("pale_wandering_trader_spawn_egg", ModEntities.PALE_WANDERING_TRADER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("mushroom_spider_spawn_egg", ModEntities.MUSHROOM_SPIDER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("wildfire_spawn_egg", ModEntities.WILDFIRE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
 
@@ -68,6 +72,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("concentrate_of_decay", CustomBrewingItems.CONCENTRATE_OF_DECAY, CreativeModeTabs.INGREDIENTS);
         registerCustomItem("concentrate_of_mining_speed", CustomBrewingItems.CONCENTRATE_OF_MINING_SPEED, CreativeModeTabs.INGREDIENTS);     // New potion!
         registerCustomItem("concentrate_of_mining_fatigue", CustomBrewingItems.CONCENTRATE_OF_MINING_FATIGUE, CreativeModeTabs.INGREDIENTS); // New potion!
+        registerCustomItem("brown_mushroom_cluster", CustomBrewingItems.BROWN_MUSHROOM_CLUSTER, CreativeModeTabs.INGREDIENTS);
         registerCustomItem("concentrate_of_toughness", CustomBrewingItems.CONCENTRATE_OF_TOUGHNESS, CreativeModeTabs.INGREDIENTS);
         registerCustomItem("concentrate_of_vulnerability", CustomBrewingItems.CONCENTRATE_OF_VULNERABILITY, CreativeModeTabs.INGREDIENTS);   // New potion!
         registerCustomItem("concentrate_of_vision", CustomBrewingItems.CONCENTRATE_OF_VISION, CreativeModeTabs.INGREDIENTS);

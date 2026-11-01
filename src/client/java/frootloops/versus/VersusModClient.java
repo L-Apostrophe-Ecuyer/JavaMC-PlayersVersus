@@ -1,10 +1,13 @@
 package frootloops.versus;
 
 import frootloops.versus.mod.environment.CustomSpecialEffects;
+import frootloops.versus.mod.environment.BuoyancyParticle;
 import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
-import frootloops.versus.mod.items_and_effects.conversion.ShroomShaking;
+import frootloops.versus.mod.items_and_effects.conversion.PaleSight;
+import frootloops.versus.mod.items_and_effects.conversion.UndeathShaking;
+import frootloops.versus.mod.mobs.hostile.end.WatchlingStatic;
 import frootloops.versus.mod.items_and_effects.inventory.HotbarRefill;
 import frootloops.versus.mod.players.building.ClientPlacement;
 import frootloops.versus.mod.environment.ClientTopples;
@@ -37,7 +40,9 @@ public class VersusModClient implements ClientModInitializer {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
 		ModEntitiesRenderers.onInitialize();
 		MeleeAnimation.register();
-		ShroomShaking.register();
+		UndeathShaking.register();
+		WatchlingStatic.register();
+		PaleSight.register();
 		CustomBlocksClient.onInitialize();
 		LeavesRustling.register();
 		LeavesView.register();
@@ -46,5 +51,6 @@ public class VersusModClient implements ClientModInitializer {
 		HotbarRefill.register();
 
 		ParticleProviderRegistry.getInstance().register(CustomSpecialEffects.SPARKS_PARTICLE, SparksParticle.Factory::new);
+		ParticleProviderRegistry.getInstance().register(CustomSpecialEffects.BUYANCY_EFFECT_PARTICLE, BuoyancyParticle.Factory::new);
 	}
 }

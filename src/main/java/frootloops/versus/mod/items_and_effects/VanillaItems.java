@@ -37,6 +37,7 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.Equippable;
@@ -270,6 +271,10 @@ public class VanillaItems {
             if (item == Items.ROTTEN_FLESH) consumeEffects = withEffect(consumeEffects, new ApplyStatusEffectsConsumeEffect(
                     List.of(new MobEffectInstance(CustomStatusEffects.CONVERSION, VersusSettings.Mushrooms.ROTTEN_FLESH_CONVERSION_TICKS, 0)),
                     VersusSettings.Mushrooms.ROTTEN_FLESH_CONVERSION_CHANCE));
+
+            // Golden apples cure Conversion, as they cure zombie and pale villagers
+            if (item == Items.GOLDEN_APPLE || item == Items.ENCHANTED_GOLDEN_APPLE) consumeEffects = withEffect(consumeEffects,
+                    new RemoveStatusEffectsConsumeEffect(CustomStatusEffects.CONVERSION));
 
             Consumable newConsumeComponent = isDrink ?
                     createDrinkConsumptionComponent(eatTime, consumeEffects, isHoneyBottle) :

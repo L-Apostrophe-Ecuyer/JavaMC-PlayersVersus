@@ -19,6 +19,7 @@
     "minecraft:outside_border",
     "minecraft:falling_anvil",
     "minecraft:falling_stalactite",
-    "players-versus:shroomified"
+    "players-versus:turned_undead",
+    "players-versus:watched"
   ]
 }

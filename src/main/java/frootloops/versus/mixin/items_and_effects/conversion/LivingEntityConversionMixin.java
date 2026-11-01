@@ -3,7 +3,7 @@ package frootloops.versus.mixin.items_and_effects.conversion;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.conversion.Conversion;
 import frootloops.versus.mod.items_and_effects.conversion.ConversionAttacks;
-import frootloops.versus.mod.items_and_effects.conversion.Shroomify;
+import frootloops.versus.mod.items_and_effects.conversion.Undeath;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -42,6 +42,6 @@ public abstract class LivingEntityConversionMixin {
 
     @Inject(method = "canBeAffected", at = @At("HEAD"), cancellable = true)
     private void playersVersus$immuneToConversion(MobEffectInstance effect, CallbackInfoReturnable<Boolean> info) {
-        if (effect.is(CustomStatusEffects.CONVERSION) && Shroomify.immune((LivingEntity) (Object) this)) info.setReturnValue(false);
+        if (effect.is(CustomStatusEffects.CONVERSION) && Undeath.immune((LivingEntity) (Object) this)) info.setReturnValue(false);
     }
 }

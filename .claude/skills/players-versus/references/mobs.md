@@ -102,9 +102,54 @@ assuming full overlap).
   goal) and hunt the plain kind (`EntityTypes.CREEPER`/`SPIDER` exactly); `HurtByTargetGoal` makes them fight back.
   The creeper's swelling ends in a spore puff, always (`CreeperMixin` at `explodeCreeper`'s head, server side; it
   also puts out a lit one, which would puff for ever): no damage, every plain creeper within 3 blocks `convertTo` a
-  mushroom creeper, every other living thing there takes a dose of Conversion (`ConversionAttacks.dose`), swell
-  reset, 100-tick cooldown on its swell goal. It never explodes, after a player or lit. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
+  mushroom creeper, nothing else touched, swell reset, 100-tick cooldown on its swell goal. It never explodes, after a
+  player or lit. Both are the red mushroom's hosts (lore spec `2026-11-01-pale-warp-lore-and-watchling-design.md`):
+  red and white skins (`tools/mushroom-mobs.py`, from the red mushroom block) and red mushrooms growing out of the
+  creeper's head and the spider's abdomen (client `RedMushroomsLayer`, the red mushroom's block model as the
+  mooshroom's, resolved each frame in their renderers' `extractRenderState`). Never converted. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
   `MushroomMobsGameTest`, assets `MushroomMobsTest`.
+- **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
+  `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman with a creaking's yellow
+  eyes that haunts. No goals, speed 0, knockback-proof, not pushable: it never moves or strikes. `customServerAiStep`:
+  watched (`WatchlingStare.watcher`) it notes its watcher; looked away from, it teleports after `TELEPORT_DELAY`-2x
+  ticks, half the time behind them (`BEHIND_NEAR`-`FAR`), half far off (`AWAY_NEAR`-`FAR`); unlooked at for
+  `VANISH_MIN`-`MAX` ticks after being seen it discards itself; hit by a player it teleports behind them.
+  `WatchlingStare` (server, each level tick): a player looking at one (48 blocks, line of sight, at least half seen by
+  `Gaze`, no `#gaze_disguise_equipment` on the head) builds static (`WatchedPayload` to the HUD), full after 120 ticks:
+  they die of `players-versus:watched` and 4-7 silverfish spawn. Spawns rarely in the dark by the pale line.
+- **The warped show only to a stare**: `Gaze` (pure, `GazeTest`, `VersusSettings.Gaze`) rates how well a view sees a
+  body (1 on it, smoothly down to 0 at 40° off its edge) and `Gaze.opacity` floors it at 12%. Client
+  `LivingEntityRendererGazeMixin` + `LivingEntityRenderStateGazeMixin` (`GazeRenderState`) draw endermen, endermites,
+  watchlings and phantoms with `RenderTypes.entityTranslucent` at that alpha and fade their shadows;
+  `EyesLayerGazeMixin` dims their eyes (the 9-argument `submitModel` with a tint); `CarriedBlockLayerGazeMixin` hides a
+  carried block under 60% (`GazeTranslucency`). A watchling is watched from 70% seen.
+- **Watchling stare, heard and seen**: client `WatchlingStaticSound` (a looping `AbstractTickableSoundInstance` of
+  `players-versus:entity.watchling.static`, `tools/watchling-static-sound.py`) swells and rises with the HUD static;
+  `PaleSight` asks for `watchling_1..16` (`tools/post-effects.py`).
+- **Pale villager** (`mod/mobs/hostile/overworld/PaleVillagerEntity`, extends `ZombieVillager`; client
+  `PaleVillagerRenderer`, the villager model and `VillagerProfessionLayer` "villager" over a villager-illager skin from
+  `tools/pale-villager.py`: ashen skin, the illager's brow, eyes and mouth): a withered villager
+  (`Undeath#wither`/`turnPaleVillager`, or killed by one). Keeps villager data (type, profession, level: its clothes),
+  gossip, offers, xp, all restored on its cure (game test `aWitheredAndCuredVillagerKeepsItsMemories`); inherits the
+  golden apple cure (`ZombieVillagerMixin`). Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, hits wither
+  (5 s), its kills turn pale (villagers and wandering traders); no reinforcements (`handleAttributes` empty, chance 0),
+  no drowned/frostbite conversion, never despawns, villager sounds pitched low. `VillagerHostilesSensorMixin` makes
+  villagers flee it (8 blocks). Conversion-immune; excluded from `ZombieMixin`'s wither-to-pale and from zombies' rare
+  converting hits.
+- **Pale wandering trader** (`PaleWanderingTraderEntity`, extends `PaleVillagerEntity`; client
+  `PaleWanderingTraderRenderer`, the wandering trader's model and the same skin treatment): a withered wandering trader
+  (`Undeath#turnPaleTrader`), keeps its offers; cured (`ZombieVillagerMixin` at `finishConversion` HEAD) it's a
+  wandering trader again with them (`overrideOffers`) and 48000 ticks to wander.
+- **Undead animals in body armour don't burn** (`MobSunArmourMixin` at `Mob#burnUndead` HEAD).
+- **Zombie chicken** (`mod/mobs/passive/ZombieChickenEntity`, extends `Chicken`; client `ZombieChickenRenderer`;
+  textures from `tools/undead-animals.py`): what Conversion makes of a chicken, a passive undead animal as the zombie
+  horse. No eggs (`eggTime` held up), no food, no offspring, never a chick (`canBeABaby`, `setAge` clamped), always the
+  temperate variant (`setVariant` ignored), lower voice. In `#minecraft:zombies` (so undead) and
+  `#minecraft:burn_in_daylight` (vanilla's tag-driven `Mob#burnUndead`), never converted. Drops 0-2 feathers and 0-1
+  rotten flesh. Baby zombies' chicken jockeys ride them (`ZombieInfectionMixin` wraps `Zombie#finalizeSpawn`'s
+  `EntityType#create` and keeps only zombie chickens among the nearby ones). Game tests `UndeadFormsGameTest`.
+- The pale zombie is in `#minecraft:zombies`, the pale creeper and spider in `#minecraft:undead` (smite, inverted
+  healing, the wither spares them); the mushroom spider joins the pale one in `#minecraft:arthropod`.
 - **Warden (`WardenMixin`)** — extensively rebalanced, all deliberate per inline doc-comments in the
   source itself (read them for full designer intent): anger toward a target **decays** over time if
   they're sneaking or far away (README-adjacent: rewards "run and hide" play over "just outrun it");

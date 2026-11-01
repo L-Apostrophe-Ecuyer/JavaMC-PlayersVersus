@@ -51,7 +51,7 @@ class ConversionTest {
     }
 
     @Test
-    void allHeartsWhiteShroomifies() {
+    void allHeartsWhiteTurnsUndead() {
         assertFalse(Conversion.allWhite(20.0F, 9));
         assertTrue(Conversion.allWhite(20.0F, 10));
         assertTrue(Conversion.allWhite(20.0F, 14));
@@ -59,5 +59,19 @@ class ConversionTest {
         assertFalse(Conversion.allWhite(21.0F, 10));
         assertTrue(Conversion.allWhite(21.0F, 11));
         assertFalse(Conversion.allWhite(20.0F, 0));
+    }
+
+    @Test
+    void theWorldGreysWithTheWhiteHeartsAndTheTimeLeft() {
+        // 20 health: 10 hearts. No Conversion, no grey; all white with time to spare, all grey
+        assertEquals(0.0F, Conversion.greyStrength(-1, 20.0F, 0), 1.0E-6F);
+        assertEquals(1.0F, Conversion.greyStrength(9, 20.0F, 2400), 1.0E-6F);
+        // As grey as the hearts are white: half, a tenth
+        assertEquals(0.5F, Conversion.greyStrength(4, 20.0F, 2400), 1.0E-6F);
+        assertEquals(0.1F, Conversion.greyStrength(0, 20.0F, 2400), 1.0E-6F);
+        // All white, wearing off in its last half minute: the grey fades with it
+        assertEquals(0.5F, Conversion.greyStrength(9, 20.0F, 300), 1.0E-6F);
+        // Endless: as grey as its hearts
+        assertEquals(1.0F, Conversion.greyStrength(9, 20.0F, -1), 1.0E-6F);
     }
 }

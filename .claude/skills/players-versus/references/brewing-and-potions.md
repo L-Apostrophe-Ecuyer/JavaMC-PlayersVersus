@@ -86,14 +86,31 @@ by `ZOMBIE_CONVERSION_CHANCE` (`ConversionAttacks.afterHit`; a converting hit's 
 are dropped), a creaking vanishing when hit, the mushroom creeper's spore puff, the pale creeper's cloud, and rotten
 flesh (`VanillaItems`: `ROTTEN_FLESH_CONVERSION_CHANCE` 1/8 of a 1200-tick dose, besides its hunger).
 `LivingEntityConversionMixin` stacks doses (new amplifier = had + dose + 1, duration the longer of the two) and keeps
-tag `players-versus:conversion_immune` (pale creepers and creakings among them) from taking it. White hearts = amplifier + 1 from the bar's end (`Conversion`, pure,
+tag `players-versus:conversion_immune` from taking it (skeletons, the nether's undead, the passive undead animals,
+the pale, red mushroom hosts, endermen and their bugs, golems, bosses; zombies are no longer immune). Zombies' rare hits convert only their kin (tag
+`players-versus:zombie_kin`; piglins for zombified piglins). The mushroom creeper's puff no longer doses (lore spec
+`2026-11-01-pale-warp-lore-and-watchling-design.md`). White hearts = amplifier + 1 from the bar's end (`Conversion`, pure,
 `ConversionTest`; client `ConversionHeartsMixin` draws `hud/heart/conversion_*`, access-widened `Hud$HeartType`).
 Food regeneration stops below them (`HungerManagerMixin`, both the overhaul's and vanilla's `heal`). All white:
-`Shroomify` shakes it `SHROOMIFY_TICKS` (`ShroomShakingPayload` -> client `ShroomShaking`, render state "fully frozen";
-nausea for a player), then at the level tick's end converts it (villager -> zombie villager via a stand-in zombie's
-`convertVillagerToZombieVillager`; piglins -> zombified piglin, hoglin -> zoglin, tag
-`players-versus:shroomify_into_pale_zombies` -> pale zombie) or kills it (`players-versus:shroomified`); a player dies
-and a pale zombie rises wearing (and guaranteed to drop) their armour.
+`Undeath` (was `Shroomify`) shakes it `TURNING_TICKS` (`UndeathShakingPayload` -> client `UndeathShaking`, render state
+"fully frozen"; nausea for a player), then at the level tick's end `turn`s it: villager -> zombie villager (a stand-in
+zombie's `convertVillagerToZombieVillager`); zombies -> pale zombie, creeper -> pale creeper, spiders -> pale spider,
+horse -> zombie horse, camel -> camel husk, nautilus -> zombie nautilus, chicken -> zombie chicken (`keepWhatWasKept`:
+tame, owner via `AbstractHorseAccessor` or `TamableAnimal#setOwnerReference`, chicken jockey), piglins -> zombified
+piglin, hoglin -> zoglin; tag `players-versus:rise_as_zombies` (illagers, witch, wandering trader) -> `zombieOfThePlace`
+(drowned under water, husk in tag `players-versus:undead_rise_as_husks`, else zombie; no longer pale by place); else
+killed (`players-versus:turned_undead`). A player dies and the zombie of the place rises wearing (and guaranteed to drop) their armour.
+**Withering** makes the pale (`Undeath#wither`, `LivingEntityWitheringMixin` at `LivingEntity#hurtServer` RETURN: wither
+damage leaving under 8 health): villager -> pale villager (`turnPaleVillager`, keeps data, gossip, offers, xp),
+wandering trader -> pale wandering trader (`turnPaleTrader`, keeps offers), spiders -> pale spider, the rest of
+`rise_as_zombies` -> pale zombie; zombies and creepers in their own mixins; a player withered to death
+rises as a pale zombie in their armour (`ServerPlayerWitheredMixin` at `ServerPlayer#die` HEAD, `risePale`).
+Golden apples (both) cure Conversion (`VanillaItems`: `RemoveStatusEffectsConsumeEffect`). Client `PaleSight` asks the
+game renderer for `players-versus:conversion_1..20` (`Conversion#greyStrength`: white hearts x time left, fading over
+`GREY_FADE_TICKS`; eased 0.01 a tick) and `watchling_1..16` (the HUD static's strength) each tick; `tools/post-effects.py` writes them from
+vanilla's `post/color_convolve`, `post/bits` and `post/blit`.
+The brown mushroom cluster (`CustomBrewingItems.BROWN_MUSHROOM_CLUSTER`, dropped by a stage-3 `brown_mushrooms`) smelts
+into a concentrate of mining fatigue (`concentrate_of_mining_fatigue_mushrooms.json`, beside prismarine's).
 
 ## Concentrates (`CustomBrewingItems`, `ConcentrateItem`)
 ~30 `ConcentrateItem`s (`concentrate_of_<effect>`), each a placeable `BlockItem` (see

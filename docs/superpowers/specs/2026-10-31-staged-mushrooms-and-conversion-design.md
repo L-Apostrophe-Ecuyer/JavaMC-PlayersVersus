@@ -1,6 +1,9 @@
 # Staged mushrooms, pale shrooms and Conversion
 
 Asked for on 2026-10-31, after the recipe book. Builds on the feedback batch's mushrooms (cave clusters, mushroom caves).
+Revised by `2026-11-01-pale-warp-lore-and-watchling-design.md` (the lore fixes): where this says "below y 0" read "where
+paleness holds" (below y 0 or a pale biome), the mushroom creeper's puff gives no Conversion, and what all-white things
+turn into is that spec's.
 
 ## What the player sees
 
@@ -26,16 +29,19 @@ Asked for on 2026-10-31, after the recipe book. Builds on the feedback batch's m
     vanishes when hit gives its attacker Conversion instead of blindness (the silverfish it otherwise lets out stays).
   - Any other zombie's hit (husks, drowned, zombie villagers, zombified piglins), 1 in 25, and then nothing else:
     a husk's converting hit gives no hunger.
-  - The mushroom creeper never explodes, lit or after a player: its spore puff turns the creepers within 3 blocks and
-    gives everything else living there a dose. The pale creeper still explodes, and its lingering cloud gives
+  - The mushroom creeper never explodes, lit or after a player: its spore puff turns the creepers within 3 blocks.
+    (It also gave everything else living there a dose until the lore fixes: a red mushroom host converts nothing.) The pale creeper still explodes, and its lingering cloud gives
     Conversion instead of darkness and wither.
   - Rotten flesh: besides its hunger, a 1-in-8 chance of a dose lasting 60 seconds.
   - A dose refreshes the effect's time but never shortens it (rotten flesh's minute on two minutes left leaves two).
-- **Shroomifying.** All of its hearts white, a living thing shakes for 5 seconds (a player feels sick), then:
-  - a player dies of it ("was shroomified") and a pale zombie rises where they fell, wearing their armour, which it
+- **Turning undead** (called shroomifying until the lore fixes). All of its hearts white, a living thing shakes for 5
+  seconds (a player feels sick), then (as revised):
+  - a player dies of it ("turned undead") and the zombie of the place rises where they fell, wearing their armour, which it
     always drops; a totem saves them, armour and all;
-  - a villager turns into a zombie villager, piglins and piglin brutes into zombified piglins, a hoglin into a zoglin,
-    illagers, witches and wandering traders into pale zombies;
+  - a villager turns into a zombie villager (where paleness holds, into the illager of its trade: lore spec), piglins
+    and piglin brutes into zombified piglins, a hoglin into a zoglin, illagers, witches and wandering traders into the
+    zombie of the place; zombies turn pale, creepers into pale creepers, spiders into pale spiders; a horse into a
+    zombie horse, a camel into a camel husk, a nautilus into a zombie nautilus, a chicken into a zombie chicken;
   - anything else dies of it.
   - The undead, mooshrooms, the mushroom creeper and spider, pale zombies, pale creepers, creakings, golems, the ender
     dragon and the warden never take Conversion.
@@ -56,10 +62,10 @@ Asked for on 2026-10-31, after the recipe book. Builds on the feedback batch's m
 - `HungerManagerMixin`: the food overhaul's regeneration stops at the cap, and so does vanilla's (`FoodData.tick`'s
   `heal`). `ConversionHeartsMixin` (client) draws white hearts over the bar's last ones (sprites
   `players-versus:hud/heart/conversion_*`), counting the containers vanilla draws to know each heart.
-- `Shroomify`: the effect's tick notes an all-white entity; at the end of the level's tick it shakes (a
-  `ShroomShakingPayload` to the clients watching, which make its render state "fully frozen"), then shroomifies.
-  Damage type `players-versus:shroomified` (no armour, shields, resistance or knockback; a totem still works).
-  `players-versus:shroomify_into_pale_zombies` lists the mobs that become pale zombies.
+- `Undeath` (was `Shroomify`): the effect's tick notes an all-white entity; at the end of the level's tick it shakes (an
+  `UndeathShakingPayload` to the clients watching, which make its render state "fully frozen"), then turns undead.
+  Damage type `players-versus:turned_undead` (no armour, shields, resistance or knockback; a totem still works).
+  `players-versus:rise_as_zombies` lists the mobs that rise as the zombie of the place.
 - Assets from `tools/staged-mushrooms.py` (tall mushrooms, pale shrooms, white hearts, the cluster models).
 
 - `ConversionAttacks`: the dose, and what a mob's landed melee hit does (`MobConversionAttackMixin` at
