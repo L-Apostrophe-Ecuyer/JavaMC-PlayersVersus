@@ -1,2 +1,25 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
+calls net.minecraft.world.entity.AreaEffectCloud tick
+member net.minecraft.world.entity.AreaEffectCloud addEffect|eapplication|setWaitTime|setDuration|setRadius|victims
+sig net.minecraft.client.Camera
+calls net.minecraft.client.Camera (setup|setRotation|update)
+findsig PlayerSkinRenderCache
+findsig ResolvableProfile
+sig net.minecraft.world.entity.player.PlayerSkin
+member net.minecraft.network.syncher.EntityDataSerializers PROFILE|Profile|PROFILE
+findsig Mannequin
+sig net.minecraft.world.entity.Avatar
+findsig AvatarRenderer
+sig net.minecraft.client.renderer.entity.ZombieRenderer
+sig net.minecraft.client.renderer.entity.AbstractZombieRenderer
+sig net.minecraft.client.renderer.entity.state.ZombieRenderState
+member net.minecraft.world.level.gamerules.GameRules KEEP_INVENTORY|SHOW_DEATH
+sig net.minecraft.world.entity.player.Inventory
+calls net.minecraft.server.level.ServerPlayer die
+calls net.minecraft.world.entity.player.Player (dropEquipment|dropAllDeathLoot|die)
+uses WITHER
+findcalls WitherRoseBlock
+findcalls WitherSkull
+calls net.minecraft.world.entity.monster.skeleton.WitherSkeleton doHurtTarget
+member net.minecraft.world.entity.LivingEntity canBeAffected|addEffect|forceAddEffect|removeEffect|hasEffect|tickEffects
