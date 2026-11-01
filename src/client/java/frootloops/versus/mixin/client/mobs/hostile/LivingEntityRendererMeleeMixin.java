@@ -1,6 +1,6 @@
 package frootloops.versus.mixin.client.mobs.hostile;
 
-import frootloops.versus.mod.items_and_effects.conversion.UndeathShaking;
+import frootloops.versus.mod.items_and_effects.blight.UndeathShaking;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

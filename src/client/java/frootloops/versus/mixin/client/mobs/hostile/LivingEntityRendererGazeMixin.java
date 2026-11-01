@@ -3,6 +3,8 @@ package frootloops.versus.mixin.client.mobs.hostile;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import frootloops.versus.mod.mobs.hostile.end.GazeRenderState;
 import frootloops.versus.mod.mobs.hostile.end.GazeTranslucency;
+import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieRenderState;
+import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -10,6 +12,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,6 +51,8 @@ public abstract class LivingEntityRendererGazeMixin {
 
     @ModifyReturnValue(method = "getModelTint", at = @At("RETURN"))
     private int playersVersus$fade(int tint, LivingEntityRenderState state) {
+        // A player zombie's skin, gone grey-green
+        if (state instanceof PlayerZombieRenderState) tint = ARGB.multiply(tint, PlayerZombieRenderer.TINT);
         float seen = ((GazeRenderState) state).playersVersus$seen();
         if (seen >= 0.999F) return tint;
         int alpha = Math.round(((tint >>> 24) & 0xFF) * seen);

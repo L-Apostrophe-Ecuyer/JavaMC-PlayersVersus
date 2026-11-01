@@ -11,6 +11,7 @@ import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieEntity;
 import frootloops.versus.mod.mobs.passive.ZombieChickenEntity;
 import frootloops.versus.mod.items_and_effects.throwing.SlimeballEntity;
 
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.spider.Spider;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.phys.Vec3;
@@ -73,10 +75,10 @@ public class ModEntities {
             EntityType.Builder.of(MushroomSpiderEntity::new, MobCategory.MONSTER).sized(1.4f, 0.9f).eyeHeight(0.65f).passengerAttachments(0.765f).clientTrackingRange(8)
     );
 
-    /** The watchling: an enderman with a creaking's eyes, sized and tracked as one. */
+    /** The watchling: an enderman with a taller head and a creaking's three eyes, sized (a little taller) and tracked as one. */
     public static final EntityType<WatchlingEntity> WATCHLING = register(
             "watchling",
-            EntityType.Builder.of(WatchlingEntity::new, MobCategory.MONSTER).sized(0.6f, 2.9f).eyeHeight(2.55f).passengerAttachments(2.80625f).clientTrackingRange(8)
+            EntityType.Builder.of(WatchlingEntity::new, MobCategory.MONSTER).sized(0.6f, 3.1f).eyeHeight(2.75f).passengerAttachments(3.0f).clientTrackingRange(8)
     );
 
     /** A villager the paleness took (withered), sized and tracked as a zombie villager. */
@@ -91,7 +93,13 @@ public class ModEntities {
             EntityType.Builder.of(PaleWanderingTraderEntity::new, MobCategory.MONSTER).sized(0.6f, 1.95f).eyeHeight(1.62f).clientTrackingRange(10)
     );
 
-    /** A chicken Conversion turned undead: a chicken in all but its eggs, sized and tracked as one. */
+    /** A player the Blight took: sized and tracked as a zombie. */
+    public static final EntityType<PlayerZombieEntity> PLAYER_ZOMBIE = register(
+            "player_zombie",
+            EntityType.Builder.of(PlayerZombieEntity::new, MobCategory.MONSTER).sized(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.0125f).ridingOffset(-0.7f).clientTrackingRange(8)
+    );
+
+    /** A chicken Blight turned undead: a chicken in all but its eggs, sized and tracked as one. */
     public static final EntityType<ZombieChickenEntity> ZOMBIE_CHICKEN = register(
             "zombie_chicken",
             EntityType.Builder.of(ZombieChickenEntity::new, MobCategory.CREATURE).sized(0.4f, 0.7f).eyeHeight(0.644f).passengerAttachments(new Vec3(0.0, 0.7, -0.1)).clientTrackingRange(10)
@@ -110,6 +118,7 @@ public class ModEntities {
     public static final Item WATCHLING_SPAWN_EGG =  new SpawnEggItem(getItemSettings("watchling_spawn_egg").spawnEgg(WATCHLING));
     public static final Item PALE_VILLAGER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_villager_spawn_egg").spawnEgg(PALE_VILLAGER));
     public static final Item PALE_WANDERING_TRADER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_wandering_trader_spawn_egg").spawnEgg(PALE_WANDERING_TRADER));
+    public static final Item PLAYER_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("player_zombie_spawn_egg").spawnEgg(PLAYER_ZOMBIE));
     public static final Item ZOMBIE_CHICKEN_SPAWN_EGG =  new SpawnEggItem(getItemSettings("zombie_chicken_spawn_egg").spawnEgg(ZOMBIE_CHICKEN));
     public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("wildfire_spawn_egg").spawnEgg(WILDFIRE));
 
@@ -120,6 +129,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(ICE_CUBE, IceCubeEntity.createIceCubeAttributes());
         FabricDefaultAttributeRegistry.register(PALE_CREEPER, PaleCreeperEntity.createPaleCreeperAttributes());
         FabricDefaultAttributeRegistry.register(PALE_ZOMBIE, PaleZombieEntity.createPaleZombieAttributes());
+        FabricDefaultAttributeRegistry.register(PLAYER_ZOMBIE, Zombie.createAttributes());
         FabricDefaultAttributeRegistry.register(PALE_SPIDER, Spider.createAttributes());
         FabricDefaultAttributeRegistry.register(MUSHROOM_CREEPER, Creeper.createAttributes());
         FabricDefaultAttributeRegistry.register(MUSHROOM_SPIDER, Spider.createAttributes());

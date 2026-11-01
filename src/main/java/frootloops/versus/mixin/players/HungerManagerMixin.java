@@ -3,7 +3,7 @@ package frootloops.versus.mixin.players;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import frootloops.versus.VersusSettings;
-import frootloops.versus.mod.items_and_effects.conversion.Undeath;
+import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodData;
@@ -65,7 +65,7 @@ public class HungerManagerMixin {
 
     }
 
-    // Without the food overhaul, vanilla's regeneration stops at Conversion's white hearts too
+    // Without the food overhaul, vanilla's regeneration stops at Blight's white hearts too
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;heal(F)V"))
     private void playersVersus$noRegenIntoWhiteHearts(ServerPlayer player, float amount, Operation<Void> original) {
         float room = Undeath.regenCap(player) - player.getHealth();
@@ -109,7 +109,7 @@ public class HungerManagerMixin {
 
     private void doHealthRegeneration(ServerPlayer player, boolean hasHungerEffect) {
         float playerHealth = player.getHealth();
-        // Food doesn't regenerate health into Conversion's white hearts
+        // Food doesn't regenerate health into Blight's white hearts
         float regenCap = Undeath.regenCap(player);
         boolean isPlayerSlowlyDying = playerHealth < 20.0f && (player.hasEffect(MobEffects.WITHER) || (player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
         boolean canPlayerRegenHealth = player.isHurt() && playerHealth < regenCap && player.level().getGameRules().get(GameRules.NATURAL_HEALTH_REGENERATION);

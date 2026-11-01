@@ -56,6 +56,13 @@ public abstract class VersusSettings {
         public static boolean DO_SMARTER_COPPER_GOLEMS = true;
     }
 
+    public static class Moon {
+        // Nights darken with the moon (client, LunarDarkness): full, a night is as vanilla's; new, the sky gives next to no
+        // light around midnight. DARKENING scales it: 1 is 1.21.10's, which the mod had before 26.x
+        public static boolean DARKER_MOONLESS_NIGHTS = true;
+        public static float DARKENING = 1.0F;
+    }
+
     // Speeds in blocks per tick: walking is about 0.22, sprinting 0.28, a ladder climbs at about 0.12.
     public static class Leaves {
         // Living things other than animals and spiders push through leaves, slowed the deeper they're in, climb them
@@ -140,15 +147,35 @@ public abstract class VersusSettings {
         // looking away, it clears in CLEAR_TICKS. Looking at one: within WATCH_RANGE blocks, in plain sight, and at
         // least half seen (Gaze)
         public static int STARE_TICKS = 120;
-        public static int CLEAR_TICKS = 60;
+        public static int CLEAR_TICKS = 400;
         public static double WATCH_RANGE = 48.0;
         public static int SILVERFISH_MIN = 4, SILVERFISH_MAX = 7;
-        // Looked at, then left: it teleports after this many ticks (and up to as many more), half the time up behind
-        // its watcher (BEHIND_NEAR to BEHIND_FAR blocks), half the time far off (AWAY_NEAR to AWAY_FAR)
+        // Looked at, then left: it teleports after this many ticks (and up to as many more), to where it isn't looked at
+        // (further than ASIDE_DEGREES either side of the way the watcher faces) and nearer: each time it's seen it comes
+        // back to between APPROACH_MIN and APPROACH_MAX of the distance it was at, never nearer than CLOSEST
         public static int TELEPORT_DELAY = 10;
-        public static double BEHIND_NEAR = 4.0, BEHIND_FAR = 8.0, AWAY_NEAR = 18.0, AWAY_FAR = 32.0;
-        // Seen once, then left unlooked at for VANISH_MIN to VANISH_MAX ticks, it vanishes and leaves you be
-        public static int VANISH_MIN = 300, VANISH_MAX = 600;
+        public static double APPROACH_MIN = 0.55, APPROACH_MAX = 0.8, CLOSEST = 3.0, ASIDE_DEGREES = 75.0;
+        // Seen once, it hunts: unlooked at, it still creeps nearer every STALK_MIN to STALK_MAX ticks, and when it has gone
+        // VANISH_MIN to VANISH_MAX ticks (90 seconds to 3 minutes) without being looked at it vanishes and leaves you be
+        public static int STALK_MIN = 400, STALK_MAX = 800;
+        public static int VANISH_MIN = 1800, VANISH_MAX = 3600;
+        // Too close: within NEAR_RANGE blocks the static builds without looking too, faster the nearer, PROXIMITY_RATE
+        // times as fast as a stare at KILL_RANGE blocks and nearer (and a stare adds to it): you die of it as of a stare
+        public static double NEAR_RANGE = 10.0, KILL_RANGE = 3.0;
+        public static float PROXIMITY_RATE = 2.0F;
+        // Hit, it stops haunting and fights as an enderman does: it teleports up to a target farther than
+        // FIGHT_TELEPORT_RANGE blocks off after FIGHT_TELEPORT_TICKS, and calms (and haunts again) after CALM_TICKS with
+        // no target alive. The static from looking at it still builds; being near it doesn't add to it
+        public static double FIGHT_TELEPORT_RANGE = 16.0;
+        public static int FIGHT_TELEPORT_TICKS = 30;
+        public static int CALM_TICKS = 200;
+        // The view of whoever it hunts is pulled towards it now and then (client): within PULL_RANGE blocks, a pull every
+        // PULL_GAP_MIN to PULL_GAP_MAX ticks (sooner the nearer), lasting PULL_MIN to PULL_MAX ticks, turning the view
+        // PULL_DEGREES degrees a tick (more the nearer)
+        public static boolean PULL_ENABLED = true;
+        public static double PULL_RANGE = 24.0;
+        public static int PULL_GAP_MIN = 100, PULL_GAP_MAX = 320, PULL_MIN = 12, PULL_MAX = 30;
+        public static float PULL_DEGREES = 2.0F;
     }
 
     public static class Gaze {
@@ -157,9 +184,22 @@ public abstract class VersusSettings {
         // SEEN_GONE_DEGREES aside and beyond, where they're drawn LEAST_OPACITY opaque, a shimmer; a watchling is
         // watched when at least WATCHED_AT seen
         public static double SEEN_FULL_DEGREES = 0.0;
-        public static double SEEN_GONE_DEGREES = 40.0;
-        public static float LEAST_OPACITY = 0.12F;
+        public static double SEEN_GONE_DEGREES = 30.0;
+        public static float LEAST_OPACITY = 0.03F;
         public static float WATCHED_AT = 0.7F;
+    }
+
+    public static class Blight {
+        // All hearts white, the Blight deals the Wither (amplifier WITHER_AMPLIFIER: 4 is Wither V), kept up WITHER_TICKS
+        // at a time while they stay all white; dying of it under the Blight is how the living are converted
+        public static int WITHER_AMPLIFIER = 4;
+        public static int WITHER_TICKS = 100;
+        // Blighted and hurt below this much health, a zombie, creeper, spider, villager, trader, illager or witch turns pale
+        public static float PALE_BELOW_HEALTH = 8.0F;
+        // The shaking begins when this part of the hearts is white and grows to all of them; the view of whoever's
+        // blighted trembles up to SHAKE_DEGREES either way
+        public static float SHAKE_FROM = 0.4F;
+        public static float SHAKE_DEGREES = 2.5F;
     }
 
     public static class Mushrooms {
@@ -171,16 +211,16 @@ public abstract class VersusSettings {
         public static float GROW_CHANCE = 0.25f;
         // Three spread no more where this many blocks of their kind are within 4 blocks across, 1 up or down
         public static int SPREAD_CAP = 8;
-        // Conversion: a dose for each DOSE_TICKS spent in pale shrooms, lasting EFFECT_TICKS (each dose refreshes it);
-        // all hearts white, TURNING_TICKS of shaking before turning undead
-        public static int DOSE_TICKS = 100;
-        public static int EFFECT_TICKS = 2400;
+        // Blight: a very slow dose for each DOSE_TICKS spent in pale shrooms, lasting EFFECT_TICKS (each dose refreshes
+        // it); a creative player, who can't wither away, shakes TURNING_TICKS all white before a copy of them rises
+        public static int DOSE_TICKS = 400;
+        public static int EFFECT_TICKS = 3600;
         public static int TURNING_TICKS = 100;
         // Pale zombies' and creakings' hits always convert, other zombies' this often (each in place of its own effect)
-        public static float ZOMBIE_CONVERSION_CHANCE = 0.04f;
-        // Rotten flesh: this chance of a dose lasting ROTTEN_FLESH_CONVERSION_TICKS
-        public static float ROTTEN_FLESH_CONVERSION_CHANCE = 0.125f;
-        public static int ROTTEN_FLESH_CONVERSION_TICKS = 1200;
+        public static float ZOMBIE_BLIGHT_CHANCE = 0.04f;
+        // Rotten flesh: this chance of a dose lasting ROTTEN_FLESH_BLIGHT_TICKS
+        public static float ROTTEN_FLESH_BLIGHT_CHANCE = 0.125f;
+        public static int ROTTEN_FLESH_BLIGHT_TICKS = 1200;
     }
 
     public static class Items {

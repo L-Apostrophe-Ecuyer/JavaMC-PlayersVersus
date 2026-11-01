@@ -15,7 +15,9 @@
       "frootloops.versus.gametest.TreeGrowthGameTest",
       "frootloops.versus.gametest.MushroomMobsGameTest",
       "frootloops.versus.gametest.StagedMushroomsGameTest",
-      "frootloops.versus.gametest.UndeadFormsGameTest"
+      "frootloops.versus.gametest.UndeadFormsGameTest",
+      "frootloops.versus.gametest.BlightGameTest",
+      "frootloops.versus.gametest.WatchlingGameTest"
     ]
   },
   "depends": {

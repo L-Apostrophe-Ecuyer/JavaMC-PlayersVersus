@@ -4,7 +4,7 @@ import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.blocks.mushrooms.StagedMushroomBlock;
 import frootloops.versus.mod.items_and_effects.CustomBrewingItems;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
-import frootloops.versus.mod.items_and_effects.conversion.Conversion;
+import frootloops.versus.mod.items_and_effects.blight.Blight;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
@@ -36,6 +36,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -46,10 +47,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * What Conversion and withering make of villagers and animals: Conversion turns villagers into zombie villagers and
- * animals with an undead kind of their own into it, still their owner's; withering turns villagers into pale villagers,
- * cured by golden apples, and illagers into pale zombies. Zombie chickens lay nothing and breed with nothing; the pale
- * and the passive undead are undead. Golden apples cure Conversion; grown brown mushroom clusters make mining fatigue.
+ * What Blight makes of villagers and animals: all white, it turns villagers into zombie villagers and
+ * animals with an undead kind of their own into it, still their owner's; blighted and wounded (below 8 health), it turns
+ * villagers into pale villagers, cured by golden apples, and illagers into pale zombies. Zombie chickens lay nothing and breed with nothing; the pale
+ * and the passive undead are undead. Golden apples cure Blight; grown brown mushroom clusters make mining fatigue.
  */
 public class UndeadFormsGameTest {
 
@@ -63,9 +64,14 @@ public class UndeadFormsGameTest {
         return AABB.encapsulatingFullBlocks(helper.absolutePos(new BlockPos(0, 0, 0)), helper.absolutePos(new BlockPos(13, 7, 7)));
     }
 
-    /** Conversion enough to whiten all the entity's hearts. */
+    /** Blight enough to whiten all the entity's hearts. */
     private static MobEffectInstance allWhite(LivingEntity entity) {
-        return new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, Conversion.hearts(entity.getMaxHealth()) - 1);
+        return new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, Blight.hearts(entity.getMaxHealth()) - 1);
+    }
+
+    /** One dose of Blight: not the whole bar, but enough that a wound turns the living pale. */
+    private static MobEffectInstance blighted() {
+        return new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0);
     }
 
     private static <T extends Mob> List<T> found(GameTestHelper helper, Class<T> type, EntityType<?> exactly) {
@@ -73,7 +79,7 @@ public class UndeadFormsGameTest {
     }
 
     /** All white, a villager turns as a zombie's kill would: into a zombie villager, anywhere (pale places too). */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhiteVillagerTurnsZombieVillager(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
@@ -85,16 +91,17 @@ public class UndeadFormsGameTest {
         });
     }
 
-    /** Withered below 8 health, a farmer turns into a pale villager, still a farmer, its experience kept for its cure. */
+    /** Blighted and wounded below 8 health, a farmer turns into a pale villager, still a farmer, its experience kept for its cure. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void aWitheredVillagerTurnsPale(GameTestHelper helper) {
+    public void aBlightedAndWoundedVillagerTurnsPale(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
         villager.setVillagerData(villager.getVillagerData().withProfession(helper.getLevel().registryAccess(), VillagerProfession.FARMER));
         villager.setVillagerXp(5);
         villager.setHealth(9.0F);
-        villager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
-        helper.assertTrue(villager.isRemoved(), "the withered villager is still a villager");
+        villager.addEffect(blighted());
+        villager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
+        helper.assertTrue(villager.isRemoved(), "the blighted, wounded villager is still a villager");
         List<PaleVillagerEntity> pale = found(helper, PaleVillagerEntity.class, ModEntities.PALE_VILLAGER);
         helper.assertTrue(pale.size() == 1, pale.size() + " pale villagers, not one");
         helper.assertTrue(pale.getFirst().getVillagerData().profession().is(VillagerProfession.FARMER), "the pale villager isn't a farmer any more");
@@ -102,14 +109,15 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
-    /** Withered below 8 health, a pillager turns into a pale zombie; Conversion would have made it the zombie of the place. */
+    /** Blighted and wounded below 8 health, a pillager turns into a pale zombie; Blight would have made it the zombie of the place. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void aWitheredIllagerTurnsPaleZombie(GameTestHelper helper) {
+    public void aBlightedAndWoundedIllagerTurnsPaleZombie(GameTestHelper helper) {
         floor(helper);
         Mob pillager = helper.spawnWithNoFreeWill(EntityTypes.PILLAGER, new Vec3(3.5, 1.0, 3.5));
         pillager.setHealth(9.0F);
-        pillager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
-        helper.assertTrue(pillager.isRemoved(), "the withered pillager is still a pillager");
+        pillager.addEffect(blighted());
+        pillager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
+        helper.assertTrue(pillager.isRemoved(), "the blighted, wounded pillager is still a pillager");
         helper.assertTrue(found(helper, Mob.class, ModEntities.PALE_ZOMBIE).size() == 1, "no pale zombie rose of the pillager");
         helper.succeed();
     }
@@ -145,15 +153,15 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
-    /** Golden apples (both) cure Conversion when eaten. */
+    /** Golden apples (both) cure Blight when eaten. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void goldenApplesCureConversion(GameTestHelper helper) {
+    public void goldenApplesCureBlight(GameTestHelper helper) {
         for (Item apple : List.of(Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE)) {
             Consumable consumable = new ItemStack(apple).get(DataComponents.CONSUMABLE);
             helper.assertTrue(consumable != null, apple + " can't be eaten");
             boolean cures = consumable.onConsumeEffects().stream().anyMatch(effect -> effect instanceof RemoveStatusEffectsConsumeEffect remove
-                    && remove.effects().contains(CustomStatusEffects.CONVERSION));
-            helper.assertTrue(cures, apple + " doesn't cure Conversion: " + consumable.onConsumeEffects());
+                    && remove.effects().contains(CustomStatusEffects.BLIGHT));
+            helper.assertTrue(cures, apple + " doesn't cure Blight: " + consumable.onConsumeEffects());
         }
         helper.succeed();
     }
@@ -174,7 +182,7 @@ public class UndeadFormsGameTest {
     }
 
     /** A child villager turns into a zombie villager child anywhere: there are no illager children. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhiteChildVillagerTurnsZombieVillagerAnywhere(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
@@ -188,7 +196,7 @@ public class UndeadFormsGameTest {
     }
 
     /** All white, a chicken turns into a zombie chicken, grown. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhiteChickenTurnsZombieChicken(GameTestHelper helper) {
         floor(helper);
         Chicken chick = helper.spawnWithNoFreeWill(EntityTypes.CHICKEN, new Vec3(3.5, 1.0, 3.5));
@@ -199,12 +207,12 @@ public class UndeadFormsGameTest {
             List<ZombieChickenEntity> undead = found(helper, ZombieChickenEntity.class, ModEntities.ZOMBIE_CHICKEN);
             helper.assertTrue(undead.size() == 1, undead.size() + " zombie chickens, not one");
             helper.assertTrue(!undead.getFirst().isBaby(), "the zombie chicken is a chick");
-            helper.assertTrue(!undead.getFirst().hasEffect(CustomStatusEffects.CONVERSION), "the zombie chicken carries Conversion");
+            helper.assertTrue(!undead.getFirst().hasEffect(CustomStatusEffects.BLIGHT), "the zombie chicken carries Blight");
         });
     }
 
     /** All white, a tamed horse turns into a zombie horse still tame and still its owner's. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhiteTamedHorseStaysItsOwners(GameTestHelper helper) {
         floor(helper);
         ServerPlayer owner = FakePlayer.get(helper.getLevel());
@@ -255,6 +263,11 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
+    /** What each of the offers gives (its result), in order: the same trades are the same list. */
+    private static List<String> sells(MerchantOffers offers) {
+        return offers.stream().map(offer -> offer.getResult().getItem() + "x" + offer.getResult().getCount()).toList();
+    }
+
     /** Cures a pale villager or trader at once: a golden apple fed, then its cure's time run out. */
     private static void cure(GameTestHelper helper, PaleVillagerEntity pale) {
         ServerPlayer player = FakePlayer.get(helper.getLevel());
@@ -265,11 +278,11 @@ public class UndeadFormsGameTest {
     }
 
     /**
-     * A villager withered pale and cured keeps its memories: its type, trade and level (so its clothes and badge), its
+     * A villager blighted pale and cured keeps its memories: its type, trade and level (so its clothes and badge), its
      * experience, its trades and what it thought of someone.
      */
     @GameTest(structure = ROOM, maxTicks = 100)
-    public void aWitheredAndCuredVillagerKeepsItsMemories(GameTestHelper helper) {
+    public void aBlightedPaleAndCuredVillagerKeepsItsMemories(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
         villager.setVillagerData(villager.getVillagerData().withProfession(helper.getLevel().registryAccess(), VillagerProfession.CLERIC).withLevel(3));
@@ -279,7 +292,8 @@ public class UndeadFormsGameTest {
         villager.getGossips().add(friend, GossipType.MAJOR_POSITIVE, 20);
         int liking = villager.getGossips().getReputation(friend, type -> true);
         villager.setHealth(9.0F);
-        villager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
+        villager.addEffect(blighted());
+        villager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
         List<PaleVillagerEntity> pale = found(helper, PaleVillagerEntity.class, ModEntities.PALE_VILLAGER);
         helper.assertTrue(pale.size() == 1, pale.size() + " pale villagers, not one");
         cure(helper, pale.getFirst());
@@ -295,23 +309,24 @@ public class UndeadFormsGameTest {
         });
     }
 
-    /** Withered, a wandering trader turns into a pale wandering trader; cured, it's a wandering trader again, its trades kept. */
+    /** Blighted and wounded, a wandering trader turns into a pale wandering trader; cured, it's a wandering trader again, its trades kept. */
     @GameTest(structure = ROOM, maxTicks = 100)
-    public void aWitheredWanderingTraderTurnsPaleAndCuresBack(GameTestHelper helper) {
+    public void aBlightedWoundedWanderingTraderTurnsPaleAndCuresBack(GameTestHelper helper) {
         floor(helper);
         WanderingTrader trader = helper.spawnWithNoFreeWill(EntityTypes.WANDERING_TRADER, new Vec3(3.5, 1.0, 3.5));
-        int trades = trader.getOffers().size();
-        helper.assertTrue(trades > 0, "the wandering trader has nothing to sell");
+        List<String> trades = sells(trader.getOffers());
+        helper.assertTrue(!trades.isEmpty(), "the wandering trader has nothing to sell");
         trader.setHealth(9.0F);
-        trader.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
-        helper.assertTrue(trader.isRemoved(), "the withered wandering trader is still a wandering trader");
+        trader.addEffect(blighted());
+        trader.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
+        helper.assertTrue(trader.isRemoved(), "the blighted, wounded wandering trader is still a wandering trader");
         List<PaleWanderingTraderEntity> pale = found(helper, PaleWanderingTraderEntity.class, ModEntities.PALE_WANDERING_TRADER);
         helper.assertTrue(pale.size() == 1, pale.size() + " pale wandering traders, not one");
         cure(helper, pale.getFirst());
         helper.succeedWhen(() -> {
             List<WanderingTrader> traders = found(helper, WanderingTrader.class, EntityTypes.WANDERING_TRADER);
             helper.assertTrue(traders.size() == 1, traders.size() + " wandering traders, not one");
-            helper.assertTrue(traders.getFirst().getOffers().size() == trades, "the cured trader has " + traders.getFirst().getOffers().size() + " trades, not " + trades);
+            helper.assertTrue(sells(traders.getFirst().getOffers()).equals(trades), "the cured trader sells " + sells(traders.getFirst().getOffers()) + ", not " + trades);
             helper.assertTrue(found(helper, Villager.class, EntityTypes.VILLAGER).isEmpty(), "the trader was cured into a villager");
         });
     }

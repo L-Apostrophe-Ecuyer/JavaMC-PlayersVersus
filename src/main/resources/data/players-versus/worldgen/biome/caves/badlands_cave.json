@@ -63,7 +63,8 @@
       "players-versus:caves/badlands_cave_ceiling",
       "players-versus:caves/badlands_cave_floor",
       "minecraft:glow_lichen",
-      "players-versus:caves/brown_mushroom_clusters"
+      "players-versus:caves/brown_mushroom_clusters",
+      "players-versus:caves/pale_shroom_clusters"
     ],
     [
       "minecraft:freeze_top_layer"

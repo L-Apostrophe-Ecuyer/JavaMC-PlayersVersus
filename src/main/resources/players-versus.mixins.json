@@ -14,10 +14,10 @@
     "players.building.BlockItemMixin",
 
     "items_and_effects.recipes.RecipeFileMixin",
-    "items_and_effects.conversion.LivingEntityConversionMixin",
-    "items_and_effects.conversion.MobConversionAttackMixin",
-    "items_and_effects.conversion.LivingEntityWitheringMixin",
-    "items_and_effects.conversion.ServerPlayerWitheredMixin",
+    "items_and_effects.blight.LivingEntityBlightMixin",
+    "items_and_effects.blight.MobBlightAttackMixin",
+    "items_and_effects.blight.ServerPlayerBlightedDeathMixin",
+    "items_and_effects.blight.HealOrHarmMobEffectMixin",
     "mobs.MobSunArmourMixin",
 
     "enchantments.AnvilCostMixin",
@@ -137,6 +137,7 @@
     "mobs.passive.PolarBearMixin",
     "mobs.passive.TransportItemsBetweenContainersMixin",
     "mobs.passive.AbstractHorseAccessor",
+    "mobs.passive.AbstractVillagerAccessor",
     "mobs.passive.VillagerHostilesSensorMixin"
   ],
   "injectors": {

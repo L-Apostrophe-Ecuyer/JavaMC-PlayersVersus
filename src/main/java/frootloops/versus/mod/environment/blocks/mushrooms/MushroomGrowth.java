@@ -4,8 +4,8 @@ package frootloops.versus.mod.environment.blocks.mushrooms;
  * How a small mushroom grows, by stages: one mushroom (vanilla's block), two, then three, giving off light 2 and 4 as
  * they grow. A mushroom grows a stage on a random tick, by chance, where it's dark (light 5 or less, or on mycelium), on
  * stone, tuff, logs, mushroom blocks or mycelium, and beside another of its kind; to the third stage, beside one of its
- * kind grown to two or more. Only where paleness doesn't hold (below y 0, or a pale biome: PaleLine): there, brown and
- * red mushrooms grow into pale shrooms instead, which grow only there. Grown, a mushroom that can't grow any more shrinks a stage; at three, where it can, it spreads a mushroom
+ * kind grown to two or more. Only where paleness doesn't hold (below y 0, a pale biome: PaleLine, or standing on
+ * deepslate): there, brown and red mushrooms grow into pale shrooms instead, which grow only there. Grown, a mushroom that can't grow any more shrinks a stage; at three, where it can, it spreads a mushroom
  * of its kind beside it.
  */
 public final class MushroomGrowth {
@@ -22,7 +22,7 @@ public final class MushroomGrowth {
      * @param ground        on stone, tuff, logs, a mushroom block or mycelium
      * @param neighbour     another of its kind beside it (the blocks round it, diagonals and a level up or down too)
      * @param grownNeighbour another of its kind beside it grown to two or more
-     * @param pale          where paleness holds (PaleLine: below y 0, or a pale biome)
+     * @param pale          where paleness holds (PaleLine: below y 0, or a pale biome; or on deepslate)
      */
     public record Conditions(boolean dark, boolean ground, boolean neighbour, boolean grownNeighbour, boolean pale) {}
 
@@ -38,8 +38,9 @@ public final class MushroomGrowth {
         };
     }
 
-    /** The light a grown mushroom gives off: 2 for two, 4 for three. */
-    public static int light(int stage) {
+    /** The light a grown mushroom gives off: 2 for two, 4 for three. Pale shrooms give off none: they're dark. */
+    public static int light(Kind kind, int stage) {
+        if (kind == Kind.PALE) return 0;
         return stage >= 3 ? 4 : stage == 2 ? 2 : 1;
     }
 }

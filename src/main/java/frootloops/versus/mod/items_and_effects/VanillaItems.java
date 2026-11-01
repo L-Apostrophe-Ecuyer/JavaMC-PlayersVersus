@@ -269,12 +269,12 @@ public class VanillaItems {
             List<ConsumeEffect> consumeEffects = consumeComponent.onConsumeEffects();
             // Rotten flesh can also convert: one white heart, for a minute
             if (item == Items.ROTTEN_FLESH) consumeEffects = withEffect(consumeEffects, new ApplyStatusEffectsConsumeEffect(
-                    List.of(new MobEffectInstance(CustomStatusEffects.CONVERSION, VersusSettings.Mushrooms.ROTTEN_FLESH_CONVERSION_TICKS, 0)),
-                    VersusSettings.Mushrooms.ROTTEN_FLESH_CONVERSION_CHANCE));
+                    List.of(new MobEffectInstance(CustomStatusEffects.BLIGHT, VersusSettings.Mushrooms.ROTTEN_FLESH_BLIGHT_TICKS, 0)),
+                    VersusSettings.Mushrooms.ROTTEN_FLESH_BLIGHT_CHANCE));
 
-            // Golden apples cure Conversion, as they cure zombie and pale villagers
+            // Golden apples cure Blight, as they cure zombie and pale villagers
             if (item == Items.GOLDEN_APPLE || item == Items.ENCHANTED_GOLDEN_APPLE) consumeEffects = withEffect(consumeEffects,
-                    new RemoveStatusEffectsConsumeEffect(CustomStatusEffects.CONVERSION));
+                    new RemoveStatusEffectsConsumeEffect(CustomStatusEffects.BLIGHT));
 
             Consumable newConsumeComponent = isDrink ?
                     createDrinkConsumptionComponent(eatTime, consumeEffects, isHoneyBottle) :

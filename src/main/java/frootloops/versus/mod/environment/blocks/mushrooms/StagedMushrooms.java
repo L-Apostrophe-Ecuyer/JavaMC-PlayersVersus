@@ -24,6 +24,9 @@ public final class StagedMushrooms {
     /** What mushrooms grow on: the overworld's stones (deepslate and tuff with them), logs, mushroom blocks, mycelium. */
     public static final TagKey<Block> GROW_ON = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "mushrooms_grow_on"));
 
+    /** Deepslate and its worked kinds: a brown or red mushroom on them is pale (tag {@code players-versus:deepslate}). */
+    public static final TagKey<Block> DEEPSLATE = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "deepslate"));
+
     private StagedMushrooms() {}
 
     /** The kind of small mushroom the state is, or null if it isn't one. */
@@ -77,7 +80,8 @@ public final class StagedMushrooms {
         BlockState below = level.getBlockState(pos.below());
         boolean mycelium = below.is(Blocks.MYCELIUM);
         boolean dark = mycelium || level.getRawBrightness(pos, 0) <= VersusSettings.Mushrooms.MAX_GROWING_LIGHT;
-        boolean pale = PaleLine.isPale(level, pos);
+        // Paleness holds below y 0 and in the pale biomes, and wherever a mushroom stands on deepslate
+        boolean pale = PaleLine.isPale(level, pos) || below.is(DEEPSLATE);
         boolean neighbour = false, grownNeighbour = false;
         for (BlockPos next : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
             if (next.equals(pos)) continue;
@@ -95,7 +99,9 @@ public final class StagedMushrooms {
     /** Three spread one mushroom of their kind beside them, where it can stand and their kind isn't crowded. */
     private static void spread(ServerLevel level, BlockPos pos, MushroomGrowth.Kind kind, RandomSource random) {
         BlockPos target = pos.offset(random.nextInt(3) - 1, random.nextInt(3) - 1, random.nextInt(3) - 1);
-        BlockState mushroom = stateOf(kind, 1);
+        // Spread onto deepslate, a brown or red mushroom is a pale shroom
+        MushroomGrowth.Kind placed = kind != MushroomGrowth.Kind.PALE && level.getBlockState(target.below()).is(DEEPSLATE) ? MushroomGrowth.Kind.PALE : kind;
+        BlockState mushroom = stateOf(placed, 1);
         if (target.equals(pos) || !level.isEmptyBlock(target) || !mushroom.canSurvive(level, target)) return;
         int crowd = 0;
         for (BlockPos next : BlockPos.betweenClosed(pos.offset(-4, -1, -4), pos.offset(4, 1, 4))) {

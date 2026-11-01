@@ -88,15 +88,15 @@ assuming full overlap).
 
 - **`PaleCreeperEntity`** (extends `CreeperEntity`, spawn egg registered): faster (0.36 speed),
   longer follow range (40), armored (10/3.0 armor/toughness), immune to Wither damage (explicit
-  `damage()` override), explodes with an area-effect cloud of Conversion on death (5-block radius,
-  300-tick duration, shrinking; Darkness+Wither until the staged mushrooms batch; each reach of the cloud is a dose)
+  `hurtServer` override), explodes with an area-effect cloud of Blight on death (5-block radius,
+  300-tick duration, shrinking; each reach of the cloud is a dose, and doses stack)
   after vanilla's plain explosion, and has bespoke footstep/hurt
   sounds (stone + mangrove-roots layered) plus a cave-ambience idle sound when it has no target —
   "blind creatures... that only move when looking away" per the README maps to `CreeperFollowTargetThroughWallsGoal`
   + `CreepingAndExplodingGoal` (not re-read this pass — check those two goal classes directly for the
-  exact "only moves unobserved" state machine). `CreeperMixin` (on the *regular* `CreeperEntity`)
-  converts a badly-Wither-damaged (< 8 HP, hit by Wither damage type) regular creeper **into** a
-  Deeper Creeper — an in-fiction mutation path, not just a separate spawn pool.
+  exact "only moves unobserved" state machine). A blighted
+  regular creeper wounded below 8 HP turns **into** a pale creeper (`Undeath#turnPale`, from
+  `LivingEntityBlightMixin`) — an in-fiction mutation path, not just a separate spawn pool.
 - **Mushroom creeper and mushroom spider** (`MushroomCreeperEntity`, `MushroomSpiderEntity`; renderers and spawn
   eggs; textures from `tools/mushroom-mobs.py`) — of the mushroom caves. They ignore players (no player target
   goal) and hunt the plain kind (`EntityTypes.CREEPER`/`SPIDER` exactly); `HurtByTargetGoal` makes them fight back.
@@ -110,15 +110,26 @@ assuming full overlap).
   `MushroomMobsGameTest`, assets `MushroomMobsTest`.
 - **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
   `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman with a creaking's yellow
-  eyes that haunts. No goals, speed 0, knockback-proof, not pushable: it never moves or strikes. `customServerAiStep`:
-  watched (`WatchlingStare.watcher`) it notes its watcher; looked away from, it teleports after `TELEPORT_DELAY`-2x
-  ticks, half the time behind them (`BEHIND_NEAR`-`FAR`), half far off (`AWAY_NEAR`-`FAR`); unlooked at for
-  `VANISH_MIN`-`MAX` ticks after being seen it discards itself; hit by a player it teleports behind them.
-  `WatchlingStare` (server, each level tick): a player looking at one (48 blocks, line of sight, at least half seen by
-  `Gaze`, no `#gaze_disguise_equipment` on the head) builds static (`WatchedPayload` to the HUD), full after 120 ticks:
-  they die of `players-versus:watched` and 4-7 silverfish spawn. Spawns rarely in the dark by the pale line.
+  eyes (three of them, on a head 12 tall: `WatchlingModel`, built from `EndermanModel.createBodyLayer().apply(...)`,
+  `tools/watchling-head.py`, big arms and a jaw from a 64x64 texture; `WatchlingModel` is a `HumanoidModel`, animated per
+  `WatchlingAnimation`: maw opening while it fights, head cocked while it haunts, a two-armed strike) that haunts like Slender. Left alone it never moves or
+  strikes (its enderman-style goals are gated on `isEnraged()`). `customServerAiStep`: watched (`WatchlingStare.watcher`) it notes its watcher and `DATA_HUNTING` (synced,
+  `isHunting`); looked away from, it teleports after `TELEPORT_DELAY`-2x ticks to nearer
+  (`WatchlingStare.approach`: `APPROACH_MIN`-`MAX` of the distance, not nearer than `CLOSEST`) at a bearing more than
+  `ASIDE_DEGREES` off the watcher's facing; unlooked at it creeps nearer the same way every `STALK_MIN`-`MAX` ticks;
+  unlooked at for `VANISH_MIN`-`MAX` ticks (90 s to 3 min) after being seen it discards itself. Hit by any non-watchling
+  living attacker (or shot at) `hurtServer` -> `enrage`: `DATA_ENRAGED`, it targets the attacker, melee-fights with an
+  enderman's stats, `fight()` teleports up to a target beyond `FIGHT_TELEPORT_RANGE` and `calm()` returns it to haunting
+  after `CALM_TICKS` with no live target; `isHunting()` is false while enraged (no pull), and `WatchlingStare.rate(
+  fighting, looking, distance)` ignores nearness for a fighting one (a stare still builds static). `WatchlingStare` (server, each level tick): the pressure on a player is the fastest rate among
+  the watchlings about them: 1 for looking at one (48 blocks, line of sight, at least half seen by `Gaze`, no
+  `#gaze_disguise_equipment` on the head) plus `proximity(distance)` (0 beyond `NEAR_RANGE`, up to `PROXIMITY_RATE` at
+  `KILL_RANGE`, looking or not); the static (`WatchedPayload` to the HUD) fills at rate/`STARE_TICKS` and clears over
+  `CLEAR_TICKS`; full, they die of `players-versus:watched` and 4-7 silverfish spawn. Client `WatchlingPull` turns the
+  local player's view towards a hunting one within `PULL_RANGE` now and then (`Entity#turn`, as the mouse does).
+  Spawns rarely in the dark by the pale line.
 - **The warped show only to a stare**: `Gaze` (pure, `GazeTest`, `VersusSettings.Gaze`) rates how well a view sees a
-  body (1 on it, smoothly down to 0 at 40° off its edge) and `Gaze.opacity` floors it at 12%. Client
+  body (1 on it, smoothly down to 0 at 30° off its edge) and `Gaze.opacity` floors it at 3% and rises with the square. Client
   `LivingEntityRendererGazeMixin` + `LivingEntityRenderStateGazeMixin` (`GazeRenderState`) draw endermen, endermites,
   watchlings and phantoms with `RenderTypes.entityTranslucent` at that alpha and fade their shadows;
   `EyesLayerGazeMixin` dims their eyes (the 9-argument `submitModel` with a tint); `CarriedBlockLayerGazeMixin` hides a
@@ -128,21 +139,20 @@ assuming full overlap).
   `PaleSight` asks for `watchling_1..16` (`tools/post-effects.py`).
 - **Pale villager** (`mod/mobs/hostile/overworld/PaleVillagerEntity`, extends `ZombieVillager`; client
   `PaleVillagerRenderer`, the villager model and `VillagerProfessionLayer` "villager" over a villager-illager skin from
-  `tools/pale-villager.py`: ashen skin, the illager's brow, eyes and mouth): a withered villager
-  (`Undeath#wither`/`turnPaleVillager`, or killed by one). Keeps villager data (type, profession, level: its clothes),
-  gossip, offers, xp, all restored on its cure (game test `aWitheredAndCuredVillagerKeepsItsMemories`); inherits the
-  golden apple cure (`ZombieVillagerMixin`). Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, hits wither
-  (5 s), its kills turn pale (villagers and wandering traders); no reinforcements (`handleAttributes` empty, chance 0),
+  `tools/pale-villager.py`: ashen skin, the illager's brow, eyes and mouth): a blighted, wounded villager
+  (`Undeath#turnPale`/`turnPaleVillager`, or killed by one). Keeps villager data (type, profession, level: its clothes),
+  gossip, offers, xp, all restored on its cure (game test `aBlightedPaleAndCuredVillagerKeepsItsMemories`); inherits the
+  golden apple cure (`ZombieVillagerMixin`). Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, its hits blight
+  (`BlightAttacks`), its kills turn pale (villagers and wandering traders); no reinforcements (`handleAttributes` empty, chance 0),
   no drowned/frostbite conversion, never despawns, villager sounds pitched low. `VillagerHostilesSensorMixin` makes
-  villagers flee it (8 blocks). Conversion-immune; excluded from `ZombieMixin`'s wither-to-pale and from zombies' rare
-  converting hits.
+  villagers flee it (8 blocks). Blight-immune.
 - **Pale wandering trader** (`PaleWanderingTraderEntity`, extends `PaleVillagerEntity`; client
-  `PaleWanderingTraderRenderer`, the wandering trader's model and the same skin treatment): a withered wandering trader
+  `PaleWanderingTraderRenderer`, the wandering trader's model and the same skin treatment): a blighted, wounded wandering trader
   (`Undeath#turnPaleTrader`), keeps its offers; cured (`ZombieVillagerMixin` at `finishConversion` HEAD) it's a
   wandering trader again with them (`overrideOffers`) and 48000 ticks to wander.
 - **Undead animals in body armour don't burn** (`MobSunArmourMixin` at `Mob#burnUndead` HEAD).
 - **Zombie chicken** (`mod/mobs/passive/ZombieChickenEntity`, extends `Chicken`; client `ZombieChickenRenderer`;
-  textures from `tools/undead-animals.py`): what Conversion makes of a chicken, a passive undead animal as the zombie
+  textures from `tools/undead-animals.py`): what Blight makes of a chicken, a passive undead animal as the zombie
   horse. No eggs (`eggTime` held up), no food, no offspring, never a chick (`canBeABaby`, `setAge` clamped), always the
   temperate variant (`setVariant` ignored), lower voice. In `#minecraft:zombies` (so undead) and
   `#minecraft:burn_in_daylight` (vanilla's tag-driven `Mob#burnUndead`), never converted. Drops 0-2 feathers and 0-1
@@ -164,12 +174,19 @@ assuming full overlap).
   peppering it with a bow from max range.
 - **`WardenVibrationListenerMixin`** — not re-read this pass; likely tunes the sniff/vibration
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
+- **Player Zombie** (`mod/mobs/hostile/overworld/PlayerZombieEntity`, extends `Zombie`; client
+  `PlayerZombieRenderer`/`PlayerZombieRenderState`, the zombie model wearing the player's skin from the skin cache,
+  tinted grey-green in `LivingEntityRendererGazeMixin`): what a player who dies of the Wither while blighted leaves
+  (`ServerPlayerBlightedDeathMixin`). Synced `ResolvableProfile`, custom name, worn items (guaranteed drops), held
+  items, and a `stash` of the rest of the inventory (saved as `Stash`, dropped by `dropCustomDeathLoot` with an extended
+  lifetime). No sun, no drowning, never despawns, its hits blight. Blight-immune; in `#minecraft:zombies`. Game tests in
+  `BlightGameTest`.
 - **Pale Zombie** (`mod/mobs/hostile/overworld/PaleZombieEntity.java`, renderer under
   `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above).
-  Its hits convert: a dose of Conversion each (`ConversionAttacks`, through `MobConversionAttackMixin` on
-  `Mob#doHurtTarget`), in place of the wither it gave. Creakings' hits do too, and their vanish-on-hit gives the
-  attacker Conversion instead of blindness (`CreakingScares`); other zombies' hits, 1 in 25
-  (`VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE`), in place of their own effect (a husk's hunger is dropped). The snow-biome Frosted
+  Its hits convert: a dose of Blight each (`BlightAttacks`, through `MobBlightAttackMixin` on
+  `Mob#doHurtTarget`), (it no longer withers). Creakings' hits do too, and their vanish-on-hit gives the
+  attacker Blight instead of blindness (`CreakingScares`); other zombies' hits, 1 in 25
+  (`VersusSettings.Mushrooms.ZOMBIE_BLIGHT_CHANCE`), in place of their own effect (a husk's hunger is dropped). The snow-biome Frosted
   Zombie was removed in the 26.4 port: vanilla's Frostbite takes its spawns, and vanilla turns
   freezing zombies into frostbites (`Zombie#convertsToWhenFreezing`), which `ZombieMixin` did before.
 - **Ice Cube** (`mod/mobs/hostile/overworld/IceCubeEntity.java`, `IceCubeRenderer` in the client set)

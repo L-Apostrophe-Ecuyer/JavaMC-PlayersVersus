@@ -53,7 +53,12 @@ class MushroomGrowthTest {
 
     @Test
     void theLightGrowsWithTheStage() {
-        assertEquals(2, MushroomGrowth.light(2));
-        assertEquals(4, MushroomGrowth.light(3));
+        assertEquals(2, MushroomGrowth.light(BROWN, 2));
+        assertEquals(4, MushroomGrowth.light(RED, 3));
+    }
+
+    @Test
+    void paleShroomsGiveOffNoLight() {
+        for (int stage = 1; stage <= 3; stage++) assertEquals(0, MushroomGrowth.light(PALE, stage));
     }
 }

@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "players-versus:pale_zombie",
-    "players-versus:zombie_chicken"
+    "players-versus:zombie_chicken",
+    "players-versus:player_zombie"
   ]
 }

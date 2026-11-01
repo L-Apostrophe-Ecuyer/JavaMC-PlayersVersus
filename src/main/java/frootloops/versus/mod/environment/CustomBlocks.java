@@ -227,7 +227,7 @@ public class CustomBlocks {
     }
 
     private static StagedMushroomBlock registerStagedMushroom(String name, MushroomGrowth.Kind kind, Block mushroom) {
-        BlockBehaviour.Properties settings = getSettings(name, mushroom).lightLevel(state -> MushroomGrowth.light(state.getValue(StagedMushroomBlock.MUSHROOMS)));
+        BlockBehaviour.Properties settings = getSettings(name, mushroom).lightLevel(state -> MushroomGrowth.light(kind, state.getValue(StagedMushroomBlock.MUSHROOMS)));
         if (kind == MushroomGrowth.Kind.PALE) settings = settings.mapColor(MapColor.COLOR_LIGHT_GRAY);
         return (StagedMushroomBlock) registerBlock(name, new StagedMushroomBlock(kind, settings));
     }

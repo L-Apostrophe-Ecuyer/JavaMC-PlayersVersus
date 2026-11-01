@@ -7,8 +7,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -51,11 +49,10 @@ public class PaleZombieEntity extends Zombie {
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
     }
 
-    // Its hits convert: a dose of Conversion each, armed or not (ConversionAttacks), in place of the wither they gave
+    // Its hits blight: a dose of Blight each, armed or not (BlightAttacks)
 
     @Override
     public void addBehaviourGoals() {
-        this.addEffect(new MobEffectInstance(MobEffects.WITHER, -1, 127));
         this.ambientSoundTime = -1000;
         this.setDropChance(EquipmentSlot.MAINHAND, 0.4F);
         this.setDropChance(EquipmentSlot.OFFHAND, 0.5F);

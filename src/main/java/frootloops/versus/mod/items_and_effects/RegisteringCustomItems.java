@@ -23,6 +23,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("recovery_compass", CustomEquipment.RECOVERY_COMPASS);
 
         registerCustomItem("pale_zombie_spawn_egg", ModEntities.PALE_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("player_zombie_spawn_egg", ModEntities.PLAYER_ZOMBIE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("ice_cube_spawn_egg", ModEntities.ICE_CUBE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("pale_creeper_spawn_egg", ModEntities.PALE_CREEPER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("pale_spider_spawn_egg", ModEntities.PALE_SPIDER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);

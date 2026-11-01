@@ -21,8 +21,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Small mushrooms grown together, two or three (MushroomGrowth): brown or red ones, whose single mushroom is vanilla's
- * block, or pale shrooms, one to three. They give off more light the more they are, stand where a mushroom stands, and
- * grow on random ticks (StagedMushrooms). Pale shrooms convert whatever stays in them (ConversionExposure).
+ * block, or pale shrooms, one to three. Brown and red ones give off more light the more they are (pale shrooms give off
+ * none), stand where a mushroom stands, and grow on random ticks (StagedMushrooms). Pale shrooms blight whatever stays in
+ * them, very slowly (BlightExposure).
  */
 public class StagedMushroomBlock extends VegetationBlock {
     public static final IntegerProperty MUSHROOMS = IntegerProperty.create("mushrooms", 1, 3);
@@ -69,7 +70,7 @@ public class StagedMushroomBlock extends VegetationBlock {
 
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effects, boolean intersects) {
-        if (this.kind == MushroomGrowth.Kind.PALE && level instanceof ServerLevel serverLevel) ConversionExposure.inside(serverLevel, entity);
+        if (this.kind == MushroomGrowth.Kind.PALE && level instanceof ServerLevel serverLevel) BlightExposure.inside(serverLevel, entity);
     }
 
     /** Brown and red ones are vanilla's mushroom, more of them: picking the block picks that mushroom. */

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Staged mushrooms' and Conversion's assets: textures, block models, blockstates and the pale shroom's item.
+"""Staged mushrooms' and Blight's assets: textures, block models, blockstates and the pale shroom's item.
 
 Usage: staged-mushrooms.py <vanilla dir> <assets/players-versus dir>
 
@@ -11,7 +11,7 @@ half.png, hardcore_full.png, hardcore_half.png, container.png and container_hard
 - A pale shroom: the brown mushroom in pale greys, a little cool; its tall one likewise.
 - Two or three mushrooms together: small crosses of the mushroom (cropped to it), the tall one among them; three adds a
   smaller one.
-- Conversion's white hearts: vanilla's hearts in whites and greys; their containers, for white hearts emptied, grey
+- Blight's white hearts: vanilla's hearts in whites and greys; their containers, for white hearts emptied, grey
   inside.
 """
 import json

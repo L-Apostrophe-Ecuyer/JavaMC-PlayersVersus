@@ -36,7 +36,8 @@
 		"mobs.passive.VillagerRessemblingModelMixin",
 		"mobs.passive.VillagerTradingScreenMixin",
 
-		"items_and_effects.conversion.ConversionHeartsMixin",
+		"items_and_effects.blight.BlightHeartsMixin",
+		"items_and_effects.blight.BlightCameraShakeMixin",
 
 		"items_and_effects.inventory.HotbarSwappingClientMixin",
 		"items_and_effects.inventory.InventoryScreenChestMixin",
