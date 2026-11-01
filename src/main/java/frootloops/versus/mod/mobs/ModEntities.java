@@ -8,6 +8,7 @@ import frootloops.versus.mod.mobs.hostile.overworld.IceCubeEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.MushroomCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.MushroomSpiderEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import frootloops.versus.mod.mobs.passive.ZombieChickenEntity;
 import frootloops.versus.mod.items_and_effects.throwing.SlimeballEntity;
@@ -77,6 +78,12 @@ public class ModEntities {
             EntityType.Builder.of(WatchlingEntity::new, MobCategory.MONSTER).sized(0.6f, 2.9f).eyeHeight(2.55f).passengerAttachments(2.80625f).clientTrackingRange(8)
     );
 
+    /** A villager the paleness took (withered), sized and tracked as a zombie villager. */
+    public static final EntityType<PaleVillagerEntity> PALE_VILLAGER = register(
+            "pale_villager",
+            EntityType.Builder.of(PaleVillagerEntity::new, MobCategory.MONSTER).sized(0.6f, 1.95f).eyeHeight(1.74f).passengerAttachments(2.125f).ridingOffset(-0.7f).clientTrackingRange(8)
+    );
+
     /** A chicken Conversion turned undead: a chicken in all but its eggs, sized and tracked as one. */
     public static final EntityType<ZombieChickenEntity> ZOMBIE_CHICKEN = register(
             "zombie_chicken",
@@ -94,6 +101,7 @@ public class ModEntities {
     public static final Item MUSHROOM_CREEPER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("mushroom_creeper_spawn_egg").spawnEgg(MUSHROOM_CREEPER));
     public static final Item MUSHROOM_SPIDER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("mushroom_spider_spawn_egg").spawnEgg(MUSHROOM_SPIDER));
     public static final Item WATCHLING_SPAWN_EGG =  new SpawnEggItem(getItemSettings("watchling_spawn_egg").spawnEgg(WATCHLING));
+    public static final Item PALE_VILLAGER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_villager_spawn_egg").spawnEgg(PALE_VILLAGER));
     public static final Item ZOMBIE_CHICKEN_SPAWN_EGG =  new SpawnEggItem(getItemSettings("zombie_chicken_spawn_egg").spawnEgg(ZOMBIE_CHICKEN));
     public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("wildfire_spawn_egg").spawnEgg(WILDFIRE));
 
@@ -110,6 +118,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(WILDFIRE, WildfireEntity.createWildfireAttributes());
         FabricDefaultAttributeRegistry.register(WATCHLING, WatchlingEntity.createWatchlingAttributes());
         FabricDefaultAttributeRegistry.register(ZOMBIE_CHICKEN, Chicken.createAttributes());
+        FabricDefaultAttributeRegistry.register(PALE_VILLAGER, PaleVillagerEntity.createPaleVillagerAttributes());
 
         // Make them spawn in the world:
         MobSpawning.addCustomSpawns();

@@ -3,9 +3,9 @@ package frootloops.versus.mod.items_and_effects.conversion;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.mobs.passive.AbstractHorseAccessor;
-import frootloops.versus.mod.environment.PaleLine;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.ModEntities;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -37,7 +37,6 @@ import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
@@ -146,13 +145,13 @@ public final class Undeath {
     }
 
     /**
-     * Turns the entity undead, or kills it. The undead and their kin turn pale: zombies of every kind into pale
-     * zombies, a creeper into a pale creeper, spiders into pale spiders. A villager turns as a zombie's kill does: into
-     * a zombie villager, or where paleness holds into the illager of its trade ({@link #turnIllager}). Piglins become
-     * zombified piglins, a hoglin a zoglin. Animals with an undead kind of their own turn into it, as calm as they were
-     * and their owner's still: a horse a zombie horse, a camel a camel husk, a nautilus a zombie nautilus, a chicken a
-     * zombie chicken. A player, an illager, a witch or a wandering trader rises as the zombie of where it turned
-     * ({@link #zombieOfThePlace}). Anything else dies of it.
+     * Turns the entity undead, or kills it. Conversion makes zombies of the living: a villager a zombie villager (as a
+     * zombie's kill does), piglins zombified piglins, a hoglin a zoglin; animals with an undead kind of their own turn
+     * into it, as calm as they were and their owner's still (a horse a zombie horse, a camel a camel husk, a nautilus a
+     * zombie nautilus, a chicken a zombie chicken). A player, an illager, a witch or a wandering trader rises as the
+     * zombie of where it turned ({@link #zombieOfThePlace}). The undead and their kin it turns pale: zombies of every kind
+     * into pale zombies, a creeper into a pale creeper, spiders into pale spiders. Anything else dies of it. (Withering is
+     * what turns the living pale: {@link #wither}.)
      */
     public static void turn(ServerLevel level, LivingEntity entity) {
         level.playSound((Player) null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ZOMBIE_INFECT, entity.getSoundSource(), 1.0F, 0.7F);
@@ -163,7 +162,7 @@ public final class Undeath {
         // What it turns into takes no Conversion along with the rest of its effects
         entity.removeEffect(CustomStatusEffects.CONVERSION);
         if (entity instanceof Villager villager) {
-            // As a zombie's kill: Zombie#convertVillagerToZombieVillager, where paleness holds turnIllager (ZombieInfectionMixin)
+            // As a zombie's kill: Zombie#convertVillagerToZombieVillager
             Zombie zombie = new Zombie(EntityTypes.ZOMBIE, level);
             zombie.snapTo(villager.position());
             if (zombie.convertVillagerToZombieVillager(level, villager)) return;
@@ -177,28 +176,39 @@ public final class Undeath {
     }
 
     /**
-     * A villager turning where paleness holds (PaleLine) turns into the illager of its trade (PaleVillagers), armed as
-     * one and kept, as a zombie villager is; a child turns into a zombie villager anywhere. Whether it turned.
+     * Withering turns the living pale, as it turns zombies and creepers (ZombieMixin, CreeperMixin): wither damage leaving
+     * them below 8 health, a villager turns into a pale villager ({@link #turnPaleVillager}), a spider into a pale spider,
+     * an illager, a witch or a wandering trader into a pale zombie. (A player withered to death rises as a pale zombie:
+     * {@link #risePale}.) Whether it turned.
      */
-    public static boolean turnIllager(ServerLevel level, Villager villager, boolean sound) {
-        if (villager.isBaby() || !PaleLine.isPale(level, villager.blockPosition())) return false;
-        String trade = villager.getVillagerData().profession().unwrapKey().map(key -> key.identifier().getPath()).orElse("none");
-        PaleVillagers.Illager kind = PaleVillagers.illagerFor(trade);
-        EntityType<? extends Mob> type = switch (kind) {
-            case PILLAGER -> EntityTypes.PILLAGER;
-            case VINDICATOR -> EntityTypes.VINDICATOR;
-            case ILLUSIONER -> EntityTypes.ILLUSIONER;
-        };
-        Mob illager = villager.convertTo(type, ConversionParams.single(villager, true, true), turned -> {
-            turned.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(switch (kind) {
-                case PILLAGER -> Items.CROSSBOW;
-                case VINDICATOR -> Items.IRON_AXE;
-                case ILLUSIONER -> Items.BOW;
-            }));
+    public static boolean wither(ServerLevel level, LivingEntity entity) {
+        if (entity instanceof Villager villager) return turnPaleVillager(level, villager, !villager.isSilent());
+        if (!(entity instanceof Mob mob)) return false;
+        EntityType<?> type = mob.getType();
+        EntityType<? extends Mob> into = type == EntityTypes.SPIDER || type == EntityTypes.CAVE_SPIDER ? ModEntities.PALE_SPIDER
+                : mob.is(RISE_AS_ZOMBIES) ? ModEntities.PALE_ZOMBIE : null;
+        if (into == null) return false;
+        return mob.convertTo(into, ConversionParams.single(mob, true, true), turned -> {
+            turned.setPersistenceRequired();
+            if (!mob.isSilent()) level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_INFECTED, turned.blockPosition(), 0);
+        }) != null;
+    }
+
+    /**
+     * A villager turns into a pale villager, keeping as a zombie villager does what it was (type, trade and level), its
+     * trades, what the village thought of it and its experience, for when it's cured. Whether it turned.
+     */
+    public static boolean turnPaleVillager(ServerLevel level, Villager villager, boolean sound) {
+        PaleVillagerEntity pale = villager.convertTo(ModEntities.PALE_VILLAGER, ConversionParams.single(villager, true, true), turned -> {
+            turned.setVillagerData(villager.getVillagerData());
+            turned.setGossips(villager.getGossips().copy());
+            turned.setTradeOffers(villager.getOffers().copy());
+            turned.setVillagerXp(villager.getVillagerXp());
+            turned.setVillagerDataFinalized(villager.getVillagerDataFinalized());
             turned.setPersistenceRequired();
             if (sound) level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_INFECTED, turned.blockPosition(), 0);
         });
-        return illager != null;
+        return pale != null;
     }
 
     /** What an animal turning undead keeps that its conversion doesn't carry: being tame and whose, being a jockey's mount. */
@@ -233,26 +243,20 @@ public final class Undeath {
     }
 
     /**
-     * The zombie that rises where something turns: under water a drowned; where paleness holds (PaleLine) a pale
-     * zombie; in the desert (tag {@code players-versus:undead_rise_as_husks}) a husk; elsewhere a zombie.
+     * The zombie that rises where something turns: under water a drowned; in the desert (tag
+     * {@code players-versus:undead_rise_as_husks}) a husk; elsewhere a zombie. (Pale zombies rise of withering, not of
+     * Conversion: {@link #wither}, {@link #risePale}.)
      */
     public static EntityType<? extends Mob> zombieOfThePlace(ServerLevel level, LivingEntity entity) {
         BlockPos pos = entity.blockPosition();
         if (entity.isUnderWater()) return EntityTypes.DROWNED;
-        if (PaleLine.isPale(level, pos)) return ModEntities.PALE_ZOMBIE;
         if (level.getBiome(pos).is(HUSK_BIOMES)) return EntityTypes.HUSK;
         return EntityTypes.ZOMBIE;
     }
 
     /** The player dies of it, their armour taken off first; if they died, the zombie of the place rises in it where they fell. */
     private static void turnPlayer(ServerLevel level, ServerPlayer player) {
-        Map<EquipmentSlot, ItemStack> armour = new EnumMap<>(EquipmentSlot.class);
-        for (EquipmentSlot slot : ARMOUR) {
-            ItemStack worn = player.getItemBySlot(slot);
-            if (worn.isEmpty()) continue;
-            armour.put(slot, worn);
-            player.setItemSlot(slot, ItemStack.EMPTY);
-        }
+        Map<EquipmentSlot, ItemStack> armour = takeArmour(player);
         EntityType<? extends Mob> rises = zombieOfThePlace(level, player);
         player.hurtServer(level, source(level), Float.MAX_VALUE);
         if (!player.isDeadOrDying()) {
@@ -260,6 +264,29 @@ public final class Undeath {
             armour.forEach(player::setItemSlot);
             return;
         }
+        rise(level, player, rises, armour);
+    }
+
+    /**
+     * A player withered to death (ServerPlayerWitheredMixin, as they die): a pale zombie rises where they fell, in their
+     * armour (which it always drops), as the zombie of the place rises of a player Conversion turned.
+     */
+    public static void risePale(ServerLevel level, ServerPlayer player) {
+        rise(level, player, ModEntities.PALE_ZOMBIE, takeArmour(player));
+    }
+
+    private static Map<EquipmentSlot, ItemStack> takeArmour(ServerPlayer player) {
+        Map<EquipmentSlot, ItemStack> armour = new EnumMap<>(EquipmentSlot.class);
+        for (EquipmentSlot slot : ARMOUR) {
+            ItemStack worn = player.getItemBySlot(slot);
+            if (worn.isEmpty()) continue;
+            armour.put(slot, worn);
+            player.setItemSlot(slot, ItemStack.EMPTY);
+        }
+        return armour;
+    }
+
+    private static void rise(ServerLevel level, ServerPlayer player, EntityType<? extends Mob> rises, Map<EquipmentSlot, ItemStack> armour) {
         Mob zombie = rises.create(level, EntitySpawnReason.CONVERSION);
         if (zombie == null) {
             armour.values().forEach(stack -> Block.popResource(level, player.blockPosition(), stack));

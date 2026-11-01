@@ -4,21 +4,11 @@
     {
       "entries": [
         {
-          "type": "minecraft:item",
-          "modifier": [
+          "type": "minecraft:alternatives",
+          "children": [
             {
-              "type": "minecraft:set_count",
-              "condition": {
-                "type": "minecraft:match_block",
-                "blocks": "players-versus:brown_mushrooms",
-                "state": {
-                  "mushrooms": "2"
-                }
-              },
-              "count": 2
-            },
-            {
-              "type": "minecraft:set_count",
+              "type": "minecraft:item",
+              "name": "players-versus:brown_mushroom_cluster",
               "condition": {
                 "type": "minecraft:match_block",
                 "blocks": "players-versus:brown_mushrooms",
@@ -26,13 +16,33 @@
                   "mushrooms": "3"
                 }
               },
-              "count": 3
+              "modifier": [
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
             },
             {
-              "type": "minecraft:explosion_decay"
+              "type": "minecraft:item",
+              "name": "minecraft:brown_mushroom",
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "condition": {
+                    "type": "minecraft:match_block",
+                    "blocks": "players-versus:brown_mushrooms",
+                    "state": {
+                      "mushrooms": "2"
+                    }
+                  },
+                  "count": 2
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
             }
-          ],
-          "name": "minecraft:brown_mushroom"
+          ]
         }
       ],
       "rolls": 1

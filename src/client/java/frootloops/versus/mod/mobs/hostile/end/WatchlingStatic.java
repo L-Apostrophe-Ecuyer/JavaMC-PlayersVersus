@@ -34,8 +34,17 @@ public final class WatchlingStatic implements HudElement {
     private WatchlingStatic() {
     }
 
+    /** The one there is, once registered. */
+    private static WatchlingStatic instance;
+
+    /** How thick the static on the screen is now, 0 to 1. */
+    public static float shown() {
+        return instance == null ? 0.0F : Math.min(1.0F, instance.shown);
+    }
+
     public static void register() {
         WatchlingStatic view = new WatchlingStatic();
+        instance = view;
         ClientPlayNetworking.registerGlobalReceiver(WatchedPayload.TYPE, (payload, context) -> view.stare = payload.stare());
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
             if (minecraft.level == null) view.stare = 0.0F;

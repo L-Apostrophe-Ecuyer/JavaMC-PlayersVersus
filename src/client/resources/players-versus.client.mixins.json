@@ -28,6 +28,8 @@
 		"mobs.hostile.LivingEntityRenderStateGripMixin",
 		"mobs.hostile.LivingEntityRendererTiltMixin",
 		"mobs.hostile.SpiderRendererGripMixin",
+		"mobs.hostile.LivingEntityRenderStateGazeMixin",
+		"mobs.hostile.LivingEntityRendererGazeMixin",
 		"mobs.passive.BabyVillagerEarModelMixin",
 		"mobs.passive.VillagerRessemblingModelMixin",
 		"mobs.passive.VillagerTradingScreenMixin",

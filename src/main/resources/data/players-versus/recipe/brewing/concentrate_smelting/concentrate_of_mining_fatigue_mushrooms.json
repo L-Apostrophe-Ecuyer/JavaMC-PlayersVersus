@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": "players-versus:brown_mushroom_cluster",
+  "result": {
+    "id": "players-versus:concentrate_of_mining_fatigue"
+  },
+  "experience": 5,
+  "cookingtime": 200
+}

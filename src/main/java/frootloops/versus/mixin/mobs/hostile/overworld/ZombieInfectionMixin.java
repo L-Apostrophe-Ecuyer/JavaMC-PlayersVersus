@@ -2,39 +2,26 @@ package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import frootloops.versus.mod.items_and_effects.conversion.Undeath;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.passive.ZombieChickenEntity;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.monster.zombie.Zombie;
-import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-/**
- * What zombies make of the living, as Conversion does (Undeath): a villager they turn (killed, or all white) turns into
- * the illager of its trade where paleness holds, a zombie villager elsewhere; and baby zombies ride zombie chickens.
- */
+/** Baby zombies ride zombie chickens: a new one, or one of those about, never a living chicken. */
 @Mixin(Zombie.class)
 public abstract class ZombieInfectionMixin {
-
-    @Inject(method = "convertVillagerToZombieVillager", at = @At("HEAD"), cancellable = true)
-    private void playersVersus$paleVillagersTurnIllager(ServerLevel level, Villager villager, CallbackInfoReturnable<Boolean> info) {
-        if (Undeath.turnIllager(level, villager, !((Zombie) (Object) this).isSilent())) info.setReturnValue(true);
-    }
 
     /** The chicken a baby zombie spawns riding is a zombie chicken. */
     @WrapOperation(method = "finalizeSpawn", at = @At(value = "INVOKE",

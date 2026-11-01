@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.BuoyancyParticle;
 import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
+import frootloops.versus.mod.items_and_effects.conversion.PaleSight;
 import frootloops.versus.mod.items_and_effects.conversion.UndeathShaking;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingStatic;
 import frootloops.versus.mod.items_and_effects.inventory.HotbarRefill;
@@ -41,6 +42,7 @@ public class VersusModClient implements ClientModInitializer {
 		MeleeAnimation.register();
 		UndeathShaking.register();
 		WatchlingStatic.register();
+		PaleSight.register();
 		CustomBlocksClient.onInitialize();
 		LeavesRustling.register();
 		LeavesView.register();

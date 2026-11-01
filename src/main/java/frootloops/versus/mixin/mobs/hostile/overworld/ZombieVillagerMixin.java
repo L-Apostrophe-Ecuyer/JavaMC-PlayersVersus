@@ -51,7 +51,8 @@ public abstract class ZombieVillagerMixin extends Zombie {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         if (itemStack.is(Items.GOLDEN_APPLE)) {
-            if(villagerConversionTime < 1200 && !((ZombieVillager)((Object)this)).isConverting()) return InteractionResult.FAIL;
+            // A first apple starts the cure (1 to 3 minutes); more hasten it, down to a minute left
+            if(villagerConversionTime < 1200 && ((ZombieVillager)((Object)this)).isConverting()) return InteractionResult.FAIL;
 
             itemStack.consume(1, player);
             if (!this.level().isClientSide()) {

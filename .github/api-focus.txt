@@ -1,15 +1,4 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
-calls net.minecraft.client.renderer.entity.VillagerRenderer ^VillagerRenderer$
-sig net.minecraft.client.renderer.entity.AgeableMobRenderer
-sig net.minecraft.client.model.npc.VillagerModel
-sig net.minecraft.client.model.npc.BabyVillagerModel
-findsig CrossedArmsItemLayer
-findsig GameRenderState
-calls net.minecraft.client.renderer.GameRenderer (extract.*|getRequestedPostEffects|preparePostEffects|applyPostEffects|setSpectatedEntityPostEffect|clearSpectatedEntityPostEffect)
-uses getRequestedPostEffects
-uses requestedPostEffects
-asset shaders/post/bits.fsh
-sig net.minecraft.world.entity.ai.goal.AvoidEntityGoal
-calls net.minecraft.world.entity.ai.sensing.VillagerHostilesSensor .
-member net.minecraft.world.entity.npc.villager.Villager Sound|VoicePitch
+asset textures/entity/villager/villager_baby.png
+asset textures/item/villager_spawn_egg.png

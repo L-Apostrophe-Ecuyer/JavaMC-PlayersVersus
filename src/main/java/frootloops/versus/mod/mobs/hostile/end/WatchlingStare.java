@@ -40,27 +40,22 @@ public final class WatchlingStare {
         ServerTickEvents.END_LEVEL_TICK.register(WatchlingStare::tick);
     }
 
-    /** Whether the player looks at it: in reach and plain sight, near the middle of their view, nothing over their eyes. */
+    /** Whether the player looks at it: in reach and plain sight, at least half seen (Gaze), nothing over their eyes. */
     public static boolean looksAt(Player player, WatchlingEntity watchling) {
         if (!player.isAlive() || player.isSpectator() || player.isCreative() || !watchling.isAlive()) return false;
         if (player.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.GAZE_DISGUISE_EQUIPMENT)) return false;
-        Vec3 towards = watchling.getEyePosition().subtract(player.getEyePosition());
-        double distance = towards.length();
-        if (distance > VersusSettings.Watchlings.WATCH_RANGE || distance < 1.0E-3) return false;
-        return looking(player.getViewVector(1.0F), towards.scale(1.0 / distance)) && player.hasLineOfSight(watchling);
+        Vec3 towards = watchling.getBoundingBox().getCenter().subtract(player.getEyePosition());
+        if (towards.length() > VersusSettings.Watchlings.WATCH_RANGE) return false;
+        return Gaze.watched(Gaze.visibility(player.getViewVector(1.0F), towards, watchling.getBbHeight() / 2.0)) && player.hasLineOfSight(watchling);
     }
 
-    /** Whether a view looks along a direction (both unit vectors): within the watching cone. */
-    static boolean looking(Vec3 view, Vec3 direction) {
-        return view.dot(direction) > VersusSettings.Watchlings.WATCH_CONE;
-    }
-
-    /** Whether any player looks at it now. */
-    public static boolean watchedByAnyone(WatchlingEntity watchling) {
+    /** The player looking at it, if any. */
+    @Nullable
+    public static Player watcher(WatchlingEntity watchling) {
         for (Player player : watchling.level().players()) {
-            if (looksAt(player, watchling)) return true;
+            if (looksAt(player, watchling)) return player;
         }
-        return false;
+        return null;
     }
 
     /** The static a stare builds up to after a tick: fuller while looking, clearing while not. */

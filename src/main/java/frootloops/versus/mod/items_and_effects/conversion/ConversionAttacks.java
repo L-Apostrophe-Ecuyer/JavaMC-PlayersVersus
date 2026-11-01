@@ -3,6 +3,7 @@ package frootloops.versus.mod.items_and_effects.conversion;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
 import net.minecraft.core.registries.Registries;
@@ -46,7 +47,8 @@ public final class ConversionAttacks {
     /** A mob's melee hit landed (Mob#doHurtTarget). */
     public static void afterHit(ServerLevel level, Mob attacker, LivingEntity target) {
         boolean always = attacker instanceof PaleZombieEntity || attacker instanceof Creaking || attacker instanceof WatchlingEntity;
-        boolean rarely = attacker instanceof Zombie && kin(attacker, target) && attacker.getRandom().nextFloat() < VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE;
+        // A pale villager's hits wither instead (PaleVillagerEntity): withering is what turns villagers pale
+        boolean rarely = attacker instanceof Zombie && !(attacker instanceof PaleVillagerEntity) && kin(attacker, target) && attacker.getRandom().nextFloat() < VersusSettings.Mushrooms.ZOMBIE_CONVERSION_CHANCE;
         if (!always && !rarely) return;
         CONVERTING_HITS.put(attacker, new Hit(target.getId(), level.getGameTime()));
         target.addEffect(dose(), attacker);

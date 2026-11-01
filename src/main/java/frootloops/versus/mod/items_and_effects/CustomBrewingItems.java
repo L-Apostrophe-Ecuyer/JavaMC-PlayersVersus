@@ -24,6 +24,9 @@ public abstract class CustomBrewingItems {
 
     public static final Item FOUR_LEAF_CLOVER = new Item(getItemSettings("four_leaf_clover").attributes(ItemAttributeModifiers.builder().add(Attributes.LUCK, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 1.0, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.OFFHAND).build()));
 
+    /** Three brown mushrooms grown together (a full cluster's drop): smelted, a concentrate of mining fatigue. */
+    public static final Item BROWN_MUSHROOM_CLUSTER = new Item(getItemSettings("brown_mushroom_cluster"));
+
     public static final Item LIVING_FLAME = new Item(getItemSettings("living_flame").rarity(Rarity.UNCOMMON));
     public static final Item GLISTERING_BEETROOT = new Item(getItemSettings("glistering_beetroot").food(new FoodProperties.Builder().nutrition(4).saturationModifier(0.8f).build()));
 

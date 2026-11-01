@@ -137,13 +137,26 @@ public abstract class VersusSettings {
 
     public static class Watchlings {
         // Looking at a watchling fills the screen with static: full after STARE_TICKS, and you die into silverfish;
-        // looking away, it clears in CLEAR_TICKS. Looking at one: within WATCH_RANGE blocks, in plain sight, and no
-        // further off the middle of the view than this cone (the cosine of its half angle)
+        // looking away, it clears in CLEAR_TICKS. Looking at one: within WATCH_RANGE blocks, in plain sight, and at
+        // least half seen (Gaze)
         public static int STARE_TICKS = 120;
         public static int CLEAR_TICKS = 60;
         public static double WATCH_RANGE = 48.0;
-        public static double WATCH_CONE = 0.9;
         public static int SILVERFISH_MIN = 4, SILVERFISH_MAX = 7;
+        // Looked at, then left: it teleports after this many ticks (and up to as many more), half the time up behind
+        // its watcher (BEHIND_NEAR to BEHIND_FAR blocks), half the time far off (AWAY_NEAR to AWAY_FAR)
+        public static int TELEPORT_DELAY = 10;
+        public static double BEHIND_NEAR = 4.0, BEHIND_FAR = 8.0, AWAY_NEAR = 18.0, AWAY_FAR = 32.0;
+        // Seen once, then left unlooked at for VANISH_MIN to VANISH_MAX ticks, it vanishes and leaves you be
+        public static int VANISH_MIN = 300, VANISH_MAX = 600;
+    }
+
+    public static class Gaze {
+        // Endermen, endermites and watchlings show only to a stare: fully within SEEN_FULL_DEGREES of the middle of
+        // the view (from their edge), not at all SEEN_GONE_DEGREES aside; watched when at least WATCHED_AT seen
+        public static double SEEN_FULL_DEGREES = 1.0;
+        public static double SEEN_GONE_DEGREES = 10.0;
+        public static float WATCHED_AT = 0.5F;
     }
 
     public static class Mushrooms {
