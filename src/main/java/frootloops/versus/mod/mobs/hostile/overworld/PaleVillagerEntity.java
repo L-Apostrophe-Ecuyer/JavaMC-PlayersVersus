@@ -22,13 +22,15 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.zombie.ZombieVillager;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 /**
  * A villager the paleness took: withered (wither damage below 8 health, as zombies and creepers turn pale), or killed
- * by another pale villager. It looks a villager still, in its own clothes, but its skin has gone white. It keeps its
- * trade, its trades and what the village thought of it, as a zombie villager does, for when it's cured: a golden apple
+ * by another pale villager. Half villager, half illager: a villager's body in its own clothes (its biome's and its
+ * trade's, its level's badge), but an illager's ashen skin and scowling face. It keeps its type, trade and level, its
+ * trades, what the village thought of it and its experience, as a zombie villager does, for when it's cured: a golden apple
  * fed to it (ZombieVillagerMixin, which it inherits) starts its cure, more apples hasten it. It shies from players and
  * hunts villagers: its hits wither them, and the villagers it withers or kills turn pale too. It neither burns nor
  * drowns into anything, and stays where it turned.
@@ -71,14 +73,16 @@ public class PaleVillagerEntity extends ZombieVillager {
         return hit;
     }
 
-    /** A villager it kills turns pale, as a zombie's kill turns zombie (as often: on normal, half of them; on hard, all). */
+    /**
+     * A villager (or wandering trader) it kills turns pale, as a zombie's kill turns zombie (as often: on normal, half of
+     * them; on hard, all).
+     */
     @Override
     public boolean killedEntity(ServerLevel level, LivingEntity entity, DamageSource source) {
-        if (entity instanceof Villager villager && level.getDifficulty() != Difficulty.EASY && level.getDifficulty() != Difficulty.PEACEFUL
-                && (level.getDifficulty() == Difficulty.HARD || this.random.nextBoolean())
-                && Undeath.turnPaleVillager(level, villager, !this.isSilent())) {
-            return false;
-        }
+        boolean turns = level.getDifficulty() != Difficulty.EASY && level.getDifficulty() != Difficulty.PEACEFUL
+                && (level.getDifficulty() == Difficulty.HARD || this.random.nextBoolean());
+        if (turns && entity instanceof Villager villager && Undeath.turnPaleVillager(level, villager, !this.isSilent())) return false;
+        if (turns && entity instanceof WanderingTrader trader && Undeath.turnPaleTrader(level, trader, !this.isSilent())) return false;
         // Not Zombie#killedEntity, which would make a zombie villager of it
         return true;
     }

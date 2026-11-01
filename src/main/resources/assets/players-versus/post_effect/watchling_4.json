@@ -19,27 +19,27 @@
                         "name": "RedMatrix",
                         "type": "vec3",
                         "value": [
-                            0.35185,
-                            0.5463,
-                            0.10185
+                            0.50741,
+                            0.41519,
+                            0.07741
                         ]
                     },
                     {
                         "name": "GreenMatrix",
                         "type": "vec3",
                         "value": [
-                            0.27778,
-                            0.62037,
-                            0.10185
+                            0.21111,
+                            0.71148,
+                            0.07741
                         ]
                     },
                     {
                         "name": "BlueMatrix",
                         "type": "vec3",
                         "value": [
-                            0.27778,
-                            0.5463,
-                            0.17593
+                            0.21111,
+                            0.41519,
+                            0.3737
                         ]
                     }
                 ]
@@ -60,12 +60,12 @@
                     {
                         "name": "Resolution",
                         "type": "float",
-                        "value": 6.0
+                        "value": 35.41
                     },
                     {
                         "name": "MosaicSize",
                         "type": "float",
-                        "value": 8.0
+                        "value": 1.875
                     }
                 ]
             }

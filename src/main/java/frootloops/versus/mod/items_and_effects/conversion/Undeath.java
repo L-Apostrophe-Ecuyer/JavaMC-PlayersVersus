@@ -6,6 +6,7 @@ import frootloops.versus.mixin.mobs.passive.AbstractHorseAccessor;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
@@ -177,12 +179,14 @@ public final class Undeath {
 
     /**
      * Withering turns the living pale, as it turns zombies and creepers (ZombieMixin, CreeperMixin): wither damage leaving
-     * them below 8 health, a villager turns into a pale villager ({@link #turnPaleVillager}), a spider into a pale spider,
-     * an illager, a witch or a wandering trader into a pale zombie. (A player withered to death rises as a pale zombie:
+     * them below 8 health, a villager turns into a pale villager ({@link #turnPaleVillager}), a wandering trader into a
+     * pale wandering trader ({@link #turnPaleTrader}), a spider into a pale spider, an illager or a witch into a pale
+     * zombie. (A player withered to death rises as a pale zombie:
      * {@link #risePale}.) Whether it turned.
      */
     public static boolean wither(ServerLevel level, LivingEntity entity) {
         if (entity instanceof Villager villager) return turnPaleVillager(level, villager, !villager.isSilent());
+        if (entity instanceof WanderingTrader trader) return turnPaleTrader(level, trader, !trader.isSilent());
         if (!(entity instanceof Mob mob)) return false;
         EntityType<?> type = mob.getType();
         EntityType<? extends Mob> into = type == EntityTypes.SPIDER || type == EntityTypes.CAVE_SPIDER ? ModEntities.PALE_SPIDER
@@ -205,6 +209,16 @@ public final class Undeath {
             turned.setTradeOffers(villager.getOffers().copy());
             turned.setVillagerXp(villager.getVillagerXp());
             turned.setVillagerDataFinalized(villager.getVillagerDataFinalized());
+            turned.setPersistenceRequired();
+            if (sound) level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_INFECTED, turned.blockPosition(), 0);
+        });
+        return pale != null;
+    }
+
+    /** A wandering trader turns into a pale wandering trader, keeping the trades it carried, for when it's cured. */
+    public static boolean turnPaleTrader(ServerLevel level, WanderingTrader trader, boolean sound) {
+        PaleWanderingTraderEntity pale = trader.convertTo(ModEntities.PALE_WANDERING_TRADER, ConversionParams.single(trader, true, true), turned -> {
+            turned.setTradeOffers(trader.getOffers().copy());
             turned.setPersistenceRequired();
             if (sound) level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_INFECTED, turned.blockPosition(), 0);
         });

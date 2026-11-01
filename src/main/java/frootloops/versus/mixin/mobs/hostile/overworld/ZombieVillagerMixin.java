@@ -1,6 +1,17 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import net.minecraft.core.BlockPos;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ConversionParams;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.block.LevelEvent;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
@@ -31,6 +42,7 @@ public abstract class ZombieVillagerMixin extends Zombie {
     }
 
     @Shadow private int villagerConversionTime;
+    @Shadow private MerchantOffers tradeOffers;
 
     @Shadow
     private void startConverting(@Nullable UUID uuid, int delay) {}
@@ -62,6 +74,23 @@ public abstract class ZombieVillagerMixin extends Zombie {
             return InteractionResult.SUCCESS;
         }
         return super.mobInteract(player, hand);
+    }
+
+    /**
+     * A pale wandering trader cured turns back into a wandering trader (not a villager), with the trades it carried and a
+     * fresh while to wander before it leaves.
+     */
+    @Inject(method = "finishConversion", at = @At("HEAD"), cancellable = true)
+    private void playersVersus$traderCured(ServerLevel level, CallbackInfo info) {
+        if (!((Object) this instanceof PaleWanderingTraderEntity)) return;
+        info.cancel();
+        MerchantOffers offers = this.tradeOffers;
+        this.convertTo(EntityTypes.WANDERING_TRADER, ConversionParams.single(this, false, false), trader -> {
+            if (offers != null) trader.overrideOffers(offers.copy());
+            trader.setDespawnDelay(48000);
+            trader.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
+            if (!this.isSilent()) level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_VILLAGER_CONVERTED, this.blockPosition(), 0);
+        });
     }
 
     @Override

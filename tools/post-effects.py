@@ -3,13 +3,15 @@
 
 Usage: post-effects.py <assets/players-versus dir>
 
-- conversion_1 to _4: the world greying as Conversion whitens the hearts (client PaleSight picks the step). One pass of
+- conversion_1 to _20: the world greying as Conversion whitens the hearts, a twentieth more each (client PaleSight
+  eases between them, so the grey comes and goes smoothly). One pass of
   minecraft:post/color_convolve: each colour row mixes the grey (0.3, 0.59, 0.11) with the colour's own, by k. The
   shader then multiplies what colour is left by 1.8 (its Saturation), so k = saturation / 1.8 leaves exactly that much
   colour, and the brightness as it was. Then minecraft:post/blit back to the screen.
-- watchling_1 to _4: the screen breaking up under a watchling's stare: colour drained the same way, then
+- watchling_1 to _16: the screen breaking up under a watchling's stare, a sixteenth more each: colour drained the same way, then
   minecraft:post/bits, the creeper's view: big pixels (MosaicSize) and few shades (Resolution); bits multiplies the
-  colour left by 1.5 again, so k = saturation / 2.7. (The static itself is the HUD's, WatchlingStatic.)
+  colour left by 1.5 again, so k = saturation / 2.7. The pixels grow from 1 to 8 screen pixels, the shades fall from 64
+  to 6, the colour drains to a fifth, each a little more every step. (The static itself is the HUD's, WatchlingStatic.)
 """
 import json
 import sys
@@ -63,15 +65,25 @@ def bits(resolution, mosaic):
     }
 
 
+CONVERSION_STEPS, WATCHLING_STEPS = 20, 16
+
+
 def main(assets):
     out = Path(assets) / "post_effect"
     out.mkdir(parents=True, exist_ok=True)
-    for step in range(1, 5):
-        saturation = 1.0 - step / 4.0
+    for old in out.glob("conversion_*.json"):
+        old.unlink()
+    for old in out.glob("watchling_*.json"):
+        old.unlink()
+    for step in range(1, CONVERSION_STEPS + 1):
+        saturation = 1.0 - step / CONVERSION_STEPS
         effect = {"targets": {"swap": {}}, "passes": [convolve(saturation / 1.8, "swap"), blit()]}
         (out / f"conversion_{step}.json").write_text(json.dumps(effect, indent=4) + "\n")
-    for step, (resolution, mosaic) in enumerate([(32, 2), (16, 3), (10, 5), (6, 8)], start=1):
-        saturation = 1.0 - 0.2 * step
+    for step in range(1, WATCHLING_STEPS + 1):
+        strength = step / WATCHLING_STEPS
+        mosaic = round(1.0 + 7.0 * strength ** 1.5, 3)
+        resolution = round(64.0 * (6.0 / 64.0) ** strength, 2)
+        saturation = 1.0 - 0.8 * strength
         effect = {"targets": {"swap": {}}, "passes": [convolve(saturation / 2.7, "swap"), bits(resolution, mosaic)]}
         (out / f"watchling_{step}.json").write_text(json.dumps(effect, indent=4) + "\n")
 

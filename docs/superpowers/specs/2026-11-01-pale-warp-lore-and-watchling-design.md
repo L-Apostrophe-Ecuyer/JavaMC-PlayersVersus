@@ -5,9 +5,10 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
 
 ## The rules a player can learn
 
-1. **Warped things care about being seen** (the End), and **show only to a stare**: endermen, endermites and
-   watchlings are see-through, as well seen as they're near the middle of the view, gone a little aside (their eyes and
-   what they carry show only once they're mostly seen). Endermen hate a stare; creakings, pale spiders and pale
+1. **Warped things care about being seen** (the End), and **show only to a stare**: endermen, endermites,
+   watchlings and phantoms are always see-through, a faint shimmer at the edge of sight that fills in smoothly as the
+   middle of the view turns onto them, whole when stared at; their glowing eyes fade with them, and what an enderman
+   carries shows once it's mostly seen. Endermen hate a stare; creakings, pale spiders and pale
    creepers move only unwatched; the watchling never moves, and kills those who watch it. Endermites and silverfish are
    the warp's bugs: silverfish come out of a hit creaking, and out of whoever looked at a watchling too long. A carved
    pumpkin over the eyes hides you from all of them that stare.
@@ -33,10 +34,12 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
      camel husks, zombie nautiluses, zombie chickens: kept beside living ones, they stay as they are); the pale
      themselves (pale zombies, creepers and spiders, creakings, watchlings); the red mushroom's hosts; endermen,
      endermites and silverfish; golems, the ender dragon, the warden.
-5. **Pale villagers are villagers the withering took.** A villager withered (rule 2), or killed by a pale villager (on
-   normal half the time, on hard always, as a zombie's kill), turns into a pale villager: a villager still to look at, in
-   its own clothes, but white-skinned. It keeps its trade, its trades, what the village thought of it and its
-   experience, for when it's cured. It shies from players and hunts villagers; its hits wither them, so the villagers
+5. **Pale villagers are villagers the withering took**, half villager, half illager. A villager withered (rule 2), or
+   killed by a pale villager (on normal half the time, on hard always, as a zombie's kill), turns into a pale villager:
+   a villager's body in its own clothes (its biome's, its trade's, its level's badge), with an illager's ashen skin and
+   scowling face. It keeps its memories for when it's cured: its type, trade and level, its experience, its trades and
+   what it thought of everyone. A wandering trader withered or killed so turns into a pale wandering trader, in its
+   blue robe, keeping the trades it carried; cured, it's a wandering trader again. It shies from players and hunts villagers; its hits wither them, so the villagers
    it hunts turn pale in turn, and villagers flee it as they flee zombie villagers. It doesn't burn, drown or freeze
    into anything, and stays where it turned. **Golden apples cure**: fed one, a pale villager (or a zombie villager)
    starts its cure, 1 to 3 minutes, and more apples hasten it; eaten, a golden apple cures Conversion.
@@ -51,7 +54,9 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    wither spares them. Undead animals burn in daylight as vanilla's zombie horse does, except the desert's camel husk
    and any in body armour (horse armour, nautilus armour).
 9. **The pale take colour from sight.** Converting, the world greys for its sufferer, as much as their hearts are
-   white, fading as Conversion wears off; under a watchling's stare it breaks into big drab pixels beneath the static.
+   white, easing in and out smoothly, fading as Conversion wears off; under a watchling's stare it breaks into ever
+   bigger, drabber pixels beneath the static, and the static is heard, a hiss, crackle and low drone that swells and
+   rises with it.
 
 ## Undead forms (second round, 2026-11-01)
 
@@ -158,3 +163,12 @@ An enderman the paleness took, with a creaking's yellow eyes.
   under the HUD static; the Conversion grey uses `post/color_convolve` at four strengths. Both are asked of the game
   renderer's requested post effects each tick (client `PaleSight`); `tools/post-effects.py` writes them.
 - Translucency and screen effects are client-side only and couldn't be seen in CI (no client run): unverified in game.
+- Fourth round: the grey eases (5 seconds end to end) through 20 post effects, the watchling's view through 16; the
+  post effect's uniforms are fixed per file, so smoothness comes from small steps and easing rather than a live
+  uniform. The see-through fade spans 0 to 40 degrees off the body's edge, smoothly, with a 12% floor so the warped
+  are never wholly invisible; a watchling counts as watched from 70% seen (about 14 degrees off its edge). Eyes fade by
+  dimming their glow; a carried block (which can't be see-through) shows from 60%. Phantoms join the warped.
+- The pale villager's face is the illager's (brow, eyes, mouth) laid on the villager head, which shares the illager's
+  layout; its skin the illager's grey, paler. Children and eggs are only greyed (other layouts).
+- The pale wandering trader extends the pale villager; its cure (a mixin at ZombieVillager#finishConversion's head)
+  makes a wandering trader with the trades it carried and two days' wandering, not a villager.

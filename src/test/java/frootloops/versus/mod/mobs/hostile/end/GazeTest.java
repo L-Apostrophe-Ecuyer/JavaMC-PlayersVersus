@@ -1,16 +1,18 @@
 package frootloops.versus.mod.mobs.hostile.end;
 
+import frootloops.versus.VersusSettings;
 import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** How well a gaze sees a warped thing: fully when stared at, not at all a little aside. */
+/** How well a gaze sees a warped thing: fully when stared at, less and less as it turns aside, never quite not at all. */
 class GazeTest {
     private static final Vec3 AHEAD = new Vec3(0.0, 0.0, 1.0);
 
-    /** A thing straight ahead, at this many degrees aside, this far off. */
+    /** A thing this many degrees aside of straight ahead, this far off. */
     private static Vec3 aside(double degrees, double distance) {
         double radians = Math.toRadians(degrees);
         return new Vec3(Math.sin(radians) * distance, 0.0, Math.cos(radians) * distance);
@@ -22,17 +24,17 @@ class GazeTest {
     }
 
     @Test
-    void aLittleAsideItsGone() {
-        // A body 1 block across at 20 blocks spans about 3 degrees each way: 25 degrees aside is well out of it
-        assertEquals(0.0F, Gaze.visibility(AHEAD, aside(25.0, 20.0), 1.0), 1.0E-6F);
+    void farAsideItsLeastSeen() {
+        assertEquals(0.0F, Gaze.visibility(AHEAD, aside(60.0, 20.0), 1.0), 1.0E-6F);
         assertEquals(0.0F, Gaze.visibility(AHEAD, aside(180.0, 20.0), 1.0), 1.0E-6F);
     }
 
     @Test
-    void itFadesInAsTheGazeNears() {
-        float far = Gaze.visibility(AHEAD, aside(10.0, 20.0), 1.0);
-        float near = Gaze.visibility(AHEAD, aside(5.0, 20.0), 1.0);
-        assertTrue(far < near && near < 1.0F && far > 0.0F, far + " then " + near);
+    void itFadesInGraduallyAsTheGazeNears() {
+        float far = Gaze.visibility(AHEAD, aside(30.0, 20.0), 1.0);
+        float middle = Gaze.visibility(AHEAD, aside(20.0, 20.0), 1.0);
+        float near = Gaze.visibility(AHEAD, aside(12.0, 20.0), 1.0);
+        assertTrue(0.0F < far && far < middle && middle < near && near < 1.0F, far + ", " + middle + ", " + near);
     }
 
     @Test
@@ -42,8 +44,16 @@ class GazeTest {
     }
 
     @Test
-    void halfSeenIsWatched() {
+    void itsNeverQuiteInvisible() {
+        assertEquals(VersusSettings.Gaze.LEAST_OPACITY, Gaze.opacity(0.0F), 1.0E-6F);
+        assertTrue(Gaze.opacity(0.0F) > 0.0F);
+        assertEquals(1.0F, Gaze.opacity(1.0F), 1.0E-6F);
+        assertTrue(Gaze.opacity(0.3F) < Gaze.opacity(0.6F));
+    }
+
+    @Test
+    void aGlanceIsntAStare() {
         assertTrue(Gaze.watched(Gaze.visibility(AHEAD, aside(2.0, 20.0), 1.0)));
-        assertTrue(!Gaze.watched(Gaze.visibility(AHEAD, aside(25.0, 20.0), 1.0)));
+        assertFalse(Gaze.watched(Gaze.visibility(AHEAD, aside(25.0, 20.0), 1.0)));
     }
 }

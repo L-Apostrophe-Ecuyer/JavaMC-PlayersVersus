@@ -118,17 +118,28 @@ assuming full overlap).
   `Gaze`, no `#gaze_disguise_equipment` on the head) builds static (`WatchedPayload` to the HUD), full after 120 ticks:
   they die of `players-versus:watched` and 4-7 silverfish spawn. Spawns rarely in the dark by the pale line.
 - **The warped show only to a stare**: `Gaze` (pure, `GazeTest`, `VersusSettings.Gaze`) rates how well a view sees a
-  body (1 within 1° of its edge, 0 at 10°). Client `LivingEntityRendererGazeMixin` + `LivingEntityRenderStateGazeMixin`
-  (`GazeRenderState`) draw endermen, endermites and watchlings with `RenderTypes.entityTranslucent` and that alpha,
-  skip their layers (eyes, carried block) under 0.6, fade their shadows (`GazeTranslucency`).
+  body (1 on it, smoothly down to 0 at 40° off its edge) and `Gaze.opacity` floors it at 12%. Client
+  `LivingEntityRendererGazeMixin` + `LivingEntityRenderStateGazeMixin` (`GazeRenderState`) draw endermen, endermites,
+  watchlings and phantoms with `RenderTypes.entityTranslucent` at that alpha and fade their shadows;
+  `EyesLayerGazeMixin` dims their eyes (the 9-argument `submitModel` with a tint); `CarriedBlockLayerGazeMixin` hides a
+  carried block under 60% (`GazeTranslucency`). A watchling is watched from 70% seen.
+- **Watchling stare, heard and seen**: client `WatchlingStaticSound` (a looping `AbstractTickableSoundInstance` of
+  `players-versus:entity.watchling.static`, `tools/watchling-static-sound.py`) swells and rises with the HUD static;
+  `PaleSight` asks for `watchling_1..16` (`tools/post-effects.py`).
 - **Pale villager** (`mod/mobs/hostile/overworld/PaleVillagerEntity`, extends `ZombieVillager`; client
-  `PaleVillagerRenderer`, the villager model and `VillagerProfessionLayer` "villager" over a white skin from
-  `tools/pale-villager.py`): a withered villager (`Undeath#wither`/`turnPaleVillager`, or killed by one). Keeps villager
-  data, gossip, offers, xp; inherits the golden apple cure (`ZombieVillagerMixin`, whose inverted start check was fixed).
-  Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, hits wither (5 s), its kills turn pale; no reinforcements
-  (`handleAttributes` empty, chance 0), no drowned/frostbite conversion, never despawns, villager sounds pitched low.
-  `VillagerHostilesSensorMixin` makes villagers flee it (8 blocks). Conversion-immune; excluded from `ZombieMixin`'s
-  wither-to-pale and from zombies' rare converting hits. Game tests `UndeadFormsGameTest`.
+  `PaleVillagerRenderer`, the villager model and `VillagerProfessionLayer` "villager" over a villager-illager skin from
+  `tools/pale-villager.py`: ashen skin, the illager's brow, eyes and mouth): a withered villager
+  (`Undeath#wither`/`turnPaleVillager`, or killed by one). Keeps villager data (type, profession, level: its clothes),
+  gossip, offers, xp, all restored on its cure (game test `aWitheredAndCuredVillagerKeepsItsMemories`); inherits the
+  golden apple cure (`ZombieVillagerMixin`). Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, hits wither
+  (5 s), its kills turn pale (villagers and wandering traders); no reinforcements (`handleAttributes` empty, chance 0),
+  no drowned/frostbite conversion, never despawns, villager sounds pitched low. `VillagerHostilesSensorMixin` makes
+  villagers flee it (8 blocks). Conversion-immune; excluded from `ZombieMixin`'s wither-to-pale and from zombies' rare
+  converting hits.
+- **Pale wandering trader** (`PaleWanderingTraderEntity`, extends `PaleVillagerEntity`; client
+  `PaleWanderingTraderRenderer`, the wandering trader's model and the same skin treatment): a withered wandering trader
+  (`Undeath#turnPaleTrader`), keeps its offers; cured (`ZombieVillagerMixin` at `finishConversion` HEAD) it's a
+  wandering trader again with them (`overrideOffers`) and 48000 ticks to wander.
 - **Undead animals in body armour don't burn** (`MobSunArmourMixin` at `Mob#burnUndead` HEAD).
 - **Zombie chicken** (`mod/mobs/passive/ZombieChickenEntity`, extends `Chicken`; client `ZombieChickenRenderer`;
   textures from `tools/undead-animals.py`): what Conversion makes of a chicken, a passive undead animal as the zombie

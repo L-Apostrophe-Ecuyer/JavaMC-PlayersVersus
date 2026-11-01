@@ -323,5 +323,8 @@
   "item.players-versus.zombie_chicken_spawn_egg": "Oeuf d'apparition de Poulet zombie",
   "entity.players-versus.pale_villager": "Villageois pâle",
   "item.players-versus.pale_villager_spawn_egg": "Oeuf d'apparition de Villageois pâle",
-  "item.players-versus.brown_mushroom_cluster": "Grappe de champignons bruns"
+  "item.players-versus.brown_mushroom_cluster": "Grappe de champignons bruns",
+  "subtitles.players-versus.entity.watchling.static": "Grésillements",
+  "entity.players-versus.pale_wandering_trader": "Marchand ambulant pâle",
+  "item.players-versus.pale_wandering_trader_spawn_egg": "Oeuf d'apparition de Marchand ambulant pâle"
 }

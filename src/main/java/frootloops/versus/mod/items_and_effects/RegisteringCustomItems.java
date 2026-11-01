@@ -30,6 +30,7 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("watchling_spawn_egg", ModEntities.WATCHLING_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("zombie_chicken_spawn_egg", ModEntities.ZOMBIE_CHICKEN_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("pale_villager_spawn_egg", ModEntities.PALE_VILLAGER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
+        registerCustomItem("pale_wandering_trader_spawn_egg", ModEntities.PALE_WANDERING_TRADER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("mushroom_spider_spawn_egg", ModEntities.MUSHROOM_SPIDER_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
         registerCustomItem("wildfire_spawn_egg", ModEntities.WILDFIRE_SPAWN_EGG, CreativeModeTabs.SPAWN_EGGS);
 

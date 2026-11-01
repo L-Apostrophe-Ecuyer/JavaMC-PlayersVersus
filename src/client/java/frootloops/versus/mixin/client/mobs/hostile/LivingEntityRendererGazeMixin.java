@@ -19,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Draws the warped as well as the camera sees them (GazeTranslucency): a see-through body faded by how well seen, not
- * drawn at all when not seen, their layers (eyes, carried block) only once mostly seen, their shadows fading with them.
+ * Draws the warped and phantoms as opaque as the camera sees them (GazeTranslucency): a see-through body, from a
+ * shimmer to whole, their shadows fading with them. (Their eyes fade in EyesLayerGazeMixin.)
  */
 @Environment(EnvType.CLIENT)
 @Mixin(LivingEntityRenderer.class)
@@ -31,7 +31,7 @@ public abstract class LivingEntityRendererGazeMixin {
 
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At("TAIL"))
     private void playersVersus$howWellSeen(LivingEntity entity, LivingEntityRenderState state, float partialTick, CallbackInfo info) {
-        float seen = GazeTranslucency.warped(entity) ? GazeTranslucency.seen(entity, partialTick) : 1.0F;
+        float seen = GazeTranslucency.faded(entity) ? GazeTranslucency.opacity(entity, partialTick) : 1.0F;
         ((GazeRenderState) state).playersVersus$setSeen(seen);
         if (seen < 1.0F) {
             state.shadowRadius *= seen;
@@ -43,7 +43,7 @@ public abstract class LivingEntityRendererGazeMixin {
     private void playersVersus$seeThrough(LivingEntityRenderState state, boolean bodyVisible, boolean translucent, boolean glowing, CallbackInfoReturnable<RenderType> info) {
         float seen = ((GazeRenderState) state).playersVersus$seen();
         if (seen >= 0.999F || glowing) return;
-        info.setReturnValue(seen <= 0.01F ? null : RenderTypes.entityTranslucent(this.getTextureLocation(state)));
+        info.setReturnValue(RenderTypes.entityTranslucent(this.getTextureLocation(state)));
     }
 
     @ModifyReturnValue(method = "getModelTint", at = @At("RETURN"))
@@ -52,10 +52,5 @@ public abstract class LivingEntityRendererGazeMixin {
         if (seen >= 0.999F) return tint;
         int alpha = Math.round(((tint >>> 24) & 0xFF) * seen);
         return (alpha << 24) | (tint & 0xFFFFFF);
-    }
-
-    @ModifyReturnValue(method = "shouldRenderLayers", at = @At("RETURN"))
-    private boolean playersVersus$layersOnceSeen(boolean render, LivingEntityRenderState state) {
-        return render && ((GazeRenderState) state).playersVersus$seen() >= GazeTranslucency.LAYERS_FROM;
     }
 }

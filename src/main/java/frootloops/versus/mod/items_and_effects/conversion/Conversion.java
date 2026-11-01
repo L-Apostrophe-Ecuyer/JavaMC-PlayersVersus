@@ -45,18 +45,15 @@ public final class Conversion {
 
     /** Ticks over which the world's grey fades as Conversion wears off. */
     public static final int GREY_FADE_TICKS = 600;
-    /** How many steps of grey the screen has (the post effects players-versus:conversion_1 to _4). */
-    public static final int GREY_STEPS = 4;
 
     /**
-     * How grey the world looks to someone converting (0 none, GREY_STEPS all): as much of it as their hearts are white,
+     * How grey the world looks to someone converting, 0 (not at all) to 1 (all grey): as much as their hearts are white,
      * fading in Conversion's last half minute. An amplifier of -1 means no Conversion.
      */
-    public static int greyStep(int amplifier, float maxHealth, int duration) {
-        if (amplifier < 0) return 0;
+    public static float greyStrength(int amplifier, float maxHealth, int duration) {
+        if (amplifier < 0) return 0.0F;
         float white = Math.min(1.0F, whiteHearts(amplifier) / (float) Math.max(1, hearts(maxHealth)));
         float time = duration < 0 ? 1.0F : Math.min(1.0F, duration / (float) GREY_FADE_TICKS);
-        float strength = white * time;
-        return strength <= 0.0F ? 0 : Math.min(GREY_STEPS, (int) Math.ceil(strength * GREY_STEPS - 1.0E-4F));
+        return white * time;
     }
 }

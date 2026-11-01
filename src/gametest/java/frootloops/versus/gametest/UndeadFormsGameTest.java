@@ -7,6 +7,7 @@ import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.conversion.Conversion;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
 import frootloops.versus.mod.mobs.passive.ZombieChickenEntity;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -26,6 +27,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.zombie.ZombieVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
+import net.minecraft.world.entity.ai.gossip.GossipType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
@@ -40,6 +43,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * What Conversion and withering make of villagers and animals: Conversion turns villagers into zombie villagers and
@@ -249,5 +253,66 @@ public class UndeadFormsGameTest {
             if (mob instanceof ZombieChickenEntity) helper.assertTrue(mob.is(EntityTypeTags.BURN_IN_DAYLIGHT), "the zombie chicken doesn't burn in daylight");
         }
         helper.succeed();
+    }
+
+    /** Cures a pale villager or trader at once: a golden apple fed, then its cure's time run out. */
+    private static void cure(GameTestHelper helper, PaleVillagerEntity pale) {
+        ServerPlayer player = FakePlayer.get(helper.getLevel());
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GOLDEN_APPLE));
+        pale.mobInteract(player, InteractionHand.MAIN_HAND);
+        helper.assertTrue(pale.isConverting(), "the golden apple didn't start the cure");
+        pale.setVillagerConversionTime(1);
+    }
+
+    /**
+     * A villager withered pale and cured keeps its memories: its type, trade and level (so its clothes and badge), its
+     * experience, its trades and what it thought of someone.
+     */
+    @GameTest(structure = ROOM, maxTicks = 100)
+    public void aWitheredAndCuredVillagerKeepsItsMemories(GameTestHelper helper) {
+        floor(helper);
+        Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
+        villager.setVillagerData(villager.getVillagerData().withProfession(helper.getLevel().registryAccess(), VillagerProfession.CLERIC).withLevel(3));
+        villager.setVillagerXp(70);
+        int trades = villager.getOffers().size();
+        UUID friend = UUID.randomUUID();
+        villager.getGossips().add(friend, GossipType.MAJOR_POSITIVE, 20);
+        int liking = villager.getGossips().getReputation(friend, type -> true);
+        villager.setHealth(9.0F);
+        villager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
+        List<PaleVillagerEntity> pale = found(helper, PaleVillagerEntity.class, ModEntities.PALE_VILLAGER);
+        helper.assertTrue(pale.size() == 1, pale.size() + " pale villagers, not one");
+        cure(helper, pale.getFirst());
+        helper.succeedWhen(() -> {
+            List<Villager> villagers = found(helper, Villager.class, EntityTypes.VILLAGER);
+            helper.assertTrue(villagers.size() == 1, villagers.size() + " villagers, not one");
+            Villager cured = villagers.getFirst();
+            helper.assertTrue(cured.getVillagerData().profession().is(VillagerProfession.CLERIC), "the cured villager isn't a cleric");
+            helper.assertTrue(cured.getVillagerData().level() == 3, "the cured villager is level " + cured.getVillagerData().level() + ", not 3");
+            helper.assertTrue(cured.getVillagerXp() == 70, "the cured villager has " + cured.getVillagerXp() + " experience, not 70");
+            helper.assertTrue(cured.getOffers().size() == trades, "the cured villager has " + cured.getOffers().size() + " trades, not " + trades);
+            helper.assertTrue(cured.getGossips().getReputation(friend, type -> true) == liking, "the cured villager forgot its friend");
+        });
+    }
+
+    /** Withered, a wandering trader turns into a pale wandering trader; cured, it's a wandering trader again, its trades kept. */
+    @GameTest(structure = ROOM, maxTicks = 100)
+    public void aWitheredWanderingTraderTurnsPaleAndCuresBack(GameTestHelper helper) {
+        floor(helper);
+        WanderingTrader trader = helper.spawnWithNoFreeWill(EntityTypes.WANDERING_TRADER, new Vec3(3.5, 1.0, 3.5));
+        int trades = trader.getOffers().size();
+        helper.assertTrue(trades > 0, "the wandering trader has nothing to sell");
+        trader.setHealth(9.0F);
+        trader.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
+        helper.assertTrue(trader.isRemoved(), "the withered wandering trader is still a wandering trader");
+        List<PaleWanderingTraderEntity> pale = found(helper, PaleWanderingTraderEntity.class, ModEntities.PALE_WANDERING_TRADER);
+        helper.assertTrue(pale.size() == 1, pale.size() + " pale wandering traders, not one");
+        cure(helper, pale.getFirst());
+        helper.succeedWhen(() -> {
+            List<WanderingTrader> traders = found(helper, WanderingTrader.class, EntityTypes.WANDERING_TRADER);
+            helper.assertTrue(traders.size() == 1, traders.size() + " wandering traders, not one");
+            helper.assertTrue(traders.getFirst().getOffers().size() == trades, "the cured trader has " + traders.getFirst().getOffers().size() + " trades, not " + trades);
+            helper.assertTrue(found(helper, Villager.class, EntityTypes.VILLAGER).isEmpty(), "the trader was cured into a villager");
+        });
     }
 }

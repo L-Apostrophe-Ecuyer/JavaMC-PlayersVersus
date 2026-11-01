@@ -8,6 +8,7 @@ import frootloops.versus.mod.mobs.hostile.overworld.MushroomSpiderRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerRenderer;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieRenderer;
 import frootloops.versus.mod.mobs.passive.ZombieChickenRenderer;
 import net.fabricmc.api.EnvType;
@@ -38,6 +39,7 @@ public class ModEntitiesRenderers {
         register(WATCHLING, context -> new WatchlingRenderer(context));
         register(ZOMBIE_CHICKEN, context -> new ZombieChickenRenderer(context));
         register(PALE_VILLAGER, context -> new PaleVillagerRenderer(context));
+        register(PALE_WANDERING_TRADER, context -> new PaleWanderingTraderRenderer(context));
     }
 
     /** Entity renderers are a client registry since 26.4-snapshot-4, keyed as their entity types are. */

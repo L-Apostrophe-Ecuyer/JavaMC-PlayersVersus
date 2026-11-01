@@ -152,11 +152,14 @@ public abstract class VersusSettings {
     }
 
     public static class Gaze {
-        // Endermen, endermites and watchlings show only to a stare: fully within SEEN_FULL_DEGREES of the middle of
-        // the view (from their edge), not at all SEEN_GONE_DEGREES aside; watched when at least WATCHED_AT seen
-        public static double SEEN_FULL_DEGREES = 1.0;
-        public static double SEEN_GONE_DEGREES = 10.0;
-        public static float WATCHED_AT = 0.5F;
+        // Endermen, endermites, watchlings and phantoms show only to a stare: fully seen with the middle of the view
+        // on them (within SEEN_FULL_DEGREES of their edge), less and less seen as they're further aside, least seen
+        // SEEN_GONE_DEGREES aside and beyond, where they're drawn LEAST_OPACITY opaque, a shimmer; a watchling is
+        // watched when at least WATCHED_AT seen
+        public static double SEEN_FULL_DEGREES = 0.0;
+        public static double SEEN_GONE_DEGREES = 40.0;
+        public static float LEAST_OPACITY = 0.12F;
+        public static float WATCHED_AT = 0.7F;
     }
 
     public static class Mushrooms {
