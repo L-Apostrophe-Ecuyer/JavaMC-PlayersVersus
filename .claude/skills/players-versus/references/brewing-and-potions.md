@@ -93,18 +93,23 @@ the pale, red mushroom hosts, endermen and their bugs, golems, bosses; zombies a
 `ConversionTest`; client `ConversionHeartsMixin` draws `hud/heart/conversion_*`, access-widened `Hud$HeartType`).
 Food regeneration stops below them (`HungerManagerMixin`, both the overhaul's and vanilla's `heal`). All white:
 `Undeath` (was `Shroomify`) shakes it `TURNING_TICKS` (`UndeathShakingPayload` -> client `UndeathShaking`, render state
-"fully frozen"; nausea for a player), then at the level tick's end `turn`s it: villager -> as a zombie's kill, via a
-stand-in zombie's `convertVillagerToZombieVillager` (`ZombieInfectionMixin` at its head: where `PaleLine` holds an adult
-turns into the illager of its trade, `Undeath.turnIllager` / `PaleVillagers.illagerFor`, pure, `PaleVillagersTest`:
-smiths, butchers, masons, leatherworkers -> vindicator with an iron axe; clerics, librarians, cartographers -> illusioner
-with a bow; the rest -> pillager with a crossbow; kept, no captains; the same hook catches a zombie's villager kill);
-zombies -> pale zombie, creeper -> pale creeper, spiders -> pale spider, horse -> zombie horse, camel -> camel husk,
-nautilus -> zombie nautilus, chicken -> zombie chicken (`keepWhatWasKept`: tame, owner via `AbstractHorseAccessor` or
-`TamableAnimal#setOwnerReference`, chicken jockey), piglins -> zombified piglin, hoglin -> zoglin; tag
-`players-versus:rise_as_zombies`
-(illagers, witch, wandering trader) -> `zombieOfThePlace` (drowned under water, pale zombie where `PaleLine` holds, husk
-in tag `players-versus:undead_rise_as_husks`, else zombie); else killed (`players-versus:turned_undead`). A player dies
-and the zombie of the place rises wearing (and guaranteed to drop) their armour.
+"fully frozen"; nausea for a player), then at the level tick's end `turn`s it: villager -> zombie villager (a stand-in
+zombie's `convertVillagerToZombieVillager`); zombies -> pale zombie, creeper -> pale creeper, spiders -> pale spider,
+horse -> zombie horse, camel -> camel husk, nautilus -> zombie nautilus, chicken -> zombie chicken (`keepWhatWasKept`:
+tame, owner via `AbstractHorseAccessor` or `TamableAnimal#setOwnerReference`, chicken jockey), piglins -> zombified
+piglin, hoglin -> zoglin; tag `players-versus:rise_as_zombies` (illagers, witch, wandering trader) -> `zombieOfThePlace`
+(drowned under water, husk in tag `players-versus:undead_rise_as_husks`, else zombie; no longer pale by place); else
+killed (`players-versus:turned_undead`). A player dies and the zombie of the place rises wearing (and guaranteed to drop) their armour.
+**Withering** makes the pale (`Undeath#wither`, `LivingEntityWitheringMixin` at `LivingEntity#hurtServer` RETURN: wither
+damage leaving under 8 health): villager -> pale villager (`turnPaleVillager`, keeps data, gossip, offers, xp), spiders
+-> pale spider, `rise_as_zombies` -> pale zombie; zombies and creepers in their own mixins; a player withered to death
+rises as a pale zombie in their armour (`ServerPlayerWitheredMixin` at `ServerPlayer#die` HEAD, `risePale`).
+Golden apples (both) cure Conversion (`VanillaItems`: `RemoveStatusEffectsConsumeEffect`). Client `PaleSight` asks the
+game renderer for `players-versus:conversion_1..4` (`Conversion#greyStep`: white hearts x time left, fading over
+`GREY_FADE_TICKS`) and `watchling_1..4` (the HUD static's strength) each tick; `tools/post-effects.py` writes them from
+vanilla's `post/color_convolve`, `post/bits` and `post/blit`.
+The brown mushroom cluster (`CustomBrewingItems.BROWN_MUSHROOM_CLUSTER`, dropped by a stage-3 `brown_mushrooms`) smelts
+into a concentrate of mining fatigue (`concentrate_of_mining_fatigue_mushrooms.json`, beside prismarine's).
 
 ## Concentrates (`CustomBrewingItems`, `ConcentrateItem`)
 ~30 `ConcentrateItem`s (`concentrate_of_<effect>`), each a placeable `BlockItem` (see

@@ -110,12 +110,26 @@ assuming full overlap).
   `MushroomMobsGameTest`, assets `MushroomMobsTest`.
 - **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
   `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman with a creaking's yellow
-  eyes. Its goals are replaced: it hunts players, freezes while watched (`FreezeWhenWatchedGoal`), teleports up behind
-  its prey when unwatched (`CreepBehindGoal`), and its hits convert. `WatchlingStare` (server, each level tick): a
-  player looking at one (`VersusSettings.Watchlings`: 48 blocks, a ~25° cone, line of sight, no
-  `#gaze_disguise_equipment` on the head) builds static (`WatchedPayload` to the client's HUD element), full after
-  120 ticks: they die of `players-versus:watched` and 4-7 silverfish spawn where they stood. Spawns rarely in the dark
-  by the pale line (`MobSpawning.canSpawnWatchling`).
+  eyes that haunts. No goals, speed 0, knockback-proof, not pushable: it never moves or strikes. `customServerAiStep`:
+  watched (`WatchlingStare.watcher`) it notes its watcher; looked away from, it teleports after `TELEPORT_DELAY`-2x
+  ticks, half the time behind them (`BEHIND_NEAR`-`FAR`), half far off (`AWAY_NEAR`-`FAR`); unlooked at for
+  `VANISH_MIN`-`MAX` ticks after being seen it discards itself; hit by a player it teleports behind them.
+  `WatchlingStare` (server, each level tick): a player looking at one (48 blocks, line of sight, at least half seen by
+  `Gaze`, no `#gaze_disguise_equipment` on the head) builds static (`WatchedPayload` to the HUD), full after 120 ticks:
+  they die of `players-versus:watched` and 4-7 silverfish spawn. Spawns rarely in the dark by the pale line.
+- **The warped show only to a stare**: `Gaze` (pure, `GazeTest`, `VersusSettings.Gaze`) rates how well a view sees a
+  body (1 within 1° of its edge, 0 at 10°). Client `LivingEntityRendererGazeMixin` + `LivingEntityRenderStateGazeMixin`
+  (`GazeRenderState`) draw endermen, endermites and watchlings with `RenderTypes.entityTranslucent` and that alpha,
+  skip their layers (eyes, carried block) under 0.6, fade their shadows (`GazeTranslucency`).
+- **Pale villager** (`mod/mobs/hostile/overworld/PaleVillagerEntity`, extends `ZombieVillager`; client
+  `PaleVillagerRenderer`, the villager model and `VillagerProfessionLayer` "villager" over a white skin from
+  `tools/pale-villager.py`): a withered villager (`Undeath#wither`/`turnPaleVillager`, or killed by one). Keeps villager
+  data, gossip, offers, xp; inherits the golden apple cure (`ZombieVillagerMixin`, whose inverted start check was fixed).
+  Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, hits wither (5 s), its kills turn pale; no reinforcements
+  (`handleAttributes` empty, chance 0), no drowned/frostbite conversion, never despawns, villager sounds pitched low.
+  `VillagerHostilesSensorMixin` makes villagers flee it (8 blocks). Conversion-immune; excluded from `ZombieMixin`'s
+  wither-to-pale and from zombies' rare converting hits. Game tests `UndeadFormsGameTest`.
+- **Undead animals in body armour don't burn** (`MobSunArmourMixin` at `Mob#burnUndead` HEAD).
 - **Zombie chicken** (`mod/mobs/passive/ZombieChickenEntity`, extends `Chicken`; client `ZombieChickenRenderer`;
   textures from `tools/undead-animals.py`): what Conversion makes of a chicken, a passive undead animal as the zombie
   horse. No eggs (`eggTime` held up), no food, no offspring, never a chick (`canBeABaby`, `setAge` clamped), always the
