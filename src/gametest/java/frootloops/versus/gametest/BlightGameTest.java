@@ -17,7 +17,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -26,7 +25,7 @@ import java.util.List;
 
 /**
  * Blight, the Wither's replacement: its doses stack however they're given; a Wither given is Blight instead; a player
- * who dies blighted, or turns, rises as a player zombie wearing and carrying what they had, which drop when it dies.
+ * who dies blighted rises as a player zombie wearing and carrying what they had, which drop when it dies.
  */
 public class BlightGameTest {
     private static final String ROOM = "players-versus-gametest:leaves_room"; // 14 x 8 x 8
@@ -61,10 +60,12 @@ public class BlightGameTest {
         return helper.getLevel().getEntitiesOfClass(PlayerZombieEntity.class, everywhere(helper));
     }
 
-    /** A survival player in the room, wearing a helmet, holding a sword, carrying diamonds. */
-    private static ServerPlayer equippedSurvivor(GameTestHelper helper) {
+    /**
+     * A player in the room, wearing a helmet, holding a sword, carrying diamonds. (The game test helper's mock player is
+     * always creative, so damage can't kill it: the tests call {@code die} themselves, which is what damage does.)
+     */
+    private static ServerPlayer equippedPlayer(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
-        player.setGameMode(GameType.SURVIVAL);
         Vec3 at = helper.absoluteVec(new Vec3(3.5, 1.0, 3.5));
         player.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
         player.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
@@ -94,10 +95,9 @@ public class BlightGameTest {
     @GameTest(structure = ROOM, maxTicks = 40)
     public void aPlayerWhoDiesBlightedRisesAsAPlayerZombieWithTheirThings(GameTestHelper helper) {
         floor(helper);
-        ServerPlayer player = equippedSurvivor(helper);
+        ServerPlayer player = equippedPlayer(helper);
         player.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0));
-        player.hurtServer(helper.getLevel(), helper.getLevel().damageSources().genericKill(), 1000.0F);
-        helper.assertTrue(player.isDeadOrDying(), "the player lives");
+        player.die(helper.getLevel().damageSources().genericKill());
         List<PlayerZombieEntity> zombies = playerZombies(helper);
         helper.assertTrue(zombies.size() == 1, zombies.size() + " player zombies, not one");
         PlayerZombieEntity zombie = zombies.getFirst();
@@ -120,22 +120,9 @@ public class BlightGameTest {
     @GameTest(structure = ROOM, maxTicks = 20)
     public void aPlayerWhoDiesUnblightedLeavesNoZombie(GameTestHelper helper) {
         floor(helper);
-        ServerPlayer player = equippedSurvivor(helper);
-        player.hurtServer(helper.getLevel(), helper.getLevel().damageSources().genericKill(), 1000.0F);
-        helper.assertTrue(player.isDeadOrDying(), "the player lives");
+        ServerPlayer player = equippedPlayer(helper);
+        player.die(helper.getLevel().damageSources().genericKill());
         helper.assertTrue(playerZombies(helper).isEmpty(), "a player zombie rose of an unblighted player");
-        helper.succeed();
-    }
-
-    /** All their hearts white, a player turns: they die of it, and a player zombie rises. */
-    @GameTest(structure = ROOM, maxTicks = 20)
-    public void anAllWhitePlayerTurnsIntoAPlayerZombie(GameTestHelper helper) {
-        floor(helper);
-        ServerPlayer player = equippedSurvivor(helper);
-        player.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, Blight.hearts(player.getMaxHealth()) - 1));
-        Undeath.turn(helper.getLevel(), player);
-        helper.assertTrue(player.isDeadOrDying(), "the all-white player lives");
-        helper.assertTrue(playerZombies(helper).size() == 1, "no player zombie rose of the all-white player");
         helper.succeed();
     }
 
@@ -143,8 +130,7 @@ public class BlightGameTest {
     @GameTest(structure = ROOM, maxTicks = 20)
     public void aCreativePlayerTurningLivesAndLeavesACopy(GameTestHelper helper) {
         floor(helper);
-        ServerPlayer player = equippedSurvivor(helper);
-        player.setGameMode(GameType.CREATIVE);
+        ServerPlayer player = equippedPlayer(helper);
         player.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, Blight.hearts(player.getMaxHealth()) - 1));
         Undeath.turn(helper.getLevel(), player);
         helper.assertTrue(!player.isDeadOrDying(), "the creative player died");
