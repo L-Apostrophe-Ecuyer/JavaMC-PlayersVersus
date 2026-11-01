@@ -1,2 +1,16 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
+member net.minecraft.world.entity.LivingEntity heal|setAbsorptionAmount|getAbsorptionAmount|forceAddEffect|addEffect|onEffectAdded
+sig net.minecraft.world.effect.MobEffect
+sig net.minecraft.world.effect.MobEffectInstance
+findsig HealOrHarm
+findsig AbsorptionMobEffect
+findsig RegenerationMobEffect
+member net.minecraft.client.model.geom.ModelPart Scale|bake|loadPose|resetPose
+sig net.minecraft.client.model.geom.builders.LayerDefinition
+sig net.minecraft.client.model.monster.enderman.EndermanModel
+sig net.minecraft.client.renderer.entity.EndermanRenderer
+member net.minecraft.client.model.HumanoidModel createMesh
+member net.minecraft.world.entity.Entity turn
+sig net.minecraft.client.renderer.entity.layers.EyesLayer
+sig net.minecraft.client.renderer.entity.state.EndermanRenderState
