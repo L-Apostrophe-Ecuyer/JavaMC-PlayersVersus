@@ -1,18 +1,17 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
-member net.minecraft.world.entity.EntityTypes NAUTILUS|CAMEL|PARCHED|CHICKEN|DONKEY|MULE|SKELETON_HORSE
-find Nautilus
-find CamelHusk
-findsig chicken/Chicken
-findsig ChickenRenderer
-sig net.minecraft.client.renderer.entity.state.ChickenRenderState
-calls net.minecraft.world.entity.monster.zombie.Zombie finalizeSpawn
-member net.minecraft.world.entity.animal.equine.AbstractHorse Tame|Owner
-member net.minecraft.world.entity.npc.villager.VillagerProfession static final
-member net.minecraft.world.entity.npc.villager.VillagerData profession
-assets textures/entity/chicken
-asset textures/entity/chicken/chicken_temperate.png
-asset textures/entity/chicken/temperate_chicken.png
-asset textures/entity/zombie/zombie.png
-data loot_table/entities/chicken.json
-datagrep tags/entity_type "minecraft:(zombie_nautilus|camel_husk|parched|zombie_horse)"
+uses BURN_IN_DAYLIGHT
+calls net.minecraft.world.entity.Mob (aiStep|[Ss]un|burn|convertTo)
+member net.minecraft.world.entity.LivingEntity VoicePitch
+member net.minecraft.world.entity.AgeableMob Age|Baby
+member net.minecraft.world.entity.TamableAnimal Tame|Owner
+member net.minecraft.world.entity.animal.nautilus.AbstractNautilus extends|Tame|Owner
+member net.minecraft.world.entity.animal.camel.CamelHusk extends|Sun|Burn
+member net.minecraft.world.entity.animal.nautilus.ZombieNautilus extends|Sun|Burn|Target
+calls net.minecraft.world.entity.monster.zombie.Zombie (convertVillagerToZombieVillager|killedEntity|aiStep)
+calls net.minecraft.world.entity.animal.chicken.Chicken (aiStep|registerGoals|isFood|defineSynchedData)
+member net.minecraft.world.entity.EntityTypes PILLAGER|VINDICATOR|ILLUSIONER
+findcalls ConversionType
+data tags/entity_type/burn_in_daylight.json
+data tags/entity_type/undead.json
+data tags/entity_type/zombies.json
