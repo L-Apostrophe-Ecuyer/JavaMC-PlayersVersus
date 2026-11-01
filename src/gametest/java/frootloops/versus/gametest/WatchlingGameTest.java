@@ -35,16 +35,18 @@ public class WatchlingGameTest {
         });
     }
 
-    /** A player's blow makes it fight that player instead of haunting. */
+    /**
+     * A player's blow makes it stop haunting and fight. (The game test helper's mock player is always creative, which a
+     * mob won't keep as a target, so whom it fights is checked with a mob below; here it's only that it fights.)
+     */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void aWatchlingHitByAPlayerFightsThemInsteadOfHaunting(GameTestHelper helper) {
+    public void aWatchlingHitByAPlayerFightsInsteadOfHaunting(GameTestHelper helper) {
         floor(helper);
         WatchlingEntity watchling = helper.spawnWithNoFreeWill(ModEntities.WATCHLING, new Vec3(6.5, 1.0, 3.5));
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         helper.assertTrue(watchling.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 1.0F), "the blow didn't land");
         helper.assertTrue(watchling.isEnraged(), "it doesn't fight after being hit");
         helper.assertTrue(!watchling.isHunting(), "it still haunts while it fights");
-        helper.assertTrue(watchling.getTarget() == player, "it fights someone else than who hit it");
         helper.succeed();
     }
 
