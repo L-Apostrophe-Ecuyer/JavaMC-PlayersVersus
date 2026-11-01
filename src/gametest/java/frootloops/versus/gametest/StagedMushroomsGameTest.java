@@ -1,5 +1,8 @@
 package frootloops.versus.gametest;
 
+import frootloops.versus.VersusMod;
+import frootloops.versus.mod.environment.blocks.mushrooms.MushroomGrowth;
+import frootloops.versus.mod.environment.blocks.mushrooms.StagedMushrooms;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.CustomBlocks;
 import frootloops.versus.mod.environment.PaleLine;
@@ -20,6 +23,9 @@ import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -130,12 +136,14 @@ public class StagedMushroomsGameTest {
         return mushrooms;
     }
 
-    /** Two mushrooms give off light 2, three light 4; their loot is as many mushrooms. */
+    /** Two mushrooms give off light 2, three light 4; pale shrooms none; their loot is as many mushrooms. */
     @GameTest(structure = ROOM, maxTicks = 20)
     public void grownMushroomsGiveOffLight(GameTestHelper helper) {
         helper.assertTrue(staged(CustomBlocks.BROWN_MUSHROOMS, 2).getLightEmission() == 2, "two brown mushrooms don't give off light 2");
         helper.assertTrue(staged(CustomBlocks.RED_MUSHROOMS, 3).getLightEmission() == 4, "three red mushrooms don't give off light 4");
-        helper.assertTrue(staged(CustomBlocks.PALE_SHROOM, 3).getLightEmission() == 4, "three pale shrooms don't give off light 4");
+        for (int stage = 1; stage <= 3; stage++) {
+            helper.assertTrue(staged(CustomBlocks.PALE_SHROOM, stage).getLightEmission() == 0, stage + " pale shrooms give off light");
+        }
         helper.succeed();
     }
 
@@ -156,8 +164,35 @@ public class StagedMushroomsGameTest {
         helper.succeed();
     }
 
+    /** Standing on deepslate, paleness holds wherever it is: a brown mushroom there turns pale (StagedMushrooms#around). */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void deepslateMakesAMushroomPale(GameTestHelper helper) {
+        floor(helper, Blocks.DEEPSLATE.defaultBlockState());
+        BlockPos mushroom = new BlockPos(3, 1, 3);
+        helper.setBlock(mushroom, Blocks.BROWN_MUSHROOM);
+        helper.assertTrue(StagedMushrooms.around(helper.getLevel(), helper.absolutePos(mushroom), MushroomGrowth.Kind.BROWN).pale(), "a mushroom on deepslate isn't in paleness");
+        floor(helper, Blocks.STONE.defaultBlockState());
+        if (!palePlace(helper, mushroom)) {
+            helper.assertTrue(!StagedMushrooms.around(helper.getLevel(), helper.absolutePos(mushroom), MushroomGrowth.Kind.BROWN).pale(), "a mushroom on stone, above y 0, is in paleness");
+        }
+        helper.succeed();
+    }
+
+    /** The cave clusters' brown mushrooms stay off deepslate, and pale ones are generated there instead; all load. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void paleShroomsAreGeneratedOnDeepslate(GameTestHelper helper) {
+        var features = helper.getLevel().registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
+        for (String id : new String[]{"caves/brown_mushroom_clusters", "caves/pale_shroom_clusters", "caves/mushroom_caves_brown_mushrooms", "caves/mushroom_caves_pale_shrooms"}) {
+            helper.assertTrue(features.get(ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, id))).isPresent(), id + " didn't load");
+        }
+        helper.assertTrue(Blocks.DEEPSLATE.defaultBlockState().is(StagedMushrooms.DEEPSLATE), "deepslate isn't in the deepslate tag");
+        helper.assertTrue(Blocks.COBBLED_DEEPSLATE.defaultBlockState().is(StagedMushrooms.DEEPSLATE), "cobbled deepslate isn't in the deepslate tag");
+        helper.assertTrue(!Blocks.STONE.defaultBlockState().is(StagedMushrooms.DEEPSLATE), "stone is in the deepslate tag");
+        helper.succeed();
+    }
+
     /** Staying in pale shrooms gives a dose. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void staysInPaleShroomsConvert(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         helper.setBlock(new BlockPos(3, 1, 3), staged(CustomBlocks.PALE_SHROOM, 3));
@@ -170,14 +205,14 @@ public class StagedMushroomsGameTest {
         return new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, Blight.hearts(entity.getMaxHealth()) - 1);
     }
 
-    /** All white, a villager shakes before it turns (what it turns into: UndeadFormsGameTest). */
-    @GameTest(structure = ROOM, maxTicks = 200)
-    public void anAllWhiteVillagerShakesThenTurns(GameTestHelper helper) {
+    /** All white, a villager withers (the Blight deals the Wither) and turns as it dies of it (what into: UndeadFormsGameTest). */
+    @GameTest(structure = ROOM, maxTicks = 900)
+    public void anAllWhiteVillagerWithersAndTurns(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
         villager.addEffect(allWhite(villager));
-        helper.runAfterDelay(VersusSettings.Mushrooms.TURNING_TICKS - 20, () ->
-                helper.assertTrue(!villager.isRemoved(), "the villager turned before it was done shaking"));
+        helper.runAfterDelay(30, () ->
+                helper.assertTrue(villager.isRemoved() || villager.hasEffect(MobEffects.WITHER), "the all-white villager has no Wither"));
         helper.succeedWhen(() -> {
             helper.assertTrue(villager.isRemoved(), "the villager is still a villager");
             List<Mob> turned = helper.getLevel().getEntitiesOfClass(Mob.class, room(helper));
@@ -186,8 +221,8 @@ public class StagedMushroomsGameTest {
         });
     }
 
-    /** All white, a pig (with no zombie of its own) dies of it. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    /** All white, a pig (with no zombie of its own) withers away. */
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhitePigDies(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
@@ -237,7 +272,7 @@ public class StagedMushroomsGameTest {
     }
 
     /** All white, a zombie turns pale, a creeper turns into a pale creeper: Blight makes the undead and their kin pale. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void allWhiteZombiesAndCreepersTurnPale(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(3.5, 1.0, 3.5));
@@ -252,7 +287,7 @@ public class StagedMushroomsGameTest {
     }
 
     /** All white, a pillager rises as the zombie of the place it turned in. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhitePillagerRisesAsTheZombieOfThePlace(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob pillager = helper.spawnWithNoFreeWill(EntityTypes.PILLAGER, new Vec3(3.5, 1.0, 3.5));

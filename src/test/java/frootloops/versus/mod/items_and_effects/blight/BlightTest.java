@@ -90,15 +90,6 @@ class BlightTest {
     }
 
     @Test
-    void witherBecomesBlightOfTheSameStrengthUpToALimit() {
-        // Wither I: a heart (amplifier 0); Wither III: three
-        assertEquals(0, Blight.fromWitherAmplifier(0));
-        assertEquals(2, Blight.fromWitherAmplifier(2));
-        // A Wither of hundreds of levels (a command's, say) is no more than the limit in one dose
-        assertEquals(VersusSettings.Blight.WITHER_MAX_HEARTS - 1, Blight.fromWitherAmplifier(250));
-    }
-
-    @Test
     void aBlightedThingTurnsPaleOnlyWhenHurtBelowTheLimit() {
         assertFalse(Blight.paleOnWound(VersusSettings.Blight.PALE_BELOW_HEALTH + 0.5F));
         assertTrue(Blight.paleOnWound(VersusSettings.Blight.PALE_BELOW_HEALTH - 0.5F));

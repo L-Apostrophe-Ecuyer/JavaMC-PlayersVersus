@@ -80,10 +80,10 @@ being a `CustomStatusEffects` registration — likely helper logic for the *vani
 overhaul rather than a new effect; verify its role before assuming it's dead code).
 
 ### Blight (`BlightStatusEffect`, `mod/items_and_effects/blight/*`; spec `docs/superpowers/specs/2026-10-31-staged-mushrooms-and-conversion-design.md`, then the lore spec's fifth round)
-Blight **replaces the Wither**: `LivingEntityBlightMixin` turns every Wither given into Blight
-(`VersusSettings.Blight.REPLACE_WITHER`, `Blight#fromWitherAmplifier`), and the mod's own Wither sources (Decay potions,
-concentrates of death/decay, their biles, `HauntingStatusEffect`, `RecoveryCompassItem`) name `CustomStatusEffects.BLIGHT`
-(a `static final`, registered when the class loads, so their statics can). Doses (`BlightAttacks.dose()`): pale shrooms (`BlightExposure`, every
+Blight is not the Wither (a redirect tried in the fifth and sixth rounds is gone): the Wither is vanilla's, the mod's
+own Wither sources (Decay potions, concentrates of death/decay, their biles, `HauntingStatusEffect`, `RecoveryCompassItem`)
+give it, and all-white Blight *deals* it (below). `CustomStatusEffects.BLIGHT` is a `static final`, registered when the
+class loads. Doses (`BlightAttacks.dose()`): pale shrooms (`BlightExposure`, every
 `VersusSettings.Mushrooms.DOSE_TICKS` in them, lasting `EFFECT_TICKS`), pale zombies' and creakings' hits, zombies'
 by `ZOMBIE_BLIGHT_CHANCE` (`BlightAttacks.afterHit`; a converting hit's other effects on its target that tick
 are dropped), a creaking vanishing when hit, the mushroom creeper's spore puff, the pale creeper's cloud, and rotten
@@ -96,26 +96,31 @@ the pale, red mushroom hosts, endermen and their bugs, golems, bosses; zombies a
 `BlightTest`; client `BlightHeartsMixin` draws `hud/heart/blight_*`, access-widened `Hud$HeartType`).
 Food regeneration stops below them (`HungerManagerMixin`, both the overhaul's and vanilla's `heal`). Shaking (from `VersusSettings.Blight.SHAKE_FROM` of the hearts white, `Blight#shakeStrength`): client
 `UndeathShaking` derives it from the effect (render state "fully frozen"; `BlightCameraShakeMixin` sways the local
-camera by `SHAKE_DEGREES`). All white: `Undeath` (was `Shroomify`) counts `TURNING_TICKS` (nausea for a player), then at
-the level tick's end `turn`s it: villager -> zombie villager (a stand-in
+camera by `SHAKE_DEGREES`). All white: `Undeath` (was `Shroomify`) gives the Wither at the level tick's end (`giveWither`: amplifier
+`VersusSettings.Blight.WITHER_AMPLIFIER` 4 = V, `WITHER_TICKS` 100, kept up; nausea for a player; a creative player
+shakes `TURNING_TICKS` and `turn`s into a copy). Conversion is dying of the Wither under the Blight: `LivingEntityBlightMixin`
+at `LivingEntity#hurtServer` HEAD, for a wither blow that would kill a blighted non-player, calls `Undeath#turn` and
+cancels the blow if it turned: villager -> zombie villager (a stand-in
 zombie's `convertVillagerToZombieVillager`); zombies -> pale zombie, creeper -> pale creeper, spiders -> pale spider,
 horse -> zombie horse, camel -> camel husk, nautilus -> zombie nautilus, chicken -> zombie chicken (`keepWhatWasKept`:
 tame, owner via `AbstractHorseAccessor` or `TamableAnimal#setOwnerReference`, chicken jockey), piglins -> zombified
 piglin, hoglin -> zoglin; tag `players-versus:rise_as_zombies` (illagers, witch, wandering trader) -> `zombieOfThePlace`
 (drowned under water, husk in tag `players-versus:undead_rise_as_husks`, else zombie; no longer pale by place); else
-killed (`players-versus:turned_undead`). A player dies (a creative one lives, loses the Blight and leaves a copy) and
-rises as a `PlayerZombieEntity` -- as for any death while blighted (`ServerPlayerBlightedDeathMixin` at `ServerPlayer#die`
-HEAD, `PlayerZombieEntity#rise`: their things move to it; keepInventory or a copy wears copies and drops nothing).
+nothing (`turn` is false and it dies of the Wither). A player who dies of the Wither while blighted rises as a
+`PlayerZombieEntity` (`ServerPlayerBlightedDeathMixin` at `ServerPlayer#die` HEAD, only for the wither damage type,
+`PlayerZombieEntity#rise`: their things move to it; keepInventory or a copy wears copies and drops nothing); a creative
+one lives and leaves a copy.
 **Blighted and wounded** makes the pale (`Undeath#turnPale`, `LivingEntityBlightMixin` at `LivingEntity#hurtServer` RETURN:
-health left under `PALE_BELOW_HEALTH`): villager -> pale villager (`turnPaleVillager`, keeps data, gossip, offers, xp),
+health left under `PALE_BELOW_HEALTH`; not by the Wither's own blows): villager -> pale villager (`turnPaleVillager`, keeps data, gossip, offers, xp),
 wandering trader -> pale wandering trader (`turnPaleTrader`, keeps offers), spiders -> pale spider, the rest of
 `rise_as_zombies` -> pale zombie; zombies and creepers by `paleKind`. Players aren't turned pale.
 **Purging:** `Undeath#purge(entity, hearts)` pushes white hearts back (what's left keeps its time): a potion of Healing
 (`HealOrHarmMobEffectMixin`, `Blight#healingPurge`: 2 hearts for I, 4 for II, by the splash scale), absorption gained
 (`LivingEntityBlightMixin` at `internalSetAbsorptionAmount`, `Blight#absorptionPurge`), the concentrate and bile of
-Healing. **No Wither:** `Undeath#asBlight` (in `addEffect`, `forceAddEffect` and a Wither found at tick); the name and
-icon of `minecraft:wither` are Blight's (`assets/minecraft/lang`, `textures/mob_effect/wither.png`). A player turning is
-taken even if the damage doesn't (`Undeath#turnPlayer`).
+Healing. Pale shrooms (`BlightExposure`) dose every `DOSE_TICKS` 400 (20 s) and give off no light
+(`MushroomGrowth#light(kind, stage)`); brown and red mushrooms standing on tag `players-versus:deepslate` count as in
+paleness (`StagedMushrooms#around`) and spread as pale shrooms; the cave clusters' placed features are the brown ones
+(from y 0, not on deepslate) and `caves/pale_shroom_clusters` (on deepslate).
 Golden apples (both) cure Blight (`VanillaItems`: `RemoveStatusEffectsConsumeEffect`). Client `PaleSight` asks the
 game renderer for `players-versus:blight_1..20` (`Blight#greyStrength`: white hearts x time left, fading over
 `GREY_FADE_TICKS`; eased 0.01 a tick) and `watchling_1..16` (the HUD static's strength) each tick; `tools/post-effects.py` writes them from

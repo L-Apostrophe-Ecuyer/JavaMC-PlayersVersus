@@ -7,10 +7,11 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * Blight, the Wither's replacement and the pale shrooms' and the pale's: hearts turn white, one per amplifier + 1, and
- * each dose adds to the last (LivingEntityBlightMixin). Food doesn't regenerate health into white hearts; the blighted
- * shake as more of their hearts whiten, and with all white they turn undead (Undeath): a player dies of it and rises as
- * a player zombie. It wears off, and milk cures it, as any effect.
+ * Blight, from staying in pale shrooms (very slowly) and from the pale's hits: hearts turn white, one per amplifier + 1,
+ * and each dose adds to the last (LivingEntityBlightMixin). Food doesn't regenerate health into white hearts; the
+ * blighted shake as more of their hearts whiten, and with all white the Blight deals the Wither (Undeath): dying of it
+ * under the Blight is how the living are converted, and a player rises as a player zombie. Healing and absorption push it
+ * back; it wears off, and milk cures it, as any effect.
  */
 public class BlightStatusEffect extends MobEffect {
     public static final int COLOR = 0xD4D4CA;

@@ -18,7 +18,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -47,10 +46,11 @@ import java.util.WeakHashMap;
 
 /**
  * What Blight does to the living as it whitens their hearts: they shake (building from SHAKE_FROM, felt in a player's
- * own view: client UndeathShaking and BlightCameraShakeMixin), and with all their hearts white, for TURNING_TICKS
- * more, they turn undead ({@link #turn}). A player dies of it (a creative one lives, and a copy of them rises) and,
- * as with any death while blighted, a player zombie rises where they fell, wearing and carrying what they had
- * (PlayerZombieEntity). A totem of undying saves a player, and cures them. Skeletons, the nether's undead, the pale,
+ * own view: client UndeathShaking and BlightCameraShakeMixin), and with all their hearts white the Blight deals the
+ * Wither, a strong one ({@link #giveWither}). It's dying of the Wither under the Blight that converts: the living with an
+ * undead form turn into it as the death comes ({@link #turn}), and a player rises a player zombie where they fell,
+ * wearing and carrying what they had (PlayerZombieEntity). A creative player can't die: they live, and a copy of them
+ * rises. A totem of undying saves a player, and cures them. Skeletons, the nether's undead, the pale,
  * red mushroom creatures, warped things, golems and bosses don't take Blight at all ({@link #immune}). Blighted and
  * hurt low, the living that can turn pale ({@link #turnPale}).
  */
@@ -97,13 +97,6 @@ public final class Undeath {
         }
     }
 
-    /** What the Wither is now: the same time and strength (up to what a dose may whiten), as Blight. Other effects as they are. */
-    public static MobEffectInstance asBlight(MobEffectInstance effect) {
-        if (!VersusSettings.Blight.REPLACE_WITHER || !effect.is(MobEffects.WITHER)) return effect;
-        return new MobEffectInstance(CustomStatusEffects.BLIGHT, effect.getDuration(), Blight.fromWitherAmplifier(effect.getAmplifier()),
-                effect.isAmbient(), effect.isVisible(), effect.showIcon());
-    }
-
     /** The health food regenerates the entity up to. */
     public static float regenCap(LivingEntity entity) {
         return Blight.regenCap(entity.getMaxHealth(), whiteHearts(entity));
@@ -111,8 +104,8 @@ public final class Undeath {
 
     /**
      * Blight's tick on an entity: it notes whether all its hearts are white. What follows happens at the end of the
-     * level's tick, out of the entity's effect ticking (which a turning or a death mustn't change under it). Spectators
-     * are left alone; creative players go through it too, and live.
+     * level's tick, out of the entity's effect ticking (which an effect given or a turning mustn't change under it).
+     * Spectators are left alone; creative players go through it too, and live.
      */
     public static void whileBlighted(ServerLevel level, LivingEntity entity, int amplifier) {
         if (entity instanceof Player player && player.isSpectator()) return;
@@ -137,13 +130,18 @@ public final class Undeath {
             }
             long ticks = now - turning.started;
             if (ticks == 0 && entity instanceof ServerPlayer player) {
-                player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, VersusSettings.Mushrooms.TURNING_TICKS + 60, 0));
+                player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, VersusSettings.Blight.WITHER_TICKS + 100, 0));
             }
             if (ticks % 4 == 0) {
                 level.sendParticles(ParticleTypes.WHITE_ASH, entity.getX(), entity.getY(0.5), entity.getZ(), 6,
                         entity.getBbWidth() / 2.0, entity.getBbHeight() / 3.0, entity.getBbWidth() / 2.0, 0.02);
             }
-            if (ticks >= VersusSettings.Mushrooms.TURNING_TICKS) due.add(entity);
+            if (entity instanceof ServerPlayer player && player.isCreative()) {
+                // A creative player can't wither away: after the shaking, a copy of them rises
+                if (ticks >= VersusSettings.Mushrooms.TURNING_TICKS) due.add(entity);
+            } else {
+                giveWither(entity);
+            }
         }
         for (LivingEntity entity : due) {
             TURNING.remove(entity);
@@ -152,54 +150,68 @@ public final class Undeath {
     }
 
     /**
-     * Turns the entity undead, or kills it. Blight makes zombies of the living: a villager a zombie villager (as a
+     * All white, the Blight deals the Wither: a strong one (WITHER_AMPLIFIER), kept up while it's all white. It's the
+     * Wither that kills, and a death of the Wither under the Blight is how the living are converted
+     * ({@link #turn}; players: ServerPlayerBlightedDeathMixin).
+     */
+    private static void giveWither(LivingEntity entity) {
+        MobEffectInstance wither = entity.getEffect(MobEffects.WITHER);
+        if (wither != null && wither.getAmplifier() >= VersusSettings.Blight.WITHER_AMPLIFIER && wither.getDuration() >= VersusSettings.Blight.WITHER_TICKS / 2) return;
+        entity.addEffect(new MobEffectInstance(MobEffects.WITHER, VersusSettings.Blight.WITHER_TICKS, VersusSettings.Blight.WITHER_AMPLIFIER));
+    }
+
+    /**
+     * Turns the entity undead, if it has an undead form to turn into: whether it did. This is what a death of the Wither
+     * under the Blight comes to (LivingEntityBlightMixin; and for a creative player, who can't die of it, after the
+     * shaking). Blight makes zombies of the living: a villager a zombie villager (as a
      * zombie's kill does), piglins zombified piglins, a hoglin a zoglin; animals with an undead kind of their own turn
      * into it, as calm as they were and their owner's still (a horse a zombie horse, a camel a camel husk, a nautilus a
      * zombie nautilus, a chicken a zombie chicken). An illager, a witch or a wandering trader rises as the zombie of
      * where it turned ({@link #zombieOfThePlace}). The undead and their kin it turns pale: zombies of every kind into pale
-     * zombies, a creeper into a pale creeper, spiders into pale spiders. A player dies of it, and a player zombie rises
-     * ({@link PlayerZombieEntity}). Anything else dies of it.
+     * zombies, a creeper into a pale creeper, spiders into pale spiders. A player who dies of it rises a player zombie
+     * ({@link PlayerZombieEntity}); one that has no undead form (a pig, a cow...) just dies of the Wither.
      */
-    public static void turn(ServerLevel level, LivingEntity entity) {
-        level.playSound((Player) null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ZOMBIE_INFECT, entity.getSoundSource(), 1.0F, 0.7F);
-        if (entity instanceof ServerPlayer player) {
-            turnPlayer(level, player);
-            return;
-        }
+    public static boolean turn(ServerLevel level, LivingEntity entity) {
+        if (entity instanceof ServerPlayer player) return turnPlayer(level, player);
         // What it turns into takes no Blight along with the rest of its effects
         entity.removeEffect(CustomStatusEffects.BLIGHT);
         if (entity instanceof Villager villager) {
             // As a zombie's kill: Zombie#convertVillagerToZombieVillager
             Zombie zombie = new Zombie(EntityTypes.ZOMBIE, level);
             zombie.snapTo(villager.position());
-            if (zombie.convertVillagerToZombieVillager(level, villager)) return;
+            if (zombie.convertVillagerToZombieVillager(level, villager)) {
+                turned(level, villager);
+                return true;
+            }
         }
         EntityType<? extends Mob> into = undeadKind(level, entity);
         if (into != null && entity instanceof Mob mob && mob.convertTo(into, ConversionParams.single(mob, true, true), converted -> {
             keepWhatWasKept(mob, converted);
             converted.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
-        }) != null) return;
-        entity.hurtServer(level, source(level), Float.MAX_VALUE);
+        }) != null) {
+            turned(level, mob);
+            return true;
+        }
+        return false;
+    }
+
+    private static void turned(ServerLevel level, LivingEntity from) {
+        level.playSound((Player) null, from.getX(), from.getY(), from.getZ(), SoundEvents.ZOMBIE_INFECT, from.getSoundSource(), 1.0F, 0.7F);
     }
 
     /**
-     * A player turning: they die of it, and the player zombie rises as for any blighted death
-     * (ServerPlayerBlightedDeathMixin). A creative player can't die: they live, the blight lifts, and a copy of them
-     * (wearing copies of what they wear, carrying nothing) rises beside them, so the turning can be seen.
+     * A player turning: a survival player withers to death and the player zombie rises as the death comes
+     * (ServerPlayerBlightedDeathMixin), so there's nothing to do here for them. A creative player can't die: they live,
+     * the Blight and the Wither lift, and a copy of them (wearing copies of what they wear, carrying nothing) rises beside
+     * them, so the turning can be seen.
      */
-    private static void turnPlayer(ServerLevel level, ServerPlayer player) {
-        if (player.isCreative()) {
-            PlayerZombieEntity.rise(level, player, true);
-            player.removeEffect(CustomStatusEffects.BLIGHT);
-            return;
-        }
-        DamageSource source = source(level);
-        player.hurtServer(level, source, Float.MAX_VALUE);
-        // Spared by something that doesn't cure (no totem was used, the Blight is still on them): it takes them anyway
-        if (player.isAlive() && player.hasEffect(CustomStatusEffects.BLIGHT)) {
-            player.setHealth(0.0F);
-            player.die(source);
-        }
+    private static boolean turnPlayer(ServerLevel level, ServerPlayer player) {
+        if (!player.isCreative()) return false;
+        PlayerZombieEntity.rise(level, player, true);
+        player.removeEffect(CustomStatusEffects.BLIGHT);
+        player.removeEffect(MobEffects.WITHER);
+        turned(level, player);
+        return true;
     }
 
     /**
@@ -299,9 +311,5 @@ public final class Undeath {
         if (entity.isUnderWater()) return EntityTypes.DROWNED;
         if (level.getBiome(pos).is(HUSK_BIOMES)) return EntityTypes.HUSK;
         return EntityTypes.ZOMBIE;
-    }
-
-    private static DamageSource source(ServerLevel level) {
-        return new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(TURNED_UNDEAD));
     }
 }

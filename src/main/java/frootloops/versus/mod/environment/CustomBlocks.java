@@ -177,12 +177,12 @@ public class CustomBlocks {
         RED_MUSHROOMS = registerStagedMushroom("red_mushrooms", MushroomGrowth.Kind.RED, Blocks.RED_MUSHROOM);
         PALE_SHROOM = registerStagedMushroom("pale_shroom", MushroomGrowth.Kind.PALE, Blocks.BROWN_MUSHROOM);
 
-        DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, CustomStatusEffects.BLIGHT, 210, 0, 4, 0.4f);
+        DEATHLY_BILE = registerBileBlock("dealthy_bile", 0, MobEffects.WITHER, 210, 0, 4, 0.4f);
         CORRUPTED_BILE = registerBileBlock("corrupted_bile", MobEffects.HUNGER, 210, 1);
         HARMFUL_BILE = registerBileBlock("harmful_bile", MobEffects.INSTANT_DAMAGE);
         HEALTHY_BILE = registerBileBlock("healthy_bile", MobEffects.INSTANT_HEALTH);
         REGENERATION_BILE = registerBileBlock("regeneration_bile", MobEffects.REGENERATION);
-        WITHERING_BILE = registerBileBlock("withering_bile", CustomStatusEffects.BLIGHT);
+        WITHERING_BILE = registerBileBlock("withering_bile", MobEffects.WITHER);
         MINING_SPEED_BILE = registerBileBlock("mining_speed_bile", MobEffects.HASTE);            // New potion!
         MINING_FATIGUE_BILE = registerBileBlock("mining_fatigue_bile", MobEffects.MINING_FATIGUE); // New potion!
         TOUGHNESS_BILE = registerBileBlock("toughness_bile", MobEffects.RESISTANCE);
@@ -227,7 +227,7 @@ public class CustomBlocks {
     }
 
     private static StagedMushroomBlock registerStagedMushroom(String name, MushroomGrowth.Kind kind, Block mushroom) {
-        BlockBehaviour.Properties settings = getSettings(name, mushroom).lightLevel(state -> MushroomGrowth.light(state.getValue(StagedMushroomBlock.MUSHROOMS)));
+        BlockBehaviour.Properties settings = getSettings(name, mushroom).lightLevel(state -> MushroomGrowth.light(kind, state.getValue(StagedMushroomBlock.MUSHROOMS)));
         if (kind == MushroomGrowth.Kind.PALE) settings = settings.mapColor(MapColor.COLOR_LIGHT_GRAY);
         return (StagedMushroomBlock) registerBlock(name, new StagedMushroomBlock(kind, settings));
     }

@@ -12,17 +12,18 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    creepers move only unwatched; the watchling never moves, and kills those who watch it. Endermites and silverfish are
    the warp's bugs: silverfish come out of a hit creaking, and out of whoever looked at a watchling too long. A carved
    pumpkin over the eyes hides you from all of them that stare.
-2. **Blight is the Wither, and a blighted wound makes pale.** The Wither effect is gone: every Wither given (the
-   wither skeleton's and the Wither's hits, Decay potions, withering bile, the commands) is Blight instead, at the same
-   strength (a dose of at most four white hearts). Blighted and wounded to below 8 health, zombies turn into pale
-   zombies, creepers into pale creepers, spiders into pale spiders, villagers into pale villagers (rule 5), illagers,
-   witches and wandering traders into pale zombies. Nether wart still withers in the dark.
-3. **Paleness holds below y 0 and in the pale biomes** (the pale line: the pale garden, the pale grotto and hollow, the
-   deep caves). Brown and red mushrooms there grow into pale shrooms; pale zombies, pale creepers, pale spiders and
+2. **A blighted wound makes pale; the Wither is the Wither.** The Wither is as it was (the wither skeleton's and the
+   Wither's hits, Decay potions, withering bile...): damage over time, and its own. Blighted and wounded to below 8
+   health (by anything but the Wither), zombies turn into pale zombies, creepers into pale creepers, spiders into pale
+   spiders, villagers into pale villagers (rule 5), illagers, witches and wandering traders into pale zombies. Nether
+   wart still withers in the dark.
+3. **Paleness holds below y 0, in the pale biomes** (the pale line: the pale garden, the pale grotto and hollow, the
+   deep caves) **and on deepslate**. Brown and red mushrooms there grow into pale shrooms; pale zombies, pale creepers, pale spiders and
    watchlings spawn there in the dark at any hour, and above it (to y 64) only at midnight under a new moon.
 4. **Pale things blight the living; the blighted rise undead (zombies); the undead turn pale.** Blight's white
-   hearts, all white for five seconds (the world shaking, a player's view too):
-   - a player dies of it and rises as a **player zombie** (rule 10);
+   hearts, all white, the Blight deals the Wither (Wither V, kept up while they stay all white; the world shaking, a
+   player's view too), and **dying of the Wither under the Blight is how the living are converted**:
+   - a player rises as a **player zombie** (rule 10);
    - an illager, a witch or a wandering trader rises as **the zombie of the place**: a drowned under water, a
      husk in the desert, a zombie elsewhere. Pale zombies rise of a blighted wound (rule 2), not of turning;
    - a villager becomes a zombie villager, anywhere;
@@ -30,7 +31,7 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    - **an animal with an undead kind of its own turns into it, and stays as calm as it was and its owner's**: a horse
      a zombie horse, a camel a camel husk, a nautilus a zombie nautilus, a chicken a zombie chicken;
    - zombies of every kind become pale zombies, a creeper a pale creeper, spiders pale spiders;
-   - anything else dies of it (donkeys, mules, pigs, cows, wolves...: no undead kind of their own).
+   - anything else just dies of the Wither (donkeys, mules, pigs, cows, wolves...: no undead kind of their own).
    - Never converted: skeletons (bone), the nether's undead, phantoms, the wither, the passive undead (undead horses,
      camel husks, zombie nautiluses, zombie chickens: kept beside living ones, they stay as they are); the pale
      themselves (pale zombies, creepers and spiders, creakings, watchlings); the red mushroom's hosts; endermen,
@@ -59,8 +60,8 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    bigger, drabber pixels beneath the static, and the static is heard, a hiss, crackle and low drone that swells and
    rises with it.
 
-10. **A player the Blight takes rises as a player zombie.** Any death while blighted, of a hit, a fall or the Blight
-   itself, leaves not a corpse's drops but a zombie in the player's skin (drawn greener and duller) and name, wearing
+10. **A player the Blight takes rises as a player zombie.** Dying of the Wither while blighted (the Blight dealing it
+   when all their hearts are white, or any other Wither) leaves not a corpse's drops but a zombie in the player's skin (drawn greener and duller) and name, wearing
    the armour they wore, holding what they held and carrying the rest of what they had, which it drops, all of it,
    when it's killed (their armour and hands guaranteed). It blights what it hits, never turns into anything else, is
    neither sunburnt nor drowned, and stays where it rose. A totem of undying saves a player and cures them. With
@@ -245,4 +246,32 @@ eyes); and the warped more transparent.
   and between; the jaw layer is left out, and the hitbox is 3.1 tall. Built from the enderman's layer in
   `WatchlingModel`; textures from `tools/watchling-head.py` (its source: `tools/watchling-source.png`). Client only:
   unseen in a running game.
+
+## The Wither is back; pale shrooms (seventh round, 2026-11-01)
+
+Asked for: brown mushrooms shouldn't generate below y 0, and on deepslate they should be pale; pale shrooms shouldn't
+give light and should very slowly blight; and instead of removing the Wither, maxed-out Blight should deal Wither V, and
+dying of the Wither be how one is converted.
+
+- **Mushrooms:** the cave clusters (`caves/brown_mushroom_clusters`: regular, badlands and deep caves) place brown
+  mushrooms from y 0 up and never on deepslate (tag `players-versus:deepslate`: deepslate and its worked kinds);
+  `caves/pale_shroom_clusters` (two a chunk, not four) place pale shrooms on deepslate instead, down to bedrock. The
+  mushroom caves keep their browns at any depth but not on deepslate, where `mushroom_caves_pale_shrooms` places pale ones.
+  A brown or red mushroom that is standing on deepslate when it grows turns pale (paleness holds there, as below y 0),
+  and one that spreads onto deepslate is a pale shroom. A lone brown mushroom placed on deepslate by hand stays brown
+  until it has a neighbour to grow with.
+- **Pale shrooms:** give off no light at any size; a dose of Blight after 20 seconds in them (was 5), each lasting 3
+  minutes: ten white hearts take over three minutes standing in them.
+- **The Wither:** every redirect is undone: the Wither is the Wither, its name and icon vanilla's, and the mod's Wither
+  sources (Decay potions, the concentrates and biles of death and decay, haunting's end, the recovery compass, the food
+  overhaul's quick healing against the Wither) are Wither again. All hearts white, the Blight gives the Wither (V, 100
+  ticks at a time, kept up; nausea for a player): about 20 health in ten seconds, as the Wither's damage allows. A
+  creative player, who can't die of it, still shakes five seconds and leaves a copy.
+- **Conversion** is a death of the Wither under the Blight, not any blighted death: a blow of the Wither that would kill
+  something blighted turns it (LivingEntityBlightMixin) into its undead form instead (a villager a zombie villager, a
+  chicken a zombie chicken...) or lets it die if it has none; a player who dies of it rises a player zombie
+  (ServerPlayerBlightedDeathMixin, only for the Wither's damage). Blighted and killed by anything else, they die. The
+  Wither's blows don't wound a blighted thing pale (that is for other wounds). Healing and absorption still purge
+  Blight, so a Healing potion drunk in time leaves the Wither to wear off but nothing to convert them; a totem saves a
+  player and clears both.
 

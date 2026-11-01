@@ -79,7 +79,7 @@ public class UndeadFormsGameTest {
     }
 
     /** All white, a villager turns as a zombie's kill would: into a zombie villager, anywhere (pale places too). */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhiteVillagerTurnsZombieVillager(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
@@ -182,7 +182,7 @@ public class UndeadFormsGameTest {
     }
 
     /** A child villager turns into a zombie villager child anywhere: there are no illager children. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhiteChildVillagerTurnsZombieVillagerAnywhere(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
@@ -196,7 +196,7 @@ public class UndeadFormsGameTest {
     }
 
     /** All white, a chicken turns into a zombie chicken, grown. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhiteChickenTurnsZombieChicken(GameTestHelper helper) {
         floor(helper);
         Chicken chick = helper.spawnWithNoFreeWill(EntityTypes.CHICKEN, new Vec3(3.5, 1.0, 3.5));
@@ -212,7 +212,7 @@ public class UndeadFormsGameTest {
     }
 
     /** All white, a tamed horse turns into a zombie horse still tame and still its owner's. */
-    @GameTest(structure = ROOM, maxTicks = 200)
+    @GameTest(structure = ROOM, maxTicks = 900)
     public void anAllWhiteTamedHorseStaysItsOwners(GameTestHelper helper) {
         floor(helper);
         ServerPlayer owner = FakePlayer.get(helper.getLevel());

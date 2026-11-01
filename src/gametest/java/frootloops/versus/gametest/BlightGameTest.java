@@ -1,5 +1,6 @@
 package frootloops.versus.gametest;
 
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.items_and_effects.blight.Blight;
 import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
@@ -15,6 +16,8 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -74,21 +77,8 @@ public class BlightGameTest {
         return player;
     }
 
-    /** Every Wither given is Blight, at the same strength (up to the most hearts a Wither's dose whitens). */
-    @GameTest(structure = ROOM, maxTicks = 20)
-    public void aWitherGivenIsBlightInstead(GameTestHelper helper) {
-        floor(helper);
-        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
-        pig.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 1));
-        helper.assertTrue(!pig.hasEffect(MobEffects.WITHER), "the pig has the Wither");
-        MobEffectInstance blight = pig.getEffect(CustomStatusEffects.BLIGHT);
-        helper.assertTrue(blight != null, "the Wither didn't become Blight");
-        helper.assertTrue(blight.getAmplifier() == Blight.fromWitherAmplifier(1), "the Blight is amplifier " + blight.getAmplifier());
-        helper.succeed();
-    }
-
     /**
-     * A player who dies blighted rises where they fell as a player zombie in their skin and name, wearing their helmet,
+     * A player who dies of the Wither while blighted rises where they fell as a player zombie in their skin and name, wearing their helmet,
      * holding their sword and carrying the rest; killed, it drops all of it. Their own inventory is left empty, so
      * nothing is dropped twice.
      */
@@ -97,7 +87,7 @@ public class BlightGameTest {
         floor(helper);
         ServerPlayer player = equippedPlayer(helper);
         player.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0));
-        player.die(helper.getLevel().damageSources().genericKill());
+        player.die(helper.getLevel().damageSources().wither());
         List<PlayerZombieEntity> zombies = playerZombies(helper);
         helper.assertTrue(zombies.size() == 1, zombies.size() + " player zombies, not one");
         PlayerZombieEntity zombie = zombies.getFirst();
@@ -116,13 +106,85 @@ public class BlightGameTest {
         helper.succeed();
     }
 
-    /** A player who dies of anything but blighted dies as they always did: no player zombie. */
+    /** Blighted but not killed by the Wither, or killed by the Wither but not blighted: they die as they always did. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void aPlayerWhoDiesUnblightedLeavesNoZombie(GameTestHelper helper) {
+    public void onlyTheWitherUnderTheBlightConvertsAPlayer(GameTestHelper helper) {
         floor(helper);
-        ServerPlayer player = equippedPlayer(helper);
-        player.die(helper.getLevel().damageSources().genericKill());
-        helper.assertTrue(playerZombies(helper).isEmpty(), "a player zombie rose of an unblighted player");
+        ServerPlayer blighted = equippedPlayer(helper);
+        blighted.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0));
+        blighted.die(helper.getLevel().damageSources().genericKill());
+        helper.assertTrue(playerZombies(helper).isEmpty(), "a player zombie rose of a blighted player who didn't die of the Wither");
+        ServerPlayer plain = equippedPlayer(helper);
+        plain.die(helper.getLevel().damageSources().wither());
+        helper.assertTrue(playerZombies(helper).isEmpty(), "a player zombie rose of a player who wasn't blighted");
+        helper.succeed();
+    }
+
+    /** The Wither is still the Wither: a Wither given stays one. Blight is Blight. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aWitherStaysTheWither(GameTestHelper helper) {
+        floor(helper);
+        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
+        pig.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 1));
+        helper.assertTrue(pig.hasEffect(MobEffects.WITHER), "the Wither didn't stay the Wither");
+        helper.assertTrue(!pig.hasEffect(CustomStatusEffects.BLIGHT), "the Wither became Blight");
+        helper.succeed();
+    }
+
+    /** All their hearts white, the Blight deals the Wither: a strong one, kept up. Not all white, none. */
+    @GameTest(structure = ROOM, maxTicks = 100)
+    public void allWhiteBlightDealsTheWither(GameTestHelper helper) {
+        floor(helper);
+        Mob few = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
+        few.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 1));
+        Mob all = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(9.5, 1.0, 3.5));
+        all.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, Blight.hearts(all.getMaxHealth()) - 1));
+        helper.succeedWhen(() -> {
+            MobEffectInstance wither = all.getEffect(MobEffects.WITHER);
+            helper.assertTrue(wither != null && wither.getAmplifier() == VersusSettings.Blight.WITHER_AMPLIFIER, "the all-white pig has " + (wither == null ? "no Wither" : "Wither amplifier " + wither.getAmplifier()));
+            helper.assertTrue(!few.hasEffect(MobEffects.WITHER), "a pig not all white has the Wither");
+        });
+    }
+
+    /**
+     * Killed by the Wither under the Blight, the living are converted if they can be: a villager into a zombie villager.
+     * Without the Blight it dies, and there's no zombie.
+     */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void dyingOfTheWitherUnderTheBlightConverts(GameTestHelper helper) {
+        floor(helper);
+        Villager blighted = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
+        blighted.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0));
+        blighted.setHealth(1.0F);
+        blighted.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
+        helper.assertTrue(blighted.isRemoved(), "the blighted villager is still a villager");
+        List<ZombieVillager> zombies = helper.getLevel().getEntitiesOfClass(ZombieVillager.class, everywhere(helper));
+        helper.assertTrue(zombies.size() == 1, zombies.size() + " zombie villagers, not one");
+
+        Villager plain = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(9.5, 1.0, 3.5));
+        plain.setHealth(1.0F);
+        plain.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
+        helper.assertTrue(plain.isDeadOrDying(), "the plain villager lives");
+        helper.assertTrue(helper.getLevel().getEntitiesOfClass(ZombieVillager.class, everywhere(helper)).size() == 1, "a plain villager's wither death left a zombie villager");
+
+        // And something with no undead form just dies of it, blighted or not
+        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(6.5, 1.0, 5.5));
+        pig.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0));
+        pig.setHealth(1.0F);
+        pig.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
+        helper.assertTrue(pig.isDeadOrDying(), "the blighted pig lives");
+        helper.succeed();
+    }
+
+    /** A blow of the Wither that wounds, not kills, doesn't turn a blighted thing pale: the Wither is for killing. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void theWithersWoundsDontTurnPale(GameTestHelper helper) {
+        floor(helper);
+        Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
+        villager.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0));
+        villager.setHealth(9.0F);
+        villager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().wither(), 2.0F);
+        helper.assertTrue(!villager.isRemoved(), "the wounded villager was turned");
         helper.succeed();
     }
 
@@ -183,14 +245,4 @@ public class BlightGameTest {
         helper.succeed();
     }
 
-    /** The Wither is Blight however it's put on, forced or not, and the Wither is never seen. */
-    @GameTest(structure = ROOM, maxTicks = 20)
-    public void aForcedWitherIsBlightToo(GameTestHelper helper) {
-        floor(helper);
-        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
-        pig.forceAddEffect(new MobEffectInstance(MobEffects.WITHER, 200, 0), null);
-        helper.assertTrue(!pig.hasEffect(MobEffects.WITHER), "a forced Wither stayed the Wither");
-        helper.assertTrue(pig.hasEffect(CustomStatusEffects.BLIGHT), "a forced Wither didn't become Blight");
-        helper.succeed();
-    }
 }

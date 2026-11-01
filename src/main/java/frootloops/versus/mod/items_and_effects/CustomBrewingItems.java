@@ -30,14 +30,14 @@ public abstract class CustomBrewingItems {
     public static final Item LIVING_FLAME = new Item(getItemSettings("living_flame").rarity(Rarity.UNCOMMON));
     public static final Item GLISTERING_BEETROOT = new Item(getItemSettings("glistering_beetroot").food(new FoodProperties.Builder().nutrition(4).saturationModifier(0.8f).build()));
 
-    public static final ConcentrateItem CONCENTRATE_OF_DEATH = new ConcentrateItem(getBileSettings("concentrate_of_death"),CustomStatusEffects.BLIGHT, 2, 80, CustomBlocks.DEATHLY_BILE);
+    public static final ConcentrateItem CONCENTRATE_OF_DEATH = new ConcentrateItem(getBileSettings("concentrate_of_death"),MobEffects.WITHER, 2, 80, CustomBlocks.DEATHLY_BILE);
     public static final ConcentrateItem CORRUPTED_WART_POWDER = new ConcentrateItem(getBileSettings("corrupted_wart_powder"),MobEffects.HUNGER, 4, 120, CustomBlocks.CORRUPTED_BILE); //-> Will be replacing Fermented Spider Eye
 
     public static final ConcentrateItem CONCENTRATE_OF_HARM = new ConcentrateItem(getBileSettings("concentrate_of_harm"),MobEffects.INSTANT_DAMAGE, CustomBlocks.HARMFUL_BILE);
     public static final ConcentrateItem CONCENTRATE_OF_HEALTH = new ConcentrateItem(getBileSettings("concentrate_of_health"),MobEffects.INSTANT_HEALTH, CustomBlocks.HEALTHY_BILE);
 
     public static final ConcentrateItem CONCENTRATE_OF_REGENERATION = new ConcentrateItem(getBileSettings("concentrate_of_regeneration"),MobEffects.REGENERATION, CustomBlocks.REGENERATION_BILE);
-    public static final ConcentrateItem CONCENTRATE_OF_DECAY = new ConcentrateItem(getBileSettings("concentrate_of_decay"),CustomStatusEffects.BLIGHT, 0, 160, CustomBlocks.WITHERING_BILE);
+    public static final ConcentrateItem CONCENTRATE_OF_DECAY = new ConcentrateItem(getBileSettings("concentrate_of_decay"),MobEffects.WITHER, 0, 160, CustomBlocks.WITHERING_BILE);
 
     public static final ConcentrateItem CONCENTRATE_OF_MINING_SPEED = new ConcentrateItem(getBileSettings("concentrate_of_mining_speed"),MobEffects.HASTE, CustomBlocks.MINING_SPEED_BILE);            // New potion!
     public static final ConcentrateItem CONCENTRATE_OF_MINING_FATIGUE = new ConcentrateItem(getBileSettings("concentrate_of_mining_fatigue"),MobEffects.MINING_FATIGUE, CustomBlocks.MINING_FATIGUE_BILE); // New potion!

@@ -172,7 +172,7 @@ assuming full overlap).
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
 - **Player Zombie** (`mod/mobs/hostile/overworld/PlayerZombieEntity`, extends `Zombie`; client
   `PlayerZombieRenderer`/`PlayerZombieRenderState`, the zombie model wearing the player's skin from the skin cache,
-  tinted grey-green in `LivingEntityRendererGazeMixin`): what a player who dies blighted leaves
+  tinted grey-green in `LivingEntityRendererGazeMixin`): what a player who dies of the Wither while blighted leaves
   (`ServerPlayerBlightedDeathMixin`). Synced `ResolvableProfile`, custom name, worn items (guaranteed drops), held
   items, and a `stash` of the rest of the inventory (saved as `Stash`, dropped by `dropCustomDeathLoot` with an extended
   lifetime). No sun, no drowning, never despawns, its hits blight. Blight-immune; in `#minecraft:zombies`. Game tests in

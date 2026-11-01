@@ -68,9 +68,9 @@ public abstract class CustomPotions {
         GLOWING_LONG = registerCustomPotion("glowing_long", MobEffects.GLOWING, 0, 7200);
         GLOWING_STRONG = registerCustomPotion("glowing_strong", new Potion("glowing_strong", new MobEffectInstance[]{new MobEffectInstance(MobEffects.GLOWING, 800), new MobEffectInstance(MobEffects.NIGHT_VISION, 800)}));
 
-        DECAY = registerCustomPotion("decay", CustomStatusEffects.BLIGHT, 0, 240);
-        DECAY_LONG = registerCustomPotion("decay_long", CustomStatusEffects.BLIGHT, 0, 360);
-        DECAY_STRONG = registerCustomPotion("decay_strong", CustomStatusEffects.BLIGHT, 1, 160);
+        DECAY = registerCustomPotion("decay", MobEffects.WITHER, 0, 240);
+        DECAY_LONG = registerCustomPotion("decay_long", MobEffects.WITHER, 0, 360);
+        DECAY_STRONG = registerCustomPotion("decay_strong", MobEffects.WITHER, 1, 160);
 
         FIRE_RESISTANCE_STRONG = registerCustomPotion("fire_resistance_strong", MobEffects.FIRE_RESISTANCE, 1, 2400);
         NIGHT_VISION_STRONG = registerCustomPotion("night_vision_strong", MobEffects.NIGHT_VISION, 1, 2400);

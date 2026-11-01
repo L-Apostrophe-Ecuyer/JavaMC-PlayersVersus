@@ -177,10 +177,10 @@ public abstract class VersusSettings {
     }
 
     public static class Blight {
-        // Blight replaces the Wither effect: every Wither given is Blight instead (up to WITHER_MAX_HEARTS white hearts
-        // a dose); the vanilla wither's black hearts are never seen
-        public static boolean REPLACE_WITHER = true;
-        public static int WITHER_MAX_HEARTS = 4;
+        // All hearts white, the Blight deals the Wither (amplifier WITHER_AMPLIFIER: 4 is Wither V), kept up WITHER_TICKS
+        // at a time while they stay all white; dying of it under the Blight is how the living are converted
+        public static int WITHER_AMPLIFIER = 4;
+        public static int WITHER_TICKS = 100;
         // Blighted and hurt below this much health, a zombie, creeper, spider, villager, trader, illager or witch turns pale
         public static float PALE_BELOW_HEALTH = 8.0F;
         // The shaking begins when this part of the hearts is white and grows to all of them; the view of whoever's
@@ -198,10 +198,10 @@ public abstract class VersusSettings {
         public static float GROW_CHANCE = 0.25f;
         // Three spread no more where this many blocks of their kind are within 4 blocks across, 1 up or down
         public static int SPREAD_CAP = 8;
-        // Blight: a dose for each DOSE_TICKS spent in pale shrooms, lasting EFFECT_TICKS (each dose refreshes it);
-        // all hearts white, TURNING_TICKS of shaking before turning undead
-        public static int DOSE_TICKS = 100;
-        public static int EFFECT_TICKS = 2400;
+        // Blight: a very slow dose for each DOSE_TICKS spent in pale shrooms, lasting EFFECT_TICKS (each dose refreshes
+        // it); a creative player, who can't wither away, shakes TURNING_TICKS all white before a copy of them rises
+        public static int DOSE_TICKS = 400;
+        public static int EFFECT_TICKS = 3600;
         public static int TURNING_TICKS = 100;
         // Pale zombies' and creakings' hits always convert, other zombies' this often (each in place of its own effect)
         public static float ZOMBIE_BLIGHT_CHANCE = 0.04f;

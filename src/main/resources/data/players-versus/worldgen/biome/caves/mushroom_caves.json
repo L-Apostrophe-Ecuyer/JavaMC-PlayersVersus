@@ -67,7 +67,8 @@
       "players-versus:caves/mushroom_rings",
       "players-versus:caves/mushroom_caves_mycelium",
       "players-versus:caves/mushroom_caves_huge_mushrooms",
-      "players-versus:caves/mushroom_caves_brown_mushrooms"
+      "players-versus:caves/mushroom_caves_brown_mushrooms",
+      "players-versus:caves/mushroom_caves_pale_shrooms"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -68,11 +68,6 @@ public final class Blight {
         return Math.max(0.0F, Math.min(1.0F, (white - from) / (1.0F - from)));
     }
 
-    /** The amplifier of the Blight a Wither of this amplifier becomes: the same strength, at most WITHER_MAX_HEARTS hearts a dose. */
-    public static int fromWitherAmplifier(int witherAmplifier) {
-        return Math.max(0, Math.min(witherAmplifier, VersusSettings.Blight.WITHER_MAX_HEARTS - 1));
-    }
-
     /** The amplifier left after this many white hearts are purged: below nothing (-1 or less), none is left. */
     public static int purgedAmplifier(int amplifier, int hearts) {
         return amplifier - Math.max(0, hearts);

@@ -78,8 +78,6 @@ public class PotionEffectBileBlock extends Block {
             return;
         }
         if (entity.isSteppingCarefully()) return;
-        // Blight stacks with every dose: standing in it, one every two seconds
-        if (effect == CustomStatusEffects.BLIGHT && entity.hasEffect(effect) && entity.level().getGameTime() % 40L != 0) return;
         if(effect == MobEffects.INSTANT_DAMAGE && !entity.level().isClientSide()) entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().magic(), extraStrongEffect ? 2 : 1);
         else if(effect == MobEffects.INSTANT_HEALTH) {
             entity.heal(extraStrongEffect ? 2 : 1);
