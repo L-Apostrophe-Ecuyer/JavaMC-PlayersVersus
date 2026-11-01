@@ -159,19 +159,27 @@ public class BlightGameTest {
         helper.succeed();
     }
 
-    /** Absorption gained purges a white heart for each heart of it; absorption lost purges nothing. */
+    /**
+     * Absorption gained purges a white heart for each heart of it; absorption lost purges nothing. (Absorption is held to
+     * the entity's maximum absorption, which only the Absorption effect raises: the tests go through the effect.)
+     */
     @GameTest(structure = ROOM, maxTicks = 20)
     public void absorptionPurgesBlight(GameTestHelper helper) {
         floor(helper);
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
         pig.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 4));
-        pig.setAbsorptionAmount(4.0F);
+        pig.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 600, 0));
+        helper.assertTrue(pig.getAbsorptionAmount() >= 4.0F, "the Absorption effect gave " + pig.getAbsorptionAmount() + " absorption");
         MobEffectInstance left = pig.getEffect(CustomStatusEffects.BLIGHT);
-        helper.assertTrue(left != null && left.getAmplifier() == 2, "4 absorption left " + (left == null ? "none" : "amplifier " + left.getAmplifier()));
+        helper.assertTrue(left != null && left.getAmplifier() == 2, "Absorption I left " + (left == null ? "none" : "amplifier " + left.getAmplifier()) + ", not three white hearts");
+        // Losing it takes no more Blight with it
         pig.setAbsorptionAmount(0.0F);
         helper.assertTrue(pig.getEffect(CustomStatusEffects.BLIGHT).getAmplifier() == 2, "losing absorption purged Blight");
-        pig.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 600, 0));
-        helper.assertTrue(pig.getEffect(CustomStatusEffects.BLIGHT).getAmplifier() == 0, "the Absorption effect didn't purge two hearts");
+        // A stronger one purges more than is there
+        Mob other = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(6.5, 1.0, 3.5));
+        other.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 3));
+        other.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 600, 1));
+        helper.assertTrue(!other.hasEffect(CustomStatusEffects.BLIGHT), "Absorption II left Blight");
         helper.succeed();
     }
 
