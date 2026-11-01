@@ -28,7 +28,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.zombie.ZombieVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.Blocks;
@@ -141,9 +140,9 @@ public class StagedMushroomsGameTest {
         helper.succeed();
     }
 
-    /** Each dose adds its amplifier + 1 to what was had; the undead never take it. */
+    /** Each dose adds its amplifier + 1 to what was had; skeletons never take it. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void conversionStacksAndSparesTheUndead(GameTestHelper helper) {
+    public void conversionStacksAndSparesSkeletons(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
         pig.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 0));
@@ -152,8 +151,9 @@ public class StagedMushroomsGameTest {
         helper.assertTrue(pig.getEffect(CustomStatusEffects.CONVERSION).getAmplifier() == 1, "a second dose didn't stack to 1");
         pig.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 1));
         helper.assertTrue(pig.getEffect(CustomStatusEffects.CONVERSION).getAmplifier() == 3, "a dose of 1 on 1 didn't stack to 3");
-        Zombie zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(6.5, 1.0, 3.5));
-        helper.assertTrue(!zombie.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 0)), "a zombie took Conversion");
+        // Skeletons have no flesh to convert (zombies do: they turn pale)
+        Mob skeleton = helper.spawnWithNoFreeWill(EntityTypes.SKELETON, new Vec3(6.5, 1.0, 3.5));
+        helper.assertTrue(!skeleton.addEffect(new MobEffectInstance(CustomStatusEffects.CONVERSION, 2400, 0)), "a skeleton took Conversion");
         helper.succeed();
     }
 
