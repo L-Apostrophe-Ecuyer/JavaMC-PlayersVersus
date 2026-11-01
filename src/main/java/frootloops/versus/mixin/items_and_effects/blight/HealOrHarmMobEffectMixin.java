@@ -3,7 +3,6 @@ package frootloops.versus.mixin.items_and_effects.blight;
 import frootloops.versus.mod.items_and_effects.blight.Blight;
 import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.effect.HealOrHarmMobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * as its strength reaches the one it's on (a splash's edge purges less). It only does so where it heals: on the living,
  * not on the undead it harms.
  */
-@Mixin(HealOrHarmMobEffect.class)
+// Package-private in the game, so named
+@Mixin(targets = "net.minecraft.world.effect.HealOrHarmMobEffect")
 public abstract class HealOrHarmMobEffectMixin {
     @Shadow @Final private boolean isHarm;
 
