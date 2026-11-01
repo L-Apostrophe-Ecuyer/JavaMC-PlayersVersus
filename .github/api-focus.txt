@@ -1,2 +1,38 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
+sig net.minecraft.world.entity.monster.zombie.ZombieVillager
+calls net.minecraft.world.entity.monster.zombie.ZombieVillager (finishConversion|startConverting|mobInteract|tick|handleEntityEvent|finalizeSpawn|convertsInWater|removeWhenFarAway|defineSynchedData)
+member net.minecraft.world.entity.monster.zombie.Zombie handleAttributes|convertsInWater|isSunSensitive|addBehaviourGoals|registerGoals|killedEntity|doHurtTarget|createAttributes
+calls net.minecraft.world.entity.monster.zombie.Zombie (registerGoals|hurtServer|doHurtTarget)
+sig net.minecraft.client.renderer.entity.ZombieVillagerRenderer
+calls net.minecraft.client.renderer.entity.ZombieVillagerRenderer (<init>|extractRenderState|getTextureLocation)
+sig net.minecraft.client.renderer.entity.VillagerRenderer
+calls net.minecraft.client.renderer.entity.VillagerRenderer (<init>|extractRenderState|getTextureLocation)
+findsig VillagerProfessionLayer
+findsig VillagerRenderState
+find VillagerModel
+find VillagerHostilesSensor
+member net.minecraft.client.model.geom.ModelLayers VILLAGER
+assets textures/entity/villager
+asset textures/entity/villager/villager.png
+member net.minecraft.server.level.ServerPlayer die
+member net.minecraft.world.entity.LivingEntity  die\(|hurtServer
+member net.minecraft.world.entity.monster.Enderman teleport|customServerAiStep|hurtServer|registerGoals
+calls net.minecraft.client.renderer.entity.LivingEntityRenderer (submit|getRenderType|getModelTint|extractRenderState|isBodyVisible)
+sig net.minecraft.client.renderer.entity.state.LivingEntityRenderState
+sig net.minecraft.client.renderer.entity.state.EntityRenderState
+calls net.minecraft.client.renderer.entity.layers.EyesLayer submit
+findsig CarriedBlockLayer
+sig net.minecraft.client.renderer.entity.EndermiteRenderer
+member net.minecraft.client.renderer.rendertype.RenderTypes [Tt]ranslucent
+member net.minecraft.client.renderer.GameRenderer [Pp]ost|[Ee]ffect
+calls net.minecraft.client.renderer.GameRenderer (setPostEffect|clearPostEffect|checkEntityPostEffect|togglePostEffect|render)
+sig net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect
+member net.minecraft.world.item.component.BlockItemStateProperties with
+assets post_effect
+asset post_effect/invert.json
+asset post_effect/creeper.json
+assets shaders/post
+asset shaders/post/invert.fsh
+asset shaders/post/color_convolve.fsh
+asset shaders/post/blit.fsh
