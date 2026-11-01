@@ -88,15 +88,15 @@ assuming full overlap).
 
 - **`PaleCreeperEntity`** (extends `CreeperEntity`, spawn egg registered): faster (0.36 speed),
   longer follow range (40), armored (10/3.0 armor/toughness), immune to Wither damage (explicit
-  `damage()` override), explodes with an area-effect cloud of Blight on death (5-block radius,
-  300-tick duration, shrinking; Darkness+Wither until the staged mushrooms batch; each reach of the cloud is a dose)
+  `hurtServer` override), explodes with an area-effect cloud of Blight on death (5-block radius,
+  300-tick duration, shrinking; each reach of the cloud is a dose, and doses stack)
   after vanilla's plain explosion, and has bespoke footstep/hurt
   sounds (stone + mangrove-roots layered) plus a cave-ambience idle sound when it has no target —
   "blind creatures... that only move when looking away" per the README maps to `CreeperFollowTargetThroughWallsGoal`
   + `CreepingAndExplodingGoal` (not re-read this pass — check those two goal classes directly for the
-  exact "only moves unobserved" state machine). `CreeperMixin` (on the *regular* `CreeperEntity`)
-  converts a badly-Wither-damaged (< 8 HP, hit by Wither damage type) regular creeper **into** a
-  Deeper Creeper — an in-fiction mutation path, not just a separate spawn pool.
+  exact "only moves unobserved" state machine). A blighted
+  regular creeper wounded below 8 HP turns **into** a pale creeper (`Undeath#turnPale`, from
+  `LivingEntityBlightMixin`) — an in-fiction mutation path, not just a separate spawn pool.
 - **Mushroom creeper and mushroom spider** (`MushroomCreeperEntity`, `MushroomSpiderEntity`; renderers and spawn
   eggs; textures from `tools/mushroom-mobs.py`) — of the mushroom caves. They ignore players (no player target
   goal) and hunt the plain kind (`EntityTypes.CREEPER`/`SPIDER` exactly); `HurtByTargetGoal` makes them fight back.
@@ -128,16 +128,15 @@ assuming full overlap).
   `PaleSight` asks for `watchling_1..16` (`tools/post-effects.py`).
 - **Pale villager** (`mod/mobs/hostile/overworld/PaleVillagerEntity`, extends `ZombieVillager`; client
   `PaleVillagerRenderer`, the villager model and `VillagerProfessionLayer` "villager" over a villager-illager skin from
-  `tools/pale-villager.py`: ashen skin, the illager's brow, eyes and mouth): a withered villager
-  (`Undeath#wither`/`turnPaleVillager`, or killed by one). Keeps villager data (type, profession, level: its clothes),
-  gossip, offers, xp, all restored on its cure (game test `aWitheredAndCuredVillagerKeepsItsMemories`); inherits the
-  golden apple cure (`ZombieVillagerMixin`). Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, hits wither
-  (5 s), its kills turn pale (villagers and wandering traders); no reinforcements (`handleAttributes` empty, chance 0),
+  `tools/pale-villager.py`: ashen skin, the illager's brow, eyes and mouth): a blighted, wounded villager
+  (`Undeath#turnPale`/`turnPaleVillager`, or killed by one). Keeps villager data (type, profession, level: its clothes),
+  gossip, offers, xp, all restored on its cure (game test `aBlightedPaleAndCuredVillagerKeepsItsMemories`); inherits the
+  golden apple cure (`ZombieVillagerMixin`). Flees players (`AvoidEntityGoal`), hunts `AbstractVillager`s, its hits blight
+  (`BlightAttacks`), its kills turn pale (villagers and wandering traders); no reinforcements (`handleAttributes` empty, chance 0),
   no drowned/frostbite conversion, never despawns, villager sounds pitched low. `VillagerHostilesSensorMixin` makes
-  villagers flee it (8 blocks). Blight-immune; excluded from `ZombieMixin`'s wither-to-pale and from zombies' rare
-  converting hits.
+  villagers flee it (8 blocks). Blight-immune.
 - **Pale wandering trader** (`PaleWanderingTraderEntity`, extends `PaleVillagerEntity`; client
-  `PaleWanderingTraderRenderer`, the wandering trader's model and the same skin treatment): a withered wandering trader
+  `PaleWanderingTraderRenderer`, the wandering trader's model and the same skin treatment): a blighted, wounded wandering trader
   (`Undeath#turnPaleTrader`), keeps its offers; cured (`ZombieVillagerMixin` at `finishConversion` HEAD) it's a
   wandering trader again with them (`overrideOffers`) and 48000 ticks to wander.
 - **Undead animals in body armour don't burn** (`MobSunArmourMixin` at `Mob#burnUndead` HEAD).
@@ -164,10 +163,17 @@ assuming full overlap).
   peppering it with a bow from max range.
 - **`WardenVibrationListenerMixin`** — not re-read this pass; likely tunes the sniff/vibration
   detection radius feeding into the anger system above. Check directly before assuming it's unrelated.
+- **Player Zombie** (`mod/mobs/hostile/overworld/PlayerZombieEntity`, extends `Zombie`; client
+  `PlayerZombieRenderer`/`PlayerZombieRenderState`, the zombie model wearing the player's skin from the skin cache,
+  tinted grey-green in `LivingEntityRendererGazeMixin`): what a player who dies blighted leaves
+  (`ServerPlayerBlightedDeathMixin`). Synced `ResolvableProfile`, custom name, worn items (guaranteed drops), held
+  items, and a `stash` of the rest of the inventory (saved as `Stash`, dropped by `dropCustomDeathLoot` with an extended
+  lifetime). No sun, no drowning, never despawns, its hits blight. Blight-immune; in `#minecraft:zombies`. Game tests in
+  `BlightGameTest`.
 - **Pale Zombie** (`mod/mobs/hostile/overworld/PaleZombieEntity.java`, renderer under
   `src/client/.../mobs/hostile/overworld/`) — the deep-cave zombie variant (spawn conditions above).
   Its hits convert: a dose of Blight each (`BlightAttacks`, through `MobBlightAttackMixin` on
-  `Mob#doHurtTarget`), in place of the wither it gave. Creakings' hits do too, and their vanish-on-hit gives the
+  `Mob#doHurtTarget`), (it no longer withers). Creakings' hits do too, and their vanish-on-hit gives the
   attacker Blight instead of blindness (`CreakingScares`); other zombies' hits, 1 in 25
   (`VersusSettings.Mushrooms.ZOMBIE_BLIGHT_CHANCE`), in place of their own effect (a husk's hunger is dropped). The snow-biome Frosted
   Zombie was removed in the 26.4 port: vanilla's Frostbite takes its spawns, and vanilla turns

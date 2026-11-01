@@ -17,7 +17,8 @@ public abstract class CustomStatusEffects {
     public static Holder<MobEffect> VULNERABILITY;
     public static Holder<MobEffect> HAUNTING;
     public static Holder<MobEffect> BUOYANCY;
-    public static Holder<MobEffect> BLIGHT;
+    /** Registered when this class loads: the concentrates' and biles' statics name it, whenever they load. */
+    public static final Holder<MobEffect> BLIGHT = registerCustomEffect("blight", new BlightStatusEffect());
 
     public static void registerCustomStatusEffects() {
         VULNERABILITY = registerCustomEffect("vulnerability", new VulnerabilityStatusEffect("vulnerability"));
@@ -25,7 +26,6 @@ public abstract class CustomStatusEffects {
         SMALLNESS = registerCustomEffect("smallness", new SmallnessStatusEffect("smallness"));
         BUOYANCY = registerCustomEffect("buoyancy", new BuoyancyStatusEffect("buoyancy"));
         HAUNTING = registerCustomEffect("haunting", new HauntingStatusEffect());
-        BLIGHT = registerCustomEffect("blight", new BlightStatusEffect());
     }
 
     private static Holder<MobEffect> registerCustomEffect(String name, MobEffect effect) {

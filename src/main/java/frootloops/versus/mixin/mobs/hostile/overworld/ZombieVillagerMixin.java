@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.overworld;
 
 import net.minecraft.core.BlockPos;
+import frootloops.versus.mixin.mobs.passive.AbstractVillagerAccessor;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -86,7 +87,7 @@ public abstract class ZombieVillagerMixin extends Zombie {
         info.cancel();
         MerchantOffers offers = this.tradeOffers;
         this.convertTo(EntityTypes.WANDERING_TRADER, ConversionParams.single(this, false, false), trader -> {
-            if (offers != null) trader.overrideOffers(offers.copy());
+            if (offers != null) ((AbstractVillagerAccessor) trader).playersVersus$setOffers(offers.copy());
             trader.setDespawnDelay(48000);
             trader.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
             if (!this.isSilent()) level.playSound(null, this.getX(), this.getEyeY(), this.getZ(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, this.getSoundSource(), 1.0F, 1.0F);

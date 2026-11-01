@@ -111,7 +111,7 @@ public class HungerManagerMixin {
         float playerHealth = player.getHealth();
         // Food doesn't regenerate health into Blight's white hearts
         float regenCap = Undeath.regenCap(player);
-        boolean isPlayerSlowlyDying = playerHealth < 20.0f && (player.hasEffect(MobEffects.WITHER) || (player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
+        boolean isPlayerSlowlyDying = playerHealth < 20.0f && ((player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
         boolean canPlayerRegenHealth = player.isHurt() && playerHealth < regenCap && player.level().getGameRules().get(GameRules.NATURAL_HEALTH_REGENERATION);
         boolean canPlayerFastHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect && isPlayerSlowlyDying;
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFastHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));

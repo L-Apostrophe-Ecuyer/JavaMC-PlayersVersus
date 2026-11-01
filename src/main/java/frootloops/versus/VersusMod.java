@@ -16,7 +16,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import frootloops.versus.mod.items_and_effects.blight.UndeathShakingPayload;
 import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import frootloops.versus.mod.mobs.hostile.end.WatchedPayload;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingStare;
@@ -66,7 +65,6 @@ public class VersusMod implements ModInitializer {
 		PayloadTypeRegistry.serverboundPlay().register(RespawnNearbyPayload.ID, RespawnNearbyPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(MobMeleePayload.TYPE, MobMeleePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(TopplePayload.TYPE, TopplePayload.CODEC);
-		PayloadTypeRegistry.clientboundPlay().register(UndeathShakingPayload.TYPE, UndeathShakingPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(WatchedPayload.TYPE, WatchedPayload.CODEC);
 		VersusModServer.addPacketRecievers();
 

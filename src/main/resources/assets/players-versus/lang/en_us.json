@@ -478,6 +478,8 @@
   "death.attack.watched.player": "%1$s looked at %2$s too long",
   "entity.players-versus.zombie_chicken": "Zombie Chicken",
   "item.players-versus.zombie_chicken_spawn_egg": "Zombie Chicken Spawn Egg",
+  "entity.players-versus.player_zombie": "Player Zombie",
+  "item.players-versus.player_zombie_spawn_egg": "Player Zombie Spawn Egg",
   "entity.players-versus.pale_villager": "Pale Villager",
   "item.players-versus.pale_villager_spawn_egg": "Pale Villager Spawn Egg",
   "item.players-versus.brown_mushroom_cluster": "Brown Mushroom Cluster",

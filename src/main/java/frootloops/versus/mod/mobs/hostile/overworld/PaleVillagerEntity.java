@@ -6,9 +6,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,18 +24,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 /**
- * A villager the paleness took: withered (wither damage below 8 health, as zombies and creepers turn pale), or killed
+ * A villager the paleness took: blighted and wounded (below 8 health, as zombies and creepers turn pale), or killed
  * by another pale villager. Half villager, half illager: a villager's body in its own clothes (its biome's and its
  * trade's, its level's badge), but an illager's ashen skin and scowling face. It keeps its type, trade and level, its
  * trades, what the village thought of it and its experience, as a zombie villager does, for when it's cured: a golden apple
  * fed to it (ZombieVillagerMixin, which it inherits) starts its cure, more apples hasten it. It shies from players and
- * hunts villagers: its hits wither them, and the villagers it withers or kills turn pale too. It neither burns nor
+ * hunts villagers: its hits blight them, and the villagers it blights and wounds or kills turn pale too. It neither burns nor
  * drowns into anything, and stays where it turned.
  */
 public class PaleVillagerEntity extends ZombieVillager {
-    /** How long its hits wither (ticks). */
-    static final int WITHER_TICKS = 100;
-
     public PaleVillagerEntity(EntityType<? extends ZombieVillager> type, Level level) {
         super(type, level);
     }
@@ -66,12 +60,7 @@ public class PaleVillagerEntity extends ZombieVillager {
     @Override
     protected void handleAttributes(float difficulty, EntitySpawnReason reason) {}
 
-    @Override
-    public boolean doHurtTarget(ServerLevel level, Entity target) {
-        boolean hit = super.doHurtTarget(level, target);
-        if (hit && target instanceof LivingEntity living) living.addEffect(new MobEffectInstance(MobEffects.WITHER, WITHER_TICKS, 0), this);
-        return hit;
-    }
+    // Its hits blight, as the pale's do (BlightAttacks): the villagers it wounds turn pale
 
     /**
      * A villager (or wandering trader) it kills turns pale, as a zombie's kill turns zombie (as often: on normal, half of

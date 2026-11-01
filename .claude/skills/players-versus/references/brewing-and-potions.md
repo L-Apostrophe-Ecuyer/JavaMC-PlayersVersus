@@ -79,8 +79,11 @@ purely cosmetic; also check `FireResistanceEffect.java` (present in `brewing/eff
 being a `CustomStatusEffects` registration — likely helper logic for the *vanilla* Fire Resistance
 overhaul rather than a new effect; verify its role before assuming it's dead code).
 
-### Blight (`BlightStatusEffect`, `mod/items_and_effects/blight/*`; spec `docs/superpowers/specs/2026-10-31-staged-mushrooms-and-conversion-design.md`)
-No potion. Doses (`BlightAttacks.dose()`): pale shrooms (`BlightExposure`, every
+### Blight (`BlightStatusEffect`, `mod/items_and_effects/blight/*`; spec `docs/superpowers/specs/2026-10-31-staged-mushrooms-and-conversion-design.md`, then the lore spec's fifth round)
+Blight **replaces the Wither**: `LivingEntityBlightMixin` turns every Wither given into Blight
+(`VersusSettings.Blight.REPLACE_WITHER`, `Blight#fromWitherAmplifier`), and the mod's own Wither sources (Decay potions,
+concentrates of death/decay, their biles, `HauntingStatusEffect`, `RecoveryCompassItem`) name `CustomStatusEffects.BLIGHT`
+(a `static final`, registered when the class loads, so their statics can). Doses (`BlightAttacks.dose()`): pale shrooms (`BlightExposure`, every
 `VersusSettings.Mushrooms.DOSE_TICKS` in them, lasting `EFFECT_TICKS`), pale zombies' and creakings' hits, zombies'
 by `ZOMBIE_BLIGHT_CHANCE` (`BlightAttacks.afterHit`; a converting hit's other effects on its target that tick
 are dropped), a creaking vanishing when hit, the mushroom creeper's spore puff, the pale creeper's cloud, and rotten
@@ -91,22 +94,24 @@ the pale, red mushroom hosts, endermen and their bugs, golems, bosses; zombies a
 `players-versus:zombie_kin`; piglins for zombified piglins). The mushroom creeper's puff no longer doses (lore spec
 `2026-11-01-pale-warp-lore-and-watchling-design.md`). White hearts = amplifier + 1 from the bar's end (`Blight`, pure,
 `BlightTest`; client `BlightHeartsMixin` draws `hud/heart/blight_*`, access-widened `Hud$HeartType`).
-Food regeneration stops below them (`HungerManagerMixin`, both the overhaul's and vanilla's `heal`). All white:
-`Undeath` (was `Shroomify`) shakes it `TURNING_TICKS` (`UndeathShakingPayload` -> client `UndeathShaking`, render state
-"fully frozen"; nausea for a player), then at the level tick's end `turn`s it: villager -> zombie villager (a stand-in
+Food regeneration stops below them (`HungerManagerMixin`, both the overhaul's and vanilla's `heal`). Shaking (from `VersusSettings.Blight.SHAKE_FROM` of the hearts white, `Blight#shakeStrength`): client
+`UndeathShaking` derives it from the effect (render state "fully frozen"; `BlightCameraShakeMixin` sways the local
+camera by `SHAKE_DEGREES`). All white: `Undeath` (was `Shroomify`) counts `TURNING_TICKS` (nausea for a player), then at
+the level tick's end `turn`s it: villager -> zombie villager (a stand-in
 zombie's `convertVillagerToZombieVillager`); zombies -> pale zombie, creeper -> pale creeper, spiders -> pale spider,
 horse -> zombie horse, camel -> camel husk, nautilus -> zombie nautilus, chicken -> zombie chicken (`keepWhatWasKept`:
 tame, owner via `AbstractHorseAccessor` or `TamableAnimal#setOwnerReference`, chicken jockey), piglins -> zombified
 piglin, hoglin -> zoglin; tag `players-versus:rise_as_zombies` (illagers, witch, wandering trader) -> `zombieOfThePlace`
 (drowned under water, husk in tag `players-versus:undead_rise_as_husks`, else zombie; no longer pale by place); else
-killed (`players-versus:turned_undead`). A player dies and the zombie of the place rises wearing (and guaranteed to drop) their armour.
-**Withering** makes the pale (`Undeath#wither`, `LivingEntityWitheringMixin` at `LivingEntity#hurtServer` RETURN: wither
-damage leaving under 8 health): villager -> pale villager (`turnPaleVillager`, keeps data, gossip, offers, xp),
+killed (`players-versus:turned_undead`). A player dies (a creative one lives, loses the Blight and leaves a copy) and
+rises as a `PlayerZombieEntity` -- as for any death while blighted (`ServerPlayerBlightedDeathMixin` at `ServerPlayer#die`
+HEAD, `PlayerZombieEntity#rise`: their things move to it; keepInventory or a copy wears copies and drops nothing).
+**Blighted and wounded** makes the pale (`Undeath#turnPale`, `LivingEntityBlightMixin` at `LivingEntity#hurtServer` RETURN:
+health left under `PALE_BELOW_HEALTH`): villager -> pale villager (`turnPaleVillager`, keeps data, gossip, offers, xp),
 wandering trader -> pale wandering trader (`turnPaleTrader`, keeps offers), spiders -> pale spider, the rest of
-`rise_as_zombies` -> pale zombie; zombies and creepers in their own mixins; a player withered to death
-rises as a pale zombie in their armour (`ServerPlayerWitheredMixin` at `ServerPlayer#die` HEAD, `risePale`).
+`rise_as_zombies` -> pale zombie; zombies and creepers by `paleKind`. Players aren't turned pale.
 Golden apples (both) cure Blight (`VanillaItems`: `RemoveStatusEffectsConsumeEffect`). Client `PaleSight` asks the
-game renderer for `players-versus:conversion_1..20` (`Blight#greyStrength`: white hearts x time left, fading over
+game renderer for `players-versus:blight_1..20` (`Blight#greyStrength`: white hearts x time left, fading over
 `GREY_FADE_TICKS`; eased 0.01 a tick) and `watchling_1..16` (the HUD static's strength) each tick; `tools/post-effects.py` writes them from
 vanilla's `post/color_convolve`, `post/bits` and `post/blit`.
 The brown mushroom cluster (`CustomBrewingItems.BROWN_MUSHROOM_CLUSTER`, dropped by a stage-3 `brown_mushrooms`) smelts

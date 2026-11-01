@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items_and_effects.blight;
 
+import frootloops.versus.VersusSettings;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -73,5 +74,33 @@ class BlightTest {
         assertEquals(0.5F, Blight.greyStrength(9, 20.0F, 300), 1.0E-6F);
         // Endless: as grey as its hearts
         assertEquals(1.0F, Blight.greyStrength(9, 20.0F, -1), 1.0E-6F);
+    }
+
+    @Test
+    void theShakeBeginsBeforeTheHeartsAreAllWhiteAndPeaksWhenTheyAre() {
+        // 20 health: 10 hearts. A third white: still; half: a tremor; all white: the worst of it
+        assertEquals(0.0F, Blight.shakeStrength(-1, 20.0F), 1.0E-6F);
+        assertEquals(0.0F, Blight.shakeStrength(2, 20.0F), 1.0E-6F);
+        float half = Blight.shakeStrength(4, 20.0F);
+        float most = Blight.shakeStrength(7, 20.0F);
+        assertTrue(0.0F < half && half < most && most < 1.0F, half + ", " + most);
+        assertEquals(1.0F, Blight.shakeStrength(9, 20.0F), 1.0E-6F);
+        // More than all white is no more than all
+        assertEquals(1.0F, Blight.shakeStrength(30, 20.0F), 1.0E-6F);
+    }
+
+    @Test
+    void witherBecomesBlightOfTheSameStrengthUpToALimit() {
+        // Wither I: a heart (amplifier 0); Wither III: three
+        assertEquals(0, Blight.fromWitherAmplifier(0));
+        assertEquals(2, Blight.fromWitherAmplifier(2));
+        // A Wither of hundreds of levels (a command's, say) is no more than the limit in one dose
+        assertEquals(VersusSettings.Blight.WITHER_MAX_HEARTS - 1, Blight.fromWitherAmplifier(250));
+    }
+
+    @Test
+    void aBlightedThingTurnsPaleOnlyWhenHurtBelowTheLimit() {
+        assertFalse(Blight.paleOnWound(VersusSettings.Blight.PALE_BELOW_HEALTH + 0.5F));
+        assertTrue(Blight.paleOnWound(VersusSettings.Blight.PALE_BELOW_HEALTH - 0.5F));
     }
 }

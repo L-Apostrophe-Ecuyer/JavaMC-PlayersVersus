@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items_and_effects.brewing.effects;
 
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,7 +80,7 @@ public class HauntingStatusEffect extends MobEffect  {
             entity.setInvisible(false);
             entity.setNoGravity(false);
         }
-        entity.addEffect(new MobEffectInstance(MobEffects.WITHER, 50, 0));
+        entity.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 50, 0));
         entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 50, 0));
         entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENDER_EYE_DEATH, entity.getSoundSource(), 1.0f, 1.0f);
     }

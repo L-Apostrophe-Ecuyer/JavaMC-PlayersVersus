@@ -6,7 +6,6 @@ import frootloops.versus.mod.environment.SparksParticle;
 import frootloops.versus.mod.mobs.ModEntitiesRenderers;
 import frootloops.versus.mod.mobs.melee.MeleeAnimation;
 import frootloops.versus.mod.items_and_effects.blight.PaleSight;
-import frootloops.versus.mod.items_and_effects.blight.UndeathShaking;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingStatic;
 import frootloops.versus.mod.items_and_effects.inventory.HotbarRefill;
 import frootloops.versus.mod.players.building.ClientPlacement;
@@ -40,7 +39,6 @@ public class VersusModClient implements ClientModInitializer {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
 		ModEntitiesRenderers.onInitialize();
 		MeleeAnimation.register();
-		UndeathShaking.register();
 		WatchlingStatic.register();
 		PaleSight.register();
 		CustomBlocksClient.onInitialize();

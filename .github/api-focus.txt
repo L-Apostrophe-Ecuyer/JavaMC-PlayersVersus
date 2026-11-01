@@ -1,18 +1,9 @@
 # What api-diff's focus job (and api-probe with [api-focus]) prints straight into its log; the workflows list the kinds
 # of line. "datadiff <path>" lines are printed by api-diff's overrides job, OLD's file against NEW's.
-findsig ClientAsset
-sig net.minecraft.world.entity.player.PlayerModelType
-sig net.minecraft.world.level.storage.ValueOutput
-sig net.minecraft.world.level.storage.ValueInput
-findsig TypedOutputList
-findsig TypedInputList
-calls net.minecraft.world.entity.npc.villager.AbstractVillager (overrideOffers|getOffers)
-calls net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader (updateTrades|mobInteract|tick|finalizeSpawn)
-member net.minecraft.gametest.framework.GameTestHelper makeMock|absoluteVec|spawnWithNoFreeWill
-calls net.minecraft.world.entity.LivingEntity (dropCustomDeathLoot|dropAllDeathLoot|dropEquipment)
-calls net.minecraft.world.entity.Mob dropCustomDeathLoot
-member net.minecraft.world.entity.item.ItemEntity setExtendedLifetime|setUnlimitedLifetime
-member net.minecraft.world.entity.Mob finalizeSpawn|setPersistenceRequired|setCanPickUpLoot|setGuaranteedDrop|setDropChance
-calls net.minecraft.world.entity.monster.zombie.Zombie (isSunSensitive|aiStep|convertToZombieType|doUnderWaterConversion|startUnderWaterConversion)
-sig net.minecraft.client.renderer.entity.layers.RenderLayer
-sig net.minecraft.client.renderer.entity.HumanoidMobRenderer
+member net.minecraft.client.Minecraft SkinRenderCache|skinManager|getSkinManager
+sig net.minecraft.client.renderer.PlayerSkinRenderCache
+sig net.minecraft.client.renderer.entity.ZombieRenderer
+member net.minecraft.client.renderer.entity.LivingEntityRenderer getModelTint|isShaking|getRenderType
+member net.minecraft.client.Camera setRotation|alignWithEntity
+member net.minecraft.world.entity.Mob setGuaranteedDrop|dropCustomDeathLoot
+member net.minecraft.world.entity.Entity snapTo

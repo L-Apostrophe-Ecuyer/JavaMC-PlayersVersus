@@ -1,9 +1,12 @@
 package frootloops.versus.mod.items_and_effects.blight;
 
+import frootloops.versus.VersusSettings;
+
 /**
- * Blight, pale shrooms' effect, by numbers: its hearts turn white, one per amplifier + 1, from the end of the health
- * bar down towards none. Each dose adds its amplifier + 1 to what was had, and refreshes it without shortening it. Food doesn't regenerate health into white
- * hearts; all hearts white, the entity turns undead (Undeath).
+ * Blight (the Wither effect's replacement, and pale shrooms' and the pale's), by numbers: its hearts turn white, one
+ * per amplifier + 1, from the end of the health bar down towards none. Each dose adds its amplifier + 1 to what was had,
+ * and refreshes it without shortening it. Food doesn't regenerate health into white hearts; the shaking starts when
+ * enough of them are white and builds; all hearts white, the entity turns undead (Undeath).
  */
 public final class Blight {
     private Blight() {}
@@ -55,5 +58,23 @@ public final class Blight {
         float white = Math.min(1.0F, whiteHearts(amplifier) / (float) Math.max(1, hearts(maxHealth)));
         float time = duration < 0 ? 1.0F : Math.min(1.0F, duration / (float) GREY_FADE_TICKS);
         return white * time;
+    }
+
+    /** How hard the blighted shake (0 to 1): nothing until SHAKE_FROM of their hearts are white, all the way at all of them. */
+    public static float shakeStrength(int amplifier, float maxHealth) {
+        if (amplifier < 0) return 0.0F;
+        float white = Math.min(1.0F, whiteHearts(amplifier) / (float) Math.max(1, hearts(maxHealth)));
+        float from = VersusSettings.Blight.SHAKE_FROM;
+        return Math.max(0.0F, Math.min(1.0F, (white - from) / (1.0F - from)));
+    }
+
+    /** The amplifier of the Blight a Wither of this amplifier becomes: the same strength, at most WITHER_MAX_HEARTS hearts a dose. */
+    public static int fromWitherAmplifier(int witherAmplifier) {
+        return Math.max(0, Math.min(witherAmplifier, VersusSettings.Blight.WITHER_MAX_HEARTS - 1));
+    }
+
+    /** Whether something blighted, hurt to this much health, turns pale. */
+    public static boolean paleOnWound(float healthAfter) {
+        return healthAfter < VersusSettings.Blight.PALE_BELOW_HEALTH;
     }
 }

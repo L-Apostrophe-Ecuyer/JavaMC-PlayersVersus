@@ -162,6 +162,19 @@ public abstract class VersusSettings {
         public static float WATCHED_AT = 0.7F;
     }
 
+    public static class Blight {
+        // Blight replaces the Wither effect: every Wither given is Blight instead (up to WITHER_MAX_HEARTS white hearts
+        // a dose); the vanilla wither's black hearts are never seen
+        public static boolean REPLACE_WITHER = true;
+        public static int WITHER_MAX_HEARTS = 4;
+        // Blighted and hurt below this much health, a zombie, creeper, spider, villager, trader, illager or witch turns pale
+        public static float PALE_BELOW_HEALTH = 8.0F;
+        // The shaking begins when this part of the hearts is white and grows to all of them; the view of whoever's
+        // blighted trembles up to SHAKE_DEGREES either way
+        public static float SHAKE_FROM = 0.4F;
+        public static float SHAKE_DEGREES = 2.5F;
+    }
+
     public static class Mushrooms {
         // Brown and red mushrooms grow by stages of one, two and three, and below y 0 into pale shrooms (MushroomGrowth)
         public static boolean DO_STAGED_MUSHROOMS = true;

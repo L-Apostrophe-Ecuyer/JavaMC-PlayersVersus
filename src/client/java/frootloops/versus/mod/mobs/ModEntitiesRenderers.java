@@ -10,6 +10,7 @@ import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieRenderer;
+import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieRenderer;
 import frootloops.versus.mod.mobs.passive.ZombieChickenRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,6 +32,7 @@ public class ModEntitiesRenderers {
         register(SLIMEBALL, context -> new ThrownItemRenderer(context, 1.0f, false));
         register(ICE_CUBE, context -> new IceCubeRenderer(context));
         register(PALE_ZOMBIE, context -> new PaleZombieRenderer(context));
+        register(PLAYER_ZOMBIE, context -> new PlayerZombieRenderer(context));
         register(PALE_CREEPER, context -> new PaleCreeperRenderer(context));
         register(PALE_SPIDER, context -> new PaleSpiderRenderer(context));
         register(MUSHROOM_CREEPER, context -> new MushroomCreeperRenderer(context));

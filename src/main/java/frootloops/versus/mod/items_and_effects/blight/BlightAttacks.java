@@ -5,6 +5,7 @@ import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieEntity;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -25,7 +26,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * Mobs whose hits convert: the pale (a pale zombie, a creaking, a watchling) convert anything living, every hit; other
+ * Mobs whose hits blight: the pale (a pale zombie or villager, a creaking, a watchling) and a player zombie blight anything living, every hit; other
  * zombies only their own kind (people for zombies: tag {@code players-versus:zombie_kin}; piglins for zombified
  * piglins), by {@link VersusSettings.Mushrooms#ZOMBIE_BLIGHT_CHANCE}. A hit that converts gives nothing else:
  * whatever effect the mob adds to what it hit in the same tick (a husk's hunger) is dropped (LivingEntityBlightMixin).
@@ -46,9 +47,9 @@ public final class BlightAttacks {
 
     /** A mob's melee hit landed (Mob#doHurtTarget). */
     public static void afterHit(ServerLevel level, Mob attacker, LivingEntity target) {
-        boolean always = attacker instanceof PaleZombieEntity || attacker instanceof Creaking || attacker instanceof WatchlingEntity;
-        // A pale villager's hits wither instead (PaleVillagerEntity): withering is what turns villagers pale
-        boolean rarely = attacker instanceof Zombie && !(attacker instanceof PaleVillagerEntity) && kin(attacker, target) && attacker.getRandom().nextFloat() < VersusSettings.Mushrooms.ZOMBIE_BLIGHT_CHANCE;
+        boolean always = attacker instanceof PaleZombieEntity || attacker instanceof PaleVillagerEntity || attacker instanceof PlayerZombieEntity
+                || attacker instanceof Creaking || attacker instanceof WatchlingEntity;
+        boolean rarely = attacker instanceof Zombie && kin(attacker, target) && attacker.getRandom().nextFloat() < VersusSettings.Mushrooms.ZOMBIE_BLIGHT_CHANCE;
         if (!always && !rarely) return;
         CONVERTING_HITS.put(attacker, new Hit(target.getId(), level.getGameTime()));
         target.addEffect(dose(), attacker);
