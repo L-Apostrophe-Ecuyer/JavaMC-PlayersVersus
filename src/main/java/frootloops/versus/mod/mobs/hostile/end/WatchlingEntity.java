@@ -20,6 +20,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.monster.Enderman;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -62,9 +63,8 @@ public class WatchlingEntity extends Enderman {
         super(type, level);
     }
 
-    /** An enderman's (40 health, 7 damage, 0.3 speed), seeing a little less far. */
     public static AttributeSupplier.Builder createWatchlingAttributes() {
-        return Enderman.createAttributes().add(Attributes.FOLLOW_RANGE, 48.0);
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 18.0).add(Attributes.MOVEMENT_SPEED, 0.3).add(Attributes.ATTACK_DAMAGE, 7.0).add(Attributes.FOLLOW_RANGE, 64.0).add(Attributes.STEP_HEIGHT, 2.0);
     }
 
     @Override
