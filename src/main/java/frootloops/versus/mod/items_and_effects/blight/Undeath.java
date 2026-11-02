@@ -3,13 +3,13 @@ package frootloops.versus.mod.items_and_effects.blight;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.mobs.passive.AbstractHorseAccessor;
+import frootloops.versus.mixin.mobs.passive.WolfAccessor;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieEntity;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -29,13 +29,13 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.LevelEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,23 +45,23 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * What Blight does to the living as it whitens their hearts: they shake (building from SHAKE_FROM, felt in a player's
- * own view: client UndeathShaking and BlightCameraShakeMixin), and with all their hearts white the Blight deals the
- * Wither, a strong one ({@link #giveWither}). It's dying of the Wither under the Blight that converts: the living with an
- * undead form turn into it as the death comes ({@link #turn}), and a player rises a player zombie where they fell,
- * wearing and carrying what they had (PlayerZombieEntity). A creative player can't die: they live, and a copy of them
- * rises. A totem of undying saves a player, and cures them. Skeletons, the nether's undead, the pale,
- * red mushroom creatures, warped things, golems and bosses don't take Blight at all ({@link #immune}). Blighted and
- * hurt low, the living that can turn pale ({@link #turnPale}).
+ * What Blight does to the living as it blights their hearts (Blight replaces the Wither: {@link #asBlight}): they shake
+ * (building from SHAKE_FROM, felt in a player's own view: client UndeathShaking and BlightCameraShakeMixin), and fully
+ * blighted (as many hearts as the bar has) the Blight deals a heart every FULL_DAMAGE_TICKS, as the Wither would.
+ * Whatever dies fully blighted, of that or of anything else, is replaced by its pale form ({@link #turn}; the death
+ * hooks are LivingEntityBlightMixin's and, for players, ServerPlayerBlightedDeathMixin's): a player rises a player
+ * zombie where they fell, wearing and carrying what they had (PlayerZombieEntity). A creative player can't die: they
+ * live, and a copy of them rises. A totem of undying saves a player, and cures them. Skeletons, the nether's undead, the
+ * pale (pillagers, vindicators and witches among them), wolves, red mushroom creatures, warped things, golems and bosses
+ * don't take Blight at all, nor the Wither it replaces ({@link #immune}).
  */
 public final class Undeath {
     public static final TagKey<EntityType<?>> IMMUNE = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "blight_immune"));
-    /** What rises as the zombie of the place it turned in: illagers, witches, wandering traders. */
+    /** What turns into a pale zombie: evokers, illusioners (pillagers, vindicators and witches are immune). */
     public static final TagKey<EntityType<?>> RISE_AS_ZOMBIES = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rise_as_zombies"));
-    public static final TagKey<Biome> HUSK_BIOMES = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "undead_rise_as_husks"));
     public static final ResourceKey<DamageType> TURNED_UNDEAD = ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "turned_undead"));
 
-    /** Since when each all-white thing has been turning, and when it was last seen all white (game time). */
+    /** Since when each fully blighted thing has been so, and when it was last seen so (game time). */
     private record Turning(long started, long lastSeen) {}
 
     private static final Map<LivingEntity, Turning> TURNING = new WeakHashMap<>();
@@ -77,14 +77,26 @@ public final class Undeath {
         return entity.is(IMMUNE);
     }
 
-    /** The entity's white hearts. */
-    public static int whiteHearts(LivingEntity entity) {
+    /** The entity's blighted hearts. */
+    public static int blightedHearts(LivingEntity entity) {
         MobEffectInstance blight = entity.getEffect(CustomStatusEffects.BLIGHT);
-        return blight == null ? 0 : Blight.whiteHearts(blight.getAmplifier());
+        return blight == null ? 0 : Blight.blightedHearts(blight.getAmplifier());
+    }
+
+    /** Whether the entity is fully blighted: as many hearts blighted as its bar has. */
+    public static boolean fullyBlighted(LivingEntity entity) {
+        return Blight.fullyBlighted(entity.getMaxHealth(), blightedHearts(entity));
+    }
+
+    /** What the Wither is now: the same time and strength (up to what a dose may blight), as Blight. Other effects as they are. */
+    public static MobEffectInstance asBlight(MobEffectInstance effect) {
+        if (!VersusSettings.Blight.REPLACE_WITHER || !effect.is(MobEffects.WITHER)) return effect;
+        return new MobEffectInstance(CustomStatusEffects.BLIGHT, effect.getDuration(), Blight.fromWitherAmplifier(effect.getAmplifier()),
+                effect.isAmbient(), effect.isVisible(), effect.showIcon());
     }
 
     /**
-     * Purges white hearts: healing (a potion of Healing) and absorption push the Blight back, a heart for each heart
+     * Purges blighted hearts: healing (a potion of Healing) and absorption push the Blight back, a heart for each heart
      * they give. Whatever's left of it keeps its time; none left, it's gone. Does nothing on an entity not blighted.
      */
     public static void purge(LivingEntity entity, int hearts) {
@@ -99,17 +111,17 @@ public final class Undeath {
 
     /** The health food regenerates the entity up to. */
     public static float regenCap(LivingEntity entity) {
-        return Blight.regenCap(entity.getMaxHealth(), whiteHearts(entity));
+        return Blight.regenCap(entity.getMaxHealth(), blightedHearts(entity));
     }
 
     /**
-     * Blight's tick on an entity: it notes whether all its hearts are white. What follows happens at the end of the
-     * level's tick, out of the entity's effect ticking (which an effect given or a turning mustn't change under it).
-     * Spectators are left alone; creative players go through it too, and live.
+     * Blight's tick on an entity: it notes whether it's fully blighted. What follows (the damage, and the turning a death
+     * brings) happens at the end of the level's tick, out of the entity's effect ticking (which a turning mustn't change
+     * under it). Spectators are left alone; creative players go through it too, and live.
      */
     public static void whileBlighted(ServerLevel level, LivingEntity entity, int amplifier) {
         if (entity instanceof Player player && player.isSpectator()) return;
-        if (!Blight.allWhite(entity.getMaxHealth(), Blight.whiteHearts(amplifier))) return;
+        if (!Blight.fullyBlighted(entity.getMaxHealth(), Blight.blightedHearts(amplifier))) return;
         long now = level.getGameTime();
         Turning turning = TURNING.get(entity);
         TURNING.put(entity, turning == null || turning.lastSeen < now - 1 ? new Turning(now, now) : new Turning(turning.started, now));
@@ -123,24 +135,25 @@ public final class Undeath {
             LivingEntity entity = entry.getKey();
             if (entity.level() != level) continue;
             Turning turning = entry.getValue();
-            // Not all white this tick (cured, healed, gone): it stops turning
+            // Not fully blighted this tick (cured, healed, gone): it's left alone
             if (turning.lastSeen < now || !entity.isAlive()) {
                 TURNING.remove(entity);
                 continue;
             }
             long ticks = now - turning.started;
             if (ticks == 0 && entity instanceof ServerPlayer player) {
-                player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, VersusSettings.Blight.WITHER_TICKS + 100, 0));
+                player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
             }
             if (ticks % 4 == 0) {
                 level.sendParticles(ParticleTypes.WHITE_ASH, entity.getX(), entity.getY(0.5), entity.getZ(), 6,
                         entity.getBbWidth() / 2.0, entity.getBbHeight() / 3.0, entity.getBbWidth() / 2.0, 0.02);
             }
             if (entity instanceof ServerPlayer player && player.isCreative()) {
-                // A creative player can't wither away: after the shaking, a copy of them rises
+                // A creative player can't be blighted to death: after the shaking, a copy of them rises
                 if (ticks >= VersusSettings.Mushrooms.TURNING_TICKS) due.add(entity);
-            } else {
-                giveWither(entity);
+            } else if (Blight.damagesNow(ticks)) {
+                // As the Wither would: dying of it (or of anything else while fully blighted) turns it pale
+                entity.hurtServer(level, entity.damageSources().wither(), VersusSettings.Blight.FULL_DAMAGE);
             }
         }
         for (LivingEntity entity : due) {
@@ -150,41 +163,24 @@ public final class Undeath {
     }
 
     /**
-     * All white, the Blight deals the Wither: a strong one (WITHER_AMPLIFIER), kept up while it's all white. It's the
-     * Wither that kills, and a death of the Wither under the Blight is how the living are converted
-     * ({@link #turn}; players: ServerPlayerBlightedDeathMixin).
-     */
-    private static void giveWither(LivingEntity entity) {
-        MobEffectInstance wither = entity.getEffect(MobEffects.WITHER);
-        if (wither != null && wither.getAmplifier() >= VersusSettings.Blight.WITHER_AMPLIFIER && wither.getDuration() >= VersusSettings.Blight.WITHER_TICKS / 2) return;
-        entity.addEffect(new MobEffectInstance(MobEffects.WITHER, VersusSettings.Blight.WITHER_TICKS, VersusSettings.Blight.WITHER_AMPLIFIER));
-    }
-
-    /**
-     * Turns the entity undead, if it has an undead form to turn into: whether it did. This is what a death of the Wither
-     * under the Blight comes to (LivingEntityBlightMixin; and for a creative player, who can't die of it, after the
-     * shaking). Blight makes zombies of the living: a villager a zombie villager (as a
-     * zombie's kill does), piglins zombified piglins, a hoglin a zoglin; animals with an undead kind of their own turn
-     * into it, as calm as they were and their owner's still (a horse a zombie horse, a camel a camel husk, a nautilus a
-     * zombie nautilus, a chicken a zombie chicken). An illager, a witch or a wandering trader rises as the zombie of
-     * where it turned ({@link #zombieOfThePlace}). The undead and their kin it turns pale: zombies of every kind into pale
-     * zombies, a creeper into a pale creeper, spiders into pale spiders. A player who dies of it rises a player zombie
-     * ({@link PlayerZombieEntity}); one that has no undead form (a pig, a cow...) just dies of the Wither.
+     * Replaces the entity with its pale form, if it has one: whether it did. This is what dying fully blighted comes to
+     * (LivingEntityBlightMixin; and for a creative player, who can't die of it, after the shaking). Its pale form first
+     * ({@link #turnPale}): a villager a pale villager, a wandering trader a pale wandering trader, an evoker or an
+     * illusioner a pale zombie, zombies of every kind pale zombies, a zombie wolf a pale wolf, a creeper a pale creeper,
+     * spiders pale spiders. What has none but an undead kind turns into that: piglins zombified piglins, a hoglin a
+     * zoglin, and animals with an undead kind of their own, as calm as they were and their owner's still (a horse a
+     * zombie horse, a camel a camel husk, a nautilus a zombie nautilus, a chicken a zombie chicken, a wolf a zombie wolf). A player rises a player zombie ({@link PlayerZombieEntity});
+     * what has no such form (a pig, a cow...) just dies.
      */
     public static boolean turn(ServerLevel level, LivingEntity entity) {
         if (entity instanceof ServerPlayer player) return turnPlayer(level, player);
         // What it turns into takes no Blight along with the rest of its effects
         entity.removeEffect(CustomStatusEffects.BLIGHT);
-        if (entity instanceof Villager villager) {
-            // As a zombie's kill: Zombie#convertVillagerToZombieVillager
-            Zombie zombie = new Zombie(EntityTypes.ZOMBIE, level);
-            zombie.snapTo(villager.position());
-            if (zombie.convertVillagerToZombieVillager(level, villager)) {
-                turned(level, villager);
-                return true;
-            }
+        if (turnPale(level, entity)) {
+            turned(level, entity);
+            return true;
         }
-        EntityType<? extends Mob> into = undeadKind(level, entity);
+        EntityType<? extends Mob> into = undeadKind(entity);
         if (into != null && entity instanceof Mob mob && mob.convertTo(into, ConversionParams.single(mob, true, true), converted -> {
             keepWhatWasKept(mob, converted);
             converted.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
@@ -200,25 +196,24 @@ public final class Undeath {
     }
 
     /**
-     * A player turning: a survival player withers to death and the player zombie rises as the death comes
+     * A player turning: a survival player dies fully blighted and the player zombie rises as the death comes
      * (ServerPlayerBlightedDeathMixin), so there's nothing to do here for them. A creative player can't die: they live,
-     * the Blight and the Wither lift, and a copy of them (wearing copies of what they wear, carrying nothing) rises beside
-     * them, so the turning can be seen.
+     * the Blight lifts, and a copy of them (wearing copies of what they wear, carrying nothing) rises beside them, so the
+     * turning can be seen.
      */
     private static boolean turnPlayer(ServerLevel level, ServerPlayer player) {
         if (!player.isCreative()) return false;
         PlayerZombieEntity.rise(level, player, true);
         player.removeEffect(CustomStatusEffects.BLIGHT);
-        player.removeEffect(MobEffects.WITHER);
         turned(level, player);
         return true;
     }
 
     /**
-     * Blighted and hurt low (Blight#paleOnWound), the living that can turn pale do: zombies of every kind into pale zombies,
-     * a creeper into a pale creeper, spiders into pale spiders, a villager into a pale villager ({@link #turnPaleVillager}),
-     * a wandering trader into a pale wandering trader ({@link #turnPaleTrader}), an illager or a witch into a pale zombie.
-     * Whether it turned.
+     * The living that have a pale form turn into it: zombies of every kind into pale zombies, a zombie wolf into a pale
+     * wolf (wild, its owner forgotten: the pale are no one's), a creeper into a pale creeper, spiders into pale spiders, a villager into a pale villager ({@link #turnPaleVillager}), a wandering trader
+     * into a pale wandering trader ({@link #turnPaleTrader}), an evoker or an illusioner into a pale zombie. Whether it
+     * turned.
      */
     public static boolean turnPale(ServerLevel level, LivingEntity entity) {
         if (immune(entity)) return false;
@@ -238,6 +233,7 @@ public final class Undeath {
     private static EntityType<? extends Mob> paleKind(Mob mob) {
         EntityType<?> type = mob.getType();
         if (mob instanceof Zombie && !(mob instanceof ZombifiedPiglin)) return ModEntities.PALE_ZOMBIE;
+        if (type == ModEntities.ZOMBIE_WOLF) return ModEntities.PALE_WOLF;
         if (mob instanceof Creeper && type == EntityTypes.CREEPER) return ModEntities.PALE_CREEPER;
         if (type == EntityTypes.SPIDER || type == EntityTypes.CAVE_SPIDER) return ModEntities.PALE_SPIDER;
         if (mob.is(RISE_AS_ZOMBIES)) return ModEntities.PALE_ZOMBIE;
@@ -271,45 +267,35 @@ public final class Undeath {
         return pale != null;
     }
 
-    /** What an animal turning undead keeps that its turning doesn't carry: being tame and whose, being a jockey's mount. */
+    /**
+     * What an animal turning undead keeps that its turning doesn't carry: being tame and whose (a tame wolf's health
+     * with it), a wolf's collar, being a jockey's mount.
+     */
     private static void keepWhatWasKept(Mob from, Mob into) {
         if (from instanceof AbstractHorse horse && into instanceof AbstractHorse undead) {
             undead.setTamed(horse.isTamed());
             ((AbstractHorseAccessor) undead).setOwnerKept(horse.getOwnerReference());
         }
         if (from instanceof TamableAnimal tame && into instanceof TamableAnimal undead) {
-            undead.setTame(tame.isTame(), false);
+            undead.setTame(tame.isTame(), true);
             undead.setOwnerReference(tame.getOwnerReference());
         }
         if (from instanceof Chicken chicken && into instanceof Chicken undead) undead.setChickenJockey(chicken.isChickenJockey());
+        if (from instanceof Wolf wolf && into instanceof Wolf undead) ((WolfAccessor) undead).playersVersus$setCollarColor(wolf.getCollarColor());
     }
 
-    /** What a mob turns into when all its hearts are white, or null if it dies of it. */
+    /** The undead kind a mob with no pale form turns into when it dies fully blighted, or null if it just dies. */
     @Nullable
-    private static EntityType<? extends Mob> undeadKind(ServerLevel level, LivingEntity entity) {
+    private static EntityType<? extends Mob> undeadKind(LivingEntity entity) {
         EntityType<?> type = entity.getType();
-        if (entity instanceof Zombie && !(entity instanceof ZombifiedPiglin)) return ModEntities.PALE_ZOMBIE;
-        if (type == EntityTypes.CREEPER) return ModEntities.PALE_CREEPER;
-        if (type == EntityTypes.SPIDER || type == EntityTypes.CAVE_SPIDER) return ModEntities.PALE_SPIDER;
         // Animals with an undead kind of their own; donkeys, mules and the rest have none and die
         if (type == EntityTypes.HORSE) return EntityTypes.ZOMBIE_HORSE;
         if (type == EntityTypes.CAMEL) return EntityTypes.CAMEL_HUSK;
         if (type == EntityTypes.NAUTILUS) return EntityTypes.ZOMBIE_NAUTILUS;
         if (type == EntityTypes.CHICKEN) return ModEntities.ZOMBIE_CHICKEN;
+        if (type == EntityTypes.WOLF) return ModEntities.ZOMBIE_WOLF;
         if (type == EntityTypes.PIGLIN || type == EntityTypes.PIGLIN_BRUTE) return EntityTypes.ZOMBIFIED_PIGLIN;
         if (type == EntityTypes.HOGLIN) return EntityTypes.ZOGLIN;
-        if (entity.is(RISE_AS_ZOMBIES)) return zombieOfThePlace(level, entity);
         return null;
-    }
-
-    /**
-     * The zombie that rises where something turns: under water a drowned; in the desert (tag
-     * {@code players-versus:undead_rise_as_husks}) a husk; elsewhere a zombie.
-     */
-    public static EntityType<? extends Mob> zombieOfThePlace(ServerLevel level, LivingEntity entity) {
-        BlockPos pos = entity.blockPosition();
-        if (entity.isUnderWater()) return EntityTypes.DROWNED;
-        if (level.getBiome(pos).is(HUSK_BIOMES)) return EntityTypes.HUSK;
-        return EntityTypes.ZOMBIE;
     }
 }

@@ -1,4 +1,5 @@
 {
+  "effect.minecraft.wither": "Blight",
 
   "subtitles.players-versus.rail_turning_sound": "Wagonnet tourne à toute vitesse",
   "subtitles.players-versus.block.leaves.rustle": "Les feuilles bruissent",
@@ -309,12 +310,20 @@
   "item.players-versus.watchling_spawn_egg": "Oeuf d'apparition de Veilleur",
   "entity.players-versus.zombie_chicken": "Poulet zombie",
   "item.players-versus.zombie_chicken_spawn_egg": "Oeuf d'apparition de Poulet zombie",
+  "entity.players-versus.zombie_wolf": "Loup zombie",
+  "item.players-versus.zombie_wolf_spawn_egg": "Oeuf d'apparition de Loup zombie",
+  "entity.players-versus.pale_wolf": "Loup pâle",
+  "item.players-versus.pale_wolf_spawn_egg": "Oeuf d'apparition de Loup pâle",
   "entity.players-versus.player_zombie": "Zombie joueur",
   "item.players-versus.player_zombie_spawn_egg": "Oeuf d'apparition de Zombie joueur",
   "entity.players-versus.pale_villager": "Villageois pâle",
   "item.players-versus.pale_villager_spawn_egg": "Oeuf d'apparition de Villageois pâle",
   "item.players-versus.brown_mushroom_cluster": "Grappe de champignons bruns",
   "subtitles.players-versus.entity.watchling.static": "Grésillements",
+  "subtitles.players-versus.entity.pale_wolf.howl": "Un loup pâle hurle",
+  "subtitles.players-versus.entity.pale_wolf.rattle": "Un loup pâle cliquette",
+  "subtitles.players-versus.entity.pale_wolf.hurt": "Un loup pâle est blessé",
+  "subtitles.players-versus.entity.pale_wolf.death": "Un loup pâle meurt",
   "entity.players-versus.pale_wandering_trader": "Marchand ambulant pâle",
   "item.players-versus.pale_wandering_trader_spawn_egg": "Oeuf d'apparition de Marchand ambulant pâle"
 }

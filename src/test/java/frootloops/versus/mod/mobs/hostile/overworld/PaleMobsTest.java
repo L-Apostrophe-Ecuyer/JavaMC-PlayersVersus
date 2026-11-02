@@ -8,21 +8,26 @@ import frootloops.versus.mod.environment.worldgen.TestGame;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import javax.imageio.ImageIO;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.creaking.Creaking;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Creakings hit twice as hard; each pale mob has its art, egg, names and loot; pale creepers also come up in the Pale Grotto. */
+/**
+ * Creakings hit twice as hard; each pale mob (and the zombie wolf) has its art, egg, names and loot; pale creepers also
+ * come up in the Pale Grotto.
+ */
 class PaleMobsTest {
     private static final Path RESOURCES = Path.of("src/main/resources");
-    private static final List<String> PALE_MOBS = List.of("pale_creeper", "pale_zombie", "pale_spider");
+    private static final List<String> PALE_MOBS = List.of("pale_creeper", "pale_zombie", "pale_spider", "pale_wolf", "zombie_wolf");
 
     @BeforeAll
     static void start() {
@@ -45,6 +50,10 @@ class PaleMobsTest {
         }
         assertExists("assets/players-versus/textures/entity/pale_zombie_outer_layer.png");
         assertExists("assets/players-versus/textures/entity/pale_spider_eyes.png");
+        // A wolf's skins: wild, angry and (for one that can be tame) tame; the pale wolf's eyes glow
+        for (String skin : List.of("pale_wolf_angry", "pale_wolf_eyes", "zombie_wolf_tame", "zombie_wolf_angry")) {
+            assertExists("assets/players-versus/textures/entity/" + skin + ".png");
+        }
         for (String namespace : List.of("minecraft", "players-versus")) {
             JsonObject english = read("assets/" + namespace + "/lang/en_us.json");
             for (String mob : PALE_MOBS) {
@@ -52,6 +61,41 @@ class PaleMobsTest {
                 assertTrue(english.has("item.players-versus." + mob + "_spawn_egg"), mob + "'s egg has no name in " + namespace);
             }
         }
+    }
+
+    /**
+     * The pale wolf is a skeleton: its body's sides have gaps between the ribs (a rib, then a gap, from the shoulders),
+     * where the wolf has fur; the spine down its back is whole.
+     */
+    @Test
+    void thePaleWolfIsASkeleton() throws IOException {
+        BufferedImage skin = ImageIO.read(RESOURCES.resolve("assets/players-versus/textures/entity/pale_wolf.png").toFile());
+        assertTrue(opaque(skin, 18, 20), "the first rib is missing");
+        assertTrue(!opaque(skin, 18, 21) && !opaque(skin, 33, 23), "the rib cage has no gaps");
+        for (int row = 20; row <= 28; row++) assertTrue(opaque(skin, 38, row), "the spine breaks at row " + row);
+    }
+
+    /** It howls and rattles, hurts and dies with sounds of its own, each with a subtitle; its own sound files are there. */
+    @Test
+    void thePaleWolfHowlsAndRattles() throws IOException {
+        JsonObject sounds = read("assets/players-versus/sounds.json");
+        JsonObject english = read("assets/players-versus/lang/en_us.json");
+        for (String sound : List.of("howl", "rattle", "hurt", "death")) {
+            String event = "entity.pale_wolf." + sound;
+            assertTrue(sounds.has(event), event + " isn't a sound");
+            assertTrue(english.has(sounds.getAsJsonObject(event).get("subtitle").getAsString()), event + " has no subtitle");
+            for (JsonElement entry : sounds.getAsJsonObject(event).getAsJsonArray("sounds")) {
+                String name = entry.isJsonObject() ? entry.getAsJsonObject().get("name").getAsString() : entry.getAsString();
+                if (name.startsWith("players-versus:")) {
+                    assertExists("assets/players-versus/sounds/" + name.substring("players-versus:".length()) + ".ogg");
+                }
+            }
+        }
+        assertExists("assets/players-versus/sounds/pale_wolf/howl1.ogg");
+    }
+
+    private static boolean opaque(BufferedImage image, int x, int y) {
+        return (image.getRGB(x, y) >>> 24) != 0;
     }
 
     @Test

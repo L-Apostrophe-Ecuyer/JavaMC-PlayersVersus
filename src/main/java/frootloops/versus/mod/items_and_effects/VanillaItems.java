@@ -267,7 +267,7 @@ public class VanillaItems {
             boolean hasParticles = !isDrink && remainderComponent == null;
 
             List<ConsumeEffect> consumeEffects = consumeComponent.onConsumeEffects();
-            // Rotten flesh can also convert: one white heart, for a minute
+            // Rotten flesh can also convert: one blighted heart, for a minute
             if (item == Items.ROTTEN_FLESH) consumeEffects = withEffect(consumeEffects, new ApplyStatusEffectsConsumeEffect(
                     List.of(new MobEffectInstance(CustomStatusEffects.BLIGHT, VersusSettings.Mushrooms.ROTTEN_FLESH_BLIGHT_TICKS, 0)),
                     VersusSettings.Mushrooms.ROTTEN_FLESH_BLIGHT_CHANCE));

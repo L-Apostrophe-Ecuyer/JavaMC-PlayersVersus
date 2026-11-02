@@ -65,7 +65,7 @@ public class HungerManagerMixin {
 
     }
 
-    // Without the food overhaul, vanilla's regeneration stops at Blight's white hearts too
+    // Without the food overhaul, vanilla's regeneration stops at Blight's blighted hearts too
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;heal(F)V"))
     private void playersVersus$noRegenIntoWhiteHearts(ServerPlayer player, float amount, Operation<Void> original) {
         float room = Undeath.regenCap(player) - player.getHealth();
@@ -109,9 +109,9 @@ public class HungerManagerMixin {
 
     private void doHealthRegeneration(ServerPlayer player, boolean hasHungerEffect) {
         float playerHealth = player.getHealth();
-        // Food doesn't regenerate health into Blight's white hearts
+        // Food doesn't regenerate health into Blight's blighted hearts
         float regenCap = Undeath.regenCap(player);
-        boolean isPlayerSlowlyDying = playerHealth < 20.0f && (player.hasEffect(MobEffects.WITHER) || (player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
+        boolean isPlayerSlowlyDying = playerHealth < 20.0f && ((player.isOnFire() && !player.hasEffect(MobEffects.FIRE_RESISTANCE)) || (playerHealth > 1 && player.hasEffect(MobEffects.POISON)));
         boolean canPlayerRegenHealth = player.isHurt() && playerHealth < regenCap && player.level().getGameRules().get(GameRules.NATURAL_HEALTH_REGENERATION);
         boolean canPlayerFastHeal = canPlayerRegenHealth && foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !hasHungerEffect && isPlayerSlowlyDying;
         boolean canPlayerSlowHeal = canPlayerRegenHealth && ((foodLevel >= FOOD_REQUIRED_FOR_FAST_REGEN && !canPlayerFastHeal) || (IS_SLOW_REGEN_ENABLED && foodLevel >= FOOD_REQUIRED_FOR_SLOW_REGEN));

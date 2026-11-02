@@ -31,7 +31,8 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    - **an animal with an undead kind of its own turns into it, and stays as calm as it was and its owner's**: a horse
      a zombie horse, a camel a camel husk, a nautilus a zombie nautilus, a chicken a zombie chicken;
    - zombies of every kind become pale zombies, a creeper a pale creeper, spiders pale spiders;
-   - anything else just dies of the Wither (donkeys, mules, pigs, cows, wolves...: no undead kind of their own).
+   - anything else just dies of the Wither (donkeys, mules, pigs, cows...: no undead kind of their own; wolves rise
+     zombie wolves since the eleventh round).
    - Never converted: skeletons (bone), the nether's undead, phantoms, the wither, the passive undead (undead horses,
      camel husks, zombie nautiluses, zombie chickens: kept beside living ones, they stay as they are); the pale
      themselves (pale zombies, creepers and spiders, creakings, watchlings); the red mushroom's hosts; endermen,
@@ -319,3 +320,81 @@ Asked for: lift its head, improve its animations. (And, aside: new moons had sto
   `WatchlingRenderState` (jaw and tilt, eased on the client in `WatchlingEntity#tick`), `WatchlingModel`,
   `WatchlingRenderer` (fills the humanoid state as the enderman's renderer does). All client only, unseen in a
   running game.
+
+## Blight takes the Wither's place for good (tenth round, 2026-11-02)
+
+Asked for: when the blighted hearts reach the entity's whole bar (max health / 2), the Blight deals damage as the Wither
+would, a heart every 10 ticks; whatever dies fully blighted is replaced by a pale zombie of it. Blight fully replaces the
+Wither, its black hearts included: a blighted heart turns black, and a lost one is an empty container.
+
+- **The Wither is Blight again:** every Wither given (a wither skeleton's hit, the wither's skulls, a wither rose, a
+  command, one already on) is Blight of its time and strength (at most `WITHER_MAX_HEARTS` 4 hearts a dose); the mod's
+  own sources give Blight; the Wither's name and icon are Blight's. The seventh round's Wither V at full blight is gone.
+- **Fully blighted** (as many hearts blighted as the bar has; a half heart counts as one), the Blight deals a heart
+  (`FULL_DAMAGE` 2) of wither damage every 10 ticks (`FULL_DAMAGE_TICKS`), from the tick it's full. Not full, it deals
+  nothing: it only holds food's regeneration below its hearts, shakes, and greys the world.
+- **Dying fully blighted**, of the Blight or of anything else, replaces the living with their pale form: a villager a
+  pale villager (keeping its trade, level, trades, gossip and experience, for golden apples to cure), a wandering
+  trader a pale wandering trader, an illager or a witch a pale zombie, zombies pale zombies, a creeper a pale creeper,
+  spiders pale spiders. What has no pale form but an undead kind turns into that (a horse a zombie horse, a camel a
+  camel husk, a nautilus a zombie nautilus, a chicken a zombie chicken, piglins zombified piglins, a hoglin a zoglin);
+  anything else just dies. A player rises a player zombie wearing and carrying what they had. Villagers no longer turn
+  into zombie villagers this way, nor illagers into the zombie of the place (the husk-biome tag is gone).
+- **No more pale by wounding:** being blighted and hurt below 8 health no longer turns anything pale; only dying fully
+  blighted does.
+- **The hearts:** blighted hearts are drawn with the Wither's own black sprites (full, half, hardcore, blinking), the
+  last hearts of the bar; a blighted heart whose health is lost is the plain empty container. The white heart sprites
+  are gone. Client only: unseen in a running game.
+- `VersusSettings.Blight` (`REPLACE_WITHER`, `WITHER_MAX_HEARTS`, `FULL_DAMAGE`, `FULL_DAMAGE_TICKS`); `Blight`
+  (`blightedHearts`, `fullyBlighted`, `isBlighted`, `damagesNow`, `fromWitherAmplifier`; `BlightTest`); `Undeath`
+  (`asBlight`, the full-blight damage, `turn`: pale form first); `LivingEntityBlightMixin` (the Wither redirects, and
+  the conversion at `LivingEntity#die`); `ServerPlayerBlightedDeathMixin` (any death, fully blighted); client
+  `BlightHeartsMixin`. Game tests in `BlightGameTest`, `UndeadFormsGameTest` and `StagedMushroomsGameTest`.
+
+## Pillagers, vindicators and witches take no Blight; zombie and pale wolves (eleventh round, 2026-11-02)
+
+Asked for: pillagers, witches and vindicators are immune to Blight and the Wither, as the other pale mobs are. Wolves
+have zombie and pale variants; pale wolves are hostile to players.
+
+- Tag `players-versus:blight_immune` takes in `minecraft:pillager`, `minecraft:vindicator` and `minecraft:witch`: no
+  Blight on them, nor the Wither it replaces, however given (a wither skeleton's hit, a wither rose, the wither's
+  skulls, a cloud, a potion, a command).
+- They leave `players-versus:rise_as_zombies` and `players-versus:zombie_kin`: zombies' rare blighting hits no longer
+  aim at them, and a blighting hit on anything immune (`BlightAttacks.afterHit`) gives it what it would otherwise.
+- Evokers and illusioners (not named) still take Blight, and still die fully blighted into pale zombies.
+- **Wolves follow the chain of the lore: the blighted rise undead, the undead turn pale.** A wolf dying fully blighted
+  rises a **zombie wolf** (an undead animal, as the zombie horse and chicken): as wild or as tame as it was, its
+  owner's still, its collar and armour kept (a tame one has a tame wolf's health). It's never a pup and never breeds,
+  eats only rotten flesh (healing a tame one), burns in daylight unless it wears wolf armour, and isn't spared the
+  Blight: dying fully blighted, a zombie wolf turns into a **pale wolf**, no one's.
+- **Pale wolves** run in packs where paleness holds (the twelfth round moves them: the Pale Garden, and the forests at
+  night; never the caves). They hunt players (and
+  whoever hurts them, the pack joining in); their bite blights, as every pale thing's; they take no Blight; they can't
+  be tamed, fed or bred; their fur is the pale oak's bark and their eyes glow the creaking's orange. Golems fight them.
+- Game tests: `BlightGameTest.pillagersVindicatorsAndWitchesTakeNoBlight`; the pillager turning tests now use an
+  evoker (`UndeadFormsGameTest.anEvokerKilledFullyBlightedIsAPaleZombie`,
+  `StagedMushroomsGameTest.aFullyBlightedEvokerDiesIntoAPaleZombie`); the wolves in `UndeadFormsGameTest`
+  (`aFullyBlightedTamedWolfIsAZombieWolfStillItsOwners`, `aZombieWolfDyingFullyBlightedIsAPaleWolfNoOnesOwn`,
+  `aPaleWolfCantBeTamedTakesNoBlightAndItsBiteBlights`, and both among the undead). Whom a pale wolf hunts isn't
+  game-tested: the test player is always creative, which no mob targets.
+
+## Pale wolves are skeletons of the forest night (twelfth round, 2026-11-02)
+
+Asked for: pale wolves don't spawn in caves, but may in forests at night; they howl and rattle; they're skeletal, and
+fear wolves as skeletons do.
+
+- **Where:** packs of 2-4 in the Pale Garden at any hour (as the other pale mobs), and now and then in the forests and
+  taigas (`#is_forest`, `#is_taiga`), only at night (13000-23000), in the dark as monsters spawn, on ground wolves stand
+  on. Never in the caves.
+- **Skeletal:** a wolf's skeleton in the pale oak's palest bone: its chest and body a rib cage around a spine and a
+  breastbone (gaps between the ribs, seen through), its tail vertebrae, its legs thin, its head a skull with dark
+  sockets in which the creaking's orange eyes glow, a nose hole and teeth.
+- **Howl and rattle:** now and then (about every ten seconds) it howls, low and far-carrying, or one time in three its
+  bones rattle. The howls are its own (`tools/pale-wolf-howl.py`: a voice swelling, held with a vibrato and falling,
+  a little hollow, echoing off the trees), 26.4 shipping no wolf howls; hunting, it growls as a wolf. Hurt, dying and walking it sounds as a skeleton.
+  Each of its own sounds has a subtitle.
+- **Fears wolves:** as a skeleton, it flees living wolves within 6 blocks (not its own kind, not zombie wolves); and
+  living wolves hunt it as they hunt skeletons.
+- Tests: `UndeadFormsGameTest.aPaleWolfFleesALivingWolf`, `aWolfHuntsPaleWolves`; `PaleMobsTest.thePaleWolfIsASkeleton`,
+  `thePaleWolfHowlsAndRattles`; `MobSpawningTest` (night). Its look and sounds are unseen and unheard in a running game.
+

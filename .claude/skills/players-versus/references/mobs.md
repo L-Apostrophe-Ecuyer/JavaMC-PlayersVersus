@@ -158,7 +158,30 @@ assuming full overlap).
   `#minecraft:burn_in_daylight` (vanilla's tag-driven `Mob#burnUndead`), never converted. Drops 0-2 feathers and 0-1
   rotten flesh. Baby zombies' chicken jockeys ride them (`ZombieInfectionMixin` wraps `Zombie#finalizeSpawn`'s
   `EntityType#create` and keeps only zombie chickens among the nearby ones). Game tests `UndeadFormsGameTest`.
-- The pale zombie is in `#minecraft:zombies`, the pale creeper and spider in `#minecraft:undead` (smite, inverted
+- **Zombie wolf** (`mod/mobs/passive/ZombieWolfEntity`, extends `Wolf`; drawn by vanilla's `WolfRenderer`, its skins
+  from `getTexture` (wild, tame, angry; `tools/wolves.py`, the zombie's green)): what Blight makes of a wolf
+  (`Undeath#undeadKind`), keeping tame/owner (`setTame(.., true)`: a tame one's 40 health), its collar (`WolfAccessor`
+  invoker) and its armour (the conversion's equipment). A wolf in all but: never a pup, never in love or breeding, eats
+  only rotten flesh (a tame one heals on it), lower voice. In `#minecraft:zombies` and `#minecraft:burn_in_daylight`
+  (wolf armour shades it, `MobSunArmourMixin`); not Blight-immune: dying fully blighted it turns pale (below). Drops
+  0-2 rotten flesh.
+- **Pale wolf** (`mod/mobs/hostile/overworld/PaleWolfEntity`, extends `Wolf`, implements `Enemy`; client
+  `PaleWolfRenderer`, `WolfRenderer` plus an `EyesLayer` of `pale_wolf_eyes.png`): a wolf's skeleton. Its skins (wild,
+  angry; `tools/wolves.py`) are bone in the pale oak's palest tones with transparent gaps (the model draws cutout, no
+  cull): the body's and mane's sides every other row (ribs) around a spine and breastbone, the tail's vertebrae, thin
+  legs; a skull with dark sockets, orange eyes, a nose hole and teeth. A zombie wolf dying fully blighted
+  (`Undeath#paleKind`; wild, its owner forgotten), or spawned in packs (`MobCategory.MONSTER`): Pale Garden 40 x 2-4
+  at any hour, and `#is_forest`/`#is_taiga` (not the Pale Garden) 8 x 2-4 only at night (`MobSpawning#canSpawnPaleWolf`:
+  `isNight` 13000-23000, `Monster.isDarkEnoughToSpawn`, on `#wolves_spawnable_on`); never in caves. Wolf goals minus a
+  pet's (beg, breed, follow owner, sit), plus a skeleton's `AvoidEntityGoal` of living wolves (`EntityTypes.WOLF` only:
+  6 blocks, 1.0/1.2); targets only `HurtByTargetGoal` (alerting its pack) and players. Living wolves hunt it as they
+  hunt skeletons (`WolfHuntsPaleWolvesMixin`, Wolf `registerGoals` TAIL, priority 6). Sounds (`CustomSpecialEffects`,
+  `sounds.json`, subtitled): ambient every ~200 ticks, a howl (`entity.pale_wolf.howl`: its own `sounds/pale_wolf/howl1-3.ogg` from
+  `tools/pale-wolf-howl.py`, 26.4 shipping no wolf howls; volume 1.5) or one time in three a bone rattle (`entity.pale_wolf.rattle`, the skeleton's); a wolf's growl
+  when hunting; the skeleton's hurt, death and steps. Its bite blights (`BlightAttacks`), it's Blight-immune and in
+  `#minecraft:undead`; `mobInteract` passes (no taming, feeding, dyeing), never a pup, despawns far off as monsters do.
+  Drops 0-2 bones. Tests: `UndeadFormsGameTest`, `PaleMobsTest` (skin, sounds), `MobSpawningTest` (night).
+- The pale zombie is in `#minecraft:zombies`, the pale creeper, spider and wolf in `#minecraft:undead` (smite, inverted
   healing, the wither spares them); the mushroom spider joins the pale one in `#minecraft:arthropod`.
 - **Warden (`WardenMixin`)** — extensively rebalanced, all deliberate per inline doc-comments in the
   source itself (read them for full designer intent): anger toward a target **decays** over time if

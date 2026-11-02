@@ -8,6 +8,7 @@ import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.IceCubeEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWolfEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -16,6 +17,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
@@ -75,6 +77,13 @@ public class MobSpawning {
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_CREEPER, 10, 1, 1);
         SpawnPlacements.register(ModEntities.PALE_SPIDER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleSpider);
 
+        // Pale wolves: in packs, in the Pale Garden at any hour as the other pale mobs, and now and then in the forests
+        // (taigas too) at night (canSpawnPaleWolf); never in the caves
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_WOLF, 40, 2, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_FOREST).or(BiomeSelectors.tag(BiomeTags.IS_TAIGA)).and(BiomeSelectors.excludeByKey(Biomes.PALE_GARDEN)),
+                MobCategory.MONSTER, ModEntities.PALE_WOLF, 8, 2, 4);
+        SpawnPlacements.register(ModEntities.PALE_WOLF, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleWolf);
+
         // Watchlings: rarely, where paleness holds, in the dark (canSpawnWatchling)
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.WATCHLING, 4, 1, 1);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.PALE_GROTTO, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.WATCHLING, 3, 1, 1);
@@ -110,6 +119,12 @@ public class MobSpawning {
         return WorldTime.moonPhase(world) == NEW_MOON_PHASE;
     }
 
+    /** Night: from dusk (13000) to dawn (23000), as the day's time goes. */
+    public static boolean isNight(long dayTime) {
+        long time = Math.floorMod(dayTime, 24000L);
+        return time >= 13000L && time <= 23000L;
+    }
+
     public static boolean isMidnight(LevelAccessor world) {
         long dayTime = WorldTime.dayTime(world) % 24000l;
         return !(dayTime < 18000l || dayTime > 20000l);
@@ -137,6 +152,18 @@ public class MobSpawning {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != EntitySpawnReason.NATURAL) return true;
         return palePlace(world, blockPos, 1);
+    }
+
+    /**
+     * A pale wolf's spawn: in the pale biomes (the Pale Garden: the only one with pale wolves) at any hour; in the forests
+     * only at night, in the dark as monsters spawn, on ground wolves stand on.
+     */
+    public static boolean canSpawnPaleWolf(EntityType<PaleWolfEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
+        if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
+        if(spawnReason != EntitySpawnReason.NATURAL) return true;
+        if (PaleLine.isPaleBiome(world, blockPos)) return true;
+        return isNight(WorldTime.dayTime(world)) && Monster.isDarkEnoughToSpawn(world, blockPos, random)
+                && world.getBlockState(blockPos.below()).is(BlockTags.WOLVES_SPAWNABLE_ON);
     }
 
     /** A monster's spawn (in the dark), by the pale line, in total darkness off the pale biomes. */

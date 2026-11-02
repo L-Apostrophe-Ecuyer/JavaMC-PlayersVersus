@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * What the pale do to a player's sight, as screen effects (assets/players-versus/post_effect, from tools/post-effects.py):
- * the world greys as Blight whitens their hearts (Blight#greyStrength), easing in and out over a few seconds
+ * the world greys as Blight takes their hearts (Blight#greyStrength), easing in and out over a few seconds
  * through twenty shades of grey, and breaks into big drab pixels under a watchling's stare (as thick as its static,
  * WatchlingStatic, through sixteen steps); the static is heard too (WatchlingStaticSound). Asked of the game renderer
  * every tick, with whatever else it shows (a spectated creeper's view).

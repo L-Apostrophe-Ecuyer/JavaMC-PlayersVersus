@@ -9,6 +9,7 @@ import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderRenderer;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWolfRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieRenderer;
 import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieRenderer;
 import frootloops.versus.mod.mobs.passive.ZombieChickenRenderer;
@@ -17,6 +18,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.core.registries.BuiltInClientRegistries;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.client.renderer.entity.WolfRenderer;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -40,6 +42,9 @@ public class ModEntitiesRenderers {
         register(WILDFIRE, context -> new WildfireEntityRenderer(context));
         register(WATCHLING, context -> new WatchlingRenderer(context));
         register(ZOMBIE_CHICKEN, context -> new ZombieChickenRenderer(context));
+        // The zombie wolf is a wolf in its own skin (ZombieWolfEntity#getTexture): the wolf's renderer draws it
+        register(ZOMBIE_WOLF, context -> new WolfRenderer(context));
+        register(PALE_WOLF, context -> new PaleWolfRenderer(context));
         register(PALE_VILLAGER, context -> new PaleVillagerRenderer(context));
         register(PALE_WANDERING_TRADER, context -> new PaleWanderingTraderRenderer(context));
     }
