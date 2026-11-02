@@ -108,6 +108,21 @@ assuming full overlap).
   creeper's head and the spider's abdomen (client `RedMushroomsLayer`, the red mushroom's block model as the
   mooshroom's, resolved each frame in their renderers' `extractRenderState`). Never converted. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
   `MushroomMobsGameTest`, assets `MushroomMobsTest`.
+- **Shulker-carrying endermen** (`mod/mobs/hostile/end/EndermanShulkerCarrier`; `VersusSettings.Endermen`): 3% of
+  endermen (exactly `EntityTypes.ENDERMAN`) spawned `NATURAL` or `CHUNK_GENERATION` get a shulker riding them
+  (`EndermanMixin#finalizeSpawn`, `startRiding(.., true, false)`; it's added with the enderman). The rider is held at
+  the chest, not on the head: `EndermanMixin` overrides `getPassengerAttachmentPoint` (`SHULKER_HELD_AT` 0.7 up,
+  centred), `getDefaultDimensions` (width `SHULKER_CARRIER_WIDTH` 0.98 while carrying, so the shulker is inside the
+  enderman's box: wherever the enderman fits, the shulker isn't in a wall; a 0.01 sliver stands out to be hit),
+  `addPassenger`/`removePassenger` (refresh dimensions) and `getControllingPassenger` (null: the shulker doesn't steer
+  it). No block while carrying (`EndermanTakeBlockGoalMixin`, `Enderman$EndermanTakeBlockGoal#canUse`). The shulker
+  can't teleport out (`ShulkerMixin#teleportSomewhere` HEAD, false while carried: it would `unRide`), shoots on its
+  own, and its bullets pass through its carrier (`ShulkerBulletCarrierMixin`, `Projectile#canHitEntity` for a
+  `ShulkerBullet` whose owner the target carries; an enderman hit by a projectile teleports). Client: the shulker is
+  drawn `SHULKER_HELD_FORWARD` 0.55 before the enderman, turned with its body (`ShulkerRendererCarriedMixin`,
+  `ShulkerRenderState.renderOffset`), the enderman's arms forward and out (`EndermanRenderStateShulkerMixin` flag,
+  `EndermanRendererShulkerMixin`, `EndermanModelShulkerMixin`). Killed, it drops the shulker (a passenger). Tests:
+  `EndermanShulkerCarrierTest`, game tests `EndermanShulkerGameTest`.
 - **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
   `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman-sized thing with a cube head
   (8), a long body (8 x 20 x 4), thick arms hanging nearly to the ground (4 x 40 x 4) and thin legs (2 x 22 x 2), all

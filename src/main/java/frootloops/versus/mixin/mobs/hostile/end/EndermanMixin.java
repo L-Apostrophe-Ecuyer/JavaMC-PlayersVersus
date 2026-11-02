@@ -2,22 +2,27 @@ package frootloops.versus.mixin.mobs.hostile.end;
 
 import frootloops.versus.mod.Combat;
 import frootloops.versus.mod.environment.WorldTime;
+import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.mobs.hostile.end.EndermanHideAndWaitGoal;
+import frootloops.versus.mod.mobs.hostile.end.EndermanShulkerCarrier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -48,7 +53,47 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData) {
         AttributeInstance instanceKnockback = this.getAttributes().getInstance(Attributes.KNOCKBACK_RESISTANCE);
         if (instanceKnockback != null) instanceKnockback.setBaseValue(0.6D);
+        // Now and then, a shulker in its arms instead of a block (EndermanShulkerCarrier)
+        EndermanShulkerCarrier.maybeGiveShulker(world, (Enderman) (Object) this, difficulty, spawnReason, this.random);
         return super.finalizeSpawn(world, difficulty, spawnReason, entityData);
+    }
+
+    /**
+     * Carrying a shulker, it's as wide as the shulker (near enough: a sliver of the shulker stands out, to be hit), which
+     * it holds inside its box: wherever it can stand or teleport to, the shulker isn't in a wall.
+     */
+    @Override
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        EntityDimensions dimensions = super.getDefaultDimensions(pose);
+        if (!EndermanShulkerCarrier.carries(this)) return dimensions;
+        return EntityDimensions.scalable(VersusSettings.Endermen.SHULKER_CARRIER_WIDTH, dimensions.height()).withEyeHeight(dimensions.eyeHeight());
+    }
+
+    /** Its size follows what it carries: a shulker taken up or let go, it refreshes. */
+    @Override
+    protected void addPassenger(Entity passenger) {
+        super.addPassenger(passenger);
+        this.refreshDimensions();
+    }
+
+    @Override
+    protected void removePassenger(Entity passenger) {
+        super.removePassenger(passenger);
+        this.refreshDimensions();
+    }
+
+    /** A shulker it carries is held at its chest, in its arms (drawn before it: client ShulkerRendererCarriedMixin), not on its head. */
+    @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
+        if (passenger instanceof Shulker) return new Vec3(0.0, VersusSettings.Endermen.SHULKER_HELD_AT * scale, 0.0);
+        return super.getPassengerAttachmentPoint(passenger, dimensions, scale);
+    }
+
+    /** The enderman goes where it means to: a shulker in its arms doesn't steer it. */
+    @Nullable
+    @Override
+    public LivingEntity getControllingPassenger() {
+        return EndermanShulkerCarrier.carries(this) ? null : super.getControllingPassenger();
     }
 
     @Inject(method = "registerGoals", at = @At("HEAD"))
