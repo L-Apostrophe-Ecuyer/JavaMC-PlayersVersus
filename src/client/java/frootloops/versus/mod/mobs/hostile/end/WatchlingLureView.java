@@ -13,10 +13,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A hunting watchling's gaze draws the eye (WatchlingLure): each tick, the nearest one hunting you within LURE_RANGE,
- * in plain sight, is the one that draws; each frame, as the mouse turns the view (MouseHandlerLureMixin), the view is
- * turned a little more onto it if it's already turned near it, smoothly, by the time the frame took. Never while a
- * screen is open, nor with a carved pumpkin over the eyes, nor in creative or spectator.
+ * A hunting watchling's gaze holds a stare just begun (WatchlingLure): each tick, while the static is rising and still
+ * thin (WatchlingStatic), the nearest one hunting you within LURE_RANGE whose eyes are in plain sight is the one that
+ * holds; each frame, as the mouse turns the view (MouseHandlerLureMixin), a view within LURE_DEGREES of its eyes is
+ * turned a little more onto them, smoothly, by the time the frame took. Never while a screen is open, nor with a carved
+ * pumpkin over the eyes, nor in creative or spectator.
  */
 @Environment(EnvType.CLIENT)
 public final class WatchlingLureView {
@@ -33,11 +34,13 @@ public final class WatchlingLureView {
     private static void tick(Minecraft minecraft) {
         drawing = null;
         LocalPlayer player = minecraft.player;
-        if (!VersusSettings.Watchlings.LURE_ENABLED || player == null || minecraft.level == null || !mayBeDrawn(player)) return;
+        if (!VersusSettings.Watchlings.LURE_ENABLED || player == null || minecraft.level == null || !mayBeDrawn(player)
+                || !WatchlingLure.grips(WatchlingStatic.rising(), WatchlingStatic.level())) return;
         double range = VersusSettings.Watchlings.LURE_RANGE, nearest = range;
         for (WatchlingEntity watchling : minecraft.level.getEntitiesOfClass(WatchlingEntity.class, player.getBoundingBox().inflate(range))) {
-            double distance = player.getEyePosition().distanceTo(watchling.getBoundingBox().getCenter());
-            if (watchling.isHunting() && watchling.isAlive() && distance < nearest && player.hasLineOfSight(watchling)) {
+            double distance = player.getEyePosition().distanceTo(watchling.getEyePosition());
+            // Its eyes in plain sight: the line from the player's eyes to its eyes clear of blocks and leaves
+            if (watchling.isHunting() && watchling.isAlive() && distance < nearest && WatchlingStare.seesEyes(player, watchling)) {
                 drawing = watchling;
                 nearest = distance;
             }
@@ -57,7 +60,7 @@ public final class WatchlingLureView {
         WatchlingEntity watchling = drawing;
         if (player == null || watchling == null || watchling.isRemoved() || seconds <= 0.0) return;
         Vec3 eye = player.getEyePosition();
-        Vec3 toward = watchling.getBoundingBox().getCenter().subtract(eye).normalize();
+        Vec3 toward = watchling.getEyePosition().subtract(eye).normalize();
         double away = Math.toDegrees(Math.acos(Math.clamp(player.getViewVector(1.0F).dot(toward), -1.0, 1.0)));
         double strength = WatchlingLure.strength(away, closeness);
         if (strength <= 0.0) return;

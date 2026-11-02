@@ -4,11 +4,28 @@ import frootloops.versus.VersusSettings;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** A hunting watchling's gaze draws a view turned near it, harder the nearer, and never past it; one turned away, not at all. */
+/**
+ * A hunting watchling's gaze holds a stare just begun: only while the static rises and is still thin; then a view near
+ * its eyes is drawn onto them, harder the nearer, and never past them; one turned away, not at all.
+ */
 class WatchlingLureTest {
     private static final double CONE = VersusSettings.Watchlings.LURE_DEGREES;
+
+    @Test
+    void itGripsOnlyAStareJustBegun() {
+        float thin = VersusSettings.Watchlings.LURE_STATIC / 2;
+        assertTrue(WatchlingLure.grips(true, 0.0F));
+        assertTrue(WatchlingLure.grips(true, thin));
+        // Unseen (the static not rising), it doesn't grip, however thin the static
+        assertFalse(WatchlingLure.grips(false, 0.0F));
+        assertFalse(WatchlingLure.grips(false, thin));
+        // A stare already thick with static is left to the one staring
+        assertFalse(WatchlingLure.grips(true, VersusSettings.Watchlings.LURE_STATIC));
+        assertFalse(WatchlingLure.grips(true, 0.9F));
+    }
 
     @Test
     void aViewTurnedAwayIsLeftAlone() {

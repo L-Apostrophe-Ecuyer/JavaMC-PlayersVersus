@@ -419,3 +419,21 @@ image (a many-eyed obsidian creature), its eyes yellow as the creaking's.
   are gone); `WatchlingLure` (pure, `WatchlingLureTest`), client `WatchlingLureView`, `MouseHandlerLureMixin`. The look
   and the lure's feel are unseen in a running game.
 
+## Only what's seen: the static and the lure (fourteenth round, 2026-11-02)
+
+Asked for: the cursor grab should happen only while the player is building up a low amount of static and can actually
+see the watchling's eyes; the static was building even when the watchling wasn't being seen.
+
+- **Static only from seeing it.** Being near a watchling no longer builds static on its own: unseen, near or far, it
+  builds nothing (and what's there clears). Its nearness only hurries a stare: within `NEAR_RANGE` (10) a stare fills
+  faster, up to `PROXIMITY_RATE` (2) stares' worth more at `KILL_RANGE` (3) and nearer. (The haunting's approach still
+  brings it nearer each time it's left; it kills only by being looked at.)
+- **Seeing means its eyes in plain sight:** the line from the player's eyes to its eyes clear of solid blocks and of
+  leaves. Leaves can be pushed through, so a plain line of sight passed straight through a canopy, and a watchling
+  behind the leaves counted as seen; now leaves hide it (`WatchlingStare.seesEyes`).
+- **The lure holds only a stare just begun:** it grips only while the static is rising (its eyes are being seen) and is
+  still under `LURE_STATIC` (0.35); then a view within 30 degrees of its eyes is drawn onto them, as before. Unseen, or
+  once the static is thick, the view is the player's own.
+- Tests: `WatchlingStareTest` (unseen builds nothing however near; nearness hurries a stare; a fighting one's stare is
+  unhurried), `WatchlingLureTest.itGripsOnlyAStareJustBegun`, game test `WatchlingGameTest.aWatchlingBehindLeavesIsUnseen`.
+

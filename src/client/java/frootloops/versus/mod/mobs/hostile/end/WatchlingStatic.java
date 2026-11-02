@@ -30,6 +30,8 @@ public final class WatchlingStatic implements HudElement {
 
     private final RandomSource random = RandomSource.create();
     private float stare, shown;
+    /** Client ticks counted, and the last tick the server's static rose. */
+    private long ticks, roseAt = Long.MIN_VALUE / 2;
 
     private WatchlingStatic() {
     }
@@ -42,11 +44,25 @@ public final class WatchlingStatic implements HudElement {
         return instance == null ? 0.0F : Math.min(1.0F, instance.shown);
     }
 
+    /** How full the server says the static is, 0 to 1. */
+    public static float level() {
+        return instance == null ? 0.0F : instance.stare;
+    }
+
+    /** Whether the static is rising: the server raised it this tick or the last (a watchling's eyes are being seen). */
+    public static boolean rising() {
+        return instance != null && instance.ticks - instance.roseAt <= 1;
+    }
+
     public static void register() {
         WatchlingStatic view = new WatchlingStatic();
         instance = view;
-        ClientPlayNetworking.registerGlobalReceiver(WatchedPayload.TYPE, (payload, context) -> view.stare = payload.stare());
+        ClientPlayNetworking.registerGlobalReceiver(WatchedPayload.TYPE, (payload, context) -> {
+            if (payload.stare() > view.stare) view.roseAt = view.ticks;
+            view.stare = payload.stare();
+        });
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+            view.ticks++;
             if (minecraft.level == null) view.stare = 0.0F;
             view.shown = Mth.approach(view.shown, view.stare, EASE_PER_TICK);
         });

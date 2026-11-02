@@ -3,13 +3,19 @@ package frootloops.versus.mod.mobs.hostile.end;
 import frootloops.versus.VersusSettings;
 
 /**
- * The draw of a hunting watchling's gaze (the client's WatchlingLureView turns the view by it; the numbers are here,
- * pure, to be tested). A view turned near it, within LURE_DEGREES, is drawn onto it: hardly at the edge, where it's a
- * shimmer at the corner of the eye, harder the nearer the view comes, and harder the nearer it stands, so a glance
- * becomes a stare (and a stare, death). A view turned elsewhere is left alone, and a quick turn away breaks free.
+ * The hold of a hunting watchling's gaze on a stare just begun (the client's WatchlingLureView turns the view by it; the
+ * numbers are here, pure, to be tested). It grips only while the static rises (its eyes are seen) and is still thin,
+ * under LURE_STATIC: then a view on its eyes, within LURE_DEGREES, is drawn onto them, harder the nearer the view and
+ * the nearer it stands, so a stare begun is hard to break. Before that (unseen, or only glimpsed) and past it (the
+ * static thick) the view is left alone, and a quick turn away always breaks free.
  */
 public final class WatchlingLure {
     private WatchlingLure() {}
+
+    /** Whether it grips: the static rising (its eyes seen) and still under LURE_STATIC. */
+    public static boolean grips(boolean staticRising, float staticNow) {
+        return staticRising && staticNow < VersusSettings.Watchlings.LURE_STATIC;
+    }
 
     /** How hard the view is drawn (0 to 1.5): by how far from it the view is turned (degrees), and how near it stands (0 to 1). */
     public static double strength(double degreesAway, double closeness) {

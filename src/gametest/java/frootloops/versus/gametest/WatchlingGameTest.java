@@ -3,13 +3,17 @@ package frootloops.versus.gametest;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
+import frootloops.versus.mod.mobs.hostile.end.WatchlingStare;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -58,6 +62,27 @@ public class WatchlingGameTest {
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(4.5, 1.0, 3.5));
         watchling.hurtServer(helper.getLevel(), helper.getLevel().damageSources().mobAttack(pig), 1.0F);
         helper.assertTrue(watchling.isEnraged() && watchling.getTarget() == pig, "it doesn't fight the pig that hit it");
+        helper.succeed();
+    }
+
+    /**
+     * Only its eyes seen put static on the screen: a (survival) player staring at it in the open sees it, but not through
+     * a wall of leaves, which anything may push through and so a plain line of sight would pass.
+     */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aWatchlingBehindLeavesIsUnseen(GameTestHelper helper) {
+        floor(helper);
+        WatchlingEntity watchling = helper.spawnWithNoFreeWill(ModEntities.WATCHLING, new Vec3(11.5, 1.0, 3.5));
+        ServerPlayer player = FakePlayer.get(helper.getLevel());
+        Vec3 at = helper.absoluteVec(new Vec3(2.5, 1.0, 3.5));
+        player.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
+        player.lookAt(EntityAnchorArgument.Anchor.EYES, watchling.getEyePosition());
+        helper.assertTrue(WatchlingStare.looksAt(player, watchling), "a player staring at it in the open doesn't see it");
+        for (int y = 1; y < 7; y++) {
+            for (int z = 0; z < 8; z++) helper.setBlock(new BlockPos(6, y, z), Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true));
+        }
+        helper.assertTrue(!WatchlingStare.seesEyes(player, watchling), "its eyes are seen through a wall of leaves");
+        helper.assertTrue(!WatchlingStare.looksAt(player, watchling), "it's looked at through a wall of leaves");
         helper.succeed();
     }
 

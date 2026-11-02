@@ -124,14 +124,16 @@ assuming full overlap).
   enderman's stats, `fight()` teleports up to a target beyond `FIGHT_TELEPORT_RANGE` and `calm()` returns it to haunting
   after `CALM_TICKS` with no live target; `isHunting()` is false while enraged (no lure), and `WatchlingStare.rate(
   fighting, looking, distance)` ignores nearness for a fighting one (a stare still builds static). `WatchlingStare` (server, each level tick): the pressure on a player is the fastest rate among
-  the watchlings about them: 1 for looking at one (48 blocks, line of sight, at least half seen by `Gaze`, no
-  `#gaze_disguise_equipment` on the head) plus `proximity(distance)` (0 beyond `NEAR_RANGE`, up to `PROXIMITY_RATE` at
-  `KILL_RANGE`, looking or not); the static (`WatchedPayload` to the HUD) fills at rate/`STARE_TICKS` and clears over
-  `CLEAR_TICKS`; full, they die of `players-versus:watched` and 4-7 silverfish spawn. Its gaze draws the eye
-  (`WatchlingLure`, pure, `WatchlingLureTest`; client `WatchlingLureView`): each tick the nearest hunting one within
-  `LURE_RANGE` in line of sight is noted; each frame, at `MouseHandler#turnPlayer` TAIL (`MouseHandlerLureMixin`, with
-  the frame's time), a view within `LURE_DEGREES` (30) of it turns onto it by `LURE_SPEED` (40°/s) x (1 - away/cone)^2
-  x (0.5 + closeness), straight and never past (`Entity#turn`, as the mouse); a view elsewhere is untouched.
+  the watchlings about them: unseen, 0; looking at one (48 blocks, its eyes in plain sight by `seesEyes`: the eye-to-eye
+  line clear of colliders and of `#leaves`, which rays otherwise pass; at least `WATCHED_AT` seen by `Gaze`; no
+  `#gaze_disguise_equipment` on the head), 1 plus `proximity(distance)` (0 beyond `NEAR_RANGE`, up to `PROXIMITY_RATE`
+  at `KILL_RANGE`; not for a fighting one): nearness hurries a stare and never builds static alone; the static (`WatchedPayload` to the HUD) fills at rate/`STARE_TICKS` and clears over
+  `CLEAR_TICKS`; full, they die of `players-versus:watched` and 4-7 silverfish spawn. Its gaze holds a stare just begun
+  (`WatchlingLure`, pure, `WatchlingLureTest`; client `WatchlingLureView`): only while `WatchlingStatic.rising()` (the
+  server raised the static this tick or the last) and `level()` is under `LURE_STATIC` (0.35); each tick the nearest
+  hunting one within `LURE_RANGE` whose eyes it `seesEyes` is noted; each frame, at `MouseHandler#turnPlayer` TAIL
+  (`MouseHandlerLureMixin`, with the frame's time), a view within `LURE_DEGREES` (30) of its eyes turns onto them by
+  `LURE_SPEED` (40°/s) x (1 - away/cone)^2 x (0.5 + closeness), straight and never past (`Entity#turn`, as the mouse).
   Spawns rarely in the dark by the pale line.
 - **The warped show only to a stare**: `Gaze` (pure, `GazeTest`, `VersusSettings.Gaze`) rates how well a view sees a
   body (1 on it, smoothly down to 0 at 30° off its edge) and `Gaze.opacity` floors it at 3% and rises with the square. Client

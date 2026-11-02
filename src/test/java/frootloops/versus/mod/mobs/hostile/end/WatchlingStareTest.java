@@ -31,53 +31,54 @@ class WatchlingStareTest {
     }
 
     @Test
-    void beingNearBuildsStaticLookingOrNot() {
+    void unseenItBuildsNoStaticHoweverNear() {
+        double near = VersusSettings.Watchlings.NEAR_RANGE, kill = VersusSettings.Watchlings.KILL_RANGE;
+        for (double distance : new double[]{0.5, kill, (near + kill) / 2, near, near + 10.0}) {
+            assertEquals(0.0F, WatchlingStare.rate(false, distance), "unseen at " + distance + " it builds static");
+            assertEquals(0.0F, WatchlingStare.next(0.0F, WatchlingStare.rate(false, distance)));
+        }
+        // Static already on the screen clears while it's unseen, even right beside it
+        assertTrue(WatchlingStare.next(0.5F, WatchlingStare.rate(false, kill)) < 0.5F);
+    }
+
+    @Test
+    void theNearerItStandsTheFasterAStareFills() {
         double near = VersusSettings.Watchlings.NEAR_RANGE, kill = VersusSettings.Watchlings.KILL_RANGE;
         assertEquals(0.0F, WatchlingStare.proximity(near + 1.0));
         assertEquals(0.0F, WatchlingStare.proximity(near));
-        assertTrue(WatchlingStare.proximity(near - 1.0) > 0.0F, "no pressure just inside the near range");
+        assertTrue(WatchlingStare.proximity(near - 1.0) > 0.0F, "no hurry just inside the near range");
         assertEquals(VersusSettings.Watchlings.PROXIMITY_RATE, WatchlingStare.proximity(kill), 1.0E-6F);
         assertEquals(VersusSettings.Watchlings.PROXIMITY_RATE, WatchlingStare.proximity(0.5), 1.0E-6F);
-        // Not looking, but at its feet: the static still builds
-        assertTrue(WatchlingStare.next(0.0F, WatchlingStare.rate(false, kill)) > 0.0F);
-        // Not looking and far off: it clears instead
-        assertEquals(0.0F, WatchlingStare.next(0.0F, WatchlingStare.rate(false, near + 10.0)));
-    }
-
-    @Test
-    void theNearerTheFasterAndAStareAddsToIt() {
-        double far = WatchlingStare.proximity(8.0), middle = WatchlingStare.proximity(6.0), close = WatchlingStare.proximity(4.0);
+        float far = WatchlingStare.rate(true, 8.0), middle = WatchlingStare.rate(true, 6.0), close = WatchlingStare.rate(true, 4.0);
         assertTrue(far < middle && middle < close, far + ", " + middle + ", " + close);
-        assertEquals(WatchlingStare.rate(false, 4.0) + 1.0F, WatchlingStare.rate(true, 4.0), 1.0E-6F);
         assertEquals(1.0F, WatchlingStare.rate(true, 40.0), 1.0E-6F);
+        assertEquals(1.0F + VersusSettings.Watchlings.PROXIMITY_RATE, WatchlingStare.rate(true, kill), 1.0E-6F);
     }
 
     @Test
-    void aFightingWatchlingBuildsStaticOnlyWhileLookedAt() {
+    void aFightingWatchlingBuildsStaticOnlyWhileLookedAtAndNeverFaster() {
         double kill = VersusSettings.Watchlings.KILL_RANGE;
-        // Right at its feet, not looking: the haunting's nearness would build static, a fight's doesn't
-        assertTrue(WatchlingStare.rate(false, false, kill) > 0.0F);
         assertEquals(0.0F, WatchlingStare.rate(true, false, kill));
         assertEquals(0.0F, WatchlingStare.next(0.0F, WatchlingStare.rate(true, false, kill)));
-        // Looking, it's a stare as ever, at any distance
+        // Looking, it's a stare as ever, at any distance, unhurried by nearness
         assertEquals(1.0F, WatchlingStare.rate(true, true, kill), 1.0E-6F);
         assertEquals(1.0F, WatchlingStare.rate(true, true, 40.0), 1.0E-6F);
-        // And one that isn't fighting rates as it always did
+        // And one that isn't fighting rates as a haunting one
         assertEquals(WatchlingStare.rate(true, 4.0), WatchlingStare.rate(false, true, 4.0), 1.0E-6F);
-        assertEquals(WatchlingStare.rate(false, 4.0), WatchlingStare.rate(false, false, 4.0), 1.0E-6F);
+        assertEquals(0.0F, WatchlingStare.rate(false, false, 4.0));
     }
 
     @Test
-    void tooCloseKillsFasterThanAStare() {
-        float stare = 0.0F, close = 0.0F;
+    void aStareUpCloseKillsFasterThanOneFarOff() {
+        float far = 0.0F, close = 0.0F;
         int ticks = 0;
         while (close < 1.0F) {
-            close = WatchlingStare.next(close, WatchlingStare.rate(false, VersusSettings.Watchlings.KILL_RANGE));
-            stare = WatchlingStare.next(stare, true);
+            close = WatchlingStare.next(close, WatchlingStare.rate(true, VersusSettings.Watchlings.KILL_RANGE));
+            far = WatchlingStare.next(far, WatchlingStare.rate(true, 40.0));
             ticks++;
         }
-        assertTrue(ticks < VersusSettings.Watchlings.STARE_TICKS, "too close took " + ticks + " ticks, no faster than a stare");
-        assertTrue(stare < 1.0F);
+        assertTrue(ticks < VersusSettings.Watchlings.STARE_TICKS, "up close took " + ticks + " ticks, no faster than a stare far off");
+        assertTrue(far < 1.0F);
     }
 
     @Test
