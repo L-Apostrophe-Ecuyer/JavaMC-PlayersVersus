@@ -75,7 +75,7 @@ class PaleMobsTest {
         for (int row = 20; row <= 28; row++) assertTrue(opaque(skin, 38, row), "the spine breaks at row " + row);
     }
 
-    /** It howls and rattles, hurts and dies with sounds of its own, each with a subtitle. */
+    /** It howls and rattles, hurts and dies with sounds of its own, each with a subtitle; its own sound files are there. */
     @Test
     void thePaleWolfHowlsAndRattles() throws IOException {
         JsonObject sounds = read("assets/players-versus/sounds.json");
@@ -84,7 +84,14 @@ class PaleMobsTest {
             String event = "entity.pale_wolf." + sound;
             assertTrue(sounds.has(event), event + " isn't a sound");
             assertTrue(english.has(sounds.getAsJsonObject(event).get("subtitle").getAsString()), event + " has no subtitle");
+            for (JsonElement entry : sounds.getAsJsonObject(event).getAsJsonArray("sounds")) {
+                String name = entry.isJsonObject() ? entry.getAsJsonObject().get("name").getAsString() : entry.getAsString();
+                if (name.startsWith("players-versus:")) {
+                    assertExists("assets/players-versus/sounds/" + name.substring("players-versus:".length()) + ".ogg");
+                }
+            }
         }
+        assertExists("assets/players-versus/sounds/pale_wolf/howl1.ogg");
     }
 
     private static boolean opaque(BufferedImage image, int x, int y) {

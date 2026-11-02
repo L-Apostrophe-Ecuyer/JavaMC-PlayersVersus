@@ -389,8 +389,9 @@ fear wolves as skeletons do.
 - **Skeletal:** a wolf's skeleton in the pale oak's palest bone: its chest and body a rib cage around a spine and a
   breastbone (gaps between the ribs, seen through), its tail vertebrae, its legs thin, its head a skull with dark
   sockets in which the creaking's orange eyes glow, a nose hole and teeth.
-- **Howl and rattle:** now and then (about every ten seconds) it howls, low and far-carrying (vanilla's old wolf howls),
-  or one time in three its bones rattle; hunting, it growls as a wolf. Hurt, dying and walking it sounds as a skeleton.
+- **Howl and rattle:** now and then (about every ten seconds) it howls, low and far-carrying, or one time in three its
+  bones rattle. The howls are its own (`tools/pale-wolf-howl.py`: a voice swelling, held with a vibrato and falling,
+  a little hollow, echoing off the trees), 26.4 shipping no wolf howls; hunting, it growls as a wolf. Hurt, dying and walking it sounds as a skeleton.
   Each of its own sounds has a subtitle.
 - **Fears wolves:** as a skeleton, it flees living wolves within 6 blocks (not its own kind, not zombie wolves); and
   living wolves hunt it as they hunt skeletons.

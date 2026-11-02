@@ -101,8 +101,9 @@
     "entity.pale_wolf.howl" : {
         "subtitle": "subtitles.players-versus.entity.pale_wolf.howl",
         "sounds" : [
-            { "name": "minecraft:mob/wolf/howl1", "pitch": 0.8 },
-            { "name": "minecraft:mob/wolf/howl2", "pitch": 0.8 }
+            "players-versus:pale_wolf/howl1",
+            "players-versus:pale_wolf/howl2",
+            "players-versus:pale_wolf/howl3"
         ]
     },
     "entity.pale_wolf.rattle" : {

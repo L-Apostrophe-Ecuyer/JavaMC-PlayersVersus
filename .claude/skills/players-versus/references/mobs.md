@@ -176,8 +176,8 @@ assuming full overlap).
   pet's (beg, breed, follow owner, sit), plus a skeleton's `AvoidEntityGoal` of living wolves (`EntityTypes.WOLF` only:
   6 blocks, 1.0/1.2); targets only `HurtByTargetGoal` (alerting its pack) and players. Living wolves hunt it as they
   hunt skeletons (`WolfHuntsPaleWolvesMixin`, Wolf `registerGoals` TAIL, priority 6). Sounds (`CustomSpecialEffects`,
-  `sounds.json`, subtitled): ambient every ~200 ticks, a howl (`entity.pale_wolf.howl`: vanilla's `mob/wolf/howl1-2`,
-  pitch 0.8, volume 1.5) or one time in three a bone rattle (`entity.pale_wolf.rattle`, the skeleton's); a wolf's growl
+  `sounds.json`, subtitled): ambient every ~200 ticks, a howl (`entity.pale_wolf.howl`: its own `sounds/pale_wolf/howl1-3.ogg` from
+  `tools/pale-wolf-howl.py`, 26.4 shipping no wolf howls; volume 1.5) or one time in three a bone rattle (`entity.pale_wolf.rattle`, the skeleton's); a wolf's growl
   when hunting; the skeleton's hurt, death and steps. Its bite blights (`BlightAttacks`), it's Blight-immune and in
   `#minecraft:undead`; `mobInteract` passes (no taming, feeding, dyeing), never a pup, despawns far off as monsters do.
   Drops 0-2 bones. Tests: `UndeadFormsGameTest`, `PaleMobsTest` (skin, sounds), `MobSpawningTest` (night).

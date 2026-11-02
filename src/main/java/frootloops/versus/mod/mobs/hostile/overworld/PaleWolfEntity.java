@@ -135,7 +135,10 @@ public class PaleWolfEntity extends Wolf implements Enemy {
         return this.isAngry() ? super.getAmbientSound() : CustomSpecialEffects.PALE_WOLF_HOWL;
     }
 
-    /** A howl carries (half again a wolf's call, and as far); one time in three, a rattle of bones instead. */
+    /**
+     * A howl (its own, vanilla's wolves no longer howling: tools/pale-wolf-howl.py) carries, half again a wolf's call and
+     * as far; one time in three, a rattle of bones instead.
+     */
     @Override
     public void playAmbientSound() {
         if (this.isAngry()) {
