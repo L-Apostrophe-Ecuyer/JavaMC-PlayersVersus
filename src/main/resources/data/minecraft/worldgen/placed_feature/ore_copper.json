@@ -16,14 +16,14 @@
         "type": "minecraft:weighted_list",
         "distribution": [
           {
-            "weight": 3,
+            "weight": 2,
             "data": {
               "type": "minecraft:uniform",
               "min_inclusive": {
                 "absolute": 72
               },
               "max_inclusive": {
-                "absolute": 80
+                "absolute": 84
               }
             }
           },

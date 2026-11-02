@@ -25,6 +25,16 @@
     },
     {
       "target": {
+        "block": "minecraft:stone",
+        "probability": 0.05,
+        "predicate_type": "minecraft:random_block_match"
+      },
+      "state": {
+        "id": "minecraft:copper_ore"
+      }
+    },
+    {
+      "target": {
         "tag": "minecraft:base_stone_overworld",
         "predicate_type": "minecraft:tag_match"
       },
