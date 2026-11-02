@@ -28,17 +28,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 /**
- * A watchling: an enderman the paleness took, with a creaking's yellow eyes and a tall head with three of them, big arms,
- * where the End's warping and the depths' paleness meet. Left alone it haunts, as a slender thing does. It doesn't walk then
+ * A watchling: an enderman the paleness took, a long thing of obsidian with many eyes glowing a creaking's yellow, arms
+ * hanging to the ground, where the End's warping and the depths' paleness meet. Left alone it haunts, as a slender thing does. It doesn't walk then
  * and doesn't strike: it stands, and it watches. Looking at it is what kills (WatchlingStare): the screen fills with
  * static, and whoever looks too long dies into silverfish. And each time it's looked at and then left, it's gone a moment
- * later and back nearer, where the watcher isn't looking: closer and closer, until it's too near to live beside, which
- * kills as a stare does. Seen once, it hunts: left unlooked at, it still creeps nearer now and then, and it keeps on for
- * 90 seconds to 3 minutes before it gives up and vanishes. While it hunts, the view of whoever it hunts is drawn towards
- * it now and then (client WatchlingPull). But attacked, it stops haunting and fights, as an enderman does (it is a melee
- * mob with big arms): it goes for whoever hit it, teleporting up to them if they get away, until they're dead or gone;
- * only then does it haunt again. Looking at it still fills the screen with static, but being near it doesn't: that was
- * the haunting's. Like all the warped it shows only to a stare (Gaze), and a carved pumpkin hides you from its gaze as
+ * later and back nearer, where the watcher isn't looking: closer and closer, and the nearer it stands the faster a
+ * stare fills the screen; unseen, it builds nothing. Seen once, it hunts: left unlooked at, it still creeps nearer now
+ * and then, and it keeps on for 90 seconds to 3 minutes before it gives up and vanishes. While it hunts, its gaze holds
+ * a stare just begun: a view on its eyes, the static rising and still thin, is drawn onto it (WatchlingLure; client
+ * WatchlingLureView). But attacked, it stops haunting and fights, as an enderman does (it is a melee mob with big arms):
+ * it goes for whoever hit it, teleporting up to them if they get away, until they're dead or gone; only then does it
+ * haunt again. Looking at it still fills the screen with static, its nearness no faster. Like all the warped it shows only to a stare (Gaze), and a carved pumpkin hides you from its gaze as
  * from an enderman's.
  */
 public class WatchlingEntity extends Enderman {

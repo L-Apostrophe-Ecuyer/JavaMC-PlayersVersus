@@ -159,8 +159,8 @@ public abstract class VersusSettings {
         // VANISH_MIN to VANISH_MAX ticks (90 seconds to 3 minutes) without being looked at it vanishes and leaves you be
         public static int STALK_MIN = 400, STALK_MAX = 800;
         public static int VANISH_MIN = 1800, VANISH_MAX = 3600;
-        // Too close: within NEAR_RANGE blocks the static builds without looking too, faster the nearer, PROXIMITY_RATE
-        // times as fast as a stare at KILL_RANGE blocks and nearer (and a stare adds to it): you die of it as of a stare
+        // Near: within NEAR_RANGE blocks a stare fills the static faster the nearer it stands, PROXIMITY_RATE stares'
+        // worth more at KILL_RANGE blocks and nearer. Unseen, near or not, it builds nothing
         public static double NEAR_RANGE = 10.0, KILL_RANGE = 3.0;
         public static float PROXIMITY_RATE = 2.0F;
         // Hit, it stops haunting and fights as an enderman does: it teleports up to a target farther than
@@ -169,13 +169,16 @@ public abstract class VersusSettings {
         public static double FIGHT_TELEPORT_RANGE = 16.0;
         public static int FIGHT_TELEPORT_TICKS = 30;
         public static int CALM_TICKS = 200;
-        // The view of whoever it hunts is pulled towards it now and then (client): within PULL_RANGE blocks, a pull every
-        // PULL_GAP_MIN to PULL_GAP_MAX ticks (sooner the nearer), lasting PULL_MIN to PULL_MAX ticks, turning the view
-        // PULL_DEGREES degrees a tick (more the nearer)
-        public static boolean PULL_ENABLED = true;
-        public static double PULL_RANGE = 24.0;
-        public static int PULL_GAP_MIN = 100, PULL_GAP_MAX = 320, PULL_MIN = 12, PULL_MAX = 30;
-        public static float PULL_DEGREES = 2.0F;
+        // Its gaze holds a stare just begun (WatchlingLure; client WatchlingLureView): only while the static is rising
+        // and still under LURE_STATIC (a stare begun, not one already lost), with its eyes in plain sight within
+        // LURE_RANGE blocks and within LURE_DEGREES of the view, the view is drawn onto its eyes, harder the nearer the
+        // view and the nearer it stands, up to LURE_SPEED degrees a second (half again that, close). Otherwise the view
+        // is left alone; a quick turn away breaks free
+        public static boolean LURE_ENABLED = true;
+        public static double LURE_RANGE = 24.0;
+        public static double LURE_DEGREES = 30.0;
+        public static float LURE_SPEED = 40.0F;
+        public static float LURE_STATIC = 0.35F;
     }
 
     public static class Gaze {

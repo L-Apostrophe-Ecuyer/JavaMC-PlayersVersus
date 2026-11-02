@@ -13,9 +13,9 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
 /**
- * A watchling: an enderman's body with a taller head, a jaw and big arms (WatchlingModel), the head bearing three eyes
- * that glow a creaking's yellow and orange rather than purple. It carries nothing, so it has no more than the body and
- * eyes. Its state carries a humanoid's swing (as the enderman's renderer fills it) and how its maw and head move.
+ * A watchling: a cube head on a long body, arms to the ground and thin legs (WatchlingModel), in obsidian's plum, its
+ * many eyes glowing the creaking's yellow. It carries nothing, so it has no more than the body and eyes. Its state
+ * carries a humanoid's swing and how its maw and head move.
  */
 @Environment(EnvType.CLIENT)
 public class WatchlingRenderer extends MobRenderer<WatchlingEntity, WatchlingRenderState, WatchlingModel> {

@@ -12,23 +12,25 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.model.monster.enderman.EndermanModel;
 import net.minecraft.util.Mth;
 
 import static frootloops.versus.mod.mobs.hostile.end.WatchlingAnimation.*;
 
 /**
- * The watchling's model: the enderman's body and legs, with a taller head (12 where the enderman's is 8) and big arms (4
- * across where the enderman's are 2), as in Minecraft Dungeons, where it is a melee mob. The texture is 64 x 64: the head
- * box is 8 x 12 x 8 from texel (0, 0); each arm is 4 x 30 x 4 from texel (0, 30); the jaw, a box inside the head as the
- * enderman's jaw layer is, is 8 x 6 x 8 from texel (16, 32) (tools/watchling-head.py draws them).
+ * The watchling's model: a cube head on a long body, thick arms hanging from its shoulders nearly to the ground, and
+ * thin legs, as tall as an enderman. Its eyes are on its skin (tools/watchling-skin.py: four down the body's front, more
+ * about the head and back), glowing. The texture is 64 x 64: head 8 x 8 x 8 from texel (0, 0); jaw 8 x 4 x 8 from
+ * (32, 0), inside the head; body 8 x 20 x 4 from (0, 16); arms 4 x 40 x 4 from (24, 16); legs 2 x 22 x 2 from (40, 16).
  *
  * <p>It moves as WatchlingAnimation says: a humanoid's walk swung less, its maw opening as it fights (the head lifts off
  * the jaw, which stays), its head cocking as it haunts, and its own two-armed strike instead of a humanoid's one-armed
- * swing. Not the enderman's model, so none of the enderman's clamps hold its swings back.
+ * swing.
  */
 @Environment(EnvType.CLIENT)
 public class WatchlingModel extends HumanoidModel<WatchlingRenderState> {
+    /** Model space puts the ground at 24: the legs stand on it, the body on them, the head on the body. */
+    private static final float GROUND = 24.0F, HIPS = GROUND - LEG_LENGTH, NECK = HIPS - BODY_HEIGHT;
+
     private final ModelPart jaw;
 
     public WatchlingModel(ModelPart root) {
@@ -36,25 +38,23 @@ public class WatchlingModel extends HumanoidModel<WatchlingRenderState> {
         this.jaw = this.head.getChild("jaw");
     }
 
-    /** The enderman's layer with its head, jaw and arms swapped for the watchling's; baked by the renderer. */
+    /** Its parts, named as a humanoid's; baked by the renderer. */
     public static LayerDefinition createBodyLayer() {
-        MeshDefinition[] built = new MeshDefinition[1];
-        EndermanModel.createBodyLayer().apply(mesh -> {
-            // Where the enderman's head sits: its neck, at the top of the body
-            PartPose neck = PartPose.offset(0.0F, -13.0F, 0.0F);
-            PartDefinition root = mesh.getRoot();
-            PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -HEAD_HEIGHT, -4.0F, 8.0F, HEAD_HEIGHT, 8.0F), neck);
-            // The enderman's jaw layer (its "hat") is left empty wherever a humanoid looks for it; the jaw is the watchling's
-            head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
-            root.addOrReplaceChild("hat", CubeListBuilder.create(), neck);
-            head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(16, 32).addBox(-4.0F, -JAW_HEIGHT, -4.0F, 8.0F, JAW_HEIGHT, 8.0F, new CubeDeformation(-0.5F)), PartPose.ZERO);
-            // Arms twice as thick, flush against the body's sides (the body is 8 across, the arms 4)
-            root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(0, 30).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 30.0F, 4.0F), PartPose.offset(-6.0F, -12.0F, 0.0F));
-            root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(0, 30).mirror().addBox(-2.0F, -2.0F, -2.0F, 4.0F, 30.0F, 4.0F), PartPose.offset(6.0F, -12.0F, 0.0F));
-            built[0] = mesh;
-            return mesh;
-        });
-        return LayerDefinition.create(built[0], 64, 64);
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
+        PartPose neck = PartPose.offset(0.0F, NECK, 0.0F);
+        PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -HEAD_HEIGHT, -4.0F, 8.0F, HEAD_HEIGHT, 8.0F), neck);
+        // A humanoid's hat layer, empty: the jaw is the watchling's
+        head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+        root.addOrReplaceChild("hat", CubeListBuilder.create(), neck);
+        head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -JAW_HEIGHT, -4.0F, 8.0F, JAW_HEIGHT, 8.0F, new CubeDeformation(-0.5F)), PartPose.ZERO);
+        root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, BODY_HEIGHT, 4.0F), neck);
+        // The arms flush against the body's sides (the body is 8 across, the arms 4), from the shoulders
+        root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(24, 16).addBox(-2.0F, -2.0F, -2.0F, 4.0F, ARM_LENGTH, 4.0F), PartPose.offset(-6.0F, NECK + 2.0F, 0.0F));
+        root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(24, 16).mirror().addBox(-2.0F, -2.0F, -2.0F, 4.0F, ARM_LENGTH, 4.0F), PartPose.offset(6.0F, NECK + 2.0F, 0.0F));
+        root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(40, 16).addBox(-1.0F, 0.0F, -1.0F, 2.0F, LEG_LENGTH, 2.0F), PartPose.offset(-2.0F, HIPS, 0.0F));
+        root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0F, 0.0F, -1.0F, 2.0F, LEG_LENGTH, 2.0F), PartPose.offset(2.0F, HIPS, 0.0F));
+        return LayerDefinition.create(mesh, 64, 64);
     }
 
     @Override

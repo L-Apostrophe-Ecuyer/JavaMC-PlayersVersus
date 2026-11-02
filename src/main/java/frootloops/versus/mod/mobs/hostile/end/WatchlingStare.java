@@ -4,11 +4,13 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
@@ -24,11 +26,11 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * A watchling's gaze. A player looking at one (in plain sight, near the middle of the view, a carved pumpkin not over
- * their eyes) has their screen fill with static; full, they die, and silverfish crawl out where they stood. So does one
- * too near them, looked at or not: within NEAR_RANGE blocks the static builds on its own, faster the nearer, and a stare
- * adds to it (not from one that fights, which is only looked at). Looking away, or backing off, it clears (slowly).
- * Creative and spectating players don't see it.
+ * A watchling's gaze. A player looking at one (its eyes in plain sight, it near the middle of the view, a carved pumpkin
+ * not over their eyes) has their screen fill with static; full, they die, and silverfish crawl out where they stood.
+ * Only seeing it does it: the nearer it stands the faster a stare fills (within NEAR_RANGE blocks; not for one that
+ * fights), but near or far, unseen it builds nothing. Looking away, it clears (slowly). Creative and spectating players
+ * don't see it.
  */
 public final class WatchlingStare {
     public static final ResourceKey<DamageType> WATCHED = ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "watched"));
@@ -42,13 +44,37 @@ public final class WatchlingStare {
         ServerTickEvents.END_LEVEL_TICK.register(WatchlingStare::tick);
     }
 
-    /** Whether the player looks at it: in reach and plain sight, at least half seen (Gaze), nothing over their eyes. */
+    /**
+     * Whether the player looks at it: in reach, its eyes in plain sight ({@link #seesEyes}: not behind blocks nor leaves),
+     * at least WATCHED_AT seen (Gaze), nothing over their eyes.
+     */
     public static boolean looksAt(Player player, WatchlingEntity watchling) {
         if (!player.isAlive() || player.isSpectator() || player.isCreative() || !watchling.isAlive()) return false;
         if (player.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.GAZE_DISGUISE_EQUIPMENT)) return false;
         Vec3 towards = watchling.getBoundingBox().getCenter().subtract(player.getEyePosition());
         if (towards.length() > VersusSettings.Watchlings.WATCH_RANGE) return false;
-        return Gaze.watched(Gaze.visibility(player.getViewVector(1.0F), towards, watchling.getBbHeight() / 2.0)) && player.hasLineOfSight(watchling);
+        return Gaze.watched(Gaze.visibility(player.getViewVector(1.0F), towards, watchling.getBbHeight() / 2.0)) && seesEyes(player, watchling);
+    }
+
+    /** How finely the line between two pairs of eyes is searched for leaves (blocks). */
+    private static final double LEAF_STEP = 0.2;
+
+    /**
+     * Whether the player's eyes have its eyes in plain sight: the line between them clear of solid blocks, and of leaves,
+     * which anything may push through (so a line of sight passes them) but which hide what's behind.
+     */
+    public static boolean seesEyes(Player player, WatchlingEntity watchling) {
+        if (!player.hasLineOfSight(watchling)) return false;
+        Vec3 from = player.getEyePosition(), to = watchling.getEyePosition();
+        Vec3 line = to.subtract(from);
+        int steps = (int) Math.ceil(line.length() / LEAF_STEP);
+        BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+        for (int i = 1; i < steps; i++) {
+            Vec3 point = from.add(line.scale((double) i / steps));
+            at.set(point.x, point.y, point.z);
+            if (player.level().getBlockState(at).is(BlockTags.LEAVES)) return false;
+        }
+        return true;
     }
 
     /** The player looking at it, if any. */
@@ -61,8 +87,8 @@ public final class WatchlingStare {
     }
 
     /**
-     * How much faster than a stare the static builds for one this far off, looked at or not: nothing beyond NEAR_RANGE,
-     * rising evenly to PROXIMITY_RATE at KILL_RANGE and nearer.
+     * How much faster than a stare far off a stare at one this far off fills the static: nothing more beyond NEAR_RANGE,
+     * rising evenly to PROXIMITY_RATE more at KILL_RANGE and nearer.
      */
     public static float proximity(double distance) {
         double near = VersusSettings.Watchlings.NEAR_RANGE, kill = VersusSettings.Watchlings.KILL_RANGE;
@@ -71,14 +97,14 @@ public final class WatchlingStare {
         return (float) ((near - distance) / (near - kill)) * VersusSettings.Watchlings.PROXIMITY_RATE;
     }
 
-    /** How fast the static builds, in stares' worth: one for a stare, and what nearness adds. */
+    /** How fast the static builds, in stares' worth: unseen, nothing; seen, one stare and what nearness adds to it. */
     public static float rate(boolean looking, double distance) {
-        return (looking ? 1.0F : 0.0F) + proximity(distance);
+        return looking ? 1.0F + proximity(distance) : 0.0F;
     }
 
     /**
      * The same for a watchling that may be fighting: one that fights (it was attacked) puts static on the screen of
-     * whoever looks at it, but being near it adds nothing: nearness was the haunting's, and a fight is up close.
+     * whoever looks at it, but its nearness doesn't hurry it: nearness is the haunting's, and a fight is up close.
      */
     public static float rate(boolean fighting, boolean looking, double distance) {
         return fighting ? (looking ? 1.0F : 0.0F) : rate(looking, distance);
@@ -138,7 +164,7 @@ public final class WatchlingStare {
         }
     }
 
-    /** Looked too long, or too near: the player dies of it, and silverfish crawl out where they stood. A totem still saves them. */
+    /** Looked at too long: the player dies of it, and silverfish crawl out where they stood. A totem still saves them. */
     private static void die(ServerLevel level, ServerPlayer player, WatchlingEntity watchling) {
         Vec3 at = player.position();
         DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(WATCHED), watchling);
