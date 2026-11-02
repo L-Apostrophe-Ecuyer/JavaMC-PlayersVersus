@@ -169,13 +169,14 @@ public abstract class VersusSettings {
         public static double FIGHT_TELEPORT_RANGE = 16.0;
         public static int FIGHT_TELEPORT_TICKS = 30;
         public static int CALM_TICKS = 200;
-        // The view of whoever it hunts is pulled towards it now and then (client): within PULL_RANGE blocks, a pull every
-        // PULL_GAP_MIN to PULL_GAP_MAX ticks (sooner the nearer), lasting PULL_MIN to PULL_MAX ticks, turning the view
-        // PULL_DEGREES degrees a tick (more the nearer)
-        public static boolean PULL_ENABLED = true;
-        public static double PULL_RANGE = 24.0;
-        public static int PULL_GAP_MIN = 100, PULL_GAP_MAX = 320, PULL_MIN = 12, PULL_MAX = 30;
-        public static float PULL_DEGREES = 2.0F;
+        // Its gaze draws the eye (WatchlingLure; client WatchlingLureView): while it hunts you, within LURE_RANGE blocks
+        // and in plain sight, a view turned within LURE_DEGREES of it is drawn onto it, hardly at the edge and harder the
+        // nearer the view and the nearer it stands, up to LURE_SPEED degrees a second (half again that, close): a glance
+        // becomes a stare. A view turned elsewhere is left alone; a quick turn away breaks free
+        public static boolean LURE_ENABLED = true;
+        public static double LURE_RANGE = 24.0;
+        public static double LURE_DEGREES = 30.0;
+        public static float LURE_SPEED = 40.0F;
     }
 
     public static class Gaze {

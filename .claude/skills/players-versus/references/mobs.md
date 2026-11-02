@@ -109,10 +109,12 @@ assuming full overlap).
   mooshroom's, resolved each frame in their renderers' `extractRenderState`). Never converted. The spider's `doHurtTarget` on a plain spider converts it, unharmed. Game tests
   `MushroomMobsGameTest`, assets `MushroomMobsTest`.
 - **Watchling** (`mod/mobs/hostile/end/WatchlingEntity`, extends `Enderman`; client `WatchlingRenderer`,
-  `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman with a creaking's yellow
-  eyes (three of them, on a head 12 tall: `WatchlingModel`, built from `EndermanModel.createBodyLayer().apply(...)`,
-  `tools/watchling-head.py`, big arms and a jaw from a 64x64 texture; `WatchlingModel` is a `HumanoidModel`, animated per
-  `WatchlingAnimation`: maw opening while it fights, head cocked while it haunts, a two-armed strike) that haunts like Slender. Left alone it never moves or
+  `WatchlingStatic`; spec `2026-11-01-pale-warp-lore-and-watchling-design.md`): an enderman-sized thing with a cube head
+  (8), a long body (8 x 20 x 4), thick arms hanging nearly to the ground (4 x 40 x 4) and thin legs (2 x 22 x 2), all
+  in obsidian's plum with near-black dashes, its thirteen eyes (head and body) slits glowing the creaking's yellow
+  (`WatchlingModel`, a `HumanoidModel` with its own mesh, a jaw inside the head; 64x64 skin and `watchling_eyes.png` from
+  `tools/watchling-skin.py`; sizes in `WatchlingAnimation`; animated per `WatchlingAnimation`: maw opening while it
+  fights, head cocked while it haunts, a two-armed strike) that haunts like Slender. Left alone it never moves or
   strikes (its enderman-style goals are gated on `isEnraged()`). `customServerAiStep`: watched (`WatchlingStare.watcher`) it notes its watcher and `DATA_HUNTING` (synced,
   `isHunting`); looked away from, it teleports after `TELEPORT_DELAY`-2x ticks to nearer
   (`WatchlingStare.approach`: `APPROACH_MIN`-`MAX` of the distance, not nearer than `CLOSEST`) at a bearing more than
@@ -120,13 +122,16 @@ assuming full overlap).
   unlooked at for `VANISH_MIN`-`MAX` ticks (90 s to 3 min) after being seen it discards itself. Hit by any non-watchling
   living attacker (or shot at) `hurtServer` -> `enrage`: `DATA_ENRAGED`, it targets the attacker, melee-fights with an
   enderman's stats, `fight()` teleports up to a target beyond `FIGHT_TELEPORT_RANGE` and `calm()` returns it to haunting
-  after `CALM_TICKS` with no live target; `isHunting()` is false while enraged (no pull), and `WatchlingStare.rate(
+  after `CALM_TICKS` with no live target; `isHunting()` is false while enraged (no lure), and `WatchlingStare.rate(
   fighting, looking, distance)` ignores nearness for a fighting one (a stare still builds static). `WatchlingStare` (server, each level tick): the pressure on a player is the fastest rate among
   the watchlings about them: 1 for looking at one (48 blocks, line of sight, at least half seen by `Gaze`, no
   `#gaze_disguise_equipment` on the head) plus `proximity(distance)` (0 beyond `NEAR_RANGE`, up to `PROXIMITY_RATE` at
   `KILL_RANGE`, looking or not); the static (`WatchedPayload` to the HUD) fills at rate/`STARE_TICKS` and clears over
-  `CLEAR_TICKS`; full, they die of `players-versus:watched` and 4-7 silverfish spawn. Client `WatchlingPull` turns the
-  local player's view towards a hunting one within `PULL_RANGE` now and then (`Entity#turn`, as the mouse does).
+  `CLEAR_TICKS`; full, they die of `players-versus:watched` and 4-7 silverfish spawn. Its gaze draws the eye
+  (`WatchlingLure`, pure, `WatchlingLureTest`; client `WatchlingLureView`): each tick the nearest hunting one within
+  `LURE_RANGE` in line of sight is noted; each frame, at `MouseHandler#turnPlayer` TAIL (`MouseHandlerLureMixin`, with
+  the frame's time), a view within `LURE_DEGREES` (30) of it turns onto it by `LURE_SPEED` (40°/s) x (1 - away/cone)^2
+  x (0.5 + closeness), straight and never past (`Entity#turn`, as the mouse); a view elsewhere is untouched.
   Spawns rarely in the dark by the pale line.
 - **The warped show only to a stare**: `Gaze` (pure, `GazeTest`, `VersusSettings.Gaze`) rates how well a view sees a
   body (1 on it, smoothly down to 0 at 30° off its edge) and `Gaze.opacity` floors it at 3% and rises with the square. Client

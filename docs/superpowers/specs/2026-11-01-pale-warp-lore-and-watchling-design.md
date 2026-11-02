@@ -398,3 +398,24 @@ fear wolves as skeletons do.
 - Tests: `UndeadFormsGameTest.aPaleWolfFleesALivingWolf`, `aWolfHuntsPaleWolves`; `PaleMobsTest.thePaleWolfIsASkeleton`,
   `thePaleWolfHowlsAndRattles`; `MobSpawningTest` (night). Its look and sounds are unseen and unheard in a running game.
 
+## The watchling's look, and a lure in place of the pull (thirteenth round, 2026-11-02)
+
+Asked for: the cursor pull is more annoying than scary or effective; the watchling should look like the reference
+image (a many-eyed obsidian creature), its eyes yellow as the creaking's.
+
+- **The look:** a cube head (8) on a long body (8 x 20 x 4), thick arms hanging from the shoulders nearly to the ground
+  (4 x 40 x 4), thin legs (2 x 22 x 2), as tall as before (3.1 blocks). Its skin is obsidian's plum, each texel a
+  shade lighter or darker, broken by near-black dashes; its eyes are thirteen slits, three texels wide, yellow at the
+  ends and white-hot in the middle, glowing: one low on the face, two on the head's left side, one on its right, one
+  behind, four down the body's front (right and left by turns), two on its back and one on each side. The head still
+  lifts off its jaw (8 x 4 x 8: fangs, teeth) when it fights. The egg is plum with yellow spots.
+  (`tools/watchling-skin.py`; `tools/watchling-head.py` and its source are gone.)
+- **The lure:** the pull came at random, wherever one was looking, and stepped the view twenty times a second. Now its
+  gaze draws the eye only when the view is already turned near it, within 30° (where it shows as a shimmer at the
+  edge of sight), in plain sight, while it hunts: hardly at the edge, harder as the view comes nearer and the nearer it
+  stands (up to 40° a second, 60° close), smoothly each frame, straight onto it. Glance near it and the glance becomes
+  a stare, which is what kills; a quick turn away breaks free, and a view turned elsewhere is never touched.
+- `VersusSettings.Watchlings` `LURE_ENABLED`, `LURE_RANGE` 24, `LURE_DEGREES` 30, `LURE_SPEED` 40 (the `PULL_` ones
+  are gone); `WatchlingLure` (pure, `WatchlingLureTest`), client `WatchlingLureView`, `MouseHandlerLureMixin`. The look
+  and the lure's feel are unseen in a running game.
+

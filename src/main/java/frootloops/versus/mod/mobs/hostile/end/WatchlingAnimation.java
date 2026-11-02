@@ -4,14 +4,16 @@ import net.minecraft.util.Mth;
 
 /**
  * How a watchling moves (client WatchlingModel; the numbers and curves are here, pure, to be tested). Haunting, it
- * stands with its long arms hanging and its tall head cocked to one side, swaying a little, as it watches. Fighting, it
+ * stands with its long arms hanging to the ground and its head cocked to one side, swaying a little, as it watches. Fighting, it
  * opens its maw (its head lifts off a jaw that stays, as an angry enderman's does, showing fangs) and reaches forward;
  * it strikes with both arms, the main one sweeping out fast and both coming back slower. Walking, its long limbs swing
  * less than a humanoid's. Model units for lengths, radians for angles.
  */
 public final class WatchlingAnimation {
-    /** How tall the head and its jaw are, and how far the head lifts off the jaw when fighting. */
-    public static final float HEAD_HEIGHT = 12.0F, JAW_HEIGHT = 6.0F, JAW_LIFT = 5.0F;
+    /** How tall the head (a cube) and its jaw are, and how far the head lifts off the jaw when fighting. */
+    public static final float HEAD_HEIGHT = 8.0F, JAW_HEIGHT = 4.0F, JAW_LIFT = 3.0F;
+    /** The body's height, and the arms' and legs' length: the arms hang from the shoulders nearly to the ground. */
+    public static final float BODY_HEIGHT = 20.0F, ARM_LENGTH = 40.0F, LEG_LENGTH = 22.0F;
     /** Ticks for the jaw to open all the way (it shuts as fast), and for the head to cock all the way (and straighten). */
     public static final int JAW_TICKS = 4, HEAD_TILT_TICKS = 30;
     /** How far the head cocks while it haunts, and how much it sways about that. */
