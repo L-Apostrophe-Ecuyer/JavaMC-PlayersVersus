@@ -56,20 +56,23 @@ public class EndermanShulkerGameTest {
     }
 
     /** Hurt low, a shulker in an enderman's arms doesn't teleport out of them. */
-    @GameTest(structure = ROOM, maxTicks = 20)
+    @GameTest(structure = ROOM, maxTicks = 400)
     public void aCarriedShulkerCantTeleportAway(GameTestHelper helper) {
         floor(helper);
         Vec3 at = new Vec3(6.5, 1.0, 3.5);
         Enderman enderman = helper.spawnWithNoFreeWill(EntityTypes.ENDERMAN, at);
         Shulker shulker = carried(helper, enderman, at);
         shulker.setHealth(shulker.getMaxHealth() * 0.4F);
-        // A shulker below half health teleports one hit in four: forty hits, and it would all but surely have gone
-        for (int i = 0; i < 40; i++) {
-            shulker.invulnerableTime = 0;
-            shulker.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 0.01F);
+        // A shulker below half health teleports one hit in four: thirty hits (each after the last's cooldown, ten ticks),
+        // and it would all but surely have gone
+        int hits = 30, apart = 11;
+        for (int i = 0; i < hits; i++) {
+            helper.runAfterDelay(1 + i * apart, () -> shulker.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 0.01F));
         }
-        helper.assertTrue(shulker.isAlive() && shulker.getVehicle() == enderman, "the shulker left the enderman's arms");
-        helper.succeed();
+        helper.runAfterDelay(2 + hits * apart, () -> {
+            helper.assertTrue(shulker.isAlive() && shulker.getVehicle() == enderman, "the shulker left the enderman's arms");
+            helper.succeed();
+        });
     }
 
     /** Its shulker's bullets pass through the enderman carrying it (which would otherwise rise, and teleport away). */
