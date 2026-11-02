@@ -27,8 +27,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Blight replaces the Wither effect: any Wither given is Blight (the same time, the same strength up to a limit), by
  * whatever gave it (a wither skeleton's hit, a wither rose, the wither's skulls, a command). Blight stacks: a dose on
  * one had adds its amplifier + 1 to it, refreshing it without shortening it, however it was given (a hit, a cloud, a
- * shroom, a command). Absorption gained pushes it back. A hit that blighted gives nothing else. The immune (undead,
- * mushroom creatures, golems, bosses) never take it. Whatever dies fully blighted is replaced by its pale form.
+ * shroom, a command). Absorption gained pushes it back. A hit that blighted gives nothing else. The immune (undead, the
+ * pale, pillagers, vindicators, witches, wolves, mushroom creatures, golems, bosses) never take it, nor the Wither. Whatever dies fully blighted is replaced by its pale form.
  */
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityBlightMixin {

@@ -3,10 +3,7 @@
     "minecraft:player",
     "minecraft:villager",
     "minecraft:wandering_trader",
-    "minecraft:pillager",
-    "minecraft:vindicator",
     "minecraft:evoker",
-    "minecraft:illusioner",
-    "minecraft:witch"
+    "minecraft:illusioner"
   ]
 }

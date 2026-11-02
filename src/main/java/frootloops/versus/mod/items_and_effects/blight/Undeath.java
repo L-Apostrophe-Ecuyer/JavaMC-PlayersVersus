@@ -50,11 +50,12 @@ import java.util.WeakHashMap;
  * hooks are LivingEntityBlightMixin's and, for players, ServerPlayerBlightedDeathMixin's): a player rises a player
  * zombie where they fell, wearing and carrying what they had (PlayerZombieEntity). A creative player can't die: they
  * live, and a copy of them rises. A totem of undying saves a player, and cures them. Skeletons, the nether's undead, the
- * pale, red mushroom creatures, warped things, golems and bosses don't take Blight at all ({@link #immune}).
+ * pale (pillagers, vindicators and witches among them), wolves, red mushroom creatures, warped things, golems and bosses
+ * don't take Blight at all, nor the Wither it replaces ({@link #immune}).
  */
 public final class Undeath {
     public static final TagKey<EntityType<?>> IMMUNE = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "blight_immune"));
-    /** What turns into a pale zombie: illagers, witches. */
+    /** What turns into a pale zombie: evokers, illusioners (pillagers, vindicators and witches are immune). */
     public static final TagKey<EntityType<?>> RISE_AS_ZOMBIES = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rise_as_zombies"));
     public static final ResourceKey<DamageType> TURNED_UNDEAD = ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "turned_undead"));
 
@@ -162,8 +163,8 @@ public final class Undeath {
     /**
      * Replaces the entity with its pale form, if it has one: whether it did. This is what dying fully blighted comes to
      * (LivingEntityBlightMixin; and for a creative player, who can't die of it, after the shaking). Its pale form first
-     * ({@link #turnPale}): a villager a pale villager, a wandering trader a pale wandering trader, an illager or a witch
-     * a pale zombie, zombies of every kind pale zombies, a creeper a pale creeper, spiders pale spiders. What has none
+     * ({@link #turnPale}): a villager a pale villager, a wandering trader a pale wandering trader, an evoker or an
+     * illusioner a pale zombie, zombies of every kind pale zombies, a creeper a pale creeper, spiders pale spiders. What has none
      * but an undead kind turns into that: piglins zombified piglins, a hoglin a zoglin, and animals with an undead kind
      * of their own, as calm as they were and their owner's still (a horse a zombie horse, a camel a camel husk, a
      * nautilus a zombie nautilus, a chicken a zombie chicken). A player rises a player zombie ({@link PlayerZombieEntity});
@@ -209,7 +210,8 @@ public final class Undeath {
     /**
      * The living that have a pale form turn into it: zombies of every kind into pale zombies, a creeper into a pale
      * creeper, spiders into pale spiders, a villager into a pale villager ({@link #turnPaleVillager}), a wandering trader
-     * into a pale wandering trader ({@link #turnPaleTrader}), an illager or a witch into a pale zombie. Whether it turned.
+     * into a pale wandering trader ({@link #turnPaleTrader}), an evoker or an illusioner into a pale zombie. Whether it
+     * turned.
      */
     public static boolean turnPale(ServerLevel level, LivingEntity entity) {
         if (immune(entity)) return false;

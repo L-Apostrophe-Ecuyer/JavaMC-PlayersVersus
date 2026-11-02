@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -149,6 +150,22 @@ public class BlightGameTest {
         helper.assertTrue(limited != null && limited.getAmplifier() == VersusSettings.Blight.WITHER_MAX_HEARTS - 1,
                 "a forced Wither of 251 levels became " + (limited == null ? "no Blight" : "Blight amplifier " + limited.getAmplifier()));
         helper.assertTrue(!forced.hasEffect(MobEffects.WITHER), "the forced Wither stayed the Wither");
+        helper.succeed();
+    }
+
+    /** Like the pale, pillagers, vindicators, witches and wolves take no Blight, nor the Wither it replaces, however given. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void pillagersVindicatorsWitchesAndWolvesTakeNoBlight(GameTestHelper helper) {
+        floor(helper);
+        List<EntityType<? extends Mob>> immune = List.of(EntityTypes.PILLAGER, EntityTypes.VINDICATOR, EntityTypes.WITCH, EntityTypes.WOLF);
+        for (int i = 0; i < immune.size(); i++) {
+            Mob mob = helper.spawnWithNoFreeWill(immune.get(i), new Vec3(2.5 + 3 * i, 1.0, 3.5));
+            String name = mob.getName().getString();
+            helper.assertTrue(!mob.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0)), "a " + name + " took Blight");
+            helper.assertTrue(!mob.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 1)), "a " + name + " took the Wither");
+            mob.forceAddEffect(new MobEffectInstance(MobEffects.WITHER, 200, 1), null);
+            helper.assertTrue(!mob.hasEffect(CustomStatusEffects.BLIGHT) && !mob.hasEffect(MobEffects.WITHER), "a " + name + " was forced blighted or withered");
+        }
         helper.succeed();
     }
 

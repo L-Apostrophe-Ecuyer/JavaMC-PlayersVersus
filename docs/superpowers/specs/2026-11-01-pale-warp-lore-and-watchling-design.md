@@ -350,3 +350,17 @@ Wither, its black hearts included: a blighted heart turns black, and a lost one 
   the conversion at `LivingEntity#die`); `ServerPlayerBlightedDeathMixin` (any death, fully blighted); client
   `BlightHeartsMixin`. Game tests in `BlightGameTest`, `UndeadFormsGameTest` and `StagedMushroomsGameTest`.
 
+## Pillagers, vindicators, witches and wolves take no Blight (eleventh round, 2026-11-02)
+
+Asked for: pillagers, witches and vindicators are immune to Blight and the Wither, as the other pale mobs are; wolves
+too.
+
+- Tag `players-versus:blight_immune` takes in `minecraft:pillager`, `minecraft:vindicator`, `minecraft:witch` and
+  `minecraft:wolf`: no Blight on them, nor the Wither it replaces, however given (a wither skeleton's hit, a wither
+  rose, the wither's skulls, a cloud, a potion, a command). A tamed wolf can fight wither skeletons unharmed by it.
+- They leave `players-versus:rise_as_zombies` and `players-versus:zombie_kin`: zombies' rare blighting hits no longer
+  aim at them, and a blighting hit on anything immune (`BlightAttacks.afterHit`) gives it what it would otherwise.
+- Evokers and illusioners (not named) still take Blight, and still die fully blighted into pale zombies.
+- Game tests: `BlightGameTest.pillagersVindicatorsWitchesAndWolvesTakeNoBlight`; the pillager turning tests now use an
+  evoker (`UndeadFormsGameTest.anEvokerKilledFullyBlightedIsAPaleZombie`,
+  `StagedMushroomsGameTest.aFullyBlightedEvokerDiesIntoAPaleZombie`).

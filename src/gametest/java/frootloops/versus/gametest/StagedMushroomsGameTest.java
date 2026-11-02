@@ -285,15 +285,15 @@ public class StagedMushroomsGameTest {
         });
     }
 
-    /** Fully blighted, a pillager wastes away and dies into a pale zombie. */
+    /** Fully blighted, an evoker wastes away and dies into a pale zombie. */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void aFullyBlightedPillagerDiesIntoAPaleZombie(GameTestHelper helper) {
+    public void aFullyBlightedEvokerDiesIntoAPaleZombie(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
-        Mob pillager = helper.spawnWithNoFreeWill(EntityTypes.PILLAGER, new Vec3(3.5, 1.0, 3.5));
-        pillager.addEffect(fullBlight(pillager));
+        Mob evoker = helper.spawnWithNoFreeWill(EntityTypes.EVOKER, new Vec3(3.5, 1.0, 3.5));
+        evoker.addEffect(fullBlight(evoker));
         helper.succeedWhen(() -> {
-            helper.assertTrue(pillager.isRemoved(), "the pillager is still a pillager");
-            helper.assertTrue(helper.getLevel().getEntitiesOfClass(PaleZombieEntity.class, room(helper)).size() == 1, "no pale zombie rose of the pillager");
+            helper.assertTrue(evoker.isRemoved(), "the evoker is still an evoker");
+            helper.assertTrue(helper.getLevel().getEntitiesOfClass(PaleZombieEntity.class, room(helper)).size() == 1, "no pale zombie rose of the evoker");
         });
     }
 

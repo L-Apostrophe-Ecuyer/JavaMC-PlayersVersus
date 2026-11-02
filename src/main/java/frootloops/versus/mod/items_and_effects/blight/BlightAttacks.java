@@ -50,7 +50,8 @@ public final class BlightAttacks {
         boolean always = attacker instanceof PaleZombieEntity || attacker instanceof PaleVillagerEntity || attacker instanceof PlayerZombieEntity
                 || attacker instanceof Creaking || attacker instanceof WatchlingEntity;
         boolean rarely = attacker instanceof Zombie && kin(attacker, target) && attacker.getRandom().nextFloat() < VersusSettings.Mushrooms.ZOMBIE_BLIGHT_CHANCE;
-        if (!always && !rarely) return;
+        // The immune take no Blight: the hit gives them what it would otherwise
+        if (!always && !rarely || Undeath.immune(target)) return;
         CONVERTING_HITS.put(attacker, new Hit(target.getId(), level.getGameTime()));
         target.addEffect(dose(), attacker);
     }

@@ -92,9 +92,11 @@ by `ZOMBIE_BLIGHT_CHANCE` (`BlightAttacks.afterHit`; a converting hit's other ef
 are dropped), a creaking vanishing when hit, the mushroom creeper's spore puff, the pale creeper's cloud, and rotten
 flesh (`VanillaItems`: `ROTTEN_FLESH_BLIGHT_CHANCE` 1/8 of a 1200-tick dose, besides its hunger), and whatever gave the
 Wither. `LivingEntityBlightMixin` stacks doses (new amplifier = had + dose + 1, duration the longer of the two) and keeps
-tag `players-versus:blight_immune` from taking it (skeletons, the nether's undead, the passive undead animals,
-the pale, red mushroom hosts, endermen and their bugs, golems, bosses; zombies are no longer immune). Zombies' rare hits convert only their kin (tag
-`players-versus:zombie_kin`; piglins for zombified piglins). The mushroom creeper's puff no longer doses (lore spec
+tag `players-versus:blight_immune` from taking it or the Wither (skeletons, the nether's undead, the passive undead
+animals, the pale, pillagers, vindicators and witches, wolves, red mushroom hosts, endermen and their bugs, golems,
+bosses; zombies are no longer immune; `BlightAttacks.afterHit` skips the immune, so their hits keep their other
+effects). Zombies' rare hits convert only their kin (tag `players-versus:zombie_kin`: players, villagers, wandering
+traders, evokers, illusioners; piglins for zombified piglins). The mushroom creeper's puff no longer doses (lore spec
 `2026-11-01-pale-warp-lore-and-watchling-design.md`). Blighted hearts = amplifier + 1 from the bar's end (`Blight`, pure,
 `BlightTest`); client `BlightHeartsMixin` draws them with vanilla's `Hud$HeartType.WITHERED` (the Wither's black
 hearts; access-widened `Hud$HeartType`), a lost one being the plain container. Food regeneration stops below them
@@ -108,7 +110,7 @@ from the tick it became full; nausea for a player; a creative player, who can't 
 `LivingEntityBlightMixin` at `LivingEntity#die` HEAD calls `Undeath#turn` and cancels the death if it turned. `turn`
 tries `turnPale` first (villager -> pale villager via `turnPaleVillager`, keeping data, gossip, offers and xp;
 wandering trader -> pale wandering trader via `turnPaleTrader`, keeping offers; zombies -> pale zombie; creeper -> pale
-creeper; spiders -> pale spider; `rise_as_zombies` (illagers, witches) -> pale zombie), then an undead kind
+creeper; spiders -> pale spider; `rise_as_zombies` (evokers, illusioners) -> pale zombie), then an undead kind
 (`undeadKind`: horse -> zombie horse, camel -> camel husk, nautilus -> zombie nautilus, chicken -> zombie chicken,
 piglins -> zombified piglin, hoglin -> zoglin, keeping tame/owner/jockey); else nothing, and it dies. A player who
 dies fully blighted rises as a `PlayerZombieEntity` (`ServerPlayerBlightedDeathMixin` at `ServerPlayer#die` HEAD,

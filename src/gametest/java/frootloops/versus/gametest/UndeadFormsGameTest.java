@@ -111,14 +111,14 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
-    /** Killed fully blighted, a pillager turns into a pale zombie. */
+    /** Killed fully blighted, an evoker turns into a pale zombie. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void aPillagerKilledFullyBlightedIsAPaleZombie(GameTestHelper helper) {
+    public void anEvokerKilledFullyBlightedIsAPaleZombie(GameTestHelper helper) {
         floor(helper);
-        Mob pillager = helper.spawnWithNoFreeWill(EntityTypes.PILLAGER, new Vec3(3.5, 1.0, 3.5));
-        killFullyBlighted(helper, pillager);
-        helper.assertTrue(pillager.isRemoved(), "the fully blighted pillager killed is still a pillager");
-        helper.assertTrue(found(helper, Mob.class, ModEntities.PALE_ZOMBIE).size() == 1, "no pale zombie rose of the pillager");
+        Mob evoker = helper.spawnWithNoFreeWill(EntityTypes.EVOKER, new Vec3(3.5, 1.0, 3.5));
+        killFullyBlighted(helper, evoker);
+        helper.assertTrue(evoker.isRemoved(), "the fully blighted evoker killed is still an evoker");
+        helper.assertTrue(found(helper, Mob.class, ModEntities.PALE_ZOMBIE).size() == 1, "no pale zombie rose of the evoker");
         helper.succeed();
     }
 
