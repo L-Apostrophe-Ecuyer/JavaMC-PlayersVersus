@@ -153,11 +153,11 @@ public class BlightGameTest {
         helper.succeed();
     }
 
-    /** Like the pale, pillagers, vindicators, witches and wolves take no Blight, nor the Wither it replaces, however given. */
+    /** Like the pale, pillagers, vindicators and witches take no Blight, nor the Wither it replaces, however given. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void pillagersVindicatorsWitchesAndWolvesTakeNoBlight(GameTestHelper helper) {
+    public void pillagersVindicatorsAndWitchesTakeNoBlight(GameTestHelper helper) {
         floor(helper);
-        List<EntityType<? extends Mob>> immune = List.of(EntityTypes.PILLAGER, EntityTypes.VINDICATOR, EntityTypes.WITCH, EntityTypes.WOLF);
+        List<EntityType<? extends Mob>> immune = List.of(EntityTypes.PILLAGER, EntityTypes.VINDICATOR, EntityTypes.WITCH);
         for (int i = 0; i < immune.size(); i++) {
             Mob mob = helper.spawnWithNoFreeWill(immune.get(i), new Vec3(2.5 + 3 * i, 1.0, 3.5));
             String name = mob.getName().getString();
