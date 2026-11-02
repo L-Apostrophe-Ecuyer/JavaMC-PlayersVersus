@@ -8,7 +8,10 @@ import frootloops.versus.mod.items_and_effects.blight.Blight;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
+import frootloops.versus.mixin.mobs.passive.WolfAccessor;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWolfEntity;
 import frootloops.versus.mod.mobs.passive.ZombieChickenEntity;
+import frootloops.versus.mod.mobs.passive.ZombieWolfEntity;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -23,6 +26,10 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.zombie.ZombieVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -49,8 +56,9 @@ import java.util.UUID;
 /**
  * What Blight makes of villagers and animals: whatever dies fully blighted is replaced by its pale form (villagers pale
  * villagers, cured by golden apples; illagers pale zombies; wandering traders pale wandering traders), or, with none, its
- * undead kind (animals with one of their own, still their owner's). Zombie chickens lay nothing and breed with nothing;
- * the pale and the passive undead are undead. Golden apples cure Blight; grown brown mushroom clusters make mining
+ * undead kind (animals with one of their own, still their owner's): a wolf a zombie wolf, and a zombie wolf in its turn a
+ * pale wolf, no one's, that hunts and blights. Zombie chickens lay nothing and breed with nothing; the pale and the
+ * passive undead are undead. Golden apples cure Blight; grown brown mushroom clusters make mining
  * fatigue.
  */
 public class UndeadFormsGameTest {
@@ -231,6 +239,65 @@ public class UndeadFormsGameTest {
         });
     }
 
+    /**
+     * Dying fully blighted, a tamed wolf turns into a zombie wolf still tame, still its owner's, its collar kept and its
+     * health a tame wolf's; grown, and eating only rotten flesh.
+     */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aFullyBlightedTamedWolfIsAZombieWolfStillItsOwners(GameTestHelper helper) {
+        floor(helper);
+        ServerPlayer owner = FakePlayer.get(helper.getLevel());
+        Wolf wolf = helper.spawnWithNoFreeWill(EntityTypes.WOLF, new Vec3(3.5, 1.0, 3.5));
+        wolf.setTame(true, true);
+        wolf.setOwner(owner);
+        ((WolfAccessor) wolf).playersVersus$setCollarColor(DyeColor.RED);
+        killFullyBlighted(helper, wolf);
+        helper.assertTrue(wolf.isRemoved(), "the fully blighted wolf killed is still a wolf");
+        List<ZombieWolfEntity> undead = found(helper, ZombieWolfEntity.class, ModEntities.ZOMBIE_WOLF);
+        helper.assertTrue(undead.size() == 1, undead.size() + " zombie wolves, not one");
+        ZombieWolfEntity zombie = undead.getFirst();
+        helper.assertTrue(zombie.isTame(), "the zombie wolf isn't tame");
+        helper.assertTrue(zombie.getOwnerReference() != null && owner.getUUID().equals(zombie.getOwnerReference().getUUID()), "the zombie wolf isn't its owner's");
+        helper.assertTrue(zombie.getCollarColor() == DyeColor.RED, "the zombie wolf's collar is " + zombie.getCollarColor());
+        helper.assertTrue(zombie.getMaxHealth() == 40.0F, "the tame zombie wolf has " + zombie.getMaxHealth() + " max health, not a tame wolf's");
+        helper.assertTrue(!zombie.isBaby() && !zombie.hasEffect(CustomStatusEffects.BLIGHT), "the zombie wolf is a pup or carries Blight");
+        helper.assertTrue(zombie.isFood(new ItemStack(Items.ROTTEN_FLESH)) && !zombie.isFood(new ItemStack(Items.BEEF)), "the zombie wolf eats more than rotten flesh");
+        helper.succeed();
+    }
+
+    /** Dying fully blighted in its turn, a tamed zombie wolf turns into a pale wolf, wild: its owner forgotten. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aZombieWolfDyingFullyBlightedIsAPaleWolfNoOnesOwn(GameTestHelper helper) {
+        floor(helper);
+        ServerPlayer owner = FakePlayer.get(helper.getLevel());
+        ZombieWolfEntity zombie = helper.spawnWithNoFreeWill(ModEntities.ZOMBIE_WOLF, new Vec3(3.5, 1.0, 3.5));
+        zombie.setTame(true, true);
+        zombie.setOwner(owner);
+        killFullyBlighted(helper, zombie);
+        helper.assertTrue(zombie.isRemoved(), "the fully blighted zombie wolf killed is still a zombie wolf");
+        List<PaleWolfEntity> pale = found(helper, PaleWolfEntity.class, ModEntities.PALE_WOLF);
+        helper.assertTrue(pale.size() == 1, pale.size() + " pale wolves, not one");
+        helper.assertTrue(!pale.getFirst().isTame() && pale.getFirst().getOwnerReference() == null, "the pale wolf is still someone's");
+        helper.succeed();
+    }
+
+    /** A pale wolf is a monster: it takes no Blight, a bone doesn't tame it, and its bite blights. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aPaleWolfCantBeTamedTakesNoBlightAndItsBiteBlights(GameTestHelper helper) {
+        floor(helper);
+        PaleWolfEntity pale = helper.spawnWithNoFreeWill(ModEntities.PALE_WOLF, new Vec3(3.5, 1.0, 3.5));
+        helper.assertTrue(pale instanceof Enemy, "a pale wolf isn't an enemy");
+        helper.assertTrue(!pale.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0)), "a pale wolf took Blight");
+        ServerPlayer player = FakePlayer.get(helper.getLevel());
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BONE, 64));
+        for (int i = 0; i < 20; i++) helper.assertTrue(pale.mobInteract(player, InteractionHand.MAIN_HAND) == InteractionResult.PASS, "a bone did something to a pale wolf");
+        helper.assertTrue(!pale.isTame(), "a pale wolf was tamed");
+        Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(5.5, 1.0, 3.5));
+        helper.assertTrue(pale.doHurtTarget(helper.getLevel(), pig), "the pale wolf's bite missed");
+        helper.assertTrue(pig.hasEffect(CustomStatusEffects.BLIGHT), "the pale wolf's bite didn't blight");
+        helper.succeed();
+    }
+
     /** A zombie chicken whose egg is due lays nothing, where a chicken lays; and it eats nothing (so breeds with nothing). */
     @GameTest(structure = ROOM, maxTicks = 100)
     public void zombieChickensLayNoEggs(GameTestHelper helper) {
@@ -250,15 +317,19 @@ public class UndeadFormsGameTest {
         });
     }
 
-    /** The pale undead and the zombie chicken are undead (smite, healing harms them); the zombie chicken burns in daylight. */
+    /**
+     * The pale undead and the undead animals (the zombie chicken, the zombie wolf) are undead (smite, healing harms them);
+     * the undead animals burn in daylight.
+     */
     @GameTest(structure = ROOM, maxTicks = 20)
     public void thePaleAndTheZombieChickenAreUndead(GameTestHelper helper) {
         floor(helper);
-        List<EntityType<? extends Mob>> types = List.of(ModEntities.PALE_ZOMBIE, ModEntities.PALE_CREEPER, ModEntities.PALE_SPIDER, ModEntities.ZOMBIE_CHICKEN);
+        List<EntityType<? extends Mob>> types = List.of(ModEntities.PALE_ZOMBIE, ModEntities.PALE_CREEPER, ModEntities.PALE_SPIDER, ModEntities.PALE_WOLF,
+                ModEntities.ZOMBIE_CHICKEN, ModEntities.ZOMBIE_WOLF);
         for (int i = 0; i < types.size(); i++) {
-            Mob mob = helper.spawnWithNoFreeWill(types.get(i), new Vec3(2.5 + 3 * i, 1.0, 3.5));
+            Mob mob = helper.spawnWithNoFreeWill(types.get(i), new Vec3(1.5 + 2 * i, 1.0, 3.5));
             helper.assertTrue(mob.is(EntityTypeTags.UNDEAD), mob.getType() + " isn't undead");
-            if (mob instanceof ZombieChickenEntity) helper.assertTrue(mob.is(EntityTypeTags.BURN_IN_DAYLIGHT), "the zombie chicken doesn't burn in daylight");
+            if (mob instanceof ZombieChickenEntity || mob instanceof ZombieWolfEntity) helper.assertTrue(mob.is(EntityTypeTags.BURN_IN_DAYLIGHT), mob.getType() + " doesn't burn in daylight");
         }
         helper.succeed();
     }

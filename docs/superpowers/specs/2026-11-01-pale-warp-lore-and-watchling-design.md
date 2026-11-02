@@ -31,7 +31,8 @@ Asked for on 2026-11-01, after a review of the mod's lore against its code: fix 
    - **an animal with an undead kind of its own turns into it, and stays as calm as it was and its owner's**: a horse
      a zombie horse, a camel a camel husk, a nautilus a zombie nautilus, a chicken a zombie chicken;
    - zombies of every kind become pale zombies, a creeper a pale creeper, spiders pale spiders;
-   - anything else just dies of the Wither (donkeys, mules, pigs, cows, wolves...: no undead kind of their own).
+   - anything else just dies of the Wither (donkeys, mules, pigs, cows...: no undead kind of their own; wolves rise
+     zombie wolves since the eleventh round).
    - Never converted: skeletons (bone), the nether's undead, phantoms, the wither, the passive undead (undead horses,
      camel husks, zombie nautiluses, zombie chickens: kept beside living ones, they stay as they are); the pale
      themselves (pale zombies, creepers and spiders, creakings, watchlings); the red mushroom's hosts; endermen,
@@ -350,17 +351,29 @@ Wither, its black hearts included: a blighted heart turns black, and a lost one 
   the conversion at `LivingEntity#die`); `ServerPlayerBlightedDeathMixin` (any death, fully blighted); client
   `BlightHeartsMixin`. Game tests in `BlightGameTest`, `UndeadFormsGameTest` and `StagedMushroomsGameTest`.
 
-## Pillagers, vindicators, witches and wolves take no Blight (eleventh round, 2026-11-02)
+## Pillagers, vindicators and witches take no Blight; zombie and pale wolves (eleventh round, 2026-11-02)
 
-Asked for: pillagers, witches and vindicators are immune to Blight and the Wither, as the other pale mobs are; wolves
-too.
+Asked for: pillagers, witches and vindicators are immune to Blight and the Wither, as the other pale mobs are. Wolves
+have zombie and pale variants; pale wolves are hostile to players.
 
-- Tag `players-versus:blight_immune` takes in `minecraft:pillager`, `minecraft:vindicator`, `minecraft:witch` and
-  `minecraft:wolf`: no Blight on them, nor the Wither it replaces, however given (a wither skeleton's hit, a wither
-  rose, the wither's skulls, a cloud, a potion, a command). A tamed wolf can fight wither skeletons unharmed by it.
+- Tag `players-versus:blight_immune` takes in `minecraft:pillager`, `minecraft:vindicator` and `minecraft:witch`: no
+  Blight on them, nor the Wither it replaces, however given (a wither skeleton's hit, a wither rose, the wither's
+  skulls, a cloud, a potion, a command).
 - They leave `players-versus:rise_as_zombies` and `players-versus:zombie_kin`: zombies' rare blighting hits no longer
   aim at them, and a blighting hit on anything immune (`BlightAttacks.afterHit`) gives it what it would otherwise.
 - Evokers and illusioners (not named) still take Blight, and still die fully blighted into pale zombies.
-- Game tests: `BlightGameTest.pillagersVindicatorsWitchesAndWolvesTakeNoBlight`; the pillager turning tests now use an
+- **Wolves follow the chain of the lore: the blighted rise undead, the undead turn pale.** A wolf dying fully blighted
+  rises a **zombie wolf** (an undead animal, as the zombie horse and chicken): as wild or as tame as it was, its
+  owner's still, its collar and armour kept (a tame one has a tame wolf's health). It's never a pup and never breeds,
+  eats only rotten flesh (healing a tame one), burns in daylight unless it wears wolf armour, and isn't spared the
+  Blight: dying fully blighted, a zombie wolf turns into a **pale wolf**, no one's.
+- **Pale wolves** run in packs where paleness holds, by the pale line (the Pale Garden at any hour; the dark caves below
+  y 0; up to y 64 at midnight under a new moon): 2-4 in the Pale Garden, 2-3 in the caves. They hunt players (and
+  whoever hurts them, the pack joining in); their bite blights, as every pale thing's; they take no Blight; they can't
+  be tamed, fed or bred; their fur is the pale oak's bark and their eyes glow the creaking's orange. Golems fight them.
+- Game tests: `BlightGameTest.pillagersVindicatorsAndWitchesTakeNoBlight`; the pillager turning tests now use an
   evoker (`UndeadFormsGameTest.anEvokerKilledFullyBlightedIsAPaleZombie`,
-  `StagedMushroomsGameTest.aFullyBlightedEvokerDiesIntoAPaleZombie`).
+  `StagedMushroomsGameTest.aFullyBlightedEvokerDiesIntoAPaleZombie`); the wolves in `UndeadFormsGameTest`
+  (`aFullyBlightedTamedWolfIsAZombieWolfStillItsOwners`, `aZombieWolfDyingFullyBlightedIsAPaleWolfNoOnesOwn`,
+  `aPaleWolfCantBeTamedTakesNoBlightAndItsBiteBlights`, and both among the undead). Whom a pale wolf hunts isn't
+  game-tested: the test player is always creative, which no mob targets.

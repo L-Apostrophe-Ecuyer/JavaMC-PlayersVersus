@@ -19,10 +19,13 @@ import net.minecraft.world.entity.monster.creaking.Creaking;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Creakings hit twice as hard; each pale mob has its art, egg, names and loot; pale creepers also come up in the Pale Grotto. */
+/**
+ * Creakings hit twice as hard; each pale mob (and the zombie wolf) has its art, egg, names and loot; pale creepers also
+ * come up in the Pale Grotto.
+ */
 class PaleMobsTest {
     private static final Path RESOURCES = Path.of("src/main/resources");
-    private static final List<String> PALE_MOBS = List.of("pale_creeper", "pale_zombie", "pale_spider");
+    private static final List<String> PALE_MOBS = List.of("pale_creeper", "pale_zombie", "pale_spider", "pale_wolf", "zombie_wolf");
 
     @BeforeAll
     static void start() {
@@ -45,6 +48,10 @@ class PaleMobsTest {
         }
         assertExists("assets/players-versus/textures/entity/pale_zombie_outer_layer.png");
         assertExists("assets/players-versus/textures/entity/pale_spider_eyes.png");
+        // A wolf's skins: wild, angry and (for one that can be tame) tame; the pale wolf's eyes glow
+        for (String skin : List.of("pale_wolf_angry", "pale_wolf_eyes", "zombie_wolf_tame", "zombie_wolf_angry")) {
+            assertExists("assets/players-versus/textures/entity/" + skin + ".png");
+        }
         for (String namespace : List.of("minecraft", "players-versus")) {
             JsonObject english = read("assets/" + namespace + "/lang/en_us.json");
             for (String mob : PALE_MOBS) {

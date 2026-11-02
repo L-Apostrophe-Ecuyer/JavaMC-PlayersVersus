@@ -3,6 +3,7 @@ package frootloops.versus.mod.items_and_effects.blight;
 import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mixin.mobs.passive.AbstractHorseAccessor;
+import frootloops.versus.mixin.mobs.passive.WolfAccessor;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
@@ -164,10 +166,10 @@ public final class Undeath {
      * Replaces the entity with its pale form, if it has one: whether it did. This is what dying fully blighted comes to
      * (LivingEntityBlightMixin; and for a creative player, who can't die of it, after the shaking). Its pale form first
      * ({@link #turnPale}): a villager a pale villager, a wandering trader a pale wandering trader, an evoker or an
-     * illusioner a pale zombie, zombies of every kind pale zombies, a creeper a pale creeper, spiders pale spiders. What has none
-     * but an undead kind turns into that: piglins zombified piglins, a hoglin a zoglin, and animals with an undead kind
-     * of their own, as calm as they were and their owner's still (a horse a zombie horse, a camel a camel husk, a
-     * nautilus a zombie nautilus, a chicken a zombie chicken). A player rises a player zombie ({@link PlayerZombieEntity});
+     * illusioner a pale zombie, zombies of every kind pale zombies, a zombie wolf a pale wolf, a creeper a pale creeper,
+     * spiders pale spiders. What has none but an undead kind turns into that: piglins zombified piglins, a hoglin a
+     * zoglin, and animals with an undead kind of their own, as calm as they were and their owner's still (a horse a
+     * zombie horse, a camel a camel husk, a nautilus a zombie nautilus, a chicken a zombie chicken, a wolf a zombie wolf). A player rises a player zombie ({@link PlayerZombieEntity});
      * what has no such form (a pig, a cow...) just dies.
      */
     public static boolean turn(ServerLevel level, LivingEntity entity) {
@@ -208,8 +210,8 @@ public final class Undeath {
     }
 
     /**
-     * The living that have a pale form turn into it: zombies of every kind into pale zombies, a creeper into a pale
-     * creeper, spiders into pale spiders, a villager into a pale villager ({@link #turnPaleVillager}), a wandering trader
+     * The living that have a pale form turn into it: zombies of every kind into pale zombies, a zombie wolf into a pale
+     * wolf (wild, its owner forgotten: the pale are no one's), a creeper into a pale creeper, spiders into pale spiders, a villager into a pale villager ({@link #turnPaleVillager}), a wandering trader
      * into a pale wandering trader ({@link #turnPaleTrader}), an evoker or an illusioner into a pale zombie. Whether it
      * turned.
      */
@@ -231,6 +233,7 @@ public final class Undeath {
     private static EntityType<? extends Mob> paleKind(Mob mob) {
         EntityType<?> type = mob.getType();
         if (mob instanceof Zombie && !(mob instanceof ZombifiedPiglin)) return ModEntities.PALE_ZOMBIE;
+        if (type == ModEntities.ZOMBIE_WOLF) return ModEntities.PALE_WOLF;
         if (mob instanceof Creeper && type == EntityTypes.CREEPER) return ModEntities.PALE_CREEPER;
         if (type == EntityTypes.SPIDER || type == EntityTypes.CAVE_SPIDER) return ModEntities.PALE_SPIDER;
         if (mob.is(RISE_AS_ZOMBIES)) return ModEntities.PALE_ZOMBIE;
@@ -264,17 +267,21 @@ public final class Undeath {
         return pale != null;
     }
 
-    /** What an animal turning undead keeps that its turning doesn't carry: being tame and whose, being a jockey's mount. */
+    /**
+     * What an animal turning undead keeps that its turning doesn't carry: being tame and whose (a tame wolf's health
+     * with it), a wolf's collar, being a jockey's mount.
+     */
     private static void keepWhatWasKept(Mob from, Mob into) {
         if (from instanceof AbstractHorse horse && into instanceof AbstractHorse undead) {
             undead.setTamed(horse.isTamed());
             ((AbstractHorseAccessor) undead).setOwnerKept(horse.getOwnerReference());
         }
         if (from instanceof TamableAnimal tame && into instanceof TamableAnimal undead) {
-            undead.setTame(tame.isTame(), false);
+            undead.setTame(tame.isTame(), true);
             undead.setOwnerReference(tame.getOwnerReference());
         }
         if (from instanceof Chicken chicken && into instanceof Chicken undead) undead.setChickenJockey(chicken.isChickenJockey());
+        if (from instanceof Wolf wolf && into instanceof Wolf undead) ((WolfAccessor) undead).playersVersus$setCollarColor(wolf.getCollarColor());
     }
 
     /** The undead kind a mob with no pale form turns into when it dies fully blighted, or null if it just dies. */
@@ -286,6 +293,7 @@ public final class Undeath {
         if (type == EntityTypes.CAMEL) return EntityTypes.CAMEL_HUSK;
         if (type == EntityTypes.NAUTILUS) return EntityTypes.ZOMBIE_NAUTILUS;
         if (type == EntityTypes.CHICKEN) return ModEntities.ZOMBIE_CHICKEN;
+        if (type == EntityTypes.WOLF) return ModEntities.ZOMBIE_WOLF;
         if (type == EntityTypes.PIGLIN || type == EntityTypes.PIGLIN_BRUTE) return EntityTypes.ZOMBIFIED_PIGLIN;
         if (type == EntityTypes.HOGLIN) return EntityTypes.ZOGLIN;
         return null;

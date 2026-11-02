@@ -1,0 +1,113 @@
+package frootloops.versus.mod.mobs.hostile.overworld;
+
+import frootloops.versus.VersusMod;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.goal.BegGoal;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
+import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * A wolf the paleness took. Packs of them run where paleness holds (MobSpawning), and a tamed zombie wolf dying fully
+ * blighted turns into one, its owner forgotten (Undeath). It hunts players, and whoever hurts it (its pack with it); its
+ * bite blights, as every pale thing's (BlightAttacks), and it takes no Blight itself. It's never tamed, fed or bred,
+ * never a pup; its fur is the pale oak's bark and its eyes glow the creaking's orange (tools/wolves.py,
+ * PaleWolfRenderer). Golems take it for the monster it is.
+ */
+public class PaleWolfEntity extends Wolf implements Enemy {
+    private static final Identifier WILD = texture("pale_wolf");
+    private static final Identifier ANGRY = texture("pale_wolf_angry");
+
+    public PaleWolfEntity(EntityType<? extends Wolf> type, Level level) {
+        super(type, level);
+    }
+
+    private static Identifier texture(String name) {
+        return Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "textures/entity/" + name + ".png");
+    }
+
+    /**
+     * A wolf's moves (it leaps, bites, wanders and looks about), none of a pet's (begging, breeding, following, sitting),
+     * and a hunter's targets in place of a wolf's: players, and whoever hurts it.
+     */
+    @Override
+    protected void registerGoals() {
+        super.registerGoals();
+        this.goalSelector.removeAllGoals(goal -> goal instanceof BegGoal || goal instanceof BreedGoal
+                || goal instanceof FollowOwnerGoal || goal instanceof SitWhenOrderedToGoal);
+        this.targetSelector.removeAllGoals(goal -> true);
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+    }
+
+    /** Hunting or wild: never tame. */
+    @Override
+    public Identifier getTexture() {
+        return this.isAngry() ? ANGRY : WILD;
+    }
+
+    /** A bone, meat, a dye do nothing to it (what a hand does to any mob still does: a name tag, a lead). */
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        return InteractionResult.PASS;
+    }
+
+    @Override
+    public boolean isFood(ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean canMate(Animal other) {
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public Wolf getBreedOffspring(ServerLevel level, AgeableMob partner) {
+        return null;
+    }
+
+    @Override
+    protected boolean canBeABaby() {
+        return false;
+    }
+
+    @Override
+    public void setAge(int age) {
+        super.setAge(Math.max(age, 0));
+    }
+
+    /** Where it spawns is the pale line's to say (MobSpawning#canSpawnPaleWolf): not an animal's want of grass and light. */
+    @Override
+    public boolean checkSpawnRules(LevelAccessor level, EntitySpawnReason reason) {
+        return true;
+    }
+
+    /** It wanders off, as monsters do, once no one is near (one that turned is kept: Undeath). */
+    @Override
+    public boolean removeWhenFarAway(double distance) {
+        return true;
+    }
+
+    @Override
+    public float getVoicePitch() {
+        return super.getVoicePitch() * 0.8F;
+    }
+}

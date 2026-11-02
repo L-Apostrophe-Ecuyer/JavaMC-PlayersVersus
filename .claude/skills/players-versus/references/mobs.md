@@ -158,7 +158,22 @@ assuming full overlap).
   `#minecraft:burn_in_daylight` (vanilla's tag-driven `Mob#burnUndead`), never converted. Drops 0-2 feathers and 0-1
   rotten flesh. Baby zombies' chicken jockeys ride them (`ZombieInfectionMixin` wraps `Zombie#finalizeSpawn`'s
   `EntityType#create` and keeps only zombie chickens among the nearby ones). Game tests `UndeadFormsGameTest`.
-- The pale zombie is in `#minecraft:zombies`, the pale creeper and spider in `#minecraft:undead` (smite, inverted
+- **Zombie wolf** (`mod/mobs/passive/ZombieWolfEntity`, extends `Wolf`; drawn by vanilla's `WolfRenderer`, its skins
+  from `getTexture` (wild, tame, angry; `tools/wolves.py`, the zombie's green)): what Blight makes of a wolf
+  (`Undeath#undeadKind`), keeping tame/owner (`setTame(.., true)`: a tame one's 40 health), its collar (`WolfAccessor`
+  invoker) and its armour (the conversion's equipment). A wolf in all but: never a pup, never in love or breeding, eats
+  only rotten flesh (a tame one heals on it), lower voice. In `#minecraft:zombies` and `#minecraft:burn_in_daylight`
+  (wolf armour shades it, `MobSunArmourMixin`); not Blight-immune: dying fully blighted it turns pale (below). Drops
+  0-2 rotten flesh.
+- **Pale wolf** (`mod/mobs/hostile/overworld/PaleWolfEntity`, extends `Wolf`, implements `Enemy`; client
+  `PaleWolfRenderer`, `WolfRenderer` plus an `EyesLayer` of `pale_wolf_eyes.png`; skins wild and angry from
+  `tools/wolves.py`, the pale oak's bark with the creaking's orange eyes): a zombie wolf dying fully blighted
+  (`Undeath#paleKind`; wild, its owner forgotten), or spawned in packs by the pale line (`MobSpawning#canSpawnPaleWolf`:
+  Pale Garden 40 x 2-4, deep and regular caves 20 x 2-3; `MobCategory.MONSTER`). Wolf goals minus a pet's (beg,
+  breed, follow owner, sit); targets only `HurtByTargetGoal` (alerting its pack) and players. Its bite blights
+  (`BlightAttacks`), it's Blight-immune and in `#minecraft:undead`; `mobInteract` passes (no taming, feeding, dyeing),
+  never a pup, despawns far off as monsters do. Drops 0-2 bones. Game tests `UndeadFormsGameTest`.
+- The pale zombie is in `#minecraft:zombies`, the pale creeper, spider and wolf in `#minecraft:undead` (smite, inverted
   healing, the wither spares them); the mushroom spider joins the pale one in `#minecraft:arthropod`.
 - **Warden (`WardenMixin`)** — extensively rebalanced, all deliberate per inline doc-comments in the
   source itself (read them for full designer intent): anger toward a target **decays** over time if

@@ -4,6 +4,7 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleVillagerEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWolfEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieEntity;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
@@ -26,7 +27,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * Mobs whose hits blight: the pale (a pale zombie or villager, a creaking, a watchling) and a player zombie blight anything living, every hit; other
+ * Mobs whose hits blight: the pale (a pale zombie, villager or wolf, a creaking, a watchling) and a player zombie blight anything living, every hit; other
  * zombies only their own kind (people for zombies: tag {@code players-versus:zombie_kin}; piglins for zombified
  * piglins), by {@link VersusSettings.Mushrooms#ZOMBIE_BLIGHT_CHANCE}. A hit that converts gives nothing else:
  * whatever effect the mob adds to what it hit in the same tick (a husk's hunger) is dropped (LivingEntityBlightMixin).
@@ -48,7 +49,7 @@ public final class BlightAttacks {
     /** A mob's melee hit landed (Mob#doHurtTarget). */
     public static void afterHit(ServerLevel level, Mob attacker, LivingEntity target) {
         boolean always = attacker instanceof PaleZombieEntity || attacker instanceof PaleVillagerEntity || attacker instanceof PlayerZombieEntity
-                || attacker instanceof Creaking || attacker instanceof WatchlingEntity;
+                || attacker instanceof Creaking || attacker instanceof WatchlingEntity || attacker instanceof PaleWolfEntity;
         boolean rarely = attacker instanceof Zombie && kin(attacker, target) && attacker.getRandom().nextFloat() < VersusSettings.Mushrooms.ZOMBIE_BLIGHT_CHANCE;
         // The immune take no Blight: the hit gives them what it would otherwise
         if (!always && !rarely || Undeath.immune(target)) return;

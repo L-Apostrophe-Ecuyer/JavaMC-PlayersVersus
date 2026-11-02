@@ -13,6 +13,8 @@ import frootloops.versus.mod.mobs.hostile.overworld.PaleWanderingTraderEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PlayerZombieEntity;
 import frootloops.versus.mod.mobs.passive.ZombieChickenEntity;
+import frootloops.versus.mod.mobs.passive.ZombieWolfEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWolfEntity;
 import frootloops.versus.mod.items_and_effects.throwing.SlimeballEntity;
 
 
@@ -26,6 +28,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -105,6 +108,18 @@ public class ModEntities {
             EntityType.Builder.of(ZombieChickenEntity::new, MobCategory.CREATURE).sized(0.4f, 0.7f).eyeHeight(0.644f).passengerAttachments(new Vec3(0.0, 0.7, -0.1)).clientTrackingRange(10)
     );
 
+    /** A wolf Blight turned undead: a wolf in all but its pups, sized and tracked as one. */
+    public static final EntityType<ZombieWolfEntity> ZOMBIE_WOLF = register(
+            "zombie_wolf",
+            EntityType.Builder.of(ZombieWolfEntity::new, MobCategory.CREATURE).sized(0.6f, 0.85f).eyeHeight(0.68f).passengerAttachments(new Vec3(0.0, 0.81875, -0.0625)).clientTrackingRange(10)
+    );
+
+    /** A wolf the paleness took: sized and tracked as a wolf, spawning as a monster. */
+    public static final EntityType<PaleWolfEntity> PALE_WOLF = register(
+            "pale_wolf",
+            EntityType.Builder.of(PaleWolfEntity::new, MobCategory.MONSTER).sized(0.6f, 0.85f).eyeHeight(0.68f).passengerAttachments(new Vec3(0.0, 0.81875, -0.0625)).clientTrackingRange(10)
+    );
+
     public static final EntityType<WildfireEntity> WILDFIRE = register(
             "wildfire", EntityType.Builder.of(WildfireEntity::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.8F).clientTrackingRange(8)
     );
@@ -120,6 +135,8 @@ public class ModEntities {
     public static final Item PALE_WANDERING_TRADER_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_wandering_trader_spawn_egg").spawnEgg(PALE_WANDERING_TRADER));
     public static final Item PLAYER_ZOMBIE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("player_zombie_spawn_egg").spawnEgg(PLAYER_ZOMBIE));
     public static final Item ZOMBIE_CHICKEN_SPAWN_EGG =  new SpawnEggItem(getItemSettings("zombie_chicken_spawn_egg").spawnEgg(ZOMBIE_CHICKEN));
+    public static final Item ZOMBIE_WOLF_SPAWN_EGG =  new SpawnEggItem(getItemSettings("zombie_wolf_spawn_egg").spawnEgg(ZOMBIE_WOLF));
+    public static final Item PALE_WOLF_SPAWN_EGG =  new SpawnEggItem(getItemSettings("pale_wolf_spawn_egg").spawnEgg(PALE_WOLF));
     public static final Item WILDFIRE_SPAWN_EGG =  new SpawnEggItem(getItemSettings("wildfire_spawn_egg").spawnEgg(WILDFIRE));
 
 
@@ -136,6 +153,8 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(WILDFIRE, WildfireEntity.createWildfireAttributes());
         FabricDefaultAttributeRegistry.register(WATCHLING, WatchlingEntity.createWatchlingAttributes());
         FabricDefaultAttributeRegistry.register(ZOMBIE_CHICKEN, Chicken.createAttributes());
+        FabricDefaultAttributeRegistry.register(ZOMBIE_WOLF, Wolf.createAttributes());
+        FabricDefaultAttributeRegistry.register(PALE_WOLF, Wolf.createAttributes());
         FabricDefaultAttributeRegistry.register(PALE_VILLAGER, PaleVillagerEntity.createPaleVillagerAttributes());
         FabricDefaultAttributeRegistry.register(PALE_WANDERING_TRADER, PaleVillagerEntity.createPaleVillagerAttributes());
 

@@ -8,6 +8,7 @@ import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.IceCubeEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleSpiderEntity;
+import frootloops.versus.mod.mobs.hostile.overworld.PaleWolfEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -75,6 +76,11 @@ public class MobSpawning {
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_CREEPER, 10, 1, 1);
         SpawnPlacements.register(ModEntities.PALE_SPIDER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleSpider);
 
+        // Pale wolves: in packs, by the pale line (canSpawnPaleWolf), in the Pale Garden and the caves as the other pale mobs
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.PALE_WOLF, 40, 2, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.PALE_WOLF, 20, 2, 3);
+        SpawnPlacements.register(ModEntities.PALE_WOLF, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleWolf);
+
         // Watchlings: rarely, where paleness holds, in the dark (canSpawnWatchling)
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.WATCHLING, 4, 1, 1);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.PALE_GROTTO, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.WATCHLING, 3, 1, 1);
@@ -134,6 +140,12 @@ public class MobSpawning {
     }
 
     public static boolean canSpawnPaleSpider(EntityType<PaleSpiderEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
+        if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
+        if(spawnReason != EntitySpawnReason.NATURAL) return true;
+        return palePlace(world, blockPos, 1);
+    }
+
+    public static boolean canSpawnPaleWolf(EntityType<PaleWolfEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL || !Monster.checkMobSpawnRules(type, world, spawnReason, blockPos, random)) return false;
         if(spawnReason != EntitySpawnReason.NATURAL) return true;
         return palePlace(world, blockPos, 1);
