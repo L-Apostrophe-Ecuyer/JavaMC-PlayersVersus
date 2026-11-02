@@ -47,10 +47,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * What Blight makes of villagers and animals: all white, it turns villagers into zombie villagers and
- * animals with an undead kind of their own into it, still their owner's; blighted and wounded (below 8 health), it turns
- * villagers into pale villagers, cured by golden apples, and illagers into pale zombies. Zombie chickens lay nothing and breed with nothing; the pale
- * and the passive undead are undead. Golden apples cure Blight; grown brown mushroom clusters make mining fatigue.
+ * What Blight makes of villagers and animals: whatever dies fully blighted is replaced by its pale form (villagers pale
+ * villagers, cured by golden apples; illagers pale zombies; wandering traders pale wandering traders), or, with none, its
+ * undead kind (animals with one of their own, still their owner's). Zombie chickens lay nothing and breed with nothing;
+ * the pale and the passive undead are undead. Golden apples cure Blight; grown brown mushroom clusters make mining
+ * fatigue.
  */
 public class UndeadFormsGameTest {
 
@@ -64,44 +65,45 @@ public class UndeadFormsGameTest {
         return AABB.encapsulatingFullBlocks(helper.absolutePos(new BlockPos(0, 0, 0)), helper.absolutePos(new BlockPos(13, 7, 7)));
     }
 
-    /** Blight enough to whiten all the entity's hearts. */
-    private static MobEffectInstance allWhite(LivingEntity entity) {
+    /** Blight enough to blight all the entity's hearts. */
+    private static MobEffectInstance fullBlight(LivingEntity entity) {
         return new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, Blight.hearts(entity.getMaxHealth()) - 1);
     }
 
-    /** One dose of Blight: not the whole bar, but enough that a wound turns the living pale. */
-    private static MobEffectInstance blighted() {
-        return new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 0);
+    /** Fully blighted and dealt a killing blow (of anything: here a plain one), as dying fully blighted is how they turn. */
+    private static void killFullyBlighted(GameTestHelper helper, LivingEntity entity) {
+        entity.addEffect(fullBlight(entity));
+        entity.setHealth(1.0F);
+        entity.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
     }
 
     private static <T extends Mob> List<T> found(GameTestHelper helper, Class<T> type, EntityType<?> exactly) {
         return helper.getLevel().getEntitiesOfClass(type, room(helper), mob -> mob.getType() == exactly);
     }
 
-    /** All white, a villager turns as a zombie's kill would: into a zombie villager, anywhere (pale places too). */
+    /** Fully blighted, a villager wastes away under the Blight, and dies into a pale villager: no zombie villager. */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void anAllWhiteVillagerTurnsZombieVillager(GameTestHelper helper) {
+    public void aFullyBlightedVillagerWastesIntoAPaleVillager(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
-        villager.addEffect(allWhite(villager));
+        villager.addEffect(fullBlight(villager));
         helper.succeedWhen(() -> {
             helper.assertTrue(villager.isRemoved(), "the villager is still a villager");
-            List<ZombieVillager> zombies = found(helper, ZombieVillager.class, EntityTypes.ZOMBIE_VILLAGER);
-            helper.assertTrue(zombies.size() == 1, zombies.size() + " zombie villagers, not one");
+            List<PaleVillagerEntity> pale = found(helper, PaleVillagerEntity.class, ModEntities.PALE_VILLAGER);
+            helper.assertTrue(pale.size() == 1, pale.size() + " pale villagers, not one");
+            helper.assertTrue(found(helper, ZombieVillager.class, EntityTypes.ZOMBIE_VILLAGER).isEmpty(), "a zombie villager rose too");
         });
     }
 
-    /** Blighted and wounded below 8 health, a farmer turns into a pale villager, still a farmer, its experience kept for its cure. */
+    /** Killed fully blighted, a farmer turns into a pale villager, still a farmer, its experience kept for its cure. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void aBlightedAndWoundedVillagerTurnsPale(GameTestHelper helper) {
+    public void aFarmerKilledFullyBlightedIsAPaleFarmer(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
         villager.setVillagerData(villager.getVillagerData().withProfession(helper.getLevel().registryAccess(), VillagerProfession.FARMER));
         villager.setVillagerXp(5);
-        villager.setHealth(9.0F);
-        villager.addEffect(blighted());
-        villager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
-        helper.assertTrue(villager.isRemoved(), "the blighted, wounded villager is still a villager");
+        killFullyBlighted(helper, villager);
+        helper.assertTrue(villager.isRemoved(), "the fully blighted villager killed is still a villager");
         List<PaleVillagerEntity> pale = found(helper, PaleVillagerEntity.class, ModEntities.PALE_VILLAGER);
         helper.assertTrue(pale.size() == 1, pale.size() + " pale villagers, not one");
         helper.assertTrue(pale.getFirst().getVillagerData().profession().is(VillagerProfession.FARMER), "the pale villager isn't a farmer any more");
@@ -109,15 +111,13 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
-    /** Blighted and wounded below 8 health, a pillager turns into a pale zombie; Blight would have made it the zombie of the place. */
+    /** Killed fully blighted, a pillager turns into a pale zombie. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void aBlightedAndWoundedIllagerTurnsPaleZombie(GameTestHelper helper) {
+    public void aPillagerKilledFullyBlightedIsAPaleZombie(GameTestHelper helper) {
         floor(helper);
         Mob pillager = helper.spawnWithNoFreeWill(EntityTypes.PILLAGER, new Vec3(3.5, 1.0, 3.5));
-        pillager.setHealth(9.0F);
-        pillager.addEffect(blighted());
-        pillager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
-        helper.assertTrue(pillager.isRemoved(), "the blighted, wounded pillager is still a pillager");
+        killFullyBlighted(helper, pillager);
+        helper.assertTrue(pillager.isRemoved(), "the fully blighted pillager killed is still a pillager");
         helper.assertTrue(found(helper, Mob.class, ModEntities.PALE_ZOMBIE).size() == 1, "no pale zombie rose of the pillager");
         helper.succeed();
     }
@@ -181,27 +181,27 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
-    /** A child villager turns into a zombie villager child anywhere: there are no illager children. */
+    /** A child villager dying fully blighted turns into a pale villager child. */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void anAllWhiteChildVillagerTurnsZombieVillagerAnywhere(GameTestHelper helper) {
+    public void aFullyBlightedChildVillagerIsAPaleChild(GameTestHelper helper) {
         floor(helper);
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
         villager.setAge(-24000);
-        villager.addEffect(allWhite(villager));
+        villager.addEffect(fullBlight(villager));
         helper.succeedWhen(() -> {
             helper.assertTrue(villager.isRemoved(), "the child is still a villager");
-            List<ZombieVillager> zombies = found(helper, ZombieVillager.class, EntityTypes.ZOMBIE_VILLAGER);
-            helper.assertTrue(zombies.size() == 1 && zombies.getFirst().isBaby(), zombies.size() + " zombie villagers, not one child");
+            List<PaleVillagerEntity> pale = found(helper, PaleVillagerEntity.class, ModEntities.PALE_VILLAGER);
+            helper.assertTrue(pale.size() == 1 && pale.getFirst().isBaby(), pale.size() + " pale villagers, not one child");
         });
     }
 
-    /** All white, a chicken turns into a zombie chicken, grown. */
+    /** Dying fully blighted, a chicken (with no pale form) turns into its undead kind, a zombie chicken, grown. */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void anAllWhiteChickenTurnsZombieChicken(GameTestHelper helper) {
+    public void aFullyBlightedChickenTurnsZombieChicken(GameTestHelper helper) {
         floor(helper);
         Chicken chick = helper.spawnWithNoFreeWill(EntityTypes.CHICKEN, new Vec3(3.5, 1.0, 3.5));
         chick.setAge(-24000);
-        chick.addEffect(allWhite(chick));
+        chick.addEffect(fullBlight(chick));
         helper.succeedWhen(() -> {
             helper.assertTrue(chick.isRemoved(), "the chicken is still a chicken");
             List<ZombieChickenEntity> undead = found(helper, ZombieChickenEntity.class, ModEntities.ZOMBIE_CHICKEN);
@@ -211,15 +211,15 @@ public class UndeadFormsGameTest {
         });
     }
 
-    /** All white, a tamed horse turns into a zombie horse still tame and still its owner's. */
+    /** Dying fully blighted, a tamed horse turns into a zombie horse still tame and still its owner's. */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void anAllWhiteTamedHorseStaysItsOwners(GameTestHelper helper) {
+    public void aFullyBlightedTamedHorseStaysItsOwners(GameTestHelper helper) {
         floor(helper);
         ServerPlayer owner = FakePlayer.get(helper.getLevel());
         Horse horse = helper.spawnWithNoFreeWill(EntityTypes.HORSE, new Vec3(3.5, 1.0, 3.5));
         horse.setTamed(true);
         horse.setOwner(owner);
-        horse.addEffect(allWhite(horse));
+        horse.addEffect(fullBlight(horse));
         helper.succeedWhen(() -> {
             helper.assertTrue(horse.isRemoved(), "the horse is still a horse");
             List<AbstractHorse> undead = found(helper, AbstractHorse.class, EntityTypes.ZOMBIE_HORSE);
@@ -291,9 +291,7 @@ public class UndeadFormsGameTest {
         UUID friend = UUID.randomUUID();
         villager.getGossips().add(friend, GossipType.MAJOR_POSITIVE, 20);
         int liking = villager.getGossips().getReputation(friend, type -> true);
-        villager.setHealth(9.0F);
-        villager.addEffect(blighted());
-        villager.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
+        killFullyBlighted(helper, villager);
         List<PaleVillagerEntity> pale = found(helper, PaleVillagerEntity.class, ModEntities.PALE_VILLAGER);
         helper.assertTrue(pale.size() == 1, pale.size() + " pale villagers, not one");
         cure(helper, pale.getFirst());
@@ -309,17 +307,15 @@ public class UndeadFormsGameTest {
         });
     }
 
-    /** Blighted and wounded, a wandering trader turns into a pale wandering trader; cured, it's a wandering trader again, its trades kept. */
+    /** Killed fully blighted, a wandering trader turns into a pale wandering trader; cured, it's a wandering trader again, its trades kept. */
     @GameTest(structure = ROOM, maxTicks = 100)
-    public void aBlightedWoundedWanderingTraderTurnsPaleAndCuresBack(GameTestHelper helper) {
+    public void aWanderingTraderKilledFullyBlightedTurnsPaleAndCuresBack(GameTestHelper helper) {
         floor(helper);
         WanderingTrader trader = helper.spawnWithNoFreeWill(EntityTypes.WANDERING_TRADER, new Vec3(3.5, 1.0, 3.5));
         List<String> trades = sells(trader.getOffers());
         helper.assertTrue(!trades.isEmpty(), "the wandering trader has nothing to sell");
-        trader.setHealth(9.0F);
-        trader.addEffect(blighted());
-        trader.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 2.0F);
-        helper.assertTrue(trader.isRemoved(), "the blighted, wounded wandering trader is still a wandering trader");
+        killFullyBlighted(helper, trader);
+        helper.assertTrue(trader.isRemoved(), "the fully blighted wandering trader killed is still a wandering trader");
         List<PaleWanderingTraderEntity> pale = found(helper, PaleWanderingTraderEntity.class, ModEntities.PALE_WANDERING_TRADER);
         helper.assertTrue(pale.size() == 1, pale.size() + " pale wandering traders, not one");
         cure(helper, pale.getFirst());

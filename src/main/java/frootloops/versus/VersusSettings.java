@@ -190,13 +190,15 @@ public abstract class VersusSettings {
     }
 
     public static class Blight {
-        // All hearts white, the Blight deals the Wither (amplifier WITHER_AMPLIFIER: 4 is Wither V), kept up WITHER_TICKS
-        // at a time while they stay all white; dying of it under the Blight is how the living are converted
-        public static int WITHER_AMPLIFIER = 4;
-        public static int WITHER_TICKS = 100;
-        // Blighted and hurt below this much health, a zombie, creeper, spider, villager, trader, illager or witch turns pale
-        public static float PALE_BELOW_HEALTH = 8.0F;
-        // The shaking begins when this part of the hearts is white and grows to all of them; the view of whoever's
+        // Blight replaces the Wither effect: every Wither given is Blight instead (up to WITHER_MAX_HEARTS blighted hearts
+        // a dose), and the Wither's black hearts are Blight's
+        public static boolean REPLACE_WITHER = true;
+        public static int WITHER_MAX_HEARTS = 4;
+        // Fully blighted (as many hearts blighted as the bar has: max health / 2), the Blight deals FULL_DAMAGE every
+        // FULL_DAMAGE_TICKS, as the Wither would (2 is a heart); whatever dies fully blighted is replaced by its pale form
+        public static float FULL_DAMAGE = 2.0F;
+        public static int FULL_DAMAGE_TICKS = 10;
+        // The shaking begins when this part of the hearts is blighted and grows to all of them; the view of whoever's
         // blighted trembles up to SHAKE_DEGREES either way
         public static float SHAKE_FROM = 0.4F;
         public static float SHAKE_DEGREES = 2.5F;

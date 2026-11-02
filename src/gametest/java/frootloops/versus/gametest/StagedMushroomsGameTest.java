@@ -10,7 +10,6 @@ import frootloops.versus.mod.environment.blocks.mushrooms.StagedMushroomBlock;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import frootloops.versus.mod.items_and_effects.blight.Blight;
 import frootloops.versus.mod.items_and_effects.blight.BlightAttacks;
-import frootloops.versus.mod.items_and_effects.blight.Undeath;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleCreeperEntity;
 import frootloops.versus.mod.mobs.hostile.overworld.PaleZombieEntity;
 import frootloops.versus.mod.mobs.ModEntities;
@@ -45,7 +44,7 @@ import java.util.List;
 /**
  * Small mushrooms grow by stages and below y 0 turn pale; pale shrooms convert what stays in them, and so do pale
  * zombies', creakings' and (rarely) zombies' hits and rotten flesh; Blight stacks, keeps food from regenerating
- * health into its white hearts, and all white, turns undead.
+ * health into its blighted hearts, and fully blighted, wastes them until they die into their pale form.
  */
 public class StagedMushroomsGameTest {
 
@@ -200,19 +199,19 @@ public class StagedMushroomsGameTest {
         helper.succeedWhen(() -> helper.assertTrue(pig.hasEffect(CustomStatusEffects.BLIGHT), "the pig in the pale shrooms isn't converting"));
     }
 
-    /** Blight enough to whiten all the entity's hearts (the mod changes some mobs' health: pigs have 16). */
-    private static MobEffectInstance allWhite(LivingEntity entity) {
+    /** Blight enough to blight all the entity's hearts (the mod changes some mobs' health: pigs have 16). */
+    private static MobEffectInstance fullBlight(LivingEntity entity) {
         return new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, Blight.hearts(entity.getMaxHealth()) - 1);
     }
 
-    /** All white, a villager withers (the Blight deals the Wither) and turns as it dies of it (what into: UndeadFormsGameTest). */
+    /** Fully blighted, a villager wastes under the Blight (no Wither) and turns as it dies (what into: UndeadFormsGameTest). */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void anAllWhiteVillagerWithersAndTurns(GameTestHelper helper) {
+    public void aFullyBlightedVillagerWastesAndTurns(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Villager villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new Vec3(3.5, 1.0, 3.5));
-        villager.addEffect(allWhite(villager));
-        helper.runAfterDelay(30, () ->
-                helper.assertTrue(villager.isRemoved() || villager.hasEffect(MobEffects.WITHER), "the all-white villager has no Wither"));
+        villager.addEffect(fullBlight(villager));
+        helper.runAfterDelay(30, () -> helper.assertTrue(villager.isRemoved()
+                || villager.getHealth() < villager.getMaxHealth() && !villager.hasEffect(MobEffects.WITHER), "the fully blighted villager isn't wasting under the Blight"));
         helper.succeedWhen(() -> {
             helper.assertTrue(villager.isRemoved(), "the villager is still a villager");
             List<Mob> turned = helper.getLevel().getEntitiesOfClass(Mob.class, room(helper));
@@ -221,13 +220,13 @@ public class StagedMushroomsGameTest {
         });
     }
 
-    /** All white, a pig (with no zombie of its own) withers away. */
+    /** Fully blighted, a pig (with no pale form, nor an undead kind of its own) wastes away and dies. */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void anAllWhitePigDies(GameTestHelper helper) {
+    public void aFullyBlightedPigDies(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(3.5, 1.0, 3.5));
-        pig.addEffect(allWhite(pig));
-        helper.succeedWhen(() -> helper.assertTrue(pig.isDeadOrDying() || pig.isRemoved(), "the all-white pig lives"));
+        pig.addEffect(fullBlight(pig));
+        helper.succeedWhen(() -> helper.assertTrue(pig.isDeadOrDying() || pig.isRemoved(), "the fully blighted pig lives"));
     }
 
     /** A pale zombie's hit and a creaking's convert, and give nothing else (the pale zombie's wither is gone). */
@@ -271,14 +270,14 @@ public class StagedMushroomsGameTest {
         helper.succeed();
     }
 
-    /** All white, a zombie turns pale, a creeper turns into a pale creeper: Blight makes the undead and their kin pale. */
+    /** Dying fully blighted, a zombie turns pale, a creeper turns into a pale creeper. */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void allWhiteZombiesAndCreepersTurnPale(GameTestHelper helper) {
+    public void fullyBlightedZombiesAndCreepersTurnPale(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(3.5, 1.0, 3.5));
         Mob creeper = helper.spawnWithNoFreeWill(EntityTypes.CREEPER, new Vec3(10.5, 1.0, 3.5));
-        zombie.addEffect(allWhite(zombie));
-        creeper.addEffect(allWhite(creeper));
+        zombie.addEffect(fullBlight(zombie));
+        creeper.addEffect(fullBlight(creeper));
         helper.succeedWhen(() -> {
             helper.assertTrue(zombie.isRemoved() && creeper.isRemoved(), "the zombie or the creeper is still itself");
             helper.assertTrue(helper.getLevel().getEntitiesOfClass(PaleZombieEntity.class, room(helper)).size() == 1, "no pale zombie rose from the zombie");
@@ -286,17 +285,15 @@ public class StagedMushroomsGameTest {
         });
     }
 
-    /** All white, a pillager rises as the zombie of the place it turned in. */
+    /** Fully blighted, a pillager wastes away and dies into a pale zombie. */
     @GameTest(structure = ROOM, maxTicks = 900)
-    public void anAllWhitePillagerRisesAsTheZombieOfThePlace(GameTestHelper helper) {
+    public void aFullyBlightedPillagerDiesIntoAPaleZombie(GameTestHelper helper) {
         floor(helper, Blocks.STONE.defaultBlockState());
         Mob pillager = helper.spawnWithNoFreeWill(EntityTypes.PILLAGER, new Vec3(3.5, 1.0, 3.5));
-        var expected = Undeath.zombieOfThePlace(helper.getLevel(), pillager);
-        pillager.addEffect(allWhite(pillager));
+        pillager.addEffect(fullBlight(pillager));
         helper.succeedWhen(() -> {
             helper.assertTrue(pillager.isRemoved(), "the pillager is still a pillager");
-            List<Mob> risen = helper.getLevel().getEntitiesOfClass(Mob.class, room(helper), mob -> mob.getType() == expected);
-            helper.assertTrue(risen.size() == 1, risen.size() + " " + expected + " rose, not one");
+            helper.assertTrue(helper.getLevel().getEntitiesOfClass(PaleZombieEntity.class, room(helper)).size() == 1, "no pale zombie rose of the pillager");
         });
     }
 
@@ -331,19 +328,19 @@ public class StagedMushroomsGameTest {
         helper.succeed();
     }
 
-    /** Food regenerates a player's health up to their white hearts, and no further. */
+    /** Food regenerates a player's health up to their blighted hearts, and no further. */
     @GameTest(structure = ROOM, maxTicks = 20)
-    public void foodDoesntRegenerateWhiteHearts(GameTestHelper helper) {
+    public void foodDoesntRegenerateBlightedHearts(GameTestHelper helper) {
         ServerPlayer player = FakePlayer.get(helper.getLevel());
         try {
             player.getFoodData().setFoodLevel(20);
             player.getFoodData().setSaturation(20.0F);
             player.setHealth(6.0F);
-            // Five white hearts of ten: food stops at 10 health
+            // Five blighted hearts of ten: food stops at 10 health
             player.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, 2400, 4));
             for (int tick = 0; tick < 600; tick++) player.getFoodData().tick(player);
             helper.assertTrue(player.getHealth() > 6.0F, "food didn't regenerate the player at all: " + player.getHealth());
-            helper.assertTrue(player.getHealth() <= 10.0F, "food regenerated the player into their white hearts: " + player.getHealth());
+            helper.assertTrue(player.getHealth() <= 10.0F, "food regenerated the player into their blighted hearts: " + player.getHealth());
         } finally {
             player.removeEffect(CustomStatusEffects.BLIGHT);
             player.setHealth(player.getMaxHealth());

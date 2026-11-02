@@ -40,7 +40,7 @@ public final class BlightAttacks {
 
     private BlightAttacks() {}
 
-    /** A dose of Blight: one white heart more, for the effect's whole time. */
+    /** A dose of Blight: one blighted heart more, for the effect's whole time. */
     public static MobEffectInstance dose() {
         return new MobEffectInstance(CustomStatusEffects.BLIGHT, VersusSettings.Mushrooms.EFFECT_TICKS, 0);
     }

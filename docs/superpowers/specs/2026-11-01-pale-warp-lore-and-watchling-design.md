@@ -319,3 +319,34 @@ Asked for: lift its head, improve its animations. (And, aside: new moons had sto
   `WatchlingRenderState` (jaw and tilt, eased on the client in `WatchlingEntity#tick`), `WatchlingModel`,
   `WatchlingRenderer` (fills the humanoid state as the enderman's renderer does). All client only, unseen in a
   running game.
+
+## Blight takes the Wither's place for good (tenth round, 2026-11-02)
+
+Asked for: when the blighted hearts reach the entity's whole bar (max health / 2), the Blight deals damage as the Wither
+would, a heart every 10 ticks; whatever dies fully blighted is replaced by a pale zombie of it. Blight fully replaces the
+Wither, its black hearts included: a blighted heart turns black, and a lost one is an empty container.
+
+- **The Wither is Blight again:** every Wither given (a wither skeleton's hit, the wither's skulls, a wither rose, a
+  command, one already on) is Blight of its time and strength (at most `WITHER_MAX_HEARTS` 4 hearts a dose); the mod's
+  own sources give Blight; the Wither's name and icon are Blight's. The seventh round's Wither V at full blight is gone.
+- **Fully blighted** (as many hearts blighted as the bar has; a half heart counts as one), the Blight deals a heart
+  (`FULL_DAMAGE` 2) of wither damage every 10 ticks (`FULL_DAMAGE_TICKS`), from the tick it's full. Not full, it deals
+  nothing: it only holds food's regeneration below its hearts, shakes, and greys the world.
+- **Dying fully blighted**, of the Blight or of anything else, replaces the living with their pale form: a villager a
+  pale villager (keeping its trade, level, trades, gossip and experience, for golden apples to cure), a wandering
+  trader a pale wandering trader, an illager or a witch a pale zombie, zombies pale zombies, a creeper a pale creeper,
+  spiders pale spiders. What has no pale form but an undead kind turns into that (a horse a zombie horse, a camel a
+  camel husk, a nautilus a zombie nautilus, a chicken a zombie chicken, piglins zombified piglins, a hoglin a zoglin);
+  anything else just dies. A player rises a player zombie wearing and carrying what they had. Villagers no longer turn
+  into zombie villagers this way, nor illagers into the zombie of the place (the husk-biome tag is gone).
+- **No more pale by wounding:** being blighted and hurt below 8 health no longer turns anything pale; only dying fully
+  blighted does.
+- **The hearts:** blighted hearts are drawn with the Wither's own black sprites (full, half, hardcore, blinking), the
+  last hearts of the bar; a blighted heart whose health is lost is the plain empty container. The white heart sprites
+  are gone. Client only: unseen in a running game.
+- `VersusSettings.Blight` (`REPLACE_WITHER`, `WITHER_MAX_HEARTS`, `FULL_DAMAGE`, `FULL_DAMAGE_TICKS`); `Blight`
+  (`blightedHearts`, `fullyBlighted`, `isBlighted`, `damagesNow`, `fromWitherAmplifier`; `BlightTest`); `Undeath`
+  (`asBlight`, the full-blight damage, `turn`: pale form first); `LivingEntityBlightMixin` (the Wither redirects, and
+  the conversion at `LivingEntity#die`); `ServerPlayerBlightedDeathMixin` (any death, fully blighted); client
+  `BlightHeartsMixin`. Game tests in `BlightGameTest`, `UndeadFormsGameTest` and `StagedMushroomsGameTest`.
+

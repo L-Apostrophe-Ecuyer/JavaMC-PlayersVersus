@@ -1,5 +1,6 @@
 package frootloops.versus.mod.items_and_effects.equipment;
 
+import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -59,7 +60,8 @@ public class RecoveryCompassItem extends Item {
             if(remainingUseTicks % 40 == 0) {
                 user.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 120, 0));
                 user.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, 3, true, false));
-                user.addEffect(new MobEffectInstance(MobEffects.WITHER, 120, 0));
+                // One blighted heart for the whole ritual (not one more each time it repeats)
+                if (!user.hasEffect(CustomStatusEffects.BLIGHT)) user.addEffect(new MobEffectInstance(CustomStatusEffects.BLIGHT, USE_TIME_TICKS + 40, 0));
                 world.playSound(user, user.blockPosition(), SoundEvents.PLAYER_BREATH, user.getSoundSource(), 0.1F, 0.4f);
 
                 Optional<GlobalPos> lastDeathPos = serverPlayer.getLastDeathLocation();

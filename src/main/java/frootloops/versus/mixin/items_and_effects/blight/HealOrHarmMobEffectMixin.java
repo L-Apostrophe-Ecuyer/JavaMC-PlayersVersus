@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * A potion of Healing pushes Blight back: the white hearts it heals (two for Healing I, four for II) are purged, as far
+ * A potion of Healing pushes Blight back: the blighted hearts it heals (two for Healing I, four for II) are purged, as far
  * as its strength reaches the one it's on (a splash's edge purges less). It only does so where it heals: on the living,
  * not on the undead it harms.
  */

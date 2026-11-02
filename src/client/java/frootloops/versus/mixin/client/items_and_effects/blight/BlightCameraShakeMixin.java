@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
- * The blighted player's own view shakes as their hearts whiten (UndeathShaking): the camera is turned a little off the
+ * The blighted player's own view shakes as their hearts are blighted (UndeathShaking): the camera is turned a little off the
  * way they face, and back, never their aim. (Others see their body shake instead.)
  */
 @Environment(EnvType.CLIENT)

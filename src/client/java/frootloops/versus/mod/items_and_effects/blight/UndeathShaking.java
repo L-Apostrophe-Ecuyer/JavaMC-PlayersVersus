@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * How the blighted shake, worked out here from the Blight they're seen to have (the server tells every client who is
- * affected, so no packet is needed): from SHAKE_FROM of their hearts white, building to all of them, they shake as
+ * affected, so no packet is needed): from SHAKE_FROM of their hearts blighted, building to all of them, they shake as
  * frozen ones do, and the player themselves feels it in their own view (BlightCameraShakeMixin).
  */
 @Environment(EnvType.CLIENT)

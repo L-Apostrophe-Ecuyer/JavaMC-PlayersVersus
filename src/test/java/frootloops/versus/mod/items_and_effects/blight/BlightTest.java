@@ -7,18 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Blight's numbers: white hearts, stacking doses, the regeneration cap and when all hearts are white. */
+/** Blight's numbers: blighted hearts, stacking doses, the regeneration cap, being fully blighted and its damage. */
 class BlightTest {
 
     @Test
-    void anAmplifierWhitensOneHeartMoreThanItself() {
-        assertEquals(1, Blight.whiteHearts(0));
-        assertEquals(4, Blight.whiteHearts(3));
+    void anAmplifierBlightsOneHeartMoreThanItself() {
+        assertEquals(1, Blight.blightedHearts(0));
+        assertEquals(4, Blight.blightedHearts(3));
     }
 
     @Test
     void eachDoseAddsItsHeartsToThoseHad() {
-        // A first dose: one white heart (amplifier 0); a second: two (1); a stronger one on top adds its own
+        // A first dose: one blighted heart (amplifier 0); a second: two (1); a stronger one on top adds its own
         assertEquals(1, Blight.stackedAmplifier(0, 0));
         assertEquals(2, Blight.stackedAmplifier(1, 0));
         assertEquals(5, Blight.stackedAmplifier(2, 2));
@@ -34,65 +34,81 @@ class BlightTest {
     }
 
     @Test
-    void foodRegeneratesOnlyUpToTheWhiteHearts() {
+    void foodRegeneratesOnlyUpToTheBlightedHearts() {
         assertEquals(20.0F, Blight.regenCap(20.0F, 0));
         assertEquals(14.0F, Blight.regenCap(20.0F, 3));
         assertEquals(0.0F, Blight.regenCap(20.0F, 12));
     }
 
     @Test
-    void whiteHeartsStartAtTheEndOfTheBar() {
-        // Ten hearts, three white: the last three
-        assertFalse(Blight.isWhite(6, 10, 3));
-        assertTrue(Blight.isWhite(7, 10, 3));
-        assertTrue(Blight.isWhite(9, 10, 3));
-        // Absorption hearts, after the bar's, are never white
-        assertFalse(Blight.isWhite(10, 10, 3));
-        assertFalse(Blight.isWhite(0, 10, 0));
+    void blightedHeartsStartAtTheEndOfTheBar() {
+        // Ten hearts, three blighted: the last three
+        assertFalse(Blight.isBlighted(6, 10, 3));
+        assertTrue(Blight.isBlighted(7, 10, 3));
+        assertTrue(Blight.isBlighted(9, 10, 3));
+        // Absorption hearts, after the bar's, are never blighted
+        assertFalse(Blight.isBlighted(10, 10, 3));
+        assertFalse(Blight.isBlighted(0, 10, 0));
     }
 
     @Test
-    void allHeartsWhiteTurnsUndead() {
-        assertFalse(Blight.allWhite(20.0F, 9));
-        assertTrue(Blight.allWhite(20.0F, 10));
-        assertTrue(Blight.allWhite(20.0F, 14));
-        // Half a heart counts as one
-        assertFalse(Blight.allWhite(21.0F, 10));
-        assertTrue(Blight.allWhite(21.0F, 11));
-        assertFalse(Blight.allWhite(20.0F, 0));
+    void asManyBlightedHeartsAsTheBarHasIsFullyBlighted() {
+        assertFalse(Blight.fullyBlighted(20.0F, 9));
+        assertTrue(Blight.fullyBlighted(20.0F, 10));
+        assertTrue(Blight.fullyBlighted(20.0F, 14));
+        // Max health / 2: half a heart counts as one (21 health is 10.5 hearts, met by 11)
+        assertFalse(Blight.fullyBlighted(21.0F, 10));
+        assertTrue(Blight.fullyBlighted(21.0F, 11));
+        assertFalse(Blight.fullyBlighted(20.0F, 0));
     }
 
     @Test
-    void theWorldGreysWithTheWhiteHeartsAndTheTimeLeft() {
-        // 20 health: 10 hearts. No Blight, no grey; all white with time to spare, all grey
+    void theWorldGreysWithTheBlightedHeartsAndTheTimeLeft() {
+        // 20 health: 10 hearts. No Blight, no grey; fully blighted with time to spare, all grey
         assertEquals(0.0F, Blight.greyStrength(-1, 20.0F, 0), 1.0E-6F);
         assertEquals(1.0F, Blight.greyStrength(9, 20.0F, 2400), 1.0E-6F);
-        // As grey as the hearts are white: half, a tenth
+        // As grey as the hearts are blighted: half, a tenth
         assertEquals(0.5F, Blight.greyStrength(4, 20.0F, 2400), 1.0E-6F);
         assertEquals(0.1F, Blight.greyStrength(0, 20.0F, 2400), 1.0E-6F);
-        // All white, wearing off in its last half minute: the grey fades with it
+        // Fully blighted, wearing off in its last half minute: the grey fades with it
         assertEquals(0.5F, Blight.greyStrength(9, 20.0F, 300), 1.0E-6F);
         // Endless: as grey as its hearts
         assertEquals(1.0F, Blight.greyStrength(9, 20.0F, -1), 1.0E-6F);
     }
 
     @Test
-    void theShakeBeginsBeforeTheHeartsAreAllWhiteAndPeaksWhenTheyAre() {
-        // 20 health: 10 hearts. A third white: still; half: a tremor; all white: the worst of it
+    void theShakeBeginsBeforeItsFullAndPeaksWhenItIs() {
+        // 20 health: 10 hearts. A third blighted: still; half: a tremor; all of them: the worst of it
         assertEquals(0.0F, Blight.shakeStrength(-1, 20.0F), 1.0E-6F);
         assertEquals(0.0F, Blight.shakeStrength(2, 20.0F), 1.0E-6F);
         float half = Blight.shakeStrength(4, 20.0F);
         float most = Blight.shakeStrength(7, 20.0F);
         assertTrue(0.0F < half && half < most && most < 1.0F, half + ", " + most);
         assertEquals(1.0F, Blight.shakeStrength(9, 20.0F), 1.0E-6F);
-        // More than all white is no more than all
+        // More than all of them is no more than all
         assertEquals(1.0F, Blight.shakeStrength(30, 20.0F), 1.0E-6F);
     }
 
     @Test
-    void aBlightedThingTurnsPaleOnlyWhenHurtBelowTheLimit() {
-        assertFalse(Blight.paleOnWound(VersusSettings.Blight.PALE_BELOW_HEALTH + 0.5F));
-        assertTrue(Blight.paleOnWound(VersusSettings.Blight.PALE_BELOW_HEALTH - 0.5F));
+    void fullyBlightedItTakesAHeartEveryTenTicks() {
+        // From the tick it's full: then, and every FULL_DAMAGE_TICKS after
+        assertEquals(10, VersusSettings.Blight.FULL_DAMAGE_TICKS);
+        assertEquals(2.0F, VersusSettings.Blight.FULL_DAMAGE);
+        assertTrue(Blight.damagesNow(0));
+        assertFalse(Blight.damagesNow(1));
+        assertFalse(Blight.damagesNow(9));
+        assertTrue(Blight.damagesNow(10));
+        assertTrue(Blight.damagesNow(40));
+        assertFalse(Blight.damagesNow(45));
+    }
+
+    @Test
+    void aWitherIsBlightOfTheSameStrengthUpToALimit() {
+        // Wither I: a heart (amplifier 0); Wither III: three
+        assertEquals(0, Blight.fromWitherAmplifier(0));
+        assertEquals(2, Blight.fromWitherAmplifier(2));
+        // A Wither of hundreds of levels (a command's, say) is no more than the limit in one dose
+        assertEquals(VersusSettings.Blight.WITHER_MAX_HEARTS - 1, Blight.fromWitherAmplifier(250));
     }
 
     @Test
@@ -107,9 +123,9 @@ class BlightTest {
         assertEquals(1, Blight.absorptionPurge(1.0F));
         assertEquals(0, Blight.absorptionPurge(0.0F));
         assertEquals(0, Blight.absorptionPurge(-3.0F));
-        // What's left: four white hearts less two are two
+        // What's left: four blighted hearts less two are two
         assertEquals(1, Blight.purgedAmplifier(3, 2));
-        assertEquals(Blight.whiteHearts(3) - 2, Blight.whiteHearts(Blight.purgedAmplifier(3, 2)));
+        assertEquals(Blight.blightedHearts(3) - 2, Blight.blightedHearts(Blight.purgedAmplifier(3, 2)));
         // As many as there are leaves none (an amplifier below nothing)
         assertTrue(Blight.purgedAmplifier(1, 2) < 0);
         assertTrue(Blight.purgedAmplifier(1, 5) < 0);
