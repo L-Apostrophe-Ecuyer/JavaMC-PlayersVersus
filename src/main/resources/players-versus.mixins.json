@@ -138,6 +138,7 @@
     "mobs.passive.TransportItemsBetweenContainersMixin",
     "mobs.passive.AbstractHorseAccessor",
     "mobs.passive.WolfAccessor",
+    "mobs.passive.WolfHuntsPaleWolvesMixin",
     "mobs.passive.AbstractVillagerAccessor",
     "mobs.passive.VillagerHostilesSensorMixin"
   ],

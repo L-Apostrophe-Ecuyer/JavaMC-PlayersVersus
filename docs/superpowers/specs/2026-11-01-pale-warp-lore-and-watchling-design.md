@@ -367,8 +367,8 @@ have zombie and pale variants; pale wolves are hostile to players.
   owner's still, its collar and armour kept (a tame one has a tame wolf's health). It's never a pup and never breeds,
   eats only rotten flesh (healing a tame one), burns in daylight unless it wears wolf armour, and isn't spared the
   Blight: dying fully blighted, a zombie wolf turns into a **pale wolf**, no one's.
-- **Pale wolves** run in packs where paleness holds, by the pale line (the Pale Garden at any hour; the dark caves below
-  y 0; up to y 64 at midnight under a new moon): 2-4 in the Pale Garden, 2-3 in the caves. They hunt players (and
+- **Pale wolves** run in packs where paleness holds (the twelfth round moves them: the Pale Garden, and the forests at
+  night; never the caves). They hunt players (and
   whoever hurts them, the pack joining in); their bite blights, as every pale thing's; they take no Blight; they can't
   be tamed, fed or bred; their fur is the pale oak's bark and their eyes glow the creaking's orange. Golems fight them.
 - Game tests: `BlightGameTest.pillagersVindicatorsAndWitchesTakeNoBlight`; the pillager turning tests now use an
@@ -377,3 +377,23 @@ have zombie and pale variants; pale wolves are hostile to players.
   (`aFullyBlightedTamedWolfIsAZombieWolfStillItsOwners`, `aZombieWolfDyingFullyBlightedIsAPaleWolfNoOnesOwn`,
   `aPaleWolfCantBeTamedTakesNoBlightAndItsBiteBlights`, and both among the undead). Whom a pale wolf hunts isn't
   game-tested: the test player is always creative, which no mob targets.
+
+## Pale wolves are skeletons of the forest night (twelfth round, 2026-11-02)
+
+Asked for: pale wolves don't spawn in caves, but may in forests at night; they howl and rattle; they're skeletal, and
+fear wolves as skeletons do.
+
+- **Where:** packs of 2-4 in the Pale Garden at any hour (as the other pale mobs), and now and then in the forests and
+  taigas (`#is_forest`, `#is_taiga`), only at night (13000-23000), in the dark as monsters spawn, on ground wolves stand
+  on. Never in the caves.
+- **Skeletal:** a wolf's skeleton in the pale oak's palest bone: its chest and body a rib cage around a spine and a
+  breastbone (gaps between the ribs, seen through), its tail vertebrae, its legs thin, its head a skull with dark
+  sockets in which the creaking's orange eyes glow, a nose hole and teeth.
+- **Howl and rattle:** now and then (about every ten seconds) it howls, low and far-carrying (vanilla's old wolf howls),
+  or one time in three its bones rattle; hunting, it growls as a wolf. Hurt, dying and walking it sounds as a skeleton.
+  Each of its own sounds has a subtitle.
+- **Fears wolves:** as a skeleton, it flees living wolves within 6 blocks (not its own kind, not zombie wolves); and
+  living wolves hunt it as they hunt skeletons.
+- Tests: `UndeadFormsGameTest.aPaleWolfFleesALivingWolf`, `aWolfHuntsPaleWolves`; `PaleMobsTest.thePaleWolfIsASkeleton`,
+  `thePaleWolfHowlsAndRattles`; `MobSpawningTest` (night). Its look and sounds are unseen and unheard in a running game.
+

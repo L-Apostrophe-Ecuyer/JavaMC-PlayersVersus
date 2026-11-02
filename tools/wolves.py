@@ -9,10 +9,12 @@ Usage: wolves.py <vanilla dir> <assets/players-versus/textures dir>
 - The zombie wolf (wild, tame and angry, as a wolf has): the fur (the wolf's greys and whites) takes the zombie's skin
   green, each keeping its shade, a little greyer than the zombie, as the zombie chicken's feathers do; the muzzle's tan
   loses some of its colour; the eyes and the nose stay.
-- The pale wolf (wild and angry: it's never tamed): the fur takes the pale oak's bark greys (the pale creeper's), darker
-  than the wolf's; the muzzle and the brows go a dark bark brown; the eyes are the creaking's orange, and glow
-  (pale_wolf_eyes.png, the eyes alone, as the pale spider's).
-- The eggs: vanilla's wolf egg the same ways.
+- The pale wolf (wild and angry: it's never tamed) is a wolf's skeleton: bone (the pale oak's palest bark tones, shaded
+  as the wolf's fur was), its body and chest a rib cage (every other row of their sides gone, around a spine and a
+  breastbone), its tail a string of vertebrae, its legs thin; a skull with dark sockets, the creaking's orange eyes
+  glowing in them (pale_wolf_eyes.png, the eyes alone, as the pale spider's), a nose hole and teeth. The model draws
+  cut out and both-sided, so the gaps show through.
+- The eggs: vanilla's wolf egg the same ways (the pale one a bone-white skull with orange eyes).
 """
 import sys
 from pathlib import Path
@@ -28,6 +30,30 @@ EYE_BRIGHT = (239, 163, 55)
 # The wolf's eyes on the head's front face (texture 64 x 32): rims outside, pupils inside
 EYE_RIMS = [(4, 6), (9, 6)]
 EYE_PUPILS = [(5, 6), (8, 6)]
+
+# The skeleton's colours: bone (light to shaded), the dark of sockets, nose and gaps between teeth, and teeth
+SOCKET = (40, 35, 34)
+TEETH = (236, 232, 229)
+# The eye sockets around the eyes, on the head's front face
+SOCKETS = [(3, 6), (10, 6), (4, 5), (5, 5), (8, 5), (9, 5), (4, 7), (5, 7), (8, 7), (9, 7)]
+
+# The wolf model's faces (vanilla's 64 x 32 layout). The body (box 6 x 9 x 6 at 18, 14) and the mane (8 x 6 x 7 at 21, 0)
+# lie along the wolf, their faces' rows running from the shoulders back: their sides' rows are the ribs.
+BODY_SIDES = [(18, 24), (30, 36)]          # columns of the body's left and right faces, rows 20-28
+BODY_BELLY, BODY_BACK = (24, 30), (36, 42)  # the belly (breastbone down its middle) and the back (the spine)
+BODY_ROWS = range(20, 29)
+BODY_RIBS = {20, 22, 24, 27, 28}           # rows of bone: three ribs, then the hips; the rest are gaps
+MANE_SIDES = [(21, 28), (36, 43)]
+MANE_BELLY, MANE_BACK = (28, 36), (43, 51)
+MANE_ROWS = range(7, 13)
+MANE_RIBS = {7, 9, 11, 12}
+TAIL = (9, 17)                              # the tail's four faces, rows 20-27: every other row a vertebra
+TAIL_ROWS = range(20, 28)
+LEGS = (0, 8)                               # the legs' four faces, rows 20-27: thin between the joints
+LEG_ROWS = range(22, 26)
+MUZZLE_TEETH_ROW = 16                       # the muzzle's sides' lowest row: the teeth
+MUZZLE_TEETH = range(0, 14)
+NOSE = [(5, 14), (5, 15)]
 
 
 def luminance(rgb):
@@ -93,6 +119,38 @@ def zombie_wolf(wolf, zombie):
     return out
 
 
+def bone(rgb):
+    """The bone for one of the wolf's pixels: its fur's shade among the bark's palest tones."""
+    return bark(0.5 + (luminance(rgb) - 0.55) / 0.35 * 0.5)
+
+
+def middle(columns):
+    """The middle two columns of a face's span."""
+    centre = (columns[0] + columns[1]) // 2
+    return {centre - 1, centre}
+
+
+def skeletal(x, y):
+    """Whether the skeleton has no bone at a pixel of the wolf's: the gaps between ribs, vertebrae and thin leg bones."""
+    if y in BODY_ROWS:
+        if any(a <= x < b for a, b in BODY_SIDES):
+            return y not in BODY_RIBS
+        if BODY_BELLY[0] <= x < BODY_BELLY[1] or BODY_BACK[0] <= x < BODY_BACK[1]:
+            span = BODY_BELLY if x < BODY_BELLY[1] else BODY_BACK
+            return y not in BODY_RIBS and x not in middle(span)
+    if y in MANE_ROWS:
+        if any(a <= x < b for a, b in MANE_SIDES):
+            return y not in MANE_RIBS
+        if MANE_BELLY[0] <= x < MANE_BELLY[1] or MANE_BACK[0] <= x < MANE_BACK[1]:
+            span = MANE_BELLY if x < MANE_BELLY[1] else MANE_BACK
+            return y not in MANE_RIBS and x not in middle(span)
+    if TAIL[0] <= x < TAIL[1] and y in TAIL_ROWS:
+        return y % 2 == 1
+    if LEGS[0] <= x < LEGS[1] and y in LEG_ROWS:
+        return x % 2 == 1  # each face keeps one column: a thin bone
+    return False
+
+
 def pale_wolf(wolf):
     out = wolf.convert("RGBA").copy()
     pixels = out.load()
@@ -101,19 +159,18 @@ def pale_wolf(wolf):
             r, g, b, a = pixels[x, y]
             if a == 0:
                 continue
-            if (x, y) in EYE_RIMS:
+            if skeletal(x, y):
+                pixels[x, y] = (0, 0, 0, 0)
+            elif (x, y) in EYE_RIMS:
                 pixels[x, y] = EYE + (a,)
             elif (x, y) in EYE_PUPILS:
                 pixels[x, y] = EYE_BRIGHT + (a,)
-            elif is_fur((r, g, b)):
-                # Fur: the wolf's greys as the bark's mid greys, well darker than the wolf (ashen, not white)
-                shade = 0.12 + (luminance((r, g, b)) - 0.55) / 0.35 * 0.5
-                pixels[x, y] = bark(shade) + (a,)
-            elif max(r, g, b) < 90 or is_white((r, g, b)):
-                pixels[x, y] = DARK_BARK + (a,)
+            elif (x, y) in SOCKETS or (x, y) in NOSE or max(r, g, b) < 90:
+                pixels[x, y] = SOCKET + (a,)
+            elif y == MUZZLE_TEETH_ROW and x in MUZZLE_TEETH:
+                pixels[x, y] = (TEETH if x % 2 == 0 else SOCKET) + (a,)
             else:
-                # The muzzle's tan: a dark bark brown, its shades kept
-                pixels[x, y] = bark((luminance((r, g, b)) - 0.4) / 0.4 * 0.35) + (a,)
+                pixels[x, y] = bone((r, g, b)) + (a,)
     return out
 
 
@@ -144,6 +201,13 @@ def zombie_egg(egg, zombie):
     return out
 
 
+# The wolf egg's head (16 x 16): eye sockets, the eyes in them, the nose and the mouth (teeth)
+EGG_SOCKETS = [(5, 6), (6, 6), (10, 6), (11, 6)]
+EGG_EYES = [(5, 7), (11, 7)]
+EGG_DARK_EYES = [(6, 7), (10, 7)]
+EGG_MOUTH_ROW = 11
+
+
 def pale_egg(egg):
     out = egg.convert("RGBA").copy()
     pixels = out.load()
@@ -152,11 +216,14 @@ def pale_egg(egg):
             r, g, b, a = pixels[x, y]
             if a == 0:
                 continue
-            if max(r, g, b) - min(r, g, b) < 16:
-                shade = (luminance((r, g, b)) - 0.2) / 0.7
-                pixels[x, y] = (bark(0.12 + shade * 0.5) if shade > 0.05 else DARK_BARK) + (a,)
+            if (x, y) in EGG_EYES:
+                pixels[x, y] = EYE + (a,)
+            elif (x, y) in EGG_SOCKETS or (x, y) in EGG_DARK_EYES or luminance((r, g, b)) < 0.3:
+                pixels[x, y] = SOCKET + (a,)
+            elif y == EGG_MOUTH_ROW and max(r, g, b) - min(r, g, b) < 16 and luminance((r, g, b)) < 0.5:
+                pixels[x, y] = (TEETH if x % 2 == 0 else SOCKET) + (a,)
             else:
-                pixels[x, y] = bark((luminance((r, g, b)) - 0.4) / 0.4 * 0.35) + (a,)
+                pixels[x, y] = bark(0.45 + (luminance((r, g, b)) - 0.3) / 0.6 * 0.55) + (a,)
     return out
 
 

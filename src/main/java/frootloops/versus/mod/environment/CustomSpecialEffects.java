@@ -17,6 +17,8 @@ public class CustomSpecialEffects {
     public static SoundEvent DEEP_CAVES_MUSIC;
     /** Leaves pushed through: vanilla's leafy sounds, by sounds.json, under a subtitle of their own. */
     public static SoundEvent LEAVES_RUSTLE, WATCHLING_STATIC;
+    /** The pale wolf's calls (a wolf's old howl, low), its rattle, hurt and death (a skeleton's), under subtitles of its own. */
+    public static SoundEvent PALE_WOLF_HOWL, PALE_WOLF_RATTLE, PALE_WOLF_HURT, PALE_WOLF_DEATH;
     public static Holder.Reference<SoundEvent> SWORD_BLOCKING_WOOD, SWORD_BLOCKING_STONE, SWORD_BLOCKING_METAL, SWORD_BLOCKING_DIAMOND;
     public static final SimpleParticleType SPARKS_PARTICLE = FabricParticleTypes.simple();
     public static final SimpleParticleType BUYANCY_EFFECT_PARTICLE = FabricParticleTypes.simple();
@@ -29,6 +31,10 @@ public class CustomSpecialEffects {
         DEEP_CAVES_MUSIC = registerSoundEvent("music.overworld.deep_caves");
         LEAVES_RUSTLE = registerSoundEvent("block.leaves.rustle");
         WATCHLING_STATIC = registerSoundEvent("entity.watchling.static");
+        PALE_WOLF_HOWL = registerSoundEvent("entity.pale_wolf.howl");
+        PALE_WOLF_RATTLE = registerSoundEvent("entity.pale_wolf.rattle");
+        PALE_WOLF_HURT = registerSoundEvent("entity.pale_wolf.hurt");
+        PALE_WOLF_DEATH = registerSoundEvent("entity.pale_wolf.death");
         SWORD_BLOCKING_WOOD = registerSoundEventReference("sword_blocking_wood");
         SWORD_BLOCKING_STONE = registerSoundEventReference("sword_blocking_stone");
         SWORD_BLOCKING_METAL = registerSoundEventReference("sword_blocking_metal");

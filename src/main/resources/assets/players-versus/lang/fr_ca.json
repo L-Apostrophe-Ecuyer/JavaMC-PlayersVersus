@@ -331,6 +331,10 @@
   "item.players-versus.pale_villager_spawn_egg": "Oeuf d'apparition de Villageois pâle",
   "item.players-versus.brown_mushroom_cluster": "Grappe de champignons bruns",
   "subtitles.players-versus.entity.watchling.static": "Grésillements",
+  "subtitles.players-versus.entity.pale_wolf.howl": "Un loup pâle hurle",
+  "subtitles.players-versus.entity.pale_wolf.rattle": "Un loup pâle cliquette",
+  "subtitles.players-versus.entity.pale_wolf.hurt": "Un loup pâle est blessé",
+  "subtitles.players-versus.entity.pale_wolf.death": "Un loup pâle meurt",
   "entity.players-versus.pale_wandering_trader": "Marchand ambulant pâle",
   "item.players-versus.pale_wandering_trader_spawn_egg": "Oeuf d'apparition de Marchand ambulant pâle"
 }

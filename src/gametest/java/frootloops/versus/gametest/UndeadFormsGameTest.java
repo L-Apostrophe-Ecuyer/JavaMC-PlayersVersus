@@ -298,6 +298,24 @@ public class UndeadFormsGameTest {
         helper.succeed();
     }
 
+    /** As a skeleton does, a pale wolf flees a living wolf near it. */
+    @GameTest(structure = ROOM, maxTicks = 200)
+    public void aPaleWolfFleesALivingWolf(GameTestHelper helper) {
+        floor(helper);
+        Wolf wolf = helper.spawnWithNoFreeWill(EntityTypes.WOLF, new Vec3(5.5, 1.0, 3.5));
+        PaleWolfEntity pale = helper.spawn(ModEntities.PALE_WOLF, new Vec3(7.5, 1.0, 3.5));
+        helper.succeedWhen(() -> helper.assertTrue(pale.distanceTo(wolf) >= 5.0F, "the pale wolf stays " + pale.distanceTo(wolf) + " from the wolf"));
+    }
+
+    /** A living wolf hunts a pale wolf, as it hunts skeletons. */
+    @GameTest(structure = ROOM, maxTicks = 200)
+    public void aWolfHuntsPaleWolves(GameTestHelper helper) {
+        floor(helper);
+        PaleWolfEntity pale = helper.spawnWithNoFreeWill(ModEntities.PALE_WOLF, new Vec3(8.5, 1.0, 3.5));
+        Wolf wolf = helper.spawn(EntityTypes.WOLF, new Vec3(5.5, 1.0, 3.5));
+        helper.succeedWhen(() -> helper.assertTrue(wolf.getTarget() == pale, "the wolf hunts " + wolf.getTarget() + ", not the pale wolf"));
+    }
+
     /** A zombie chicken whose egg is due lays nothing, where a chicken lays; and it eats nothing (so breeds with nothing). */
     @GameTest(structure = ROOM, maxTicks = 100)
     public void zombieChickensLayNoEggs(GameTestHelper helper) {

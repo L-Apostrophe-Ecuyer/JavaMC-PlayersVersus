@@ -8,11 +8,13 @@ import frootloops.versus.mod.environment.worldgen.TestGame;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import javax.imageio.ImageIO;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.creaking.Creaking;
 
@@ -59,6 +61,34 @@ class PaleMobsTest {
                 assertTrue(english.has("item.players-versus." + mob + "_spawn_egg"), mob + "'s egg has no name in " + namespace);
             }
         }
+    }
+
+    /**
+     * The pale wolf is a skeleton: its body's sides have gaps between the ribs (a rib, then a gap, from the shoulders),
+     * where the wolf has fur; the spine down its back is whole.
+     */
+    @Test
+    void thePaleWolfIsASkeleton() throws IOException {
+        BufferedImage skin = ImageIO.read(RESOURCES.resolve("assets/players-versus/textures/entity/pale_wolf.png").toFile());
+        assertTrue(opaque(skin, 18, 20), "the first rib is missing");
+        assertTrue(!opaque(skin, 18, 21) && !opaque(skin, 33, 23), "the rib cage has no gaps");
+        for (int row = 20; row <= 28; row++) assertTrue(opaque(skin, 38, row), "the spine breaks at row " + row);
+    }
+
+    /** It howls and rattles, hurts and dies with sounds of its own, each with a subtitle. */
+    @Test
+    void thePaleWolfHowlsAndRattles() throws IOException {
+        JsonObject sounds = read("assets/players-versus/sounds.json");
+        JsonObject english = read("assets/players-versus/lang/en_us.json");
+        for (String sound : List.of("howl", "rattle", "hurt", "death")) {
+            String event = "entity.pale_wolf." + sound;
+            assertTrue(sounds.has(event), event + " isn't a sound");
+            assertTrue(english.has(sounds.getAsJsonObject(event).get("subtitle").getAsString()), event + " has no subtitle");
+        }
+    }
+
+    private static boolean opaque(BufferedImage image, int x, int y) {
+        return (image.getRGB(x, y) >>> 24) != 0;
     }
 
     @Test

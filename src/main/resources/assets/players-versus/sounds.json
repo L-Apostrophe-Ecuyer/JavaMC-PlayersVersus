@@ -97,5 +97,30 @@
         "sounds" : [
             "players-versus:watchling/static"
         ]
+    },
+    "entity.pale_wolf.howl" : {
+        "subtitle": "subtitles.players-versus.entity.pale_wolf.howl",
+        "sounds" : [
+            { "name": "minecraft:mob/wolf/howl1", "pitch": 0.8 },
+            { "name": "minecraft:mob/wolf/howl2", "pitch": 0.8 }
+        ]
+    },
+    "entity.pale_wolf.rattle" : {
+        "subtitle": "subtitles.players-versus.entity.pale_wolf.rattle",
+        "sounds" : [
+            { "name": "minecraft:entity.skeleton.ambient", "type": "event" }
+        ]
+    },
+    "entity.pale_wolf.hurt" : {
+        "subtitle": "subtitles.players-versus.entity.pale_wolf.hurt",
+        "sounds" : [
+            { "name": "minecraft:entity.skeleton.hurt", "type": "event" }
+        ]
+    },
+    "entity.pale_wolf.death" : {
+        "subtitle": "subtitles.players-versus.entity.pale_wolf.death",
+        "sounds" : [
+            { "name": "minecraft:entity.skeleton.death", "type": "event" }
+        ]
     }
 }

@@ -470,6 +470,10 @@
   "item.players-versus.pale_villager_spawn_egg": "Pale Villager Spawn Egg",
   "item.players-versus.brown_mushroom_cluster": "Brown Mushroom Cluster",
   "subtitles.players-versus.entity.watchling.static": "Static hisses",
+  "subtitles.players-versus.entity.pale_wolf.howl": "Pale Wolf howls",
+  "subtitles.players-versus.entity.pale_wolf.rattle": "Pale Wolf rattles",
+  "subtitles.players-versus.entity.pale_wolf.hurt": "Pale Wolf hurts",
+  "subtitles.players-versus.entity.pale_wolf.death": "Pale Wolf dies",
   "entity.players-versus.pale_wandering_trader": "Pale Wandering Trader",
   "item.players-versus.pale_wandering_trader_spawn_egg": "Pale Wandering Trader Spawn Egg"
 }
