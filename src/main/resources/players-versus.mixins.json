@@ -98,6 +98,8 @@
     "mobs.hostile.end.dragon.StrafePlayerPhaseMixin",
     "mobs.hostile.end.EndermanMixin",
     "mobs.hostile.end.ShulkerMixin",
+    "mobs.hostile.end.EndermanTakeBlockGoalMixin",
+    "mobs.hostile.end.ShulkerBulletCarrierMixin",
 
     "mobs.hostile.illager.MoveToRaidCenterGoalMixin",
     "mobs.hostile.illager.PillagerMixin",

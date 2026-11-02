@@ -1,6 +1,7 @@
 package frootloops.versus.mixin.mobs.hostile.end;
 
 import frootloops.versus.VersusMod;
+import frootloops.versus.mod.mobs.hostile.end.EndermanShulkerCarrier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -45,6 +46,12 @@ public abstract class ShulkerMixin extends AbstractGolem implements Enemy {
 
     @Invoker("setVariant")
     protected abstract void versus$setVariant(Optional<DyeColor> color);
+
+    /** Held in an enderman's arms (EndermanShulkerCarrier), it can't teleport out of them, hurt or not. */
+    @Inject(method = "teleportSomewhere", at = @At("HEAD"), cancellable = true)
+    private void playersVersus$heldFast(CallbackInfoReturnable<Boolean> info) {
+        if (EndermanShulkerCarrier.isCarried(this)) info.setReturnValue(false);
+    }
 
     @Inject(method = "teleportSomewhere", at = @At("RETURN"))
     private void matchSurfaceColor(CallbackInfoReturnable<Boolean> cir) {
