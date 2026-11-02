@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  */
 public final class InventorySorter {
     /** Items an inventory of two rows holds: at most this many, and the hotbar is left alone. */
-    private static final int SMALL_INVENTORY = 18;
+    private static final int PLAYER_NUM_ITEMS_FOR_SMALL_INVENTORY = 18;
 
 
     /**
@@ -109,7 +109,7 @@ public final class InventorySorter {
         // Step 2: Try forming rows withing a group, and combining similar groups
         if(isPlayerInventory) {
             // A small inventory (two rows or less) keeps its hotbar as it is, but for the nine stacks it holds
-            if(numItems > SMALL_INVENTORY) {
+            if(numItems > PLAYER_NUM_ITEMS_FOR_SMALL_INVENTORY) {
                 this.cleanUpHotbar();
                 for (ItemSlot slot : hotbar.keepOnlyEssentials()) this.insertItemIntoGroup(slot);
                 this.avoidAWeakHotbar();
@@ -128,6 +128,8 @@ public final class InventorySorter {
         SortingDebug.log(() -> "[ INVENTORY SORTING ] ---- STARTING TO INPUT INTO INVENTORY -----");
         SortedInventoryOutput inventoryOutput = new SortedInventoryOutput(numRows, numEmptySlots, orderedGroups.size(), isPlayerInventory);
         List<ItemSlot> slotsTaken = new ArrayList<>(), slotsToAdd = new ArrayList<>();
+
+
 
         // Case 4.1 - One Row Per List
         // If each individual sublist can have their own row, then do the work to split them:
@@ -148,7 +150,7 @@ public final class InventorySorter {
 
         // Case 4.2 - One Row Per Group
         // If each group can have their own row, then best case scenario:
-        if(orderedGroups.size() <= numRows) {
+        if(orderedGroups.size() <= numRows && (!isPlayerInventory || numItems <= PLAYER_NUM_ITEMS_FOR_SMALL_INVENTORY)) {
             int actualNumRowsInGroups = orderedGroups.size() + orderedGroups.stream().mapToInt(g -> (g.size() - 1)/9).sum();
             SortingDebug.log(() -> "              -> Actual number of rows in groups is " + actualNumRowsInGroups + ", the inventory has " + numRows);
             if(actualNumRowsInGroups <= numRows) {
