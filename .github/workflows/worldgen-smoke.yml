@@ -412,7 +412,7 @@ jobs:
           -Ppv.acceptEula=true
           "-Ppv.levelType=${{ matrix.level_type }}"
           "-Ppv.seed=$SEED"
-          "-Ppv.census=swamp,mangrove_swamp"
+          "-Ppv.census=end_barrens,savanna,jungle"
           "-Ppv.censusRadius=4"
       - name: show the census
         if: always()
