@@ -78,7 +78,7 @@ public final class PvBiomeLayout {
                     (slice, biome) -> CustomOverworldBiomes.getSnowyToTemperateTransitionBiome(biome)),
             new Rule("humid", Box.ALL.withMin(Box.H, Climate.quantizeCoord(0.275F)).withMax(Box.H, Climate.quantizeCoord(0.35F)),
                     (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)),
-            new Rule("warm", Box.ALL.withMin(Box.W, Climate.quantizeCoord(0.2F)).withMax(Box.H, Climate.quantizeCoord(0.375F)),
+            new Rule("warm", Box.ALL.withMin(Box.T, Climate.quantizeCoord(0.15F)).withMax(Box.H, Climate.quantizeCoord(0.375F)),
                     (slice, biome) -> CustomOverworldBiomes.getWarmTransitionBiome(biome)),
 
             new Rule("flower-forest", Box.ALL,

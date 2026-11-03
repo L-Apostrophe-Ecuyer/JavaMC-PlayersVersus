@@ -213,8 +213,8 @@ public abstract class VersusSettings {
         public static int FULL_DAMAGE_TICKS = 10;
         // The shaking begins when this part of the hearts is blighted and grows to all of them; the view of whoever's
         // blighted trembles up to SHAKE_DEGREES either way
-        public static float SHAKE_FROM = 0.4F;
-        public static float SHAKE_DEGREES = 2.5F;
+        public static float SHAKE_FROM = 0.5F;
+        public static float SHAKE_DEGREES = 2.0F;
     }
 
     public static class Mushrooms {

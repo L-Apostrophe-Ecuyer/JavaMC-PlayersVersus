@@ -70,7 +70,6 @@ public class CustomOverworldBiomes {
             new PlacedBiome(Biomes.DRIPSTONE_CAVES, PlacedBiomeType.CAVE, true, Climate.Parameter.span(0.0f, 0.7f), defaultParameter, Climate.Parameter.span(0.4f, 1.0f), Climate.Parameter.span(-0.8f, 0.0f), Climate.Parameter.span(-0.75f, 0.3f)),
             new PlacedBiome(Biomes.DEEP_DARK, PlacedBiomeType.DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, Climate.Parameter.span(-1.0f, -0.8f), defaultParameter),
 
-
             new PlacedBiome(REGULAR_CAVE, PlacedBiomeType.GENERIC_CAVE, false, Climate.Parameter.span(-0.7f, 1.0f), defaultParameter, defaultParameter, defaultParameter, defaultParameter),
             new PlacedBiome(DEEP_CAVES, PlacedBiomeType.GENERIC_DEEP_CAVE, false, defaultParameter, defaultParameter, defaultParameter, defaultParameter, defaultParameter)
     };
@@ -92,40 +91,40 @@ public class CustomOverworldBiomes {
             Map.entry(Biomes.SAVANNA_PLATEAU, Biomes.STONY_PEAKS));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> FROZEN_BIOME_REPLACEMENTS = Map.ofEntries(
-            Map.entry(Biomes.SNOWY_BEACH, COLD_BEACH),
-            Map.entry(Biomes.TAIGA, COLD_TAIGA),
-            Map.entry(Biomes.FOREST, Biomes.TAIGA),
-            Map.entry(Biomes.BIRCH_FOREST, BIRCH_TAIGA_FOREST),
-            Map.entry(Biomes.SNOWY_TAIGA, COLD_TAIGA),
-            Map.entry(Biomes.PLAINS, Biomes.MEADOW),
-            Map.entry(Biomes.SNOWY_PLAINS, COLD_PLAINS),
-            Map.entry(Biomes.FROZEN_OCEAN, Biomes.COLD_OCEAN),
-            Map.entry(Biomes.ICE_SPIKES, Biomes.SNOWY_PLAINS));
+            Map.entry(Biomes.SNOWY_BEACH,   COLD_BEACH),
+            Map.entry(Biomes.TAIGA,         COLD_TAIGA),
+            Map.entry(Biomes.FOREST,        Biomes.TAIGA),
+            Map.entry(Biomes.BIRCH_FOREST,  BIRCH_TAIGA_FOREST),
+            Map.entry(Biomes.SNOWY_TAIGA,   COLD_TAIGA),
+            Map.entry(Biomes.PLAINS,        Biomes.MEADOW),
+            Map.entry(Biomes.SNOWY_PLAINS,  COLD_PLAINS),
+            Map.entry(Biomes.FROZEN_OCEAN,  Biomes.COLD_OCEAN),
+            Map.entry(Biomes.ICE_SPIKES,    Biomes.SNOWY_PLAINS));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> HUMID_BIOME_REPLACEMENTS = Map.ofEntries(
-            Map.entry(Biomes.BIRCH_FOREST, DARK_BIRCH_FOREST),
-            Map.entry(Biomes.DARK_FOREST, DARK_BIRCH_FOREST),
-            Map.entry(Biomes.JUNGLE, Biomes.SPARSE_JUNGLE),
-            Map.entry(Biomes.DESERT, DESERT_OASIS),
-            Map.entry(Biomes.BADLANDS, Biomes.DESERT));
+            Map.entry(Biomes.BIRCH_FOREST,      DARK_BIRCH_FOREST),
+            Map.entry(Biomes.DARK_FOREST,       DARK_BIRCH_FOREST),
+            Map.entry(Biomes.JUNGLE,            Biomes.SPARSE_JUNGLE),
+            Map.entry(Biomes.DESERT,            DESERT_OASIS),
+            Map.entry(Biomes.BADLANDS,          Biomes.DESERT));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> WARM_BIOME_REPLACEMENTS = Map.ofEntries(
-            Map.entry(Biomes.SAVANNA_PLATEAU, Biomes.PLAINS),
-            Map.entry(Biomes.SAVANNA, MOUNTAINSIDE_FOREST_WARM),
-            Map.entry(Biomes.DARK_FOREST, Biomes.FOREST),
-            Map.entry(Biomes.SPARSE_JUNGLE, MOUNTAINSIDE_JUNGLE),
-            Map.entry(Biomes.JUNGLE, Biomes.SPARSE_JUNGLE),
-            Map.entry(Biomes.BAMBOO_JUNGLE, Biomes.SPARSE_JUNGLE));
+            Map.entry(Biomes.SAVANNA_PLATEAU,   Biomes.END_BARRENS),
+            Map.entry(Biomes.SAVANNA,           Biomes.END_BARRENS),
+            Map.entry(Biomes.DARK_FOREST,       Biomes.END_BARRENS),
+            Map.entry(Biomes.SPARSE_JUNGLE,     Biomes.END_BARRENS),
+            Map.entry(Biomes.JUNGLE,            Biomes.END_BARRENS),
+            Map.entry(Biomes.BAMBOO_JUNGLE,     Biomes.END_BARRENS));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> SURFACE_CAVE_BIOME_REPLACEMENTS = Map.ofEntries(
-            Map.entry(Biomes.FROZEN_PEAKS, Biomes.ICE_CAVES),
-            Map.entry(Biomes.SNOWY_SLOPES, Biomes.ICE_CAVES),
-            Map.entry(Biomes.DESERT, DESERT_CREEPER_CAVE),
-            Map.entry(Biomes.BADLANDS, BADLANDS_CAVE),
-            Map.entry(Biomes.ERODED_BADLANDS, BADLANDS_CAVE),
-            Map.entry(Biomes.WOODED_BADLANDS, BADLANDS_CAVE),
-            Map.entry(Biomes.PALE_GARDEN, PALE_GROTTO),
-            Map.entry(Biomes.MUSHROOM_FIELDS, MUSHROOM_CAVES));
+            Map.entry(Biomes.FROZEN_PEAKS,      Biomes.ICE_CAVES),
+            Map.entry(Biomes.SNOWY_SLOPES,      Biomes.ICE_CAVES),
+            Map.entry(Biomes.DESERT,            DESERT_CREEPER_CAVE),
+            Map.entry(Biomes.BADLANDS,          BADLANDS_CAVE),
+            Map.entry(Biomes.ERODED_BADLANDS,   BADLANDS_CAVE),
+            Map.entry(Biomes.WOODED_BADLANDS,   BADLANDS_CAVE),
+            Map.entry(Biomes.PALE_GARDEN,       PALE_GROTTO),
+            Map.entry(Biomes.MUSHROOM_FIELDS,   MUSHROOM_CAVES));
 
     @Nullable
     public static ResourceKey<Biome> getMountainTransitionBiome(ResourceKey<Biome> originalBiome) {
