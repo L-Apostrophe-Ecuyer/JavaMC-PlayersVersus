@@ -22,6 +22,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -252,6 +253,47 @@ public class BlightGameTest {
         helper.assertTrue(zombies.getFirst().getItemBySlot(EquipmentSlot.HEAD).is(Items.IRON_HELMET), "the copy doesn't wear a helmet");
         helper.assertTrue(zombies.getFirst().getStash().isEmpty(), "the copy carries things");
         helper.succeed();
+    }
+
+    /**
+     * A player's effects tick with their connection (ServerPlayer#doTick), after the level's tick, not with the level's
+     * entities. The mock player's connection doesn't tick, so the test's own tick (also after the level's) does it.
+     */
+    private static void tickAsAConnection(GameTestHelper helper, ServerPlayer player) {
+        helper.onEachTick(() -> {
+            if (!player.isRemoved() && !player.isDeadOrDying()) player.doTick();
+        });
+    }
+
+    /**
+     * A survival player left fully blighted is blighted to death, as anything is, and rises a player zombie: with a heart
+     * left, the Blight's first blow kills them.
+     */
+    @GameTest(structure = ROOM, maxTicks = 60)
+    public void aFullyBlightedPlayerIsBlightedToDeathAndRises(GameTestHelper helper) {
+        floor(helper);
+        ServerPlayer player = equippedPlayer(helper);
+        player.setGameMode(GameType.SURVIVAL);
+        player.addEffect(fullBlight(player));
+        player.setHealth(VersusSettings.Blight.FULL_DAMAGE);
+        tickAsAConnection(helper, player);
+        helper.succeedWhen(() -> {
+            helper.assertTrue(player.isDeadOrDying(), "the fully blighted player still has " + player.getHealth() + " health");
+            helper.assertTrue(playerZombies(helper).size() == 1, playerZombies(helper).size() + " player zombies, not one");
+        });
+    }
+
+    /** A creative player left fully blighted shakes TURNING_TICKS, then lives, the Blight lifted, and a copy of them rises. */
+    @GameTest(structure = ROOM, maxTicks = 200)
+    public void aFullyBlightedCreativePlayerLeavesACopyAfterTheShaking(GameTestHelper helper) {
+        floor(helper);
+        ServerPlayer player = equippedPlayer(helper);
+        player.addEffect(fullBlight(player));
+        tickAsAConnection(helper, player);
+        helper.succeedWhen(() -> {
+            helper.assertTrue(playerZombies(helper).size() == 1, playerZombies(helper).size() + " player zombies, not one");
+            helper.assertTrue(!player.isDeadOrDying() && !player.hasEffect(CustomStatusEffects.BLIGHT), "the creative player died or is still blighted");
+        });
     }
 
     /** A potion of Healing purges the blighted hearts it heals; a stronger one purges the lot. */

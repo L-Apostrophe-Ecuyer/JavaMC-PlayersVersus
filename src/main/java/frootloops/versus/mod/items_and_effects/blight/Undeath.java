@@ -61,8 +61,13 @@ public final class Undeath {
     public static final TagKey<EntityType<?>> RISE_AS_ZOMBIES = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rise_as_zombies"));
     public static final ResourceKey<DamageType> TURNED_UNDEAD = ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "turned_undead"));
 
-    /** Since when each fully blighted thing has been so, and when it was last seen so (game time). */
+    /**
+     * Since when each fully blighted thing has been so (the end of the first level tick to see it: NOT_STARTED till then),
+     * and when its Blight last ticked so (game time).
+     */
     private record Turning(long started, long lastSeen) {}
+
+    private static final long NOT_STARTED = -1L;
 
     private static final Map<LivingEntity, Turning> TURNING = new WeakHashMap<>();
 
@@ -124,7 +129,16 @@ public final class Undeath {
         if (!Blight.fullyBlighted(entity.getMaxHealth(), Blight.blightedHearts(amplifier))) return;
         long now = level.getGameTime();
         Turning turning = TURNING.get(entity);
-        TURNING.put(entity, turning == null || turning.lastSeen < now - 1 ? new Turning(now, now) : new Turning(turning.started, now));
+        TURNING.put(entity, turning == null || lapsed(turning, now) ? new Turning(NOT_STARTED, now) : new Turning(turning.started, now));
+    }
+
+    /**
+     * Whether it's no longer seen fully blighted: its Blight didn't tick so this tick nor the last. (The last counts: a
+     * player's effects tick with their connection, ServerPlayer#doTick, after the level's tick and its end, so the end of
+     * a level tick sees what the player's Blight noted the tick before. A mob's Blight ticks within the level's tick.)
+     */
+    private static boolean lapsed(Turning turning, long now) {
+        return turning.lastSeen < now - 1;
     }
 
     private static void tick(ServerLevel level) {
@@ -135,10 +149,14 @@ public final class Undeath {
             LivingEntity entity = entry.getKey();
             if (entity.level() != level) continue;
             Turning turning = entry.getValue();
-            // Not fully blighted this tick (cured, healed, gone): it's left alone
-            if (turning.lastSeen < now || !entity.isAlive()) {
+            // No longer fully blighted (cured, healed, gone): it's left alone
+            if (lapsed(turning, now) || !entity.isAlive() || !fullyBlighted(entity)) {
                 TURNING.remove(entity);
                 continue;
+            }
+            if (turning.started == NOT_STARTED) {
+                turning = new Turning(now, turning.lastSeen);
+                TURNING.put(entity, turning);
             }
             long ticks = now - turning.started;
             if (ticks == 0 && entity instanceof ServerPlayer player) {
