@@ -43,10 +43,10 @@ public class EndermanShulkerGameTest {
         Shulker shulker = carried(helper, enderman, at);
         helper.runAfterDelay(2, () -> {
             helper.assertTrue(EndermanShulkerCarrier.carries(enderman), "the enderman carries nothing");
-            helper.assertTrue(Math.abs(enderman.getBbWidth() - VersusSettings.Endermen.SHULKER_CARRIER_WIDTH) < 1.0E-4F, "the enderman is " + enderman.getBbWidth() + " wide, not as wide as its shulker");
+            helper.assertTrue(Math.abs(enderman.getBbWidth() - 0.98F) < 1.0E-4F, "the enderman is " + enderman.getBbWidth() + " wide, not as wide as its shulker");
             helper.assertTrue(enderman.getControllingPassenger() == null, "the shulker steers the enderman");
             double held = shulker.getY() - enderman.getY();
-            helper.assertTrue(Math.abs(held - VersusSettings.Endermen.SHULKER_HELD_AT) < 0.01, "the shulker is held " + held + " up, not at its chest");
+            helper.assertTrue(Math.abs(held - 0.7) < 0.01, "the shulker is held " + held + " up, not at its chest");
             AABB room = enderman.getBoundingBox().inflate(0.011);
             AABB box = shulker.getBoundingBox();
             helper.assertTrue(box.minX >= room.minX && box.maxX <= room.maxX && box.minZ >= room.minZ && box.maxZ <= room.maxZ

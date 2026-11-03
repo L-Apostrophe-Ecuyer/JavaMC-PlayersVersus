@@ -184,7 +184,7 @@ public abstract class VersusSettings {
     public static class Endermen {
         // Now and then an enderman carries a shulker in its arms instead of a block: SHULKER_CARRIER_CHANCE of those that
         // spawn naturally or with the world (EndermanShulkerCarrier). It's an enderman otherwise
-        public static float SHULKER_CARRIER_CHANCE = 0.03F;
+        public static float SHULKER_CARRIER_CHANCE = 0.06F;
         // How high the shulker it holds sits (its bottom, blocks above the enderman's feet), and how far in front of it
         // the shulker is drawn, in its arms (it really is inside the enderman's box, which widens to SHULKER_CARRIER_WIDTH)
         public static double SHULKER_HELD_AT = 0.7, SHULKER_HELD_FORWARD = 0.55;

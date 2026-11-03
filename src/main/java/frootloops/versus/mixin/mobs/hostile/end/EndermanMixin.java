@@ -66,7 +66,7 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
     protected EntityDimensions getDefaultDimensions(Pose pose) {
         EntityDimensions dimensions = super.getDefaultDimensions(pose);
         if (!EndermanShulkerCarrier.carries(this)) return dimensions;
-        return EntityDimensions.scalable(VersusSettings.Endermen.SHULKER_CARRIER_WIDTH, dimensions.height()).withEyeHeight(dimensions.eyeHeight());
+        return EntityDimensions.scalable(0.98F, dimensions.height()).withEyeHeight(dimensions.eyeHeight());
     }
 
     /** Its size follows what it carries: a shulker taken up or let go, it refreshes. */
@@ -85,7 +85,7 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
     /** A shulker it carries is held at its chest, in its arms (drawn before it: client ShulkerRendererCarriedMixin), not on its head. */
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
-        if (passenger instanceof Shulker) return new Vec3(0.0, VersusSettings.Endermen.SHULKER_HELD_AT * scale, 0.0);
+        if (passenger instanceof Shulker) return new Vec3(0.0, 0.7 * scale, 0.0);
         return super.getPassengerAttachmentPoint(passenger, dimensions, scale);
     }
 
