@@ -65,8 +65,6 @@
     ],
     [
       "players-versus:swamp_patch_vegetation",
-      "players-versus:swamp_patch_rooted_dirt",
-      "players-versus:swamp_patch_pond",
       "players-versus:pale_moss_patch",
       "players-versus:pale_swamp_trees",
       "minecraft:flower_swamp",

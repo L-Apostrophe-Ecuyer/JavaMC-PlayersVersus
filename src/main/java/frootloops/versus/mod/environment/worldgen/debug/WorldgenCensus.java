@@ -184,7 +184,8 @@ public final class WorldgenCensus {
 
     private static final class Tally {
         int columns, plantable;
-        final Map<String, Integer> floors = new TreeMap<>(), blocks = new TreeMap<>(), onGround = new TreeMap<>();
+        final Map<String, Integer> floors = new TreeMap<>(), blocks = new TreeMap<>(), onGround = new TreeMap<>(), floating = new TreeMap<>();
+        final List<BlockPos> floatingAt = new ArrayList<>();
     }
 
     private static void count(ServerLevel world, String biome, BlockPos middle, int radius, Consumer<String> log) {
@@ -211,6 +212,7 @@ public final class WorldgenCensus {
                         if (name.equals(biome) && inBiome++ % COLUMN_SAMPLE_SPACING == 0) samples.add(new BlockPos(x, top, z));
                         String plant = path(world.getBlockState(ground.above()));
                         if (!isTree(plant)) tally.onGround.merge(plant, 1, Integer::sum);
+                        floating(world, x, z, tally);
                         for (int y = ground.getY() + 1; y <= ground.getY() + TREE_HEIGHT; y++) {
                             String block = path(world.getBlockState(new BlockPos(x, y, z)));
                             if (isTree(block)) tally.blocks.merge(block, 1, Integer::sum);
@@ -226,8 +228,32 @@ public final class WorldgenCensus {
             log.accept("[pvwg] census     ground: " + tally.floors);
             log.accept("[pvwg] census     on the ground: " + tally.onGround);
             log.accept("[pvwg] census     trees: " + tally.blocks);
+            if (!tally.floating.isEmpty()) log.accept("[pvwg] census     floating: " + tally.floating + " at " + tally.floatingAt);
         });
         for (BlockPos sample : samples) column(world, sample, log);
+        Tally asked = tallies.get(biome.contains(":") ? biome : "minecraft:" + biome);
+        if (asked != null) for (int i = 0; i < Math.min(3, asked.floatingAt.size()); i++) column(world, asked.floatingAt.get(i * asked.floatingAt.size() / 3).above(3), log);
+    }
+
+    /** How many floating positions are kept to show where, per biome. */
+    private static final int FLOATING_SAMPLES = 12;
+
+    /**
+     * Ground that floats in this column: a block of the ground (not a tree's, nor a lily pad) over air or water, from the
+     * top of the column down to sea level, as a feature that places ground where there is none leaves it (the small
+     * swamp mangrove's alter_ground did: its provider answered at any height, so it laid disks two blocks above the
+     * ground).
+     */
+    private static void floating(ServerLevel world, int x, int z, Tally tally) {
+        int top = world.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        for (int y = top - 1; y > world.getSeaLevel(); y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            if (!isGround(world, pos) || world.getBlockState(pos).is(Blocks.LILY_PAD)) continue;
+            BlockPos below = pos.below();
+            if (!world.getBlockState(below).getCollisionShape(world, below).isEmpty()) continue;
+            tally.floating.merge(path(world.getBlockState(pos)), 1, Integer::sum);
+            if (tally.floatingAt.size() < FLOATING_SAMPLES) tally.floatingAt.add(pos);
+        }
     }
 
     /** A column as it is: the heightmaps' heights, and the blocks from three above the ocean floor's down to six under it. */
