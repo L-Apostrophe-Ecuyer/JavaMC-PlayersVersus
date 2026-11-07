@@ -7,6 +7,7 @@ Each transition biome lies between two biomes (PvBiomeLayout's warm band and swa
 
 - what lies under it (lakes, ores, springs, the carvers, the frost) is its main neighbour's, the mod's version where the
   mod overrides it, so every biome keeps the same order of features (BiomeFeatureOrderTest);
+- the humid oak forest's ground is the marsh's, drier (tools/wetlands.py);
 - its plants are its own: trees from both sides chosen by a random selector and placed by noise (noise_based_count, as
   the savanna's are), so they gather in groves and leave clearings instead of standing evenly; then the neighbours'
   flowers and grass in the order their own biomes place them;
@@ -117,24 +118,8 @@ BIOMES = {
         "colors": {"grass_color": "#5f8c42", "foliage_color": "#5e8a3a", "dry_foliage_color": "#7b5334", "water_color": "#507a9e"},
         "trees": selector("minecraft:oak_checked", (SWAMP_OAK, 0.35), ("minecraft:fancy_oak_checked", 0.08), ("minecraft:fallen_oak_tree", 0.06)),
         "tree_placement": dict(ratio=12, offset=0.45, max_water=2),
-        # Under its water, brown mud on the sand and gravel: disks that only replace those, after the clay's
-        "underground_extra": [("humid_mud_disks", {"type": "minecraft:disk", "half_height": 1,
-                                                   "radius": {"type": "minecraft:uniform", "min_inclusive": 2, "max_inclusive": 4},
-                                                   "state_provider": {"type": "minecraft:rule_based", "fallback": {"id": f"{MOD}:brown_mud"}, "rules": []},
-                                                   "target": {"type": "minecraft:matching_blocks", "blocks": ["minecraft:sand", "minecraft:gravel", "minecraft:dirt"]}},
-                               {"feature": f"{MOD}:humid_mud_disks", "placement": [
-                                   {"type": "minecraft:count", "count": 2},
-                                   {"type": "minecraft:in_square"},
-                                   {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"},
-                                   {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_fluids", "fluids": "minecraft:water"}},
-                                   {"type": "minecraft:biome"}]})],
-        # Mud, clay and rooted dirt, and puddles: the swamp's own patches, a few a chunk on the ground
-        "extra": [("humid_mud_patches", {"feature": f"{MOD}:swamp_patch_vegetation", "placement": [
-            {"type": "minecraft:count", "count": {"type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 3}},
-            {"type": "minecraft:in_square"},
-            {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING_NO_LEAVES"},
-            {"type": "minecraft:biome"}]})],
-        "vegetation": [f"{MOD}:humid_mud_patches", "minecraft:glow_lichen", f"{MOD}:trees_humid_oak_forest", "minecraft:flower_swamp",
+        # Its ground is the marsh's, drier: gray and brown mud by the water, rooted dirt, grass (tools/wetlands.py)
+        "vegetation": [f"{MOD}:marsh_rim", "minecraft:glow_lichen", f"{MOD}:trees_humid_oak_forest", "minecraft:flower_swamp",
                        "minecraft:patch_grass_normal", "minecraft:patch_waterlily", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal",
                        "minecraft:patch_sugar_cane_swamp", "minecraft:patch_pumpkin", "minecraft:patch_firefly_bush_near_water_swamp",
                        "minecraft:seagrass_swamp"],

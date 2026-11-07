@@ -48,6 +48,8 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> DARK_JUNGLE_FOREST = keyOf("dark_jungle_forest");
     /** The rim of every swamp: oaks with vines on damp ground, mud and puddles. */
     public static final ResourceKey<Biome> HUMID_OAK_FOREST = keyOf("humid_oak_forest");
+    /** The cold half of swamps, next to taigas: spruce and birch over mud, podzol and moss, ferns and berries. */
+    public static final ResourceKey<Biome> COLD_SWAMP = keyOf("cold_swamp");
 
     /** Where a biome goes; ALL_DEPTHS is a cave biome from the surface caves down to the deep caves. */
     public enum PlacedBiomeType {

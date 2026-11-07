@@ -23,7 +23,13 @@ import net.minecraft.world.level.levelgen.densityfunction.DensityBufferPool;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import net.fabricmc.loader.api.FabricLoader;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -195,6 +201,9 @@ public final class WorldgenCensus {
         Map<String, Tally> tallies = new TreeMap<>();
         List<BlockPos> samples = new ArrayList<>();
         int inBiome = 0;
+        int side = (2 * radius + 1) * 16;
+        BufferedImage map = new BufferedImage(side, side, BufferedImage.TYPE_INT_RGB);
+        int originX = (center.x() - radius) * 16, originZ = (center.z() - radius) * 16;
         for (int chunkX = center.x() - radius; chunkX <= center.x() + radius; chunkX++) {
             for (int chunkZ = center.z() - radius; chunkZ <= center.z() + radius; chunkZ++) {
                 chunks.getChunk(chunkX, chunkZ, ChunkStatus.FULL, true);
@@ -205,6 +214,7 @@ public final class WorldgenCensus {
                         BlockPos ground = new BlockPos(x, top - 1, z);
                         while (ground.getY() > world.getMinY() && !isGround(world, ground)) ground = ground.below();
                         String name = world.getBiome(ground).getRegisteredName();
+                        map.setRGB(x - originX, z - originZ, groundColor(world, ground, top));
                         Tally tally = tallies.computeIfAbsent(name, key -> new Tally());
                         tally.columns++;
                         tally.floors.merge(path(world.getBlockState(ground)), 1, Integer::sum);
@@ -230,9 +240,35 @@ public final class WorldgenCensus {
             log.accept("[pvwg] census     trees: " + tally.blocks);
             if (!tally.floating.isEmpty()) log.accept("[pvwg] census     floating: " + tally.floating + " at " + tally.floatingAt);
         });
+        writeMap(map, biome, log);
         for (BlockPos sample : samples) column(world, sample, log);
         Tally asked = tallies.get(biome.contains(":") ? biome : "minecraft:" + biome);
         if (asked != null) for (int i = 0; i < Math.min(3, asked.floatingAt.size()); i++) column(world, asked.floatingAt.get(i * asked.floatingAt.size() / 3).above(3), log);
+    }
+
+    /**
+     * The ground as it is once the chunks are full (the bench's maps are of the terrain, before the features): each
+     * column's ground block in the bench's colours, shaded by height, and water by its depth.
+     */
+    private static int groundColor(ServerLevel world, BlockPos ground, int top) {
+        int depth = world.getHeight(Heightmap.Types.WORLD_SURFACE, ground.getX(), ground.getZ()) - 1 - ground.getY();
+        if (depth > 0 && !world.getFluidState(ground.above()).isEmpty()) {
+            return WorldgenBench.Region.scale(0x3F76E4, 1.0F - Math.min(depth, 12) / 12.0F * 0.6F);
+        }
+        float shade = 0.7F + 0.3F * Math.clamp((ground.getY() - 56) / 24.0F, 0.0F, 1.0F);
+        return WorldgenBench.Region.scale(WorldgenBench.Region.baseColor(world.getBlockState(ground)), shade);
+    }
+
+    private static void writeMap(BufferedImage map, String biome, Consumer<String> log) {
+        try {
+            Path dir = FabricLoader.getInstance().getGameDir().resolve("pvwg");
+            Files.createDirectories(dir);
+            Path file = dir.resolve("census-" + biome.replace(':', '_').replace('/', '_') + ".png");
+            ImageIO.write(map, "png", file.toFile());
+            log.accept("[pvwg] census map " + file);
+        } catch (IOException exception) {
+            log.accept("[pvwg] census map not written: " + exception);
+        }
     }
 
     /** How many floating positions are kept to show where, per biome. */

@@ -264,6 +264,26 @@ class PvBiomeLayoutTest {
         assertTrue(checked > 0, "no swamp slice at the surface");
     }
 
+    /** The cold half of every swamp is a cold swamp, which has no rim; the warmer half keeps its swamp and its rim. */
+    @Test
+    void theColdHalfOfSwampsIsColdSwamp() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long cold = Climate.quantizeCoord(-0.3F), mild = Climate.quantizeCoord(0.0F);
+        long rim = Climate.quantizeCoord((0.55F + PvBiomeLayout.SWAMP_RIM_MAX) / 2), heart = Climate.quantizeCoord(0.8F);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.SWAMP || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            for (long erosion : new long[]{rim, heart}) {
+                assertEquals(CustomOverworldBiomes.COLD_SWAMP, layout.findValue(point(cold, mid(h.humidity()), mid(h.continentalness()), erosion, mid(h.weirdness()))),
+                        "a cold swamp at erosion " + erosion);
+            }
+            assertEquals(Biomes.SWAMP, layout.findValue(point(mild, mid(h.humidity()), mid(h.continentalness()), heart, mid(h.weirdness()))), "a mild swamp");
+            checked++;
+        }
+        assertTrue(checked > 0, "no swamp slice at the surface");
+    }
+
     /** Above freezing, no windswept biome nor old growth birch forest is left at the surface. */
     @Test
     void noWindsweptNorOldGrowthBirchAboveFreezing() {

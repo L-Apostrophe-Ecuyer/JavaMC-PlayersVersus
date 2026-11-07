@@ -336,5 +336,7 @@
   "biome.players-versus.tuscan_grove": "Bosquet toscan",
   "biome.players-versus.warm_oak_forest": "Chênaie chaude",
   "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre",
-  "biome.players-versus.humid_oak_forest": "Chênaie humide"
+  "biome.players-versus.humid_oak_forest": "Chênaie humide",
+
+  "biome.players-versus.cold_swamp": "Marais froid"
 }

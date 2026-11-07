@@ -273,7 +273,7 @@ public final class WorldgenBench {
     }
 
     /** Column data captured after the carvers ran, for images and metrics. */
-    private static final class Region {
+    static final class Region {
         private static final byte AIR = 0, WATER = 1, LAVA = 2, STONE = 3, DEEPSLATE = 4, OTHER = 5;
 
         private final int minX, minZ, size, bottomY, topY, seaLevel;
@@ -611,7 +611,7 @@ public final class WorldgenBench {
         }
 
         /** Rough map colors for the top solid block, so beaches, snow, badlands and mud stand out. */
-        private static int baseColor(BlockState state) {
+        static int baseColor(BlockState state) {
             Block block = state.getBlock();
             if (block == Blocks.SAND || block == Blocks.SANDSTONE || block == Blocks.SUSPICIOUS_SAND) return 0xDACD96;
             if (block == Blocks.RED_SAND || block == Blocks.RED_SANDSTONE) return 0xBE6E3C;
@@ -620,7 +620,16 @@ public final class WorldgenBench {
             if (block == Blocks.SNOW_BLOCK || block == Blocks.SNOW || block == Blocks.POWDER_SNOW) return 0xF0F5FA;
             if (block == Blocks.ICE || block == Blocks.PACKED_ICE || block == Blocks.BLUE_ICE) return 0xAAC8F0;
             if (block == Blocks.MUD || block == Blocks.MUDDY_MANGROVE_ROOTS) return 0x5A463C;
-            if (block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.ROOTED_DIRT) return 0x785A3C;
+            if (block == Blocks.DIRT || block == Blocks.COARSE_DIRT) return 0x785A3C;
+            if (block == Blocks.ROOTED_DIRT) return 0x9C7A55;
+            if (block == Blocks.PODZOL) return 0x6A4A26;
+            if (block == Blocks.MOSS_BLOCK) return 0x597D2E;
+            // The mod's muds and clays, so wet ground stands out from dirt and stone
+            String path = BuiltInRegistries.BLOCK.getKey(block).getPath();
+            if (path.equals("brown_mud")) return 0x4E3524;
+            if (path.equals("gray_mud")) return 0x3E3F3C;
+            if (path.equals("brown_clay")) return 0xA07E5C;
+            if (path.equals("gray_clay")) return 0x9EA4AC;
             if (block == Blocks.MYCELIUM) return 0x826E82;
             if (block == Blocks.CALCITE) return 0xDDDDD5;
             if (BuiltInRegistries.BLOCK.getKey(block).getPath().contains("terracotta")) return 0xAA6446;
@@ -695,7 +704,7 @@ public final class WorldgenBench {
             return Color.HSBtoRGB(hue, saturation, brightness) & 0xFFFFFF;
         }
 
-        private static int scale(int rgb, float factor) {
+        static int scale(int rgb, float factor) {
             int r = Math.min(255, Math.round(((rgb >> 16) & 0xFF) * factor));
             int g = Math.min(255, Math.round(((rgb >> 8) & 0xFF) * factor));
             int b = Math.min(255, Math.round((rgb & 0xFF) * factor));

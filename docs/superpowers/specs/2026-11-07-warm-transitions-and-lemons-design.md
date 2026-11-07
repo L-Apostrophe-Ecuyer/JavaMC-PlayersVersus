@@ -43,3 +43,17 @@ meant. `OldBiomeLayout`, edited alongside, is test-only: it is the reference the
   eating), `TreeGrowthGameTest` (the bush's stripped trunk is expected).
 - Census (`runWorldgenSmoke -Ppv.census=...`) on seed 8675309: all four biomes generate; the swamp's floating ground
   went from 257 blocks to none.
+
+## Wetlands (asked after: grass islands ringed by mud and water, a cold swamp, gradients instead of random patches)
+
+| Question | Decision |
+|---|---|
+| Microbiomes | A Cold Swamp biome for the cold half of swamps (temperature ≤ −0.15, next to taigas); marsh clearings in every swamp where the trees' noise leaves gaps |
+| Mud, dirt and water | One smooth noise (dryness) per column: channels and islands near the water line, rings of gray mud, brown mud, an edge block and grass around every pool (`MarshFeature`). Replaces the patches of randomly mixed blocks |
+| Why a feature, not a surface rule | PV's swamps are mostly flooded flats (about 70% water in a census); a surface rule only recolours ground that exists, so the islands and channels need blocks moved |
+| Cold Swamp | Spruce and birch by noise, ferns, berries, the taiga's grass, podzol in its rings, cooler colours, cold frogs, witch huts |
+| Swamp rim | Narrowed to erosion 0.565: at 0.6 it took most of the swamp |
+
+Checked by `MarshFeatureTest` (rings in order, islands and channels against the water line, every ring over a stretch of
+noise), `PvBiomeLayoutTest.theColdHalfOfSwampsIsColdSwamp`, and a census of seed 8675309 whose new ground map (the census
+writes `pvwg/census-<biome>.png` from the finished chunks) shows the islands and rings.

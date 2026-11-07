@@ -1,0 +1,9 @@
+{
+  "type": "players-versus:marsh",
+  "biomes": [
+    "minecraft:swamp"
+  ],
+  "edge": {
+    "id": "minecraft:rooted_dirt"
+  }
+}

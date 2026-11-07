@@ -22,7 +22,8 @@ import net.minecraft.world.level.biome.OverworldBiomeBuilder;
  * The biome layout of the Players Versus world type, derived from vanilla's overworld layout:
  * <ul>
  *   <li>each vanilla surface slice is first cut by the replacements ({@link #REPLACEMENTS}): the part inside one's region
- *   is another biome from then on (windswept hills and old growth birch forests above freezing);</li>
+ *   is another biome from then on (windswept hills and old growth birch forests above freezing, the cold half of
+ *   swamps);</li>
  *   <li>then each piece is cut by the transition rules ({@link #RULES}) into disjoint boxes: the part inside a rule's
  *   region gets the transition biome, the rest keeps the piece's biome;</li>
  *   <li>vanilla's second copy of each surface slice (depth 1) is dropped, so the underground belongs to the cave
@@ -71,7 +72,9 @@ public final class PvBiomeLayout {
     /** Jungles with a humidity up to this border birch forests and forests (warm oak forest); wetter ones dark forests. */
     static final float WARM_HUMIDITY_SPLIT = 0.3F;
     /** The swamp's rim: swamps (vanilla's from erosion 0.55) up to this erosion turn into humid oak forest. */
-    static final float SWAMP_RIM_MAX = 0.6F;
+    static final float SWAMP_RIM_MAX = 0.565F;
+    /** Swamps (vanilla's from temperature -0.45 to 0.2) up to this temperature are cold swamps: they border taigas. */
+    static final float COLD_SWAMP_MAX = -0.15F;
     /** Above this temperature, windswept biomes and old growth birch forests give way to plainer ones. */
     static final float TEMPERATE_MIN = 0.0F;
 
@@ -84,7 +87,9 @@ public final class PvBiomeLayout {
      * does). A target of {@code null} means the replacement doesn't apply; it is given the part inside the region.
      */
     private static final List<Rule> REPLACEMENTS = List.of(
-            new Rule("temperate", Box.ALL.withMin(Box.T, Climate.quantizeCoord(TEMPERATE_MIN)), PvBiomeLayout::temperateTarget));
+            new Rule("temperate", Box.ALL.withMin(Box.T, Climate.quantizeCoord(TEMPERATE_MIN)), PvBiomeLayout::temperateTarget),
+            new Rule("cold-swamp", Box.ALL.withMax(Box.T, Climate.quantizeCoord(COLD_SWAMP_MAX)),
+                    (part, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.COLD_SWAMP : null));
 
     /** Earlier rules win where regions overlap. A target of {@code null} means the rule doesn't apply to that slice. */
     private static final List<Rule> RULES = List.of(

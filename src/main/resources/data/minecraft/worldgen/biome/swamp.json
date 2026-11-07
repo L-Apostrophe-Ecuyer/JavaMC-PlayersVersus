@@ -65,9 +65,12 @@
       "minecraft:spring_lava"
     ],
     [
-      "players-versus:swamp_patch_vegetation",
+      "players-versus:marsh",
       "minecraft:glow_lichen",
       "players-versus:trees_swamp",
+      "players-versus:marsh_tall_grass",
+      "players-versus:marsh_reeds",
+      "players-versus:marsh_flowers",
       "minecraft:flower_swamp",
       "minecraft:patch_grass_normal",
       "minecraft:patch_dead_bush",

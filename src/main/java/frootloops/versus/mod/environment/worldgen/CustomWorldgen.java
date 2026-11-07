@@ -32,6 +32,8 @@ public class CustomWorldgen {
     public static final ResourceKey<WorldPreset> BETTER_WORLDGEN_PRESET = ResourceKey.create(Registries.WORLD_PRESET, BETTER_WORLDGEN_PRESET_ID);
     public static final ResourceKey<NoiseGeneratorSettings> OVERWORLD = ResourceKey.create(Registries.NOISE_SETTINGS, BETTER_WORLDGEN_PRESET_ID);
 
+    /** The wetlands' ground, islands and channels, from one smooth noise (MarshFeature). */
+    public static final Identifier MARSH_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "marsh");
     public static final Identifier STONE_STALAGTITE_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "stone_stalagtite");
     public static final Identifier MUD_PATCH_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "mud_patch");
     public static final Identifier MUSHROOM_RING_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "mushroom_ring");
@@ -48,6 +50,7 @@ public class CustomWorldgen {
         Registry.register(BuiltInRegistries.FEATURE_TYPE, STONE_STALAGTITE_ID, StoneStalagtiteFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MUD_PATCH_ID, MudPatchFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MUSHROOM_RING_ID, MushroomRingFeature.CODEC);
+        Registry.register(BuiltInRegistries.FEATURE_TYPE, MARSH_ID, frootloops.versus.mod.environment.worldgen.features.MarshFeature.CODEC);
         BiomeModifications.create(Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "no_mushrooms_in_the_nether"))
                 .add(ModificationPhase.REMOVALS, BiomeSelectors.foundInTheNether(), context -> {
                     for (ResourceKey<PlacedFeature> mushrooms : OVERWORLD_MUSHROOMS) {

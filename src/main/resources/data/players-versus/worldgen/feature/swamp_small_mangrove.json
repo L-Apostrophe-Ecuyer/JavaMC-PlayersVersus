@@ -95,30 +95,7 @@
               "tag": "minecraft:beneath_tree_podzol_replaceable"
             },
             "then": {
-              "type": "minecraft:weighted",
-              "entries": [
-                {
-                  "data": {
-                    "id": "minecraft:grass_block",
-                    "properties": {
-                      "snowy": "false"
-                    }
-                  },
-                  "weight": 4
-                },
-                {
-                  "data": {
-                    "id": "players-versus:gray_mud"
-                  },
-                  "weight": 2
-                },
-                {
-                  "data": {
-                    "id": "players-versus:brown_mud"
-                  },
-                  "weight": 2
-                }
-              ]
+              "id": "players-versus:gray_mud"
             }
           }
         ]

@@ -57,8 +57,7 @@
       "minecraft:ore_lapis_buried",
       "minecraft:ore_copper",
       "minecraft:underwater_magma",
-      "minecraft:disk_clay",
-      "players-versus:humid_mud_disks"
+      "minecraft:disk_clay"
     ],
     [],
     [
@@ -66,7 +65,7 @@
       "minecraft:spring_lava"
     ],
     [
-      "players-versus:humid_mud_patches",
+      "players-versus:marsh_rim",
       "minecraft:glow_lichen",
       "players-versus:trees_humid_oak_forest",
       "minecraft:flower_swamp",
