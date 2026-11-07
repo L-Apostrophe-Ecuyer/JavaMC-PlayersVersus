@@ -34,7 +34,7 @@ public abstract class ZombieHordeMixin implements CustomSpawner {
     public void tick(ServerLevel world, boolean spawnMonsters) {
 
         if (world.isBrightOutside() || !spawnMonsters) {
-            this.zombiesToSpawn = 15;
+            this.zombiesToSpawn = 6;
             this.nextSpawnTime = 1 + world.getRandom().nextInt(2);
             this.hasSetupSiege = false;
             return;
@@ -46,7 +46,7 @@ public abstract class ZombieHordeMixin implements CustomSpawner {
         if (--this.nextSpawnTime > 0) return;
 
         int i;
-        for(i = 0; i < Math.min(this.zombiesToSpawn, 10); i++) {
+        for(i = 0; i < Math.min(this.zombiesToSpawn, 6); i++) {
             this.trySpawn(world);
         }
         this.hasSetupSiege = true;
@@ -66,7 +66,7 @@ public abstract class ZombieHordeMixin implements CustomSpawner {
                 this.spawnY = blockPos.getY();
                 this.spawnZ = blockPos.getZ() + Mth.floor(Mth.sin(f) * 32.0f);
                 if(this.findRandomSpawnPos(world, new BlockPos(this.spawnX, this.spawnY, this.spawnZ)) == null) continue;
-                if(!this.hasSetupSiege) this.zombiesToSpawn = canSpawnZombieHorde ? 32 : 20;
+                if(!this.hasSetupSiege) this.zombiesToSpawn = canSpawnZombieHorde ? 24 : 12;
                 break;
             }
             return true;
