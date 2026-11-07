@@ -21,8 +21,10 @@ import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 /**
  * The biome layout of the Players Versus world type, derived from vanilla's overworld layout:
  * <ul>
- *   <li>each vanilla surface slice is cut by the transition rules ({@link #RULES}) into disjoint boxes: the part inside
- *   a rule's region gets the transition biome, the rest keeps the slice's biome;</li>
+ *   <li>each vanilla surface slice is first cut by the replacements ({@link #REPLACEMENTS}): the part inside one's region
+ *   is another biome from then on (windswept hills and old growth birch forests above freezing);</li>
+ *   <li>then each piece is cut by the transition rules ({@link #RULES}) into disjoint boxes: the part inside a rule's
+ *   region gets the transition biome, the rest keeps the piece's biome;</li>
  *   <li>vanilla's second copy of each surface slice (depth 1) is dropped, so the underground belongs to the cave
  *   biomes;</li>
  *   <li>vanilla's lush and dripstone cave entries are replaced, and the Players Versus cave biomes are added.</li>
@@ -61,8 +63,28 @@ public final class PvBiomeLayout {
     static final float DAPPLED_COOL = 0.0F;
     static final float DAPPLED_COLD = -0.075F;
 
+    /**
+     * The warm band: the cool edge of savannas and jungles (vanilla's from temperature 0.2), up to this temperature. The
+     * old biome mixin's warm transition stopped there too.
+     */
+    static final float WARM_BAND_MAX = 0.3F;
+    /** Jungles with a humidity up to this border birch forests and forests (warm oak forest); wetter ones dark forests. */
+    static final float WARM_HUMIDITY_SPLIT = 0.3F;
+    /** The swamp's rim: swamps (vanilla's from erosion 0.55) up to this erosion turn into humid oak forest. */
+    static final float SWAMP_RIM_MAX = 0.6F;
+    /** Above this temperature, windswept biomes and old growth birch forests give way to plainer ones. */
+    static final float TEMPERATE_MIN = 0.0F;
+
     private record Rule(String name, Box region, BiFunction<Box, ResourceKey<Biome>, ResourceKey<Biome>> target) {
     }
+
+    /**
+     * Biomes swapped for others before the transitions: the part of a slice inside the region is the target from then on,
+     * so a transition can still apply to it (a windswept savanna's cool edge turns into the Tuscan grove as a savanna's
+     * does). A target of {@code null} means the replacement doesn't apply; it is given the part inside the region.
+     */
+    private static final List<Rule> REPLACEMENTS = List.of(
+            new Rule("temperate", Box.ALL.withMin(Box.T, Climate.quantizeCoord(TEMPERATE_MIN)), PvBiomeLayout::temperateTarget));
 
     /** Earlier rules win where regions overlap. A target of {@code null} means the rule doesn't apply to that slice. */
     private static final List<Rule> RULES = List.of(
@@ -70,16 +92,20 @@ public final class PvBiomeLayout {
                     Box.ALL.withMax(Box.E, MOUNTAIN_EROSION_MAX).withMin(Box.C, MOUNTAIN_CONTINENTALNESS_MIN),
                     PvBiomeLayout::mountainTarget),
             new Rule("peak-warm", Box.ALL.withMin(Box.T, Climate.quantizeCoord(0.145F)),
+                    // Snowy slopes this warm are above freezing: an alpine meadow, not windswept hills
                     (slice, biome) -> biome == Biomes.GROVE ? Biomes.TAIGA
-                            : biome == Biomes.SNOWY_SLOPES ? Biomes.WINDSWEPT_HILLS : null),
+                            : biome == Biomes.SNOWY_SLOPES ? Biomes.MEADOW : null),
             new Rule("peak-cold", Box.ALL.withMax(Box.T, Climate.quantizeCoord(0.235F)),
-                    (slice, biome) -> biome == Biomes.STONY_PEAKS ? Biomes.WINDSWEPT_GRAVELLY_HILLS : null),
+                    // Stony peaks start at 0.2, above freezing: their cold edge is an alpine meadow, not windswept hills
+                    (slice, biome) -> biome == Biomes.STONY_PEAKS ? Biomes.MEADOW : null),
             new Rule("frozen", Box.ALL.withMin(Box.T, Climate.quantizeCoord(-0.55F)).withMax(Box.T, Climate.quantizeCoord(-0.375F)),
                     (slice, biome) -> CustomOverworldBiomes.getSnowyToTemperateTransitionBiome(biome)),
+            // Before the humid band, which would otherwise cut a strip of sparse jungle across the warm one
+            new Rule("warm", Box.ALL.withMax(Box.T, Climate.quantizeCoord(WARM_BAND_MAX)), PvBiomeLayout::warmTarget),
             new Rule("humid", Box.ALL.withMin(Box.H, Climate.quantizeCoord(0.275F)).withMax(Box.H, Climate.quantizeCoord(0.35F)),
                     (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)),
-            new Rule("warm", Box.ALL.withMin(Box.T, Climate.quantizeCoord(0.15F)).withMax(Box.H, Climate.quantizeCoord(0.375F)),
-                    (slice, biome) -> CustomOverworldBiomes.getWarmTransitionBiome(biome)),
+            new Rule("swamp-rim", Box.ALL.withMax(Box.E, Climate.quantizeCoord(SWAMP_RIM_MAX)),
+                    (slice, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.HUMID_OAK_FOREST : null),
 
             new Rule("flower-forest", Box.ALL,
                     (slice, biome) -> CustomOverworldBiomes.DAPPLED_FOREST.equals(biome) ? Biomes.FLOWER_FOREST : null),
@@ -132,10 +158,33 @@ public final class PvBiomeLayout {
     }
 
     private static void emitSurface(ParameterPoint slice, ResourceKey<Biome> biome, List<Entry> out) {
-        Box sliceBox = Box.of(slice);
-        List<Box> original = List.of(sliceBox);
+        // The replacements first: each part of the slice goes on as its own biome
+        List<Box> kept = List.of(Box.of(slice));
+        for (Rule replacement : REPLACEMENTS) {
+            List<Box> rest = new ArrayList<>();
+            for (Box piece : kept) {
+                Box inside = piece.intersect(replacement.region());
+                ResourceKey<Biome> swapped = inside == null ? null : replacement.target().apply(inside, biome);
+                if (swapped == null) {
+                    rest.add(piece);
+                    continue;
+                }
+                emitPiece(inside, swapped, replacement.name(), slice.offset(), out);
+                rest.addAll(piece.minus(replacement.region()));
+            }
+            kept = rest;
+        }
+        for (Box piece : kept) emitPiece(piece, biome, "vanilla", slice.offset(), out);
+    }
+
+    /**
+     * One piece of a slice, as this biome (named {@code untouched} where no transition applies): cut by the transition
+     * rules, and the part no rule takes over gets the biome's surface cave below it.
+     */
+    private static void emitPiece(Box pieceBox, ResourceKey<Biome> biome, String untouched, long offset, List<Entry> out) {
+        List<Box> original = List.of(pieceBox);
         for (Rule rule : RULES) {
-            ResourceKey<Biome> target = rule.target().apply(sliceBox, biome);
+            ResourceKey<Biome> target = rule.target().apply(pieceBox, biome);
             if (target == null) continue;
             List<Box> rest = new ArrayList<>();
             for (Box piece : original) {
@@ -144,21 +193,51 @@ public final class PvBiomeLayout {
                     rest.add(piece);
                     continue;
                 }
-                out.add(new Entry(inside.toHypercube(SURFACE_DEPTH, slice.offset()), target, rule.name()));
+                out.add(new Entry(inside.toHypercube(SURFACE_DEPTH, offset), target, rule.name()));
                 rest.addAll(piece.minus(rule.region()));
             }
             original = rest;
         }
         for (Box piece : original) {
-            out.add(new Entry(piece.toHypercube(SURFACE_DEPTH, slice.offset()), biome, "vanilla"));
+            out.add(new Entry(piece.toHypercube(SURFACE_DEPTH, offset), biome, untouched));
         }
         ResourceKey<Biome> cave = CustomOverworldBiomes.getSurfaceCaveBiome(biome);
         if (cave != null) {
-            long caveOffset = Climate.quantizeCoord(Climate.unquantizeCoord(slice.offset()) + SURFACE_CAVE_OFFSET);
+            long caveOffset = Climate.quantizeCoord(Climate.unquantizeCoord(offset) + SURFACE_CAVE_OFFSET);
             for (Box piece : original) {
                 out.add(new Entry(piece.toHypercube(SURFACE_CAVE_DEPTH, caveOffset), cave, "surface-cave"));
             }
         }
+    }
+
+    /**
+     * Above freezing, the windswept biomes and old growth birch forests give way to what they break up: windswept hills
+     * (and gravelly hills) to plains, windswept forests and old growth birch forests to forests, and windswept savannas to
+     * plains below the savannas' temperature, to savannas from it.
+     */
+    @Nullable
+    private static ResourceKey<Biome> temperateTarget(Box part, ResourceKey<Biome> biome) {
+        if (biome == Biomes.WINDSWEPT_HILLS || biome == Biomes.WINDSWEPT_GRAVELLY_HILLS) return Biomes.PLAINS;
+        if (biome == Biomes.WINDSWEPT_FOREST || biome == Biomes.OLD_GROWTH_BIRCH_FOREST) return Biomes.FOREST;
+        if (biome == Biomes.WINDSWEPT_SAVANNA) return part.min[Box.T] >= WARM_BAND_START ? Biomes.SAVANNA : Biomes.PLAINS;
+        return null;
+    }
+
+    /** Where vanilla's warm biomes (savannas, jungles) begin. */
+    private static final long WARM_BAND_START = Climate.quantizeCoord(0.2F);
+
+    /**
+     * What the cool edge of a warm biome turns into, by what lies beyond it: savannas, next to plains, into the Tuscan
+     * grove; the drier jungles, next to birch forests and forests, into the warm oak forest; the wettest, next to dark
+     * forests, into the dark jungle forest.
+     */
+    @Nullable
+    private static ResourceKey<Biome> warmTarget(Box slice, ResourceKey<Biome> biome) {
+        if (biome == Biomes.SAVANNA || biome == Biomes.SAVANNA_PLATEAU) return CustomOverworldBiomes.TUSCAN_GROVE;
+        boolean wet = slice.min[Box.H] >= Climate.quantizeCoord(WARM_HUMIDITY_SPLIT);
+        if (biome == Biomes.JUNGLE || biome == Biomes.SPARSE_JUNGLE) return wet ? CustomOverworldBiomes.DARK_JUNGLE_FOREST : CustomOverworldBiomes.WARM_OAK_FOREST;
+        if (biome == Biomes.BAMBOO_JUNGLE) return CustomOverworldBiomes.DARK_JUNGLE_FOREST;
+        return null;
     }
 
     /**

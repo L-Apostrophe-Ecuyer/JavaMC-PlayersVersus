@@ -40,6 +40,14 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> DEEP_CAVES = keyOf("caves/deep_caves");
     public static final ResourceKey<Biome> PALE_GROTTO = keyOf("caves/pale_grotto");
     public static final ResourceKey<Biome> MUSHROOM_CAVES = keyOf("caves/mushroom_caves");
+    /** The cool edge of savannas: an open, sunny grove of round oaks and lemon bushes on dry grass, a few acacias. */
+    public static final ResourceKey<Biome> TUSCAN_GROVE = keyOf("tuscan_grove");
+    /** The cool edge of the drier jungles, next to birch forests and forests: oaks mixed with jungle trees and bushes. */
+    public static final ResourceKey<Biome> WARM_OAK_FOREST = keyOf("warm_oak_forest");
+    /** The cool edge of the wettest jungles, next to dark forests: dark oaks with jungle trees, vines and cocoa. */
+    public static final ResourceKey<Biome> DARK_JUNGLE_FOREST = keyOf("dark_jungle_forest");
+    /** The rim of every swamp: oaks with vines on damp ground, mud and puddles. */
+    public static final ResourceKey<Biome> HUMID_OAK_FOREST = keyOf("humid_oak_forest");
 
     /** Where a biome goes; ALL_DEPTHS is a cave biome from the surface caves down to the deep caves. */
     public enum PlacedBiomeType {
@@ -108,14 +116,6 @@ public class CustomOverworldBiomes {
             Map.entry(Biomes.DESERT,            DESERT_OASIS),
             Map.entry(Biomes.BADLANDS,          Biomes.DESERT));
 
-    private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> WARM_BIOME_REPLACEMENTS = Map.ofEntries(
-            Map.entry(Biomes.SAVANNA_PLATEAU,   Biomes.END_BARRENS),
-            Map.entry(Biomes.SAVANNA,           Biomes.END_BARRENS),
-            Map.entry(Biomes.DARK_FOREST,       Biomes.END_BARRENS),
-            Map.entry(Biomes.SPARSE_JUNGLE,     Biomes.END_BARRENS),
-            Map.entry(Biomes.JUNGLE,            Biomes.END_BARRENS),
-            Map.entry(Biomes.BAMBOO_JUNGLE,     Biomes.END_BARRENS));
-
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> SURFACE_CAVE_BIOME_REPLACEMENTS = Map.ofEntries(
             Map.entry(Biomes.FROZEN_PEAKS,      Biomes.ICE_CAVES),
             Map.entry(Biomes.SNOWY_SLOPES,      Biomes.ICE_CAVES),
@@ -139,11 +139,6 @@ public class CustomOverworldBiomes {
     @Nullable
     public static ResourceKey<Biome> getHumidTransitionBiome(ResourceKey<Biome> originalBiome) {
         return HUMID_BIOME_REPLACEMENTS.get(originalBiome);
-    }
-
-    @Nullable
-    public static ResourceKey<Biome> getWarmTransitionBiome(ResourceKey<Biome> originalBiome) {
-        return WARM_BIOME_REPLACEMENTS.get(originalBiome);
     }
 
     @Nullable

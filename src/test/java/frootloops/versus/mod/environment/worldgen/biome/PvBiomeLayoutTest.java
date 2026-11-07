@@ -211,6 +211,85 @@ class PvBiomeLayoutTest {
         assertTrue(checked.keySet().stream().anyMatch(key -> key.startsWith("dark forest ")), "no dark forest turns into dark taiga");
     }
 
+    /**
+     * The warm band: the cool edge of savannas and jungles (from their start at 0.2 up to {@link PvBiomeLayout#WARM_BAND_MAX})
+     * turns into the transition to what lies beyond it, and the rest of each slice keeps its biome. Probed above the
+     * mountainsides' erosion and away from the humid band.
+     */
+    @Test
+    void warmBandTakesTheCoolEdgeOfWarmBiomes() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long inBand = Climate.quantizeCoord(0.25F), beyond = Climate.quantizeCoord(0.4F);
+        Map<String, Integer> checked = new TreeMap<>();
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || h.erosion().max() <= ABOVE_MOUNTAINS) continue;
+            boolean savanna = biome == Biomes.SAVANNA || biome == Biomes.SAVANNA_PLATEAU;
+            boolean jungle = biome == Biomes.JUNGLE || biome == Biomes.SPARSE_JUNGLE || biome == Biomes.BAMBOO_JUNGLE;
+            if (!savanna && !jungle) continue;
+            assertTrue(h.temperature().min() == Climate.quantizeCoord(0.2F), () -> biome + " no longer starts at 0.2: " + h);
+            boolean wet = h.humidity().min() >= Climate.quantizeCoord(PvBiomeLayout.WARM_HUMIDITY_SPLIT);
+            ResourceKey<Biome> expected = savanna ? CustomOverworldBiomes.TUSCAN_GROVE
+                    : wet || biome == Biomes.BAMBOO_JUNGLE ? CustomOverworldBiomes.DARK_JUNGLE_FOREST : CustomOverworldBiomes.WARM_OAK_FOREST;
+            long erosion = Math.max(mid(h.erosion()), ABOVE_MOUNTAINS);
+            Climate.TargetPoint band = point(inBand, mid(h.humidity()), mid(h.continentalness()), erosion, mid(h.weirdness()));
+            Climate.TargetPoint core = point(beyond, mid(h.humidity()), mid(h.continentalness()), erosion, mid(h.weirdness()));
+            assertEquals(expected, layout.findValue(band), biome.identifier().getPath() + " band at " + band);
+            assertEquals(biome, layout.findValue(core), biome.identifier().getPath() + " core at " + core);
+            checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
+        }
+        System.out.println("[warm] checked slices: " + checked);
+        for (ResourceKey<Biome> target : List.of(CustomOverworldBiomes.TUSCAN_GROVE, CustomOverworldBiomes.WARM_OAK_FOREST, CustomOverworldBiomes.DARK_JUNGLE_FOREST)) {
+            assertTrue(checked.keySet().stream().anyMatch(key -> key.endsWith(target.identifier().getPath())), "nothing turns into " + target);
+        }
+    }
+
+    /** Every swamp has a rim of humid oak forest where its erosion begins, up to {@link PvBiomeLayout#SWAMP_RIM_MAX}. */
+    @Test
+    void swampsHaveAHumidOakRim() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long rim = Climate.quantizeCoord((0.55F + PvBiomeLayout.SWAMP_RIM_MAX) / 2), heart = Climate.quantizeCoord(0.8F);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.SWAMP || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            assertEquals(Climate.quantizeCoord(0.55F), h.erosion().min(), "swamps no longer start at erosion 0.55");
+            Climate.TargetPoint atRim = point(mid(h.temperature()), mid(h.humidity()), mid(h.continentalness()), rim, mid(h.weirdness()));
+            Climate.TargetPoint inside = point(mid(h.temperature()), mid(h.humidity()), mid(h.continentalness()), heart, mid(h.weirdness()));
+            assertEquals(CustomOverworldBiomes.HUMID_OAK_FOREST, layout.findValue(atRim), "rim at " + atRim);
+            assertEquals(Biomes.SWAMP, layout.findValue(inside), "swamp at " + inside);
+            checked++;
+        }
+        assertTrue(checked > 0, "no swamp slice at the surface");
+    }
+
+    /** Above freezing, no windswept biome nor old growth birch forest is left at the surface. */
+    @Test
+    void noWindsweptNorOldGrowthBirchAboveFreezing() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Set<ResourceKey<Biome>> gone = Set.of(Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_FOREST,
+                Biomes.WINDSWEPT_SAVANNA, Biomes.OLD_GROWTH_BIRCH_FOREST);
+        Random random = new Random(20261107L);
+        Map<String, Integer> found = new TreeMap<>();
+        for (int i = 0; i < 100_000; i++) {
+            float temperature = PvBiomeLayout.TEMPERATE_MIN + 0.005F + (1.0F - PvBiomeLayout.TEMPERATE_MIN - 0.005F) * random.nextFloat();
+            Climate.TargetPoint point = Climate.target(temperature, uniform(random), uniform(random), uniform(random), 0.0F, uniform(random));
+            ResourceKey<Biome> biome = layout.findValue(point);
+            found.merge(biome.identifier().getPath(), 1, Integer::sum);
+            assertFalse(gone.contains(biome), () -> biome + " above freezing at " + point);
+        }
+        // and they are still there below it, where they were asked to stay
+        boolean windsweptBelow = false;
+        for (int i = 0; i < 100_000 && !windsweptBelow; i++) {
+            Climate.TargetPoint point = Climate.target(-0.1F - 0.3F * random.nextFloat(), uniform(random), uniform(random), uniform(random), 0.0F, uniform(random));
+            windsweptBelow = gone.contains(layout.findValue(point));
+        }
+        assertTrue(windsweptBelow, "no windswept biome left below freezing either");
+        assertTrue(found.containsKey("tuscan_grove") && found.containsKey("warm_oak_forest") && found.containsKey("dark_jungle_forest"),
+                "a warm transition is missing above freezing: " + found);
+    }
+
     /** The middle of the part of {@code range} between {@code from} and {@code to}, or null if it has no width there. */
     private static Long inside(Climate.Parameter range, float from, float to) {
         long lo = Math.max(range.min(), Climate.quantizeCoord(from)), hi = Math.min(range.max(), Climate.quantizeCoord(to));

@@ -106,17 +106,25 @@ All thresholds are named in `PvWorldgenConstants`. In words: rivers and oceans a
 
 ### 1.4 Biome placement (`PvBiomeLayout`, since Phase 1)
 
-`PvBiomeLayout.build()` reads vanilla's overworld list once per world: 7,593 entries, which are 3,795 surface slices at depth 0, their copies at depth 1, and lush caves, dripstone caves and the deep dark (a unit test checks this shape). Each surface slice goes through these rules in order. A rule cuts the pieces of the slice that still have the original biome into the part inside its region, which gets the transition biome, and the rest:
+`PvBiomeLayout.build()` reads vanilla's overworld list once per world: 7,595 entries in 26.4, which are 3,795 surface slices at depth 0, their copies at depth 1, and lush caves, dripstone caves, sulfur caves, ice caves and the deep dark (a unit test checks this shape). Each surface slice is first cut by the **replacements**: the part inside one's region is another biome from then on, and goes through the transitions as that biome.
 
-1. **mountainside**: erosion < −0.475 and continentalness > 0.03, except slices whose weirdness lies within ±0.3 (river valleys);
-2. **peak-warm**: grove and snowy slopes above temperature 0.145 become taiga and windswept hills;
-3. **peak-cold**: stony peaks below temperature 0.235 become windswept gravelly hills;
+- **temperate** (temperature ≥ 0.0): windswept hills and windswept gravelly hills become plains, windswept forests and old growth birch forests become forests, and windswept savannas become plains below temperature 0.2 and savannas from it (so their cool edge turns into the Tuscan grove, as a savanna's does). No windswept biome nor old growth birch forest is left above freezing (a unit test samples 100,000 points).
+
+Then each piece goes through these rules in order. A rule cuts the pieces that still have the piece's biome into the part inside its region, which gets the transition biome, and the rest:
+
+1. **mountainside**: erosion < −0.385 and continentalness > 0.03, except slices whose weirdness lies within ±0.3 (river valleys);
+2. **peak-warm**: grove above temperature 0.145 becomes taiga, snowy slopes become meadow (they are above freezing there);
+3. **peak-cold**: stony peaks below temperature 0.235 become meadow (stony peaks start at 0.2, above freezing);
 4. **frozen**: temperature −0.55..−0.375;
-5. **humid**: humidity 0.275..0.35.
+5. **warm**: temperature up to 0.3, the cool edge of the warm biomes, which start at 0.2: savannas and savanna plateaus become the **Tuscan grove** (next to plains), jungles and sparse jungles with a humidity under 0.3 the **warm oak forest** (next to birch forests and forests), wetter jungles and bamboo jungles the **dark jungle forest** (next to dark forests). Before the humid band, which would otherwise cut a strip of sparse jungle across it;
+6. **humid**: humidity 0.275..0.35;
+7. **swamp-rim**: erosion up to 0.6, the rim of every swamp (swamps start at 0.55), becomes the **humid oak forest**. Mangrove swamps keep theirs.
 
-The original biome keeps the remaining pieces, all at depth 0. The depth-1 copies are dropped, so the underground belongs to the cave biomes. Each remaining piece also gets its surface-cave biome at depth 0.1–0.25 (vanilla's ice caves since 26.4, which replaced the frosted caves; desert-creeper or badlands cave). Vanilla's lush and dripstone entries are replaced as before, and the 13 Players Versus cave entries are appended. The result has 6,293 entries, 5,400 of them at the surface. Unit tests check that the pieces of each slice don't overlap and add up to the slice.
+Each transition biome is made from its two neighbours (`tools/transition-biomes.py`): what lies under it is its main neighbour's, so the order of features stays one for every biome; its trees come from both sides through a random selector placed by noise, as the savanna's are, so they gather in groves; its grass and leaves take the colour halfway between theirs, so the game's colour blending fades one into the other; its animals are both neighbours'. The Tuscan grove also has lemon bushes, in orchards on a coarser noise than its oaks; the humid oak forest has the swamp's mud patches on its ground and brown mud disks under its water.
 
-The deleted mixin emitted the same rules, but built each transition from the whole slice and narrowed the original along one axis at most, so its boxes overlapped in places and left holes in others (Q4), and results depended on the search tree's tie-breaking. A test-only copy of it (`OldBiomeLayout`) lets the tests measure what changed: 98.5% of random climate points at the surface keep their biome, and 100% (up to ties) from depth 0.3 down.
+The original biome keeps the remaining pieces, all at depth 0. The depth-1 copies are dropped, so the underground belongs to the cave biomes. Each remaining piece also gets its surface-cave biome at depth 0.1–0.25 (vanilla's ice caves since 26.4, which replaced the frosted caves; desert-creeper or badlands cave). Vanilla's lush and dripstone entries are replaced as before, and the 13 Players Versus cave entries are appended. The result has 7,081 entries, 6,162 of them at the surface (26.4, with the replacements and the warm and swamp transitions). Unit tests check that the pieces of each slice don't overlap and add up to the slice.
+
+The deleted mixin emitted the same rules, but built each transition from the whole slice and narrowed the original along one axis at most, so its boxes overlapped in places and left holes in others (Q4), and results depended on the search tree's tie-breaking. A test-only copy of it (`OldBiomeLayout`) lets the tests measure what changed: 95.5% of random climate points at the surface keep their biome (98.5% before the warm and swamp transitions and the replacements), and 100% (up to ties) from depth 0.3 down. Its warm transition (added in c82d4371) keeps its own frozen copy of that commit's map, so the live layout can't move the reference.
 
 ### 1.5 Evaluation contexts (why small JSON edits ripple everywhere)
 

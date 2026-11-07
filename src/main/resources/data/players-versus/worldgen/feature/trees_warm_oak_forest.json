@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "minecraft:oak_checked",
+  "features": [
+    {
+      "chance": 0.22,
+      "feature": "minecraft:jungle_bush"
+    },
+    {
+      "chance": 0.18,
+      "feature": "minecraft:jungle_tree"
+    },
+    {
+      "chance": 0.12,
+      "feature": "minecraft:fancy_oak_checked"
+    },
+    {
+      "chance": 0.06,
+      "feature": "minecraft:birch_checked"
+    }
+  ]
+}
