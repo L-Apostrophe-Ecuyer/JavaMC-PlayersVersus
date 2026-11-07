@@ -217,6 +217,20 @@ public abstract class VersusSettings {
         public static float SHAKE_DEGREES = 2.0F;
     }
 
+    public static class Lemons {
+        // Lemon leaves go bare -> blossoms -> lemons, one stage on this chance a random tick (about nine minutes a stage)
+        public static float FRUIT_GROW_CHANCE = 0.125f;
+        // Eating a lemon makes one Sour this long, in ticks: the view widens at once and eases back (SourFov)
+        public static int SOUR_TICKS = 30;
+        // How far the view widens at its widest (times the player's field of view, scaled by the FOV Effects slider)
+        public static float SOUR_PEAK = 1.9f;
+        // The view widens over this many ticks, and eases back over the last this many
+        public static int SOUR_RISE_TICKS = 2;
+        public static int SOUR_FALL_TICKS = 22;
+        // However wide the player's own field of view, Sour never takes it past this (degrees)
+        public static float SOUR_MAX_FOV = 165.0f;
+    }
+
     public static class Mushrooms {
         // Brown and red mushrooms grow by stages of one, two and three, and below y 0 into pale shrooms (MushroomGrowth)
         public static boolean DO_STAGED_MUSHROOMS = true;

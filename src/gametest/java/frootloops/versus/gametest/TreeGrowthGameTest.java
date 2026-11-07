@@ -40,6 +40,8 @@ import net.minecraft.world.level.levelgen.feature.TreeFeature;
 public class TreeGrowthGameTest {
 
     private static final String GROVE = "players-versus-gametest:leaves_grove"; // 48 x 40 x 48, a grass floor
+    /** Trees whose trunk is a stripped log, which has no tree block, by design. */
+    private static final java.util.Set<String> STRIPPED_TRUNKS = java.util.Set.of("players-versus:lemon_bush");
 
     private static Feature feature(ServerLevel level, ResourceKey<Feature> key) {
         return level.registryAccess().lookupOrThrow(Registries.FEATURE).getOrThrow(key).value();
@@ -170,7 +172,8 @@ public class TreeGrowthGameTest {
                     if (state.getBlock() instanceof TreeBlock) treeBlocks++;
                     else if (TreeBlocks.forLog(state.getBlock()) != null) logs.add(pos.toShortString() + " " + state.getBlock().getName().getString());
                 }
-                if (treeBlocks == 0) wrong.add(name + " grew no tree blocks");
+                // The lemon bush's trunk is stripped oak, which has no tree block: it stays as it is, as any such log does
+                if (treeBlocks == 0 && !STRIPPED_TRUNKS.contains(name)) wrong.add(name + " grew no tree blocks");
                 if (!logs.isEmpty()) wrong.add(name + " grew " + logs.size() + " vanilla logs (" + String.join("; ", logs.subList(0, Math.min(3, logs.size()))) + ")");
                 grown.add(name + " " + treeBlocks);
             }

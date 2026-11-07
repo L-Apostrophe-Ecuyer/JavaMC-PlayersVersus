@@ -89,6 +89,15 @@ public abstract class CustomBlockItems {
             .component(DataComponents.COMPOSTABLE, new Compostable(ResourceKey.create(ResourceKey.<ContextIntProvider>createRegistryKey(
                     Identifier.withDefaultNamespace("context_int_provider")), Identifier.withDefaultNamespace("compostable/low")))));
 
+    public static final BlockItem LEMON_LEAVES = new BlockItem(CustomBlocks.LEMON_LEAVES, compostable(getBlockSettings("lemon_leaves")));
+    public static final BlockItem LEMON_SAPLING = new BlockItem(CustomBlocks.LEMON_SAPLING, compostable(getBlockSettings("lemon_sapling")));
+
+    /** As vanilla's leaves, saplings and berries: a low chance to raise the composter's level. */
+    public static Item.Properties compostable(Item.Properties properties) {
+        return properties.component(DataComponents.COMPOSTABLE, new Compostable(ResourceKey.create(ResourceKey.<ContextIntProvider>createRegistryKey(
+                Identifier.withDefaultNamespace("context_int_provider")), Identifier.withDefaultNamespace("compostable/low"))));
+    }
+
     public static final BlockItem CREEPER_SPORE_BLOSSOM = new BlockItem(CustomBlocks.CREEPER_SPORE_BLOSSOM, getBlockSettings("creeper_spore_blossom"));
     public static final BlockItem PALE_SHROOM = new BlockItem(CustomBlocks.PALE_SHROOM, getBlockSettings("pale_shroom"));
 

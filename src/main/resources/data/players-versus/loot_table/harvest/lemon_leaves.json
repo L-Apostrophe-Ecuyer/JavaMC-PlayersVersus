@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:block_interact",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "players-versus:lemon",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 6
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "players-versus:harvest/lemon_leaves"
+}

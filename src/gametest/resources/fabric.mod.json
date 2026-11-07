@@ -18,7 +18,8 @@
       "frootloops.versus.gametest.UndeadFormsGameTest",
       "frootloops.versus.gametest.BlightGameTest",
       "frootloops.versus.gametest.WatchlingGameTest",
-      "frootloops.versus.gametest.EndermanShulkerGameTest"
+      "frootloops.versus.gametest.EndermanShulkerGameTest",
+      "frootloops.versus.gametest.LemonsGameTest"
     ]
   },
   "depends": {

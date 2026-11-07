@@ -8,6 +8,7 @@
 		"enchantments.EnchantingScreenMixin",
 
 		"environment.visuals.ClientWorldSkyMixin",
+		"items_and_effects.fruit.CameraSourMixin",
 		"environment.visuals.DarknessFogRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",

@@ -336,5 +336,16 @@
   "subtitles.players-versus.entity.pale_wolf.hurt": "Un loup pâle est blessé",
   "subtitles.players-versus.entity.pale_wolf.death": "Un loup pâle meurt",
   "entity.players-versus.pale_wandering_trader": "Marchand ambulant pâle",
-  "item.players-versus.pale_wandering_trader_spawn_egg": "Oeuf d'apparition de Marchand ambulant pâle"
+  "item.players-versus.pale_wandering_trader_spawn_egg": "Oeuf d'apparition de Marchand ambulant pâle",
+
+  "item.players-versus.lemon": "Citron",
+  "block.players-versus.lemon_leaves": "Feuilles de citronnier",
+  "block.players-versus.lemon_sapling": "Pousse de citronnier",
+  "block.players-versus.potted_lemon_sapling": "Pousse de citronnier en pot",
+  "effect.players-versus.sour": "Acidité",
+
+  "biome.players-versus.tuscan_grove": "Bosquet toscan",
+  "biome.players-versus.warm_oak_forest": "Chênaie chaude",
+  "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre",
+  "biome.players-versus.humid_oak_forest": "Chênaie humide"
 }
