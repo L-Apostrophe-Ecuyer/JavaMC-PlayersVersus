@@ -20,6 +20,9 @@
       "frootloops.versus.gametest.WatchlingGameTest",
       "frootloops.versus.gametest.EndermanShulkerGameTest",
       "frootloops.versus.gametest.LemonsGameTest"
+    ],
+    "fabric-client-gametest": [
+      "frootloops.versus.gametest.client.WorldgenGallery"
     ]
   },
   "depends": {

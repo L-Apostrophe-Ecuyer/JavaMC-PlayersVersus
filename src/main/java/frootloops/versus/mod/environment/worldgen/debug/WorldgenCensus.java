@@ -143,7 +143,8 @@ public final class WorldgenCensus {
     // Finding a biome
 
     /** The middle of the nearest patch of a biome that the biome source places at sea level, or null. */
-    private static BlockPos find(ServerLevel world, String biome, int range, Consumer<String> log) {
+    @Nullable
+    public static BlockPos find(ServerLevel world, String biome, int range, Consumer<String> log) {
         RandomState noise = world.getChunkSource().randomState();
         DensityBufferPool buffers = noise.acquireDensityBufferPool();
         try {
