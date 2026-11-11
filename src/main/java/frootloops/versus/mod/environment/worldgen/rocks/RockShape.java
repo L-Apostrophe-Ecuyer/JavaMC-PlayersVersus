@@ -105,7 +105,7 @@ public enum RockShape {
                 }
                 plates(dice, lobes, dice.whole(0, 2), radius, turn + Math.PI);
                 yield new Body(0, 0, fit(lobes, this.spread * radius), warp, Math.max(4, radius), this.pieces(Math.max(3.5, 1.2 * radius), 0.85, 1.2), Fracture.NONE,
-                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.14, 0.3, 1, 0.03, 0.3, true, 0, 0, this.scree, seed);
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.14, 0.3, 1, 0.03, 0.3, true, 0, 0, this.scree, seed);
             }
             case PILE -> {
                 lobes.add(mound(dice, 0, 0, height, 0.7 * radius));
@@ -118,7 +118,7 @@ public enum RockShape {
                 }
                 plates(dice, lobes, dice.whole(1, 3), radius, turn);
                 yield new Body(0, 0, fit(lobes, this.spread * radius), warp, Math.max(4, radius), this.pieces(Math.max(3.5, 0.8 * radius), 0.85, 1.2), Fracture.NONE,
-                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.18, 0.3, 1, 0.04, 0.3, true, 0, 0, this.scree, seed);
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.18, 0.3, 1, 0.04, 0.3, true, 0, 0, this.scree, seed);
             }
             case CRAG -> {
                 double lean = dice.angle();
@@ -132,7 +132,7 @@ public enum RockShape {
                             dice.between(0.9, 1.1), 0, 0, dice.between(2.5, 3.2), 0, 0, 0, 0.1, dice.whole(5, 7), 0.22));
                 }
                 yield new Body(0, 0, lobes, warp, 8, this.pieces(Math.max(3, 0.9 * radius), 1.3, 2), this.chunks(3, 1.3),
-                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.45, 0.5, 2, 0.1, 0.35, true, 0, 0, this.scree, seed);
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.45, 0.5, 2, 0.1, 0.35, true, 0, 0, this.scree, seed);
             }
             case DOME -> {
                 double lean = dice.angle();
@@ -144,7 +144,7 @@ public enum RockShape {
                             dice.between(0.9, 1.1), 0, 0, 2.2, 0, 0, 0.1, 0.14, 0, 0));
                 }
                 yield new Body(0, 0, lobes, warp, Math.max(10, radius), this.pieces(0.8 * radius, 0.9, 2.2), this.chunks(4.5, 0.9),
-                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.8, 0.5, 3, 0.12, 0.45, false, this.skirtWidth, 2, this.scree, seed);
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.8, 0.5, 3, 0.12, 0.45, false, this.skirtWidth, 2, this.scree, seed);
             }
             case MONOLITH -> {
                 double lean = dice.angle(), far = radius * dice.between(0.65, 0.9);
@@ -159,7 +159,7 @@ public enum RockShape {
                             dice.between(0.75, 1.0), 0, 0, 2.4, 0, 0, 0.1, 0.1, dice.whole(4, 6), 0.12));
                 }
                 yield new Body(0, 0, lobes, warp, 15, this.pieces(0.95 * radius, 1.4, 2.2), this.chunks(5, 1.6),
-                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.95, 1.3, 5, 0.2, 0.5, false, this.skirtWidth, 6, this.scree, seed);
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.95, 1.3, 5, 0.2, 0.5, false, this.skirtWidth, 6, this.scree, seed);
             }
             case TOWER -> {
                 double lean = dice.angle(), far = radius * dice.between(0.1, 0.25);
@@ -171,14 +171,14 @@ public enum RockShape {
                             dice.between(0.8, 1.0), 0, 0, 3, 0, 0, 0.1, 0.1, dice.whole(4, 6), 0.15));
                 }
                 yield new Body(0, 0, lobes, warp, 14, this.pieces(radius, 1.6, 2.5), this.chunks(5, 1.8),
-                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.75, 0.9, 4, 0.25, 0.45, false, this.skirtWidth, 2.5, this.scree, seed);
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.75, 0.9, 4, 0.25, 0.45, false, this.skirtWidth, 2.5, this.scree, seed);
             }
             case NEEDLE -> {
                 double lean = dice.angle(), far = radius * dice.between(0.5, 1.2);
                 lobes.add(column(dice, 0, 0, height, radius, dice.between(0.8, 1.0), far * Math.cos(lean), far * Math.sin(lean), dice.between(3, 4.5), 0, 0,
                         0, 0.05, dice.whole(4, 5), 0.15));
                 yield new Body(0, 0, lobes, warp, 10, this.pieces(Math.max(3.5, 1.6 * radius), 2.2, 2), this.chunks(3.5, 2),
-                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.35, 0.6, 1, 0.15, 0.3, false, this.skirtWidth, 1.5, this.scree, seed);
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.35, 0.6, 1, 0.15, 0.3, false, this.skirtWidth, 1.5, this.scree, seed);
             }
             case SPIRE -> {
                 double lean = dice.angle(), far = radius * dice.between(0.05, 0.2);
@@ -195,7 +195,7 @@ public enum RockShape {
                             dice.between(0.8, 1.0), 0, 0, 2.4, 0, 0, 0.1, 0.1, dice.whole(4, 6), 0.15));
                 }
                 yield new Body(0, 0, lobes, warp, 18, this.pieces(0.9 * radius, 1.8, 2.6), this.chunks(5.5, 1.8),
-                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.7, 0.9, 3, 0.25, 0.4, false,
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.7, 0.9, 3, 0.25, 0.4, false,
                         this.skirtWidth, 4, this.scree, seed);
             }
             case MASSIF -> {
@@ -210,7 +210,7 @@ public enum RockShape {
                             dice.between(0.85, 1.15), 0, 0, dice.between(6, 8), 0.04, 0, dice.between(0.08, 0.12), dice.between(0.05, 0.1), dice.whole(5, 7), 0.1));
                 }
                 yield new Body(0, 0, lobes, warp, 24, this.pieces(0.6 * radius, 1.6, 2.8), this.chunks(6, 1.6),
-                        radius * dice.between(0.8, 1.1), dice.between(0.35, 0.5), dice.between(0.7, 1.2), this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.85, 0.9, 4, 0.25, 0.5, false,
+                        radius * dice.between(0.8, 1.1), dice.between(0.35, 0.5), dice.between(0.7, 1.2), this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), this.dusk(), 0.85, 0.9, 4, 0.25, 0.5, false,
                         this.skirtWidth, 3, this.scree, seed);
             }
         };
@@ -300,5 +300,19 @@ public enum RockShape {
         boolean chance(double chance) {
             return RockNoise.unit(this.next()) < chance;
         }
+    }
+
+    /**
+     * How far a rock's own shade reaches over its side turned from the sun and around its foot ({@link Body#dusk}): the
+     * game draws no shadow for it, so a small rock's shade must be in its stone; a tall one's faces are shaded by the
+     * game's own light, and its cracks and overhangs by the model.
+     */
+    private double dusk() {
+        return switch (this) {
+            case BOULDER, PILE -> 1;
+            case CRAG -> 0.8;
+            case NEEDLE, DOME -> 0.5;
+            default -> 0.2;
+        };
     }
 }

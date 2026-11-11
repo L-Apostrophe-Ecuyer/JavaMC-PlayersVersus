@@ -38,6 +38,9 @@ public record RockPlan(List<Body> bodies, RockPalette palette) {
      * @param flutes       how deep the grooves are that run down its faces, a block wide: the joints between columns
      *                     {@code fluteScale} blocks across (the cells of a Voronoi diagram over the ground plan), as
      *                     columnar rock is jointed: organ pipes; 0: none
+     * @param dusk         how far its own shade reaches over the side turned from the sun and around its foot, in tuff:
+     *                     the game draws no shadow for a rock, so a small one's shade is in its stone (0: only its
+     *                     cracks, creases and overhangs; 1: a boulder's)
      * @param cover        how much of its level faces plants cover (0: bare, 1: every ledge)
      * @param coverTop     how much more the cover favours the top over the foot
      * @param drape        how many blocks moss hangs down the face from an edge, at most
@@ -50,7 +53,7 @@ public record RockPlan(List<Body> bodies, RockPalette palette) {
      */
     public record Body(int dx, int dz, List<Lobe> lobes, double warp, double warpScale, Fracture pieces, Fracture chunks,
                        double pinnacles, double pinnacleDrop, double cleft, double roughness, double flutes, double fluteScale,
-                       double cover, double coverTop, int drape, double vines, double plants, boolean slabs,
+                       double dusk, double cover, double coverTop, int drape, double vines, double plants, boolean slabs,
                        double skirtWidth, double skirtHeight, double scree, long seed) {
 
         public Body withCover(double cover) {
@@ -63,14 +66,14 @@ public record RockPlan(List<Body> bodies, RockPalette palette) {
          */
         public Body with(Double cover, Double vines, Double plants, Double scree, Boolean slabs, double skirt) {
             return new Body(this.dx, this.dz, this.lobes, this.warp, this.warpScale, this.pieces, this.chunks, this.pinnacles, this.pinnacleDrop,
-                    this.cleft, this.roughness, this.flutes, this.fluteScale, cover == null ? this.cover : cover, this.coverTop, this.drape, vines == null ? this.vines : vines,
+                    this.cleft, this.roughness, this.flutes, this.fluteScale, this.dusk, cover == null ? this.cover : cover, this.coverTop, this.drape, vines == null ? this.vines : vines,
                     plants == null ? this.plants : plants, slabs == null ? this.slabs : slabs, this.skirtWidth * skirt, this.skirtHeight * skirt,
                     scree == null ? this.scree : scree, this.seed);
         }
 
         public Body at(int dx, int dz) {
             return new Body(dx, dz, this.lobes, this.warp, this.warpScale, this.pieces, this.chunks, this.pinnacles, this.pinnacleDrop, this.cleft,
-                    this.roughness, this.flutes, this.fluteScale, this.cover, this.coverTop, this.drape, this.vines, this.plants, this.slabs, this.skirtWidth, this.skirtHeight,
+                    this.roughness, this.flutes, this.fluteScale, this.dusk, this.cover, this.coverTop, this.drape, this.vines, this.plants, this.slabs, this.skirtWidth, this.skirtHeight,
                     this.scree, this.seed);
         }
     }

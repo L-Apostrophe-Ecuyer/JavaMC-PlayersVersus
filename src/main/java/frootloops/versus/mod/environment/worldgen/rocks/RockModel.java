@@ -607,7 +607,11 @@ public final class RockModel {
         double sun = this.faceX * SUN_X + this.faceZ * SUN_Z;
         // Shade: what faces down, what is shut in (the creases where two stones meet), and on the side turned from the sun
         // its foot and patches of its face
-        double shadow = -0.5 * openness - 0.7 * up + 0.08 * grain;
+        // and the rock's own shade, which the game doesn't draw: over the side turned from the sun and toward the foot, in
+        // patches, as much as the body has of it
+        double low = 1 - Math.clamp(cy / this.top, 0, 1);
+        double dusk = this.body.dusk() * (0.6 * -sun + 0.8 * low - 0.36 + 0.3 * RockNoise.noise(this.seed + 21, cx / 3.5, cy / 3.0, cz / 3.5));
+        double shadow = -0.5 * openness - 0.7 * up + 0.08 * grain + Math.max(0, dusk);
         if (!this.filled(solid, x, y - 1, z) || openness < -0.6 && this.filled(solid, x, y + 1, z) || shadow > 0.42) return RockMaterial.SHADE;
         if (sun < -0.3) {
             double patch = RockNoise.noise(this.seed + 19, cx / 4.0, cy / 6.0, cz / 4.0) + 0.2 * grain;

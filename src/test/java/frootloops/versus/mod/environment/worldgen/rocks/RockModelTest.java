@@ -259,7 +259,7 @@ class RockModelTest {
 
     private static Body withoutFlutes(Body body) {
         return new Body(body.dx(), body.dz(), body.lobes(), body.warp(), body.warpScale(), body.pieces(), body.chunks(), body.pinnacles(), body.pinnacleDrop(),
-                body.cleft(), body.roughness(), 0, body.fluteScale(), body.cover(), body.coverTop(), body.drape(), body.vines(), body.plants(), body.slabs(),
+                body.cleft(), body.roughness(), 0, body.fluteScale(), body.dusk(), body.cover(), body.coverTop(), body.drape(), body.vines(), body.plants(), body.slabs(),
                 body.skirtWidth(), body.skirtHeight(), body.scree(), body.seed());
     }
 
@@ -601,6 +601,46 @@ class RockModelTest {
             if (most >= 2) several++;
         }
         assertTrue(several >= 7, "boulders are two or three stones together: " + several + " of 8 have more than one hump");
+    }
+
+    @Test
+    void aSmallRocksShadedSideAndFootAreInShade() {
+        // The game draws no shadows: a boulder's own shade is in its stone, on the side turned from the sun (to the north)
+        // and around its foot; the side toward the sun and its crown stay plain or light
+        int[] away = new int[3], toward = new int[3], foot = new int[3], crown = new int[3];
+        for (long seed = 1; seed <= 8; seed++) {
+            RockTestCanvas canvas = stamp(RockShape.BOULDER.body(seed, 7, 4.5).withCover(0), FLAT, RockTestCanvas.NO_WATER);
+            int top = GROUND;
+            for (long[] cell : rock(canvas)) top = Math.max(top, (int) cell[1]);
+            for (long[] cell : rock(canvas)) {
+                int x = (int) cell[0], y = (int) cell[1], z = (int) cell[2];
+                int tone = tone(canvas, x, y, z);
+                // The upright faces above the ground that one sees from afar: under rock, open three blocks out to a side
+                // (not the walls of creases and the undersides of overhangs, which are in shade whatever the sun)
+                if (tone < 0 || y < GROUND || !canvas.isRock(x, y + 1, z)) continue;
+                boolean north = false, south = false, broad = false;
+                for (int[] step : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                    boolean open = true;
+                    for (int out = 1; out <= 3; out++) open &= !canvas.isRock(x + out * step[0], y, z + out * step[1]);
+                    broad |= open;
+                    if (open && step[1] < 0) north = true;
+                    if (open && step[1] > 0) south = true;
+                }
+                if (!broad) continue;
+                if (north && !south) away[tone]++;
+                if (south && !north) toward[tone]++;
+                double height = (double) (y - GROUND) / Math.max(1, top - GROUND);
+                if (height < 0.34) foot[tone]++;
+                if (height > 0.6) crown[tone]++;
+            }
+        }
+        String tones = "away " + share(away, 0) + ", toward " + share(toward, 0) + ", foot " + share(foot, 0) + ", crown " + share(crown, 0);
+        // (Toward the sun there is still the shade under the bulges of a rounded stone: the sun stands high)
+        assertTrue(share(away, 0) >= 0.45, "the side turned from the sun is much in shade: " + tones);
+        assertTrue(share(toward, 0) <= 0.25 && share(away, 0) >= share(toward, 0) + 0.25, "the side toward it much less: " + tones);
+        assertTrue(share(foot, 0) >= 0.38, "the foot is much in shade: " + tones);
+        assertTrue(share(crown, 0) <= share(foot, 0) - 0.15, "the crown less than the foot: " + tones);
+        assertTrue(share(crown, 1) + share(crown, 2) >= 0.7, "the crown is mostly plain or light: " + tones);
     }
 
     @Test
