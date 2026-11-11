@@ -68,11 +68,20 @@ public final class RockBlock {
 
     /** About the distance to its surface in blocks, negative inside: the planes' soft maximum. */
     public double distance(double x, double y, double z) {
+        return this.distance(x, y, z, Double.MAX_VALUE);
+    }
+
+    /**
+     * As {@link #distance(double, double, double)} within {@code near} of its surface; further out or in, the planes' hard
+     * maximum, which is as good there and much cheaper.
+     */
+    double distance(double x, double y, double z, double near) {
         double px = x - this.cx, py = y - this.cy, pz = z - this.cz;
         double[] o = this.orientation, p = this.planes;
         double ux = o[0] * px + o[3] * py + o[6] * pz, uy = o[1] * px + o[4] * py + o[7] * pz, uz = o[2] * px + o[5] * py + o[8] * pz;
         double max = -Double.MAX_VALUE;
         for (int i = 0; i < p.length; i += 4) max = Math.max(max, p[i] * ux + p[i + 1] * uy + p[i + 2] * uz - p[i + 3]);
+        if (Math.abs(max) >= near) return max;
         double sum = 0;
         for (int i = 0; i < p.length; i += 4) sum += Math.exp((p[i] * ux + p[i + 1] * uy + p[i + 2] * uz - p[i + 3] - max) / SOFT);
         return max + SOFT * Math.log(sum);
