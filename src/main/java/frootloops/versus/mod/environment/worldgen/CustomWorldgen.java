@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.worldgen.features.MudPatchFeature;
 import frootloops.versus.mod.environment.worldgen.features.MushroomRingFeature;
 import frootloops.versus.mod.environment.worldgen.features.StoneStalagtiteFeature;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFeature;
+import frootloops.versus.mod.environment.worldgen.rocks.RockGroundFilter;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFormationPiece;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFormationStructure;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
@@ -45,6 +46,8 @@ public class CustomWorldgen {
     /** Small rocks (RockFeature), and large ones on the world's grid (RockFormationStructure, one piece a body). */
     public static final Identifier ROCK_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock");
     public static final Identifier ROCK_FORMATION_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock_formation");
+    /** Where rock may stand (RockGroundFilter): a placement filter for the rocks' placed features. */
+    public static final Identifier ROCK_GROUND_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock_ground");
     public static final StructureType<RockFormationStructure> ROCK_FORMATION =
             Registry.register(BuiltInRegistries.STRUCTURE_TYPE, ROCK_FORMATION_ID, () -> RockFormationStructure.CODEC);
     public static final StructurePieceType ROCK_FORMATION_PIECE =
@@ -64,6 +67,7 @@ public class CustomWorldgen {
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MUSHROOM_RING_ID, MushroomRingFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MARSH_ID, frootloops.versus.mod.environment.worldgen.features.MarshFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, ROCK_ID, RockFeature.CODEC);
+        Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, ROCK_GROUND_ID, RockGroundFilter.CODEC);
         BiomeModifications.create(Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "no_mushrooms_in_the_nether"))
                 .add(ModificationPhase.REMOVALS, BiomeSelectors.foundInTheNether(), context -> {
                     for (ResourceKey<PlacedFeature> mushrooms : OVERWORLD_MUSHROOMS) {

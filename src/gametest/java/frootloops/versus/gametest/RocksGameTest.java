@@ -7,6 +7,7 @@ import frootloops.versus.mod.environment.worldgen.rocks.LevelRockCanvas;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFeature;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFormationPiece;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFormationStructure;
+import frootloops.versus.mod.environment.worldgen.rocks.RockGroundFilter;
 import frootloops.versus.mod.environment.worldgen.rocks.RockModel;
 import frootloops.versus.mod.environment.worldgen.rocks.RockPlan;
 import frootloops.versus.mod.environment.worldgen.rocks.RockStamper;
@@ -230,6 +231,22 @@ public class RocksGameTest {
         helper.assertTrue(rock[0] >= 40, "the command placed " + rock[0] + " blocks of rock");
         helper.assertTrue(rock[2] >= 8, "the rock stands on the floor with " + rock[2] + " blocks");
         helper.assertTrue(rock[1] <= RockFeature.MAX_REACH, "rock " + rock[1] + " blocks from where it was run");
+        helper.succeed();
+    }
+
+    @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
+    public void theRockGroundIsLevelAndDry(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos middle = helper.absolutePos(new BlockPos(24, 1, 24));
+        helper.assertTrue(RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "a grass plain is rock ground");
+        helper.setBlock(new BlockPos(24, 1, 24), Blocks.WATER.defaultBlockState());
+        helper.assertTrue(!RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "not with water at its middle");
+        helper.setBlock(new BlockPos(24, 1, 24), Blocks.AIR.defaultBlockState());
+        // The ground three blocks higher at one of the points 8 blocks out
+        for (int y = 1; y <= 3; y++) helper.setBlock(new BlockPos(32, y, 24), Blocks.DIRT.defaultBlockState());
+        helper.assertTrue(!RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "not with a step of three blocks 8 out");
+        helper.setBlock(new BlockPos(32, 3, 24), Blocks.AIR.defaultBlockState());
+        helper.assertTrue(RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "with a step of two");
         helper.succeed();
     }
 

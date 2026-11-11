@@ -4,6 +4,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
@@ -17,7 +19,8 @@ import java.util.Optional;
  * stands on the terrain's height at its own middle and draws, chunk by chunk, only the columns of the chunk being made.
  * In the data, a structure's usual settings and {@code "rock": {...}}, as a feature's.
  *
- * <p>No formation where its middle is under water: rock towers in lakes and seas are another thing.
+ * <p>No formation where its middle is under water (rock towers in lakes and seas are another thing), nor where rock may
+ * not stand there ({@link RockGround}: the climate, level ground).
  */
 public class RockFormationStructure extends Structure {
 
@@ -49,10 +52,22 @@ public class RockFormationStructure extends Structure {
                     context.heightAccessor(), context.randomState()) + 1;
         }
         int seaLevel = context.chunkGenerator().getSeaLevel();
-        if (anchors[0] < seaLevel - 1) return Optional.empty();
+        if (anchors[0] < seaLevel - 1 || !this.onRockGround(context, x, anchors[0], z)) return Optional.empty();
         return Optional.of(new Structure.GenerationStub(new BlockPos(x, anchors[0], z), builder -> {
             for (int index = 0; index < anchors.length; index++) builder.addPiece(new RockFormationPiece(this.rock, seed, index, x, z, anchors[index]));
         }));
+    }
+
+    /** Whether rock may stand at the main body's middle: its climate, and level ground around it ({@link RockGround}). */
+    private boolean onRockGround(Structure.GenerationContext context, int x, int y, int z) {
+        Climate.TargetPoint climate = context.climateSampler().sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z));
+        if (!RockGroundFilter.climate(climate)) return false;
+        int[] heights = new int[RockGround.AROUND.length];
+        for (int index = 0; index < heights.length; index++) {
+            heights[index] = context.chunkGenerator().getFirstOccupiedHeight(x + RockGround.AROUND[index][0], z + RockGround.AROUND[index][1], Heightmap.Types.OCEAN_FLOOR_WG,
+                    context.heightAccessor(), context.randomState());
+        }
+        return RockGround.level(heights);
     }
 
     @Override
