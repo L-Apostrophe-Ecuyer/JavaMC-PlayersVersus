@@ -63,7 +63,7 @@ public class CustomWorldgen {
             ResourceKey.create(Registries.PLACED_FEATURE, Identifier.withDefaultNamespace("brown_mushroom_normal")),
             ResourceKey.create(Registries.PLACED_FEATURE, Identifier.withDefaultNamespace("red_mushroom_normal")));
 
-    /** A rock here and there, on rock ground (RockGroundFilter keeps the middle temperatures and level ground). */
+    /** Rare-ish clusters of rocks, on rock ground (RockGroundFilter keeps the middle temperatures and level ground). */
     private static final ResourceKey<PlacedFeature> SPARSE_ROCKS = ResourceKey.create(Registries.PLACED_FEATURE,
             Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock/sparse"));
     /** A cluster of rocks now and then. */
@@ -89,7 +89,7 @@ public class CustomWorldgen {
                         context.getGenerationSettings().removeFeature(GenerationStep.Decoration.VEGETAL_DECORATION, mushrooms);
                     }
                 });
-        // Rocks here and there in the middle biomes, in clusters in meadows: the step before trees, which they would cut
+        // Rare-ish clusters of rocks in the middle biomes, rarer in meadows: the step before trees, which they would cut
         BiomeModifications.addFeature(BiomeSelectors.includeByKey(SPARSE_ROCK_BIOMES), GenerationStep.Decoration.LOCAL_MODIFICATIONS, SPARSE_ROCKS);
         BiomeModifications.addFeature(BiomeSelectors.includeByKey(Biomes.MEADOW), GenerationStep.Decoration.LOCAL_MODIFICATIONS, MEADOW_ROCKS);
         PvWorldgen.initialize();

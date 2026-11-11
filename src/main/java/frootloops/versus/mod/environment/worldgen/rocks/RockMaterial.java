@@ -14,8 +14,10 @@ public enum RockMaterial {
     LIGHT,
     /** The rock in the brightest light, rarely (clay). */
     BRIGHT,
-    /** Earth under the grass on top. */
+    /** Earth under the grass on top (dirt). */
     SOIL,
+    /** Earth under the moss on top (packed mud). */
+    MUD,
     /** The plant cover of level tops, where the sky is open. */
     GRASS,
     /** Moss: among the grass, on ledges, and hanging a little down the face from an edge. */

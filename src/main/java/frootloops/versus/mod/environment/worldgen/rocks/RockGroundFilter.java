@@ -20,12 +20,14 @@ import net.minecraft.world.level.levelgen.placement.PlacementFilter;
  * Placement filter {@code players-versus:rock_ground}: keeps a position where rock may stand ({@link RockGround}): in
  * the Players Versus world type only (vanilla world types keep vanilla's worldgen), on level ground with no water at its
  * middle, and in a climate for rocks unless {@code "climate": false} (a meadow's cluster: meadows are cool, high and
- * little eroded, yet a few rocks belong there).
+ * little eroded, yet a few rocks belong there). The ground's heights are within {@link RockGround#LEVEL} of each other,
+ * or within {@code "level"} (a rocky biome's: rocks on its hillsides too).
  */
-public record RockGroundFilter(boolean climate) implements PlacementFilter {
+public record RockGroundFilter(boolean climate, int level) implements PlacementFilter {
 
     public static final MapCodec<RockGroundFilter> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.BOOL.optionalFieldOf("climate", true).forGetter(RockGroundFilter::climate)
+            Codec.BOOL.optionalFieldOf("climate", true).forGetter(RockGroundFilter::climate),
+            Codec.intRange(0, 16).optionalFieldOf("level", RockGround.LEVEL).forGetter(RockGroundFilter::level)
     ).apply(instance, RockGroundFilter::new));
 
     @Override
@@ -40,7 +42,7 @@ public record RockGroundFilter(boolean climate) implements PlacementFilter {
                 return false;
             }
         }
-        boolean ground = ground(context.level(), origin.getX(), origin.getZ());
+        boolean ground = ground(context.level(), origin.getX(), origin.getZ(), this.level);
         WorldgenCensus.rockGround(ground ? "kept" : "not level, or wet");
         return ground;
     }
@@ -59,12 +61,17 @@ public record RockGroundFilter(boolean climate) implements PlacementFilter {
 
     /** Whether the ground at (x, z) is level ({@link RockGround#level}) and has no water over its middle. */
     public static boolean ground(WorldGenLevel level, int x, int z) {
+        return ground(level, x, z, RockGround.LEVEL);
+    }
+
+    /** Whether the ground at (x, z) has its heights within {@code tolerance} of each other and no water over its middle. */
+    public static boolean ground(WorldGenLevel level, int x, int z, int tolerance) {
         int[] heights = new int[RockGround.AROUND.length];
         for (int index = 0; index < heights.length; index++) {
             heights[index] = level.getHeight(Heightmap.Types.OCEAN_FLOOR, x + RockGround.AROUND[index][0], z + RockGround.AROUND[index][1]);
         }
         if (level.getFluidState(new BlockPos(x, heights[0], z)).is(FluidTags.WATER)) return false;
-        return RockGround.level(heights);
+        return RockGround.level(heights, tolerance);
     }
 
     @Override

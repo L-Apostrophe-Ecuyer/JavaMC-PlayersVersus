@@ -123,6 +123,15 @@ public final class RockBlock {
      * across its upright edges, a prism's); and {@code bends} of its upright faces leaning back above a line partway up.
      */
     public static double[] planes(RockDice dice, double a, double b, double c, int cuts, double depth, double crown, double skew, boolean upright, int bends) {
+        return planes(dice, a, b, c, cuts, depth, crown, skew, upright, bends, Math.PI / 2);
+    }
+
+    /**
+     * As {@link #planes(RockDice, double, double, double, int, double, double, double, boolean, int)}, no cut across its
+     * top sloping steeper than {@code steepest} radians: a steeper one is tipped up to it, facing the same way out and
+     * cutting in as deep, so that the top is never a point.
+     */
+    public static double[] planes(RockDice dice, double a, double b, double c, int cuts, double depth, double crown, double skew, boolean upright, int bends, double steepest) {
         List<double[]> planes = new ArrayList<>();
         double[] half = {a, b, c};
         for (int axis = 0; axis < 3; axis++) {
@@ -150,9 +159,15 @@ public final class RockBlock {
             }
             double[] n = {sx * rx, sy * ry, sz * rz};
             normalize(n);
+            double share = Math.max(0.35, dice.between(depth, depth + 0.15) - (n[1] > 0.3 ? 0.25 * crown : 0));
+            double out = Math.hypot(n[0], n[2]);
+            if (n[1] > 0 && Math.atan2(out, n[1]) > steepest) {
+                n[0] *= Math.sin(steepest) / out;
+                n[2] *= Math.sin(steepest) / out;
+                n[1] = Math.cos(steepest);
+            }
             double support = a * Math.abs(n[0]) + b * Math.abs(n[1]) + c * Math.abs(n[2]);
-            double share = dice.between(depth, depth + 0.15) - (n[1] > 0.3 ? 0.25 * crown : 0);
-            planes.add(new double[]{n[0], n[1], n[2], support * Math.max(0.35, share)});
+            planes.add(new double[]{n[0], n[1], n[2], support * share});
         }
         for (int bend = 0; bend < bends; bend++) {
             // The broader faces more often

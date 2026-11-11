@@ -25,6 +25,9 @@ After four rounds of a throwaway prototype rendered next to the references:
 - "Some of your cliff faces are too straight/flat, with no supporting smaller block at the base and no slight curve
   down either."
 - On the last round: "These are officially perfect."
+- On the rocks in game: "To better blend with the rest of the environment, maybe have 1 layer of either dirt or packed
+  mud at the top, then grass and moss"; "The shapes of boulders are a little too pointy at the tips sometimes, they
+  should slope at a 30 degree angle or be flatter".
 
 The prototype's last renders are the reference for the look; the rebuilt model is checked against them.
 
@@ -44,11 +47,11 @@ The shapes keep their names (the data and `/pvwg rock` use them); each is a reci
 
 | Shape | Recipe |
 |---|---|
-| boulder | A big block narrowing upward (radius about half its height), one or two smaller ones (55 to 85% as tall) leaning on it, up to two flat stones at its foot |
-| pile | Layers of flat blocks, each layer narrower than the one under it (a cone about as tall as it is wide), lying over each other |
+| boulder | A big block narrowing upward (radius about half its height), one or two smaller ones (55 to 85% as tall) leaning on it, up to two flat stones at its foot; no cut across a top slopes more than 30°, so its top is never a point |
+| pile | Layers of flat blocks, each layer narrower than the one under it (a cone about as tall as it is wide), lying over each other; no stone narrower than 1.25 times its thickness, so the top stone is never a post |
 | dome | A broad boulder: the boulder's recipe, lower and wider |
 | crag | A few upright columns close together, 8 to 13 tall |
-| tower, needle, spire | Columns of blocks between upright joints (a jittered grid), each column its own height, lower outward, its top block cut at angles: tower 1 to 3 columns, needle one narrow one, spire a tall column with a needle beside it |
+| tower, needle, spire | Columns of blocks between upright joints (a jittered grid), each column its own height, lower outward, its top block cut at angles: tower a cluster of columns (4 to 7, as in the approved prototype), needle one narrow one, spire a tall column with a needle beside it |
 | massif | The same, wide, the columns' heights nearly level (a mesa) |
 | monolith | A tall leaning mass and a lower shoulder against it, opposite its lean |
 
@@ -64,8 +67,9 @@ of rock open to the air:
 
 Undersides, inside corners and the drawn cracks are tuff. The rest goes by its light: the darkest 30% tuff, then 46%
 stone, 21% andesite and the brightest 3% clay. The cracks drawn are half of the seams between blocks, each drawn whole,
-never the joints inside one column. Moss (mostly) and grass grow on level tops, more often higher up, with moss hanging
-a block or two over their edges and plants on the grass. No deepslate anywhere.
+never the joints inside one column. Moss (mostly) and grass grow on level tops, more often higher up, on a layer of
+earth (dirt under grass, packed mud under moss), with moss hanging a block or two over their edges and plants on the
+grass. No deepslate anywhere.
 
 The palette gets one key, `bright` (clay by default); `shade` is tuff, `base` stone, `light` andesite.
 
@@ -86,7 +90,8 @@ The palette gets one key, `bright` (clay by default); `shade` is tuff, `base` st
 From the review of this spec: "boulders ought to be in areas of mostly flat terrain, in middling ranges, and nowhere
 near mountain peaks"; "at most they should start to appear erosion > -0.3, but ought to stay in flat stretches"; "they
 appear in flat areas like jungles, plains, savannas, in the middle ranges of temperature"; "a case could be made to have
-some appear in meadows in rare clusters".
+some appear in meadows in rare clusters". Then, on the rocks in game: "these boulders should be rare-ish, and get
+clustered together, except for in rocky biomes where they're just everywhere".
 
 - Flat ground only: erosion above -0.3, and there only where the ground is nearly level under the rock and around it.
   Never on mountainsides (where the layout's mountainside rule applies), on slopes or near peaks.
@@ -94,7 +99,8 @@ some appear in meadows in rare clusters".
   frozen and cold biomes, not in deserts or badlands.
 - Never in the 3D-noise terrain (part 2).
 - Meadows: a rare cluster here and there.
-- The rocky biomes (part 3): many.
+- Elsewhere in the middle biomes: rare-ish, in small clusters.
+- The rocky biomes (part 3): everywhere.
 
 The layout rules in `docs/worldgen-refactor-plan.md` (mountainside, peak-warm and the rest) say which biome takes which
 climate; they don't place rocks, and stay as they are.
@@ -105,22 +111,28 @@ Built as (part 3, the boxes read from vanilla's `OverworldBiomeBuilder` tables):
   -0.15 to 0.55; erosion above -0.3; not humidity 0 to 0.3 with erosion 0.3 to 0.6 (part 2's 3D-noise terrain); the
   ground within 3 blocks over the 16 read around the middle (most of the middle biomes' ground rises and falls 6 or
   more); no water at the middle; the Players Versus world type only.
-- Here and there: a boulder (0.6), a pile (0.25) or a crag (0.15) tried in one chunk of 5 in the plains, forests,
-  savannas and jungles, vanilla's and the mod's. Meadows: 2 to 4 in one chunk of 48, on level ground whatever their
-  climate. In the step before trees.
+- Rare-ish clusters: in one chunk of 8 in the plains, forests, savannas and jungles, vanilla's and the mod's, a
+  cluster's middle on rock ground, and 2 to 4 rocks within 4 blocks of it on level ground, each a boulder (0.6), a pile
+  (0.25) or a crag (0.15); every rock's origin stays in its chunk. Meadows: a cluster in one chunk of 32, on level
+  ground whatever their climate. In the step before trees.
 - Rocky Plains: the savannas' cool edge (temperature 0.2 to 0.3) where the erosion is 0.05 or more; the Tuscan Grove
   keeps the rest. Rocky Jungle: the jungles from 0.3 to 0.36, erosion 0.05 or more, out of the 3D-noise climate. Rocky
   Birch Forest: the old growth birch forests below -0.075, erosion 0.05 to 0.3. The formations stand in these three.
+  Their rocks are everywhere: several places tried a chunk (3 to 5 in the plains, 6 to 9 in the hillier jungle and
+  birch forest), on ground within 6 blocks over the 16 read, 8 in the birch forest (the foot goes on down where the
+  ground falls away), their biome standing for the rocks' climate (the rocky birch forest's is colder than -0.15);
+  about one rock a chunk.
 
 ## Checks
 
 - Unit tests (`RockModelTest` rewritten, `RockTemplateTest` adjusted): the same seed gives the same rock; nothing
   floats; stamped a chunk at a time in any order is stamped whole; it stays within its reach, a feature's within 16
-  blocks; it reaches the ground on a slope; no noise (single-block knobs and pits under 1% of its surface); a boulder is
-  two or more blocks, a monolith has its shoulder, a tower's columns differ in height; a tall rock is wider at its
-  foot than halfway up and has props there; only tuff, stone, andesite and clay under the cover; undersides are tuff;
-  what faces up and stands high is lighter than what faces down and lies low; stone is the commonest tone and clay
-  5% or less; cover only on level tops under the sky; nothing green under water.
+  blocks; it reaches the ground on a slope; no noise (single-block knobs and pits under 1% of its surface); a
+  boulder is two or more blocks, a boulder's or a pile's top no steeper than 30°, a monolith has its shoulder, a
+  tower's columns differ in height; a tall rock is wider at its foot than halfway up and has props there; only tuff,
+  stone, andesite and clay in the rock, and a layer of earth (dirt, packed mud) under the cover; undersides are
+  tuff; what faces up and stands high is lighter than what faces down and lies low; stone is the commonest tone and
+  clay 5% or less; cover only on level tops under the sky; nothing green under water.
 - Game tests (`RocksGameTest`): as now.
 - Looking: preview renders of every shape next to the references and the prototype's last renders, then the in-game
   gallery (`tools/gallery.sh @tools/gallery-rocks.txt`).

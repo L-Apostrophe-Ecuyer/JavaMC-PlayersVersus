@@ -251,7 +251,7 @@ class RockModelTest {
                         continue;
                     }
                     if (cell.startsWith("rock:")) wet++;
-                    assertTrue(!cell.equals("rock:GRASS") && !cell.equals("rock:SOIL") && !cell.equals("plant"),
+                    assertTrue(!cell.equals("rock:GRASS") && !cell.equals("rock:SOIL") && !cell.equals("rock:MUD") && !cell.equals("plant"),
                             cell + " under water at height " + RockTestCanvas.y(entry.getKey()));
                 }
             }
@@ -294,6 +294,34 @@ class RockModelTest {
     }
 
     @Test
+    void theCoverLiesOnEarth() {
+        // As on the ground around: grass on dirt, moss on packed mud, a layer of it between the cover and the rock (or
+        // moss hanging over the edge)
+        int grass = 0, moss = 0;
+        for (long seed = 1; seed <= 3; seed++) {
+            for (Body body : everyShape(seed)) {
+                RockModel model = RockModel.build(body);
+                for (int x = model.minX; x < model.minX + model.sizeX; x++) {
+                    for (int z = model.minZ; z < model.minZ + model.sizeZ; z++) {
+                        int top = model.highest(x, z);
+                        if (top == RockModel.NONE || top < 1) continue;
+                        RockMaterial cover = model.material(x, top, z), under = model.material(x, top - 1, z);
+                        if (under == null || under == RockMaterial.MOSS) continue;
+                        if (cover == RockMaterial.GRASS) {
+                            assertEquals(RockMaterial.SOIL, under, "grass on " + under + " at " + x + " " + top + " " + z);
+                            grass++;
+                        } else if (cover == RockMaterial.MOSS) {
+                            assertEquals(RockMaterial.MUD, under, "moss on " + under + " at " + x + " " + top + " " + z);
+                            moss++;
+                        }
+                    }
+                }
+            }
+        }
+        assertTrue(grass > 0 && moss > 0, "grass on earth " + grass + ", moss on earth " + moss);
+    }
+
+    @Test
     void levelTopsAreOvergrownMostlyWithMoss() {
         int moss = 0, grass = 0;
         for (long seed = 1; seed <= 3; seed++) {
@@ -310,7 +338,7 @@ class RockModelTest {
 
     @Test
     void onlyTheFourTonesUnderTheCover() {
-        Set<String> allowed = Set.of("rock:SHADE", "rock:BASE", "rock:LIGHT", "rock:BRIGHT", "rock:GRASS", "rock:MOSS", "rock:SOIL", "ground", "plant");
+        Set<String> allowed = Set.of("rock:SHADE", "rock:BASE", "rock:LIGHT", "rock:BRIGHT", "rock:GRASS", "rock:MOSS", "rock:SOIL", "rock:MUD", "ground", "plant");
         int[] tones = new int[4];
         for (long seed = 1; seed <= 2; seed++) {
             for (Body body : everyShape(seed)) {
@@ -346,6 +374,22 @@ class RockModelTest {
                     }
                 }
                 assertTrue(surface > 0 && odd <= 0.01 * surface, body.blocks().size() + " blocks, seed " + seed + ": " + odd + " knobs and pits on " + surface + " faces");
+            }
+        }
+    }
+
+    @Test
+    void bouldersAndPilesTopsAreNoSteeperThanThirtyDegrees() {
+        // No pointed tips, no posts on top: a top sloping 30 degrees or flatter has some 9 columns or more within a block of it
+        for (RockShape shape : List.of(RockShape.BOULDER, RockShape.DOME, RockShape.PILE)) {
+            for (double size : new double[]{0, 0.5, 1}) {
+                double height = shape.minHeight + size * (shape.maxHeight - shape.minHeight), radius = shape.minRadius + size * (shape.maxRadius - shape.minRadius);
+                for (long seed = 1; seed <= 40; seed++) {
+                    RockModel model = RockModel.build(shape.body(seed, height, radius));
+                    int[] tip = RockTips.highest(model);
+                    int cap = RockTips.cap(model, tip);
+                    assertTrue(cap >= 9, shape + " " + height + " tall, seed " + seed + ": " + cap + " columns within a block of its top, at " + tip[0] + " " + tip[1]);
+                }
             }
         }
     }

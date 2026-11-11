@@ -8,11 +8,11 @@ public record RockPalette(Map<RockMaterial, String> blocks, List<String> plants)
 
     /**
      * Gray stone: tuff in its shade (undersides, corners, cracks), stone for most of it, andesite in the light, clay in
-     * the brightest; dirt, grass and moss on its tops, plants on the grass.
+     * the brightest; grass on dirt and moss on packed mud on its tops, plants on the grass.
      */
     public static final RockPalette GRAY = new RockPalette(Map.of(
             RockMaterial.SHADE, "minecraft:tuff", RockMaterial.BASE, "minecraft:stone", RockMaterial.LIGHT, "minecraft:andesite",
-            RockMaterial.BRIGHT, "minecraft:clay", RockMaterial.SOIL, "minecraft:dirt", RockMaterial.GRASS, "minecraft:grass_block",
+            RockMaterial.BRIGHT, "minecraft:clay", RockMaterial.SOIL, "minecraft:dirt", RockMaterial.MUD, "minecraft:packed_mud", RockMaterial.GRASS, "minecraft:grass_block",
             RockMaterial.MOSS, "minecraft:moss_block"),
             List.of("minecraft:short_grass", "minecraft:short_grass", "minecraft:short_grass", "minecraft:fern", "minecraft:bush"));
 

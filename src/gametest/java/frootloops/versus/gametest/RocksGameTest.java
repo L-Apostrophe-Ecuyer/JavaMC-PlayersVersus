@@ -255,6 +255,7 @@ public class RocksGameTest {
         // The ground four blocks higher at one of the points 8 blocks out
         for (int y = 1; y <= 4; y++) helper.setBlock(new BlockPos(32, y, 24), Blocks.DIRT.defaultBlockState());
         helper.assertTrue(!RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "not with a step of four blocks 8 out");
+        helper.assertTrue(RockGroundFilter.ground(level, middle.getX(), middle.getZ(), 6), "a rocky biome's ground: with a step of four");
         helper.setBlock(new BlockPos(32, 4, 24), Blocks.AIR.defaultBlockState());
         helper.assertTrue(RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "with a step of three");
         helper.succeed();
@@ -266,7 +267,7 @@ public class RocksGameTest {
         ResourceKey<PlacedFeature> sparse = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.parse("players-versus:rock/sparse"));
         ResourceKey<PlacedFeature> cluster = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.parse("players-versus:rock/meadow_cluster"));
         for (ResourceKey<Biome> biome : List.of(Biomes.PLAINS, Biomes.FOREST, Biomes.SAVANNA, Biomes.JUNGLE, CustomOverworldBiomes.TUSCAN_GROVE)) {
-            helper.assertTrue(rocks(biomes, biome, sparse), biome.identifier() + " has rocks here and there");
+            helper.assertTrue(rocks(biomes, biome, sparse), biome.identifier() + " has clusters of rocks");
         }
         helper.assertTrue(rocks(biomes, Biomes.MEADOW, cluster), "a meadow has a cluster of rocks now and then");
         for (ResourceKey<Biome> biome : List.of(Biomes.DESERT, Biomes.SNOWY_PLAINS, Biomes.TAIGA, Biomes.SWAMP)) {
@@ -292,14 +293,17 @@ public class RocksGameTest {
             RockPlan plan = boulder.plan(at.asLong());
             RockStamper.stamp(plan, at.getX(), at.getZ(), new LevelRockCanvas(level, plan.palette()), at.getX() - 16, at.getZ() - 16, at.getX() + 16, at.getZ() + 16);
         }
-        // Every block of rock is joined, face to face, to rock standing on the floor
+        // Every block of rock is joined, face to face, to rock standing on the floor: its stone, the earth on its tops
+        // (dirt, packed mud) and their cover (grass, moss)
         java.util.Set<BlockPos> rock = new java.util.HashSet<>(), reached = new java.util.HashSet<>();
         java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
         for (int x = 0; x < 48; x++) {
             for (int z = 0; z < 48; z++) {
                 for (int y = 1; y < 40; y++) {
                     BlockPos at = new BlockPos(x, y, z);
-                    if (!isRock(helper.getBlockState(at)) && !helper.getBlockState(at).is(BlockTags.GRASS_BLOCKS) && !helper.getBlockState(at).is(BlockTags.MOSS_BLOCKS)) continue;
+                    BlockState state = helper.getBlockState(at);
+                    boolean ofTheRock = isRock(state) || state.is(Blocks.DIRT) || state.is(Blocks.PACKED_MUD) || state.is(BlockTags.GRASS_BLOCKS) || state.is(BlockTags.MOSS_BLOCKS);
+                    if (!ofTheRock) continue;
                     rock.add(at);
                     if (y == 1 && reached.add(at)) queue.add(at);
                 }
@@ -313,7 +317,9 @@ public class RocksGameTest {
             }
         }
         helper.assertTrue(rock.size() > 100, "two boulders: " + rock.size() + " blocks");
-        helper.assertTrue(reached.size() == rock.size(), (rock.size() - reached.size()) + " blocks of rock not joined to the ground");
+        rock.removeAll(reached);
+        helper.assertTrue(rock.isEmpty(), rock.size() + " blocks of rock not joined to the ground: "
+                + rock.stream().limit(4).map(at -> at.toShortString() + " " + helper.getBlockState(at).getBlock().getName().getString()).toList());
         helper.succeed();
     }
 

@@ -12,8 +12,9 @@ import java.util.List;
  * chunks are made; built whole at once and only read after, so any number of threads may read it.
  *
  * <p>Its blocks are joined into cells ({@link RockVoxels}) and light is painted into their stone from above
- * ({@link RockLight}). Then moss (mostly) and grass grow on its level tops, more often higher up, the moss hanging a
- * block or two over their edges, plants on some of the grass; and the ground rises against its foot, all around it.
+ * ({@link RockLight}). Then moss (mostly) and grass grow on its level tops, more often higher up, on a layer of earth
+ * (packed mud, dirt), the moss hanging a block or two over their edges, plants on some of the grass; and the ground
+ * rises against its foot, all around it.
  *
  * <p>Coordinates are the body's own: x and z from its middle, y from the ground there (0 is the first block above the
  * ground).
@@ -184,6 +185,7 @@ public final class RockModel {
                 }
             }
         }
+        List<int[]> covered = new ArrayList<>();
         for (int x = this.minX + 1; x < this.minX + this.sizeX - 1; x++) {
             for (int z = this.minZ + 1; z < this.minZ + this.sizeZ - 1; z++) {
                 int top = tops[(x - this.minX) * this.sizeZ + (z - this.minZ)];
@@ -198,6 +200,7 @@ public final class RockModel {
                 if (level < 3 || patch >= 2 * chance - 1 + 0.15 * (RockNoise.unit(RockNoise.hash(seed + 41, x, top, z)) - 0.5)) continue;
                 boolean moss = RockNoise.noise(seed + 42, x / 3.5, top / 3.5, z / 3.5) > -0.25;
                 this.cells[this.index(x, top, z)] = (byte) ((moss ? RockMaterial.MOSS : RockMaterial.GRASS).ordinal() + 1);
+                covered.add(new int[]{x, top, z, moss ? 1 : 0});
                 // Over an open side moss hangs a block or two down the face
                 for (int[] side : SIDES) {
                     int sx = x + side[0], sz = z + side[1];
@@ -210,6 +213,13 @@ public final class RockModel {
                     }
                 }
             }
+        }
+        // A layer of earth under the cover, as on the ground around: dirt under grass, packed mud under moss (where moss
+        // doesn't hang over the edge there)
+        for (int[] cell : covered) {
+            int under = this.index(cell[0], cell[1] - 1, cell[2]);
+            if (this.cells[under] == 0 || !RockMaterial.of(this.cells[under] - 1).isRock()) continue;
+            this.cells[under] = (byte) ((cell[3] == 1 ? RockMaterial.MUD : RockMaterial.SOIL).ordinal() + 1);
         }
     }
 

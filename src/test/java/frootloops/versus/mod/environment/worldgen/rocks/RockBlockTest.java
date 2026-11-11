@@ -50,6 +50,27 @@ class RockBlockTest {
     }
 
     @Test
+    void noCutAcrossTheTopIsSteeperThanAsked() {
+        double steepest = Math.toRadians(30);
+        int steep = 0;
+        for (long seed = 1; seed <= 20; seed++) {
+            double[] free = RockBlock.planes(new RockDice(seed), 4, 5, 3, 12, 0.6, 0.6, 0.12, false, 0);
+            double[] gentle = RockBlock.planes(new RockDice(seed), 4, 5, 3, 12, 0.6, 0.6, 0.12, false, 0, steepest);
+            assertEquals(free.length, gentle.length, "as many planes");
+            for (int i = 6 * 4; i < gentle.length; i += 4) {
+                double out = Math.hypot(free[i], free[i + 2]);
+                boolean tipped = free[i + 1] > 0 && Math.atan2(out, free[i + 1]) > steepest;
+                if (tipped) steep++;
+                if (gentle[i + 1] > 0) assertTrue(Math.atan2(Math.hypot(gentle[i], gentle[i + 2]), gentle[i + 1]) <= steepest + 1e-9, "seed " + seed + " cut " + i / 4);
+                // Facing the same way out; a cut no steeper than that unchanged
+                assertEquals(Math.atan2(free[i + 2], free[i]), Math.atan2(gentle[i + 2], gentle[i]), 1e-9, "seed " + seed + " cut " + i / 4);
+                if (!tipped) assertEquals(free[i + 3], gentle[i + 3], 1e-12, "seed " + seed + " cut " + i / 4);
+            }
+        }
+        assertTrue(steep > 20, "most cuts across a crown are steeper: " + steep);
+    }
+
+    @Test
     void aBentFaceLeansBackAboveItsLine() {
         // Below every bend's line (it lies 20 to 60% of the way up) the block is whole; near its top, bent faces stand back
         RockBlock straight = new RockBlock(0, 0, 0, RockBlock.planes(new RockDice(3), 3, 6, 3, 0, 0.7, 0, 0, false, 0), RockBlock.level(0), -1);

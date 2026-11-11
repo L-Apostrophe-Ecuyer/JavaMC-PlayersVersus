@@ -45,11 +45,16 @@ public final class RockGround {
 
     /** Whether the ground read at {@link #AROUND} is level enough for a rock: its heights within {@link #LEVEL} of each other. */
     public static boolean level(int[] heights) {
+        return level(heights, LEVEL);
+    }
+
+    /** Whether the ground read at {@link #AROUND} has its heights within {@code tolerance} of each other. */
+    public static boolean level(int[] heights, int tolerance) {
         int low = Integer.MAX_VALUE, high = Integer.MIN_VALUE;
         for (int height : heights) {
             low = Math.min(low, height);
             high = Math.max(high, height);
         }
-        return high - low <= LEVEL;
+        return high - low <= tolerance;
     }
 }

@@ -27,7 +27,7 @@ import java.util.Set;
  * shape's own, {@code cover} (0 to 1).
  *
  * <p>The {@code palette} names the blocks in place of gray stone's ({@link RockPalette#GRAY}): {@code shade},
- * {@code base}, {@code light}, {@code bright}, {@code soil}, {@code grass}, {@code moss}, {@code plants} (a list).
+ * {@code base}, {@code light}, {@code bright}, {@code soil}, {@code mud}, {@code grass}, {@code moss}, {@code plants} (a list).
  *
  * <p>A mistake is an {@link IllegalArgumentException} whose message starts with the field's path and a colon.
  */
@@ -36,7 +36,7 @@ public final class RockTemplate {
     private static final Set<String> KEYS = Set.of("bodies", "palette");
     private static final Set<String> BODY_KEYS = Set.of("shape", "count", "distance", "angle", "height", "radius", "cover");
     private static final Map<String, RockMaterial> PALETTE_BLOCKS = Map.of("shade", RockMaterial.SHADE, "base", RockMaterial.BASE, "light", RockMaterial.LIGHT,
-            "bright", RockMaterial.BRIGHT, "soil", RockMaterial.SOIL, "grass", RockMaterial.GRASS, "moss", RockMaterial.MOSS);
+            "bright", RockMaterial.BRIGHT, "soil", RockMaterial.SOIL, "mud", RockMaterial.MUD, "grass", RockMaterial.GRASS, "moss", RockMaterial.MOSS);
 
     private record Range(double least, double most) {
         double pick(long hash) {

@@ -127,21 +127,30 @@ public enum RockShape {
     /** The least half size across of a small block: the planes' soft maximum rounds a smaller one away to a speck. */
     private static final double SMALLEST = 1.3;
 
+    /** The steepest a boulder's top slopes, in radians: never a point. */
+    private static final double GENTLE = Math.toRadians(30);
+
+    /** How much wider than thick a pile's stone is at least: a flat stone, never a post on top. */
+    private static final double FLAT = 1.25;
+
     /** The spire's needle's column: none of a castle's. */
     private static final int NEEDLE_GROUP = 1_000_000;
 
-    /** A big angular block narrowing upward, one or two smaller ones leaning on it, a flat stone or two at its foot. */
+    /**
+     * A big angular block narrowing upward, its top no steeper than {@link #GENTLE}, one or two smaller ones leaning on it,
+     * a flat stone or two at its foot.
+     */
     private static void boulder(RockDice dice, Blocks rock, double height, double radius) {
         double yaw = dice.between(0, Math.PI), mr = radius * dice.between(0.8, 1.0), sink = dice.between(1, 2), mz = mr * dice.between(0.7, 0.9);
-        rock.stand(0, 0, height, sink, RockBlock.planes(dice, mr, (height + sink) / 2, mz, dice.whole(8, 12), dice.between(0.6, 0.72), 0.6, 0.12, false, dice.whole(1, 2)),
-                mr, mz, yaw, dice.angle(), dice.between(0, 0.12));
+        rock.stand(0, 0, height, sink, RockBlock.planes(dice, mr, (height + sink) / 2, mz, dice.whole(8, 12), dice.between(0.6, 0.72), 0.6, 0.12, false, dice.whole(1, 2),
+                GENTLE), mr, mz, yaw, dice.angle(), dice.between(0, 0.12));
         int more = dice.whole(1, 2);
         double turn = dice.angle();
         for (int index = 0; index < more; index++) {
             double angle = turn + index * dice.between(1.6, 2.6), size = dice.between(0.5, 0.72), away = mr * dice.between(0.95, 1.2);
             double tall = height * dice.between(0.55, 0.85), a = Math.max(SMALLEST, mr * size), c = Math.max(SMALLEST, a * dice.between(0.7, 0.95)), low = dice.between(1, 2);
             rock.stand(away * Math.cos(angle), away * Math.sin(angle), tall, low, RockBlock.planes(dice, a, (tall + low) / 2, c, dice.whole(6, 10), dice.between(0.6, 0.75), 0.5,
-                    0.15, false, 1), a, c, dice.between(0, Math.PI), angle + Math.PI, dice.between(0.12, 0.35));
+                    0.15, false, 1, GENTLE), a, c, dice.between(0, Math.PI), angle + Math.PI, dice.between(0.12, 0.35));
         }
         int plates = dice.whole(0, 2);
         for (int index = 0; index < plates; index++) {
@@ -154,7 +163,8 @@ public enum RockShape {
 
     /**
      * Flat angular stones in layers about {@code layer} thick, each layer's narrower than the one under it, lying over
-     * and against each other; none so small that it doesn't make whole blocks.
+     * and against each other; none so small that it doesn't make whole blocks, nor narrower than {@link #FLAT} times its
+     * thickness.
      */
     private static void pile(RockDice dice, Blocks rock, double height, double radius, double layer) {
         double y = -dice.between(0.6, 1.2);
@@ -171,7 +181,8 @@ public enum RockShape {
             for (int stone = 0; stone < count; stone++) {
                 double angle = turn + 2 * Math.PI * (stone + dice.between(-0.3, 0.3)) / count;
                 double away = count == 1 ? reach * dice.between(0, 0.25) : reach * dice.between(0.3, 0.6);
-                double a = Math.max(SMALLEST, reach * dice.between(0.45, 0.65)), c = Math.max(SMALLEST, a * dice.between(0.6, 0.9)), b = thick / 2 + 0.4;
+                double b = thick / 2 + 0.4, least = Math.max(SMALLEST, FLAT * b);
+                double a = Math.max(least, reach * dice.between(0.45, 0.65)), c = Math.max(least, a * dice.between(0.6, 0.9));
                 double x = away * Math.cos(angle), z = away * Math.sin(angle);
                 RockBlock flat = new RockBlock(x, mid, z, RockBlock.planes(dice, a, b, c, dice.whole(4, 8), dice.between(0.7, 0.82), 0.3, 0.08, false, 0),
                         RockBlock.level(dice.between(0, Math.PI)), -1);

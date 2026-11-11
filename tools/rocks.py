@@ -4,9 +4,9 @@
     python3 tools/rocks.py
 
 - Small rocks, feature type players-versus:rock (RockFeature), each within 16 blocks of its origin: a boulder, a pile, a
-  crag. Placed here and there in the middle biomes (rock/sparse, a selector of the three) and in clusters in meadows
-  (rock/meadow_cluster), on rock ground only (the players-versus:rock_ground filter); the rocky biomes place them with
-  placed features of their own (tools/transition-biomes.py).
+  crag. Placed in small clusters, rarely, in the middle biomes (rock/sparse, a selector of the three) and in meadows
+  (rock/meadow_cluster), on rock ground only (the players-versus:rock_ground filter); the rocky biomes place them
+  everywhere, on steeper ground too, with placed features of their own (tools/transition-biomes.py lists them).
 - Large rocks, structure type players-versus:rock_formation (RockFormationStructure), on the world's grid of the
   structure set rock_formations: a monolith, spires, towers, great boulders, a massif. They generate in the biomes of
   the tag #players-versus:has_structure/rock_formation: the rocky biomes (tools/transition-biomes.py adds them).
@@ -53,22 +53,35 @@ def bare(feature):
     return {"feature": feature, "placement": []}
 
 
-# Here and there in the middle biomes: a boulder mostly, now and then a pile or a crag. A random selector tries its
+# In the middle biomes' clusters: a boulder mostly, now and then a pile or a crag. A random selector tries its
 # choices in turn: a pile in 0.25, a crag in 0.75 x 0.2 = 0.15, a boulder in the rest
 SPARSE = {"type": "minecraft:random_selector", "default": bare(f"{MOD}:rock/boulder"),
           "features": [{"chance": 0.25, "feature": bare(f"{MOD}:rock/boulder_pile")}, {"chance": 0.2, "feature": bare(f"{MOD}:rock/crag")}]}
 
 
-def rock_placement(rarity, count=None, climate=True):
-    """Where a rock goes: in about one chunk of `rarity` (of those `count` times), on rock ground ({MOD}:rock_ground)."""
-    placement = [{"type": "minecraft:rarity_filter", "chance": rarity}]
-    if count:
-        placement.append({"type": "minecraft:count", "count": {"type": "minecraft:uniform", "min_inclusive": count[0], "max_inclusive": count[1]}})
+def uniform(low, high):
+    return {"type": "minecraft:uniform", "min_inclusive": low, "max_inclusive": high}
+
+
+# How far a cluster's rocks stand from its middle at most, along x and z; its middle stands this far inside its chunk
+# at least, so that every rock's origin is in the chunk: a rock writes up to 16 blocks from its origin, and a feature
+# only in the chunks around its own
+CLUSTER = 4
+
+
+def cluster_placement(rarity, count, climate=True):
+    """A cluster of `count` rocks in about one chunk of `rarity`: its middle on rock ground ({MOD}:rock_ground), in a
+    climate for rocks unless `climate` is false; each rock within CLUSTER blocks of it, on level ground too."""
     ground = {"type": f"{MOD}:rock_ground"}
     if not climate:
         ground["climate"] = False
-    placement += [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, ground, {"type": "minecraft:biome"}]
-    return placement
+    return [{"type": "minecraft:rarity_filter", "chance": rarity},
+            {"type": "minecraft:offset", "x": uniform(CLUSTER, 15 - CLUSTER), "y": 0, "z": uniform(CLUSTER, 15 - CLUSTER)},
+            {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, ground,
+            {"type": "minecraft:count", "count": uniform(*count)},
+            {"type": "minecraft:offset", "x": uniform(-CLUSTER, CLUSTER), "y": 0, "z": uniform(-CLUSTER, CLUSTER)},
+            {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, {"type": f"{MOD}:rock_ground", "climate": False},
+            {"type": "minecraft:biome"}]
 
 
 # The rocky jungle's: crags mostly (as karst stands among the trees); the rocky birch forest's: boulders, now and then a crag
@@ -78,25 +91,32 @@ BOULDERS = {"type": "minecraft:random_selector", "default": bare(f"{MOD}:rock/bo
             "features": [{"chance": 0.25, "feature": bare(f"{MOD}:rock/crag")}]}
 
 
-def rocky_placement(count):
-    """In a rocky biome: `count` places a chunk, kept on rock ground."""
-    return [{"type": "minecraft:count", "count": {"type": "minecraft:uniform", "min_inclusive": count[0], "max_inclusive": count[1]}},
-            {"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, {"type": f"{MOD}:rock_ground"},
-            {"type": "minecraft:biome"}]
+# How far the ground may rise and fall under a rocky biome's rock, over the 16 blocks read: its hillsides too (the
+# rock's foot goes on down to the ground where it falls away)
+ROCKY_LEVEL = 6
+
+
+def rocky_placement(count, level=ROCKY_LEVEL):
+    """In a rocky biome: `count` places a chunk, kept on ground as steep as `level`. The biome is the rocks' climate:
+    the rocky birch forest's is colder than the rocks' elsewhere, and none is in the 3D-noise terrain's."""
+    return [{"type": "minecraft:count", "count": uniform(*count)},
+            {"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"},
+            {"type": f"{MOD}:rock_ground", "climate": False, "level": level}, {"type": "minecraft:biome"}]
 
 
 # Placed features: their biomes list them in the step before trees (CustomWorldgen adds them to vanilla's and the mod's
 # middle biomes; the rocky biomes list theirs, tools/transition-biomes.py). A meadow's cluster skips the rocks' climate:
 # meadows are cool, high and little eroded
 PLACED = {
-    # Many: about 9 places in 10 are refused even there (the ground rises and falls), so many are tried; on a level
-    # stretch they stand close, a field of rocks
-    "rocky_plains": {"feature": f"{MOD}:rock/sparse", "placement": rocky_placement((2, 4))},
-    "rocky_jungle": {"feature": f"{MOD}:rock/craggy", "placement": rocky_placement((2, 5))},
-    "rocky_birch_forest": {"feature": f"{MOD}:rock/boulders", "placement": rocky_placement((4, 8))},
-    # Most of the middle biomes' ground is hilly: a place is tried in one chunk of 5, and kept on level ground
-    "sparse": {"feature": f"{MOD}:rock/sparse", "placement": rock_placement(5)},
-    "meadow_cluster": {"feature": f"{MOD}:rock/sparse", "placement": rock_placement(48, count=(2, 4), climate=False)},
+    # Everywhere: several places a chunk, on its hillsides too, about one rock a chunk kept (the jungle's ground is
+    # hillier: more places are tried; the birch forest's is hillier still: steeper ground too)
+    "rocky_plains": {"feature": f"{MOD}:rock/sparse", "placement": rocky_placement((3, 5))},
+    "rocky_jungle": {"feature": f"{MOD}:rock/craggy", "placement": rocky_placement((6, 9))},
+    "rocky_birch_forest": {"feature": f"{MOD}:rock/boulders", "placement": rocky_placement((6, 9), level=8)},
+    # Rare-ish, two to four together: most of the middle biomes' ground is hilly, and a cluster's middle is kept on
+    # level ground only
+    "sparse": {"feature": f"{MOD}:rock/sparse", "placement": cluster_placement(8, (2, 4))},
+    "meadow_cluster": {"feature": f"{MOD}:rock/sparse", "placement": cluster_placement(32, (2, 4), climate=False)},
 }
 
 

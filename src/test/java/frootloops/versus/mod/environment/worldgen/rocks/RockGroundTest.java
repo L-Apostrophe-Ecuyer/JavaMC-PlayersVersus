@@ -49,4 +49,15 @@ class RockGroundTest {
         heights[12] = 60;
         assertFalse(RockGround.level(heights), "four blocks down");
     }
+
+    @Test
+    void steeperGroundWhereAskedFor() {
+        int[] heights = new int[RockGround.AROUND.length];
+        Arrays.fill(heights, 64);
+        heights[9] = 70;
+        assertFalse(RockGround.level(heights), "six blocks up: too steep for a rock here and there");
+        assertTrue(RockGround.level(heights, 6), "a rocky biome's: rocks on its hillsides too");
+        heights[9] = 71;
+        assertFalse(RockGround.level(heights, 6), "seven blocks up");
+    }
 }
