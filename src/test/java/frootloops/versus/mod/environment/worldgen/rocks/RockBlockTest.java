@@ -103,4 +103,24 @@ class RockBlockTest {
         assertTrue(differs, "another seed, other draws");
         assertFalse(new RockDice(7).whole(3, 3) != 3, "whole(3, 3) is 3");
     }
+
+    @Test
+    void theCheapDistanceFallsOnTheSameSideAsTheExactOne() {
+        // Whatever value a decision turns on (0 at the face, more out in the foot's flare), the cheap distance taken around
+        // it puts every point on the same side of it as the exact distance does
+        RockDice dice = new RockDice(9);
+        int near = 0;
+        for (int index = 0; index < 20; index++) {
+            double tall = dice.between(4, 12);
+            RockBlock block = RockBlock.standing(0, 0, tall, 1, RockBlock.planes(dice, dice.between(1.5, 5), (tall + 1) / 2, dice.between(1.5, 5), dice.whole(4, 12),
+                    0.62, 0.7, 0.1, false, dice.whole(0, 3)), dice.angle(), dice.angle(), dice.between(0, 0.3), -1);
+            for (int point = 0; point < 2000; point++) {
+                double x = dice.between(-10, 10), y = dice.between(-4, 16), z = dice.between(-10, 10), around = dice.between(0, 6);
+                double exact = block.distance(x, y, z);
+                assertEquals(exact < around, block.distance(x, y, z, around) < around, "at " + x + " " + y + " " + z + " around " + around);
+                if (Math.abs(exact - around) < 0.5) near++;
+            }
+        }
+        assertTrue(near > 1000, "many points near the value: " + near);
+    }
 }

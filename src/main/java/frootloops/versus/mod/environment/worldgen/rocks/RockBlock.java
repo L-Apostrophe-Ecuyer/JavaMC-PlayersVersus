@@ -13,6 +13,11 @@ public final class RockBlock {
 
     /** How much the planes' soft maximum rounds an edge, in blocks. */
     static final double SOFT = 0.4;
+    /**
+     * Beyond this of a value a decision turns on, the planes' hard maximum falls on the same side of it as their soft one:
+     * the soft one is never less, and never more by over {@code SOFT * ln(planes)}, about 1.2 for a block's twenty.
+     */
+    static final double NEAR = 2;
 
     private final double cx, cy, cz, reach;
     private final double[] planes, orientation;
@@ -68,20 +73,24 @@ public final class RockBlock {
 
     /** About the distance to its surface in blocks, negative inside: the planes' soft maximum. */
     public double distance(double x, double y, double z) {
-        return this.distance(x, y, z, Double.MAX_VALUE);
+        return this.distance(x, y, z, 0, Double.MAX_VALUE);
     }
 
     /**
-     * As {@link #distance(double, double, double)} within {@code near} of its surface; further out or in, the planes' hard
-     * maximum, which is as good there and much cheaper.
+     * As {@link #distance(double, double, double)} for a decision that turns on the value {@code around}: where the planes'
+     * hard maximum lies further than {@link #NEAR} from it, that hard maximum, on the same side of it and much cheaper.
      */
-    double distance(double x, double y, double z, double near) {
+    double distance(double x, double y, double z, double around) {
+        return this.distance(x, y, z, around, NEAR);
+    }
+
+    private double distance(double x, double y, double z, double around, double near) {
         double px = x - this.cx, py = y - this.cy, pz = z - this.cz;
         double[] o = this.orientation, p = this.planes;
         double ux = o[0] * px + o[3] * py + o[6] * pz, uy = o[1] * px + o[4] * py + o[7] * pz, uz = o[2] * px + o[5] * py + o[8] * pz;
         double max = -Double.MAX_VALUE;
         for (int i = 0; i < p.length; i += 4) max = Math.max(max, p[i] * ux + p[i + 1] * uy + p[i + 2] * uz - p[i + 3]);
-        if (Math.abs(max) >= near) return max;
+        if (Math.abs(max - around) >= near) return max;
         double sum = 0;
         for (int i = 0; i < p.length; i += 4) sum += Math.exp((p[i] * ux + p[i + 1] * uy + p[i + 2] * uz - p[i + 3] - max) / SOFT);
         return max + SOFT * Math.log(sum);

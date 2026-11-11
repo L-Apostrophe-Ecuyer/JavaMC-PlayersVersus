@@ -11,9 +11,6 @@ import java.util.List;
  */
 final class RockVoxels {
 
-    /** Within this of a block's surface its distance is the soft maximum of its planes; further, the hard one does. */
-    private static final double NEAR = 2;
-
     final int minX, minY, minZ, sizeX, sizeY, sizeZ;
     private BitSet solid;
     private final BitSet seams;
@@ -77,13 +74,15 @@ final class RockVoxels {
             for (int z = this.minZ; z < this.minZ + this.sizeZ; z++) {
                 for (int y = this.minY; y < this.minY + this.sizeY; y++) {
                     double px = x + 0.5, py = y + 0.5, pz = z + 0.5;
+                    // The foot widens toward the ground, curving out: there a cell is rock further from the blocks
+                    double rise = Math.max(0, 1 - py / flareHeight), threshold = flare * rise * rise;
                     double joined = Double.MAX_VALUE, best = Double.MAX_VALUE, second = Double.MAX_VALUE;
                     int bestAt = -1, secondAt = -1;
                     for (int at = 0; at < blocks.size(); at++) {
                         RockBlock block = blocks.get(at);
                         double reach = block.reach();
                         if (Math.abs(px - block.cx()) > reach || Math.abs(py - block.cy()) > reach || Math.abs(pz - block.cz()) > reach) continue;
-                        double distance = block.distance(px, py, pz, NEAR);
+                        double distance = block.distance(px, py, pz, threshold);
                         if (distance < best) {
                             second = best;
                             secondAt = bestAt;
@@ -96,12 +95,10 @@ final class RockVoxels {
                         joined = joined == Double.MAX_VALUE ? distance : joined(joined, distance, blend);
                     }
                     if (joined == Double.MAX_VALUE) continue;
-                    // The foot widens toward the ground, curving out
-                    double rise = Math.max(0, 1 - py / flareHeight);
-                    if (joined - flare * rise * rise >= 0) continue;
                     int index = this.index(x, y, z);
-                    this.solid.set(index);
+                    // Marked on air too: a pit the clean-up fills on a drawn seam is part of it
                     if (secondAt >= 0 && second - best < 1 && drawn(blocks.get(bestAt), bestAt, blocks.get(secondAt), secondAt, seed)) this.seams.set(index);
+                    if (joined < threshold) this.solid.set(index);
                 }
             }
         }

@@ -80,6 +80,32 @@ class RockVoxelsTest {
     }
 
     @Test
+    void theFootIsWhereTheExactDistancePutsIt() {
+        // Blocks turned every way, their edges cut, their foot flared far out: by their edges the planes' soft maximum is
+        // well over their hard maximum, out where the flare ends as well as at their faces
+        RockDice dice = new RockDice(4);
+        int rock = 0;
+        for (int index = 0; index < 8; index++) {
+            double tall = dice.between(6, 12);
+            RockBlock block = RockBlock.standing(0, 0, tall, 1, RockBlock.planes(dice, dice.between(2, 4), (tall + 1) / 2, dice.between(2, 4), dice.whole(4, 10), 0.65, 0.5,
+                    0.1, false, 1), dice.angle(), dice.angle(), dice.between(0, 0.2), -1);
+            RockVoxels cells = RockVoxels.of(List.of(block), 0.6, 6, 9, 1);
+            for (int x = cells.minX; x < cells.minX + cells.sizeX; x++) {
+                for (int z = cells.minZ; z < cells.minZ + cells.sizeZ; z++) {
+                    for (int y = 0; y < cells.minY + cells.sizeY; y++) {
+                        double px = x + 0.5, py = y + 0.5, pz = z + 0.5, rise = Math.max(0, 1 - py / 9);
+                        boolean within = Math.abs(px - block.cx()) <= block.reach() && Math.abs(py - block.cy()) <= block.reach() && Math.abs(pz - block.cz()) <= block.reach();
+                        boolean exact = within && block.distance(px, py, pz) - 6 * rise * rise < 0;
+                        assertEquals(exact, cells.solid(x, y, z), "block " + index + " at " + x + " " + y + " " + z);
+                        if (exact) rock++;
+                    }
+                }
+            }
+        }
+        assertTrue(rock > 1000, "the blocks: " + rock);
+    }
+
+    @Test
     void seamsAreDrawnWholeAndNeverInsideAGroup() {
         // Two blocks pressed together, overlapping by half a block
         for (long seed = 1; seed <= 20; seed++) {
@@ -113,5 +139,20 @@ class RockVoxelsTest {
             }
         }
         assertTrue(drawn > 0 && left > 0, "some seams are drawn, some not: " + drawn + " drawn, " + left + " not");
+    }
+
+    @Test
+    void aPitTheCleanUpFillsTakesItsPartInTheSeam() {
+        // Four blocks round a column of cells none of them reaches: the first two half a block from it across x, the others
+        // 0.6 across z. Its lowest two cells, shut in on five sides, are filled by the clean-up; they lie on the first two's seam
+        int drawn = 0;
+        for (long seed = 1; seed <= 20; seed++) {
+            RockVoxels cells = RockVoxels.of(List.of(box(-3, 0.5, 3, 3.5, 6, 1, 1), box(4, 0.5, 3, 3.5, 6, 1, 2), box(0.5, -3.1, 3.5, 3, 6, 1, 3),
+                    box(0.5, 4.1, 3.5, 3, 6, 1, 4)), 0.01, 0, 1, seed);
+            assertTrue(cells.solid(0, 0, 0) && cells.solid(0, 1, 0), "the pit is filled");
+            assertEquals(cells.seam(0, 0, 0), cells.seam(0, 1, 0), "seed " + seed + ": drawn whole");
+            if (cells.seam(0, 0, 0)) drawn++;
+        }
+        assertTrue(drawn > 0 && drawn < 20, "in some seeds the seam is drawn, the filled pit with it: " + drawn + " of 20");
     }
 }
