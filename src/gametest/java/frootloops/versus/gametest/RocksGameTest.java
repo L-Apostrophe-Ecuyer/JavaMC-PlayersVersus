@@ -1,8 +1,11 @@
 package frootloops.versus.gametest;
 
 import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
+import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
 import frootloops.versus.mod.environment.worldgen.rocks.LevelRockCanvas;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFeature;
+import frootloops.versus.mod.environment.worldgen.rocks.RockFormationPiece;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFormationStructure;
 import frootloops.versus.mod.environment.worldgen.rocks.RockModel;
 import frootloops.versus.mod.environment.worldgen.rocks.RockPlan;
@@ -17,12 +20,16 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -124,6 +131,55 @@ public class RocksGameTest {
             if (isRock(whole[index])) rock++;
         }
         helper.assertTrue(rock >= 40, "the boulder is " + rock + " blocks of rock");
+        helper.succeed();
+    }
+
+    @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
+    public void aSavedFormationPieceDrawsTheSameRockWithinItsBox(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        // The second body of a formation stands away from its middle
+        RockTemplate template = RockTemplate.fromJson(JsonParser.parseString("{\"bodies\": [{\"shape\": \"boulder\", \"height\": 5, \"radius\": 3.5},"
+                + " {\"shape\": \"boulder\", \"height\": 6, \"radius\": 4, \"distance\": 7}]}").getAsJsonObject());
+        BlockPos middle = helper.absolutePos(new BlockPos(24, 1, 24));
+        RockFormationPiece piece = new RockFormationPiece(template, 11, 1, middle.getX(), middle.getZ(), middle.getY());
+        StructurePieceSerializationContext context = StructurePieceSerializationContext.fromLevel(level);
+        StructurePiece loaded = CustomWorldgen.ROCK_FORMATION_PIECE.load(context, piece.createTag(context));
+        BoundingBox box = piece.getBoundingBox();
+        helper.assertTrue(loaded instanceof RockFormationPiece && loaded.getBoundingBox().equals(box), "the piece loaded is " + loaded + " in " + loaded.getBoundingBox() + ", not in " + box);
+        int reach = 22, below = 4, above = 20;
+        BoundingBox everywhere = new BoundingBox(middle.getX() - reach, level.getMinY(), middle.getZ() - reach, middle.getX() + reach, level.getMaxY(), middle.getZ() + reach);
+        ChunkPos chunk = ChunkPos.containing(middle);
+        BlockState[] before = save(level, middle, reach, below, above);
+        piece.postProcess(level, level.structureManager(), level.getChunkSource().getGenerator(), RandomSource.create(1), everywhere, chunk, middle);
+        BlockState[] drawn = save(level, middle, reach, below, above);
+        restore(level, middle, reach, below, above, before);
+        loaded.postProcess(level, level.structureManager(), level.getChunkSource().getGenerator(), RandomSource.create(2), everywhere, chunk, middle);
+        BlockState[] again = save(level, middle, reach, below, above);
+        int rock = 0, outside = 0, side = 2 * reach + 1, height = below + above + 1;
+        for (int index = 0; index < drawn.length; index++) {
+            int dx = index / (side * height) - reach, dz = index / height % side - reach, dy = index % height - below;
+            helper.assertTrue(drawn[index] == again[index], "at " + dx + " " + dy + " " + dz + " from the middle: " + drawn[index] + " drawn, " + again[index] + " drawn again");
+            if (drawn[index] == before[index]) continue;
+            if (isRock(drawn[index])) rock++;
+            if (!box.isInside(middle.offset(dx, dy, dz))) outside++;
+        }
+        helper.assertTrue(rock >= 30, "the piece drew " + rock + " blocks of rock");
+        helper.assertTrue(outside == 0, outside + " blocks drawn outside the piece's box " + box);
+        helper.succeed();
+    }
+
+    @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
+    public void badRockDataFailsToLoadSayingWhatIsWrong(GameTestHelper helper) {
+        String[][] cases = {
+                {"{\"bodies\": [{\"shape\": \"boulder\"}], \"palette\": {\"base\": \"minecraft:no_such_stone\"}}", "minecraft:no_such_stone"},
+                {"{\"bodies\": [{\"shape\": \"boulder\", \"height\": -3}]}", "bodies[0].height"},
+                {"{\"bodies\": [{\"shape\": \"massif\"}]}", "reach"},
+        };
+        for (String[] bad : cases) {
+            var result = RockFeature.CODEC.codec().parse(JsonOps.INSTANCE, JsonParser.parseString("{\"rock\": " + bad[0] + "}"));
+            String message = result.error().map(error -> error.message()).orElse("");
+            helper.assertTrue(result.isError() && message.contains(bad[1]), bad[0] + " loaded as " + result + ": the error doesn't name " + bad[1]);
+        }
         helper.succeed();
     }
 

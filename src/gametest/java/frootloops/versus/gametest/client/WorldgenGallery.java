@@ -1,6 +1,10 @@
 package frootloops.versus.gametest.client;
 
+import frootloops.versus.mod.environment.worldgen.debug.RockCommand;
 import frootloops.versus.mod.environment.worldgen.debug.WorldgenCensus;
+import frootloops.versus.mod.environment.worldgen.rocks.RockModel;
+import frootloops.versus.mod.environment.worldgen.rocks.RockPlan;
+import frootloops.versus.mod.environment.worldgen.rocks.RockTemplate;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -25,6 +29,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -38,6 +44,9 @@ import java.util.Locale;
  *   <li>{@code biome:<id>}: the nearest patch of the biome: one view from the air, one from the ground;</li>
  *   <li>{@code at:<x>,<z>[,<yaw>[,<pitch>[,<height above ground>]]]}: one view from there;</li>
  *   <li>{@code cmd:<command>}: runs a command (without the slash), as the server;</li>
+ *   <li>{@code stage:<biome id>}: the rocks that follow go in the nearest patch of the biome, one beside the other;</li>
+ *   <li>{@code rock:<id>[,<seed>]}: places a rock feature's or formation's rock (as {@code /pvwg rock} does) on dry,
+ *   open ground past the last one, then looks at it from the south-west and the north-east, and from above;</li>
  *   <li>{@code name:<text>}: the name of the screenshots that follow (they are numbered).</li>
  * </ul>
  * {@code -Dpv.gallery.seed} (default 8675309), {@code -Dpv.gallery.preset} (default {@code players-versus:better_world}),
@@ -54,6 +63,9 @@ public class WorldgenGallery implements FabricClientGameTest {
     private int width = 1280, height = 720;
     private String name = "shot";
     private int count;
+    /** Where the rocks go (none before a stage), and those placed there: x, z and how far each reaches. */
+    private BlockPos stage;
+    private final List<int[]> rocks = new ArrayList<>();
 
     @Override
     public void runTest(ClientGameTestContext context) {
@@ -111,6 +123,8 @@ public class WorldgenGallery implements FabricClientGameTest {
                     case "biome" -> this.biome(context, world, argument.contains(":") ? argument : "minecraft:" + argument);
                     case "at" -> this.at(context, world, argument);
                     case "cmd" -> world.getServer().runCommand(argument);
+                    case "stage" -> this.stage(world, argument.contains(":") ? argument : "minecraft:" + argument);
+                    case "rock" -> this.rock(context, world, argument);
                     case "name" -> {
                         this.name = argument;
                         this.count = 0;
@@ -138,6 +152,127 @@ public class WorldgenGallery implements FabricClientGameTest {
         BlockPos stand = world.getServer().computeOnServer(server -> clearest(server.overworld(), middle));
         this.view(context, world, stand.getX(), stand.getY() + 3, stand.getZ(), 180, 4);
         this.view(context, world, stand.getX(), stand.getY() + 3, stand.getZ(), -60, 4);
+    }
+
+    private void stage(TestSingleplayerContext world, String id) {
+        BlockPos middle = world.getServer().computeOnServer(server ->
+                WorldgenCensus.find(server.overworld(), id, SEARCH_RANGE, LOGGER::info));
+        if (middle == null) throw new IllegalStateException("No " + id + " within " + SEARCH_RANGE + " blocks for the rocks");
+        this.stage = middle;
+        this.rocks.clear();
+    }
+
+    /**
+     * A rock on the nearest dry, open and gentle ground to the stage that leaves room for the rocks already placed; then
+     * three views, each far enough out for the whole rock (its own rock, not its bounds): from the south-west and the
+     * north-east a little above it, and from the south-east, higher.
+     */
+    private void rock(ClientGameTestContext context, TestSingleplayerContext world, String argument) {
+        if (this.stage == null) throw new IllegalStateException("rock:" + argument + " before any stage:");
+        String[] parts = argument.split(",");
+        Identifier id = Identifier.parse(parts[0].trim());
+        long seed = parts.length > 1 ? Long.parseLong(parts[1].trim()) : 1;
+        // How far the plan's rock reaches from its middle along x or z, and how tall it stands, from its models
+        int[] size = world.getServer().computeOnServer(server -> {
+            RockTemplate template = RockCommand.template(server.registryAccess(), id);
+            return template == null ? null : size(template.plan(seed));
+        });
+        if (size == null) throw new IllegalArgumentException("No rock feature or rock formation " + id);
+        int extent = size[0], top = size[1];
+        BlockPos spot = world.getServer().computeOnServer(server -> this.spot(server.overworld(), extent));
+        int x = spot.getX(), z = spot.getZ();
+        // The ground before the rock covers it
+        int ground = this.ground(world, x, z);
+        world.getServer().runCommand(String.format(Locale.ROOT, "execute positioned %d 0 %d run pvwg rock %s %d", x, z, id, seed));
+        this.rocks.add(new int[]{x, z, extent});
+        this.name = id.getPath().replace('/', '_') + "_" + seed;
+        this.count = 0;
+        double targetY = ground + 0.4 * top;
+        double distance = Math.max(1.6 * extent, 1.15 * top) + 6;
+        double[][] views = {{135, 10, 1}, {-45, 10, 1}, {60, 28, 1.1}};
+        for (double[] view : views) {
+            double around = Math.toRadians(view[0]), out = distance * view[2];
+            int cameraX = (int) Math.round(x + out * Math.cos(around)), cameraZ = (int) Math.round(z + out * Math.sin(around));
+            double cameraY = Math.max(targetY + out * Math.tan(Math.toRadians(view[1])), this.ground(world, cameraX, cameraZ) + 3);
+            float yaw = (float) Math.toDegrees(Math.atan2(Math.cos(around), -Math.sin(around)));
+            float pitch = (float) Math.toDegrees(Math.atan2(cameraY - targetY, out));
+            this.view(context, world, cameraX, (int) Math.round(cameraY), cameraZ, yaw, pitch);
+        }
+    }
+
+    /** How far a plan's rock reaches from its middle along x or z (its rock, not its skirt), and its highest rock. */
+    private static int[] size(RockPlan plan) {
+        int extent = 2, top = 2;
+        for (RockPlan.Body body : plan.bodies()) {
+            RockModel model = RockModel.build(body);
+            int[] bounds = RockModel.bounds(body);
+            for (int x = bounds[0]; x <= bounds[3]; x++) {
+                for (int z = bounds[2]; z <= bounds[5]; z++) {
+                    if (model.lowest(x, z) == RockModel.NONE) continue;
+                    extent = Math.max(extent, Math.max(Math.abs(body.dx() + x), Math.abs(body.dz() + z)));
+                    top = Math.max(top, model.highest(x, z));
+                }
+            }
+        }
+        return new int[]{extent, top};
+    }
+
+    /**
+     * The nearest spot to the stage, on a spiral of 12-block steps, where a rock reaching this far leaves room for those
+     * already placed and stands on dry, open, gentle ground; the stage itself if there is none within 300 blocks.
+     */
+    private BlockPos spot(ServerLevel level, int extent) {
+        int x = this.stage.getX(), z = this.stage.getZ(), dx = 1, dz = 0, leg = 1, moved = 0, turns = 0;
+        for (int step = 0; step < 2500; step++) {
+            if (this.roomAt(x, z, extent) && open(level, x, z, extent)) return new BlockPos(x, 0, z);
+            // A square spiral, its legs 1, 1, 2, 2, 3, 3... steps long
+            x += 12 * dx;
+            z += 12 * dz;
+            if (++moved == leg) {
+                moved = 0;
+                int turn = dx;
+                dx = -dz;
+                dz = turn;
+                if (++turns % 2 == 0) leg++;
+            }
+        }
+        LOGGER.warn("[gallery] no dry, open ground near the stage for a rock reaching {}: placing it at the stage", extent);
+        return this.stage;
+    }
+
+    private boolean roomAt(int x, int z, int extent) {
+        for (int[] rock : this.rocks) {
+            if (Math.max(Math.abs(rock[0] - x), Math.abs(rock[1] - z)) < rock[2] + extent + 12) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Whether the ground the rock covers is above the sea and dry, and gentle for its size, and the ground around it,
+     * out to a little beyond, has few trees (water there is fine).
+     */
+    private static boolean open(ServerLevel level, int x, int z, int extent) {
+        int out = extent + 4, step = Math.max(2, out / 3), low = Integer.MAX_VALUE, high = Integer.MIN_VALUE, samples = 0, trees = 0;
+        for (int dx = -out; dx <= out; dx += step) {
+            for (int dz = -out; dz <= out; dz += step) {
+                int sampleX = x + dx, sampleZ = z + dz;
+                boolean under = Math.max(Math.abs(dx), Math.abs(dz)) <= extent;
+                level.getChunk(sampleX >> 4, sampleZ >> 4);
+                int floor = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sampleX, sampleZ);
+                if (floor <= level.getSeaLevel() + 1 || !level.getFluidState(new BlockPos(sampleX, floor - 1, sampleZ)).isEmpty()) {
+                    if (under) return false;
+                    continue;
+                }
+                samples++;
+                // Leaves overhead: a tree
+                if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, sampleX, sampleZ) > floor) trees++;
+                if (under) {
+                    low = Math.min(low, floor);
+                    high = Math.max(high, floor);
+                }
+            }
+        }
+        return trees <= samples / 8 && high - low <= 3 + extent / 2;
     }
 
     private void at(ClientGameTestContext context, TestSingleplayerContext world, String argument) {

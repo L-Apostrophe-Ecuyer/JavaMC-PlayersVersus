@@ -48,8 +48,9 @@ public final class RockCommand {
         return Math.max(canvas.placed(), 1);
     }
 
+    /** The rock template of a rock feature or a rock formation, or null when the id is neither. */
     @Nullable
-    static RockTemplate template(RegistryAccess registries, Identifier id) {
+    public static RockTemplate template(RegistryAccess registries, Identifier id) {
         if (registries.lookupOrThrow(Registries.FEATURE).getValue(id) instanceof RockFeature feature) return feature.rock();
         if (registries.lookupOrThrow(Registries.STRUCTURE).getValue(id) instanceof RockFormationStructure formation) return formation.rock();
         return null;
