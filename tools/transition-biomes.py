@@ -25,6 +25,7 @@ MOD = "players-versus"
 DATA = os.path.join("src", "main", "resources", "data")
 ASSETS = os.path.join("src", "main", "resources", "assets")
 CARVERS = ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"]
+LOCAL_MODIFICATIONS = 2
 SPAWNS = "minecraft:gameplay/natural_mob_spawns"
 VEGETATION = 9
 UNDERGROUND_ORES = 6
@@ -127,6 +128,44 @@ BIOMES = {
 }
 
 
+# The rocky biomes: each between two others, its rocks placed in the step before trees (tools/rocks.py writes them)
+BIOMES.update({
+    "rocky_plains": {
+        "neighbours": ["minecraft:savanna", "minecraft:plains"],
+        # Drier than the Tuscan grove (0.95, 0.25): the savanna's gold through the plains' green
+        "temperature": 1.2, "downfall": 0.2, "has_precipitation": True,
+        "trees": selector("minecraft:oak_checked", ("minecraft:acacia_checked", 0.35), ("minecraft:fancy_oak_checked", 0.1)),
+        "tree_placement": dict(ratio=2, offset=-0.2),
+        "rocks": [f"{MOD}:rock/rocky_plains"],
+        "vegetation": ["minecraft:glow_lichen", "minecraft:patch_tall_grass", f"{MOD}:trees_rocky_plains", "minecraft:flower_plains",
+                       "minecraft:patch_grass_savanna", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal",
+                       "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water"],
+    },
+    "rocky_jungle": {
+        "neighbours": ["minecraft:sparse_jungle", "minecraft:jungle"],
+        # The sparse jungle's (0.95, 0.8) and the jungle's (0.95, 0.9)
+        "temperature": 0.95, "downfall": 0.85, "has_precipitation": True,
+        "trees": selector("minecraft:jungle_bush", ("minecraft:jungle_tree", 0.35), ("minecraft:oak_checked", 0.1), ("minecraft:mega_jungle_tree_checked", 0.05)),
+        "tree_placement": dict(ratio=8, offset=0.3),
+        "rocks": [f"{MOD}:rock/rocky_jungle"],
+        "vegetation": ["minecraft:glow_lichen", f"{MOD}:trees_rocky_jungle", "minecraft:flower_warm", "minecraft:patch_grass_jungle",
+                       "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane",
+                       "minecraft:patch_firefly_bush_near_water", "minecraft:vines", "minecraft:patch_melon_sparse"],
+    },
+    "rocky_birch_forest": {
+        "neighbours": ["minecraft:old_growth_birch_forest", "minecraft:taiga"],
+        # Between the old growth birch forest's (0.6, 0.6) and the taiga's (0.25, 0.8)
+        "temperature": 0.45, "downfall": 0.7, "has_precipitation": True,
+        "trees": selector("minecraft:super_birch_bees_0002", ("minecraft:spruce_checked", 0.35), ("minecraft:birch_checked", 0.15), ("minecraft:pine_checked", 0.08)),
+        "tree_placement": dict(ratio=10, offset=0.4),
+        "rocks": [f"{MOD}:rock/rocky_birch_forest"],
+        "vegetation": ["minecraft:glow_lichen", "minecraft:patch_large_fern", "minecraft:wildflowers_birch_forest", f"{MOD}:trees_rocky_birch_forest",
+                       "minecraft:flower_default", "minecraft:patch_grass_taiga_2", "minecraft:brown_mushroom_taiga", "minecraft:red_mushroom_taiga",
+                       "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water", "minecraft:patch_berry_common"],
+    },
+})
+
+
 def merged_creatures(neighbours):
     """Both neighbours' animals: each kind once, with the larger of its weights."""
     creatures = {}
@@ -151,6 +190,8 @@ def make(vanilla, name, spec):
     made["effects"] = effects
     made["carvers"] = CARVERS
     made["features"][VEGETATION] = spec["vegetation"]
+    # Rocks after what the main neighbour has in their step (an amethyst geode), before the trees
+    made["features"][LOCAL_MODIFICATIONS] = main["features"][LOCAL_MODIFICATIONS] + spec.get("rocks", [])
     for extra_name, feature, placed in spec.get("underground_extra", []):
         write_json(f"{MOD}/worldgen/feature/{extra_name}.json", feature)
         write_json(f"{MOD}/worldgen/placed_feature/{extra_name}.json", placed)
@@ -183,16 +224,24 @@ def tags():
     every = [f"{MOD}:{name}" for name in BIOMES]
     add_to_tag("minecraft/tags/worldgen/biome/is_overworld.json", *every)
     add_to_tag("minecraft/tags/worldgen/biome/has_structure/mineshaft.json", *every)
-    add_to_tag("minecraft/tags/worldgen/biome/is_forest.json", f"{MOD}:warm_oak_forest", f"{MOD}:dark_jungle_forest", f"{MOD}:humid_oak_forest")
+    add_to_tag("minecraft/tags/worldgen/biome/is_forest.json", f"{MOD}:warm_oak_forest", f"{MOD}:dark_jungle_forest", f"{MOD}:humid_oak_forest",
+               f"{MOD}:rocky_birch_forest")
+    add_to_tag("minecraft/tags/worldgen/biome/is_jungle.json", f"{MOD}:rocky_jungle")
+    # The large rock formations stand in the rocky biomes only
+    add_to_tag(f"{MOD}/tags/worldgen/biome/has_structure/rock_formation.json", f"{MOD}:rocky_plains", f"{MOD}:rocky_jungle", f"{MOD}:rocky_birch_forest")
     # A Tuscan countryside has its villages
     add_to_tag("minecraft/tags/worldgen/biome/has_structure/village_plains.json", f"{MOD}:tuscan_grove")
 
 
 NAMES = {
     "en": {"biome.players-versus.tuscan_grove": "Tuscan Grove", "biome.players-versus.warm_oak_forest": "Warm Oak Forest",
-           "biome.players-versus.dark_jungle_forest": "Dark Jungle Forest", "biome.players-versus.humid_oak_forest": "Humid Oak Forest"},
+           "biome.players-versus.dark_jungle_forest": "Dark Jungle Forest", "biome.players-versus.humid_oak_forest": "Humid Oak Forest",
+           "biome.players-versus.rocky_plains": "Rocky Plains", "biome.players-versus.rocky_jungle": "Rocky Jungle",
+           "biome.players-versus.rocky_birch_forest": "Rocky Birch Forest"},
     "fr": {"biome.players-versus.tuscan_grove": "Bosquet toscan", "biome.players-versus.warm_oak_forest": "Chênaie chaude",
-           "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre", "biome.players-versus.humid_oak_forest": "Chênaie humide"},
+           "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre", "biome.players-versus.humid_oak_forest": "Chênaie humide",
+           "biome.players-versus.rocky_plains": "Plaines rocheuses", "biome.players-versus.rocky_jungle": "Jungle rocheuse",
+           "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse"},
 }
 
 

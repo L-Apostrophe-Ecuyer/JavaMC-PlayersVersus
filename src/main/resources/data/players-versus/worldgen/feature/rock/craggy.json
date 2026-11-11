@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "players-versus:rock/boulder",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.5,
+      "feature": {
+        "feature": "players-versus:rock/crag",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.2,
+      "feature": {
+        "feature": "players-versus:rock/boulder_pile",
+        "placement": []
+      }
+    }
+  ]
+}

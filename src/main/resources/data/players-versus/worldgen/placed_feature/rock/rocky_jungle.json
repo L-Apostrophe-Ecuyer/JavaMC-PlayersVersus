@@ -1,0 +1,26 @@
+{
+  "feature": "players-versus:rock/craggy",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:uniform",
+        "min_inclusive": 2,
+        "max_inclusive": 5
+      }
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "players-versus:rock_ground"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

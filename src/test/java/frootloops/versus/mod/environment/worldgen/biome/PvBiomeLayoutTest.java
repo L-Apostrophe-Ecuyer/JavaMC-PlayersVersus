@@ -187,8 +187,10 @@ class PvBiomeLayoutTest {
             Long coldPoint = birch ? either(inside(h.temperature(), -0.375F, cold), inside(h.temperature(), -1.0F, Math.min(cold, -0.55F)))
                     : inside(h.temperature(), -1.0F, cold);
             Long coolPoint = inside(h.temperature(), cold, PvBiomeLayout.DAPPLED_COOL);
+            // The cold old growth birch on level ground (erosion 0.05 to 0.3) is the rocky birch forest
+            boolean level = erosion >= Climate.quantizeCoord(PvBiomeLayout.ROCKY_EROSION_MIN) && erosion < Climate.quantizeCoord(0.3F);
             ResourceKey<Biome> coldTarget = birch ? CustomOverworldBiomes.DAPPLED_TAIGA
-                    : dark ? CustomOverworldBiomes.DARK_TAIGA_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
+                    : dark ? CustomOverworldBiomes.DARK_TAIGA_FOREST : level ? CustomOverworldBiomes.ROCKY_BIRCH_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
             ResourceKey<Biome> coolTarget = birch ? CustomOverworldBiomes.SPARSE_DAPPLED_FOREST
                     : dark ? CustomOverworldBiomes.DARK_TAIGA_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
             String name = birch ? "birch forest" : dark ? "dark forest" : "old growth birch forest";
@@ -230,9 +232,11 @@ class PvBiomeLayoutTest {
             if (!savanna && !jungle) continue;
             assertTrue(h.temperature().min() == Climate.quantizeCoord(0.2F), () -> biome + " no longer starts at 0.2: " + h);
             boolean wet = h.humidity().min() >= Climate.quantizeCoord(PvBiomeLayout.WARM_HUMIDITY_SPLIT);
-            ResourceKey<Biome> expected = savanna ? CustomOverworldBiomes.TUSCAN_GROVE
-                    : wet || biome == Biomes.BAMBOO_JUNGLE ? CustomOverworldBiomes.DARK_JUNGLE_FOREST : CustomOverworldBiomes.WARM_OAK_FOREST;
             long erosion = Math.max(mid(h.erosion()), ABOVE_MOUNTAINS);
+            // The level stretches of a savanna's cool edge are rocky plains
+            boolean level = erosion >= Climate.quantizeCoord(PvBiomeLayout.ROCKY_EROSION_MIN);
+            ResourceKey<Biome> expected = savanna ? (level ? CustomOverworldBiomes.ROCKY_PLAINS : CustomOverworldBiomes.TUSCAN_GROVE)
+                    : wet || biome == Biomes.BAMBOO_JUNGLE ? CustomOverworldBiomes.DARK_JUNGLE_FOREST : CustomOverworldBiomes.WARM_OAK_FOREST;
             Climate.TargetPoint band = point(inBand, mid(h.humidity()), mid(h.continentalness()), erosion, mid(h.weirdness()));
             Climate.TargetPoint core = point(beyond, mid(h.humidity()), mid(h.continentalness()), erosion, mid(h.weirdness()));
             assertEquals(expected, layout.findValue(band), biome.identifier().getPath() + " band at " + band);
@@ -243,6 +247,86 @@ class PvBiomeLayoutTest {
         for (ResourceKey<Biome> target : List.of(CustomOverworldBiomes.TUSCAN_GROVE, CustomOverworldBiomes.WARM_OAK_FOREST, CustomOverworldBiomes.DARK_JUNGLE_FOREST)) {
             assertTrue(checked.keySet().stream().anyMatch(key -> key.endsWith(target.identifier().getPath())), "nothing turns into " + target);
         }
+    }
+
+    /** The level stretches (erosion 0.05 and more) of the savannas' cool edge are rocky plains; the Tuscan grove keeps the rest. */
+    @Test
+    void rockyPlainsTakeTheLevelCoolEdgeOfSavannas() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long band = Climate.quantizeCoord(0.25F), beyond = Climate.quantizeCoord(0.4F);
+        int rocky = 0, grove = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || (biome != Biomes.SAVANNA && biome != Biomes.SAVANNA_PLATEAU)) continue;
+            Long level = inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 1.0F);
+            Long hilly = inside(h.erosion(), Climate.unquantizeCoord(ABOVE_MOUNTAINS), PvBiomeLayout.ROCKY_EROSION_MIN);
+            if (level != null) {
+                assertEquals(CustomOverworldBiomes.ROCKY_PLAINS, layout.findValue(point(band, mid(h.humidity()), mid(h.continentalness()), level, mid(h.weirdness()))),
+                        "the level cool edge of " + h);
+                assertEquals(biome, layout.findValue(point(beyond, mid(h.humidity()), mid(h.continentalness()), level, mid(h.weirdness()))), "the savanna beyond " + h);
+                rocky++;
+            }
+            if (hilly != null) {
+                assertEquals(CustomOverworldBiomes.TUSCAN_GROVE, layout.findValue(point(band, mid(h.humidity()), mid(h.continentalness()), hilly, mid(h.weirdness()))),
+                        "the hilly cool edge of " + h);
+                grove++;
+            }
+        }
+        assertTrue(rocky > 0 && grove > 0, "both: " + rocky + " rocky, " + grove + " grove");
+    }
+
+    /**
+     * Just warmer than the warm band (temperature 0.3 to 0.36), the level jungle is rocky: out of the 3D-noise terrain's
+     * climate (humidity 0 to 0.3 with erosion 0.3 to 0.6).
+     */
+    @Test
+    void rockyJungleLiesBetweenTheWarmBandAndTheJungle() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long rockyBand = Climate.quantizeCoord(0.33F), beyond = Climate.quantizeCoord(0.45F);
+        int rocky = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            boolean jungle = biome == Biomes.JUNGLE || biome == Biomes.SPARSE_JUNGLE || biome == Biomes.BAMBOO_JUNGLE;
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || !jungle) continue;
+            long humidity = mid(h.humidity());
+            boolean dry = humidity < Climate.quantizeCoord(0.3F);
+            Long level = dry ? either(inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 0.3F), inside(h.erosion(), 0.6F, 1.0F))
+                    : inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 1.0F);
+            if (level == null) continue;
+            assertEquals(CustomOverworldBiomes.ROCKY_JUNGLE, layout.findValue(point(rockyBand, humidity, mid(h.continentalness()), level, mid(h.weirdness()))),
+                    "the level jungle just past the warm band, " + h);
+            assertEquals(biome, layout.findValue(point(beyond, humidity, mid(h.continentalness()), level, mid(h.weirdness()))), "the jungle beyond " + h);
+            if (dry) {
+                Long noise = inside(h.erosion(), 0.3F, 0.6F);
+                if (noise != null) assertFalse(layout.findValue(point(rockyBand, humidity, mid(h.continentalness()), noise, mid(h.weirdness())))
+                        == CustomOverworldBiomes.ROCKY_JUNGLE, "no rocky jungle in the 3D-noise climate, " + h);
+            }
+            rocky++;
+        }
+        assertTrue(rocky > 0, "no jungle slice turns rocky");
+    }
+
+    /** The cold side of old growth birch forests (temperature below -0.075), level (erosion 0.05 to 0.3), is the rocky birch forest. */
+    @Test
+    void rockyBirchForestTakesTheColdLevelOldGrowthBirch() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long cold = Climate.quantizeCoord(-0.11F), cool = Climate.quantizeCoord(-0.03F);
+        int rocky = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || entry.getSecond() != Biomes.OLD_GROWTH_BIRCH_FOREST) continue;
+            Long level = inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 0.3F);
+            if (level == null) continue;
+            long weirdness = Math.max(mid(h.weirdness()), Climate.quantizeCoord(PvBiomeLayout.DAPPLED_WEIRDNESS) + EDGE);
+            assertEquals(CustomOverworldBiomes.ROCKY_BIRCH_FOREST, layout.findValue(point(cold, mid(h.humidity()), mid(h.continentalness()), level, weirdness)),
+                    "the cold level old growth birch of " + h);
+            assertFalse(layout.findValue(point(cool, mid(h.humidity()), mid(h.continentalness()), level, weirdness)) == CustomOverworldBiomes.ROCKY_BIRCH_FOREST,
+                    "only the cold side, " + h);
+            rocky++;
+        }
+        assertTrue(rocky > 0, "no old growth birch turns rocky");
     }
 
     /** Every swamp has a rim of humid oak forest where its erosion begins, up to {@link PvBiomeLayout#SWAMP_RIM_MAX}. */

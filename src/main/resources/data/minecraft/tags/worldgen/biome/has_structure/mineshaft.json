@@ -22,6 +22,9 @@
     "players-versus:warm_oak_forest",
     "players-versus:dark_jungle_forest",
     "players-versus:humid_oak_forest",
-    "players-versus:cold_swamp"
+    "players-versus:cold_swamp",
+    "players-versus:rocky_plains",
+    "players-versus:rocky_jungle",
+    "players-versus:rocky_birch_forest"
   ]
 }

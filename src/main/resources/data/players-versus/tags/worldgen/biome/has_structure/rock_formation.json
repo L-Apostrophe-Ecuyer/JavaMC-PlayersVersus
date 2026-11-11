@@ -1,4 +1,8 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    "players-versus:rocky_plains",
+    "players-versus:rocky_jungle",
+    "players-versus:rocky_birch_forest"
+  ]
 }

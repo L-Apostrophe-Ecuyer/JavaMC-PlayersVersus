@@ -338,5 +338,9 @@
   "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre",
   "biome.players-versus.humid_oak_forest": "Chênaie humide",
 
-  "biome.players-versus.cold_swamp": "Marais froid"
+  "biome.players-versus.cold_swamp": "Marais froid",
+
+  "biome.players-versus.rocky_plains": "Plaines rocheuses",
+  "biome.players-versus.rocky_jungle": "Jungle rocheuse",
+  "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse"
 }

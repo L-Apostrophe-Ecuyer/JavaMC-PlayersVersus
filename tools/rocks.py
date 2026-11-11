@@ -9,7 +9,7 @@
   placed features of their own (tools/transition-biomes.py).
 - Large rocks, structure type players-versus:rock_formation (RockFormationStructure), on the world's grid of the
   structure set rock_formations: a monolith, spires, towers, great boulders, a massif. They generate in the biomes of
-  the tag #players-versus:has_structure/rock_formation, empty until their looks are approved.
+  the tag #players-versus:has_structure/rock_formation: the rocky biomes (tools/transition-biomes.py adds them).
 
 A rock is a template (RockTemplate): its bodies, each a shape (RockShape) with sizes the seed picks from, and where
 around the formation's middle it stands.
@@ -71,9 +71,29 @@ def rock_placement(rarity, count=None, climate=True):
     return placement
 
 
+# The rocky jungle's: crags mostly (as karst stands among the trees); the rocky birch forest's: boulders, now and then a crag
+CRAGGY = {"type": "minecraft:random_selector", "default": bare(f"{MOD}:rock/boulder"),
+          "features": [{"chance": 0.5, "feature": bare(f"{MOD}:rock/crag")}, {"chance": 0.2, "feature": bare(f"{MOD}:rock/boulder_pile")}]}
+BOULDERS = {"type": "minecraft:random_selector", "default": bare(f"{MOD}:rock/boulder"),
+            "features": [{"chance": 0.25, "feature": bare(f"{MOD}:rock/crag")}]}
+
+
+def rocky_placement(count):
+    """In a rocky biome: `count` places a chunk, kept on rock ground."""
+    return [{"type": "minecraft:count", "count": {"type": "minecraft:uniform", "min_inclusive": count[0], "max_inclusive": count[1]}},
+            {"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, {"type": f"{MOD}:rock_ground"},
+            {"type": "minecraft:biome"}]
+
+
 # Placed features: their biomes list them in the step before trees (CustomWorldgen adds them to vanilla's and the mod's
-# middle biomes). A meadow's cluster skips the rocks' climate: meadows are cool, high and little eroded
+# middle biomes; the rocky biomes list theirs, tools/transition-biomes.py). A meadow's cluster skips the rocks' climate:
+# meadows are cool, high and little eroded
 PLACED = {
+    # Many: about 9 places in 10 are refused even there (the ground rises and falls), so many are tried; on a level
+    # stretch they stand close, a field of rocks
+    "rocky_plains": {"feature": f"{MOD}:rock/sparse", "placement": rocky_placement((2, 4))},
+    "rocky_jungle": {"feature": f"{MOD}:rock/craggy", "placement": rocky_placement((2, 5))},
+    "rocky_birch_forest": {"feature": f"{MOD}:rock/boulders", "placement": rocky_placement((4, 8))},
     # Most of the middle biomes' ground is hilly: a place is tried in one chunk of 5, and kept on level ground
     "sparse": {"feature": f"{MOD}:rock/sparse", "placement": rock_placement(5)},
     "meadow_cluster": {"feature": f"{MOD}:rock/sparse", "placement": rock_placement(48, count=(2, 4), climate=False)},
@@ -92,6 +112,8 @@ def main():
     for name, rock in FEATURES.items():
         write_json(f"{MOD}/worldgen/feature/rock/{name}.json", {"type": f"{MOD}:rock", "rock": rock})
     write_json(f"{MOD}/worldgen/feature/rock/sparse.json", SPARSE)
+    write_json(f"{MOD}/worldgen/feature/rock/craggy.json", CRAGGY)
+    write_json(f"{MOD}/worldgen/feature/rock/boulders.json", BOULDERS)
     for name, placed in PLACED.items():
         write_json(f"{MOD}/worldgen/placed_feature/rock/{name}.json", placed)
     for name, (rock, _) in FORMATIONS.items():
@@ -100,8 +122,8 @@ def main():
             "spawn_overrides": {}, "terrain_adaptation": "none", "rock": rock})
     write_json(f"{MOD}/worldgen/structure_set/rock_formations.json", {
         "structures": [{"structure": f"{MOD}:rock/{name}", "weight": weight} for name, (_, weight) in FORMATIONS.items()],
-        # About one formation in every ten chunks by ten, none closer than four chunks to the next
-        "placement": {"type": "minecraft:random_spread", "salt": 1734120691, "spacing": 10, "separation": 4}})
+        # In the rocky biomes, about one formation in every seven chunks by seven, none closer than three to the next
+        "placement": {"type": "minecraft:random_spread", "salt": 1734120691, "spacing": 7, "separation": 3}})
     tag = os.path.join(DATA, MOD, "tags", "worldgen", "biome", "has_structure", "rock_formation.json")
     if not os.path.exists(tag):
         write_json(f"{MOD}/tags/worldgen/biome/has_structure/rock_formation.json", {"replace": False, "values": []})

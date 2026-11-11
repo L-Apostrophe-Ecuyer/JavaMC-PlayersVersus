@@ -99,6 +99,19 @@ some appear in meadows in rare clusters".
 The layout rules in `docs/worldgen-refactor-plan.md` (mountainside, peak-warm and the rest) say which biome takes which
 climate; they don't place rocks, and stay as they are.
 
+Built as (part 3, the boxes read from vanilla's `OverworldBiomeBuilder` tables):
+
+- Rock ground (`RockGround`, the placement filter `players-versus:rock_ground`, the formations' check): temperature from
+  -0.15 to 0.55; erosion above -0.3; not humidity 0 to 0.3 with erosion 0.3 to 0.6 (part 2's 3D-noise terrain); the
+  ground within 3 blocks over the 16 read around the middle (most of the middle biomes' ground rises and falls 6 or
+  more); no water at the middle; the Players Versus world type only.
+- Here and there: a boulder (0.6), a pile (0.25) or a crag (0.15) tried in one chunk of 5 in the plains, forests,
+  savannas and jungles, vanilla's and the mod's. Meadows: 2 to 4 in one chunk of 48, on level ground whatever their
+  climate. In the step before trees.
+- Rocky Plains: the savannas' cool edge (temperature 0.2 to 0.3) where the erosion is 0.05 or more; the Tuscan Grove
+  keeps the rest. Rocky Jungle: the jungles from 0.3 to 0.36, erosion 0.05 or more, out of the 3D-noise climate. Rocky
+  Birch Forest: the old growth birch forests below -0.075, erosion 0.05 to 0.3. The formations stand in these three.
+
 ## Checks
 
 - Unit tests (`RockModelTest` rewritten, `RockTemplateTest` adjusted): the same seed gives the same rock; nothing

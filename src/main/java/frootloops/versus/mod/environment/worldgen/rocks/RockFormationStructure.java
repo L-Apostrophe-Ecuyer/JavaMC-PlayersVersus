@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.rocks;
 
+import frootloops.versus.mod.environment.worldgen.debug.WorldgenCensus;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
@@ -52,7 +53,10 @@ public class RockFormationStructure extends Structure {
                     context.heightAccessor(), context.randomState()) + 1;
         }
         int seaLevel = context.chunkGenerator().getSeaLevel();
-        if (anchors[0] < seaLevel - 1 || !this.onRockGround(context, x, anchors[0], z)) return Optional.empty();
+        if (anchors[0] < seaLevel - 1) return Optional.empty();
+        boolean ground = this.onRockGround(context, x, anchors[0], z);
+        WorldgenCensus.rockGround(ground ? "a formation kept" : "a formation refused");
+        if (!ground) return Optional.empty();
         return Optional.of(new Structure.GenerationStub(new BlockPos(x, anchors[0], z), builder -> {
             for (int index = 0; index < anchors.length; index++) builder.addPiece(new RockFormationPiece(this.rock, seed, index, x, z, anchors[index]));
         }));

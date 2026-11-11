@@ -488,5 +488,9 @@
   "biome.players-versus.dark_jungle_forest": "Dark Jungle Forest",
   "biome.players-versus.humid_oak_forest": "Humid Oak Forest",
 
-  "biome.players-versus.cold_swamp": "Cold Swamp"
+  "biome.players-versus.cold_swamp": "Cold Swamp",
+
+  "biome.players-versus.rocky_plains": "Rocky Plains",
+  "biome.players-versus.rocky_jungle": "Rocky Jungle",
+  "biome.players-versus.rocky_birch_forest": "Rocky Birch Forest"
 }

@@ -50,6 +50,12 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> HUMID_OAK_FOREST = keyOf("humid_oak_forest");
     /** The cold half of swamps, next to taigas: spruce and birch over mud, podzol and moss, ferns and berries. */
     public static final ResourceKey<Biome> COLD_SWAMP = keyOf("cold_swamp");
+    /** The level stretches of savannas' cool edge: dry grass, a few oaks and acacias, and rocks everywhere. */
+    public static final ResourceKey<Biome> ROCKY_PLAINS = keyOf("rocky_plains");
+    /** The level jungle just past the warm band: jungle trees thinned out among crags and towers of rock. */
+    public static final ResourceKey<Biome> ROCKY_JUNGLE = keyOf("rocky_jungle");
+    /** The cold, level side of old growth birch forests: tall birches and spruces among boulders. */
+    public static final ResourceKey<Biome> ROCKY_BIRCH_FOREST = keyOf("rocky_birch_forest");
 
     /** Where a biome goes; ALL_DEPTHS is a cave biome from the surface caves down to the deep caves. */
     public enum PlacedBiomeType {

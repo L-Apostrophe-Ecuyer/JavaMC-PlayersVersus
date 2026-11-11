@@ -77,6 +77,15 @@ public final class PvBiomeLayout {
     static final float COLD_SWAMP_MAX = -0.15F;
     /** Above this temperature, windswept biomes and old growth birch forests give way to plainer ones. */
     static final float TEMPERATE_MIN = 0.0F;
+    /** The rocky biomes lie where the ground is level: erosion from this up. */
+    static final float ROCKY_EROSION_MIN = 0.05F;
+    /** The rocky jungle: the jungles from the warm band up to this temperature. */
+    static final float ROCKY_JUNGLE_MAX = 0.36F;
+    /**
+     * The 3D-noise terrain's climate (part 2): humidity 0 to 0.3 with erosion 0.3 to 0.6. Rugged, overhanging ground, where
+     * no rocky biome goes.
+     */
+    static final float NOISE_HUMIDITY_MAX = 0.3F, NOISE_EROSION_MIN = 0.3F, NOISE_EROSION_MAX = 0.6F;
 
     private record Rule(String name, Box region, BiFunction<Box, ResourceKey<Biome>, ResourceKey<Biome>> target) {
     }
@@ -105,13 +114,26 @@ public final class PvBiomeLayout {
                     (slice, biome) -> biome == Biomes.STONY_PEAKS ? Biomes.MEADOW : null),
             new Rule("frozen", Box.ALL.withMin(Box.T, Climate.quantizeCoord(-0.55F)).withMax(Box.T, Climate.quantizeCoord(-0.375F)),
                     (slice, biome) -> CustomOverworldBiomes.getSnowyToTemperateTransitionBiome(biome)),
+            // The level part of the savannas' cool edge, before the Tuscan grove takes the rest
+            new Rule("rocky-plains", Box.ALL.withMax(Box.T, Climate.quantizeCoord(WARM_BAND_MAX)).withMin(Box.E, Climate.quantizeCoord(ROCKY_EROSION_MIN)),
+                    (slice, biome) -> biome == Biomes.SAVANNA || biome == Biomes.SAVANNA_PLATEAU ? CustomOverworldBiomes.ROCKY_PLAINS : null),
             // Before the humid band, which would otherwise cut a strip of sparse jungle across the warm one
             new Rule("warm", Box.ALL.withMax(Box.T, Climate.quantizeCoord(WARM_BAND_MAX)), PvBiomeLayout::warmTarget),
+            // The level jungle just past the warm band, out of the 3D-noise terrain's climate: three boxes
+            new Rule("rocky-jungle", rockyJungle().withMin(Box.H, Climate.quantizeCoord(NOISE_HUMIDITY_MAX)), PvBiomeLayout::rockyJungleTarget),
+            new Rule("rocky-jungle", rockyJungle().withMax(Box.H, Climate.quantizeCoord(NOISE_HUMIDITY_MAX)).withMax(Box.E, Climate.quantizeCoord(NOISE_EROSION_MIN)),
+                    PvBiomeLayout::rockyJungleTarget),
+            new Rule("rocky-jungle", rockyJungle().withMax(Box.H, Climate.quantizeCoord(NOISE_HUMIDITY_MAX)).withMin(Box.E, Climate.quantizeCoord(NOISE_EROSION_MAX)),
+                    PvBiomeLayout::rockyJungleTarget),
             new Rule("humid", Box.ALL.withMin(Box.H, Climate.quantizeCoord(0.275F)).withMax(Box.H, Climate.quantizeCoord(0.35F)),
                     (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)),
             new Rule("swamp-rim", Box.ALL.withMax(Box.E, Climate.quantizeCoord(SWAMP_RIM_MAX)),
                     (slice, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.HUMID_OAK_FOREST : null),
 
+            // The cold, level side of old growth birch forests, before it turns dappled
+            new Rule("rocky-birch", Box.ALL.withMax(Box.T, Climate.quantizeCoord(DAPPLED_COLD)).withMin(Box.E, Climate.quantizeCoord(ROCKY_EROSION_MIN))
+                    .withMax(Box.E, Climate.quantizeCoord(NOISE_EROSION_MIN)),
+                    (slice, biome) -> biome == Biomes.OLD_GROWTH_BIRCH_FOREST ? CustomOverworldBiomes.ROCKY_BIRCH_FOREST : null),
             new Rule("flower-forest", Box.ALL,
                     (slice, biome) -> CustomOverworldBiomes.DAPPLED_FOREST.equals(biome) ? Biomes.FLOWER_FOREST : null),
             new Rule("weird-cold", Box.ALL.withMin(Box.W, Climate.quantizeCoord(DAPPLED_WEIRDNESS)).withMax(Box.T, Climate.quantizeCoord(DAPPLED_COLD)),
@@ -226,6 +248,17 @@ public final class PvBiomeLayout {
         if (biome == Biomes.WINDSWEPT_FOREST || biome == Biomes.OLD_GROWTH_BIRCH_FOREST) return Biomes.FOREST;
         if (biome == Biomes.WINDSWEPT_SAVANNA) return part.min[Box.T] >= WARM_BAND_START ? Biomes.SAVANNA : Biomes.PLAINS;
         return null;
+    }
+
+    /** The rocky jungle's box before the 3D-noise terrain's climate is cut out of it: just warmer than the warm band, level. */
+    private static Box rockyJungle() {
+        return Box.ALL.withMin(Box.T, Climate.quantizeCoord(WARM_BAND_MAX)).withMax(Box.T, Climate.quantizeCoord(ROCKY_JUNGLE_MAX))
+                .withMin(Box.E, Climate.quantizeCoord(ROCKY_EROSION_MIN));
+    }
+
+    @Nullable
+    private static ResourceKey<Biome> rockyJungleTarget(Box slice, ResourceKey<Biome> biome) {
+        return biome == Biomes.JUNGLE || biome == Biomes.SPARSE_JUNGLE || biome == Biomes.BAMBOO_JUNGLE ? CustomOverworldBiomes.ROCKY_JUNGLE : null;
     }
 
     /** Where vanilla's warm biomes (savannas, jungles) begin. */

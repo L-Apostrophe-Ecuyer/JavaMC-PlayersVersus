@@ -1,0 +1,26 @@
+{
+  "feature": "players-versus:rock/boulders",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:uniform",
+        "min_inclusive": 4,
+        "max_inclusive": 8
+      }
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "players-versus:rock_ground"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
