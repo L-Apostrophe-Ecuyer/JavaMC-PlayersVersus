@@ -90,7 +90,7 @@ public enum RockShape {
 
     /** A body of this shape, {@code height} blocks tall and {@code radius} across at its widest lobe. */
     public Body body(long seed, double height, double radius) {
-        Dice dice = new Dice(seed);
+        RockDice dice = new RockDice(seed);
         List<Lobe> lobes = new ArrayList<>();
         double warp = this.warp(radius);
         return switch (this) {
@@ -221,14 +221,14 @@ public enum RockShape {
      * blunt point, a rounded cone (a low {@code shoulder} and {@code cap}), as a boulder half sunk in the ground is;
      * a little out of round, its top off its middle.
      */
-    private static Lobe mound(Dice dice, double x, double z, double height, double radius) {
+    private static Lobe mound(RockDice dice, double x, double z, double height, double radius) {
         double lean = dice.angle(), far = radius * dice.between(0.15, 0.4);
         return new Lobe(false, x, z, height, 0, radius, dice.between(0.8, 1.2), dice.angle(), far * Math.cos(lean), far * Math.sin(lean), 1.2,
                 dice.between(1.4, 1.7), 1.3, 0, 0.3, 0, dice.between(0.06, 0.16), 0, 0, 0, dice.next());
     }
 
     /** Low flat stones beside a boulder: a block or two high, cut to angular plates; slabs make their layers thin. */
-    private static void plates(Dice dice, List<Lobe> lobes, int count, double radius, double turn) {
+    private static void plates(RockDice dice, List<Lobe> lobes, int count, double radius, double turn) {
         for (int index = 0; index < count; index++) {
             double size = radius * dice.between(0.4, 0.6), angle = turn + 1.9 * index + dice.between(-0.5, 0.5), away = radius * dice.between(0.9, 1.25);
             double height = dice.between(1.2, 2.2);
@@ -266,41 +266,12 @@ public enum RockShape {
         return fitted;
     }
 
-    private static Lobe column(Dice dice, double x, double z, double height, double radius, double aspect, double leanX, double leanZ, double cap,
+    private static Lobe column(RockDice dice, double x, double z, double height, double radius, double aspect, double leanX, double leanZ, double cap,
                                double bulge, double foot, double lobing, double plateau, int facets, double facetDepth) {
         return new Lobe(false, x, z, height, 0, radius, aspect, dice.angle(), leanX, leanZ, 1.3, cap, 2, bulge, 0.3, foot, lobing, plateau,
                 facets, facetDepth, dice.next());
     }
 
-    /** Numbers drawn from a seed, one after another. */
-    private static final class Dice {
-        private final long seed;
-        private int rolls;
-
-        Dice(long seed) {
-            this.seed = seed;
-        }
-
-        long next() {
-            return RockNoise.hash(this.seed, ++this.rolls);
-        }
-
-        double between(double from, double to) {
-            return from + (to - from) * RockNoise.unit(this.next());
-        }
-
-        int whole(int from, int to) {
-            return from + (int) ((to - from + 1) * RockNoise.unit(this.next()));
-        }
-
-        double angle() {
-            return this.between(0, 2 * Math.PI);
-        }
-
-        boolean chance(double chance) {
-            return RockNoise.unit(this.next()) < chance;
-        }
-    }
 
     /**
      * How far a rock's own shade reaches over its side turned from the sun and around its foot ({@link Body#dusk}): the
