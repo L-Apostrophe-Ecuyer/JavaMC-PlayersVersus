@@ -47,8 +47,8 @@ public abstract class LightmapMixin {
         if(factor > 0f) return Math.max(0.0f, Mth.cos(((float)entity.tickCount - delta) * (float)Math.PI * 0.025f) * factor);
         // Night vision lifts the depth darkness (1.21.10 learnt of it from the night vision factor it had just modified).
         else if(entity.hasEffect(MobEffects.NIGHT_VISION)) return 0f;
-        else if(entity.getY() < -32d) return 32f/384f;
-        else if(entity.getY() < 0d) return -((float)entity.getY())/384f;
+        else if(entity.getY() < -48d) return 48f/512f;
+        else if(entity.getY() < 0d) return -((float)entity.getY())/512f;
         else return 0f;
     }
 }
