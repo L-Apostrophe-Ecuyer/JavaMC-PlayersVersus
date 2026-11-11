@@ -18,6 +18,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
@@ -61,6 +63,19 @@ public class CustomWorldgen {
             ResourceKey.create(Registries.PLACED_FEATURE, Identifier.withDefaultNamespace("brown_mushroom_normal")),
             ResourceKey.create(Registries.PLACED_FEATURE, Identifier.withDefaultNamespace("red_mushroom_normal")));
 
+    /** A rock here and there, on rock ground (RockGroundFilter keeps the middle temperatures and level ground). */
+    private static final ResourceKey<PlacedFeature> SPARSE_ROCKS = ResourceKey.create(Registries.PLACED_FEATURE,
+            Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock/sparse"));
+    /** A cluster of rocks now and then. */
+    private static final ResourceKey<PlacedFeature> MEADOW_ROCKS = ResourceKey.create(Registries.PLACED_FEATURE,
+            Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock/meadow_cluster"));
+    /** The middle biomes, vanilla's and the mod's: plains, forests, savannas and jungles, and their transitions. */
+    private static final List<ResourceKey<Biome>> SPARSE_ROCK_BIOMES = List.of(Biomes.PLAINS, Biomes.SUNFLOWER_PLAINS, Biomes.FOREST,
+            Biomes.FLOWER_FOREST, Biomes.BIRCH_FOREST, Biomes.DARK_FOREST, Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU, Biomes.JUNGLE,
+            Biomes.SPARSE_JUNGLE, Biomes.BAMBOO_JUNGLE, CustomOverworldBiomes.DAPPLED_FOREST, CustomOverworldBiomes.SPARSE_DAPPLED_FOREST,
+            CustomOverworldBiomes.DARK_BIRCH_FOREST, CustomOverworldBiomes.TUSCAN_GROVE, CustomOverworldBiomes.WARM_OAK_FOREST,
+            CustomOverworldBiomes.DARK_JUNGLE_FOREST);
+
     public static void onInitialize() {
         Registry.register(BuiltInRegistries.FEATURE_TYPE, STONE_STALAGTITE_ID, StoneStalagtiteFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MUD_PATCH_ID, MudPatchFeature.CODEC);
@@ -74,6 +89,9 @@ public class CustomWorldgen {
                         context.getGenerationSettings().removeFeature(GenerationStep.Decoration.VEGETAL_DECORATION, mushrooms);
                     }
                 });
+        // Rocks here and there in the middle biomes, in clusters in meadows: the step before trees, which they would cut
+        BiomeModifications.addFeature(BiomeSelectors.includeByKey(SPARSE_ROCK_BIOMES), GenerationStep.Decoration.LOCAL_MODIFICATIONS, SPARSE_ROCKS);
+        BiomeModifications.addFeature(BiomeSelectors.includeByKey(Biomes.MEADOW), GenerationStep.Decoration.LOCAL_MODIFICATIONS, MEADOW_ROCKS);
         PvWorldgen.initialize();
     }
 }

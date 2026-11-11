@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.rocks;
 
+import frootloops.versus.mod.environment.worldgen.debug.WorldgenCensus;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -55,6 +56,8 @@ public record RockFeature(RockTemplate rock) implements Feature {
         LevelRockCanvas canvas = new LevelRockCanvas(level, plan.palette());
         int x = origin.getX(), z = origin.getZ();
         RockStamper.stamp(plan, x, z, canvas, x - MAX_REACH, z - MAX_REACH, x + MAX_REACH, z + MAX_REACH);
-        return canvas.placed() > 0;
+        if (canvas.placed() == 0) return false;
+        WorldgenCensus.rockPlaced(level, origin);
+        return true;
     }
 }

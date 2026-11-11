@@ -3,9 +3,10 @@
 
     python3 tools/rocks.py
 
-- Small rocks, feature type players-versus:rock (RockFeature), each within 16 blocks of its origin: a boulder (two or
-  three rounded stones), a pile, a crag. Biomes place them with placed features of their own (tools/transition-biomes.py
-  for the rocky biomes).
+- Small rocks, feature type players-versus:rock (RockFeature), each within 16 blocks of its origin: a boulder, a pile, a
+  crag. Placed here and there in the middle biomes (rock/sparse, a selector of the three) and in clusters in meadows
+  (rock/meadow_cluster), on rock ground only (the players-versus:rock_ground filter); the rocky biomes place them with
+  placed features of their own (tools/transition-biomes.py).
 - Large rocks, structure type players-versus:rock_formation (RockFormationStructure), on the world's grid of the
   structure set rock_formations: a monolith, spires, towers, great boulders, a massif. They generate in the biomes of
   the tag #players-versus:has_structure/rock_formation, empty until their looks are approved.
@@ -47,6 +48,38 @@ FORMATIONS = {
 FORMATION_BIOMES = f"#{MOD}:has_structure/rock_formation"
 
 
+def bare(feature):
+    """A feature placed as it is: a selector's choice, placed where the selector is."""
+    return {"feature": feature, "placement": []}
+
+
+# Here and there in the middle biomes: a boulder mostly, now and then a pile or a crag. A random selector tries its
+# choices in turn: a pile in 0.25, a crag in 0.75 x 0.2 = 0.15, a boulder in the rest
+SPARSE = {"type": "minecraft:random_selector", "default": bare(f"{MOD}:rock/boulder"),
+          "features": [{"chance": 0.25, "feature": bare(f"{MOD}:rock/boulder_pile")}, {"chance": 0.2, "feature": bare(f"{MOD}:rock/crag")}]}
+
+
+def rock_placement(rarity, count=None, climate=True):
+    """Where a rock goes: in about one chunk of `rarity` (of those `count` times), on rock ground ({MOD}:rock_ground)."""
+    placement = [{"type": "minecraft:rarity_filter", "chance": rarity}]
+    if count:
+        placement.append({"type": "minecraft:count", "count": {"type": "minecraft:uniform", "min_inclusive": count[0], "max_inclusive": count[1]}})
+    ground = {"type": f"{MOD}:rock_ground"}
+    if not climate:
+        ground["climate"] = False
+    placement += [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, ground, {"type": "minecraft:biome"}]
+    return placement
+
+
+# Placed features: their biomes list them in the step before trees (CustomWorldgen adds them to vanilla's and the mod's
+# middle biomes). A meadow's cluster skips the rocks' climate: meadows are cool, high and little eroded
+PLACED = {
+    # Most of the middle biomes' ground is hilly: a place is tried in one chunk of 5, and kept on level ground
+    "sparse": {"feature": f"{MOD}:rock/sparse", "placement": rock_placement(5)},
+    "meadow_cluster": {"feature": f"{MOD}:rock/sparse", "placement": rock_placement(48, count=(2, 4), climate=False)},
+}
+
+
 def write_json(path, value):
     path = os.path.join(DATA, path)
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -58,6 +91,9 @@ def write_json(path, value):
 def main():
     for name, rock in FEATURES.items():
         write_json(f"{MOD}/worldgen/feature/rock/{name}.json", {"type": f"{MOD}:rock", "rock": rock})
+    write_json(f"{MOD}/worldgen/feature/rock/sparse.json", SPARSE)
+    for name, placed in PLACED.items():
+        write_json(f"{MOD}/worldgen/placed_feature/rock/{name}.json", placed)
     for name, (rock, _) in FORMATIONS.items():
         write_json(f"{MOD}/worldgen/structure/rock/{name}.json", {
             "type": f"{MOD}:rock_formation", "biomes": FORMATION_BIOMES, "step": "surface_structures",

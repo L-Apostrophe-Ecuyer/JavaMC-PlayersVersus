@@ -12,8 +12,11 @@ public final class RockGround {
     private static final float LEAST_EROSION = -0.3F;
     /** The 3D-noise terrain's climate: rugged, overhanging ground. */
     private static final float NOISE_HUMIDITY_MIN = 0.0F, NOISE_HUMIDITY_MAX = 0.3F, NOISE_EROSION_MIN = 0.3F, NOISE_EROSION_MAX = 0.6F;
-    /** How far the ground may rise or fall under a rock and around it, in blocks. */
-    public static final int LEVEL = 2;
+    /**
+     * How far the ground may rise or fall under a rock and around it, in blocks, over the 16 blocks read: a gentle slope
+     * at most. Most of the ground in the middle biomes rises and falls 6 blocks or more over that: hills, not stretches.
+     */
+    public static final int LEVEL = 3;
     /** Where the ground is read, from the rock's middle: there, then eight points 4 blocks out and eight 8 blocks out. */
     public static final int[][] AROUND = around();
 

@@ -2,6 +2,7 @@ package frootloops.versus.gametest;
 
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
 import frootloops.versus.mod.environment.worldgen.rocks.LevelRockCanvas;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFeature;
@@ -15,23 +16,32 @@ import frootloops.versus.mod.environment.worldgen.rocks.RockTemplate;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
 
 /**
  * Rocks in the world: a rock feature from the data writes its rock within its reach; a formation's body stamped a chunk
@@ -242,11 +252,68 @@ public class RocksGameTest {
         helper.setBlock(new BlockPos(24, 1, 24), Blocks.WATER.defaultBlockState());
         helper.assertTrue(!RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "not with water at its middle");
         helper.setBlock(new BlockPos(24, 1, 24), Blocks.AIR.defaultBlockState());
-        // The ground three blocks higher at one of the points 8 blocks out
-        for (int y = 1; y <= 3; y++) helper.setBlock(new BlockPos(32, y, 24), Blocks.DIRT.defaultBlockState());
-        helper.assertTrue(!RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "not with a step of three blocks 8 out");
-        helper.setBlock(new BlockPos(32, 3, 24), Blocks.AIR.defaultBlockState());
-        helper.assertTrue(RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "with a step of two");
+        // The ground four blocks higher at one of the points 8 blocks out
+        for (int y = 1; y <= 4; y++) helper.setBlock(new BlockPos(32, y, 24), Blocks.DIRT.defaultBlockState());
+        helper.assertTrue(!RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "not with a step of four blocks 8 out");
+        helper.setBlock(new BlockPos(32, 4, 24), Blocks.AIR.defaultBlockState());
+        helper.assertTrue(RockGroundFilter.ground(level, middle.getX(), middle.getZ()), "with a step of three");
+        helper.succeed();
+    }
+
+    @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
+    public void theMiddleBiomesHaveRocks(GameTestHelper helper) {
+        Registry<Biome> biomes = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
+        ResourceKey<PlacedFeature> sparse = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.parse("players-versus:rock/sparse"));
+        ResourceKey<PlacedFeature> cluster = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.parse("players-versus:rock/meadow_cluster"));
+        for (ResourceKey<Biome> biome : List.of(Biomes.PLAINS, Biomes.FOREST, Biomes.SAVANNA, Biomes.JUNGLE, CustomOverworldBiomes.TUSCAN_GROVE)) {
+            helper.assertTrue(rocks(biomes, biome, sparse), biome.identifier() + " has rocks here and there");
+        }
+        helper.assertTrue(rocks(biomes, Biomes.MEADOW, cluster), "a meadow has a cluster of rocks now and then");
+        for (ResourceKey<Biome> biome : List.of(Biomes.DESERT, Biomes.SNOWY_PLAINS, Biomes.TAIGA, Biomes.SWAMP)) {
+            helper.assertTrue(!rocks(biomes, biome, sparse) && !rocks(biomes, biome, cluster), biome.identifier() + " has no rocks");
+        }
+        helper.succeed();
+    }
+
+    /** Whether the biome places the feature in the step before trees. */
+    private static boolean rocks(Registry<Biome> biomes, ResourceKey<Biome> biome, ResourceKey<PlacedFeature> feature) {
+        List<HolderSet<PlacedFeature>> steps = biomes.getValueOrThrow(biome).getGenerationSettings().features();
+        int step = GenerationStep.Decoration.LOCAL_MODIFICATIONS.ordinal();
+        return steps.size() > step && steps.get(step).stream().anyMatch(holder -> holder.is(feature));
+    }
+
+    @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
+    public void twoBouldersStampedOverEachOtherStandTogether(GameTestHelper helper) {
+        // A meadow's cluster can put one rock on another: the two are one rock, joined to the ground
+        ServerLevel level = helper.getLevel();
+        RockTemplate boulder = ((RockFeature) level.registryAccess().lookupOrThrow(Registries.FEATURE).getValue(Identifier.parse("players-versus:rock/boulder"))).rock();
+        BlockPos one = helper.absolutePos(new BlockPos(22, 1, 24)), two = helper.absolutePos(new BlockPos(26, 1, 25));
+        for (BlockPos at : List.of(one, two)) {
+            RockPlan plan = boulder.plan(at.asLong());
+            RockStamper.stamp(plan, at.getX(), at.getZ(), new LevelRockCanvas(level, plan.palette()), at.getX() - 16, at.getZ() - 16, at.getX() + 16, at.getZ() + 16);
+        }
+        // Every block of rock is joined, face to face, to rock standing on the floor
+        java.util.Set<BlockPos> rock = new java.util.HashSet<>(), reached = new java.util.HashSet<>();
+        java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
+        for (int x = 0; x < 48; x++) {
+            for (int z = 0; z < 48; z++) {
+                for (int y = 1; y < 40; y++) {
+                    BlockPos at = new BlockPos(x, y, z);
+                    if (!isRock(helper.getBlockState(at)) && !helper.getBlockState(at).is(BlockTags.GRASS_BLOCKS) && !helper.getBlockState(at).is(BlockTags.MOSS_BLOCKS)) continue;
+                    rock.add(at);
+                    if (y == 1 && reached.add(at)) queue.add(at);
+                }
+            }
+        }
+        while (!queue.isEmpty()) {
+            BlockPos at = queue.poll();
+            for (net.minecraft.core.Direction side : net.minecraft.core.Direction.values()) {
+                BlockPos next = at.relative(side);
+                if (rock.contains(next) && reached.add(next)) queue.add(next);
+            }
+        }
+        helper.assertTrue(rock.size() > 100, "two boulders: " + rock.size() + " blocks");
+        helper.assertTrue(reached.size() == rock.size(), (rock.size() - reached.size()) + " blocks of rock not joined to the ground");
         helper.succeed();
     }
 

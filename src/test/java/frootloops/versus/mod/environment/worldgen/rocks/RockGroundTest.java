@@ -41,12 +41,12 @@ class RockGroundTest {
         int[] heights = new int[RockGround.AROUND.length];
         Arrays.fill(heights, 64);
         assertTrue(RockGround.level(heights), "flat");
-        heights[5] = 66;
-        assertTrue(RockGround.level(heights), "two blocks up somewhere");
         heights[5] = 67;
-        assertFalse(RockGround.level(heights), "three blocks up");
+        assertTrue(RockGround.level(heights), "three blocks up somewhere: a gentle slope over 16 blocks");
+        heights[5] = 68;
+        assertFalse(RockGround.level(heights), "four blocks up");
         heights[5] = 64;
-        heights[12] = 61;
-        assertFalse(RockGround.level(heights), "three blocks down");
+        heights[12] = 60;
+        assertFalse(RockGround.level(heights), "four blocks down");
     }
 }

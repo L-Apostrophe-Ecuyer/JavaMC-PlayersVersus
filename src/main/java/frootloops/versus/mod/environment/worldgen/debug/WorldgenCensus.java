@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -35,6 +36,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * What a biome's land is made of and what grows on it, counted on a generated world: the headless run's way of asking why
@@ -48,7 +51,8 @@ import java.util.function.Consumer;
  *   block is in;</li>
  *   <li>for each biome: the nearest patch of it (searched in {@code pv.worldgen.census.range} blocks, default 8000), then
  *   the full chunks {@code pv.worldgen.census.radius} chunks around its middle (default 4): per biome found there, its
- *   columns, how many a propagule could be planted on, the blocks under them, and the trees' blocks above them.</li>
+ *   columns, how many a propagule could be planted on, the blocks under them, and the trees' blocks above them;</li>
+ *   <li>the rocks features placed meanwhile, by the biome at their middle.</li>
  * </ul>
  */
 public final class WorldgenCensus {
@@ -68,7 +72,26 @@ public final class WorldgenCensus {
             "minecraft:dandelion", "players-versus:wheat_grass", "players-versus:clovers");
     private static final List<String> TAGS = List.of("supports_mangrove_propagule", "supports_vegetation", "substrate_overworld", "dirt", "mud");
 
+    /** The rocks placed by features while the census runs, by the biome at their middle. */
+    private static final Map<String, AtomicInteger> ROCKS = new ConcurrentHashMap<>();
+    private static final boolean REQUESTED = isRequested();
+
     private WorldgenCensus() {
+    }
+
+    /** Why rock ground was refused or kept (RockGroundFilter), while the census runs. */
+    private static final Map<String, AtomicInteger> ROCK_GROUND = new ConcurrentHashMap<>();
+
+    /** Counts what the rock ground filter said of a place: kept, or why not. */
+    public static void rockGround(String outcome) {
+        if (REQUESTED) ROCK_GROUND.computeIfAbsent(outcome, key -> new AtomicInteger()).incrementAndGet();
+    }
+
+    /** Counts a rock a feature placed (RockFeature), while the census runs. */
+    public static void rockPlaced(WorldGenLevel level, BlockPos at) {
+        if (!REQUESTED) return;
+        String biome = level.getBiome(at).unwrapKey().map(key -> key.identifier().toString()).orElse("?");
+        ROCKS.computeIfAbsent(biome, key -> new AtomicInteger()).incrementAndGet();
     }
 
     /** Headless mode for {@code runWorldgenSmoke}: run once when the server has started, then stop it. */
@@ -103,6 +126,9 @@ public final class WorldgenCensus {
             BlockPos middle = find(world, id, range, log);
             if (middle != null) count(world, id, middle, radius, log);
         }
+        // Against the columns of each biome counted above
+        log.accept("[pvwg] census rocks placed, by biome: " + new TreeMap<>(ROCKS));
+        log.accept("[pvwg] census rock ground, places tried: " + new TreeMap<>(ROCK_GROUND));
     }
 
     // Survival

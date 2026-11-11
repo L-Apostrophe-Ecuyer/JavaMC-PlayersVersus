@@ -61,7 +61,7 @@ public class RockFormationStructure extends Structure {
     /** Whether rock may stand at the main body's middle: its climate, and level ground around it ({@link RockGround}). */
     private boolean onRockGround(Structure.GenerationContext context, int x, int y, int z) {
         Climate.TargetPoint climate = context.climateSampler().sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z));
-        if (!RockGroundFilter.climate(climate)) return false;
+        if (!RockGroundFilter.suits(climate)) return false;
         int[] heights = new int[RockGround.AROUND.length];
         for (int index = 0; index < heights.length; index++) {
             heights[index] = context.chunkGenerator().getFirstOccupiedHeight(x + RockGround.AROUND[index][0], z + RockGround.AROUND[index][1], Heightmap.Types.OCEAN_FLOOR_WG,
