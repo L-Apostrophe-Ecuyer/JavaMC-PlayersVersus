@@ -5,7 +5,7 @@
     "minecraft:snowy_plains",
     "minecraft:ice_spikes",
     "minecraft:ice_caves",
-    "minecraft:cold_taiga"
+    "players-versus:cold_taiga"
   ],
   "step": "underground_structures",
   "spawn_overrides": {
