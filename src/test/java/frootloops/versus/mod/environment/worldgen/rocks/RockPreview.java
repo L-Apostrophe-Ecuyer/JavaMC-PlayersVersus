@@ -26,7 +26,8 @@ import java.util.zip.ZipFile;
  *   out=rock.png template=some.json seed=5 size=960x540 water=2
  * </pre>
  * {@code orbit} is the camera's place: the angle around the rock, the distance from its middle, and the height of the
- * eye over the ground; {@code look} is the height over the ground it looks at. {@code textures} lists the folders and
+ * eye over the ground; {@code look} is the height over the ground it looks at, {@code target} the place ({@code x,z}
+ * from the middle) it looks at and circles. {@code textures} lists the folders and
  * jars to take block textures from, first found first, separated by {@code :}.
  */
 public final class RockPreview {
@@ -287,12 +288,15 @@ public final class RockPreview {
         double angle = Math.toRadians(Double.parseDouble(orbit[0])), distance = Double.parseDouble(orbit[1]), eye = Double.parseDouble(orbit[2]);
         double look = Double.parseDouble(options.getOrDefault("look", String.valueOf(0.42 * top)));
         int base = scene.ground[(HALF) * 2 * HALF + HALF];
-        double cameraX = distance * Math.sin(angle), cameraZ = -distance * Math.cos(angle);
+        // What the camera looks at and circles: the middle, or the place given
+        String[] target = options.getOrDefault("target", "0,0").split(",");
+        double targetX = Double.parseDouble(target[0]), targetZ = Double.parseDouble(target[1]);
+        double cameraX = targetX + distance * Math.sin(angle), cameraZ = targetZ - distance * Math.cos(angle);
         int under = scene.ground[(Math.clamp((int) cameraX, -HALF, HALF - 1) + HALF) * 2 * HALF + Math.clamp((int) cameraZ, -HALF, HALF - 1) + HALF];
         double cameraY = Math.max(under, base) + eye;
         String[] size = options.getOrDefault("size", "960x540").split("x");
         RockPreview preview = new RockPreview(scene, new Textures(options.getOrDefault("textures", "")));
-        BufferedImage image = preview.render(cameraX, cameraY, cameraZ, 0.5, base + look, 0.5, Integer.parseInt(size[0]), Integer.parseInt(size[1]),
+        BufferedImage image = preview.render(cameraX, cameraY, cameraZ, targetX + 0.5, base + look, targetZ + 0.5, Integer.parseInt(size[0]), Integer.parseInt(size[1]),
                 Double.parseDouble(options.getOrDefault("fov", "70")));
         File out = new File(options.getOrDefault("out", "rock.png"));
         ImageIO.write(image, "png", out);

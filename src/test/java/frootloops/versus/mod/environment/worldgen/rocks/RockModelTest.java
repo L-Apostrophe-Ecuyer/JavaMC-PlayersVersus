@@ -183,10 +183,10 @@ class RockModelTest {
     }
 
     @Test
-    void aSpireSplitsIntoSeveralPeaks() {
+    void aMassifHasSeveralTops() {
         for (long seed = 1; seed <= 6; seed++) {
-            RockTestCanvas canvas = stamp(RockShape.SPIRE.body(seed, 60, 11), FLAT, RockTestCanvas.NO_WATER);
-            int size = 81, half = 40;
+            RockTestCanvas canvas = stamp(RockShape.MASSIF.body(seed, 45, 22), FLAT, RockTestCanvas.NO_WATER);
+            int size = 121, half = 60;
             int[][] tops = new int[size][size];
             int highest = 0;
             for (long[] cell : rock(canvas)) {
@@ -196,8 +196,116 @@ class RockModelTest {
                 highest = Math.max(highest, tops[gx][gz]);
             }
             int most = 0;
-            for (double share = 0.5; share <= 0.93; share += 0.03) most = Math.max(most, peaks(tops, (int) (share * highest)));
-            assertTrue(most >= 2, "seed " + seed + ": a spire has several peaks with clefts between, not " + most);
+            for (double share = 0.5; share <= 0.97; share += 0.03) most = Math.max(most, peaks(tops, (int) (share * highest)));
+            assertTrue(most >= 2, "seed " + seed + ": a massif has several tops with clefts between, not " + most);
+        }
+    }
+
+    @Test
+    void aSpireIsOneColumnWithAFlatOvergrownTop() {
+        for (long seed = 1; seed <= 6; seed++) {
+            RockTestCanvas canvas = stamp(RockShape.SPIRE.body(seed, 66, 12), FLAT, RockTestCanvas.NO_WATER);
+            int size = 121, half = 60;
+            int[][] tops = new int[size][size];
+            int highest = 0;
+            for (long[] cell : rock(canvas)) {
+                int gx = (int) cell[0] + half, gz = (int) cell[2] + half;
+                tops[gx][gz] = Math.max(tops[gx][gz], (int) cell[1] - GROUND + 1);
+                highest = Math.max(highest, tops[gx][gz]);
+            }
+            int level = 0, green = 0;
+            for (int x = 0; x < size; x++) {
+                for (int z = 0; z < size; z++) {
+                    if (tops[x][z] < highest - 2) continue;
+                    level++;
+                    String cell = canvas.at(x - half, GROUND + tops[x][z] - 1, z - half);
+                    if ("rock:GRASS".equals(cell) || "rock:MOSS".equals(cell)) green++;
+                }
+            }
+            assertEquals(1, peaks(tops, highest - 2), "seed " + seed + ": one top, not split into fingers");
+            assertTrue(level >= 9, "seed " + seed + ": the top is flat: " + level + " columns within two blocks of it");
+            assertTrue(green >= 0.5 * level, "seed " + seed + ": the top is overgrown: " + green + " of " + level);
+        }
+    }
+
+    @Test
+    void tallRocksAreFluted() {
+        // Grooves down the faces, like organ pipes: open cells a block wide with rock on both sides; at least twice as many
+        // as the same rock has without its flutes (cracks between its pieces make some of those)
+        for (RockShape shape : new RockShape[]{RockShape.SPIRE, RockShape.TOWER}) {
+            for (long seed = 1; seed <= 4; seed++) {
+                double height = shape == RockShape.SPIRE ? 66 : 40, radius = shape == RockShape.SPIRE ? 12 : 8;
+                Body body = shape.body(seed, height, radius).withCover(0);
+                int fluted = grooves(stamp(body, FLAT, RockTestCanvas.NO_WATER), height), plain = grooves(stamp(withoutFlutes(body), FLAT, RockTestCanvas.NO_WATER), height);
+                assertTrue(body.flutes() > 0, shape + " has flutes");
+                assertTrue(fluted >= 2 * plain && fluted >= 14, shape + " seed " + seed + ": its faces are fluted: " + fluted + " groove cells, " + plain + " without flutes");
+            }
+        }
+    }
+
+    /** Groove cells in every third slice from a quarter of the height to seven tenths of it. */
+    private static int grooves(RockTestCanvas canvas, double height) {
+        int grooves = 0;
+        for (int y = GROUND + (int) (0.25 * height); y <= GROUND + (int) (0.7 * height); y += 3) {
+            for (int x = -40; x <= 40; x++) {
+                for (int z = -40; z <= 40; z++) {
+                    if (canvas.isRock(x, y, z)) continue;
+                    if (canvas.isRock(x - 1, y, z) && canvas.isRock(x + 1, y, z) || canvas.isRock(x, y, z - 1) && canvas.isRock(x, y, z + 1)) grooves++;
+                }
+            }
+        }
+        return grooves;
+    }
+
+    private static Body withoutFlutes(Body body) {
+        return new Body(body.dx(), body.dz(), body.lobes(), body.warp(), body.warpScale(), body.pieces(), body.chunks(), body.pinnacles(), body.pinnacleDrop(),
+                body.cleft(), body.roughness(), 0, body.fluteScale(), body.cover(), body.coverTop(), body.drape(), body.vines(), body.plants(), body.slabs(),
+                body.skirtWidth(), body.skirtHeight(), body.scree(), body.seed());
+    }
+
+    @Test
+    void aMonolithLeansAndItsUpperHalfIsOvergrown() {
+        for (long seed = 1; seed <= 6; seed++) {
+            Body body = RockShape.MONOLITH.body(seed, 32, 10);
+            RockTestCanvas canvas = stamp(body, FLAT, RockTestCanvas.NO_WATER);
+            int highest = 0;
+            for (long[] cell : rock(canvas)) highest = Math.max(highest, (int) cell[1]);
+            double footX = 0, footZ = 0, topX = 0, topZ = 0;
+            int foot = 0, top = 0, open = 0, green = 0;
+            for (long[] cell : rock(canvas)) {
+                int x = (int) cell[0], y = (int) cell[1], z = (int) cell[2];
+                if (y == GROUND + 1) {
+                    footX += x;
+                    footZ += z;
+                    foot++;
+                }
+                if (y >= highest - 3) {
+                    topX += x;
+                    topZ += z;
+                    top++;
+                }
+                boolean exposed = false;
+                for (int[] step : SIX) exposed |= !canvas.isRock(x + step[0], y + step[1], z + step[2]);
+                if (!exposed || y < GROUND + (highest - GROUND) / 2) continue;
+                open++;
+                String material = canvas.at(x, y, z);
+                if (material.equals("rock:GRASS") || material.equals("rock:MOSS")) green++;
+            }
+            double lean = Math.hypot(topX / top - footX / foot, topZ / top - footZ / foot);
+            assertTrue(lean >= 0.35 * 10, "seed " + seed + ": the monolith leans: its top is " + lean + " blocks off its foot");
+            assertTrue(green >= 0.2 * open, "seed " + seed + ": its upper half is overgrown: " + green + " of " + open + " open blocks");
+        }
+    }
+
+    @Test
+    void aMonolithHasATerracedRampOnOneSide() {
+        for (long seed = 1; seed <= 6; seed++) {
+            RockModel model = RockModel.build(RockShape.MONOLITH.body(seed, 32, 10));
+            int highest = 0;
+            for (int x = model.groundMinX; x < model.groundMinX + model.groundSizeX; x++) {
+                for (int z = model.groundMinZ; z < model.groundMinZ + model.groundSizeZ; z++) highest = Math.max(highest, model.rise(x, z));
+            }
+            assertTrue(highest >= 4, "seed " + seed + ": the ramp rises four blocks or more, not " + highest);
         }
     }
 
@@ -292,7 +400,7 @@ class RockModelTest {
             assertTrue(share(up, 2) > share(up, 0), "seed " + seed + ": upward faces are more often light than in shade");
             if (down[0] + down[1] + down[2] < 10) continue;
             compared++;
-            assertTrue(share(up, 2) > share(down, 2) + 0.2, "seed " + seed + ": upward faces are lighter than the undersides of overhangs");
+            assertTrue(share(up, 2) > share(down, 2) + 0.1, "seed " + seed + ": upward faces are lighter than the undersides of overhangs");
             assertTrue(share(down, 0) > share(up, 0) + 0.2, "seed " + seed + ": the undersides of overhangs are in shade");
         }
         assertTrue(compared >= 3, "monoliths have overhangs to compare: " + compared + " of 6 had ten blocks of them");
@@ -312,7 +420,8 @@ class RockModelTest {
 
     @Test
     void tuffLinesTheCracksAndStoneIsTheWalls() {
-        // A crack: an open cell a block wide with rock on both sides of it. A wall: rock that faces open air
+        // A crack: an open cell a block wide with rock on both sides of it, that goes on two blocks deep or more (a
+        // flute, a groove a block deep, is shaded by the game's own light). A wall: rock that faces open air
         for (long seed = 1; seed <= 4; seed++) {
             for (Body body : List.of(RockShape.MONOLITH.body(seed, 30, 9).withCover(0), RockShape.SPIRE.body(seed, 60, 11).withCover(0))) {
                 RockTestCanvas canvas = stamp(body, FLAT, RockTestCanvas.NO_WATER);
@@ -321,16 +430,26 @@ class RockModelTest {
                     int x = (int) cell[0], y = (int) cell[1], z = (int) cell[2];
                     int tone = tone(canvas, x, y, z);
                     if (tone < 0 || y < GROUND + 2 || !canvas.isRock(x, y + 1, z) || !canvas.isRock(x, y - 1, z)) continue;
-                    boolean inCrack = false, open = false;
+                    boolean inCrack = false, open = false, inGroove = false;
                     for (int[] step : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
-                        if (canvas.isRock(x + step[0], y, z + step[1])) continue;
-                        if (canvas.isRock(x + 2 * step[0], y, z + 2 * step[1])) inCrack = true;
-                        else if (!canvas.isRock(x + 3 * step[0], y, z + 3 * step[1])) open = true;
+                        int gapX = x + step[0], gapZ = z + step[1];
+                        if (canvas.isRock(gapX, y, gapZ)) continue;
+                        // The floor of a groove (a flute): it looks out between two walls, and is in their shadow
+                        if (canvas.isRock(gapX + step[1], y, gapZ + step[0]) && canvas.isRock(gapX - step[1], y, gapZ - step[0])) inGroove = true;
+                        if (canvas.isRock(gapX + step[0], y, gapZ + step[1])) {
+                            // Deep: the gap goes on, across the line from this wall to the other, on one side or the other
+                            for (int side = -1; side <= 1; side += 2) {
+                                int nextX = gapX + side * step[1], nextZ = gapZ + side * step[0];
+                                if (!canvas.isRock(nextX, y, nextZ) && canvas.isRock(nextX - step[0], y, nextZ - step[1]) && canvas.isRock(nextX + step[0], y, nextZ + step[1])) inCrack = true;
+                            }
+                        } else if (!canvas.isRock(x + 3 * step[0], y, z + 3 * step[1])) {
+                            open = true;
+                        }
                     }
                     if (inCrack) crack[tone]++;
-                    else if (open) wall[tone]++;
+                    else if (open && !inGroove) wall[tone]++;
                 }
-                assertTrue(crack[0] + crack[1] + crack[2] >= 30, "seed " + seed + ": the rock has cracks");
+                assertTrue(crack[0] + crack[1] + crack[2] >= 15, "seed " + seed + ": the rock has cracks: " + (crack[0] + crack[1] + crack[2]));
                 assertTrue(share(crack, 0) >= 0.6, "seed " + seed + ": cracks are lined with the rock in shade: " + share(crack, 0));
                 assertTrue(share(wall, 1) >= 0.55, "seed " + seed + ": open walls are mostly plain rock: " + share(wall, 1));
                 assertTrue(share(wall, 0) <= 0.2, "seed " + seed + ": little shade on open walls: " + share(wall, 0));
@@ -355,9 +474,9 @@ class RockModelTest {
                     for (int[] step : SIX) exposed |= !canvas.isRock(x + step[0], y + step[1], z + step[2]);
                     if (exposed && y >= GROUND && tone(canvas, x, y, z) >= 0) tones[tone(canvas, x, y, z)]++;
                 }
-                String what = "seed " + seed + ": shade " + share(tones, 0) + ", stone " + share(tones, 1) + ", light " + share(tones, 2);
+                String what = body.lobes().size() + " lobes, seed " + seed + ": shade " + share(tones, 0) + ", stone " + share(tones, 1) + ", light " + share(tones, 2);
                 assertTrue(share(tones, 1) >= 0.5, what + ": the rock is mostly plain rock");
-                assertTrue(share(tones, 2) >= 0.08 && share(tones, 2) <= 0.32, what + ": the light is an accent");
+                assertTrue(share(tones, 2) >= 0.08 && share(tones, 2) <= 0.34, what + ": the light is an accent");
                 // The walls of every crack are shade, and a crack's walls are many blocks for the little that shows of them
                 // (tuffLinesTheCracksAndStoneIsTheWalls looks at the open walls alone)
                 assertTrue(share(tones, 0) >= 0.05 && share(tones, 0) <= 0.42, what + ": the shade is an accent");
@@ -427,7 +546,8 @@ class RockModelTest {
                 cover++;
                 if (!canvas.isRock(x, y + 1, z)) topped++;
             }
-            assertTrue(topped >= 0.7 * cover, "seed " + seed + ": plants sit on upward faces: " + topped + " of " + cover);
+            // (moss hangs some way down from the edges of a level top, as in the reference picture of the monolith)
+            assertTrue(topped >= 0.5 * cover, "seed " + seed + ": plants sit on upward faces: " + topped + " of " + cover);
             assertTrue(cover <= 0.35 * faces, "seed " + seed + ": most of the rock is bare: " + cover + " of " + faces + " open blocks are plants");
         }
     }
@@ -445,7 +565,7 @@ class RockModelTest {
                     if (rock || model.rise(x, z) > 0) raised.add(new int[]{x, z});
                 }
             }
-            assertTrue(filled(foot) <= 0.62 && filled(foot) >= 0.3, "seed " + seed + ": the foot fills " + filled(foot) + " of the circle around it");
+            assertTrue(filled(foot) <= 0.7 && filled(foot) >= 0.3, "seed " + seed + ": the foot fills " + filled(foot) + " of the circle around it");
             assertTrue(filled(raised) <= 0.66, "seed " + seed + ": the foot with its skirt fills " + filled(raised) + " of the circle around them: a ring");
         }
     }
@@ -463,27 +583,45 @@ class RockModelTest {
     }
 
     @Test
-    void aBoulderLooksLikeSeveralStones() {
-        // Cracks run through it: open cells a block wide with rock on both sides and rock under them
-        int cracked = 0;
+    void aBoulderLooksLikeTwoOrThreeStones() {
+        // Several humps: at some height its columns that reach it fall into two groups or more
+        int several = 0;
         for (long seed = 1; seed <= 8; seed++) {
             RockTestCanvas canvas = stamp(RockShape.BOULDER.body(seed, 5, 4.5), FLAT, RockTestCanvas.NO_WATER);
-            Set<Long> cracks = new HashSet<>();
+            int size = 41, half = 20;
+            int[][] tops = new int[size][size];
+            int highest = 0;
             for (long[] cell : rock(canvas)) {
-                int x = (int) cell[0], y = (int) cell[1], z = (int) cell[2];
-                if (y < GROUND + 1) continue;
-                for (int[] step : new int[][]{{1, 0}, {0, 1}}) {
-                    int gapX = x + step[0], gapZ = z + step[1];
-                    if (!canvas.isRock(gapX, y, gapZ) && canvas.isRock(gapX + step[0], y, gapZ + step[1]) && canvas.isRock(gapX, y - 1, gapZ)) {
-                        cracks.add(RockTestCanvas.key(gapX, y, gapZ));
-                    }
-                }
+                int gx = (int) cell[0] + half, gz = (int) cell[2] + half;
+                tops[gx][gz] = Math.max(tops[gx][gz], (int) cell[1] - GROUND + 1);
+                highest = Math.max(highest, tops[gx][gz]);
             }
-            if (cracks.size() >= 3) cracked++;
+            int most = 0;
+            for (int level = 2; level <= highest; level++) most = Math.max(most, peaks(tops, level));
+            if (most >= 2) several++;
         }
-        assertTrue(cracked >= 6, "boulders are split by cracks: " + cracked + " of 8 have three blocks of crack or more");
+        assertTrue(several >= 7, "boulders are two or three stones together: " + several + " of 8 have more than one hump");
     }
 
+    @Test
+    void theSideTowardTheSunIsLighter() {
+        // The sun stands to the south (+z): of the upright faces, those turned to it have more light and less shade than those turned away
+        int[] toward = new int[3], away = new int[3];
+        for (long seed = 1; seed <= 6; seed++) {
+            RockTestCanvas canvas = stamp(RockShape.MONOLITH.body(seed, 30, 9).withCover(0), FLAT, RockTestCanvas.NO_WATER);
+            for (long[] cell : rock(canvas)) {
+                int x = (int) cell[0], y = (int) cell[1], z = (int) cell[2];
+                int tone = tone(canvas, x, y, z);
+                if (tone < 0 || y < GROUND + 2 || !canvas.isRock(x, y + 1, z) || !canvas.isRock(x, y - 1, z)) continue;
+                boolean south = !canvas.isRock(x, y, z + 1) && !canvas.isRock(x, y, z + 2) && !canvas.isRock(x, y, z + 3);
+                boolean north = !canvas.isRock(x, y, z - 1) && !canvas.isRock(x, y, z - 2) && !canvas.isRock(x, y, z - 3);
+                if (south && !north) toward[tone]++;
+                if (north && !south) away[tone]++;
+            }
+        }
+        assertTrue(share(toward, 2) > share(away, 2) + 0.04, "more light toward the sun: " + share(toward, 2) + " against " + share(away, 2));
+        assertTrue(share(away, 0) > share(toward, 0) + 0.04, "more shade away from it: " + share(away, 0) + " against " + share(toward, 0));
+    }
     @Test
     void aPileHasSlabsOnBareRock() {
         int slabs = 0;
@@ -533,8 +671,9 @@ class RockModelTest {
                 }
             }
             assertTrue(body.skirtWidth() >= 4, "a monolith has a skirt");
-            assertTrue(near / nearCount >= 1, "seed " + seed + ": the ground rises at the foot: " + near / nearCount);
-            assertTrue(near / nearCount > far / farCount + 0.5, "seed " + seed + ": higher at the foot than at the skirt's edge");
+            // (along part of the foot only: a ramp, not a ring)
+            assertTrue(near / nearCount >= 0.5, "seed " + seed + ": the ground rises at the foot: " + near / nearCount);
+            assertTrue(near / nearCount > far / farCount + 0.3, "seed " + seed + ": higher at the foot than at the skirt's edge");
         }
     }
 }

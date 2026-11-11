@@ -22,7 +22,8 @@ import java.util.Set;
  *  "palette": {"shade": "minecraft:tuff", "light": "minecraft:andesite"}}
  * </pre>
  * A body has a {@code shape} ({@link RockShape}, in lower case) and may have: {@code count} (how many of it, 1),
- * {@code distance} (how far from the formation's middle each stands, 0), {@code height} and {@code radius} (the shape's
+ * {@code distance} (how far from the formation's middle each stands, 0), {@code angle} (where around the middle, in
+ * degrees from east toward south; left out, copies are spread around), {@code height} and {@code radius} (the shape's
  * own range of sizes), each a number or a range {@code [least, most]} that the seed picks from; and, in place of the
  * shape's own, {@code cover}, {@code vines}, {@code plants}, {@code scree} (0 to 1), {@code slabs} (true or false), and
  * {@code skirt} (how many times the shape's own skirt, 1).
@@ -36,7 +37,7 @@ import java.util.Set;
 public final class RockTemplate {
 
     private static final Set<String> KEYS = Set.of("bodies", "palette");
-    private static final Set<String> BODY_KEYS = Set.of("shape", "count", "distance", "height", "radius", "cover", "vines", "plants", "scree", "slabs", "skirt");
+    private static final Set<String> BODY_KEYS = Set.of("shape", "count", "distance", "angle", "height", "radius", "cover", "vines", "plants", "scree", "slabs", "skirt");
     private static final Map<String, RockMaterial> PALETTE_BLOCKS = Map.of("shade", RockMaterial.SHADE, "base", RockMaterial.BASE, "light", RockMaterial.LIGHT,
             "soil", RockMaterial.SOIL, "grass", RockMaterial.GRASS, "moss", RockMaterial.MOSS);
 
@@ -50,8 +51,8 @@ public final class RockTemplate {
         }
     }
 
-    private record BodySpec(RockShape shape, Range count, Range distance, Range height, Range radius, Double cover, Double vines, Double plants,
-                            Double scree, Boolean slabs, double skirt) {
+    private record BodySpec(RockShape shape, Range count, Range distance, Range angle, Range height, Range radius, Double cover, Double vines,
+                            Double plants, Double scree, Boolean slabs, double skirt) {
     }
 
     private final JsonObject json;
@@ -110,8 +111,9 @@ public final class RockTemplate {
                 long bodySeed = RockNoise.hash(specSeed, 10 + copy);
                 double height = spec.height.pick(RockNoise.hash(bodySeed, 1)), radius = spec.radius.pick(RockNoise.hash(bodySeed, 2));
                 double away = spec.distance.pick(RockNoise.hash(bodySeed, 3));
-                // Copies stand around the middle, each in its own part of the circle
-                double angle = turn + 2 * Math.PI * (copy + 0.7 * (RockNoise.unit(RockNoise.hash(bodySeed, 4)) - 0.5)) / count;
+                // Copies stand around the middle, each in its own part of the circle, unless the angle is given
+                double angle = spec.angle != null ? Math.toRadians(spec.angle.pick(RockNoise.hash(bodySeed, 4)))
+                        : turn + 2 * Math.PI * (copy + 0.7 * (RockNoise.unit(RockNoise.hash(bodySeed, 4)) - 0.5)) / count;
                 bodies.add(spec.shape.body(bodySeed, height, radius)
                         .with(spec.cover, spec.vines, spec.plants, spec.scree, spec.slabs, spec.skirt)
                         .at((int) Math.round(away * Math.cos(angle)), (int) Math.round(away * Math.sin(angle))));
@@ -145,6 +147,7 @@ public final class RockTemplate {
         }
         Range count = range(path + ".count", json, new Range(1, 1), true, false);
         Range distance = range(path + ".distance", json, new Range(0, 0), false, false);
+        Range angle = range(path + ".angle", json, null, false, false);
         Range height = range(path + ".height", json, new Range(shape.minHeight, shape.maxHeight), false, true);
         Range radius = range(path + ".radius", json, new Range(shape.minRadius, shape.maxRadius), false, true);
         Boolean slabs = null;
@@ -154,8 +157,8 @@ public final class RockTemplate {
             slabs = value.getAsBoolean();
         }
         double skirt = json.has("skirt") ? number(path + ".skirt", json.get("skirt"), 0, 4) : 1;
-        return new BodySpec(shape, count, distance, height, radius, share(path, json, "cover"), share(path, json, "vines"), share(path, json, "plants"),
-                share(path, json, "scree"), slabs, skirt);
+        return new BodySpec(shape, count, distance, angle, height, radius, share(path, json, "cover"), share(path, json, "vines"),
+                share(path, json, "plants"), share(path, json, "scree"), slabs, skirt);
     }
 
     private static String shapes() {

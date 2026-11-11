@@ -15,24 +15,24 @@ import java.util.List;
  * blocks of its origin), the large ones are for formations.
  */
 public enum RockShape {
-    /** A stone or two or three against each other, part in the ground: ellipsoids cut flat by planes and split by cracks. */
-    BOULDER(3, 6, 3.5, 5, 1.9, 0.25, 0.4, 0, 0.25, 0, 0.35),
-    /** A heap of boulders: a large one with smaller ones against it. */
-    PILE(3.5, 6, 4, 6, 1.5, 0.3, 0.45, 0, 0.25, 0, 0.6),
+    /** Two or three rounded stones against each other, part in the ground, with a low flat one or two beside them. */
+    BOULDER(5, 9, 3.5, 5, 2.0, 0.5, 0.15, 0, 0.3, 0, 0, 0.35),
+    /** A heap of boulders: a large one with smaller ones and flat ones against it. */
+    PILE(4, 7, 4.5, 6, 1.6, 0.5, 0.15, 0, 0.25, 0, 0, 0.5),
     /** A small angular outcrop: two or three upright lobes with flat sides. */
-    CRAG(8, 13, 3.5, 5, 1.36, 0.8, 0.6, 0.3, 0.2, 0, 0.6),
+    CRAG(8, 13, 3.5, 5, 1.36, 0.8, 0.4, 0.2, 0.2, 0.5, 0, 0.6),
     /** A rounded hill of rock, about as tall as it is wide, with a wide overgrown top. */
-    DOME(10, 18, 9, 14, 1.4, 1.5, 0.6, 0.35, 0.15, 5, 0.5),
-    /** A leaning egg of rock with a flat top and a smaller lobe or two at its foot. */
-    MONOLITH(26, 38, 8, 11, 1.78, 1.4, 1.0, 0.25, 0.15, 8, 0.6),
-    /** An upright tower with a flat top. */
-    TOWER(30, 46, 7, 10, 1.48, 1.2, 1.1, 0.25, 0.15, 7, 0.5),
+    DOME(10, 18, 9, 14, 1.4, 1.5, 0.4, 0.2, 0.15, 0.3, 5, 0.5),
+    /** A leaning egg of rock: one side upright, the other a slope down to a lower lobe, overgrown from the top down. */
+    MONOLITH(26, 38, 8, 11, 2.3, 1.4, 0.2, 0.12, 0.12, 0.4, 10, 0.6),
+    /** An upright tower with a flat overgrown top and fluted sides. */
+    TOWER(30, 46, 7, 10, 1.48, 1.2, 0.2, 0.12, 0.12, 1.4, 7, 0.5),
     /** A thin, leaning pinnacle. */
-    NEEDLE(18, 34, 2.5, 4.5, 2.25, 0.6, 0.5, 0.3, 0.15, 3, 0.4),
-    /** A great spire split into pinnacles of different heights, with clefts between them. */
-    SPIRE(55, 85, 10, 14, 1.6, 1.8, 1.3, 0.3, 0.15, 9, 0.6),
-    /** A wide mass with upright cliffs and several tops. */
-    MASSIF(38, 56, 18, 26, 1.45, 3, 1.5, 0.5, 0.15, 10, 0.6);
+    NEEDLE(18, 34, 2.5, 4.5, 2.25, 0.6, 0.25, 0.15, 0.15, 0.5, 3, 0.4),
+    /** A great spire: one fluted column with a flat overgrown top, a needle standing beside it. */
+    SPIRE(55, 85, 10, 14, 2.3, 1.2, 0.25, 0.12, 0.12, 1.2, 9, 0.6),
+    /** A wide mass with upright fluted cliffs and several tops. */
+    MASSIF(38, 56, 18, 26, 1.45, 3, 0.5, 0.2, 0.12, 1.0, 10, 0.6);
 
     /** The sizes a shape looks right at. */
     public final double minHeight, maxHeight, minRadius, maxRadius;
@@ -40,10 +40,12 @@ public enum RockShape {
     private final double spread;
     /** The most its outline is pushed out by its bulges, its pieces and its chunks. */
     private final double warp, pieceDepth, chunkDepth, roughness;
+    /** How deep the grooves down its faces are. */
+    private final double flutes;
     private final double skirtWidth, scree;
 
     RockShape(double minHeight, double maxHeight, double minRadius, double maxRadius, double spread, double warp, double pieceDepth, double chunkDepth,
-              double roughness, double skirtWidth, double scree) {
+              double roughness, double flutes, double skirtWidth, double scree) {
         this.minHeight = minHeight;
         this.maxHeight = maxHeight;
         this.minRadius = minRadius;
@@ -53,6 +55,7 @@ public enum RockShape {
         this.pieceDepth = pieceDepth;
         this.chunkDepth = chunkDepth;
         this.roughness = roughness;
+        this.flutes = flutes;
         this.skirtWidth = skirtWidth;
         this.scree = scree;
     }
@@ -72,9 +75,17 @@ public enum RockShape {
         return Math.min(this.warp, radius / 5);
     }
 
-    /** The few large pieces a body is broken into: about its radius across, standing in and out by a share of it. */
-    private Fracture pieces(double size, double tall, double depth, double gape) {
-        return new Fracture(size, tall, Math.min(depth, this.pieceDepth), this == BOULDER || this == PILE ? 1 : 0.7, gape);
+    /**
+     * The few large pieces a body is broken into: about its radius across, each standing a little in or out, with a
+     * crack along some of the borders between them.
+     */
+    private Fracture pieces(double size, double tall, double gape) {
+        return new Fracture(size, tall, this.pieceDepth, this == BOULDER || this == PILE ? 0.18 : 0.3, gape);
+    }
+
+    /** The small plates a face is broken into: a faint relief, with a rare crack. */
+    private Fracture chunks(double size, double tall) {
+        return new Fracture(size, tall, this.chunkDepth, 0.08, 1.2);
     }
 
     /** A body of this shape, {@code height} blocks tall and {@code radius} across at its widest lobe. */
@@ -84,27 +95,30 @@ public enum RockShape {
         double warp = this.warp(radius);
         return switch (this) {
             case BOULDER -> {
-                lobes.add(blob(dice, 0, 0, height, radius));
-                // More often than not a smaller stone or two lean against it
-                int more = dice.chance(0.7) ? dice.whole(1, 2) : 0;
+                lobes.add(mound(dice, 0, 0, height, radius));
+                // A smaller stone or two lean against it, far enough out to be stones of their own
+                int more = dice.whole(1, 2);
                 double turn = dice.angle();
                 for (int index = 0; index < more; index++) {
-                    double angle = turn + Math.PI * index + dice.between(-0.7, 0.7), away = radius * dice.between(0.65, 0.95), size = dice.between(0.5, 0.75);
-                    lobes.add(blob(dice, away * Math.cos(angle), away * Math.sin(angle), height * size * dice.between(0.9, 1.1), radius * size));
+                    double size = dice.between(0.5, 0.7), angle = turn + 2.2 * index + dice.between(-0.4, 0.4), away = radius * (1 + size) * dice.between(0.88, 1.02);
+                    lobes.add(mound(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.55, 0.85), radius * size));
                 }
-                yield new Body(0, 0, lobes, warp, 5, this.pieces(Math.max(3, 1.1 * radius), 0.85, 0.4, 1.6), Fracture.NONE,
-                        0, 0, 0, this.roughness, 0.18, 0.3, 1, 0.03, 0.3, true, 0, 0, this.scree, seed);
+                plates(dice, lobes, dice.whole(0, 2), radius, turn + Math.PI);
+                yield new Body(0, 0, fit(lobes, this.spread * radius), warp, Math.max(4, radius), this.pieces(Math.max(3.5, 1.2 * radius), 0.85, 1.2), Fracture.NONE,
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.14, 0.3, 1, 0.03, 0.3, true, 0, 0, this.scree, seed);
             }
             case PILE -> {
-                lobes.add(blob(dice, 0, 0, height, 0.62 * radius));
+                lobes.add(mound(dice, 0, 0, height, 0.7 * radius));
                 int more = dice.whole(3, 5);
                 double turn = dice.angle();
                 for (int index = 0; index < more; index++) {
-                    double angle = turn + 2 * Math.PI * (index + dice.between(-0.3, 0.3)) / more, away = radius * dice.between(0.5, 0.85);
-                    lobes.add(blob(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.45, 0.8), radius * dice.between(0.28, 0.5)));
+                    double size = dice.between(0.3, 0.5), angle = turn + 2 * Math.PI * (index + dice.between(-0.3, 0.3)) / more;
+                    double away = radius * (0.7 + size) * dice.between(0.7, 0.9);
+                    lobes.add(mound(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.4, 0.75), radius * size));
                 }
-                yield new Body(0, 0, lobes, warp, 5, this.pieces(Math.max(3, 0.75 * radius), 0.85, 0.45, 1.6), Fracture.NONE,
-                        0, 0, 0, this.roughness, 0.22, 0.3, 1, 0.04, 0.3, true, 0, 0, this.scree, seed);
+                plates(dice, lobes, dice.whole(1, 3), radius, turn);
+                yield new Body(0, 0, fit(lobes, this.spread * radius), warp, Math.max(4, radius), this.pieces(Math.max(3.5, 0.8 * radius), 0.85, 1.2), Fracture.NONE,
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.18, 0.3, 1, 0.04, 0.3, true, 0, 0, this.scree, seed);
             }
             case CRAG -> {
                 double lean = dice.angle();
@@ -117,8 +131,8 @@ public enum RockShape {
                     lobes.add(column(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.45, 0.75), radius * dice.between(0.45, 0.6),
                             dice.between(0.9, 1.1), 0, 0, dice.between(2.5, 3.2), 0, 0, 0, 0.1, dice.whole(5, 7), 0.22));
                 }
-                yield new Body(0, 0, lobes, warp, 8, this.pieces(Math.max(3, 0.9 * radius), 1.3, 0.6, 2), new Fracture(3, 1.3, this.chunkDepth, 0.12, 1.2),
-                        0, 0, 0, this.roughness, 0.4, 0.5, 1, 0.1, 0.35, true, this.skirtWidth, 1.5, this.scree, seed);
+                yield new Body(0, 0, lobes, warp, 8, this.pieces(Math.max(3, 0.9 * radius), 1.3, 2), this.chunks(3, 1.3),
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.45, 0.5, 2, 0.1, 0.35, true, 0, 0, this.scree, seed);
             }
             case DOME -> {
                 double lean = dice.angle();
@@ -129,55 +143,59 @@ public enum RockShape {
                     lobes.add(column(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.4, 0.65), radius * dice.between(0.35, 0.5),
                             dice.between(0.9, 1.1), 0, 0, 2.2, 0, 0, 0.1, 0.14, 0, 0));
                 }
-                yield new Body(0, 0, lobes, warp, Math.max(10, radius), this.pieces(0.8 * radius, 0.9, 0.9, 2.2), new Fracture(4.5, 0.9, this.chunkDepth, 0.12, 1.2),
-                        0, 0, 0, this.roughness, 0.75, 0.5, 2, 0.12, 0.45, false, this.skirtWidth, 2, this.scree, seed);
+                yield new Body(0, 0, lobes, warp, Math.max(10, radius), this.pieces(0.8 * radius, 0.9, 2.2), this.chunks(4.5, 0.9),
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.8, 0.5, 3, 0.12, 0.45, false, this.skirtWidth, 2, this.scree, seed);
             }
             case MONOLITH -> {
-                double lean = dice.angle(), far = radius * dice.between(0.2, 0.4);
-                lobes.add(column(dice, 0, 0, height, radius, dice.between(0.6, 0.9), far * Math.cos(lean), far * Math.sin(lean), dice.between(2.6, 3.4),
-                        dice.between(0.06, 0.12), 0, dice.between(0.16, 0.26), dice.between(0.1, 0.15), dice.whole(5, 7), dice.between(0.12, 0.22)));
+                double lean = dice.angle(), far = radius * dice.between(0.65, 0.9);
+                lobes.add(column(dice, 0, 0, height, radius, dice.between(0.65, 0.9), far * Math.cos(lean), far * Math.sin(lean), dice.between(2.2, 2.8),
+                        dice.between(0.12, 0.2), -dice.between(0.04, 0.1), dice.between(0.22, 0.32), dice.between(0.1, 0.14), dice.whole(5, 7), dice.between(0.08, 0.15)));
+                // The lower lobe on the side the top leans away from: the slope the plants climb
                 int more = dice.chance(0.35) ? 2 : 1;
-                double turn = dice.angle();
                 for (int index = 0; index < more; index++) {
-                    double angle = turn + Math.PI * index + dice.between(-0.6, 0.6), away = radius * dice.between(0.6, 0.75);
-                    lobes.add(column(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.25, 0.42), radius * dice.between(0.45, 0.65),
-                            dice.between(0.75, 1.0), 0, 0, 2.4, 0, 0, 0.1, 0.1, dice.whole(4, 6), 0.15));
+                    double angle = lean + Math.PI + dice.between(-0.6, 0.6) + (index == 0 ? 0 : (dice.chance(0.5) ? 1.4 : -1.4));
+                    double away = radius * dice.between(0.78, 0.92);
+                    lobes.add(column(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.3, 0.45), radius * dice.between(0.48, 0.62),
+                            dice.between(0.75, 1.0), 0, 0, 2.4, 0, 0, 0.1, 0.1, dice.whole(4, 6), 0.12));
                 }
-                yield new Body(0, 0, lobes, warp, 15, this.pieces(0.95 * radius, 1.4, Math.max(0.7, 0.11 * radius), 2.5), new Fracture(5, 1.6, this.chunkDepth, 0.12, 1.4),
-                        0, 0, 0, this.roughness, 0.6, 0.7, 2, 0.2, 0.45, false, this.skirtWidth, 3, this.scree, seed);
+                yield new Body(0, 0, lobes, warp, 15, this.pieces(0.95 * radius, 1.4, 2.2), this.chunks(5, 1.6),
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.95, 1.3, 5, 0.2, 0.5, false, this.skirtWidth, 6, this.scree, seed);
             }
             case TOWER -> {
                 double lean = dice.angle(), far = radius * dice.between(0.1, 0.25);
-                lobes.add(column(dice, 0, 0, height, radius, dice.between(0.7, 0.98), far * Math.cos(lean), far * Math.sin(lean), dice.between(4.5, 6),
+                lobes.add(column(dice, 0, 0, height, radius, dice.between(0.7, 0.98), far * Math.cos(lean), far * Math.sin(lean), dice.between(6, 8),
                         dice.between(0.04, 0.08), 0, dice.between(0.08, 0.15), dice.between(0.07, 0.11), dice.whole(5, 7), dice.between(0.1, 0.18)));
                 if (dice.chance(0.6)) {
                     double angle = dice.angle(), away = 0.7 * radius;
                     lobes.add(column(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.25, 0.4), radius * dice.between(0.5, 0.6),
                             dice.between(0.8, 1.0), 0, 0, 3, 0, 0, 0.1, 0.1, dice.whole(4, 6), 0.15));
                 }
-                yield new Body(0, 0, lobes, warp, 14, this.pieces(radius, 1.6, Math.max(0.7, 0.11 * radius), 2.5), new Fracture(5, 1.8, this.chunkDepth, 0.12, 1.4),
-                        0, 0, 0, this.roughness, 0.6, 0.8, 2, 0.25, 0.45, false, this.skirtWidth, 3, this.scree, seed);
+                yield new Body(0, 0, lobes, warp, 14, this.pieces(radius, 1.6, 2.5), this.chunks(5, 1.8),
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.75, 0.9, 4, 0.25, 0.45, false, this.skirtWidth, 2.5, this.scree, seed);
             }
             case NEEDLE -> {
                 double lean = dice.angle(), far = radius * dice.between(0.5, 1.2);
                 lobes.add(column(dice, 0, 0, height, radius, dice.between(0.8, 1.0), far * Math.cos(lean), far * Math.sin(lean), dice.between(3, 4.5), 0, 0,
                         0, 0.05, dice.whole(4, 5), 0.15));
-                yield new Body(0, 0, lobes, warp, 10, this.pieces(Math.max(3.5, 1.6 * radius), 2.2, 0.5, 2), new Fracture(3.5, 2.0, this.chunkDepth, 0.12, 1.2),
-                        0, 0, 0, this.roughness, 0.35, 0.6, 1, 0.15, 0.3, false, this.skirtWidth, 1.5, this.scree, seed);
+                yield new Body(0, 0, lobes, warp, 10, this.pieces(Math.max(3.5, 1.6 * radius), 2.2, 2), this.chunks(3.5, 2),
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.35, 0.6, 1, 0.15, 0.3, false, this.skirtWidth, 1.5, this.scree, seed);
             }
             case SPIRE -> {
-                double lean = dice.angle(), far = radius * dice.between(0.1, 0.3);
-                lobes.add(column(dice, 0, 0, height, radius, dice.between(0.8, 1.08), far * Math.cos(lean), far * Math.sin(lean), dice.between(5.5, 7), 0.05, 0,
-                        dice.between(0.1, 0.15), dice.between(0.04, 0.07), dice.whole(5, 7), 0.12));
-                int more = dice.whole(1, 3);
-                double turn = dice.angle();
-                for (int index = 0; index < more; index++) {
-                    double angle = turn + 2 * Math.PI * (index + dice.between(-0.25, 0.25)) / more, away = radius * dice.between(0.6, 0.8);
-                    lobes.add(column(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.3, 0.6), radius * dice.between(0.45, 0.6),
-                            dice.between(0.8, 1.0), 0, 0, 4, 0, 0, 0.1, 0.08, dice.whole(4, 6), 0.15));
+                double lean = dice.angle(), far = radius * dice.between(0.05, 0.2);
+                lobes.add(column(dice, 0, 0, height, radius, dice.between(0.8, 1.05), far * Math.cos(lean), far * Math.sin(lean), dice.between(8, 11), 0.04, 0.12,
+                        dice.between(0.08, 0.14), dice.between(0.05, 0.08), dice.whole(5, 7), 0.1));
+                // A needle beside it, a gap of a few blocks between them above their feet
+                double angle = dice.angle(), away = radius * dice.between(1.4, 1.55);
+                lobes.add(column(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.4, 0.62), radius * dice.between(0.28, 0.38),
+                        dice.between(0.85, 1.0), 0, 0, dice.between(2.4, 3.2), 0, 0.1, 0.08, 0.02, dice.whole(4, 5), 0.12));
+                // Now and then a low shoulder on another side
+                if (dice.chance(0.5)) {
+                    double side = angle + Math.PI + dice.between(-0.8, 0.8), out = radius * dice.between(0.6, 0.75);
+                    lobes.add(column(dice, out * Math.cos(side), out * Math.sin(side), height * dice.between(0.15, 0.3), radius * dice.between(0.45, 0.6),
+                            dice.between(0.8, 1.0), 0, 0, 2.4, 0, 0, 0.1, 0.1, dice.whole(4, 6), 0.15));
                 }
-                yield new Body(0, 0, lobes, warp, 18, this.pieces(0.9 * radius, 1.8, Math.max(0.9, 0.1 * radius), 2.6), new Fracture(5.5, 1.8, this.chunkDepth, 0.12, 1.5),
-                        radius * dice.between(0.9, 1.25), dice.between(0.3, 0.45), dice.between(0.9, 1.4), this.roughness, 0.55, 0.8, 2, 0.25, 0.4, false,
+                yield new Body(0, 0, lobes, warp, 18, this.pieces(0.9 * radius, 1.8, 2.6), this.chunks(5.5, 1.8),
+                        0, 0, 0, this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.7, 0.9, 3, 0.25, 0.4, false,
                         this.skirtWidth, 4, this.scree, seed);
             }
             case MASSIF -> {
@@ -191,22 +209,61 @@ public enum RockShape {
                     lobes.add(column(dice, away * Math.cos(angle), away * Math.sin(angle), height * dice.between(0.7, 0.95), radius * dice.between(0.5, 0.7),
                             dice.between(0.85, 1.15), 0, 0, dice.between(6, 8), 0.04, 0, dice.between(0.08, 0.12), dice.between(0.05, 0.1), dice.whole(5, 7), 0.1));
                 }
-                yield new Body(0, 0, lobes, warp, 24, this.pieces(0.6 * radius, 1.6, Math.max(1.1, 0.07 * radius), 2.8), new Fracture(6, 1.6, this.chunkDepth, 0.12, 1.5),
-                        radius * dice.between(0.6, 0.85), dice.between(0.2, 0.35), dice.between(1.0, 1.6), this.roughness, 0.8, 0.9, 2, 0.25, 0.5, false,
-                        this.skirtWidth, 5, this.scree, seed);
+                yield new Body(0, 0, lobes, warp, 24, this.pieces(0.6 * radius, 1.6, 2.8), this.chunks(6, 1.6),
+                        radius * dice.between(0.8, 1.1), dice.between(0.35, 0.5), dice.between(0.7, 1.2), this.roughness, this.flutes, Math.max(3.2, 0.32 * radius), 0.85, 0.9, 4, 0.25, 0.5, false,
+                        this.skirtWidth, 3, this.scree, seed);
             }
         };
     }
 
     /**
-     * A boulder that stands {@code height} above the ground: the upper half of an ellipsoid whose middle lies about at
-     * the ground, so that its sides slope in from the foot up, cut by six to nine planes of which the last is its flat
-     * top. The ellipsoid is a little larger than asked, as the planes take that much off again.
+     * A rounded stone that stands {@code height} above the ground: a column whose sides draw in from the foot up to a
+     * blunt point, a rounded cone (a low {@code shoulder} and {@code cap}), as a boulder half sunk in the ground is;
+     * a little out of round, its top off its middle.
      */
-    private static Lobe blob(Dice dice, double x, double z, double height, double radius) {
-        double middle = height * dice.between(-0.05, 0.15);
-        return new Lobe(true, x, z, 2.2 * (height - middle), middle, 1.1 * radius, dice.between(0.75, 1.15), dice.angle(), 0, 0, 1, 2, 2, 0, 0, 0, 0, 0,
-                dice.whole(6, 9), dice.between(0.15, 0.3), dice.next());
+    private static Lobe mound(Dice dice, double x, double z, double height, double radius) {
+        double lean = dice.angle(), far = radius * dice.between(0.15, 0.4);
+        return new Lobe(false, x, z, height, 0, radius, dice.between(0.8, 1.2), dice.angle(), far * Math.cos(lean), far * Math.sin(lean), 1.2,
+                dice.between(1.4, 1.7), 1.3, 0, 0.3, 0, dice.between(0.06, 0.16), 0, 0, 0, dice.next());
+    }
+
+    /** Low flat stones beside a boulder: a block or two high, cut to angular plates; slabs make their layers thin. */
+    private static void plates(Dice dice, List<Lobe> lobes, int count, double radius, double turn) {
+        for (int index = 0; index < count; index++) {
+            double size = radius * dice.between(0.4, 0.6), angle = turn + 1.9 * index + dice.between(-0.5, 0.5), away = radius * dice.between(0.9, 1.25);
+            double height = dice.between(1.2, 2.2);
+            lobes.add(new Lobe(true, away * Math.cos(angle), away * Math.sin(angle), 2.2 * height, 0.05, 1.05 * size, dice.between(0.7, 1.3), dice.angle(),
+                    0, 0, 1, 2, 2, 0, 0, 0, 0, 0, dice.whole(5, 7), dice.between(0.15, 0.3), dice.next()));
+        }
+    }
+
+    /**
+     * The lobes moved so that the rectangle around them has its middle at the body's, and drawn in toward it if they
+     * still reach further than {@code limit}: a feature's rock must fit around its origin.
+     */
+    private static List<Lobe> fit(List<Lobe> lobes, double limit) {
+        double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE, minZ = Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
+        for (Lobe lobe : lobes) {
+            double reach = lobe.radius() * Math.max(1, lobe.aspect());
+            minX = Math.min(minX, lobe.x() - reach);
+            maxX = Math.max(maxX, lobe.x() + reach);
+            minZ = Math.min(minZ, lobe.z() - reach);
+            maxZ = Math.max(maxZ, lobe.z() + reach);
+        }
+        double middleX = (minX + maxX) / 2, middleZ = (minZ + maxZ) / 2;
+        double scale = 1;
+        for (Lobe lobe : lobes) {
+            double reach = lobe.radius() * Math.max(1, lobe.aspect());
+            double far = Math.max(Math.abs(lobe.x() - middleX), Math.abs(lobe.z() - middleZ));
+            if (far + reach > limit && far > 0) scale = Math.min(scale, Math.max(limit - reach, 0) / far);
+        }
+        List<Lobe> fitted = new ArrayList<>();
+        for (Lobe lobe : lobes) {
+            fitted.add(new Lobe(lobe.blob(), (lobe.x() - middleX) * scale, (lobe.z() - middleZ) * scale, lobe.height(), lobe.centerY(), lobe.radius(),
+                    lobe.aspect(), lobe.rotation(), lobe.leanX(), lobe.leanZ(), lobe.leanCurve(), lobe.cap(), lobe.shoulder(), lobe.bulge(), lobe.bulgeAt(),
+                    lobe.foot(), lobe.lobing(), lobe.plateau(), lobe.facets(), lobe.facetDepth(), lobe.seed()));
+        }
+        return fitted;
     }
 
     private static Lobe column(Dice dice, double x, double z, double height, double radius, double aspect, double leanX, double leanZ, double cap,

@@ -52,6 +52,12 @@ public final class RockModel {
     public static final int NONE = Integer.MIN_VALUE;
     /** The bit of a cell that makes it a slab of its material. */
     private static final int SLAB = 0x40;
+    /**
+     * Where the sun stands for the rocks' shading, level with the ground: to the south and a little east, in every
+     * rock alike. The game lights north and south faces better than east and west ones; this turns one of the two
+     * toward the light.
+     */
+    private static final double SUN_X = 0.38, SUN_Z = 0.92;
     /** How far lobes blend into each other where they meet, in blocks. */
     private static final double FUSE = 2.5;
     private static final int[][] SIDES = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
@@ -66,7 +72,10 @@ public final class RockModel {
     /** Per lobe: where around it its two and its three swellings lie. */
     private final double[][] swells;
     private final long tallest;
-    private final RockNoise.Cells plan = new RockNoise.Cells(), piece = new RockNoise.Cells(), chunk = new RockNoise.Cells();
+    private final RockNoise.Cells plan = new RockNoise.Cells(), piece = new RockNoise.Cells(), chunk = new RockNoise.Cells(), column = new RockNoise.Cells();
+    private double faceX, faceY, faceZ;
+    /** The size across of the columns whose joints are the flutes, in blocks (0: none). */
+    private final double flutes;
 
     public final int minX, minY, minZ, sizeX, sizeY, sizeZ;
     private final byte[] cells;
@@ -83,13 +92,14 @@ public final class RockModel {
         double top = 0, maxRadius = 0;
         double x0 = Double.MAX_VALUE, x1 = -Double.MAX_VALUE, z0 = Double.MAX_VALUE, z1 = -Double.MAX_VALUE, y0 = -2;
         this.reach = body.warp() + body.pieces().depth() + body.chunks().depth() + body.roughness() + 0.5;
+        this.flutes = body.flutes() > 0 ? Math.max(1, body.fluteScale()) : 0;
         this.facets = new double[body.lobes().size()][];
         this.swells = new double[body.lobes().size()][];
         for (int index = 0; index < body.lobes().size(); index++) {
             Lobe lobe = body.lobes().get(index);
             double lobeTop = lobe.blob() ? lobe.centerY() + lobe.height() / 2 : lobe.height() * (1 - lobe.plateau());
             top = Math.max(top, lobeTop);
-            double radius = lobe.radius() * Math.max(1, lobe.aspect()) * (1 + Math.max(lobe.bulge(), 0) + lobe.foot() + lobe.lobing());
+            double radius = lobe.radius() * Math.max(1, lobe.aspect()) * (1 + Math.max(lobe.bulge(), 0) + Math.max(lobe.foot(), 0) + lobe.lobing());
             this.swells[index] = new double[]{2 * Math.PI * RockNoise.unit(RockNoise.hash(lobe.seed(), 7)), 2 * Math.PI * RockNoise.unit(RockNoise.hash(lobe.seed(), 8))};
             maxRadius = Math.max(maxRadius, radius);
             x0 = Math.min(x0, Math.min(lobe.x(), lobe.x() + lobe.leanX()) - radius);
@@ -237,6 +247,15 @@ public final class RockModel {
             if (body.roughness() > 0) density += body.roughness() * RockNoise.noise(this.seed + 4, x / 2.6, y / 2.6, z / 2.6);
             if (pieces.size() > 0) density = crack(pieces, this.piece, density);
             if (chunks.size() > 0) density = crack(chunks, this.chunk, density);
+            if (this.flutes > 0) {
+                // Columns: the cells of a Voronoi diagram over the ground plan, a few blocks across, as columnar rock is
+                // jointed; the joints between them are grooves a block wide down the faces, wandering a little with height
+                double wanderX = 0.8 * RockNoise.noise(this.seed + 56, y / 11, 0.5, 3.5), wanderZ = 0.8 * RockNoise.noise(this.seed + 57, y / 11, 7.5, 1.5);
+                RockNoise.cells(this.seed + 58, x + wanderX, z + wanderZ, this.flutes, this.column);
+                // Not across the top: the joints fade out in its last few blocks, where plants grow on it
+                double depth = body.flutes() * RockNoise.smoothstep(this.top - 0.5, this.top - 5, y);
+                if (depth > 0) density = Math.min(density, Math.max(this.column.edge - 0.45, density - depth));
+            }
         }
         return Math.min(density, cleft);
     }
@@ -253,9 +272,14 @@ public final class RockModel {
         RockNoise.cells(this.seed + 52, x + wanderX, z + wanderZ, this.body.pinnacles(), this.plan);
     }
 
-    /** The share of the body's height this pinnacle is lower by: none for the tallest, at least a quarter of the most for the rest. */
+    /**
+     * The share of the body's height this pinnacle is lower by: none for the tallest; of the rest, four in five stand
+     * nearly as tall (a twentieth to an eighth lower), the others much lower, up to the body's most: shoulders.
+     */
     private double drop(long pinnacle) {
-        return pinnacle == this.tallest ? 0 : this.body.pinnacleDrop() * (0.25 + 0.75 * RockNoise.unit(RockNoise.mix(pinnacle + 5)));
+        if (pinnacle == this.tallest) return 0;
+        double roll = RockNoise.unit(RockNoise.mix(pinnacle + 5));
+        return roll < 0.82 ? 0.05 + 0.075 * roll / 0.82 : 0.25 + (this.body.pinnacleDrop() - 0.25) * (roll - 0.82) / 0.18;
     }
 
     private double outline(double x, double y, double z, double heightScale) {
@@ -351,7 +375,7 @@ public final class RockModel {
             planes[facet * 4 + 1] = up;
             planes[facet * 4 + 2] = level * Math.sin(turn);
             // A boulder's flat top is cut less deep than its sides, so that it stays about as tall as asked
-            double deep = lobe.blob() && facet == lobe.facets() - 1 ? 0.3 + 0.3 * RockNoise.unit(RockNoise.mix(hash + 2)) : 0.3 + 0.7 * RockNoise.unit(RockNoise.mix(hash + 2));
+            double deep = lobe.blob() && facet == lobe.facets() - 1 ? 0.2 + 0.3 * RockNoise.unit(RockNoise.mix(hash + 2)) : 0.3 + 0.7 * RockNoise.unit(RockNoise.mix(hash + 2));
             planes[facet * 4 + 3] = 1 - lobe.facetDepth() * deep;
         }
         return planes;
@@ -477,6 +501,12 @@ public final class RockModel {
 
     /** How much an open cell faces up: 1 on level rock, 0 on an upright face, negative under an overhang. */
     private double upness(BitSet solid, int x, int y, int z) {
+        this.face(solid, x, y, z);
+        return this.faceY;
+    }
+
+    /** Which way an open cell faces, into {@link #faceX}, {@link #faceY} and {@link #faceZ}: the open cells around it pull it their way. */
+    private void face(BitSet solid, int x, int y, int z) {
         double nx = 0, ny = 0, nz = 0;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
@@ -490,20 +520,20 @@ public final class RockModel {
             }
         }
         double length = Math.sqrt(nx * nx + ny * ny + nz * nz);
-        return length < 1e-6 ? 0 : ny / length;
+        this.faceX = length < 1e-6 ? 0 : nx / length;
+        this.faceY = length < 1e-6 ? 0 : ny / length;
+        this.faceZ = length < 1e-6 ? 0 : nz / length;
     }
 
     /**
-     * Whether a cell looks into a crack: a gap a block wide with rock again right behind it, that runs on for another
-     * block at least (up, down or along): a slot, not a notch where two steps meet.
+     * Whether a cell looks into a crack: a gap a block wide with rock again right behind it, that goes on two blocks
+     * deep or more (across, from the face in). A flute, a groove a block deep, isn't one: the game's own light shades it.
      */
     private boolean inCrack(BitSet solid, int x, int y, int z) {
         for (int[] side : SIDES) {
             int dx = side[0], dz = side[1];
             if (!this.slot(solid, x + dx, y, z + dz, dx, dz)) continue;
-            // Along the gap: the other level direction, and up and down
-            if (this.slot(solid, x + dx + dz, y, z + dz + dx, dx, dz) || this.slot(solid, x + dx - dz, y, z + dz - dx, dx, dz)
-                    || this.slot(solid, x + dx, y + 1, z + dz, dx, dz) || this.slot(solid, x + dx, y - 1, z + dz, dx, dz)) return true;
+            if (this.slot(solid, x + dx + dz, y, z + dz + dx, dx, dz) || this.slot(solid, x + dx - dz, y, z + dz - dx, dx, dz)) return true;
         }
         return false;
     }
@@ -515,8 +545,8 @@ public final class RockModel {
 
     private RockMaterial rock(BitSet solid, int x, int y, int z) {
         double cx = x + 0.5, cy = y + 0.5, cz = z + 0.5;
-        // Streaks of lighter rock down the faces, for texture: a noise drawn out along the height
-        double streak = RockNoise.noise(this.seed + 13, cx / 3.2, cy / 9.0, cz / 3.2) + 0.5 * RockNoise.noise(this.seed + 17, cx / 1.3, cy / 2.6, cz / 1.3);
+        // Streaks of lighter rock down the faces, for texture: a noise drawn far out along the height
+        double streak = RockNoise.noise(this.seed + 13, cx / 3.2, cy / 14.0, cz / 3.2) + 0.5 * RockNoise.noise(this.seed + 17, cx / 1.3, cy / 3.5, cz / 1.3);
         double grain = 2 * RockNoise.unit(RockNoise.hash(this.seed + 12, x, y, z)) - 1;
         if (this.neighbours(solid, x, y, z) == 6) {
             // Inside, where no light tells: the streaks alone, for whoever digs in
@@ -535,14 +565,25 @@ public final class RockModel {
             }
         }
         double openness = Math.clamp(((double) open / all - 0.47) / 0.25, -1, 1);
-        double up = this.upness(solid, x, y, z);
-        // Shade: what faces down, and what is shut in
+        this.face(solid, x, y, z);
+        double up = this.faceY;
+        // How much the face is turned toward the sun, or away from it (negative)
+        double sun = this.faceX * SUN_X + this.faceZ * SUN_Z;
+        // Shade: what faces down, what is shut in (the creases where two stones meet), and on the side turned from the sun
+        // its foot and patches of its face
         double shadow = -0.5 * openness - 0.7 * up + 0.08 * grain;
-        if (up < -0.35 || shadow > 0.42) return RockMaterial.SHADE;
-        // Light: on what faces up, in patches (a rock of any size has about as much of it); and the streaks down its faces
-        // where nothing shades them
-        boolean lit = !this.filled(solid, x, y + 1, z) && RockNoise.noise(this.seed + 18, cx / 4.5, cy / 3.0, cz / 4.5) + 0.25 * grain > 0.02;
-        return lit || streak > 0.42 && shadow < 0.2 ? RockMaterial.LIGHT : RockMaterial.BASE;
+        if (!this.filled(solid, x, y - 1, z) || openness < -0.6 && this.filled(solid, x, y + 1, z) || shadow > 0.42) return RockMaterial.SHADE;
+        if (sun < -0.3) {
+            double patch = RockNoise.noise(this.seed + 19, cx / 4.0, cy / 6.0, cz / 4.0) + 0.2 * grain;
+            if (patch > (cy < 1 ? 0.0 : 0.42 + 0.5 * (1 + sun)) && openness < 0.6) return RockMaterial.SHADE;
+        }
+        // Light: in patches on what faces up, more of it on the edges that stand out; and the streaks down the faces where
+        // nothing shades them. Both more on the side turned toward the sun
+        boolean lit = !this.filled(solid, x, y + 1, z)
+                && RockNoise.noise(this.seed + 18, cx / 4.5, cy / 3.0, cz / 4.5) + 0.25 * grain > (openness > 0.35 ? 0.12 : 0.36) - 0.16 * sun;
+        // And texture: single blocks of it scattered over the faces
+        boolean speck = grain > 0.86 && shadow < 0.2;
+        return lit || speck || streak > 0.43 - 0.12 * sun && shadow < 0.2 ? RockMaterial.LIGHT : RockMaterial.BASE;
     }
 
     // Plant cover
@@ -551,6 +592,7 @@ public final class RockModel {
         Body body = this.body;
         if (body.cover() <= 0) return;
         List<int[]> covered = new ArrayList<>();
+        BitSet vined = new BitSet();
         for (int x = this.minX; x < this.minX + this.sizeX; x++) {
             for (int z = this.minZ; z < this.minZ + this.sizeZ; z++) {
                 int high = this.highest(x, z);
@@ -583,7 +625,7 @@ public final class RockModel {
                 if (this.solid(solid, x + dx, y, z + dz)) continue;
                 long sideHash = RockNoise.mix(hash + side);
                 double clump = 0.5 + 0.5 * RockNoise.noise(this.seed + 22, x / 5.0, z / 5.0);
-                int length = RockNoise.unit(sideHash) < 0.45 * clump ? 1 + (int) (body.drape() * RockNoise.unit(RockNoise.mix(sideHash + 5))) : 0;
+                int length = RockNoise.unit(sideHash) < 0.25 + 0.6 * clump ? 1 + (int) (body.drape() * clump * RockNoise.unit(RockNoise.mix(sideHash + 5))) : 0;
                 int down = 1;
                 for (; down <= length; down++) {
                     if (y - down < 0 || !this.solid(solid, x, y - down, z) || this.solid(solid, x + dx, y - down, z + dz)) break;
@@ -594,7 +636,9 @@ public final class RockModel {
                 int vines = 2 + (int) (6 * RockNoise.unit(RockNoise.mix(sideHash + 8)));
                 for (int hang = 0; hang < vines; hang++) {
                     int vy = y - down + 1 - hang;
-                    if (vy < 1 || this.solid(solid, x + dx, vy, z + dz)) break;
+                    // One vine a cell: where another already hangs, this one ends (it would cut the other's string)
+                    if (vy < 1 || !this.inside(x + dx, vy, z + dz) || this.solid(solid, x + dx, vy, z + dz) || vined.get(this.index(x + dx, vy, z + dz))) break;
+                    vined.set(this.index(x + dx, vy, z + dz));
                     this.decorations.add(new Decoration(x + dx, vy, z + dz, DecorationKind.VINE, -dx, -dz, 0, null));
                 }
             }
@@ -653,8 +697,12 @@ public final class RockModel {
                 }
             }
         }
-        // The ground rises on one side of the rock, where its scree gathers, and thins out around it: a ramp, not a ring
-        double heavy = 2 * Math.PI * RockNoise.unit(RockNoise.hash(this.seed, 30));
+        // The ground rises on one side of the rock, where its scree gathers (under the side it leans over), and thins out
+        // around it: a ramp, not a ring
+        Lobe first = body.lobes().getFirst();
+        double heavy = Math.hypot(first.leanX(), first.leanZ()) > 1.5
+                ? Math.atan2(first.leanZ(), first.leanX()) + 0.8 * (RockNoise.unit(RockNoise.hash(this.seed, 30)) - 0.5)
+                : 2 * Math.PI * RockNoise.unit(RockNoise.hash(this.seed, 30));
         double stones = Math.max(body.skirtWidth(), 3);
         for (int gx = 0; gx < this.groundSizeX; gx++) {
             for (int gz = 0; gz < this.groundSizeZ; gz++) {
@@ -662,7 +710,7 @@ public final class RockModel {
                 float away = distance[gx * this.groundSizeZ + gz];
                 if (away <= 0 || away == Float.MAX_VALUE) continue;
                 if (body.skirtWidth() > 0 && away <= body.skirtWidth()) {
-                    double side = RockNoise.smoothstep(-0.25, 0.55, Math.cos(Math.atan2(z, x) - heavy) + 0.7 * RockNoise.noise(this.seed + 31, x / 9.0, z / 9.0));
+                    double side = RockNoise.smoothstep(0.1, 0.75, Math.cos(Math.atan2(z, x) - heavy) + 0.7 * RockNoise.noise(this.seed + 31, x / 9.0, z / 9.0));
                     double height = body.skirtHeight() * Math.pow(1 - (away - 1) / body.skirtWidth(), 1.25) * side;
                     this.rise[gx * this.groundSizeZ + gz] = (byte) Math.clamp(Math.round(height), 0, (long) Math.ceil(body.skirtHeight()) + 1);
                 }

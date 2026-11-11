@@ -29,10 +29,9 @@ class RockTemplateTest {
         RockPlan plan = template("{\"bodies\": [{\"shape\": \"boulder\"}]}").plan(1);
         assertEquals(1, plan.bodies().size());
         Body boulder = plan.bodies().getFirst();
-        assertFalse(boulder.lobes().isEmpty(), "a boulder has a lobe");
-        assertTrue(boulder.lobes().getFirst().blob(), "a boulder is a blob, not a column");
+        assertTrue(boulder.lobes().size() >= 2, "a boulder is two stones or more");
         double height = boulder.lobes().getFirst().height();
-        assertTrue(height >= 3 && height <= 10, "a boulder left to itself is a few blocks tall, not " + height);
+        assertTrue(height >= 4 && height <= 8, "a boulder left to itself is a few blocks tall, not " + height);
         assertEquals(0, boulder.dx());
         assertEquals(0, boulder.dz());
         assertEquals(RockPalette.GRAY, plan.palette());
@@ -65,6 +64,23 @@ class RockTemplateTest {
             }
         }
         assertTrue(counts.size() >= 3, "seeds pick different numbers of boulders: " + counts);
+    }
+
+    @Test
+    void anAngleSaysWhereAroundTheMiddle() {
+        // Degrees from east (+x) toward south (+z); without one, copies are spread around
+        RockTemplate template = template("""
+                {"bodies": [{"shape": "monolith"},
+                  {"shape": "boulder", "distance": 10, "angle": 90},
+                  {"shape": "boulder", "distance": 20, "angle": 180}]}""");
+        for (long seed = 1; seed <= 5; seed++) {
+            RockPlan plan = template.plan(seed);
+            assertEquals(0, plan.bodies().get(1).dx());
+            assertEquals(10, plan.bodies().get(1).dz());
+            assertEquals(-20, plan.bodies().get(2).dx());
+            assertEquals(0, plan.bodies().get(2).dz());
+        }
+        assertNames("bodies[0].angle", "{\"bodies\": [{\"shape\": \"crag\", \"angle\": \"north\"}]}");
     }
 
     @Test

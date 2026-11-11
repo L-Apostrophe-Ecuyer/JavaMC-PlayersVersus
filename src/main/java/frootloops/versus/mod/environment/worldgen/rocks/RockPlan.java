@@ -35,6 +35,9 @@ public record RockPlan(List<Body> bodies, RockPalette palette) {
      * @param pinnacleDrop the share of its height a pinnacle is lower than the tallest by, at most
      * @param cleft        half the width of the clefts between pinnacles, at their top
      * @param roughness    block-sized unevenness
+     * @param flutes       how deep the grooves are that run down its faces, a block wide: the joints between columns
+     *                     {@code fluteScale} blocks across (the cells of a Voronoi diagram over the ground plan), as
+     *                     columnar rock is jointed: organ pipes; 0: none
      * @param cover        how much of its level faces plants cover (0: bare, 1: every ledge)
      * @param coverTop     how much more the cover favours the top over the foot
      * @param drape        how many blocks moss hangs down the face from an edge, at most
@@ -46,7 +49,7 @@ public record RockPlan(List<Body> bodies, RockPalette palette) {
      * @param scree        how many loose stones lie around its foot (0 to 1)
      */
     public record Body(int dx, int dz, List<Lobe> lobes, double warp, double warpScale, Fracture pieces, Fracture chunks,
-                       double pinnacles, double pinnacleDrop, double cleft, double roughness,
+                       double pinnacles, double pinnacleDrop, double cleft, double roughness, double flutes, double fluteScale,
                        double cover, double coverTop, int drape, double vines, double plants, boolean slabs,
                        double skirtWidth, double skirtHeight, double scree, long seed) {
 
@@ -60,14 +63,14 @@ public record RockPlan(List<Body> bodies, RockPalette palette) {
          */
         public Body with(Double cover, Double vines, Double plants, Double scree, Boolean slabs, double skirt) {
             return new Body(this.dx, this.dz, this.lobes, this.warp, this.warpScale, this.pieces, this.chunks, this.pinnacles, this.pinnacleDrop,
-                    this.cleft, this.roughness, cover == null ? this.cover : cover, this.coverTop, this.drape, vines == null ? this.vines : vines,
+                    this.cleft, this.roughness, this.flutes, this.fluteScale, cover == null ? this.cover : cover, this.coverTop, this.drape, vines == null ? this.vines : vines,
                     plants == null ? this.plants : plants, slabs == null ? this.slabs : slabs, this.skirtWidth * skirt, this.skirtHeight * skirt,
                     scree == null ? this.scree : scree, this.seed);
         }
 
         public Body at(int dx, int dz) {
             return new Body(dx, dz, this.lobes, this.warp, this.warpScale, this.pieces, this.chunks, this.pinnacles, this.pinnacleDrop, this.cleft,
-                    this.roughness, this.cover, this.coverTop, this.drape, this.vines, this.plants, this.slabs, this.skirtWidth, this.skirtHeight,
+                    this.roughness, this.flutes, this.fluteScale, this.cover, this.coverTop, this.drape, this.vines, this.plants, this.slabs, this.skirtWidth, this.skirtHeight,
                     this.scree, this.seed);
         }
     }
@@ -78,7 +81,7 @@ public record RockPlan(List<Body> bodies, RockPalette palette) {
      *   <li>A column ({@code blob} false) rises from the ground: its radius at the height {@code t} (0 at the ground, 1 at
      *   its top) is {@code radius * (1 - t^cap)^(1/shoulder)}: a higher {@code cap} keeps the sides upright longer before
      *   the top rounds off. It leans by ({@code leanX}, {@code leanZ}) at its top, bulges by {@code bulge} of its radius
-     *   around the height {@code bulgeAt}, and spreads by {@code foot} at the ground. Its top is cut level
+     *   around the height {@code bulgeAt}, and spreads by {@code foot} at the ground (or draws in, if negative). Its top is cut level
      *   {@code plateau} of its height below where it would end: a flat top for plants to stand on.</li>
      *   <li>A blob ({@code blob} true) is a boulder: an ellipsoid {@code height} tall whose middle is {@code centerY} above
      *   the ground (part of it buried).</li>
