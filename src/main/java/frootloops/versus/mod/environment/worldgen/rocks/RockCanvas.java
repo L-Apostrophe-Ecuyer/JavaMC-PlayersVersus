@@ -14,13 +14,10 @@ public interface RockCanvas {
     /** Whether rock may take this position: air, water, plants, earth and stone, but not what someone built. */
     boolean replaceable(int x, int y, int z);
 
-    void rock(int x, int y, int z, RockMaterial material, boolean slab);
+    void rock(int x, int y, int z, RockMaterial material);
 
     /** Raises this column's ground: fills {@code from} up to {@code to} (exclusive), the ground's own top block on top. */
     void raise(int x, int z, int from, int to);
-
-    /** A vine in this position, hanging on the rock toward ({@code dx}, {@code dz}). */
-    void vine(int x, int y, int z, int dx, int dz);
 
     /** A plant in this position, standing on the block below; {@code data} picks which. */
     void plant(int x, int y, int z, int data);

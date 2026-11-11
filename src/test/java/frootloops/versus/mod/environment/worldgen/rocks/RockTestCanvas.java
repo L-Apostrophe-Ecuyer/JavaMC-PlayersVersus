@@ -12,7 +12,7 @@ final class RockTestCanvas implements RockCanvas {
 
     static final int NO_WATER = Integer.MIN_VALUE;
 
-    /** What was put at each position: {@code rock:BASE}, {@code slab:LIGHT}, {@code ground}, {@code vine:1,0}, {@code plant}. */
+    /** What was put at each position: {@code rock:BASE}, {@code ground}, {@code plant}. */
     final Map<Long, String> cells = new HashMap<>();
     private final Map<Long, Integer> tops = new HashMap<>();
     private final IntBinaryOperator ground;
@@ -50,7 +50,7 @@ final class RockTestCanvas implements RockCanvas {
 
     boolean isRock(int x, int y, int z) {
         String cell = this.at(x, y, z);
-        return cell != null && (cell.startsWith("rock:") || cell.startsWith("slab:"));
+        return cell != null && cell.startsWith("rock:");
     }
 
     boolean isFullRock(int x, int y, int z) {
@@ -74,8 +74,8 @@ final class RockTestCanvas implements RockCanvas {
     }
 
     @Override
-    public void rock(int x, int y, int z, RockMaterial material, boolean slab) {
-        this.cells.put(key(x, y, z), (slab ? "slab:" : "rock:") + material);
+    public void rock(int x, int y, int z, RockMaterial material) {
+        this.cells.put(key(x, y, z), "rock:" + material);
         this.tops.merge(key(x, 0, z), y + 1, Math::max);
     }
 
@@ -83,11 +83,6 @@ final class RockTestCanvas implements RockCanvas {
     public void raise(int x, int z, int from, int to) {
         for (int y = from; y < to; y++) this.cells.put(key(x, y, z), "ground");
         this.tops.merge(key(x, 0, z), to, Math::max);
-    }
-
-    @Override
-    public void vine(int x, int y, int z, int dx, int dz) {
-        this.cells.put(key(x, y, z), "vine:" + dx + "," + dz);
     }
 
     @Override

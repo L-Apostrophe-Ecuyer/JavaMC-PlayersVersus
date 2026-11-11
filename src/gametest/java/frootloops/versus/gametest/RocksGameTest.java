@@ -44,8 +44,7 @@ public class RocksGameTest {
     private static final String GROVE = "players-versus-gametest:leaves_grove";
 
     private static boolean isRock(BlockState state) {
-        return state.is(Blocks.STONE) || state.is(Blocks.TUFF) || state.is(Blocks.ANDESITE) || state.is(Blocks.STONE_SLAB) || state.is(Blocks.TUFF_SLAB)
-                || state.is(Blocks.ANDESITE_SLAB);
+        return state.is(Blocks.STONE) || state.is(Blocks.TUFF) || state.is(Blocks.ANDESITE) || state.is(Blocks.CLAY);
     }
 
     /**

@@ -120,9 +120,8 @@ public final class RockPreview {
         }
 
         @Override
-        public void rock(int x, int y, int z, RockMaterial material, boolean slab) {
-            String block = slab ? this.palette.slab(material) : null;
-            this.set(x, y, z, this.id(block != null ? block : this.palette.block(material)));
+        public void rock(int x, int y, int z, RockMaterial material) {
+            this.set(x, y, z, this.id(this.palette.block(material)));
             // What stood on the ground here goes
             if (this.kind(x, y + 1, z) == Kind.CROSS) this.set(x, y + 1, z, (short) 0);
         }
@@ -134,11 +133,6 @@ public final class RockPreview {
                 this.set(x, y, z, this.id(y == to - 1 ? (wet ? "minecraft:gravel" : "minecraft:grass_block") : "minecraft:dirt"));
             }
             if (this.kind(x, to, z) == Kind.CROSS) this.set(x, to, z, (short) 0);
-        }
-
-        @Override
-        public void vine(int x, int y, int z, int dx, int dz) {
-            if (this.get(x, y, z) == 0) this.set(x, y, z, this.id(this.palette.vine() + "|" + dx + "," + dz));
         }
 
         @Override

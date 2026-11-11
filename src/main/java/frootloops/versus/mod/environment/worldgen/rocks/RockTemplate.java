@@ -7,7 +7,6 @@ import frootloops.versus.mod.environment.worldgen.rocks.RockPlan.Body;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -25,21 +24,19 @@ import java.util.Set;
  * {@code distance} (how far from the formation's middle each stands, 0), {@code angle} (where around the middle, in
  * degrees from east toward south; left out, copies are spread around), {@code height} and {@code radius} (the shape's
  * own range of sizes), each a number or a range {@code [least, most]} that the seed picks from; and, in place of the
- * shape's own, {@code cover}, {@code vines}, {@code plants}, {@code scree} (0 to 1), {@code slabs} (true or false), and
- * {@code skirt} (how many times the shape's own skirt, 1).
+ * shape's own, {@code cover} (0 to 1).
  *
  * <p>The {@code palette} names the blocks in place of gray stone's ({@link RockPalette#GRAY}): {@code shade},
- * {@code base}, {@code light}, {@code soil}, {@code grass}, {@code moss}, {@code vine}, {@code plants} (a list),
- * {@code slabs} (each block's slab).
+ * {@code base}, {@code light}, {@code bright}, {@code soil}, {@code grass}, {@code moss}, {@code plants} (a list).
  *
  * <p>A mistake is an {@link IllegalArgumentException} whose message starts with the field's path and a colon.
  */
 public final class RockTemplate {
 
     private static final Set<String> KEYS = Set.of("bodies", "palette");
-    private static final Set<String> BODY_KEYS = Set.of("shape", "count", "distance", "angle", "height", "radius", "cover", "vines", "plants", "scree", "slabs", "skirt");
+    private static final Set<String> BODY_KEYS = Set.of("shape", "count", "distance", "angle", "height", "radius", "cover");
     private static final Map<String, RockMaterial> PALETTE_BLOCKS = Map.of("shade", RockMaterial.SHADE, "base", RockMaterial.BASE, "light", RockMaterial.LIGHT,
-            "soil", RockMaterial.SOIL, "grass", RockMaterial.GRASS, "moss", RockMaterial.MOSS);
+            "bright", RockMaterial.BRIGHT, "soil", RockMaterial.SOIL, "grass", RockMaterial.GRASS, "moss", RockMaterial.MOSS);
 
     private record Range(double least, double most) {
         double pick(long hash) {
@@ -51,8 +48,7 @@ public final class RockTemplate {
         }
     }
 
-    private record BodySpec(RockShape shape, Range count, Range distance, Range angle, Range height, Range radius, Double cover, Double vines,
-                            Double plants, Double scree, Boolean slabs, double skirt) {
+    private record BodySpec(RockShape shape, Range count, Range distance, Range angle, Range height, Range radius, Double cover) {
     }
 
     private final JsonObject json;
@@ -94,8 +90,7 @@ public final class RockTemplate {
         for (BodySpec spec : this.bodies) {
             // A body's place is rounded to whole blocks
             int away = spec.distance.most > 0 ? (int) Math.ceil(spec.distance.most) + 1 : 0;
-            double scree = spec.scree == null ? 1 : spec.scree;
-            reach = Math.max(reach, away + spec.shape.reach(spec.radius.most, spec.skirt, scree));
+            reach = Math.max(reach, away + spec.shape.reach(spec.radius.most, 1, 1));
         }
         return reach;
     }
@@ -114,9 +109,9 @@ public final class RockTemplate {
                 // Copies stand around the middle, each in its own part of the circle, unless the angle is given
                 double angle = spec.angle != null ? Math.toRadians(spec.angle.pick(RockNoise.hash(bodySeed, 4)))
                         : turn + 2 * Math.PI * (copy + 0.7 * (RockNoise.unit(RockNoise.hash(bodySeed, 4)) - 0.5)) / count;
-                bodies.add(spec.shape.body(bodySeed, height, radius)
-                        .with(spec.cover, spec.vines, spec.plants, spec.scree, spec.slabs, spec.skirt)
-                        .at((int) Math.round(away * Math.cos(angle)), (int) Math.round(away * Math.sin(angle))));
+                Body body = spec.shape.body(bodySeed, height, radius);
+                if (spec.cover != null) body = body.withCover(spec.cover);
+                bodies.add(body.at((int) Math.round(away * Math.cos(angle)), (int) Math.round(away * Math.sin(angle))));
             }
         }
         return new RockPlan(List.copyOf(bodies), this.palette);
@@ -150,15 +145,7 @@ public final class RockTemplate {
         Range angle = range(path + ".angle", json, null, false, false);
         Range height = range(path + ".height", json, new Range(shape.minHeight, shape.maxHeight), false, true);
         Range radius = range(path + ".radius", json, new Range(shape.minRadius, shape.maxRadius), false, true);
-        Boolean slabs = null;
-        if (json.has("slabs")) {
-            JsonElement value = json.get("slabs");
-            if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isBoolean()) throw mistake(path + ".slabs", "true or false");
-            slabs = value.getAsBoolean();
-        }
-        double skirt = json.has("skirt") ? number(path + ".skirt", json.get("skirt"), 0, 4) : 1;
-        return new BodySpec(shape, count, distance, angle, height, radius, share(path, json, "cover"), share(path, json, "vines"),
-                share(path, json, "plants"), share(path, json, "scree"), slabs, skirt);
+        return new BodySpec(shape, count, distance, angle, height, radius, share(path, json, "cover"));
     }
 
     private static String shapes() {
@@ -202,29 +189,22 @@ public final class RockTemplate {
         if (!element.isJsonObject()) throw mistake("palette", "an object of blocks");
         JsonObject json = element.getAsJsonObject();
         Map<RockMaterial, String> blocks = new EnumMap<>(RockPalette.GRAY.blocks());
-        Map<String, String> slabs = new HashMap<>(RockPalette.GRAY.slabs());
         List<String> plants = RockPalette.GRAY.plants();
-        String vine = RockPalette.GRAY.vine();
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             String path = "palette." + entry.getKey();
             JsonElement value = entry.getValue();
             if (PALETTE_BLOCKS.containsKey(entry.getKey())) {
                 blocks.put(PALETTE_BLOCKS.get(entry.getKey()), text(path, value));
-            } else if (entry.getKey().equals("vine")) {
-                vine = text(path, value);
             } else if (entry.getKey().equals("plants")) {
                 if (!value.isJsonArray()) throw mistake(path, "a list of blocks");
                 List<String> listed = new ArrayList<>();
                 for (JsonElement plant : value.getAsJsonArray()) listed.add(text(path, plant));
                 plants = List.copyOf(listed);
-            } else if (entry.getKey().equals("slabs")) {
-                if (!value.isJsonObject()) throw mistake(path, "an object: each block's slab");
-                for (Map.Entry<String, JsonElement> slab : value.getAsJsonObject().entrySet()) slabs.put(slab.getKey(), text(path + "." + slab.getKey(), slab.getValue()));
             } else {
-                throw mistake(path, "not something a palette has; it has " + sorted(PALETTE_BLOCKS.keySet()) + ", vine, plants and slabs");
+                throw mistake(path, "not something a palette has; it has " + sorted(PALETTE_BLOCKS.keySet()) + " and plants");
             }
         }
-        return new RockPalette(Map.copyOf(blocks), Map.copyOf(slabs), plants, vine);
+        return new RockPalette(Map.copyOf(blocks), plants);
     }
 
     private static String text(String path, JsonElement element) {

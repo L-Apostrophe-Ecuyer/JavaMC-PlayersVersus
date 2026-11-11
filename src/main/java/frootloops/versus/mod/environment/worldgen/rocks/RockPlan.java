@@ -57,18 +57,9 @@ public record RockPlan(List<Body> bodies, RockPalette palette) {
                        double skirtWidth, double skirtHeight, double scree, long seed) {
 
         public Body withCover(double cover) {
-            return this.with(cover, null, null, null, null, 1);
-        }
-
-        /**
-         * This body with the numbers a template gives instead of its shape's own ({@code null}: the shape's); its skirt is
-         * {@code skirt} times as wide and as high.
-         */
-        public Body with(Double cover, Double vines, Double plants, Double scree, Boolean slabs, double skirt) {
             return new Body(this.dx, this.dz, this.lobes, this.warp, this.warpScale, this.pieces, this.chunks, this.pinnacles, this.pinnacleDrop,
-                    this.cleft, this.roughness, this.flutes, this.fluteScale, this.dusk, cover == null ? this.cover : cover, this.coverTop, this.drape, vines == null ? this.vines : vines,
-                    plants == null ? this.plants : plants, slabs == null ? this.slabs : slabs, this.skirtWidth * skirt, this.skirtHeight * skirt,
-                    scree == null ? this.scree : scree, this.seed);
+                    this.cleft, this.roughness, this.flutes, this.fluteScale, this.dusk, cover, this.coverTop, this.drape, this.vines,
+                    this.plants, this.slabs, this.skirtWidth, this.skirtHeight, this.scree, this.seed);
         }
 
         public Body at(int dx, int dz) {

@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.worldgen.rocks.RockPlan.Body;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,11 +93,8 @@ class RockTemplateTest {
 
     @Test
     void numbersGivenReplaceTheShapesOwn() {
-        Body bare = template("{\"bodies\": [{\"shape\": \"monolith\", \"cover\": 0, \"vines\": 0, \"slabs\": true, \"scree\": 1}]}").plan(3).bodies().getFirst();
+        Body bare = template("{\"bodies\": [{\"shape\": \"monolith\", \"cover\": 0}]}").plan(3).bodies().getFirst();
         assertEquals(0, bare.cover());
-        assertEquals(0, bare.vines());
-        assertTrue(bare.slabs());
-        assertEquals(1, bare.scree());
         Body usual = template("{\"bodies\": [{\"shape\": \"monolith\"}]}").plan(3).bodies().getFirst();
         assertTrue(usual.cover() > 0.3, "a monolith left to itself has plants on it");
     }
@@ -105,13 +103,26 @@ class RockTemplateTest {
     void aPaletteNamesItsBlocks() {
         RockPlan plan = template("""
                 {"bodies": [{"shape": "crag"}], "palette": {"shade": "minecraft:deepslate", "light": "minecraft:diorite",
-                 "slabs": {"minecraft:diorite": "minecraft:diorite_slab"}, "plants": ["minecraft:dead_bush"], "vine": "minecraft:glow_lichen"}}""").plan(1);
+                 "plants": ["minecraft:dead_bush"]}}""").plan(1);
         assertEquals("minecraft:deepslate", plan.palette().block(RockMaterial.SHADE));
         assertEquals("minecraft:diorite", plan.palette().block(RockMaterial.LIGHT));
         assertEquals("minecraft:stone", plan.palette().block(RockMaterial.BASE), "what isn't named stays gray stone's");
-        assertEquals("minecraft:diorite_slab", plan.palette().slab(RockMaterial.LIGHT));
         assertEquals(java.util.List.of("minecraft:dead_bush"), plan.palette().plants());
-        assertEquals("minecraft:glow_lichen", plan.palette().vine());
+    }
+
+    @Test
+    void theOldKeysAreGone() {
+        for (String key : List.of("vines", "plants", "scree", "slabs", "skirt")) {
+            var mistake = assertThrows(IllegalArgumentException.class, () -> template("{\"bodies\": [{\"shape\": \"boulder\", \"" + key + "\": 1}]}"));
+            assertTrue(mistake.getMessage().startsWith("bodies[0]." + key), mistake.getMessage());
+        }
+    }
+
+    @Test
+    void clayIsTheBrightestUnlessThePaletteSaysOtherwise() {
+        assertEquals("minecraft:clay", template("{\"bodies\": [{\"shape\": \"boulder\"}]}").palette().block(RockMaterial.BRIGHT));
+        assertEquals("minecraft:calcite", template("{\"bodies\": [{\"shape\": \"boulder\"}], \"palette\": {\"bright\": \"minecraft:calcite\"}}")
+                .palette().block(RockMaterial.BRIGHT));
     }
 
     @Test

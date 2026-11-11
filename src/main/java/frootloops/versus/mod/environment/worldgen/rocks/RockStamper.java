@@ -85,42 +85,30 @@ public final class RockStamper {
             // A foot: a column that stands at the body's ground goes on down to the ground it finds
             if (low <= 1) {
                 for (int y = anchorY + low - 1, filled = 0; y >= floor && filled < MAX_FILL; y--, filled++) {
-                    if (canvas.replaceable(worldX, y, worldZ)) canvas.rock(worldX, y, worldZ, RockMaterial.BASE, false);
+                    if (canvas.replaceable(worldX, y, worldZ)) canvas.rock(worldX, y, worldZ, RockMaterial.BASE);
                 }
             }
             for (int y = low; y <= high; y++) {
                 RockMaterial material = model.material(x, y, z);
                 int worldY = anchorY + y;
-                if (material == null || !canvas.replaceable(worldX, worldY, worldZ)) continue;
+                // No slabs: where the model has one, nothing
+                if (material == null || model.slab(x, y, z) || !canvas.replaceable(worldX, worldY, worldZ)) continue;
                 if (!material.isRock() && (worldY < ground || canvas.water(worldX, worldY, worldZ))) {
                     // No plants in the ground or under water: plain rock where they would be
                     material = RockMaterial.BASE;
                 }
                 if (material == RockMaterial.GRASS) grass.set(y - low);
-                canvas.rock(worldX, worldY, worldZ, material, model.slab(x, y, z));
+                canvas.rock(worldX, worldY, worldZ, material);
             }
         }
         if (decorations == null) return;
         for (Decoration decoration : decorations) {
             int worldY = anchorY + decoration.y();
-            switch (decoration.kind()) {
-                case VINE -> {
-                    if (worldY >= floor && !canvas.water(worldX, worldY, worldZ) && model.material(x, decoration.y(), z) == null) {
-                        canvas.vine(worldX, worldY, worldZ, decoration.dx(), decoration.dz());
-                    }
-                }
-                case PLANT -> {
-                    // On the grass under it, if that was put as grass: not under water, not in the ground
-                    boolean onGrass = rock && decoration.y() - 1 >= low && grass.get(decoration.y() - 1 - low);
-                    if (onGrass && !canvas.water(worldX, worldY, worldZ) && canvas.replaceable(worldX, worldY, worldZ)) {
-                        canvas.plant(worldX, worldY, worldZ, decoration.data());
-                    }
-                }
-                case STONE -> {
-                    if (!onGround && (!rock || anchorY + low > floor) && canvas.replaceable(worldX, floor, worldZ)) {
-                        canvas.rock(worldX, floor, worldZ, decoration.material(), false);
-                    }
-                }
+            if (decoration.kind() != RockModel.DecorationKind.PLANT) continue;
+            // On the grass under it, if that was put as grass: not under water, not in the ground
+            boolean onGrass = rock && decoration.y() - 1 >= low && grass.get(decoration.y() - 1 - low);
+            if (onGrass && !canvas.water(worldX, worldY, worldZ) && canvas.replaceable(worldX, worldY, worldZ)) {
+                canvas.plant(worldX, worldY, worldZ, decoration.data());
             }
         }
     }

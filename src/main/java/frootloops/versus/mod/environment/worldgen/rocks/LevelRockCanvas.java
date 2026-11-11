@@ -1,7 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.rocks;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
@@ -9,11 +8,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.PipeBlock;
-import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,36 +25,24 @@ public final class LevelRockCanvas implements RockCanvas {
 
     private final WorldGenLevel level;
     private final BlockState[] blocks = new BlockState[RockMaterial.values().length];
-    private final BlockState[] slabs = new BlockState[RockMaterial.values().length];
     private final List<BlockState> plants = new ArrayList<>();
-    private final BlockState vine;
     private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
     private int placed;
 
     public LevelRockCanvas(WorldGenLevel level, RockPalette palette) {
         this.level = level;
-        for (RockMaterial material : RockMaterial.values()) {
-            this.blocks[material.ordinal()] = state(palette.block(material));
-            String slab = palette.slab(material);
-            this.slabs[material.ordinal()] = slab == null ? null : state(slab).setValue(SlabBlock.TYPE, SlabType.BOTTOM);
-        }
+        for (RockMaterial material : RockMaterial.values()) this.blocks[material.ordinal()] = state(palette.block(material));
         for (String plant : palette.plants()) this.plants.add(state(plant));
-        this.vine = state(palette.vine());
     }
 
     /** The first block id of a palette that isn't a block, or null when all are. */
     @Nullable
     public static String unknownBlock(RockPalette palette) {
         List<String> ids = new ArrayList<>(palette.blocks().values());
-        ids.addAll(palette.slabs().values());
         ids.addAll(palette.plants());
-        ids.add(palette.vine());
         for (String id : ids) {
             Identifier identifier = Identifier.tryParse(id);
             if (identifier == null || BuiltInRegistries.BLOCK.getOptional(identifier).isEmpty()) return id;
-        }
-        for (String slab : palette.slabs().values()) {
-            if (!BuiltInRegistries.BLOCK.getValue(Identifier.parse(slab)).defaultBlockState().hasProperty(SlabBlock.TYPE)) return slab + " (not a slab)";
         }
         return null;
     }
@@ -97,17 +80,12 @@ public final class LevelRockCanvas implements RockCanvas {
         for (BlockState block : this.blocks) {
             if (block != null && state.is(block.getBlock())) return true;
         }
-        for (BlockState slab : this.slabs) {
-            if (slab != null && state.is(slab.getBlock())) return true;
-        }
         return false;
     }
 
     @Override
-    public void rock(int x, int y, int z, RockMaterial material, boolean slab) {
-        BlockState state = slab && this.slabs[material.ordinal()] != null ? this.slabs[material.ordinal()] : this.blocks[material.ordinal()];
-        if (slab && state.hasProperty(SlabBlock.WATERLOGGED) && this.water(x, y, z)) state = state.setValue(SlabBlock.WATERLOGGED, true);
-        this.set(x, y, z, state);
+    public void rock(int x, int y, int z, RockMaterial material) {
+        this.set(x, y, z, this.blocks[material.ordinal()]);
         // What stood on the old ground here can no longer stand
         this.clearUnsupported(x, y + 1, z);
     }
@@ -128,16 +106,6 @@ public final class LevelRockCanvas implements RockCanvas {
     /** Ground that grows: it can't be buried, nor lie under water. */
     private static boolean living(BlockState state) {
         return state.is(BlockTags.GRASS_BLOCKS) || state.is(BlockTags.MOSS_BLOCKS);
-    }
-
-    @Override
-    public void vine(int x, int y, int z, int dx, int dz) {
-        if (!this.level.getBlockState(this.pos.set(x, y, z)).isAir()) return;
-        BlockState vine = this.vine;
-        Direction toward = dx > 0 ? Direction.EAST : dx < 0 ? Direction.WEST : dz > 0 ? Direction.SOUTH : dz < 0 ? Direction.NORTH : null;
-        BooleanProperty face = toward == null ? null : PipeBlock.PROPERTY_BY_DIRECTION.get(toward);
-        if (face != null && vine.hasProperty(face)) vine = vine.setValue(face, true);
-        this.set(x, y, z, vine);
     }
 
     @Override

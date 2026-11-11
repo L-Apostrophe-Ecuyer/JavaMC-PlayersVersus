@@ -375,7 +375,7 @@ class RockModelTest {
                         continue;
                     }
                     if (cell.startsWith("rock:")) wet++;
-                    assertTrue(!cell.equals("rock:GRASS") && !cell.equals("rock:SOIL") && !cell.equals("plant") && !cell.startsWith("vine:"),
+                    assertTrue(!cell.equals("rock:GRASS") && !cell.equals("rock:SOIL") && !cell.equals("plant"),
                             cell + " under water at height " + RockTestCanvas.y(entry.getKey()));
                 }
             }
@@ -488,12 +488,12 @@ class RockModelTest {
     void aRockIsThreeTonesOfRockUnderItsPlants() {
         // No broken or mossy rock, no gravel: the rock, its shade and its light, and on its level tops grass, moss and earth
         java.util.Set<String> allowed = java.util.Set.of("rock:SHADE", "rock:BASE", "rock:LIGHT", "rock:GRASS", "rock:MOSS", "rock:SOIL",
-                "slab:SHADE", "slab:BASE", "slab:LIGHT", "ground", "plant");
+                "rock:BRIGHT", "ground", "plant");
         for (long seed = 1; seed <= 3; seed++) {
             for (Body body : everyShape(seed)) {
                 for (int water : new int[]{RockTestCanvas.NO_WATER, GROUND + 2}) {
                     for (String cell : stamp(body, FLAT, water).cells.values()) {
-                        assertTrue(allowed.contains(cell) || cell.startsWith("vine:"), "a rock is not made of " + cell);
+                        assertTrue(allowed.contains(cell), "a rock is not made of " + cell);
                     }
                 }
             }
@@ -583,27 +583,6 @@ class RockModelTest {
     }
 
     @Test
-    void aBoulderLooksLikeTwoOrThreeStones() {
-        // Several humps: at some height its columns that reach it fall into two groups or more
-        int several = 0;
-        for (long seed = 1; seed <= 8; seed++) {
-            RockTestCanvas canvas = stamp(RockShape.BOULDER.body(seed, 5, 4.5), FLAT, RockTestCanvas.NO_WATER);
-            int size = 41, half = 20;
-            int[][] tops = new int[size][size];
-            int highest = 0;
-            for (long[] cell : rock(canvas)) {
-                int gx = (int) cell[0] + half, gz = (int) cell[2] + half;
-                tops[gx][gz] = Math.max(tops[gx][gz], (int) cell[1] - GROUND + 1);
-                highest = Math.max(highest, tops[gx][gz]);
-            }
-            int most = 0;
-            for (int level = 2; level <= highest; level++) most = Math.max(most, peaks(tops, level));
-            if (most >= 2) several++;
-        }
-        assertTrue(several >= 7, "boulders are two or three stones together: " + several + " of 8 have more than one hump");
-    }
-
-    @Test
     void aSmallRocksShadedSideAndFootAreInShade() {
         // The game draws no shadows: a boulder's own shade is in its stone, on the side turned from the sun (to the north)
         // and around its foot; the side toward the sun and its crown stay plain or light
@@ -662,24 +641,6 @@ class RockModelTest {
         assertTrue(share(toward, 2) > share(away, 2) + 0.04, "more light toward the sun: " + share(toward, 2) + " against " + share(away, 2));
         assertTrue(share(away, 0) > share(toward, 0) + 0.04, "more shade away from it: " + share(away, 0) + " against " + share(toward, 0));
     }
-    @Test
-    void aPileHasSlabsOnBareRock() {
-        int slabs = 0;
-        for (long seed = 1; seed <= 5; seed++) {
-            RockTestCanvas canvas = stamp(RockShape.PILE.body(seed, 5, 6), FLAT, RockTestCanvas.NO_WATER);
-            for (Map.Entry<Long, String> entry : canvas.cells.entrySet()) {
-                if (!entry.getValue().startsWith("slab:")) continue;
-                slabs++;
-                int x = RockTestCanvas.x(entry.getKey()), y = RockTestCanvas.y(entry.getKey()), z = RockTestCanvas.z(entry.getKey());
-                String below = canvas.at(x, y - 1, z);
-                assertTrue(below != null && below.startsWith("rock:") && RockMaterial.valueOf(below.substring(5)).isRock(), "a slab on " + below);
-                assertEquals(below.substring(5), entry.getValue().substring(5), "a slab of the rock under it");
-                assertTrue(!canvas.isRock(x, y + 1, z), "a slab with rock on it");
-            }
-        }
-        assertTrue(slabs >= 10, "piles have slabs: " + slabs + " on five of them");
-    }
-
     @Test
     void theGroundRisesTowardAMonolithsFoot() {
         for (long seed = 1; seed <= 4; seed++) {

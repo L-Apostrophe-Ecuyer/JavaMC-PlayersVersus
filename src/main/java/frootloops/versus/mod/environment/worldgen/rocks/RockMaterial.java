@@ -6,12 +6,14 @@ package frootloops.versus.mod.environment.worldgen.rocks;
  * catch it and in streaks for texture, and the plain rock everywhere else.
  */
 public enum RockMaterial {
-    /** The rock in shade: in cracks, under overhangs, in hollows (tuff). */
+    /** The rock in shade: its undersides, inside corners and cracks, and the least lit of it (tuff). */
     SHADE,
-    /** The rock (stone). */
+    /** The rock (stone): most of it. */
     BASE,
-    /** The rock in the light: upward faces, edges that stand out, and streaks for texture (andesite). */
+    /** The rock in the light: highlights and the edges that stand out (andesite). */
     LIGHT,
+    /** The rock in the brightest light, rarely (clay). */
+    BRIGHT,
     /** Earth under the grass on top. */
     SOIL,
     /** The plant cover of level tops, where the sky is open. */
@@ -25,8 +27,8 @@ public enum RockMaterial {
         return VALUES[ordinal];
     }
 
-    /** Whether this is bare rock, which a slab can top, rather than plants or earth. */
+    /** Whether this is bare rock rather than plants or earth. */
     public boolean isRock() {
-        return this.ordinal() <= LIGHT.ordinal();
+        return this.ordinal() <= BRIGHT.ordinal();
     }
 }
