@@ -1,0 +1,10 @@
+{
+  "type": "players-versus:rock",
+  "rock": {
+    "bodies": [
+      {
+        "shape": "pile"
+      }
+    ]
+  }
+}

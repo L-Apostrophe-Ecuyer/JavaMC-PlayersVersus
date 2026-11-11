@@ -19,7 +19,8 @@
       "frootloops.versus.gametest.BlightGameTest",
       "frootloops.versus.gametest.WatchlingGameTest",
       "frootloops.versus.gametest.EndermanShulkerGameTest",
-      "frootloops.versus.gametest.LemonsGameTest"
+      "frootloops.versus.gametest.LemonsGameTest",
+      "frootloops.versus.gametest.RocksGameTest"
     ],
     "fabric-client-gametest": [
       "frootloops.versus.gametest.client.WorldgenGallery"

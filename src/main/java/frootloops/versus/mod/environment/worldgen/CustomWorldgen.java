@@ -4,6 +4,9 @@ import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.features.MudPatchFeature;
 import frootloops.versus.mod.environment.worldgen.features.MushroomRingFeature;
 import frootloops.versus.mod.environment.worldgen.features.StoneStalagtiteFeature;
+import frootloops.versus.mod.environment.worldgen.rocks.RockFeature;
+import frootloops.versus.mod.environment.worldgen.rocks.RockFormationPiece;
+import frootloops.versus.mod.environment.worldgen.rocks.RockFormationStructure;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
@@ -15,6 +18,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 
 import java.util.List;
@@ -37,6 +42,13 @@ public class CustomWorldgen {
     public static final Identifier STONE_STALAGTITE_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "stone_stalagtite");
     public static final Identifier MUD_PATCH_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "mud_patch");
     public static final Identifier MUSHROOM_RING_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "mushroom_ring");
+    /** Small rocks (RockFeature), and large ones on the world's grid (RockFormationStructure, one piece a body). */
+    public static final Identifier ROCK_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock");
+    public static final Identifier ROCK_FORMATION_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock_formation");
+    public static final StructureType<RockFormationStructure> ROCK_FORMATION =
+            Registry.register(BuiltInRegistries.STRUCTURE_TYPE, ROCK_FORMATION_ID, () -> RockFormationStructure.CODEC);
+    public static final StructurePieceType ROCK_FORMATION_PIECE =
+            Registry.register(BuiltInRegistries.STRUCTURE_PIECE, ROCK_FORMATION_ID, (StructurePieceType.ContextlessType) RockFormationPiece::new);
 
     /**
      * The overworld's own mushroom patches, which vanilla also lists in the nether's biomes, where they grow on its
@@ -51,6 +63,7 @@ public class CustomWorldgen {
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MUD_PATCH_ID, MudPatchFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MUSHROOM_RING_ID, MushroomRingFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MARSH_ID, frootloops.versus.mod.environment.worldgen.features.MarshFeature.CODEC);
+        Registry.register(BuiltInRegistries.FEATURE_TYPE, ROCK_ID, RockFeature.CODEC);
         BiomeModifications.create(Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "no_mushrooms_in_the_nether"))
                 .add(ModificationPhase.REMOVALS, BiomeSelectors.foundInTheNether(), context -> {
                     for (ResourceKey<PlacedFeature> mushrooms : OVERWORLD_MUSHROOMS) {

@@ -1,0 +1,30 @@
+{
+  "structures": [
+    {
+      "structure": "players-versus:rock/monolith",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/spires",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/towers",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/great_boulders",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/massif",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1734120691,
+    "spacing": 10,
+    "separation": 4
+  }
+}

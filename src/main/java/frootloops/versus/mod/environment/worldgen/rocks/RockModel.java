@@ -89,36 +89,23 @@ public final class RockModel {
     private RockModel(Body body) {
         this.body = body;
         this.seed = body.seed();
-        double top = 0, maxRadius = 0;
-        double x0 = Double.MAX_VALUE, x1 = -Double.MAX_VALUE, z0 = Double.MAX_VALUE, z1 = -Double.MAX_VALUE, y0 = -2;
-        this.reach = body.warp() + body.pieces().depth() + body.chunks().depth() + body.roughness() + 0.5;
+        this.reach = reach(body);
         this.flutes = body.flutes() > 0 ? Math.max(1, body.fluteScale()) : 0;
         this.facets = new double[body.lobes().size()][];
         this.swells = new double[body.lobes().size()][];
         for (int index = 0; index < body.lobes().size(); index++) {
             Lobe lobe = body.lobes().get(index);
-            double lobeTop = lobe.blob() ? lobe.centerY() + lobe.height() / 2 : lobe.height() * (1 - lobe.plateau());
-            top = Math.max(top, lobeTop);
-            double radius = lobe.radius() * Math.max(1, lobe.aspect()) * (1 + Math.max(lobe.bulge(), 0) + Math.max(lobe.foot(), 0) + lobe.lobing());
             this.swells[index] = new double[]{2 * Math.PI * RockNoise.unit(RockNoise.hash(lobe.seed(), 7)), 2 * Math.PI * RockNoise.unit(RockNoise.hash(lobe.seed(), 8))};
-            maxRadius = Math.max(maxRadius, radius);
-            x0 = Math.min(x0, Math.min(lobe.x(), lobe.x() + lobe.leanX()) - radius);
-            x1 = Math.max(x1, Math.max(lobe.x(), lobe.x() + lobe.leanX()) + radius);
-            z0 = Math.min(z0, Math.min(lobe.z(), lobe.z() + lobe.leanZ()) - radius);
-            z1 = Math.max(z1, Math.max(lobe.z(), lobe.z() + lobe.leanZ()) + radius);
-            if (lobe.blob()) y0 = Math.min(y0, lobe.centerY() - lobe.height() / 2 - this.reach - 1);
             this.facets[index] = facets(lobe);
         }
-        this.top = top;
-        // A column goes on into the ground, deeper the wider it is, so that it still stands where the ground falls away
-        if (body.lobes().stream().anyMatch(lobe -> !lobe.blob())) y0 = Math.min(y0, -Math.clamp(2 + maxRadius / 2, 3, 8));
-        double margin = Math.ceil(this.reach);
-        this.minX = RockNoise.floor(x0 - margin);
-        this.minZ = RockNoise.floor(z0 - margin);
-        this.minY = RockNoise.floor(y0);
-        this.sizeX = RockNoise.floor(x1 + margin) + 1 - this.minX;
-        this.sizeZ = RockNoise.floor(z1 + margin) + 1 - this.minZ;
-        this.sizeY = RockNoise.floor(top + this.reach + 2) + 1 - this.minY;
+        this.top = top(body);
+        int[] grid = grid(body);
+        this.minX = grid[0];
+        this.minY = grid[1];
+        this.minZ = grid[2];
+        this.sizeX = grid[3] - grid[0] + 1;
+        this.sizeY = grid[4] - grid[1] + 1;
+        this.sizeZ = grid[5] - grid[2] + 1;
         this.cells = new byte[this.sizeX * this.sizeY * this.sizeZ];
         this.lowest = new int[this.sizeX * this.sizeZ];
         this.highest = new int[this.sizeX * this.sizeZ];
@@ -130,17 +117,66 @@ public final class RockModel {
         long tallest = 0;
         if (body.pinnacles() > 0 && !body.lobes().isEmpty()) {
             Lobe first = body.lobes().getFirst();
-            this.pinnacle(first.x() + first.leanX(), top, first.z() + first.leanZ());
+            this.pinnacle(first.x() + first.leanX(), this.top, first.z() + first.leanZ());
             tallest = this.plan.id1;
         }
         this.tallest = tallest;
 
-        int around = (int) Math.ceil(Math.max(body.skirtWidth(), body.scree() > 0 ? 3 : 0));
+        int around = around(body);
         this.groundMinX = this.minX - around;
         this.groundMinZ = this.minZ - around;
         this.groundSizeX = this.sizeX + 2 * around;
         this.groundSizeZ = this.sizeZ + 2 * around;
         this.rise = new byte[this.groundSizeX * this.groundSizeZ];
+    }
+
+    /** How far the outline is pushed out at most: its bulges, its pieces and chunks standing out, its roughness. */
+    private static double reach(Body body) {
+        return body.warp() + body.pieces().depth() + body.chunks().depth() + body.roughness() + 0.5;
+    }
+
+    /** The highest point of its lobes' outline. */
+    private static double top(Body body) {
+        double top = 0;
+        for (Lobe lobe : body.lobes()) top = Math.max(top, lobe.blob() ? lobe.centerY() + lobe.height() / 2 : lobe.height() * (1 - lobe.plateau()));
+        return top;
+    }
+
+    /** How far past the rock's grid the skirt and the stones reach. */
+    private static int around(Body body) {
+        return (int) Math.ceil(Math.max(body.skirtWidth(), body.scree() > 0 ? 3 : 0));
+    }
+
+    /** The cells the rock can take: {minX, minY, minZ, maxX, maxY, maxZ}, in the body's own coordinates. */
+    private static int[] grid(Body body) {
+        double reach = reach(body), top = top(body), maxRadius = 0;
+        double x0 = Double.MAX_VALUE, x1 = -Double.MAX_VALUE, z0 = Double.MAX_VALUE, z1 = -Double.MAX_VALUE, y0 = -2;
+        for (Lobe lobe : body.lobes()) {
+            double radius = lobe.radius() * Math.max(1, lobe.aspect()) * (1 + Math.max(lobe.bulge(), 0) + Math.max(lobe.foot(), 0) + lobe.lobing());
+            maxRadius = Math.max(maxRadius, radius);
+            x0 = Math.min(x0, Math.min(lobe.x(), lobe.x() + lobe.leanX()) - radius);
+            x1 = Math.max(x1, Math.max(lobe.x(), lobe.x() + lobe.leanX()) + radius);
+            z0 = Math.min(z0, Math.min(lobe.z(), lobe.z() + lobe.leanZ()) - radius);
+            z1 = Math.max(z1, Math.max(lobe.z(), lobe.z() + lobe.leanZ()) + radius);
+            if (lobe.blob()) y0 = Math.min(y0, lobe.centerY() - lobe.height() / 2 - reach - 1);
+        }
+        if (body.lobes().isEmpty()) return new int[]{0, 0, 0, 0, 0, 0};
+        // A column goes on into the ground, deeper the wider it is, so that it still stands where the ground falls away
+        if (body.lobes().stream().anyMatch(lobe -> !lobe.blob())) y0 = Math.min(y0, -Math.clamp(2 + maxRadius / 2, 3, 8));
+        double margin = Math.ceil(reach);
+        return new int[]{RockNoise.floor(x0 - margin), RockNoise.floor(y0), RockNoise.floor(z0 - margin), RockNoise.floor(x1 + margin),
+                RockNoise.floor(top + reach + 2), RockNoise.floor(z1 + margin)};
+    }
+
+    /**
+     * Everything a body can write, without building it: {minX, minY, minZ, maxX, maxY, maxZ}, in its own coordinates
+     * (x and z from its middle, y from the ground there): its rock, its skirt and its stones. Its foot can also be filled
+     * further down, to the ground ({@link RockStamper#MAX_FILL}).
+     */
+    public static int[] bounds(Body body) {
+        int[] grid = grid(body);
+        int around = around(body);
+        return new int[]{grid[0] - around, grid[1], grid[2] - around, grid[3] + around, grid[4], grid[5] + around};
     }
 
     public static RockModel build(Body body) {
