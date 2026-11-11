@@ -1,12 +1,13 @@
 # Weathered rocks: the rock model rebuilt from the approved prototype
 
-**Status: for review.** Part 1 of 4, in the order agreed on 2026-11-11:
+**Status: approved 2026-11-11, with the placement rules added from the review.** Part 1 of 4, in the order agreed on
+2026-11-11:
 
 1. The rocks rebuilt (this spec).
 2. Terrain: the old 3D-noise terrain moved to humidity 0 to 0.3 and erosion 0.3 to 0.6, held to beta-like heights; the
    windswept biomes placed where their climate fits.
-3. The rocky biomes (Rocky Plains, Rocky Jungle, a rare rocky birch and spruce forest) and where rocks appear: flat and
-   high-erosion ground only, never in the 3D-noise terrain.
+3. The rocky biomes (Rocky Plains, Rocky Jungle, a rare rocky birch and spruce forest) and where rocks appear (the
+   rules are below, in "Where rocks go").
 4. The earlier list: the warm dark forest and the other transitions, the wetlands.
 
 It replaces the "Rocks" section of `2026-11-09-rocks-transitions-wetlands-design.md`.
@@ -79,6 +80,24 @@ The palette gets one key, `bright` (clay by default); `shade` is tuff, `base` st
   data uses them.
 - A big formation's model is built in 300 ms or less (how open a block stands is read from a summed-volume table,
   not counted cell by cell).
+
+## Where rocks go (decided here, built in part 3)
+
+From the review of this spec: "boulders ought to be in areas of mostly flat terrain, in middling ranges, and nowhere
+near mountain peaks"; "at most they should start to appear erosion > -0.3, but ought to stay in flat stretches"; "they
+appear in flat areas like jungles, plains, savannas, in the middle ranges of temperature"; "a case could be made to have
+some appear in meadows in rare clusters".
+
+- Flat ground only: erosion above -0.3, and there only where the ground is nearly level under the rock and around it.
+  Never on mountainsides (where the layout's mountainside rule applies), on slopes or near peaks.
+- Middle temperatures: in the plains, forests, savannas and jungles (temperature from about -0.15 to 0.55); not in the
+  frozen and cold biomes, not in deserts or badlands.
+- Never in the 3D-noise terrain (part 2).
+- Meadows: a rare cluster here and there.
+- The rocky biomes (part 3): many.
+
+The layout rules in `docs/worldgen-refactor-plan.md` (mountainside, peak-warm and the rest) say which biome takes which
+climate; they don't place rocks, and stay as they are.
 
 ## Checks
 
