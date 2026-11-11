@@ -90,7 +90,7 @@ public final class RockTemplate {
         for (BodySpec spec : this.bodies) {
             // A body's place is rounded to whole blocks
             int away = spec.distance.most > 0 ? (int) Math.ceil(spec.distance.most) + 1 : 0;
-            reach = Math.max(reach, away + spec.shape.reach(spec.radius.most, 1, 1));
+            reach = Math.max(reach, away + spec.shape.reach(spec.height.most, spec.radius.most));
         }
         return reach;
     }

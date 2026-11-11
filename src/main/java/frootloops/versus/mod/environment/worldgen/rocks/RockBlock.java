@@ -1,7 +1,9 @@
 package frootloops.versus.mod.environment.worldgen.rocks;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * One block of a rock: a box whose faces are a little off square, its edges and corners cut off by planes, its big faces
@@ -69,6 +71,17 @@ public final class RockBlock {
 
     public int group() {
         return this.group;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof RockBlock block && this.cx == block.cx && this.cy == block.cy && this.cz == block.cz && this.group == block.group
+                && Arrays.equals(this.planes, block.planes) && Arrays.equals(this.orientation, block.orientation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.cx, this.cy, this.cz, this.group, Arrays.hashCode(this.planes), Arrays.hashCode(this.orientation));
     }
 
     /** About the distance to its surface in blocks, negative inside: the planes' soft maximum. */

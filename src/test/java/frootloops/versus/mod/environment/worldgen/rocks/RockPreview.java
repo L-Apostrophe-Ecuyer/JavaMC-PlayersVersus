@@ -275,9 +275,7 @@ public final class RockPreview {
         scene.light();
 
         double top = 0;
-        for (RockPlan.Body body : plan.bodies()) {
-            for (RockPlan.Lobe lobe : body.lobes()) top = Math.max(top, lobe.blob() ? lobe.centerY() + lobe.height() / 2 : lobe.height());
-        }
+        for (RockPlan.Body body : plan.bodies()) top = Math.max(top, body.height());
         String[] orbit = options.getOrDefault("orbit", "40," + Math.round(1.5 * top + 16) + ",3").split(",");
         double angle = Math.toRadians(Double.parseDouble(orbit[0])), distance = Double.parseDouble(orbit[1]), eye = Double.parseDouble(orbit[2]);
         double look = Double.parseDouble(options.getOrDefault("look", String.valueOf(0.42 * top)));

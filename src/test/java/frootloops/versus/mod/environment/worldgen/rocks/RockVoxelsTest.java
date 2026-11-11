@@ -80,6 +80,14 @@ class RockVoxelsTest {
     }
 
     @Test
+    void theFootGoesStraightOnIntoTheGround() {
+        // Below the ground the foot widens no more: what is there is buried, and a rock on a slope shows it
+        RockVoxels cells = RockVoxels.of(List.of(box(0, 0, 3, 3, 20, 4, -1)), 0.6, 3, 9, 1);
+        assertTrue(width(cells, -1) >= width(cells, 0), "at the ground as wide as just above it: " + width(cells, -1) + " against " + width(cells, 0));
+        assertEquals(width(cells, -1), width(cells, -3), "as wide three blocks down as one");
+    }
+
+    @Test
     void theFootIsWhereTheExactDistancePutsIt() {
         // Blocks turned every way, their edges cut, their foot flared far out: by their edges the planes' soft maximum is
         // well over their hard maximum, out where the flare ends as well as at their faces

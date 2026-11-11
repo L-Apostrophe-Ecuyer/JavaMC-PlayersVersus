@@ -47,7 +47,7 @@ public class RockFormationPiece extends StructurePiece {
         this.anchorY = tag.getIntOr("Y", 0);
     }
 
-    /** Everything the body can write: its rock, its foot filled down to the ground, its skirt and stones. */
+    /** Everything the body can write: its rock and its plants, its foot filled down to the ground, the ground risen around it. */
     private static BoundingBox box(RockPlan.Body body, int originX, int originZ, int anchorY) {
         int[] bounds = RockModel.bounds(body);
         int x = originX + body.dx(), z = originZ + body.dz();

@@ -30,9 +30,9 @@ class RockTemplateTest {
         RockPlan plan = template("{\"bodies\": [{\"shape\": \"boulder\"}]}").plan(1);
         assertEquals(1, plan.bodies().size());
         Body boulder = plan.bodies().getFirst();
-        assertTrue(boulder.lobes().size() >= 2, "a boulder is two stones or more");
-        double height = boulder.lobes().getFirst().height();
-        assertTrue(height >= 4 && height <= 8, "a boulder left to itself is a few blocks tall, not " + height);
+        assertTrue(boulder.blocks().size() >= 2, "a boulder is two blocks or more");
+        double height = boulder.height();
+        assertTrue(height >= RockShape.BOULDER.minHeight && height <= RockShape.BOULDER.maxHeight, "a boulder left to itself is of its own height, not " + height);
         assertEquals(0, boulder.dx());
         assertEquals(0, boulder.dz());
         assertEquals(RockPalette.GRAY, plan.palette());
@@ -43,9 +43,8 @@ class RockTemplateTest {
         RockTemplate template = template(MONOLITH_AND_BOULDERS);
         Set<Long> heights = new HashSet<>();
         for (long seed = 1; seed <= 20; seed++) {
-            RockPlan.Lobe main = template.plan(seed).bodies().getFirst().lobes().getFirst();
+            Body main = template.plan(seed).bodies().getFirst();
             assertTrue(main.height() >= 26 && main.height() <= 38, "the monolith's height is in its range: " + main.height());
-            assertTrue(main.radius() >= 8 && main.radius() <= 11, "the monolith's radius is in its range: " + main.radius());
             heights.add(Math.round(main.height()));
         }
         assertTrue(heights.size() >= 4, "seeds pick different heights: " + heights);
@@ -162,11 +161,12 @@ class RockTemplateTest {
 
     @Test
     void smallRocksFitAFeature() {
-        // What a feature may hold: everything within 15 blocks of its origin
+        // What a feature may hold: everything within 16 blocks of its origin (RockFeature.MAX_REACH)
         for (String shape : new String[]{"boulder", "pile", "crag"}) {
-            assertTrue(template("{\"bodies\": [{\"shape\": \"" + shape + "\"}]}").reach() <= 15, shape + " left to itself fits a feature");
+            int reach = template("{\"bodies\": [{\"shape\": \"" + shape + "\"}]}").reach();
+            assertTrue(reach <= 16, shape + " left to itself fits a feature: it reaches " + reach);
         }
-        assertTrue(template("{\"bodies\": [{\"shape\": \"massif\"}]}").reach() > 15, "a massif doesn't");
+        assertTrue(template("{\"bodies\": [{\"shape\": \"massif\"}]}").reach() > 16, "a massif doesn't");
     }
 
     @Test

@@ -105,6 +105,18 @@ class RockBlockTest {
     }
 
     @Test
+    void blocksMadeAlikeAreEqual() {
+        // A plan is equal to the same plan drawn again: its bodies' blocks are values
+        RockBlock one = RockBlock.standing(1, 2, 6, 1, RockBlock.planes(new RockDice(3), 2, 3.5, 2, 5, 0.65, 0.5, 0.1, false, 1), 0.4, 1, 0.2, 7);
+        RockBlock same = RockBlock.standing(1, 2, 6, 1, RockBlock.planes(new RockDice(3), 2, 3.5, 2, 5, 0.65, 0.5, 0.1, false, 1), 0.4, 1, 0.2, 7);
+        RockBlock other = RockBlock.standing(1, 2, 6, 1, RockBlock.planes(new RockDice(4), 2, 3.5, 2, 5, 0.65, 0.5, 0.1, false, 1), 0.4, 1, 0.2, 7);
+        assertEquals(one, same);
+        assertEquals(one.hashCode(), same.hashCode());
+        assertFalse(one.equals(other), "other planes, another block");
+        assertFalse(one.equals(same.turned(RockBlock.level(0.1), 0, 0, 0)), "turned, another block");
+    }
+
+    @Test
     void theCheapDistanceFallsOnTheSameSideAsTheExactOne() {
         // Whatever value a decision turns on (0 at the face, more out in the foot's flare), the cheap distance taken around
         // it puts every point on the same side of it as the exact distance does

@@ -46,19 +46,8 @@ final class RockVoxels {
      */
     static RockVoxels of(List<RockBlock> blocks, double blend, double flare, double flareHeight, long seed) {
         if (blocks.isEmpty()) return new RockVoxels(new RockVoxels(0, 0, 0, 1, 1, 1), Integer.MIN_VALUE);
-        double x0 = Double.MAX_VALUE, y0 = Double.MAX_VALUE, z0 = Double.MAX_VALUE, x1 = -Double.MAX_VALUE, y1 = -Double.MAX_VALUE, z1 = -Double.MAX_VALUE;
-        for (RockBlock block : blocks) {
-            x0 = Math.min(x0, block.cx() - block.reach());
-            x1 = Math.max(x1, block.cx() + block.reach());
-            y0 = Math.min(y0, block.cy() - block.reach());
-            y1 = Math.max(y1, block.cy() + block.reach());
-            z0 = Math.min(z0, block.cz() - block.reach());
-            z1 = Math.max(z1, block.cz() + block.reach());
-        }
-        double margin = flare + 1;
-        int minX = (int) Math.floor(x0 - margin), minZ = (int) Math.floor(z0 - margin), minY = Math.max(-4, (int) Math.floor(y0) - 1);
-        RockVoxels grid = new RockVoxels(minX, minY, minZ, (int) Math.ceil(x1 + margin) - minX + 1, Math.max(1, (int) Math.ceil(y1) + 1 - minY + 1),
-                (int) Math.ceil(z1 + margin) - minZ + 1);
+        int[] cells = grid(blocks, flare);
+        RockVoxels grid = new RockVoxels(cells[0], cells[1], cells[2], cells[3] - cells[0] + 1, cells[4] - cells[1] + 1, cells[5] - cells[2] + 1);
         grid.fill(blocks, blend, flare, flareHeight, seed);
         grid.clean();
         grid.clean();
@@ -69,19 +58,44 @@ final class RockVoxels {
         return new RockVoxels(grid, top);
     }
 
+    /**
+     * The cells the blocks can take, their foot widened by {@code flare}: {minX, minY, minZ, maxX, maxY, maxZ}, from
+     * their centres to their reach, the flare and a cell more; no deeper than 4 under the ground.
+     */
+    static int[] grid(List<RockBlock> blocks, double flare) {
+        if (blocks.isEmpty()) return new int[]{0, 0, 0, 0, 0, 0};
+        double x0 = Double.MAX_VALUE, y0 = Double.MAX_VALUE, z0 = Double.MAX_VALUE, x1 = -Double.MAX_VALUE, y1 = -Double.MAX_VALUE, z1 = -Double.MAX_VALUE;
+        for (RockBlock block : blocks) {
+            x0 = Math.min(x0, block.cx() - block.reach());
+            x1 = Math.max(x1, block.cx() + block.reach());
+            y0 = Math.min(y0, block.cy() - block.reach());
+            y1 = Math.max(y1, block.cy() + block.reach());
+            z0 = Math.min(z0, block.cz() - block.reach());
+            z1 = Math.max(z1, block.cz() + block.reach());
+        }
+        double margin = flare + 1;
+        int minY = Math.max(-4, (int) Math.floor(y0) - 1);
+        return new int[]{(int) Math.floor(x0 - margin), minY, (int) Math.floor(z0 - margin), (int) Math.ceil(x1 + margin), Math.max(minY, (int) Math.ceil(y1) + 1),
+                (int) Math.ceil(z1 + margin)};
+    }
+
     private void fill(List<RockBlock> blocks, double blend, double flare, double flareHeight, long seed) {
+        // The blocks each column of cells is within reach of, in their order: only those are looked at there
+        int[] start = new int[this.sizeX * this.sizeZ + 1], near = this.near(blocks, start);
         for (int x = this.minX; x < this.minX + this.sizeX; x++) {
             for (int z = this.minZ; z < this.minZ + this.sizeZ; z++) {
+                int column = (x - this.minX) * this.sizeZ + (z - this.minZ);
                 for (int y = this.minY; y < this.minY + this.sizeY; y++) {
                     double px = x + 0.5, py = y + 0.5, pz = z + 0.5;
-                    // The foot widens toward the ground, curving out: there a cell is rock further from the blocks
-                    double rise = Math.max(0, 1 - py / flareHeight), threshold = flare * rise * rise;
+                    // The foot widens toward the ground, curving out: there a cell is rock further from the blocks. Under
+                    // the ground it goes straight on
+                    double rise = Math.clamp(1 - py / flareHeight, 0, 1), threshold = flare * rise * rise;
                     double joined = Double.MAX_VALUE, best = Double.MAX_VALUE, second = Double.MAX_VALUE;
                     int bestAt = -1, secondAt = -1;
-                    for (int at = 0; at < blocks.size(); at++) {
+                    for (int entry = start[column]; entry < start[column + 1]; entry++) {
+                        int at = near[entry];
                         RockBlock block = blocks.get(at);
-                        double reach = block.reach();
-                        if (Math.abs(px - block.cx()) > reach || Math.abs(py - block.cy()) > reach || Math.abs(pz - block.cz()) > reach) continue;
+                        if (Math.abs(py - block.cy()) > block.reach()) continue;
                         double distance = block.distance(px, py, pz, threshold);
                         if (distance < best) {
                             second = best;
@@ -102,6 +116,34 @@ final class RockVoxels {
                 }
             }
         }
+    }
+
+    /**
+     * For each column of cells, the blocks whose reach takes in its middle along x and z, in their order: the column's
+     * from {@code start[column]} up to {@code start[column + 1]} of what this returns.
+     */
+    private int[] near(List<RockBlock> blocks, int[] start) {
+        int[][] spans = new int[blocks.size()][];
+        for (int at = 0; at < blocks.size(); at++) {
+            RockBlock block = blocks.get(at);
+            // The cells whose middle, half a block in, lies within reach of the block's centre
+            spans[at] = new int[]{Math.max(this.minX, (int) Math.ceil(block.cx() - block.reach() - 0.5)), Math.min(this.minX + this.sizeX - 1, (int) Math.floor(block.cx() + block.reach() - 0.5)),
+                    Math.max(this.minZ, (int) Math.ceil(block.cz() - block.reach() - 0.5)), Math.min(this.minZ + this.sizeZ - 1, (int) Math.floor(block.cz() + block.reach() - 0.5))};
+            for (int x = spans[at][0]; x <= spans[at][1]; x++) {
+                for (int z = spans[at][2]; z <= spans[at][3]; z++) start[(x - this.minX) * this.sizeZ + (z - this.minZ) + 1]++;
+            }
+        }
+        for (int column = 0; column < this.sizeX * this.sizeZ; column++) start[column + 1] += start[column];
+        int[] near = new int[start[this.sizeX * this.sizeZ]], filled = new int[this.sizeX * this.sizeZ];
+        for (int at = 0; at < blocks.size(); at++) {
+            for (int x = spans[at][0]; x <= spans[at][1]; x++) {
+                for (int z = spans[at][2]; z <= spans[at][3]; z++) {
+                    int column = (x - this.minX) * this.sizeZ + (z - this.minZ);
+                    near[start[column] + filled[column]++] = at;
+                }
+            }
+        }
+        return near;
     }
 
     /** The smooth minimum: within {@code blend} of each other two distances join a little below the smaller. */

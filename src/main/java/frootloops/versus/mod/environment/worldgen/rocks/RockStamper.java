@@ -13,8 +13,8 @@ import java.util.Map;
  * it, and nothing a column gets depends on another column of the canvas: so a rock stamped a chunk at a time, in any
  * order, is the rock stamped whole.
  *
- * <p>For each column inside the box given: the ground rises to the skirt's height (never into the rock overhead, and
- * no more than the skirt's own height and two blocks where the ground has fallen away); then the rock's cells are
+ * <p>For each column inside the box given: the ground rises as high as the model says (never into the rock overhead,
+ * and no more than that and two blocks where the ground has fallen away); then the rock's cells are
  * written, a column that stands at the body's ground going on down to the ground it finds
  * (at most {@link #MAX_FILL} blocks); then what grows and lies on it. Under water and inside the ground the plant
  * cover is rock instead, and nothing is planted.
@@ -29,7 +29,7 @@ public final class RockStamper {
 
     /** Stamps a whole formation: each body stands on the canvas's ground at its own middle. */
     public static void stamp(RockPlan plan, int originX, int originZ, RockCanvas canvas, int minX, int minZ, int maxX, int maxZ) {
-        // Every body's ground before any is stamped: one's skirt doesn't lift the next
+        // Every body's ground before any is stamped: the ground risen around one doesn't lift the next
         int[] anchors = new int[plan.bodies().size()];
         for (int index = 0; index < anchors.length; index++) {
             RockPlan.Body body = plan.bodies().get(index);
@@ -66,12 +66,17 @@ public final class RockStamper {
         int ground = canvas.ground(worldX, worldZ);
         int low = model.lowest(x, z), high = model.highest(x, z);
         boolean rock = low != RockModel.NONE;
-        // The skirt: the ground rises toward the foot, but not into rock that hangs over it
+        // The ground rises against the foot, but not into rock that hangs over it
         int floor = ground;
         int rise = model.rise(x, z);
         if (rise > 0) {
             int to = Math.min(anchorY + rise, ground + rise + 2);
-            if (rock) to = Math.min(to, anchorY + low);
+            // Rock under the ground it buries
+            for (int y = 0; y < rise; y++) {
+                if (model.material(x, y, z) == null) continue;
+                to = Math.min(to, anchorY + y);
+                break;
+            }
             if (to > ground) {
                 canvas.raise(worldX, worldZ, ground, to);
                 floor = to;
@@ -91,8 +96,7 @@ public final class RockStamper {
             for (int y = low; y <= high; y++) {
                 RockMaterial material = model.material(x, y, z);
                 int worldY = anchorY + y;
-                // No slabs: where the model has one, nothing
-                if (material == null || model.slab(x, y, z) || !canvas.replaceable(worldX, worldY, worldZ)) continue;
+                if (material == null || !canvas.replaceable(worldX, worldY, worldZ)) continue;
                 if (!material.isRock() && (worldY < ground || canvas.water(worldX, worldY, worldZ))) {
                     // No plants in the ground or under water: plain rock where they would be
                     material = RockMaterial.BASE;
@@ -104,7 +108,6 @@ public final class RockStamper {
         if (decorations == null) return;
         for (Decoration decoration : decorations) {
             int worldY = anchorY + decoration.y();
-            if (decoration.kind() != RockModel.DecorationKind.PLANT) continue;
             // On the grass under it, if that was put as grass: not under water, not in the ground
             boolean onGrass = rock && decoration.y() - 1 >= low && grass.get(decoration.y() - 1 - low);
             if (onGrass && !canvas.water(worldX, worldY, worldZ) && canvas.replaceable(worldX, worldY, worldZ)) {
