@@ -27,6 +27,9 @@ and the test API's own chunk wait never ends from a render distance of 7 (it ask
 
 ## Rocks
 
+Superseded by `2026-11-11-weathered-rocks-design.md`: rocks are now angular blocks joined where they meet, painted from
+above, not a field of noisy lobes. The table below is kept as the record of the first approach.
+
 | Question | Decision |
 |---|---|
 | How a rock is made | A field over space, positive inside: lobes fused together (columns with a rounded top, or boulders: ellipsoids cut flat by planes), pushed in and out by noise (bulges, grooves down the face, benches around it, roughness), split by cracks. Cells inside are rock (`RockModel`) |

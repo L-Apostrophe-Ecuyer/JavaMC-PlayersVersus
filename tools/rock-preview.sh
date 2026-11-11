@@ -12,7 +12,7 @@ gson=$(find ~/.gradle -name 'gson-2*.jar' ! -name '*sources*' 2>/dev/null | head
 client=$(find ~/.gradle .gradle -name 'minecraft-client*only*.jar' ! -name '*sources*' 2>/dev/null | head -1)
 rocks=src/main/java/frootloops/versus/mod/environment/worldgen/rocks
 mkdir -p "$classes"
-javac -nowarn -d "$classes" -cp "$gson" "$rocks"/Rock{Noise,Material,Palette,Plan,Shape,Model,Canvas,Stamper,Template}.java \
+javac -nowarn -d "$classes" -cp "$gson" "$rocks"/Rock{Noise,Material,Palette,Plan,Shape,Model,Canvas,Stamper,Template,Dice,Block,Voxels,Light}.java \
     src/test/java/frootloops/versus/mod/environment/worldgen/rocks/RockPreview.java
 java -cp "$classes:$gson" frootloops.versus.mod.environment.worldgen.rocks.RockPreview \
     "textures=src/main/resources/assets/minecraft/textures/block:$client" "$@"
