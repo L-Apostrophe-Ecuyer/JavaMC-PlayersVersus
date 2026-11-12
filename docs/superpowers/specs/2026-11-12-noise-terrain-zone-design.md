@@ -59,13 +59,19 @@ Its numbers are `PvWorldgenConstants`'s (`NOISE_ZONE_*`); the density-function g
 vanilla's splines in two forms, mixed by the window: `lerp(zone, plain, shattered)`.
 
 - **plain**: vanilla's spline without the bump: the points at erosion 0.45 and 0.55 are taken out of each erosion
-  node, so the spline runs from its point at 0.40 (0.35 for factor) to the one at 0.58 (0.62), which are the plain
-  terrain either side (factor 4.7 to 6.3, offset about -0.50). Everywhere outside erosion 0.40 to 0.62 it is vanilla's
-  spline, point for point.
+  node, so the spline runs from its point at 0.40 to the one at 0.58 (the far inland nodes, which is most of the zone;
+  the factor's nodes at the coast, from 0.35 to 0.62), which are the plain terrain either side (factor 4.7 to 6.3,
+  offset about -0.50). Everywhere outside erosion 0.35 to 0.62 it is vanilla's spline, point for point. Vanilla's low
+  factor on peaks (ridges at the plateaus, 1.56 at erosion 0.4) isn't part of the bump: it fades out toward 4.7 at 0.58,
+  so at erosion 0.5 on peaks the factor is still about 3.4 outside the zone.
 - **shattered**: the bump's plateau, its sub-spline at erosion 0.45 in each node that has one (the nodes of the coast,
   which have none, read erosion 0.5), a function of continentalness and the ridges only. Inside the window the terrain
-  doesn't depend on the erosion; the window's fades are the transition, over some 30 to 60 blocks: the ground rises
-  22 blocks over a fade, as steeply as vanilla's own bump does, and no more than 0.12 (15 blocks) in 4 blocks.
+  doesn't depend on the erosion; the window's fades are the transition, over about 100 blocks at the climate's median
+  gradient and 35 where it is steepest (a tenth of the ground): the ground rises 22 blocks over a fade, as steeply as
+  vanilla's own bump does: measured over 1,100 columns in the fades and 1,300 on vanilla's bump edges, the 90th
+  percentile of the offset's change in 8 blocks is 0.031 against 0.034 (the factor's 0.78 against 0.82); the test asks
+  for at most 1.25 times vanilla's. (The humidity noise changes about a seventh faster per block than the erosion's;
+  the zone's humidity edges are that much steeper than its erosion edges.)
 
 `tools/terrain.py` writes the two functions (and the surface-level copies) from vanilla's files in the game's jar.
 
@@ -86,11 +92,11 @@ the zone nothing changes (a test compares the sloped cheese with the old formula
 ### Windswept biomes
 
 They are the biomes of the rugged terrain, so they go where it is: vanilla's windswept slices (erosion 0.45 to 0.55,
-which the window holds at full strength from 0.36 to 0.54) stay windswept only where the humidity is 0.025 to 0.275 (the
-window at half strength or more), the continentalness 0.03 or more and the temperature below 0 (the rule that took them
+which the window holds at full strength from 0.36 to 0.54) stay windswept only where the window is at half strength or
+more: the humidity 0.025 to 0.275, the continentalness 0.075 or more, and the temperature below 0 (the rule that took them
 from temperate climates, `TEMPERATE_MIN`, stays), as the biome that fits:
 
-| Temperature | Humidity 0.03 to 0.1 | Humidity 0.1 to 0.27 |
+| Temperature | Humidity 0.025 to 0.1 | Humidity 0.1 to 0.275 |
 |---|---|---|
 | below -0.15 | windswept gravelly hills | windswept forest |
 | -0.15 to 0 | windswept hills | windswept forest |
@@ -107,13 +113,16 @@ The windswept savanna stays out: the earlier request replaced the warm windswept
 
 - Unit tests with the game's own evaluation (`WorldgenTestData`: vanilla's pack and this mod's, the router built as a
   world does, `RandomState#sampleBlockValueUncached`): the window is 0 outside the box and 1 well inside; outside the
-  window and outside erosion 0.40 to 0.62 the mod's offset and factor equal vanilla's; in the band outside the window
-  the offset is under -0.4 (vanilla's -0.33) and the mean factor 4 or more (4.8; vanilla's 3.1); inside the window they
-  are the plateau's (equal to vanilla's where it is the plateau); in the zone the base noise is gone over y 128 and
+  window and outside erosion 0.35 to 0.63 the mod's offset and factor equal vanilla's; in the band outside the window
+  the offset is under -0.4 (vanilla's -0.33) and the mean factor 4 or more (4.8; vanilla's 3.1, and not every column:
+  peaks keep some of their low factor, see above); inside the window they are the plateau's (equal to vanilla's where it
+  is the plateau); over the fades the ground and the noise's weight change no faster than along vanilla's bump edges
+  (the 90th percentile of the steps in 8 blocks, at most 1.25 times); in the zone the base noise is gone over y 128 and
   nothing is solid over it, the tops' median lies between y 65 and 90 and their spread (tenth to ninetieth percentile)
   is 25 blocks or more.
-- `PvBiomeLayoutTest`: windswept biomes only inside the zone's box and below 0 (400,000 random climates); the table
-  above, slice by slice, and what lies beside them elsewhere; the pieces still partition vanilla's slices.
+- `PvBiomeLayoutTest`: windswept biomes only inside the zone where the window is at half strength or more, and below 0
+  (400,000 random climates); the table above, slice by slice, and what lies beside them elsewhere; the pieces still
+  partition vanilla's slices.
 - Looking: the gallery's windswept biomes, before and after, and the zone's edge.
 - Running: `runWorldgenSmoke` for the Players Versus world type (census of the windswept biomes), the game tests.
 

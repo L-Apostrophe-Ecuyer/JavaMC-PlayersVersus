@@ -24,7 +24,7 @@ import net.minecraft.world.level.biome.OverworldBiomeBuilder;
  * The biome layout of the Players Versus world type, derived from vanilla's overworld layout:
  * <ul>
  *   <li>each vanilla surface slice is first cut by the replacements ({@link #REPLACEMENTS}): the part inside one's region
- *   is another biome from then on (the windswept biomes: in the 3D-noise zone below freezing's side the one that fits,
+ *   is another biome from then on (the windswept biomes: in the 3D-noise zone, below temperature 0, the one that fits,
  *   anywhere else what lies beside; old growth birch forests above freezing; the cold half of swamps);</li>
  *   <li>then each piece is cut by the transition rules ({@link #RULES}) into disjoint boxes: the part inside a rule's
  *   region gets the transition biome, the rest keeps the piece's biome;</li>
@@ -92,11 +92,12 @@ public final class PvBiomeLayout {
 
     /**
      * The windswept biomes are the rugged terrain's, so they stand in the 3D-noise zone: where its window is at half
-     * strength or more (humidity from 0.025 to 0.275, the half of each fade), inland, below {@link #TEMPERATE_MIN}.
+     * strength or more (humidity 0.025 to 0.275, continentalness 0.075 and up: the half of each fade), below
+     * {@link #TEMPERATE_MIN} (the rule that keeps them out of the warm climates).
      */
     static final long WINDSWEPT_HUMIDITY_MIN = Climate.quantizeCoord((float) (PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MIN + PvWorldgenConstants.NOISE_ZONE_HUMIDITY_FADE / 2));
     static final long WINDSWEPT_HUMIDITY_MAX = Climate.quantizeCoord((float) (PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MAX - PvWorldgenConstants.NOISE_ZONE_HUMIDITY_FADE / 2));
-    static final long WINDSWEPT_CONTINENTALNESS_MIN = Climate.quantizeCoord((float) PvWorldgenConstants.NOISE_ZONE_CONTINENTALNESS_MIN);
+    static final long WINDSWEPT_CONTINENTALNESS_MIN = Climate.quantizeCoord((float) (PvWorldgenConstants.NOISE_ZONE_CONTINENTALNESS_MIN + PvWorldgenConstants.NOISE_ZONE_CONTINENTALNESS_FADE / 2));
     /** In the zone, from this humidity (vanilla's, where its windswept biomes turn to forest) the windswept forest, below it hills. */
     private static final float WINDSWEPT_FOREST_HUMIDITY = 0.1F;
     /** The zone's hills are gravelly (stony, dry) below this temperature: the cold, dry windswept biome of vanilla's tables. */
@@ -114,7 +115,7 @@ public final class PvBiomeLayout {
      * does). A target of {@code null} means the replacement doesn't apply; it is given the part inside the region.
      */
     private static final List<Rule> REPLACEMENTS = List.of(
-            // Vanilla's windswept slices: in the 3D-noise zone the windswept biome that fits, anywhere else below freezing's side what lies beside
+            // Vanilla's windswept slices: in the 3D-noise zone the windswept biome that fits, anywhere else below temperature 0 what lies beside
             new Rule("windswept-zone", Box.ALL.withMin(Box.H, WINDSWEPT_HUMIDITY_MIN).withMax(Box.H, WINDSWEPT_HUMIDITY_MAX)
                     .withMin(Box.C, WINDSWEPT_CONTINENTALNESS_MIN).withMax(Box.T, Climate.quantizeCoord(TEMPERATE_MIN)), PvBiomeLayout::windsweptZoneTarget),
             new Rule("windswept", Box.ALL.withMax(Box.T, Climate.quantizeCoord(TEMPERATE_MIN)), PvBiomeLayout::windsweptBesideTarget),
@@ -273,7 +274,7 @@ public final class PvBiomeLayout {
     }
 
     /**
-     * A windswept slice's part inside the zone (humidity, inland, below {@link #TEMPERATE_MIN}): the windswept biome that
+     * A windswept slice's part inside the zone (humidity, continentalness, below {@link #TEMPERATE_MIN}): the windswept biome that
      * fits: forest from humidity {@link #WINDSWEPT_FOREST_HUMIDITY}, below it hills, gravelly where it is colder than
      * {@link #WINDSWEPT_GRAVELLY_MAX_TEMPERATURE}.
      */

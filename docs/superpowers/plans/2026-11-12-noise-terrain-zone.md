@@ -16,7 +16,7 @@
 - Vanilla's `offset`, `factor` and every `minecraft:` data file stay as they are: vanilla world types are untouched. Only `players-versus:overworld/*` density functions change.
 - Outside the window and outside erosion 0.34 to 0.63 the mod's offset and factor equal vanilla's.
 - Heights: in the zone the base noise is `noise * (1 - zone * ramp)`, the ramp 0 at y 100 and 1 at y 128, clamped; the zone's tops: median y 65 to 90 with a spread of 25 blocks or more, none over 128.
-- Windswept: only where humidity is 0.025 to 0.275, continentalness 0.03 or more, temperature below 0; hills / gravelly hills / forest by the spec's table; elsewhere what lies beside; the temperate rule (`TEMPERATE_MIN` 0) stays.
+- Windswept: only where humidity is 0.025 to 0.275, continentalness 0.075 or more (the window at half strength or more), temperature below 0; hills / gravelly hills / forest by the spec's table; elsewhere what lies beside; the temperate rule (`TEMPERATE_MIN` 0) stays.
 - `BiomeFeatureOrderTest`, `PvBiomeLayoutTest` (pieces partition vanilla's slices) and the rock tests stay green. Known failures on the base, not ours: `BlightTest`, `EndermanShulkerCarrierTest`, the blight game test.
 
 ## Review Focus
@@ -25,7 +25,7 @@
 - Coasts and rivers inside the zone: the continentalness fade keeps the zone off the shore; the mod's high river and river carver terms are untouched (`sloped_cheese` keeps its `min` with them).
 - The aquifer and surface rules reading the surface-level estimate: it follows the new offset and factor (Task 2), so water and surface blocks stand where the ground is.
 - Vanilla's data changing under the copies (a snapshot moving its splines): `theTerrainOutsideTheBumpIsVanillas` fails when the copies drift from vanilla.
-- Old worlds: a world keeps its generator and its data from when it was made; chunks already generated don't change; new chunks next to old ones meet at the zone's old edge (the window is smooth, the old terrain isn't): noted, not fixed.
+- Old worlds: the mod's data is read at every launch, so an existing world's new chunks get the new terrain and biomes; chunks already generated don't change, so a seam shows where the old and the new terrain meet (the window is smooth, the old terrain isn't): noted, not fixed.
 
 ---
 
@@ -63,7 +63,7 @@
   - `theTerrainOutsideTheBumpIsVanillas`: where the window is 0 and erosion < 0.3 or > 0.63 (any continentalness): the mod's offset and factor equal vanilla's within 1e-4, at 3,000 or more samples.
   - `theBumpIsGoneOutsideTheZone`: where the window is 0, continentalness 0.3 or more and erosion 0.47 to 0.53 (200 or more samples): factor 4 or more (vanilla's bump: 1.4 to 1.8 off the valleys) and offset under -0.4 (vanilla's -0.33); and the mean over them is within 0.1 of the mean at erosion 0.62 to 0.66.
   - `theBumpHoldsInsideTheZone`: where the window is 1 and continentalness 0.3 or more: at erosion 0.47 to 0.53 the mod's equal vanilla's (the plateau); at erosion 0.37 to 0.43 the offset averages over -0.4 (vanilla's plain -0.5) and factor under 3.
-  - `theTransitionIsSmooth`: along a line of 400 positions across a fade (found by walking in x from a position inside the zone out), consecutive offsets differ by under 0.03 and factors by under 0.5.
+  - `theZonesEdgesAreNoSteeperThanVanillasBump` (instead of the walk across a fade this plan first named, whose bounds were too loose to show anything): the 90th percentile of the offset's and the factor's change in 8 blocks, over the columns in the zone's fades and on vanilla's bump edges (erosion 0.402 to 0.448 and 0.552 to 0.578), well inland, is at most 1.25 times vanilla's.
 - [ ] **Step 2: Run them to see them fail**: no mod offset or factor.
 - [ ] **Step 3: Write `tools/terrain.py`**: `plain(spline)` removes the points at erosion 0.45 and 0.55 from every erosion node; `shattered(spline)` replaces each erosion node that has them by its 0.45 point's sub-tree (equal to the 0.55's, asserted) and each other erosion node's coordinate by the constant 0.5; both keep vanilla's other points and derivatives; the files wrap them as vanilla's do (`cache(lerp(blend_alpha, blend_offset | 10.0, ...))`, the offset adding -0.50375). In `pv_density.py`: the references, `preliminary_surface_level` (vanilla's `find_top_surface` tree with the mod's offset and factor) and `chunk_surface_level` (its `interpolated`, 16 by 1), `noise_settings`, `GONE`. Run both generators.
 - [ ] **Step 4: Run `./gradlew test --tests '*TerrainShapeTest' --tests '*NoiseZoneTest'`**: pass; `python3 tools/port-26.3/pv_density.py --check` reports only the three files stale before this plan (`material_rule/overworld.json`, `noise/sand_beach.json`, `noise/gravel_beach.json`).

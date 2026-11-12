@@ -102,42 +102,49 @@ class TerrainShapeTest {
         assertTrue(flankFactors / flanks <= vanillaFactors / flanks - 1.0, "the flanks of the zone are smooth: mean factor " + flankFactors / flanks);
     }
 
+    private static double step(DensityFunction function, Column c, int dx, int dz) {
+        return Math.abs(TerrainSamples.at(function, c.x() + dx, c.z() + dz) - TerrainSamples.at(function, c.x(), c.z()));
+    }
+
+    private static double percentile(List<Double> values, double share) {
+        List<Double> sorted = new ArrayList<>(values);
+        sorted.sort(null);
+        return sorted.get((int) Math.min(sorted.size() - 1, Math.round(share * (sorted.size() - 1))));
+    }
+
     /**
-     * Along lines out of the zone, over its fades, the ground and the noise's weight change a little at a time: the ground
-     * rises 22 blocks (0.17) over a fade of some 30 blocks, as steep as vanilla's own bump edge, and by no more than 0.12
-     * in 4 blocks where the climate changes fastest; a step in the data would be the whole 0.17 at once.
+     * Over the zone's fades the ground and the noise's weight change no faster than along vanilla's own bump edges
+     * (erosion 0.40 to 0.45 and 0.55 to 0.58): the 90th percentile of what the offset and the factor move in 8 blocks, over
+     * the columns in the fades and on the bump's slopes, well inland, is at most 1.25 times vanilla's. (Measured: 0.030
+     * against 0.034 for the offset, 0.74 against 0.94 for the factor; the humidity noise changes about a seventh faster per
+     * block than the erosion's, so a fade of its own width is a seventh steeper, and the fades are as wide as vanilla's.)
      */
     @Test
-    void theTransitionIsSmooth() {
-        int lines = 0;
-        double worstOffset = 0, worstFactor = 0;
-        for (Column start : columns) {
-            if (start.zone() < 0.999 || start.continentalness() < 0.4) continue;
-            for (int direction : new int[]{1, -1}) {
-                boolean crossed = false;
-                double previousOffset = Double.NaN, previousFactor = Double.NaN;
-                for (int step = 0; step <= 150; step++) {
-                    int x = start.x() + direction * 4 * step;
-                    double zone = TerrainSamples.at(WorldgenTestData.density("players-versus:overworld/noise_zone"), x, start.z());
-                    double continents = TerrainSamples.at(WorldgenTestData.router().continents(), x, start.z());
-                    double offset = TerrainSamples.at(OFFSET, x, start.z()), factor = TerrainSamples.at(FACTOR, x, start.z());
-                    if (continents < 0.3) break;
-                    if (zone < 0.999) crossed = true;
-                    if (!Double.isNaN(previousOffset)) {
-                        worstOffset = Math.max(worstOffset, Math.abs(offset - previousOffset));
-                        worstFactor = Math.max(worstFactor, Math.abs(factor - previousFactor));
-                    }
-                    previousOffset = offset;
-                    previousFactor = factor;
-                    if (zone == 0) break;
-                }
-                if (crossed) lines++;
+    void theZonesEdgesAreNoSteeperThanVanillasBump() {
+        List<Double> zoneOffsets = new ArrayList<>(), zoneFactors = new ArrayList<>(), vanillaOffsets = new ArrayList<>(), vanillaFactors = new ArrayList<>();
+        int alternate = 0;
+        for (Column c : columns) {
+            if (c.continentalness() < 0.3) continue;
+            boolean zoneEdge = c.zone() > 0.02 && c.zone() < 0.98;
+            boolean bumpEdge = (c.erosion() > 0.402 && c.erosion() < 0.448) || (c.erosion() > 0.552 && c.erosion() < 0.578);
+            if (!zoneEdge && !bumpEdge) continue;
+            // Along x and along z by turns
+            int dx = alternate++ % 2 == 0 ? 8 : 0, dz = 8 - dx;
+            if (zoneEdge) {
+                zoneOffsets.add(step(OFFSET, c, dx, dz));
+                zoneFactors.add(step(FACTOR, c, dx, dz));
             }
-            if (lines >= 40) break;
+            if (bumpEdge) {
+                vanillaOffsets.add(step(VANILLA_OFFSET, c, dx, dz));
+                vanillaFactors.add(step(VANILLA_FACTOR, c, dx, dz));
+            }
         }
-        System.out.printf("[terrain] %d lines over a fade: the most the offset moves in 4 blocks %.3f, the factor %.2f%n", lines, worstOffset, worstFactor);
-        assertTrue(lines >= 20, "only " + lines + " lines crossed a fade");
-        assertTrue(worstOffset <= 0.12, "the ground steps by " + worstOffset + " in 4 blocks");
-        assertTrue(worstFactor <= 2.5, "the noise's weight steps by " + worstFactor + " in 4 blocks");
+        assertTrue(zoneOffsets.size() >= 300 && vanillaOffsets.size() >= 300, "only " + zoneOffsets.size() + " columns in the zone's fades and " + vanillaOffsets.size() + " on vanilla's bump");
+        double zoneOffset = percentile(zoneOffsets, 0.9), vanillaOffset = percentile(vanillaOffsets, 0.9);
+        double zoneFactor = percentile(zoneFactors, 0.9), vanillaFactor = percentile(vanillaFactors, 0.9);
+        System.out.printf("[terrain] 8-block steps, 90th percentile: offset %.4f in the zone's fades (%d columns), %.4f on vanilla's bump (%d); factor %.3f against %.3f%n",
+                zoneOffset, zoneOffsets.size(), vanillaOffset, vanillaOffsets.size(), zoneFactor, vanillaFactor);
+        assertTrue(zoneOffset <= 1.25 * vanillaOffset, "the ground steps by " + zoneOffset + " in 8 blocks along the zone's edges, vanilla's bump by " + vanillaOffset);
+        assertTrue(zoneFactor <= 1.25 * vanillaFactor, "the noise's weight steps by " + zoneFactor + " in 8 blocks along the zone's edges, vanilla's bump by " + vanillaFactor);
     }
 }

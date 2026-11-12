@@ -416,9 +416,9 @@ class PvBiomeLayoutTest {
     }
 
     /**
-     * The windswept biomes are the rugged terrain's (the 3D-noise zone): where vanilla puts one, inside the zone's box
-     * (humidity 0.025 to 0.275, inland) and below freezing's side, it is the windswept biome that fits; anywhere else
-     * it is what lies beside it.
+     * The windswept biomes are the rugged terrain's (the 3D-noise zone): where vanilla puts one, inside the zone where its
+     * window is at half strength or more (humidity 0.025 to 0.275, continentalness 0.075 or more) and below 0, it is the
+     * windswept biome that fits; anywhere else it is what lies beside it.
      */
     @Test
     void windsweptSlicesFollowTheZone() {
@@ -428,7 +428,7 @@ class PvBiomeLayoutTest {
             ParameterPoint h = entry.getFirst();
             ResourceKey<Biome> biome = entry.getSecond();
             if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || !WINDSWEPT.contains(biome)) continue;
-            Long cool = inside(h.temperature(), -1.0F, -0.02F), inland = inside(h.continentalness(), 0.04F, 1.0F);
+            Long cool = inside(h.temperature(), -1.0F, -0.02F), inland = inside(h.continentalness(), 0.085F, 1.0F);
             if (cool == null) continue;
             long erosion = mid(h.erosion()), weirdness = mid(h.weirdness());
             float t = Climate.unquantizeCoord(cool);
@@ -451,7 +451,8 @@ class PvBiomeLayoutTest {
                 assertEquals(expected, layout.findValue(point), biome.identifier().getPath() + " outside the zone at " + point);
                 checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
             }
-            Long coast = inside(h.continentalness(), -1.0F, 0.02F);
+            // Off the coast: where the window is under half strength (continentalness 0.03 to 0.075), the terrain is still plain
+            Long coast = inside(h.continentalness(), -1.0F, 0.065F);
             if (coast != null) {
                 long humidity = inBox != null ? inBox : mid(h.humidity());
                 Climate.TargetPoint point = point(cool, humidity, coast, erosion, weirdness);
@@ -484,7 +485,7 @@ class PvBiomeLayoutTest {
             String where = String.format(Locale.ROOT, "%s at T %.3f H %.3f C %.3f E %.3f", biome.identifier().getPath(), temperature, humidity, continentalness, erosion);
             assertTrue(temperature < 0.003F, where);
             assertTrue(humidity >= 0.022F && humidity <= 0.278F, where);
-            assertTrue(continentalness >= 0.027F, where);
+            assertTrue(continentalness >= 0.072F, where);
             assertTrue(erosion >= 0.447F && erosion <= 0.553F, where);
         }
         assertTrue(found >= 200, "only " + found + " windswept points found");
