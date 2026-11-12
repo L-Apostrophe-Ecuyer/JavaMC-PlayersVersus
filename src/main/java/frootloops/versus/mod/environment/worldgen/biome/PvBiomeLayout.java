@@ -3,6 +3,7 @@ package frootloops.versus.mod.environment.worldgen.biome;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes.PlacedBiome;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes.PlacedBiomeType;
+import frootloops.versus.mod.environment.worldgen.PvWorldgenConstants;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -82,10 +83,11 @@ public final class PvBiomeLayout {
     /** The rocky jungle: the jungles from the warm band up to this temperature. */
     static final float ROCKY_JUNGLE_MAX = 0.36F;
     /**
-     * The 3D-noise terrain's climate (part 2): humidity 0 to 0.3 with erosion 0.3 to 0.6. Rugged, overhanging ground, where
-     * no rocky biome goes.
+     * The 3D-noise terrain's climate (part 2's zone, {@link PvWorldgenConstants}): humidity 0 to 0.3 with erosion 0.3 to
+     * 0.6. Rugged, overhanging ground, where no rocky biome goes.
      */
-    static final float NOISE_HUMIDITY_MAX = 0.3F, NOISE_EROSION_MIN = 0.3F, NOISE_EROSION_MAX = 0.6F;
+    static final float NOISE_HUMIDITY_MAX = (float) PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MAX;
+    static final float NOISE_EROSION_MIN = (float) PvWorldgenConstants.NOISE_ZONE_EROSION_MIN, NOISE_EROSION_MAX = (float) PvWorldgenConstants.NOISE_ZONE_EROSION_MAX;
 
     private record Rule(String name, Box region, BiFunction<Box, ResourceKey<Biome>, ResourceKey<Biome>> target) {
     }

@@ -144,6 +144,7 @@ def spaghetti(noise_name):
 # --- the functions (each mirrors the Java kernel it replaces) ------------------------------------------------------
 
 REF_OFFSET, REF_FACTOR, REF_JAGGEDNESS = mc("overworld/offset"), mc("overworld/factor"), mc("overworld/jaggedness")
+REF_HUMIDITY, REF_EROSION = mc("overworld/vegetation"), mc("overworld/erosion")
 REF_RIDGES, REF_CONTINENTS = mc("overworld/ridges"), mc("overworld/continents")
 REF_BASE_3D, REF_ROUGHNESS = mc("overworld/base_3d_noise"), mc("overworld/caves/spaghetti_roughness_function")
 REF_DEPTH, REF_ENTRANCES = pv("overworld/depth"), pv("overworld/caves/entrances")
@@ -157,6 +158,24 @@ REF_UPPER_VALLEY, REF_UPPER_ACROSS = pv("overworld/high_river/upper_valley"), pv
 REF_BANK, REF_UPPER_BANK = pv("overworld/high_river/bank"), pv("overworld/high_river/upper_bank")
 REF_DRY_PATHS = pv("overworld/caves/dry_paths")
 REF_BASIN_LEVEL = pv("overworld/caves/basin_level")
+
+
+def smoothstep(x, start, end):
+    """0 at `start`, 1 at `end` (either way round), t * t * (3 - 2 * t) between, t the clamped distance from `start`."""
+    shifted = x if start == 0 else add(x, -start)
+    t = clamp(mul(shifted, 1.0 / (end - start)), 0.0, 1.0)
+    return mul(square(t), add(3.0, mul(t, -2.0)))
+
+
+def noise_zone():
+    """Where the shattered terrain is, 0 to 1: the box of humidity, erosion and continentalness in PvWorldgenConstants
+    (NOISE_ZONE_*), a smoothstep rising over each fade inside an edge; continentalness only from its low edge."""
+    humidity = mul(smoothstep(REF_HUMIDITY, C["NOISE_ZONE_HUMIDITY_MIN"], C["NOISE_ZONE_HUMIDITY_MIN"] + C["NOISE_ZONE_HUMIDITY_FADE"]),
+                   smoothstep(REF_HUMIDITY, C["NOISE_ZONE_HUMIDITY_MAX"], C["NOISE_ZONE_HUMIDITY_MAX"] - C["NOISE_ZONE_HUMIDITY_FADE"]))
+    erosion = mul(smoothstep(REF_EROSION, C["NOISE_ZONE_EROSION_MIN"], C["NOISE_ZONE_EROSION_MIN"] + C["NOISE_ZONE_EROSION_FADE"]),
+                  smoothstep(REF_EROSION, C["NOISE_ZONE_EROSION_MAX"], C["NOISE_ZONE_EROSION_MAX"] - C["NOISE_ZONE_EROSION_FADE"]))
+    inland = smoothstep(REF_CONTINENTS, C["NOISE_ZONE_CONTINENTALNESS_MIN"], C["NOISE_ZONE_CONTINENTALNESS_MIN"] + C["NOISE_ZONE_CONTINENTALNESS_FADE"])
+    return cache(mul(mul(humidity, erosion), inland))
 
 
 def depth():
@@ -498,6 +517,7 @@ FUNCTIONS = {
     "overworld/ore_vein/copper_richness": lambda: vein_richness("copper"),
     "overworld/ore_vein/iron_density": lambda: vein_density("iron"),
     "overworld/ore_vein/iron_richness": lambda: vein_richness("iron"),
+    "overworld/noise_zone": noise_zone,
     "overworld/depth": depth,
     "overworld/sloped_cheese": sloped_cheese,
     "overworld/terrain": terrain,
