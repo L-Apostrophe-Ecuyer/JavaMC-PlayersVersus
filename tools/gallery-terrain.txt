@@ -1,0 +1,8 @@
+# The 3D-noise zone's windswept biomes: tools/gallery.sh @tools/gallery-terrain.txt <output directory>
+# Each biome: one view from the air, one from the ground. The zone's rugged ground reaches 20 to 40 blocks over the plain.
+name:windswept_forest
+biome:minecraft:windswept_forest
+name:windswept_hills
+biome:minecraft:windswept_hills
+name:windswept_gravelly_hills
+biome:minecraft:windswept_gravelly_hills
