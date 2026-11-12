@@ -10,7 +10,7 @@
       "to_coordinate": 320,
       "to_value": -1.5
     },
-    "right": "minecraft:overworld/offset"
+    "right": "players-versus:overworld/offset"
   },
   "right": {
     "type": "minecraft:range_choice",

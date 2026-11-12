@@ -85,7 +85,7 @@
                 }
               }
             },
-            "right": "minecraft:overworld/factor"
+            "right": "players-versus:overworld/factor"
           }
         },
         "right": 4.0

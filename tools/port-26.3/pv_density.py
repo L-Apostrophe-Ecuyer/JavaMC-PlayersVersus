@@ -143,7 +143,9 @@ def spaghetti(noise_name):
 
 # --- the functions (each mirrors the Java kernel it replaces) ------------------------------------------------------
 
-REF_OFFSET, REF_FACTOR, REF_JAGGEDNESS = mc("overworld/offset"), mc("overworld/factor"), mc("overworld/jaggedness")
+# The offset and factor are this mod's own (tools/terrain.py writes them: vanilla's splines, the shattered terrain moved
+# into the 3D-noise zone); the jaggedness is vanilla's
+REF_OFFSET, REF_FACTOR, REF_JAGGEDNESS = pv("overworld/offset"), pv("overworld/factor"), mc("overworld/jaggedness")
 REF_HUMIDITY, REF_EROSION = mc("overworld/vegetation"), mc("overworld/erosion")
 REF_RIDGES, REF_CONTINENTS = mc("overworld/ridges"), mc("overworld/continents")
 REF_BASE_3D, REF_ROUGHNESS = mc("overworld/base_3d_noise"), mc("overworld/caves/spaghetti_roughness_function")
@@ -543,8 +545,7 @@ FUNCTIONS = {
     "overworld/aquifer_barrier": lambda: noise(mc("aquifer_barrier"), 1.0, 0.5),
 }
 # Replaced by the functions above and gone: the kernels' inputs that only they read.
-GONE = ["overworld/high_river/channel.json", "overworld/high_river/depth.json", "overworld/high_river/terrain.json",
-        "overworld/preliminary_surface_level.json"]
+GONE = ["overworld/high_river/channel.json", "overworld/high_river/depth.json", "overworld/high_river/terrain.json"]
 
 
 def noise_settings():
@@ -576,7 +577,7 @@ def noise_settings():
                 "level": REF_BASIN_LEVEL,
             },
             "lava": noise(mc("aquifer_lava"), 1.0, 1.0),
-            "surface_level": mc("overworld/preliminary_surface_level"),
+            "surface_level": pv("overworld/preliminary_surface_level"),
         },
         "default_fluid": mc("water"),
         "disable_mob_generation": False,
@@ -584,7 +585,7 @@ def noise_settings():
         "material_rule": pv("overworld"),
         "noise": {"height": 336, "min_y": -64},
         "noise_router": {
-            "chunk_surface_level": mc("overworld/chunk_surface_level"),
+            "chunk_surface_level": pv("overworld/chunk_surface_level"),
             "continents": REF_CONTINENTS,
             "depth": REF_DEPTH,
             "erosion": mc("overworld/erosion"),
