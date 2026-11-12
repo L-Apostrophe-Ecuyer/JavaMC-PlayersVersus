@@ -3,7 +3,8 @@
   "downfall": 0.25,
   "has_precipitation": true,
   "effects": {
-    "water_color": "#3f76e4"
+    "water_color": "#3f76e4",
+    "foliage_color": "#7a874c"
   },
   "carvers": [
     "minecraft:cave",
@@ -65,6 +66,8 @@
       "minecraft:glow_lichen",
       "players-versus:lemon_orchards",
       "players-versus:trees_tuscan_grove",
+      "players-versus:tuscan_flower_field",
+      "players-versus:tuscan_dry_grass",
       "minecraft:flower_plains",
       "minecraft:patch_grass_savanna",
       "minecraft:brown_mushroom_normal",

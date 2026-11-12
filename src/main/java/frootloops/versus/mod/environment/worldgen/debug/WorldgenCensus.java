@@ -343,9 +343,9 @@ public final class WorldgenCensus {
         return BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
     }
 
-    /** A tree's blocks (and what grows on them), as opposed to the ground and the air. */
+    /** A tree's blocks (and what grows on them), as opposed to the ground and the air: logs and the mod's tree blocks (a trunk's blocks) too. */
     private static boolean isTree(String path) {
-        return path.endsWith("_log") || path.endsWith("_leaves") || path.equals("mangrove_roots") || path.equals("mangrove_propagule")
+        return path.endsWith("_log") || path.endsWith("_tree") || path.endsWith("_leaves") || path.equals("mangrove_roots") || path.equals("mangrove_propagule")
                 || path.equals("vine") || path.equals("moss_carpet") || path.equals("bee_nest") || path.endsWith("_wood");
     }
 }

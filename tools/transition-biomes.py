@@ -80,14 +80,18 @@ BIOMES = {
         "neighbours": ["minecraft:savanna", "minecraft:plains"],
         # Between the plains' grass (0.8, 0.4) and the savanna's (2.0 counts as 1.0, 0.0): drier, more olive than the plains
         "temperature": 0.95, "downfall": 0.25, "has_precipitation": True,
-        "trees": selector("minecraft:oak_checked", ("minecraft:fancy_oak_checked", 0.3), ("minecraft:acacia_checked", 0.12)),
-        "tree_placement": dict(ratio=5, offset=0.0),
+        # The oaks' leaves olive-grey (the cypresses' spruce leaves keep their own dark green)
+        "colors": {"foliage_color": "#7a874c"},
+        # Cypresses among oaks and fancy oaks
+        "trees": selector("minecraft:oak_checked", (f"{MOD}:cypress_checked", 0.4), ("minecraft:fancy_oak_checked", 0.2)),
+        "tree_placement": dict(ratio=8, offset=0.1),
         # Lemon bushes in orchards of their own, on a coarser noise than the oaks', so the two don't share their patches
         "extra": [("lemon_orchards", noise_trees(f"{MOD}:lemon_bush", 10, -0.1, factor=14,
                                                      survives={"id": f"{MOD}:lemon_sapling", "properties": {"stage": "0"}}))],
-        "vegetation": ["minecraft:glow_lichen", f"{MOD}:lemon_orchards", f"{MOD}:trees_tuscan_grove", "minecraft:flower_plains",
-                       "minecraft:patch_grass_savanna", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal",
-                       "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water"],
+        # Fields of flowers and of dry grass (tuscan_fields), the plains' flowers and the savanna's grass between them
+        "vegetation": ["minecraft:glow_lichen", f"{MOD}:lemon_orchards", f"{MOD}:trees_tuscan_grove", f"{MOD}:tuscan_flower_field",
+                       f"{MOD}:tuscan_dry_grass", "minecraft:flower_plains", "minecraft:patch_grass_savanna", "minecraft:brown_mushroom_normal",
+                       "minecraft:red_mushroom_normal", "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water"],
     },
     "warm_oak_forest": {
         "neighbours": ["minecraft:sparse_jungle", "minecraft:forest"],
@@ -95,8 +99,9 @@ BIOMES = {
         "temperature": 0.825, "downfall": 0.85, "has_precipitation": True,
         "trees": selector("minecraft:oak_checked", ("minecraft:jungle_bush", 0.22), ("minecraft:jungle_tree", 0.18),
                           ("minecraft:fancy_oak_checked", 0.12), ("minecraft:birch_checked", 0.06)),
-        "tree_placement": dict(ratio=12, offset=0.45),
-        "vegetation": ["minecraft:glow_lichen", f"{MOD}:trees_warm_oak_forest", "minecraft:flower_warm", "minecraft:patch_grass_jungle",
+        "tree_placement": dict(ratio=22, offset=0.55),
+        "vegetation": ["minecraft:glow_lichen", f"{MOD}:trees_warm_oak_forest", "minecraft:patch_large_fern", "minecraft:patch_bush",
+                       "minecraft:flower_warm", "minecraft:patch_grass_jungle",
                        "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_pumpkin",
                        "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water", "minecraft:vines", "minecraft:patch_melon_sparse"],
     },
@@ -106,8 +111,9 @@ BIOMES = {
         "temperature": 0.825, "downfall": 0.85, "has_precipitation": True, "grass_color_modifier": "dark_forest",
         "trees": selector("minecraft:dark_oak_checked", (f"{MOD}:dark_oak_with_vines_checked", 0.35), ("minecraft:jungle_tree", 0.18),
                           ("minecraft:jungle_bush", 0.15), ("minecraft:mega_jungle_tree_checked", 0.05)),
-        "tree_placement": dict(ratio=16, offset=0.55),
-        "vegetation": ["minecraft:glow_lichen", f"{MOD}:trees_dark_jungle_forest", "minecraft:flower_default", "minecraft:patch_grass_jungle",
+        "tree_placement": dict(ratio=34, offset=0.7),
+        "vegetation": ["minecraft:glow_lichen", f"{MOD}:trees_dark_jungle_forest", "minecraft:patch_large_fern", "minecraft:patch_bush",
+                       "minecraft:flower_default", "minecraft:patch_grass_jungle",
                        "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_leaf_litter",
                        "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water",
                        "minecraft:vines", "minecraft:patch_melon_sparse"],
@@ -132,9 +138,10 @@ BIOMES = {
         "temperature": 0.75, "downfall": 0.9, "has_precipitation": True,
         "colors": {"grass_color": "#5f8c42", "foliage_color": "#5e8a3a", "dry_foliage_color": "#7b5334", "water_color": "#507a9e"},
         "trees": selector("minecraft:oak_checked", (SWAMP_OAK, 0.35), ("minecraft:fancy_oak_checked", 0.08), ("minecraft:fallen_oak_tree", 0.06)),
-        "tree_placement": dict(ratio=12, offset=0.45, max_water=2),
+        "tree_placement": dict(ratio=20, offset=0.55, max_water=2),
         # Its ground is the marsh's, drier: gray and brown mud by the water, rooted dirt, grass (tools/wetlands.py)
-        "vegetation": [f"{MOD}:marsh_rim", "minecraft:glow_lichen", f"{MOD}:trees_humid_oak_forest", "minecraft:flower_swamp",
+        "vegetation": [f"{MOD}:marsh_rim", "minecraft:glow_lichen", f"{MOD}:trees_humid_oak_forest", "minecraft:patch_large_fern", "minecraft:patch_bush",
+                       "minecraft:patch_tall_grass", "minecraft:flower_swamp",
                        "minecraft:patch_grass_normal", "minecraft:patch_waterlily", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal",
                        "minecraft:patch_sugar_cane_swamp", "minecraft:patch_pumpkin", "minecraft:patch_firefly_bush_near_water_swamp",
                        "minecraft:seagrass_swamp"],
@@ -178,6 +185,47 @@ BIOMES.update({
                        "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water", "minecraft:patch_berry_common"],
     },
 })
+
+
+# A cypress: a tall, narrow spindle of spruce leaves (a plus, three blocks across, from a point at the top to a point at the
+# bottom) on a straight trunk of twelve or thirteen blocks, bare for two to four blocks at its foot
+CYPRESS = {
+    "type": "minecraft:tree",
+    "below_trunk_provider": "minecraft:soil_beneath_tree",
+    "decorators": [],
+    "foliage_placer": {"type": "minecraft:pine_foliage_placer", "height": {"type": "minecraft:uniform", "min_inclusive": 10, "max_inclusive": 11},
+                       "offset": 1, "radius": 1},
+    "foliage_provider": {"id": "minecraft:spruce_leaves", "properties": {"distance": "7", "persistent": "false", "waterlogged": "false"}},
+    "ignore_vines": True,
+    "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 1, "upper_size": 1},
+    "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": 12, "height_rand_a": 1, "height_rand_b": 0},
+    "trunk_provider": {"id": "minecraft:spruce_log", "properties": {"axis": "y"}},
+}
+
+
+def vanilla_placed(vanilla, name):
+    with open(os.path.join(vanilla, "data", "minecraft", "worldgen", "placed_feature", name + ".json")) as file:
+        return json.load(file)
+
+
+def cypress():
+    write_json(f"{MOD}/worldgen/feature/cypress.json", CYPRESS)
+    write_json(f"{MOD}/worldgen/placed_feature/cypress_checked.json", {"feature": f"{MOD}:cypress", "placement": [
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": "minecraft:spruce_sapling"}}]})
+
+
+def tuscan_fields(vanilla):
+    """
+    Fields of flowers where the biome noise (a 200-block scale, the plains' flowers use it too) is high, of dry grass where
+    it is low, a patch each chunk: the meadow's flowers (and tall grass) and the desert's dry grass, in fields of their own.
+    """
+    flowers = vanilla_placed(vanilla, "flower_meadow")
+    flowers["placement"].insert(0, {"type": "minecraft:noise_threshold_count", "noise_level": 0.1, "below_noise": 0, "above_noise": 1})
+    write_json(f"{MOD}/worldgen/placed_feature/tuscan_flower_field.json", flowers)
+    dry = vanilla_placed(vanilla, "patch_dry_grass_desert")
+    dry["placement"] = [step for step in dry["placement"] if step["type"] != "minecraft:rarity_filter"]
+    dry["placement"].insert(0, {"type": "minecraft:noise_threshold_count", "noise_level": -0.05, "below_noise": 1, "above_noise": 0})
+    write_json(f"{MOD}/worldgen/placed_feature/tuscan_dry_grass.json", dry)
 
 
 def merged_creatures(neighbours):
@@ -281,6 +329,8 @@ NAMES = {
 
 
 def main(vanilla):
+    cypress()
+    tuscan_fields(vanilla)
     for name, spec in BIOMES.items():
         make(vanilla, name, spec)
     tags(vanilla)

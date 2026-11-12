@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -89,6 +91,85 @@ class BiomeDataTest {
         }
         String cold = Files.readString(DATA.resolve("players-versus/worldgen/feature/waterlogged_leaves_cold.json"));
         assertTrue(cold.contains("players-versus:waterlogged_spruce_leaves") && cold.contains("players-versus:waterlogged_birch_leaves"), "the cold swamp's leaves: " + cold);
+    }
+
+    /** The game's own copy of a data file (the mod's files of the same name come first on the classpath, and shadow it). */
+    private static JsonObject vanilla(String file) throws IOException {
+        java.util.Enumeration<URL> found = BiomeDataTest.class.getClassLoader().getResources("data/" + file);
+        while (found.hasMoreElements()) {
+            URL url = found.nextElement();
+            if (url.getProtocol().equals("jar")) {
+                try (java.io.InputStream stream = url.openStream()) {
+                    return JsonParser.parseString(new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+                }
+            }
+        }
+        throw new IOException("the game has no " + file);
+    }
+
+    private static double highest(JsonElement provider) {
+        return provider.isJsonPrimitive() ? provider.getAsDouble() : provider.getAsJsonObject().get("max_inclusive").getAsDouble();
+    }
+
+    /**
+     * The Tuscan grove is cypresses (a narrow column of spruce leaves, taller than an oak), oaks in olive-grey leaves and lemon
+     * orchards, with fields of flowers and of dry grass.
+     */
+    @Test
+    void theTuscanGroveGrowsCypressesAndHasFieldsOfFlowersAndDryGrass() throws IOException {
+        JsonObject cypress = read(DATA.resolve("players-versus/worldgen/feature/cypress.json"));
+        assertEquals("minecraft:tree", cypress.get("type").getAsString());
+        assertEquals("minecraft:spruce_leaves", cypress.getAsJsonObject("foliage_provider").get("id").getAsString());
+        assertEquals("minecraft:spruce_log", cypress.getAsJsonObject("trunk_provider").get("id").getAsString());
+        assertTrue(highest(cypress.getAsJsonObject("foliage_placer").get("radius")) <= 1, "a cypress is a column: leaves one block from its trunk");
+        JsonObject trunk = cypress.getAsJsonObject("trunk_placer");
+        assertTrue(trunk.get("base_height").getAsInt() >= 10, "a cypress is taller than an oak");
+        assertTrue(placedFeatureExists("players-versus:cypress_checked"), "players-versus:cypress_checked is no placed feature");
+        assertTrue(Files.readString(DATA.resolve("players-versus/worldgen/feature/trees_tuscan_grove.json")).contains("players-versus:cypress_checked"),
+                "the Tuscan grove doesn't grow cypresses");
+
+        JsonObject grove = read(DATA.resolve("players-versus/worldgen/biome/tuscan_grove.json"));
+        String leaves = grove.getAsJsonObject("effects").get("foliage_color").getAsString();
+        int rgb = Integer.parseInt(leaves.substring(1), 16), red = rgb >> 16 & 255, green = rgb >> 8 & 255, blue = rgb & 255;
+        // Olive-grey: green leads, but red is close behind and blue well under both
+        assertTrue(green >= red && green - red <= 30 && blue < red - 20, "the oaks' leaves " + leaves + " aren't olive-grey");
+        List<String> plants = vegetation("players-versus/worldgen/biome/tuscan_grove.json");
+        for (String field : List.of("players-versus:tuscan_flower_field", "players-versus:tuscan_dry_grass")) {
+            assertTrue(plants.contains(field), "the Tuscan grove has no " + field + ": " + plants);
+            assertTrue(placedFeatureExists(field), field + " is no placed feature");
+        }
+    }
+
+    /**
+     * The warm oak forest, the dark jungle forest and the humid oak forest are denser than they were (their trees' noise ratio
+     * up from 12, 16 and 12) and have undergrowth: bushes and ferns right after their trees.
+     */
+    @Test
+    void theWarmForestsAreDenserAndHaveUndergrowth() throws IOException {
+        Object[][] forests = {{"warm_oak_forest", 18}, {"dark_jungle_forest", 22}, {"humid_oak_forest", 17}};
+        for (Object[] forest : forests) {
+            String name = (String) forest[0];
+            JsonObject trees = read(DATA.resolve("players-versus/worldgen/placed_feature/trees_" + name + ".json"));
+            int ratio = trees.getAsJsonArray("placement").get(0).getAsJsonObject().get("noise_to_count_ratio").getAsInt();
+            assertTrue(ratio >= (int) forest[1], name + "'s trees have a noise ratio of " + ratio);
+            List<String> plants = vegetation("players-versus/worldgen/biome/" + name + ".json");
+            int grown = plants.indexOf("players-versus:trees_" + name);
+            for (String undergrowth : List.of("minecraft:patch_bush", "minecraft:patch_large_fern")) {
+                assertTrue(plants.indexOf(undergrowth) > grown, name + " has no " + undergrowth + " after its trees: " + plants);
+            }
+        }
+    }
+
+    /** The mangrove swamp's foliage is a clear green in place of vanilla's yellow-brown one: the only thing its file changes. */
+    @Test
+    void theMangroveSwampKeepsVanillasFileButForItsGreenerFoliage() throws IOException {
+        JsonObject ours = read(DATA.resolve("minecraft/worldgen/biome/mangrove_swamp.json")), theirs = vanilla("minecraft/worldgen/biome/mangrove_swamp.json");
+        String greener = ours.getAsJsonObject("effects").get("foliage_color").getAsString(), original = theirs.getAsJsonObject("effects").get("foliage_color").getAsString();
+        assertNotEquals(original, greener, "the foliage colour is vanilla's");
+        int rgb = Integer.parseInt(greener.substring(1), 16);
+        assertTrue((rgb >> 8 & 255) - (rgb >> 16 & 255) >= 50, greener + " isn't a clear green: green must lead red by 50");
+        ours.getAsJsonObject("effects").addProperty("foliage_color", original);
+        assertEquals(theirs, ours, "the mangrove swamp changes more than its foliage colour");
     }
 
     @Test

@@ -15,6 +15,7 @@
 - The grassy wetlands (PvBiomeLayout: the drier part of the warm swamp): an open wet meadow, the swamp's underground, its
   marsh drier and greener, few oaks, tall grass, reeds and flowers all over.
 - The mangrove marsh (the mangrove swamp's rim and drier part): mud flats and grass, small mangroves and jungle bushes.
+- The mangrove swamp's own file (data/minecraft, so every world type): vanilla's, its foliage a clear green like the marsh's.
 - The waterlogged leaves: clumps of persistent, waterlogged leaves in the top layer of the swamps' pools (oak in the swamp and
   the grassy wetlands, spruce and now and then birch in the cold swamp), after the biome's trees.
 """
@@ -172,7 +173,7 @@ def mangrove_marsh(vanilla):
     made["downfall"] = 0.85
     made["has_precipitation"] = True
     # The mangrove swamp's water, clear greens in place of its murky grass
-    made["effects"] = {"water_color": "#3a8a78", "grass_color": "#78a84c", "foliage_color": "#62a83e", "dry_foliage_color": "#7b5334"}
+    made["effects"] = {"water_color": "#3a8a78", "grass_color": "#78a84c", "foliage_color": MANGROVE_FOLIAGE, "dry_foliage_color": "#7b5334"}
     made["features"][VEGETATION] = [
         f"{MOD}:marsh_mangrove", "minecraft:glow_lichen", f"{MOD}:trees_mangrove_marsh", "minecraft:patch_grass_normal", "minecraft:patch_dead_bush",
         "minecraft:patch_waterlily", "minecraft:seagrass_swamp", "minecraft:patch_firefly_bush_near_water"]
@@ -182,6 +183,17 @@ def mangrove_marsh(vanilla):
         "minecraft:jungle_bush", ("minecraft:mangrove_checked", 0.45), ("minecraft:tall_mangrove_checked", 0.1)))
     write_json(f"{MOD}/worldgen/placed_feature/trees_mangrove_marsh.json",
                transition.noise_trees(f"{MOD}:trees_mangrove_marsh", ratio=8, offset=0.1, max_water=3))
+
+
+# The mangrove swamp's leaves, and the marsh beside it: a clear green in place of vanilla's yellow-brown #8db127
+MANGROVE_FOLIAGE = "#62a83e"
+
+
+def mangrove_swamp(vanilla):
+    """Vanilla's mangrove swamp, its foliage colour the marsh's (the only change; it applies to every world type)."""
+    biome = transition.biome(vanilla, "minecraft:mangrove_swamp")
+    biome["effects"]["foliage_color"] = MANGROVE_FOLIAGE
+    write_json("minecraft/worldgen/biome/mangrove_swamp.json", biome)
 
 
 def tags(vanilla):
@@ -210,6 +222,7 @@ def main(vanilla):
     cold_swamp(vanilla)
     grassy_wetlands(vanilla)
     mangrove_marsh(vanilla)
+    mangrove_swamp(vanilla)
     tags(vanilla)
     lemons.add_names(NAMES)
 

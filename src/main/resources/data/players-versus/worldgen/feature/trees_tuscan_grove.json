@@ -3,12 +3,12 @@
   "default": "minecraft:oak_checked",
   "features": [
     {
-      "chance": 0.3,
-      "feature": "minecraft:fancy_oak_checked"
+      "chance": 0.4,
+      "feature": "players-versus:cypress_checked"
     },
     {
-      "chance": 0.12,
-      "feature": "minecraft:acacia_checked"
+      "chance": 0.2,
+      "feature": "minecraft:fancy_oak_checked"
     }
   ]
 }

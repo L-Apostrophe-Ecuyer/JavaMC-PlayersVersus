@@ -65,6 +65,8 @@
     [
       "minecraft:glow_lichen",
       "players-versus:trees_dark_jungle_forest",
+      "minecraft:patch_large_fern",
+      "minecraft:patch_bush",
       "minecraft:flower_default",
       "minecraft:patch_grass_jungle",
       "minecraft:brown_mushroom_normal",

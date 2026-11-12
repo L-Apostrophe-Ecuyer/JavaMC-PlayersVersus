@@ -175,6 +175,8 @@
     [
       "minecraft:glow_lichen",
       "players-versus:trees_warm_oak_forest",
+      "minecraft:patch_large_fern",
+      "minecraft:patch_bush",
       "minecraft:flower_warm",
       "minecraft:patch_grass_jungle",
       "minecraft:brown_mushroom_normal",
