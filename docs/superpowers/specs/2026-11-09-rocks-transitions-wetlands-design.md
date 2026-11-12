@@ -4,6 +4,12 @@ What was asked, what was decided and how each part is checked. It follows
 `2026-11-07-warm-transitions-and-lemons-design.md`; the layout rules are described in
 `docs/worldgen-refactor-plan.md` section 1.4.
 
+**Status: built, in four parts.** The rocks are rebuilt as `2026-11-11-weathered-rocks-design.md` (where they go and the rocky
+biomes: plan `2026-11-11-rocks-in-the-world.md`); the 3D-noise terrain's place, Beta-style heights and the windswept biomes by
+climate are `2026-11-12-noise-terrain-zone-design.md`; the rows left open below ("band to derive": the warm dark forest, the
+grassy wetlands, the mangrove marsh, the waterlogged leaves, the Tuscan grove redone, the denser warm forests) are
+`2026-11-12-warm-dark-forest-and-wetlands-design.md`, whose "As built" section lists where the build differs.
+
 ## What was asked
 
 1. More transition biomes: a warmer dark forest, swamp transitions, waterlogged leaves in swamp water, a grassy
