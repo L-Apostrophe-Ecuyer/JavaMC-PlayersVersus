@@ -368,6 +368,75 @@ class PvBiomeLayoutTest {
         assertTrue(checked > 0, "no swamp slice at the surface");
     }
 
+    /**
+     * The dark forest's warm side (temperature {@link PvBiomeLayout#WARM_DARK_FOREST_MIN} up to its 0.2) is the warm dark
+     * forest, between the dark forest and the dark jungle forest; the humid band keeps its strip of dark birch forest; the
+     * cool side is the dark forest still.
+     */
+    @Test
+    void theDarkForestsWarmSideIsTheWarmDarkForest() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.DARK_FOREST || !PvBiomeLayout.isPoint(h.depth(), 0.0F) || h.erosion().max() <= ABOVE_MOUNTAINS) continue;
+            Long warm = inside(h.temperature(), 0.08F, 0.19F), cool = inside(h.temperature(), -0.14F, -0.01F), dry = inside(h.humidity(), 0.4F, 1.0F);
+            Long strip = inside(h.humidity(), 0.31F, 0.34F);
+            long erosion = Math.max(mid(h.erosion()), ABOVE_MOUNTAINS), continentalness = mid(h.continentalness()), weirdness = mid(h.weirdness());
+            if (warm == null || cool == null || dry == null) continue;
+            assertEquals(CustomOverworldBiomes.WARM_DARK_FOREST, layout.findValue(point(warm, dry, continentalness, erosion, weirdness)), "the warm side at " + h);
+            ResourceKey<Biome> coolSide = layout.findValue(point(cool, dry, continentalness, erosion, weirdness));
+            assertTrue(coolSide != CustomOverworldBiomes.WARM_DARK_FOREST, "the cool side is warm at " + h);
+            if (strip != null) {
+                assertEquals(CustomOverworldBiomes.DARK_BIRCH_FOREST, layout.findValue(point(warm, strip, continentalness, erosion, weirdness)), "the humid strip at " + h);
+            }
+            checked++;
+        }
+        assertTrue(checked > 0, "no dark forest slice checked");
+    }
+
+    /**
+     * The warm swamps' drier part (humidity {@link PvBiomeLayout#WETLAND_HUMIDITY_MAX} and under) past the rim is the grassy
+     * wetlands; the wetter part stays swamp, the rim humid oak forest whatever the humidity, the cold half cold swamp.
+     */
+    @Test
+    void theDrierWarmSwampIsGrassyWetlands() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long rim = Climate.quantizeCoord((0.55F + PvBiomeLayout.SWAMP_RIM_MAX) / 2), heart = Climate.quantizeCoord(0.8F);
+        long dry = Climate.quantizeCoord(-0.4F), wet = Climate.quantizeCoord(0.1F), cold = Climate.quantizeCoord(-0.3F);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.SWAMP || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            long warm = inside(h.temperature(), -0.1F, 0.19F), continentalness = mid(h.continentalness()), weirdness = mid(h.weirdness());
+            assertEquals(CustomOverworldBiomes.GRASSY_WETLANDS, layout.findValue(point(warm, dry, continentalness, heart, weirdness)), "the drier swamp at " + h);
+            assertEquals(Biomes.SWAMP, layout.findValue(point(warm, wet, continentalness, heart, weirdness)), "the wetter swamp at " + h);
+            assertEquals(CustomOverworldBiomes.HUMID_OAK_FOREST, layout.findValue(point(warm, dry, continentalness, rim, weirdness)), "the drier rim at " + h);
+            assertEquals(CustomOverworldBiomes.COLD_SWAMP, layout.findValue(point(cold, dry, continentalness, heart, weirdness)), "the cold half, dry, at " + h);
+            checked++;
+        }
+        assertTrue(checked > 0, "no swamp slice at the surface");
+    }
+
+    /** The mangrove swamp's rim (erosion up to {@link PvBiomeLayout#SWAMP_RIM_MAX}) and its drier part are the mangrove marsh. */
+    @Test
+    void theMangroveSwampsRimAndDrierPartAreMarsh() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long rim = Climate.quantizeCoord((0.55F + PvBiomeLayout.SWAMP_RIM_MAX) / 2), heart = Climate.quantizeCoord(0.8F);
+        long dry = Climate.quantizeCoord(-0.4F), wet = Climate.quantizeCoord(0.2F);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.MANGROVE_SWAMP || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            long temperature = mid(h.temperature()), continentalness = mid(h.continentalness()), weirdness = mid(h.weirdness());
+            assertEquals(Biomes.MANGROVE_SWAMP, layout.findValue(point(temperature, wet, continentalness, heart, weirdness)), "the wetter mangrove swamp at " + h);
+            assertEquals(CustomOverworldBiomes.MANGROVE_MARSH, layout.findValue(point(temperature, dry, continentalness, heart, weirdness)), "the drier part at " + h);
+            assertEquals(CustomOverworldBiomes.MANGROVE_MARSH, layout.findValue(point(temperature, wet, continentalness, rim, weirdness)), "the rim at " + h);
+            checked++;
+        }
+        assertTrue(checked > 0, "no mangrove swamp slice at the surface");
+    }
+
     /** Above freezing, no windswept biome nor old growth birch forest is left at the surface. */
     @Test
     void noWindsweptNorOldGrowthBirchAboveFreezing() {

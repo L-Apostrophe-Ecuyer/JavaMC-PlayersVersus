@@ -73,8 +73,15 @@ public final class PvBiomeLayout {
     static final float WARM_BAND_MAX = 0.3F;
     /** Jungles with a humidity up to this border birch forests and forests (warm oak forest); wetter ones dark forests. */
     static final float WARM_HUMIDITY_SPLIT = 0.3F;
-    /** The swamp's rim: swamps (vanilla's from erosion 0.55) up to this erosion turn into humid oak forest. */
+    /**
+     * The swamp's rim: swamps (vanilla's from erosion 0.55) up to this erosion turn into humid oak forest, mangrove swamps
+     * into the mangrove marsh.
+     */
     static final float SWAMP_RIM_MAX = 0.565F;
+    /** The warm swamps and the mangrove swamps, past the rim, turn into wetlands (grassy wetlands, mangrove marsh) at this humidity and under. */
+    static final float WETLAND_HUMIDITY_MAX = -0.15F;
+    /** The dark forest's warm side (vanilla's dark forests reach temperature 0.2, where the dark jungle forest begins): the warm dark forest, from this up. */
+    static final float WARM_DARK_FOREST_MIN = 0.05F;
     /** Swamps (vanilla's from temperature -0.45 to 0.2) up to this temperature are cold swamps: they border taigas. */
     static final float COLD_SWAMP_MAX = -0.15F;
     /** Above this temperature, windswept biomes and old growth birch forests give way to plainer ones. */
@@ -150,8 +157,16 @@ public final class PvBiomeLayout {
                     PvBiomeLayout::rockyJungleTarget),
             new Rule("humid", Box.ALL.withMin(Box.H, Climate.quantizeCoord(0.275F)).withMax(Box.H, Climate.quantizeCoord(0.35F)),
                     (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)),
+            // After the humid band, which keeps its strip of dark birch forest
+            new Rule("warm-dark", Box.ALL.withMin(Box.T, Climate.quantizeCoord(WARM_DARK_FOREST_MIN)),
+                    (slice, biome) -> biome == Biomes.DARK_FOREST ? CustomOverworldBiomes.WARM_DARK_FOREST : null),
             new Rule("swamp-rim", Box.ALL.withMax(Box.E, Climate.quantizeCoord(SWAMP_RIM_MAX)),
-                    (slice, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.HUMID_OAK_FOREST : null),
+                    (slice, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.HUMID_OAK_FOREST
+                            : biome == Biomes.MANGROVE_SWAMP ? CustomOverworldBiomes.MANGROVE_MARSH : null),
+            // Past the rim, the drier part of the warm swamps (the cold swamp is another biome by now)
+            new Rule("wetlands", Box.ALL.withMax(Box.H, Climate.quantizeCoord(WETLAND_HUMIDITY_MAX)),
+                    (slice, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.GRASSY_WETLANDS
+                            : biome == Biomes.MANGROVE_SWAMP ? CustomOverworldBiomes.MANGROVE_MARSH : null),
 
             // The cold, level side of old growth birch forests, before it turns dappled
             new Rule("rocky-birch", Box.ALL.withMax(Box.T, Climate.quantizeCoord(DAPPLED_COLD)).withMin(Box.E, Climate.quantizeCoord(ROCKY_EROSION_MIN))
