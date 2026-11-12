@@ -147,6 +147,7 @@ def spaghetti(noise_name):
 # into the 3D-noise zone); the jaggedness is vanilla's
 REF_OFFSET, REF_FACTOR, REF_JAGGEDNESS = pv("overworld/offset"), pv("overworld/factor"), mc("overworld/jaggedness")
 REF_HUMIDITY, REF_EROSION = mc("overworld/vegetation"), mc("overworld/erosion")
+REF_NOISE_ZONE = pv("overworld/noise_zone")
 REF_RIDGES, REF_CONTINENTS = mc("overworld/ridges"), mc("overworld/continents")
 REF_BASE_3D, REF_ROUGHNESS = mc("overworld/base_3d_noise"), mc("overworld/caves/spaghetti_roughness_function")
 REF_DEPTH, REF_ENTRANCES = pv("overworld/depth"), pv("overworld/caves/entrances")
@@ -196,11 +197,15 @@ def river_carver():
 
 
 def sloped_cheese():
-    """PvTerrain.slopedCheese: depth with jagged peaks, scaled by the factor, plus the 3D base noise; rivers cut in."""
+    """PvTerrain.slopedCheese: depth with jagged peaks, scaled by the factor, plus the 3D base noise; rivers cut in. In
+    the 3D-noise zone the base noise fades out between NOISE_CAP_FROM_Y and NOISE_CAP_TO_Y (Beta's heights): above the
+    second the density is the smooth depth's, so no ground stands there."""
     jagged = cache(noise(mc("jagged"), 1500.0, 0.0))
     with_peaks = add(REF_DEPTH, mul(REF_JAGGEDNESS, half_negative(jagged)))
     shaped = mul(with_peaks, REF_FACTOR)
-    return cache(min_(river_carver(), add(mul(quarter_negative(shaped), 4.0), REF_BASE_3D)))
+    faded = gradient(int(C["NOISE_CAP_FROM_Y"]), int(C["NOISE_CAP_TO_Y"]), 0.0, 1.0)
+    base = mul(REF_BASE_3D, sub(1.0, mul(REF_NOISE_ZONE, faded)))
+    return cache(min_(river_carver(), add(mul(quarter_negative(shaped), 4.0), base)))
 
 
 def terrain():
