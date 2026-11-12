@@ -2,10 +2,7 @@ package frootloops.versus.gametest;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -13,11 +10,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.placement.BiomeFilter;
-import net.minecraft.world.level.levelgen.placement.CountPlacement;
-import net.minecraft.world.level.levelgen.placement.NoiseBasedCountPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,26 +48,13 @@ public class WetlandsGameTest {
     }
 
     /**
-     * The placed feature of the mod's data, without its biome check (the test world's biome doesn't list it) and with four patches
-     * where the data's count is the trees' noise (which at the pond's chunk may well be zero): the rest is the data's own.
-     */
-    private static PlacedFeature placed(GameTestHelper helper, String name) {
-        Registry<PlacedFeature> features = helper.getLevel().registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
-        PlacedFeature feature = features.getValue(Identifier.parse("players-versus:" + name));
-        helper.assertTrue(feature != null, "players-versus:" + name + " is not a placed feature");
-        List<PlacementModifier> placement = feature.placement().stream().filter(modifier -> !(modifier instanceof BiomeFilter))
-                .map(modifier -> modifier instanceof NoiseBasedCountPlacement ? (PlacementModifier) CountPlacement.of(4) : modifier).toList();
-        return new PlacedFeature(feature.feature(), placement);
-    }
-
-    /**
      * Runs the placed feature {@link #RUNS} times over the pond and returns the leaves it made, checking each: waterlogged and
      * persistent, in the water's top layer, with air above and water below, inside the ring; the ring and the floor are as they
      * were and nothing grew in the air above.
      */
     private static List<BlockState> leavesOver(GameTestHelper helper, String name) {
         ServerLevel level = helper.getLevel();
-        PlacedFeature feature = placed(helper, name);
+        PlacedFeature feature = PlacedFeatures.withoutBiomeCheck(helper, name, 4);
         int[] pond = pond(helper);
         int x0 = pond[0], z0 = pond[1], floor = pond[2], surface = floor + DEPTH;
         for (int run = 0; run < RUNS; run++) {

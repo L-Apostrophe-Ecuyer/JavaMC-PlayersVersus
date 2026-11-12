@@ -219,17 +219,28 @@ def cypress():
         {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": "minecraft:spruce_sapling"}}]})
 
 
+# The Tuscan grove's field flowers: a mix of kinds everywhere, with some grass among them. (The meadow's own provider picks one to
+# three kinds for a whole region of a thousand blocks, and the region may have no flower at all.)
+TUSCAN_FLOWERS = [("minecraft:poppy", 4), ("minecraft:cornflower", 3), ("minecraft:oxeye_daisy", 3), ("minecraft:dandelion", 3),
+                  ("minecraft:allium", 1), ("minecraft:azure_bluet", 1), ("minecraft:short_grass", 4),
+                  ({"id": "minecraft:tall_grass", "properties": {"half": "lower"}}, 1)]
+
+
 def tuscan_fields(vanilla):
     """
     Fields of flowers where the biome noise (a 200-block scale, the plains' flowers use it too) is high, of dry grass where
-    it is low, a patch each chunk: the meadow's flowers (and tall grass) and the desert's dry grass, in fields of their own.
+    it is low: the meadow's patches (96 tries, the flowers a mix of kinds) three a chunk where it is above 0.1, the desert's dry
+    grass two a chunk where it is below -0.05, in fields of their own. About a third of a patch's tries find the ground.
     """
+    write_json(f"{MOD}/worldgen/feature/tuscan_flowers.json", {"type": "minecraft:simple_block", "to_place": {
+        "type": "minecraft:weighted", "entries": [{"data": block, "weight": weight} for block, weight in TUSCAN_FLOWERS]}})
     flowers = vanilla_placed(vanilla, "flower_meadow")
-    flowers["placement"].insert(0, {"type": "minecraft:noise_threshold_count", "noise_level": 0.1, "below_noise": 0, "above_noise": 1})
+    flowers["feature"] = f"{MOD}:tuscan_flowers"
+    flowers["placement"].insert(0, {"type": "minecraft:noise_threshold_count", "noise_level": 0.1, "below_noise": 0, "above_noise": 3})
     write_json(f"{MOD}/worldgen/placed_feature/tuscan_flower_field.json", flowers)
     dry = vanilla_placed(vanilla, "patch_dry_grass_desert")
     dry["placement"] = [step for step in dry["placement"] if step["type"] != "minecraft:rarity_filter"]
-    dry["placement"].insert(0, {"type": "minecraft:noise_threshold_count", "noise_level": -0.05, "below_noise": 1, "above_noise": 0})
+    dry["placement"].insert(0, {"type": "minecraft:noise_threshold_count", "noise_level": -0.05, "below_noise": 2, "above_noise": 0})
     write_json(f"{MOD}/worldgen/placed_feature/tuscan_dry_grass.json", dry)
 
 

@@ -13,6 +13,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The Tuscan grove's cypress: a tall, narrow column of spruce leaves on a straight trunk, whatever the seed (a foliage placer
@@ -70,6 +74,51 @@ public class TuscanGroveGameTest {
             helper.assertTrue(top >= trunk, "seed " + seed + ": the crown's top, " + top + ", is under the trunk's");
             helper.assertTrue(leaves >= 30, "seed " + seed + ": only " + leaves + " leaves");
         }
+        clear(helper);
+        helper.succeed();
+    }
+
+    /**
+     * A field of flowers is a mix of flower kinds (the meadow's own provider picks one to three kinds for a whole region of a
+     * thousand blocks, and a region may have no flower at all), and a field of dry grass is dry grass: the placed features run over
+     * the grove's floor, four patches of the one and two of the other.
+     */
+    @GameTest(structure = GROVE, maxTicks = 40, skyAccess = true)
+    public void theFieldsGrowAMixOfFlowersAndDryGrass(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos middle = helper.absolutePos(new BlockPos(24, 1, 24));
+        int x0 = middle.getX() & ~15, z0 = middle.getZ() & ~15, floor = middle.getY() - 1;
+
+        clear(helper);
+        PlacedFeature flowers = PlacedFeatures.withoutBiomeCheck(helper, "tuscan_flower_field", 4);
+        for (int run = 0; run < 6; run++) flowers.place(level, level.getChunkSource().getGenerator(), RandomSource.create(run), new BlockPos(x0, floor + 1, z0));
+        Set<Block> kinds = new HashSet<>();
+        int flower = 0;
+        for (int x = x0; x < x0 + 16; x++) {
+            for (int z = z0; z < z0 + 16; z++) {
+                for (int y = floor + 1; y <= floor + 3; y++) {
+                    BlockState state = level.getBlockState(new BlockPos(x, y, z));
+                    if (state.is(BlockTags.SMALL_FLOWERS)) {
+                        flower++;
+                        kinds.add(state.getBlock());
+                    }
+                }
+            }
+        }
+        helper.assertTrue(flower >= 40, "only " + flower + " flowers in the field");
+        helper.assertTrue(kinds.size() >= 4, "a field of " + kinds.size() + " kinds of flower: " + kinds);
+
+        clear(helper);
+        PlacedFeature dry = PlacedFeatures.withoutBiomeCheck(helper, "tuscan_dry_grass", 2);
+        for (int run = 0; run < 6; run++) dry.place(level, level.getChunkSource().getGenerator(), RandomSource.create(run), new BlockPos(x0, floor + 1, z0));
+        int dryGrass = 0;
+        for (int x = x0; x < x0 + 16; x++) {
+            for (int z = z0; z < z0 + 16; z++) {
+                BlockState state = level.getBlockState(new BlockPos(x, floor + 1, z));
+                if (state.is(Blocks.SHORT_DRY_GRASS) || state.is(Blocks.TALL_DRY_GRASS)) dryGrass++;
+            }
+        }
+        helper.assertTrue(dryGrass >= 20, "only " + dryGrass + " dry grass in the field");
         clear(helper);
         helper.succeed();
     }
