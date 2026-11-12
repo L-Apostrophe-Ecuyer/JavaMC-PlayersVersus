@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "players-versus:caves/regular_cave",
-    "players-versus:caves/pale_grotto"
+    "players-versus:caves/pale_grotto",
+    "players-versus:warm_dark_forest"
   ]
 }

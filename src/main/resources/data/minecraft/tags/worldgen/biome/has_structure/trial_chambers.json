@@ -1,5 +1,8 @@
 {
   "values": [
-    "#minecraft:is_overworld"
+    "#minecraft:is_overworld",
+    "players-versus:warm_dark_forest",
+    "players-versus:grassy_wetlands",
+    "players-versus:mangrove_marsh"
   ]
 }

@@ -25,6 +25,9 @@
     "players-versus:cold_swamp",
     "players-versus:rocky_plains",
     "players-versus:rocky_jungle",
-    "players-versus:rocky_birch_forest"
+    "players-versus:rocky_birch_forest",
+    "players-versus:warm_dark_forest",
+    "players-versus:grassy_wetlands",
+    "players-versus:mangrove_marsh"
   ]
 }

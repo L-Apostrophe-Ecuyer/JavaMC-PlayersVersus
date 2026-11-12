@@ -112,6 +112,20 @@ BIOMES = {
                        "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water",
                        "minecraft:vines", "minecraft:patch_melon_sparse"],
     },
+    "warm_dark_forest": {
+        "neighbours": ["minecraft:dark_forest", "minecraft:forest"],
+        # The dark forest's (0.7, 0.8) warmed toward the dark jungle forest's (0.825, 0.85): the same dark canopy in warmer greens
+        "temperature": 0.8, "downfall": 0.8, "has_precipitation": True,
+        "colors": {"grass_color": "#6a9a52", "foliage_color": "#7a9c4c", "dry_foliage_color": "#7b5334"},
+        # Dark oaks, with vines and with oaks, fancy oaks and jungle bushes among them; a third of the dark forest's giant mushrooms
+        "trees": selector("minecraft:dark_oak_checked", (f"{MOD}:dark_oak_with_vines_checked", 0.25), ("minecraft:fancy_oak_checked", 0.14),
+                          ("minecraft:oak_checked", 0.12), ("minecraft:jungle_bush", 0.1), ("minecraft:birch_checked", 0.04),
+                          ({"feature": "minecraft:huge_brown_mushroom", "placement": []}, 0.008)),
+        "tree_placement": dict(ratio=14, offset=0.5),
+        "vegetation": ["minecraft:glow_lichen", f"{MOD}:trees_warm_dark_forest", "minecraft:forest_flowers", "minecraft:patch_bush", "minecraft:flower_default",
+                       "minecraft:patch_grass_forest", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_leaf_litter",
+                       "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane_dark", "minecraft:patch_firefly_bush_near_water", "minecraft:vines"],
+    },
     "humid_oak_forest": {
         "neighbours": ["minecraft:swamp", "minecraft:forest"],
         # Between the forest's and the swamp's: its colours between theirs (the swamp's grass and leaves are its own)
@@ -220,12 +234,31 @@ def add_to_tag(path, *values):
     write_json(path, tag)
 
 
-def tags():
+def inherit_tags(vanilla, parent, child):
+    """Adds `child` to every biome tag (the game's and the mod's, by file) that holds `parent`: the structures, mobs and
+    the rest of what makes the parent what it is."""
+    found = []
+    for root in [os.path.join(vanilla, "data"), DATA]:
+        base = os.path.join(root, "minecraft", "tags", "worldgen", "biome")
+        for folder, _, files in os.walk(base):
+            for file in files:
+                path = os.path.join(folder, file)
+                with open(path) as handle:
+                    if parent in json.load(handle).get("values", []):
+                        found.append(os.path.relpath(path, os.path.join(root, "minecraft", "tags", "worldgen", "biome")))
+    for relative in sorted(set(found)):
+        add_to_tag(f"minecraft/tags/worldgen/biome/{relative}", child)
+
+
+def tags(vanilla=None):
     every = [f"{MOD}:{name}" for name in BIOMES]
     add_to_tag("minecraft/tags/worldgen/biome/is_overworld.json", *every)
     add_to_tag("minecraft/tags/worldgen/biome/has_structure/mineshaft.json", *every)
     add_to_tag("minecraft/tags/worldgen/biome/is_forest.json", f"{MOD}:warm_oak_forest", f"{MOD}:dark_jungle_forest", f"{MOD}:humid_oak_forest",
-               f"{MOD}:rocky_birch_forest")
+               f"{MOD}:rocky_birch_forest", f"{MOD}:warm_dark_forest")
+    # A warm dark forest is a dark forest still: its woodland mansions, trial chambers and strongholds
+    if vanilla:
+        inherit_tags(vanilla, "minecraft:dark_forest", f"{MOD}:warm_dark_forest")
     add_to_tag("minecraft/tags/worldgen/biome/is_jungle.json", f"{MOD}:rocky_jungle")
     # The large rock formations stand in the rocky biomes only
     add_to_tag(f"{MOD}/tags/worldgen/biome/has_structure/rock_formation.json", f"{MOD}:rocky_plains", f"{MOD}:rocky_jungle", f"{MOD}:rocky_birch_forest")
@@ -235,10 +268,12 @@ def tags():
 
 NAMES = {
     "en": {"biome.players-versus.tuscan_grove": "Tuscan Grove", "biome.players-versus.warm_oak_forest": "Warm Oak Forest",
+           "biome.players-versus.warm_dark_forest": "Warm Dark Forest",
            "biome.players-versus.dark_jungle_forest": "Dark Jungle Forest", "biome.players-versus.humid_oak_forest": "Humid Oak Forest",
            "biome.players-versus.rocky_plains": "Rocky Plains", "biome.players-versus.rocky_jungle": "Rocky Jungle",
            "biome.players-versus.rocky_birch_forest": "Rocky Birch Forest"},
     "fr": {"biome.players-versus.tuscan_grove": "Bosquet toscan", "biome.players-versus.warm_oak_forest": "Chênaie chaude",
+           "biome.players-versus.warm_dark_forest": "Forêt sombre chaude",
            "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre", "biome.players-versus.humid_oak_forest": "Chênaie humide",
            "biome.players-versus.rocky_plains": "Plaines rocheuses", "biome.players-versus.rocky_jungle": "Jungle rocheuse",
            "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse"},
@@ -248,7 +283,7 @@ NAMES = {
 def main(vanilla):
     for name, spec in BIOMES.items():
         make(vanilla, name, spec)
-    tags()
+    tags(vanilla)
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     lemons = __import__("lemons")
     lemons.add_names(NAMES)

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "minecraft:jungle_bush",
+  "features": [
+    {
+      "chance": 0.45,
+      "feature": "minecraft:mangrove_checked"
+    },
+    {
+      "chance": 0.1,
+      "feature": "minecraft:tall_mangrove_checked"
+    }
+  ]
+}

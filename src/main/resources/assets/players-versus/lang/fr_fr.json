@@ -353,5 +353,10 @@
 
   "biome.players-versus.rocky_plains": "Plaines rocheuses",
   "biome.players-versus.rocky_jungle": "Jungle rocheuse",
-  "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse"
+  "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse",
+
+  "biome.players-versus.warm_dark_forest": "Forêt sombre chaude",
+
+  "biome.players-versus.grassy_wetlands": "Zones humides herbeuses",
+  "biome.players-versus.mangrove_marsh": "Marécage de mangrove"
 }

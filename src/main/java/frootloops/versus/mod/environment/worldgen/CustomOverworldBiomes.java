@@ -48,6 +48,9 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> DARK_JUNGLE_FOREST = keyOf("dark_jungle_forest");
     /** The rim of every swamp: oaks with vines on damp ground, mud and puddles. */
     public static final ResourceKey<Biome> HUMID_OAK_FOREST = keyOf("humid_oak_forest");
+    public static final ResourceKey<Biome> WARM_DARK_FOREST = keyOf("warm_dark_forest");
+    public static final ResourceKey<Biome> GRASSY_WETLANDS = keyOf("grassy_wetlands");
+    public static final ResourceKey<Biome> MANGROVE_MARSH = keyOf("mangrove_marsh");
     /** The cold half of swamps, next to taigas: spruce and birch over mud, podzol and moss, ferns and berries. */
     public static final ResourceKey<Biome> COLD_SWAMP = keyOf("cold_swamp");
     /** The level stretches of savannas' cool edge: dry grass, a few oaks and acacias, and rocks everywhere. */

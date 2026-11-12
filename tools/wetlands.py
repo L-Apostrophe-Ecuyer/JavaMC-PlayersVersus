@@ -12,6 +12,9 @@
   taiga's animals, cold frogs, witch huts.
 - The marsh clearings: where the trees' noise leaves none (noise_based_count with a negative ratio: the trees' own
   noise, upside down), tall grass, reeds and blue orchids fill the islands.
+- The grassy wetlands (PvBiomeLayout: the drier part of the warm swamp): an open wet meadow, the swamp's underground, its
+  marsh drier and greener, few oaks, tall grass, reeds and flowers all over.
+- The mangrove marsh (the mangrove swamp's rim and drier part): mud flats and grass, small mangroves and jungle bushes.
 """
 import copy
 import json
@@ -37,7 +40,10 @@ def vanilla_placed(vanilla, name):
 def marsh():
     swamps = {"marsh": {"biomes": ["minecraft:swamp"], "edge": {"id": "minecraft:rooted_dirt"}},
               "marsh_cold": {"biomes": [f"{MOD}:cold_swamp"], "edge": {"id": "minecraft:podzol", "properties": {"snowy": "false"}}},
-              "marsh_rim": {"biomes": [f"{MOD}:humid_oak_forest"], "edge": {"id": "minecraft:rooted_dirt"}, "dryness": 0.25, "reshape": False}}
+              "marsh_rim": {"biomes": [f"{MOD}:humid_oak_forest"], "edge": {"id": "minecraft:rooted_dirt"}, "dryness": 0.25, "reshape": False},
+              # The wetlands: more land than the swamp's, still with its pools and channels; the mangrove marsh's edge is mud
+              "marsh_wetlands": {"biomes": [f"{MOD}:grassy_wetlands"], "edge": {"id": "minecraft:rooted_dirt"}, "dryness": 0.2},
+              "marsh_mangrove": {"biomes": [f"{MOD}:mangrove_marsh"], "edge": {"id": "minecraft:mud"}, "dryness": 0.1}}
     for name, config in swamps.items():
         write_json(f"{MOD}/worldgen/feature/{name}.json", dict({"type": f"{MOD}:marsh"}, **config))
         # No placement: it runs once a chunk and shapes the chunk's columns of its biomes itself
@@ -100,14 +106,66 @@ def cold_swamp(vanilla):
                transition.noise_trees(f"{MOD}:trees_cold_swamp", ratio=9, offset=0.05, max_water=2))
 
 
-def tags():
+def grassy_wetlands(vanilla):
+    """An open wet meadow beside the swamp: its underground and animals, the plains' too; the marsh drier, few oaks."""
+    main, plains = transition.biome(vanilla, "minecraft:swamp"), transition.biome(vanilla, "minecraft:plains")
+    made = copy.deepcopy(main)
+    made["temperature"] = 0.75
+    made["downfall"] = 0.85
+    made["has_precipitation"] = True
+    # Lusher than the swamp's: clear water, bright grass and leaves
+    made["effects"] = {"water_color": "#3e9ab0", "grass_color": "#7db356", "foliage_color": "#62ad4a", "dry_foliage_color": "#7b5334"}
+    made["attributes"]["minecraft:visual/water_fog_color"] = "#274b48"
+    made["features"][VEGETATION] = [
+        f"{MOD}:marsh_wetlands", "minecraft:glow_lichen", f"{MOD}:trees_grassy_wetlands", "minecraft:patch_tall_grass", f"{MOD}:marsh_reeds",
+        f"{MOD}:marsh_flowers", "minecraft:flower_swamp", "minecraft:patch_grass_normal", "minecraft:patch_waterlily",
+        "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_sugar_cane_swamp", "minecraft:patch_pumpkin",
+        "minecraft:patch_firefly_bush_near_water_swamp", "minecraft:seagrass_swamp"]
+    made["attributes"][SPAWNS]["argument"]["spawns_by_category"]["creature"] = transition.merged_creatures([main, plains])
+    write_json(f"{MOD}/worldgen/biome/grassy_wetlands.json", made)
+    # A few oaks, in small groves: the noise's high ground
+    write_json(f"{MOD}/worldgen/feature/trees_grassy_wetlands.json", transition.selector(
+        "minecraft:oak_checked", (transition.SWAMP_OAK, 0.3), ("minecraft:fancy_oak_checked", 0.05)))
+    write_json(f"{MOD}/worldgen/placed_feature/trees_grassy_wetlands.json",
+               transition.noise_trees(f"{MOD}:trees_grassy_wetlands", ratio=4, offset=-0.2, max_water=2))
+
+
+def mangrove_marsh(vanilla):
+    """The mangrove swamp's rim and drier part: mud flats and grass, small mangroves, jungle bushes."""
+    main, jungle = transition.biome(vanilla, "minecraft:mangrove_swamp"), transition.biome(vanilla, "minecraft:sparse_jungle")
+    made = copy.deepcopy(main)
+    made["temperature"] = 0.85
+    made["downfall"] = 0.85
+    made["has_precipitation"] = True
+    # The mangrove swamp's water, clear greens in place of its murky grass
+    made["effects"] = {"water_color": "#3a8a78", "grass_color": "#78a84c", "foliage_color": "#62a83e", "dry_foliage_color": "#7b5334"}
+    made["features"][VEGETATION] = [
+        f"{MOD}:marsh_mangrove", "minecraft:glow_lichen", f"{MOD}:trees_mangrove_marsh", "minecraft:patch_grass_normal", "minecraft:patch_dead_bush",
+        "minecraft:patch_waterlily", "minecraft:seagrass_swamp", "minecraft:patch_firefly_bush_near_water"]
+    made["attributes"][SPAWNS]["argument"]["spawns_by_category"]["creature"] = transition.merged_creatures([main, jungle])
+    write_json(f"{MOD}/worldgen/biome/mangrove_marsh.json", made)
+    write_json(f"{MOD}/worldgen/feature/trees_mangrove_marsh.json", transition.selector(
+        "minecraft:jungle_bush", ("minecraft:mangrove_checked", 0.45), ("minecraft:tall_mangrove_checked", 0.1)))
+    write_json(f"{MOD}/worldgen/placed_feature/trees_mangrove_marsh.json",
+               transition.noise_trees(f"{MOD}:trees_mangrove_marsh", ratio=8, offset=0.1, max_water=3))
+
+
+def tags(vanilla):
     cold = f"{MOD}:cold_swamp"
     for tag in ["is_overworld", "has_structure/mineshaft", "has_structure/swamp_hut", "spawns_cold_variant_frogs",
                 "allows_surface_slime_spawns", "has_closer_water_fog"]:
         transition.add_to_tag(f"minecraft/tags/worldgen/biome/{tag}.json", cold)
+    # Each new wetland is what it comes from, in the tags of structures, mobs and the map
+    for child, parent in [("grassy_wetlands", "minecraft:swamp"), ("mangrove_marsh", "minecraft:mangrove_swamp")]:
+        for tag in ["is_overworld", "has_structure/mineshaft"]:
+            transition.add_to_tag(f"minecraft/tags/worldgen/biome/{tag}.json", f"{MOD}:{child}")
+        transition.inherit_tags(vanilla, parent, f"{MOD}:{child}")
 
 
-NAMES = {"en": {"biome.players-versus.cold_swamp": "Cold Swamp"}, "fr": {"biome.players-versus.cold_swamp": "Marais froid"}}
+NAMES = {"en": {"biome.players-versus.cold_swamp": "Cold Swamp", "biome.players-versus.grassy_wetlands": "Grassy Wetlands",
+                "biome.players-versus.mangrove_marsh": "Mangrove Marsh"},
+         "fr": {"biome.players-versus.cold_swamp": "Marais froid", "biome.players-versus.grassy_wetlands": "Zones humides herbeuses",
+                "biome.players-versus.mangrove_marsh": "Marécage de mangrove"}}
 
 
 def main(vanilla):
@@ -115,7 +173,9 @@ def main(vanilla):
     clearings(vanilla)
     swamp()
     cold_swamp(vanilla)
-    tags()
+    grassy_wetlands(vanilla)
+    mangrove_marsh(vanilla)
+    tags(vanilla)
     lemons.add_names(NAMES)
 
 

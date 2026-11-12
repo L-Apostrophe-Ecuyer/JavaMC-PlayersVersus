@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "minecraft:dark_oak_checked",
+  "features": [
+    {
+      "chance": 0.25,
+      "feature": "players-versus:dark_oak_with_vines_checked"
+    },
+    {
+      "chance": 0.14,
+      "feature": "minecraft:fancy_oak_checked"
+    },
+    {
+      "chance": 0.12,
+      "feature": "minecraft:oak_checked"
+    },
+    {
+      "chance": 0.1,
+      "feature": "minecraft:jungle_bush"
+    },
+    {
+      "chance": 0.04,
+      "feature": "minecraft:birch_checked"
+    },
+    {
+      "chance": 0.008,
+      "feature": {
+        "feature": "minecraft:huge_brown_mushroom",
+        "placement": []
+      }
+    }
+  ]
+}

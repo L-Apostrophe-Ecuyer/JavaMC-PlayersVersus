@@ -492,5 +492,10 @@
 
   "biome.players-versus.rocky_plains": "Rocky Plains",
   "biome.players-versus.rocky_jungle": "Rocky Jungle",
-  "biome.players-versus.rocky_birch_forest": "Rocky Birch Forest"
+  "biome.players-versus.rocky_birch_forest": "Rocky Birch Forest",
+
+  "biome.players-versus.warm_dark_forest": "Warm Dark Forest",
+
+  "biome.players-versus.grassy_wetlands": "Grassy Wetlands",
+  "biome.players-versus.mangrove_marsh": "Mangrove Marsh"
 }
