@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "players-versus:waterlogged_spruce_leaves",
+  "features": [
+    {
+      "chance": 0.25,
+      "feature": "players-versus:waterlogged_birch_leaves"
+    }
+  ]
+}

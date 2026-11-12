@@ -15,6 +15,8 @@
 - The grassy wetlands (PvBiomeLayout: the drier part of the warm swamp): an open wet meadow, the swamp's underground, its
   marsh drier and greener, few oaks, tall grass, reeds and flowers all over.
 - The mangrove marsh (the mangrove swamp's rim and drier part): mud flats and grass, small mangroves and jungle bushes.
+- The waterlogged leaves: clumps of persistent, waterlogged leaves in the top layer of the swamps' pools (oak in the swamp and
+  the grassy wetlands, spruce and now and then birch in the cold swamp), after the biome's trees.
 """
 import copy
 import json
@@ -62,15 +64,47 @@ def clearings(vanilla):
 
 
 MARSH_CLEARINGS = [f"{MOD}:marsh_tall_grass", f"{MOD}:marsh_reeds", f"{MOD}:marsh_flowers"]
+LEAVES = f"{MOD}:waterlogged_leaves"
+LEAVES_COLD = f"{MOD}:waterlogged_leaves_cold"
+
+
+def waterlogged_leaves():
+    """
+    Clumps of leaves in the top layer of the pools: four a chunk, each twelve tries within four blocks, a try standing
+    where the position is water with air above and something under it (water or ground), one block under the surface the
+    height map finds. Persistent, so they don't decay away from logs, and waterlogged, so the pool stays whole around them.
+    """
+    spread = {"type": "minecraft:trapezoid", "min": -4, "max": 4, "plateau": 0}
+    patch = [
+        {"type": "minecraft:count", "count": 4},
+        {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"},
+        {"type": "minecraft:biome"},
+        {"type": "minecraft:count", "count": 12},
+        {"type": "minecraft:offset", "x": spread, "y": {"type": "minecraft:constant", "value": -1}, "z": spread},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+            {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"},
+            {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, 1, 0]},
+            {"type": "minecraft:not", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, -1, 0]}}]}}]
+    for name, wood in [("waterlogged_leaves", "oak"), ("waterlogged_spruce_leaves", "spruce"), ("waterlogged_birch_leaves", "birch")]:
+        write_json(f"{MOD}/worldgen/feature/{name}.json", {"type": "minecraft:simple_block", "to_place": {
+            "id": f"minecraft:{wood}_leaves", "properties": {"distance": "7", "persistent": "true", "waterlogged": "true"}}})
+    write_json(f"{MOD}/worldgen/placed_feature/waterlogged_leaves.json", {"feature": LEAVES, "placement": patch})
+    # The cold swamp's: each leaf block spruce, a quarter of them birch
+    for name in ("waterlogged_spruce_leaves", "waterlogged_birch_leaves"):
+        write_json(f"{MOD}/worldgen/placed_feature/{name}.json", {"feature": f"{MOD}:{name}", "placement": []})
+    write_json(f"{MOD}/worldgen/feature/waterlogged_leaves_cold.json",
+               transition.selector(f"{MOD}:waterlogged_spruce_leaves", (f"{MOD}:waterlogged_birch_leaves", 0.25)))
+    write_json(f"{MOD}/worldgen/placed_feature/waterlogged_leaves_cold.json", {"feature": LEAVES_COLD, "placement": patch})
 
 
 def swamp():
     path = os.path.join(DATA, "minecraft", "worldgen", "biome", "swamp.json")
     with open(path) as file:
         biome = json.load(file)
-    plants = [f for f in biome["features"][VEGETATION] if f not in [f"{MOD}:swamp_patch_vegetation", f"{MOD}:marsh"] + MARSH_CLEARINGS]
+    plants = [f for f in biome["features"][VEGETATION] if f not in [f"{MOD}:swamp_patch_vegetation", f"{MOD}:marsh", LEAVES] + MARSH_CLEARINGS]
     trees = plants.index(f"{MOD}:trees_swamp")
-    biome["features"][VEGETATION] = [f"{MOD}:marsh"] + plants[:trees + 1] + MARSH_CLEARINGS + plants[trees + 1:]
+    biome["features"][VEGETATION] = [f"{MOD}:marsh"] + plants[:trees + 1] + [LEAVES] + MARSH_CLEARINGS + plants[trees + 1:]
     write_json("minecraft/worldgen/biome/swamp.json", biome)
 
     # The small mangrove's ground ring: gray mud only, as the marsh's wettest ring
@@ -93,7 +127,7 @@ def cold_swamp(vanilla):
     made["effects"] = {"water_color": "#3a7484", "grass_color": "#6a8a4a", "foliage_color": "#4f7a46", "dry_foliage_color": "#7b5334"}
     made["attributes"]["minecraft:visual/water_fog_color"] = "#16262b"
     made["features"][VEGETATION] = [
-        f"{MOD}:marsh_cold", "minecraft:glow_lichen", "minecraft:patch_large_fern", f"{MOD}:trees_cold_swamp", *MARSH_CLEARINGS,
+        f"{MOD}:marsh_cold", "minecraft:glow_lichen", "minecraft:patch_large_fern", f"{MOD}:trees_cold_swamp", LEAVES_COLD, *MARSH_CLEARINGS,
         "minecraft:patch_grass_taiga_2", "minecraft:patch_waterlily", "minecraft:brown_mushroom_taiga", "minecraft:red_mushroom_taiga",
         "minecraft:patch_sugar_cane_swamp", "minecraft:patch_pumpkin", "minecraft:patch_firefly_bush_near_water_swamp",
         "minecraft:seagrass_swamp", "minecraft:patch_berry_common"]
@@ -117,7 +151,7 @@ def grassy_wetlands(vanilla):
     made["effects"] = {"water_color": "#3e9ab0", "grass_color": "#7db356", "foliage_color": "#62ad4a", "dry_foliage_color": "#7b5334"}
     made["attributes"]["minecraft:visual/water_fog_color"] = "#274b48"
     made["features"][VEGETATION] = [
-        f"{MOD}:marsh_wetlands", "minecraft:glow_lichen", f"{MOD}:trees_grassy_wetlands", "minecraft:patch_tall_grass", f"{MOD}:marsh_reeds",
+        f"{MOD}:marsh_wetlands", "minecraft:glow_lichen", f"{MOD}:trees_grassy_wetlands", LEAVES, "minecraft:patch_tall_grass", f"{MOD}:marsh_reeds",
         f"{MOD}:marsh_flowers", "minecraft:flower_swamp", "minecraft:patch_grass_normal", "minecraft:patch_waterlily",
         "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_sugar_cane_swamp", "minecraft:patch_pumpkin",
         "minecraft:patch_firefly_bush_near_water_swamp", "minecraft:seagrass_swamp"]
@@ -171,6 +205,7 @@ NAMES = {"en": {"biome.players-versus.cold_swamp": "Cold Swamp", "biome.players-
 def main(vanilla):
     marsh()
     clearings(vanilla)
+    waterlogged_leaves()
     swamp()
     cold_swamp(vanilla)
     grassy_wetlands(vanilla)
