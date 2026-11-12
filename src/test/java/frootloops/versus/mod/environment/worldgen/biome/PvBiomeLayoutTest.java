@@ -394,6 +394,102 @@ class PvBiomeLayoutTest {
                 "a warm transition is missing above freezing: " + found);
     }
 
+    private static final Set<ResourceKey<Biome>> WINDSWEPT = Set.of(Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_FOREST,
+            Biomes.WINDSWEPT_SAVANNA);
+
+    /** In the 3D-noise zone, below 0: the windswept biome that fits (the spec's table): gravelly hills, hills, forest. */
+    private static ResourceKey<Biome> windsweptThatFits(float temperature, float humidity) {
+        if (humidity >= 0.1F) return Biomes.WINDSWEPT_FOREST;
+        return temperature < -0.15F ? Biomes.WINDSWEPT_GRAVELLY_HILLS : Biomes.WINDSWEPT_HILLS;
+    }
+
+    /**
+     * What lies beside a windswept slice outside the zone, below 0 (vanilla's middle biomes by temperature and humidity;
+     * from -0.15 up the temperate rule's: hills and savannas to plains, forests to forest).
+     */
+    private static ResourceKey<Biome> besideWindswept(ResourceKey<Biome> windswept, float temperature, float humidity) {
+        if (temperature < -0.45F) return humidity < 0.1F ? Biomes.SNOWY_PLAINS : humidity < 0.3F ? Biomes.SNOWY_TAIGA : Biomes.TAIGA;
+        if (temperature < -0.15F) {
+            return humidity < -0.1F ? Biomes.PLAINS : humidity < 0.1F ? Biomes.FOREST : humidity < 0.3F ? Biomes.TAIGA : Biomes.OLD_GROWTH_SPRUCE_TAIGA;
+        }
+        return windswept == Biomes.WINDSWEPT_FOREST ? Biomes.FOREST : Biomes.PLAINS;
+    }
+
+    /**
+     * The windswept biomes are the rugged terrain's (the 3D-noise zone): where vanilla puts one, inside the zone's box
+     * (humidity 0.025 to 0.275, inland) and below freezing's side, it is the windswept biome that fits; anywhere else
+     * it is what lies beside it.
+     */
+    @Test
+    void windsweptSlicesFollowTheZone() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Map<String, Integer> checked = new TreeMap<>();
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || !WINDSWEPT.contains(biome)) continue;
+            Long cool = inside(h.temperature(), -1.0F, -0.02F), inland = inside(h.continentalness(), 0.04F, 1.0F);
+            if (cool == null) continue;
+            long erosion = mid(h.erosion()), weirdness = mid(h.weirdness());
+            float t = Climate.unquantizeCoord(cool);
+            Long inBox = inside(h.humidity(), 0.04F, 0.26F);
+            if (inBox != null && inland != null) {
+                Climate.TargetPoint point = point(cool, inBox, inland, erosion, weirdness);
+                ResourceKey<Biome> expected = windsweptThatFits(t, Climate.unquantizeCoord(inBox));
+                assertEquals(expected, layout.findValue(point), biome.identifier().getPath() + " in the zone at " + point);
+                checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
+            }
+            // Outside the box: too dry or too humid, or off the coast
+            List<Long> outside = new ArrayList<>();
+            Long dry = inside(h.humidity(), -1.0F, 0.015F), wet = inside(h.humidity(), 0.285F, 1.0F);
+            if (dry != null) outside.add(dry);
+            if (wet != null) outside.add(wet);
+            for (long humidity : outside) {
+                if (inland == null) continue;
+                Climate.TargetPoint point = point(cool, humidity, inland, erosion, weirdness);
+                ResourceKey<Biome> expected = besideWindswept(biome, t, Climate.unquantizeCoord(humidity));
+                assertEquals(expected, layout.findValue(point), biome.identifier().getPath() + " outside the zone at " + point);
+                checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
+            }
+            Long coast = inside(h.continentalness(), -1.0F, 0.02F);
+            if (coast != null) {
+                long humidity = inBox != null ? inBox : mid(h.humidity());
+                Climate.TargetPoint point = point(cool, humidity, coast, erosion, weirdness);
+                ResourceKey<Biome> expected = besideWindswept(biome, t, Climate.unquantizeCoord(humidity));
+                assertEquals(expected, layout.findValue(point), biome.identifier().getPath() + " off the coast at " + point);
+                checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
+            }
+        }
+        System.out.println("[windswept] checked slices: " + checked);
+        for (ResourceKey<Biome> fits : List.of(Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_FOREST)) {
+            assertTrue(checked.keySet().stream().anyMatch(key -> key.endsWith("-> " + fits.identifier().getPath())), "nowhere is " + fits);
+        }
+        for (ResourceKey<Biome> beside : List.of(Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.TAIGA, Biomes.PLAINS, Biomes.FOREST, Biomes.OLD_GROWTH_SPRUCE_TAIGA)) {
+            assertTrue(checked.keySet().stream().anyMatch(key -> key.endsWith("-> " + beside.identifier().getPath())), "no windswept slice turns into " + beside);
+        }
+    }
+
+    /** Over random climates, a windswept biome is only ever in the zone's box, below 0, or on a mountainside. */
+    @Test
+    void windsweptBiomesStandOnlyInTheZone() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Random random = new Random(20261112L);
+        int found = 0;
+        for (int i = 0; i < 400_000; i++) {
+            float temperature = uniform(random), humidity = uniform(random), continentalness = uniform(random), erosion = uniform(random), weirdness = uniform(random);
+            ResourceKey<Biome> biome = layout.findValue(Climate.target(temperature, humidity, continentalness, erosion, 0.0F, weirdness));
+            // The taigas' mountainsides have a windswept forest of their own (the mountainside rule): not this rule's
+            if (!WINDSWEPT.contains(biome) || erosion < -0.3F) continue;
+            found++;
+            String where = String.format(Locale.ROOT, "%s at T %.3f H %.3f C %.3f E %.3f", biome.identifier().getPath(), temperature, humidity, continentalness, erosion);
+            assertTrue(temperature < 0.003F, where);
+            assertTrue(humidity >= 0.022F && humidity <= 0.278F, where);
+            assertTrue(continentalness >= 0.027F, where);
+            assertTrue(erosion >= 0.447F && erosion <= 0.553F, where);
+        }
+        assertTrue(found >= 200, "only " + found + " windswept points found");
+    }
+
     /** The middle of the part of {@code range} between {@code from} and {@code to}, or null if it has no width there. */
     private static Long inside(Climate.Parameter range, float from, float to) {
         long lo = Math.max(range.min(), Climate.quantizeCoord(from)), hi = Math.min(range.max(), Climate.quantizeCoord(to));

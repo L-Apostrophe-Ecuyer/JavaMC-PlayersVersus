@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
@@ -23,8 +24,8 @@ import net.minecraft.world.level.biome.OverworldBiomeBuilder;
  * The biome layout of the Players Versus world type, derived from vanilla's overworld layout:
  * <ul>
  *   <li>each vanilla surface slice is first cut by the replacements ({@link #REPLACEMENTS}): the part inside one's region
- *   is another biome from then on (windswept hills and old growth birch forests above freezing, the cold half of
- *   swamps);</li>
+ *   is another biome from then on (the windswept biomes: in the 3D-noise zone below freezing's side the one that fits,
+ *   anywhere else what lies beside; old growth birch forests above freezing; the cold half of swamps);</li>
  *   <li>then each piece is cut by the transition rules ({@link #RULES}) into disjoint boxes: the part inside a rule's
  *   region gets the transition biome, the rest keeps the piece's biome;</li>
  *   <li>vanilla's second copy of each surface slice (depth 1) is dropped, so the underground belongs to the cave
@@ -89,6 +90,21 @@ public final class PvBiomeLayout {
     static final float NOISE_HUMIDITY_MAX = (float) PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MAX;
     static final float NOISE_EROSION_MIN = (float) PvWorldgenConstants.NOISE_ZONE_EROSION_MIN, NOISE_EROSION_MAX = (float) PvWorldgenConstants.NOISE_ZONE_EROSION_MAX;
 
+    /**
+     * The windswept biomes are the rugged terrain's, so they stand in the 3D-noise zone: where its window is at half
+     * strength or more (humidity from 0.025 to 0.275, the half of each fade), inland, below {@link #TEMPERATE_MIN}.
+     */
+    static final long WINDSWEPT_HUMIDITY_MIN = Climate.quantizeCoord((float) (PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MIN + PvWorldgenConstants.NOISE_ZONE_HUMIDITY_FADE / 2));
+    static final long WINDSWEPT_HUMIDITY_MAX = Climate.quantizeCoord((float) (PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MAX - PvWorldgenConstants.NOISE_ZONE_HUMIDITY_FADE / 2));
+    static final long WINDSWEPT_CONTINENTALNESS_MIN = Climate.quantizeCoord((float) PvWorldgenConstants.NOISE_ZONE_CONTINENTALNESS_MIN);
+    /** In the zone, from this humidity (vanilla's, where its windswept biomes turn to forest) the windswept forest, below it hills. */
+    private static final float WINDSWEPT_FOREST_HUMIDITY = 0.1F;
+    /** The zone's hills are gravelly (stony, dry) below this temperature: the cold, dry windswept biome of vanilla's tables. */
+    private static final float WINDSWEPT_GRAVELLY_MAX_TEMPERATURE = -0.15F;
+
+    private static final Set<ResourceKey<Biome>> WINDSWEPT = Set.of(Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_FOREST,
+            Biomes.WINDSWEPT_SAVANNA);
+
     private record Rule(String name, Box region, BiFunction<Box, ResourceKey<Biome>, ResourceKey<Biome>> target) {
     }
 
@@ -98,6 +114,10 @@ public final class PvBiomeLayout {
      * does). A target of {@code null} means the replacement doesn't apply; it is given the part inside the region.
      */
     private static final List<Rule> REPLACEMENTS = List.of(
+            // Vanilla's windswept slices: in the 3D-noise zone the windswept biome that fits, anywhere else below freezing's side what lies beside
+            new Rule("windswept-zone", Box.ALL.withMin(Box.H, WINDSWEPT_HUMIDITY_MIN).withMax(Box.H, WINDSWEPT_HUMIDITY_MAX)
+                    .withMin(Box.C, WINDSWEPT_CONTINENTALNESS_MIN).withMax(Box.T, Climate.quantizeCoord(TEMPERATE_MIN)), PvBiomeLayout::windsweptZoneTarget),
+            new Rule("windswept", Box.ALL.withMax(Box.T, Climate.quantizeCoord(TEMPERATE_MIN)), PvBiomeLayout::windsweptBesideTarget),
             new Rule("temperate", Box.ALL.withMin(Box.T, Climate.quantizeCoord(TEMPERATE_MIN)), PvBiomeLayout::temperateTarget),
             new Rule("cold-swamp", Box.ALL.withMax(Box.T, Climate.quantizeCoord(COLD_SWAMP_MAX)),
                     (part, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.COLD_SWAMP : null));
@@ -250,6 +270,37 @@ public final class PvBiomeLayout {
         if (biome == Biomes.WINDSWEPT_FOREST || biome == Biomes.OLD_GROWTH_BIRCH_FOREST) return Biomes.FOREST;
         if (biome == Biomes.WINDSWEPT_SAVANNA) return part.min[Box.T] >= WARM_BAND_START ? Biomes.SAVANNA : Biomes.PLAINS;
         return null;
+    }
+
+    /**
+     * A windswept slice's part inside the zone (humidity, inland, below {@link #TEMPERATE_MIN}): the windswept biome that
+     * fits: forest from humidity {@link #WINDSWEPT_FOREST_HUMIDITY}, below it hills, gravelly where it is colder than
+     * {@link #WINDSWEPT_GRAVELLY_MAX_TEMPERATURE}.
+     */
+    @Nullable
+    private static ResourceKey<Biome> windsweptZoneTarget(Box part, ResourceKey<Biome> biome) {
+        if (!WINDSWEPT.contains(biome)) return null;
+        if (part.min[Box.H] >= Climate.quantizeCoord(WINDSWEPT_FOREST_HUMIDITY)) return Biomes.WINDSWEPT_FOREST;
+        return part.max[Box.T] <= Climate.quantizeCoord(WINDSWEPT_GRAVELLY_MAX_TEMPERATURE) ? Biomes.WINDSWEPT_GRAVELLY_HILLS : Biomes.WINDSWEPT_HILLS;
+    }
+
+    /**
+     * A windswept slice's part anywhere else below {@link #TEMPERATE_MIN}: what lies beside it, vanilla's middle biome of
+     * its temperature and humidity (snowy plains, snowy and plain taiga, plains, forest, old growth spruce taiga); from
+     * -0.15 up the temperate rule's (hills and savannas to plains, forests to forest).
+     */
+    @Nullable
+    private static ResourceKey<Biome> windsweptBesideTarget(Box part, ResourceKey<Biome> biome) {
+        if (!WINDSWEPT.contains(biome)) return null;
+        long humidity = part.min[Box.H];
+        if (part.max[Box.T] <= Climate.quantizeCoord(-0.45F)) {
+            return humidity < Climate.quantizeCoord(0.1F) ? Biomes.SNOWY_PLAINS : humidity < Climate.quantizeCoord(0.3F) ? Biomes.SNOWY_TAIGA : Biomes.TAIGA;
+        }
+        if (part.max[Box.T] <= Climate.quantizeCoord(-0.15F)) {
+            return humidity < Climate.quantizeCoord(-0.1F) ? Biomes.PLAINS : humidity < Climate.quantizeCoord(0.1F) ? Biomes.FOREST
+                    : humidity < Climate.quantizeCoord(0.3F) ? Biomes.TAIGA : Biomes.OLD_GROWTH_SPRUCE_TAIGA;
+        }
+        return temperateTarget(part, biome);
     }
 
     /** The rocky jungle's box before the 3D-noise terrain's climate is cut out of it: just warmer than the warm band, level. */
