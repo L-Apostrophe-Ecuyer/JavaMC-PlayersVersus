@@ -17,7 +17,7 @@
 - The mangrove marsh (the mangrove swamp's rim and drier part): mud flats and grass, small mangroves and jungle bushes.
 - The mangrove swamp's own file (data/minecraft, so every world type): vanilla's, its foliage a clear green like the marsh's.
 - The waterlogged leaves: clumps of persistent, waterlogged leaves in the top layer of the swamps' pools (oak in the swamp and
-  the grassy wetlands, spruce and now and then birch in the cold swamp), after the biome's trees.
+  the grassy wetlands, spruce and now and then birch in the cold swamp), after the biome's trees and placed by their noise.
 """
 import copy
 import json
@@ -67,36 +67,53 @@ def clearings(vanilla):
 MARSH_CLEARINGS = [f"{MOD}:marsh_tall_grass", f"{MOD}:marsh_reeds", f"{MOD}:marsh_flowers"]
 LEAVES = f"{MOD}:waterlogged_leaves"
 LEAVES_COLD = f"{MOD}:waterlogged_leaves_cold"
+LEAVES_WETLANDS = f"{MOD}:waterlogged_leaves_wetlands"
+# A chunk's patches of leaves: this times the biome's trees' noise (so as many as before in the swamps, none where the trees have none)
+LEAVES_RATIO = 20
 
 
 def waterlogged_leaves():
     """
-    Clumps of leaves in the top layer of the pools: four a chunk, each twelve tries within four blocks, a try standing
-    where the position is water with air above and something under it (water or ground), one block under the surface the
-    height map finds. Persistent, so they don't decay away from logs, and waterlogged, so the pool stays whole around them.
+    Clumps of leaves in the top layer of the pools, among the trees: a chunk's patches by the noise its biome's trees are placed by
+    (the same factor and offset: where they have none, the pools have none, so an open wetland has no clumps far from a tree),
+    each twelve tries within four blocks, a try standing where the position is water with air above and something under it, one
+    block under the surface the height map finds. Persistent, so they don't decay away from logs, and waterlogged, so the pool
+    stays whole around them. Run after the biomes' trees are written.
     """
     spread = {"type": "minecraft:trapezoid", "min": -4, "max": 4, "plateau": 0}
-    patch = [
-        {"type": "minecraft:count", "count": 4},
-        {"type": "minecraft:in_square"},
-        {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"},
-        {"type": "minecraft:biome"},
-        {"type": "minecraft:count", "count": 12},
-        {"type": "minecraft:offset", "x": spread, "y": {"type": "minecraft:constant", "value": -1}, "z": spread},
-        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
-            {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"},
-            {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, 1, 0]},
-            {"type": "minecraft:not", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, -1, 0]}}]}}]
+
+    def patch(trees):
+        noise = placed_file(trees)["placement"][0]
+        assert noise["type"] == "minecraft:noise_based_count", trees + " isn't placed by noise"
+        return [
+            {"type": "minecraft:noise_based_count", "noise_to_count_ratio": LEAVES_RATIO, "noise_factor": noise["noise_factor"],
+             "noise_offset": noise["noise_offset"]},
+            {"type": "minecraft:in_square"},
+            {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"},
+            {"type": "minecraft:biome"},
+            {"type": "minecraft:count", "count": 12},
+            {"type": "minecraft:offset", "x": spread, "y": {"type": "minecraft:constant", "value": -1}, "z": spread},
+            {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+                {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"},
+                {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, 1, 0]},
+                {"type": "minecraft:not", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, -1, 0]}}]}}]
     for name, wood in [("waterlogged_leaves", "oak"), ("waterlogged_spruce_leaves", "spruce"), ("waterlogged_birch_leaves", "birch")]:
         write_json(f"{MOD}/worldgen/feature/{name}.json", {"type": "minecraft:simple_block", "to_place": {
             "id": f"minecraft:{wood}_leaves", "properties": {"distance": "7", "persistent": "true", "waterlogged": "true"}}})
-    write_json(f"{MOD}/worldgen/placed_feature/waterlogged_leaves.json", {"feature": LEAVES, "placement": patch})
+    write_json(f"{MOD}/worldgen/placed_feature/waterlogged_leaves.json", {"feature": LEAVES, "placement": patch("trees_swamp")})
+    write_json(f"{MOD}/worldgen/placed_feature/waterlogged_leaves_wetlands.json", {"feature": LEAVES, "placement": patch("trees_grassy_wetlands")})
     # The cold swamp's: each leaf block spruce, a quarter of them birch
     for name in ("waterlogged_spruce_leaves", "waterlogged_birch_leaves"):
         write_json(f"{MOD}/worldgen/placed_feature/{name}.json", {"feature": f"{MOD}:{name}", "placement": []})
     write_json(f"{MOD}/worldgen/feature/waterlogged_leaves_cold.json",
                transition.selector(f"{MOD}:waterlogged_spruce_leaves", (f"{MOD}:waterlogged_birch_leaves", 0.25)))
-    write_json(f"{MOD}/worldgen/placed_feature/waterlogged_leaves_cold.json", {"feature": LEAVES_COLD, "placement": patch})
+    write_json(f"{MOD}/worldgen/placed_feature/waterlogged_leaves_cold.json", {"feature": LEAVES_COLD, "placement": patch("trees_cold_swamp")})
+
+
+def placed_file(name):
+    """One of this mod's placed features, as written."""
+    with open(os.path.join(DATA, MOD, "worldgen", "placed_feature", name + ".json")) as file:
+        return json.load(file)
 
 
 def swamp():
@@ -152,7 +169,7 @@ def grassy_wetlands(vanilla):
     made["effects"] = {"water_color": "#3e9ab0", "grass_color": "#7db356", "foliage_color": "#62ad4a", "dry_foliage_color": "#7b5334"}
     made["attributes"]["minecraft:visual/water_fog_color"] = "#274b48"
     made["features"][VEGETATION] = [
-        f"{MOD}:marsh_wetlands", "minecraft:glow_lichen", f"{MOD}:trees_grassy_wetlands", LEAVES, "minecraft:patch_tall_grass", f"{MOD}:marsh_reeds",
+        f"{MOD}:marsh_wetlands", "minecraft:glow_lichen", f"{MOD}:trees_grassy_wetlands", LEAVES_WETLANDS, "minecraft:patch_tall_grass", f"{MOD}:marsh_reeds",
         f"{MOD}:marsh_flowers", "minecraft:flower_swamp", "minecraft:patch_grass_normal", "minecraft:patch_waterlily",
         "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_sugar_cane_swamp", "minecraft:patch_pumpkin",
         "minecraft:patch_firefly_bush_near_water_swamp", "minecraft:seagrass_swamp"]
@@ -217,12 +234,12 @@ NAMES = {"en": {"biome.players-versus.cold_swamp": "Cold Swamp", "biome.players-
 def main(vanilla):
     marsh()
     clearings(vanilla)
-    waterlogged_leaves()
     swamp()
     cold_swamp(vanilla)
     grassy_wetlands(vanilla)
     mangrove_marsh(vanilla)
     mangrove_swamp(vanilla)
+    waterlogged_leaves()
     tags(vanilla)
     lemons.add_names(NAMES)
 

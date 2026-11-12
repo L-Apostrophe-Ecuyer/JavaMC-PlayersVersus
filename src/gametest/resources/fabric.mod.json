@@ -21,7 +21,8 @@
       "frootloops.versus.gametest.EndermanShulkerGameTest",
       "frootloops.versus.gametest.LemonsGameTest",
       "frootloops.versus.gametest.RocksGameTest",
-      "frootloops.versus.gametest.WetlandsGameTest"
+      "frootloops.versus.gametest.WetlandsGameTest",
+      "frootloops.versus.gametest.TuscanGroveGameTest"
     ],
     "fabric-client-gametest": [
       "frootloops.versus.gametest.client.WorldgenGallery"

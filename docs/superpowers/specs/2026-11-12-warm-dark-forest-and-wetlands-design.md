@@ -40,6 +40,19 @@ humidity 0.3 and up, temperature -0.15 to 0.2) border the dark jungle forest at 
 - Census (`runWorldgenSmoke -Ppv.census=...`): every new biome generates; the denser biomes' tree counts (before and after).
 - Looking: the gallery's shots of each new biome and the changed ones.
 
+## As built
+
+Where the build differs from the table above (the plan's ledger holds each ruling and the census numbers):
+
+- **Tree densities** went above the table's numbers: warm oak forest 12/0.45 to 22/0.55 (tree noise ratio/offset), dark jungle forest 16/0.55 to 34/0.7, humid oak forest 12/0.45 to 20/0.55, Tuscan grove 5/0.0 to 8/0.1. The table's own numbers raised the census's leaves only 19%, 11% and 78% (tries fail and canopies overlap); the built ones give +35%, +43%, +86% and +92% over the same patches.
+- **Warm dark forest**: as dense as the dark forest by the census (tree noise 22/0.55 against its flat 16 tries a chunk), and a third of its giant mushrooms, brown and red, tried first in the selector (found by the final review: the mushroom had been tried last, at 0.4% a try).
+- **Cypress**: a column three blocks across made with the spruce's foliage placer (radius 1). The pine's, first used, adds a random radius and made most cypresses cones (found by the final review; `TuscanGroveGameTest`).
+- **Tuscan grove** fields: the meadow's flowers where the biome noise is above 0.1 and the desert's dry grass where it is below -0.05, a patch each chunk (`tuscan_flower_field`, `tuscan_dry_grass`).
+- **Waterlogged leaves**: three placed features (swamp, cold swamp, grassy wetlands), each placed by its biome's trees' noise (found by the final review: counted flat, the wetlands' pools were dotted with leaves far from any tree); the cold swamp's mix is a random selector of spruce and birch leaves.
+- **Mangrove swamp**: the foliage colour `#62a83e` (the marsh's) in an override file, vanilla's in every other field (`BiomeDataTest` compares it with the game's own).
+- **The census** counts the mod's `*_tree` blocks as trees (it had counted none of the trunks).
+- The grassy wetlands' share of water follows the terrain under them: 56% in one low coastal patch, and a meadow with ponds where the ground is higher.
+
 ## Not in this part
 
 Anything of the wetlands' ground beyond the marsh's existing rings; the swamp rim's width (0.565, as before).

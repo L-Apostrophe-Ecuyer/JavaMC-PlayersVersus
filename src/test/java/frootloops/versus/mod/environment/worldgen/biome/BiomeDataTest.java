@@ -67,20 +67,27 @@ class BiomeDataTest {
     }
 
     /**
-     * Clumps of waterlogged, persistent leaves float at the water line of the swamps' pools, after the biome's trees: oak in the
-     * swamp and the grassy wetlands, spruce (mostly) and birch in the cold swamp.
+     * Clumps of waterlogged, persistent leaves float at the water line of the swamps' pools, after the biome's trees and by their
+     * noise (the same factor and offset: where the trees are, the clumps are, so the open parts of the wetlands have none far from
+     * a tree): oak in the swamp and the grassy wetlands, spruce (mostly) and birch in the cold swamp.
      */
     @Test
-    void theSwampsFloatWaterloggedLeavesAfterTheirTrees() throws IOException {
+    void theSwampsFloatWaterloggedLeavesAfterTheirTreesAndByTheirNoise() throws IOException {
         String[][] swamps = {
-                {"minecraft/worldgen/biome/swamp.json", "players-versus:trees_swamp", "players-versus:waterlogged_leaves"},
-                {"players-versus/worldgen/biome/grassy_wetlands.json", "players-versus:trees_grassy_wetlands", "players-versus:waterlogged_leaves"},
-                {"players-versus/worldgen/biome/cold_swamp.json", "players-versus:trees_cold_swamp", "players-versus:waterlogged_leaves_cold"}};
+                {"minecraft/worldgen/biome/swamp.json", "trees_swamp", "waterlogged_leaves"},
+                {"players-versus/worldgen/biome/grassy_wetlands.json", "trees_grassy_wetlands", "waterlogged_leaves_wetlands"},
+                {"players-versus/worldgen/biome/cold_swamp.json", "trees_cold_swamp", "waterlogged_leaves_cold"}};
         for (String[] swamp : swamps) {
+            String trees = "players-versus:" + swamp[1], leaves = "players-versus:" + swamp[2];
             List<String> plants = vegetation(swamp[0]);
-            assertTrue(plants.contains(swamp[2]), swamp[0] + " doesn't list " + swamp[2] + ": " + plants);
-            assertTrue(plants.indexOf(swamp[2]) > plants.indexOf(swamp[1]), swamp[0] + " lists " + swamp[2] + " before its trees: " + plants);
-            assertTrue(placedFeatureExists(swamp[2]), swamp[2] + " has no placed feature");
+            assertTrue(plants.contains(leaves), swamp[0] + " doesn't list " + leaves + ": " + plants);
+            assertTrue(plants.indexOf(leaves) > plants.indexOf(trees), swamp[0] + " lists " + leaves + " before its trees: " + plants);
+            assertTrue(placedFeatureExists(leaves), leaves + " has no placed feature");
+            JsonObject treeNoise = read(DATA.resolve("players-versus/worldgen/placed_feature/" + swamp[1] + ".json")).getAsJsonArray("placement").get(0).getAsJsonObject();
+            JsonObject leafNoise = read(DATA.resolve("players-versus/worldgen/placed_feature/" + swamp[2] + ".json")).getAsJsonArray("placement").get(0).getAsJsonObject();
+            assertEquals("minecraft:noise_based_count", leafNoise.get("type").getAsString(), swamp[2] + " isn't placed by the trees' noise");
+            assertEquals(treeNoise.get("noise_factor"), leafNoise.get("noise_factor"), swamp[2] + "'s noise factor isn't its trees'");
+            assertEquals(treeNoise.get("noise_offset"), leafNoise.get("noise_offset"), swamp[2] + "'s noise offset isn't its trees'");
         }
         // Every leaf block of the clumps is waterlogged (it holds the pool's water) and persistent (it would decay away from logs)
         for (String wood : List.of("", "spruce_", "birch_")) {
@@ -107,13 +114,9 @@ class BiomeDataTest {
         throw new IOException("the game has no " + file);
     }
 
-    private static double highest(JsonElement provider) {
-        return provider.isJsonPrimitive() ? provider.getAsDouble() : provider.getAsJsonObject().get("max_inclusive").getAsDouble();
-    }
-
     /**
-     * The Tuscan grove is cypresses (a narrow column of spruce leaves, taller than an oak), oaks in olive-grey leaves and lemon
-     * orchards, with fields of flowers and of dry grass.
+     * The Tuscan grove is cypresses (a tall column of spruce leaves, taller than an oak; its width is the game test's), oaks in
+     * olive-grey leaves and lemon orchards, with fields of flowers and of dry grass.
      */
     @Test
     void theTuscanGroveGrowsCypressesAndHasFieldsOfFlowersAndDryGrass() throws IOException {
@@ -121,7 +124,7 @@ class BiomeDataTest {
         assertEquals("minecraft:tree", cypress.get("type").getAsString());
         assertEquals("minecraft:spruce_leaves", cypress.getAsJsonObject("foliage_provider").get("id").getAsString());
         assertEquals("minecraft:spruce_log", cypress.getAsJsonObject("trunk_provider").get("id").getAsString());
-        assertTrue(highest(cypress.getAsJsonObject("foliage_placer").get("radius")) <= 1, "a cypress is a column: leaves one block from its trunk");
+        // How narrow it grows is the game test's (TuscanGroveGameTest): a foliage placer can add to the radius written here
         JsonObject trunk = cypress.getAsJsonObject("trunk_placer");
         assertTrue(trunk.get("base_height").getAsInt() >= 10, "a cypress is taller than an oak");
         assertTrue(placedFeatureExists("players-versus:cypress_checked"), "players-versus:cypress_checked is no placed feature");
@@ -138,6 +141,39 @@ class BiomeDataTest {
             assertTrue(plants.contains(field), "the Tuscan grove has no " + field + ": " + plants);
             assertTrue(placedFeatureExists(field), field + " is no placed feature");
         }
+    }
+
+    /**
+     * The chance one try of a random selector plants a feature whose id contains {@code part}: the entries are tried in order, so
+     * an entry's chance is its own times the chance that none before it was taken.
+     */
+    private static double chanceOf(JsonObject selector, String part) {
+        double none = 1, chance = 0;
+        for (JsonElement entry : selector.getAsJsonArray("features")) {
+            double own = entry.getAsJsonObject().get("chance").getAsDouble();
+            if (entry.getAsJsonObject().get("feature").toString().contains(part)) chance += none * own;
+            none *= 1 - own;
+        }
+        return chance;
+    }
+
+    /**
+     * The warm dark forest is a dark forest: its tries a chunk, at zero noise, at least three quarters of the dark forest's flat 16
+     * (the census, over the same ground, has them as dense), and a third of its giant mushrooms, tried first as the dark forest's are
+     * (an entry tried last takes only what the entries before it leave).
+     */
+    @Test
+    void theWarmDarkForestIsAsDenseAsTheDarkForestWithAThirdOfItsMushrooms() throws IOException {
+        int flat = vanilla("minecraft/worldgen/placed_feature/dark_forest_vegetation.json").getAsJsonArray("placement").get(0).getAsJsonObject().get("count").getAsInt();
+        JsonObject count = read(DATA.resolve("players-versus/worldgen/placed_feature/trees_warm_dark_forest.json")).getAsJsonArray("placement").get(0).getAsJsonObject();
+        assertEquals("minecraft:noise_based_count", count.get("type").getAsString());
+        double atZeroNoise = Math.ceil(count.get("noise_offset").getAsDouble() * count.get("noise_to_count_ratio").getAsDouble());
+        assertTrue(atZeroNoise >= 0.75 * flat, "the warm dark forest tries " + atZeroNoise + " times a chunk at zero noise; the dark forest's flat " + flat);
+
+        double theirs = chanceOf(vanilla("minecraft/worldgen/feature/dark_forest_vegetation.json"), "huge_");
+        double ours = chanceOf(read(DATA.resolve("players-versus/worldgen/feature/trees_warm_dark_forest.json")), "huge_");
+        assertTrue(ours >= theirs * 0.25 && ours <= theirs * 0.5, "a try plants a giant mushroom " + ours + " of the time; the dark forest's " + theirs + ", a third is asked");
+        assertTrue(chanceOf(read(DATA.resolve("players-versus/worldgen/feature/trees_warm_dark_forest.json")), "huge_red") > 0, "no giant red mushrooms");
     }
 
     /**

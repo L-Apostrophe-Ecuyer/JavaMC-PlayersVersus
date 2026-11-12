@@ -2,8 +2,10 @@
   "feature": "players-versus:waterlogged_leaves_cold",
   "placement": [
     {
-      "type": "minecraft:count",
-      "count": 4
+      "type": "minecraft:noise_based_count",
+      "noise_to_count_ratio": 20,
+      "noise_factor": 8,
+      "noise_offset": 0.05
     },
     {
       "type": "minecraft:in_square"

@@ -123,11 +123,15 @@ BIOMES = {
         # The dark forest's (0.7, 0.8) warmed toward the dark jungle forest's (0.825, 0.85): the same dark canopy in warmer greens
         "temperature": 0.8, "downfall": 0.8, "has_precipitation": True,
         "colors": {"grass_color": "#6a9a52", "foliage_color": "#7a9c4c", "dry_foliage_color": "#7b5334"},
-        # Dark oaks, with vines and with oaks, fancy oaks and jungle bushes among them; a third of the dark forest's giant mushrooms
-        "trees": selector("minecraft:dark_oak_checked", (f"{MOD}:dark_oak_with_vines_checked", 0.25), ("minecraft:fancy_oak_checked", 0.14),
-                          ("minecraft:oak_checked", 0.12), ("minecraft:jungle_bush", 0.1), ("minecraft:birch_checked", 0.04),
-                          ({"feature": "minecraft:huge_brown_mushroom", "placement": []}, 0.008)),
-        "tree_placement": dict(ratio=14, offset=0.5),
+        # Dark oaks, with vines and with oaks, fancy oaks and jungle bushes among them. A third of the dark forest's giant mushrooms, tried
+        # first as its own are (an entry tried last takes only what the entries before it leave): brown 0.008, red 0.017 a try, 2.5%
+        # together against its 7.4%
+        "trees": selector("minecraft:dark_oak_checked", ({"feature": "minecraft:huge_brown_mushroom", "placement": []}, 0.008),
+                          ({"feature": "minecraft:huge_red_mushroom", "placement": []}, 0.017), (f"{MOD}:dark_oak_with_vines_checked", 0.25),
+                          ("minecraft:fancy_oak_checked", 0.14), ("minecraft:oak_checked", 0.12), ("minecraft:jungle_bush", 0.1),
+                          ("minecraft:birch_checked", 0.04)),
+        # As dense as the dark forest's (its flat 16 a chunk): the census over the same ground
+        "tree_placement": dict(ratio=22, offset=0.55),
         "vegetation": ["minecraft:glow_lichen", f"{MOD}:trees_warm_dark_forest", "minecraft:forest_flowers", "minecraft:patch_bush", "minecraft:flower_default",
                        "minecraft:patch_grass_forest", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_leaf_litter",
                        "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane_dark", "minecraft:patch_firefly_bush_near_water", "minecraft:vines"],
@@ -187,14 +191,15 @@ BIOMES.update({
 })
 
 
-# A cypress: a tall, narrow spindle of spruce leaves (a plus, three blocks across, from a point at the top to a point at the
-# bottom) on a straight trunk of twelve or thirteen blocks, bare for two to four blocks at its foot
+# A cypress: a tall, narrow column of spruce leaves (a plus, three blocks across, tapering at its top) on a straight trunk of
+# twelve or thirteen blocks, bare for one or two blocks at its foot. The spruce's foliage placer, not the pine's: the pine's adds
+# a random radius (the trunk's bare length), which makes most of its trees cones as wide as spruces.
 CYPRESS = {
     "type": "minecraft:tree",
     "below_trunk_provider": "minecraft:soil_beneath_tree",
     "decorators": [],
-    "foliage_placer": {"type": "minecraft:pine_foliage_placer", "height": {"type": "minecraft:uniform", "min_inclusive": 10, "max_inclusive": 11},
-                       "offset": 1, "radius": 1},
+    "foliage_placer": {"type": "minecraft:spruce_foliage_placer", "offset": 1, "radius": 1,
+                       "trunk_height": {"type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 2}},
     "foliage_provider": {"id": "minecraft:spruce_leaves", "properties": {"distance": "7", "persistent": "false", "waterlogged": "false"}},
     "ignore_vines": True,
     "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 1, "upper_size": 1},

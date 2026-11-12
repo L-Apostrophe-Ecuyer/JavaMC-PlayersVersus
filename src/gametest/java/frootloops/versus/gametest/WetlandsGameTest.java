@@ -14,7 +14,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.placement.BiomeFilter;
+import net.minecraft.world.level.levelgen.placement.CountPlacement;
+import net.minecraft.world.level.levelgen.placement.NoiseBasedCountPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,12 +54,17 @@ public class WetlandsGameTest {
         return new int[]{x0, z0, floor};
     }
 
-    /** The placed feature of the mod's data, without its biome check (the test world's biome doesn't list it). */
+    /**
+     * The placed feature of the mod's data, without its biome check (the test world's biome doesn't list it) and with four patches
+     * where the data's count is the trees' noise (which at the pond's chunk may well be zero): the rest is the data's own.
+     */
     private static PlacedFeature placed(GameTestHelper helper, String name) {
         Registry<PlacedFeature> features = helper.getLevel().registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
         PlacedFeature feature = features.getValue(Identifier.parse("players-versus:" + name));
         helper.assertTrue(feature != null, "players-versus:" + name + " is not a placed feature");
-        return new PlacedFeature(feature.feature(), feature.placement().stream().filter(modifier -> !(modifier instanceof BiomeFilter)).toList());
+        List<PlacementModifier> placement = feature.placement().stream().filter(modifier -> !(modifier instanceof BiomeFilter))
+                .map(modifier -> modifier instanceof NoiseBasedCountPlacement ? (PlacementModifier) CountPlacement.of(4) : modifier).toList();
+        return new PlacedFeature(feature.feature(), placement);
     }
 
     /**
@@ -102,9 +110,12 @@ public class WetlandsGameTest {
 
     @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
     public void waterloggedLeavesFloatAtTheWaterLine(GameTestHelper helper) {
-        List<BlockState> leaves = leavesOver(helper, "waterlogged_leaves");
-        helper.assertTrue(leaves.size() >= 3, "only " + leaves.size() + " leaves floated on the pond");
-        helper.assertTrue(leaves.stream().allMatch(state -> state.is(Blocks.OAK_LEAVES)), "the swamp's leaves are oak: " + leaves);
+        // The swamp's and the grassy wetlands' (each placed by its own trees' noise), oak both
+        for (String name : List.of("waterlogged_leaves", "waterlogged_leaves_wetlands")) {
+            List<BlockState> leaves = leavesOver(helper, name);
+            helper.assertTrue(leaves.size() >= 3, "only " + leaves.size() + " leaves floated on the pond: " + name);
+            helper.assertTrue(leaves.stream().allMatch(state -> state.is(Blocks.OAK_LEAVES)), name + "'s leaves are oak: " + leaves);
+        }
         helper.succeed();
     }
 
