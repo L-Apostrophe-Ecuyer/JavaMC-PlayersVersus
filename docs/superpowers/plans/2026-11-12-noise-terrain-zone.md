@@ -15,8 +15,8 @@
 - The zone: humidity 0 to 0.3 (fade 0.05), erosion 0.3 to 0.6 (fade 0.06), continentalness from 0.03 (fade 0.09). Smoothsteps, product of the five edges.
 - Vanilla's `offset`, `factor` and every `minecraft:` data file stay as they are: vanilla world types are untouched. Only `players-versus:overworld/*` density functions change.
 - Outside the window and outside erosion 0.34 to 0.63 the mod's offset and factor equal vanilla's.
-- Heights: in the zone the base noise is `noise * (1 - zone * ramp)`, the ramp 0 at y 100 and 1 at y 128, clamped; the zone's tops: median y 70 to 90, none over 128.
-- Windswept: only where humidity is 0.03 to 0.27, continentalness 0.03 or more, temperature below 0; hills / gravelly hills / forest by the spec's table; elsewhere what lies beside; the temperate rule (`TEMPERATE_MIN` 0) stays.
+- Heights: in the zone the base noise is `noise * (1 - zone * ramp)`, the ramp 0 at y 100 and 1 at y 128, clamped; the zone's tops: median y 65 to 90 with a spread of 25 blocks or more, none over 128.
+- Windswept: only where humidity is 0.025 to 0.275, continentalness 0.03 or more, temperature below 0; hills / gravelly hills / forest by the spec's table; elsewhere what lies beside; the temperate rule (`TEMPERATE_MIN` 0) stays.
 - `BiomeFeatureOrderTest`, `PvBiomeLayoutTest` (pieces partition vanilla's slices) and the rock tests stay green. Known failures on the base, not ours: `BlightTest`, `EndermanShulkerCarrierTest`, the blight game test.
 
 ## Review Focus
@@ -80,7 +80,7 @@
 
 - [ ] **Step 1: Write the failing tests** `TerrainCapTest`, over 3,000 columns where the window is 1 and continentalness 0.3 or more:
   - `nothingStandsOverTheCapInTheZone`: `final_density` is negative at every y in 129 to 255 (step 6), and the highest y with positive density (scanning down from 255 in steps of 2) is 128 or less.
-  - `theZonesTopsAreBetaLike`: the tops' median is 70 to 90 and the 90th percentile 115 or less.
+  - `theZonesTopsAreBetaLike`: the tops' median is 65 to 90, their spread (tenth to ninetieth percentile) 25 blocks or more, the 90th percentile 115 or less and none over 128.
   - `theCapLeavesOtherTerrainAlone`: where the window is 0 (1,000 columns), the tops' distribution equals what the same columns give with the sloped cheese's reference formula (`4 * quarter_negative((depth + jaggedness * half_negative(jagged)) * factor) + base_3d_noise`, composed in the test from the registry's functions), column by column, where `|ridges| >= 0.22` (off the rivers' carver).
 - [ ] **Step 2: Run them to see the first two fail** (the zone's terrain, with no cap yet, has ground over 128).
 - [ ] **Step 3: In `sloped_cheese`, the base noise becomes `mul(base_3d_noise, sub(1.0, mul(noise_zone, gradient(y, 100 -> 128, 0 -> 1))))`**; run the generator; note the zone's heights; if the median is out of range, the shattered form's offset gets a ruling (a lift or a drop), recorded in the ledger.
@@ -98,7 +98,7 @@
 - Produces: `PvBiomeLayout` with the replacement `windswept`: the part of a windswept slice (hills, gravelly hills, forest) inside the box (humidity `NOISE_ZONE_HUMIDITY_MIN + fade/2` to `MAX - fade/2`, continentalness from `NOISE_ZONE_CONTINENTALNESS_MIN`, temperature under `TEMPERATE_MIN`) is the biome of the spec's table; the rest is what lies beside it (the spec's list).
 
 - [ ] **Step 1: Write the failing tests** (random points through `layout.findValue`, as `noWindsweptNorOldGrowthBirchAboveFreezing` does):
-  - `windsweptBiomesStandOnlyInTheZone`: over 200,000 points, every windswept biome found has humidity 0.03 to 0.27, continentalness 0.03 or more, temperature below 0 and erosion 0.45 to 0.55 (the slice's own).
+  - `windsweptBiomesStandOnlyInTheZone`: over 400,000 points, every windswept biome found (off the mountainsides) has humidity 0.025 to 0.275, continentalness 0.03 or more, temperature below 0 and erosion 0.45 to 0.55 (the slice's own).
   - `theZoneHasTheRightWindsweptBiome`: inside that box, the table: temperature under -0.15: gravelly hills at humidity under 0.1, forest from it; -0.15 to 0: hills under 0.1, forest from it; and 1,000 or more points found.
   - `windsweptSlicesOutsideTheZoneBecomeTheirNeighbours`: at erosion 0.5, temperature -0.6 / -0.3 / -0.1, humidity -0.5 / 0 / 0.2 / 0.5, continentalness 0.5, weirdness -0.9: the biome is the one the spec lists (snowy plains, snowy taiga, taiga, plains, forest, old growth spruce taiga), none windswept.
   - the existing `noWindsweptNorOldGrowthBirchAboveFreezing` and `piecesPartitionEachSurfaceSlice` stay.
