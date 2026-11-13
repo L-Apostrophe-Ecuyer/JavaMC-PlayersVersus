@@ -42,25 +42,35 @@ public class RockFormationStructure extends Structure {
         return this.rock;
     }
 
+    /**
+     * The main body's ground first, and the biome there (the structure's biomes, as the game checks them once a structure has
+     * its place): the structure sets try their formations one after another in every cell of the world's grid, and a formation
+     * out of its biomes stops after one column of terrain read, not the twenty of its ground and its bodies' places.
+     */
     @Override
     protected Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext context) {
         int x = context.chunkPos().getMiddleBlockX(), z = context.chunkPos().getMiddleBlockZ();
         long seed = context.random().nextLong();
         RockPlan plan = this.rock.plan(seed);
         int[] anchors = new int[plan.bodies().size()];
-        for (int index = 0; index < anchors.length; index++) {
-            RockPlan.Body body = plan.bodies().get(index);
-            anchors[index] = context.chunkGenerator().getFirstOccupiedHeight(x + body.dx(), z + body.dz(), Heightmap.Types.OCEAN_FLOOR_WG,
-                    context.heightAccessor(), context.randomState()) + 1;
+        anchors[0] = anchor(context, x, z, plan.bodies().get(0));
+        if (anchors[0] < context.chunkGenerator().getSeaLevel() - 1) return Optional.empty();
+        if (!context.validBiome().test(context.noiseBiomeResolver().getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(anchors[0]), QuartPos.fromBlock(z)))) {
+            return Optional.empty();
         }
-        int seaLevel = context.chunkGenerator().getSeaLevel();
-        if (anchors[0] < seaLevel - 1) return Optional.empty();
+        for (int index = 1; index < anchors.length; index++) anchors[index] = anchor(context, x, z, plan.bodies().get(index));
         boolean ground = this.onRockGround(context, x, anchors[0], z);
         WorldgenCensus.rockGround(ground ? "a formation kept" : "a formation refused");
         if (!ground) return Optional.empty();
         return Optional.of(new Structure.GenerationStub(new BlockPos(x, anchors[0], z), builder -> {
             for (int index = 0; index < anchors.length; index++) builder.addPiece(new RockFormationPiece(this.rock, seed, index, x, z, anchors[index]));
         }));
+    }
+
+    /** Where a body stands: on the ground at its middle. */
+    private static int anchor(Structure.GenerationContext context, int x, int z, RockPlan.Body body) {
+        return context.chunkGenerator().getFirstOccupiedHeight(x + body.dx(), z + body.dz(), Heightmap.Types.OCEAN_FLOOR_WG, context.heightAccessor(),
+                context.randomState()) + 1;
     }
 
     /**

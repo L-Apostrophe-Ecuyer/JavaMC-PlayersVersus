@@ -15,16 +15,31 @@ import frootloops.versus.mod.environment.worldgen.rocks.RockTemplate;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.FixedBiomeSource;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.levelgen.NoiseColumn;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,6 +53,9 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 /**
  * Rocks in the world: a rock feature from the data writes its rock within its reach; a formation's body stamped a chunk
@@ -298,6 +316,88 @@ public class RocksGameTest {
         helper.assertTrue(after[0] - before[0] >= 12, "only " + (after[0] - before[0]) + " packed ice on four icy boulders");
         helper.assertTrue(after[1] == before[1] && after[2] == before[2] && after[3] == before[3], "icy boulders added " + (after[1] - before[1]) + " moss, "
                 + (after[2] - before[2]) + " packed mud and " + (after[3] - before[3]) + " plants");
+        helper.succeed();
+    }
+
+    /**
+     * Level ground at y 70 everywhere, in one biome, counting the columns of terrain read: the structure step's terrain is the
+     * generator's noise, and every height a structure asks for reads a whole column of it.
+     */
+    private static final class CountingGenerator extends ChunkGenerator {
+        int columns;
+
+        CountingGenerator(Holder<Biome> biome) {
+            super(new FixedBiomeSource(biome));
+        }
+
+        @Override
+        public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor heightAccessor, RandomState randomState) {
+            this.columns++;
+            NoiseColumn column = new NoiseColumn(-64, 384);
+            for (int y = -64; y < 70; y++) column.setSolid(y);
+            return column;
+        }
+
+        @Override
+        protected MapCodec<? extends ChunkGenerator> codec() {
+            throw new UnsupportedOperationException("a test's generator");
+        }
+
+        @Override
+        public void spawnOriginalMobs(WorldGenRegion region) {
+        }
+
+        @Override
+        public int getGenDepth() {
+            return 384;
+        }
+
+        @Override
+        public CompletableFuture<ChunkAccess> buildTerrain(ChunkAccess chunk, Blender blender, RandomState randomState, StructureManager structureManager,
+                                                          WorldGenRegion carverBiomeRegion, Set<Holder<Biome>> possibleBiomes) {
+            return CompletableFuture.completedFuture(chunk);
+        }
+
+        @Override
+        public int getSeaLevel() {
+            return 63;
+        }
+
+        @Override
+        public int getMinY() {
+            return -64;
+        }
+
+        @Override
+        public void addDebugScreenInfo(BiConsumer<String, String> addFact, RandomState randomState, BlockPos feetPos, SamplerContext samplerContext) {
+        }
+    }
+
+    /**
+     * A formation looked for where its biomes aren't reads the ground once, for the biome there, and stops: the structure sets try
+     * their formations one after another in every cell of the world's grid, up to ten in one cell, and the game checks a
+     * structure's biome only once it has found its place, so a formation reading the ground all around it (seventeen columns,
+     * and its bodies' places) everywhere made the structure step slow over the whole world.
+     */
+    @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
+    public void aFormationOutOfItsBiomesReadsTheGroundOnce(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        var registries = level.registryAccess();
+        Holder<Biome> plains = registries.lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS);
+        CountingGenerator generator = new CountingGenerator(plains);
+        RandomState randomState = level.getChunkSource().randomState();
+        int searches = 0, starts = 0;
+        for (String id : new String[]{"players-versus:rock/great_boulders", "players-versus:rock/icy_monolith", "players-versus:rock/scattered_icy_massif"}) {
+            Holder<Structure> formation = registries.lookupOrThrow(Registries.STRUCTURE).getOrThrow(ResourceKey.create(Registries.STRUCTURE, Identifier.parse(id)));
+            for (int cell = 0; cell < 8; cell++) {
+                StructureStart start = formation.value().generate(formation, level.dimension(), registries, generator, generator.getBiomeSource(),
+                        randomState.createClimateSampler(SamplerContext.EMPTY_UNCACHED), randomState, level.getStructureTemplateManager(), level.getSeed(), new ChunkPos(cell * 7, 5), level, formation.value().biomes()::contains);
+                searches++;
+                if (start != null) starts++;
+            }
+        }
+        helper.assertTrue(starts == 0, starts + " formations in the plains");
+        helper.assertTrue(generator.columns <= searches, searches + " searches read " + generator.columns + " columns of terrain");
         helper.succeed();
     }
 

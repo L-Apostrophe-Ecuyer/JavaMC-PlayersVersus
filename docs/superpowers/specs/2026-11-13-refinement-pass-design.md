@@ -103,3 +103,22 @@ and rocky snowy plains (with packed ice instead of grass and moss)."
 ## Not in this part
 
 New blocks or fruits; terrain; the rocks' shapes; other biomes' sub-biomes (savanna, taiga, desert interiors).
+
+## As built
+
+Where the build differs from the decisions above (each a ruling in the plan's ledger):
+
+- The warm dark forest starts at temperature 0.12 (not 0.1) and the dark birch strip's dark side ends at humidity 0.31
+  (not 0.32): at the decided numbers the plain dark forest was 34% of its family, under this spec's own 40% floor. It
+  is now 42% (1.00% of the world, of the family's 2.35%).
+- The pale swamp is every swamp at humidity 0.25 and up, whatever the weirdness (not 0.35 and weirdness 0.3): swamps
+  that wet are 3% of the swamps' columns, and with the weirdness condition the pale swamp was a few columns in the test
+  world. It is now 0.03% of the world.
+- The animals live in one table, `tools/animals.py`, which the three generators read.
+- A wolf coat's mod biomes are a second spawn condition beside vanilla's (vanilla's rusty is a tag, `#is_jungle`, which a
+  list can't extend).
+- The river banks are kept to this world type by a placement filter (`players-versus:players_versus_world`), as the
+  rocks are; the river's own banks get reeds, plants and mud, no willows (it runs through every climate).
+- The cold beach keeps only its glow lichen.
+- The rocks (asked during the pass) are as decided under Rocks: the icy cover is packed ice in place of grass and moss in
+  both the cold plains and the rocky snowy plains, plain rock under it.
