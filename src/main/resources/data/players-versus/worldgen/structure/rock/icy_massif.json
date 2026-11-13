@@ -1,0 +1,21 @@
+{
+  "type": "players-versus:rock_formation",
+  "biomes": "#players-versus:has_structure/icy_rock_formation",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "rock": {
+    "bodies": [
+      {
+        "shape": "massif"
+      }
+    ],
+    "palette": {
+      "grass": "minecraft:packed_ice",
+      "moss": "minecraft:packed_ice",
+      "soil": "minecraft:stone",
+      "mud": "minecraft:stone",
+      "plants": []
+    }
+  }
+}

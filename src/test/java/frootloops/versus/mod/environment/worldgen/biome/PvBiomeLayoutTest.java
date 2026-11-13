@@ -152,8 +152,9 @@ class PvBiomeLayoutTest {
 
     /**
      * The weirdness rules: where the weirdness is positive and the temperature negative, birch forests turn into sparse
-     * dappled forest, and nearer the taigas into dappled taiga, old growth birch into vanilla's dappled forest, and dark
-     * forest into dark taiga; vanilla's dappled forests turn into flower forests. Checked inside vanilla's slices away
+     * dappled forest, and nearer the taigas into dappled taiga, old growth birch into vanilla's dappled forest; dark forests
+     * keep their cool side (their cold side, next to the old taigas, is the dark taiga forest of the taigas' transition);
+     * vanilla's dappled forests turn into flower forests. Checked inside vanilla's slices away
      * from the transitions that come first (mountainside, the humid band for birch and dark forest, the frozen band for
      * birch), and every new biome must turn up. Also prints where vanilla puts these biomes.
      */
@@ -187,10 +188,13 @@ class PvBiomeLayoutTest {
             Long coldPoint = birch ? either(inside(h.temperature(), -0.375F, cold), inside(h.temperature(), -1.0F, Math.min(cold, -0.55F)))
                     : inside(h.temperature(), -1.0F, cold);
             Long coolPoint = inside(h.temperature(), cold, PvBiomeLayout.DAPPLED_COOL);
+            // The cold old growth birch on level ground (erosion 0.05 to 0.3) is the rocky birch forest
+            boolean level = erosion >= Climate.quantizeCoord(PvBiomeLayout.ROCKY_EROSION_MIN) && erosion < Climate.quantizeCoord(0.3F);
             ResourceKey<Biome> coldTarget = birch ? CustomOverworldBiomes.DAPPLED_TAIGA
-                    : dark ? CustomOverworldBiomes.DARK_TAIGA_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
+                    : dark ? CustomOverworldBiomes.DARK_TAIGA_FOREST : level ? CustomOverworldBiomes.ROCKY_BIRCH_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
+            // The dark forest's cool side is dark forest: the dark taiga forest is the taigas' transition now (its cold side, by the dark-taiga rule)
             ResourceKey<Biome> coolTarget = birch ? CustomOverworldBiomes.SPARSE_DAPPLED_FOREST
-                    : dark ? CustomOverworldBiomes.DARK_TAIGA_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
+                    : dark ? Biomes.DARK_FOREST : CustomOverworldBiomes.DAPPLED_FOREST;
             String name = birch ? "birch forest" : dark ? "dark forest" : "old growth birch forest";
             if (coldPoint != null) {
                 Climate.TargetPoint point = point(coldPoint, humidity, mid(h.continentalness()), erosion, weirdness);
@@ -209,6 +213,529 @@ class PvBiomeLayoutTest {
         assertTrue(checked.containsKey("birch forest cold -> dappled_taiga"), "no birch forest turns into dappled taiga");
         assertTrue(checked.containsKey("birch forest cool -> sparse_dappled_forest"), "no birch forest turns into sparse dappled forest");
         assertTrue(checked.keySet().stream().anyMatch(key -> key.startsWith("dark forest ")), "no dark forest turns into dark taiga");
+    }
+
+    /**
+     * The warm band: the cool edge of savannas and jungles (from their start at 0.2 up to {@link PvBiomeLayout#WARM_BAND_MAX})
+     * turns into the transition to what lies beyond it, and the rest of each slice keeps its biome. Probed above the
+     * mountainsides' erosion and away from the humid band.
+     */
+    @Test
+    void warmBandTakesTheCoolEdgeOfWarmBiomes() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long inBand = Climate.quantizeCoord(0.25F), beyond = Climate.quantizeCoord(0.4F);
+        Map<String, Integer> checked = new TreeMap<>();
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || h.erosion().max() <= ABOVE_MOUNTAINS) continue;
+            boolean savanna = biome == Biomes.SAVANNA || biome == Biomes.SAVANNA_PLATEAU;
+            boolean jungle = biome == Biomes.JUNGLE || biome == Biomes.SPARSE_JUNGLE || biome == Biomes.BAMBOO_JUNGLE;
+            if (!savanna && !jungle) continue;
+            assertTrue(h.temperature().min() == Climate.quantizeCoord(0.2F), () -> biome + " no longer starts at 0.2: " + h);
+            boolean wet = h.humidity().min() >= Climate.quantizeCoord(PvBiomeLayout.WARM_HUMIDITY_SPLIT);
+            long erosion = Math.max(mid(h.erosion()), ABOVE_MOUNTAINS);
+            // The level stretches of a savanna's cool edge are rocky plains
+            boolean level = erosion >= Climate.quantizeCoord(PvBiomeLayout.ROCKY_EROSION_MIN);
+            ResourceKey<Biome> expected = savanna ? (level ? CustomOverworldBiomes.ROCKY_PLAINS : CustomOverworldBiomes.TUSCAN_GROVE)
+                    : wet || biome == Biomes.BAMBOO_JUNGLE ? CustomOverworldBiomes.DARK_JUNGLE_FOREST : CustomOverworldBiomes.WARM_OAK_FOREST;
+            Climate.TargetPoint band = point(inBand, mid(h.humidity()), mid(h.continentalness()), erosion, mid(h.weirdness()));
+            Climate.TargetPoint core = point(beyond, mid(h.humidity()), mid(h.continentalness()), erosion, mid(h.weirdness()));
+            assertEquals(expected, layout.findValue(band), biome.identifier().getPath() + " band at " + band);
+            assertEquals(biome, layout.findValue(core), biome.identifier().getPath() + " core at " + core);
+            checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
+        }
+        System.out.println("[warm] checked slices: " + checked);
+        for (ResourceKey<Biome> target : List.of(CustomOverworldBiomes.TUSCAN_GROVE, CustomOverworldBiomes.WARM_OAK_FOREST, CustomOverworldBiomes.DARK_JUNGLE_FOREST)) {
+            assertTrue(checked.keySet().stream().anyMatch(key -> key.endsWith(target.identifier().getPath())), "nothing turns into " + target);
+        }
+    }
+
+    /** The level stretches (erosion 0.05 and more) of the savannas' cool edge are rocky plains; the Tuscan grove keeps the rest. */
+    @Test
+    void rockyPlainsTakeTheLevelCoolEdgeOfSavannas() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long band = Climate.quantizeCoord(0.25F), beyond = Climate.quantizeCoord(0.4F);
+        int rocky = 0, grove = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || (biome != Biomes.SAVANNA && biome != Biomes.SAVANNA_PLATEAU)) continue;
+            Long level = inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 1.0F);
+            Long hilly = inside(h.erosion(), Climate.unquantizeCoord(ABOVE_MOUNTAINS), PvBiomeLayout.ROCKY_EROSION_MIN);
+            if (level != null) {
+                assertEquals(CustomOverworldBiomes.ROCKY_PLAINS, layout.findValue(point(band, mid(h.humidity()), mid(h.continentalness()), level, mid(h.weirdness()))),
+                        "the level cool edge of " + h);
+                assertEquals(biome, layout.findValue(point(beyond, mid(h.humidity()), mid(h.continentalness()), level, mid(h.weirdness()))), "the savanna beyond " + h);
+                rocky++;
+            }
+            if (hilly != null) {
+                assertEquals(CustomOverworldBiomes.TUSCAN_GROVE, layout.findValue(point(band, mid(h.humidity()), mid(h.continentalness()), hilly, mid(h.weirdness()))),
+                        "the hilly cool edge of " + h);
+                grove++;
+            }
+        }
+        assertTrue(rocky > 0 && grove > 0, "both: " + rocky + " rocky, " + grove + " grove");
+    }
+
+    /**
+     * Just warmer than the warm band (temperature 0.3 to 0.36), the level jungle is rocky: out of the 3D-noise terrain's
+     * climate (humidity 0 to 0.3 with erosion 0.3 to 0.6).
+     */
+    @Test
+    void rockyJungleLiesBetweenTheWarmBandAndTheJungle() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long rockyBand = Climate.quantizeCoord(0.33F), beyond = Climate.quantizeCoord(0.45F);
+        int rocky = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            boolean jungle = biome == Biomes.JUNGLE || biome == Biomes.SPARSE_JUNGLE || biome == Biomes.BAMBOO_JUNGLE;
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || !jungle) continue;
+            long humidity = mid(h.humidity());
+            boolean dry = humidity < Climate.quantizeCoord(0.3F);
+            Long level = dry ? either(inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 0.3F), inside(h.erosion(), 0.6F, 1.0F))
+                    : inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 1.0F);
+            if (level == null) continue;
+            assertEquals(CustomOverworldBiomes.ROCKY_JUNGLE, layout.findValue(point(rockyBand, humidity, mid(h.continentalness()), level, mid(h.weirdness()))),
+                    "the level jungle just past the warm band, " + h);
+            assertEquals(biome, layout.findValue(point(beyond, humidity, mid(h.continentalness()), level, mid(h.weirdness()))), "the jungle beyond " + h);
+            if (dry) {
+                Long noise = inside(h.erosion(), 0.3F, 0.6F);
+                if (noise != null) assertFalse(layout.findValue(point(rockyBand, humidity, mid(h.continentalness()), noise, mid(h.weirdness())))
+                        == CustomOverworldBiomes.ROCKY_JUNGLE, "no rocky jungle in the 3D-noise climate, " + h);
+            }
+            rocky++;
+        }
+        assertTrue(rocky > 0, "no jungle slice turns rocky");
+    }
+
+    /** The cold side of old growth birch forests (temperature below -0.075), level (erosion 0.05 to 0.3), is the rocky birch forest. */
+    @Test
+    void rockyBirchForestTakesTheColdLevelOldGrowthBirch() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long cold = Climate.quantizeCoord(-0.11F), cool = Climate.quantizeCoord(-0.03F);
+        int rocky = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || entry.getSecond() != Biomes.OLD_GROWTH_BIRCH_FOREST) continue;
+            Long level = inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 0.3F);
+            if (level == null) continue;
+            long weirdness = Math.max(mid(h.weirdness()), Climate.quantizeCoord(PvBiomeLayout.DAPPLED_WEIRDNESS) + EDGE);
+            assertEquals(CustomOverworldBiomes.ROCKY_BIRCH_FOREST, layout.findValue(point(cold, mid(h.humidity()), mid(h.continentalness()), level, weirdness)),
+                    "the cold level old growth birch of " + h);
+            assertFalse(layout.findValue(point(cool, mid(h.humidity()), mid(h.continentalness()), level, weirdness)) == CustomOverworldBiomes.ROCKY_BIRCH_FOREST,
+                    "only the cold side, " + h);
+            rocky++;
+        }
+        assertTrue(rocky > 0, "no old growth birch turns rocky");
+    }
+
+    /**
+     * The snowy plains' level ground (erosion 0.05 and up) from temperature {@link PvBiomeLayout#ROCKY_SNOWY_PLAINS_MIN} up to the
+     * frozen strip, beside the cold plains, is the rocky snowy plains; colder, hilly, or in the 3D-noise terrain's climate they
+     * stay snowy plains.
+     */
+    @Test
+    void rockySnowyPlainsTakeTheLevelSnowyPlainsBesideTheColdPlains() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long band = Climate.quantizeCoord(-0.62F), colder = Climate.quantizeCoord(-0.8F);
+        int rocky = 0, noise = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || entry.getSecond() != Biomes.SNOWY_PLAINS || !holds(h.temperature(), band) || !holds(h.temperature(), colder)) continue;
+            long humidity = Math.min(mid(h.humidity()), Climate.quantizeCoord(-0.05F)), c = mid(h.continentalness()), w = mid(h.weirdness());
+            if (!holds(h.humidity(), humidity)) continue;
+            Long level = inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 1.0F), hilly = inside(h.erosion(), -0.3F, PvBiomeLayout.ROCKY_EROSION_MIN);
+            if (level != null) {
+                assertEquals(CustomOverworldBiomes.ROCKY_SNOWY_PLAINS, layout.findValue(point(band, humidity, c, level, w)), "the level snowy plains of " + h);
+                assertEquals(Biomes.SNOWY_PLAINS, layout.findValue(point(colder, humidity, c, level, w)), "only beside the cold plains, " + h);
+                rocky++;
+            }
+            if (hilly != null) assertEquals(Biomes.SNOWY_PLAINS, layout.findValue(point(band, humidity, c, hilly, w)), "hilly, " + h);
+            Long inNoise = inside(h.erosion(), 0.35F, 0.55F);
+            if (inNoise != null && holds(h.humidity(), Climate.quantizeCoord(0.05F))) {
+                assertEquals(Biomes.SNOWY_PLAINS, layout.findValue(point(band, Climate.quantizeCoord(0.05F), c, inNoise, w)), "in the 3D-noise terrain's climate, " + h);
+                noise++;
+            }
+        }
+        assertTrue(rocky > 0, "no snowy plains slice turns rocky");
+        assertTrue(noise > 0, "no snowy plains slice in the 3D-noise terrain's climate checked");
+    }
+
+    /** Every swamp has a rim of humid oak forest where its erosion begins, up to {@link PvBiomeLayout#SWAMP_RIM_MAX}. */
+    @Test
+    void swampsHaveAHumidOakRim() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long rim = Climate.quantizeCoord((0.55F + PvBiomeLayout.SWAMP_RIM_MAX) / 2), heart = Climate.quantizeCoord(0.8F);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.SWAMP || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            assertEquals(Climate.quantizeCoord(0.55F), h.erosion().min(), "swamps no longer start at erosion 0.55");
+            Climate.TargetPoint atRim = point(mid(h.temperature()), mid(h.humidity()), mid(h.continentalness()), rim, mid(h.weirdness()));
+            Climate.TargetPoint inside = point(mid(h.temperature()), mid(h.humidity()), mid(h.continentalness()), heart, mid(h.weirdness()));
+            assertEquals(CustomOverworldBiomes.HUMID_OAK_FOREST, layout.findValue(atRim), "rim at " + atRim);
+            assertEquals(Biomes.SWAMP, layout.findValue(inside), "swamp at " + inside);
+            checked++;
+        }
+        assertTrue(checked > 0, "no swamp slice at the surface");
+    }
+
+    /** The cold half of every swamp is a cold swamp, with the humid oak forest for its rim as the warmer half has. */
+    @Test
+    void theColdHalfOfSwampsIsColdSwamp() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long cold = Climate.quantizeCoord(-0.3F), mild = Climate.quantizeCoord(0.0F);
+        long rim = Climate.quantizeCoord((0.55F + PvBiomeLayout.SWAMP_RIM_MAX) / 2), heart = Climate.quantizeCoord(0.8F);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.SWAMP || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            assertEquals(CustomOverworldBiomes.COLD_SWAMP, layout.findValue(point(cold, mid(h.humidity()), mid(h.continentalness()), heart, mid(h.weirdness()))),
+                    "a cold swamp at its heart");
+            assertEquals(CustomOverworldBiomes.HUMID_OAK_FOREST, layout.findValue(point(cold, mid(h.humidity()), mid(h.continentalness()), rim, mid(h.weirdness()))),
+                    "the cold swamp's rim");
+            assertEquals(Biomes.SWAMP, layout.findValue(point(mild, mid(h.humidity()), mid(h.continentalness()), heart, mid(h.weirdness()))), "a mild swamp");
+            checked++;
+        }
+        assertTrue(checked > 0, "no swamp slice at the surface");
+    }
+
+    /**
+     * The dark forest's warm side (temperature {@link PvBiomeLayout#WARM_DARK_FOREST_MIN} up to its 0.2) is the warm dark
+     * forest, between the dark forest and the dark jungle forest; the humid band keeps its strip of dark birch forest; the
+     * cool side is the dark forest still.
+     */
+    @Test
+    void theDarkForestsWarmSideIsTheWarmDarkForest() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.DARK_FOREST || !PvBiomeLayout.isPoint(h.depth(), 0.0F) || h.erosion().max() <= ABOVE_MOUNTAINS) continue;
+            Long warm = inside(h.temperature(), 0.08F, 0.19F), cool = inside(h.temperature(), -0.14F, -0.01F), dry = inside(h.humidity(), 0.4F, 1.0F);
+            Long strip = inside(h.humidity(), 0.301F, 0.309F);
+            long erosion = Math.max(mid(h.erosion()), ABOVE_MOUNTAINS), continentalness = mid(h.continentalness()), weirdness = mid(h.weirdness());
+            if (warm == null || cool == null || dry == null) continue;
+            assertEquals(CustomOverworldBiomes.WARM_DARK_FOREST, layout.findValue(point(warm, dry, continentalness, erosion, weirdness)), "the warm side at " + h);
+            ResourceKey<Biome> coolSide = layout.findValue(point(cool, dry, continentalness, erosion, weirdness));
+            assertTrue(coolSide != CustomOverworldBiomes.WARM_DARK_FOREST, "the cool side is warm at " + h);
+            if (strip != null) {
+                assertEquals(CustomOverworldBiomes.DARK_BIRCH_FOREST, layout.findValue(point(warm, strip, continentalness, erosion, weirdness)), "the humid strip at " + h);
+            }
+            checked++;
+        }
+        assertTrue(checked > 0, "no dark forest slice checked");
+    }
+
+    /**
+     * The warm swamps' drier part (humidity {@link PvBiomeLayout#WETLAND_HUMIDITY_MAX} and under) past the rim is the grassy
+     * wetlands; the wetter part stays swamp, the rim humid oak forest whatever the humidity, the cold half cold swamp.
+     */
+    @Test
+    void theDrierWarmSwampIsGrassyWetlands() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long rim = Climate.quantizeCoord((0.55F + PvBiomeLayout.SWAMP_RIM_MAX) / 2), heart = Climate.quantizeCoord(0.8F);
+        long dry = Climate.quantizeCoord(-0.4F), wet = Climate.quantizeCoord(0.1F), cold = Climate.quantizeCoord(-0.3F);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.SWAMP || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            long warm = inside(h.temperature(), -0.1F, 0.19F), continentalness = mid(h.continentalness()), weirdness = mid(h.weirdness());
+            assertEquals(CustomOverworldBiomes.GRASSY_WETLANDS, layout.findValue(point(warm, dry, continentalness, heart, weirdness)), "the drier swamp at " + h);
+            assertEquals(Biomes.SWAMP, layout.findValue(point(warm, wet, continentalness, heart, weirdness)), "the wetter swamp at " + h);
+            assertEquals(CustomOverworldBiomes.HUMID_OAK_FOREST, layout.findValue(point(warm, dry, continentalness, rim, weirdness)), "the drier rim at " + h);
+            assertEquals(CustomOverworldBiomes.GRASSY_WETLANDS, layout.findValue(point(cold, dry, continentalness, heart, weirdness)), "the cold half, dry, at " + h);
+            checked++;
+        }
+        assertTrue(checked > 0, "no swamp slice at the surface");
+    }
+
+    /** The mangrove swamp's rim (erosion up to {@link PvBiomeLayout#SWAMP_RIM_MAX}) and its drier part are the mangrove marsh. */
+    @Test
+    void theMangroveSwampsRimAndDrierPartAreMarsh() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long rim = Climate.quantizeCoord((0.55F + PvBiomeLayout.SWAMP_RIM_MAX) / 2), heart = Climate.quantizeCoord(0.8F);
+        long dry = Climate.quantizeCoord(-0.4F), wet = Climate.quantizeCoord(0.2F);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (entry.getSecond() != Biomes.MANGROVE_SWAMP || !PvBiomeLayout.isPoint(h.depth(), 0.0F)) continue;
+            long temperature = mid(h.temperature()), continentalness = mid(h.continentalness()), weirdness = mid(h.weirdness());
+            assertEquals(Biomes.MANGROVE_SWAMP, layout.findValue(point(temperature, wet, continentalness, heart, weirdness)), "the wetter mangrove swamp at " + h);
+            assertEquals(CustomOverworldBiomes.MANGROVE_MARSH, layout.findValue(point(temperature, dry, continentalness, heart, weirdness)), "the drier part at " + h);
+            assertEquals(CustomOverworldBiomes.MANGROVE_MARSH, layout.findValue(point(temperature, wet, continentalness, rim, weirdness)), "the rim at " + h);
+            checked++;
+        }
+        assertTrue(checked > 0, "no mangrove swamp slice at the surface");
+    }
+
+    private static boolean holds(Climate.Parameter range, long value) {
+        return value > range.min() + EDGE && value < range.max() - EDGE;
+    }
+
+    /**
+     * At the given temperature, humidity and (when not null) weirdness, inside every vanilla surface slice of {@code biome} that
+     * holds them, at an erosion from {@code erosionFrom} (above the mountainsides by default), the layout's biome is
+     * {@code expected}; returns how many slices it checked.
+     */
+    private static int expectIn(Climate.ParameterList<ResourceKey<Biome>> layout, ResourceKey<Biome> biome, float temperature, float humidity,
+                                Float weirdness, float erosionFrom, ResourceKey<Biome> expected) {
+        long t = Climate.quantizeCoord(temperature), h = Climate.quantizeCoord(humidity);
+        int checked = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint slice = entry.getFirst();
+            if (entry.getSecond() != biome || !PvBiomeLayout.isPoint(slice.depth(), 0.0F) || !holds(slice.temperature(), t) || !holds(slice.humidity(), h)) continue;
+            Long w = weirdness == null ? Long.valueOf(mid(slice.weirdness())) : holds(slice.weirdness(), Climate.quantizeCoord(weirdness)) ? Long.valueOf(Climate.quantizeCoord(weirdness)) : null;
+            Long e = inside(slice.erosion(), erosionFrom, 1.0F);
+            if (w == null || e == null) continue;
+            Climate.TargetPoint point = point(t, h, mid(slice.continentalness()), e, w);
+            assertEquals(expected, layout.findValue(point), biome.identifier().getPath() + " at " + point);
+            checked++;
+        }
+        return checked;
+    }
+
+    private static final float LEVEL = Climate.unquantizeCoord(ABOVE_MOUNTAINS);
+
+    /**
+     * Plains and forest meet through the forest edge: within {@link PvBiomeLayout#FOREST_EDGE_HALF_WIDTH} of their humidity
+     * border, on both sides, at temperatures under the warm climates'; away from it each keeps its own.
+     */
+    @Test
+    void plainsAndForestMeetThroughTheForestEdge() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        int checked = 0;
+        for (float t : new float[]{-0.3F, 0.15F}) {
+            checked += expectIn(layout, Biomes.PLAINS, t, -0.12F, null, LEVEL, CustomOverworldBiomes.FOREST_EDGE);
+            checked += expectIn(layout, Biomes.FOREST, t, -0.07F, null, LEVEL, CustomOverworldBiomes.FOREST_EDGE);
+            assertTrue(expectIn(layout, Biomes.PLAINS, t, -0.17F, null, LEVEL, Biomes.PLAINS) > 0, "no plains slice at " + t);
+            assertTrue(expectIn(layout, Biomes.FOREST, t, 0.02F, null, LEVEL, Biomes.FOREST) > 0, "no forest slice at " + t);
+        }
+        assertTrue(checked >= 4, "only " + checked + " slices checked");
+    }
+
+    /** Forest and taiga meet through the mixed forest, within {@link PvBiomeLayout#MIXED_FOREST_HALF_WIDTH} of their humidity border. */
+    @Test
+    void forestAndTaigaMeetThroughTheMixedForest() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        int checked = expectIn(layout, Biomes.FOREST, -0.25F, 0.07F, null, LEVEL, CustomOverworldBiomes.MIXED_FOREST)
+                + expectIn(layout, Biomes.TAIGA, -0.25F, 0.12F, null, LEVEL, CustomOverworldBiomes.MIXED_FOREST);
+        assertTrue(checked >= 2, "only " + checked + " slices checked");
+        assertTrue(expectIn(layout, Biomes.FOREST, -0.25F, 0.0F, null, LEVEL, Biomes.FOREST) > 0, "no forest slice");
+        assertTrue(expectIn(layout, Biomes.TAIGA, -0.25F, 0.22F, null, LEVEL, Biomes.TAIGA) > 0, "no taiga slice");
+    }
+
+    /**
+     * The taigas meet the birch and dark forests (at temperature -0.15) through transitions: taiga and birch forest through the
+     * birch taiga forest (the dappled taiga where the weirdness is positive), the old growth taigas and the dark forest
+     * through the dark taiga forest.
+     */
+    @Test
+    void theTaigasMeetTheBirchAndDarkForestsThroughTheirTransitions() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        int checked = expectIn(layout, Biomes.TAIGA, -0.17F, 0.2F, -0.35F, LEVEL, CustomOverworldBiomes.BIRCH_TAIGA_FOREST)
+                + expectIn(layout, Biomes.BIRCH_FOREST, -0.12F, 0.2F, -0.35F, LEVEL, CustomOverworldBiomes.BIRCH_TAIGA_FOREST)
+                + expectIn(layout, Biomes.TAIGA, -0.17F, 0.2F, 0.35F, LEVEL, CustomOverworldBiomes.DAPPLED_TAIGA)
+                + expectIn(layout, Biomes.OLD_GROWTH_SPRUCE_TAIGA, -0.17F, 0.5F, null, LEVEL, CustomOverworldBiomes.DARK_TAIGA_FOREST)
+                + expectIn(layout, Biomes.DARK_FOREST, -0.12F, 0.5F, null, LEVEL, CustomOverworldBiomes.DARK_TAIGA_FOREST);
+        assertTrue(checked >= 5, "only " + checked + " slices checked");
+        assertTrue(expectIn(layout, Biomes.TAIGA, -0.3F, 0.2F, null, LEVEL, Biomes.TAIGA) > 0, "no taiga slice");
+        assertTrue(expectIn(layout, Biomes.OLD_GROWTH_SPRUCE_TAIGA, -0.3F, 0.5F, null, LEVEL, Biomes.OLD_GROWTH_SPRUCE_TAIGA) > 0, "no old taiga slice");
+        assertTrue(expectIn(layout, Biomes.DARK_FOREST, -0.05F, 0.5F, 0.35F, LEVEL, Biomes.DARK_FOREST) > 0, "the dark forest's weird side");
+    }
+
+    /**
+     * The dark forest keeps most of its climate: the warm dark forest from {@link PvBiomeLayout#WARM_DARK_FOREST_MIN}, the dark
+     * birch strip on its side to {@link PvBiomeLayout#DARK_BIRCH_MAX}.
+     */
+    @Test
+    void theDarkForestKeepsMostOfItsClimate() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        int checked = expectIn(layout, Biomes.DARK_FOREST, 0.07F, 0.5F, null, LEVEL, Biomes.DARK_FOREST)
+                + expectIn(layout, Biomes.DARK_FOREST, 0.15F, 0.5F, null, LEVEL, CustomOverworldBiomes.WARM_DARK_FOREST)
+                + expectIn(layout, Biomes.DARK_FOREST, 0.0F, 0.305F, null, LEVEL, CustomOverworldBiomes.DARK_BIRCH_FOREST)
+                + expectIn(layout, Biomes.DARK_FOREST, 0.0F, 0.33F, null, LEVEL, Biomes.DARK_FOREST);
+        assertTrue(checked >= 4, "only " + checked + " slices checked");
+    }
+
+    /** In the warm climates (from 0.2) vanilla's forest is the warm oak forest, and so is its plains' strip next to the jungle. */
+    @Test
+    void theWarmClimatesForestAndPlainsAreWarmOakForest() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        int checked = expectIn(layout, Biomes.FOREST, 0.35F, 0.0F, null, LEVEL, CustomOverworldBiomes.WARM_OAK_FOREST)
+                + expectIn(layout, Biomes.FOREST, 0.25F, -0.07F, null, LEVEL, CustomOverworldBiomes.WARM_OAK_FOREST)
+                + expectIn(layout, Biomes.PLAINS, 0.35F, 0.07F, null, LEVEL, CustomOverworldBiomes.WARM_OAK_FOREST);
+        assertTrue(checked >= 3, "only " + checked + " slices checked");
+        assertTrue(expectIn(layout, Biomes.PLAINS, 0.35F, -0.05F, null, LEVEL, Biomes.PLAINS) > 0, "no warm plains slice");
+    }
+
+    /** The old oak forest and the prairie are pockets of the forest's and the plains' climates. */
+    @Test
+    void theOldOakForestAndThePrairieArePockets() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        int checked = expectIn(layout, Biomes.FOREST, 0.0F, 0.01F, 0.35F, LEVEL, CustomOverworldBiomes.OLD_OAK_FOREST)
+                + expectIn(layout, Biomes.PLAINS, -0.2F, -0.25F, -0.35F, LEVEL, CustomOverworldBiomes.PRAIRIE);
+        assertTrue(checked >= 2, "only " + checked + " slices checked");
+        assertTrue(expectIn(layout, Biomes.FOREST, 0.0F, 0.01F, -0.35F, LEVEL, Biomes.FOREST) > 0, "the forest's other side");
+        assertTrue(expectIn(layout, Biomes.PLAINS, -0.2F, -0.25F, 0.35F, LEVEL, Biomes.PLAINS) > 0, "the plains' other side");
+    }
+
+    /** The pale garden's cold strip is the pale taiga; the wettest, weirdest swamps, warm and cold, are pale swamps. */
+    @Test
+    void thePaleGardensNeighboursArePale() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        assertTrue(expectIn(layout, Biomes.PALE_GARDEN, -0.12F, 0.5F, null, -1.0F, CustomOverworldBiomes.PALE_TAIGA) > 0, "no pale garden slice checked");
+        assertTrue(expectIn(layout, Biomes.PALE_GARDEN, 0.05F, 0.5F, null, -1.0F, Biomes.PALE_GARDEN) > 0, "no pale garden slice checked");
+        // The wettest swamps, warm and cold, whatever the weirdness; the less wet ones stay swamps
+        int pale = 0;
+        for (float weirdness : new float[]{-0.2F, 0.0F, 0.2F}) {
+            pale += expectIn(layout, Biomes.SWAMP, 0.0F, 0.5F, weirdness, 0.7F, CustomOverworldBiomes.PALE_SWAMP)
+                    + expectIn(layout, Biomes.SWAMP, -0.3F, 0.5F, weirdness, 0.7F, CustomOverworldBiomes.PALE_SWAMP);
+        }
+        assertTrue(pale >= 6, "only " + pale + " swamp slices checked");
+        assertTrue(expectIn(layout, Biomes.SWAMP, 0.0F, 0.2F, 0.2F, 0.7F, Biomes.SWAMP)
+                + expectIn(layout, Biomes.SWAMP, -0.3F, 0.2F, 0.2F, 0.7F, CustomOverworldBiomes.COLD_SWAMP) >= 2, "the less wet swamps");
+    }
+
+    /** Above freezing, no windswept biome nor old growth birch forest is left at the surface. */
+    @Test
+    void noWindsweptNorOldGrowthBirchAboveFreezing() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Set<ResourceKey<Biome>> gone = Set.of(Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_FOREST,
+                Biomes.WINDSWEPT_SAVANNA, Biomes.OLD_GROWTH_BIRCH_FOREST);
+        Random random = new Random(20261107L);
+        Map<String, Integer> found = new TreeMap<>();
+        for (int i = 0; i < 100_000; i++) {
+            float temperature = PvBiomeLayout.TEMPERATE_MIN + 0.005F + (1.0F - PvBiomeLayout.TEMPERATE_MIN - 0.005F) * random.nextFloat();
+            Climate.TargetPoint point = Climate.target(temperature, uniform(random), uniform(random), uniform(random), 0.0F, uniform(random));
+            ResourceKey<Biome> biome = layout.findValue(point);
+            found.merge(biome.identifier().getPath(), 1, Integer::sum);
+            assertFalse(gone.contains(biome), () -> biome + " above freezing at " + point);
+        }
+        // and they are still there below it, where they were asked to stay
+        boolean windsweptBelow = false;
+        for (int i = 0; i < 100_000 && !windsweptBelow; i++) {
+            Climate.TargetPoint point = Climate.target(-0.1F - 0.3F * random.nextFloat(), uniform(random), uniform(random), uniform(random), 0.0F, uniform(random));
+            windsweptBelow = gone.contains(layout.findValue(point));
+        }
+        assertTrue(windsweptBelow, "no windswept biome left below freezing either");
+        assertTrue(found.containsKey("tuscan_grove") && found.containsKey("warm_oak_forest") && found.containsKey("dark_jungle_forest"),
+                "a warm transition is missing above freezing: " + found);
+    }
+
+    private static final Set<ResourceKey<Biome>> WINDSWEPT = Set.of(Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_FOREST,
+            Biomes.WINDSWEPT_SAVANNA);
+
+    /** In the 3D-noise zone, below 0: the windswept biome that fits (the spec's table): gravelly hills, hills, forest. */
+    private static ResourceKey<Biome> windsweptThatFits(float temperature, float humidity) {
+        if (humidity >= 0.1F) return Biomes.WINDSWEPT_FOREST;
+        return temperature < -0.15F ? Biomes.WINDSWEPT_GRAVELLY_HILLS : Biomes.WINDSWEPT_HILLS;
+    }
+
+    /**
+     * What lies beside a windswept slice outside the zone, below 0 (vanilla's middle biomes by temperature and humidity;
+     * from -0.15 up the temperate rule's: hills and savannas to plains, forests to forest).
+     */
+    private static ResourceKey<Biome> besideWindswept(ResourceKey<Biome> windswept, float temperature, float humidity) {
+        if (temperature < -0.45F) return humidity < 0.1F ? Biomes.SNOWY_PLAINS : humidity < 0.3F ? Biomes.SNOWY_TAIGA : Biomes.TAIGA;
+        if (temperature < -0.15F) {
+            return humidity < -0.1F ? Biomes.PLAINS : humidity < 0.1F ? Biomes.FOREST : humidity < 0.3F ? Biomes.TAIGA : Biomes.OLD_GROWTH_SPRUCE_TAIGA;
+        }
+        return windswept == Biomes.WINDSWEPT_FOREST ? Biomes.FOREST : Biomes.PLAINS;
+    }
+
+    /**
+     * A middle biome and what the transition rules make of its edges and pockets (the forest edge, the mixed forest, the
+     * taigas' transitions, the old oak forest and the prairie): where a windswept slice gives way to what lies beside it, it
+     * is one of these.
+     */
+    private static Set<ResourceKey<Biome>> family(ResourceKey<Biome> middle) {
+        if (middle == Biomes.PLAINS) return Set.of(Biomes.PLAINS, CustomOverworldBiomes.PRAIRIE, CustomOverworldBiomes.FOREST_EDGE, CustomOverworldBiomes.WARM_OAK_FOREST);
+        if (middle == Biomes.FOREST) return Set.of(Biomes.FOREST, CustomOverworldBiomes.FOREST_EDGE, CustomOverworldBiomes.MIXED_FOREST, CustomOverworldBiomes.OLD_OAK_FOREST,
+                CustomOverworldBiomes.WARM_OAK_FOREST);
+        if (middle == Biomes.TAIGA) return Set.of(Biomes.TAIGA, CustomOverworldBiomes.MIXED_FOREST, CustomOverworldBiomes.BIRCH_TAIGA_FOREST, CustomOverworldBiomes.DAPPLED_TAIGA);
+        if (middle == Biomes.OLD_GROWTH_SPRUCE_TAIGA) return Set.of(Biomes.OLD_GROWTH_SPRUCE_TAIGA, CustomOverworldBiomes.DARK_TAIGA_FOREST);
+        return Set.of(middle);
+    }
+
+    /**
+     * The windswept biomes are the rugged terrain's (the 3D-noise zone): where vanilla puts one, inside the zone where its
+     * window is at half strength or more (humidity 0.025 to 0.275, continentalness 0.075 or more) and below 0, it is the
+     * windswept biome that fits; anywhere else it is what lies beside it.
+     */
+    @Test
+    void windsweptSlicesFollowTheZone() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Map<String, Integer> checked = new TreeMap<>();
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            ResourceKey<Biome> biome = entry.getSecond();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || !WINDSWEPT.contains(biome)) continue;
+            Long cool = inside(h.temperature(), -1.0F, -0.02F), inland = inside(h.continentalness(), 0.085F, 1.0F);
+            if (cool == null) continue;
+            long erosion = mid(h.erosion()), weirdness = mid(h.weirdness());
+            float t = Climate.unquantizeCoord(cool);
+            Long inBox = inside(h.humidity(), 0.04F, 0.26F);
+            if (inBox != null && inland != null) {
+                Climate.TargetPoint point = point(cool, inBox, inland, erosion, weirdness);
+                ResourceKey<Biome> expected = windsweptThatFits(t, Climate.unquantizeCoord(inBox));
+                assertEquals(expected, layout.findValue(point), biome.identifier().getPath() + " in the zone at " + point);
+                checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
+            }
+            // Outside the box: too dry or too humid, or off the coast
+            List<Long> outside = new ArrayList<>();
+            Long dry = inside(h.humidity(), -1.0F, 0.015F), wet = inside(h.humidity(), 0.285F, 1.0F);
+            if (dry != null) outside.add(dry);
+            if (wet != null) outside.add(wet);
+            for (long humidity : outside) {
+                if (inland == null) continue;
+                Climate.TargetPoint point = point(cool, humidity, inland, erosion, weirdness);
+                ResourceKey<Biome> expected = besideWindswept(biome, t, Climate.unquantizeCoord(humidity));
+                ResourceKey<Biome> found = layout.findValue(point);
+                assertTrue(family(expected).contains(found), biome.identifier().getPath() + " outside the zone at " + point + ": " + found + ", not " + expected + "'s");
+                checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
+            }
+            // Off the coast: where the window is under half strength (continentalness 0.03 to 0.075), the terrain is still plain
+            Long coast = inside(h.continentalness(), -1.0F, 0.065F);
+            if (coast != null) {
+                long humidity = inBox != null ? inBox : mid(h.humidity());
+                Climate.TargetPoint point = point(cool, humidity, coast, erosion, weirdness);
+                ResourceKey<Biome> expected = besideWindswept(biome, t, Climate.unquantizeCoord(humidity));
+                ResourceKey<Biome> found = layout.findValue(point);
+                assertTrue(family(expected).contains(found), biome.identifier().getPath() + " off the coast at " + point + ": " + found + ", not " + expected + "'s");
+                checked.merge(biome.identifier().getPath() + " -> " + expected.identifier().getPath(), 1, Integer::sum);
+            }
+        }
+        System.out.println("[windswept] checked slices: " + checked);
+        for (ResourceKey<Biome> fits : List.of(Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_FOREST)) {
+            assertTrue(checked.keySet().stream().anyMatch(key -> key.endsWith("-> " + fits.identifier().getPath())), "nowhere is " + fits);
+        }
+        for (ResourceKey<Biome> beside : List.of(Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.TAIGA, Biomes.PLAINS, Biomes.FOREST, Biomes.OLD_GROWTH_SPRUCE_TAIGA)) {
+            assertTrue(checked.keySet().stream().anyMatch(key -> key.endsWith("-> " + beside.identifier().getPath())), "no windswept slice turns into " + beside);
+        }
+    }
+
+    /** Over random climates, a windswept biome is only ever in the zone's box, below 0, or on a mountainside. */
+    @Test
+    void windsweptBiomesStandOnlyInTheZone() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        Random random = new Random(20261112L);
+        int found = 0;
+        for (int i = 0; i < 400_000; i++) {
+            float temperature = uniform(random), humidity = uniform(random), continentalness = uniform(random), erosion = uniform(random), weirdness = uniform(random);
+            ResourceKey<Biome> biome = layout.findValue(Climate.target(temperature, humidity, continentalness, erosion, 0.0F, weirdness));
+            // The taigas' mountainsides have a windswept forest of their own (the mountainside rule): not this rule's
+            if (!WINDSWEPT.contains(biome) || erosion < -0.3F) continue;
+            found++;
+            String where = String.format(Locale.ROOT, "%s at T %.3f H %.3f C %.3f E %.3f", biome.identifier().getPath(), temperature, humidity, continentalness, erosion);
+            assertTrue(temperature < 0.003F, where);
+            assertTrue(humidity >= 0.022F && humidity <= 0.278F, where);
+            assertTrue(continentalness >= 0.072F, where);
+            assertTrue(erosion >= 0.447F && erosion <= 0.553F, where);
+        }
+        assertTrue(found >= 200, "only " + found + " windswept points found");
     }
 
     /** The middle of the part of {@code range} between {@code from} and {@code to}, or null if it has no width there. */
@@ -244,7 +771,8 @@ class PvBiomeLayoutTest {
             ResourceKey<Biome> below = layout.findValue(point(temperature, mid(h.humidity()), continentalness, limit - EDGE, mid(h.weirdness())));
             ResourceKey<Biome> above = layout.findValue(point(temperature, mid(h.humidity()), continentalness, limit + EDGE, mid(h.weirdness())));
             assertTrue(below == CustomOverworldBiomes.MOUNTAINSIDE_FOREST || below == CustomOverworldBiomes.MOUNTAINSIDE_FOREST_WARM, "below: " + below);
-            assertEquals(Biomes.FOREST, above, "above");
+            assertTrue(above == Biomes.FOREST || above == CustomOverworldBiomes.WARM_OAK_FOREST || above == CustomOverworldBiomes.OLD_OAK_FOREST,
+                    "above: " + above);
             checked++;
         }
         assertTrue(checked > 0, "no forest slice crosses the mountainside erosion limit outside river valleys");

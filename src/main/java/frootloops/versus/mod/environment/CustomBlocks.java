@@ -24,8 +24,14 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
+import frootloops.versus.mod.environment.blocks.fruit.LemonLeavesBlock;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.grower.TreeGrower;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
@@ -79,6 +85,13 @@ public class CustomBlocks {
     public static Block WILD_WHEAT;
     public static Block CLOVERS;
     public static FallenLeavesBlock FALLEN_LEAVES;
+    public static LemonLeavesBlock LEMON_LEAVES;
+    public static Block LEMON_SAPLING;
+    public static Block POTTED_LEMON_SAPLING;
+    /** A lemon bush: two or three stripped oak logs under a round crown of lemon leaves (worldgen/feature/lemon_bush). */
+    public static final ResourceKey<Feature> LEMON_BUSH = ResourceKey.create(Registries.FEATURE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "lemon_bush"));
+    public static final TreeGrower LEMON = new TreeGrower(VersusMod.MOD_ID + ":lemon", WeightedList.<ResourceKey<Feature>>of(LEMON_BUSH),
+            WeightedList.of(), WeightedList.of(), null);
     // What growing trees are made of (TreeBlock), one per wood, by the vanilla log each stands for
     public static final Map<Block, TreeBlock> TREE_BLOCKS = new LinkedHashMap<>();
 
@@ -161,6 +174,10 @@ public class CustomBlocks {
         CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
         FALLEN_LEAVES = (FallenLeavesBlock) registerBlock("fallen_leaves", new FallenLeavesBlock(getSettings("fallen_leaves", Blocks.LEAF_LITTER).mapColor(MapColor.PLANT)));
         FlammableBlockRegistry.getDefaultInstance().add(FALLEN_LEAVES, 60, 100);
+        LEMON_LEAVES = (LemonLeavesBlock) registerBlock("lemon_leaves", new LemonLeavesBlock(getSettings("lemon_leaves", Blocks.OAK_LEAVES)));
+        FlammableBlockRegistry.getDefaultInstance().add(LEMON_LEAVES, 30, 60); // as leaves
+        LEMON_SAPLING = registerBlock("lemon_sapling", new SaplingBlock(LEMON, getSettings("lemon_sapling", Blocks.OAK_SAPLING)));
+        POTTED_LEMON_SAPLING = registerBlock("potted_lemon_sapling", new FlowerPotBlock(LEMON_SAPLING, getSettings("potted_lemon_sapling", Blocks.POTTED_OAK_SAPLING)));
 
         for (Block log : List.of(Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.CHERRY_LOG,
                 Blocks.DARK_OAK_LOG, Blocks.PALE_OAK_LOG, Blocks.MANGROVE_LOG, Blocks.POPLAR_LOG)) {

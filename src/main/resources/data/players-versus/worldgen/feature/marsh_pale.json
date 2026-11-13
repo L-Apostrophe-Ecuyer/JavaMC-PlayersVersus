@@ -1,0 +1,9 @@
+{
+  "type": "players-versus:marsh",
+  "biomes": [
+    "players-versus:pale_swamp"
+  ],
+  "edge": {
+    "id": "minecraft:pale_moss_block"
+  }
+}

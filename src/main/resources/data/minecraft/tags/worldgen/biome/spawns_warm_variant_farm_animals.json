@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "players-versus:mangrove_marsh",
+    "players-versus:desert_oasis",
+    "players-versus:tuscan_grove",
+    "players-versus:rocky_plains",
+    "players-versus:warm_oak_forest",
+    "players-versus:dark_jungle_forest",
+    "players-versus:mountainside_jungle",
+    "players-versus:mountainside_forest_warm"
+  ]
+}

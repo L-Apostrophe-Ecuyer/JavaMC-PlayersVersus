@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "players-versus:mountainside_jungle"
+    "players-versus:mountainside_jungle",
+    "players-versus:rocky_jungle"
   ]
 }

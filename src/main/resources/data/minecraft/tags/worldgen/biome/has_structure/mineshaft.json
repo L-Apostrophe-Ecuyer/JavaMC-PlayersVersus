@@ -17,6 +17,24 @@
     "players-versus:caves/badlands_cave",
     "players-versus:caves/creeper_caves",
     "players-versus:caves/regular_cave",
-    "players-versus:caves/pale_grotto"
+    "players-versus:caves/pale_grotto",
+    "players-versus:tuscan_grove",
+    "players-versus:warm_oak_forest",
+    "players-versus:dark_jungle_forest",
+    "players-versus:humid_oak_forest",
+    "players-versus:cold_swamp",
+    "players-versus:rocky_plains",
+    "players-versus:rocky_jungle",
+    "players-versus:rocky_birch_forest",
+    "players-versus:warm_dark_forest",
+    "players-versus:grassy_wetlands",
+    "players-versus:mangrove_marsh",
+    "players-versus:forest_edge",
+    "players-versus:mixed_forest",
+    "players-versus:old_oak_forest",
+    "players-versus:prairie",
+    "players-versus:pale_taiga",
+    "players-versus:pale_swamp",
+    "players-versus:rocky_snowy_plains"
   ]
 }

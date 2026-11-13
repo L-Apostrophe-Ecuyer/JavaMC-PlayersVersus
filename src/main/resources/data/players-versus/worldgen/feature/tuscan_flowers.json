@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": "minecraft:poppy",
+        "weight": 4
+      },
+      {
+        "data": "minecraft:cornflower",
+        "weight": 3
+      },
+      {
+        "data": "minecraft:oxeye_daisy",
+        "weight": 3
+      },
+      {
+        "data": "minecraft:dandelion",
+        "weight": 3
+      },
+      {
+        "data": "minecraft:allium",
+        "weight": 1
+      },
+      {
+        "data": "minecraft:azure_bluet",
+        "weight": 1
+      },
+      {
+        "data": "minecraft:short_grass",
+        "weight": 4
+      },
+      {
+        "data": {
+          "id": "minecraft:tall_grass",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 1
+      }
+    ]
+  }
+}

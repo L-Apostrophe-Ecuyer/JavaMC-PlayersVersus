@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -49,7 +50,9 @@ public final class BlockTagAudit {
             Identifier id = BuiltInRegistries.BLOCK.getKey(block);
             if (!id.getNamespace().equals(VersusMod.MOD_ID)) continue;
             BlockState state = block.defaultBlockState();
-            if (isSolid(state) && !state.is(BLOCKS_MOTION)) missing.add(id);
+            // Leaves block motion by #minecraft:leaves (vanilla's blocks_motion adds it); in this tag they'd stop the
+            // heightmaps that look past leaves
+            if (isSolid(state) && !state.is(BLOCKS_MOTION) && !state.is(BlockTags.LEAVES)) missing.add(id);
         }
         return missing;
     }

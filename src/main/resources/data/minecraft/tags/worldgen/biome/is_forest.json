@@ -9,6 +9,14 @@
     "players-versus:cold_taiga",
     "players-versus:mountainside_jungle",
     "players-versus:mountainside_forest",
-    "players-versus:mountainside_forest_warm"
+    "players-versus:mountainside_forest_warm",
+    "players-versus:warm_oak_forest",
+    "players-versus:dark_jungle_forest",
+    "players-versus:humid_oak_forest",
+    "players-versus:rocky_birch_forest",
+    "players-versus:warm_dark_forest",
+    "players-versus:old_oak_forest",
+    "players-versus:forest_edge",
+    "players-versus:mixed_forest"
   ]
 }

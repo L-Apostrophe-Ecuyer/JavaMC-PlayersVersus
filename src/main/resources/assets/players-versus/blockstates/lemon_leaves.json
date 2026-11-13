@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "fruit=0": {
+      "model": "players-versus:block/lemon_leaves"
+    },
+    "fruit=1": {
+      "model": "players-versus:block/lemon_leaves_blossoms"
+    },
+    "fruit=2": {
+      "model": "players-versus:block/lemon_leaves_lemons"
+    }
+  }
+}

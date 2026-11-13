@@ -67,6 +67,7 @@
     [
       "minecraft:glow_lichen",
       "minecraft:patch_tall_grass_2",
+      "minecraft:patch_bush",
       "minecraft:patch_grass_plain",
       "players-versus:flowers_mountainside_warm",
       "players-versus:trees_mountainside_warm"
@@ -89,31 +90,28 @@
           "axolotls": [],
           "creature": [
             {
-              "type": "minecraft:donkey",
-              "weight": 1,
+              "type": "minecraft:goat",
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 1,
-                "max_inclusive": 2
-              }
+                "max_inclusive": 3,
+                "min_inclusive": 1
+              },
+              "weight": 5
             },
             {
-              "type": "minecraft:rabbit",
-              "weight": 2,
-              "count": {
-                "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 6
-              }
+              "type": "minecraft:llama",
+              "count": 4,
+              "weight": 4
             },
             {
               "type": "minecraft:sheep",
-              "weight": 2,
-              "count": {
-                "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 4
-              }
+              "count": 4,
+              "weight": 4
+            },
+            {
+              "type": "minecraft:donkey",
+              "count": 1,
+              "weight": 1
             }
           ],
           "misc": [],

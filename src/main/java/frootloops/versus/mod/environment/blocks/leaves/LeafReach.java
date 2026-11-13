@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.blocks.leaves;
 
+import frootloops.versus.mod.environment.CustomBlocks;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +37,9 @@ public final class LeafReach {
             Blocks.DARK_OAK_LEAVES, logs("dark_oak_logs"),
             Blocks.JUNGLE_LEAVES, BlockTags.JUNGLE_LOGS,
             Blocks.ACACIA_LEAVES, logs("acacia_logs"),
-            Blocks.CHERRY_LEAVES, logs("cherry_logs"));
+            Blocks.CHERRY_LEAVES, logs("cherry_logs"),
+            // The lemon bush's trunk is stripped oak
+            CustomBlocks.LEMON_LEAVES, logs("oak_logs"));
 
     private LeafReach() {
     }

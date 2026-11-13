@@ -1,16 +1,17 @@
 {
-  "temperature": 0.8,
+  "temperature": 0.7,
   "downfall": 0.9,
   "has_precipitation": true,
   "effects": {
-    "water_color": "#3c908e",
-    "grass_color": "#76923a",
-    "foliage_color": "#61af4b"
+    "water_color": "#5c7a76",
+    "grass_color": "#7b8a6c",
+    "foliage_color": "#7f8b6e",
+    "dry_foliage_color": "#a0a69c"
   },
   "carvers": [
-    "players-versus:cave",
-    "players-versus:cave_extra_underground",
-    "players-versus:canyon"
+    "minecraft:cave",
+    "minecraft:cave_extra_underground",
+    "minecraft:canyon"
   ],
   "features": [
     [],
@@ -64,19 +65,17 @@
       "minecraft:spring_lava"
     ],
     [
-      "players-versus:swamp_patch_vegetation",
-      "players-versus:swamp_patch_rooted_dirt",
-      "players-versus:swamp_patch_pond",
+      "players-versus:marsh_pale",
+      "minecraft:glow_lichen",
+      "players-versus:trees_pale_swamp",
       "players-versus:pale_moss_patch",
-      "players-versus:pale_swamp_trees",
       "minecraft:flower_swamp",
       "minecraft:patch_grass_normal",
       "minecraft:patch_waterlily",
       "minecraft:brown_mushroom_swamp",
       "minecraft:red_mushroom_swamp",
-      "minecraft:brown_mushroom_normal",
-      "minecraft:red_mushroom_normal",
       "minecraft:patch_sugar_cane_swamp",
+      "minecraft:patch_firefly_bush_near_water_swamp",
       "minecraft:seagrass_swamp"
     ],
     [
@@ -95,7 +94,17 @@
             }
           ],
           "axolotls": [],
-          "creature": [],
+          "creature": [
+            {
+              "type": "minecraft:frog",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 5,
+                "min_inclusive": 2
+              },
+              "weight": 10
+            }
+          ],
           "misc": [],
           "monster": [
             {
@@ -107,6 +116,11 @@
               "type": "minecraft:zombie",
               "weight": 95,
               "count": 4
+            },
+            {
+              "type": "minecraft:zombie_villager",
+              "weight": 5,
+              "count": 1
             },
             {
               "type": "minecraft:skeleton",
@@ -133,6 +147,16 @@
               }
             },
             {
+              "type": "minecraft:witch",
+              "weight": 10,
+              "count": 1
+            },
+            {
+              "type": "minecraft:slime",
+              "weight": 1,
+              "count": 1
+            },
+            {
               "type": "minecraft:bogged",
               "weight": 30,
               "count": 4
@@ -156,7 +180,7 @@
       },
       "modifier": "overlay"
     },
-    "minecraft:visual/sky_color": "#78a3d9",
+    "minecraft:visual/sky_color": "#78a7ff",
     "minecraft:visual/fog_color": "#c0d8ff",
     "minecraft:visual/water_fog_color": "#192e21",
     "minecraft:audio/ambient_sounds": {
@@ -174,7 +198,6 @@
         "replace_current_music": false,
         "sound": "minecraft:music.overworld.swamp"
       }
-    },
-    "minecraft:audio/music_volume": 0.5
+    }
   }
 }

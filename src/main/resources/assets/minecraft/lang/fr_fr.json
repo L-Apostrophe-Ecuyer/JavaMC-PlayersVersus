@@ -325,5 +325,36 @@
   "subtitles.players-versus.entity.pale_wolf.hurt": "Un loup pâle est blessé",
   "subtitles.players-versus.entity.pale_wolf.death": "Un loup pâle meurt",
   "entity.players-versus.pale_wandering_trader": "Marchand ambulant pâle",
-  "item.players-versus.pale_wandering_trader_spawn_egg": "Oeuf d'apparition de Marchand ambulant pâle"
+  "item.players-versus.pale_wandering_trader_spawn_egg": "Oeuf d'apparition de Marchand ambulant pâle",
+
+  "item.players-versus.lemon": "Citron",
+  "block.players-versus.lemon_leaves": "Feuilles de citronnier",
+  "block.players-versus.lemon_sapling": "Pousse de citronnier",
+  "block.players-versus.potted_lemon_sapling": "Pousse de citronnier en pot",
+  "effect.players-versus.sour": "Acidité",
+
+  "biome.players-versus.tuscan_grove": "Bosquet toscan",
+  "biome.players-versus.warm_oak_forest": "Chênaie chaude",
+  "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre",
+  "biome.players-versus.humid_oak_forest": "Chênaie humide",
+
+  "biome.players-versus.cold_swamp": "Marais froid",
+
+  "biome.players-versus.rocky_plains": "Plaines rocheuses",
+  "biome.players-versus.rocky_jungle": "Jungle rocheuse",
+  "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse",
+
+  "biome.players-versus.warm_dark_forest": "Forêt sombre chaude",
+
+  "biome.players-versus.grassy_wetlands": "Zones humides herbeuses",
+  "biome.players-versus.mangrove_marsh": "Marécage de mangrove",
+
+  "biome.players-versus.forest_edge": "Lisière de forêt",
+  "biome.players-versus.mixed_forest": "Forêt mixte",
+  "biome.players-versus.old_oak_forest": "Vieille chênaie",
+  "biome.players-versus.prairie": "Prairie",
+  "biome.players-versus.pale_taiga": "Taïga pâle",
+  "biome.players-versus.pale_swamp": "Marais pâle",
+
+  "biome.players-versus.rocky_snowy_plains": "Plaines enneigées rocheuses"
 }

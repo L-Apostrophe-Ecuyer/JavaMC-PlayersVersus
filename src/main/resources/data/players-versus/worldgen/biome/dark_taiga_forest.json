@@ -67,11 +67,14 @@
       "minecraft:glow_lichen",
       "players-versus:dark_taiga_forest_vegetation",
       "minecraft:forest_flowers",
+      "minecraft:patch_large_fern",
       "minecraft:flower_default",
       "minecraft:patch_grass_forest",
       "minecraft:brown_mushroom_normal",
       "minecraft:red_mushroom_normal",
-      "minecraft:patch_pumpkin"
+      "minecraft:patch_leaf_litter",
+      "minecraft:patch_pumpkin",
+      "minecraft:patch_berry_common"
     ],
     [
       "minecraft:freeze_top_layer"
@@ -92,23 +95,46 @@
           "creature": [
             {
               "type": "minecraft:sheep",
-              "weight": 12,
-              "count": 4
+              "count": 4,
+              "weight": 12
             },
             {
               "type": "minecraft:pig",
-              "weight": 10,
-              "count": 4
+              "count": 4,
+              "weight": 10
             },
             {
               "type": "minecraft:chicken",
-              "weight": 10,
-              "count": 4
+              "count": 4,
+              "weight": 10
             },
             {
               "type": "minecraft:cow",
-              "weight": 8,
-              "count": 4
+              "count": 4,
+              "weight": 8
+            },
+            {
+              "type": "minecraft:wolf",
+              "count": 4,
+              "weight": 8
+            },
+            {
+              "type": "minecraft:rabbit",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 3,
+                "min_inclusive": 2
+              },
+              "weight": 4
+            },
+            {
+              "type": "minecraft:fox",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 4,
+                "min_inclusive": 2
+              },
+              "weight": 8
             }
           ],
           "misc": [],

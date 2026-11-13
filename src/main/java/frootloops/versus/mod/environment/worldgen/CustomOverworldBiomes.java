@@ -16,6 +16,7 @@ public class CustomOverworldBiomes {
     private static final Climate.Parameter defaultParameter = Climate.Parameter.span(-1.0F, 1.0F);
     /** Every value the climate's noise can take, beyond the usual -1 to 1. */
     private static final Climate.Parameter anyValue = Climate.Parameter.span(-2.0F, 2.0F);
+    /** Birches among spruces: the birch forests' mountainsides and cold edge, and the taigas' border with them where the weirdness is negative. */
     public static final ResourceKey<Biome> BIRCH_TAIGA_FOREST = keyOf("birch_taiga_forest");
     /** The birch taiga with dappled trees (26.3's poplars) where it has birch. */
     public static final ResourceKey<Biome> DAPPLED_TAIGA = keyOf("dappled_taiga");
@@ -24,14 +25,23 @@ public class CustomOverworldBiomes {
     /** Vanilla's dappled forest (new in 26.3), by its id. */
     public static final ResourceKey<Biome> DAPPLED_FOREST = ResourceKey.create(Registries.BIOME,
             Identifier.fromNamespaceAndPath("minecraft", "dappled_forest"));
+    /** Dark oaks among spruces and pines: where the dark forest meets the old growth taigas, and the dark forest's mountainsides. */
     public static final ResourceKey<Biome> DARK_TAIGA_FOREST = keyOf("dark_taiga_forest");
+    /** Dark oaks with birches and fancy oaks, moss and leaf litter: the strip between the birch forest and the dark forest. */
     public static final ResourceKey<Biome> DARK_BIRCH_FOREST = keyOf("dark_birch_forest");
+    /** The snowy beach where the snow ends (the frozen strip): sand and gravel, lichen on the stones. */
     public static final ResourceKey<Biome> COLD_BEACH = keyOf("cold_beach");
+    /** The snowy plains where the snow ends (the frozen strip): grass and ferns, snow piles, a lone spruce; icy rock formations here and there. */
     public static final ResourceKey<Biome> COLD_PLAINS = keyOf("cold_plains");
+    /** The taiga where it meets the snowy taiga (the frozen strip): windswept spruces over ferns, snow piles and berries. */
     public static final ResourceKey<Biome> COLD_TAIGA = keyOf("cold_taiga");
+    /** The jungles' mountainsides: sparse jungle trees on steep ground, parrots and goats. */
     public static final ResourceKey<Biome> MOUNTAINSIDE_JUNGLE = keyOf("mountainside_jungle");
+    /** The forests' mountainsides: oaks and birches over an alpine meadow's grass and flowers, goats. */
     public static final ResourceKey<Biome> MOUNTAINSIDE_FOREST = keyOf("mountainside_forest");
+    /** The savannas' mountainsides: warm, open woods over grass and flowers, goats and llamas. */
     public static final ResourceKey<Biome> MOUNTAINSIDE_FOREST_WARM = keyOf("mountainside_forest_warm");
+    /** The desert's wettest part: sparse jungle trees and bushes around water, sugar cane, melons, camels; the desert's husks and parched. */
     public static final ResourceKey<Biome> DESERT_OASIS = keyOf("desert_oasis");
     public static final ResourceKey<Biome> DESERT_CREEPER_CAVE = keyOf("caves/creeper_caves_desert");
     public static final ResourceKey<Biome> BADLANDS_CAVE = keyOf("caves/badlands_cave");
@@ -40,6 +50,42 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> DEEP_CAVES = keyOf("caves/deep_caves");
     public static final ResourceKey<Biome> PALE_GROTTO = keyOf("caves/pale_grotto");
     public static final ResourceKey<Biome> MUSHROOM_CAVES = keyOf("caves/mushroom_caves");
+    /** The cool edge of savannas: an open, sunny grove of round oaks and lemon bushes on dry grass, a few acacias. */
+    public static final ResourceKey<Biome> TUSCAN_GROVE = keyOf("tuscan_grove");
+    /** The cool edge of the drier jungles, next to birch forests and forests: oaks mixed with jungle trees and bushes. */
+    public static final ResourceKey<Biome> WARM_OAK_FOREST = keyOf("warm_oak_forest");
+    /** The cool edge of the wettest jungles, next to dark forests: dark oaks with jungle trees, vines and cocoa. */
+    public static final ResourceKey<Biome> DARK_JUNGLE_FOREST = keyOf("dark_jungle_forest");
+    /** The rim of every swamp: oaks with vines on damp ground, mud and puddles. */
+    public static final ResourceKey<Biome> HUMID_OAK_FOREST = keyOf("humid_oak_forest");
+    /** The dark forest's warm side, next to the dark jungle forest: dark oaks with oaks, fancy oaks and jungle bushes, giant mushrooms. */
+    public static final ResourceKey<Biome> WARM_DARK_FOREST = keyOf("warm_dark_forest");
+    /** The swamps' drier part: an open wet meadow of pools, channels and grass, few oaks, reeds and flowers. */
+    public static final ResourceKey<Biome> GRASSY_WETLANDS = keyOf("grassy_wetlands");
+    /** The mangrove swamp's rim and drier part: mud flats and grass, small mangroves and jungle bushes. */
+    public static final ResourceKey<Biome> MANGROVE_MARSH = keyOf("mangrove_marsh");
+    /** Between plains and forest: oaks and birches in small groves on open grass, bushes and flowers. */
+    public static final ResourceKey<Biome> FOREST_EDGE = keyOf("forest_edge");
+    /** Between forest and taiga: spruces with oaks and birches, ferns and berries, fallen logs. */
+    public static final ResourceKey<Biome> MIXED_FOREST = keyOf("mixed_forest");
+    /** A pocket of the forest: great oaks and fancy oaks over moss and azaleas, fallen logs, ferns and mushrooms. */
+    public static final ResourceKey<Biome> OLD_OAK_FOREST = keyOf("old_oak_forest");
+    /** A pocket of the plains: a sea of tall grass and wildflowers, a lone oak now and then. */
+    public static final ResourceKey<Biome> PRAIRIE = keyOf("prairie");
+    /** The pale garden's cold edge, next to the old growth taigas: spruces and pale oaks over pale moss. */
+    public static final ResourceKey<Biome> PALE_TAIGA = keyOf("pale_taiga");
+    /** The wettest, weirdest swamps: swamp oaks and pale oaks, creaking hearts, pale moss at the water's edge. */
+    public static final ResourceKey<Biome> PALE_SWAMP = keyOf("pale_swamp");
+    /** The cold half of swamps, next to taigas: spruce and birch over mud, podzol and moss, ferns and berries. */
+    public static final ResourceKey<Biome> COLD_SWAMP = keyOf("cold_swamp");
+    /** The level stretches of savannas' cool edge: dry grass, a few oaks and acacias, and rocks everywhere. */
+    public static final ResourceKey<Biome> ROCKY_PLAINS = keyOf("rocky_plains");
+    /** The level jungle just past the warm band: jungle trees thinned out among crags and towers of rock. */
+    public static final ResourceKey<Biome> ROCKY_JUNGLE = keyOf("rocky_jungle");
+    /** The cold, level side of old growth birch forests: tall birches and spruces among boulders. */
+    public static final ResourceKey<Biome> ROCKY_BIRCH_FOREST = keyOf("rocky_birch_forest");
+    /** The level snowy plains beside the cold plains: rock formations capped with packed ice, a lone spruce now and then. */
+    public static final ResourceKey<Biome> ROCKY_SNOWY_PLAINS = keyOf("rocky_snowy_plains");
 
     /** Where a biome goes; ALL_DEPTHS is a cave biome from the surface caves down to the deep caves. */
     public enum PlacedBiomeType {
@@ -102,19 +148,11 @@ public class CustomOverworldBiomes {
             Map.entry(Biomes.ICE_SPIKES,    Biomes.SNOWY_PLAINS));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> HUMID_BIOME_REPLACEMENTS = Map.ofEntries(
+            // The dark forest's side of the strip is PvBiomeLayout's dark-birch rule, narrower
             Map.entry(Biomes.BIRCH_FOREST,      DARK_BIRCH_FOREST),
-            Map.entry(Biomes.DARK_FOREST,       DARK_BIRCH_FOREST),
             Map.entry(Biomes.JUNGLE,            Biomes.SPARSE_JUNGLE),
             Map.entry(Biomes.DESERT,            DESERT_OASIS),
             Map.entry(Biomes.BADLANDS,          Biomes.DESERT));
-
-    private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> WARM_BIOME_REPLACEMENTS = Map.ofEntries(
-            Map.entry(Biomes.SAVANNA_PLATEAU,   Biomes.END_BARRENS),
-            Map.entry(Biomes.SAVANNA,           Biomes.END_BARRENS),
-            Map.entry(Biomes.DARK_FOREST,       Biomes.END_BARRENS),
-            Map.entry(Biomes.SPARSE_JUNGLE,     Biomes.END_BARRENS),
-            Map.entry(Biomes.JUNGLE,            Biomes.END_BARRENS),
-            Map.entry(Biomes.BAMBOO_JUNGLE,     Biomes.END_BARRENS));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> SURFACE_CAVE_BIOME_REPLACEMENTS = Map.ofEntries(
             Map.entry(Biomes.FROZEN_PEAKS,      Biomes.ICE_CAVES),
@@ -139,11 +177,6 @@ public class CustomOverworldBiomes {
     @Nullable
     public static ResourceKey<Biome> getHumidTransitionBiome(ResourceKey<Biome> originalBiome) {
         return HUMID_BIOME_REPLACEMENTS.get(originalBiome);
-    }
-
-    @Nullable
-    public static ResourceKey<Biome> getWarmTransitionBiome(ResourceKey<Biome> originalBiome) {
-        return WARM_BIOME_REPLACEMENTS.get(originalBiome);
     }
 
     @Nullable

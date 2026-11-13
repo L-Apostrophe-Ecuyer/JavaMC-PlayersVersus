@@ -14,6 +14,8 @@ public abstract class CustomStatusEffects {
 
     public static Holder<MobEffect> LARGENESS;
     public static Holder<MobEffect> SMALLNESS;
+    /** From eating a lemon: the view widens absurdly for a moment. */
+    public static Holder<MobEffect> SOUR;
     public static Holder<MobEffect> VULNERABILITY;
     public static Holder<MobEffect> HAUNTING;
     public static Holder<MobEffect> BUOYANCY;
@@ -26,6 +28,7 @@ public abstract class CustomStatusEffects {
         SMALLNESS = registerCustomEffect("smallness", new SmallnessStatusEffect("smallness"));
         BUOYANCY = registerCustomEffect("buoyancy", new BuoyancyStatusEffect("buoyancy"));
         HAUNTING = registerCustomEffect("haunting", new HauntingStatusEffect());
+        SOUR = registerCustomEffect("sour", new frootloops.versus.mod.items_and_effects.fruit.SourStatusEffect());
     }
 
     private static Holder<MobEffect> registerCustomEffect(String name, MobEffect effect) {

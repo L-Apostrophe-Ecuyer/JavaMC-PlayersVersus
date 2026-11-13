@@ -15,6 +15,8 @@ public class CustomBlocksClient {
         BlockColorRegistry.register(List.of(BlockTintSources.grass()), CustomBlocks.CLOVERS);
         // Fallen leaves take the biome's leaf colour, where vanilla's leaf litter takes its dry foliage colour
         BlockColorRegistry.register(List.of(BlockTintSources.foliage()), CustomBlocks.FALLEN_LEAVES);
+        // Lemon leaves take the biome's leaf colour on their leaves (layer 0); their blossoms and lemons keep their own
+        BlockColorRegistry.register(List.of(BlockTintSources.foliage()), CustomBlocks.LEMON_LEAVES);
     }
 
 }

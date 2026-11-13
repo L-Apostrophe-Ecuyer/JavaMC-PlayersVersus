@@ -1,0 +1,16 @@
+# Rocks in the world: tools/gallery.sh @tools/gallery-rocks.txt <output directory>
+stage:minecraft:plains
+rock:players-versus:rock/boulder,7
+rock:players-versus:rock/boulder,21
+rock:players-versus:rock/boulder_pile,3
+rock:players-versus:rock/crag,5
+rock:players-versus:rock/great_boulders,2
+rock:players-versus:rock/monolith,8
+stage:minecraft:savanna
+rock:players-versus:rock/spires,4
+rock:players-versus:rock/towers,6
+rock:players-versus:rock/massif,1
+stage:minecraft:snowy_plains
+rock:players-versus:rock/icy_great_boulders,2
+rock:players-versus:rock/icy_monolith,8
+rock:players-versus:rock/icy_massif,1
