@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""The refinement pass's data for the older biomes and vanilla's: run from the repository root.
+"""The refinement pass's data for the older biomes and vanilla's: run from the repository root, with the game's data
+extracted where `vanilla` points (its data/minecraft/...).
 
-    python3 tools/refine-biomes.py
+    python3 tools/refine-biomes.py <vanilla>
 
 - River banks: what grows and lies at the water's edge in the temperate biomes. CustomWorldgen's biome modifications put
   them in the biomes of two tags, in the Players Versus world type only (the players-versus:players_versus_world filter):
@@ -13,9 +14,15 @@
   players-versus:has_riverbanks holds the temperate biomes beside water (and the river: its own banks, whatever its
   climate; reeds grow by a desert's river, and nothing that needs grass grows on its sand);
   players-versus:has_riverbank_willows those of them whose trees are deciduous.
+- Animals (tools/animals.py chooses them): the older, hand-made biomes' (their files rewritten with their animals and, for
+  some, a vanilla biome's monsters), the game's tags for warm and cold farm animals and frogs, and its wolf variants (each
+  file vanilla's, with a second spawn condition for the mod's biomes of that coat).
 """
 import json
 import os
+import sys
+
+import animals
 
 MOD = "players-versus"
 DATA = os.path.join("src", "main", "resources", "data")
@@ -137,9 +144,53 @@ def riverbanks():
     write_json(f"{MOD}/tags/worldgen/biome/has_riverbank_willows.json", {"replace": False, "values": WILLOWS})
 
 
-def main():
+# The older biomes, made by hand before the generators (the generated ones get their animals from their generator)
+HAND_MADE = ["birch_taiga_forest", "cold_beach", "cold_plains", "cold_taiga", "dappled_taiga", "dark_birch_forest", "dark_taiga_forest",
+             "desert_oasis", "mountainside_forest", "mountainside_forest_warm", "mountainside_jungle", "sparse_dappled_forest"]
+
+
+def read_json(path):
+    with open(path) as file:
+        return json.load(file)
+
+
+def vanilla_biome(vanilla, name):
+    return read_json(os.path.join(vanilla, "data", "minecraft", "worldgen", "biome", name.split(":")[1] + ".json"))
+
+
+def add_to_tag(path, *values):
+    full = os.path.join(DATA, path)
+    tag = read_json(full) if os.path.exists(full) else {"replace": False, "values": []}
+    for value in values:
+        if value not in tag["values"]:
+            tag["values"].append(value)
+    write_json(path, tag)
+
+
+def mobs(vanilla):
+    for name in HAND_MADE:
+        path = os.path.join(DATA, MOD, "worldgen", "biome", name + ".json")
+        biome = read_json(path)
+        animals.set_spawns(biome, name, lambda other: vanilla_biome(vanilla, other))
+        write_json(f"{MOD}/worldgen/biome/{name}.json", biome)
+    tags = "minecraft/tags/worldgen/biome"
+    warm, cold = [f"{MOD}:{name}" for name in animals.WARM], [f"{MOD}:{name}" for name in animals.COLD]
+    add_to_tag(f"{tags}/spawns_warm_variant_farm_animals.json", *warm)
+    add_to_tag(f"{tags}/spawns_warm_variant_frogs.json", *warm)
+    add_to_tag(f"{tags}/spawns_cold_variant_farm_animals.json", *cold)
+    add_to_tag(f"{tags}/spawns_cold_variant_frogs.json", *[f"{MOD}:{name}" for name in animals.COLD_FROGS])
+    for coat, biomes in animals.WOLF_COATS.items():
+        variant = read_json(os.path.join(vanilla, "data", "minecraft", "wolf_variant", coat + ".json"))
+        variant["spawn_conditions"].append({"condition": {"type": "minecraft:biome", "biomes": [f"{MOD}:{name}" for name in biomes]}, "priority": 1})
+        write_json(f"minecraft/wolf_variant/{coat}.json", variant)
+
+
+def main(vanilla):
     riverbanks()
+    mobs(vanilla)
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    main(sys.argv[1])

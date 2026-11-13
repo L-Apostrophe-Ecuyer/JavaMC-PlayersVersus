@@ -13,19 +13,32 @@
           ],
           "creature": [
             {
+              "type": "minecraft:horse",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 6,
+                "min_inclusive": 2
+              },
+              "weight": 10
+            },
+            {
+              "type": "minecraft:donkey",
+              "count": 1,
+              "weight": 3
+            },
+            {
+              "type": "minecraft:rabbit",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 3,
+                "min_inclusive": 2
+              },
+              "weight": 6
+            },
+            {
               "type": "minecraft:sheep",
               "count": 4,
               "weight": 12
-            },
-            {
-              "type": "minecraft:pig",
-              "count": 4,
-              "weight": 10
-            },
-            {
-              "type": "minecraft:chicken",
-              "count": 4,
-              "weight": 10
             },
             {
               "type": "minecraft:cow",
@@ -33,31 +46,14 @@
               "weight": 8
             },
             {
-              "type": "minecraft:horse",
-              "count": {
-                "type": "minecraft:uniform",
-                "max_inclusive": 6,
-                "min_inclusive": 2
-              },
-              "weight": 5
+              "type": "minecraft:pig",
+              "count": 4,
+              "weight": 6
             },
             {
-              "type": "minecraft:donkey",
-              "count": {
-                "type": "minecraft:uniform",
-                "max_inclusive": 3,
-                "min_inclusive": 1
-              },
-              "weight": 1
-            },
-            {
-              "type": "minecraft:rabbit",
-              "count": {
-                "type": "minecraft:uniform",
-                "max_inclusive": 6,
-                "min_inclusive": 2
-              },
-              "weight": 2
+              "type": "minecraft:chicken",
+              "count": 4,
+              "weight": 6
             }
           ],
           "monster": [

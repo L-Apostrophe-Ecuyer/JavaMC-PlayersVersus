@@ -96,23 +96,13 @@
           "axolotls": [],
           "creature": [
             {
-              "type": "minecraft:pig",
-              "weight": 10,
-              "count": 4
-            },
-            {
-              "type": "minecraft:chicken",
-              "weight": 10,
-              "count": 4
-            },
-            {
               "type": "minecraft:frog",
-              "weight": 10,
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 5
-              }
+                "max_inclusive": 5,
+                "min_inclusive": 2
+              },
+              "weight": 10
             }
           ],
           "misc": [],

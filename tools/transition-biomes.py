@@ -21,6 +21,8 @@ import json
 import os
 import sys
 
+import animals
+
 MOD = "players-versus"
 DATA = os.path.join("src", "main", "resources", "data")
 ASSETS = os.path.join("src", "main", "resources", "assets")
@@ -374,17 +376,6 @@ def tuscan_fields(vanilla):
     write_json(f"{MOD}/worldgen/placed_feature/tuscan_dry_grass.json", dry)
 
 
-def merged_creatures(neighbours):
-    """Both neighbours' animals: each kind once, with the larger of its weights."""
-    creatures = {}
-    for neighbour in neighbours:
-        for entry in neighbour["attributes"][SPAWNS]["argument"]["spawns_by_category"].get("creature", []):
-            kept = creatures.get(entry["type"])
-            if kept is None or entry["weight"] > kept["weight"]:
-                creatures[entry["type"]] = copy.deepcopy(entry)
-    return list(creatures.values())
-
-
 def make(vanilla, name, spec):
     main, other = (biome(vanilla, neighbour) for neighbour in spec["neighbours"])
     made = copy.deepcopy(main)
@@ -404,8 +395,8 @@ def make(vanilla, name, spec):
         write_json(f"{MOD}/worldgen/feature/{extra_name}.json", feature)
         write_json(f"{MOD}/worldgen/placed_feature/{extra_name}.json", placed)
         made["features"][UNDERGROUND_ORES].append(f"{MOD}:{extra_name}")
-    spawns = made["attributes"][SPAWNS]["argument"]["spawns_by_category"]
-    spawns["creature"] = merged_creatures([main, other])
+    # Its animals chosen for the place (tools/animals.py), not its neighbours' merged
+    animals.set_spawns(made, name, lambda neighbour: biome(vanilla, neighbour))
     # Milder than a savanna: snow golems don't melt
     made["attributes"].pop("minecraft:gameplay/snow_golem_melts", None)
     write_json(f"{MOD}/worldgen/biome/{name}.json", made)

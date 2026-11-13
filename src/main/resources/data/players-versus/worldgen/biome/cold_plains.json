@@ -90,30 +90,40 @@
           "creature": [
             {
               "type": "minecraft:rabbit",
-              "weight": 16,
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 3
-              }
-            },
-            {
-              "type": "minecraft:polar_bear",
-              "weight": 2,
-              "count": {
-                "type": "minecraft:uniform",
-                "min_inclusive": 1,
-                "max_inclusive": 2
-              }
+                "max_inclusive": 3,
+                "min_inclusive": 2
+              },
+              "weight": 12
             },
             {
               "type": "minecraft:sheep",
-              "weight": 1,
+              "count": 4,
+              "weight": 8
+            },
+            {
+              "type": "minecraft:fox",
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 3,
-                "max_inclusive": 4
-              }
+                "max_inclusive": 4,
+                "min_inclusive": 2
+              },
+              "weight": 4
+            },
+            {
+              "type": "minecraft:wolf",
+              "count": 4,
+              "weight": 2
+            },
+            {
+              "type": "minecraft:polar_bear",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 2,
+                "min_inclusive": 1
+              },
+              "weight": 1
             }
           ],
           "misc": [],

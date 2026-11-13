@@ -31,6 +31,7 @@ SPAWNS = "minecraft:gameplay/natural_mob_spawns"
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 transition = __import__("transition-biomes")
+import animals
 lemons = __import__("lemons")
 write_json = transition.write_json
 
@@ -151,7 +152,7 @@ def cold_swamp(vanilla):
         "minecraft:patch_grass_taiga_2", "minecraft:patch_waterlily", "minecraft:brown_mushroom_taiga", "minecraft:red_mushroom_taiga",
         "minecraft:patch_sugar_cane_swamp", "minecraft:patch_pumpkin", "minecraft:patch_firefly_bush_near_water_swamp",
         "minecraft:seagrass_swamp", "minecraft:patch_berry_common"]
-    made["attributes"][SPAWNS]["argument"]["spawns_by_category"]["creature"] = transition.merged_creatures([main, taiga])
+    animals.set_spawns(made, "cold_swamp", lambda neighbour: transition.biome(vanilla, neighbour))
     write_json(f"{MOD}/worldgen/biome/cold_swamp.json", made)
 
     write_json(f"{MOD}/worldgen/feature/trees_cold_swamp.json", transition.selector(
@@ -175,7 +176,7 @@ def grassy_wetlands(vanilla):
         f"{MOD}:marsh_flowers", "minecraft:flower_swamp", "minecraft:patch_grass_normal", "minecraft:patch_waterlily",
         "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_sugar_cane_swamp", "minecraft:patch_pumpkin",
         "minecraft:patch_firefly_bush_near_water_swamp", "minecraft:seagrass_swamp"]
-    made["attributes"][SPAWNS]["argument"]["spawns_by_category"]["creature"] = transition.merged_creatures([main, plains])
+    animals.set_spawns(made, "grassy_wetlands", lambda neighbour: transition.biome(vanilla, neighbour))
     write_json(f"{MOD}/worldgen/biome/grassy_wetlands.json", made)
     # A few oaks, in small groves: the noise's high ground
     write_json(f"{MOD}/worldgen/feature/trees_grassy_wetlands.json", transition.selector(
@@ -196,7 +197,7 @@ def mangrove_marsh(vanilla):
     made["features"][VEGETATION] = [
         f"{MOD}:marsh_mangrove", "minecraft:glow_lichen", f"{MOD}:trees_mangrove_marsh", "minecraft:patch_grass_normal", "minecraft:patch_dead_bush",
         "minecraft:patch_waterlily", "minecraft:seagrass_swamp", "minecraft:patch_firefly_bush_near_water"]
-    made["attributes"][SPAWNS]["argument"]["spawns_by_category"]["creature"] = transition.merged_creatures([main, jungle])
+    animals.set_spawns(made, "mangrove_marsh", lambda neighbour: transition.biome(vanilla, neighbour))
     write_json(f"{MOD}/worldgen/biome/mangrove_marsh.json", made)
     write_json(f"{MOD}/worldgen/feature/trees_mangrove_marsh.json", transition.selector(
         "minecraft:jungle_bush", ("minecraft:mangrove_checked", 0.45), ("minecraft:tall_mangrove_checked", 0.1)))

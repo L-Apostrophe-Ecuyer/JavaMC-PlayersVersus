@@ -101,37 +101,26 @@
           "axolotls": [],
           "creature": [
             {
-              "type": "minecraft:pig",
-              "weight": 10,
-              "count": 4
-            },
-            {
-              "type": "minecraft:chicken",
-              "weight": 10,
-              "count": 4
-            },
-            {
               "type": "minecraft:frog",
-              "weight": 10,
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 5
-              }
-            },
-            {
-              "type": "minecraft:sheep",
-              "count": 4,
-              "weight": 12
-            },
-            {
-              "type": "minecraft:cow",
-              "count": 4,
-              "weight": 8
+                "max_inclusive": 5,
+                "min_inclusive": 2
+              },
+              "weight": 10
             },
             {
               "type": "minecraft:wolf",
               "count": 4,
+              "weight": 8
+            },
+            {
+              "type": "minecraft:fox",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 4,
+                "min_inclusive": 2
+              },
               "weight": 8
             },
             {
@@ -144,13 +133,9 @@
               "weight": 4
             },
             {
-              "type": "minecraft:fox",
-              "count": {
-                "type": "minecraft:uniform",
-                "max_inclusive": 4,
-                "min_inclusive": 2
-              },
-              "weight": 8
+              "type": "minecraft:sheep",
+              "count": 4,
+              "weight": 6
             }
           ],
           "misc": [],

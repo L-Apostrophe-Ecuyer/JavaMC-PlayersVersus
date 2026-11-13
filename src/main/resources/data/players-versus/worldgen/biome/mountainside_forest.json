@@ -89,31 +89,32 @@
           "axolotls": [],
           "creature": [
             {
-              "type": "minecraft:donkey",
-              "weight": 1,
+              "type": "minecraft:goat",
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 1,
-                "max_inclusive": 2
-              }
-            },
-            {
-              "type": "minecraft:rabbit",
-              "weight": 2,
-              "count": {
-                "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 6
-              }
+                "max_inclusive": 3,
+                "min_inclusive": 1
+              },
+              "weight": 5
             },
             {
               "type": "minecraft:sheep",
-              "weight": 2,
+              "count": 4,
+              "weight": 4
+            },
+            {
+              "type": "minecraft:rabbit",
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 4
-              }
+                "max_inclusive": 3,
+                "min_inclusive": 2
+              },
+              "weight": 2
+            },
+            {
+              "type": "minecraft:donkey",
+              "count": 1,
+              "weight": 1
             }
           ],
           "misc": [],

@@ -9,7 +9,11 @@ import java.nio.file.Files;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -299,6 +303,89 @@ class BiomeDataTest {
         assertTrue(tagged("minecraft/tags/worldgen/biome/spawns_snow_foxes.json", "rocky_snowy_plains"), "no snow foxes in the rocky snowy plains");
         assertFalse(tagged("minecraft/tags/worldgen/biome/has_structure/village_snowy.json", "rocky_snowy_plains"), "a village among the formations");
         assertFalse(tagged("minecraft/tags/worldgen/biome/has_structure/pillager_outpost.json", "rocky_snowy_plains"), "an outpost among the formations");
+    }
+
+    /** A mod biome's natural spawns of a category: the kinds (without their namespace) and their weights. */
+    private static Map<String, Integer> spawns(String biome, String category) throws IOException {
+        JsonObject spawns = read(DATA.resolve("players-versus/worldgen/biome/" + biome + ".json")).getAsJsonObject("attributes")
+                .getAsJsonObject("minecraft:gameplay/natural_mob_spawns").getAsJsonObject("argument").getAsJsonObject("spawns_by_category");
+        Map<String, Integer> found = new LinkedHashMap<>();
+        if (spawns.has(category)) {
+            for (JsonElement entry : spawns.getAsJsonArray(category)) {
+                found.merge(entry.getAsJsonObject().get("type").getAsString().replace("minecraft:", ""), entry.getAsJsonObject().get("weight").getAsInt(), Integer::sum);
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Every mod biome's animals are chosen for the place: no cattle or wolves in the warm, wet mangrove marsh; frogs and the
+     * swamp's monsters in every wetland; camels, husks and parched in the oasis; horses, donkeys and rabbits on the prairie;
+     * goats on the mountainsides and the rocky plains; parrots and ocelots toward the jungles; strays in the cold; no llamas in
+     * the woods; no farm animals in the pale biomes.
+     */
+    @Test
+    void theAnimalsAreChosenForThePlace() throws IOException {
+        assertTrue(Collections.disjoint(spawns("mangrove_marsh", "creature").keySet(), Set.of("cow", "sheep", "pig", "wolf")),
+                "the mangrove marsh's animals: " + spawns("mangrove_marsh", "creature"));
+        for (String wetland : List.of("grassy_wetlands", "humid_oak_forest", "cold_swamp", "mangrove_marsh", "pale_swamp")) {
+            assertTrue(spawns(wetland, "creature").containsKey("frog"), "no frogs in the " + wetland);
+            assertTrue(spawns(wetland, "monster").keySet().containsAll(Set.of("bogged", "slime", "witch")), "the " + wetland + "'s monsters: " + spawns(wetland, "monster"));
+        }
+        Map<String, Integer> oasis = spawns("desert_oasis", "creature");
+        assertTrue(oasis.containsKey("camel") && !oasis.containsKey("pig"), "the oasis's animals: " + oasis);
+        assertTrue(spawns("desert_oasis", "monster").keySet().containsAll(Set.of("husk", "parched")), "the oasis's monsters: " + spawns("desert_oasis", "monster"));
+        assertTrue(spawns("prairie", "creature").keySet().containsAll(Set.of("horse", "donkey", "rabbit")), "the prairie's animals: " + spawns("prairie", "creature"));
+        for (String rocky : List.of("rocky_plains", "rocky_snowy_plains", "mountainside_forest", "mountainside_forest_warm", "mountainside_jungle")) {
+            assertTrue(spawns(rocky, "creature").containsKey("goat"), "no goats in the " + rocky);
+        }
+        for (String jungleSide : List.of("warm_oak_forest", "dark_jungle_forest", "rocky_jungle", "mountainside_jungle")) {
+            assertTrue(spawns(jungleSide, "creature").containsKey("parrot"), "no parrots in the " + jungleSide);
+            assertTrue(spawns(jungleSide, "monster").containsKey("ocelot"), "no ocelots in the " + jungleSide);
+        }
+        for (String cold : List.of("cold_plains", "rocky_snowy_plains")) {
+            assertTrue(spawns(cold, "monster").containsKey("stray"), "no strays in the " + cold);
+        }
+        for (String woods : List.of("birch_taiga_forest", "dappled_taiga", "sparse_dappled_forest")) {
+            assertFalse(spawns(woods, "creature").containsKey("llama"), "llamas in the " + woods);
+        }
+        for (String pale : List.of("pale_taiga", "pale_swamp")) {
+            assertTrue(Collections.disjoint(spawns(pale, "creature").keySet(), Set.of("cow", "sheep", "pig", "chicken")), "farm animals in the " + pale + ": " + spawns(pale, "creature"));
+        }
+    }
+
+    /**
+     * The animals' variants follow the climate: warm and cold farm animals and frogs by the game's tags, and wolves' coats by its
+     * wolf variants (woods in the forests, rusty toward the jungles, ashen in the cold, chestnut by the old taigas), each variant
+     * keeping vanilla's own conditions and adding one for the mod's biomes.
+     */
+    @Test
+    void theAnimalsComeInTheirClimatesVariants() throws IOException {
+        String tags = "minecraft/tags/worldgen/biome/";
+        for (String warm : List.of("desert_oasis", "tuscan_grove", "rocky_plains", "warm_oak_forest", "dark_jungle_forest", "mangrove_marsh", "mountainside_jungle",
+                "mountainside_forest_warm")) {
+            assertTrue(tagged(tags + "spawns_warm_variant_farm_animals.json", warm), warm + "'s farm animals aren't the warm ones");
+            assertTrue(tagged(tags + "spawns_warm_variant_frogs.json", warm), warm + "'s frogs aren't the warm ones");
+        }
+        for (String cold : List.of("cold_plains", "cold_taiga", "cold_beach", "rocky_snowy_plains", "birch_taiga_forest", "dappled_taiga", "sparse_dappled_forest",
+                "dark_taiga_forest", "pale_taiga", "mixed_forest", "rocky_birch_forest", "cold_swamp")) {
+            assertTrue(tagged(tags + "spawns_cold_variant_farm_animals.json", cold), cold + "'s farm animals aren't the cold ones");
+        }
+        for (String cold : List.of("cold_swamp", "cold_plains", "cold_taiga", "rocky_snowy_plains")) {
+            assertTrue(tagged(tags + "spawns_cold_variant_frogs.json", cold), cold + "'s frogs aren't the cold ones");
+        }
+        Map<String, List<String>> coats = Map.of("woods", List.of("forest_edge", "old_oak_forest", "humid_oak_forest", "mixed_forest"),
+                "rusty", List.of("mountainside_jungle"), "ashen", List.of("cold_taiga", "cold_plains", "rocky_snowy_plains"),
+                "chestnut", List.of("pale_taiga", "dark_taiga_forest"));
+        for (Map.Entry<String, List<String>> coat : coats.entrySet()) {
+            Path file = DATA.resolve("minecraft/wolf_variant/" + coat.getKey() + ".json");
+            assertTrue(Files.exists(file), "the " + coat.getKey() + " wolves have no override");
+            JsonArray conditions = read(file).getAsJsonArray("spawn_conditions");
+            JsonArray own = vanilla("minecraft/wolf_variant/" + coat.getKey() + ".json").getAsJsonArray("spawn_conditions");
+            for (JsonElement condition : own) assertTrue(conditions.contains(condition), coat.getKey() + " lost vanilla's " + condition);
+            String all = conditions.toString();
+            for (String biome : coat.getValue()) assertTrue(all.contains("\"players-versus:" + biome + "\""), "no " + coat.getKey() + " wolves in the " + biome);
+        }
     }
 
     @Test
