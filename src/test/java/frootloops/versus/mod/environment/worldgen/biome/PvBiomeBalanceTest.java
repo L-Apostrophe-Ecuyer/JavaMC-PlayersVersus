@@ -126,6 +126,9 @@ class PvBiomeBalanceTest {
         for (String biome : List.of("pale_taiga", "pale_swamp")) {
             assertTrue(share(biome) > 0.003, biome + " is " + percent(share(biome)) + " of the world");
         }
+        // The rocky snowy plains: found, and a part of the snowy plains only
+        double rocky = share("rocky_snowy_plains"), snowy = share("snowy_plains") + rocky;
+        assertTrue(rocky >= 0.1 && rocky <= 0.5 * snowy, "the rocky snowy plains are " + percent(rocky) + " of the world, of the snowy plains' " + percent(snowy));
         // Sub-biomes stay pockets: the forest and the plains keep most of their climate
         assertTrue(share("old_oak_forest") <= 0.25 * share("forest"), "the old oak forest " + percent(share("old_oak_forest")) + " against the forest's " + percent(share("forest")));
         assertTrue(share("prairie") <= 0.25 * share("plains"), "the prairie " + percent(share("prairie")) + " against the plains' " + percent(share("plains")));

@@ -74,6 +74,8 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> ROCKY_JUNGLE = keyOf("rocky_jungle");
     /** The cold, level side of old growth birch forests: tall birches and spruces among boulders. */
     public static final ResourceKey<Biome> ROCKY_BIRCH_FOREST = keyOf("rocky_birch_forest");
+    /** The level snowy plains beside the cold plains: rock formations capped with packed ice, a lone spruce now and then. */
+    public static final ResourceKey<Biome> ROCKY_SNOWY_PLAINS = keyOf("rocky_snowy_plains");
 
     /** Where a biome goes; ALL_DEPTHS is a cave biome from the surface caves down to the deep caves. */
     public enum PlacedBiomeType {

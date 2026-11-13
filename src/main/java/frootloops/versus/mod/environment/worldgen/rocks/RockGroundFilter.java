@@ -19,9 +19,9 @@ import net.minecraft.world.level.levelgen.placement.PlacementFilter;
 /**
  * Placement filter {@code players-versus:rock_ground}: keeps a position where rock may stand ({@link RockGround}): in
  * the Players Versus world type only (vanilla world types keep vanilla's worldgen), on level ground with no water at its
- * middle, and in a climate for rocks unless {@code "climate": false} (a meadow's cluster: meadows are cool, high and
- * little eroded, yet a few rocks belong there). The ground's heights are within {@link RockGround#LEVEL} of each other,
- * or within {@code "level"} (a rocky biome's: rocks on its hillsides too).
+ * middle, and in a climate for rocks unless {@code "climate": false} (a rocky biome's rocks: the biome is their
+ * climate). The ground's heights are within {@link RockGround#LEVEL} of each other, or within {@code "level"} (a rocky
+ * biome's: rocks on its hillsides too).
  */
 public record RockGroundFilter(boolean climate, int level) implements PlacementFilter {
 

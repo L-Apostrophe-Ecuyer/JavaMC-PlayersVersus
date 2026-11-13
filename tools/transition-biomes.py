@@ -240,7 +240,8 @@ BIOMES.update({
 })
 
 
-# The rocky biomes: each between two others, its rocks placed in the step before trees (tools/rocks.py writes them)
+# The rocky biomes: each between two others, with rock formations (tools/rocks.py's structures, by the biome tags below); the
+# rocky jungle has small rocks too, placed in the step before trees
 BIOMES.update({
     "rocky_plains": {
         "neighbours": ["minecraft:savanna", "minecraft:plains"],
@@ -248,7 +249,6 @@ BIOMES.update({
         "temperature": 1.2, "downfall": 0.2, "has_precipitation": True,
         "trees": selector("minecraft:oak_checked", ("minecraft:acacia_checked", 0.35), ("minecraft:fancy_oak_checked", 0.1)),
         "tree_placement": dict(ratio=2, offset=-0.2),
-        "rocks": [f"{MOD}:rock/rocky_plains"],
         "vegetation": ["minecraft:glow_lichen", "minecraft:patch_tall_grass", f"{MOD}:trees_rocky_plains", "minecraft:flower_plains",
                        "minecraft:patch_grass_savanna", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal",
                        "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water"],
@@ -270,10 +270,21 @@ BIOMES.update({
         "temperature": 0.45, "downfall": 0.7, "has_precipitation": True,
         "trees": selector("minecraft:super_birch_bees_0002", ("minecraft:spruce_checked", 0.35), ("minecraft:birch_checked", 0.15), ("minecraft:pine_checked", 0.08)),
         "tree_placement": dict(ratio=10, offset=0.4),
-        "rocks": [f"{MOD}:rock/rocky_birch_forest"],
         "vegetation": ["minecraft:glow_lichen", "minecraft:patch_large_fern", "minecraft:wildflowers_birch_forest", f"{MOD}:trees_rocky_birch_forest",
                        "minecraft:flower_default", "minecraft:patch_grass_taiga_2", "minecraft:brown_mushroom_taiga", "minecraft:red_mushroom_taiga",
                        "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water", "minecraft:patch_berry_common"],
+    },
+    # The level snowy plains beside the cold plains: the snowy plains' ground and plants, a lone spruce or pine now and then,
+    # among rock formations capped with packed ice
+    "rocky_snowy_plains": {
+        "neighbours": ["minecraft:snowy_plains", "minecraft:snowy_taiga"],
+        # The snowy plains' (0.0, 0.5)
+        "temperature": 0.0, "downfall": 0.5, "has_precipitation": True,
+        "trees": selector("minecraft:spruce_checked", ("minecraft:pine_checked", 0.3)),
+        "tree_placement": dict(ratio=1, offset=-0.3),
+        "vegetation": ["minecraft:glow_lichen", f"{MOD}:trees_rocky_snowy_plains", "minecraft:flower_default", "minecraft:patch_grass_badlands",
+                       "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane",
+                       "minecraft:patch_firefly_bush_near_water"],
     },
 })
 
@@ -417,9 +428,9 @@ def add_to_tag(path, *values):
     write_json(path, tag)
 
 
-def inherit_tags(vanilla, parent, child):
+def inherit_tags(vanilla, parent, child, skip=()):
     """Adds `child` to every biome tag (the game's and the mod's, by file) that holds `parent`: the structures, mobs and
-    the rest of what makes the parent what it is."""
+    the rest of what makes the parent what it is; but the tags in `skip` (their paths under tags/worldgen/biome)."""
     found = []
     for root in [os.path.join(vanilla, "data"), DATA]:
         base = os.path.join(root, "minecraft", "tags", "worldgen", "biome")
@@ -429,7 +440,7 @@ def inherit_tags(vanilla, parent, child):
                 with open(path) as handle:
                     if parent in json.load(handle).get("values", []):
                         found.append(os.path.relpath(path, os.path.join(root, "minecraft", "tags", "worldgen", "biome")))
-    for relative in sorted(set(found)):
+    for relative in sorted(set(found) - set(skip)):
         add_to_tag(f"minecraft/tags/worldgen/biome/{relative}", child)
 
 
@@ -443,8 +454,16 @@ def tags(vanilla=None):
     if vanilla:
         inherit_tags(vanilla, "minecraft:dark_forest", f"{MOD}:warm_dark_forest")
     add_to_tag("minecraft/tags/worldgen/biome/is_jungle.json", f"{MOD}:rocky_jungle")
-    # The large rock formations stand in the rocky biomes only
+    # The large rock formations stand in the rocky biomes; capped with packed ice in the rocky snowy plains, and scattered so
+    # in the cold plains
     add_to_tag(f"{MOD}/tags/worldgen/biome/has_structure/rock_formation.json", f"{MOD}:rocky_plains", f"{MOD}:rocky_jungle", f"{MOD}:rocky_birch_forest")
+    add_to_tag(f"{MOD}/tags/worldgen/biome/has_structure/icy_rock_formation.json", f"{MOD}:rocky_snowy_plains")
+    add_to_tag(f"{MOD}/tags/worldgen/biome/has_structure/scattered_icy_rock_formation.json", f"{MOD}:cold_plains")
+    # The rocky snowy plains are snowy plains (igloos, snow foxes and white rabbits, cold animals), but for villages and
+    # outposts, which the formations would cut through
+    if vanilla:
+        inherit_tags(vanilla, "minecraft:snowy_plains", f"{MOD}:rocky_snowy_plains",
+                     skip=("has_structure/village_snowy.json", "has_structure/pillager_outpost.json"))
     # A Tuscan countryside has its villages
     add_to_tag("minecraft/tags/worldgen/biome/has_structure/village_plains.json", f"{MOD}:tuscan_grove")
     # The refinement pass's biomes are what they come from (villages on the forest edge and the prairie, taiga villages in the
@@ -467,7 +486,7 @@ NAMES = {
            "biome.players-versus.rocky_birch_forest": "Rocky Birch Forest", "biome.players-versus.forest_edge": "Forest Edge",
            "biome.players-versus.mixed_forest": "Mixed Forest", "biome.players-versus.old_oak_forest": "Old Oak Forest",
            "biome.players-versus.prairie": "Prairie", "biome.players-versus.pale_taiga": "Pale Taiga",
-           "biome.players-versus.pale_swamp": "Pale Swamp"},
+           "biome.players-versus.pale_swamp": "Pale Swamp", "biome.players-versus.rocky_snowy_plains": "Rocky Snowy Plains"},
     "fr": {"biome.players-versus.tuscan_grove": "Bosquet toscan", "biome.players-versus.warm_oak_forest": "Chênaie chaude",
            "biome.players-versus.warm_dark_forest": "Forêt sombre chaude",
            "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre", "biome.players-versus.humid_oak_forest": "Chênaie humide",
@@ -475,7 +494,7 @@ NAMES = {
            "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse", "biome.players-versus.forest_edge": "Lisière de forêt",
            "biome.players-versus.mixed_forest": "Forêt mixte", "biome.players-versus.old_oak_forest": "Vieille chênaie",
            "biome.players-versus.prairie": "Prairie", "biome.players-versus.pale_taiga": "Taïga pâle",
-           "biome.players-versus.pale_swamp": "Marais pâle"},
+           "biome.players-versus.pale_swamp": "Marais pâle", "biome.players-versus.rocky_snowy_plains": "Plaines enneigées rocheuses"},
 }
 
 

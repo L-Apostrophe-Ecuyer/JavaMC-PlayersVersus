@@ -509,5 +509,7 @@
   "biome.players-versus.forest_edge": "Forest Edge",
   "biome.players-versus.mixed_forest": "Mixed Forest",
   "biome.players-versus.old_oak_forest": "Old Oak Forest",
-  "biome.players-versus.prairie": "Prairie"
+  "biome.players-versus.prairie": "Prairie",
+
+  "biome.players-versus.rocky_snowy_plains": "Rocky Snowy Plains"
 }

@@ -10,3 +10,7 @@ stage:minecraft:savanna
 rock:players-versus:rock/spires,4
 rock:players-versus:rock/towers,6
 rock:players-versus:rock/massif,1
+stage:minecraft:snowy_plains
+rock:players-versus:rock/icy_great_boulders,2
+rock:players-versus:rock/icy_monolith,8
+rock:players-versus:rock/icy_massif,1

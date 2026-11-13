@@ -1,5 +1,6 @@
 package frootloops.versus.mod.environment.worldgen.rocks;
 
+import net.minecraft.world.level.biome.Climate;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -33,6 +34,22 @@ class RockGroundTest {
         assertTrue(RockGround.climate(0.1F, 0.35F, 0.4F), "wetter");
         assertTrue(RockGround.climate(0.1F, 0.1F, 0.25F), "less eroded");
         assertTrue(RockGround.climate(0.1F, 0.1F, 0.65F), "more eroded");
+    }
+
+    /**
+     * A formation stands where its biomes' tags put it, cold ones too (the rocky snowy plains, the cold plains): the ground
+     * decides, not the temperature. Still not on mountainsides, nor in the 3D-noise terrain.
+     */
+    @Test
+    void formationsStandWhateverTheTemperature() {
+        assertTrue(RockGround.terrain(-0.3F, 0.2F), "a snowy plain's ground");
+        assertTrue(RockGround.terrain(0.35F, 0.4F), "wetter than the 3D-noise terrain");
+        assertFalse(RockGround.terrain(0.0F, -0.35F), "a mountainside");
+        assertFalse(RockGround.terrain(0.1F, 0.4F), "the 3D-noise terrain");
+        assertTrue(RockFormationStructure.suits(Climate.target(-0.8F, -0.3F, 0.3F, 0.2F, 0.0F, 0.0F)), "a formation in a snowy plain's climate");
+        assertTrue(RockFormationStructure.suits(Climate.target(0.1F, -0.3F, 0.3F, 0.2F, 0.0F, 0.0F)), "and in a plain's");
+        assertFalse(RockFormationStructure.suits(Climate.target(-0.8F, 0.1F, 0.3F, 0.4F, 0.0F, 0.0F)), "not in the 3D-noise terrain's");
+        assertFalse(RockFormationStructure.suits(Climate.target(-0.8F, -0.3F, 0.3F, -0.5F, 0.0F, 0.0F)), "nor on a mountainside");
     }
 
     @Test

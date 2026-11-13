@@ -21,7 +21,8 @@ import java.util.Optional;
  * In the data, a structure's usual settings and {@code "rock": {...}}, as a feature's.
  *
  * <p>No formation where its middle is under water (rock towers in lakes and seas are another thing), nor where rock may
- * not stand there ({@link RockGround}: the climate, level ground).
+ * not stand there ({@link RockGround}: above the mountainsides, out of the 3D-noise terrain, on level ground); its biomes
+ * decide the rest, cold ones too.
  */
 public class RockFormationStructure extends Structure {
 
@@ -62,10 +63,18 @@ public class RockFormationStructure extends Structure {
         }));
     }
 
-    /** Whether rock may stand at the main body's middle: its climate, and level ground around it ({@link RockGround}). */
+    /**
+     * Whether a formation may stand in this climate: its ground's ({@link RockGround#terrain}), whatever the temperature, as the
+     * structure's biomes (its tag) decide where it goes, cold places too.
+     */
+    static boolean suits(Climate.TargetPoint climate) {
+        return RockGround.terrain(Climate.unquantizeCoord(climate.humidity()), Climate.unquantizeCoord(climate.erosion()));
+    }
+
+    /** Whether rock may stand at the main body's middle: its climate's ground, and level ground around it ({@link RockGround}). */
     private boolean onRockGround(Structure.GenerationContext context, int x, int y, int z) {
         Climate.TargetPoint climate = context.climateSampler().sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z));
-        if (!RockGroundFilter.suits(climate)) return false;
+        if (!suits(climate)) return false;
         int[] heights = new int[RockGround.AROUND.length];
         for (int index = 0; index < heights.length; index++) {
             heights[index] = context.chunkGenerator().getFirstOccupiedHeight(x + RockGround.AROUND[index][0], z + RockGround.AROUND[index][1], Heightmap.Types.OCEAN_FLOOR_WG,

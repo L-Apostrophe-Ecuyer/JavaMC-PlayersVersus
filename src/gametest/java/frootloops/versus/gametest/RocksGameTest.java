@@ -2,7 +2,6 @@ package frootloops.versus.gametest;
 
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
-import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.environment.worldgen.CustomWorldgen;
 import frootloops.versus.mod.environment.worldgen.rocks.LevelRockCanvas;
 import frootloops.versus.mod.environment.worldgen.rocks.RockFeature;
@@ -21,26 +20,23 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -261,26 +257,65 @@ public class RocksGameTest {
         helper.succeed();
     }
 
+    /**
+     * The small rocks are the rocky jungle's only (a boulder, a pile or a crag alone on a plain looks out of place; among the
+     * rocky jungle's crags they belong): no other biome, vanilla's or the mod's, places a rock feature, modifications included.
+     */
     @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
-    public void theMiddleBiomesHaveRocks(GameTestHelper helper) {
+    public void onlyTheRockyJungleHasSmallRocks(GameTestHelper helper) {
         Registry<Biome> biomes = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
-        ResourceKey<PlacedFeature> sparse = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.parse("players-versus:rock/sparse"));
-        ResourceKey<PlacedFeature> cluster = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.parse("players-versus:rock/meadow_cluster"));
-        for (ResourceKey<Biome> biome : List.of(Biomes.PLAINS, Biomes.FOREST, Biomes.SAVANNA, Biomes.JUNGLE, CustomOverworldBiomes.TUSCAN_GROVE)) {
-            helper.assertTrue(rocks(biomes, biome, sparse), biome.identifier() + " has clusters of rocks");
+        List<String> rocky = new ArrayList<>();
+        for (var entry : biomes.entrySet()) {
+            boolean rocks = entry.getValue().getGenerationSettings().features().stream().flatMap(HolderSet::stream)
+                    .anyMatch(holder -> holder.unwrapKey().map(key -> key.identifier().getNamespace().equals("players-versus")
+                            && key.identifier().getPath().startsWith("rock/")).orElse(false));
+            if (rocks) rocky.add(entry.getKey().identifier().toString());
         }
-        helper.assertTrue(rocks(biomes, Biomes.MEADOW, cluster), "a meadow has a cluster of rocks now and then");
-        for (ResourceKey<Biome> biome : List.of(Biomes.DESERT, Biomes.SNOWY_PLAINS, Biomes.TAIGA, Biomes.SWAMP)) {
-            helper.assertTrue(!rocks(biomes, biome, sparse) && !rocks(biomes, biome, cluster), biome.identifier() + " has no rocks");
-        }
+        helper.assertTrue(rocky.equals(List.of("players-versus:rocky_jungle")), "small rocks in " + rocky);
         helper.succeed();
     }
 
-    /** Whether the biome places the feature in the step before trees. */
-    private static boolean rocks(Registry<Biome> biomes, ResourceKey<Biome> biome, ResourceKey<PlacedFeature> feature) {
-        List<HolderSet<PlacedFeature>> steps = biomes.getValueOrThrow(biome).getGenerationSettings().features();
-        int step = GenerationStep.Decoration.LOCAL_MODIFICATIONS.ordinal();
-        return steps.size() > step && steps.get(step).stream().anyMatch(holder -> holder.is(feature));
+    /**
+     * The icy formations are capped for the cold: boulders of the icy great boulders, stamped on the grove's floor at four
+     * places, have packed ice on their tops, and add none of the gray rock's moss, packed mud or plants.
+     */
+    @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)
+    public void anIcyFormationIsCappedWithPackedIce(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Structure structure = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(Identifier.parse("players-versus:rock/icy_great_boulders"));
+        helper.assertTrue(structure instanceof RockFormationStructure, "players-versus:rock/icy_great_boulders is a rock formation, not " + structure);
+        RockTemplate rock = ((RockFormationStructure) structure).rock();
+        int[] before = coverCount(helper);
+        int[][] spots = {{12, 12}, {36, 12}, {12, 36}, {36, 36}};
+        for (int index = 0; index < spots.length; index++) {
+            // The first of the boulders around the great one: a boulder of the usual size, with the boulder's own cover
+            RockModel model = RockModel.build(rock.plan(index).bodies().get(1));
+            BlockPos at = helper.absolutePos(new BlockPos(spots[index][0], 1, spots[index][1]));
+            RockStamper.stamp(model, at.getX(), at.getY(), at.getZ(), new LevelRockCanvas(level, rock.palette()), at.getX() - 11, at.getZ() - 11,
+                    at.getX() + 11, at.getZ() + 11);
+        }
+        int[] after = coverCount(helper);
+        helper.assertTrue(after[0] - before[0] >= 12, "only " + (after[0] - before[0]) + " packed ice on four icy boulders");
+        helper.assertTrue(after[1] == before[1] && after[2] == before[2] && after[3] == before[3], "icy boulders added " + (after[1] - before[1]) + " moss, "
+                + (after[2] - before[2]) + " packed mud and " + (after[3] - before[3]) + " plants");
+        helper.succeed();
+    }
+
+    /** How many blocks of packed ice, moss, packed mud and plants (short grass, ferns, bushes) the grove has. */
+    private static int[] coverCount(GameTestHelper helper) {
+        int[] count = new int[4];
+        for (int x = 0; x < 48; x++) {
+            for (int z = 0; z < 48; z++) {
+                for (int y = 1; y < 40; y++) {
+                    BlockState state = helper.getBlockState(new BlockPos(x, y, z));
+                    if (state.is(Blocks.PACKED_ICE)) count[0]++;
+                    else if (state.is(BlockTags.MOSS_BLOCKS)) count[1]++;
+                    else if (state.is(Blocks.PACKED_MUD)) count[2]++;
+                    else if (state.is(Blocks.SHORT_GRASS) || state.is(Blocks.FERN) || state.is(Blocks.BUSH)) count[3]++;
+                }
+            }
+        }
+        return count;
     }
 
     @GameTest(structure = GROVE, maxTicks = 20, skyAccess = true)

@@ -71,6 +71,24 @@ the cold woods, fallen logs, berries), the cold beach is made a beach (no flower
 earlier parts' deferred items: the waterlogged leaves only where the water is two deep and in their own biome, the
 mangrove marsh's bushes out of the water, the leaves' game test from the chunk's corner, the docs' counts and javadoc.
 
+### Rocks (asked during the pass)
+
+"Small boulders rocks are ugly atm, unless next to massive boulders or in rocky jungles (which are already quite noisy).
+They should become exclusive to rocky jungles. I would also have the massive boulders be able to spawn in cold plains
+and rocky snowy plains (with packed ice instead of grass and moss)."
+
+- The small rocks (the boulder, pile and crag features) are the rocky jungle's only: gone from the middle biomes and the
+  meadows (`CustomWorldgen`'s modifications), the rocky plains and the rocky birch forest. The formations keep the
+  smaller bodies around their great one (next to it, where the user finds them right).
+- Icy formations: the five formations again, capped for the cold: packed ice in place of grass and moss, rock in place
+  of the earth under them, no plants. As dense as the other rocky biomes' in a new **Rocky Snowy Plains** (the
+  formations' own structure set), scattered in the cold plains (a set of their own, about a third as dense).
+- Rocky Snowy Plains: the snowy plains' level ground (erosion 0.05 and up, out of the 3D-noise terrain) from
+  temperature -0.7 up to the frozen strip (-0.55), beside the cold plains. The snowy plains' features, a lone spruce or
+  pine now and then; igloos and the snowy plains' animals, no villages or outposts (the formations would cut them).
+- Formations check the ground (erosion, the 3D-noise terrain, level ground) but no longer the temperature: their
+  biomes' tags place them.
+
 ## Checks
 
 - `PvBiomeBalanceTest` (new): the real climate (seed 1234) on a grid; the dark forest's share of its family, the
@@ -84,4 +102,4 @@ mangrove marsh's bushes out of the water, the leaves' game test from the chunk's
 
 ## Not in this part
 
-New blocks or fruits; terrain; the rocks; other biomes' sub-biomes (savanna, taiga, desert interiors).
+New blocks or fruits; terrain; the rocks' shapes; other biomes' sub-biomes (savanna, taiga, desert interiors).

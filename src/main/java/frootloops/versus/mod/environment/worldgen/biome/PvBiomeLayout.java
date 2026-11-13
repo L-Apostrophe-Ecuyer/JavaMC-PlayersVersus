@@ -111,13 +111,17 @@ public final class PvBiomeLayout {
     static final float TEMPERATE_MIN = 0.0F;
     /** The rocky biomes lie where the ground is level: erosion from this up. */
     static final float ROCKY_EROSION_MIN = 0.05F;
+    /** The frozen strip: the snowy biomes' warm edge and the cool biomes' cold edge, where they turn into each other's kin. */
+    static final float FROZEN_MIN = -0.55F, FROZEN_MAX = -0.375F;
+    /** The rocky snowy plains: the snowy plains from this temperature up to the frozen strip (the cold plains), on level ground. */
+    static final float ROCKY_SNOWY_PLAINS_MIN = -0.7F;
     /** The rocky jungle: the jungles from the warm band up to this temperature. */
     static final float ROCKY_JUNGLE_MAX = 0.36F;
     /**
      * The 3D-noise terrain's climate (part 2's zone, {@link PvWorldgenConstants}): humidity 0 to 0.3 with erosion 0.3 to
      * 0.6. Rugged, overhanging ground, where no rocky biome goes.
      */
-    static final float NOISE_HUMIDITY_MAX = (float) PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MAX;
+    static final float NOISE_HUMIDITY_MIN = (float) PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MIN, NOISE_HUMIDITY_MAX = (float) PvWorldgenConstants.NOISE_ZONE_HUMIDITY_MAX;
     static final float NOISE_EROSION_MIN = (float) PvWorldgenConstants.NOISE_ZONE_EROSION_MIN, NOISE_EROSION_MAX = (float) PvWorldgenConstants.NOISE_ZONE_EROSION_MAX;
 
     /**
@@ -165,8 +169,14 @@ public final class PvBiomeLayout {
             new Rule("peak-cold", Box.ALL.withMax(Box.T, Climate.quantizeCoord(0.235F)),
                     // Stony peaks start at 0.2, above freezing: their cold edge is an alpine meadow, not windswept hills
                     (slice, biome) -> biome == Biomes.STONY_PEAKS ? Biomes.MEADOW : null),
-            new Rule("frozen", Box.ALL.withMin(Box.T, Climate.quantizeCoord(-0.55F)).withMax(Box.T, Climate.quantizeCoord(-0.375F)),
+            new Rule("frozen", Box.ALL.withMin(Box.T, Climate.quantizeCoord(FROZEN_MIN)).withMax(Box.T, Climate.quantizeCoord(FROZEN_MAX)),
                     (slice, biome) -> CustomOverworldBiomes.getSnowyToTemperateTransitionBiome(biome)),
+            // The level snowy plains beside the cold plains, out of the 3D-noise terrain's climate: three boxes
+            new Rule("rocky-snowy-plains", rockySnowyPlains().withMax(Box.H, Climate.quantizeCoord(NOISE_HUMIDITY_MIN)), PvBiomeLayout::rockySnowyPlainsTarget),
+            new Rule("rocky-snowy-plains", rockySnowyPlains().withMin(Box.H, Climate.quantizeCoord(NOISE_HUMIDITY_MIN)).withMax(Box.E, Climate.quantizeCoord(NOISE_EROSION_MIN)),
+                    PvBiomeLayout::rockySnowyPlainsTarget),
+            new Rule("rocky-snowy-plains", rockySnowyPlains().withMin(Box.H, Climate.quantizeCoord(NOISE_HUMIDITY_MIN)).withMin(Box.E, Climate.quantizeCoord(NOISE_EROSION_MAX)),
+                    PvBiomeLayout::rockySnowyPlainsTarget),
             // The level part of the savannas' cool edge, before the Tuscan grove takes the rest
             new Rule("rocky-plains", Box.ALL.withMax(Box.T, Climate.quantizeCoord(WARM_BAND_MAX)).withMin(Box.E, Climate.quantizeCoord(ROCKY_EROSION_MIN)),
                     (slice, biome) -> biome == Biomes.SAVANNA || biome == Biomes.SAVANNA_PLATEAU ? CustomOverworldBiomes.ROCKY_PLAINS : null),
@@ -384,6 +394,17 @@ public final class PvBiomeLayout {
     private static Box taigaEdge() {
         return Box.ALL.withMin(Box.T, Climate.quantizeCoord(TAIGA_EDGE_TEMPERATURE - TAIGA_EDGE_HALF_WIDTH))
                 .withMax(Box.T, Climate.quantizeCoord(TAIGA_EDGE_TEMPERATURE + TAIGA_EDGE_HALF_WIDTH));
+    }
+
+    /** The rocky snowy plains' box before the 3D-noise terrain's climate is cut out of it: just colder than the frozen strip, level. */
+    private static Box rockySnowyPlains() {
+        return Box.ALL.withMin(Box.T, Climate.quantizeCoord(ROCKY_SNOWY_PLAINS_MIN)).withMax(Box.T, Climate.quantizeCoord(FROZEN_MIN))
+                .withMin(Box.E, Climate.quantizeCoord(ROCKY_EROSION_MIN));
+    }
+
+    @Nullable
+    private static ResourceKey<Biome> rockySnowyPlainsTarget(Box slice, ResourceKey<Biome> biome) {
+        return biome == Biomes.SNOWY_PLAINS ? CustomOverworldBiomes.ROCKY_SNOWY_PLAINS : null;
     }
 
     /** The rocky jungle's box before the 3D-noise terrain's climate is cut out of it: just warmer than the warm band, level. */

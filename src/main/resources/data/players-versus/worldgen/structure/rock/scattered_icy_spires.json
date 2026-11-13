@@ -1,0 +1,43 @@
+{
+  "type": "players-versus:rock_formation",
+  "biomes": "#players-versus:has_structure/scattered_icy_rock_formation",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "rock": {
+    "bodies": [
+      {
+        "shape": "spire"
+      },
+      {
+        "shape": "tower",
+        "count": [
+          0,
+          1
+        ],
+        "distance": [
+          30,
+          40
+        ]
+      },
+      {
+        "shape": "pile",
+        "count": [
+          1,
+          2
+        ],
+        "distance": [
+          23,
+          30
+        ]
+      }
+    ],
+    "palette": {
+      "grass": "minecraft:packed_ice",
+      "moss": "minecraft:packed_ice",
+      "soil": "minecraft:stone",
+      "mud": "minecraft:stone",
+      "plants": []
+    }
+  }
+}

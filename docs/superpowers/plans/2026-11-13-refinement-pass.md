@@ -46,6 +46,13 @@
 - [ ] Implement the rules (constants named for each number).
 - [ ] Run `PvBiomeLayoutTest`, `PvBiomeBalanceTest`, `BiomeDataTest`, `*Rock*`: PASS. Commit.
 
+### Task 2b: Rocks (asked during the pass)
+
+**Files:** `tools/rocks.py` (small rocks the rocky jungle's only; the icy formations and their structure set), `tools/transition-biomes.py` (rocky snowy plains; the rocky plains and birch forest without small rocks; tags; names), `CustomWorldgen.java` (no small rocks by modification), `RockGround.java` and `RockFormationStructure.java` (formations check the ground, not the temperature), `PvBiomeLayout.java` (rocky-snowy-plains rule), `CustomOverworldBiomes.java` (`ROCKY_SNOWY_PLAINS`); tests `RocksGameTest`, `BiomeDataTest`, `RockGroundTest`, `PvBiomeLayoutTest`, `PvBiomeBalanceTest`.
+
+- [ ] Write the failing tests: no biome but the rocky jungle places small rocks (game test, the registry with the modifications); an icy formation's boulder stamped has packed ice on top and no moss, packed mud or plants (game test); the icy structures, their sets and tags, the rocky snowy plains' tags (`BiomeDataTest`); formations stand in the cold, not on mountainsides nor in the 3D-noise terrain (`RockGroundTest`); the rule's probes (`PvBiomeLayoutTest`); the rocky snowy plains' share (`PvBiomeBalanceTest`).
+- [ ] Run them: FAIL. Implement and regenerate. Run them, `*Rock*` and `BiomeFeatureOrderTest`, and the rock game tests: PASS. Commit.
+
 ### Task 3: River banks
 
 **Files:** `tools/refine-biomes.py` (features, placed features, the tags `players-versus:has_riverbanks` and `players-versus:has_riverbank_willows`), `CustomWorldgen.java` (biome modifications), new `RiverbanksGameTest`.

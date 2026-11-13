@@ -3,9 +3,10 @@ package frootloops.versus.mod.environment.worldgen.rocks;
 import frootloops.versus.mod.environment.worldgen.PvWorldgenConstants;
 
 /**
- * Where rock may stand in the world: in the middle temperatures (plains, forests, savannas, jungles, not the cold
- * biomes, nor deserts and badlands), above the mountainsides, out of the 3D-noise terrain, on level ground. Rocks and
- * formations alike ({@link RockGroundFilter}, {@link RockFormationStructure}).
+ * Where rock may stand in the world: above the mountainsides, out of the 3D-noise terrain, on level ground; and for rocks
+ * placed by a filter that asks for it, in the middle temperatures (plains, forests, savannas, jungles, not the cold biomes,
+ * nor deserts and badlands). Formations go where their biomes' tags put them, cold places too ({@link RockGroundFilter},
+ * {@link RockFormationStructure}).
  */
 public final class RockGround {
 
@@ -39,9 +40,14 @@ public final class RockGround {
         return around;
     }
 
-    /** Whether rock may stand in this climate. */
+    /** Whether rock may stand in this climate: its temperature, and its ground ({@link #terrain}). */
     public static boolean climate(float temperature, float humidity, float erosion) {
-        if (temperature < COLDEST || temperature > WARMEST || erosion <= LEAST_EROSION) return false;
+        return temperature >= COLDEST && temperature <= WARMEST && terrain(humidity, erosion);
+    }
+
+    /** Whether the climate's ground takes rock, whatever its temperature: above the mountainsides, out of the 3D-noise terrain. */
+    public static boolean terrain(float humidity, float erosion) {
+        if (erosion <= LEAST_EROSION) return false;
         boolean noise = humidity >= NOISE_HUMIDITY_MIN && humidity < NOISE_HUMIDITY_MAX && erosion >= NOISE_EROSION_MIN && erosion < NOISE_EROSION_MAX;
         return !noise;
     }

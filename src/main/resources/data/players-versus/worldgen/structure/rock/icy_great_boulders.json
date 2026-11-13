@@ -1,0 +1,56 @@
+{
+  "type": "players-versus:rock_formation",
+  "biomes": "#players-versus:has_structure/icy_rock_formation",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "rock": {
+    "bodies": [
+      {
+        "shape": "boulder",
+        "height": [
+          12,
+          18
+        ],
+        "radius": [
+          7,
+          10
+        ],
+        "cover": 0.1
+      },
+      {
+        "shape": "boulder",
+        "count": [
+          1,
+          3
+        ],
+        "distance": [
+          14,
+          19
+        ],
+        "height": [
+          5,
+          9
+        ]
+      },
+      {
+        "shape": "pile",
+        "count": [
+          0,
+          2
+        ],
+        "distance": [
+          16,
+          22
+        ]
+      }
+    ],
+    "palette": {
+      "grass": "minecraft:packed_ice",
+      "moss": "minecraft:packed_ice",
+      "soil": "minecraft:stone",
+      "mud": "minecraft:stone",
+      "plants": []
+    }
+  }
+}

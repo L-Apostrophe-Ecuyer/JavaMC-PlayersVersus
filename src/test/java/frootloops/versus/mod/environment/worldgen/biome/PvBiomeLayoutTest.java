@@ -331,6 +331,38 @@ class PvBiomeLayoutTest {
         assertTrue(rocky > 0, "no old growth birch turns rocky");
     }
 
+    /**
+     * The snowy plains' level ground (erosion 0.05 and up) from temperature {@link PvBiomeLayout#ROCKY_SNOWY_PLAINS_MIN} up to the
+     * frozen strip, beside the cold plains, is the rocky snowy plains; colder, hilly, or in the 3D-noise terrain's climate they
+     * stay snowy plains.
+     */
+    @Test
+    void rockySnowyPlainsTakeTheLevelSnowyPlainsBesideTheColdPlains() {
+        Climate.ParameterList<ResourceKey<Biome>> layout = entries(toPairs(PvBiomeLayout.build()));
+        long band = Climate.quantizeCoord(-0.62F), colder = Climate.quantizeCoord(-0.8F);
+        int rocky = 0, noise = 0;
+        for (Pair<ParameterPoint, ResourceKey<Biome>> entry : vanilla) {
+            ParameterPoint h = entry.getFirst();
+            if (!PvBiomeLayout.isPoint(h.depth(), 0.0F) || entry.getSecond() != Biomes.SNOWY_PLAINS || !holds(h.temperature(), band) || !holds(h.temperature(), colder)) continue;
+            long humidity = Math.min(mid(h.humidity()), Climate.quantizeCoord(-0.05F)), c = mid(h.continentalness()), w = mid(h.weirdness());
+            if (!holds(h.humidity(), humidity)) continue;
+            Long level = inside(h.erosion(), PvBiomeLayout.ROCKY_EROSION_MIN, 1.0F), hilly = inside(h.erosion(), -0.3F, PvBiomeLayout.ROCKY_EROSION_MIN);
+            if (level != null) {
+                assertEquals(CustomOverworldBiomes.ROCKY_SNOWY_PLAINS, layout.findValue(point(band, humidity, c, level, w)), "the level snowy plains of " + h);
+                assertEquals(Biomes.SNOWY_PLAINS, layout.findValue(point(colder, humidity, c, level, w)), "only beside the cold plains, " + h);
+                rocky++;
+            }
+            if (hilly != null) assertEquals(Biomes.SNOWY_PLAINS, layout.findValue(point(band, humidity, c, hilly, w)), "hilly, " + h);
+            Long inNoise = inside(h.erosion(), 0.35F, 0.55F);
+            if (inNoise != null && holds(h.humidity(), Climate.quantizeCoord(0.05F))) {
+                assertEquals(Biomes.SNOWY_PLAINS, layout.findValue(point(band, Climate.quantizeCoord(0.05F), c, inNoise, w)), "in the 3D-noise terrain's climate, " + h);
+                noise++;
+            }
+        }
+        assertTrue(rocky > 0, "no snowy plains slice turns rocky");
+        assertTrue(noise > 0, "no snowy plains slice in the 3D-noise terrain's climate checked");
+    }
+
     /** Every swamp has a rim of humid oak forest where its erosion begins, up to {@link PvBiomeLayout#SWAMP_RIM_MAX}. */
     @Test
     void swampsHaveAHumidOakRim() {

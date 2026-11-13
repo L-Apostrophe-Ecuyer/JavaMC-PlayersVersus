@@ -19,6 +19,26 @@
     {
       "structure": "players-versus:rock/massif",
       "weight": 1
+    },
+    {
+      "structure": "players-versus:rock/icy_monolith",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/icy_spires",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/icy_towers",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/icy_great_boulders",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/icy_massif",
+      "weight": 1
     }
   ],
   "placement": {

@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,7 +30,9 @@ class BiomeDataTest {
     /** The vegetation step's index in a biome's feature steps. */
     private static final int VEGETATION = 9;
     private static final List<String> NEW_BIOMES = List.of("warm_dark_forest", "grassy_wetlands", "mangrove_marsh", "forest_edge", "mixed_forest",
-            "old_oak_forest", "prairie", "pale_taiga", "pale_swamp");
+            "old_oak_forest", "prairie", "pale_taiga", "pale_swamp", "rocky_snowy_plains");
+    /** The rock formations (tools/rocks.py), by their structures' names. */
+    private static final List<String> FORMATIONS = List.of("monolith", "spires", "towers", "great_boulders", "massif");
 
     private static JsonObject read(Path path) throws IOException {
         return JsonParser.parseString(Files.readString(path)).getAsJsonObject();
@@ -239,6 +242,63 @@ class BiomeDataTest {
         assertTrue(placedFeatureExists("players-versus:great_oak_checked"), "players-versus:great_oak_checked is no placed feature");
         assertTrue(Files.readString(DATA.resolve("players-versus/worldgen/feature/trees_old_oak_forest.json")).contains("players-versus:great_oak_checked"),
                 "the old oak forest doesn't grow great oaks");
+    }
+
+    /**
+     * The small rocks (a boulder, a pile or a crag on their own) are the rocky jungle's only: no other biome file lists one, and
+     * the placed features that put them in the middle biomes, the meadows, the rocky plains and the rocky birch forest are gone.
+     */
+    @Test
+    void theSmallRocksAreTheRockyJunglesOnly() throws IOException {
+        List<String> rocky = new ArrayList<>();
+        for (String folder : List.of("players-versus/worldgen/biome", "minecraft/worldgen/biome")) {
+            if (!Files.isDirectory(DATA.resolve(folder))) continue;
+            try (Stream<Path> files = Files.list(DATA.resolve(folder))) {
+                for (Path file : files.filter(f -> f.toString().endsWith(".json")).sorted().toList()) {
+                    if (read(file).getAsJsonArray("features").toString().contains("players-versus:rock/")) rocky.add(file.getFileName().toString());
+                }
+            }
+        }
+        assertEquals(List.of("rocky_jungle.json"), rocky, "the biomes with small rocks");
+        for (String gone : List.of("sparse", "meadow_cluster", "rocky_plains", "rocky_birch_forest")) {
+            assertFalse(Files.exists(DATA.resolve("players-versus/worldgen/placed_feature/rock/" + gone + ".json")), "rock/" + gone + " is still a placed feature");
+        }
+    }
+
+    /**
+     * The formations again, capped for the cold (packed ice in place of grass and moss, no plants): as dense as the other rocky
+     * biomes' in the rocky snowy plains (in the formations' own structure set), scattered in the cold plains (a set of their
+     * own, further apart). The rocky snowy plains have the snowy plains' igloos and snow foxes, and no villages or outposts
+     * among their formations.
+     */
+    @Test
+    void theIcyFormationsStandInTheRockySnowyPlainsAndTheColdPlains() throws IOException {
+        Path structures = DATA.resolve("players-versus/worldgen/structure/rock"), sets = DATA.resolve("players-versus/worldgen/structure_set");
+        String dense = read(sets.resolve("rock_formations.json")).toString();
+        JsonObject scattered = read(sets.resolve("scattered_icy_rock_formations.json"));
+        for (String name : FORMATIONS) {
+            JsonObject gray = read(structures.resolve(name + ".json"));
+            for (String[] kind : new String[][]{{"icy_", "icy_rock_formation"}, {"scattered_icy_", "scattered_icy_rock_formation"}}) {
+                JsonObject icy = read(structures.resolve(kind[0] + name + ".json"));
+                assertEquals("#players-versus:has_structure/" + kind[1], icy.get("biomes").getAsString(), kind[0] + name + "'s biomes");
+                assertEquals(gray.getAsJsonObject("rock").get("bodies"), icy.getAsJsonObject("rock").get("bodies"), kind[0] + name + " is shaped as " + name);
+                JsonObject palette = icy.getAsJsonObject("rock").getAsJsonObject("palette");
+                assertEquals("minecraft:packed_ice", palette.get("grass").getAsString(), kind[0] + name + "'s cover");
+                assertEquals("minecraft:packed_ice", palette.get("moss").getAsString(), kind[0] + name + "'s moss");
+                assertEquals(0, palette.getAsJsonArray("plants").size(), kind[0] + name + "'s plants");
+            }
+            assertTrue(dense.contains("\"players-versus:rock/icy_" + name + "\""), "rock_formations doesn't place icy_" + name);
+            assertTrue(scattered.toString().contains("\"players-versus:rock/scattered_icy_" + name + "\""), "the scattered set doesn't place scattered_icy_" + name);
+        }
+        int denseSpacing = read(sets.resolve("rock_formations.json")).getAsJsonObject("placement").get("spacing").getAsInt();
+        assertTrue(scattered.getAsJsonObject("placement").get("spacing").getAsInt() > denseSpacing, "the cold plains' formations are scattered");
+        assertTrue(tagged("players-versus/tags/worldgen/biome/has_structure/icy_rock_formation.json", "rocky_snowy_plains"), "no icy formations in the rocky snowy plains");
+        assertTrue(tagged("players-versus/tags/worldgen/biome/has_structure/scattered_icy_rock_formation.json", "cold_plains"), "no icy formations in the cold plains");
+        assertFalse(tagged("players-versus/tags/worldgen/biome/has_structure/icy_rock_formation.json", "cold_plains"), "the cold plains' formations are the scattered ones");
+        assertTrue(tagged("minecraft/tags/worldgen/biome/has_structure/igloo.json", "rocky_snowy_plains"), "no igloos in the rocky snowy plains");
+        assertTrue(tagged("minecraft/tags/worldgen/biome/spawns_snow_foxes.json", "rocky_snowy_plains"), "no snow foxes in the rocky snowy plains");
+        assertFalse(tagged("minecraft/tags/worldgen/biome/has_structure/village_snowy.json", "rocky_snowy_plains"), "a village among the formations");
+        assertFalse(tagged("minecraft/tags/worldgen/biome/has_structure/pillager_outpost.json", "rocky_snowy_plains"), "an outpost among the formations");
     }
 
     @Test

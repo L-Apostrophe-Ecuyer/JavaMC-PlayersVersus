@@ -4,12 +4,16 @@
     python3 tools/rocks.py
 
 - Small rocks, feature type players-versus:rock (RockFeature), each within 16 blocks of its origin: a boulder, a pile, a
-  crag. Placed in small clusters, rarely, in the middle biomes (rock/sparse, a selector of the three) and in meadows
-  (rock/meadow_cluster), on rock ground only (the players-versus:rock_ground filter); the rocky biomes place them
-  everywhere, on steeper ground too, with placed features of their own (tools/transition-biomes.py lists them).
+  crag. The rocky jungle's only (among its crags they belong; alone on a plain they looked out of place): placed
+  everywhere in it, on steeper ground too, on rock ground (the players-versus:rock_ground filter; tools/transition-biomes.py
+  lists the placed feature in the biome).
 - Large rocks, structure type players-versus:rock_formation (RockFormationStructure), on the world's grid of the
   structure set rock_formations: a monolith, spires, towers, great boulders, a massif. They generate in the biomes of
   the tag #players-versus:has_structure/rock_formation: the rocky biomes (tools/transition-biomes.py adds them).
+- The same formations capped for the cold (packed ice in place of grass and moss, rock under it, no plants): icy_*, in
+  the same set, in the biomes of #players-versus:has_structure/icy_rock_formation (the rocky snowy plains); and
+  scattered_icy_*, further apart (their own set, scattered_icy_rock_formations), in the biomes of
+  #players-versus:has_structure/scattered_icy_rock_formation (the cold plains).
 
 A rock is a template (RockTemplate): its bodies, each a shape (RockShape) with sizes the seed picks from, and where
 around the formation's middle it stands.
@@ -45,7 +49,13 @@ FORMATIONS = {
     "massif": ({"bodies": [{"shape": "massif"}]}, 1),
 }
 
-FORMATION_BIOMES = f"#{MOD}:has_structure/rock_formation"
+# The formations' kinds: gray in the rocky biomes, icy in the snowy ones, by their biome tags (tools/transition-biomes.py
+# fills them)
+FORMATION_TAGS = {"": "rock_formation", "icy_": "icy_rock_formation", "scattered_icy_": "scattered_icy_rock_formation"}
+
+# Capped for the cold: packed ice where grass and moss would grow, and hanging down the faces from the edges as moss
+# would; the rock itself under it in place of the earth (dirt, packed mud); nothing growing on it
+ICY = {"grass": "minecraft:packed_ice", "moss": "minecraft:packed_ice", "soil": "minecraft:stone", "mud": "minecraft:stone", "plants": []}
 
 
 def bare(feature):
@@ -53,42 +63,14 @@ def bare(feature):
     return {"feature": feature, "placement": []}
 
 
-# In the middle biomes' clusters: a boulder mostly, now and then a pile or a crag. A random selector tries its
-# choices in turn: a pile in 0.25, a crag in 0.75 x 0.2 = 0.15, a boulder in the rest
-SPARSE = {"type": "minecraft:random_selector", "default": bare(f"{MOD}:rock/boulder"),
-          "features": [{"chance": 0.25, "feature": bare(f"{MOD}:rock/boulder_pile")}, {"chance": 0.2, "feature": bare(f"{MOD}:rock/crag")}]}
-
-
 def uniform(low, high):
     return {"type": "minecraft:uniform", "min_inclusive": low, "max_inclusive": high}
 
 
-# How far a cluster's rocks stand from its middle at most, along x and z; its middle stands this far inside its chunk
-# at least, so that every rock's origin is in the chunk: a rock writes up to 16 blocks from its origin, and a feature
-# only in the chunks around its own
-CLUSTER = 4
-
-
-def cluster_placement(rarity, count, climate=True):
-    """A cluster of `count` rocks in about one chunk of `rarity`: its middle on rock ground ({MOD}:rock_ground), in a
-    climate for rocks unless `climate` is false; each rock within CLUSTER blocks of it, on level ground too."""
-    ground = {"type": f"{MOD}:rock_ground"}
-    if not climate:
-        ground["climate"] = False
-    return [{"type": "minecraft:rarity_filter", "chance": rarity},
-            {"type": "minecraft:offset", "x": uniform(CLUSTER, 15 - CLUSTER), "y": 0, "z": uniform(CLUSTER, 15 - CLUSTER)},
-            {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, ground,
-            {"type": "minecraft:count", "count": uniform(*count)},
-            {"type": "minecraft:offset", "x": uniform(-CLUSTER, CLUSTER), "y": 0, "z": uniform(-CLUSTER, CLUSTER)},
-            {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, {"type": f"{MOD}:rock_ground", "climate": False},
-            {"type": "minecraft:biome"}]
-
-
-# The rocky jungle's: crags mostly (as karst stands among the trees); the rocky birch forest's: boulders, now and then a crag
+# The rocky jungle's: crags mostly (as karst stands among the trees). A random selector tries its choices in turn: a crag
+# in 0.5, a pile in 0.5 x 0.2 = 0.1, a boulder in the rest
 CRAGGY = {"type": "minecraft:random_selector", "default": bare(f"{MOD}:rock/boulder"),
           "features": [{"chance": 0.5, "feature": bare(f"{MOD}:rock/crag")}, {"chance": 0.2, "feature": bare(f"{MOD}:rock/boulder_pile")}]}
-BOULDERS = {"type": "minecraft:random_selector", "default": bare(f"{MOD}:rock/boulder"),
-            "features": [{"chance": 0.25, "feature": bare(f"{MOD}:rock/crag")}]}
 
 
 # How far the ground may rise and fall under a rocky biome's rock, over the 16 blocks read: its hillsides too (the
@@ -97,26 +79,18 @@ ROCKY_LEVEL = 6
 
 
 def rocky_placement(count, level=ROCKY_LEVEL):
-    """In a rocky biome: `count` places a chunk, kept on ground as steep as `level`. The biome is the rocks' climate:
-    the rocky birch forest's is colder than the rocks' elsewhere, and none is in the 3D-noise terrain's."""
+    """In a rocky biome: `count` places a chunk, kept on ground as steep as `level`. The biome is the rocks' climate (none
+    is in the 3D-noise terrain's)."""
     return [{"type": "minecraft:count", "count": uniform(*count)},
             {"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"},
             {"type": f"{MOD}:rock_ground", "climate": False, "level": level}, {"type": "minecraft:biome"}]
 
 
-# Placed features: their biomes list them in the step before trees (CustomWorldgen adds them to vanilla's and the mod's
-# middle biomes; the rocky biomes list theirs, tools/transition-biomes.py). A meadow's cluster skips the rocks' climate:
-# meadows are cool, high and little eroded
+# Placed features: their biome lists them in the step before trees (tools/transition-biomes.py)
 PLACED = {
-    # Everywhere: several places a chunk, on its hillsides too, about one rock a chunk kept (the jungle's ground is
-    # hillier: more places are tried; the birch forest's is hillier still: steeper ground too)
-    "rocky_plains": {"feature": f"{MOD}:rock/sparse", "placement": rocky_placement((3, 5))},
+    # Everywhere: several places a chunk, on its hillsides too, about one rock a chunk kept (the jungle's ground is hilly:
+    # many places are tried)
     "rocky_jungle": {"feature": f"{MOD}:rock/craggy", "placement": rocky_placement((6, 9))},
-    "rocky_birch_forest": {"feature": f"{MOD}:rock/boulders", "placement": rocky_placement((6, 9), level=8)},
-    # Rare-ish, two to four together: most of the middle biomes' ground is hilly, and a cluster's middle is kept on
-    # level ground only
-    "sparse": {"feature": f"{MOD}:rock/sparse", "placement": cluster_placement(8, (2, 4))},
-    "meadow_cluster": {"feature": f"{MOD}:rock/sparse", "placement": cluster_placement(32, (2, 4), climate=False)},
 }
 
 
@@ -131,22 +105,27 @@ def write_json(path, value):
 def main():
     for name, rock in FEATURES.items():
         write_json(f"{MOD}/worldgen/feature/rock/{name}.json", {"type": f"{MOD}:rock", "rock": rock})
-    write_json(f"{MOD}/worldgen/feature/rock/sparse.json", SPARSE)
     write_json(f"{MOD}/worldgen/feature/rock/craggy.json", CRAGGY)
-    write_json(f"{MOD}/worldgen/feature/rock/boulders.json", BOULDERS)
     for name, placed in PLACED.items():
         write_json(f"{MOD}/worldgen/placed_feature/rock/{name}.json", placed)
-    for name, (rock, _) in FORMATIONS.items():
-        write_json(f"{MOD}/worldgen/structure/rock/{name}.json", {
-            "type": f"{MOD}:rock_formation", "biomes": FORMATION_BIOMES, "step": "surface_structures",
-            "spawn_overrides": {}, "terrain_adaptation": "none", "rock": rock})
+    for kind, tag in FORMATION_TAGS.items():
+        for name, (rock, _) in FORMATIONS.items():
+            write_json(f"{MOD}/worldgen/structure/rock/{kind}{name}.json", {
+                "type": f"{MOD}:rock_formation", "biomes": f"#{MOD}:has_structure/{tag}", "step": "surface_structures",
+                "spawn_overrides": {}, "terrain_adaptation": "none", "rock": dict(rock, palette=ICY) if kind else rock})
+        path = f"{MOD}/tags/worldgen/biome/has_structure/{tag}.json"
+        if not os.path.exists(os.path.join(DATA, path)):
+            write_json(path, {"replace": False, "values": []})
+    # A set tries its formations in turn, by weight, until one may stand where it is: the gray ones in the rocky biomes,
+    # the icy ones in the rocky snowy plains
     write_json(f"{MOD}/worldgen/structure_set/rock_formations.json", {
-        "structures": [{"structure": f"{MOD}:rock/{name}", "weight": weight} for name, (_, weight) in FORMATIONS.items()],
+        "structures": [{"structure": f"{MOD}:rock/{kind}{name}", "weight": weight} for kind in ("", "icy_") for name, (_, weight) in FORMATIONS.items()],
         # In the rocky biomes, about one formation in every seven chunks by seven, none closer than three to the next
         "placement": {"type": "minecraft:random_spread", "salt": 1734120691, "spacing": 7, "separation": 3}})
-    tag = os.path.join(DATA, MOD, "tags", "worldgen", "biome", "has_structure", "rock_formation.json")
-    if not os.path.exists(tag):
-        write_json(f"{MOD}/tags/worldgen/biome/has_structure/rock_formation.json", {"replace": False, "values": []})
+    write_json(f"{MOD}/worldgen/structure_set/scattered_icy_rock_formations.json", {
+        "structures": [{"structure": f"{MOD}:rock/scattered_icy_{name}", "weight": weight} for name, (_, weight) in FORMATIONS.items()],
+        # In the cold plains, a third as many: one in every twelve chunks by twelve, none closer than five to the next
+        "placement": {"type": "minecraft:random_spread", "salt": 905181357, "spacing": 12, "separation": 5}})
 
 
 if __name__ == "__main__":
