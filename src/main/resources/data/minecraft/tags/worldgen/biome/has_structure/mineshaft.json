@@ -28,6 +28,12 @@
     "players-versus:rocky_birch_forest",
     "players-versus:warm_dark_forest",
     "players-versus:grassy_wetlands",
-    "players-versus:mangrove_marsh"
+    "players-versus:mangrove_marsh",
+    "players-versus:forest_edge",
+    "players-versus:mixed_forest",
+    "players-versus:old_oak_forest",
+    "players-versus:prairie",
+    "players-versus:pale_taiga",
+    "players-versus:pale_swamp"
   ]
 }

@@ -28,7 +28,8 @@ class BiomeDataTest {
     private static final Path ASSETS = Path.of("src/main/resources/assets/players-versus/lang");
     /** The vegetation step's index in a biome's feature steps. */
     private static final int VEGETATION = 9;
-    private static final List<String> NEW_BIOMES = List.of("warm_dark_forest", "grassy_wetlands", "mangrove_marsh");
+    private static final List<String> NEW_BIOMES = List.of("warm_dark_forest", "grassy_wetlands", "mangrove_marsh", "forest_edge", "mixed_forest",
+            "old_oak_forest", "prairie", "pale_taiga", "pale_swamp");
 
     private static JsonObject read(Path path) throws IOException {
         return JsonParser.parseString(Files.readString(path)).getAsJsonObject();
@@ -206,6 +207,38 @@ class BiomeDataTest {
         assertTrue((rgb >> 8 & 255) - (rgb >> 16 & 255) >= 50, greener + " isn't a clear green: green must lead red by 50");
         ours.getAsJsonObject("effects").addProperty("foliage_color", original);
         assertEquals(theirs, ours, "the mangrove swamp changes more than its foliage colour");
+    }
+
+    private static boolean tagged(String tag, String biome) throws IOException {
+        Path file = DATA.resolve(tag);
+        return Files.exists(file) && read(file).getAsJsonArray("values").contains(new com.google.gson.JsonPrimitive("players-versus:" + biome));
+    }
+
+    /**
+     * The refinement pass's biomes are what they come from in the tags: the forest edge, the mixed forest and the old oak forest
+     * forests, the mixed forest and the pale taiga taigas, the pale ones pale (where the pale mobs come out); the old oak forest
+     * grows great oaks, taller than any oak.
+     */
+    @Test
+    void theRefinedBiomesAreTaggedForWhatTheyAre() throws IOException {
+        for (String forest : List.of("forest_edge", "mixed_forest", "old_oak_forest")) {
+            assertTrue(tagged("minecraft/tags/worldgen/biome/is_forest.json", forest), forest + " isn't in is_forest");
+        }
+        for (String taiga : List.of("mixed_forest", "pale_taiga")) {
+            assertTrue(tagged("minecraft/tags/worldgen/biome/is_taiga.json", taiga), taiga + " isn't in is_taiga");
+        }
+        for (String pale : List.of("pale_taiga", "pale_swamp")) {
+            assertTrue(tagged("players-versus/tags/worldgen/biome/pale.json", pale), pale + " isn't in players-versus:pale");
+        }
+        assertTrue(tagged("minecraft/tags/worldgen/biome/has_structure/swamp_hut.json", "pale_swamp"), "the pale swamp has no swamp huts");
+
+        JsonObject greatOak = read(DATA.resolve("players-versus/worldgen/feature/great_oak.json"));
+        assertEquals("minecraft:tree", greatOak.get("type").getAsString());
+        assertEquals("minecraft:oak_log", greatOak.getAsJsonObject("trunk_provider").get("id").getAsString());
+        assertTrue(greatOak.getAsJsonObject("trunk_placer").get("base_height").getAsInt() >= 9, "a great oak is taller than a fancy oak");
+        assertTrue(placedFeatureExists("players-versus:great_oak_checked"), "players-versus:great_oak_checked is no placed feature");
+        assertTrue(Files.readString(DATA.resolve("players-versus/worldgen/feature/trees_old_oak_forest.json")).contains("players-versus:great_oak_checked"),
+                "the old oak forest doesn't grow great oaks");
     }
 
     @Test

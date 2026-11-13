@@ -3,6 +3,8 @@
     "minecraft:pale_garden",
     "players-versus:caves/pale_grotto",
     "players-versus:caves/pale_hollow",
-    "players-versus:caves/deep_caves"
+    "players-versus:caves/deep_caves",
+    "players-versus:pale_taiga",
+    "players-versus:pale_swamp"
   ]
 }

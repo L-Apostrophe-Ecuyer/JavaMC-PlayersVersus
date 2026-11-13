@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "players-versus:cold_swamp",
-    "players-versus:grassy_wetlands"
+    "players-versus:grassy_wetlands",
+    "players-versus:pale_swamp"
   ]
 }

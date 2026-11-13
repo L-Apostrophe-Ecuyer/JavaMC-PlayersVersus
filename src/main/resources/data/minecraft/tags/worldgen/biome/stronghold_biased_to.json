@@ -3,6 +3,11 @@
   "values": [
     "players-versus:caves/regular_cave",
     "players-versus:caves/pale_grotto",
-    "players-versus:warm_dark_forest"
+    "players-versus:warm_dark_forest",
+    "players-versus:forest_edge",
+    "players-versus:mixed_forest",
+    "players-versus:old_oak_forest",
+    "players-versus:prairie",
+    "players-versus:pale_taiga"
   ]
 }

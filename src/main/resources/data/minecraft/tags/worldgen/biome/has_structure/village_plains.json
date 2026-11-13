@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "players-versus:tuscan_grove"
+    "players-versus:tuscan_grove",
+    "players-versus:forest_edge",
+    "players-versus:prairie"
   ]
 }

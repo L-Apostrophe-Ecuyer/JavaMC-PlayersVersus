@@ -153,6 +153,93 @@ BIOMES = {
 }
 
 
+# The refinement pass: the transitions of the most common borders, sub-biomes of the forest and the plains, and the pale
+# garden's neighbours (spec docs/superpowers/specs/2026-11-13-refinement-pass-design.md)
+BIOMES.update({
+    "forest_edge": {
+        "neighbours": ["minecraft:plains", "minecraft:forest"],
+        # Between the plains' (0.8, 0.4) and the forest's (0.7, 0.8)
+        "temperature": 0.75, "downfall": 0.6, "has_precipitation": True,
+        # Oaks and birches in small groves with open grass between, their leaf litter under them
+        "trees": selector("minecraft:oak_leaf_litter", ("minecraft:birch_leaf_litter", 0.2), ("minecraft:fancy_oak_leaf_litter", 0.12),
+                          ("minecraft:oak_bees_0002_leaf_litter", 0.04)),
+        "tree_placement": dict(ratio=6, offset=0.1),
+        "vegetation": ["minecraft:glow_lichen", "minecraft:patch_tall_grass_2", "minecraft:forest_flowers", "minecraft:patch_bush",
+                       f"{MOD}:trees_forest_edge", "minecraft:flower_plains", "minecraft:flower_default", "minecraft:patch_grass_forest",
+                       "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane",
+                       "minecraft:patch_firefly_bush_near_water"],
+    },
+    "mixed_forest": {
+        "neighbours": ["minecraft:taiga", "minecraft:forest"],
+        # Between the taiga's (0.25, 0.8) and the forest's (0.7, 0.8)
+        "temperature": 0.5, "downfall": 0.8, "has_precipitation": True,
+        # Spruces with oaks and birches among them, a pine now and then, fallen logs
+        "trees": selector("minecraft:spruce_checked", ("minecraft:oak_leaf_litter", 0.3), ("minecraft:birch_leaf_litter", 0.2),
+                          ("minecraft:pine_checked", 0.08), ("minecraft:fancy_oak_leaf_litter", 0.05), ("minecraft:fallen_spruce_tree", 0.04),
+                          ("minecraft:fallen_oak_tree", 0.03)),
+        "tree_placement": dict(ratio=11, offset=0.45),
+        "vegetation": ["minecraft:glow_lichen", "minecraft:patch_large_fern", f"{MOD}:trees_mixed_forest", "minecraft:patch_bush",
+                       "minecraft:flower_default", "minecraft:patch_grass_taiga_2", "minecraft:brown_mushroom_taiga", "minecraft:red_mushroom_taiga",
+                       "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water", "minecraft:patch_berry_common"],
+    },
+    "old_oak_forest": {
+        "neighbours": ["minecraft:forest", "minecraft:dark_forest"],
+        # The forest's climate, its greens deeper
+        "temperature": 0.7, "downfall": 0.85, "has_precipitation": True,
+        "colors": {"grass_color": "#6aa84f", "foliage_color": "#53a03b", "dry_foliage_color": "#7b5334"},
+        # Great oaks and fancy oaks over moss and azaleas, a few oaks and birches, fallen logs with mushrooms on them
+        "trees": selector(f"{MOD}:great_oak_checked", ("minecraft:fancy_oak_leaf_litter", 0.3), ("minecraft:oak_leaf_litter", 0.12),
+                          ("minecraft:fallen_oak_tree", 0.06), ("minecraft:birch_leaf_litter", 0.04)),
+        "tree_placement": dict(ratio=12, offset=0.45),
+        "vegetation": ["minecraft:glow_lichen", f"{MOD}:old_oak_moss", "minecraft:forest_flowers", f"{MOD}:trees_old_oak_forest",
+                       "minecraft:patch_large_fern", "minecraft:patch_bush", "minecraft:flower_default", "minecraft:patch_grass_forest",
+                       "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_leaf_litter", "minecraft:patch_pumpkin",
+                       "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water"],
+    },
+    "prairie": {
+        "neighbours": ["minecraft:plains", "minecraft:meadow"],
+        # The plains' (0.8, 0.4), drier: a more golden green
+        "temperature": 0.8, "downfall": 0.3, "has_precipitation": True,
+        # A lone oak now and then: the noise's high ground only
+        "trees": selector("minecraft:oak_checked", ("minecraft:fancy_oak_checked", 0.3)),
+        "tree_placement": dict(ratio=1, offset=-0.25),
+        # A sea of tall grass with wildflowers through it
+        "vegetation": ["minecraft:glow_lichen", "minecraft:patch_tall_grass_2", f"{MOD}:prairie_tall_grass", "minecraft:patch_bush",
+                       f"{MOD}:trees_prairie", "minecraft:flower_plains", "minecraft:patch_grass_plain", "minecraft:brown_mushroom_normal",
+                       "minecraft:red_mushroom_normal", "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane", "minecraft:patch_firefly_bush_near_water",
+                       "minecraft:wildflowers_meadow"],
+    },
+    "pale_taiga": {
+        "neighbours": ["minecraft:old_growth_spruce_taiga", "minecraft:pale_garden"],
+        # The old taiga's (0.25, 0.8) greyed toward the pale garden's colours
+        "temperature": 0.4, "downfall": 0.8, "has_precipitation": True,
+        "colors": {"grass_color": "#7d9479", "foliage_color": "#7f9076", "dry_foliage_color": "#a0a69c", "water_color": "#5a81ce"},
+        # Spruces and pines with pale oaks among them
+        "trees": selector("minecraft:spruce_checked", ("minecraft:pale_oak_checked", 0.25), ("minecraft:pine_checked", 0.1),
+                          ("minecraft:mega_spruce_checked", 0.05), ("minecraft:fallen_spruce_tree", 0.03)),
+        "tree_placement": dict(ratio=10, offset=0.4),
+        "vegetation": ["minecraft:glow_lichen", "minecraft:patch_large_fern", f"{MOD}:trees_pale_taiga", "minecraft:pale_moss_patch",
+                       "minecraft:flower_default", "minecraft:patch_grass_taiga", "minecraft:brown_mushroom_old_growth",
+                       "minecraft:red_mushroom_old_growth", "minecraft:patch_pumpkin", "minecraft:patch_sugar_cane",
+                       "minecraft:patch_firefly_bush_near_water", "minecraft:patch_berry_common"],
+    },
+    "pale_swamp": {
+        "neighbours": ["minecraft:swamp", "minecraft:pale_garden"],
+        # The swamp's (0.8, 0.9) greyed toward the pale garden's
+        "temperature": 0.7, "downfall": 0.9, "has_precipitation": True,
+        "colors": {"grass_color": "#7b8a6c", "foliage_color": "#7f8b6e", "dry_foliage_color": "#a0a69c", "water_color": "#5c7a76"},
+        # Swamp oaks with pale oaks among them, a creaking heart in one in ten (the pale swamp's own trees of an earlier pass)
+        "trees": selector({"feature": "minecraft:swamp_oak", "placement": []}, ("minecraft:pale_oak_creaking_checked", 0.1),
+                          ("minecraft:pale_oak_checked", 0.2)),
+        "tree_placement": dict(ratio=6, offset=0.1, max_water=2, survives={"id": "minecraft:oak_sapling", "properties": {"stage": "0"}}),
+        # Its ground is the marsh's, with pale moss for its edge (tools/wetlands.py)
+        "vegetation": [f"{MOD}:marsh_pale", "minecraft:glow_lichen", f"{MOD}:trees_pale_swamp", f"{MOD}:pale_moss_patch", "minecraft:flower_swamp",
+                       "minecraft:patch_grass_normal", "minecraft:patch_waterlily", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
+                       "minecraft:patch_sugar_cane_swamp", "minecraft:patch_firefly_bush_near_water_swamp", "minecraft:seagrass_swamp"],
+    },
+})
+
+
 # The rocky biomes: each between two others, its rocks placed in the step before trees (tools/rocks.py writes them)
 BIOMES.update({
     "rocky_plains": {
@@ -224,6 +311,38 @@ def cypress():
 TUSCAN_FLOWERS = [("minecraft:poppy", 4), ("minecraft:cornflower", 3), ("minecraft:oxeye_daisy", 3), ("minecraft:dandelion", 3),
                   ("minecraft:allium", 1), ("minecraft:azure_bluet", 1), ("minecraft:short_grass", 4),
                   ({"id": "minecraft:tall_grass", "properties": {"half": "lower"}}, 1)]
+
+
+# A great oak: the fancy oak grown old, its trunk 10 to 16 blocks with branches, a wide crown, vines on the trunk, bees now and then
+GREAT_OAK = {
+    "type": "minecraft:tree",
+    "below_trunk_provider": "minecraft:soil_beneath_tree",
+    "decorators": [{"type": "minecraft:trunk_vine"}, {"type": "minecraft:beehive", "probability": 0.02}],
+    "foliage_placer": {"type": "minecraft:fancy_foliage_placer", "height": 5, "offset": 4, "radius": 3},
+    "foliage_provider": {"id": "minecraft:oak_leaves", "properties": {"distance": "7", "persistent": "false", "waterlogged": "false"}},
+    "ignore_vines": True,
+    "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 0, "min_clipped_height": 6, "upper_size": 0},
+    "trunk_placer": {"type": "minecraft:fancy_trunk_placer", "base_height": 10, "height_rand_a": 6, "height_rand_b": 0},
+    "trunk_provider": {"id": "minecraft:oak_log", "properties": {"axis": "y"}},
+}
+
+
+def great_oak():
+    write_json(f"{MOD}/worldgen/feature/great_oak.json", GREAT_OAK)
+    write_json(f"{MOD}/worldgen/placed_feature/great_oak_checked.json", {"feature": f"{MOD}:great_oak", "placement": [
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": "minecraft:oak_sapling"}}]})
+
+
+def sub_biome_ground(vanilla):
+    """The old oak forest's moss and azaleas (the dark forest's moss patch, two a chunk) and the prairie's sea of tall grass
+    (vanilla's tall grass patch, without its rarity, two a chunk)."""
+    write_json(f"{MOD}/worldgen/placed_feature/old_oak_moss.json", {"feature": f"{MOD}:dark_forest_moss_patch", "placement": [
+        {"type": "minecraft:count", "count": 2}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING_NO_LEAVES"}, {"type": "minecraft:biome"}]})
+    grass = vanilla_placed(vanilla, "patch_tall_grass")
+    grass["placement"] = [step for step in grass["placement"] if step["type"] != "minecraft:rarity_filter"]
+    grass["placement"].insert(0, {"type": "minecraft:count", "count": 2})
+    write_json(f"{MOD}/worldgen/placed_feature/prairie_tall_grass.json", grass)
 
 
 def tuscan_fields(vanilla):
@@ -328,6 +447,16 @@ def tags(vanilla=None):
     add_to_tag(f"{MOD}/tags/worldgen/biome/has_structure/rock_formation.json", f"{MOD}:rocky_plains", f"{MOD}:rocky_jungle", f"{MOD}:rocky_birch_forest")
     # A Tuscan countryside has its villages
     add_to_tag("minecraft/tags/worldgen/biome/has_structure/village_plains.json", f"{MOD}:tuscan_grove")
+    # The refinement pass's biomes are what they come from (villages on the forest edge and the prairie, taiga villages in the
+    # mixed forest, swamp huts in the pale swamp...), and what they are
+    if vanilla:
+        for child, parent in [("forest_edge", "minecraft:plains"), ("mixed_forest", "minecraft:taiga"), ("old_oak_forest", "minecraft:forest"),
+                              ("prairie", "minecraft:plains"), ("pale_taiga", "minecraft:old_growth_spruce_taiga"), ("pale_swamp", "minecraft:swamp")]:
+            inherit_tags(vanilla, parent, f"{MOD}:{child}")
+    add_to_tag("minecraft/tags/worldgen/biome/is_forest.json", f"{MOD}:forest_edge", f"{MOD}:mixed_forest", f"{MOD}:old_oak_forest")
+    add_to_tag("minecraft/tags/worldgen/biome/is_taiga.json", f"{MOD}:mixed_forest", f"{MOD}:pale_taiga")
+    # Pale: where the pale mobs come out (PaleLine)
+    add_to_tag(f"{MOD}/tags/worldgen/biome/pale.json", f"{MOD}:pale_taiga", f"{MOD}:pale_swamp")
 
 
 NAMES = {
@@ -335,17 +464,25 @@ NAMES = {
            "biome.players-versus.warm_dark_forest": "Warm Dark Forest",
            "biome.players-versus.dark_jungle_forest": "Dark Jungle Forest", "biome.players-versus.humid_oak_forest": "Humid Oak Forest",
            "biome.players-versus.rocky_plains": "Rocky Plains", "biome.players-versus.rocky_jungle": "Rocky Jungle",
-           "biome.players-versus.rocky_birch_forest": "Rocky Birch Forest"},
+           "biome.players-versus.rocky_birch_forest": "Rocky Birch Forest", "biome.players-versus.forest_edge": "Forest Edge",
+           "biome.players-versus.mixed_forest": "Mixed Forest", "biome.players-versus.old_oak_forest": "Old Oak Forest",
+           "biome.players-versus.prairie": "Prairie", "biome.players-versus.pale_taiga": "Pale Taiga",
+           "biome.players-versus.pale_swamp": "Pale Swamp"},
     "fr": {"biome.players-versus.tuscan_grove": "Bosquet toscan", "biome.players-versus.warm_oak_forest": "Chênaie chaude",
            "biome.players-versus.warm_dark_forest": "Forêt sombre chaude",
            "biome.players-versus.dark_jungle_forest": "Forêt de jungle sombre", "biome.players-versus.humid_oak_forest": "Chênaie humide",
            "biome.players-versus.rocky_plains": "Plaines rocheuses", "biome.players-versus.rocky_jungle": "Jungle rocheuse",
-           "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse"},
+           "biome.players-versus.rocky_birch_forest": "Forêt de bouleaux rocheuse", "biome.players-versus.forest_edge": "Lisière de forêt",
+           "biome.players-versus.mixed_forest": "Forêt mixte", "biome.players-versus.old_oak_forest": "Vieille chênaie",
+           "biome.players-versus.prairie": "Prairie", "biome.players-versus.pale_taiga": "Taïga pâle",
+           "biome.players-versus.pale_swamp": "Marais pâle"},
 }
 
 
 def main(vanilla):
     cypress()
+    great_oak()
+    sub_biome_ground(vanilla)
     tuscan_fields(vanilla)
     for name, spec in BIOMES.items():
         make(vanilla, name, spec)

@@ -1,21 +1,11 @@
 {
-  "feature": "players-versus:pale_swamp_trees",
+  "feature": "players-versus:trees_pale_swamp",
   "placement": [
     {
-      "type": "minecraft:count",
-      "count": {
-        "type": "minecraft:weighted_list",
-        "distribution": [
-          {
-            "data": 2,
-            "weight": 9
-          },
-          {
-            "data": 3,
-            "weight": 1
-          }
-        ]
-      }
+      "type": "minecraft:noise_based_count",
+      "noise_to_count_ratio": 6,
+      "noise_factor": 8,
+      "noise_offset": 0.1
     },
     {
       "type": "minecraft:in_square"

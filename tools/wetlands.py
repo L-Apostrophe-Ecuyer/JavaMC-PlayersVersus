@@ -46,7 +46,9 @@ def marsh():
               "marsh_rim": {"biomes": [f"{MOD}:humid_oak_forest"], "edge": {"id": "minecraft:rooted_dirt"}, "dryness": 0.25, "reshape": False},
               # The wetlands: more land than the swamp's, still with its pools and channels; the mangrove marsh's edge is mud
               "marsh_wetlands": {"biomes": [f"{MOD}:grassy_wetlands"], "edge": {"id": "minecraft:rooted_dirt"}, "dryness": 0.2},
-              "marsh_mangrove": {"biomes": [f"{MOD}:mangrove_marsh"], "edge": {"id": "minecraft:mud"}, "dryness": 0.1}}
+              "marsh_mangrove": {"biomes": [f"{MOD}:mangrove_marsh"], "edge": {"id": "minecraft:mud"}, "dryness": 0.1},
+              # The pale swamp: the swamp's, its edge pale moss
+              "marsh_pale": {"biomes": [f"{MOD}:pale_swamp"], "edge": {"id": "minecraft:pale_moss_block"}}}
     for name, config in swamps.items():
         write_json(f"{MOD}/worldgen/feature/{name}.json", dict({"type": f"{MOD}:marsh"}, **config))
         # No placement: it runs once a chunk and shapes the chunk's columns of its biomes itself

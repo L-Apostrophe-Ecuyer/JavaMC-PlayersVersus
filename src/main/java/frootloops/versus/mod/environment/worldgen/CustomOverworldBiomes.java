@@ -48,9 +48,24 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> DARK_JUNGLE_FOREST = keyOf("dark_jungle_forest");
     /** The rim of every swamp: oaks with vines on damp ground, mud and puddles. */
     public static final ResourceKey<Biome> HUMID_OAK_FOREST = keyOf("humid_oak_forest");
+    /** The dark forest's warm side, next to the dark jungle forest: dark oaks with oaks, fancy oaks and jungle bushes, giant mushrooms. */
     public static final ResourceKey<Biome> WARM_DARK_FOREST = keyOf("warm_dark_forest");
+    /** The swamps' drier part: an open wet meadow of pools, channels and grass, few oaks, reeds and flowers. */
     public static final ResourceKey<Biome> GRASSY_WETLANDS = keyOf("grassy_wetlands");
+    /** The mangrove swamp's rim and drier part: mud flats and grass, small mangroves and jungle bushes. */
     public static final ResourceKey<Biome> MANGROVE_MARSH = keyOf("mangrove_marsh");
+    /** Between plains and forest: oaks and birches in small groves on open grass, bushes and flowers. */
+    public static final ResourceKey<Biome> FOREST_EDGE = keyOf("forest_edge");
+    /** Between forest and taiga: spruces with oaks and birches, ferns and berries, fallen logs. */
+    public static final ResourceKey<Biome> MIXED_FOREST = keyOf("mixed_forest");
+    /** A pocket of the forest: great oaks and fancy oaks over moss and azaleas, fallen logs, ferns and mushrooms. */
+    public static final ResourceKey<Biome> OLD_OAK_FOREST = keyOf("old_oak_forest");
+    /** A pocket of the plains: a sea of tall grass and wildflowers, a lone oak now and then. */
+    public static final ResourceKey<Biome> PRAIRIE = keyOf("prairie");
+    /** The pale garden's cold edge, next to the old growth taigas: spruces and pale oaks over pale moss. */
+    public static final ResourceKey<Biome> PALE_TAIGA = keyOf("pale_taiga");
+    /** The wettest, weirdest swamps: swamp oaks and pale oaks, creaking hearts, pale moss at the water's edge. */
+    public static final ResourceKey<Biome> PALE_SWAMP = keyOf("pale_swamp");
     /** The cold half of swamps, next to taigas: spruce and birch over mud, podzol and moss, ferns and berries. */
     public static final ResourceKey<Biome> COLD_SWAMP = keyOf("cold_swamp");
     /** The level stretches of savannas' cool edge: dry grass, a few oaks and acacias, and rocks everywhere. */

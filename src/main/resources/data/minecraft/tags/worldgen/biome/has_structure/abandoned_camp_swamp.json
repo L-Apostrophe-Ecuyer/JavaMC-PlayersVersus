@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "players-versus:grassy_wetlands"
+    "players-versus:grassy_wetlands",
+    "players-versus:pale_swamp"
   ]
 }
