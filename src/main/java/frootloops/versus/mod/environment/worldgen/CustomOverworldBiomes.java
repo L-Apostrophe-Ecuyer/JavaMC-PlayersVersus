@@ -136,8 +136,8 @@ public class CustomOverworldBiomes {
             Map.entry(Biomes.ICE_SPIKES,    Biomes.SNOWY_PLAINS));
 
     private static final Map<ResourceKey<Biome>, ResourceKey<Biome>> HUMID_BIOME_REPLACEMENTS = Map.ofEntries(
+            // The dark forest's side of the strip is PvBiomeLayout's dark-birch rule, narrower
             Map.entry(Biomes.BIRCH_FOREST,      DARK_BIRCH_FOREST),
-            Map.entry(Biomes.DARK_FOREST,       DARK_BIRCH_FOREST),
             Map.entry(Biomes.JUNGLE,            Biomes.SPARSE_JUNGLE),
             Map.entry(Biomes.DESERT,            DESERT_OASIS),
             Map.entry(Biomes.BADLANDS,          Biomes.DESERT));

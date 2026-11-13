@@ -59,7 +59,7 @@ public final class PvBiomeLayout {
     private static final long WARM_MOUNTAINSIDE_FOREST_TEMPERATURE = Climate.quantizeCoord(0.1998F);
     /**
      * Birch forests turn dappled where the weirdness is above this and the temperature below {@link #DAPPLED_COOL}, old
-     * growth birch forests turn into vanilla's dappled forest, and dark forests into dark taiga ({@link #weirdTarget}).
+     * growth birch forests turn into vanilla's dappled forest ({@link #weirdTarget}).
      * Vanilla's birch forests reach down to -0.15, where they border taigas.
      */
     static final float DAPPLED_WEIRDNESS = 0.0F;
@@ -78,10 +78,33 @@ public final class PvBiomeLayout {
      * into the mangrove marsh.
      */
     static final float SWAMP_RIM_MAX = 0.565F;
-    /** The warm swamps and the mangrove swamps, past the rim, turn into wetlands (grassy wetlands, mangrove marsh) at this humidity and under. */
+    /** The swamps (warm and cold) and the mangrove swamps, past the rim, turn into wetlands (grassy wetlands, mangrove marsh) at this humidity and under. */
     static final float WETLAND_HUMIDITY_MAX = -0.15F;
     /** The dark forest's warm side (vanilla's dark forests reach temperature 0.2, where the dark jungle forest begins): the warm dark forest, from this up. */
-    static final float WARM_DARK_FOREST_MIN = 0.05F;
+    static final float WARM_DARK_FOREST_MIN = 0.12F;
+    /** The dark birch forest's strip on the dark forest's side of their border (0.3): dark forest up to this humidity. */
+    static final float DARK_BIRCH_MAX = 0.31F;
+
+    /** Plains (vanilla's humidity -0.35 to -0.1) and forest (-0.1 to 0.1) meet at this humidity; the forest edge reaches this far either side. */
+    static final float FOREST_EDGE_HUMIDITY = -0.1F, FOREST_EDGE_HALF_WIDTH = 0.05F;
+    /** Forest and taiga meet at this humidity (temperatures -0.45 to -0.15); the mixed forest reaches this far either side. */
+    static final float MIXED_FOREST_HUMIDITY = 0.1F, MIXED_FOREST_HALF_WIDTH = 0.05F;
+    /** The taigas meet the birch and dark forests at this temperature; their transitions reach this far either side. */
+    static final float TAIGA_EDGE_TEMPERATURE = -0.15F, TAIGA_EDGE_HALF_WIDTH = 0.05F;
+    /** Vanilla's warm climates (savannas, jungles) begin at this temperature; its forest there, and its plains' strip next to the jungle, are warm oak forest. */
+    static final float WARM_CLIMATE_MIN = 0.2F;
+    static final float WARM_PLAINS_JUNGLE_SIDE = 0.04F;
+    /** The old oak forest: a pocket of the forest's climate where the weirdness is positive. */
+    static final float OLD_OAK_TEMPERATURE_MIN = -0.1F, OLD_OAK_TEMPERATURE_MAX = 0.1F, OLD_OAK_HUMIDITY_MIN = -0.04F, OLD_OAK_HUMIDITY_MAX = 0.06F;
+    /** The prairie: a pocket of the plains' climate where the weirdness is negative. */
+    static final float PRAIRIE_TEMPERATURE_MIN = -0.3F, PRAIRIE_TEMPERATURE_MAX = -0.05F, PRAIRIE_HUMIDITY_MIN = -0.3F, PRAIRIE_HUMIDITY_MAX = -0.2F;
+    /** The pale garden's cold strip (its temperatures start at -0.15), next to the old growth taigas: the pale taiga. */
+    static final float PALE_TAIGA_MAX = -0.1F;
+    /**
+     * The pale swamp: swamps (warm and cold) this wet, near the dark forests' humidity (few swamps are: about one in
+     * twenty of the swamps' columns, against one in two hundred with a weirdness condition too).
+     */
+    static final float PALE_SWAMP_HUMIDITY_MIN = 0.25F;
     /** Swamps (vanilla's from temperature -0.45 to 0.2) up to this temperature are cold swamps: they border taigas. */
     static final float COLD_SWAMP_MAX = -0.15F;
     /** Above this temperature, windswept biomes and old growth birch forests give way to plainer ones. */
@@ -157,15 +180,53 @@ public final class PvBiomeLayout {
                     PvBiomeLayout::rockyJungleTarget),
             new Rule("humid", Box.ALL.withMin(Box.H, Climate.quantizeCoord(0.275F)).withMax(Box.H, Climate.quantizeCoord(0.35F)),
                     (slice, biome) -> CustomOverworldBiomes.getHumidTransitionBiome(biome)),
-            // After the humid band, which keeps its strip of dark birch forest
+            // The dark birch strip's dark side, narrower than the humid band's: the dark forest keeps most of its climate
+            new Rule("dark-birch", Box.ALL.withMax(Box.H, Climate.quantizeCoord(DARK_BIRCH_MAX)),
+                    (slice, biome) -> biome == Biomes.DARK_FOREST ? CustomOverworldBiomes.DARK_BIRCH_FOREST : null),
             new Rule("warm-dark", Box.ALL.withMin(Box.T, Climate.quantizeCoord(WARM_DARK_FOREST_MIN)),
                     (slice, biome) -> biome == Biomes.DARK_FOREST ? CustomOverworldBiomes.WARM_DARK_FOREST : null),
+            // The taigas' warm edge (temperature -0.15): with the dark forest, the dark taiga forest (dark oak among spruce)
+            new Rule("dark-taiga", taigaEdge(),
+                    (slice, biome) -> biome == Biomes.DARK_FOREST || biome == Biomes.OLD_GROWTH_SPRUCE_TAIGA || biome == Biomes.OLD_GROWTH_PINE_TAIGA
+                            ? CustomOverworldBiomes.DARK_TAIGA_FOREST : null),
+            // The pale garden's cold strip, next to the old growth taigas
+            new Rule("pale-taiga", Box.ALL.withMax(Box.T, Climate.quantizeCoord(PALE_TAIGA_MAX)),
+                    (slice, biome) -> biome == Biomes.PALE_GARDEN ? CustomOverworldBiomes.PALE_TAIGA : null),
+            // With the birch forest, the birch taiga forest; where the weirdness is positive the birch forest's cold side is
+            // the dappled taiga (weird-cold), and the taiga's warm edge is dappled taiga with it
+            new Rule("taiga-birch", taigaEdge().withMax(Box.W, 0L),
+                    (slice, biome) -> biome == Biomes.TAIGA || biome == Biomes.BIRCH_FOREST ? CustomOverworldBiomes.BIRCH_TAIGA_FOREST : null),
+            new Rule("taiga-dappled", taigaEdge().withMin(Box.W, 0L),
+                    (slice, biome) -> biome == Biomes.TAIGA ? CustomOverworldBiomes.DAPPLED_TAIGA : null),
+            // Forest and taiga, plains and forest: their humidity borders
+            new Rule("mixed-forest", Box.ALL.withMax(Box.T, Climate.quantizeCoord(TAIGA_EDGE_TEMPERATURE))
+                    .withMin(Box.H, Climate.quantizeCoord(MIXED_FOREST_HUMIDITY - MIXED_FOREST_HALF_WIDTH))
+                    .withMax(Box.H, Climate.quantizeCoord(MIXED_FOREST_HUMIDITY + MIXED_FOREST_HALF_WIDTH)),
+                    (slice, biome) -> biome == Biomes.FOREST || biome == Biomes.TAIGA ? CustomOverworldBiomes.MIXED_FOREST : null),
+            new Rule("forest-edge", Box.ALL.withMax(Box.T, Climate.quantizeCoord(WARM_CLIMATE_MIN))
+                    .withMin(Box.H, Climate.quantizeCoord(FOREST_EDGE_HUMIDITY - FOREST_EDGE_HALF_WIDTH))
+                    .withMax(Box.H, Climate.quantizeCoord(FOREST_EDGE_HUMIDITY + FOREST_EDGE_HALF_WIDTH)),
+                    (slice, biome) -> biome == Biomes.FOREST || biome == Biomes.PLAINS ? CustomOverworldBiomes.FOREST_EDGE : null),
+            // Pockets of the forest's and the plains' climates
+            new Rule("old-oak", Box.ALL.withMin(Box.T, Climate.quantizeCoord(OLD_OAK_TEMPERATURE_MIN)).withMax(Box.T, Climate.quantizeCoord(OLD_OAK_TEMPERATURE_MAX))
+                    .withMin(Box.H, Climate.quantizeCoord(OLD_OAK_HUMIDITY_MIN)).withMax(Box.H, Climate.quantizeCoord(OLD_OAK_HUMIDITY_MAX)).withMin(Box.W, 0L),
+                    (slice, biome) -> biome == Biomes.FOREST ? CustomOverworldBiomes.OLD_OAK_FOREST : null),
+            new Rule("prairie", Box.ALL.withMin(Box.T, Climate.quantizeCoord(PRAIRIE_TEMPERATURE_MIN)).withMax(Box.T, Climate.quantizeCoord(PRAIRIE_TEMPERATURE_MAX))
+                    .withMin(Box.H, Climate.quantizeCoord(PRAIRIE_HUMIDITY_MIN)).withMax(Box.H, Climate.quantizeCoord(PRAIRIE_HUMIDITY_MAX)).withMax(Box.W, 0L),
+                    (slice, biome) -> biome == Biomes.PLAINS ? CustomOverworldBiomes.PRAIRIE : null),
+            // In the warm climates vanilla's forest (between savanna and jungle) and its plains' strip next to the sparse jungle
+            new Rule("hot-forest", Box.ALL.withMin(Box.T, Climate.quantizeCoord(WARM_CLIMATE_MIN)),
+                    (slice, biome) -> biome == Biomes.FOREST ? CustomOverworldBiomes.WARM_OAK_FOREST : null),
+            new Rule("hot-plains", Box.ALL.withMin(Box.T, Climate.quantizeCoord(WARM_CLIMATE_MIN)).withMin(Box.H, Climate.quantizeCoord(WARM_PLAINS_JUNGLE_SIDE)),
+                    (slice, biome) -> biome == Biomes.PLAINS ? CustomOverworldBiomes.WARM_OAK_FOREST : null),
             new Rule("swamp-rim", Box.ALL.withMax(Box.E, Climate.quantizeCoord(SWAMP_RIM_MAX)),
-                    (slice, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.HUMID_OAK_FOREST
+                    (slice, biome) -> biome == Biomes.SWAMP || biome == CustomOverworldBiomes.COLD_SWAMP ? CustomOverworldBiomes.HUMID_OAK_FOREST
                             : biome == Biomes.MANGROVE_SWAMP ? CustomOverworldBiomes.MANGROVE_MARSH : null),
-            // Past the rim, the drier part of the warm swamps (the cold swamp is another biome by now)
+            // Past the rim: the wettest swamps are pale, the drier part of every swamp wetlands
+            new Rule("pale-swamp", Box.ALL.withMin(Box.H, Climate.quantizeCoord(PALE_SWAMP_HUMIDITY_MIN)),
+                    (slice, biome) -> biome == Biomes.SWAMP || biome == CustomOverworldBiomes.COLD_SWAMP ? CustomOverworldBiomes.PALE_SWAMP : null),
             new Rule("wetlands", Box.ALL.withMax(Box.H, Climate.quantizeCoord(WETLAND_HUMIDITY_MAX)),
-                    (slice, biome) -> biome == Biomes.SWAMP ? CustomOverworldBiomes.GRASSY_WETLANDS
+                    (slice, biome) -> biome == Biomes.SWAMP || biome == CustomOverworldBiomes.COLD_SWAMP ? CustomOverworldBiomes.GRASSY_WETLANDS
                             : biome == Biomes.MANGROVE_SWAMP ? CustomOverworldBiomes.MANGROVE_MARSH : null),
 
             // The cold, level side of old growth birch forests, before it turns dappled
@@ -319,6 +380,12 @@ public final class PvBiomeLayout {
         return temperateTarget(part, biome);
     }
 
+    /** The taigas' warm edge: within {@link #TAIGA_EDGE_HALF_WIDTH} of temperature {@link #TAIGA_EDGE_TEMPERATURE}. */
+    private static Box taigaEdge() {
+        return Box.ALL.withMin(Box.T, Climate.quantizeCoord(TAIGA_EDGE_TEMPERATURE - TAIGA_EDGE_HALF_WIDTH))
+                .withMax(Box.T, Climate.quantizeCoord(TAIGA_EDGE_TEMPERATURE + TAIGA_EDGE_HALF_WIDTH));
+    }
+
     /** The rocky jungle's box before the 3D-noise terrain's climate is cut out of it: just warmer than the warm band, level. */
     private static Box rockyJungle() {
         return Box.ALL.withMin(Box.T, Climate.quantizeCoord(WARM_BAND_MAX)).withMax(Box.T, Climate.quantizeCoord(ROCKY_JUNGLE_MAX))
@@ -350,14 +417,12 @@ public final class PvBiomeLayout {
     /**
      * What a biome becomes where the weirdness is positive and the temperature negative: birch forest turns dappled
      * (dappled taiga nearer the taigas, below {@link #DAPPLED_COLD}, else sparse dappled forest), old growth birch into
-     * vanilla's dappled forest, and dark forest into the dark taiga forest (dark oak among spruce and pine), as it does on
-     * mountainsides.
+     * vanilla's dappled forest. (Dark forests no longer: their dark taiga forest is the taigas' transition, rule dark-taiga.)
      */
     @Nullable
     private static ResourceKey<Biome> weirdTarget(ResourceKey<Biome> biome, boolean cold) {
         if (biome == Biomes.BIRCH_FOREST) return cold ? CustomOverworldBiomes.DAPPLED_TAIGA : CustomOverworldBiomes.SPARSE_DAPPLED_FOREST;
         if (biome == Biomes.OLD_GROWTH_BIRCH_FOREST) return CustomOverworldBiomes.DAPPLED_FOREST;
-        if (biome == Biomes.DARK_FOREST) return CustomOverworldBiomes.DARK_TAIGA_FOREST;
         return null;
     }
 
