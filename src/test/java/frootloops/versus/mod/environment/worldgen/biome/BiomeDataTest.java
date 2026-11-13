@@ -388,6 +388,68 @@ class BiomeDataTest {
         }
     }
 
+    /** A mod biome's vegetation step, by the features' ids. */
+    private static List<String> modVegetation(String biome) throws IOException {
+        return vegetation("players-versus/worldgen/biome/" + biome + ".json");
+    }
+
+    /**
+     * The older biomes have the undergrowth the newer ones have: bushes, leaf litter under broad trees, ferns and berries in the
+     * cold woods, fallen logs among their trees; the cold plains grow grass and ferns, not the badlands' dry grass.
+     */
+    @Test
+    void theOlderBiomesHaveTheNewerOnesUndergrowth() throws IOException {
+        for (String bushes : List.of("dark_birch_forest", "birch_taiga_forest", "dappled_taiga", "sparse_dappled_forest", "mountainside_forest", "mountainside_forest_warm")) {
+            assertTrue(modVegetation(bushes).contains("minecraft:patch_bush"), "no bushes in the " + bushes);
+        }
+        for (String broad : List.of("dark_birch_forest", "dark_taiga_forest")) {
+            assertTrue(modVegetation(broad).contains("minecraft:patch_leaf_litter"), "no leaf litter in the " + broad);
+        }
+        assertTrue(modVegetation("dark_taiga_forest").containsAll(List.of("minecraft:patch_large_fern", "minecraft:patch_berry_common")),
+                "the dark taiga forest's ferns and berries: " + modVegetation("dark_taiga_forest"));
+        for (String trees : List.of("dark_birch_forest_vegetation", "dark_taiga_forest_vegetation", "birch_taiga_vegetation", "dappled_taiga_vegetation",
+                "sparse_dappled_vegetation")) {
+            assertTrue(Files.readString(DATA.resolve("players-versus/worldgen/feature/" + trees + ".json")).contains("\"minecraft:fallen_"), "no fallen logs among " + trees);
+        }
+        assertFalse(modVegetation("cold_plains").contains("minecraft:patch_grass_badlands"), "the badlands' dry grass in the cold plains");
+        assertTrue(modVegetation("cold_plains").contains("minecraft:patch_grass_taiga_2"), "no grass and ferns in the cold plains");
+    }
+
+    /** The cold beach is a beach: no flowers, no dry grass, no mushrooms or pumpkins on it. */
+    @Test
+    void theColdBeachIsABeach() throws IOException {
+        List<String> beach = modVegetation("cold_beach");
+        for (String inland : List.of("minecraft:flower_default", "minecraft:patch_grass_badlands", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal",
+                "minecraft:patch_pumpkin")) {
+            assertFalse(beach.contains(inland), inland + " on the cold beach");
+        }
+    }
+
+    /** The mangrove marsh's jungle bushes stand on dry land; its mangroves may stand in water. */
+    @Test
+    void theMangroveMarshsBushesStandOnLand() throws IOException {
+        JsonObject trees = read(DATA.resolve("players-versus/worldgen/feature/trees_mangrove_marsh.json"));
+        JsonElement bush = trees.get("default");
+        assertTrue(bush.isJsonObject() && bush.getAsJsonObject().get("feature").getAsString().equals("minecraft:jungle_bush"), "the marsh's default tree is a jungle bush: " + bush);
+        String placement = bush.getAsJsonObject().getAsJsonArray("placement").toString();
+        assertTrue(placement.contains("\"minecraft:surface_water_depth_filter\"") && placement.contains("\"max_water_depth\":0"), "the bushes may stand in water: " + placement);
+    }
+
+    /** The waterlogged leaves, spread from their trees' places, are checked for their biome where they land too. */
+    @Test
+    void theWaterloggedLeavesStayInTheirBiome() throws IOException {
+        for (String name : List.of("waterlogged_leaves", "waterlogged_leaves_wetlands", "waterlogged_leaves_cold")) {
+            JsonArray placement = read(DATA.resolve("players-versus/worldgen/placed_feature/" + name + ".json")).getAsJsonArray("placement");
+            int offset = -1, lastBiome = -1;
+            for (int index = 0; index < placement.size(); index++) {
+                String type = placement.get(index).getAsJsonObject().get("type").getAsString();
+                if (type.equals("minecraft:offset")) offset = index;
+                if (type.equals("minecraft:biome")) lastBiome = index;
+            }
+            assertTrue(offset >= 0 && lastBiome > offset, name + ": no biome check after the leaves are spread");
+        }
+    }
+
     @Test
     void theNewBiomesExistAreTaggedAndNamed() throws IOException {
         JsonArray overworld = read(DATA.resolve("minecraft/tags/worldgen/biome/is_overworld.json")).getAsJsonArray("values");

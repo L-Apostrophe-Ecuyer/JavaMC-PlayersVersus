@@ -79,9 +79,10 @@ def waterlogged_leaves():
     """
     Clumps of leaves in the top layer of the pools, among the trees: a chunk's patches by the noise its biome's trees are placed by
     (the same factor and offset: where they have none, the pools have none, so an open wetland has no clumps far from a tree),
-    each twelve tries within four blocks, a try standing where the position is water with air above and something under it, one
-    block under the surface the height map finds. Persistent, so they don't decay away from logs, and waterlogged, so the pool
-    stays whole around them. Run after the biomes' trees are written.
+    each twelve tries within four blocks, a try standing where the position is water with air above and water under it (two deep
+    at least: over one deep water a clump would sit on the bottom), one block under the surface the height map finds, and in the
+    biome still where it lands. Persistent, so they don't decay away from logs, and waterlogged, so the pool stays whole around
+    them. Run after the biomes' trees are written.
     """
     spread = {"type": "minecraft:trapezoid", "min": -4, "max": 4, "plateau": 0}
 
@@ -99,7 +100,8 @@ def waterlogged_leaves():
             {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
                 {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"},
                 {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, 1, 0]},
-                {"type": "minecraft:not", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, -1, 0]}}]}}]
+                {"type": "minecraft:matching_blocks", "blocks": "minecraft:water", "offset": [0, -1, 0]}]}},
+            {"type": "minecraft:biome"}]
     for name, wood in [("waterlogged_leaves", "oak"), ("waterlogged_spruce_leaves", "spruce"), ("waterlogged_birch_leaves", "birch")]:
         write_json(f"{MOD}/worldgen/feature/{name}.json", {"type": "minecraft:simple_block", "to_place": {
             "id": f"minecraft:{wood}_leaves", "properties": {"distance": "7", "persistent": "true", "waterlogged": "true"}}})
@@ -199,8 +201,12 @@ def mangrove_marsh(vanilla):
         "minecraft:patch_waterlily", "minecraft:seagrass_swamp", "minecraft:patch_firefly_bush_near_water"]
     animals.set_spawns(made, "mangrove_marsh", lambda neighbour: transition.biome(vanilla, neighbour))
     write_json(f"{MOD}/worldgen/biome/mangrove_marsh.json", made)
+    # Mangroves may stand in the water, the jungle bushes on dry land only
+    bush = {"feature": "minecraft:jungle_bush", "placement": [
+        {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": "minecraft:oak_sapling"}}]}
     write_json(f"{MOD}/worldgen/feature/trees_mangrove_marsh.json", transition.selector(
-        "minecraft:jungle_bush", ("minecraft:mangrove_checked", 0.45), ("minecraft:tall_mangrove_checked", 0.1)))
+        bush, ("minecraft:mangrove_checked", 0.45), ("minecraft:tall_mangrove_checked", 0.1)))
     write_json(f"{MOD}/worldgen/placed_feature/trees_mangrove_marsh.json",
                transition.noise_trees(f"{MOD}:trees_mangrove_marsh", ratio=8, offset=0.1, max_water=3))
 

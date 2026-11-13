@@ -16,6 +16,7 @@ public class CustomOverworldBiomes {
     private static final Climate.Parameter defaultParameter = Climate.Parameter.span(-1.0F, 1.0F);
     /** Every value the climate's noise can take, beyond the usual -1 to 1. */
     private static final Climate.Parameter anyValue = Climate.Parameter.span(-2.0F, 2.0F);
+    /** Birches among spruces: the birch forests' mountainsides and cold edge, and the taigas' border with them where the weirdness is negative. */
     public static final ResourceKey<Biome> BIRCH_TAIGA_FOREST = keyOf("birch_taiga_forest");
     /** The birch taiga with dappled trees (26.3's poplars) where it has birch. */
     public static final ResourceKey<Biome> DAPPLED_TAIGA = keyOf("dappled_taiga");
@@ -24,14 +25,23 @@ public class CustomOverworldBiomes {
     /** Vanilla's dappled forest (new in 26.3), by its id. */
     public static final ResourceKey<Biome> DAPPLED_FOREST = ResourceKey.create(Registries.BIOME,
             Identifier.fromNamespaceAndPath("minecraft", "dappled_forest"));
+    /** Dark oaks among spruces and pines: where the dark forest meets the old growth taigas, and the dark forest's mountainsides. */
     public static final ResourceKey<Biome> DARK_TAIGA_FOREST = keyOf("dark_taiga_forest");
+    /** Dark oaks with birches and fancy oaks, moss and leaf litter: the strip between the birch forest and the dark forest. */
     public static final ResourceKey<Biome> DARK_BIRCH_FOREST = keyOf("dark_birch_forest");
+    /** The snowy beach where the snow ends (the frozen strip): sand and gravel, lichen on the stones. */
     public static final ResourceKey<Biome> COLD_BEACH = keyOf("cold_beach");
+    /** The snowy plains where the snow ends (the frozen strip): grass and ferns, snow piles, a lone spruce; icy rock formations here and there. */
     public static final ResourceKey<Biome> COLD_PLAINS = keyOf("cold_plains");
+    /** The taiga where it meets the snowy taiga (the frozen strip): windswept spruces over ferns, snow piles and berries. */
     public static final ResourceKey<Biome> COLD_TAIGA = keyOf("cold_taiga");
+    /** The jungles' mountainsides: sparse jungle trees on steep ground, parrots and goats. */
     public static final ResourceKey<Biome> MOUNTAINSIDE_JUNGLE = keyOf("mountainside_jungle");
+    /** The forests' mountainsides: oaks and birches over an alpine meadow's grass and flowers, goats. */
     public static final ResourceKey<Biome> MOUNTAINSIDE_FOREST = keyOf("mountainside_forest");
+    /** The savannas' mountainsides: warm, open woods over grass and flowers, goats and llamas. */
     public static final ResourceKey<Biome> MOUNTAINSIDE_FOREST_WARM = keyOf("mountainside_forest_warm");
+    /** The desert's wettest part: sparse jungle trees and bushes around water, sugar cane, melons, camels; the desert's husks and parched. */
     public static final ResourceKey<Biome> DESERT_OASIS = keyOf("desert_oasis");
     public static final ResourceKey<Biome> DESERT_CREEPER_CAVE = keyOf("caves/creeper_caves_desert");
     public static final ResourceKey<Biome> BADLANDS_CAVE = keyOf("caves/badlands_cave");

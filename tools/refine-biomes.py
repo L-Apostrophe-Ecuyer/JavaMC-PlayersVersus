@@ -14,6 +14,10 @@ extracted where `vanilla` points (its data/minecraft/...).
   players-versus:has_riverbanks holds the temperate biomes beside water (and the river: its own banks, whatever its
   climate; reeds grow by a desert's river, and nothing that needs grass grows on its sand);
   players-versus:has_riverbank_willows those of them whose trees are deciduous.
+- Undergrowth: the older, hand-made biomes get what the newer ones have (bushes, leaf litter under broad trees, ferns and
+  berries in the cold woods, fallen logs among their trees; grass and ferns in the cold plains, not the badlands' dry
+  grass), and the cold beach is a beach (no flowers, dry grass, mushrooms or pumpkins on it). Their files are edited in
+  place, each change made once.
 - Animals (tools/animals.py chooses them): the older, hand-made biomes' (their files rewritten with their animals and, for
   some, a vanilla biome's monsters), the game's tags for warm and cold farm animals and frogs, and its wolf variants (each
   file vanilla's, with a second spawn condition for the mod's biomes of that coat).
@@ -185,8 +189,59 @@ def mobs(vanilla):
         write_json(f"minecraft/wolf_variant/{coat}.json", variant)
 
 
+VEGETATION = 9
+
+# Each older biome's vegetation: what goes after or before which feature, in the order the game's biomes have them (the
+# features of every biome must agree on one order), or in place of which
+UNDERGROWTH = {
+    "dark_birch_forest": [("after", "minecraft:forest_flowers", "minecraft:patch_bush"), ("before", "minecraft:patch_pumpkin", "minecraft:patch_leaf_litter")],
+    "dark_taiga_forest": [("after", "minecraft:forest_flowers", "minecraft:patch_large_fern"), ("before", "minecraft:patch_pumpkin", "minecraft:patch_leaf_litter"),
+                          ("last", None, "minecraft:patch_berry_common")],
+    "birch_taiga_forest": [("after", "minecraft:patch_large_fern", "minecraft:patch_bush")],
+    "dappled_taiga": [("after", "minecraft:patch_large_fern", "minecraft:patch_bush")],
+    "sparse_dappled_forest": [("after", "minecraft:patch_large_fern", "minecraft:patch_bush")],
+    "mountainside_forest": [("after", "minecraft:patch_tall_grass_2", "minecraft:patch_bush")],
+    "mountainside_forest_warm": [("after", "minecraft:patch_tall_grass_2", "minecraft:patch_bush")],
+    "cold_plains": [("instead", "minecraft:patch_grass_badlands", "minecraft:patch_grass_taiga_2")],
+}
+# Fallen logs among the older biomes' trees, as the game's own tree mixes have them: the first choices of their selectors
+FALLEN = {
+    "dark_birch_forest_vegetation": [("minecraft:fallen_birch_tree", 0.0125)],
+    "dark_taiga_forest_vegetation": [("minecraft:fallen_spruce_tree", 0.0125)],
+    "birch_taiga_vegetation": [("minecraft:fallen_spruce_tree", 0.0125), ("minecraft:fallen_birch_tree", 0.0025)],
+    "dappled_taiga_vegetation": [("minecraft:fallen_spruce_tree", 0.0125)],
+}
+# A cold beach of sand and gravel: lichen on its stones, nothing of the land's
+COLD_BEACH = ["minecraft:glow_lichen"]
+
+
+def undergrowth():
+    for name, edits in UNDERGROWTH.items():
+        biome = read_json(os.path.join(DATA, MOD, "worldgen", "biome", name + ".json"))
+        features = biome["features"][VEGETATION]
+        for how, anchor, feature in edits:
+            if how == "instead":
+                if anchor in features:
+                    features[features.index(anchor)] = feature
+            elif feature not in features:
+                if how == "last":
+                    features.append(feature)
+                else:
+                    features.insert(features.index(anchor) + (1 if how == "after" else 0), feature)
+        write_json(f"{MOD}/worldgen/biome/{name}.json", biome)
+    for name, fallen in FALLEN.items():
+        trees = read_json(os.path.join(DATA, MOD, "worldgen", "feature", name + ".json"))
+        if not any(str(choice["feature"]).startswith("minecraft:fallen_") for choice in trees["features"]):
+            trees["features"] = [{"chance": chance, "feature": feature} for feature, chance in fallen] + trees["features"]
+        write_json(f"{MOD}/worldgen/feature/{name}.json", trees)
+    beach = read_json(os.path.join(DATA, MOD, "worldgen", "biome", "cold_beach.json"))
+    beach["features"][VEGETATION] = COLD_BEACH
+    write_json(f"{MOD}/worldgen/biome/cold_beach.json", beach)
+
+
 def main(vanilla):
     riverbanks()
+    undergrowth()
     mobs(vanilla)
 
 

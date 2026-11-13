@@ -67,11 +67,14 @@
       "minecraft:glow_lichen",
       "players-versus:dark_taiga_forest_vegetation",
       "minecraft:forest_flowers",
+      "minecraft:patch_large_fern",
       "minecraft:flower_default",
       "minecraft:patch_grass_forest",
       "minecraft:brown_mushroom_normal",
       "minecraft:red_mushroom_normal",
-      "minecraft:patch_pumpkin"
+      "minecraft:patch_leaf_litter",
+      "minecraft:patch_pumpkin",
+      "minecraft:patch_berry_common"
     ],
     [
       "minecraft:freeze_top_layer"

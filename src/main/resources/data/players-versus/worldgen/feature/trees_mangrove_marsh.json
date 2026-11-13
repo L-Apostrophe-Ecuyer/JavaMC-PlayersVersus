@@ -1,6 +1,21 @@
 {
   "type": "minecraft:random_selector",
-  "default": "minecraft:jungle_bush",
+  "default": {
+    "feature": "minecraft:jungle_bush",
+    "placement": [
+      {
+        "type": "minecraft:surface_water_depth_filter",
+        "max_water_depth": 0
+      },
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:would_survive",
+          "state": "minecraft:oak_sapling"
+        }
+      }
+    ]
+  },
   "features": [
     {
       "chance": 0.45,
