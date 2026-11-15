@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * data-fixes one while it generates a world. Since 26.4 structure starts are made on several threads at once, and the
  * data fixer builds its rules lazily in a map that fails ("Recursive update") when two templates are fixed at the same
  * time: the structure start was lost and the world's creation hung. When the game's version moves, re-save the templates
- * (tools/upgrade-templates: see StructureTemplateUpgrade).
+ * with StructureTemplateUpgrade.
  */
 class StructureTemplatesTest {
 
