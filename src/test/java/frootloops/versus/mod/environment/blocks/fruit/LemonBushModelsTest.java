@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -17,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The lemon bush looks like a tiny tree: its lower half a trunk at every stage, its upper half a crown of leaves (boxes,
- * not a cross) wider than the trunk, carrying its stage (bare, blossoms, lemons) on its faces.
+ * not a cross) wider than the trunk, carrying its stage (bare, blossoms, lemons) on its faces. The lemon trees of earlier
+ * versions are gone.
  */
 class LemonBushModelsTest {
 
@@ -61,8 +64,32 @@ class LemonBushModelsTest {
             assertTrue(crown.has("elements") && crown.getAsJsonArray("elements").size() >= 2 && widest(crown) >= 12, "stage " + fruit + "'s crown isn't a bush: " + crown);
             String textures = crown.getAsJsonObject("textures").toString();
             assertTrue(textures.contains("lemon_bush_leaves"), "stage " + fruit + "'s crown isn't of the bush's leaves: " + textures);
-            if (fruit == 1) assertTrue(textures.contains("lemon_leaves_blossoms"), "the blossoming crown has no blossoms: " + textures);
-            if (fruit == 2) assertTrue(textures.contains("lemon_leaves_lemons"), "the fruiting crown has no lemons: " + textures);
+            if (fruit == 1) assertTrue(textures.contains("lemon_bush_blossoms"), "the blossoming crown has no blossoms: " + textures);
+            if (fruit == 2) assertTrue(textures.contains("lemon_bush_lemons"), "the fruiting crown has no lemons: " + textures);
         }
+    }
+
+    /**
+     * The lemon trees of earlier versions (two or three stripped oak logs under lemon leaves) are gone: no lemon leaves
+     * (block, item, models, textures, loot, tags, names) and no tree feature. Lemons grow on lemon bushes.
+     */
+    @Test
+    void theLemonTreesAreGone() throws IOException {
+        Path data = Path.of("src/main/resources/data");
+        List<Path> leftOver = new ArrayList<>();
+        for (Path file : List.of(ASSETS.resolve("blockstates/lemon_leaves.json"), ASSETS.resolve("items/lemon_leaves.json"),
+                ASSETS.resolve("models/block/lemon_leaves.json"), ASSETS.resolve("models/block/lemon_leaves_blossoms.json"),
+                ASSETS.resolve("models/block/lemon_leaves_lemons.json"), ASSETS.resolve("textures/block/lemon_leaves.png"),
+                ASSETS.resolve("textures/block/lemon_leaves_blossoms.png"), ASSETS.resolve("textures/block/lemon_leaves_lemons.png"),
+                data.resolve("players-versus/loot_table/blocks/lemon_leaves.json"), data.resolve("players-versus/loot_table/harvest/lemon_leaves.json"),
+                data.resolve("players-versus/worldgen/feature/lemon_bush.json"), data.resolve("players-versus/worldgen/placed_feature/lemon_bush_checked.json"))) {
+            if (Files.exists(file)) leftOver.add(file);
+        }
+        try (Stream<Path> files = Stream.concat(Files.walk(data), Files.walk(Path.of("src/main/resources/assets")))) {
+            for (Path file : files.filter(f -> f.toString().endsWith(".json")).toList()) {
+                if (Files.readString(file).contains("lemon_leaves")) leftOver.add(file);
+            }
+        }
+        assertTrue(leftOver.isEmpty(), "the lemon trees are still in: " + leftOver);
     }
 }

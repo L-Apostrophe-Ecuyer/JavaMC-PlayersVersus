@@ -53,3 +53,10 @@
 ### Task 5: In the world
 
 - [ ] Suite, game tests, the gallery (a cypress and lemon bushes up close; the Tuscan grove), docs, a fresh final review, fixes, push.
+
+### Task 6: Remove the lemon trees (asked during execution)
+
+**Files:** delete `LemonLeavesBlock` (its stages move to `LemonBushBlock`); `CustomBlocks`, `CustomBlockItems`, `RegisteringCustomItems`, `LeafReach`, `CustomBlocksClient`, `VersusSettings`; `tools/lemons.py` (no leaves, no tree; the overlays the bush's own); the lemon leaves' and the tree's assets and data, their tag entries and names; `LemonsGameTest`, `TreeGrowthGameTest`, `BiomeDataTest`, `LemonBushModelsTest`.
+
+- [ ] Failing test: nothing of the lemon trees is left in the assets or data; the crowns use the bush's own overlays. Remove, regenerate. Run the lemon and tree growth game tests. Commit.
+

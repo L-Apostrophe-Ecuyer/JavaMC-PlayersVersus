@@ -3,7 +3,7 @@
   "textures": {
     "particle": "players-versus:block/lemon_bush_leaves",
     "leaves": "players-versus:block/lemon_bush_leaves",
-    "overlay": "players-versus:block/lemon_leaves_blossoms"
+    "overlay": "players-versus:block/lemon_bush_blossoms"
   },
   "elements": [
     {

@@ -155,8 +155,6 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT, CreativeModeTabs.NATURAL_BLOCKS);
         registerCustomItem("clovers", CustomBlockItems.CLOVERS, CreativeModeTabs.NATURAL_BLOCKS);
         registerCustomItem("fallen_leaves", CustomBlockItems.FALLEN_LEAVES);
-        registerCustomItem("lemon_leaves", CustomBlockItems.LEMON_LEAVES);
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.OAK_LEAVES, CustomBlockItems.LEMON_LEAVES));
         registerCustomItem("lemon_sapling", CustomBlockItems.LEMON_SAPLING);
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.OAK_SAPLING, CustomBlockItems.LEMON_SAPLING));
         registerCustomItem("cypress_leaves", CustomBlockItems.CYPRESS_LEAVES);

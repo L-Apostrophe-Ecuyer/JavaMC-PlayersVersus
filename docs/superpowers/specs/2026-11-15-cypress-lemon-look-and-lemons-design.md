@@ -41,6 +41,14 @@ Asked (2026-11-15), with a reference picture of a "Medium Cypress Tree":
    (bare, blossoms, lemons) on its faces, as the lemon leaves carry theirs. The item is a tiny tree's picture. The cross
    models go. Everything the bush does stays.
 
+5. **The lemon trees go** (asked later the same day: "Remove lemon trees though, they aren't good enough as is"): by the
+   owner's own words, "lemon trees" are the full trees of earlier versions (two or three stripped oak logs under lemon
+   leaves) and "lemon bushes" the two-block bushes, so the trees go, the bushes stay. Nothing generated or grew the trees
+   any more; they were kept for the worlds that had them. Now the lemon leaves (block, item, models, textures, loot,
+   tags, names), the tree feature and its checked placement go; the fruit overlays the bush's crowns use are the bush's
+   own (`lemon_bush_blossoms`, `lemon_bush_lemons`). A world that has lemon leaves loses them (unknown blocks become
+   air).
+
 ## Checks
 
 - Game tests: eating a lemon gives the three effects for their times, takes 40 ticks, fills one hunger and no
@@ -68,4 +76,7 @@ Asked (2026-11-15), with a reference picture of a "Medium Cypress Tree":
 - **Checks**: `LemonsGameTest.aLemonIsALittleFoodAndAQuickSour`, `TuscanGroveGameTest.cypressLeavesAreSpruceLeavesInLighterColours`
   and `aCypressIsAFuzzyPear` (24 seeds), `LemonBushModelsTest` (2); each watched failing first. The gallery looked at:
   the cypresses and the three stages of bush up close, and the Tuscan grove.
+- **The lemon trees** (decision 5): gone, as decided. `LemonBushBlock` holds the stages (`FRUIT`, `BARE`, `BLOSSOMS`,
+  `LEMONS`) the lemon leaves held; `LemonBushModelsTest.theLemonTreesAreGone` checks nothing of them is left in the
+  assets or data (watched failing first).
 

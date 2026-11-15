@@ -31,7 +31,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * The lemon bush: two blocks tall, as a rose bush is (a lower and an upper half, whole or gone), leafy, and fruiting as
- * the lemon leaves do: bare, then in blossom, then hung with lemons ({@link #FRUIT} 0 to 2), both halves together, a
+ * fruit trees do: bare, then in blossom, then hung with lemons ({@link #FRUIT} 0 to 2), both halves together, a
  * stage at a time on random ticks (its lower half's, so it doesn't grow twice as fast) or with bone meal on either half.
  * Lemons are picked by hand, 2 to 6 at a time (the harvest/lemon_bush loot table), and the bush goes bare. Broken, it
  * drops itself from its lower half, as a rose bush does, and its lemons if it has them. Hung with lemons it has nothing
@@ -39,13 +39,15 @@ import net.minecraft.world.phys.BlockHitResult;
  */
 public class LemonBushBlock extends DoublePlantBlock implements BonemealableBlock {
 
-    public static final IntegerProperty FRUIT = LemonLeavesBlock.FRUIT;
+    /** Its stages: bare, in blossom, hung with lemons. */
+    public static final int BARE = 0, BLOSSOMS = 1, LEMONS = 2;
+    public static final IntegerProperty FRUIT = IntegerProperty.create("fruit", BARE, LEMONS);
     public static final ResourceKey<LootTable> HARVEST = ResourceKey.create(Registries.LOOT_TABLE,
             Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "harvest/lemon_bush"));
 
     public LemonBushBlock(BlockBehaviour.Properties properties) {
         super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FRUIT, LemonLeavesBlock.BARE));
+        this.registerDefaultState(this.defaultBlockState().setValue(FRUIT, BARE));
     }
 
     @Override
@@ -56,7 +58,7 @@ public class LemonBushBlock extends DoublePlantBlock implements BonemealableBloc
 
     @Override
     protected boolean isRandomlyTicking(BlockState state) {
-        return state.getValue(HALF) == DoubleBlockHalf.LOWER && state.getValue(FRUIT) < LemonLeavesBlock.LEMONS;
+        return state.getValue(HALF) == DoubleBlockHalf.LOWER && state.getValue(FRUIT) < LEMONS;
     }
 
     @Override
@@ -75,13 +77,13 @@ public class LemonBushBlock extends DoublePlantBlock implements BonemealableBloc
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (state.getValue(FRUIT) != LemonLeavesBlock.LEMONS) return super.useWithoutItem(state, level, pos, player, hitResult);
+        if (state.getValue(FRUIT) != LEMONS) return super.useWithoutItem(state, level, pos, player, hitResult);
         if (level instanceof ServerLevel serverLevel) {
             Block.dropFromBlockInteractLootTable(serverLevel, HARVEST, pos, state, null, null, player,
                     (lootLevel, stack) -> Block.popResource(lootLevel, pos, stack));
             serverLevel.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F,
                     0.8F + serverLevel.getRandom().nextFloat() * 0.4F);
-            setFruit(serverLevel, pos, state, LemonLeavesBlock.BARE);
+            setFruit(serverLevel, pos, state, BARE);
             serverLevel.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, serverLevel.getBlockState(pos)));
         }
         return InteractionResult.SUCCESS;
@@ -99,7 +101,7 @@ public class LemonBushBlock extends DoublePlantBlock implements BonemealableBloc
 
     @Override
     public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
-        if (state.getValue(FRUIT) < LemonLeavesBlock.LEMONS) setFruit(level, pos, state, state.getValue(FRUIT) + 1);
+        if (state.getValue(FRUIT) < LEMONS) setFruit(level, pos, state, state.getValue(FRUIT) + 1);
         else Block.popResource(level, pos, new ItemStack(CustomBlocks.LEMON_SAPLING));
     }
 }

@@ -466,9 +466,9 @@ class BiomeDataTest {
     }
 
     /**
-     * Lemons grow on lemon bushes now (a plant two blocks tall), not on trees: the Tuscan grove's orchards place patches of
-     * lemon bushes, at every stage, where a bush would stand; and no biome places the lemon tree (players-versus:lemon_bush,
-     * a feature kept for /place).
+     * Lemons grow on lemon bushes (tiny trees two blocks tall), not on the lemon trees of earlier versions, which are gone:
+     * the Tuscan grove's orchards place patches of lemon bushes, at every stage, where a bush would stand; and no biome
+     * places a feature players-versus:lemon_bush (the old tree's id).
      */
     @Test
     void theOrchardsAreLemonBushesAndNoBiomeGrowsLemonTrees() throws IOException {

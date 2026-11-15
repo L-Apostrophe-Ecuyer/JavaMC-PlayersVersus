@@ -38,8 +38,6 @@ public final class LeafReach {
             Blocks.JUNGLE_LEAVES, BlockTags.JUNGLE_LOGS,
             Blocks.ACACIA_LEAVES, logs("acacia_logs"),
             Blocks.CHERRY_LEAVES, logs("cherry_logs"),
-            // The lemon trees' trunks are stripped oak
-            CustomBlocks.LEMON_LEAVES, logs("oak_logs"),
             // The cypress's lighter leaves, among its spruce leaves on its spruce trunk
             CustomBlocks.CYPRESS_LEAVES, logs("spruce_logs"));
 
