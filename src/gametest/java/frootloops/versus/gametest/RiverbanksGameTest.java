@@ -154,12 +154,15 @@ public class RiverbanksGameTest {
         helper.succeed();
     }
 
-    /** Muddy banks: the mod's gray mud at the water, brown mud behind it, in the bank's top two layers. */
+    /**
+     * Muddy banks: the mod's gray mud at the water, brown mud behind it, one layer deep, the bank's top, as the marsh's:
+     * wet mud swallows whoever walks into it, and two layers would close over their head.
+     */
     @GameTest(structure = GROVE, maxTicks = 40, skyAccess = true)
     public void theBanksAreMuddy(GameTestHelper helper) {
         List<BlockPos> mud = place(helper, "riverbank_mud", state -> state.is(CustomBlocks.GRAY_MUD) || state.is(CustomBlocks.BROWN_MUD));
         helper.assertTrue(mud.size() >= 8, "only " + mud.size() + " mud by the pond");
-        for (BlockPos at : mud) helper.assertTrue(at.getY() == 1 || at.getY() == 2, "mud at " + at.toShortString() + ", out of the bank's top two layers");
+        for (BlockPos at : mud) helper.assertTrue(at.getY() == 2, "mud at " + at.toShortString() + ", below the bank's top layer");
         helper.assertTrue(mud.stream().anyMatch(at -> helper.getBlockState(at).is(CustomBlocks.GRAY_MUD)), "no gray mud at the water");
         helper.succeed();
     }

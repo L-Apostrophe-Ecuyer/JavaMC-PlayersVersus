@@ -90,8 +90,9 @@ OAK_SAPLING = {"id": "minecraft:oak_sapling", "properties": {"stage": "0"}}
 BANK_GROUND = ["minecraft:grass_block", "minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:rooted_dirt"]
 
 FEATURES = {
-    # Gray mud where the bank meets the water, brown mud behind it, two deep (the grass and the dirt under it)
-    "riverbank_mud": {"type": "minecraft:disk", "half_height": 1, "radius": {"type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 2},
+    # Gray mud where the bank meets the water, brown mud behind it, one deep (the bank's top), as the marsh's: wet mud
+    # swallows whoever walks into it, and two layers would close over their head
+    "riverbank_mud": {"type": "minecraft:disk", "half_height": 0, "radius": {"type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 2},
                       "state_provider": {"type": "minecraft:rule_based", "fallback": {"id": f"{MOD}:brown_mud"},
                                          "rules": [{"if_true": beside_water(0), "then": {"id": f"{MOD}:gray_mud"}}]},
                       "target": {"type": "minecraft:matching_blocks", "blocks": BANK_GROUND}},

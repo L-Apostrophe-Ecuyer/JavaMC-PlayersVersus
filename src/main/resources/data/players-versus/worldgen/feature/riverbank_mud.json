@@ -1,6 +1,6 @@
 {
   "type": "minecraft:disk",
-  "half_height": 1,
+  "half_height": 0,
   "radius": {
     "type": "minecraft:uniform",
     "min_inclusive": 1,
