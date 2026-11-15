@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cross",
-  "textures": {
-    "cross": "players-versus:block/lemon_bush_top"
-  }
-}

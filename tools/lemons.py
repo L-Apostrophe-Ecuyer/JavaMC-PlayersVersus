@@ -3,9 +3,9 @@
 
     python3 tools/lemons.py <vanilla>     (<vanilla> holds assets/minecraft and data/minecraft, from the game's jars)
 
-The lemon bush (LemonBushBlock) is two blocks tall, as the rose bush is, and drawn from the rose bush's textures: its
-leaves a glossier, darker green, and where the roses were, more leaves (bare), white blossoms with yellow hearts, or
-lemons (the leaves' own, one a rose), by its stage. The orchards (lemon_bushes, at every stage) and the sapling (lemon_bush_plant, bare) place it.
+The lemon bush (LemonBushBlock) is a tiny tree two blocks tall: its lower half a short oak stem, its upper half a bushy
+crown (boxes of oak leaves' texture in a fixed citrus green) carrying its stage as the lemon leaves carry theirs, the
+blossoms' or lemons' overlay on its faces; its item a tiny tree's picture. The orchards (lemon_bushes, at every stage) and the sapling (lemon_bush_plant, bare) place it.
 
 Lemon leaves (LemonLeavesBlock) are oak's leaves that fruit: bare, in blossom, hung with lemons, the leaves of the
 lemon trees earlier worlds have (nothing generates or grows them now). Their texture is oak leaves' (the biome tints
@@ -151,72 +151,83 @@ def citrus(colour):
     return (int(r * 0.75), min(255, int(g * 0.95)), int(b * 0.7), a)
 
 
-def is_rose(colour):
-    r, g, b, a = colour
-    return a > 0 and r > g + 30
+# The bush's crown: oak leaves' texture in a fixed citrus green (untinted: the fruit's overlays are drawn on its pixels)
+BUSH_GREEN = (96, 150, 56)
 
 
-def rose_shade(rose, roses):
-    """A rose pixel's shade, 0 (the lightest of the roses' colours) to 4 (the darkest)."""
-    ranked = sorted(roses, key=lambda c: -(c[0] * 3 + c[1] * 6 + c[2]))
-    return min(4, ranked.index(rose) * 5 // len(ranked))
-
-
-BARE_SHADES = [(74, 143, 40, 255), (43, 112, 42, 255), (38, 90, 37, 255), (32, 70, 38, 255), (32, 70, 38, 255)]
-BLOSSOM_SHADES = [(255, 255, 250, 255), BLOSSOM, (236, 230, 212, 255), (214, 204, 176, 255), BLOSSOM_HEART]
-
-
-def rose_clusters(image):
-    """The rose bush's roses: each a group of touching rose pixels."""
-    left = {(x, y) for y in range(16) for x in range(16) if is_rose(image.getpixel((x, y)))}
-    clusters = []
-    while left:
-        todo, cluster = [left.pop()], set()
-        while todo:
-            x, y = todo.pop()
-            cluster.add((x, y))
-            for neighbour in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
-                if neighbour in left:
-                    left.remove(neighbour)
-                    todo.append(neighbour)
-        clusters.append(cluster)
-    return sorted(clusters, key=min)
-
-
-def bush(rose_bush, shades, leafy):
-    """
-    The rose bush's texture made the lemon bush's: its leaves citrus green; its roses, shade for shade, in the stage's
-    colours (more leaves, made citrus too, when it's bare).
-    """
-    image = rose_bush.copy().convert("RGBA")
-    roses = sorted({image.getpixel((x, y)) for y in range(16) for x in range(16) if is_rose(image.getpixel((x, y)))})
+def bush_leaves(oak_leaves):
+    image = oak_leaves.copy().convert("RGBA")
     for y in range(16):
         for x in range(16):
-            colour = image.getpixel((x, y))
-            if colour[3] == 0:
-                continue
-            if is_rose(colour):
-                shade = shades[rose_shade(colour, roses)]
-                image.putpixel((x, y), citrus(shade) if leafy else shade)
-            else:
-                image.putpixel((x, y), citrus(colour))
+            r, g, b, a = image.getpixel((x, y))
+            if a:
+                image.putpixel((x, y), citrus((r * BUSH_GREEN[0] // 255, g * BUSH_GREEN[1] // 255, b * BUSH_GREEN[2] // 255, a)))
     return image
 
 
-def fruiting(rose_bush):
-    """The bare bush with a lemon (the lemon leaves' own) hanging where each rose was."""
-    image = bush(rose_bush, BARE_SHADES, True)
-    rose_bush = rose_bush.convert("RGBA")
-    mask = {(x, y) for y in range(16) for x in range(16) if rose_bush.getpixel((x, y))[3] > 0}
-    for cluster in rose_clusters(rose_bush):
-        x = round(sum(px for px, _ in cluster) / len(cluster)) - 1
-        y = round(sum(py for _, py in cluster) / len(cluster)) - 2
-        lemon_at(image, x, y, mask)
+BARK, BARK_DARK = (125, 96, 58, 255), (84, 63, 37, 255)
+
+
+def bush_item(leaves):
+    """The bush's item: a tiny tree, a round crown of its leaves hung with lemons on a short trunk."""
+    image = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(10, 16):
+        image.putpixel((7, y), BARK)
+        image.putpixel((8, y), BARK_DARK)
+    for y in range(16):
+        for x in range(16):
+            dx, dy = (x - 7.5) / 6.5, (y - 5.5) / 5.0
+            if dx * dx + dy * dy <= 1.0:
+                r, g, b, _ = leaves.getpixel((x, y)) if leaves.getpixel((x, y))[3] else citrus((70, 120, 40, 255))
+                # Lit from the top left, shaded to the bottom right
+                light = 1.15 - 0.3 * (dx + dy + 1.0) / 2.0
+                image.putpixel((x, y), (min(255, int(r * light)), min(255, int(g * light)), min(255, int(b * light)), 255))
+    for x, y in [(4, 5), (9, 3), (11, 7), (6, 8)]:
+        lemon_at(image, x - 1, y - 1, set())
     return image
 
 
-# The bush's stages, by FRUIT: bare (more leaves where the roses were), in blossom, hung with lemons
-BUSH_STAGES = [("", lambda rose: bush(rose, BARE_SHADES, True)), ("_blossoms", lambda rose: bush(rose, BLOSSOM_SHADES, False)), ("_lemons", fruiting)]
+def box(start, end, texture, inflate=0.0):
+    """A model element from start to end (pixels), every face of the texture at one pixel a pixel, centred on it."""
+    start = [c - inflate for c in start]
+    end = [c + inflate for c in end]
+    width, height, depth = (end[i] - start[i] for i in range(3))
+
+    def uv(w, h):
+        u, v = (16 - min(16, w)) / 2, (16 - min(16, h)) / 2
+        return [u, v, u + min(16, w), v + min(16, h)]
+
+    faces = {face: {"uv": uv(width, height) if face in ("north", "south") else uv(depth, height) if face in ("east", "west") else uv(width, depth),
+                    "texture": texture} for face in ["down", "up", "north", "south", "west", "east"]}
+    return {"from": start, "to": end, "faces": faces}
+
+
+# The crown: a box of leaves reaching three pixels down over the trunk's top, a wider band round its middle, a cap
+CROWN = [([2, -3, 2], [14, 12, 14]), ([0, 1, 3], [16, 9, 13]), ([3, 1, 0], [13, 9, 16]), ([4, 12, 4], [12, 15, 12])]
+
+
+def crown_model(overlay):
+    elements = [box(start, end, "#leaves") for start, end in CROWN]
+    if overlay:
+        elements += [box(start, end, "#overlay", inflate=0.05) for start, end in CROWN]
+    textures = {"particle": f"{MOD}:block/lemon_bush_leaves", "leaves": f"{MOD}:block/lemon_bush_leaves"}
+    if overlay:
+        textures["overlay"] = f"{MOD}:block/{overlay}"
+    return {"parent": "minecraft:block/block", "textures": textures, "elements": elements}
+
+
+def trunk_model():
+    """A short oak stem, flared at its foot."""
+    elements = [box([6.5, 0, 6.5], [9.5, 2, 9.5], "#bark"), box([7, 2, 7], [9, 16, 9], "#bark")]
+    for element in elements:
+        element["faces"]["up"]["texture"] = element["faces"]["down"]["texture"] = "#end"
+    return {"parent": "minecraft:block/block", "ambientocclusion": False,
+            "textures": {"particle": "minecraft:block/oak_log", "bark": "minecraft:block/oak_log", "end": "minecraft:block/oak_log_top"},
+            "elements": elements}
+
+
+# The bush's stages, by FRUIT: the crown bare, in blossom, hung with lemons (the lemon leaves' own overlays)
+CROWN_STAGES = [("", None), ("_blossoms", "lemon_leaves_blossoms"), ("_lemons", "lemon_leaves_lemons")]
 
 
 def leaves_model(overlay):
@@ -273,17 +284,18 @@ def assets(vanilla):
     write_json(ASSETS, f"{models}/item/lemon.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/lemon"}})
     write_json(ASSETS, f"{MOD}/items/lemon.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/lemon"}})
 
-    # The lemon bush: a cross of the rose bush's shape for each half and stage; its item shows its top with lemons
+    # The lemon bush: a tiny tree, its lower half a trunk at every stage, its upper half a crown carrying its stage
+    leaves = bush_leaves(oak_leaves)
+    save(leaves, "block/lemon_bush_leaves.png")
+    write_json(ASSETS, f"{models}/block/lemon_bush_trunk.json", trunk_model())
     variants = {}
-    for fruit, (suffix, draw) in enumerate(BUSH_STAGES):
-        for half, part in [("lower", "bottom"), ("upper", "top")]:
-            rose = Image.open(os.path.join(textures, "block", f"rose_bush_{part}.png"))
-            save(draw(rose), f"block/lemon_bush_{part}{suffix}.png")
-            write_json(ASSETS, f"{models}/block/lemon_bush_{part}{suffix}.json",
-                       {"parent": "minecraft:block/cross", "textures": {"cross": f"{MOD}:block/lemon_bush_{part}{suffix}"}})
-            variants[f"fruit={fruit},half={half}"] = {"model": f"{MOD}:block/lemon_bush_{part}{suffix}"}
+    for fruit, (suffix, overlay) in enumerate(CROWN_STAGES):
+        write_json(ASSETS, f"{models}/block/lemon_bush_crown{suffix}.json", crown_model(overlay))
+        variants[f"fruit={fruit},half=lower"] = {"model": f"{MOD}:block/lemon_bush_trunk"}
+        variants[f"fruit={fruit},half=upper"] = {"model": f"{MOD}:block/lemon_bush_crown{suffix}"}
     write_json(ASSETS, f"{MOD}/blockstates/lemon_bush.json", {"variants": variants})
-    write_json(ASSETS, f"{models}/item/lemon_bush.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:block/lemon_bush_top_lemons"}})
+    save(bush_item(leaves), "item/lemon_bush.png")
+    write_json(ASSETS, f"{models}/item/lemon_bush.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/lemon_bush"}})
     write_json(ASSETS, f"{MOD}/items/lemon_bush.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/lemon_bush"}})
 
 
